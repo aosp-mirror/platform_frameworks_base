@@ -23,15 +23,28 @@ YuvToJpegEncoder* YuvToJpegEncoder::create(int format, int* strides) {
 YuvToJpegEncoder::YuvToJpegEncoder(int* strides) : fStrides(strides) {
 }
 
+struct ErrorMgr {
+    struct jpeg_error_mgr pub;
+    jmp_buf jmp;
+};
+
+void error_exit(j_common_ptr cinfo) {
+    ErrorMgr* err = (ErrorMgr*) cinfo->err;
+    (*cinfo->err->output_message) (cinfo);
+    longjmp(err->jmp, 1);
+}
+
 bool YuvToJpegEncoder::encode(SkWStream* stream, void* inYuv, int width,
         int height, int* offsets, int jpegQuality) {
     jpeg_compress_struct    cinfo;
-    skjpeg_error_mgr        sk_err;
+    ErrorMgr                err;
     skjpeg_destination_mgr  sk_wstream(stream);
 
-    cinfo.err = jpeg_std_error(&sk_err);
-    sk_err.error_exit = skjpeg_error_exit;
-    if (setjmp(sk_err.fJmpBuf)) {
+    cinfo.err = jpeg_std_error(&err.pub);
+    err.pub.error_exit = error_exit;
+
+    if (setjmp(err.jmp)) {
+        jpeg_destroy_compress(&cinfo);
         return false;
     }
     jpeg_create_compress(&cinfo);
@@ -45,6 +58,8 @@ bool YuvToJpegEncoder::encode(SkWStream* stream, void* inYuv, int width,
     compress(&cinfo, (uint8_t*) inYuv, offsets);
 
     jpeg_finish_compress(&cinfo);
+
+    jpeg_destroy_compress(&cinfo);
 
     return true;
 }

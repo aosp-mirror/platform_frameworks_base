@@ -71,6 +71,11 @@ public class PbapServerProfile implements LocalBluetoothProfile {
         return mIsProfileReady;
     }
 
+    @Override
+    public int getProfileId() {
+        return BluetoothProfile.PBAP;
+    }
+
     PbapServerProfile(Context context) {
         BluetoothPbap pbap = new BluetoothPbap(context, new PbapServiceListener());
     }

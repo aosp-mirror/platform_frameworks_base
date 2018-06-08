@@ -43,6 +43,13 @@ public class BatteryProperty implements Parcelable {
         return mValueLong;
     }
 
+    /**
+     * @hide
+     */
+    public void setLong(long val) {
+        mValueLong = val;
+    }
+
     /*
      * Parcel read/write code must be kept in sync with
      * frameworks/native/services/batteryservice/BatteryProperty.cpp

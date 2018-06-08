@@ -18,11 +18,13 @@ package com.android.systemui.statusbar;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
+import android.hardware.biometrics.IBiometricPromptReceiver;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.support.annotation.VisibleForTesting;
 import android.util.Pair;
 
@@ -82,6 +84,15 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_TOGGLE_PANEL                  = 35 << MSG_SHIFT;
     private static final int MSG_SHOW_SHUTDOWN_UI              = 36 << MSG_SHIFT;
     private static final int MSG_SET_TOP_APP_HIDES_STATUS_BAR  = 37 << MSG_SHIFT;
+    private static final int MSG_ROTATION_PROPOSAL             = 38 << MSG_SHIFT;
+    private static final int MSG_FINGERPRINT_SHOW              = 39 << MSG_SHIFT;
+    private static final int MSG_FINGERPRINT_AUTHENTICATED     = 40 << MSG_SHIFT;
+    private static final int MSG_FINGERPRINT_HELP              = 41 << MSG_SHIFT;
+    private static final int MSG_FINGERPRINT_ERROR             = 42 << MSG_SHIFT;
+    private static final int MSG_FINGERPRINT_HIDE              = 43 << MSG_SHIFT;
+    private static final int MSG_SHOW_CHARGING_ANIMATION       = 44 << MSG_SHIFT;
+    private static final int MSG_SHOW_PINNING_TOAST_ENTER_EXIT = 45 << MSG_SHIFT;
+    private static final int MSG_SHOW_PINNING_TOAST_ESCAPE     = 46 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -115,7 +126,7 @@ public class CommandQueue extends IStatusBar.Stub {
         default void topAppWindowChanged(boolean visible) { }
         default void setImeWindowStatus(IBinder token, int vis, int backDisposition,
                 boolean showImeSwitcher) { }
-        default void showRecentApps(boolean triggeredFromAltTab, boolean fromHome) { }
+        default void showRecentApps(boolean triggeredFromAltTab) { }
         default void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) { }
         default void toggleRecentApps() { }
         default void toggleSplitScreen() { }
@@ -140,8 +151,20 @@ public class CommandQueue extends IStatusBar.Stub {
         default void clickTile(ComponentName tile) { }
 
         default void handleSystemKey(int arg1) { }
+        default void showPinningEnterExitToast(boolean entering) { }
+        default void showPinningEscapeToast() { }
         default void handleShowGlobalActionsMenu() { }
         default void handleShowShutdownUi(boolean isReboot, String reason) { }
+
+        default void showWirelessChargingAnimation(int batteryLevel) {  }
+
+        default void onRotationProposal(int rotation, boolean isValid) { }
+
+        default void showFingerprintDialog(Bundle bundle, IBiometricPromptReceiver receiver) { }
+        default void onFingerprintAuthenticated() { }
+        default void onFingerprintHelp(String message) { }
+        default void onFingerprintError(String error) { }
+        default void hideFingerprintDialog() { }
     }
 
     @VisibleForTesting
@@ -265,11 +288,11 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void showRecentApps(boolean triggeredFromAltTab, boolean fromHome) {
+    public void showRecentApps(boolean triggeredFromAltTab) {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_SHOW_RECENT_APPS);
-            mHandler.obtainMessage(MSG_SHOW_RECENT_APPS,
-                    triggeredFromAltTab ? 1 : 0, fromHome ? 1 : 0, null).sendToTarget();
+            mHandler.obtainMessage(MSG_SHOW_RECENT_APPS, triggeredFromAltTab ? 1 : 0, 0,
+                    null).sendToTarget();
         }
     }
 
@@ -435,6 +458,21 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @Override
+    public void showPinningEnterExitToast(boolean entering) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_SHOW_PINNING_TOAST_ENTER_EXIT, entering).sendToTarget();
+        }
+    }
+
+    @Override
+    public void showPinningEscapeToast() {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_SHOW_PINNING_TOAST_ESCAPE).sendToTarget();
+        }
+    }
+
+
+    @Override
     public void showGlobalActionsMenu() {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_SHOW_GLOBAL_ACTIONS);
@@ -455,6 +493,61 @@ public class CommandQueue extends IStatusBar.Stub {
             mHandler.removeMessages(MSG_SHOW_SHUTDOWN_UI);
             mHandler.obtainMessage(MSG_SHOW_SHUTDOWN_UI, isReboot ? 1 : 0, 0, reason)
                     .sendToTarget();
+        }
+    }
+
+    @Override
+    public void showWirelessChargingAnimation(int batteryLevel) {
+        mHandler.removeMessages(MSG_SHOW_CHARGING_ANIMATION);
+        mHandler.obtainMessage(MSG_SHOW_CHARGING_ANIMATION, batteryLevel, 0)
+                .sendToTarget();
+    }
+
+    @Override
+    public void onProposedRotationChanged(int rotation, boolean isValid) {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_ROTATION_PROPOSAL);
+            mHandler.obtainMessage(MSG_ROTATION_PROPOSAL, rotation, isValid ? 1 : 0,
+                    null).sendToTarget();
+        }
+    }
+
+    @Override
+    public void showFingerprintDialog(Bundle bundle, IBiometricPromptReceiver receiver) {
+        synchronized (mLock) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = bundle;
+            args.arg2 = receiver;
+            mHandler.obtainMessage(MSG_FINGERPRINT_SHOW, args)
+                    .sendToTarget();
+        }
+    }
+
+    @Override
+    public void onFingerprintAuthenticated() {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_FINGERPRINT_AUTHENTICATED).sendToTarget();
+        }
+    }
+
+    @Override
+    public void onFingerprintHelp(String message) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_FINGERPRINT_HELP, message).sendToTarget();
+        }
+    }
+
+    @Override
+    public void onFingerprintError(String error) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_FINGERPRINT_ERROR, error).sendToTarget();
+        }
+    }
+
+    @Override
+    public void hideFingerprintDialog() {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_FINGERPRINT_HIDE).sendToTarget();
         }
     }
 
@@ -529,7 +622,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_SHOW_RECENT_APPS:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).showRecentApps(msg.arg1 != 0, msg.arg2 != 0);
+                        mCallbacks.get(i).showRecentApps(msg.arg1 != 0);
                     }
                     break;
                 case MSG_HIDE_RECENT_APPS:
@@ -654,6 +747,56 @@ public class CommandQueue extends IStatusBar.Stub {
                         mCallbacks.get(i).setTopAppHidesStatusBar(msg.arg1 != 0);
                     }
                     break;
+                case MSG_ROTATION_PROPOSAL:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).onRotationProposal(msg.arg1, msg.arg2 != 0);
+                    }
+                    break;
+                case MSG_FINGERPRINT_SHOW:
+                    mHandler.removeMessages(MSG_FINGERPRINT_ERROR);
+                    mHandler.removeMessages(MSG_FINGERPRINT_HELP);
+                    mHandler.removeMessages(MSG_FINGERPRINT_AUTHENTICATED);
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).showFingerprintDialog(
+                                (Bundle)((SomeArgs)msg.obj).arg1,
+                                (IBiometricPromptReceiver)((SomeArgs)msg.obj).arg2);
+                    }
+                    break;
+                case MSG_FINGERPRINT_AUTHENTICATED:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).onFingerprintAuthenticated();
+                    }
+                    break;
+                case MSG_FINGERPRINT_HELP:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).onFingerprintHelp((String) msg.obj);
+                    }
+                    break;
+                case MSG_FINGERPRINT_ERROR:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).onFingerprintError((String) msg.obj);
+                    }
+                    break;
+                case MSG_FINGERPRINT_HIDE:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).hideFingerprintDialog();
+                    }
+                    break;
+                case MSG_SHOW_CHARGING_ANIMATION:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).showWirelessChargingAnimation(msg.arg1);
+                    }
+                    break;
+                case MSG_SHOW_PINNING_TOAST_ENTER_EXIT:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).showPinningEnterExitToast((Boolean) msg.obj);
+                    }
+                    break;
+                case MSG_SHOW_PINNING_TOAST_ESCAPE:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).showPinningEscapeToast();
+                    }
+                    break;
             }
         }
     }
@@ -667,4 +810,3 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 }
-

@@ -143,4 +143,21 @@ interface IPrintManager {
     void stopPrinterStateTracking(in PrinterId printerId, int userId);
     void destroyPrinterDiscoverySession(in IPrinterDiscoveryObserver observer,
             int userId);
+
+    /**
+     * Check if the system will bind to print services in intant app.
+     *
+     * @param userId the Id of the user the behavior should be checked for
+     *
+     * @return {@code true} iff the system will bind to print services in instant apps.
+     */
+    boolean getBindInstantServiceAllowed(int userId);
+
+    /**
+     * Set if the system will bind to print services in intant app.
+     *
+     * @param userId the Id of the user the behavior should be changed for
+     * @param allows iff {@code true} the system will bind to print services in instant apps
+     */
+    void setBindInstantServiceAllowed(int userId, boolean allowed);
 }

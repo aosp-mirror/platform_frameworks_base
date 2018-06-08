@@ -18,6 +18,9 @@ package com.android.server.display;
 
 import android.util.Slog;
 
+import java.io.PrintWriter;
+import java.util.Arrays;
+
 /**
  * A helper class for handling access to illuminance hysteresis level values.
  */
@@ -100,5 +103,12 @@ final class HysteresisLevels {
             levelArray[index] = (float)configArray[index] / divideFactor;
         }
         return levelArray;
+    }
+
+    public void dump(PrintWriter pw) {
+        pw.println("HysteresisLevels");
+        pw.println("  mBrightLevels=" + Arrays.toString(mBrightLevels));
+        pw.println("  mDarkLevels=" + Arrays.toString(mDarkLevels));
+        pw.println("  mLuxLevels=" + Arrays.toString(mLuxLevels));
     }
 }

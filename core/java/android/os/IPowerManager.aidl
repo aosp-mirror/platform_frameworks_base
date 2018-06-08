@@ -63,11 +63,9 @@ interface IPowerManager
     // --- deprecated ---
     boolean isScreenBrightnessBoosted();
 
-    // temporarily overrides the screen brightness settings to allow the user to
-    // see the effect of a settings change without applying it immediately
-    void setTemporaryScreenBrightnessSettingOverride(int brightness);
-    void setTemporaryScreenAutoBrightnessAdjustmentSettingOverride(float adj);
-
     // sets the attention light (used by phone app only)
     void setAttentionLight(boolean on, int color);
+
+    // controls whether PowerManager should doze after the screen turns off or not
+    void setDozeAfterScreenOff(boolean on);
 }

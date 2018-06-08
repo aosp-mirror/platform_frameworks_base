@@ -25,6 +25,7 @@ public final class CategoryKey {
 
     // Top level category.
     public static final String CATEGORY_NETWORK = "com.android.settings.category.ia.wireless";
+    public static final String CATEGORY_CONNECT = "com.android.settings.category.ia.connect";
     public static final String CATEGORY_DEVICE = "com.android.settings.category.ia.device";
     public static final String CATEGORY_APPS = "com.android.settings.category.ia.apps";
     public static final String CATEGORY_APPS_DEFAULT =
@@ -46,6 +47,10 @@ public final class CategoryKey {
             "com.android.settings.category.ia.development";
     public static final String CATEGORY_NOTIFICATIONS =
             "com.android.settings.category.ia.notifications";
+    public static final String CATEGORY_DO_NOT_DISTURB = "com.android.settings.category.ia.dnd";
+    public static final String CATEGORY_GESTURES = "com.android.settings.category.ia.gestures";
+    public static final String CATEGORY_NIGHT_DISPLAY =
+            "com.android.settings.category.ia.night_display";
 
     public static final Map<String, String> KEY_COMPAT_MAP;
 

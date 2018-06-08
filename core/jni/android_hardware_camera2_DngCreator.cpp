@@ -1723,13 +1723,13 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
         // Adjust the bad pixel coordinates to be relative to the origin of the active area DNG tag
         std::vector<uint32_t> v;
-        for (size_t i = 0; i < entry3.count; i+=2) {
+        for (size_t i = 0; i < entry3.count; i += 2) {
             int32_t x = entry3.data.i32[i];
             int32_t y = entry3.data.i32[i + 1];
             x -= static_cast<int32_t>(xmin);
             y -= static_cast<int32_t>(ymin);
             if (x < 0 || y < 0 || static_cast<uint32_t>(x) >= width ||
-                    static_cast<uint32_t>(y) >= width) {
+                    static_cast<uint32_t>(y) >= height) {
                 continue;
             }
             v.push_back(x);
@@ -1770,20 +1770,79 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
         status_t err = OK;
 
         // Set up rectilinear distortion correction
-        camera_metadata_entry entry3 =
-                results.find(ANDROID_LENS_RADIAL_DISTORTION);
+        float distortion[6] {1.f, 0.f, 0.f, 0.f, 0.f, 0.f};
+        bool gotDistortion = false;
+
         camera_metadata_entry entry4 =
                 results.find(ANDROID_LENS_INTRINSIC_CALIBRATION);
 
-        if (entry3.count == 6 && entry4.count == 5) {
+        if (entry4.count == 5) {
             float cx = entry4.data.f[/*c_x*/2];
             float cy = entry4.data.f[/*c_y*/3];
-            err = builder.addWarpRectilinearForMetadata(entry3.data.f, preWidth, preHeight, cx,
-                    cy);
-            if (err != OK) {
-                ALOGE("%s: Could not add distortion correction.", __FUNCTION__);
-                jniThrowRuntimeException(env, "failed to add distortion correction.");
-                return nullptr;
+            // Assuming f_x = f_y, or at least close enough.
+            // Also assuming s = 0, or at least close enough.
+            float f = entry4.data.f[/*f_x*/0];
+
+            camera_metadata_entry entry3 =
+                    results.find(ANDROID_LENS_DISTORTION);
+            if (entry3.count == 5) {
+                gotDistortion = true;
+                float m_x = std::fmaxf(preWidth-1 - cx, cx);
+                float m_y = std::fmaxf(preHeight-1 - cy, cy);
+                float m_sq = m_x*m_x + m_y*m_y;
+                float m = sqrtf(m_sq); // distance to farthest corner from optical center
+                float f_sq = f * f;
+                // Conversion factors from Camera2 K factors for new LENS_DISTORTION field
+                // to DNG spec.
+                //
+                //       Camera2 / OpenCV assume distortion is applied in a space where focal length
+                //       is factored out, while DNG assumes a normalized space where the distance
+                //       from optical center to the farthest corner is 1.
+                //       Scale from camera2 to DNG spec accordingly.
+                //       distortion[0] is always 1 with the new LENS_DISTORTION field.
+                const double convCoeff[5] = {
+                    m_sq / f_sq,
+                    pow(m_sq, 2) / pow(f_sq, 2),
+                    pow(m_sq, 3) / pow(f_sq, 3),
+                    m / f,
+                    m / f
+                };
+                for (size_t i = 0; i < entry3.count; i++) {
+                    distortion[i+1] = convCoeff[i] * entry3.data.f[i];
+                }
+            } else {
+                entry3 = results.find(ANDROID_LENS_RADIAL_DISTORTION);
+                if (entry3.count == 6) {
+                    gotDistortion = true;
+                    // Conversion factors from Camera2 K factors to DNG spec. K factors:
+                    //
+                    //      Note: these are necessary because our unit system assumes a
+                    //      normalized max radius of sqrt(2), whereas the DNG spec's
+                    //      WarpRectilinear opcode assumes a normalized max radius of 1.
+                    //      Thus, each K coefficient must include the domain scaling
+                    //      factor (the DNG domain is scaled by sqrt(2) to emulate the
+                    //      domain used by the Camera2 specification).
+                    const double convCoeff[6] = {
+                        sqrt(2),
+                        2 * sqrt(2),
+                        4 * sqrt(2),
+                        8 * sqrt(2),
+                        2,
+                        2
+                    };
+                    for (size_t i = 0; i < entry3.count; i++) {
+                        distortion[i] = entry3.data.f[i] * convCoeff[i];
+                    }
+                }
+            }
+            if (gotDistortion) {
+                err = builder.addWarpRectilinearForMetadata(distortion, preWidth, preHeight, cx,
+                        cy);
+                if (err != OK) {
+                    ALOGE("%s: Could not add distortion correction.", __FUNCTION__);
+                    jniThrowRuntimeException(env, "failed to add distortion correction.");
+                    return nullptr;
+                }
             }
         }
 

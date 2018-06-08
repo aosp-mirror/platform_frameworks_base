@@ -16,6 +16,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/quick_settings_container"
+    android:clipChildren="false"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/car_qs_background_primary"
@@ -26,10 +27,23 @@
     <include layout="@layout/car_status_bar_header"/>
     <include layout="@layout/car_qs_footer"/>
 
-    <com.android.systemui.statusbar.car.UserGridView
-        android:id="@+id/user_grid"
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/user_switcher_container"
+        android:clipChildren="false"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/car_margin"
-        android:layout_marginRight="@dimen/car_margin" />
+        android:layout_height="@dimen/car_user_switcher_container_height">
+
+        <com.android.systemui.statusbar.car.UserGridRecyclerView
+            android:id="@+id/user_grid"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:dayNightStyle="always_light"
+            app:showPagedListViewDivider="false"
+            app:gutter="both"
+            app:itemSpacing="@dimen/car_user_switcher_vertical_spacing_between_users"/>
+
+    </RelativeLayout>
+
 </LinearLayout>

@@ -19,6 +19,7 @@ package android.widget.espresso;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.RootMatchers.isPlatformPopup;
 import static android.support.test.espresso.matcher.RootMatchers.withDecorView;
 import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
@@ -47,6 +48,7 @@ import org.hamcrest.TypeSafeMatcher;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Espresso utility methods for the floating toolbar.
@@ -58,7 +60,9 @@ public class FloatingToolbarEspressoUtils {
 
     private static ViewInteraction onFloatingToolBar() {
         return onView(withTagValue(is(TAG)))
-                .inRoot(withDecorView(hasDescendant(withTagValue(is(TAG)))));
+                .inRoot(allOf(
+                        isPlatformPopup(),
+                        withDecorView(hasDescendant(withTagValue(is(TAG))))));
     }
 
     /**
@@ -84,7 +88,9 @@ public class FloatingToolbarEspressoUtils {
      * Asserts that the floating toolbar is not displayed on screen.
      *
      * @throws AssertionError if the assertion fails
+     * @deprecated Negative assertions are taking too long to timeout in Espresso.
      */
+    @Deprecated
     public static void assertFloatingToolbarIsNotDisplayed() {
         try {
             onFloatingToolBar().check(matches(isDisplayed()));
@@ -170,12 +176,10 @@ public class FloatingToolbarEspressoUtils {
      * @throws AssertionError if the assertion fails
      */
     public static void assertFloatingToolbarDoesNotContainItem(String itemLabel) {
-        try{
-            assertFloatingToolbarContainsItem(itemLabel);
-        } catch (AssertionError e) {
-            return;
-        }
-        throw new AssertionError("Floating toolbar contains " + itemLabel);
+        final Predicate<View> hasMenuItemLabel = view ->
+                view.getTag() instanceof MenuItem
+                        && itemLabel.equals(((MenuItem) view.getTag()).getTitle().toString());
+        assertFloatingToolbarMenuItem(hasMenuItemLabel, false);
     }
 
     /**
@@ -185,23 +189,30 @@ public class FloatingToolbarEspressoUtils {
      * @throws AssertionError if the assertion fails
      */
     public static void assertFloatingToolbarDoesNotContainItem(final int menuItemId) {
+        final Predicate<View> hasMenuItemId = view ->
+                view.getTag() instanceof MenuItem
+                        && ((MenuItem) view.getTag()).getItemId() == menuItemId;
+        assertFloatingToolbarMenuItem(hasMenuItemId, false);
+    }
+
+    private static void assertFloatingToolbarMenuItem(
+            final Predicate<View> predicate, final boolean positiveAssertion) {
         onFloatingToolBar().check(matches(new TypeSafeMatcher<View>() {
             @Override
             public boolean matchesSafely(View view) {
-                return !hasMenuItemWithSpecifiedId(view);
+                return positiveAssertion == containsItem(view);
             }
 
             @Override
             public void describeTo(Description description) {}
 
-            private boolean hasMenuItemWithSpecifiedId(View view) {
-                if (view.getTag() instanceof MenuItem
-                        && ((MenuItem) view.getTag()).getItemId() == menuItemId) {
+            private boolean containsItem(View view) {
+                if (predicate.test(view)) {
                     return true;
                 } else if (view instanceof ViewGroup) {
                     ViewGroup viewGroup = (ViewGroup) view;
                     for (int i = 0; i < viewGroup.getChildCount(); i++) {
-                        if (hasMenuItemWithSpecifiedId(viewGroup.getChildAt(i))) {
+                        if (containsItem(viewGroup.getChildAt(i))) {
                             return true;
                         }
                     }

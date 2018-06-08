@@ -66,6 +66,12 @@ public final class TextServicesManager {
     private static final String TAG = TextServicesManager.class.getSimpleName();
     private static final boolean DBG = false;
 
+    /**
+     * A compile time switch to control per-profile spell checker, which is not yet ready.
+     * @hide
+     */
+    public static final boolean DISABLE_PER_PROFILE_SPELL_CHECKER = true;
+
     private static TextServicesManager sInstance;
 
     private final ITextServicesManager mService;

@@ -73,6 +73,115 @@ public abstract class AttestationUtils {
     public static final int ID_TYPE_MEID = 3;
 
     /**
+     * Creates an array of X509Certificates from the provided KeymasterCertificateChain.
+     *
+     * @hide Only called by the DevicePolicyManager.
+     */
+    @NonNull public static X509Certificate[] parseCertificateChain(
+            final KeymasterCertificateChain kmChain) throws
+            KeyAttestationException {
+        // Extract certificate chain.
+        final Collection<byte[]> rawChain = kmChain.getCertificates();
+        if (rawChain.size() < 2) {
+            throw new KeyAttestationException("Attestation certificate chain contained "
+                    + rawChain.size() + " entries. At least two are required.");
+        }
+        final ByteArrayOutputStream concatenatedRawChain = new ByteArrayOutputStream();
+        try {
+            for (final byte[] cert : rawChain) {
+                concatenatedRawChain.write(cert);
+            }
+            return CertificateFactory.getInstance("X.509").generateCertificates(
+                    new ByteArrayInputStream(concatenatedRawChain.toByteArray()))
+                            .toArray(new X509Certificate[0]);
+        } catch (Exception e) {
+            throw new KeyAttestationException("Unable to construct certificate chain", e);
+        }
+    }
+
+    @NonNull private static KeymasterArguments prepareAttestationArgumentsForDeviceId(
+            Context context, @NonNull int[] idTypes, @NonNull byte[] attestationChallenge) throws
+            DeviceIdAttestationException {
+        // Verify that device ID attestation types are provided.
+        if (idTypes == null) {
+            throw new NullPointerException("Missing id types");
+        }
+
+        return prepareAttestationArguments(context, idTypes, attestationChallenge);
+    }
+
+    /**
+     * Prepares Keymaster Arguments with attestation data.
+     * @hide should only be used by KeyChain.
+     */
+    @NonNull public static KeymasterArguments prepareAttestationArguments(Context context,
+            @NonNull int[] idTypes, @NonNull byte[] attestationChallenge) throws
+            DeviceIdAttestationException {
+        // Check method arguments, retrieve requested device IDs and prepare attestation arguments.
+        if (attestationChallenge == null) {
+            throw new NullPointerException("Missing attestation challenge");
+        }
+        final KeymasterArguments attestArgs = new KeymasterArguments();
+        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_CHALLENGE, attestationChallenge);
+        // Return early if the caller did not request any device identifiers to be included in the
+        // attestation record.
+        if (idTypes == null) {
+            return attestArgs;
+        }
+        final Set<Integer> idTypesSet = new ArraySet<>(idTypes.length);
+        for (int idType : idTypes) {
+            idTypesSet.add(idType);
+        }
+        TelephonyManager telephonyService = null;
+        if (idTypesSet.contains(ID_TYPE_IMEI) || idTypesSet.contains(ID_TYPE_MEID)) {
+            telephonyService = (TelephonyManager) context.getSystemService(
+                    Context.TELEPHONY_SERVICE);
+            if (telephonyService == null) {
+                throw new DeviceIdAttestationException("Unable to access telephony service");
+            }
+        }
+        for (final Integer idType : idTypesSet) {
+            switch (idType) {
+                case ID_TYPE_SERIAL:
+                    attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_SERIAL,
+                            Build.getSerial().getBytes(StandardCharsets.UTF_8));
+                    break;
+                case ID_TYPE_IMEI: {
+                    final String imei = telephonyService.getImei(0);
+                    if (imei == null) {
+                        throw new DeviceIdAttestationException("Unable to retrieve IMEI");
+                    }
+                    attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_IMEI,
+                            imei.getBytes(StandardCharsets.UTF_8));
+                    break;
+                }
+                case ID_TYPE_MEID: {
+                    final String meid = telephonyService.getMeid(0);
+                    if (meid == null) {
+                        throw new DeviceIdAttestationException("Unable to retrieve MEID");
+                    }
+                    attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MEID,
+                            meid.getBytes(StandardCharsets.UTF_8));
+                    break;
+                }
+                default:
+                    throw new IllegalArgumentException("Unknown device ID type " + idType);
+            }
+        }
+        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_BRAND,
+                Build.BRAND.getBytes(StandardCharsets.UTF_8));
+        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_DEVICE,
+                Build.DEVICE.getBytes(StandardCharsets.UTF_8));
+        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_PRODUCT,
+                Build.PRODUCT.getBytes(StandardCharsets.UTF_8));
+        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MANUFACTURER,
+                Build.MANUFACTURER.getBytes(StandardCharsets.UTF_8));
+        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MODEL,
+                Build.MODEL.getBytes(StandardCharsets.UTF_8));
+        return attestArgs;
+    }
+
+    /**
      * Performs attestation of the device's identifiers. This method returns a certificate chain
      * whose first element contains the requested device identifiers in an extension. The device's
      * manufacturer, model, brand, device and product are always also included in the attestation.
@@ -105,65 +214,8 @@ public abstract class AttestationUtils {
     @NonNull public static X509Certificate[] attestDeviceIds(Context context,
             @NonNull int[] idTypes, @NonNull byte[] attestationChallenge) throws
             DeviceIdAttestationException {
-        // Check method arguments, retrieve requested device IDs and prepare attestation arguments.
-        if (idTypes == null) {
-            throw new NullPointerException("Missing id types");
-        }
-        if (attestationChallenge == null) {
-            throw new NullPointerException("Missing attestation challenge");
-        }
-        final KeymasterArguments attestArgs = new KeymasterArguments();
-        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_CHALLENGE, attestationChallenge);
-        final Set<Integer> idTypesSet = new ArraySet<>(idTypes.length);
-        for (int idType : idTypes) {
-            idTypesSet.add(idType);
-        }
-        TelephonyManager telephonyService = null;
-        if (idTypesSet.contains(ID_TYPE_IMEI) || idTypesSet.contains(ID_TYPE_MEID)) {
-            telephonyService = (TelephonyManager) context.getSystemService(
-                    Context.TELEPHONY_SERVICE);
-            if (telephonyService == null) {
-                throw new DeviceIdAttestationException("Unable to access telephony service");
-            }
-        }
-        for (final Integer idType : idTypesSet) {
-            switch (idType) {
-                case ID_TYPE_SERIAL:
-                    attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_SERIAL,
-                            Build.getSerial().getBytes(StandardCharsets.UTF_8));
-                    break;
-                case ID_TYPE_IMEI: {
-                    final String imei = telephonyService.getImei(0);
-                    if (imei == null) {
-                        throw new DeviceIdAttestationException("Unable to retrieve IMEI");
-                    }
-                    attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_IMEI,
-                            imei.getBytes(StandardCharsets.UTF_8));
-                    break;
-                }
-                case ID_TYPE_MEID: {
-                    final String meid = telephonyService.getDeviceId();
-                    if (meid == null) {
-                        throw new DeviceIdAttestationException("Unable to retrieve MEID");
-                    }
-                    attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MEID,
-                            meid.getBytes(StandardCharsets.UTF_8));
-                    break;
-                }
-                default:
-                    throw new IllegalArgumentException("Unknown device ID type " + idType);
-            }
-        }
-        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_BRAND,
-                Build.BRAND.getBytes(StandardCharsets.UTF_8));
-        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_DEVICE,
-                Build.DEVICE.getBytes(StandardCharsets.UTF_8));
-        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_PRODUCT,
-                Build.PRODUCT.getBytes(StandardCharsets.UTF_8));
-        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MANUFACTURER,
-                Build.MANUFACTURER.getBytes(StandardCharsets.UTF_8));
-        attestArgs.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MODEL,
-                Build.MODEL.getBytes(StandardCharsets.UTF_8));
+        final KeymasterArguments attestArgs = prepareAttestationArgumentsForDeviceId(
+                context, idTypes, attestationChallenge);
 
         // Perform attestation.
         final KeymasterCertificateChain outChain = new KeymasterCertificateChain();
@@ -173,22 +225,18 @@ public abstract class AttestationUtils {
                     KeyStore.getKeyStoreException(errorCode));
         }
 
-        // Extract certificate chain.
-        final Collection<byte[]> rawChain = outChain.getCertificates();
-        if (rawChain.size() < 2) {
-            throw new DeviceIdAttestationException("Attestation certificate chain contained "
-                    + rawChain.size() + " entries. At least two are required.");
-        }
-        final ByteArrayOutputStream concatenatedRawChain = new ByteArrayOutputStream();
         try {
-            for (final byte[] cert : rawChain) {
-                concatenatedRawChain.write(cert);
-            }
-            return CertificateFactory.getInstance("X.509").generateCertificates(
-                    new ByteArrayInputStream(concatenatedRawChain.toByteArray()))
-                            .toArray(new X509Certificate[0]);
-        } catch (Exception e) {
-            throw new DeviceIdAttestationException("Unable to construct certificate chain", e);
+            return parseCertificateChain(outChain);
+        } catch (KeyAttestationException e) {
+            throw new DeviceIdAttestationException(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Returns true if the attestation chain provided is a valid key attestation chain.
+     * @hide
+     */
+    public static boolean isChainValid(KeymasterCertificateChain chain) {
+        return chain != null && chain.getCertificates().size() >= 2;
     }
 }

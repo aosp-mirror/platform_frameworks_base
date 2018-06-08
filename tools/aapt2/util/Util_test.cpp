@@ -41,45 +41,6 @@ TEST(UtilTest, StringStartsWith) {
   EXPECT_TRUE(util::StartsWith("hello.xml", "he"));
 }
 
-TEST(UtilTest, StringBuilderSplitEscapeSequence) {
-  EXPECT_THAT(util::StringBuilder().Append("this is a new\\").Append("nline.").ToString(),
-              Eq("this is a new\nline."));
-}
-
-TEST(UtilTest, StringBuilderWhitespaceRemoval) {
-  EXPECT_THAT(util::StringBuilder().Append("    hey guys ").Append(" this is so cool ").ToString(),
-              Eq("hey guys this is so cool"));
-  EXPECT_THAT(
-      util::StringBuilder().Append(" \" wow,  so many \t ").Append("spaces. \"what? ").ToString(),
-      Eq(" wow,  so many \t spaces. what?"));
-  EXPECT_THAT(util::StringBuilder().Append("  where \t ").Append(" \nis the pie?").ToString(),
-              Eq("where is the pie?"));
-}
-
-TEST(UtilTest, StringBuilderEscaping) {
-  EXPECT_THAT(util::StringBuilder()
-                  .Append("    hey guys\\n ")
-                  .Append(" this \\t is so\\\\ cool ")
-                  .ToString(),
-              Eq("hey guys\n this \t is so\\ cool"));
-  EXPECT_THAT(util::StringBuilder().Append("\\@\\?\\#\\\\\\'").ToString(), Eq("@?#\\\'"));
-}
-
-TEST(UtilTest, StringBuilderMisplacedQuote) {
-  util::StringBuilder builder;
-  EXPECT_FALSE(builder.Append("they're coming!"));
-}
-
-TEST(UtilTest, StringBuilderUnicodeCodes) {
-  EXPECT_THAT(util::StringBuilder().Append("\\u00AF\\u0AF0 woah").ToString(),
-              Eq("\u00AF\u0AF0 woah"));
-  EXPECT_FALSE(util::StringBuilder().Append("\\u00 yo"));
-}
-
-TEST(UtilTest, StringBuilderPreserveSpaces) {
-  EXPECT_THAT(util::StringBuilder(true /*preserve_spaces*/).Append("\"").ToString(), Eq("\""));
-}
-
 TEST(UtilTest, TokenizeInput) {
   auto tokenizer = util::Tokenize(StringPiece("this| is|the|end"), '|');
   auto iter = tokenizer.begin();

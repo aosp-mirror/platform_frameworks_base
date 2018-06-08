@@ -609,7 +609,6 @@ public final class ImsReasonInfo implements Parcelable {
         mExtraMessage = null;
     }
 
-    /** @hide */
     public ImsReasonInfo(int code, int extraCode, String extraMessage) {
         mCode = code;
         mExtraCode = extraCode;

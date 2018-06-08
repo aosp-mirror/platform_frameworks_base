@@ -18,8 +18,8 @@
 
 #include "GammaFontRenderer.h"
 #include "TextDropShadowCache.h"
-#include "utils/Blur.h"
 #include "tests/common/TestUtils.h"
+#include "utils/Blur.h"
 
 #include <SkPaint.h>
 
@@ -29,6 +29,7 @@ using namespace android::uirenderer;
 RENDERTHREAD_OPENGL_PIPELINE_TEST(TextDropShadowCache, addRemove) {
     SkPaint paint;
     paint.setTextSize(20);
+    paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
 
     GammaFontRenderer gammaFontRenderer;
     FontRenderer& fontRenderer = gammaFontRenderer.getFontRenderer();
@@ -40,15 +41,15 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(TextDropShadowCache, addRemove) {
     std::vector<float> positions;
     float totalAdvance;
     uirenderer::Rect bounds;
-    TestUtils::layoutTextUnscaled(paint, "This is a test",
-            &glyphs, &positions, &totalAdvance, &bounds);
+    TestUtils::layoutTextUnscaled(paint, "This is a test", &glyphs, &positions, &totalAdvance,
+                                  &bounds);
     EXPECT_TRUE(bounds.contains(5, -10, 100, 0)) << "Expect input to be nontrivially sized";
 
     ShadowTexture* texture = cache.get(&paint, glyphs.data(), glyphs.size(), 10, positions.data());
 
     ASSERT_TRUE(texture);
     ASSERT_FALSE(texture->cleanup);
-    ASSERT_EQ((uint32_t) texture->objectSize(), cache.getSize());
+    ASSERT_EQ((uint32_t)texture->objectSize(), cache.getSize());
     ASSERT_TRUE(cache.getSize());
     cache.clear();
     ASSERT_EQ(cache.getSize(), 0u);

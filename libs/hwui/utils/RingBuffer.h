@@ -23,7 +23,7 @@
 namespace android {
 namespace uirenderer {
 
-template<class T, size_t SIZE>
+template <class T, size_t SIZE>
 class RingBuffer {
     PREVENT_COPY_AND_ASSIGN(RingBuffer);
 
@@ -42,21 +42,13 @@ public:
         return mBuffer[mHead];
     }
 
-    T& front() {
-        return (*this)[0];
-    }
+    T& front() { return (*this)[0]; }
 
-    T& back() {
-        return (*this)[size() - 1];
-    }
+    T& back() { return (*this)[size() - 1]; }
 
-    T& operator[](size_t index) {
-        return mBuffer[(mHead + index + 1) % mCount];
-    }
+    T& operator[](size_t index) { return mBuffer[(mHead + index + 1) % mCount]; }
 
-    const T& operator[](size_t index) const {
-        return mBuffer[(mHead + index + 1) % mCount];
-    }
+    const T& operator[](size_t index) const { return mBuffer[(mHead + index + 1) % mCount]; }
 
     void clear() {
         mCount = 0;
@@ -69,7 +61,7 @@ private:
     size_t mCount = 0;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
 #endif /* RINGBUFFER_H_ */

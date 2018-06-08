@@ -16,17 +16,21 @@
 
 package com.android.server.policy;
 
+import static com.android.server.wm.BarControllerProto.STATE;
+import static com.android.server.wm.BarControllerProto.TRANSIENT_STATE;
+
 import android.app.StatusBarManager;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.WindowManagerPolicy.WindowState;
 
 import com.android.server.LocalServices;
+import com.android.server.policy.WindowManagerPolicy.WindowState;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.PrintWriter;
@@ -65,6 +69,7 @@ public class BarController {
     private boolean mShowTransparent;
     private boolean mSetUnHideFlagWhenNextTransparent;
     private boolean mNoAnimationOnNextShow;
+    private final Rect mContentFrame = new Rect();
 
     private OnBarVisibilityChangedListener mVisibilityChangeListener;
 
@@ -82,6 +87,15 @@ public class BarController {
 
     public void setWindow(WindowState win) {
         mWin = win;
+    }
+
+    /**
+     * Sets the frame within which the bar will display its content.
+     *
+     * This is used to determine if letterboxes interfere with the display of such content.
+     */
+    public void setContentFrame(Rect frame) {
+        mContentFrame.set(frame);
     }
 
     public void setShowTransparent(boolean transparent) {
@@ -132,7 +146,8 @@ public class BarController {
                 } else {
                     vis &= ~mTranslucentFlag;
                 }
-                if ((fl & WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0) {
+                if ((fl & WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0
+                        && isTransparentAllowed(win)) {
                     vis |= mTransparentFlag;
                 } else {
                     vis &= ~mTransparentFlag;
@@ -143,6 +158,10 @@ public class BarController {
             }
         }
         return vis;
+    }
+
+    boolean isTransparentAllowed(WindowState win) {
+        return win == null || !win.isLetterboxedOverlappingWith(mContentFrame);
     }
 
     public boolean setBarShowingLw(final boolean show) {
@@ -311,6 +330,13 @@ public class BarController {
         throw new IllegalArgumentException("Unknown state " + state);
     }
 
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(STATE, mState);
+        proto.write(TRANSIENT_STATE, mTransientBarState);
+        proto.end(token);
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         if (mWin != null) {
             pw.print(prefix); pw.println(mTag);
@@ -318,6 +344,7 @@ public class BarController {
             pw.println(StatusBarManager.windowStateToString(mState));
             pw.print(prefix); pw.print("  "); pw.print("mTransientBar"); pw.print('=');
             pw.println(transientBarStateToString(mTransientBarState));
+            pw.print(prefix); pw.print("  mContentFrame="); pw.println(mContentFrame);
         }
     }
 

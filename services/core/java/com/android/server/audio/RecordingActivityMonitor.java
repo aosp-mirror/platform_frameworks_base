@@ -103,6 +103,9 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                 conf.dump(pw);
             }
         }
+        pw.println("\n");
+        // log
+        sEventLogger.dump(pw);
     }
 
     private ArrayList<AudioRecordingConfiguration> anonymizeForPublicConsumption(
@@ -190,6 +193,9 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
             case AudioManager.RECORD_CONFIG_EVENT_STOP:
                 // return failure if an unknown recording session stopped
                 configChanged = (mRecordConfigs.remove(new Integer(session)) != null);
+                if (configChanged) {
+                    sEventLogger.log(new RecordingEvent(event, uid, session, source, null));
+                }
                 break;
             case AudioManager.RECORD_CONFIG_EVENT_START:
                 final AudioFormat clientFormat = new AudioFormat.Builder()
@@ -230,6 +236,9 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                 } else {
                     mRecordConfigs.put(sessionKey, updatedConfig);
                     configChanged = true;
+                }
+                if (configChanged) {
+                    sEventLogger.log(new RecordingEvent(event, uid, session, source, packageName));
                 }
                 break;
             default:
@@ -281,4 +290,36 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
             mDispatcherCb.asBinder().unlinkToDeath(this, 0);
         }
     }
+
+    /**
+     * Inner class for recording event logging
+     */
+    private static final class RecordingEvent extends AudioEventLogger.Event {
+        private final int mRecEvent;
+        private final int mClientUid;
+        private final int mSession;
+        private final int mSource;
+        private final String mPackName;
+
+        RecordingEvent(int event, int uid, int session, int source, String packName) {
+            mRecEvent = event;
+            mClientUid = uid;
+            mSession = session;
+            mSource = source;
+            mPackName = packName;
+        }
+
+        @Override
+        public String eventToString() {
+            return new StringBuilder("rec ").append(
+                        mRecEvent == AudioManager.RECORD_CONFIG_EVENT_START ? "start" : "stop ")
+                    .append(" uid:").append(mClientUid)
+                    .append(" session:").append(mSession)
+                    .append(" src:").append(MediaRecorder.toLogFriendlyAudioSource(mSource))
+                    .append(mPackName == null ? "" : " pack:" + mPackName).toString();
+        }
+    }
+
+    private static final AudioEventLogger sEventLogger = new AudioEventLogger(50,
+            "recording activity as reported through AudioSystem.AudioRecordingCallback");
 }

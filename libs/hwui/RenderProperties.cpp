@@ -44,9 +44,9 @@ void LayerProperties::reset() {
 }
 
 bool LayerProperties::setColorFilter(SkColorFilter* filter) {
-   if (mColorFilter == filter) return false;
-   SkRefCnt_SafeAssign(mColorFilter, filter);
-   return true;
+    if (mColorFilter == filter) return false;
+    SkRefCnt_SafeAssign(mColorFilter, filter);
+    return true;
 }
 
 bool LayerProperties::setFromPaint(const SkPaint* paint) {
@@ -66,18 +66,13 @@ LayerProperties& LayerProperties::operator=(const LayerProperties& other) {
     return *this;
 }
 
-RenderProperties::ComputedFields::ComputedFields()
-        : mTransformMatrix(nullptr) {
-}
+RenderProperties::ComputedFields::ComputedFields() : mTransformMatrix(nullptr) {}
 
 RenderProperties::ComputedFields::~ComputedFields() {
     delete mTransformMatrix;
 }
 
-RenderProperties::RenderProperties()
-        : mStaticMatrix(nullptr)
-        , mAnimationMatrix(nullptr) {
-}
+RenderProperties::RenderProperties() : mStaticMatrix(nullptr), mAnimationMatrix(nullptr) {}
 
 RenderProperties::~RenderProperties() {
     delete mStaticMatrix;
@@ -99,14 +94,14 @@ RenderProperties& RenderProperties::operator=(const RenderProperties& other) {
     return *this;
 }
 
-static void dumpMatrix(std::ostream& output, std::string& indent,
-        const char* label, SkMatrix* matrix) {
-   if (matrix) {
-        output << indent << "(" <<  label << " " << matrix << ": ";
+static void dumpMatrix(std::ostream& output, std::string& indent, const char* label,
+                       SkMatrix* matrix) {
+    if (matrix) {
+        output << indent << "(" << label << " " << matrix << ": ";
         output << std::fixed << std::setprecision(2);
-        output << "[" << matrix->get(0) << " "<< matrix->get(1) << " " << matrix->get(2) << "]";
-        output << " [" << matrix->get(3) << " "<< matrix->get(4) << " " << matrix->get(5) << "]";
-        output << " [" << matrix->get(6) << " "<< matrix->get(7) << " " << matrix->get(8) << "]";
+        output << "[" << matrix->get(0) << " " << matrix->get(1) << " " << matrix->get(2) << "]";
+        output << " [" << matrix->get(3) << " " << matrix->get(4) << " " << matrix->get(5) << "]";
+        output << " [" << matrix->get(6) << " " << matrix->get(7) << " " << matrix->get(8) << "]";
         output << ")" << std::endl;
     }
 }
@@ -114,8 +109,8 @@ static void dumpMatrix(std::ostream& output, std::string& indent,
 void RenderProperties::debugOutputProperties(std::ostream& output, const int level) const {
     auto indent = std::string(level * 2, ' ');
     if (mPrimitiveFields.mLeft != 0 || mPrimitiveFields.mTop != 0) {
-        output << indent << "(Translate (left, top) " << mPrimitiveFields.mLeft
-                << ", " << mPrimitiveFields.mTop << ")" << std::endl;
+        output << indent << "(Translate (left, top) " << mPrimitiveFields.mLeft << ", "
+               << mPrimitiveFields.mTop << ")" << std::endl;
     }
     dumpMatrix(output, indent, "ConcatMatrix (static)", mStaticMatrix);
     dumpMatrix(output, indent, "ConcatMatrix (animation)", mAnimationMatrix);
@@ -124,7 +119,7 @@ void RenderProperties::debugOutputProperties(std::ostream& output, const int lev
     if (hasTransformMatrix()) {
         if (isTransformTranslateOnly()) {
             output << indent << "(Translate " << getTranslationX() << ", " << getTranslationY()
-                    << ", " << getZ() << ")" << std::endl;
+                   << ", " << getZ() << ")" << std::endl;
         } else {
             dumpMatrix(output, indent, "ConcatMatrix ", mComputedFields.mTransformMatrix);
         }
@@ -132,10 +127,9 @@ void RenderProperties::debugOutputProperties(std::ostream& output, const int lev
 
     const bool isLayer = effectiveLayerType() != LayerType::None;
     int clipFlags = getClippingFlags();
-    if (mPrimitiveFields.mAlpha < 1
-            && !MathUtils::isZero(mPrimitiveFields.mAlpha)) {
+    if (mPrimitiveFields.mAlpha < 1 && !MathUtils::isZero(mPrimitiveFields.mAlpha)) {
         if (isLayer) {
-            clipFlags &= ~CLIP_TO_BOUNDS; // bounds clipping done by layer
+            clipFlags &= ~CLIP_TO_BOUNDS;  // bounds clipping done by layer
         }
 
         if (CC_LIKELY(isLayer || !getHasOverlappingRendering())) {
@@ -146,31 +140,28 @@ void RenderProperties::debugOutputProperties(std::ostream& output, const int lev
             Rect layerBounds(0, 0, getWidth(), getHeight());
             if (clipFlags) {
                 getClippingRectForFlags(clipFlags, &layerBounds);
-                clipFlags = 0; // all clipping done by savelayer
+                clipFlags = 0;  // all clipping done by savelayer
             }
-            output << indent << "(SaveLayerAlpha "
-                    << (int)layerBounds.left << ", " << (int)layerBounds.top << ", "
-                    << (int)layerBounds.right << ", " << (int)layerBounds.bottom << ", "
-                    << (int)(mPrimitiveFields.mAlpha * 255) << ", 0x" << std::hex
-                    << (SaveFlags::HasAlphaLayer | SaveFlags::ClipToLayer) << ")" << std::dec
-                    << std::endl;
+            output << indent << "(SaveLayerAlpha " << (int)layerBounds.left << ", "
+                   << (int)layerBounds.top << ", " << (int)layerBounds.right << ", "
+                   << (int)layerBounds.bottom << ", " << (int)(mPrimitiveFields.mAlpha * 255)
+                   << ", 0x" << std::hex << (SaveFlags::HasAlphaLayer | SaveFlags::ClipToLayer)
+                   << ")" << std::dec << std::endl;
         }
     }
 
     if (clipFlags) {
         Rect clipRect;
         getClippingRectForFlags(clipFlags, &clipRect);
-        output << indent << "(ClipRect "
-                << (int)clipRect.left << ", " << (int)clipRect.top << ", "
-                << (int)clipRect.right << ", " << (int)clipRect.bottom << ")" << std::endl;
+        output << indent << "(ClipRect " << (int)clipRect.left << ", " << (int)clipRect.top << ", "
+               << (int)clipRect.right << ", " << (int)clipRect.bottom << ")" << std::endl;
     }
 
     if (getRevealClip().willClip()) {
         Rect bounds;
         getRevealClip().getBounds(&bounds);
-        output << indent << "(Clip to reveal clip with bounds "
-                << bounds.left << ", " << bounds.top << ", "
-                << bounds.right << ", " << bounds.bottom << ")" << std::endl;
+        output << indent << "(Clip to reveal clip with bounds " << bounds.left << ", " << bounds.top
+               << ", " << bounds.right << ", " << bounds.bottom << ")" << std::endl;
     }
 
     auto& outline = mPrimitiveFields.mOutline;
@@ -179,9 +170,8 @@ void RenderProperties::debugOutputProperties(std::ostream& output, const int lev
             output << indent << "(Clip to empty outline)";
         } else if (outline.willClip()) {
             const Rect& bounds = outline.getBounds();
-            output << indent << "(Clip to outline with bounds "
-                    << bounds.left << ", " << bounds.top << ", "
-                    << bounds.right << ", " << bounds.bottom << ")" << std::endl;
+            output << indent << "(Clip to outline with bounds " << bounds.left << ", " << bounds.top
+                   << ", " << bounds.right << ", " << bounds.bottom << ")" << std::endl;
         }
     }
 }
@@ -212,7 +202,7 @@ void RenderProperties::updateMatrix() {
             mComputedFields.mTransformCamera.getMatrix(&transform3D);
             transform3D.preTranslate(-getPivotX(), -getPivotY());
             transform3D.postTranslate(getPivotX() + getTranslationX(),
-                    getPivotY() + getTranslationY());
+                                      getPivotY() + getTranslationY());
             transform->postConcat(transform3D);
             mComputedFields.mTransformCamera.restore();
         }

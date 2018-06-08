@@ -24,7 +24,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Pair;
+import android.util.Range;
 import android.util.RecurrenceRule;
 
 import com.android.internal.util.Preconditions;
@@ -34,6 +34,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.time.Period;
 import java.time.ZonedDateTime;
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * Description of a billing relationship plan between a carrier and a specific
@@ -43,7 +44,6 @@ import java.util.Iterator;
  *
  * @see SubscriptionManager#setSubscriptionPlans(int, java.util.List)
  * @see SubscriptionManager#getSubscriptionPlans(int)
- * @hide
  */
 @SystemApi
 public final class SubscriptionPlan implements Parcelable {
@@ -125,6 +125,27 @@ public final class SubscriptionPlan implements Parcelable {
                 .append("}").toString();
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(cycleRule, title, summary, dataLimitBytes, dataLimitBehavior,
+                dataUsageBytes, dataUsageTime);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SubscriptionPlan) {
+            final SubscriptionPlan other = (SubscriptionPlan) obj;
+            return Objects.equals(cycleRule, other.cycleRule)
+                    && Objects.equals(title, other.title)
+                    && Objects.equals(summary, other.summary)
+                    && dataLimitBytes == other.dataLimitBytes
+                    && dataLimitBehavior == other.dataLimitBehavior
+                    && dataUsageBytes == other.dataUsageBytes
+                    && dataUsageTime == other.dataUsageTime;
+        }
+        return false;
+    }
+
     public static final Parcelable.Creator<SubscriptionPlan> CREATOR = new Parcelable.Creator<SubscriptionPlan>() {
         @Override
         public SubscriptionPlan createFromParcel(Parcel source) {
@@ -188,7 +209,7 @@ public final class SubscriptionPlan implements Parcelable {
      * any recurrence rules. The iterator starts from the currently active cycle
      * and walks backwards through time.
      */
-    public Iterator<Pair<ZonedDateTime, ZonedDateTime>> cycleIterator() {
+    public Iterator<Range<ZonedDateTime>> cycleIterator() {
         return cycleRule.cycleIterator();
     }
 
@@ -206,6 +227,9 @@ public final class SubscriptionPlan implements Parcelable {
         /**
          * Start defining a {@link SubscriptionPlan} that covers a very specific
          * window of time, and never automatically recurs.
+         *
+         * @param start The exact time at which the plan starts.
+         * @param end The exact time at which the plan ends.
          */
         public static Builder createNonrecurring(ZonedDateTime start, ZonedDateTime end) {
             if (!end.isAfter(start)) {
@@ -216,28 +240,43 @@ public final class SubscriptionPlan implements Parcelable {
         }
 
         /**
-         * Start defining a {@link SubscriptionPlan} that will recur
-         * automatically every month. It will always recur on the same day of a
-         * particular month. When a particular month ends before the defined
-         * recurrence day, the plan will recur on the last instant of that
-         * month.
+         * Start defining a {@link SubscriptionPlan} that starts at a specific
+         * time, and automatically recurs after each specific period of time,
+         * repeating indefinitely.
+         * <p>
+         * When the given period is set to exactly one month, the plan will
+         * always recur on the day of the month defined by
+         * {@link ZonedDateTime#getDayOfMonth()}. When a particular month ends
+         * before this day, the plan will recur on the last possible instant of
+         * that month.
+         *
+         * @param start The exact time at which the plan starts.
+         * @param period The period after which the plan automatically recurs.
          */
+        public static Builder createRecurring(ZonedDateTime start, Period period) {
+            if (period.isZero() || period.isNegative()) {
+                throw new IllegalArgumentException("Period " + period + " must be positive");
+            }
+            return new Builder(start, null, period);
+        }
+
+        /** {@hide} */
+        @SystemApi
+        @Deprecated
         public static Builder createRecurringMonthly(ZonedDateTime start) {
             return new Builder(start, null, Period.ofMonths(1));
         }
 
-        /**
-         * Start defining a {@link SubscriptionPlan} that will recur
-         * automatically every week.
-         */
+        /** {@hide} */
+        @SystemApi
+        @Deprecated
         public static Builder createRecurringWeekly(ZonedDateTime start) {
             return new Builder(start, null, Period.ofDays(7));
         }
 
-        /**
-         * Start defining a {@link SubscriptionPlan} that will recur
-         * automatically every day.
-         */
+        /** {@hide} */
+        @SystemApi
+        @Deprecated
         public static Builder createRecurringDaily(ZonedDateTime start) {
             return new Builder(start, null, Period.ofDays(1));
         }

@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.IVold;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -75,24 +76,24 @@ public class VolumeInfo implements Parcelable {
     /** Real volume representing internal emulated storage */
     public static final String ID_EMULATED_INTERNAL = "emulated";
 
-    public static final int TYPE_PUBLIC = 0;
-    public static final int TYPE_PRIVATE = 1;
-    public static final int TYPE_EMULATED = 2;
-    public static final int TYPE_ASEC = 3;
-    public static final int TYPE_OBB = 4;
+    public static final int TYPE_PUBLIC = IVold.VOLUME_TYPE_PUBLIC;
+    public static final int TYPE_PRIVATE = IVold.VOLUME_TYPE_PRIVATE;
+    public static final int TYPE_EMULATED = IVold.VOLUME_TYPE_EMULATED;
+    public static final int TYPE_ASEC = IVold.VOLUME_TYPE_ASEC;
+    public static final int TYPE_OBB = IVold.VOLUME_TYPE_OBB;
 
-    public static final int STATE_UNMOUNTED = 0;
-    public static final int STATE_CHECKING = 1;
-    public static final int STATE_MOUNTED = 2;
-    public static final int STATE_MOUNTED_READ_ONLY = 3;
-    public static final int STATE_FORMATTING = 4;
-    public static final int STATE_EJECTING = 5;
-    public static final int STATE_UNMOUNTABLE = 6;
-    public static final int STATE_REMOVED = 7;
-    public static final int STATE_BAD_REMOVAL = 8;
+    public static final int STATE_UNMOUNTED = IVold.VOLUME_STATE_UNMOUNTED;
+    public static final int STATE_CHECKING = IVold.VOLUME_STATE_CHECKING;
+    public static final int STATE_MOUNTED = IVold.VOLUME_STATE_MOUNTED;
+    public static final int STATE_MOUNTED_READ_ONLY = IVold.VOLUME_STATE_MOUNTED_READ_ONLY;
+    public static final int STATE_FORMATTING = IVold.VOLUME_STATE_FORMATTING;
+    public static final int STATE_EJECTING = IVold.VOLUME_STATE_EJECTING;
+    public static final int STATE_UNMOUNTABLE = IVold.VOLUME_STATE_UNMOUNTABLE;
+    public static final int STATE_REMOVED = IVold.VOLUME_STATE_REMOVED;
+    public static final int STATE_BAD_REMOVAL = IVold.VOLUME_STATE_BAD_REMOVAL;
 
-    public static final int MOUNT_FLAG_PRIMARY = 1 << 0;
-    public static final int MOUNT_FLAG_VISIBLE = 1 << 1;
+    public static final int MOUNT_FLAG_PRIMARY = IVold.MOUNT_FLAG_PRIMARY;
+    public static final int MOUNT_FLAG_VISIBLE = IVold.MOUNT_FLAG_VISIBLE;
 
     private static SparseArray<String> sStateToEnvironment = new SparseArray<>();
     private static ArrayMap<String, String> sEnvironmentToBroadcast = new ArrayMap<>();
@@ -268,22 +269,7 @@ public class VolumeInfo implements Parcelable {
         return (mountFlags & MOUNT_FLAG_VISIBLE) != 0;
     }
 
-    public boolean isVisibleForRead(int userId) {
-        if (type == TYPE_PUBLIC) {
-            if (isPrimary() && mountUserId != userId) {
-                // Primary physical is only visible to single user
-                return false;
-            } else {
-                return isVisible();
-            }
-        } else if (type == TYPE_EMULATED) {
-            return isVisible();
-        } else {
-            return false;
-        }
-    }
-
-    public boolean isVisibleForWrite(int userId) {
+    public boolean isVisibleForUser(int userId) {
         if (type == TYPE_PUBLIC && mountUserId == userId) {
             return isVisible();
         } else if (type == TYPE_EMULATED) {
@@ -291,6 +277,14 @@ public class VolumeInfo implements Parcelable {
         } else {
             return false;
         }
+    }
+
+    public boolean isVisibleForRead(int userId) {
+        return isVisibleForUser(userId);
+    }
+
+    public boolean isVisibleForWrite(int userId) {
+        return isVisibleForUser(userId);
     }
 
     public File getPath() {
@@ -339,12 +333,14 @@ public class VolumeInfo implements Parcelable {
         if (userPath == null) {
             userPath = new File("/dev/null");
         }
+        File internalPath = getInternalPathForUser(userId);
+        if (internalPath == null) {
+            internalPath = new File("/dev/null");
+        }
 
         String description = null;
         String derivedFsUuid = fsUuid;
-        long mtpReserveSize = 0;
         long maxFileSize = 0;
-        int mtpStorageId = StorageVolume.STORAGE_ID_INVALID;
 
         if (type == TYPE_EMULATED) {
             emulated = true;
@@ -354,12 +350,6 @@ public class VolumeInfo implements Parcelable {
                 description = storage.getBestVolumeDescription(privateVol);
                 derivedFsUuid = privateVol.fsUuid;
             }
-
-            if (isPrimary()) {
-                mtpStorageId = StorageVolume.STORAGE_ID_PRIMARY;
-            }
-
-            mtpReserveSize = storage.getStorageLowBytes(userPath);
 
             if (ID_EMULATED_INTERNAL.equals(id)) {
                 removable = false;
@@ -373,14 +363,6 @@ public class VolumeInfo implements Parcelable {
 
             description = storage.getBestVolumeDescription(this);
 
-            if (isPrimary()) {
-                mtpStorageId = StorageVolume.STORAGE_ID_PRIMARY;
-            } else {
-                // Since MediaProvider currently persists this value, we need a
-                // value that is stable over time.
-                mtpStorageId = buildStableMtpStorageId(fsUuid);
-            }
-
             if ("vfat".equals(fsType)) {
                 maxFileSize = 4294967295L;
             }
@@ -393,8 +375,8 @@ public class VolumeInfo implements Parcelable {
             description = context.getString(android.R.string.unknownName);
         }
 
-        return new StorageVolume(id, mtpStorageId, userPath, description, isPrimary(), removable,
-                emulated, mtpReserveSize, allowMassStorage, maxFileSize, new UserHandle(userId),
+        return new StorageVolume(id, userPath, internalPath, description, isPrimary(), removable,
+                emulated, allowMassStorage, maxFileSize, new UserHandle(userId),
                 derivedFsUuid, envState);
     }
 
@@ -424,9 +406,13 @@ public class VolumeInfo implements Parcelable {
      * Build an intent to browse the contents of this volume. Only valid for
      * {@link #TYPE_EMULATED} or {@link #TYPE_PUBLIC}.
      */
-    public Intent buildBrowseIntent() {
+    public @Nullable Intent buildBrowseIntent() {
+        return buildBrowseIntentForUser(UserHandle.myUserId());
+    }
+
+    public @Nullable Intent buildBrowseIntentForUser(int userId) {
         final Uri uri;
-        if (type == VolumeInfo.TYPE_PUBLIC) {
+        if (type == VolumeInfo.TYPE_PUBLIC && mountUserId == userId) {
             uri = DocumentsContract.buildRootUri(DOCUMENT_AUTHORITY, fsUuid);
         } else if (type == VolumeInfo.TYPE_EMULATED && isPrimary()) {
             uri = DocumentsContract.buildRootUri(DOCUMENT_AUTHORITY,

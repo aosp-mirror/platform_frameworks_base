@@ -21,30 +21,30 @@ namespace android {
 namespace uirenderer {
 
 const std::string FrameInfoNames[] = {
-    "Flags",
-    "IntendedVsync",
-    "Vsync",
-    "OldestInputEvent",
-    "NewestInputEvent",
-    "HandleInputStart",
-    "AnimationStart",
-    "PerformTraversalsStart",
-    "DrawStart",
-    "SyncQueued",
-    "SyncStart",
-    "IssueDrawCommandsStart",
-    "SwapBuffers",
-    "FrameCompleted",
-    "DequeueBufferDuration",
-    "QueueBufferDuration",
+        "Flags",
+        "IntendedVsync",
+        "Vsync",
+        "OldestInputEvent",
+        "NewestInputEvent",
+        "HandleInputStart",
+        "AnimationStart",
+        "PerformTraversalsStart",
+        "DrawStart",
+        "SyncQueued",
+        "SyncStart",
+        "IssueDrawCommandsStart",
+        "SwapBuffers",
+        "FrameCompleted",
+        "DequeueBufferDuration",
+        "QueueBufferDuration",
 };
 
-static_assert((sizeof(FrameInfoNames)/sizeof(FrameInfoNames[0]))
-        == static_cast<int>(FrameInfoIndex::NumIndexes),
-        "size mismatch: FrameInfoNames doesn't match the enum!");
+static_assert((sizeof(FrameInfoNames) / sizeof(FrameInfoNames[0])) ==
+                      static_cast<int>(FrameInfoIndex::NumIndexes),
+              "size mismatch: FrameInfoNames doesn't match the enum!");
 
 static_assert(static_cast<int>(FrameInfoIndex::NumIndexes) == 16,
-        "Must update value in FrameMetrics.java#FRAME_STATS_COUNT (and here)");
+              "Must update value in FrameMetrics.java#FRAME_STATS_COUNT (and here)");
 
 void FrameInfo::importUiThreadInfo(int64_t* info) {
     memcpy(mFrameInfo, info, UI_THREAD_FRAME_INFO_SIZE * sizeof(int64_t));

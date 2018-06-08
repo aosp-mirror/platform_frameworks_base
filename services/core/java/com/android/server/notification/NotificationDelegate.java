@@ -16,15 +16,21 @@
 
 package com.android.server.notification;
 
+import android.service.notification.NotificationStats;
+
 import com.android.internal.statusbar.NotificationVisibility;
 
 public interface NotificationDelegate {
     void onSetDisabled(int status);
     void onClearAll(int callingUid, int callingPid, int userId);
-    void onNotificationClick(int callingUid, int callingPid, String key);
-    void onNotificationActionClick(int callingUid, int callingPid, String key, int actionIndex);
+    void onNotificationClick(int callingUid, int callingPid, String key,
+            NotificationVisibility nv);
+    void onNotificationActionClick(int callingUid, int callingPid, String key, int actionIndex,
+            NotificationVisibility nv);
     void onNotificationClear(int callingUid, int callingPid,
-            String pkg, String tag, int id, int userId);
+            String pkg, String tag, int id, int userId, String key,
+            @NotificationStats.DismissalSurface int dismissalSurface,
+            NotificationVisibility nv);
     void onNotificationError(int callingUid, int callingPid,
             String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId);
@@ -35,4 +41,8 @@ public interface NotificationDelegate {
             NotificationVisibility[] newlyVisibleKeys,
             NotificationVisibility[] noLongerVisibleKeys);
     void onNotificationExpansionChanged(String key, boolean userAction, boolean expanded);
+    void onNotificationDirectReplied(String key);
+    void onNotificationSettingsViewed(String key);
+    void onNotificationSmartRepliesAdded(String key, int replyCount);
+    void onNotificationSmartReplySent(String key, int replyIndex);
 }

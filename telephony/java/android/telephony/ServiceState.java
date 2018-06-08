@@ -17,7 +17,6 @@
 package android.telephony;
 
 import android.annotation.IntDef;
-import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -977,11 +976,13 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public void setCellBandwidths(int[] bandwidths) {
         mCellBandwidths = bandwidths;
     }
 
     /** @hide */
+    @TestApi
     public void setChannelNumber(int channelNumber) {
         mChannelNumber = channelNumber;
     }
@@ -1172,6 +1173,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public void setRilVoiceRadioTechnology(int rt) {
         if (rt == RIL_RADIO_TECHNOLOGY_LTE_CA) {
             rt = RIL_RADIO_TECHNOLOGY_LTE;
@@ -1181,6 +1183,7 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public void setRilDataRadioTechnology(int rt) {
         if (rt == RIL_RADIO_TECHNOLOGY_LTE_CA) {
             rt = RIL_RADIO_TECHNOLOGY_LTE;
@@ -1530,7 +1533,6 @@ public class ServiceState implements Parcelable {
      * @return List of registration states
      * @hide
      */
-    @SystemApi
     public List<NetworkRegistrationState> getNetworkRegistrationStates() {
         synchronized (mNetworkRegistrationStates) {
             return new ArrayList<>(mNetworkRegistrationStates);
@@ -1544,7 +1546,6 @@ public class ServiceState implements Parcelable {
      * @return List of registration states.
      * @hide
      */
-    @SystemApi
     public List<NetworkRegistrationState> getNetworkRegistrationStates(int transportType) {
         List<NetworkRegistrationState> list = new ArrayList<>();
 
@@ -1567,7 +1568,6 @@ public class ServiceState implements Parcelable {
      * @return The matching NetworkRegistrationState.
      * @hide
      */
-    @SystemApi
     public NetworkRegistrationState getNetworkRegistrationStates(int transportType, int domain) {
         synchronized (mNetworkRegistrationStates) {
             for (NetworkRegistrationState networkRegistrationState : mNetworkRegistrationStates) {

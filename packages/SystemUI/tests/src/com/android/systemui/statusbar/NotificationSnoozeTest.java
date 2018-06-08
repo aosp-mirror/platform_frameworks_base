@@ -62,57 +62,6 @@ public class NotificationSnoozeTest extends SysuiTestCase {
     }
 
     @Test
-    public void testParseIntArrayNull() throws Exception {
-        when(mMockParser.getString(anyString(), isNull())).thenReturn(null);
-        mNotificationSnooze.setKeyValueListParser(mMockParser);
-
-        int[] result = mNotificationSnooze.parseIntArray("foo", RES_OPTIONS);
-        assertEquals(RES_OPTIONS, result);
-    }
-
-    @Test
-    public void testParseIntArrayLeadingSep() throws Exception {
-        when(mMockParser.getString(anyString(), isNull())).thenReturn(":4:5:6");
-        mNotificationSnooze.setKeyValueListParser(mMockParser);
-
-        int[] result = mNotificationSnooze.parseIntArray("foo", RES_OPTIONS);
-        assertEquals(RES_OPTIONS, result);
-    }
-
-    @Test
-    public void testParseIntArrayEmptyItem() throws Exception {
-        when(mMockParser.getString(anyString(), isNull())).thenReturn("4::6");
-        mNotificationSnooze.setKeyValueListParser(mMockParser);
-
-        int[] result = mNotificationSnooze.parseIntArray("foo", RES_OPTIONS);
-        assertEquals(RES_OPTIONS, result);
-    }
-
-    @Test
-    public void testParseIntArrayTrailingSep() throws Exception {
-        when(mMockParser.getString(anyString(), isNull())).thenReturn("4:5:6:");
-        mNotificationSnooze.setKeyValueListParser(mMockParser);
-
-        int[] result = mNotificationSnooze.parseIntArray("foo", RES_OPTIONS);
-        assertEquals(3, result.length);
-        assertEquals(4, result[0]);  // respect order
-        assertEquals(5, result[1]);
-        assertEquals(6, result[2]);
-    }
-
-    @Test
-    public void testParseIntArrayGoodData() throws Exception {
-        when(mMockParser.getString(anyString(), isNull())).thenReturn("4:5:6");
-        mNotificationSnooze.setKeyValueListParser(mMockParser);
-
-        int[] result = mNotificationSnooze.parseIntArray("foo", RES_OPTIONS);
-        assertEquals(3, result.length);
-        assertEquals(4, result[0]);  // respect order
-        assertEquals(5, result[1]);
-        assertEquals(6, result[2]);
-    }
-
-    @Test
     public void testGetOptionsWithNoConfig() throws Exception {
         ArrayList<SnoozeOption> result = mNotificationSnooze.getDefaultSnoozeOptions();
         assertEquals(3, result.size());

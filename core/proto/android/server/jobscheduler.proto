@@ -1,0 +1,665 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package com.android.server.job;
+
+option java_multiple_files = true;
+
+import "frameworks/base/core/proto/android/app/job/enums.proto";
+import "frameworks/base/core/proto/android/content/clipdata.proto";
+import "frameworks/base/core/proto/android/content/component_name.proto";
+import "frameworks/base/core/proto/android/content/intent.proto";
+import "frameworks/base/core/proto/android/net/network.proto";
+import "frameworks/base/core/proto/android/net/networkrequest.proto";
+import "frameworks/base/core/proto/android/os/bundle.proto";
+import "frameworks/base/core/proto/android/os/persistablebundle.proto";
+import "frameworks/base/core/proto/android/server/forceappstandbytracker.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+message JobSchedulerServiceDumpProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional ConstantsProto settings = 1;
+
+    optional int32 current_heartbeat = 14;
+    repeated int32 next_heartbeat = 15;
+    optional int64 last_heartbeat_time_millis = 16;
+    optional int64 next_heartbeat_time_millis = 17;
+    optional bool in_parole = 18;
+
+    repeated int32 started_users = 2;
+
+    message RegisteredJob {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional JobStatusShortInfoProto info = 1;
+        optional JobStatusDumpProto dump = 2;
+
+        // A job is ready to be executed if:
+        // is_job_ready && is_user_started && !is_job_pending &&
+        // !is_job_currently_active && !is_uid_backing_up &&
+        // is_component_present.
+        optional bool is_job_ready = 3;
+        optional bool is_user_started = 4;
+        optional bool is_job_pending = 5;
+        optional bool is_job_currently_active = 6;
+        optional bool is_uid_backing_up = 7;
+        optional bool is_component_present = 8;
+
+        optional int64 last_run_heartbeat = 9;
+    }
+    repeated RegisteredJob registered_jobs = 3;
+
+    repeated StateControllerProto controllers = 4;
+
+    // Which uids are currently in the foreground.
+    message PriorityOverride {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 uid = 1;
+        // Use sint32 instead of an enum since priorities can technically be
+        // negative.
+        optional sint32 override_value = 2;
+    }
+    repeated PriorityOverride priority_overrides = 5;
+
+    // UIDs that are currently performing backups, so their jobs won't be
+    // allowed to run.
+    repeated int32 backing_up_uids = 6;
+
+    optional JobPackageHistoryProto history = 7;
+    optional JobPackageTrackerDumpProto package_tracker = 8;
+
+    message PendingJob {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional JobStatusShortInfoProto info = 1;
+        optional JobStatusDumpProto dump = 2;
+        optional sint32 evaluated_priority = 3;
+        // How long this job has been pending.
+        optional int64 enqueued_duration_ms = 4;
+    }
+    repeated PendingJob pending_jobs = 9;
+
+    // From a service that has currently active or pending jobs.
+    message ActiveJob {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        message InactiveJob {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional int64 time_since_stopped_ms = 1;
+            // This is not always provided.
+            optional string stopped_reason = 2;
+        }
+        message RunningJob {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional JobStatusShortInfoProto info = 1;
+            // How long this job has been running for.
+            optional int64 running_duration_ms = 2;
+            optional int64 time_until_timeout_ms = 3;
+
+            optional JobStatusDumpProto dump = 4;
+
+            optional sint32 evaluated_priority = 5;
+
+            optional int64 time_since_made_active_ms = 6;
+            // How long this job has been pending.
+            optional int64 pending_duration_ms = 7;
+        }
+        oneof job {
+            InactiveJob inactive = 1;
+            RunningJob running = 2;
+        }
+    }
+    repeated ActiveJob active_jobs = 10;
+
+    // True when JobScheduler is allowed to run third party apps.
+    optional bool is_ready_to_rock = 11;
+    // What was last reported to DeviceIdleController about whether the device
+    // is active.
+    optional bool reported_active = 12;
+    // The current limit on the number of concurrent JobServiceContext entries
+    // we want to keep actively running a job.
+    optional int32 max_active_jobs = 13;
+}
+
+// A com.android.server.job.JobSchedulerService.Constants object.
+message ConstantsProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Minimum # of idle jobs that must be ready in order to force the JMS to
+    // schedule things early.
+    optional int32 min_idle_count = 1;
+    // Minimum # of charging jobs that must be ready in order to force the JMS
+    // to schedule things early.
+    optional int32 min_charging_count = 2;
+    // Minimum # of "battery not low" jobs that must be ready in order to force
+    // the JMS to schedule things early.
+    optional int32 min_battery_not_low_count = 3;
+    // Minimum # of "storage not low" jobs that must be ready in order to force
+    // the JMS to schedule things early.
+    optional int32 min_storage_not_low_count = 4;
+    // Minimum # of connectivity jobs that must be ready in order to force the
+    // JMS to schedule things early. 1 == Run connectivity jobs as soon as
+    // ready.
+    optional int32 min_connectivity_count = 5;
+    // Minimum # of content trigger jobs that must be ready in order to force
+    // the JMS to schedule things early.
+    optional int32 min_content_count = 6;
+    // Minimum # of jobs (with no particular constraints) for which the JMS will
+    // be happy running some work early. This (and thus the other min counts)
+    // is now set to 1, to prevent any batching at this level. Since we now do
+    // batching through doze, that is a much better mechanism.
+    optional int32 min_ready_jobs_count = 7;
+    // This is the job execution factor that is considered to be heavy use of
+    // the system.
+    optional double heavy_use_factor = 8;
+    // This is the job execution factor that is considered to be moderate use of
+    // the system.
+    optional double moderate_use_factor = 9;
+    // The number of MAX_JOB_CONTEXTS_COUNT we reserve for the foreground app.
+    optional int32 fg_job_count = 10;
+    // The maximum number of background jobs we allow when the system is in a
+    // normal memory state.
+    optional int32 bg_normal_job_count = 11;
+    // The maximum number of background jobs we allow when the system is in a
+    // moderate memory state.
+    optional int32 bg_moderate_job_count = 12;
+    // The maximum number of background jobs we allow when the system is in a
+    // low memory state.
+    optional int32 bg_low_job_count = 13;
+    // The maximum number of background jobs we allow when the system is in a
+    // critical memory state.
+    optional int32 bg_critical_job_count = 14;
+    // The maximum number of times we allow a job to have itself rescheduled
+    // before giving up on it, for standard jobs.
+    optional int32 max_standard_reschedule_count = 15;
+    // The maximum number of times we allow a job to have itself rescheduled
+    // before giving up on it, for jobs that are executing work.
+    optional int32 max_work_reschedule_count = 16;
+    // The minimum backoff time to allow for linear backoff.
+    optional int64 min_linear_backoff_time_ms = 17;
+    // The minimum backoff time to allow for exponential backoff.
+    optional int64 min_exp_backoff_time_ms = 18;
+    // How often we recalculate runnability based on apps' standby bucket
+    // assignment. This should be prime relative to common time interval lengths
+    // such as a quarter-hour or day, so that the heartbeat drifts relative to
+    // wall-clock milestones.
+    optional int64 standby_heartbeat_time_ms = 19;
+    // Mapping: standby bucket -> number of heartbeats between each sweep of
+    // that bucket's jobs.
+    // Bucket assignments as recorded in the JobStatus objects are normalized to
+    // be indices into this array, rather than the raw constants used by
+    // AppIdleHistory.
+    repeated int32 standby_beats = 20;
+    // The fraction of a job's running window that must pass before we
+    // consider running it when the network is congested.
+    optional double conn_congestion_delay_frac = 21;
+    // The fraction of a prefetch job's running window that must pass before
+    // we consider matching it against a metered network.
+    optional double conn_prefetch_relax_frac = 22;
+}
+
+message StateControllerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    message BackgroundJobsController {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional com.android.server.ForceAppStandbyTrackerProto force_app_standby_tracker = 1;
+
+        message TrackedJob {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional JobStatusShortInfoProto info = 1;
+            optional int32 source_uid = 2;
+            optional string source_package_name = 3;
+            optional bool is_in_foreground = 4;
+            optional bool is_whitelisted = 5;
+            optional bool can_run_any_in_background = 6;
+            // If the constraints are satisfied, then the controller will mark
+            // the job as RUNNABLE, otherwise, it will be WAITING.
+            optional bool are_constraints_satisfied = 7;
+        }
+        repeated TrackedJob tracked_jobs = 2;
+    }
+    message BatteryController {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional bool is_on_stable_power = 1;
+        optional bool is_battery_not_low = 2;
+
+        // Whether or not the controller is monitoring battery changes.
+        optional bool is_monitoring = 3;
+        // Only valid if is_monitoring is true.
+        optional int32 last_broadcast_sequence_number = 4;
+
+        message TrackedJob {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional JobStatusShortInfoProto info = 1;
+            optional int32 source_uid = 2;
+        }
+        repeated TrackedJob tracked_jobs = 5;
+    }
+    message ConnectivityController {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional bool is_connected = 1;
+
+        message TrackedJob {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional JobStatusShortInfoProto info = 1;
+            optional int32 source_uid = 2;
+            optional .android.net.NetworkRequestProto required_network = 3;
+        }
+        repeated TrackedJob tracked_jobs = 2;
+    }
+    message ContentObserverController {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        message TrackedJob {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional JobStatusShortInfoProto info = 1;
+            optional int32 source_uid = 2;
+        }
+        repeated TrackedJob tracked_jobs = 1;
+
+        message Observer {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional int32 user_id = 1;
+
+            message TriggerContentData {
+                option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+                optional string uri = 1 [
+                    (.android.privacy).dest = DEST_EXPLICIT
+                ];
+                optional int32 flags = 2;
+
+                // A
+                // com.android.server.job.controllers.ContentObserverController.JobInstance
+                // object.
+                message JobInstance {
+                    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+                    optional JobStatusShortInfoProto info = 1;
+                    optional int32 source_uid = 2;
+
+                    optional int64 trigger_content_update_delay_ms = 3;
+                    optional int64 trigger_content_max_delay_ms = 4;
+
+                    repeated string changed_authorities = 5 [
+                        (.android.privacy).dest = DEST_EXPLICIT
+                    ];
+                    repeated string changed_uris = 6 [
+                        (.android.privacy).dest = DEST_EXPLICIT
+                    ];
+                }
+                repeated JobInstance jobs = 3;
+            }
+            repeated TriggerContentData triggers = 2;
+        }
+        repeated Observer observers = 2;
+    }
+    message DeviceIdleJobsController {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // True when in device idle mode.
+        optional bool is_device_idle_mode = 1;
+
+        message TrackedJob {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional JobStatusShortInfoProto info = 1;
+            optional int32 source_uid = 2;
+            optional string source_package_name = 3;
+            // If the constraints are satisfied, then the controller will mark
+            // the job as RUNNABLE, otherwise, it will be WAITING.
+            optional bool are_constraints_satisfied = 4;
+            optional bool is_doze_whitelisted = 5;
+            // A job that is exempted from Doze when the app is temp whitelisted
+            // or in the foreground.
+            optional bool is_allowed_in_doze = 6;
+        }
+        repeated TrackedJob tracked_jobs = 2;
+    }
+    message IdleController {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional bool is_idle = 1;
+
+        message TrackedJob {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional JobStatusShortInfoProto info = 1;
+            optional int32 source_uid = 2;
+        }
+        repeated TrackedJob tracked_jobs = 2;
+    }
+    message StorageController {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional bool is_storage_not_low = 1;
+        optional int32 last_broadcast_sequence_number = 2;
+
+        message TrackedJob {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional JobStatusShortInfoProto info = 1;
+            optional int32 source_uid = 2;
+        }
+        repeated TrackedJob tracked_jobs = 3;
+    }
+    message TimeController {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int64 now_elapsed_realtime = 1;
+        optional int64 time_until_next_delay_alarm_ms = 2;
+        optional int64 time_until_next_deadline_alarm_ms = 3;
+
+        message TrackedJob {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional JobStatusShortInfoProto info = 1;
+            optional int32 source_uid = 2;
+
+            optional bool has_timing_delay_constraint = 3;
+            // Only valid if has_timing_delay_constraint is true. Can be
+            // negative if the delay is in the past.
+            optional int64 delay_time_remaining_ms = 4;
+
+            optional bool has_deadline_constraint = 5;
+            // Only valid if has_timing_delay_constraint is true. Can be
+            // negative in certain situations.
+            optional int64 time_remaining_until_deadline_ms = 6;
+        }
+        repeated TrackedJob tracked_jobs = 4;
+    }
+    oneof controller {
+        BackgroundJobsController background = 1;
+        BatteryController battery = 2;
+        ConnectivityController connectivity = 3;
+        ContentObserverController content_observer = 4;
+        DeviceIdleJobsController device_idle = 5;
+        IdleController idle = 6;
+        StorageController storage = 7;
+        TimeController time = 8;
+    }
+}
+
+// A com.android.server.job.JobPackageTracker.DataSet object.
+message DataSetProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int64 start_clock_time_ms = 1;
+    // How much time has elapsed since the DataSet was instantiated.
+    optional int64 elapsed_time_ms = 2;
+    optional int64 period_ms = 3;
+
+    // Represents a com.android.server.job.JobPackageTracker.PackageEntry
+    // object, but with some extra data.
+    message PackageEntryProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 uid = 1;
+        optional string package_name = 2;
+
+        message State {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional int64 duration_ms = 1;
+            optional int32 count = 2;
+        }
+        optional State pending_state = 3;
+        optional State active_state = 4;
+        optional State active_top_state = 5;
+
+        // True if the PackageEntry is currently pending or has been pending in
+        // the past.
+        optional bool pending = 6;
+        // True if the PackageEntry is currently active or has been active in
+        // the past.
+        optional bool active = 7;
+        // True if the PackageEntry is currently active top or has been active
+        // top in the past.
+        optional bool active_top = 8;
+
+        message StopReasonCount {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional .android.app.job.StopReasonEnum reason = 1;
+            optional int32 count = 2;
+        }
+        repeated StopReasonCount stop_reasons = 9;
+    }
+    repeated PackageEntryProto package_entries = 4;
+
+    optional int32 max_concurrency = 5;
+    optional int32 max_foreground_concurrency = 6;
+}
+
+// Dump from com.android.server.job.GrantedUriPermissions.
+message GrantedUriPermissionsDumpProto {
+    option (.android.msg_privacy).dest = DEST_EXPLICIT;
+
+    optional int32 flags = 1 [ (.android.privacy).dest = DEST_AUTOMATIC ];
+    optional int32 source_user_id = 2 [
+        (.android.privacy).dest = DEST_AUTOMATIC
+    ];
+    optional string tag = 3;
+    optional string permission_owner = 4;
+    repeated string uris = 5;
+}
+
+message JobPackageTrackerDumpProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    repeated DataSetProto historical_stats = 1;
+    optional DataSetProto current_stats = 2;
+}
+
+message JobPackageHistoryProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum Event {
+        UNKNOWN = 0;
+        START_JOB = 1;
+        STOP_JOB = 2;
+        START_PERIODIC_JOB = 3;
+        STOP_PERIODIC_JOB = 4;
+    }
+    message HistoryEvent {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional Event event = 1;
+        optional int64 time_since_event_ms = 2;
+        optional int32 uid = 3;
+        // Job IDs can technically be negative.
+        optional int32 job_id = 4;
+        optional string tag = 5;
+        // Only valid for STOP_JOB or STOP_PERIODIC_JOB Events.
+        optional .android.app.job.StopReasonEnum stop_reason = 6;
+    }
+    repeated HistoryEvent history_event = 1;
+}
+
+message JobStatusShortInfoProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 calling_uid = 1;
+    // Job IDs can technically be negative.
+    optional int32 job_id = 2;
+    optional string battery_name = 3;
+}
+
+// Dump from a com.android.server.job.controllers.JobStatus object.
+message JobStatusDumpProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // The UID that scheduled the job.
+    optional int32 calling_uid = 1;
+    optional string tag = 2;
+
+    // The UID for which the job is being run.
+    optional int32 source_uid = 3;
+    optional int32 source_user_id = 4;
+    // The package for which the job is being run.
+    optional string source_package_name = 5;
+
+    // Custom dump of android.app.job.JobInfo object.
+    message JobInfo {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional .android.content.ComponentNameProto service = 1;
+
+        optional bool is_periodic = 2;
+        // Only valid if is_periodic is true.
+        optional int64 period_interval_ms = 3;
+        // Only valid if is_periodic is true.
+        optional int64 period_flex_ms = 4;
+
+        optional bool is_persisted = 5;
+        optional sint32 priority = 6;
+        optional int32 flags = 7;
+
+        optional bool requires_charging = 8;
+        optional bool requires_battery_not_low = 9;
+        optional bool requires_device_idle = 10;
+
+        message TriggerContentUri {
+            optional int32 flags = 1 [
+                (.android.privacy).dest = DEST_AUTOMATIC
+            ];
+            optional string uri = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
+        }
+        repeated TriggerContentUri trigger_content_uris = 11;
+        optional int64 trigger_content_update_delay_ms = 12;
+        optional int64 trigger_content_max_delay_ms = 13;
+
+        optional .android.os.PersistableBundleProto extras = 14;
+        optional .android.os.BundleProto transient_extras = 15;
+        // ClipData of information that is returned to the application at
+        // execution time, but not persisted by the system. This is provided by
+        // the app and the main purpose of providing a ClipData is to allow
+        // granting of URI permissions for data associated with the clip.  The
+        // exact kind of permission grant to perform is specified in the flags
+        // field.
+        optional .android.content.ClipDataProto clip_data = 16;
+
+        optional GrantedUriPermissionsDumpProto granted_uri_permissions = 17;
+
+        optional .android.net.NetworkRequestProto required_network = 18;
+
+        optional int64 total_network_bytes = 19;
+
+        optional int64 min_latency_ms = 20;
+        optional int64 max_execution_delay_ms = 21;
+
+        message Backoff {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            enum Policy {
+                BACKOFF_POLICY_LINEAR = 0;
+                BACKOFF_POLICY_EXPONENTIAL = 1;
+            }
+            optional Policy policy = 1;
+            optional int64 initial_backoff_ms = 2;
+        }
+        optional Backoff backoff_policy = 22;
+
+        optional bool has_early_constraint = 23;
+        optional bool has_late_constraint = 24;
+    }
+    optional JobInfo job_info = 6;
+
+    enum Constraint {
+        CONSTRAINT_CHARGING = 1;
+        CONSTRAINT_BATTERY_NOT_LOW = 2;
+        CONSTRAINT_STORAGE_NOT_LOW = 3;
+        CONSTRAINT_TIMING_DELAY = 4;
+        CONSTRAINT_DEADLINE = 5;
+        CONSTRAINT_IDLE = 6;
+        CONSTRAINT_CONNECTIVITY = 7;
+        CONSTRAINT_CONTENT_TRIGGER = 8;
+        CONSTRAINT_DEVICE_NOT_DOZING = 9;
+    }
+    repeated Constraint required_constraints = 7;
+    repeated Constraint satisfied_constraints = 8;
+    repeated Constraint unsatisfied_constraints = 9;
+    optional bool is_doze_whitelisted = 10;
+
+    enum TrackingController {
+        TRACKING_BATTERY = 0;
+        TRACKING_CONNECTIVITY = 1;
+        TRACKING_CONTENT = 2;
+        TRACKING_IDLE = 3;
+        TRACKING_STORAGE = 4;
+        TRACKING_TIME = 5;
+    }
+    // Controllers that are currently tracking the job.
+    repeated TrackingController tracking_controllers = 11;
+
+    repeated string changed_authorities = 12 [
+        (.android.privacy).dest = DEST_EXPLICIT
+    ];
+    repeated string changed_uris = 13 [
+        (.android.privacy).dest = DEST_EXPLICIT
+    ];
+
+    optional .android.net.NetworkProto network = 14;
+
+    // Only the desired data from an android.app.job.JobWorkItem object.
+    message JobWorkItem {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 work_id = 1;
+        optional int32 delivery_count = 2;
+        optional .android.content.IntentProto intent = 3;
+        optional GrantedUriPermissionsDumpProto uri_grants = 4;
+    }
+    repeated JobWorkItem pending_work = 15;
+    repeated JobWorkItem executing_work = 16;
+
+    enum Bucket {
+        ACTIVE = 0;
+        WORKING_SET = 1;
+        FREQUENT = 2;
+        RARE = 3;
+        NEVER = 4;
+    }
+    optional Bucket standby_bucket = 17;
+
+    optional int64 enqueue_duration_ms = 18;
+    // Can be negative if the earliest runtime deadline has passed.
+    optional sint64 time_until_earliest_runtime_ms = 19;
+    // Can be negative if the latest runtime deadline has passed.
+    optional sint64 time_until_latest_runtime_ms = 20;
+
+    optional int32 num_failures = 21;
+
+    optional int64 last_successful_run_time = 22;
+    optional int64 last_failed_run_time = 23;
+
+    optional int64 internal_flags = 24;
+}

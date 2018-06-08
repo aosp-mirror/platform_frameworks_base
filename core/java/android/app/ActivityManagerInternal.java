@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.SparseIntArray;
+import android.view.RemoteAnimationAdapter;
 
 import com.android.internal.app.IVoiceInteractor;
 
@@ -40,34 +41,60 @@ import java.util.List;
 public abstract class ActivityManagerInternal {
 
     /**
-     * Type for {@link #notifyAppTransitionStarting}: The transition was started because we had
-     * the surface saved.
-     */
-    public static final int APP_TRANSITION_SAVED_SURFACE = 0;
-
-    /**
      * Type for {@link #notifyAppTransitionStarting}: The transition was started because we drew
      * the splash screen.
      */
-    public static final int APP_TRANSITION_SPLASH_SCREEN = 1;
+    public static final int APP_TRANSITION_SPLASH_SCREEN =
+              AppProtoEnums.APP_TRANSITION_SPLASH_SCREEN; // 1
 
     /**
      * Type for {@link #notifyAppTransitionStarting}: The transition was started because we all
      * app windows were drawn
      */
-    public static final int APP_TRANSITION_WINDOWS_DRAWN = 2;
+    public static final int APP_TRANSITION_WINDOWS_DRAWN =
+              AppProtoEnums.APP_TRANSITION_WINDOWS_DRAWN; // 2
 
     /**
      * Type for {@link #notifyAppTransitionStarting}: The transition was started because of a
      * timeout.
      */
-    public static final int APP_TRANSITION_TIMEOUT = 3;
+    public static final int APP_TRANSITION_TIMEOUT =
+              AppProtoEnums.APP_TRANSITION_TIMEOUT; // 3
 
     /**
      * Type for {@link #notifyAppTransitionStarting}: The transition was started because of a
      * we drew a task snapshot.
      */
-    public static final int APP_TRANSITION_SNAPSHOT = 4;
+    public static final int APP_TRANSITION_SNAPSHOT =
+              AppProtoEnums.APP_TRANSITION_SNAPSHOT; // 4
+
+    /**
+     * Type for {@link #notifyAppTransitionStarting}: The transition was started because it was a
+     * recents animation and we only needed to wait on the wallpaper.
+     */
+    public static final int APP_TRANSITION_RECENTS_ANIM =
+            AppProtoEnums.APP_TRANSITION_RECENTS_ANIM; // 5
+
+    /**
+     * The bundle key to extract the assist data.
+     */
+    public static final String ASSIST_KEY_DATA = "data";
+
+    /**
+     * The bundle key to extract the assist structure.
+     */
+    public static final String ASSIST_KEY_STRUCTURE = "structure";
+
+    /**
+     * The bundle key to extract the assist content.
+     */
+    public static final String ASSIST_KEY_CONTENT = "content";
+
+    /**
+     * The bundle key to extract the assist receiver extras.
+     */
+    public static final String ASSIST_KEY_RECEIVER_EXTRAS = "receiverExtras";
+
 
     /**
      * Grant Uri permissions from one app to another. This method only extends
@@ -84,7 +111,10 @@ public abstract class ActivityManagerInternal {
     // Called by the power manager.
     public abstract void onWakefulnessChanged(int wakefulness);
 
-    public abstract int startIsolatedProcess(String entryPoint, String[] mainArgs,
+    /**
+     * @return {@code true} if process start is successful, {@code false} otherwise.
+     */
+    public abstract boolean startIsolatedProcess(String entryPoint, String[] mainArgs,
             String processName, String abiOverride, int uid, Runnable crashHandler);
 
     /**
@@ -132,8 +162,8 @@ public abstract class ActivityManagerInternal {
      * Callback for window manager to let activity manager know that we are finally starting the
      * app transition;
      *
-     * @param reasons A map from stack id to a reason integer why the transition was started,, which
-     *                must be one of the APP_TRANSITION_* values.
+     * @param reasons A map from windowing mode to a reason integer why the transition was started,
+     *                which must be one of the APP_TRANSITION_* values.
      * @param timestamp The time at which the app transition started in
      *                  {@link SystemClock#uptimeMillis()} timebase.
      */
@@ -177,7 +207,7 @@ public abstract class ActivityManagerInternal {
     /**
      * Allow DeviceIdleController to tell us about what apps are whitelisted.
      */
-    public abstract void setDeviceIdleWhitelist(int[] appids);
+    public abstract void setDeviceIdleWhitelist(int[] allAppids, int[] exceptIdleAppids);
 
     /**
      * Update information about which app IDs are on the temp whitelist.
@@ -197,10 +227,24 @@ public abstract class ActivityManagerInternal {
     /**
      * Start activity {@code intents} as if {@code packageName} on user {@code userId} did it.
      *
+     * - DO NOT call it with the calling UID cleared.
+     * - All the necessary caller permission checks must be done at callsites.
+     *
      * @return error codes used by {@link IActivityManager#startActivity} and its siblings.
      */
     public abstract int startActivitiesAsPackage(String packageName,
             int userId, Intent[] intents, Bundle bOptions);
+
+    /**
+     * Start activity {@code intent} without calling user-id check.
+     *
+     * - DO NOT call it with the calling UID cleared.
+     * - The caller must do the calling user ID check.
+     *
+     * @return error codes used by {@link IActivityManager#startActivity} and its siblings.
+     */
+    public abstract int startActivityAsUser(IApplicationThread caller, String callingPackage,
+            Intent intent, @Nullable Bundle options, int userId);
 
     /**
      * Get the procstate for the UID.  The return value will be between
@@ -239,11 +283,27 @@ public abstract class ActivityManagerInternal {
     public abstract void setHasOverlayUi(int pid, boolean hasOverlayUi);
 
     /**
+     * Sets if the given pid is currently running a remote animation, which is taken a signal for
+     * determining oom adjustment and scheduling behavior.
+     *
+     * @param pid The pid we are setting overlay UI for.
+     * @param runningRemoteAnimation True if the process is running a remote animation, false
+     *                               otherwise.
+     * @see RemoteAnimationAdapter
+     */
+    public abstract void setRunningRemoteAnimation(int pid, boolean runningRemoteAnimation);
+
+    /**
      * Called after the network policy rules are updated by
      * {@link com.android.server.net.NetworkPolicyManagerService} for a specific {@param uid} and
      * {@param procStateSeq}.
      */
     public abstract void notifyNetworkPolicyRulesUpdated(int uid, long procStateSeq);
+
+    /**
+     * Called after the voice interaction service has changed.
+     */
+    public abstract void notifyActiveVoiceInteractionServiceChanged(ComponentName component);
 
     /**
      * Called after virtual display Id is updated by
@@ -268,4 +328,83 @@ public abstract class ActivityManagerInternal {
      * @param token The IApplicationToken for the activity
      */
     public abstract void setFocusedActivity(IBinder token);
+
+    /**
+     * Set a uid that is allowed to bypass stopped app switches, launching an app
+     * whenever it wants.
+     *
+     * @param type Type of the caller -- unique string the caller supplies to identify itself
+     * and disambiguate with other calles.
+     * @param uid The uid of the app to be allowed, or -1 to clear the uid for this type.
+     * @param userId The user it is allowed for.
+     */
+    public abstract void setAllowAppSwitches(@NonNull String type, int uid, int userId);
+
+    /**
+     * @return true if runtime was restarted, false if it's normal boot
+     */
+    public abstract boolean isRuntimeRestarted();
+
+    /**
+     * Returns {@code true} if {@code uid} is running an activity from {@code packageName}.
+     */
+    public abstract boolean hasRunningActivity(int uid, @Nullable String packageName);
+
+    public interface ScreenObserver {
+        public void onAwakeStateChanged(boolean isAwake);
+        public void onKeyguardStateChanged(boolean isShowing);
+    }
+
+    public abstract void registerScreenObserver(ScreenObserver observer);
+
+    /**
+     * Returns if more users can be started without stopping currently running users.
+     */
+    public abstract boolean canStartMoreUsers();
+
+    /**
+     * Sets the user switcher message for switching from {@link android.os.UserHandle#SYSTEM}.
+     */
+    public abstract void setSwitchingFromSystemUserMessage(String switchingFromSystemUserMessage);
+
+    /**
+     * Sets the user switcher message for switching to {@link android.os.UserHandle#SYSTEM}.
+     */
+    public abstract void setSwitchingToSystemUserMessage(String switchingToSystemUserMessage);
+
+    /**
+     * Returns maximum number of users that can run simultaneously.
+     */
+    public abstract int getMaxRunningUsers();
+
+    /**
+     * Returns is the caller has the same uid as the Recents component
+     */
+    public abstract boolean isCallerRecents(int callingUid);
+
+    /**
+     * Returns whether the recents component is the home activity for the given user.
+     */
+    public abstract boolean isRecentsComponentHomeActivity(int userId);
+
+    /**
+     * Cancels any currently running recents animation.
+     */
+    public abstract void cancelRecentsAnimation(boolean restoreHomeStackPosition);
+
+    /**
+     * Whether an UID is active or idle.
+     */
+    public abstract boolean isUidActive(int uid);
+
+    /**
+     * Returns a list that contains the memory stats for currently running processes.
+     */
+    public abstract List<ProcessMemoryState> getMemoryStateForProcesses();
+
+    /**
+     * This enforces {@code func} can only be called if either the caller is Recents activity or
+     * has {@code permission}.
+     */
+    public abstract void enforceCallerIsRecentsOrHasPermission(String permission, String func);
 }

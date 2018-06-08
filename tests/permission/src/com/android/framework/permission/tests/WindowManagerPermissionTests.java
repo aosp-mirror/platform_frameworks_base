@@ -24,7 +24,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.view.IWindowManager;
 import junit.framework.TestCase;
 
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 /**

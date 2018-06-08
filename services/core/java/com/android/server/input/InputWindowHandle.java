@@ -92,7 +92,7 @@ public final class InputWindowHandle {
     public int inputFeatures;
 
     // Display this input is on.
-    public final int displayId;
+    public int displayId;
 
     private native void nativeDispose();
 

@@ -13,25 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
 #ifndef FD_BUFFER_H
 #define FD_BUFFER_H
 
-#include "Reporter.h"
-
+#include <android-base/unique_fd.h>
+#include <android/util/EncodedBuffer.h>
 #include <utils/Errors.h>
 
-#include <set>
-#include <vector>
+namespace android {
+namespace os {
+namespace incidentd {
 
-using namespace android;
-using namespace std;
+using namespace android::base;
+using namespace android::util;
 
 /**
- * Reads a file into a buffer, and then writes that data to an FdSet.
+ * Reads data from fd into a buffer, fd must be closed explicitly.
  */
-class FdBuffer
-{
+class FdBuffer {
 public:
     FdBuffer();
     ~FdBuffer();
@@ -44,9 +45,28 @@ public:
     status_t read(int fd, int64_t timeoutMs);
 
     /**
+     * Read the data until we hit eof.
+     * Returns NO_ERROR if there were no errors.
+     */
+    status_t readFully(int fd);
+
+    /**
+     * Read processed results by streaming data to a parsing process, e.g. incident helper.
+     * The parsing process provides IO fds which are 'toFd' and 'fromFd'. The function
+     * reads original data in 'fd' and writes to parsing process through 'toFd', then it reads
+     * and stores the processed data from 'fromFd' in memory for later usage.
+     * This function behaves in a streaming fashion in order to save memory usage.
+     * Returns NO_ERROR if there were no errors or if we timed out.
+     *
+     * Poll will return POLLERR if fd is from sysfs, handle this edge case.
+     */
+    status_t readProcessedDataInStream(int fd, unique_fd toFd, unique_fd fromFd, int64_t timeoutMs,
+                                       const bool isSysfs = false);
+
+    /**
      * Whether we timed out.
      */
-    bool timedOut() { return mTimedOut; }
+    bool timedOut() const { return mTimedOut; }
 
     /**
      * If more than 4 MB is read, we truncate the data and return success.
@@ -56,31 +76,38 @@ public:
      * happens, truncated() will return true so it can be marked. If the data is
      * exactly 4 MB, truncated is still set. Sorry.
      */
-    bool truncated() { return mTruncated; }
+    bool truncated() const { return mTruncated; }
 
     /**
      * How much data was read.
      */
-    size_t size();
-
-    /**
-     * Write the data that we recorded to the fd given.
-     */
-    status_t write(ReportRequestSet* requests);
+    size_t size() const;
 
     /**
      * How long the read took in milliseconds.
      */
-    int64_t durationMs() { return mFinishTime - mStartTime; }
+    int64_t durationMs() const { return mFinishTime - mStartTime; }
+
+    /**
+     * Reader API for data stored in FdBuffer
+     */
+    EncodedBuffer::iterator data() const;
+
+    /**
+     * Return the internal buffer, don't call unless you are familiar with EncodedBuffer.
+     */
+    EncodedBuffer* getInternalBuffer() { return &mBuffer; }
 
 private:
-    vector<uint8_t*> mBuffers;
+    EncodedBuffer mBuffer;
     int64_t mStartTime;
     int64_t mFinishTime;
-    ssize_t mCurrentWritten;
     bool mTimedOut;
     bool mTruncated;
 };
 
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android
 
-#endif // FD_BUFFER_H
+#endif  // FD_BUFFER_H

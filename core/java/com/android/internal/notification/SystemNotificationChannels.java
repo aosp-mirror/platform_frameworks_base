@@ -20,6 +20,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
+import android.media.AudioAttributes;
 import android.os.RemoteException;
 import android.provider.Settings;
 
@@ -47,14 +48,19 @@ public class SystemNotificationChannels {
     public static String RETAIL_MODE = "RETAIL_MODE";
     public static String USB = "USB";
     public static String FOREGROUND_SERVICE = "FOREGROUND_SERVICE";
+    public static String HEAVY_WEIGHT_APP = "HEAVY_WEIGHT_APP";
+    public static String SYSTEM_CHANGES = "SYSTEM_CHANGES";
+    public static String DO_NOT_DISTURB = "DO_NOT_DISTURB";
 
     public static void createAll(Context context) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
         List<NotificationChannel> channelsList = new ArrayList<NotificationChannel>();
-        channelsList.add(new NotificationChannel(
+        final NotificationChannel keyboard = new NotificationChannel(
                 VIRTUAL_KEYBOARD,
                 context.getString(R.string.notification_channel_virtual_keyboard),
-                NotificationManager.IMPORTANCE_LOW));
+                NotificationManager.IMPORTANCE_LOW);
+        keyboard.setBlockableSystem(true);
+        channelsList.add(keyboard);
 
         final NotificationChannel physicalKeyboardChannel = new NotificationChannel(
                 PHYSICAL_KEYBOARD,
@@ -62,75 +68,86 @@ public class SystemNotificationChannels {
                 NotificationManager.IMPORTANCE_DEFAULT);
         physicalKeyboardChannel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,
                 Notification.AUDIO_ATTRIBUTES_DEFAULT);
+        physicalKeyboardChannel.setBlockableSystem(true);
         channelsList.add(physicalKeyboardChannel);
 
-        channelsList.add(new NotificationChannel(
+        final NotificationChannel security = new NotificationChannel(
                 SECURITY,
                 context.getString(R.string.notification_channel_security),
-                NotificationManager.IMPORTANCE_LOW));
+                NotificationManager.IMPORTANCE_LOW);
+        channelsList.add(security);
 
-        channelsList.add(new NotificationChannel(
+        final NotificationChannel car = new NotificationChannel(
                 CAR_MODE,
                 context.getString(R.string.notification_channel_car_mode),
-                NotificationManager.IMPORTANCE_LOW));
+                NotificationManager.IMPORTANCE_LOW);
+        car.setBlockableSystem(true);
+        channelsList.add(car);
 
         channelsList.add(newAccountChannel(context));
 
-        channelsList.add(new NotificationChannel(
+        final NotificationChannel developer = new NotificationChannel(
                 DEVELOPER,
                 context.getString(R.string.notification_channel_developer),
-                NotificationManager.IMPORTANCE_LOW));
+                NotificationManager.IMPORTANCE_LOW);
+        developer.setBlockableSystem(true);
+        channelsList.add(developer);
 
-        channelsList.add(new NotificationChannel(
+        final NotificationChannel updates = new NotificationChannel(
                 UPDATES,
                 context.getString(R.string.notification_channel_updates),
-                NotificationManager.IMPORTANCE_LOW));
+                NotificationManager.IMPORTANCE_LOW);
+        channelsList.add(updates);
 
-        channelsList.add(new NotificationChannel(
+        final NotificationChannel network = new NotificationChannel(
                 NETWORK_STATUS,
                 context.getString(R.string.notification_channel_network_status),
-                NotificationManager.IMPORTANCE_LOW));
+                NotificationManager.IMPORTANCE_LOW);
+        channelsList.add(network);
 
         final NotificationChannel networkAlertsChannel = new NotificationChannel(
                 NETWORK_ALERTS,
                 context.getString(R.string.notification_channel_network_alerts),
                 NotificationManager.IMPORTANCE_HIGH);
-        networkAlertsChannel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,
-                Notification.AUDIO_ATTRIBUTES_DEFAULT);
+        networkAlertsChannel.setBlockableSystem(true);
         channelsList.add(networkAlertsChannel);
 
-        channelsList.add(new NotificationChannel(
+        final NotificationChannel networkAvailable = new NotificationChannel(
                 NETWORK_AVAILABLE,
                 context.getString(R.string.notification_channel_network_available),
-                NotificationManager.IMPORTANCE_LOW));
+                NotificationManager.IMPORTANCE_LOW);
+        networkAvailable.setBlockableSystem(true);
+        channelsList.add(networkAvailable);
 
-        channelsList.add(new NotificationChannel(
+        final NotificationChannel vpn = new NotificationChannel(
                 VPN,
                 context.getString(R.string.notification_channel_vpn),
-                NotificationManager.IMPORTANCE_LOW));
+                NotificationManager.IMPORTANCE_LOW);
+        channelsList.add(vpn);
 
-        channelsList.add(new NotificationChannel(
+        final NotificationChannel deviceAdmin = new NotificationChannel(
                 DEVICE_ADMIN,
                 context.getString(R.string.notification_channel_device_admin),
-                NotificationManager.IMPORTANCE_LOW));
+                NotificationManager.IMPORTANCE_LOW);
+        channelsList.add(deviceAdmin);
 
         final NotificationChannel alertsChannel = new NotificationChannel(
                 ALERTS,
                 context.getString(R.string.notification_channel_alerts),
                 NotificationManager.IMPORTANCE_DEFAULT);
-        alertsChannel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,
-                Notification.AUDIO_ATTRIBUTES_DEFAULT);
         channelsList.add(alertsChannel);
 
-        channelsList.add(new NotificationChannel(
+        final NotificationChannel retail = new NotificationChannel(
                 RETAIL_MODE,
                 context.getString(R.string.notification_channel_retail_mode),
-                NotificationManager.IMPORTANCE_LOW));
+                NotificationManager.IMPORTANCE_LOW);
+        channelsList.add(retail);
 
-        channelsList.add(new NotificationChannel(
+        final NotificationChannel usb = new NotificationChannel(
                 USB,
                 context.getString(R.string.notification_channel_usb),
-                NotificationManager.IMPORTANCE_MIN));
+                NotificationManager.IMPORTANCE_MIN);
+        channelsList.add(usb);
 
         NotificationChannel foregroundChannel = new NotificationChannel(
                 FOREGROUND_SERVICE,
@@ -138,6 +155,27 @@ public class SystemNotificationChannels {
                 NotificationManager.IMPORTANCE_LOW);
         foregroundChannel.setBlockableSystem(true);
         channelsList.add(foregroundChannel);
+
+        NotificationChannel heavyWeightChannel = new NotificationChannel(
+                HEAVY_WEIGHT_APP,
+                context.getString(R.string.notification_channel_heavy_weight_app),
+                NotificationManager.IMPORTANCE_DEFAULT);
+        heavyWeightChannel.setShowBadge(false);
+        heavyWeightChannel.setSound(null, new AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
+                .build());
+        channelsList.add(heavyWeightChannel);
+
+        NotificationChannel systemChanges = new NotificationChannel(SYSTEM_CHANGES,
+                context.getString(R.string.notification_channel_system_changes),
+                NotificationManager.IMPORTANCE_LOW);
+        channelsList.add(systemChanges);
+
+        NotificationChannel dndChanges = new NotificationChannel(DO_NOT_DISTURB,
+                context.getString(R.string.notification_channel_do_not_disturb),
+                NotificationManager.IMPORTANCE_LOW);
+        channelsList.add(dndChanges);
 
         nm.createNotificationChannels(channelsList);
     }

@@ -106,7 +106,7 @@ public interface KeyguardSecurityView {
      * @param message the message to show
      * @param color the color to use
      */
-    void showMessage(String message, int color);
+    void showMessage(CharSequence message, int color);
 
     /**
      * Instruct the view to show usability hints, if any.
@@ -127,4 +127,12 @@ public interface KeyguardSecurityView {
      *         animation started and {@code finishRunnable} will not be run
      */
     boolean startDisappearAnimation(Runnable finishRunnable);
+
+    /**
+     * The localized name of the security view, provided to accessibility. This may be the content
+     * description, but content descriptions have other implications, so the title is kept separate.
+     *
+     * @return The View's title.
+     */
+    CharSequence getTitle();
 }

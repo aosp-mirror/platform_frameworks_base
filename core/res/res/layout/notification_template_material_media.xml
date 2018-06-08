@@ -49,7 +49,7 @@
             android:layout_gravity="fill_vertical"
             android:layout_weight="1"
             android:minHeight="@dimen/notification_min_content_height"
-            android:paddingBottom="@dimen/notification_content_margin_bottom"
+            android:paddingBottom="@dimen/notification_content_margin"
             android:orientation="vertical"
             >
             <include layout="@layout/notification_template_part_line1"/>

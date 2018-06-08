@@ -49,6 +49,7 @@
     <uses-permission android:name="android.permission.CONFIGURE_WIFI_DISPLAY" />
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.GET_APP_OPS_STATS" />
+    <uses-permission android:name="android.permission.USE_RESERVED_DISK" />
 
     <!-- Networking and telephony -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -71,6 +72,7 @@
     <uses-permission android:name="android.permission.PEERS_MAC_ADDRESS"/>
     <!-- Physical hardware -->
     <uses-permission android:name="android.permission.MANAGE_USB" />
+    <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />
     <uses-permission android:name="android.permission.DEVICE_POWER" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.MASTER_CLEAR" />
@@ -120,6 +122,7 @@
     <uses-permission android:name="android.permission.TRUST_LISTENER" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.RESET_FINGERPRINT_LOCKOUT" />
+    <uses-permission android:name="android.permission.MANAGE_SLICE_PERMISSIONS" />
 
     <!-- Needed for WallpaperManager.clear in ImageWallpaper.updateWallpaperLocked -->
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
@@ -173,9 +176,6 @@
     <!-- It's like, reality, but, you know, virtual -->
     <uses-permission android:name="android.permission.ACCESS_VR_MANAGER" />
 
-    <!-- To control car audio module volume -->
-    <uses-permission android:name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME" />
-
     <!-- the ability to rename notifications posted by other apps -->
     <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
 
@@ -196,8 +196,25 @@
     <!-- to access instant apps -->
     <uses-permission android:name="android.permission.ACCESS_INSTANT_APPS" />
 
+    <!-- to control remote app transitions -->
+    <uses-permission android:name="android.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS" />
+
     <!-- to change themes - light or dark -->
     <uses-permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES" />
+
+    <!-- Listen app op changes -->
+    <uses-permission android:name="android.permission.WATCH_APPOPS" />
+
+    <!-- to read and change hvac values in a car -->
+    <uses-permission android:name="android.car.permission.CONTROL_CAR_CLIMATE" />
+
+    <!-- Permission necessary to change car audio volume through CarAudioManager -->
+    <uses-permission android:name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME" />
+
+    <uses-permission android:name="android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS" />
+
+    <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
+    <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
 
     <application
         android:name=".SystemUIApplication"
@@ -211,7 +228,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SystemUI"
         android:defaultToDeviceProtectedStorage="true"
-        android:directBootAware="true">
+        android:directBootAware="true"
+        android:appComponentFactory="android.support.v4.app.CoreComponentFactory">
         <!-- Keep theme in sync with SystemUIApplication.onCreate().
              Setting the theme on the application does not affect views inflated by services.
              The application theme is set again from onCreate to take effect for those views. -->
@@ -222,7 +240,7 @@
              -->
         <service android:name="SystemUIService"
             android:exported="true"
-            />
+        />
 
         <!-- Recents depends on every user having their own SystemUI process, so on user switch,
              ensure that the process is created by starting this service.
@@ -273,6 +291,8 @@
             </intent-filter>
             <meta-data android:name="com.android.settings.category"
                     android:value="com.android.settings.category.ia.system" />
+            <meta-data android:name="com.android.settings.summary"
+                    android:resource="@string/summary_empty"/>
         </activity>
 
         <activity-alias android:name=".DemoMode"
@@ -319,7 +339,7 @@
         </activity>
 
         <!-- Springboard for launching the share activity -->
-        <receiver android:name=".screenshot.GlobalScreenshot$ShareReceiver"
+        <receiver android:name=".screenshot.GlobalScreenshot$ScreenshotActionReceiver"
             android:process=":screenshot"
             android:exported="false" />
 
@@ -376,6 +396,12 @@
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">
         </activity>
+        <activity-alias
+            android:name=".UsbDebuggingActivityAlias"
+            android:permission="android.permission.DUMP"
+            android:targetActivity=".usb.UsbDebuggingActivity"
+            android:exported="true">
+        </activity-alias>
         <activity android:name=".usb.UsbDebuggingSecondaryUserActivity"
             android:theme="@style/Theme.SystemUI.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
@@ -401,7 +427,8 @@
             android:theme="@style/Theme.AlertDialogHost"
             android:finishOnCloseSystemDialogs="true"
             android:launchMode="singleTop"
-            android:excludeFromRecents="true" />
+            android:excludeFromRecents="true"
+            android:visibleToInstantApps="true"/>
 
         <!-- started from PipUI -->
         <activity
@@ -430,6 +457,16 @@
             android:taskAffinity=""
             android:launchMode="singleTop"
             androidprv:alwaysFocusable="true" />
+
+        <!-- started from SliceProvider -->
+        <activity android:name=".SlicePermissionActivity"
+            android:theme="@style/Theme.SystemUI.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="com.android.intent.action.REQUEST_SLICE_PERMISSION" />
+            </intent-filter>
+        </activity>
 
         <!-- platform logo easter egg activity -->
         <activity
@@ -566,6 +603,12 @@
                 android:resource="@xml/fileprovider" />
         </provider>
 
+        <provider android:name=".keyguard.KeyguardSliceProvider"
+                  android:authorities="com.android.systemui.keyguard"
+                  android:grantUriPermissions="true"
+                  android:exported="true">
+        </provider>
+
         <receiver
             android:name=".statusbar.KeyboardShortcutsReceiver">
             <intent-filter>
@@ -573,5 +616,6 @@
                 <action android:name="com.android.intent.action.SHOW_KEYBOARD_SHORTCUTS" />
             </intent-filter>
         </receiver>
+
     </application>
 </manifest>

@@ -33,13 +33,13 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"請檢查密碼，然後再試一次"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"不在有效範圍內"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"無法自動連線"</string>
-    <string name="wifi_no_internet" msgid="3880396223819116454">"沒有可用的網際網路連線"</string>
+    <string name="wifi_no_internet" msgid="4663834955626848401">"沒有可用的網際網路連線"</string>
     <string name="saved_network" msgid="4352716707126620811">"由「<xliff:g id="NAME">%1$s</xliff:g>」儲存"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"已透過 %1$s 自動連線"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"已透過網路評分供應商自動連線"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"已透過 %1$s 連線"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"可透過 %1$s 使用"</string>
-    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"已連線，沒有網際網路"</string>
+    <string name="wifi_connected_no_internet" msgid="8202906332837777829">"已連線，沒有網際網路"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"存取點暫時滿載"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"已透過 %1$s 連線"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"可透過 %1$s 使用"</string>
@@ -53,16 +53,16 @@
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"已中斷連線"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"正在中斷連線…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"連線中…"</string>
-    <string name="bluetooth_connected" msgid="6038755206916626419">"已連線"</string>
+    <string name="bluetooth_connected" msgid="5427152882755735944">"已連線到「<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>」"</string>
     <string name="bluetooth_pairing" msgid="1426882272690346242">"配對中…"</string>
-    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"已連線 (無手機音訊)"</string>
-    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"已連線 (無媒體音訊)"</string>
-    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"已連線 (無訊息存取權)"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"已連線 (無手機或媒體音訊)"</string>
-    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"已連線，電量為 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"已連線 (無手機)，電量為 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"已連線 (無媒體音訊)，電量為 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"已連線 (無手機或媒體音訊)，電量為 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset" msgid="616068069034994802">"已連線到「<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>」(無手機音訊)"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="3736431800395923868">"已連線到「<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>」(無媒體音訊)"</string>
+    <string name="bluetooth_connected_no_map" msgid="3200033913678466453">"已連線到「<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>」(無訊息存取權)"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2047403011284187056">"已連線到「<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>」(無手機或媒體音訊)"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5162924691231307748">"已連線，電量為 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"已連線 (無手機音訊)，電量為 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"已連線 (無媒體音訊)，電量為 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"已連線 (無手機或媒體音訊)，電量為 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"媒體音訊"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"通話"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"檔案傳輸"</string>
@@ -75,6 +75,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"SIM 卡存取權"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD 高解析音訊：<xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD 高解析音訊"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"助聽器"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"已連接到助聽器"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"連接至媒體音訊"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"連接至電話音訊"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"已連線到檔案傳輸伺服器"</string>
@@ -82,15 +84,16 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"已連線到 SAP"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"不要連線到檔案傳輸伺服器"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"已連線到輸入裝置"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"已連線至裝置並取得網際網路存取權"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"與裝置分享本地網際網路連線"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"用於網際網路連線"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"已連線至裝置並取得網際網路連線"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"與裝置分享本地網際網路連線"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"用於網際網路連線"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"地圖使用偏好"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"用於 SIM 卡存取權"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"用於媒體音訊"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"用於電話音訊"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"用於傳輸檔案"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"用於輸入"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"用於助聽器"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"配對"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"配對"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"取消"</string>
@@ -99,6 +102,13 @@
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"無法與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 配對，因為 PIN 碼或密碼金鑰不正確。"</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"無法與 <xliff:g id="DEVICE_NAME">%1$s</xliff:g> 通訊。"</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"「<xliff:g id="DEVICE_NAME">%1$s</xliff:g>」拒絕配對要求。"</string>
+    <string name="bluetooth_talkback_computer" msgid="4875089335641234463">"電腦"</string>
+    <string name="bluetooth_talkback_headset" msgid="5140152177885220949">"免持耳機"</string>
+    <string name="bluetooth_talkback_phone" msgid="4260255181240622896">"電話"</string>
+    <string name="bluetooth_talkback_imaging" msgid="551146170554589119">"顯像裝置"</string>
+    <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"頭戴式耳機"</string>
+    <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"周邊輸入裝置"</string>
+    <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"藍牙"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"已關閉 Wi-Fi。"</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi 連線已中斷。"</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi 訊號強度一格。"</string>
@@ -189,13 +199,11 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"網路連線"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"無線螢幕分享認證"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"啟用 Wi‑Fi 詳細紀錄設定"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Wi-Fi 至行動數據轉換強化"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"一律允許 Wi-Fi 漫遊掃描"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"已連線的 MAC 隨機化處理"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"行動數據連線一律保持啟用狀態"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"數據連線硬體加速"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"顯示沒有名稱的藍牙裝置"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"停用絕對音量功能"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"啟用藍牙同步鈴聲功能"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"藍牙 AVRCP 版本"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"選取藍牙 AVRCP 版本"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"藍牙音訊轉碼器"</string>
@@ -212,13 +220,13 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"私人 DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"選取私人 DNS 模式"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"停用"</string>
-    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"隨機"</string>
+    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
+    <skip />
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"私人 DNS 供應商主機名稱"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"輸入 DNS 供應商的主機名稱"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"顯示無線螢幕分享認證的選項"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"讓 Wi‑Fi 記錄功能升級，在 Wi‑Fi 選擇器中依每個 SSID RSSI 顯示 Wi‑Fi 詳細紀錄"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"啟用時，Wi-Fi 連線在訊號不穩的情況下會更積極轉換成行動數據連線"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"根據介面中目前的數據流量允許/禁止 Wi-Fi 漫遊掃描"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"連線至 Wi‑Fi 網路時隨機化 MAC 位址"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"紀錄器緩衝區空間"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"選取每個紀錄緩衝區的紀錄器空間"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"要清除永久儲存的記錄器資料嗎？"</string>
@@ -241,7 +249,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"檢查透過 ADB/ADT 安裝的應用程式是否具有有害行為。"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"系統會顯示沒有名稱 (僅具有 MAC 位址) 的藍牙裝置"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"只要停用藍牙絕對音量功能，即可避免在連線到遠端裝置時，發生音量過大或無法控制音量等問題。"</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"允許手機鈴聲透過藍牙耳機播放"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"本機終端機"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"啟用可提供本機命令介面存取權的終端機應用程式"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP 檢查"</string>
@@ -254,8 +261,6 @@
     <string name="no_application" msgid="2813387563129153880">"無"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"等待偵錯程式"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"執行受偵錯的應用程式之前，先等待偵錯程序附加完成"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Telephony Monitor"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Telephony Monitor 會在偵測到電話/數據機功能發生問題時收集相關紀錄，並顯示通知方便使用者回報錯誤"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"輸入"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"繪圖"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"硬體加速轉譯"</string>
@@ -274,7 +279,6 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"顯示硬體層更新"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"在硬體層更新時閃綠燈"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"針對 GPU 重複繪圖進行偵錯"</string>
-    <string name="debug_hw_renderer" msgid="7568529019431785816">"設定 GPU 轉譯器"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"停用硬體重疊圖層"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"一律使用 GPU 進行畫面合成"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"模擬色彩空間"</string>
@@ -291,6 +295,8 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"在 OpenGL ES 2.0 應用程式中啟用 4x MSAA"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"針對非矩形裁剪操作進行偵錯"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"剖析 GPU 轉譯"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"啟用 GPU 偵錯圖層"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"允許載入 GPU 偵錯圖層為應用程式偵錯"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"視窗動畫比例"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"轉場動畫比例"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"動畫影片長度比例"</string>
@@ -325,9 +331,10 @@
     <item msgid="8280754435979370728">"眼睛所見的自然色彩"</item>
     <item msgid="5363960654009010371">"針對數位內容最佳化的色彩"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"未啟用的應用程式"</string>
+    <string name="inactive_apps_title" msgid="9042996804461901648">"待命應用程式"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"未啟用。輕觸即可切換。"</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"已啟用。輕觸即可切換。"</string>
+    <string name="standby_bucket_summary" msgid="6567835350910684727">"應用程式待命狀態：<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"正在運作的服務"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"查看並管理目前正在執行的服務"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"WebView 實作"</string>
@@ -349,16 +356,43 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"色彩校正"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"這是一項實驗性功能，可能會對效能造成影響。"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"已改為<xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"還有大約 <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"根據你的使用情形，剩餘時間大約還有 <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"再過 <xliff:g id="TIME">^1</xliff:g>就能完成充電"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"還剩 <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"根據你的使用情形，剩餘時間還有 <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> - 約剩 <xliff:g id="TIME">^2</xliff:g>"</string>
-    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> - 根據你的使用情形，剩餘時間大約還有 <xliff:g id="TIME">^2</xliff:g>"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - 還剩 <xliff:g id="TIME">^2</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"還有大約 <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
+    <skip />
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"根據你的使用情形，剩餘時間大約還有 <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
+    <skip />
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"還剩 <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
+    <skip />
+    <!-- no translation found for power_discharge_by (6427074755635635749) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
+    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"電池可用時間不到 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
+    <skip />
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>後充飽"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"再過 <xliff:g id="TIME">%1$s</xliff:g>就能完成充電"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>後充飽"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"不明"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"充電中"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"充電中"</string>
@@ -396,4 +430,24 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"無法開啟「<xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>」的設定"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"這個輸入法是由「<xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>」應用程式所提供，它可能會收集你輸入的所有文字，包括密碼和信用卡號等個人資料。要啟用這個輸入法嗎？"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"注意：重新啟動後，你必須將手機解鎖，才能執行這個應用程式"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"IMS 註冊狀態"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"已註冊"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"未註冊"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"無法取得"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">%1$d 個已連線的裝置</item>
+      <item quantity="one">%1$d 個已連線的裝置</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"增加時間。"</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"減少時間。"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"開啟"</string>
+    <string name="cancel" msgid="6859253417269739139">"取消"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"開啟「零打擾」模式"</string>
+    <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"永不"</string>
+    <string name="zen_interruption_level_priority" msgid="2078370238113347720">"僅限優先通知"</string>
+    <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"你不會聽到下一個<xliff:g id="WHEN">%1$s</xliff:g> 的鬧鐘，除非你預先關閉這項功能"</string>
+    <string name="zen_alarm_warning" msgid="6236690803924413088">"你不會聽到下一個<xliff:g id="WHEN">%1$s</xliff:g> 的鬧鐘"</string>
+    <string name="alarm_template" msgid="4996153414057676512">"時間：<xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="3779172822607461675">"時間：<xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

@@ -63,7 +63,8 @@ class RenderNode;
 }
 
 /**
- * Primary class for storing recorded canvas commands, as well as per-View/ViewGroup display properties.
+ * Primary class for storing recorded canvas commands, as well as per-View/ViewGroup display
+ * properties.
  *
  * Recording of canvas commands is somewhat similar to SkPicture, except the canvas-recording
  * functionality is split between RecordingCanvas (which manages the recording), DisplayList
@@ -74,33 +75,32 @@ class RenderNode;
  * attached.
  */
 class RenderNode : public VirtualLightRefBase {
-friend class TestUtils; // allow TestUtils to access syncDisplayList / syncProperties
-friend class FrameBuilder;
+    friend class TestUtils;  // allow TestUtils to access syncDisplayList / syncProperties
+    friend class FrameBuilder;
+
 public:
     enum DirtyPropertyMask {
-        GENERIC         = 1 << 1,
-        TRANSLATION_X   = 1 << 2,
-        TRANSLATION_Y   = 1 << 3,
-        TRANSLATION_Z   = 1 << 4,
-        SCALE_X         = 1 << 5,
-        SCALE_Y         = 1 << 6,
-        ROTATION        = 1 << 7,
-        ROTATION_X      = 1 << 8,
-        ROTATION_Y      = 1 << 9,
-        X               = 1 << 10,
-        Y               = 1 << 11,
-        Z               = 1 << 12,
-        ALPHA           = 1 << 13,
-        DISPLAY_LIST    = 1 << 14,
+        GENERIC = 1 << 1,
+        TRANSLATION_X = 1 << 2,
+        TRANSLATION_Y = 1 << 3,
+        TRANSLATION_Z = 1 << 4,
+        SCALE_X = 1 << 5,
+        SCALE_Y = 1 << 6,
+        ROTATION = 1 << 7,
+        ROTATION_X = 1 << 8,
+        ROTATION_Y = 1 << 9,
+        X = 1 << 10,
+        Y = 1 << 11,
+        Z = 1 << 12,
+        ALPHA = 1 << 13,
+        DISPLAY_LIST = 1 << 14,
     };
 
     ANDROID_API RenderNode();
     ANDROID_API virtual ~RenderNode();
 
     // See flags defined in DisplayList.java
-    enum ReplayFlag {
-        kReplayFlag_ClipChildren = 0x1
-    };
+    enum ReplayFlag { kReplayFlag_ClipChildren = 0x1 };
 
     ANDROID_API void setStagingDisplayList(DisplayList* newData);
 
@@ -110,17 +110,13 @@ public:
     ANDROID_API int getDebugSize();
     void copyTo(proto::RenderNode* node);
 
-    bool isRenderable() const {
-        return mDisplayList && !mDisplayList->isEmpty();
-    }
+    bool isRenderable() const { return mDisplayList && !mDisplayList->isEmpty(); }
 
     bool hasProjectionReceiver() const {
         return mDisplayList && mDisplayList->projectionReceiveIndex >= 0;
     }
 
-    const char* getName() const {
-        return mName.string();
-    }
+    const char* getName() const { return mName.string(); }
 
     void setName(const char* name) {
         if (name) {
@@ -133,49 +129,29 @@ public:
         }
     }
 
-    VirtualLightRefBase* getUserContext() const {
-        return mUserContext.get();
-    }
+    VirtualLightRefBase* getUserContext() const { return mUserContext.get(); }
 
-    void setUserContext(VirtualLightRefBase* context) {
-        mUserContext = context;
-    }
+    void setUserContext(VirtualLightRefBase* context) { mUserContext = context; }
 
     bool isPropertyFieldDirty(DirtyPropertyMask field) const {
         return mDirtyPropertyFields & field;
     }
 
-    void setPropertyFieldsDirty(uint32_t fields) {
-        mDirtyPropertyFields |= fields;
-    }
+    void setPropertyFieldsDirty(uint32_t fields) { mDirtyPropertyFields |= fields; }
 
-    const RenderProperties& properties() const {
-        return mProperties;
-    }
+    const RenderProperties& properties() const { return mProperties; }
 
-    RenderProperties& animatorProperties() {
-        return mProperties;
-    }
+    RenderProperties& animatorProperties() { return mProperties; }
 
-    const RenderProperties& stagingProperties() {
-        return mStagingProperties;
-    }
+    const RenderProperties& stagingProperties() { return mStagingProperties; }
 
-    RenderProperties& mutateStagingProperties() {
-        return mStagingProperties;
-    }
+    RenderProperties& mutateStagingProperties() { return mStagingProperties; }
 
-    bool isValid() {
-        return mValid;
-    }
+    bool isValid() { return mValid; }
 
-    int getWidth() const {
-        return properties().getWidth();
-    }
+    int getWidth() const { return properties().getWidth(); }
 
-    int getHeight() const {
-        return properties().getHeight();
-    }
+    int getHeight() const { return properties().getHeight(); }
 
     ANDROID_API virtual void prepareTree(TreeInfo& info);
     void destroyHardwareResources(TreeInfo* info = nullptr);
@@ -196,18 +172,14 @@ public:
 
     bool nothingToDraw() const {
         const Outline& outline = properties().getOutline();
-        return mDisplayList == nullptr
-                || properties().getAlpha() <= 0
-                || (outline.getShouldClip() && outline.isEmpty())
-                || properties().getScaleX() == 0
-                || properties().getScaleY() == 0;
+        return mDisplayList == nullptr || properties().getAlpha() <= 0 ||
+               (outline.getShouldClip() && outline.isEmpty()) || properties().getScaleX() == 0 ||
+               properties().getScaleY() == 0;
     }
 
-    const DisplayList* getDisplayList() const {
-        return mDisplayList;
-    }
+    const DisplayList* getDisplayList() const { return mDisplayList; }
     OffscreenBuffer* getLayer() const { return mLayer; }
-    OffscreenBuffer** getLayerHandle() { return &mLayer; } // ugh...
+    OffscreenBuffer** getLayerHandle() { return &mLayer; }  // ugh...
     void setLayer(OffscreenBuffer* layer) { mLayer = layer; }
 
     // Note: The position callbacks are relying on the listener using
@@ -234,16 +206,12 @@ public:
 
     // This is only modified in MODE_FULL, so it can be safely accessed
     // on the UI thread.
-    ANDROID_API bool hasParents() {
-        return mParentCount;
-    }
+    ANDROID_API bool hasParents() { return mParentCount; }
 
     void onRemovedFromTree(TreeInfo* info);
 
     // Called by CanvasContext to promote a RenderNode to be a root node
-    void makeRoot() {
-        incParentRefCount();
-    }
+    void makeRoot() { incParentRefCount(); }
 
     // Called by CanvasContext when it drops a RenderNode from being a root node
     void clearRoot();
@@ -252,8 +220,8 @@ public:
 
 private:
     void computeOrderingImpl(RenderNodeOp* opState,
-            std::vector<RenderNodeOp*>* compositedChildrenOfProjectionSurface,
-            const mat4* transformFromProjectionSurface);
+                             std::vector<RenderNodeOp*>* compositedChildrenOfProjectionSurface,
+                             const mat4* transformFromProjectionSurface);
 
     void syncProperties();
     void syncDisplayList(TreeObserver& observer, TreeInfo* info);
@@ -309,7 +277,7 @@ private:
 
     sp<PositionListener> mPositionListener;
 
-// METHODS & FIELDS ONLY USED BY THE SKIA RENDERER
+    // METHODS & FIELDS ONLY USED BY THE SKIA RENDERER
 public:
     /**
      * Detach and transfer ownership of an already allocated displayList for use
@@ -361,9 +329,19 @@ public:
         return mSkiaLayer.get() ? mSkiaLayer->layerSurface.get() : nullptr;
     }
 
-    skiapipeline::SkiaLayer* getSkiaLayer() const {
-        return mSkiaLayer.get();
-    }
+    skiapipeline::SkiaLayer* getSkiaLayer() const { return mSkiaLayer.get(); }
+
+    /**
+     * Returns the path that represents the outline of RenderNode intersected with
+     * the provided rect.  This call will internally cache the resulting path in
+     * order to potentially return that path for subsequent calls to this method.
+     * By reusing the same path we get better performance on the GPU backends since
+     * those resources are cached in the hardware based on the path's genID.
+     *
+     * The returned path is only guaranteed to be valid until this function is called
+     * again or the RenderNode's outline is mutated.
+     */
+    const SkPath* getClippedOutline(const SkRect& clipRect) const;
 
 private:
     /**
@@ -380,17 +358,25 @@ private:
      * when it has been set to draw as a LayerType::RenderLayer.
      */
     std::unique_ptr<skiapipeline::SkiaLayer> mSkiaLayer;
-}; // class RenderNode
+
+    struct ClippedOutlineCache {
+        // keys
+        uint32_t outlineID = 0;
+        SkRect clipRect;
+
+        // value
+        SkPath clippedOutline;
+    };
+    mutable ClippedOutlineCache mClippedOutlineCache;
+};  // class RenderNode
 
 class MarkAndSweepRemoved : public TreeObserver {
-PREVENT_COPY_AND_ASSIGN(MarkAndSweepRemoved);
+    PREVENT_COPY_AND_ASSIGN(MarkAndSweepRemoved);
 
 public:
     explicit MarkAndSweepRemoved(TreeInfo* info) : mTreeInfo(info) {}
 
-    void onMaybeRemovedFromTree(RenderNode* node) override {
-        mMarked.emplace_back(node);
-    }
+    void onMaybeRemovedFromTree(RenderNode* node) override { mMarked.emplace_back(node); }
 
     ~MarkAndSweepRemoved() {
         for (auto& node : mMarked) {

@@ -26,8 +26,8 @@
 
 #include "Debug.h"
 
-#include <vector>
 #include <unordered_map>
+#include <vector>
 
 namespace android {
 
@@ -43,9 +43,9 @@ class Texture;
 
 // Debug
 #if DEBUG_TEXTURES
-    #define TEXTURE_LOGD(...) ALOGD(__VA_ARGS__)
+#define TEXTURE_LOGD(...) ALOGD(__VA_ARGS__)
 #else
-    #define TEXTURE_LOGD(...)
+#define TEXTURE_LOGD(...)
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -136,9 +136,9 @@ private:
     bool mDebugEnabled;
 
     std::unordered_map<uint32_t, std::unique_ptr<Texture>> mHardwareTextures;
-}; // class TextureCache
+};  // class TextureCache
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_TEXTURE_CACHE_H
+#endif  // ANDROID_HWUI_TEXTURE_CACHE_H

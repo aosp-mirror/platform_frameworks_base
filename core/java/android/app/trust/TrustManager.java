@@ -36,9 +36,11 @@ public class TrustManager {
 
     private static final int MSG_TRUST_CHANGED = 1;
     private static final int MSG_TRUST_MANAGED_CHANGED = 2;
+    private static final int MSG_TRUST_ERROR = 3;
 
     private static final String TAG = "TrustManager";
     private static final String DATA_FLAGS = "initiatedByUser";
+    private static final String DATA_MESSAGE = "message";
 
     private final ITrustManager mService;
     private final ArrayMap<TrustListener, ITrustListener> mTrustListeners;
@@ -148,6 +150,13 @@ public class TrustManager {
                     mHandler.obtainMessage(MSG_TRUST_MANAGED_CHANGED, (managed ? 1 : 0), userId,
                             trustListener).sendToTarget();
                 }
+
+                @Override
+                public void onTrustError(CharSequence message) {
+                    Message m = mHandler.obtainMessage(MSG_TRUST_ERROR);
+                    m.getData().putCharSequence(DATA_MESSAGE, message);
+                    m.sendToTarget();
+                }
             };
             mService.registerTrustListener(iTrustListener);
             mTrustListeners.put(trustListener, iTrustListener);
@@ -221,6 +230,10 @@ public class TrustManager {
                     break;
                 case MSG_TRUST_MANAGED_CHANGED:
                     ((TrustListener)msg.obj).onTrustManagedChanged(msg.arg1 != 0, msg.arg2);
+                    break;
+                case MSG_TRUST_ERROR:
+                    final CharSequence message = msg.peekData().getCharSequence(DATA_MESSAGE);
+                    ((TrustListener)msg.obj).onTrustError(message);
             }
         }
     };
@@ -229,9 +242,9 @@ public class TrustManager {
 
         /**
          * Reports that the trust state has changed.
-         * @param enabled if true, the system believes the environment to be trusted.
-         * @param userId the user, for which the trust changed.
-         * @param flags flags specified by the trust agent when granting trust. See
+         * @param enabled If true, the system believes the environment to be trusted.
+         * @param userId The user, for which the trust changed.
+         * @param flags Flags specified by the trust agent when granting trust. See
          *     {@link android.service.trust.TrustAgentService#grantTrust(CharSequence, long, int)
          *                 TrustAgentService.grantTrust(CharSequence, long, int)}.
          */
@@ -239,9 +252,15 @@ public class TrustManager {
 
         /**
          * Reports that whether trust is managed has changed
-         * @param enabled if true, at least one trust agent is managing trust.
-         * @param userId the user, for which the state changed.
+         * @param enabled If true, at least one trust agent is managing trust.
+         * @param userId The user, for which the state changed.
          */
         void onTrustManagedChanged(boolean enabled, int userId);
+
+        /**
+         * Reports that an error happened on a TrustAgentService.
+         * @param message A message that should be displayed on the UI.
+         */
+        void onTrustError(CharSequence message);
     }
 }

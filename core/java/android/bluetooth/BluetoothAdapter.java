@@ -156,7 +156,7 @@ public final class BluetoothAdapter {
             "android.bluetooth.adapter.extra.PREVIOUS_STATE";
 
     /** @hide */
-    @IntDef({
+    @IntDef(prefix = { "STATE_" }, value = {
             STATE_OFF,
             STATE_TURNING_ON,
             STATE_ON,
@@ -365,7 +365,11 @@ public final class BluetoothAdapter {
             "android.bluetooth.adapter.extra.PREVIOUS_SCAN_MODE";
 
     /** @hide */
-    @IntDef({SCAN_MODE_NONE, SCAN_MODE_CONNECTABLE, SCAN_MODE_CONNECTABLE_DISCOVERABLE})
+    @IntDef(prefix = { "SCAN_" }, value = {
+            SCAN_MODE_NONE,
+            SCAN_MODE_CONNECTABLE,
+            SCAN_MODE_CONNECTABLE_DISCOVERABLE
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScanMode {}
 
@@ -485,7 +489,7 @@ public final class BluetoothAdapter {
      * Intent used to broadcast the change in connection state of the local
      * Bluetooth adapter to a profile of the remote device. When the adapter is
      * not connected to any profiles of any remote devices and it attempts a
-     * connection to a profile this intent will sent. Once connected, this intent
+     * connection to a profile this intent will be sent. Once connected, this intent
      * will not be sent for any more connection attempts to any profiles of any
      * remote device. When the adapter disconnects from the last profile its
      * connected to of any remote device, this intent will be sent.
@@ -725,10 +729,6 @@ public final class BluetoothAdapter {
      */
     public BluetoothLeAdvertiser getBluetoothLeAdvertiser() {
         if (!getLeAccess()) {
-            return null;
-        }
-        if (!isMultipleAdvertisementSupported()) {
-            Log.e(TAG, "Bluetooth LE advertising not supported");
             return null;
         }
         synchronized (mLock) {

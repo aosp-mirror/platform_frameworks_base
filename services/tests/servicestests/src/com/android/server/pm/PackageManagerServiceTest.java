@@ -17,73 +17,93 @@
 package com.android.server.pm;
 
 import android.content.IIntentReceiver;
-
 import android.os.Bundle;
+import android.support.test.runner.AndroidJUnit4;
 
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.File;
 
 // runtest -c com.android.server.pm.PackageManagerServiceTest frameworks-services
-
-@SmallTest
-public class PackageManagerServiceTest extends AndroidTestCase {
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+// bit FrameworksServicesTests:com.android.server.pm.PackageManagerServiceTest
+@RunWith(AndroidJUnit4.class)
+public class PackageManagerServiceTest {
+    @Before
+    public void setUp() throws Exception {
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
     }
 
+    @Test
     public void testPackageRemoval() throws Exception {
-      class PackageSenderImpl implements PackageSender {
-        public void sendPackageBroadcast(final String action, final String pkg,
-            final Bundle extras, final int flags, final String targetPkg,
-            final IIntentReceiver finishedReceiver, final int[] userIds) {
+        class PackageSenderImpl implements PackageSender {
+            public void sendPackageBroadcast(final String action, final String pkg,
+                    final Bundle extras, final int flags, final String targetPkg,
+                    final IIntentReceiver finishedReceiver, final int[] userIds,
+                    int[] instantUserIds) {
+            }
+
+            public void sendPackageAddedForNewUsers(String packageName,
+                    boolean sendBootComplete, boolean includeStopped, int appId,
+                    int[] userIds, int[] instantUserIds) {
+            }
+
+            @Override
+            public void notifyPackageAdded(String packageName) {
+            }
+
+            @Override
+            public void notifyPackageRemoved(String packageName) {
+            }
         }
 
-        public void sendPackageAddedForNewUsers(String packageName,
-            boolean sendBootComplete, boolean includeStopped, int appId, int... userIds) {
-        }
-      }
+        PackageSenderImpl sender = new PackageSenderImpl();
+        PackageSetting setting = null;
+        PackageManagerService.PackageRemovedInfo pri =
+                new PackageManagerService.PackageRemovedInfo(sender);
 
-      PackageSenderImpl sender = new PackageSenderImpl();
-      PackageSetting setting = null;
-      PackageManagerService.PackageRemovedInfo pri =
-          new PackageManagerService.PackageRemovedInfo(sender);
+        // Initial conditions: nothing there
+        Assert.assertNull(pri.removedUsers);
+        Assert.assertNull(pri.broadcastUsers);
 
-      // Initial conditions: nothing there
-      assertNull(pri.removedUsers);
-      assertNull(pri.broadcastUsers);
+        // populateUsers with nothing leaves nothing
+        pri.populateUsers(null, setting);
+        Assert.assertNull(pri.broadcastUsers);
 
-      // populateUsers with nothing leaves nothing
-      pri.populateUsers(null, setting);
-      assertNull(pri.broadcastUsers);
+        // Create a real (non-null) PackageSetting and confirm that the removed
+        // users are copied properly
+        setting = new PackageSetting("name", "realName", new File("codePath"),
+                new File("resourcePath"), "legacyNativeLibraryPathString",
+                "primaryCpuAbiString", "secondaryCpuAbiString",
+                "cpuAbiOverrideString", 0, 0, 0, "parentPackageName", null, 0,
+                null, null);
+        pri.populateUsers(new int[] {
+                1, 2, 3, 4, 5
+        }, setting);
+        Assert.assertNotNull(pri.broadcastUsers);
+        Assert.assertEquals(5, pri.broadcastUsers.length);
+        Assert.assertNotNull(pri.instantUserIds);
+        Assert.assertEquals(0, pri.instantUserIds.length);
 
-      // Create a real (non-null) PackageSetting and confirm that the removed
-      // users are copied properly
-      setting = new PackageSetting("name", "realName", new File("codePath"),
-          new File("resourcePath"), "legacyNativeLibraryPathString",
-          "primaryCpuAbiString", "secondaryCpuAbiString",
-          "cpuAbiOverrideString", 0, 0, 0, "parentPackageName", null, 0,
-          null, null);
-      pri.populateUsers(new int[] {1, 2, 3, 4, 5}, setting);
-      assertNotNull(pri.broadcastUsers);
-      assertEquals(5, pri.broadcastUsers.length);
+        // Exclude a user
+        pri.broadcastUsers = null;
+        final int EXCLUDED_USER_ID = 4;
+        setting.setInstantApp(true, EXCLUDED_USER_ID);
+        pri.populateUsers(new int[] {
+                1, 2, 3, EXCLUDED_USER_ID, 5
+        }, setting);
+        Assert.assertNotNull(pri.broadcastUsers);
+        Assert.assertEquals(4, pri.broadcastUsers.length);
+        Assert.assertNotNull(pri.instantUserIds);
+        Assert.assertEquals(1, pri.instantUserIds.length);
 
-      // Exclude a user
-      pri.broadcastUsers = null;
-      final int EXCLUDED_USER_ID = 4;
-      setting.setInstantApp(true, EXCLUDED_USER_ID);
-      pri.populateUsers(new int[] {1, 2, 3, EXCLUDED_USER_ID, 5}, setting);
-      assertNotNull(pri.broadcastUsers);
-      assertEquals(5 - 1, pri.broadcastUsers.length);
-
-      // TODO: test that sendApplicationHiddenForUser() actually fills in
-      // broadcastUsers
+        // TODO: test that sendApplicationHiddenForUser() actually fills in
+        // broadcastUsers
     }
 }

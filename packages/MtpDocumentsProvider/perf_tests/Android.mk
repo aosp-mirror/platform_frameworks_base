@@ -8,5 +8,6 @@ LOCAL_PACKAGE_NAME := MtpDocumentsProviderPerfTests
 LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_INSTRUMENTATION_FOR := MtpDocumentsProvider
 LOCAL_CERTIFICATE := media
+LOCAL_COMPATIBILITY_SUITE += device-tests
 
 include $(BUILD_PACKAGE)

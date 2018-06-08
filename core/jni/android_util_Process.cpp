@@ -610,7 +610,7 @@ static jlong getFreeMemoryImpl(const char* const sums[], const size_t sumsLen[],
         return -1;
     }
 
-    char buffer[256];
+    char buffer[2048];
     const int len = read(fd, buffer, sizeof(buffer)-1);
     close(fd);
 
@@ -719,7 +719,7 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
     int fd = open(file.string(), O_RDONLY | O_CLOEXEC);
 
     if (fd >= 0) {
-        const size_t BUFFER_SIZE = 2048;
+        const size_t BUFFER_SIZE = 4096;
         char* buffer = (char*)malloc(BUFFER_SIZE);
         int len = read(fd, buffer, BUFFER_SIZE-1);
         close(fd);

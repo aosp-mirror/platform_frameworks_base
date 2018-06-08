@@ -23,8 +23,8 @@
     android:orientation="horizontal" >
 
    <ImageView android:id="@+id/account_row_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
+        android:layout_width="?attr/listPreferredItemHeight"
+        android:layout_height="?attr/listPreferredItemHeight"
         android:paddingEnd="8dip" />
 
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"

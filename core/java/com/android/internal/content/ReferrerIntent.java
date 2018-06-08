@@ -19,6 +19,8 @@ package com.android.internal.content;
 import android.content.Intent;
 import android.os.Parcel;
 
+import java.util.Objects;
+
 /**
  * Subclass of Intent that also contains referrer (as a package name) information.
  */
@@ -48,4 +50,21 @@ public class ReferrerIntent extends Intent {
             return new ReferrerIntent[size];
         }
     };
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof ReferrerIntent)) {
+            return false;
+        }
+        final ReferrerIntent other = (ReferrerIntent) obj;
+        return filterEquals(other) && Objects.equals(mReferrer, other.mReferrer);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + filterHashCode();
+        result = 31 * result + Objects.hashCode(mReferrer);
+        return result;
+    }
 }

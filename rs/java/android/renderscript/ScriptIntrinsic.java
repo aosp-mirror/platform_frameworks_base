@@ -17,9 +17,9 @@
 package android.renderscript;
 
 /**
- * Base class for all Intrinsic scripts. An intrinsic a script
- * which implements a pre-defined function. Intrinsics are
- * provided to provide effecient implemtations of common
+ * Base class for all Intrinsic scripts. An intrinsic is a script
+ * that implements a pre-defined function. Intrinsics are
+ * provided to provide efficient implementations of common
  * operations.
  *
  * Not intended for direct use.

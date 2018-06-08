@@ -24,9 +24,8 @@
 
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadioFactory.h>
 #include <binder/IPCThreadState.h>
-#include <broadcastradio-utils/Utils.h>
+#include <broadcastradio-utils-1x/Utils.h>
 #include <core_jni_helpers.h>
-#include <media/AudioSystem.h>
 #include <nativehelper/JNIHelp.h>
 #include <utils/Log.h>
 
@@ -44,6 +43,7 @@ using hardware::hidl_vec;
 
 namespace V1_0 = hardware::broadcastradio::V1_0;
 namespace V1_1 = hardware::broadcastradio::V1_1;
+namespace utils = hardware::broadcastradio::utils;
 
 using V1_0::Band;
 using V1_0::BandConfig;
@@ -51,6 +51,8 @@ using V1_0::MetaData;
 using V1_0::Result;
 using V1_1::ITunerCallback;
 using V1_1::ProgramListResult;
+using V1_1::VendorKeyValue;
+using utils::HalRevision;
 
 static mutex gContextMutex;
 
@@ -66,8 +68,6 @@ static struct {
         jfieldID tunerCallback;
     } Tuner;
 } gjni;
-
-static const char* const kAudioDeviceName = "Radio tuner source";
 
 class HalDeathRecipient : public hidl_death_recipient {
     wp<V1_1::ITunerCallback> mTunerCallback;
@@ -87,10 +87,11 @@ struct TunerContext {
     bool mIsAudioConnected = false;
     Band mBand;
     wp<V1_0::IBroadcastRadio> mHalModule;
-    wp<V1_1::IBroadcastRadio> mHalModule11;
     sp<V1_0::ITuner> mHalTuner;
     sp<V1_1::ITuner> mHalTuner11;
     sp<HalDeathRecipient> mHalDeathRecipient;
+
+    sp<V1_1::IBroadcastRadio> getHalModule11() const;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(TunerContext);
@@ -140,18 +141,14 @@ void HalDeathRecipient::serviceDied(uint64_t cookie __unused,
     tunerCallback->hardwareFailure();
 }
 
-// TODO(b/62713378): implement support for multiple tuners open at the same time
-static void notifyAudioService(TunerContext& ctx, bool connected) {
-    if (!ctx.mWithAudio) return;
-    if (ctx.mIsAudioConnected == connected) return;
-    ctx.mIsAudioConnected = connected;
+sp<V1_1::IBroadcastRadio> TunerContext::getHalModule11() const {
+    auto halModule = mHalModule.promote();
+    if (halModule == nullptr) {
+        ALOGE("HAL module is gone");
+        return nullptr;
+    }
 
-    ALOGD("Notifying AudioService about new state: %d", connected);
-    auto token = IPCThreadState::self()->clearCallingIdentity();
-    AudioSystem::setDeviceConnectionState(AUDIO_DEVICE_IN_FM_TUNER,
-            connected ? AUDIO_POLICY_DEVICE_STATE_AVAILABLE : AUDIO_POLICY_DEVICE_STATE_UNAVAILABLE,
-            nullptr, kAudioDeviceName);
-    IPCThreadState::self()->restoreCallingIdentity(token);
+    return V1_1::IBroadcastRadio::castFrom(halModule).withDefault(nullptr);
 }
 
 void assignHalInterfaces(JNIEnv *env, JavaRef<jobject> const &jTuner,
@@ -172,8 +169,6 @@ void assignHalInterfaces(JNIEnv *env, JavaRef<jobject> const &jTuner,
     }
 
     ctx.mHalModule = halModule;
-    ctx.mHalModule11 = V1_1::IBroadcastRadio::castFrom(halModule).withDefault(nullptr);
-
     ctx.mHalTuner = halTuner;
     ctx.mHalTuner11 = V1_1::ITuner::castFrom(halTuner).withDefault(nullptr);
     ALOGW_IF(ctx.mHalRev >= HalRevision::V1_1 && ctx.mHalTuner11 == nullptr,
@@ -181,8 +176,6 @@ void assignHalInterfaces(JNIEnv *env, JavaRef<jobject> const &jTuner,
 
     ctx.mHalDeathRecipient = new HalDeathRecipient(getNativeCallback(env, jTuner));
     halTuner->linkToDeath(ctx.mHalDeathRecipient, 0);
-
-    notifyAudioService(ctx, true);
 }
 
 static sp<V1_0::ITuner> getHalTuner(const TunerContext& ctx) {
@@ -191,12 +184,12 @@ static sp<V1_0::ITuner> getHalTuner(const TunerContext& ctx) {
     return tuner;
 }
 
-sp<V1_0::ITuner> getHalTuner(jlong nativeContext) {
+static sp<V1_0::ITuner> getHalTuner(jlong nativeContext) {
     lock_guard<mutex> lk(gContextMutex);
     return getHalTuner(getNativeContext(nativeContext));
 }
 
-sp<V1_1::ITuner> getHalTuner11(jlong nativeContext) {
+static sp<V1_1::ITuner> getHalTuner11(jlong nativeContext) {
     lock_guard<mutex> lk(gContextMutex);
     return getNativeContext(nativeContext).mHalTuner11;
 }
@@ -223,8 +216,6 @@ static void nativeClose(JNIEnv *env, jobject obj, jlong nativeContext) {
     }
 
     ALOGI("Closing tuner %p", ctx.mHalTuner.get());
-
-    notifyAudioService(ctx, false);
 
     ctx.mHalTuner->unlinkToDeath(ctx.mHalDeathRecipient);
     ctx.mHalDeathRecipient = nullptr;
@@ -268,14 +259,6 @@ static jobject nativeGetConfiguration(JNIEnv *env, jobject obj, jlong nativeCont
     return convert::BandConfigFromHal(env, halConfig, region).release();
 }
 
-static void nativeSetMuted(JNIEnv *env, jobject obj, jlong nativeContext, bool mute) {
-    ALOGV("%s(%d)", __func__, mute);
-    lock_guard<mutex> lk(gContextMutex);
-    auto& ctx = getNativeContext(nativeContext);
-
-    notifyAudioService(ctx, !mute);
-}
-
 static void nativeStep(JNIEnv *env, jobject obj, jlong nativeContext,
         bool directionDown, bool skipSubChannel) {
     ALOGV("%s", __func__);
@@ -310,7 +293,7 @@ static void nativeTune(JNIEnv *env, jobject obj, jlong nativeContext, jobject jS
         convert::ThrowIfFailed(env, halTuner11->tuneByProgramSelector(selector));
     } else {
         uint32_t channel, subChannel;
-        if (!V1_1::utils::getLegacyChannel(selector, &channel, &subChannel)) {
+        if (!utils::getLegacyChannel(selector, &channel, &subChannel)) {
             jniThrowException(env, "java/lang/IllegalArgumentException",
                     "Can't tune to non-AM/FM channel with HAL<1.1");
             return;
@@ -336,39 +319,6 @@ static void nativeCancelAnnouncement(JNIEnv *env, jobject obj, jlong nativeConte
     }
 
     convert::ThrowIfFailed(env, halTuner->cancelAnnouncement());
-}
-
-static jobject nativeGetProgramInformation(JNIEnv *env, jobject obj, jlong nativeContext) {
-    ALOGV("%s", __func__);
-    lock_guard<mutex> lk(gContextMutex);
-    auto& ctx = getNativeContext(nativeContext);
-
-    auto halTuner10 = getHalTuner(ctx);
-    auto halTuner11 = ctx.mHalTuner11;
-    if (halTuner10 == nullptr) return nullptr;
-
-    JavaRef<jobject> jInfo;
-    Result halResult;
-    Return<void> hidlResult;
-    if (halTuner11 != nullptr) {
-        hidlResult = halTuner11->getProgramInformation_1_1([&](Result result,
-                const V1_1::ProgramInfo& info) {
-            halResult = result;
-            if (result != Result::OK) return;
-            jInfo = convert::ProgramInfoFromHal(env, info);
-        });
-    } else {
-        hidlResult = halTuner10->getProgramInformation([&](Result result,
-                const V1_0::ProgramInfo& info) {
-            halResult = result;
-            if (result != Result::OK) return;
-            jInfo = convert::ProgramInfoFromHal(env, info, ctx.mBand);
-        });
-    }
-
-    if (jInfo != nullptr) return jInfo.release();
-    convert::ThrowIfFailed(env, hidlResult, halResult);
-    return nullptr;
 }
 
 static bool nativeStartBackgroundScan(JNIEnv *env, jobject obj, jlong nativeContext) {
@@ -418,15 +368,10 @@ static jbyteArray nativeGetImage(JNIEnv *env, jobject obj, jlong nativeContext, 
     lock_guard<mutex> lk(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
 
-    if (ctx.mHalModule11 == nullptr) {
+    auto halModule = ctx.getHalModule11();
+    if (halModule == nullptr) {
         jniThrowException(env, "java/lang/IllegalStateException",
                 "Out-of-band images are not supported with HAL < 1.1");
-        return nullptr;
-    }
-
-    auto halModule = ctx.mHalModule11.promote();
-    if (halModule == nullptr) {
-        ALOGE("HAL module is gone");
         return nullptr;
     }
 
@@ -448,7 +393,7 @@ static jbyteArray nativeGetImage(JNIEnv *env, jobject obj, jlong nativeContext, 
 
     if (convert::ThrowIfFailed(env, hidlResult)) return nullptr;
 
-    return jRawImage.get();
+    return jRawImage.release();
 }
 
 static bool nativeIsAnalogForced(JNIEnv *env, jobject obj, jlong nativeContext) {
@@ -485,21 +430,6 @@ static void nativeSetAnalogForced(JNIEnv *env, jobject obj, jlong nativeContext,
     convert::ThrowIfFailed(env, halResult);
 }
 
-static bool nativeIsAntennaConnected(JNIEnv *env, jobject obj, jlong nativeContext) {
-    ALOGV("%s", __func__);
-    auto halTuner = getHalTuner(nativeContext);
-    if (halTuner == nullptr) return false;
-
-    bool isConnected = false;
-    Result halResult;
-    auto hidlResult = halTuner->getConfiguration([&](Result result, const BandConfig& config) {
-        halResult = result;
-        isConnected = config.antennaConnected;
-    });
-    convert::ThrowIfFailed(env, hidlResult, halResult);
-    return isConnected;
-}
-
 static const JNINativeMethod gTunerMethods[] = {
     { "nativeInit", "(IZI)J", (void*)nativeInit },
     { "nativeFinalize", "(J)V", (void*)nativeFinalize },
@@ -508,21 +438,17 @@ static const JNINativeMethod gTunerMethods[] = {
             (void*)nativeSetConfiguration },
     { "nativeGetConfiguration", "(JI)Landroid/hardware/radio/RadioManager$BandConfig;",
             (void*)nativeGetConfiguration },
-    { "nativeSetMuted", "(JZ)V", (void*)nativeSetMuted },
     { "nativeStep", "(JZZ)V", (void*)nativeStep },
     { "nativeScan", "(JZZ)V", (void*)nativeScan },
     { "nativeTune", "(JLandroid/hardware/radio/ProgramSelector;)V", (void*)nativeTune },
     { "nativeCancel", "(J)V", (void*)nativeCancel },
     { "nativeCancelAnnouncement", "(J)V", (void*)nativeCancelAnnouncement },
-    { "nativeGetProgramInformation", "(J)Landroid/hardware/radio/RadioManager$ProgramInfo;",
-            (void*)nativeGetProgramInformation },
     { "nativeStartBackgroundScan", "(J)Z", (void*)nativeStartBackgroundScan },
     { "nativeGetProgramList", "(JLjava/util/Map;)Ljava/util/List;",
             (void*)nativeGetProgramList },
     { "nativeGetImage", "(JI)[B", (void*)nativeGetImage},
     { "nativeIsAnalogForced", "(J)Z", (void*)nativeIsAnalogForced },
     { "nativeSetAnalogForced", "(JZ)V", (void*)nativeSetAnalogForced },
-    { "nativeIsAntennaConnected", "(J)Z", (void*)nativeIsAntennaConnected },
 };
 
 } // namespace Tuner
@@ -534,18 +460,18 @@ void register_android_server_broadcastradio_Tuner(JavaVM *vm, JNIEnv *env) {
 
     register_android_server_broadcastradio_TunerCallback(vm, env);
 
-    auto tunerClass = FindClassOrDie(env, "com/android/server/broadcastradio/Tuner");
+    auto tunerClass = FindClassOrDie(env, "com/android/server/broadcastradio/hal1/Tuner");
     gjni.Tuner.nativeContext = GetFieldIDOrDie(env, tunerClass, "mNativeContext", "J");
     gjni.Tuner.region = GetFieldIDOrDie(env, tunerClass, "mRegion", "I");
     gjni.Tuner.tunerCallback = GetFieldIDOrDie(env, tunerClass, "mTunerCallback",
-            "Lcom/android/server/broadcastradio/TunerCallback;");
+            "Lcom/android/server/broadcastradio/hal1/TunerCallback;");
 
     auto arrayListClass = FindClassOrDie(env, "java/util/ArrayList");
     gjni.ArrayList.clazz = MakeGlobalRefOrDie(env, arrayListClass);
     gjni.ArrayList.cstor = GetMethodIDOrDie(env, arrayListClass, "<init>", "()V");
     gjni.ArrayList.add = GetMethodIDOrDie(env, arrayListClass, "add", "(Ljava/lang/Object;)Z");
 
-    auto res = jniRegisterNativeMethods(env, "com/android/server/broadcastradio/Tuner",
+    auto res = jniRegisterNativeMethods(env, "com/android/server/broadcastradio/hal1/Tuner",
             gTunerMethods, NELEM(gTunerMethods));
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
 }

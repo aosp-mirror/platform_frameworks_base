@@ -43,36 +43,50 @@ import java.util.UUID;
 public final class SmartSelectionEventTracker {
 
     private static final String LOG_TAG = "SmartSelectEventTracker";
-    private static final boolean DEBUG_LOG_ENABLED = false;
+    private static final boolean DEBUG_LOG_ENABLED = true;
 
     private static final int START_EVENT_DELTA = MetricsEvent.FIELD_SELECTION_SINCE_START;
     private static final int PREV_EVENT_DELTA = MetricsEvent.FIELD_SELECTION_SINCE_PREVIOUS;
     private static final int INDEX = MetricsEvent.FIELD_SELECTION_SESSION_INDEX;
-    private static final int VERSION_TAG = MetricsEvent.FIELD_SELECTION_VERSION_TAG;
-    private static final int SMART_INDICES = MetricsEvent.FIELD_SELECTION_SMART_RANGE;
-    private static final int EVENT_INDICES = MetricsEvent.FIELD_SELECTION_RANGE;
+    private static final int WIDGET_TYPE = MetricsEvent.FIELD_SELECTION_WIDGET_TYPE;
+    private static final int WIDGET_VERSION = MetricsEvent.FIELD_SELECTION_WIDGET_VERSION;
+    private static final int MODEL_NAME = MetricsEvent.FIELD_TEXTCLASSIFIER_MODEL;
+    private static final int ENTITY_TYPE = MetricsEvent.FIELD_SELECTION_ENTITY_TYPE;
+    private static final int SMART_START = MetricsEvent.FIELD_SELECTION_SMART_RANGE_START;
+    private static final int SMART_END = MetricsEvent.FIELD_SELECTION_SMART_RANGE_END;
+    private static final int EVENT_START = MetricsEvent.FIELD_SELECTION_RANGE_START;
+    private static final int EVENT_END = MetricsEvent.FIELD_SELECTION_RANGE_END;
     private static final int SESSION_ID = MetricsEvent.FIELD_SELECTION_SESSION_ID;
 
     private static final String ZERO = "0";
     private static final String TEXTVIEW = "textview";
     private static final String EDITTEXT = "edittext";
+    private static final String UNSELECTABLE_TEXTVIEW = "nosel-textview";
     private static final String WEBVIEW = "webview";
     private static final String EDIT_WEBVIEW = "edit-webview";
+    private static final String CUSTOM_TEXTVIEW = "customview";
+    private static final String CUSTOM_EDITTEXT = "customedit";
+    private static final String CUSTOM_UNSELECTABLE_TEXTVIEW = "nosel-customview";
     private static final String UNKNOWN = "unknown";
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({WidgetType.UNSPECIFIED, WidgetType.TEXTVIEW, WidgetType.WEBVIEW,
             WidgetType.EDITTEXT, WidgetType.EDIT_WEBVIEW})
     public @interface WidgetType {
-    int UNSPECIFIED = 0;
-    int TEXTVIEW = 1;
-    int WEBVIEW = 2;
-    int EDITTEXT = 3;
-    int EDIT_WEBVIEW = 4;
+        int UNSPECIFIED = 0;
+        int TEXTVIEW = 1;
+        int WEBVIEW = 2;
+        int EDITTEXT = 3;
+        int EDIT_WEBVIEW = 4;
+        int UNSELECTABLE_TEXTVIEW = 5;
+        int CUSTOM_TEXTVIEW = 6;
+        int CUSTOM_EDITTEXT = 7;
+        int CUSTOM_UNSELECTABLE_TEXTVIEW = 8;
     }
 
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
     private final int mWidgetType;
+    @Nullable private final String mWidgetVersion;
     private final Context mContext;
 
     @Nullable private String mSessionId;
@@ -83,10 +97,18 @@ public final class SmartSelectionEventTracker {
     private long mSessionStartTime;
     private long mLastEventTime;
     private boolean mSmartSelectionTriggered;
-    private String mVersionTag;
+    private String mModelName;
 
     public SmartSelectionEventTracker(@NonNull Context context, @WidgetType int widgetType) {
         mWidgetType = widgetType;
+        mWidgetVersion = null;
+        mContext = Preconditions.checkNotNull(context);
+    }
+
+    public SmartSelectionEventTracker(
+            @NonNull Context context, @WidgetType int widgetType, @Nullable String widgetVersion) {
+        mWidgetType = widgetType;
+        mWidgetVersion = widgetVersion;
         mContext = Preconditions.checkNotNull(context);
     }
 
@@ -115,7 +137,7 @@ public final class SmartSelectionEventTracker {
             case SelectionEvent.EventType.SMART_SELECTION_SINGLE:  // fall through
             case SelectionEvent.EventType.SMART_SELECTION_MULTI:
                 mSmartSelectionTriggered = true;
-                mVersionTag = getVersionTag(event);
+                mModelName = getModelName(event);
                 mSmartIndices[0] = event.mStart;
                 mSmartIndices[1] = event.mEnd;
                 break;
@@ -137,15 +159,19 @@ public final class SmartSelectionEventTracker {
         final long prevEventDelta = mLastEventTime == 0 ? 0 : now - mLastEventTime;
         final LogMaker log = new LogMaker(MetricsEvent.TEXT_SELECTION_SESSION)
                 .setType(getLogType(event))
-                .setSubtype(getLogSubType(event))
+                .setSubtype(MetricsEvent.TEXT_SELECTION_INVOCATION_MANUAL)
                 .setPackageName(mContext.getPackageName())
-                .setTimestamp(now)
                 .addTaggedData(START_EVENT_DELTA, now - mSessionStartTime)
                 .addTaggedData(PREV_EVENT_DELTA, prevEventDelta)
                 .addTaggedData(INDEX, mIndex)
-                .addTaggedData(VERSION_TAG, mVersionTag)
-                .addTaggedData(SMART_INDICES, getSmartDelta())
-                .addTaggedData(EVENT_INDICES, getEventDelta(event))
+                .addTaggedData(WIDGET_TYPE, getWidgetTypeName())
+                .addTaggedData(WIDGET_VERSION, mWidgetVersion)
+                .addTaggedData(MODEL_NAME, mModelName)
+                .addTaggedData(ENTITY_TYPE, event.mEntityType)
+                .addTaggedData(SMART_START, getSmartRangeDelta(mSmartIndices[0]))
+                .addTaggedData(SMART_END, getSmartRangeDelta(mSmartIndices[1]))
+                .addTaggedData(EVENT_START, getRangeDelta(event.mStart))
+                .addTaggedData(EVENT_END, getRangeDelta(event.mEnd))
                 .addTaggedData(SESSION_ID, mSessionId);
         mMetricsLogger.write(log);
         debugLog(log);
@@ -170,7 +196,7 @@ public final class SmartSelectionEventTracker {
         mSessionStartTime = 0;
         mLastEventTime = 0;
         mSmartSelectionTriggered = false;
-        mVersionTag = getVersionTag(null);
+        mModelName = getModelName(null);
         mSessionId = null;
     }
 
@@ -252,113 +278,75 @@ public final class SmartSelectionEventTracker {
         }
     }
 
-    private static int getLogSubType(SelectionEvent event) {
-        switch (event.mEntityType) {
-            case TextClassifier.TYPE_OTHER:
-                return MetricsEvent.TEXT_CLASSIFIER_TYPE_OTHER;
-            case TextClassifier.TYPE_EMAIL:
-                return MetricsEvent.TEXT_CLASSIFIER_TYPE_EMAIL;
-            case TextClassifier.TYPE_PHONE:
-                return MetricsEvent.TEXT_CLASSIFIER_TYPE_PHONE;
-            case TextClassifier.TYPE_ADDRESS:
-                return MetricsEvent.TEXT_CLASSIFIER_TYPE_ADDRESS;
-            case TextClassifier.TYPE_URL:
-                return MetricsEvent.TEXT_CLASSIFIER_TYPE_URL;
-            default:
-                return MetricsEvent.TEXT_CLASSIFIER_TYPE_UNKNOWN;
-        }
+    private int getRangeDelta(int offset) {
+        return offset - mOrigStart;
     }
 
-    private static String getLogSubTypeString(int logSubType) {
-        switch (logSubType) {
-            case MetricsEvent.TEXT_CLASSIFIER_TYPE_OTHER:
-                return TextClassifier.TYPE_OTHER;
-            case MetricsEvent.TEXT_CLASSIFIER_TYPE_EMAIL:
-                return TextClassifier.TYPE_EMAIL;
-            case MetricsEvent.TEXT_CLASSIFIER_TYPE_PHONE:
-                return TextClassifier.TYPE_PHONE;
-            case MetricsEvent.TEXT_CLASSIFIER_TYPE_ADDRESS:
-                return TextClassifier.TYPE_ADDRESS;
-            case MetricsEvent.TEXT_CLASSIFIER_TYPE_URL:
-                return TextClassifier.TYPE_URL;
-            default:
-                return TextClassifier.TYPE_UNKNOWN;
-        }
+    private int getSmartRangeDelta(int offset) {
+        return mSmartSelectionTriggered ? getRangeDelta(offset) : 0;
     }
 
-    private int getSmartDelta() {
-        if (mSmartSelectionTriggered) {
-            return (clamp(mSmartIndices[0] - mOrigStart) << 16)
-                    | (clamp(mSmartIndices[1] - mOrigStart) & 0xffff);
-        }
-        // If the smart selection model was not run, return invalid selection indices [0,0]. This
-        // allows us to tell from the terminal event alone whether the model was run.
-        return 0;
-    }
-
-    private int getEventDelta(SelectionEvent event) {
-        return (clamp(event.mStart - mOrigStart) << 16)
-                | (clamp(event.mEnd - mOrigStart) & 0xffff);
-    }
-
-    private String getVersionTag(@Nullable SelectionEvent event) {
-        final String widgetType;
+    private String getWidgetTypeName() {
         switch (mWidgetType) {
             case WidgetType.TEXTVIEW:
-                widgetType = TEXTVIEW;
-                break;
+                return TEXTVIEW;
             case WidgetType.WEBVIEW:
-                widgetType = WEBVIEW;
-                break;
+                return WEBVIEW;
             case WidgetType.EDITTEXT:
-                widgetType = EDITTEXT;
-                break;
+                return EDITTEXT;
             case WidgetType.EDIT_WEBVIEW:
-                widgetType = EDIT_WEBVIEW;
-                break;
+                return EDIT_WEBVIEW;
+            case WidgetType.UNSELECTABLE_TEXTVIEW:
+                return UNSELECTABLE_TEXTVIEW;
+            case WidgetType.CUSTOM_TEXTVIEW:
+                return CUSTOM_TEXTVIEW;
+            case WidgetType.CUSTOM_EDITTEXT:
+                return CUSTOM_EDITTEXT;
+            case WidgetType.CUSTOM_UNSELECTABLE_TEXTVIEW:
+                return CUSTOM_UNSELECTABLE_TEXTVIEW;
             default:
-                widgetType = UNKNOWN;
+                return UNKNOWN;
         }
-        final String version = event == null
+    }
+
+    private String getModelName(@Nullable SelectionEvent event) {
+        return event == null
                 ? SelectionEvent.NO_VERSION_TAG
                 : Objects.toString(event.mVersionTag, SelectionEvent.NO_VERSION_TAG);
-        return String.format("%s/%s", widgetType, version);
     }
 
     private static String createSessionId() {
         return UUID.randomUUID().toString();
     }
 
-    private static int clamp(int val) {
-        return Math.max(Math.min(val, Short.MAX_VALUE), Short.MIN_VALUE);
-    }
-
     private static void debugLog(LogMaker log) {
         if (!DEBUG_LOG_ENABLED) return;
 
-        final String tag = Objects.toString(log.getTaggedData(VERSION_TAG), "tag");
+        final String widgetType = Objects.toString(log.getTaggedData(WIDGET_TYPE), UNKNOWN);
+        final String widgetVersion = Objects.toString(log.getTaggedData(WIDGET_VERSION), "");
+        final String widget = widgetVersion.isEmpty()
+                ? widgetType : widgetType + "-" + widgetVersion;
         final int index = Integer.parseInt(Objects.toString(log.getTaggedData(INDEX), ZERO));
         if (log.getType() == MetricsEvent.ACTION_TEXT_SELECTION_START) {
             String sessionId = Objects.toString(log.getTaggedData(SESSION_ID), "");
             sessionId = sessionId.substring(sessionId.lastIndexOf("-") + 1);
-            Log.d(LOG_TAG, String.format("New selection session: %s(%s)", tag, sessionId));
+            Log.d(LOG_TAG, String.format("New selection session: %s (%s)", widget, sessionId));
         }
 
+        final String model = Objects.toString(log.getTaggedData(MODEL_NAME), UNKNOWN);
+        final String entity = Objects.toString(log.getTaggedData(ENTITY_TYPE), UNKNOWN);
         final String type = getLogTypeString(log.getType());
-        final String subType = getLogSubTypeString(log.getSubtype());
+        final int smartStart = Integer.parseInt(
+                Objects.toString(log.getTaggedData(SMART_START), ZERO));
+        final int smartEnd = Integer.parseInt(
+                Objects.toString(log.getTaggedData(SMART_END), ZERO));
+        final int eventStart = Integer.parseInt(
+                Objects.toString(log.getTaggedData(EVENT_START), ZERO));
+        final int eventEnd = Integer.parseInt(
+                Objects.toString(log.getTaggedData(EVENT_END), ZERO));
 
-        final int smartIndices = Integer.parseInt(
-                Objects.toString(log.getTaggedData(SMART_INDICES), ZERO));
-        final int smartStart = (short) ((smartIndices & 0xffff0000) >> 16);
-        final int smartEnd = (short) (smartIndices & 0xffff);
-
-        final int eventIndices = Integer.parseInt(
-                Objects.toString(log.getTaggedData(EVENT_INDICES), ZERO));
-        final int eventStart = (short) ((eventIndices & 0xffff0000) >> 16);
-        final int eventEnd = (short) (eventIndices & 0xffff);
-
-        Log.d(LOG_TAG, String.format("%2d: %s/%s, context=%d,%d - old=%d,%d (%s)",
-                index, type, subType, eventStart, eventEnd, smartStart, smartEnd, tag));
+        Log.d(LOG_TAG, String.format("%2d: %s/%s, range=%d,%d - smart_range=%d,%d (%s/%s)",
+                index, type, entity, eventStart, eventEnd, smartStart, smartEnd, widget, model));
     }
 
     /**
@@ -370,12 +358,12 @@ public final class SmartSelectionEventTracker {
         /**
          * Use this to specify an indeterminate positive index.
          */
-        public static final int OUT_OF_BOUNDS = Short.MAX_VALUE;
+        public static final int OUT_OF_BOUNDS = Integer.MAX_VALUE;
 
         /**
          * Use this to specify an indeterminate negative index.
          */
-        public static final int OUT_OF_BOUNDS_NEGATIVE = Short.MIN_VALUE;
+        public static final int OUT_OF_BOUNDS_NEGATIVE = Integer.MIN_VALUE;
 
         private static final String NO_VERSION_TAG = "";
 
@@ -485,7 +473,7 @@ public final class SmartSelectionEventTracker {
             final String entityType = classification.getEntityCount() > 0
                     ? classification.getEntity(0)
                     : TextClassifier.TYPE_UNKNOWN;
-            final String versionTag = classification.getVersionInfo();
+            final String versionTag = getVersionInfo(classification.getId());
             return new SelectionEvent(
                     start, end, EventType.SELECTION_MODIFIED, entityType, versionTag);
         }
@@ -501,7 +489,7 @@ public final class SmartSelectionEventTracker {
          */
         public static SelectionEvent selectionModified(
                 int start, int end, @NonNull TextSelection selection) {
-            final boolean smartSelection = selection.getSourceClassifier()
+            final boolean smartSelection = getSourceClassifier(selection.getId())
                     .equals(TextClassifier.DEFAULT_LOG_TAG);
             final int eventType;
             if (smartSelection) {
@@ -515,7 +503,7 @@ public final class SmartSelectionEventTracker {
             final String entityType = selection.getEntityCount() > 0
                     ? selection.getEntity(0)
                     : TextClassifier.TYPE_UNKNOWN;
-            final String versionTag = selection.getVersionInfo();
+            final String versionTag = getVersionInfo(selection.getId());
             return new SelectionEvent(start, end, eventType, entityType, versionTag);
         }
 
@@ -550,26 +538,25 @@ public final class SmartSelectionEventTracker {
             final String entityType = classification.getEntityCount() > 0
                     ? classification.getEntity(0)
                     : TextClassifier.TYPE_UNKNOWN;
-            final String versionTag = classification.getVersionInfo();
+            final String versionTag = getVersionInfo(classification.getId());
             return new SelectionEvent(start, end, actionType, entityType, versionTag);
         }
 
-        private boolean isActionType() {
-            switch (mEventType) {
-                case ActionType.OVERTYPE:  // fall through
-                case ActionType.COPY:  // fall through
-                case ActionType.PASTE:  // fall through
-                case ActionType.CUT:  // fall through
-                case ActionType.SHARE:  // fall through
-                case ActionType.SMART_SHARE:  // fall through
-                case ActionType.DRAG:  // fall through
-                case ActionType.ABANDON:  // fall through
-                case ActionType.SELECT_ALL:  // fall through
-                case ActionType.RESET:  // fall through
-                    return true;
-                default:
-                    return false;
+        private static String getVersionInfo(String signature) {
+            final int start = signature.indexOf("|");
+            final int end = signature.indexOf("|", start);
+            if (start >= 0 && end >= start) {
+                return signature.substring(start, end);
             }
+            return "";
+        }
+
+        private static String getSourceClassifier(String signature) {
+            final int end = signature.indexOf("|");
+            if (end >= 0) {
+                return signature.substring(0, end);
+            }
+            return "";
         }
 
         private boolean isTerminal() {

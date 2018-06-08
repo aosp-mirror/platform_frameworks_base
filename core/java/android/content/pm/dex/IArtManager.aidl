@@ -44,8 +44,8 @@ interface IArtManager {
      * {@link ArtManager#isRuntimeProfilingEnabled(int)} does not return true for the given
      * {@code profileType}.
      */
-    oneway void snapshotRuntimeProfile(int profileType, in String packageName,
-        in String codePath, in ISnapshotRuntimeProfileCallback callback);
+    void snapshotRuntimeProfile(int profileType, in String packageName,
+        in String codePath, in ISnapshotRuntimeProfileCallback callback, String callingPackage);
 
      /**
        * Returns true if runtime profiles are enabled for the given type, false otherwise.
@@ -54,5 +54,5 @@ interface IArtManager {
        *
        * @param profileType
        */
-    boolean isRuntimeProfilingEnabled(int profileType);
+    boolean isRuntimeProfilingEnabled(int profileType, String callingPackage);
 }

@@ -33,25 +33,24 @@ public:
     renderthread::MakeCurrentResult makeCurrent() override;
     renderthread::Frame getFrame() override;
     bool draw(const renderthread::Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
-            const FrameBuilder::LightGeometry& lightGeometry,
-            LayerUpdateQueue* layerUpdateQueue,
-            const Rect& contentDrawBounds, bool opaque, bool wideColorGamut,
-            const BakedOpRenderer::LightInfo& lightInfo,
-            const std::vector< sp<RenderNode> >& renderNodes,
-            FrameInfoVisualizer* profiler) override;
+              const FrameBuilder::LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
+              const Rect& contentDrawBounds, bool opaque, bool wideColorGamut,
+              const BakedOpRenderer::LightInfo& lightInfo,
+              const std::vector<sp<RenderNode> >& renderNodes,
+              FrameInfoVisualizer* profiler) override;
     bool swapBuffers(const renderthread::Frame& frame, bool drew, const SkRect& screenDirty,
-            FrameInfo* currentFrameInfo, bool* requireSwap) override;
+                     FrameInfo* currentFrameInfo, bool* requireSwap) override;
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) override;
     DeferredLayerUpdater* createTextureLayer() override;
     bool setSurface(Surface* window, renderthread::SwapBehavior swapBehavior,
-            renderthread::ColorMode colorMode) override;
+                    renderthread::ColorMode colorMode) override;
     void onStop() override;
     bool isSurfaceReady() override;
     bool isContextReady() override;
 
     static void invokeFunctor(const renderthread::RenderThread& thread, Functor* functor);
     static sk_sp<Bitmap> allocateHardwareBitmap(renderthread::RenderThread& thread,
-            SkBitmap& skBitmap);
+                                                SkBitmap& skBitmap);
 
 private:
     renderthread::EglManager& mEglManager;

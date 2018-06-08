@@ -16,10 +16,7 @@
 -->
 
 <!--    android:background="@drawable/status_bar_closed_default_background" -->
-<merge
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
-    >
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
     <CheckBox
         android:id="@+id/toggle"
         android:layout_width="48dp"
@@ -44,6 +41,7 @@
         android:paddingTop="16dp"
         android:paddingBottom="16dp"
         android:thumb="@drawable/ic_brightness_thumb"
+        android:progressDrawable="@drawable/brightness_progress_drawable"
         android:splitTrack="false"
         />
     <TextView

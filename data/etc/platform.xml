@@ -62,7 +62,6 @@
 
     <permission name="android.permission.WRITE_MEDIA_STORAGE" >
         <group gid="media_rw" />
-        <group gid="sdcard_rw" />
     </permission>
 
     <permission name="android.permission.ACCESS_MTP" >
@@ -112,6 +111,10 @@
         <group gid="media" />
     </permission>
 
+    <permission name="android.permission.USE_RESERVED_DISK">
+        <group gid="reserved_disk" />
+    </permission>
+
     <!-- These are permissions that were mapped to gids but we need
          to keep them here until an upgrade from L to the current
          version is to be supported. These permissions are built-in
@@ -150,6 +153,7 @@
     <assign-permission name="android.permission.WAKE_LOCK" uid="audioserver" />
     <assign-permission name="android.permission.UPDATE_DEVICE_STATS" uid="audioserver" />
     <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="audioserver" />
+    <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="audioserver" />
 
     <assign-permission name="android.permission.MODIFY_AUDIO_SETTINGS" uid="cameraserver" />
     <assign-permission name="android.permission.ACCESS_SURFACE_FLINGER" uid="cameraserver" />
@@ -157,12 +161,28 @@
     <assign-permission name="android.permission.UPDATE_DEVICE_STATS" uid="cameraserver" />
     <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="cameraserver" />
     <assign-permission name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" uid="cameraserver" />
+    <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="cameraserver" />
+    <assign-permission name="android.permission.WATCH_APPOPS" uid="cameraserver" />
 
     <assign-permission name="android.permission.ACCESS_SURFACE_FLINGER" uid="graphics" />
+
+    <assign-permission name="android.permission.DUMP" uid="incidentd" />
+    <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="incidentd" />
+    <assign-permission name="android.permission.INTERACT_ACROSS_USERS" uid="incidentd" />
+
+    <assign-permission name="android.permission.ACCESS_LOWPAN_STATE" uid="lowpan" />
+    <assign-permission name="android.permission.MANAGE_LOWPAN_INTERFACES" uid="lowpan" />
+
+    <assign-permission name="android.permission.DUMP" uid="statsd" />
+    <assign-permission name="android.permission.PACKAGE_USAGE_STATS" uid="statsd" />
+    <assign-permission name="android.permission.STATSCOMPANION" uid="statsd" />
+    <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="statsd" />
 
     <!-- This is a list of all the libraries available for application
          code to link against. -->
 
+    <library name="android.test.base"
+            file="/system/framework/android.test.base.jar" />
     <library name="android.test.mock"
             file="/system/framework/android.test.mock.jar" />
     <library name="android.test.runner"
@@ -179,6 +199,10 @@
     <!-- This is a core platform component that needs to freely run in the background -->
     <allow-in-power-save package="com.android.cellbroadcastreceiver" />
     <allow-in-power-save package="com.android.shell" />
+
+    <!-- Whitelist system providers -->
+    <allow-in-power-save-except-idle package="com.android.providers.calendar" />
+    <allow-in-power-save-except-idle package="com.android.providers.contacts" />
 
     <!-- These are the packages that are white-listed to be able to run as system user -->
     <system-user-whitelisted-app package="com.android.settings" />

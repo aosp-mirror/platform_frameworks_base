@@ -30,9 +30,7 @@ namespace uirenderer {
 
 class unordered_string_set : public std::unordered_set<std::string> {
 public:
-    bool has(const char* str) {
-        return find(std::string(str)) != end();
-    }
+    bool has(const char* str) { return find(std::string(str)) != end(); }
 };
 
 class StringUtils {
@@ -55,8 +53,8 @@ struct SizePrinter {
     }
 };
 
-class LogcatStream: public std::ostream {
-    class LogcatStreamBuf: public std::stringbuf {
+class LogcatStream : public std::ostream {
+    class LogcatStreamBuf : public std::stringbuf {
         virtual int sync() {
             ALOGD("%s", str().c_str());
             str("");
@@ -65,10 +63,9 @@ class LogcatStream: public std::ostream {
     };
 
     LogcatStreamBuf buffer;
+
 public:
-    LogcatStream()
-            :std::ostream(&buffer) {
-    }
+    LogcatStream() : std::ostream(&buffer) {}
 };
 
 } /* namespace uirenderer */

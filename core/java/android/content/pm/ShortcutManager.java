@@ -36,15 +36,26 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.List;
 
 /**
- * The ShortcutManager manages an app's <em>shortcuts</em>. Shortcuts provide users with quick
- * access to activities other than an app's main activity in the currently-active launcher, provided
- * that the launcher supports app shortcuts.  For example, an email app may publish the "compose new
- * email" action, which will directly open the compose activity.  The {@link ShortcutInfo} class
- * contains information about each of the shortcuts themselves.
+ * The ShortcutManager performs operations on an app's set of <em>shortcuts</em>. The
+ * {@link ShortcutInfo} class contains information about each of the shortcuts themselves.
+ *
+ * <p>An app's shortcuts represent specific tasks and actions that users can perform within your
+ * app. When a user selects a shortcut in the currently-active launcher, your app opens an activity
+ * other than the app's starting activity, provided that the currently-active launcher supports app
+ * shortcuts.</p>
+ *
+ * <p>The types of shortcuts that you create for your app depend on the app's key use cases. For
+ * example, an email app may publish the "compose new email" shortcut, which allows the app to
+ * directly open the compose activity.</p>
+ *
+ * <p class="note"><b>Note:</b> Only main activities&mdash;activities that handle the
+ * {@link Intent#ACTION_MAIN} action and the {@link Intent#CATEGORY_LAUNCHER} category&mdash;can
+ * have shortcuts. If an app has multiple main activities, you need to define the set of shortcuts
+ * for <em>each</em> activity.
  *
  * <p>This page discusses the implementation details of the <code>ShortcutManager</code> class. For
- * guidance on performing operations on app shortcuts within your app, see the
- * <a href="/guide/topics/ui/shortcuts.html">App Shortcuts</a> feature guide.
+ * definitions of key terms and guidance on performing operations on shortcuts within your app, see
+ * the <a href="/guide/topics/ui/shortcuts.html">App Shortcuts</a> feature guide.
  *
  * <h3>Shortcut characteristics</h3>
  *
@@ -69,8 +80,8 @@ import java.util.List;
  * <ul>
  *     <li>The user removes it.
  *     <li>The publisher app associated with the shortcut is uninstalled.
- *     <li>The user performs the clear data action on the publisher app from the device's
- *     <b>Settings</b> app.
+ *     <li>The user selects <b>Clear data</b> from the publisher app's <i>Storage</i> screen, within
+ *     the system's <b>Settings</b> app.
  * </ul>
  *
  * <p>Because the system performs
@@ -83,12 +94,17 @@ import java.util.List;
  *
  * <p>When the launcher displays an app's shortcuts, they should appear in the following order:
  *
- * <ul>
- *   <li>Static shortcuts (if {@link ShortcutInfo#isDeclaredInManifest()} is {@code true}),
- *   and then show dynamic shortcuts (if {@link ShortcutInfo#isDynamic()} is {@code true}).
- *   <li>Within each shortcut type (static and dynamic), sort the shortcuts in order of increasing
- *   rank according to {@link ShortcutInfo#getRank()}.
- * </ul>
+ * <ol>
+ *   <li><b>Static shortcuts:</b> Shortcuts whose {@link ShortcutInfo#isDeclaredInManifest()} method
+ *   returns {@code true}.</li>
+ *   <li><b>Dynamic shortcuts:</b> Shortcuts whose {@link ShortcutInfo#isDynamic()} method returns
+ *   {@code true}.</li>
+ * </ol>
+ *
+ * <p>Within each shortcut type (static and dynamic), shortcuts are sorted in order of increasing
+ * rank according to {@link ShortcutInfo#getRank()}.</p>
+ *
+ * <h4>Shortcut ranks</h4>
  *
  * <p>Shortcut ranks are non-negative, sequential integers that determine the order in which
  * shortcuts appear, assuming that the shortcuts are all in the same category. You can update ranks
@@ -103,63 +119,98 @@ import java.util.List;
  *
  * <h3>Options for static shortcuts</h3>
  *
- * The following list includes descriptions for the different attributes within a static shortcut:
+ * The following list includes descriptions for the different attributes within a static shortcut.
+ * You must provide a value for {@code android:shortcutId} and {@code android:shortcutShortLabel};
+ * all other values are optional.
+ *
  * <dl>
  *   <dt>{@code android:shortcutId}</dt>
- *   <dd>Mandatory shortcut ID.
- *   <p>
- *   This must be a string literal.
- *   A resource string, such as <code>@string/foo</code>, cannot be used.
+ *   <dd><p>A string literal, which represents the shortcut when a {@code ShortcutManager} object
+ *   performs operations on it.</p>
+ *   <p class="note"><b>Note: </b>You cannot set this attribute's value to a resource string, such
+ *   as <code>@string/foo</code>.</p>
  *   </dd>
  *
  *   <dt>{@code android:enabled}</dt>
- *   <dd>Default is {@code true}.  Can be set to {@code false} in order
- *   to disable a static shortcut that was published in a previous version and set a custom
- *   disabled message.  If a custom disabled message is not needed, then a static shortcut can
- *   be simply removed from the XML file rather than keeping it with {@code enabled="false"}.</dd>
+ *   <dd><p>Whether the user can interact with the shortcut from a supported launcher.</p>
+ *   <p>The default value is {@code true}. If you set it to {@code false}, you should also set
+ *   {@code android:shortcutDisabledMessage} to a message that explains why you've disabled the
+ *   shortcut. If you don't think you need to provide such a message, it's easiest to just remove
+ *   the shortcut from the XML file entirely, rather than changing the values of the shortcut's
+ *   {@code android:enabled} and {@code android:shortcutDisabledMessage} attributes.
+ *   </dd>
  *
  *   <dt>{@code android:icon}</dt>
- *   <dd>Shortcut icon.</dd>
+ *   <dd><p>The <a href="/topic/performance/graphics/index.html">bitmap</a> or
+ *   <a href="/guide/practices/ui_guidelines/icon_design_adaptive.html">adaptive icon</a> that the
+ *   launcher uses when displaying the shortcut to the user. This value can be either the path to an
+ *   image or the resource file that contains the image. Use adaptive icons whenever possible to
+ *   improve performance and consistency.</p>
+ *   <p class="note"><b>Note: </b>Shortcut icons cannot include
+ *   <a href="/training/material/drawables.html#DrawableTint">tints</a>.
+ *   </dd>
  *
  *   <dt>{@code android:shortcutShortLabel}</dt>
- *   <dd>Mandatory shortcut short label.
- *   See {@link ShortcutInfo.Builder#setShortLabel(CharSequence)}.
- *   <p>
- *   This must be a resource string, such as <code>@string/shortcut_label</code>.
+ *   <dd><p>A concise phrase that describes the shortcut's purpose. For more information, see
+ *   {@link ShortcutInfo.Builder#setShortLabel(CharSequence)}.</p>
+ *   <p class="note"><b>Note: </b>This attribute's value must be a resource string, such as
+ *   <code>@string/shortcut_short_label</code>.</p>
  *   </dd>
  *
  *   <dt>{@code android:shortcutLongLabel}</dt>
- *   <dd>Shortcut long label.
- *   See {@link ShortcutInfo.Builder#setLongLabel(CharSequence)}.
- *   <p>
- *   This must be a resource string, such as <code>@string/shortcut_long_label</code>.
+ *   <dd><p>An extended phrase that describes the shortcut's purpose. If there's enough space, the
+ *   launcher displays this value instead of {@code android:shortcutShortLabel}. For more
+ *   information, see {@link ShortcutInfo.Builder#setLongLabel(CharSequence)}.</p>
+ *   <p class="note"><b>Note: </b>This attribute's value must be a resource string, such as
+ *   <code>@string/shortcut_long_label</code>.</p>
  *   </dd>
  *
  *   <dt>{@code android:shortcutDisabledMessage}</dt>
- *   <dd>When {@code android:enabled} is set to
- *   {@code false}, this attribute is used to display a custom disabled message.
- *   <p>
- *   This must be a resource string, such as <code>@string/shortcut_disabled_message</code>.
+ *   <dd><p>The message that appears in a supported launcher when the user attempts to launch a
+ *   disabled shortcut. The message should explain to the user why the shortcut is now disabled.
+ *   This attribute's value has no effect if {@code android:enabled} is {@code true}.</p>
+ *   <p class="note"><b>Note: </b>This attribute's value must be a resource string, such as
+ *   <code>@string/shortcut_disabled_message</code>.</p>
+ *   </dd>
+ * </dl>
+ *
+ * <h3>Inner elements that define static shortcuts</h3>
+ *
+ * <p>The XML file that lists an app's static shortcuts supports the following elements inside each
+ * {@code <shortcut>} element. You must include an {@code intent} inner element for each
+ * static shortcut that you define.</p>
+ *
+ * <dl>
+ *   <dt>{@code intent}</dt>
+ *   <dd><p>The action that the system launches when the user selects the shortcut. This intent must
+ *   provide a value for the {@code android:action} attribute.</p>
+ *   <p>You can provide multiple intents for a single shortcut. If you do so, the last defined
+ *   activity is launched, and the other activities are placed in the
+ *   <a href="/guide/components/tasks-and-back-stack.html">back stack</a>. See
+ *   <a href="/guide/topics/ui/shortcuts.html#static">Using Static Shortcuts</a> and the
+ *   {@link android.app.TaskStackBuilder} class reference for details.</p>
+ *   <p class="note"><b>Note:</b> This {@code intent} element cannot include string resources.</p>
+ *   <p>To learn more about how to configure intents, see
+ *   <a href="{@docRoot}guide/topics/ui/settings.html#Intents">Using intents</a>.</p>
  *   </dd>
  *
- *   <dt>{@code intent}</dt>
- *   <dd>Intent to launch when the user selects the shortcut.
- *   {@code android:action} is mandatory.
- *   See <a href="{@docRoot}guide/topics/ui/settings.html#Intents">Using intents</a> for the
- *   other supported tags.
- *   <p>You can provide multiple intents for a single shortcut so that the last defined activity is
- *   launched with the other activities in the
- *   <a href="/guide/components/tasks-and-back-stack.html">back stack</a>. See
- *   {@link android.app.TaskStackBuilder} for details.
- *   <p><b>Note:</b> String resources may not be used within an {@code <intent>} element.
- *   </dd>
  *   <dt>{@code categories}</dt>
- *   <dd>Specify shortcut categories.  Currently only
- *   {@link ShortcutInfo#SHORTCUT_CATEGORY_CONVERSATION} is defined in the framework.
+ *   <dd><p>Provides a grouping for the types of actions that your app's shortcuts perform, such as
+ *   creating new chat messages.</p>
+ *   <p>For a list of supported shortcut categories, see the {@link ShortcutInfo} class reference
+ *   for a list of supported shortcut categories.
  *   </dd>
  * </dl>
  *
  * <h3>Updating shortcuts</h3>
+ *
+ * <p>Each app's launcher icon can contain at most {@link #getMaxShortcutCountPerActivity()} number
+ * of static and dynamic shortcuts combined. There is no limit to the number of pinned shortcuts
+ * that an app can create, though.
+ *
+ * <p>When a dynamic shortcut is pinned, even when the publisher removes it as a dynamic shortcut,
+ * the pinned shortcut is still visible and launchable.  This allows an app to have more than
+ * {@link #getMaxShortcutCountPerActivity()} number of shortcuts.
  *
  * <p>As an example, suppose {@link #getMaxShortcutCountPerActivity()} is 5:
  * <ol>
@@ -168,18 +219,13 @@ import java.util.List;
  *
  *     <li>The user pins all 5 of the shortcuts.
  *
- *     <li>Later, the user has started 3 additional conversations (c6, c7, and c8),
- *     so the publisher app
- *     re-publishes its dynamic shortcuts.  The new dynamic shortcut list is:
- *     c4, c5, ..., c8.
- *     The publisher app has to remove c1, c2, and c3 because it can't have more than
- *     5 dynamic shortcuts.
- *
- *     <li>However, even though c1, c2, and c3 are no longer dynamic shortcuts, the pinned
- *     shortcuts for these conversations are still available and launchable.
- *
- *     <li>At this point, the user can access a total of 8 shortcuts that link to activities in
- *     the publisher app, including the 3 pinned shortcuts, even though an app can have at most 5
+ *     <li>Later, the user has started 3 additional conversations (c6, c7, and c8), so the publisher
+ *     app re-publishes its dynamic shortcuts. The new dynamic shortcut list is: c4, c5, ..., c8.
+ *     <p>The publisher app has to remove c1, c2, and c3 because it can't have more than 5 dynamic
+ *     shortcuts. However, c1, c2, and c3 are still pinned shortcuts that the user can access and
+ *     launch.
+ *     <p>At this point, the user can access a total of 8 shortcuts that link to activities in the
+ *     publisher app, including the 3 pinned shortcuts, even though an app can have at most 5
  *     dynamic shortcuts.
  *
  *     <li>The app can use {@link #updateShortcuts(List)} to update <em>any</em> of the existing
@@ -196,44 +242,23 @@ import java.util.List;
  * Dynamic shortcuts can be published with any set of {@link Intent#addFlags Intent} flags.
  * Typically, {@link Intent#FLAG_ACTIVITY_CLEAR_TASK} is specified, possibly along with other
  * flags; otherwise, if the app is already running, the app is simply brought to
- * the foreground, and the target activity may not appear.
+ * the foreground, and the target activity might not appear.
  *
  * <p>Static shortcuts <b>cannot</b> have custom intent flags.
  * The first intent of a static shortcut will always have {@link Intent#FLAG_ACTIVITY_NEW_TASK}
  * and {@link Intent#FLAG_ACTIVITY_CLEAR_TASK} set. This means, when the app is already running, all
- * the existing activities in your app will be destroyed when a static shortcut is launched.
+ * the existing activities in your app are destroyed when a static shortcut is launched.
  * If this behavior is not desirable, you can use a <em>trampoline activity</em>, or an invisible
  * activity that starts another activity in {@link Activity#onCreate}, then calls
  * {@link Activity#finish()}:
  * <ol>
  *     <li>In the <code>AndroidManifest.xml</code> file, the trampoline activity should include the
  *     attribute assignment {@code android:taskAffinity=""}.
- *     <li>In the shortcuts resource file, the intent within the static shortcut should point at
+ *     <li>In the shortcuts resource file, the intent within the static shortcut should reference
  *     the trampoline activity.
  * </ol>
  *
- * <h3>Handling system locale changes</h3>
- *
- * <p>Apps should update dynamic and pinned shortcuts when the system locale changes using the
- * {@link Intent#ACTION_LOCALE_CHANGED} broadcast. When the system locale changes,
- * <a href="/guide/topics/ui/shortcuts.html#rate-limit">rate limiting</a> is reset, so even
- * background apps can add and update dynamic shortcuts until the rate limit is reached again.
- *
- * <h3>Shortcut limits</h3>
- *
- * <p>Only main activities&mdash;activities that handle the {@code MAIN} action and the
- * {@code LAUNCHER} category&mdash;can have shortcuts. If an app has multiple main activities, you
- * need to define the set of shortcuts for <em>each</em> activity.
- *
- * <p>Each launcher icon can have at most {@link #getMaxShortcutCountPerActivity()} number of
- * static and dynamic shortcuts combined. There is no limit to the number of pinned shortcuts that
- * an app can create.
- *
- * <p>When a dynamic shortcut is pinned, even when the publisher removes it as a dynamic shortcut,
- * the pinned shortcut is still visible and launchable.  This allows an app to have more than
- * {@link #getMaxShortcutCountPerActivity()} number of shortcuts.
- *
- * <h4>Rate limiting</h4>
+ * <h3>Rate limiting</h3>
  *
  * <p>When <a href="/guide/topics/ui/shortcuts.html#rate-limit">rate limiting</a> is active,
  * {@link #isRateLimitingActive()} returns {@code true}.
@@ -243,8 +268,20 @@ import java.util.List;
  * <ul>
  *   <li>An app comes to the foreground.
  *   <li>The system locale changes.
- *   <li>The user performs the <strong>inline reply</strong> action on a notification.
+ *   <li>The user performs the <a href="/guide/topics/ui/notifiers/notifications.html#direct">inline
+ *   reply</a> action on a notification.
  * </ul>
+ *
+ * <h3>Handling system locale changes</h3>
+ *
+ * <p>Apps should update dynamic and pinned shortcuts when they receive the
+ * {@link Intent#ACTION_LOCALE_CHANGED} broadcast, indicating that the system locale has changed.
+ * <p>When the system locale changes, <a href="/guide/topics/ui/shortcuts.html#rate-limit">rate
+ * limiting</a> is reset, so even background apps can add and update dynamic shortcuts until the
+ * rate limit is reached again.
+ *
+ * <h3>Retrieving class instances</h3>
+ * <!-- Provides a heading for the content filled in by the @SystemService annotation below -->
  */
 @SystemService(Context.SHORTCUT_SERVICE)
 public class ShortcutManager {
@@ -733,6 +770,6 @@ public class ShortcutManager {
     /** @hide injection point */
     @VisibleForTesting
     protected int injectMyUserId() {
-        return UserHandle.myUserId();
+        return mContext.getUserId();
     }
 }

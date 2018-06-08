@@ -15,31 +15,30 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:padding="4dp"
+    android:orientation="vertical" android:padding="24dp"
     android:gravity="center_horizontal"
     android:layout_width="wrap_content" android:layout_height="wrap_content">
 
     <TextView
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_weight="0"
-        android:paddingBottom="8dp"
+        android:paddingBottom="20dp"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/heavy_weight_switcher_title"/>
+
+    <TextView
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:paddingBottom="16dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="@string/heavy_weight_switcher_text"/>
 
-    <ImageView android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scaleType="fitXY"
-        android:src="?android:listDivider" />
-            
     <LinearLayout android:id="@+id/switch_old"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="?android:attr/listPreferredItemHeight"
+        android:minHeight="72dp"
         android:orientation="horizontal"
         android:background="@android:drawable/list_selector_background"
-        android:paddingEnd="3dip"
-        android:paddingStart="3dip"
-        android:paddingTop="5dip"
-        android:paddingBottom="14dip"
         android:gravity="center_vertical"
         android:focusable="true" >
     
@@ -61,33 +60,16 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textStyle="bold"
                 android:singleLine="true"
-                android:layout_marginBottom="2dip"
-                android:duplicateParentState="true" />
-            <TextView android:id="@+id/old_app_description"
-                android:layout_marginTop="-4dip"
-                android:layout_gravity="center_vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
                 android:duplicateParentState="true" />
         </LinearLayout>
     </LinearLayout>
 
-    <ImageView android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scaleType="fitXY"
-        android:src="?android:listDivider" />
-            
     <LinearLayout android:id="@+id/switch_new"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="?android:attr/listPreferredItemHeight"
+        android:minHeight="88dp"
         android:orientation="horizontal"
         android:background="@android:drawable/list_selector_background"
-        android:paddingEnd="3dip"
-        android:paddingStart="3dip"
-        android:paddingTop="5dip"
-        android:paddingBottom="8dip"
         android:gravity="center_vertical"
         android:focusable="true" >
     
@@ -109,10 +91,10 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textStyle="bold"
                 android:singleLine="true"
-                android:layout_marginBottom="2dip"
+                android:layout_marginBottom="2dp"
                 android:duplicateParentState="true" />
             <TextView android:id="@+id/new_app_description"
-                android:layout_marginTop="-4dip"
+                android:layout_marginTop="-4dp"
                 android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -120,26 +102,5 @@
                 android:duplicateParentState="true" />
         </LinearLayout>
     </LinearLayout>
-
-    <ImageView android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scaleType="fitXY"
-        android:src="?android:listDivider" />
-
-    <TextView android:id="@+id/cancel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="?android:attr/listPreferredItemHeight"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:background="@android:drawable/list_selector_background"
-        android:paddingEnd="6dip"
-        android:paddingStart="6dip"
-        android:paddingTop="5dip"
-        android:paddingBottom="8dip"
-        android:textStyle="bold"
-        android:singleLine="true"
-        android:gravity="center"
-        android:focusable="true"
-        android:text="@string/cancel" />
 
 </LinearLayout>

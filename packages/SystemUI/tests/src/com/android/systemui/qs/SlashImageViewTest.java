@@ -27,8 +27,14 @@ import com.android.systemui.qs.tileimpl.SlashImageView;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 @SmallTest
@@ -80,13 +86,12 @@ public class SlashImageViewTest extends SysuiTestCase {
     public void testSetImageDrawableUsesDrawableLevel() {
         SlashImageView iv = new SlashImageView(mContext);
         Drawable mockDrawable = mock(Drawable.class);
-        mockDrawable.setLevel(2);
-        assertTrue(mockDrawable.getLevel() == 2);
+        when(mockDrawable.getLevel()).thenReturn(2);
 
         iv.setImageDrawable(mockDrawable);
 
         // Make sure setting the drawable didn't reset its level to 0
-        assertTrue(mockDrawable.getLevel() == 2);
+        verify(mockDrawable).setLevel(eq(2));
     }
 
     // Expose getSlashDrawable

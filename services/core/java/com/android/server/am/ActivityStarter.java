@@ -26,19 +26,14 @@ import static android.app.ActivityManager.START_RETURN_INTENT_TO_CALLER;
 import static android.app.ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
-import static android.app.ActivityManager.StackId;
-import static android.app.ActivityManager.StackId.ASSISTANT_STACK_ID;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.HOME_STACK_ID;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-import static android.app.ActivityManager.StackId.RECENTS_STACK_ID;
-import static android.app.ActivityManager.StackId.isDynamicStack;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
-import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
@@ -50,8 +45,8 @@ import static android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT;
 import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
-import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
+import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
@@ -60,7 +55,6 @@ import static android.view.Display.INVALID_DISPLAY;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RESULTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
@@ -72,12 +66,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_USER_LEAV
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.ANIMATE;
-import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.ASSISTANT_ACTIVITY_TYPE;
-import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
-import static com.android.server.am.ActivityStack.STACK_INVISIBLE;
-import static com.android.server.am.ActivityStackSupervisor.CREATE_IF_NEEDED;
 import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
@@ -87,9 +76,9 @@ import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.AppGlobals;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.app.ProfilerInfo;
@@ -105,7 +94,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.hardware.power.V1_0.PowerHint;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -116,21 +104,22 @@ import android.os.UserManager;
 import android.service.voice.IVoiceInteractionSession;
 import android.text.TextUtils;
 import android.util.EventLog;
+import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.ActivityStackSupervisor.PendingActivityLaunch;
+import com.android.server.am.LaunchParamsController.LaunchParams;
 import com.android.server.pm.InstantAppResolver;
-import com.android.server.wm.WindowManagerService;
 
 import java.io.PrintWriter;
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 /**
- * Controller for interpreting how and then launching activities.
+ * Controller for interpreting how and then launching an activity.
  *
  * This class collects all the logic for determining how an intent and flags should be turned into
  * an activity and associated task and stack.
@@ -141,13 +130,12 @@ class ActivityStarter {
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
     private static final String TAG_USER_LEAVING = TAG + POSTFIX_USER_LEAVING;
+    private static final int INVALID_LAUNCH_MODE = -1;
 
     private final ActivityManagerService mService;
     private final ActivityStackSupervisor mSupervisor;
-    private ActivityStartInterceptor mInterceptor;
-    private WindowManagerService mWindowManager;
-
-    final ArrayList<PendingActivityLaunch> mPendingActivityLaunches = new ArrayList<>();
+    private final ActivityStartInterceptor mInterceptor;
+    private final ActivityStartController mController;
 
     // Share state variable among methods when starting an activity.
     private ActivityRecord mStartActivity;
@@ -155,19 +143,19 @@ class ActivityStarter {
     private int mCallingUid;
     private ActivityOptions mOptions;
 
-    private boolean mLaunchSingleTop;
-    private boolean mLaunchSingleInstance;
-    private boolean mLaunchSingleTask;
+    private int mLaunchMode;
     private boolean mLaunchTaskBehind;
     private int mLaunchFlags;
 
-    private Rect mLaunchBounds;
+    private LaunchParams mLaunchParams = new LaunchParams();
 
     private ActivityRecord mNotTop;
     private boolean mDoResume;
     private int mStartFlags;
     private ActivityRecord mSourceRecord;
-    private int mSourceDisplayId;
+
+    // The display to launch the activity onto, barring any strong reason to do otherwise.
+    private int mPreferredDisplayId;
 
     private TaskRecord mInTask;
     private boolean mAddingToTask;
@@ -177,14 +165,10 @@ class ActivityStarter {
     private Intent mNewTaskIntent;
     private ActivityStack mSourceStack;
     private ActivityStack mTargetStack;
-    // Indicates that we moved other task and are going to put something on top soon, so
-    // we don't want to show it redundantly or accidentally change what's shown below.
-    private boolean mMovedOtherTask;
     private boolean mMovedToFront;
     private boolean mNoAnimation;
     private boolean mKeepCurTransition;
     private boolean mAvoidMoveToFront;
-    private boolean mPowerHintSent;
 
     // We must track when we deliver the new intent since multiple code paths invoke
     // {@link #deliverNewIntent}. This is due to early returns in the code path. This flag is used
@@ -195,12 +179,6 @@ class ActivityStarter {
     private IVoiceInteractionSession mVoiceSession;
     private IVoiceInteractor mVoiceInteractor;
 
-    private boolean mUsingVr2dDisplay;
-
-    // Last home activity record we attempted to start
-    private final ActivityRecord[] mLastHomeActivityStartRecord = new ActivityRecord[1];
-    // The result of the last home activity we attempted to start.
-    private int mLastHomeActivityStartResult;
     // Last activity record we attempted to start
     private final ActivityRecord[] mLastStartActivityRecord = new ActivityRecord[1];
     // The result of the last activity we attempted to start.
@@ -210,63 +188,351 @@ class ActivityStarter {
     // The reason we were trying to start the last activity
     private String mLastStartReason;
 
-    private void reset() {
-        mStartActivity = null;
-        mIntent = null;
-        mCallingUid = -1;
-        mOptions = null;
+    /*
+     * Request details provided through setter methods. Should be reset after {@link #execute()}
+     * to avoid unnecessarily retaining parameters. Note that the request is ignored when
+     * {@link #startResolvedActivity} is invoked directly.
+     */
+    private Request mRequest = new Request();
 
-        mLaunchSingleTop = false;
-        mLaunchSingleInstance = false;
-        mLaunchSingleTask = false;
-        mLaunchTaskBehind = false;
-        mLaunchFlags = 0;
+    /**
+     * An interface that to provide {@link ActivityStarter} instances to the controller. This is
+     * used by tests to inject their own starter implementations for verification purposes.
+     */
+    @VisibleForTesting
+    interface Factory {
+        /**
+         * Sets the {@link ActivityStartController} to be passed to {@link ActivityStarter}.
+         */
+        void setController(ActivityStartController controller);
 
-        mLaunchBounds = null;
+        /**
+         * Generates an {@link ActivityStarter} that is ready to handle a new start request.
+         * @param controller The {@link ActivityStartController} which the starter who will own
+         *                   this instance.
+         * @return an {@link ActivityStarter}
+         */
+        ActivityStarter obtain();
 
-        mNotTop = null;
-        mDoResume = false;
-        mStartFlags = 0;
-        mSourceRecord = null;
-        mSourceDisplayId = INVALID_DISPLAY;
-
-        mInTask = null;
-        mAddingToTask = false;
-        mReuseTask = null;
-
-        mNewTaskInfo = null;
-        mNewTaskIntent = null;
-        mSourceStack = null;
-
-        mTargetStack = null;
-        mMovedOtherTask = false;
-        mMovedToFront = false;
-        mNoAnimation = false;
-        mKeepCurTransition = false;
-        mAvoidMoveToFront = false;
-
-        mVoiceSession = null;
-        mVoiceInteractor = null;
-
-        mUsingVr2dDisplay = false;
-
-        mIntentDelivered = false;
+        /**
+         * Recycles a starter for reuse.
+         */
+        void recycle(ActivityStarter starter);
     }
 
-    ActivityStarter(ActivityManagerService service, ActivityStackSupervisor supervisor) {
+    /**
+     * Default implementation of {@link StarterFactory}.
+     */
+    static class DefaultFactory implements Factory {
+        /**
+         * The maximum count of starters that should be active at one time:
+         * 1. last ran starter (for logging and post activity processing)
+         * 2. current running starter
+         * 3. starter from re-entry in (2)
+         */
+        private final int MAX_STARTER_COUNT = 3;
+
+        private ActivityStartController mController;
+        private ActivityManagerService mService;
+        private ActivityStackSupervisor mSupervisor;
+        private ActivityStartInterceptor mInterceptor;
+
+        private SynchronizedPool<ActivityStarter> mStarterPool =
+                new SynchronizedPool<>(MAX_STARTER_COUNT);
+
+        DefaultFactory(ActivityManagerService service,
+                ActivityStackSupervisor supervisor, ActivityStartInterceptor interceptor) {
+            mService = service;
+            mSupervisor = supervisor;
+            mInterceptor = interceptor;
+        }
+
+        @Override
+        public void setController(ActivityStartController controller) {
+            mController = controller;
+        }
+
+        @Override
+        public ActivityStarter obtain() {
+            ActivityStarter starter = mStarterPool.acquire();
+
+            if (starter == null) {
+                starter = new ActivityStarter(mController, mService, mSupervisor, mInterceptor);
+            }
+
+            return starter;
+        }
+
+        @Override
+        public void recycle(ActivityStarter starter) {
+            starter.reset(true /* clearRequest*/);
+            mStarterPool.release(starter);
+        }
+    }
+
+    /**
+     * Container for capturing initial start request details. This information is NOT reset until
+     * the {@link ActivityStarter} is recycled, allowing for multiple invocations with the same
+     * parameters.
+     *
+     * TODO(b/64750076): Investigate consolidating member variables of {@link ActivityStarter} with
+     * the request object. Note that some member variables are referenced in
+     * {@link #dump(PrintWriter, String)} and therefore cannot be cleared immediately after
+     * execution.
+     */
+    private static class Request {
+        private static final int DEFAULT_CALLING_UID = -1;
+        private static final int DEFAULT_CALLING_PID = 0;
+
+        IApplicationThread caller;
+        Intent intent;
+        Intent ephemeralIntent;
+        String resolvedType;
+        ActivityInfo activityInfo;
+        ResolveInfo resolveInfo;
+        IVoiceInteractionSession voiceSession;
+        IVoiceInteractor voiceInteractor;
+        IBinder resultTo;
+        String resultWho;
+        int requestCode;
+        int callingPid = DEFAULT_CALLING_UID;
+        int callingUid = DEFAULT_CALLING_PID;
+        String callingPackage;
+        int realCallingPid;
+        int realCallingUid;
+        int startFlags;
+        SafeActivityOptions activityOptions;
+        boolean ignoreTargetSecurity;
+        boolean componentSpecified;
+        boolean avoidMoveToFront;
+        ActivityRecord[] outActivity;
+        TaskRecord inTask;
+        String reason;
+        ProfilerInfo profilerInfo;
+        Configuration globalConfig;
+        int userId;
+        WaitResult waitResult;
+        int filterCallingUid;
+
+        /**
+         * If set to {@code true}, allows this activity start to look into
+         * {@link PendingRemoteAnimationRegistry}
+         */
+        boolean allowPendingRemoteAnimationRegistryLookup;
+
+        /**
+         * Indicates that we should wait for the result of the start request. This flag is set when
+         * {@link ActivityStarter#setMayWait(int)} is called.
+         * {@see ActivityStarter#startActivityMayWait}.
+         */
+        boolean mayWait;
+
+        /**
+         * Ensure constructed request matches reset instance.
+         */
+        Request() {
+            reset();
+        }
+
+        /**
+         * Sets values back to the initial state, clearing any held references.
+         */
+        void reset() {
+            caller = null;
+            intent = null;
+            ephemeralIntent = null;
+            resolvedType = null;
+            activityInfo = null;
+            resolveInfo = null;
+            voiceSession = null;
+            voiceInteractor = null;
+            resultTo = null;
+            resultWho = null;
+            requestCode = 0;
+            callingPid = DEFAULT_CALLING_PID;
+            callingUid = DEFAULT_CALLING_UID;
+            callingPackage = null;
+            realCallingPid = 0;
+            realCallingUid = 0;
+            startFlags = 0;
+            activityOptions = null;
+            ignoreTargetSecurity = false;
+            componentSpecified = false;
+            outActivity = null;
+            inTask = null;
+            reason = null;
+            profilerInfo = null;
+            globalConfig = null;
+            userId = 0;
+            waitResult = null;
+            mayWait = false;
+            avoidMoveToFront = false;
+            allowPendingRemoteAnimationRegistryLookup = true;
+            filterCallingUid = UserHandle.USER_NULL;
+        }
+
+        /**
+         * Adopts all values from passed in request.
+         */
+        void set(Request request) {
+            caller = request.caller;
+            intent = request.intent;
+            ephemeralIntent = request.ephemeralIntent;
+            resolvedType = request.resolvedType;
+            activityInfo = request.activityInfo;
+            resolveInfo = request.resolveInfo;
+            voiceSession = request.voiceSession;
+            voiceInteractor = request.voiceInteractor;
+            resultTo = request.resultTo;
+            resultWho = request.resultWho;
+            requestCode = request.requestCode;
+            callingPid = request.callingPid;
+            callingUid = request.callingUid;
+            callingPackage = request.callingPackage;
+            realCallingPid = request.realCallingPid;
+            realCallingUid = request.realCallingUid;
+            startFlags = request.startFlags;
+            activityOptions = request.activityOptions;
+            ignoreTargetSecurity = request.ignoreTargetSecurity;
+            componentSpecified = request.componentSpecified;
+            outActivity = request.outActivity;
+            inTask = request.inTask;
+            reason = request.reason;
+            profilerInfo = request.profilerInfo;
+            globalConfig = request.globalConfig;
+            userId = request.userId;
+            waitResult = request.waitResult;
+            mayWait = request.mayWait;
+            avoidMoveToFront = request.avoidMoveToFront;
+            allowPendingRemoteAnimationRegistryLookup
+                    = request.allowPendingRemoteAnimationRegistryLookup;
+            filterCallingUid = request.filterCallingUid;
+        }
+    }
+
+    ActivityStarter(ActivityStartController controller, ActivityManagerService service,
+            ActivityStackSupervisor supervisor, ActivityStartInterceptor interceptor) {
+        mController = controller;
         mService = service;
         mSupervisor = supervisor;
-        mInterceptor = new ActivityStartInterceptor(mService, mSupervisor);
-        mUsingVr2dDisplay = false;
+        mInterceptor = interceptor;
+        reset(true);
     }
 
-    int startActivityLocked(IApplicationThread caller, Intent intent, Intent ephemeralIntent,
+    /**
+     * Effectively duplicates the starter passed in. All state and request values will be
+     * mirrored.
+     * @param starter
+     */
+    void set(ActivityStarter starter) {
+        mStartActivity = starter.mStartActivity;
+        mIntent = starter.mIntent;
+        mCallingUid = starter.mCallingUid;
+        mOptions = starter.mOptions;
+
+        mLaunchTaskBehind = starter.mLaunchTaskBehind;
+        mLaunchFlags = starter.mLaunchFlags;
+        mLaunchMode = starter.mLaunchMode;
+
+        mLaunchParams.set(starter.mLaunchParams);
+
+        mNotTop = starter.mNotTop;
+        mDoResume = starter.mDoResume;
+        mStartFlags = starter.mStartFlags;
+        mSourceRecord = starter.mSourceRecord;
+        mPreferredDisplayId = starter.mPreferredDisplayId;
+
+        mInTask = starter.mInTask;
+        mAddingToTask = starter.mAddingToTask;
+        mReuseTask = starter.mReuseTask;
+
+        mNewTaskInfo = starter.mNewTaskInfo;
+        mNewTaskIntent = starter.mNewTaskIntent;
+        mSourceStack = starter.mSourceStack;
+
+        mTargetStack = starter.mTargetStack;
+        mMovedToFront = starter.mMovedToFront;
+        mNoAnimation = starter.mNoAnimation;
+        mKeepCurTransition = starter.mKeepCurTransition;
+        mAvoidMoveToFront = starter.mAvoidMoveToFront;
+
+        mVoiceSession = starter.mVoiceSession;
+        mVoiceInteractor = starter.mVoiceInteractor;
+
+        mIntentDelivered = starter.mIntentDelivered;
+
+        mRequest.set(starter.mRequest);
+    }
+
+    ActivityRecord getStartActivity() {
+        return mStartActivity;
+    }
+
+    boolean relatedToPackage(String packageName) {
+        return (mLastStartActivityRecord[0] != null
+                && packageName.equals(mLastStartActivityRecord[0].packageName))
+                || (mStartActivity != null && packageName.equals(mStartActivity.packageName));
+    }
+
+    /**
+     * Starts an activity based on the request parameters provided earlier.
+     * @return The starter result.
+     */
+    int execute() {
+        try {
+            // TODO(b/64750076): Look into passing request directly to these methods to allow
+            // for transactional diffs and preprocessing.
+            if (mRequest.mayWait) {
+                return startActivityMayWait(mRequest.caller, mRequest.callingUid,
+                        mRequest.callingPackage, mRequest.intent, mRequest.resolvedType,
+                        mRequest.voiceSession, mRequest.voiceInteractor, mRequest.resultTo,
+                        mRequest.resultWho, mRequest.requestCode, mRequest.startFlags,
+                        mRequest.profilerInfo, mRequest.waitResult, mRequest.globalConfig,
+                        mRequest.activityOptions, mRequest.ignoreTargetSecurity, mRequest.userId,
+                        mRequest.inTask, mRequest.reason,
+                        mRequest.allowPendingRemoteAnimationRegistryLookup);
+            } else {
+                return startActivity(mRequest.caller, mRequest.intent, mRequest.ephemeralIntent,
+                        mRequest.resolvedType, mRequest.activityInfo, mRequest.resolveInfo,
+                        mRequest.voiceSession, mRequest.voiceInteractor, mRequest.resultTo,
+                        mRequest.resultWho, mRequest.requestCode, mRequest.callingPid,
+                        mRequest.callingUid, mRequest.callingPackage, mRequest.realCallingPid,
+                        mRequest.realCallingUid, mRequest.startFlags, mRequest.activityOptions,
+                        mRequest.ignoreTargetSecurity, mRequest.componentSpecified,
+                        mRequest.outActivity, mRequest.inTask, mRequest.reason,
+                        mRequest.allowPendingRemoteAnimationRegistryLookup);
+            }
+        } finally {
+            onExecutionComplete();
+        }
+    }
+
+    /**
+     * Starts an activity based on the provided {@link ActivityRecord} and environment parameters.
+     * Note that this method is called internally as well as part of {@link #startActivity}.
+     *
+     * @return The start result.
+     */
+    int startResolvedActivity(final ActivityRecord r, ActivityRecord sourceRecord,
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+            int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
+            ActivityRecord[] outActivity) {
+        try {
+            return startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
+                    doResume, options, inTask, outActivity);
+        } finally {
+            onExecutionComplete();
+        }
+    }
+
+    private int startActivity(IApplicationThread caller, Intent intent, Intent ephemeralIntent,
             String resolvedType, ActivityInfo aInfo, ResolveInfo rInfo,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             IBinder resultTo, String resultWho, int requestCode, int callingPid, int callingUid,
             String callingPackage, int realCallingPid, int realCallingUid, int startFlags,
-            ActivityOptions options, boolean ignoreTargetSecurity, boolean componentSpecified,
-            ActivityRecord[] outActivity, TaskRecord inTask, String reason) {
+            SafeActivityOptions options, boolean ignoreTargetSecurity, boolean componentSpecified,
+            ActivityRecord[] outActivity, TaskRecord inTask, String reason,
+            boolean allowPendingRemoteAnimationRegistryLookup) {
 
         if (TextUtils.isEmpty(reason)) {
             throw new IllegalArgumentException("Need to specify a reason.");
@@ -279,25 +545,37 @@ class ActivityStarter {
                 aInfo, rInfo, voiceSession, voiceInteractor, resultTo, resultWho, requestCode,
                 callingPid, callingUid, callingPackage, realCallingPid, realCallingUid, startFlags,
                 options, ignoreTargetSecurity, componentSpecified, mLastStartActivityRecord,
-                inTask);
+                inTask, allowPendingRemoteAnimationRegistryLookup);
 
         if (outActivity != null) {
             // mLastStartActivityRecord[0] is set in the call to startActivity above.
             outActivity[0] = mLastStartActivityRecord[0];
         }
 
-        // Aborted results are treated as successes externally, but we must track them internally.
-        return mLastStartActivityResult != START_ABORTED ? mLastStartActivityResult : START_SUCCESS;
+        return getExternalResult(mLastStartActivityResult);
     }
 
-    /** DO NOT call this method directly. Use {@link #startActivityLocked} instead. */
+    static int getExternalResult(int result) {
+        // Aborted results are treated as successes externally, but we must track them internally.
+        return result != START_ABORTED ? result : START_SUCCESS;
+    }
+
+    /**
+     * Called when execution is complete. Sets state indicating completion and proceeds with
+     * recycling if appropriate.
+     */
+    private void onExecutionComplete() {
+        mController.onExecutionComplete(this);
+    }
+
     private int startActivity(IApplicationThread caller, Intent intent, Intent ephemeralIntent,
             String resolvedType, ActivityInfo aInfo, ResolveInfo rInfo,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             IBinder resultTo, String resultWho, int requestCode, int callingPid, int callingUid,
             String callingPackage, int realCallingPid, int realCallingUid, int startFlags,
-            ActivityOptions options, boolean ignoreTargetSecurity, boolean componentSpecified,
-            ActivityRecord[] outActivity, TaskRecord inTask) {
+            SafeActivityOptions options,
+            boolean ignoreTargetSecurity, boolean componentSpecified, ActivityRecord[] outActivity,
+            TaskRecord inTask, boolean allowPendingRemoteAnimationRegistryLookup) {
         int err = ActivityManager.START_SUCCESS;
         // Pull the optional Ephemeral Installer-only bundle out of the options early.
         final Bundle verificationBundle
@@ -317,7 +595,8 @@ class ActivityStarter {
             }
         }
 
-        final int userId = aInfo != null ? UserHandle.getUserId(aInfo.applicationInfo.uid) : 0;
+        final int userId = aInfo != null && aInfo.applicationInfo != null
+                ? UserHandle.getUserId(aInfo.applicationInfo.uid) : 0;
 
         if (err == ActivityManager.START_SUCCESS) {
             Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true, true, false)
@@ -343,7 +622,7 @@ class ActivityStarter {
             // Transfer the result target from the source activity to the new
             // one being started, including any failures.
             if (requestCode >= 0) {
-                ActivityOptions.abort(options);
+                SafeActivityOptions.abort(options);
                 return ActivityManager.START_FORWARD_AND_REQUEST_CONFLICT;
             }
             resultRecord = sourceRecord.resultTo;
@@ -393,7 +672,7 @@ class ActivityStarter {
                     && sourceRecord.info.applicationInfo.uid != aInfo.applicationInfo.uid) {
                 try {
                     intent.addCategory(Intent.CATEGORY_VOICE);
-                    if (!AppGlobals.getPackageManager().activitySupportsIntent(
+                    if (!mService.getPackageManager().activitySupportsIntent(
                             intent.getComponent(), intent, resolvedType)) {
                         Slog.w(TAG,
                                 "Activity being started in current voice task does not support voice: "
@@ -411,7 +690,7 @@ class ActivityStarter {
             // If the caller is starting a new voice session, just make sure the target
             // is actually allowing it to run this way.
             try {
-                if (!AppGlobals.getPackageManager().activitySupportsIntent(intent.getComponent(),
+                if (!mService.getPackageManager().activitySupportsIntent(intent.getComponent(),
                         intent, resolvedType)) {
                     Slog.w(TAG,
                             "Activity being started in new voice task does not support: "
@@ -431,16 +710,25 @@ class ActivityStarter {
                 resultStack.sendActivityResultLocked(
                         -1, resultRecord, resultWho, requestCode, RESULT_CANCELED, null);
             }
-            ActivityOptions.abort(options);
+            SafeActivityOptions.abort(options);
             return err;
         }
 
         boolean abort = !mSupervisor.checkStartAnyActivityPermission(intent, aInfo, resultWho,
-                requestCode, callingPid, callingUid, callingPackage, ignoreTargetSecurity, callerApp,
-                resultRecord, resultStack, options);
+                requestCode, callingPid, callingUid, callingPackage, ignoreTargetSecurity,
+                inTask != null, callerApp, resultRecord, resultStack);
         abort |= !mService.mIntentFirewall.checkStartActivity(intent, callingUid,
                 callingPid, resolvedType, aInfo.applicationInfo);
 
+        // Merge the two options bundles, while realCallerOptions takes precedence.
+        ActivityOptions checkedOptions = options != null
+                ? options.getOptions(intent, aInfo, callerApp, mSupervisor)
+                : null;
+        if (allowPendingRemoteAnimationRegistryLookup) {
+            checkedOptions = mService.getActivityStartController()
+                    .getPendingRemoteAnimationRegistry()
+                    .overrideOptionsIfNeeded(callingPackage, checkedOptions);
+        }
         if (mService.mController != null) {
             try {
                 // The Intent we give to the watcher has the extra data
@@ -454,16 +742,20 @@ class ActivityStarter {
         }
 
         mInterceptor.setStates(userId, realCallingPid, realCallingUid, startFlags, callingPackage);
-        mInterceptor.intercept(intent, rInfo, aInfo, resolvedType, inTask, callingPid, callingUid,
-                options);
-        intent = mInterceptor.mIntent;
-        rInfo = mInterceptor.mRInfo;
-        aInfo = mInterceptor.mAInfo;
-        resolvedType = mInterceptor.mResolvedType;
-        inTask = mInterceptor.mInTask;
-        callingPid = mInterceptor.mCallingPid;
-        callingUid = mInterceptor.mCallingUid;
-        options = mInterceptor.mActivityOptions;
+        if (mInterceptor.intercept(intent, rInfo, aInfo, resolvedType, inTask, callingPid,
+                callingUid, checkedOptions)) {
+            // activity start was intercepted, e.g. because the target user is currently in quiet
+            // mode (turn off work) or the target application is suspended
+            intent = mInterceptor.mIntent;
+            rInfo = mInterceptor.mRInfo;
+            aInfo = mInterceptor.mAInfo;
+            resolvedType = mInterceptor.mResolvedType;
+            inTask = mInterceptor.mInTask;
+            callingPid = mInterceptor.mCallingPid;
+            callingUid = mInterceptor.mCallingUid;
+            checkedOptions = mInterceptor.mActivityOptions;
+        }
+
         if (abort) {
             if (resultRecord != null) {
                 resultStack.sendActivityResultLocked(-1, resultRecord, resultWho, requestCode,
@@ -471,7 +763,7 @@ class ActivityStarter {
             }
             // We pretend to the caller that it was really started, but
             // they will just get a cancel result.
-            ActivityOptions.abort(options);
+            ActivityOptions.abort(checkedOptions);
             return START_ABORTED;
         }
 
@@ -502,7 +794,9 @@ class ActivityStarter {
                 callingUid = realCallingUid;
                 callingPid = realCallingPid;
 
-                rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId);
+                rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId, 0,
+                        computeResolveFilterUid(
+                                callingUid, realCallingUid, mRequest.filterCallingUid));
                 aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags,
                         null /*profilerInfo*/);
 
@@ -532,7 +826,7 @@ class ActivityStarter {
         ActivityRecord r = new ActivityRecord(mService, callerApp, callingPid, callingUid,
                 callingPackage, intent, resolvedType, aInfo, mService.getGlobalConfiguration(),
                 resultRecord, resultWho, requestCode, componentSpecified, voiceSession != null,
-                mSupervisor, options, sourceRecord);
+                mSupervisor, checkedOptions, sourceRecord);
         if (outActivity != null) {
             outActivity[0] = r;
         }
@@ -544,14 +838,16 @@ class ActivityStarter {
         }
 
         final ActivityStack stack = mSupervisor.mFocusedStack;
-        if (voiceSession == null && (stack.mResumedActivity == null
-                || stack.mResumedActivity.info.applicationInfo.uid != callingUid)) {
+
+        // If we are starting an activity that is not from the same uid as the currently resumed
+        // one, check whether app switches are allowed.
+        if (voiceSession == null && (stack.getResumedActivity() == null
+                || stack.getResumedActivity().info.applicationInfo.uid != realCallingUid)) {
             if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid,
                     realCallingPid, realCallingUid, "Activity start")) {
-                PendingActivityLaunch pal =  new PendingActivityLaunch(r,
-                        sourceRecord, startFlags, stack, callerApp);
-                mPendingActivityLaunches.add(pal);
-                ActivityOptions.abort(options);
+                mController.addPendingActivityLaunch(new PendingActivityLaunch(r,
+                        sourceRecord, startFlags, stack, callerApp));
+                ActivityOptions.abort(checkedOptions);
                 return ActivityManager.START_SWITCHES_CANCELED;
             }
         }
@@ -567,140 +863,134 @@ class ActivityStarter {
             mService.mDidAppSwitch = true;
         }
 
-        doPendingActivityLaunchesLocked(false);
+        mController.doPendingActivityLaunches(false);
 
-        return startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags, true,
-                options, inTask, outActivity);
+        return startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
+                true /* doResume */, checkedOptions, inTask, outActivity);
     }
+
 
     /**
      * Creates a launch intent for the given auxiliary resolution data.
      */
-    private @NonNull Intent createLaunchIntent(@NonNull AuxiliaryResolveInfo auxiliaryResponse,
+    private @NonNull Intent createLaunchIntent(@Nullable AuxiliaryResolveInfo auxiliaryResponse,
             Intent originalIntent, String callingPackage, Bundle verificationBundle,
             String resolvedType, int userId) {
-        if (auxiliaryResponse.needsPhaseTwo) {
+        if (auxiliaryResponse != null && auxiliaryResponse.needsPhaseTwo) {
             // request phase two resolution
             mService.getPackageManagerInternalLocked().requestInstantAppResolutionPhaseTwo(
                     auxiliaryResponse, originalIntent, resolvedType, callingPackage,
                     verificationBundle, userId);
         }
         return InstantAppResolver.buildEphemeralInstallerIntent(
-                Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE, originalIntent,
-                auxiliaryResponse.failureIntent, callingPackage, verificationBundle,
-                resolvedType, userId, auxiliaryResponse.packageName, auxiliaryResponse.splitName,
-                auxiliaryResponse.installFailureActivity, auxiliaryResponse.versionCode,
-                auxiliaryResponse.token, auxiliaryResponse.needsPhaseTwo);
+                originalIntent,
+                InstantAppResolver.sanitizeIntent(originalIntent),
+                auxiliaryResponse == null ? null : auxiliaryResponse.failureIntent,
+                callingPackage,
+                verificationBundle,
+                resolvedType,
+                userId,
+                auxiliaryResponse == null ? null : auxiliaryResponse.installFailureActivity,
+                auxiliaryResponse == null ? null : auxiliaryResponse.token,
+                auxiliaryResponse != null && auxiliaryResponse.needsPhaseTwo,
+                auxiliaryResponse == null ? null : auxiliaryResponse.filters);
     }
 
-    void postStartActivityProcessing(
-            ActivityRecord r, int result, int prevFocusedStackId, ActivityRecord sourceRecord,
-            ActivityStack targetStack) {
-
+    void postStartActivityProcessing(ActivityRecord r, int result, ActivityStack targetStack) {
         if (ActivityManager.isStartResultFatalError(result)) {
             return;
         }
 
         // We're waiting for an activity launch to finish, but that activity simply
-        // brought another activity to front. Let startActivityMayWait() know about
-        // this, so it waits for the new activity to become visible instead.
-        if (result == START_TASK_TO_FRONT && !mSupervisor.mWaitingActivityLaunched.isEmpty()) {
-            mSupervisor.reportTaskToFrontNoLaunch(mStartActivity);
-        }
+        // brought another activity to front. We must also handle the case where the task is already
+        // in the front as a result of the trampoline activity being in the same task (it will be
+        // considered focused as the trampoline will be finished). Let startActivityMayWait() know
+        // about this, so it waits for the new activity to become visible instead.
+        mSupervisor.reportWaitingActivityLaunchedIfNeeded(r, result);
 
-        int startedActivityStackId = INVALID_STACK_ID;
+        ActivityStack startedActivityStack = null;
         final ActivityStack currentStack = r.getStack();
         if (currentStack != null) {
-            startedActivityStackId = currentStack.mStackId;
+            startedActivityStack = currentStack;
         } else if (mTargetStack != null) {
-            startedActivityStackId = targetStack.mStackId;
+            startedActivityStack = targetStack;
         }
 
-        if (startedActivityStackId == DOCKED_STACK_ID) {
-            final ActivityStack homeStack = mSupervisor.getStack(HOME_STACK_ID);
-            final boolean homeStackVisible = homeStack != null && homeStack.isVisible();
-            if (homeStackVisible) {
-                // We launch an activity while being in home stack, which means either launcher or
-                // recents into docked stack. We don't want the launched activity to be alone in a
-                // docked stack, so we want to immediately launch recents too.
-                if (DEBUG_RECENTS) Slog.d(TAG, "Scheduling recents launch.");
-                mWindowManager.showRecentApps(true /* fromHome */);
+        if (startedActivityStack == null) {
+            return;
+        }
+
+        final int clearTaskFlags = FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK;
+        boolean clearedTask = (mLaunchFlags & clearTaskFlags) == clearTaskFlags
+                && mReuseTask != null;
+        if (result == START_TASK_TO_FRONT || result == START_DELIVERED_TO_TOP || clearedTask) {
+            // The activity was already running so it wasn't started, but either brought to the
+            // front or the new intent was delivered to it since it was already in front. Notify
+            // anyone interested in this piece of information.
+            switch (startedActivityStack.getWindowingMode()) {
+                case WINDOWING_MODE_PINNED:
+                    mService.mTaskChangeNotificationController.notifyPinnedActivityRestartAttempt(
+                            clearedTask);
+                    break;
+                case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
+                    final ActivityStack homeStack = mSupervisor.mHomeStack;
+                    if (homeStack != null && homeStack.shouldBeVisible(null /* starting */)) {
+                        mService.mWindowManager.showRecentApps();
+                    }
+                    break;
             }
-            return;
-        }
-
-        boolean clearedTask = (mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
-                == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK) && (mReuseTask != null);
-        if (startedActivityStackId == PINNED_STACK_ID && (result == START_TASK_TO_FRONT
-                || result == START_DELIVERED_TO_TOP || clearedTask)) {
-            // The activity was already running in the pinned stack so it wasn't started, but either
-            // brought to the front or the new intent was delivered to it since it was already in
-            // front. Notify anyone interested in this piece of information.
-            mService.mTaskChangeNotificationController.notifyPinnedActivityRestartAttempt(
-                    clearedTask);
-            return;
         }
     }
 
-    void startHomeActivityLocked(Intent intent, ActivityInfo aInfo, String reason) {
-        mSupervisor.moveHomeStackTaskToTop(reason);
-        mLastHomeActivityStartResult = startActivityLocked(null /*caller*/, intent,
-                null /*ephemeralIntent*/, null /*resolvedType*/, aInfo, null /*rInfo*/,
-                null /*voiceSession*/, null /*voiceInteractor*/, null /*resultTo*/,
-                null /*resultWho*/, 0 /*requestCode*/, 0 /*callingPid*/, 0 /*callingUid*/,
-                null /*callingPackage*/, 0 /*realCallingPid*/, 0 /*realCallingUid*/,
-                0 /*startFlags*/, null /*options*/, false /*ignoreTargetSecurity*/,
-                false /*componentSpecified*/, mLastHomeActivityStartRecord /*outActivity*/,
-                null /*inTask*/, "startHomeActivity: " + reason);
-        if (mSupervisor.inResumeTopActivity) {
-            // If we are in resume section already, home activity will be initialized, but not
-            // resumed (to avoid recursive resume) and will stay that way until something pokes it
-            // again. We need to schedule another resume.
-            mSupervisor.scheduleResumeTopActivities();
-        }
-    }
-
-    void startConfirmCredentialIntent(Intent intent, Bundle optionsBundle) {
-        intent.addFlags(FLAG_ACTIVITY_NEW_TASK |
-                FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS |
-                FLAG_ACTIVITY_TASK_ON_HOME);
-        ActivityOptions options = (optionsBundle != null ? new ActivityOptions(optionsBundle)
-                        : ActivityOptions.makeBasic());
-        options.setLaunchTaskId(mSupervisor.getHomeActivity().getTask().taskId);
-        mService.mContext.startActivityAsUser(intent, options.toBundle(), UserHandle.CURRENT);
-    }
-
-    final int startActivityMayWait(IApplicationThread caller, int callingUid,
+    private int startActivityMayWait(IApplicationThread caller, int callingUid,
             String callingPackage, Intent intent, String resolvedType,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             IBinder resultTo, String resultWho, int requestCode, int startFlags,
             ProfilerInfo profilerInfo, WaitResult outResult,
-            Configuration globalConfig, Bundle bOptions, boolean ignoreTargetSecurity, int userId,
-            TaskRecord inTask, String reason) {
+            Configuration globalConfig, SafeActivityOptions options, boolean ignoreTargetSecurity,
+            int userId, TaskRecord inTask, String reason,
+            boolean allowPendingRemoteAnimationRegistryLookup) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
-        mSupervisor.mActivityMetricsLogger.notifyActivityLaunching();
+        mSupervisor.getActivityMetricsLogger().notifyActivityLaunching();
         boolean componentSpecified = intent.getComponent() != null;
+
+        final int realCallingPid = Binder.getCallingPid();
+        final int realCallingUid = Binder.getCallingUid();
+
+        int callingPid;
+        if (callingUid >= 0) {
+            callingPid = -1;
+        } else if (caller == null) {
+            callingPid = realCallingPid;
+            callingUid = realCallingUid;
+        } else {
+            callingPid = callingUid = -1;
+        }
 
         // Save a copy in case ephemeral needs it
         final Intent ephemeralIntent = new Intent(intent);
         // Don't modify the client's object!
         intent = new Intent(intent);
         if (componentSpecified
-                && intent.getData() != null
-                && Intent.ACTION_VIEW.equals(intent.getAction())
+                && !(Intent.ACTION_VIEW.equals(intent.getAction()) && intent.getData() == null)
+                && !Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE.equals(intent.getAction())
+                && !Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE.equals(intent.getAction())
                 && mService.getPackageManagerInternalLocked()
                         .isInstantAppInstallerComponent(intent.getComponent())) {
             // intercept intents targeted directly to the ephemeral installer the
-            // ephemeral installer should never be started with a raw URL; instead
+            // ephemeral installer should never be started with a raw Intent; instead
             // adjust the intent so it looks like a "normal" instant app launch
             intent.setComponent(null /*component*/);
             componentSpecified = false;
         }
 
-        ResolveInfo rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId);
+        ResolveInfo rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId,
+                0 /* matchFlags */,
+                        computeResolveFilterUid(
+                                callingUid, realCallingUid, mRequest.filterCallingUid));
         if (rInfo == null) {
             UserInfo userInfo = mSupervisor.getUserInfo(userId);
             if (userInfo != null && userInfo.isManagedProfile()) {
@@ -721,27 +1011,16 @@ class ActivityStarter {
                 if (profileLockedAndParentUnlockingOrUnlocked) {
                     rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId,
                             PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                            computeResolveFilterUid(
+                                    callingUid, realCallingUid, mRequest.filterCallingUid));
                 }
             }
         }
         // Collect information about the target of the Intent.
         ActivityInfo aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, profilerInfo);
 
-        ActivityOptions options = ActivityOptions.fromBundle(bOptions);
         synchronized (mService) {
-            final int realCallingPid = Binder.getCallingPid();
-            final int realCallingUid = Binder.getCallingUid();
-            int callingPid;
-            if (callingUid >= 0) {
-                callingPid = -1;
-            } else if (caller == null) {
-                callingPid = realCallingPid;
-                callingUid = realCallingUid;
-            } else {
-                callingPid = callingUid = -1;
-            }
-
             final ActivityStack stack = mSupervisor.mFocusedStack;
             stack.mConfigWillChange = globalConfig != null
                     && mService.getGlobalConfiguration().diff(globalConfig) != 0;
@@ -752,7 +1031,8 @@ class ActivityStarter {
 
             if (aInfo != null &&
                     (aInfo.applicationInfo.privateFlags
-                            & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
+                            & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0 &&
+                    mService.mHasHeavyWeightFeature) {
                 // This may be a heavy-weight process!  Check to see if we already
                 // have another, different heavy-weight process running.
                 if (aInfo.processName.equals(aInfo.applicationInfo.packageName)) {
@@ -768,7 +1048,7 @@ class ActivityStarter {
                                 Slog.w(TAG, "Unable to find app for caller " + caller
                                         + " (pid=" + callingPid + ") when starting: "
                                         + intent.toString());
-                                ActivityOptions.abort(options);
+                                SafeActivityOptions.abort(options);
                                 return ActivityManager.START_PERMISSION_DENIED;
                             }
                         }
@@ -804,7 +1084,9 @@ class ActivityStarter {
                         callingUid = Binder.getCallingUid();
                         callingPid = Binder.getCallingPid();
                         componentSpecified = true;
-                        rInfo = mSupervisor.resolveIntent(intent, null /*resolvedType*/, userId);
+                        rInfo = mSupervisor.resolveIntent(intent, null /*resolvedType*/, userId,
+                                0 /* matchFlags */, computeResolveFilterUid(
+                                        callingUid, realCallingUid, mRequest.filterCallingUid));
                         aInfo = rInfo != null ? rInfo.activityInfo : null;
                         if (aInfo != null) {
                             aInfo = mService.getActivityInfoForUser(aInfo, userId);
@@ -814,12 +1096,11 @@ class ActivityStarter {
             }
 
             final ActivityRecord[] outRecord = new ActivityRecord[1];
-            int res = startActivityLocked(caller, intent, ephemeralIntent, resolvedType,
-                    aInfo, rInfo, voiceSession, voiceInteractor,
-                    resultTo, resultWho, requestCode, callingPid,
-                    callingUid, callingPackage, realCallingPid, realCallingUid, startFlags,
-                    options, ignoreTargetSecurity, componentSpecified, outRecord, inTask,
-                    reason);
+            int res = startActivity(caller, intent, ephemeralIntent, resolvedType, aInfo, rInfo,
+                    voiceSession, voiceInteractor, resultTo, resultWho, requestCode, callingPid,
+                    callingUid, callingPackage, realCallingPid, realCallingUid, startFlags, options,
+                    ignoreTargetSecurity, componentSpecified, outRecord, inTask, reason,
+                    allowPendingRemoteAnimationRegistryLookup);
 
             Binder.restoreCallingIdentity(origId);
 
@@ -838,157 +1119,81 @@ class ActivityStarter {
 
             if (outResult != null) {
                 outResult.result = res;
-                if (res == ActivityManager.START_SUCCESS) {
-                    mSupervisor.mWaitingActivityLaunched.add(outResult);
-                    do {
-                        try {
-                            mService.wait();
-                        } catch (InterruptedException e) {
-                        }
-                    } while (outResult.result != START_TASK_TO_FRONT
-                            && !outResult.timeout && outResult.who == null);
-                    if (outResult.result == START_TASK_TO_FRONT) {
-                        res = START_TASK_TO_FRONT;
-                    }
-                }
-                if (res == START_TASK_TO_FRONT) {
-                    final ActivityRecord r = outRecord[0];
 
-                    // ActivityRecord may represent a different activity, but it should not be in
-                    // the resumed state.
-                    if (r.nowVisible && r.state == RESUMED) {
-                        outResult.timeout = false;
-                        outResult.who = r.realActivity;
-                        outResult.totalTime = 0;
-                        outResult.thisTime = 0;
-                    } else {
-                        outResult.thisTime = SystemClock.uptimeMillis();
-                        mSupervisor.waitActivityVisible(r.realActivity, outResult);
-                        // Note: the timeout variable is not currently not ever set.
+                final ActivityRecord r = outRecord[0];
+
+                switch(res) {
+                    case START_SUCCESS: {
+                        mSupervisor.mWaitingActivityLaunched.add(outResult);
                         do {
                             try {
                                 mService.wait();
                             } catch (InterruptedException e) {
                             }
-                        } while (!outResult.timeout && outResult.who == null);
+                        } while (outResult.result != START_TASK_TO_FRONT
+                                && !outResult.timeout && outResult.who == null);
+                        if (outResult.result == START_TASK_TO_FRONT) {
+                            res = START_TASK_TO_FRONT;
+                        }
+                        break;
+                    }
+                    case START_DELIVERED_TO_TOP: {
+                        outResult.timeout = false;
+                        outResult.who = r.realActivity;
+                        outResult.totalTime = 0;
+                        outResult.thisTime = 0;
+                        break;
+                    }
+                    case START_TASK_TO_FRONT: {
+                        // ActivityRecord may represent a different activity, but it should not be
+                        // in the resumed state.
+                        if (r.nowVisible && r.isState(RESUMED)) {
+                            outResult.timeout = false;
+                            outResult.who = r.realActivity;
+                            outResult.totalTime = 0;
+                            outResult.thisTime = 0;
+                        } else {
+                            outResult.thisTime = SystemClock.uptimeMillis();
+                            mSupervisor.waitActivityVisible(r.realActivity, outResult);
+                            // Note: the timeout variable is not currently not ever set.
+                            do {
+                                try {
+                                    mService.wait();
+                                } catch (InterruptedException e) {
+                                }
+                            } while (!outResult.timeout && outResult.who == null);
+                        }
+                        break;
                     }
                 }
             }
 
-            mSupervisor.mActivityMetricsLogger.notifyActivityLaunched(res, outRecord[0]);
+            mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(res, outRecord[0]);
             return res;
         }
     }
 
-    final int startActivities(IApplicationThread caller, int callingUid, String callingPackage,
-            Intent[] intents, String[] resolvedTypes, IBinder resultTo,
-            Bundle bOptions, int userId, String reason) {
-        if (intents == null) {
-            throw new NullPointerException("intents is null");
-        }
-        if (resolvedTypes == null) {
-            throw new NullPointerException("resolvedTypes is null");
-        }
-        if (intents.length != resolvedTypes.length) {
-            throw new IllegalArgumentException("intents are length different than resolvedTypes");
-        }
-
-        final int realCallingPid = Binder.getCallingPid();
-        final int realCallingUid = Binder.getCallingUid();
-
-        int callingPid;
-        if (callingUid >= 0) {
-            callingPid = -1;
-        } else if (caller == null) {
-            callingPid = realCallingPid;
-            callingUid = realCallingUid;
-        } else {
-            callingPid = callingUid = -1;
-        }
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mService) {
-                ActivityRecord[] outActivity = new ActivityRecord[1];
-                for (int i=0; i<intents.length; i++) {
-                    Intent intent = intents[i];
-                    if (intent == null) {
-                        continue;
-                    }
-
-                    // Refuse possible leaked file descriptors
-                    if (intent != null && intent.hasFileDescriptors()) {
-                        throw new IllegalArgumentException("File descriptors passed in Intent");
-                    }
-
-                    boolean componentSpecified = intent.getComponent() != null;
-
-                    // Don't modify the client's object!
-                    intent = new Intent(intent);
-
-                    // Collect information about the target of the Intent.
-                    ActivityInfo aInfo = mSupervisor.resolveActivity(intent, resolvedTypes[i], 0,
-                            null, userId);
-                    // TODO: New, check if this is correct
-                    aInfo = mService.getActivityInfoForUser(aInfo, userId);
-
-                    if (aInfo != null &&
-                            (aInfo.applicationInfo.privateFlags
-                                    & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE)  != 0) {
-                        throw new IllegalArgumentException(
-                                "FLAG_CANT_SAVE_STATE not supported here");
-                    }
-
-                    ActivityOptions options = ActivityOptions.fromBundle(
-                            i == intents.length - 1 ? bOptions : null);
-                    int res = startActivityLocked(caller, intent, null /*ephemeralIntent*/,
-                            resolvedTypes[i], aInfo, null /*rInfo*/, null, null, resultTo, null, -1,
-                            callingPid, callingUid, callingPackage,
-                            realCallingPid, realCallingUid, 0,
-                            options, false, componentSpecified, outActivity, null, reason);
-                    if (res < 0) {
-                        return res;
-                    }
-
-                    resultTo = outActivity[0] != null ? outActivity[0].appToken : null;
-                }
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-
-        return START_SUCCESS;
-    }
-
-    void sendPowerHintForLaunchStartIfNeeded(boolean forceSend, ActivityRecord targetActivity) {
-        boolean sendHint = forceSend;
-
-        if (!sendHint) {
-            // If not forced, send power hint when the activity's process is different than the
-            // current resumed activity.
-            final ActivityRecord resumedActivity = mSupervisor.getResumedActivityLocked();
-            sendHint = resumedActivity == null
-                || resumedActivity.app == null
-                || !resumedActivity.app.equals(targetActivity.app);
-        }
-
-        if (sendHint && mService.mLocalPowerManager != null) {
-            mService.mLocalPowerManager.powerHint(PowerHint.LAUNCH, 1);
-            mPowerHintSent = true;
-        }
-    }
-
-    void sendPowerHintForLaunchEndIfNeeded() {
-        // Trigger launch power hint if activity is launched
-        if (mPowerHintSent && mService.mLocalPowerManager != null) {
-            mService.mLocalPowerManager.powerHint(PowerHint.LAUNCH, 0);
-            mPowerHintSent = false;
-        }
+    /**
+     * Compute the logical UID based on which the package manager would filter
+     * app components i.e. based on which the instant app policy would be applied
+     * because it is the logical calling UID.
+     *
+     * @param customCallingUid The UID on whose behalf to make the call.
+     * @param actualCallingUid The UID actually making the call.
+     * @param filterCallingUid The UID to be used to filter for instant apps.
+     * @return The logical UID making the call.
+     */
+    static int computeResolveFilterUid(int customCallingUid, int actualCallingUid,
+            int filterCallingUid) {
+        return filterCallingUid != UserHandle.USER_NULL
+                ? filterCallingUid
+                : (customCallingUid >= 0 ? customCallingUid : actualCallingUid);
     }
 
     private int startActivity(final ActivityRecord r, ActivityRecord sourceRecord,
-            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
-            ActivityRecord[] outActivity) {
+                IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+                int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
+                ActivityRecord[] outActivity) {
         int result = START_CANCELED;
         try {
             mService.mWindowManager.deferSurfaceLayout();
@@ -998,15 +1203,15 @@ class ActivityStarter {
             // If we are not able to proceed, disassociate the activity from the task. Leaving an
             // activity in an incomplete state can lead to issues, such as performing operations
             // without a window container.
-            if (!ActivityManager.isStartResultSuccessful(result)
-                    && mStartActivity.getTask() != null) {
-                mStartActivity.getTask().removeActivity(mStartActivity);
+            final ActivityStack stack = mStartActivity.getStack();
+            if (!ActivityManager.isStartResultSuccessful(result) && stack != null) {
+                stack.finishActivityLocked(mStartActivity, RESULT_CANCELED,
+                        null /* intentResultData */, "startActivity", true /* oomAdj */);
             }
             mService.mWindowManager.continueSurfaceLayout();
         }
 
-        postStartActivityProcessing(r, result, mSupervisor.getLastStack().mStackId,  mSourceRecord,
-                mTargetStack);
+        postStartActivityProcessing(r, result, mTargetStack);
 
         return result;
     }
@@ -1028,26 +1233,50 @@ class ActivityStarter {
 
         ActivityRecord reusedActivity = getReusableIntentActivity();
 
-        final int preferredLaunchStackId =
-                (mOptions != null) ? mOptions.getLaunchStackId() : INVALID_STACK_ID;
-        final int preferredLaunchDisplayId =
-                (mOptions != null) ? mOptions.getLaunchDisplayId() : DEFAULT_DISPLAY;
+        int preferredWindowingMode = WINDOWING_MODE_UNDEFINED;
+        int preferredLaunchDisplayId = DEFAULT_DISPLAY;
+        if (mOptions != null) {
+            preferredWindowingMode = mOptions.getLaunchWindowingMode();
+            preferredLaunchDisplayId = mOptions.getLaunchDisplayId();
+        }
+
+        // windowing mode and preferred launch display values from {@link LaunchParams} take
+        // priority over those specified in {@link ActivityOptions}.
+        if (!mLaunchParams.isEmpty()) {
+            if (mLaunchParams.hasPreferredDisplay()) {
+                preferredLaunchDisplayId = mLaunchParams.mPreferredDisplayId;
+            }
+
+            if (mLaunchParams.hasWindowingMode()) {
+                preferredWindowingMode = mLaunchParams.mWindowingMode;
+            }
+        }
 
         if (reusedActivity != null) {
             // When the flags NEW_TASK and CLEAR_TASK are set, then the task gets reused but
             // still needs to be a lock task mode violation since the task gets cleared out and
             // the device would otherwise leave the locked task.
-            if (mSupervisor.isLockTaskModeViolation(reusedActivity.getTask(),
+            if (mService.getLockTaskController().isLockTaskModeViolation(reusedActivity.getTask(),
                     (mLaunchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))
                             == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK))) {
-                mSupervisor.showLockTaskToast();
                 Slog.e(TAG, "startActivityUnchecked: Attempt to violate Lock Task Mode");
                 return START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
 
-            if (mStartActivity.getTask() == null) {
+            // True if we are clearing top and resetting of a standard (default) launch mode
+            // ({@code LAUNCH_MULTIPLE}) activity. The existing activity will be finished.
+            final boolean clearTopAndResetStandardLaunchMode =
+                    (mLaunchFlags & (FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_RESET_TASK_IF_NEEDED))
+                            == (FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
+                    && mLaunchMode == LAUNCH_MULTIPLE;
+
+            // If mStartActivity does not have a task associated with it, associate it with the
+            // reused activity's task. Do not do so if we're clearing top and resetting for a
+            // standard launchMode activity.
+            if (mStartActivity.getTask() == null && !clearTopAndResetStandardLaunchMode) {
                 mStartActivity.setTask(reusedActivity.getTask());
             }
+
             if (reusedActivity.getTask().intent == null) {
                 // This task was started because of movement of the activity based on affinity...
                 // Now that we are actually launching it, we can assign the base intent.
@@ -1059,7 +1288,7 @@ class ActivityStarter {
             // operations.
             if ((mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0
                     || isDocumentLaunchesIntoExisting(mLaunchFlags)
-                    || mLaunchSingleInstance || mLaunchSingleTask) {
+                    || isLaunchModeOneOf(LAUNCH_SINGLE_INSTANCE, LAUNCH_SINGLE_TASK)) {
                 final TaskRecord task = reusedActivity.getTask();
 
                 // In this situation we want to remove all activities from the task up to the one
@@ -1086,7 +1315,7 @@ class ActivityStarter {
                 }
             }
 
-            sendPowerHintForLaunchStartIfNeeded(false /* forceSend */, reusedActivity);
+            mSupervisor.sendPowerHintForLaunchStartIfNeeded(false /* forceSend */, reusedActivity);
 
             reusedActivity = setTargetStackAndMoveToFrontIfNeeded(reusedActivity);
 
@@ -1106,17 +1335,21 @@ class ActivityStarter {
                 resumeTargetStackIfNeeded();
                 return START_RETURN_INTENT_TO_CALLER;
             }
-            setTaskFromIntentActivity(reusedActivity);
 
-            if (!mAddingToTask && mReuseTask == null) {
-                // We didn't do anything...  but it was needed (a.k.a., client don't use that
-                // intent!)  And for paranoia, make sure we have correctly resumed the top activity.
-                resumeTargetStackIfNeeded();
-                if (outActivity != null && outActivity.length > 0) {
-                    outActivity[0] = reusedActivity;
+            if (reusedActivity != null) {
+                setTaskFromIntentActivity(reusedActivity);
+
+                if (!mAddingToTask && mReuseTask == null) {
+                    // We didn't do anything...  but it was needed (a.k.a., client don't use that
+                    // intent!)  And for paranoia, make sure we have correctly resumed the top activity.
+
+                    resumeTargetStackIfNeeded();
+                    if (outActivity != null && outActivity.length > 0) {
+                        outActivity[0] = reusedActivity;
+                    }
+
+                    return mMovedToFront ? START_TASK_TO_FRONT : START_DELIVERED_TO_TOP;
                 }
-
-                return START_TASK_TO_FRONT;
             }
         }
 
@@ -1135,14 +1368,14 @@ class ActivityStarter {
         // If the activity being launched is the same as the one currently at the top, then
         // we need to check if it should only be launched once.
         final ActivityStack topStack = mSupervisor.mFocusedStack;
-        final ActivityRecord topFocused = topStack.topActivity();
+        final ActivityRecord topFocused = topStack.getTopActivity();
         final ActivityRecord top = topStack.topRunningNonDelayedActivityLocked(mNotTop);
         final boolean dontStart = top != null && mStartActivity.resultTo == null
                 && top.realActivity.equals(mStartActivity.realActivity)
                 && top.userId == mStartActivity.userId
                 && top.app != null && top.app.thread != null
                 && ((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
-                || mLaunchSingleTop || mLaunchSingleTask);
+                || isLaunchModeOneOf(LAUNCH_SINGLE_TOP, LAUNCH_SINGLE_TASK));
         if (dontStart) {
             // For paranoia, make sure we have correctly resumed the top activity.
             topStack.mLastPausedActivity = null;
@@ -1160,8 +1393,8 @@ class ActivityStarter {
 
             // Don't use mStartActivity.task to show the toast. We're not starting a new activity
             // but reusing 'top'. Fields in mStartActivity may not be fully initialized.
-            mSupervisor.handleNonResizableTaskIfNeeded(top.getTask(), preferredLaunchStackId,
-                    preferredLaunchDisplayId, topStack.mStackId);
+            mSupervisor.handleNonResizableTaskIfNeeded(top.getTask(), preferredWindowingMode,
+                    preferredLaunchDisplayId, topStack);
 
             return START_DELIVERED_TO_TOP;
         }
@@ -1175,8 +1408,7 @@ class ActivityStarter {
         if (mStartActivity.resultTo == null && mInTask == null && !mAddingToTask
                 && (mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0) {
             newTask = true;
-            result = setTaskFromReuseOrCreateNewTask(
-                    taskToAffiliate, preferredLaunchStackId, topStack);
+            result = setTaskFromReuseOrCreateNewTask(taskToAffiliate, topStack);
         } else if (mSourceRecord != null) {
             result = setTaskFromSourceRecord();
         } else if (mInTask != null) {
@@ -1194,19 +1426,15 @@ class ActivityStarter {
                 mIntent, mStartActivity.getUriPermissionsLocked(), mStartActivity.userId);
         mService.grantEphemeralAccessLocked(mStartActivity.userId, mIntent,
                 mStartActivity.appInfo.uid, UserHandle.getAppId(mCallingUid));
-        if (mSourceRecord != null) {
-            mStartActivity.getTask().setTaskToReturnTo(mSourceRecord);
-        }
         if (newTask) {
-            EventLog.writeEvent(
-                    EventLogTags.AM_CREATE_TASK, mStartActivity.userId,
+            EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, mStartActivity.userId,
                     mStartActivity.getTask().taskId);
         }
         ActivityStack.logStartActivity(
                 EventLogTags.AM_CREATE_ACTIVITY, mStartActivity, mStartActivity.getTask());
         mTargetStack.mLastPausedActivity = null;
 
-        sendPowerHintForLaunchStartIfNeeded(false /* forceSend */, mStartActivity);
+        mSupervisor.sendPowerHintForLaunchStartIfNeeded(false /* forceSend */, mStartActivity);
 
         mTargetStack.startActivityLocked(mStartActivity, topFocused, newTask, mKeepCurTransition,
                 mOptions);
@@ -1225,7 +1453,7 @@ class ActivityStarter {
                 mTargetStack.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 // Go ahead and tell window manager to execute app transition for this activity
                 // since the app transition will not be triggered through the resume channel.
-                mWindowManager.executeAppTransition();
+                mService.mWindowManager.executeAppTransition();
             } else {
                 // If the target stack was not previously focusable (previous top running activity
                 // on that stack was not visible) then any prior calls to move the stack to the
@@ -1238,21 +1466,67 @@ class ActivityStarter {
                 mSupervisor.resumeFocusedStackTopActivityLocked(mTargetStack, mStartActivity,
                         mOptions);
             }
-        } else {
-            mTargetStack.addRecentActivityLocked(mStartActivity);
+        } else if (mStartActivity != null) {
+            mSupervisor.mRecentTasks.add(mStartActivity.getTask());
         }
         mSupervisor.updateUserStackLocked(mStartActivity.userId, mTargetStack);
 
-        mSupervisor.handleNonResizableTaskIfNeeded(mStartActivity.getTask(), preferredLaunchStackId,
-                preferredLaunchDisplayId, mTargetStack.mStackId);
+        mSupervisor.handleNonResizableTaskIfNeeded(mStartActivity.getTask(), preferredWindowingMode,
+                preferredLaunchDisplayId, mTargetStack);
 
         return START_SUCCESS;
+    }
+
+    /**
+     * Resets the {@link ActivityStarter} state.
+     * @param clearRequest whether the request should be reset to default values.
+     */
+    void reset(boolean clearRequest) {
+        mStartActivity = null;
+        mIntent = null;
+        mCallingUid = -1;
+        mOptions = null;
+
+        mLaunchTaskBehind = false;
+        mLaunchFlags = 0;
+        mLaunchMode = INVALID_LAUNCH_MODE;
+
+        mLaunchParams.reset();
+
+        mNotTop = null;
+        mDoResume = false;
+        mStartFlags = 0;
+        mSourceRecord = null;
+        mPreferredDisplayId = INVALID_DISPLAY;
+
+        mInTask = null;
+        mAddingToTask = false;
+        mReuseTask = null;
+
+        mNewTaskInfo = null;
+        mNewTaskIntent = null;
+        mSourceStack = null;
+
+        mTargetStack = null;
+        mMovedToFront = false;
+        mNoAnimation = false;
+        mKeepCurTransition = false;
+        mAvoidMoveToFront = false;
+
+        mVoiceSession = null;
+        mVoiceInteractor = null;
+
+        mIntentDelivered = false;
+
+        if (clearRequest) {
+            mRequest.reset();
+        }
     }
 
     private void setInitialState(ActivityRecord r, ActivityOptions options, TaskRecord inTask,
             boolean doResume, int startFlags, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor) {
-        reset();
+        reset(false /* clearRequest */);
 
         mStartActivity = r;
         mIntent = r.intent;
@@ -1262,17 +1536,20 @@ class ActivityStarter {
         mVoiceSession = voiceSession;
         mVoiceInteractor = voiceInteractor;
 
-        mSourceDisplayId = getSourceDisplayId(mSourceRecord, mStartActivity);
+        mPreferredDisplayId = getPreferedDisplayId(mSourceRecord, mStartActivity, options);
 
-        mLaunchBounds = getOverrideBounds(r, options, inTask);
+        mLaunchParams.reset();
 
-        mLaunchSingleTop = r.launchMode == LAUNCH_SINGLE_TOP;
-        mLaunchSingleInstance = r.launchMode == LAUNCH_SINGLE_INSTANCE;
-        mLaunchSingleTask = r.launchMode == LAUNCH_SINGLE_TASK;
+        mSupervisor.getLaunchParamsController().calculate(inTask, null /*layout*/, r, sourceRecord,
+                options, mLaunchParams);
+
+        mLaunchMode = r.launchMode;
+
         mLaunchFlags = adjustLaunchFlagsToDocumentMode(
-                r, mLaunchSingleInstance, mLaunchSingleTask, mIntent.getFlags());
+                r, LAUNCH_SINGLE_INSTANCE == mLaunchMode,
+                LAUNCH_SINGLE_TASK == mLaunchMode, mIntent.getFlags());
         mLaunchTaskBehind = r.mLaunchTaskBehind
-                && !mLaunchSingleTask && !mLaunchSingleInstance
+                && !isLaunchModeOneOf(LAUNCH_SINGLE_TASK, LAUNCH_SINGLE_INSTANCE)
                 && (mLaunchFlags & FLAG_ACTIVITY_NEW_DOCUMENT) != 0;
 
         sendNewTaskResultRequestIfNeeded();
@@ -1305,19 +1582,24 @@ class ActivityStarter {
             mDoResume = false;
         }
 
-        if (mOptions != null && mOptions.getLaunchTaskId() != -1
-                && mOptions.getTaskOverlay()) {
-            r.mTaskOverlay = true;
-            if (!mOptions.canTaskOverlayResume()) {
-                final TaskRecord task = mSupervisor.anyTaskForIdLocked(mOptions.getLaunchTaskId());
-                final ActivityRecord top = task != null ? task.getTopActivity() : null;
-                if (top != null && top.state != RESUMED) {
+        if (mOptions != null) {
+            if (mOptions.getLaunchTaskId() != -1 && mOptions.getTaskOverlay()) {
+                r.mTaskOverlay = true;
+                if (!mOptions.canTaskOverlayResume()) {
+                    final TaskRecord task = mSupervisor.anyTaskForIdLocked(
+                            mOptions.getLaunchTaskId());
+                    final ActivityRecord top = task != null ? task.getTopActivity() : null;
+                    if (top != null && !top.isState(RESUMED)) {
 
-                    // The caller specifies that we'd like to be avoided to be moved to the front,
-                    // so be it!
-                    mDoResume = false;
-                    mAvoidMoveToFront = true;
+                        // The caller specifies that we'd like to be avoided to be moved to the
+                        // front, so be it!
+                        mDoResume = false;
+                        mAvoidMoveToFront = true;
+                    }
                 }
+            } else if (mOptions.getAvoidMoveToFront()) {
+                mDoResume = false;
+                mAvoidMoveToFront = true;
             }
         }
 
@@ -1382,7 +1664,7 @@ class ActivityStarter {
 
             // If this task is empty, then we are adding the first activity -- it
             // determines the root, and must be launching as a NEW_TASK.
-            if (mLaunchSingleInstance || mLaunchSingleTask) {
+            if (isLaunchModeOneOf(LAUNCH_SINGLE_INSTANCE, LAUNCH_SINGLE_TASK)) {
                 if (!baseIntent.getComponent().equals(mStartActivity.intent.getComponent())) {
                     ActivityOptions.abort(mOptions);
                     throw new IllegalArgumentException("Trying to launch singleInstance/Task "
@@ -1425,7 +1707,7 @@ class ActivityStarter {
             // in any task/stack, however it could launch other activities like ResolverActivity,
             // and we want those to stay in the original task.
             if ((mStartActivity.isResolverActivity() || mStartActivity.noDisplay) && mSourceRecord != null
-                    && mSourceRecord.isFreeform())  {
+                    && mSourceRecord.inFreeformWindowingMode())  {
                 mAddingToTask = true;
             }
         }
@@ -1444,7 +1726,7 @@ class ActivityStarter {
                 // instance...  this new activity it is starting must go on its
                 // own task.
                 mLaunchFlags |= FLAG_ACTIVITY_NEW_TASK;
-            } else if (mLaunchSingleInstance || mLaunchSingleTask) {
+            } else if (isLaunchModeOneOf(LAUNCH_SINGLE_INSTANCE, LAUNCH_SINGLE_TASK)) {
                 // The activity being started is a single instance...  it always
                 // gets launched into its own task.
                 mLaunchFlags |= FLAG_ACTIVITY_NEW_TASK;
@@ -1495,7 +1777,7 @@ class ActivityStarter {
         // launch this as a new task behind the current one.
         boolean putIntoExistingTask = ((mLaunchFlags & FLAG_ACTIVITY_NEW_TASK) != 0 &&
                 (mLaunchFlags & FLAG_ACTIVITY_MULTIPLE_TASK) == 0)
-                || mLaunchSingleInstance || mLaunchSingleTask;
+                || isLaunchModeOneOf(LAUNCH_SINGLE_INSTANCE, LAUNCH_SINGLE_TASK);
         // If bring to front is requested, and no result is requested and we have not been given
         // an explicit task to launch in to, and we can find a task that was started with this
         // same component, then instead of launching bring that one to the front.
@@ -1505,19 +1787,19 @@ class ActivityStarter {
             final TaskRecord task = mSupervisor.anyTaskForIdLocked(mOptions.getLaunchTaskId());
             intentActivity = task != null ? task.getTopActivity() : null;
         } else if (putIntoExistingTask) {
-            if (mLaunchSingleInstance) {
+            if (LAUNCH_SINGLE_INSTANCE == mLaunchMode) {
                 // There can be one and only one instance of single instance activity in the
                 // history, and it is always in its own unique task, so we do a special search.
                intentActivity = mSupervisor.findActivityLocked(mIntent, mStartActivity.info,
-                       mStartActivity.isHomeActivity());
+                       mStartActivity.isActivityTypeHome());
             } else if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
                 // For the launch adjacent case we only want to put the activity in an existing
                 // task if the activity already exists in the history.
                 intentActivity = mSupervisor.findActivityLocked(mIntent, mStartActivity.info,
-                        !mLaunchSingleTask);
+                        !(LAUNCH_SINGLE_TASK == mLaunchMode));
             } else {
                 // Otherwise find the best task to put the activity in.
-                intentActivity = mSupervisor.findTaskLocked(mStartActivity, mSourceDisplayId);
+                intentActivity = mSupervisor.findTaskLocked(mStartActivity, mPreferredDisplayId);
             }
         }
         return intentActivity;
@@ -1525,10 +1807,12 @@ class ActivityStarter {
 
     /**
      * Returns the ID of the display to use for a new activity. If the device is in VR mode,
-     * then return the Vr mode's virtual display ID. If not, if the source activity has
-     * a explicit display ID set, use that to launch the activity.
+     * then return the Vr mode's virtual display ID. If not,  if the activity was started with
+     * a launchDisplayId, use that. Otherwise, if the source activity has a explicit display ID
+     * set, use that to launch the activity.
      */
-    private int getSourceDisplayId(ActivityRecord sourceRecord, ActivityRecord startingActivity) {
+    private int getPreferedDisplayId(
+            ActivityRecord sourceRecord, ActivityRecord startingActivity, ActivityOptions options) {
         // Check if the Activity is a VR activity. If so, the activity should be launched in
         // main display.
         if (startingActivity != null && startingActivity.requestedVrComponent != null) {
@@ -1541,8 +1825,14 @@ class ActivityStarter {
             if (DEBUG_STACK) {
                 Slog.d(TAG, "getSourceDisplayId :" + displayId);
             }
-            mUsingVr2dDisplay = true;
             return displayId;
+        }
+
+        // If the caller requested a display, prefer that display.
+        final int launchDisplayId =
+                (options != null) ? options.getLaunchDisplayId() : INVALID_DISPLAY;
+        if (launchDisplayId != INVALID_DISPLAY) {
+            return launchDisplayId;
         }
 
         displayId = sourceRecord != null ? sourceRecord.getDisplayId() : INVALID_DISPLAY;
@@ -1575,13 +1865,12 @@ class ActivityStarter {
                 && (topTask != intentActivity.getTask() || topTask != focusStack.topTask())
                 && !mAvoidMoveToFront) {
             mStartActivity.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-            if (mSourceRecord == null || (mSourceStack.topActivity() != null &&
-                    mSourceStack.topActivity().getTask() == mSourceRecord.getTask())) {
+            if (mSourceRecord == null || (mSourceStack.getTopActivity() != null &&
+                    mSourceStack.getTopActivity().getTask() == mSourceRecord.getTask())) {
                 // We really do want to push this one into the user's face, right now.
                 if (mLaunchTaskBehind && mSourceRecord != null) {
                     intentActivity.setTaskToAffiliateWith(mSourceRecord.getTask());
                 }
-                mMovedOtherTask = true;
 
                 // If the launch flags carry both NEW_TASK and CLEAR_TASK, the task's activities
                 // will be cleared soon by ActivityStarter in setTaskFromIntentActivity().
@@ -1603,12 +1892,11 @@ class ActivityStarter {
                         mTargetStack.moveTaskToFrontLocked(intentTask, mNoAnimation, mOptions,
                                 mStartActivity.appTimeTracker, "bringingFoundTaskToFront");
                         mMovedToFront = true;
-                    } else if (launchStack.mStackId == DOCKED_STACK_ID
-                            || launchStack.mStackId == FULLSCREEN_WORKSPACE_STACK_ID) {
+                    } else if (launchStack.inSplitScreenWindowingMode()) {
                         if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
                             // If we want to launch adjacent and mTargetStack is not the computed
                             // launch stack - move task to top of computed stack.
-                            intentTask.reparent(launchStack.mStackId, ON_TOP,
+                            intentTask.reparent(launchStack, ON_TOP,
                                     REPARENT_MOVE_STACK_TO_FRONT, ANIMATE, DEFER_RESUME,
                                     "launchToSide");
                         } else {
@@ -1620,22 +1908,23 @@ class ActivityStarter {
                                     mNoAnimation, mOptions, mStartActivity.appTimeTracker,
                                     "bringToFrontInsteadOfAdjacentLaunch");
                         }
-                        mMovedToFront = true;
+                        mMovedToFront = launchStack != launchStack.getDisplay()
+                                .getTopStackInWindowingMode(launchStack.getWindowingMode());
                     } else if (launchStack.mDisplayId != mTargetStack.mDisplayId) {
                         // Target and computed stacks are on different displays and we've
                         // found a matching task - move the existing instance to that display and
                         // move it to front.
-                        intentActivity.getTask().reparent(launchStack.mStackId, ON_TOP,
+                        intentActivity.getTask().reparent(launchStack, ON_TOP,
                                 REPARENT_MOVE_STACK_TO_FRONT, ANIMATE, DEFER_RESUME,
                                 "reparentToDisplay");
                         mMovedToFront = true;
-                    } else if (launchStack.getStackId() == StackId.HOME_STACK_ID
-                        && mTargetStack.getStackId() != StackId.HOME_STACK_ID) {
+                    } else if (launchStack.isActivityTypeHome()
+                            && !mTargetStack.isActivityTypeHome()) {
                         // It is possible for the home activity to be in another stack initially.
                         // For example, the activity may have been initially started with an intent
                         // which placed it in the fullscreen stack. To ensure the proper handling of
                         // the activity based on home stack assumptions, we must move it over.
-                        intentActivity.getTask().reparent(launchStack.mStackId, ON_TOP,
+                        intentActivity.getTask().reparent(launchStack, ON_TOP,
                                 REPARENT_MOVE_STACK_TO_FRONT, ANIMATE, DEFER_RESUME,
                                 "reparentingHome");
                         mMovedToFront = true;
@@ -1647,45 +1936,25 @@ class ActivityStarter {
                     intentActivity.showStartingWindow(null /* prev */, false /* newTask */,
                             true /* taskSwitch */);
                 }
-                updateTaskReturnToType(intentActivity.getTask(), mLaunchFlags, focusStack);
             }
         }
+        // Need to update mTargetStack because if task was moved out of it, the original stack may
+        // be destroyed.
+        mTargetStack = intentActivity.getStack();
         if (!mMovedToFront && mDoResume) {
             if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Bring to front target: " + mTargetStack
                     + " from " + intentActivity);
             mTargetStack.moveToFront("intentActivityFound");
         }
 
-        mSupervisor.handleNonResizableTaskIfNeeded(intentActivity.getTask(), INVALID_STACK_ID,
-                DEFAULT_DISPLAY, mTargetStack.mStackId);
+        mSupervisor.handleNonResizableTaskIfNeeded(intentActivity.getTask(),
+                WINDOWING_MODE_UNDEFINED, DEFAULT_DISPLAY, mTargetStack);
 
         // If the caller has requested that the target task be reset, then do so.
         if ((mLaunchFlags & FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
             return mTargetStack.resetTaskIfNeededLocked(intentActivity, mStartActivity);
         }
         return intentActivity;
-    }
-
-    private void updateTaskReturnToType(
-            TaskRecord task, int launchFlags, ActivityStack focusedStack) {
-        if ((launchFlags & (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
-                == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
-            // Caller wants to appear on home activity.
-            task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
-            return;
-        } else if (focusedStack == null || focusedStack.isHomeStack()) {
-            // Task will be launched over the home stack, so return home.
-            task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
-            return;
-        } else if (focusedStack != null && focusedStack != task.getStack() &&
-                focusedStack.isAssistantStack()) {
-            // Task was launched over the assistant stack, so return there
-            task.setTaskToReturnTo(ASSISTANT_ACTIVITY_TYPE);
-            return;
-        }
-
-        // Else we are coming from an application stack so return to an application.
-        task.setTaskToReturnTo(APPLICATION_ACTIVITY_TYPE);
     }
 
     private void setTaskFromIntentActivity(ActivityRecord intentActivity) {
@@ -1704,13 +1973,8 @@ class ActivityStarter {
             task.performClearTaskLocked();
             mReuseTask = task;
             mReuseTask.setIntent(mStartActivity);
-
-            // When we clear the task - focus will be adjusted, which will bring another task
-            // to top before we launch the activity we need. This will temporary swap their
-            // mTaskToReturnTo values and we don't want to overwrite them accidentally.
-            mMovedOtherTask = true;
         } else if ((mLaunchFlags & FLAG_ACTIVITY_CLEAR_TOP) != 0
-                || mLaunchSingleInstance || mLaunchSingleTask) {
+                || isLaunchModeOneOf(LAUNCH_SINGLE_INSTANCE, LAUNCH_SINGLE_TASK)) {
             ActivityRecord top = intentActivity.getTask().performClearTaskLocked(mStartActivity,
                     mLaunchFlags);
             if (top == null) {
@@ -1729,7 +1993,7 @@ class ActivityStarter {
                     // Target stack got cleared when we all activities were removed above.
                     // Go ahead and reset it.
                     mTargetStack = computeStackFocus(mSourceRecord, false /* newTask */,
-                            null /* bounds */, mLaunchFlags, mOptions);
+                            mLaunchFlags, mOptions);
                     mTargetStack.addTask(task,
                             !mLaunchTaskBehind /* toTop */, "startActivityUnchecked");
                 }
@@ -1739,7 +2003,8 @@ class ActivityStarter {
             // so we take that as a request to bring the task to the foreground. If the top
             // activity in the task is the root activity, deliver this new intent to it if it
             // desires.
-            if (((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0 || mLaunchSingleTop)
+            if (((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
+                        || LAUNCH_SINGLE_TOP == mLaunchMode)
                     && intentActivity.realActivity.equals(mStartActivity.realActivity)) {
                 if (intentActivity.frontOfTask) {
                     intentActivity.getTask().setIntent(mStartActivity);
@@ -1778,9 +2043,8 @@ class ActivityStarter {
     }
 
     private int setTaskFromReuseOrCreateNewTask(
-            TaskRecord taskToAffiliate, int preferredLaunchStackId, ActivityStack topStack) {
-        mTargetStack = computeStackFocus(
-                mStartActivity, true, mLaunchBounds, mLaunchFlags, mOptions);
+            TaskRecord taskToAffiliate, ActivityStack topStack) {
+        mTargetStack = computeStackFocus(mStartActivity, true, mLaunchFlags, mOptions);
 
         // Do no move the target stack to front yet, as we might bail if
         // isLockTaskModeViolation fails below.
@@ -1790,17 +2054,11 @@ class ActivityStarter {
                     mSupervisor.getNextTaskIdForUserLocked(mStartActivity.userId),
                     mNewTaskInfo != null ? mNewTaskInfo : mStartActivity.info,
                     mNewTaskIntent != null ? mNewTaskIntent : mIntent, mVoiceSession,
-                    mVoiceInteractor, !mLaunchTaskBehind /* toTop */, mStartActivity.mActivityType);
+                    mVoiceInteractor, !mLaunchTaskBehind /* toTop */, mStartActivity, mSourceRecord,
+                    mOptions);
             addOrReparentStartingActivity(task, "setTaskFromReuseOrCreateNewTask - mReuseTask");
-            if (mLaunchBounds != null) {
-                final int stackId = mTargetStack.mStackId;
-                if (StackId.resizeStackWithLaunchBounds(stackId)) {
-                    mService.resizeStack(
-                            stackId, mLaunchBounds, true, !PRESERVE_WINDOWS, ANIMATE, -1);
-                } else {
-                    mStartActivity.getTask().updateOverrideConfiguration(mLaunchBounds);
-                }
-            }
+            updateBounds(mStartActivity.getTask(), mLaunchParams.mBounds);
+
             if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
                     + " in new task " + mStartActivity.getTask());
         } else {
@@ -1811,18 +2069,11 @@ class ActivityStarter {
             mStartActivity.setTaskToAffiliateWith(taskToAffiliate);
         }
 
-        if (mSupervisor.isLockTaskModeViolation(mStartActivity.getTask())) {
+        if (mService.getLockTaskController().isLockTaskModeViolation(mStartActivity.getTask())) {
             Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
             return START_RETURN_LOCK_TASK_MODE_VIOLATION;
         }
 
-        if (!mMovedOtherTask) {
-            // If stack id is specified in activity options, usually it means that activity is
-            // launched not from currently focused stack (e.g. from SysUI or from shell) - in
-            // that case we check the target stack.
-            updateTaskReturnToType(mStartActivity.getTask(), mLaunchFlags,
-                    preferredLaunchStackId != INVALID_STACK_ID ? mTargetStack : topStack);
-        }
         if (mDoResume) {
             mTargetStack.moveToFront("reuseOrNewTask");
         }
@@ -1841,7 +2092,7 @@ class ActivityStarter {
     }
 
     private int setTaskFromSourceRecord() {
-        if (mSupervisor.isLockTaskModeViolation(mSourceRecord.getTask())) {
+        if (mService.getLockTaskController().isLockTaskModeViolation(mSourceRecord.getTask())) {
             Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
             return START_RETURN_LOCK_TASK_MODE_VIOLATION;
         }
@@ -1877,8 +2128,8 @@ class ActivityStarter {
         if (mTargetStack == null) {
             mTargetStack = sourceStack;
         } else if (mTargetStack != sourceStack) {
-            sourceTask.reparent(mTargetStack.mStackId, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT,
-                    !ANIMATE, DEFER_RESUME, "launchToSide");
+            sourceTask.reparent(mTargetStack, ON_TOP, REPARENT_MOVE_STACK_TO_FRONT, !ANIMATE,
+                    DEFER_RESUME, "launchToSide");
         }
 
         final TaskRecord topTask = mTargetStack.topTask();
@@ -1935,7 +2186,7 @@ class ActivityStarter {
     private int setTaskFromInTask() {
         // The caller is asking that the new activity be started in an explicit
         // task it has provided to us.
-        if (mSupervisor.isLockTaskModeViolation(mInTask)) {
+        if (mService.getLockTaskController().isLockTaskModeViolation(mInTask)) {
             Slog.e(TAG, "Attempted Lock Task Mode violation mStartActivity=" + mStartActivity);
             return START_RETURN_LOCK_TASK_MODE_VIOLATION;
         }
@@ -1948,7 +2199,7 @@ class ActivityStarter {
         if (top != null && top.realActivity.equals(mStartActivity.realActivity)
                 && top.userId == mStartActivity.userId) {
             if ((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
-                    || mLaunchSingleTop || mLaunchSingleTask) {
+                    || isLaunchModeOneOf(LAUNCH_SINGLE_TOP, LAUNCH_SINGLE_TASK)) {
                 mTargetStack.moveTaskToFrontLocked(mInTask, mNoAnimation, mOptions,
                         mStartActivity.appTimeTracker, "inTaskToFront");
                 if ((mStartFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
@@ -1970,18 +2221,16 @@ class ActivityStarter {
             return START_TASK_TO_FRONT;
         }
 
-        if (mLaunchBounds != null) {
-            mInTask.updateOverrideConfiguration(mLaunchBounds);
-            int stackId = mInTask.getLaunchStackId();
-            if (stackId != mInTask.getStackId()) {
-                mInTask.reparent(stackId, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, !ANIMATE,
+        if (!mLaunchParams.mBounds.isEmpty()) {
+            // TODO: Shouldn't we already know what stack to use by the time we get here?
+            ActivityStack stack = mSupervisor.getLaunchStack(null, null, mInTask, ON_TOP);
+            if (stack != mInTask.getStack()) {
+                mInTask.reparent(stack, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, !ANIMATE,
                         DEFER_RESUME, "inTaskToFront");
-                stackId = mInTask.getStackId();
                 mTargetStack = mInTask.getStack();
             }
-            if (StackId.resizeStackWithLaunchBounds(stackId)) {
-                mService.resizeStack(stackId, mLaunchBounds, true, !PRESERVE_WINDOWS, ANIMATE, -1);
-            }
+
+            updateBounds(mInTask, mLaunchParams.mBounds);
         }
 
         mTargetStack.moveTaskToFrontLocked(
@@ -1994,16 +2243,29 @@ class ActivityStarter {
         return START_SUCCESS;
     }
 
+    @VisibleForTesting
+    void updateBounds(TaskRecord task, Rect bounds) {
+        if (bounds.isEmpty()) {
+            return;
+        }
+
+        final ActivityStack stack = task.getStack();
+        if (stack != null && stack.resizeStackWithLaunchBounds()) {
+            mService.resizeStack(stack.mStackId, bounds, true, !PRESERVE_WINDOWS, ANIMATE, -1);
+        } else {
+            task.updateOverrideConfiguration(bounds);
+        }
+    }
+
     private void setTaskToCurrentTopOrCreateNewTask() {
-        mTargetStack = computeStackFocus(mStartActivity, false, null /* bounds */, mLaunchFlags,
-                mOptions);
+        mTargetStack = computeStackFocus(mStartActivity, false, mLaunchFlags, mOptions);
         if (mDoResume) {
             mTargetStack.moveToFront("addingToTopTask");
         }
-        final ActivityRecord prev = mTargetStack.topActivity();
+        final ActivityRecord prev = mTargetStack.getTopActivity();
         final TaskRecord task = (prev != null) ? prev.getTask() : mTargetStack.createTaskRecord(
                 mSupervisor.getNextTaskIdForUserLocked(mStartActivity.userId), mStartActivity.info,
-                mIntent, null, null, true, mStartActivity.mActivityType);
+                mIntent, null, null, true, mStartActivity, mSourceRecord, mOptions);
         addOrReparentStartingActivity(task, "setTaskToCurrentTopOrCreateNewTask");
         mTargetStack.positionChildWindowContainerAtTop(task);
         if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
@@ -2045,22 +2307,8 @@ class ActivityStarter {
         return launchFlags;
     }
 
-    final void doPendingActivityLaunchesLocked(boolean doResume) {
-        while (!mPendingActivityLaunches.isEmpty()) {
-            final PendingActivityLaunch pal = mPendingActivityLaunches.remove(0);
-            final boolean resume = doResume && mPendingActivityLaunches.isEmpty();
-            try {
-                startActivity(pal.r, pal.sourceRecord, null, null, pal.startFlags, resume, null,
-                        null, null /*outRecords*/);
-            } catch (Exception e) {
-                Slog.e(TAG, "Exception during pending activity launch pal=" + pal, e);
-                pal.sendErrorResult(e.getMessage());
-            }
-        }
-    }
-
-    private ActivityStack computeStackFocus(ActivityRecord r, boolean newTask, Rect bounds,
-            int launchFlags, ActivityOptions aOptions) {
+    private ActivityStack computeStackFocus(ActivityRecord r, boolean newTask, int launchFlags,
+            ActivityOptions aOptions) {
         final TaskRecord task = r.getTask();
         ActivityStack stack = getLaunchStack(r, launchFlags, task, aOptions);
         if (stack != null) {
@@ -2087,33 +2335,30 @@ class ActivityStarter {
             return mSupervisor.mFocusedStack;
         }
 
-        if (mSourceDisplayId != DEFAULT_DISPLAY) {
+        if (mPreferredDisplayId != DEFAULT_DISPLAY) {
             // Try to put the activity in a stack on a secondary display.
-            stack = mSupervisor.getValidLaunchStackOnDisplay(mSourceDisplayId, r);
+            stack = mSupervisor.getValidLaunchStackOnDisplay(mPreferredDisplayId, r);
             if (stack == null) {
                 // If source display is not suitable - look for topmost valid stack in the system.
                 if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
-                        "computeStackFocus: Can't launch on mSourceDisplayId=" + mSourceDisplayId
-                                + ", looking on all displays.");
-                stack = mSupervisor.getNextValidLaunchStackLocked(r, mSourceDisplayId);
+                        "computeStackFocus: Can't launch on mPreferredDisplayId="
+                                + mPreferredDisplayId + ", looking on all displays.");
+                stack = mSupervisor.getNextValidLaunchStackLocked(r, mPreferredDisplayId);
             }
         }
         if (stack == null) {
             // We first try to put the task in the first dynamic stack on home display.
-            final ArrayList<ActivityStack> homeDisplayStacks = mSupervisor.mHomeStack.mStacks;
-            for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                stack = homeDisplayStacks.get(stackNdx);
-                if (isDynamicStack(stack.mStackId)) {
+            final ActivityDisplay display = mSupervisor.getDefaultDisplay();
+            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+                stack = display.getChildAt(stackNdx);
+                if (!stack.isOnHomeDisplay()) {
                     if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
                             "computeStackFocus: Setting focused stack=" + stack);
                     return stack;
                 }
             }
             // If there is no suitable dynamic stack then we figure out which static stack to use.
-            final int stackId = task != null ? task.getLaunchStackId() :
-                    bounds != null ? FREEFORM_WORKSPACE_STACK_ID :
-                            FULLSCREEN_WORKSPACE_STACK_ID;
-            stack = mSupervisor.getStack(stackId, CREATE_IF_NEEDED, ON_TOP);
+            stack = mSupervisor.getLaunchStack(r, aOptions, task, ON_TOP);
         }
         if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS, "computeStackFocus: New stack r="
                 + r + " stackId=" + stack.mStackId);
@@ -2121,37 +2366,39 @@ class ActivityStarter {
     }
 
     /** Check if provided activity record can launch in currently focused stack. */
+    // TODO: This method can probably be consolidated into getLaunchStack() below.
     private boolean canLaunchIntoFocusedStack(ActivityRecord r, boolean newTask) {
         final ActivityStack focusedStack = mSupervisor.mFocusedStack;
-        final int focusedStackId = mSupervisor.mFocusedStack.mStackId;
         final boolean canUseFocusedStack;
-        switch (focusedStackId) {
-            case FULLSCREEN_WORKSPACE_STACK_ID:
-                // The fullscreen stack can contain any task regardless of if the task is resizeable
-                // or not. So, we let the task go in the fullscreen task if it is the focus stack.
-                canUseFocusedStack = true;
-                break;
-            case ASSISTANT_STACK_ID:
-                canUseFocusedStack = r.isAssistantActivity();
-                break;
-            case DOCKED_STACK_ID:
-                // Any activity which supports split screen can go in the docked stack.
-                canUseFocusedStack = r.supportsSplitScreen();
-                break;
-            case FREEFORM_WORKSPACE_STACK_ID:
-                // Any activity which supports freeform can go in the freeform stack.
-                canUseFocusedStack = r.supportsFreeform();
-                break;
-            default:
-                // Dynamic stacks behave similarly to the fullscreen stack and can contain any
-                // resizeable task.
-                canUseFocusedStack = isDynamicStack(focusedStackId)
-                        && r.canBeLaunchedOnDisplay(focusedStack.mDisplayId);
+        if (focusedStack.isActivityTypeAssistant()) {
+            canUseFocusedStack = r.isActivityTypeAssistant();
+        } else {
+            switch (focusedStack.getWindowingMode()) {
+                case WINDOWING_MODE_FULLSCREEN:
+                    // The fullscreen stack can contain any task regardless of if the task is
+                    // resizeable or not. So, we let the task go in the fullscreen task if it is the
+                    // focus stack.
+                    canUseFocusedStack = true;
+                    break;
+                case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
+                case WINDOWING_MODE_SPLIT_SCREEN_SECONDARY:
+                    // Any activity which supports split screen can go in the docked stack.
+                    canUseFocusedStack = r.supportsSplitScreenWindowingMode();
+                    break;
+                case WINDOWING_MODE_FREEFORM:
+                    // Any activity which supports freeform can go in the freeform stack.
+                    canUseFocusedStack = r.supportsFreeform();
+                    break;
+                default:
+                    // Dynamic stacks behave similarly to the fullscreen stack and can contain any
+                    // resizeable task.
+                    canUseFocusedStack = !focusedStack.isOnHomeDisplay()
+                            && r.canBeLaunchedOnDisplay(focusedStack.mDisplayId);
+            }
         }
-
         return canUseFocusedStack && !newTask
-                // We strongly prefer to launch activities on the same display as their source.
-                && (mSourceDisplayId == focusedStack.mDisplayId);
+                // Using the focus stack isn't important enough to override the preferred display.
+                && (mPreferredDisplayId == focusedStack.mDisplayId);
     }
 
     private ActivityStack getLaunchStack(ActivityRecord r, int launchFlags, TaskRecord task,
@@ -2161,55 +2408,13 @@ class ActivityStarter {
             return mReuseTask.getStack();
         }
 
-        // If the activity is of a specific type, return the associated stack, creating it if
-        // necessary
-        if (r.isHomeActivity()) {
-            return mSupervisor.mHomeStack;
-        }
-        if (r.isRecentsActivity()) {
-            return mSupervisor.getStack(RECENTS_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
-        }
-        if (r.isAssistantActivity()) {
-            return mSupervisor.getStack(ASSISTANT_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
-        }
-
-        final int launchDisplayId =
-                (aOptions != null) ? aOptions.getLaunchDisplayId() : INVALID_DISPLAY;
-
-        final int launchStackId =
-                (aOptions != null) ? aOptions.getLaunchStackId() : INVALID_STACK_ID;
-
-        if (launchStackId != INVALID_STACK_ID && launchDisplayId != INVALID_DISPLAY) {
-            throw new IllegalArgumentException(
-                    "Stack and display id can't be set at the same time.");
-        }
-
-        if (isValidLaunchStackId(launchStackId, launchDisplayId, r)) {
-            return mSupervisor.getStack(launchStackId, CREATE_IF_NEEDED, ON_TOP);
-        }
-        if (launchStackId == DOCKED_STACK_ID) {
-            // The preferred launch stack is the docked stack, but it isn't a valid launch stack
-            // for this activity, so we put the activity in the fullscreen stack.
-            return mSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID, CREATE_IF_NEEDED, ON_TOP);
-        }
-        if (launchDisplayId != INVALID_DISPLAY) {
-            // Stack id has higher priority than display id.
-            return mSupervisor.getValidLaunchStackOnDisplay(launchDisplayId, r);
-        }
-
-        // If we are using Vr2d display, find the virtual display stack.
-        if (mUsingVr2dDisplay) {
-            ActivityStack as = mSupervisor.getValidLaunchStackOnDisplay(mSourceDisplayId, r);
-            if (DEBUG_STACK) {
-                Slog.v(TAG, "Launch stack for app: " + r.toString() +
-                    ", on virtual display stack:" + as.toString());
-            }
-            return as;
-        }
-
         if (((launchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) == 0)
-                 || mSourceDisplayId != DEFAULT_DISPLAY) {
-            return null;
+                 || mPreferredDisplayId != DEFAULT_DISPLAY) {
+            // We don't pass in the default display id into the get launch stack call so it can do a
+            // full resolution.
+            final int candidateDisplay =
+                    mPreferredDisplayId != DEFAULT_DISPLAY ? mPreferredDisplayId : INVALID_DISPLAY;
+            return mSupervisor.getLaunchStack(r, aOptions, task, ON_TOP, candidateDisplay);
         }
         // Otherwise handle adjacent launch.
 
@@ -2227,20 +2432,21 @@ class ActivityStarter {
                 return mSupervisor.mFocusedStack;
             }
 
-            if (parentStack != null && parentStack.isDockedStack()) {
+            if (parentStack != null && parentStack.inSplitScreenPrimaryWindowingMode()) {
                 // If parent was in docked stack, the natural place to launch another activity
                 // will be fullscreen, so it can appear alongside the docked window.
-                return mSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID, CREATE_IF_NEEDED,
-                        ON_TOP);
+                final int activityType = mSupervisor.resolveActivityType(r, mOptions, task);
+                return parentStack.getDisplay().getOrCreateStack(
+                        WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, activityType, ON_TOP);
             } else {
                 // If the parent is not in the docked stack, we check if there is docked window
                 // and if yes, we will launch into that stack. If not, we just put the new
                 // activity into parent's stack, because we can't find a better place.
-                final ActivityStack dockedStack = mSupervisor.getStack(DOCKED_STACK_ID);
-                if (dockedStack != null
-                        && dockedStack.shouldBeVisible(r) == STACK_INVISIBLE) {
+                final ActivityStack dockedStack =
+                        mSupervisor.getDefaultDisplay().getSplitScreenPrimaryStack();
+                if (dockedStack != null && !dockedStack.shouldBeVisible(r)) {
                     // There is a docked stack, but it isn't visible, so we can't launch into that.
-                    return null;
+                    return mSupervisor.getLaunchStack(r, aOptions, task, ON_TOP);
                 } else {
                     return dockedStack;
                 }
@@ -2248,54 +2454,8 @@ class ActivityStarter {
         }
     }
 
-    boolean isValidLaunchStackId(int stackId, int displayId, ActivityRecord r) {
-        switch (stackId) {
-            case INVALID_STACK_ID:
-            case HOME_STACK_ID:
-                return false;
-            case FULLSCREEN_WORKSPACE_STACK_ID:
-                return true;
-            case FREEFORM_WORKSPACE_STACK_ID:
-                return r.supportsFreeform();
-            case DOCKED_STACK_ID:
-                return r.supportsSplitScreen();
-            case PINNED_STACK_ID:
-                return r.supportsPictureInPicture();
-            case RECENTS_STACK_ID:
-                return r.isRecentsActivity();
-            case ASSISTANT_STACK_ID:
-                return r.isAssistantActivity();
-            default:
-                if (StackId.isDynamicStack(stackId)) {
-                    return r.canBeLaunchedOnDisplay(displayId);
-                }
-                Slog.e(TAG, "isValidLaunchStackId: Unexpected stackId=" + stackId);
-                return false;
-        }
-    }
-
-    Rect getOverrideBounds(ActivityRecord r, ActivityOptions options, TaskRecord inTask) {
-        Rect newBounds = null;
-        if (options != null && (r.isResizeable() || (inTask != null && inTask.isResizeable()))) {
-            if (mSupervisor.canUseActivityOptionsLaunchBounds(
-                    options, options.getLaunchStackId())) {
-                newBounds = TaskRecord.validateBounds(options.getLaunchBounds());
-            }
-        }
-        return newBounds;
-    }
-
-    void setWindowManager(WindowManagerService wm) {
-        mWindowManager = wm;
-    }
-
-    void removePendingActivityLaunchesLocked(ActivityStack stack) {
-        for (int palNdx = mPendingActivityLaunches.size() - 1; palNdx >= 0; --palNdx) {
-            PendingActivityLaunch pal = mPendingActivityLaunches.get(palNdx);
-            if (pal.stack == stack) {
-                mPendingActivityLaunches.remove(palNdx);
-            }
-        }
+    private boolean isLaunchModeOneOf(int mode1, int mode2) {
+        return mode1 == mLaunchMode || mode2 == mLaunchMode;
     }
 
     static boolean isDocumentLaunchesIntoExisting(int flags) {
@@ -2303,35 +2463,170 @@ class ActivityStarter {
                 (flags & Intent.FLAG_ACTIVITY_MULTIPLE_TASK) == 0;
     }
 
-    boolean clearPendingActivityLaunchesLocked(String packageName) {
-        boolean didSomething = false;
-
-        for (int palNdx = mPendingActivityLaunches.size() - 1; palNdx >= 0; --palNdx) {
-            PendingActivityLaunch pal = mPendingActivityLaunches.get(palNdx);
-            ActivityRecord r = pal.r;
-            if (r != null && r.packageName.equals(packageName)) {
-                mPendingActivityLaunches.remove(palNdx);
-                didSomething = true;
-            }
-        }
-        return didSomething;
+    ActivityStarter setIntent(Intent intent) {
+        mRequest.intent = intent;
+        return this;
     }
 
-    void dump(PrintWriter pw, String prefix, String dumpPackage) {
+    @VisibleForTesting
+    Intent getIntent() {
+        return mRequest.intent;
+    }
+
+    ActivityStarter setReason(String reason) {
+        mRequest.reason = reason;
+        return this;
+    }
+
+    ActivityStarter setCaller(IApplicationThread caller) {
+        mRequest.caller = caller;
+        return this;
+    }
+
+    ActivityStarter setEphemeralIntent(Intent intent) {
+        mRequest.ephemeralIntent = intent;
+        return this;
+    }
+
+
+    ActivityStarter setResolvedType(String type) {
+        mRequest.resolvedType = type;
+        return this;
+    }
+
+    ActivityStarter setActivityInfo(ActivityInfo info) {
+        mRequest.activityInfo = info;
+        return this;
+    }
+
+    ActivityStarter setResolveInfo(ResolveInfo info) {
+        mRequest.resolveInfo = info;
+        return this;
+    }
+
+    ActivityStarter setVoiceSession(IVoiceInteractionSession voiceSession) {
+        mRequest.voiceSession = voiceSession;
+        return this;
+    }
+
+    ActivityStarter setVoiceInteractor(IVoiceInteractor voiceInteractor) {
+        mRequest.voiceInteractor = voiceInteractor;
+        return this;
+    }
+
+    ActivityStarter setResultTo(IBinder resultTo) {
+        mRequest.resultTo = resultTo;
+        return this;
+    }
+
+    ActivityStarter setResultWho(String resultWho) {
+        mRequest.resultWho = resultWho;
+        return this;
+    }
+
+    ActivityStarter setRequestCode(int requestCode) {
+        mRequest.requestCode = requestCode;
+        return this;
+    }
+
+    ActivityStarter setCallingPid(int pid) {
+        mRequest.callingPid = pid;
+        return this;
+    }
+
+    ActivityStarter setCallingUid(int uid) {
+        mRequest.callingUid = uid;
+        return this;
+    }
+
+    ActivityStarter setCallingPackage(String callingPackage) {
+        mRequest.callingPackage = callingPackage;
+        return this;
+    }
+
+    ActivityStarter setRealCallingPid(int pid) {
+        mRequest.realCallingPid = pid;
+        return this;
+    }
+
+    ActivityStarter setRealCallingUid(int uid) {
+        mRequest.realCallingUid = uid;
+        return this;
+    }
+
+    ActivityStarter setStartFlags(int startFlags) {
+        mRequest.startFlags = startFlags;
+        return this;
+    }
+
+    ActivityStarter setActivityOptions(SafeActivityOptions options) {
+        mRequest.activityOptions = options;
+        return this;
+    }
+
+    ActivityStarter setActivityOptions(Bundle bOptions) {
+        return setActivityOptions(SafeActivityOptions.fromBundle(bOptions));
+    }
+
+    ActivityStarter setIgnoreTargetSecurity(boolean ignoreTargetSecurity) {
+        mRequest.ignoreTargetSecurity = ignoreTargetSecurity;
+        return this;
+    }
+
+    ActivityStarter setFilterCallingUid(int filterCallingUid) {
+        mRequest.filterCallingUid = filterCallingUid;
+        return this;
+    }
+
+    ActivityStarter setComponentSpecified(boolean componentSpecified) {
+        mRequest.componentSpecified = componentSpecified;
+        return this;
+    }
+
+    ActivityStarter setOutActivity(ActivityRecord[] outActivity) {
+        mRequest.outActivity = outActivity;
+        return this;
+    }
+
+    ActivityStarter setInTask(TaskRecord inTask) {
+        mRequest.inTask = inTask;
+        return this;
+    }
+
+    ActivityStarter setWaitResult(WaitResult result) {
+        mRequest.waitResult = result;
+        return this;
+    }
+
+    ActivityStarter setProfilerInfo(ProfilerInfo info) {
+        mRequest.profilerInfo = info;
+        return this;
+    }
+
+    ActivityStarter setGlobalConfiguration(Configuration config) {
+        mRequest.globalConfig = config;
+        return this;
+    }
+
+    ActivityStarter setUserId(int userId) {
+        mRequest.userId = userId;
+        return this;
+    }
+
+    ActivityStarter setMayWait(int userId) {
+        mRequest.mayWait = true;
+        mRequest.userId = userId;
+
+        return this;
+    }
+
+    ActivityStarter setAllowPendingRemoteAnimationRegistryLookup(boolean allowLookup) {
+        mRequest.allowPendingRemoteAnimationRegistryLookup = allowLookup;
+        return this;
+    }
+
+    void dump(PrintWriter pw, String prefix) {
         prefix = prefix + "  ";
-
-        if (dumpPackage != null) {
-            if ((mLastStartActivityRecord[0] == null ||
-                    !dumpPackage.equals(mLastHomeActivityStartRecord[0].packageName)) &&
-                    (mLastHomeActivityStartRecord[0] == null ||
-                    !dumpPackage.equals(mLastHomeActivityStartRecord[0].packageName)) &&
-                    (mStartActivity == null || !dumpPackage.equals(mStartActivity.packageName))) {
-                pw.print(prefix);
-                pw.println("(nothing)");
-                return;
-            }
-        }
-
         pw.print(prefix);
         pw.print("mCurrentUser=");
         pw.println(mSupervisor.mCurrentUser);
@@ -2348,15 +2643,6 @@ class ActivityStarter {
         if (r != null) {
             pw.print(prefix);
             pw.println("mLastStartActivityRecord:");
-            r.dump(pw, prefix + "  ");
-        }
-        pw.print(prefix);
-        pw.print("mLastHomeActivityStartResult=");
-        pw.println(mLastHomeActivityStartResult);
-        r = mLastHomeActivityStartRecord[0];
-        if (r != null) {
-            pw.print(prefix);
-            pw.println("mLastHomeActivityStartRecord:");
             r.dump(pw, prefix + "  ");
         }
         if (mStartActivity != null) {
@@ -2376,11 +2662,11 @@ class ActivityStarter {
         }
         pw.print(prefix);
         pw.print("mLaunchSingleTop=");
-        pw.print(mLaunchSingleTop);
+        pw.print(LAUNCH_SINGLE_TOP == mLaunchMode);
         pw.print(" mLaunchSingleInstance=");
-        pw.print(mLaunchSingleInstance);
+        pw.print(LAUNCH_SINGLE_INSTANCE == mLaunchMode);
         pw.print(" mLaunchSingleTask=");
-        pw.println(mLaunchSingleTask);
+        pw.println(LAUNCH_SINGLE_TASK == mLaunchMode);
         pw.print(prefix);
         pw.print("mLaunchFlags=0x");
         pw.print(Integer.toHexString(mLaunchFlags));

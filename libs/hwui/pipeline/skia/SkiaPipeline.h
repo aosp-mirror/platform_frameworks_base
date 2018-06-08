@@ -16,10 +16,13 @@
 
 #pragma once
 
-#include "renderthread/CanvasContext.h"
-#include "FrameBuilder.h"
-#include "renderthread/IRenderPipeline.h"
 #include <SkSurface.h>
+#include "FrameBuilder.h"
+#include "hwui/AnimatedImageDrawable.h"
+#include "renderthread/CanvasContext.h"
+#include "renderthread/IRenderPipeline.h"
+
+class SkPictureRecorder;
 
 namespace android {
 namespace uirenderer {
@@ -28,7 +31,7 @@ namespace skiapipeline {
 class SkiaPipeline : public renderthread::IRenderPipeline {
 public:
     SkiaPipeline(renderthread::RenderThread& thread);
-    virtual ~SkiaPipeline() {}
+    virtual ~SkiaPipeline();
 
     TaskManager* getTaskManager() override;
 
@@ -37,17 +40,18 @@ public:
     bool pinImages(std::vector<SkImage*>& mutableImages) override;
     bool pinImages(LsaVector<sk_sp<Bitmap>>& images) override { return false; }
     void unpinImages() override;
+    void onPrepareTree() override;
 
     void renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
-            LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
-            const BakedOpRenderer::LightInfo& lightInfo) override;
+                      LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
+                      const BakedOpRenderer::LightInfo& lightInfo) override;
 
-    bool createOrUpdateLayer(RenderNode* node,
-            const DamageAccumulator& damageAccumulator, bool wideColorGamut) override;
+    bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
+                             bool wideColorGamut, ErrorHandler* errorHandler) override;
 
     void renderFrame(const LayerUpdateQueue& layers, const SkRect& clip,
-            const std::vector< sp<RenderNode> >& nodes, bool opaque, bool wideColorGamut,
-            const Rect &contentDrawBounds, sk_sp<SkSurface> surface);
+                     const std::vector<sp<RenderNode>>& nodes, bool opaque, bool wideColorGamut,
+                     const Rect& contentDrawBounds, sk_sp<SkSurface> surface);
 
     std::vector<VectorDrawableRoot*>* getVectorDrawables() { return &mVectorDrawables; }
 
@@ -55,9 +59,7 @@ public:
 
     static void prepareToDraw(const renderthread::RenderThread& thread, Bitmap* bitmap);
 
-    static void renderLayersImpl(const LayerUpdateQueue& layers, bool opaque, bool wideColorGamut);
-
-    static bool skpCaptureEnabled() { return false; }
+    void renderLayersImpl(const LayerUpdateQueue& layers, bool opaque, bool wideColorGamut);
 
     static float getLightRadius() {
         if (CC_UNLIKELY(Properties::overrideLightRadius > 0)) {
@@ -85,7 +87,7 @@ public:
             Vector3 adjustedLightCenter = mLightCenter;
             if (CC_UNLIKELY(Properties::overrideLightPosY > 0)) {
                 // negated since this shifts up
-                adjustedLightCenter.y = - Properties::overrideLightPosY;
+                adjustedLightCenter.y = -Properties::overrideLightPosY;
             }
             if (CC_UNLIKELY(Properties::overrideLightPosZ > 0)) {
                 adjustedLightCenter.z = Properties::overrideLightPosZ;
@@ -96,7 +98,7 @@ public:
     }
 
     static void updateLighting(const FrameBuilder::LightGeometry& lightGeometry,
-            const BakedOpRenderer::LightInfo& lightInfo) {
+                               const BakedOpRenderer::LightInfo& lightInfo) {
         mLightRadius = lightGeometry.radius;
         mAmbientShadowAlpha = lightInfo.ambientShadowAlpha;
         mSpotShadowAlpha = lightInfo.spotShadowAlpha;
@@ -110,29 +112,53 @@ protected:
 
 private:
     void renderFrameImpl(const LayerUpdateQueue& layers, const SkRect& clip,
-            const std::vector< sp<RenderNode> >& nodes, bool opaque, bool wideColorGamut,
-            const Rect &contentDrawBounds, SkCanvas* canvas);
+                         const std::vector<sp<RenderNode>>& nodes, bool opaque, bool wideColorGamut,
+                         const Rect& contentDrawBounds, SkCanvas* canvas);
 
     /**
      *  Debugging feature.  Draws a semi-transparent overlay on each pixel, indicating
      *  how many times it has been drawn.
      */
     void renderOverdraw(const LayerUpdateQueue& layers, const SkRect& clip,
-            const std::vector< sp<RenderNode> >& nodes, const Rect &contentDrawBounds,
-            sk_sp<SkSurface>);
+                        const std::vector<sp<RenderNode>>& nodes, const Rect& contentDrawBounds,
+                        sk_sp<SkSurface>);
 
     /**
      *  Render mVectorDrawables into offscreen buffers.
      */
     void renderVectorDrawableCache();
 
-    TaskManager mTaskManager;
+    SkCanvas* tryCapture(SkSurface* surface);
+    void endCapture(SkSurface* surface);
+
     std::vector<sk_sp<SkImage>> mPinnedImages;
 
     /**
      *  populated by prepareTree with dirty VDs
      */
     std::vector<VectorDrawableRoot*> mVectorDrawables;
+
+    // Block of properties used only for debugging to record a SkPicture and save it in a file.
+    /**
+     * mCapturedFile is used to enforce we don't capture more than once for a given name (cause
+     * permissions don't allow to reset a property from render thread).
+     */
+    std::string mCapturedFile;
+    /**
+     *  mCaptureSequence counts how many frames are left to take in the sequence.
+     */
+    int mCaptureSequence = 0;
+    /**
+     *  mSavePictureProcessor is used to run the file saving code in a separate thread.
+     */
+    class SavePictureProcessor;
+    sp<SavePictureProcessor> mSavePictureProcessor;
+    /**
+     *  mRecorder holds the current picture recorder. We could store it on the stack to support
+     *  parallel tryCapture calls (not really needed).
+     */
+    std::unique_ptr<SkPictureRecorder> mRecorder;
+
     static float mLightRadius;
     static uint8_t mAmbientShadowAlpha;
     static uint8_t mSpotShadowAlpha;

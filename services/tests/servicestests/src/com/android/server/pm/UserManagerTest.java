@@ -170,6 +170,31 @@ public class UserManagerTest extends AndroidTestCase {
     }
 
     @MediumTest
+    public void testSetUserAdmin() throws Exception {
+        UserInfo userInfo = createUser("SecondaryUser", /*flags=*/ 0);
+
+        // Assert user is not admin and has SMS and calls restrictions.
+        assertFalse(userInfo.isAdmin());
+        assertTrue(mUserManager.hasUserRestriction(UserManager.DISALLOW_SMS,
+                userInfo.getUserHandle()));
+        assertTrue(mUserManager.hasUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS,
+                userInfo.getUserHandle()));
+
+        // Assign admin privileges.
+        mUserManager.setUserAdmin(userInfo.id);
+
+        // Refresh.
+        userInfo = mUserManager.getUserInfo(userInfo.id);
+
+        // Verify user became admin and SMS and call restrictions are lifted.
+        assertTrue(userInfo.isAdmin());
+        assertFalse(mUserManager.hasUserRestriction(UserManager.DISALLOW_SMS,
+                userInfo.getUserHandle()));
+        assertFalse(mUserManager.hasUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS,
+                userInfo.getUserHandle()));
+    }
+
+    @MediumTest
     public void testGetProfileParent() throws Exception {
         final int primaryUserId = mUserManager.getPrimaryUser().id;
 
@@ -309,6 +334,8 @@ public class UserManagerTest extends AndroidTestCase {
 
     @MediumTest
     public void testAddRestrictedProfile() throws Exception {
+        assertFalse("There should be no associated restricted profiles before the test",
+                mUserManager.hasRestrictedProfiles());
         UserInfo userInfo = createRestrictedProfile("Profile");
         assertNotNull(userInfo);
 
@@ -324,6 +351,9 @@ public class UserManagerTest extends AndroidTestCase {
                 userInfo.id);
         assertEquals("Restricted profile should have setting LOCATION_MODE set to "
                 + "LOCATION_MODE_OFF by default", locationMode, Settings.Secure.LOCATION_MODE_OFF);
+
+        assertTrue("Newly created profile should be associated with the current user",
+                mUserManager.hasRestrictedProfiles());
     }
 
     @MediumTest

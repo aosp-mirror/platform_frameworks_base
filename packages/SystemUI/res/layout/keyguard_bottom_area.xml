@@ -40,6 +40,7 @@
             android:gravity="center_horizontal"
             android:textStyle="italic"
             android:textColor="?attr/wallpaperTextColorSecondary"
+            android:textSize="16sp"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:visibility="gone" />
 
@@ -50,6 +51,7 @@
             android:gravity="center_horizontal"
             android:textStyle="italic"
             android:textColor="?attr/wallpaperTextColorSecondary"
+            android:textSize="16sp"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:accessibilityLiveRegion="polite" />
 

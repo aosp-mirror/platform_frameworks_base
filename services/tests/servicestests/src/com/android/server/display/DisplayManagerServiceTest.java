@@ -17,16 +17,18 @@
 package com.android.server.display;
 
 import android.content.Context;
+import android.hardware.display.BrightnessConfiguration;
+import android.hardware.display.Curve;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayViewport;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.input.InputManagerInternal;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.UserHandle;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.SurfaceControl;
-import android.view.WindowManagerInternal;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -34,6 +36,7 @@ import com.android.server.display.DisplayDeviceInfo;
 import com.android.server.display.DisplayManagerService.SyncRoot;
 import com.android.server.display.VirtualDisplayAdapter.SurfaceControlDisplayFactory;
 import com.android.server.lights.LightsManager;
+import com.android.server.wm.WindowManagerInternal;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -44,6 +47,7 @@ import java.util.List;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 @SmallTest
 public class DisplayManagerServiceTest extends AndroidTestCase {
@@ -123,7 +127,7 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
                 "Test Virtual Display", width, height, dpi, null /* surface */, flags /* flags */,
                 uniqueId);
 
-        displayManager.performTraversalInTransactionFromWindowManagerInternal();
+        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
         // flush the handler
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
@@ -161,7 +165,7 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
                 "Test Virtual Display", width, height, dpi, null /* surface */, flags /* flags */,
                 uniqueId);
 
-        displayManager.performTraversalInTransactionFromWindowManagerInternal();
+        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
         // flush the handler
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
@@ -223,6 +227,62 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
         }
         fail("Expected DisplayManager to throw RuntimeException when it cannot initialize the"
                 + " virtual display adapter");
+    }
+
+    /**
+     * Tests that an exception is raised for too dark a brightness configuration.
+     */
+    public void testTooDarkBrightnessConfigurationThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        Curve minimumBrightnessCurve = displayManager.getMinimumBrightnessCurveInternal();
+        float[] lux = minimumBrightnessCurve.getX();
+        float[] minimumNits = minimumBrightnessCurve.getY();
+        float[] nits = new float[minimumNits.length];
+        // For every control point, assert that making it slightly lower than the minimum throws an
+        // exception.
+        for (int i = 0; i < nits.length; i++) {
+            for (int j = 0; j < nits.length; j++) {
+                nits[j] = minimumNits[j];
+                if (j == i) {
+                    nits[j] -= 0.1f;
+                }
+                if (nits[j] < 0) {
+                    nits[j] = 0;
+                }
+            }
+            BrightnessConfiguration config =
+                    new BrightnessConfiguration.Builder(lux, nits).build();
+            Exception thrown = null;
+            try {
+                displayManager.validateBrightnessConfiguration(config);
+            } catch (IllegalArgumentException e) {
+                thrown = e;
+            }
+            assertNotNull("Building too dark a brightness configuration must throw an exception");
+        }
+    }
+
+    /**
+     * Tests that no exception is raised for not too dark a brightness configuration.
+     */
+    public void testBrightEnoughBrightnessConfigurationDoesNotThrowException() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        Curve minimumBrightnessCurve = displayManager.getMinimumBrightnessCurveInternal();
+        float[] lux = minimumBrightnessCurve.getX();
+        float[] nits = minimumBrightnessCurve.getY();
+        BrightnessConfiguration config = new BrightnessConfiguration.Builder(lux, nits).build();
+        displayManager.validateBrightnessConfiguration(config);
+    }
+
+    /**
+     * Tests that null brightness configurations are alright.
+     */
+    public void testNullBrightnessConfiguration() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        displayManager.validateBrightnessConfiguration(null);
     }
 
     private void registerDefaultDisplays(DisplayManagerService displayManager) {

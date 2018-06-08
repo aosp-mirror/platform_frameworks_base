@@ -46,6 +46,19 @@ extends Spanned
     public void removeSpan(Object what);
 
     /**
+     * Remove the specified object from the range of text to which it
+     * was attached, if any.  It is OK to remove an object that was never
+     * attached in the first place.
+     *
+     * See {@link Spanned} for an explanation of what the flags mean.
+     *
+     * @hide
+     */
+    default void removeSpan(Object what, int flags) {
+        removeSpan(what);
+    }
+
+    /**
      * Factory used by TextView to create new {@link Spannable Spannables}. You can subclass
      * it to provide something other than {@link SpannableString}.
      *

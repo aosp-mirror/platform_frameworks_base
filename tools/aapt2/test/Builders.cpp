@@ -19,10 +19,14 @@
 #include "android-base/logging.h"
 #include "androidfw/StringPiece.h"
 
-#include "io/StringInputStream.h"
+#include "io/StringStream.h"
 #include "test/Common.h"
 #include "util/Util.h"
 
+using ::aapt::configuration::Abi;
+using ::aapt::configuration::AndroidSdk;
+using ::aapt::configuration::ConfiguredArtifact;
+using ::aapt::configuration::GetOrCreateGroup;
 using ::aapt::io::StringInputStream;
 using ::android::StringPiece;
 
@@ -75,21 +79,27 @@ ResourceTableBuilder& ResourceTableBuilder::AddString(const StringPiece& name, c
 }
 
 ResourceTableBuilder& ResourceTableBuilder::AddFileReference(const StringPiece& name,
-                                                             const StringPiece& path) {
-  return AddFileReference(name, {}, path);
+                                                             const StringPiece& path,
+                                                             io::IFile* file) {
+  return AddFileReference(name, {}, path, file);
 }
 
 ResourceTableBuilder& ResourceTableBuilder::AddFileReference(const StringPiece& name,
                                                              const ResourceId& id,
-                                                             const StringPiece& path) {
-  return AddValue(name, id, util::make_unique<FileReference>(table_->string_pool.MakeRef(path)));
+                                                             const StringPiece& path,
+                                                             io::IFile* file) {
+  auto file_ref = util::make_unique<FileReference>(table_->string_pool.MakeRef(path));
+  file_ref->file = file;
+  return AddValue(name, id, std::move(file_ref));
 }
 
 ResourceTableBuilder& ResourceTableBuilder::AddFileReference(const StringPiece& name,
                                                              const StringPiece& path,
-                                                             const ConfigDescription& config) {
-  return AddValue(name, config, {},
-                  util::make_unique<FileReference>(table_->string_pool.MakeRef(path)));
+                                                             const ConfigDescription& config,
+                                                             io::IFile* file) {
+  auto file_ref = util::make_unique<FileReference>(table_->string_pool.MakeRef(path));
+  file_ref->file = file;
+  return AddValue(name, config, {}, std::move(file_ref));
 }
 
 ResourceTableBuilder& ResourceTableBuilder::AddValue(const StringPiece& name,
@@ -107,19 +117,20 @@ ResourceTableBuilder& ResourceTableBuilder::AddValue(const StringPiece& name,
                                                      const ResourceId& id,
                                                      std::unique_ptr<Value> value) {
   ResourceName res_name = ParseNameOrDie(name);
-  CHECK(table_->AddResourceAllowMangled(res_name, id, config, {}, std::move(value),
-                                        GetDiagnostics()));
+  CHECK(table_->AddResourceWithIdMangled(res_name, id, config, {}, std::move(value),
+                                         GetDiagnostics()));
   return *this;
 }
 
 ResourceTableBuilder& ResourceTableBuilder::SetSymbolState(const StringPiece& name,
-                                                           const ResourceId& id, SymbolState state,
+                                                           const ResourceId& id,
+                                                           Visibility::Level level,
                                                            bool allow_new) {
   ResourceName res_name = ParseNameOrDie(name);
-  Symbol symbol;
-  symbol.state = state;
-  symbol.allow_new = allow_new;
-  CHECK(table_->SetSymbolStateAllowMangled(res_name, id, symbol, GetDiagnostics()));
+  Visibility visibility;
+  visibility.level = level;
+  CHECK(table_->SetVisibilityWithIdMangled(res_name, visibility, id, GetDiagnostics()));
+  CHECK(table_->SetAllowNewMangled(res_name, AllowNew{}, GetDiagnostics()));
   return *this;
 }
 
@@ -145,12 +156,17 @@ std::unique_ptr<BinaryPrimitive> BuildPrimitive(uint8_t type, uint32_t data) {
   return util::make_unique<BinaryPrimitive>(value);
 }
 
-AttributeBuilder::AttributeBuilder(bool weak) : attr_(util::make_unique<Attribute>(weak)) {
-  attr_->type_mask = android::ResTable_map::TYPE_ANY;
+AttributeBuilder::AttributeBuilder()
+    : attr_(util::make_unique<Attribute>(android::ResTable_map::TYPE_ANY)) {
 }
 
 AttributeBuilder& AttributeBuilder::SetTypeMask(uint32_t typeMask) {
   attr_->type_mask = typeMask;
+  return *this;
+}
+
+AttributeBuilder& AttributeBuilder::SetWeak(bool weak) {
+  attr_->SetWeak(weak);
   return *this;
 }
 
@@ -210,6 +226,89 @@ std::unique_ptr<xml::XmlResource> BuildXmlDomForPackageName(IAaptContext* contex
   std::unique_ptr<xml::XmlResource> doc = BuildXmlDom(str);
   doc->file.name.package = context->GetCompilationPackage();
   return doc;
+}
+
+ArtifactBuilder& ArtifactBuilder::SetName(const std::string& name) {
+  artifact_.name = name;
+  return *this;
+}
+
+ArtifactBuilder& ArtifactBuilder::SetVersion(int version) {
+  artifact_.version = version;
+  return *this;
+}
+
+ArtifactBuilder& ArtifactBuilder::AddAbi(configuration::Abi abi) {
+  artifact_.abis.push_back(abi);
+  return *this;
+}
+
+ArtifactBuilder& ArtifactBuilder::AddDensity(const ConfigDescription& density) {
+  artifact_.screen_densities.push_back(density);
+  return *this;
+}
+
+ArtifactBuilder& ArtifactBuilder::AddLocale(const ConfigDescription& locale) {
+  artifact_.locales.push_back(locale);
+  return *this;
+}
+
+ArtifactBuilder& ArtifactBuilder::SetAndroidSdk(int min_sdk) {
+  artifact_.android_sdk = {AndroidSdk::ForMinSdk(min_sdk)};
+  return *this;
+}
+
+configuration::OutputArtifact ArtifactBuilder::Build() {
+  return artifact_;
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddAbiGroup(
+    const std::string& label, std::vector<configuration::Abi> abis) {
+  return AddGroup(label, &config_.abi_groups, std::move(abis));
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddDensityGroup(
+    const std::string& label, std::vector<std::string> densities) {
+  std::vector<ConfigDescription> configs;
+  for (const auto& density : densities) {
+    configs.push_back(test::ParseConfigOrDie(density));
+  }
+  return AddGroup(label, &config_.screen_density_groups, configs);
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddLocaleGroup(
+    const std::string& label, std::vector<std::string> locales) {
+  std::vector<ConfigDescription> configs;
+  for (const auto& locale : locales) {
+    configs.push_back(test::ParseConfigOrDie(locale));
+  }
+  return AddGroup(label, &config_.locale_groups, configs);
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddDeviceFeatureGroup(
+    const std::string& label) {
+  return AddGroup(label, &config_.device_feature_groups);
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddGlTextureGroup(
+    const std::string& label) {
+  return AddGroup(label, &config_.gl_texture_groups);
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddAndroidSdk(
+    std::string label, int min_sdk) {
+  config_.android_sdks[label] = AndroidSdk::ForMinSdk(min_sdk);
+  return *this;
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddArtifact(
+    configuration::ConfiguredArtifact artifact) {
+  config_.artifacts.push_back(std::move(artifact));
+  return *this;
+}
+
+configuration::PostProcessingConfiguration PostProcessingConfigurationBuilder::Build() {
+  return config_;
 }
 
 }  // namespace test

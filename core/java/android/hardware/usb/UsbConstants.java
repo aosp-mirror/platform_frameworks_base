@@ -16,6 +16,8 @@
 
 package android.hardware.usb;
 
+import android.service.ServiceProtoEnums;
+
 /**
  * Contains constants for the USB protocol.
  * These constants correspond to definitions in linux/usb/ch9.h in the linux kernel.
@@ -35,12 +37,12 @@ public final class UsbConstants {
      * Used to signify direction of data for a {@link UsbEndpoint} is OUT (host to device)
      * @see UsbEndpoint#getDirection
      */
-    public static final int USB_DIR_OUT = 0;
+    public static final int USB_DIR_OUT = ServiceProtoEnums.USB_ENDPOINT_DIR_OUT; // 0
     /**
      * Used to signify direction of data for a {@link UsbEndpoint} is IN (device to host)
      * @see UsbEndpoint#getDirection
      */
-    public static final int USB_DIR_IN = 0x80;
+    public static final int USB_DIR_IN = ServiceProtoEnums.USB_ENDPOINT_DIR_IN; // 0x80
 
     /**
      * Bitmask used for extracting the {@link UsbEndpoint} number its address field.
@@ -63,22 +65,26 @@ public final class UsbConstants {
      * Control endpoint type (endpoint zero)
      * @see UsbEndpoint#getType
      */
-    public static final int USB_ENDPOINT_XFER_CONTROL = 0;
+    public static final int USB_ENDPOINT_XFER_CONTROL =
+            ServiceProtoEnums.USB_ENDPOINT_TYPE_XFER_CONTROL; // 0
     /**
      * Isochronous endpoint type (currently not supported)
      * @see UsbEndpoint#getType
      */
-    public static final int USB_ENDPOINT_XFER_ISOC = 1;
+    public static final int USB_ENDPOINT_XFER_ISOC =
+            ServiceProtoEnums.USB_ENDPOINT_TYPE_XFER_ISOC; // 1
     /**
      * Bulk endpoint type
      * @see UsbEndpoint#getType
      */
-    public static final int USB_ENDPOINT_XFER_BULK = 2;
+    public static final int USB_ENDPOINT_XFER_BULK =
+            ServiceProtoEnums.USB_ENDPOINT_TYPE_XFER_BULK; // 2
     /**
      * Interrupt endpoint type
      * @see UsbEndpoint#getType
      */
-    public static final int USB_ENDPOINT_XFER_INT = 3;
+    public static final int USB_ENDPOINT_XFER_INT =
+            ServiceProtoEnums.USB_ENDPOINT_TYPE_XFER_INT; // 3
 
 
     /**

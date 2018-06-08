@@ -1,0 +1,27 @@
+<?xml version='1.0'?>
+<watchlist-config>
+    <sha256-domain>
+        <!-- test-cc-domain.com -->
+        <hash>8E7DCD2AEB4F364358242BB3F403263E61E3B4AECE4E2500FF28BF32E52FF0F1</hash>
+        <!-- test-cc-match-sha256-only.com -->
+        <hash>F0905DA7549614957B449034C281EF7BDEFDBC2B6E050AD1E78D6DE18FBD0D5F</hash>
+    </sha256-domain>
+    <sha256-ip>
+        <!-- 127.0.0.2 -->
+        <hash>1EDD62868F2767A1FFF68DF0A4CB3C23448E45100715768DB9310B5E719536A1</hash>
+        <!-- 127.0.0.3, match in sha256 only -->
+        <hash>18DD41C9F2E8E4879A1575FB780514EF33CF6E1F66578C4AE7CCA31F49B9F2ED</hash>
+    </sha256-ip>
+    <crc32-domain>
+        <!-- test-cc-domain.com -->
+        <hash>6C67059D</hash>
+        <!-- test-cc-match-crc32-only.com -->
+        <hash>3DC775F8</hash>
+    </crc32-domain>
+    <crc32-ip>
+        <!-- 127.0.0.2 -->
+        <hash>4EBEB612</hash>
+        <!-- 127.0.0.4, match in crc32 only -->
+        <hash>A7DD1327</hash>
+    </crc32-ip>
+</watchlist-config>

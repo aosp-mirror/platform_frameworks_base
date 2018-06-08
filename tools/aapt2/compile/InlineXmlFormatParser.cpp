@@ -65,14 +65,10 @@ class Visitor : public xml::PackageAwareVisitor {
     }
 
     const ResourceName& name = ref.value().name.value();
-
-    // Use an empty string for the compilation package because we don't want to default to
-    // the local package if the user specified name="style" or something. This should just
-    // be the default namespace.
-    Maybe<xml::ExtractedPackage> maybe_pkg = TransformPackageAlias(name.package, {});
+    Maybe<xml::ExtractedPackage> maybe_pkg = TransformPackageAlias(name.package);
     if (!maybe_pkg) {
-      context_->GetDiagnostics()->Error(DiagMessage(src) << "invalid namespace prefix '"
-                                                         << name.package << "'");
+      context_->GetDiagnostics()->Error(DiagMessage(src)
+                                        << "invalid namespace prefix '" << name.package << "'");
       error_ = true;
       return;
     }
@@ -83,8 +79,15 @@ class Visitor : public xml::PackageAwareVisitor {
     InlineDeclaration decl;
     decl.el = el;
     decl.attr_name = name.entry;
-    if (!pkg.package.empty()) {
-      decl.attr_namespace_uri = xml::BuildPackageNamespace(pkg.package, private_namespace);
+
+    // We need to differentiate between no-namespace defined, or the alias resolves to an empty
+    // package, which means we must use the res-auto schema.
+    if (!name.package.empty()) {
+      if (pkg.package.empty()) {
+        decl.attr_namespace_uri = xml::kSchemaAuto;
+      } else {
+        decl.attr_namespace_uri = xml::BuildPackageNamespace(pkg.package, private_namespace);
+      }
     }
 
     inline_declarations_.push_back(std::move(decl));
@@ -118,10 +121,11 @@ bool InlineXmlFormatParser::Consume(IAaptContext* context, xml::XmlResource* doc
 
   size_t name_suffix_counter = 0;
   for (const InlineDeclaration& decl : visitor.GetInlineDeclarations()) {
-    auto new_doc = util::make_unique<xml::XmlResource>();
-    new_doc->file.config = doc->file.config;
-    new_doc->file.source = doc->file.source.WithLine(decl.el->line_number);
-    new_doc->file.name = doc->file.name;
+    // Create a new XmlResource with the same ResourceFile as the base XmlResource.
+    auto new_doc = util::make_unique<xml::XmlResource>(doc->file);
+
+    // Attach the line number.
+    new_doc->file.source.line = decl.el->line_number;
 
     // Modify the new entry name. We need to suffix the entry with a number to
     // avoid local collisions, then mangle it with the empty package, such that it won't show up
@@ -146,6 +150,10 @@ bool InlineXmlFormatParser::Consume(IAaptContext* context, xml::XmlResource* doc
       } else {
         new_doc->root.reset(static_cast<xml::Element*>(child.release()));
         new_doc->root->parent = nullptr;
+        // Copy down the namespace declarations
+        new_doc->root->namespace_decls = doc->root->namespace_decls;
+        // Recurse for nested inlines
+        Consume(context, new_doc.get());
       }
     }
 
@@ -159,7 +167,7 @@ bool InlineXmlFormatParser::Consume(IAaptContext* context, xml::XmlResource* doc
 
     // Add the inline attribute to the parent.
     parent_el->attributes.push_back(xml::Attribute{decl.attr_namespace_uri, decl.attr_name,
-                                                   "@" + new_doc->file.name.ToString()});
+                                                   "@" + new_doc->file.name.to_string()});
 
     // Delete the subtree.
     for (auto iter = parent_el->children.begin(); iter != parent_el->children.end(); ++iter) {

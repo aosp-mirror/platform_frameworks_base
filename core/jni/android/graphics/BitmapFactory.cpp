@@ -7,6 +7,7 @@
 #include "SkAndroidCodec.h"
 #include "SkBRDAllocator.h"
 #include "SkFrontBufferedStream.h"
+#include "SkMakeUnique.h"
 #include "SkMath.h"
 #include "SkPixelRef.h"
 #include "SkStream.h"
@@ -45,9 +46,6 @@ jfieldID gOptions_mCancelID;
 jfieldID gOptions_bitmapFieldID;
 
 jfieldID gBitmap_ninePatchInsetsFieldID;
-
-jclass gInsetStruct_class;
-jmethodID gInsetStruct_constructorMethodID;
 
 jclass gBitmapConfig_class;
 jmethodID gBitmapConfig_nativeToConfigMethodID;
@@ -98,41 +96,6 @@ jstring encodedFormatToString(JNIEnv* env, SkEncodedImageFormat format) {
     return jstr;
 }
 
-static void scaleDivRange(int32_t* divs, int count, float scale, int maxValue) {
-    for (int i = 0; i < count; i++) {
-        divs[i] = int32_t(divs[i] * scale + 0.5f);
-        if (i > 0 && divs[i] == divs[i - 1]) {
-            divs[i]++; // avoid collisions
-        }
-    }
-
-    if (CC_UNLIKELY(divs[count - 1] > maxValue)) {
-        // if the collision avoidance above put some divs outside the bounds of the bitmap,
-        // slide outer stretchable divs inward to stay within bounds
-        int highestAvailable = maxValue;
-        for (int i = count - 1; i >= 0; i--) {
-            divs[i] = highestAvailable;
-            if (i > 0 && divs[i] <= divs[i-1]){
-                // keep shifting
-                highestAvailable = divs[i] - 1;
-            } else {
-                break;
-            }
-        }
-    }
-}
-
-static void scaleNinePatchChunk(android::Res_png_9patch* chunk, float scale,
-        int scaledWidth, int scaledHeight) {
-    chunk->paddingLeft = int(chunk->paddingLeft * scale + 0.5f);
-    chunk->paddingTop = int(chunk->paddingTop * scale + 0.5f);
-    chunk->paddingRight = int(chunk->paddingRight * scale + 0.5f);
-    chunk->paddingBottom = int(chunk->paddingBottom * scale + 0.5f);
-
-    scaleDivRange(chunk->getXDivs(), chunk->numXDivs, scale, scaledWidth);
-    scaleDivRange(chunk->getYDivs(), chunk->numYDivs, scale, scaledHeight);
-}
-
 class ScaleCheckingAllocator : public SkBitmap::HeapAllocator {
 public:
     ScaleCheckingAllocator(float scale, int size)
@@ -173,13 +136,12 @@ public:
             return false;
         }
 
-        const int64_t size64 = info.getSafeSize64(bitmap->rowBytes());
-        if (!sk_64_isS32(size64)) {
+        const size_t size = info.computeByteSize(bitmap->rowBytes());
+        if (size > SK_MaxS32) {
             ALOGW("bitmap is too large");
             return false;
         }
 
-        const size_t size = sk_64_asS32(size64);
         if (size > mSize) {
             ALOGW("bitmap marked for reuse (%u bytes) can't fit new bitmap "
                   "(%zu bytes)", mSize, size);
@@ -216,13 +178,8 @@ static bool needsFineScale(const SkISize fullSize, const SkISize decodedSize,
            needsFineScale(fullSize.height(), decodedSize.height(), sampleSize);
 }
 
-static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding, jobject options) {
-    // This function takes ownership of the input stream.  Since the SkAndroidCodec
-    // will take ownership of the stream, we don't necessarily need to take ownership
-    // here.  This is a precaution - if we were to return before creating the codec,
-    // we need to make sure that we delete the stream.
-    std::unique_ptr<SkStreamRewindable> streamDeleter(stream);
-
+static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
+                        jobject padding, jobject options) {
     // Set default values for the options parameters.
     int sampleSize = 1;
     bool onlyDecodeSize = false;
@@ -280,10 +237,22 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
     // Create the codec.
     NinePatchPeeker peeker;
-    std::unique_ptr<SkAndroidCodec> codec(SkAndroidCodec::NewFromStream(
-            streamDeleter.release(), &peeker));
-    if (!codec.get()) {
-        return nullObjectReturn("SkAndroidCodec::NewFromStream returned null");
+    std::unique_ptr<SkAndroidCodec> codec;
+    {
+        SkCodec::Result result;
+        std::unique_ptr<SkCodec> c = SkCodec::MakeFromStream(std::move(stream), &result,
+                                                             &peeker);
+        if (!c) {
+            SkString msg;
+            msg.printf("Failed to create image decoder with message '%s'",
+                       SkCodec::ResultToString(result));
+            return nullObjectReturn(msg.c_str());
+        }
+
+        codec = SkAndroidCodec::MakeFromCodec(std::move(c));
+        if (!codec) {
+            return nullObjectReturn("SkAndroidCodec::MakeFromCodec returned null");
+        }
     }
 
     // Do not allow ninepatch decodes to 565.  In the past, decodes to 565
@@ -428,10 +397,18 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
             return nullObjectReturn("codec->getAndroidPixels() failed.");
     }
 
+    // This is weird so let me explain: we could use the scale parameter
+    // directly, but for historical reasons this is how the corresponding
+    // Dalvik code has always behaved. We simply recreate the behavior here.
+    // The result is slightly different from simply using scale because of
+    // the 0.5f rounding bias applied when computing the target image size
+    const float scaleX = scaledWidth / float(decodingBitmap.width());
+    const float scaleY = scaledHeight / float(decodingBitmap.height());
+
     jbyteArray ninePatchChunk = NULL;
     if (peeker.mPatch != NULL) {
         if (willScale) {
-            scaleNinePatchChunk(peeker.mPatch, scale, scaledWidth, scaledHeight);
+            peeker.scale(scaleX, scaleY, scaledWidth, scaledHeight);
         }
 
         size_t ninePatchArraySize = peeker.mPatch->serializedSize();
@@ -451,12 +428,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
     jobject ninePatchInsets = NULL;
     if (peeker.mHasInsets) {
-        ninePatchInsets = env->NewObject(gInsetStruct_class, gInsetStruct_constructorMethodID,
-                peeker.mOpticalInsets[0], peeker.mOpticalInsets[1],
-                peeker.mOpticalInsets[2], peeker.mOpticalInsets[3],
-                peeker.mOutlineInsets[0], peeker.mOutlineInsets[1],
-                peeker.mOutlineInsets[2], peeker.mOutlineInsets[3],
-                peeker.mOutlineRadius, peeker.mOutlineAlpha, scale);
+        ninePatchInsets = peeker.createNinePatchInsets(env, scale);
         if (ninePatchInsets == NULL) {
             return nullObjectReturn("nine patch insets == null");
         }
@@ -467,14 +439,6 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
     SkBitmap outputBitmap;
     if (willScale) {
-        // This is weird so let me explain: we could use the scale parameter
-        // directly, but for historical reasons this is how the corresponding
-        // Dalvik code has always behaved. We simply recreate the behavior here.
-        // The result is slightly different from simply using scale because of
-        // the 0.5f rounding bias applied when computing the target image size
-        const float sx = scaledWidth / float(decodingBitmap.width());
-        const float sy = scaledHeight / float(decodingBitmap.height());
-
         // Set the allocator for the outputBitmap.
         SkBitmap::Allocator* outputAllocator;
         if (javaBitmap != nullptr) {
@@ -504,20 +468,14 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         paint.setFilterQuality(kLow_SkFilterQuality); // bilinear filtering
 
         SkCanvas canvas(outputBitmap, SkCanvas::ColorBehavior::kLegacy);
-        canvas.scale(sx, sy);
+        canvas.scale(scaleX, scaleY);
         canvas.drawBitmap(decodingBitmap, 0.0f, 0.0f, &paint);
     } else {
         outputBitmap.swap(decodingBitmap);
     }
 
     if (padding) {
-        if (peeker.mPatch != NULL) {
-            GraphicsJNI::set_jrect(env, padding,
-                    peeker.mPatch->paddingLeft, peeker.mPatch->paddingTop,
-                    peeker.mPatch->paddingRight, peeker.mPatch->paddingBottom);
-        } else {
-            GraphicsJNI::set_jrect(env, padding, -1, -1, -1, -1);
-        }
+        peeker.getPadding(env, padding);
     }
 
     // If we get here, the outputBitmap should have an installed pixelref.
@@ -564,9 +522,9 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteA
 
     if (stream.get()) {
         std::unique_ptr<SkStreamRewindable> bufferedStream(
-                SkFrontBufferedStream::Create(stream.release(), SkCodec::MinBufferedBytesNeeded()));
+                SkFrontBufferedStream::Make(std::move(stream), SkCodec::MinBufferedBytesNeeded()));
         SkASSERT(bufferedStream.get() != NULL);
-        bitmap = doDecode(env, bufferedStream.release(), padding, options);
+        bitmap = doDecode(env, std::move(bufferedStream), padding, options);
     }
     return bitmap;
 }
@@ -608,16 +566,16 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
     // If there is no offset for the file descriptor, we use SkFILEStream directly.
     if (::lseek(descriptor, 0, SEEK_CUR) == 0) {
         assert(isSeekable(dupDescriptor));
-        return doDecode(env, fileStream.release(), padding, bitmapFactoryOptions);
+        return doDecode(env, std::move(fileStream), padding, bitmapFactoryOptions);
     }
 
     // Use a buffered stream. Although an SkFILEStream can be rewound, this
     // ensures that SkImageDecoder::Factory never rewinds beyond the
     // current position of the file descriptor.
-    std::unique_ptr<SkStreamRewindable> stream(SkFrontBufferedStream::Create(fileStream.release(),
+    std::unique_ptr<SkStreamRewindable> stream(SkFrontBufferedStream::Make(std::move(fileStream),
             SkCodec::MinBufferedBytesNeeded()));
 
-    return doDecode(env, stream.release(), padding, bitmapFactoryOptions);
+    return doDecode(env, std::move(stream), padding, bitmapFactoryOptions);
 }
 
 static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,
@@ -626,16 +584,15 @@ static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
     // since we know we'll be done with the asset when we return, we can
     // just use a simple wrapper
-    std::unique_ptr<AssetStreamAdaptor> stream(new AssetStreamAdaptor(asset));
-    return doDecode(env, stream.release(), padding, options);
+    return doDecode(env, skstd::make_unique<AssetStreamAdaptor>(asset), padding, options);
 }
 
 static jobject nativeDecodeByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
         jint offset, jint length, jobject options) {
 
     AutoJavaByteArray ar(env, byteArray);
-    std::unique_ptr<SkMemoryStream> stream(new SkMemoryStream(ar.ptr() + offset, length, false));
-    return doDecode(env, stream.release(), NULL, options);
+    return doDecode(env, skstd::make_unique<SkMemoryStream>(ar.ptr() + offset, length, false),
+                    nullptr, options);
 }
 
 static jboolean nativeIsSeekable(JNIEnv* env, jobject, jobject fileDescriptor) {
@@ -644,8 +601,8 @@ static jboolean nativeIsSeekable(JNIEnv* env, jobject, jobject fileDescriptor) {
 }
 
 jobject decodeBitmap(JNIEnv* env, void* data, size_t size) {
-    SkMemoryStream stream(data, size);
-    return doDecode(env, &stream, NULL, NULL);
+    return doDecode(env, skstd::make_unique<SkMemoryStream>(data, size),
+                    nullptr, nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -708,11 +665,6 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     jclass bitmap_class = FindClassOrDie(env, "android/graphics/Bitmap");
     gBitmap_ninePatchInsetsFieldID = GetFieldIDOrDie(env, bitmap_class, "mNinePatchInsets",
             "Landroid/graphics/NinePatch$InsetStruct;");
-
-    gInsetStruct_class = MakeGlobalRefOrDie(env, FindClassOrDie(env,
-        "android/graphics/NinePatch$InsetStruct"));
-    gInsetStruct_constructorMethodID = GetMethodIDOrDie(env, gInsetStruct_class, "<init>",
-                                                        "(IIIIIIIIFIF)V");
 
     gBitmapConfig_class = MakeGlobalRefOrDie(env, FindClassOrDie(env,
             "android/graphics/Bitmap$Config"));

@@ -16,12 +16,16 @@
 
 package android.app;
 
-import static android.app.ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -34,6 +38,7 @@ import android.os.IRemoteCallback;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.UserHandle;
 import android.transition.Transition;
 import android.transition.TransitionListenerAdapter;
 import android.transition.TransitionManager;
@@ -41,6 +46,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.view.AppTransitionAnimationSpec;
 import android.view.IAppTransitionAnimationSpecsFuture;
+import android.view.RemoteAnimationAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -157,6 +163,12 @@ public class ActivityOptions {
     private static final String KEY_ANIM_SPECS = "android:activity.animSpecs";
 
     /**
+     * Whether the activity should be launched into LockTask mode.
+     * @see #setLockTaskEnabled(boolean)
+     */
+    private static final String KEY_LOCK_TASK_MODE = "android:activity.lockTaskMode";
+
+    /**
      * The display id the activity should be launched into.
      * @see #setLaunchDisplayId(int)
      * @hide
@@ -164,10 +176,16 @@ public class ActivityOptions {
     private static final String KEY_LAUNCH_DISPLAY_ID = "android.activity.launchDisplayId";
 
     /**
-     * The stack id the activity should be launched into.
+     * The windowing mode the activity should be launched into.
      * @hide
      */
-    private static final String KEY_LAUNCH_STACK_ID = "android.activity.launchStackId";
+    private static final String KEY_LAUNCH_WINDOWING_MODE = "android.activity.windowingMode";
+
+    /**
+     * The activity type the activity should be launched as.
+     * @hide
+     */
+    private static final String KEY_LAUNCH_ACTIVITY_TYPE = "android.activity.activityType";
 
     /**
      * The task id the activity should be launched into.
@@ -189,10 +207,17 @@ public class ActivityOptions {
             "android.activity.taskOverlayCanResume";
 
     /**
-     * Where the docked stack should be positioned.
+     * See {@link #setAvoidMoveToFront()}.
      * @hide
      */
-    private static final String KEY_DOCK_CREATE_MODE = "android:activity.dockCreateMode";
+    private static final String KEY_AVOID_MOVE_TO_FRONT = "android.activity.avoidMoveToFront";
+
+    /**
+     * Where the split-screen-primary stack should be positioned.
+     * @hide
+     */
+    private static final String KEY_SPLIT_SCREEN_CREATE_MODE =
+            "android:activity.splitScreenCreateMode";
 
     /**
      * Determines whether to disallow the outgoing activity from entering picture-in-picture as the
@@ -225,6 +250,8 @@ public class ActivityOptions {
     private static final String KEY_INSTANT_APP_VERIFICATION_BUNDLE
             = "android:instantapps.installerbundle";
     private static final String KEY_SPECS_FUTURE = "android:activity.specsFuture";
+    private static final String KEY_REMOTE_ANIMATION_ADAPTER
+            = "android:activity.remoteAnimationAdapter";
 
     /** @hide */
     public static final int ANIM_NONE = 0;
@@ -250,6 +277,10 @@ public class ActivityOptions {
     public static final int ANIM_CUSTOM_IN_PLACE = 10;
     /** @hide */
     public static final int ANIM_CLIP_REVEAL = 11;
+    /** @hide */
+    public static final int ANIM_OPEN_CROSS_PROFILE_APPS = 12;
+    /** @hide */
+    public static final int ANIM_REMOTE_ANIMATION = 13;
 
     private String mPackageName;
     private Rect mLaunchBounds;
@@ -271,17 +302,23 @@ public class ActivityOptions {
     private int mResultCode;
     private int mExitCoordinatorIndex;
     private PendingIntent mUsageTimeReport;
+    private boolean mLockTaskMode = false;
     private int mLaunchDisplayId = INVALID_DISPLAY;
-    private int mLaunchStackId = INVALID_STACK_ID;
+    @WindowConfiguration.WindowingMode
+    private int mLaunchWindowingMode = WINDOWING_MODE_UNDEFINED;
+    @WindowConfiguration.ActivityType
+    private int mLaunchActivityType = ACTIVITY_TYPE_UNDEFINED;
     private int mLaunchTaskId = -1;
-    private int mDockCreateMode = DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+    private int mSplitScreenCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
     private boolean mDisallowEnterPictureInPictureWhileLaunching;
     private boolean mTaskOverlay;
     private boolean mTaskOverlayCanResume;
+    private boolean mAvoidMoveToFront;
     private AppTransitionAnimationSpec mAnimSpecs[];
     private int mRotationAnimationHint = -1;
     private Bundle mAppVerificationBundle;
     private IAppTransitionAnimationSpecsFuture mSpecsFuture;
+    private RemoteAnimationAdapter mRemoteAnimationAdapter;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -464,6 +501,19 @@ public class ActivityOptions {
         opts.mWidth = width;
         opts.mHeight = height;
         return opts;
+    }
+
+    /**
+     * Creates an {@link ActivityOptions} object specifying an animation where the new activity
+     * is started in another user profile by calling {@link
+     * android.content.pm.crossprofile.CrossProfileApps#startMainActivity(ComponentName, UserHandle)
+     * }.
+     * @hide
+     */
+    public static ActivityOptions makeOpenCrossProfileAppsAnimation() {
+        ActivityOptions options = new ActivityOptions();
+        options.mAnimationType = ANIM_OPEN_CROSS_PROFILE_APPS;
+        return options;
     }
 
     /**
@@ -791,6 +841,20 @@ public class ActivityOptions {
         return opts;
     }
 
+    /**
+     * Create an {@link ActivityOptions} instance that lets the application control the entire
+     * animation using a {@link RemoteAnimationAdapter}.
+     * @hide
+     */
+    @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
+    public static ActivityOptions makeRemoteAnimation(
+            RemoteAnimationAdapter remoteAnimationAdapter) {
+        final ActivityOptions opts = new ActivityOptions();
+        opts.mRemoteAnimationAdapter = remoteAnimationAdapter;
+        opts.mAnimationType = ANIM_REMOTE_ANIMATION;
+        return opts;
+    }
+
     /** @hide */
     public boolean getLaunchTaskBehind() {
         return mAnimationType == ANIM_LAUNCH_TASK_BEHIND;
@@ -859,12 +923,16 @@ public class ActivityOptions {
                 mExitCoordinatorIndex = opts.getInt(KEY_EXIT_COORDINATOR_INDEX);
                 break;
         }
+        mLockTaskMode = opts.getBoolean(KEY_LOCK_TASK_MODE, false);
         mLaunchDisplayId = opts.getInt(KEY_LAUNCH_DISPLAY_ID, INVALID_DISPLAY);
-        mLaunchStackId = opts.getInt(KEY_LAUNCH_STACK_ID, INVALID_STACK_ID);
+        mLaunchWindowingMode = opts.getInt(KEY_LAUNCH_WINDOWING_MODE, WINDOWING_MODE_UNDEFINED);
+        mLaunchActivityType = opts.getInt(KEY_LAUNCH_ACTIVITY_TYPE, ACTIVITY_TYPE_UNDEFINED);
         mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
         mTaskOverlay = opts.getBoolean(KEY_TASK_OVERLAY, false);
         mTaskOverlayCanResume = opts.getBoolean(KEY_TASK_OVERLAY_CAN_RESUME, false);
-        mDockCreateMode = opts.getInt(KEY_DOCK_CREATE_MODE, DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT);
+        mAvoidMoveToFront = opts.getBoolean(KEY_AVOID_MOVE_TO_FRONT, false);
+        mSplitScreenCreateMode = opts.getInt(KEY_SPLIT_SCREEN_CREATE_MODE,
+                SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT);
         mDisallowEnterPictureInPictureWhileLaunching = opts.getBoolean(
                 KEY_DISALLOW_ENTER_PICTURE_IN_PICTURE_WHILE_LAUNCHING, false);
         if (opts.containsKey(KEY_ANIM_SPECS)) {
@@ -884,6 +952,7 @@ public class ActivityOptions {
             mSpecsFuture = IAppTransitionAnimationSpecsFuture.Stub.asInterface(opts.getBinder(
                     KEY_SPECS_FUTURE));
         }
+        mRemoteAnimationAdapter = opts.getParcelable(KEY_REMOTE_ANIMATION_ADAPTER);
     }
 
     /**
@@ -1032,6 +1101,16 @@ public class ActivityOptions {
     }
 
     /** @hide */
+    public RemoteAnimationAdapter getRemoteAnimationAdapter() {
+        return mRemoteAnimationAdapter;
+    }
+
+    /** @hide */
+    public void setRemoteAnimationAdapter(RemoteAnimationAdapter remoteAnimationAdapter) {
+        mRemoteAnimationAdapter = remoteAnimationAdapter;
+    }
+
+    /** @hide */
     public static ActivityOptions fromBundle(Bundle bOptions) {
         return bOptions != null ? new ActivityOptions(bOptions) : null;
     }
@@ -1041,6 +1120,38 @@ public class ActivityOptions {
         if (options != null) {
             options.abort();
         }
+    }
+
+    /**
+     * Gets whether the activity is to be launched into LockTask mode.
+     * @return {@code true} if the activity is to be launched into LockTask mode.
+     * @see Activity#startLockTask()
+     * @see android.app.admin.DevicePolicyManager#setLockTaskPackages(ComponentName, String[])
+     */
+    public boolean getLockTaskMode() {
+        return mLockTaskMode;
+    }
+
+    /**
+     * Sets whether the activity is to be launched into LockTask mode.
+     *
+     * Use this option to start an activity in LockTask mode. Note that only apps permitted by
+     * {@link android.app.admin.DevicePolicyManager} can run in LockTask mode. Therefore, if
+     * {@link android.app.admin.DevicePolicyManager#isLockTaskPermitted(String)} returns
+     * {@code false} for the package of the target activity, a {@link SecurityException} will be
+     * thrown during {@link Context#startActivity(Intent, Bundle)}. This method doesn't affect
+     * activities that are already running — relaunch the activity to run in lock task mode.
+     *
+     * Defaults to {@code false} if not set.
+     *
+     * @param lockTaskMode {@code true} if the activity is to be launched into LockTask mode.
+     * @return {@code this} {@link ActivityOptions} instance.
+     * @see Activity#startLockTask()
+     * @see android.app.admin.DevicePolicyManager#setLockTaskPackages(ComponentName, String[])
+     */
+    public ActivityOptions setLockTaskEnabled(boolean lockTaskMode) {
+        mLockTaskMode = lockTaskMode;
+        return this;
     }
 
     /**
@@ -1070,14 +1181,34 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public int getLaunchStackId() {
-        return mLaunchStackId;
+    public int getLaunchWindowingMode() {
+        return mLaunchWindowingMode;
+    }
+
+    /**
+     * Sets the windowing mode the activity should launch into. If the input windowing mode is
+     * {@link android.app.WindowConfiguration#WINDOWING_MODE_SPLIT_SCREEN_SECONDARY} and the device
+     * isn't currently in split-screen windowing mode, then the activity will be launched in
+     * {@link android.app.WindowConfiguration#WINDOWING_MODE_FULLSCREEN} windowing mode. For clarity
+     * on this you can use
+     * {@link android.app.WindowConfiguration#WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY}
+     *
+     * @hide
+     */
+    @TestApi
+    public void setLaunchWindowingMode(int windowingMode) {
+        mLaunchWindowingMode = windowingMode;
+    }
+
+    /** @hide */
+    public int getLaunchActivityType() {
+        return mLaunchActivityType;
     }
 
     /** @hide */
     @TestApi
-    public void setLaunchStackId(int launchStackId) {
-        mLaunchStackId = launchStackId;
+    public void setLaunchActivityType(int activityType) {
+        mLaunchActivityType = activityType;
     }
 
     /**
@@ -1122,14 +1253,33 @@ public class ActivityOptions {
         return mTaskOverlayCanResume;
     }
 
-    /** @hide */
-    public int getDockCreateMode() {
-        return mDockCreateMode;
+    /**
+     * Sets whether the activity launched should not cause the activity stack it is contained in to
+     * be moved to the front as a part of launching.
+     *
+     * @hide
+     */
+    public void setAvoidMoveToFront() {
+        mAvoidMoveToFront = true;
+    }
+
+    /**
+     * @return whether the activity launch should prevent moving the associated activity stack to
+     *         the front.
+     * @hide
+     */
+    public boolean getAvoidMoveToFront() {
+        return mAvoidMoveToFront;
     }
 
     /** @hide */
-    public void setDockCreateMode(int dockCreateMode) {
-        mDockCreateMode = dockCreateMode;
+    public int getSplitScreenCreateMode() {
+        return mSplitScreenCreateMode;
+    }
+
+    /** @hide */
+    public void setSplitScreenCreateMode(int splitScreenCreateMode) {
+        mSplitScreenCreateMode = splitScreenCreateMode;
     }
 
     /** @hide */
@@ -1216,9 +1366,11 @@ public class ActivityOptions {
                 mExitCoordinatorIndex = otherOptions.mExitCoordinatorIndex;
                 break;
         }
+        mLockTaskMode = otherOptions.mLockTaskMode;
         mAnimSpecs = otherOptions.mAnimSpecs;
         mAnimationFinishedListener = otherOptions.mAnimationFinishedListener;
         mSpecsFuture = otherOptions.mSpecsFuture;
+        mRemoteAnimationAdapter = otherOptions.mRemoteAnimationAdapter;
     }
 
     /**
@@ -1290,12 +1442,15 @@ public class ActivityOptions {
                 b.putInt(KEY_EXIT_COORDINATOR_INDEX, mExitCoordinatorIndex);
                 break;
         }
+        b.putBoolean(KEY_LOCK_TASK_MODE, mLockTaskMode);
         b.putInt(KEY_LAUNCH_DISPLAY_ID, mLaunchDisplayId);
-        b.putInt(KEY_LAUNCH_STACK_ID, mLaunchStackId);
+        b.putInt(KEY_LAUNCH_WINDOWING_MODE, mLaunchWindowingMode);
+        b.putInt(KEY_LAUNCH_ACTIVITY_TYPE, mLaunchActivityType);
         b.putInt(KEY_LAUNCH_TASK_ID, mLaunchTaskId);
         b.putBoolean(KEY_TASK_OVERLAY, mTaskOverlay);
         b.putBoolean(KEY_TASK_OVERLAY_CAN_RESUME, mTaskOverlayCanResume);
-        b.putInt(KEY_DOCK_CREATE_MODE, mDockCreateMode);
+        b.putBoolean(KEY_AVOID_MOVE_TO_FRONT, mAvoidMoveToFront);
+        b.putInt(KEY_SPLIT_SCREEN_CREATE_MODE, mSplitScreenCreateMode);
         b.putBoolean(KEY_DISALLOW_ENTER_PICTURE_IN_PICTURE_WHILE_LAUNCHING,
                 mDisallowEnterPictureInPictureWhileLaunching);
         if (mAnimSpecs != null) {
@@ -1311,7 +1466,9 @@ public class ActivityOptions {
         if (mAppVerificationBundle != null) {
             b.putBundle(KEY_INSTANT_APP_VERIFICATION_BUNDLE, mAppVerificationBundle);
         }
-
+        if (mRemoteAnimationAdapter != null) {
+            b.putParcelable(KEY_REMOTE_ANIMATION_ADAPTER, mRemoteAnimationAdapter);
+        }
         return b;
     }
 

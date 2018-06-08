@@ -353,6 +353,26 @@ public class RenderNode {
         return nHasShadow(mNativeRenderNode);
     }
 
+    /** setSpotShadowColor */
+    public boolean setSpotShadowColor(int color) {
+        return nSetSpotShadowColor(mNativeRenderNode, color);
+    }
+
+    /** setAmbientShadowColor */
+    public boolean setAmbientShadowColor(int color) {
+        return nSetAmbientShadowColor(mNativeRenderNode, color);
+    }
+
+    /** getSpotShadowColor */
+    public int getSpotShadowColor() {
+        return nGetSpotShadowColor(mNativeRenderNode);
+    }
+
+    /** getAmbientShadowColor */
+    public int getAmbientShadowColor() {
+        return nGetAmbientShadowColor(mNativeRenderNode);
+    }
+
     /**
      * Enables or disables clipping to the outline.
      *
@@ -667,6 +687,11 @@ public class RenderNode {
         return nIsPivotExplicitlySet(mNativeRenderNode);
     }
 
+    /** lint */
+    public boolean resetPivot() {
+        return nResetPivot(mNativeRenderNode);
+    }
+
     /**
      * Sets the camera distance for the display list. Refer to
      * {@link View#setCameraDistance(float)} for more information on how to
@@ -883,6 +908,8 @@ public class RenderNode {
     @CriticalNative
     private static native boolean nSetPivotX(long renderNode, float pivotX);
     @CriticalNative
+    private static native boolean nResetPivot(long renderNode);
+    @CriticalNative
     private static native boolean nSetLayerType(long renderNode, int layerType);
     @CriticalNative
     private static native boolean nSetLayerPaint(long renderNode, long paint);
@@ -909,6 +936,14 @@ public class RenderNode {
     private static native boolean nSetOutlineNone(long renderNode);
     @CriticalNative
     private static native boolean nHasShadow(long renderNode);
+    @CriticalNative
+    private static native boolean nSetSpotShadowColor(long renderNode, int color);
+    @CriticalNative
+    private static native boolean nSetAmbientShadowColor(long renderNode, int color);
+    @CriticalNative
+    private static native int nGetSpotShadowColor(long renderNode);
+    @CriticalNative
+    private static native int nGetAmbientShadowColor(long renderNode);
     @CriticalNative
     private static native boolean nSetClipToOutline(long renderNode, boolean clipToOutline);
     @CriticalNative

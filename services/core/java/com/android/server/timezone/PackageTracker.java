@@ -22,11 +22,15 @@ import android.app.timezone.RulesUpdaterContract;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Environment;
+import android.os.FileUtils;
+import android.os.SystemClock;
 import android.provider.TimeZoneRulesDataContract;
 import android.util.Slog;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.Clock;
 
 /**
  * Monitors the installed applications associated with time zone updates. If the app packages are
@@ -55,10 +59,10 @@ public class PackageTracker {
     private static final String TAG = "timezone.PackageTracker";
 
     private final PackageManagerHelper mPackageManagerHelper;
-    private final IntentHelper mIntentHelper;
+    private final PackageTrackerIntentHelper mIntentHelper;
     private final ConfigHelper mConfigHelper;
     private final PackageStatusStorage mPackageStatusStorage;
-    private final ClockHelper mClockHelper;
+    private final Clock mElapsedRealtimeClock;
 
     // False if tracking is disabled.
     private boolean mTrackingEnabled;
@@ -91,26 +95,22 @@ public class PackageTracker {
 
     /** Creates the {@link PackageTracker} for normal use. */
     static PackageTracker create(Context context) {
+        Clock elapsedRealtimeClock = SystemClock.elapsedRealtimeClock();
         PackageTrackerHelperImpl helperImpl = new PackageTrackerHelperImpl(context);
-        // TODO(nfuller): Switch to FileUtils.createDir() when available. http://b/31008728
-        File storageDir = new File(Environment.getDataSystemDirectory(), "timezone");
-        if (!storageDir.exists()) {
-            storageDir.mkdir();
-        }
-
+        File storageDir = FileUtils.createDir(Environment.getDataSystemDirectory(), "timezone");
         return new PackageTracker(
-                helperImpl /* clock */,
+                elapsedRealtimeClock /* elapsedRealtimeClock */,
                 helperImpl /* configHelper */,
                 helperImpl /* packageManagerHelper */,
                 new PackageStatusStorage(storageDir),
-                new IntentHelperImpl(context));
+                new PackageTrackerIntentHelperImpl(context));
     }
 
     // A constructor that can be used by tests to supply mocked / faked dependencies.
-    PackageTracker(ClockHelper clockHelper, ConfigHelper configHelper,
+    PackageTracker(Clock elapsedRealtimeClock, ConfigHelper configHelper,
             PackageManagerHelper packageManagerHelper, PackageStatusStorage packageStatusStorage,
-            IntentHelper intentHelper) {
-        mClockHelper = clockHelper;
+            PackageTrackerIntentHelper intentHelper) {
+        mElapsedRealtimeClock = elapsedRealtimeClock;
         mConfigHelper = configHelper;
         mPackageManagerHelper = packageManagerHelper;
         mPackageStatusStorage = packageStatusStorage;
@@ -118,11 +118,11 @@ public class PackageTracker {
     }
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    protected synchronized void start() {
+    protected synchronized boolean start() {
         mTrackingEnabled = mConfigHelper.isTrackingEnabled();
         if (!mTrackingEnabled) {
             Slog.i(TAG, "Time zone updater / data package tracking explicitly disabled.");
-            return;
+            return false;
         }
 
         mUpdateAppPackageName = mConfigHelper.getUpdateAppPackageName();
@@ -140,6 +140,14 @@ public class PackageTracker {
         mCheckTriggered = false;
         mCheckFailureCount = 0;
 
+        // Initialize the storage, as needed.
+        try {
+            mPackageStatusStorage.initialize();
+        } catch (IOException e) {
+            Slog.w(TAG, "PackageTracker storage could not be initialized.", e);
+            return false;
+        }
+
         // Initialize the intent helper.
         mIntentHelper.initialize(mUpdateAppPackageName, mDataAppPackageName, this);
 
@@ -149,6 +157,7 @@ public class PackageTracker {
         mIntentHelper.scheduleReliabilityTrigger(mDelayBeforeReliabilityCheckMillis);
 
         Slog.i(TAG, "Time zone updater / data package tracking enabled");
+        return true;
     }
 
     /**
@@ -425,7 +434,7 @@ public class PackageTracker {
     }
 
     private void setCheckInProgress() {
-        mLastTriggerTimestamp = mClockHelper.currentTimestamp();
+        mLastTriggerTimestamp = mElapsedRealtimeClock.millis();
     }
 
     private void setCheckComplete() {
@@ -441,12 +450,12 @@ public class PackageTracker {
             return false;
         }
         // Risk of overflow, but highly unlikely given the implementation and not problematic.
-        return mClockHelper.currentTimestamp() > mLastTriggerTimestamp + mCheckTimeAllowedMillis;
+        return mElapsedRealtimeClock.millis() > mLastTriggerTimestamp + mCheckTimeAllowedMillis;
     }
 
     private PackageVersions lookupInstalledPackageVersions() {
-        int updatePackageVersion;
-        int dataPackageVersion;
+        long updatePackageVersion;
+        long dataPackageVersion;
         try {
             updatePackageVersion =
                     mPackageManagerHelper.getInstalledPackageVersion(mUpdateAppPackageName);

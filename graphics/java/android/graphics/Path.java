@@ -24,6 +24,8 @@ import android.annotation.Size;
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
+import libcore.util.NativeAllocationRegistry;
+
 /**
  * The Path class encapsulates compound (multiple contour) geometric paths
  * consisting of straight line segments, quadratic curves, and cubic curves.
@@ -32,10 +34,14 @@ import dalvik.annotation.optimization.FastNative;
  * text on a path.
  */
 public class Path {
+
+    private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
+                Path.class.getClassLoader(), nGetFinalizer(), 48 /* dummy size */);
+
     /**
      * @hide
      */
-    public long mNativePath;
+    public final long mNativePath;
 
     /**
      * @hide
@@ -52,6 +58,7 @@ public class Path {
      */
     public Path() {
         mNativePath = nInit();
+        sRegistry.registerNativeAllocation(this, mNativePath);
     }
 
     /**
@@ -69,6 +76,7 @@ public class Path {
             }
         }
         mNativePath = nInit(valNative);
+        sRegistry.registerNativeAllocation(this, mNativePath);
     }
 
     /**
@@ -297,7 +305,7 @@ public class Path {
      *             a rectangle
      * @return     true if the path specifies a rectangle
      */
-    public boolean isRect(RectF rect) {
+    public boolean isRect(@Nullable  RectF rect) {
         return nIsRect(mNativePath, rect);
     }
 
@@ -771,15 +779,6 @@ public class Path {
         nTransform(mNativePath, matrix.native_instance);
     }
 
-    protected void finalize() throws Throwable {
-        try {
-            nFinalize(mNativePath);
-            mNativePath = 0;  //  Other finalizers can still call us.
-        } finally {
-            super.finalize();
-        }
-    }
-
     /** @hide */
     public final long readOnlyNI() {
         return mNativePath;
@@ -820,7 +819,7 @@ public class Path {
 
     private static native long nInit();
     private static native long nInit(long nPath);
-    private static native void nFinalize(long nPath);
+    private static native long nGetFinalizer();
     private static native void nSet(long native_dst, long nSrc);
     private static native void nComputeBounds(long nPath, RectF bounds);
     private static native void nIncReserve(long nPath, int extraPtCount);

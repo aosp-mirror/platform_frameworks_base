@@ -34,7 +34,7 @@ interface IUsbManager
     /* Returns a file descriptor for communicating with the USB device.
      * The native fd can be passed to usb_device_new() in libusbhost.
      */
-    ParcelFileDescriptor openDevice(String deviceName);
+    ParcelFileDescriptor openDevice(String deviceName, String packageName);
 
     /* Returns the currently attached USB accessory */
     UsbAccessory getCurrentAccessory();
@@ -55,7 +55,7 @@ interface IUsbManager
     void setAccessoryPackage(in UsbAccessory accessory, String packageName, int userId);
 
     /* Returns true if the caller has permission to access the device. */
-    boolean hasDevicePermission(in UsbDevice device);
+    boolean hasDevicePermission(in UsbDevice device, String packageName);
 
     /* Returns true if the caller has permission to access the accessory. */
     boolean hasAccessoryPermission(in UsbAccessory accessory);
@@ -88,13 +88,28 @@ interface IUsbManager
     /* Returns true if the specified USB function is enabled. */
     boolean isFunctionEnabled(String function);
 
-    /* Sets the current USB function as well as whether USB data
-     * (for example, MTP exposed pictures) should be made available
-     * on the USB connection. Unlocking data should only be done with
-     * user involvement, since exposing pictures or other data could
-     * leak sensitive user information.
-     */
+    /* Sets the current USB function. */
+    void setCurrentFunctions(long functions);
+
+    /* Compatibility version of setCurrentFunctions(long). */
     void setCurrentFunction(String function, boolean usbDataUnlocked);
+
+    /* Gets the current USB functions. */
+    long getCurrentFunctions();
+
+    /* Sets the screen unlocked USB function(s), which will be set automatically
+     * when the screen is unlocked.
+     */
+    void setScreenUnlockedFunctions(long functions);
+
+    /* Gets the current screen unlocked functions. */
+    long getScreenUnlockedFunctions();
+
+    /* Get the functionfs control handle for the given function. Usb
+     * descriptors will already be written, and the handle will be
+     * ready to use.
+     */
+    ParcelFileDescriptor getControlFd(long function);
 
     /* Allow USB debugging from the attached host. If alwaysAllow is true, add the
      * the public key to list of host keys that the user has approved.

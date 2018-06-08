@@ -21,7 +21,7 @@ import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.MotionEvent;
-import android.view.WindowManagerPolicy.PointerEventListener;
+import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.server.UiThread;
 

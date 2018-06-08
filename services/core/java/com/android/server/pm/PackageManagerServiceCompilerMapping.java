@@ -25,7 +25,7 @@ import dalvik.system.DexFile;
  */
 public class PackageManagerServiceCompilerMapping {
     // Names for compilation reasons.
-    static final String REASON_STRINGS[] = {
+    public static final String REASON_STRINGS[] = {
             "first-boot", "boot", "install", "bg-dexopt", "ab-ota", "inactive", "shared"
     };
 

@@ -61,8 +61,6 @@ private:
     // Make a copy of a picture that is in the midst of being recorded. The
     // resulting picture will have balanced saves and restores.
     sk_sp<SkPicture> makePartialCopy() const;
-
-    void validate() const;
 };
 
 }; // namespace android

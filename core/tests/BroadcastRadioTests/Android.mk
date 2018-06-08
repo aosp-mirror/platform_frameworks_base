@@ -27,6 +27,8 @@ LOCAL_PRIVATE_PLATFORM_APIS := true
 
 LOCAL_STATIC_JAVA_LIBRARIES := compatibility-device-util android-support-test testng
 
+LOCAL_JAVA_LIBRARIES := android.test.base
+
 LOCAL_MODULE_PATH := $(TARGET_OUT_DATA_APPS)
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 

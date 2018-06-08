@@ -17,12 +17,13 @@
 #pragma once
 
 #include "DisplayList.h"
+#include "hwui/AnimatedImageDrawable.h"
 #include "GLFunctorDrawable.h"
 #include "RenderNodeDrawable.h"
 
-#include <deque>
 #include <SkLiteDL.h>
 #include <SkLiteRecorder.h>
+#include <deque>
 
 namespace android {
 namespace uirenderer {
@@ -62,7 +63,7 @@ public:
      * need to monitor that they don't extend beyond the lifetime of the class
      * that creates them. Allocator dtor invokes all SkDrawable dtors.
      */
-    template<class T, typename... Params>
+    template <class T, typename... Params>
     SkDrawable* allocateDrawable(Params&&... params) {
         return allocator.create<T>(std::forward<Params>(params)...);
     }
@@ -113,7 +114,8 @@ public:
      *       to subclass from DisplayList
      */
 
-    bool prepareListAndChildren(TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
+    bool prepareListAndChildren(
+            TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
             std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn) override;
 
     /**
@@ -143,26 +145,28 @@ public:
     std::deque<GLFunctorDrawable> mChildFunctors;
     std::vector<SkImage*> mMutableImages;
     std::vector<VectorDrawableRoot*> mVectorDrawables;
+    std::vector<AnimatedImageDrawable*> mAnimatedImages;
     SkLiteDL mDisplayList;
 
-    //mProjectionReceiver points to a child node (stored in mChildNodes) that is as a projection
-    //receiver. It is set at record time and used at both prepare and draw tree traversals to
-    //make sure backward projected nodes are found and drawn immediately after mProjectionReceiver.
+    // mProjectionReceiver points to a child node (stored in mChildNodes) that is as a projection
+    // receiver. It is set at record time and used at both prepare and draw tree traversals to
+    // make sure backward projected nodes are found and drawn immediately after mProjectionReceiver.
     RenderNodeDrawable* mProjectionReceiver = nullptr;
 
-    //mProjectedOutline is valid only when render node tree is traversed during the draw pass.
-    //Render nodes that have a child receiver node, will store a pointer to their outline in
-    //mProjectedOutline. Child receiver node will apply the clip before any backward projected
-    //node is drawn.
+    // mProjectedOutline is valid only when render node tree is traversed during the draw pass.
+    // Render nodes that have a child receiver node, will store a pointer to their outline in
+    // mProjectedOutline. Child receiver node will apply the clip before any backward projected
+    // node is drawn.
     const Outline* mProjectedOutline = nullptr;
 
-    //mProjectedReceiverParentMatrix is valid when render node tree is traversed during the draw
-    //pass. Render nodes that have a child receiver node, will store their matrix in
-    //mProjectedReceiverParentMatrix. Child receiver node will set the matrix and then clip with the
-    //outline of their parent.
+    // mProjectedReceiverParentMatrix is valid when render node tree is traversed during the draw
+    // pass. Render nodes that have a child receiver node, will store their matrix in
+    // mProjectedReceiverParentMatrix. Child receiver node will set the matrix and then clip with
+    // the
+    // outline of their parent.
     SkMatrix mProjectedReceiverParentMatrix;
 };
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace skiapipeline
+};  // namespace uirenderer
+};  // namespace android

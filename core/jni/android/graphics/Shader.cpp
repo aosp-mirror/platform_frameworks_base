@@ -1,4 +1,5 @@
 #include "GraphicsJNI.h"
+#include "SkColorFilter.h"
 #include "SkGradientShader.h"
 #include "SkImagePriv.h"
 #include "SkShader.h"
@@ -64,28 +65,29 @@ static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, j
         jint tileModeX, jint tileModeY) {
     const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
     sk_sp<SkImage> image;
+    sk_sp<SkColorFilter> colorFilter;
     if (jbitmap) {
         // Only pass a valid SkBitmap object to the constructor if the Bitmap exists. Otherwise,
         // we'll pass an empty SkBitmap to avoid crashing/excepting for compatibility.
-        image = android::bitmap::toBitmap(env, jbitmap).makeImage();
+        image = android::bitmap::toBitmap(env, jbitmap).makeImage(&colorFilter);
     }
 
     if (!image.get()) {
         SkBitmap bitmap;
         image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
     }
-    sk_sp<SkShader> baseShader = image->makeShader(
+    sk_sp<SkShader> shader = image->makeShader(
             (SkShader::TileMode)tileModeX, (SkShader::TileMode)tileModeY);
 
-    SkShader* shader;
     if (matrix) {
-        shader = baseShader->makeWithLocalMatrix(*matrix).release();
-    } else {
-        shader = baseShader.release();
+        shader = shader->makeWithLocalMatrix(*matrix);
+    }
+    if(colorFilter) {
+        shader = shader->makeWithColorFilter(colorFilter);
     }
 
-    ThrowIAE_IfNull(env, shader);
-    return reinterpret_cast<jlong>(shader);
+    ThrowIAE_IfNull(env, shader.get());
+    return reinterpret_cast<jlong>(shader.release());
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////

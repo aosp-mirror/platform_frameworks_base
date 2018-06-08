@@ -26,10 +26,12 @@ import static android.hardware.camera2.ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_
 import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.params.OutputConfiguration;
+import android.hardware.camera2.params.SessionConfiguration;
 import android.os.Handler;
 import android.view.Surface;
 
 import java.util.List;
+import java.util.Set;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -151,7 +153,7 @@ public abstract class CameraDevice implements AutoCloseable {
           TEMPLATE_RECORD,
           TEMPLATE_VIDEO_SNAPSHOT,
           TEMPLATE_ZERO_SHUTTER_LAG,
-          TEMPLATE_MANUAL })
+          TEMPLATE_MANUAL})
      public @interface RequestTemplate {};
 
     /**
@@ -811,6 +813,27 @@ public abstract class CameraDevice implements AutoCloseable {
             throws CameraAccessException;
 
     /**
+     * <p>Create a new {@link CameraCaptureSession} using a {@link SessionConfiguration} helper
+     * object that aggregates all supported parameters.</p>
+     *
+     * @param config A session configuration (see {@link SessionConfiguration}).
+     *
+     * @throws IllegalArgumentException In case the session configuration is invalid; or the output
+     *                                  configurations are empty; or the session configuration
+     *                                  executor is invalid.
+     * @throws CameraAccessException In case the camera device is no longer connected or has
+     *                               encountered a fatal error.
+     * @see #createCaptureSession(List, CameraCaptureSession.StateCallback, Handler)
+     * @see #createCaptureSessionByOutputConfigurations
+     * @see #createReprocessableCaptureSession
+     * @see #createConstrainedHighSpeedCaptureSession
+     */
+    public void createCaptureSession(
+            SessionConfiguration config) throws CameraAccessException {
+        throw new UnsupportedOperationException("No default implementation");
+    }
+
+    /**
      * <p>Create a {@link CaptureRequest.Builder} for new capture requests,
      * initialized with template for a target use case. The settings are chosen
      * to be the best options for the specific camera device, so it is not
@@ -829,16 +852,56 @@ public abstract class CameraDevice implements AutoCloseable {
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
+     */
+    @NonNull
+    public abstract CaptureRequest.Builder createCaptureRequest(@RequestTemplate int templateType)
+            throws CameraAccessException;
+
+    /**
+     * <p>Create a {@link CaptureRequest.Builder} for new capture requests,
+     * initialized with template for a target use case. This methods allows
+     * clients to pass physical camera ids which can be used to customize the
+     * request for a specific physical camera. The settings are chosen
+     * to be the best options for the specific logical camera device. If
+     * additional physical camera ids are passed, then they will also use the
+     * same settings template. Clients can further modify individual camera
+     * settings by calling {@link CaptureRequest.Builder#setPhysicalCameraKey}.</p>
+     *
+     * <p>Individual physical camera settings will only be honored for camera session
+     * that was initialiazed with corresponding physical camera id output configuration
+     * {@link OutputConfiguration#setPhysicalCameraId} and the same output targets are
+     * also attached in the request by {@link CaptureRequest.Builder#addTarget}.</p>
+     *
+     * <p>The output is undefined for any logical camera streams in case valid physical camera
+     * settings are attached.</p>
+     *
+     * @param templateType An enumeration selecting the use case for this request. Not all template
+     * types are supported on every device. See the documentation for each template type for
+     * details.
+     * @param physicalCameraIdSet A set of physical camera ids that can be used to customize
+     *                            the request for a specific physical camera.
+     * @return a builder for a capture request, initialized with default
+     * settings for that template, and no output streams
+     *
+     * @throws IllegalArgumentException if the templateType is not supported by
+     * this device, or one of the physical id arguments matches with logical camera id.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
      *
      * @see #TEMPLATE_PREVIEW
      * @see #TEMPLATE_RECORD
      * @see #TEMPLATE_STILL_CAPTURE
      * @see #TEMPLATE_VIDEO_SNAPSHOT
      * @see #TEMPLATE_MANUAL
+     * @see CaptureRequest.Builder#setPhysicalCameraKey
+     * @see CaptureRequest.Builder#getPhysicalCameraKey
      */
     @NonNull
-    public abstract CaptureRequest.Builder createCaptureRequest(@RequestTemplate int templateType)
-            throws CameraAccessException;
+    public CaptureRequest.Builder createCaptureRequest(@RequestTemplate int templateType,
+            Set<String> physicalCameraIdSet) throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
 
     /**
      * <p>Create a {@link CaptureRequest.Builder} for a new reprocess {@link CaptureRequest} from a

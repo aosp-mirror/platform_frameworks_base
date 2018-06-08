@@ -40,49 +40,50 @@ struct ClipBase;
 class DeferredLayerUpdater;
 struct RecordedOp;
 
-class ANDROID_API RecordingCanvas: public Canvas, public CanvasStateClient {
+class ANDROID_API RecordingCanvas : public Canvas, public CanvasStateClient {
     enum class DeferredBarrierType {
         None,
         InOrder,
         OutOfOrder,
     };
+
 public:
     RecordingCanvas(size_t width, size_t height);
     virtual ~RecordingCanvas();
 
     virtual void resetRecording(int width, int height, RenderNode* node = nullptr) override;
     virtual WARN_UNUSED_RESULT DisplayList* finishRecording() override;
-// ----------------------------------------------------------------------------
-// MISC HWUI OPERATIONS - TODO: CATEGORIZE
-// ----------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+    // MISC HWUI OPERATIONS - TODO: CATEGORIZE
+    // ----------------------------------------------------------------------------
     virtual void insertReorderBarrier(bool enableReorder) override;
 
     virtual void drawLayer(DeferredLayerUpdater* layerHandle) override;
     virtual void drawRenderNode(RenderNode* renderNode) override;
     virtual void callDrawGLFunction(Functor* functor,
-            GlFunctorLifecycleListener* listener) override;
+                                    GlFunctorLifecycleListener* listener) override;
 
-// ----------------------------------------------------------------------------
-// CanvasStateClient interface
-// ----------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+    // CanvasStateClient interface
+    // ----------------------------------------------------------------------------
     virtual void onViewportInitialized() override;
     virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) override;
     virtual GLuint getTargetFbo() const override { return -1; }
 
-// ----------------------------------------------------------------------------
-// HWUI Canvas draw operations
-// ----------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+    // HWUI Canvas draw operations
+    // ----------------------------------------------------------------------------
 
     virtual void drawRoundRect(CanvasPropertyPrimitive* left, CanvasPropertyPrimitive* top,
-            CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
-            CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
-            CanvasPropertyPaint* paint) override;
+                               CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
+                               CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
+                               CanvasPropertyPaint* paint) override;
     virtual void drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
-            CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint) override;
+                            CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint) override;
 
-// ----------------------------------------------------------------------------
-// android/graphics/Canvas interface
-// ----------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+    // android/graphics/Canvas interface
+    // ----------------------------------------------------------------------------
     virtual SkCanvas* asSkCanvas() override;
 
     virtual void setBitmap(const SkBitmap& bitmap) override {
@@ -93,14 +94,9 @@ public:
     virtual int width() override { return mState.getWidth(); }
     virtual int height() override { return mState.getHeight(); }
 
-    virtual void setHighContrastText(bool highContrastText) override {
-        mHighContrastText = highContrastText;
-    }
-    virtual bool isHighContrastText() override { return mHighContrastText; }
-
-// ----------------------------------------------------------------------------
-// android/graphics/Canvas state operations
-// ----------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+    // android/graphics/Canvas state operations
+    // ----------------------------------------------------------------------------
     // Save (layer)
     virtual int getSaveCount() const override { return mState.getSaveCount(); }
     virtual int save(SaveFlags::Flags flags) override;
@@ -108,9 +104,9 @@ public:
     virtual void restoreToCount(int saveCount) override;
 
     virtual int saveLayer(float left, float top, float right, float bottom, const SkPaint* paint,
-        SaveFlags::Flags flags) override;
-    virtual int saveLayerAlpha(float left, float top, float right, float bottom,
-            int alpha, SaveFlags::Flags flags) override {
+                          SaveFlags::Flags flags) override;
+    virtual int saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
+                               SaveFlags::Flags flags) override {
         SkPaint paint;
         paint.setAlpha(alpha);
         return saveLayer(left, top, right, bottom, &paint, flags);
@@ -131,8 +127,7 @@ public:
     virtual bool quickRejectRect(float left, float top, float right, float bottom) const override;
     virtual bool quickRejectPath(const SkPath& path) const override;
 
-    virtual bool clipRect(float left, float top, float right, float bottom,
-            SkClipOp op) override;
+    virtual bool clipRect(float left, float top, float right, float bottom, SkClipOp op) override;
     virtual bool clipPath(const SkPath* path, SkClipOp op) override;
 
     // Misc
@@ -141,59 +136,65 @@ public:
         mDrawFilter.reset(SkSafeRef(filter));
     }
 
-// ----------------------------------------------------------------------------
-// android/graphics/Canvas draw operations
-// ----------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+    // android/graphics/Canvas draw operations
+    // ----------------------------------------------------------------------------
     virtual void drawColor(int color, SkBlendMode mode) override;
     virtual void drawPaint(const SkPaint& paint) override;
 
     // Geometry
     virtual void drawPoint(float x, float y, const SkPaint& paint) override {
-        float points[2] = { x, y };
+        float points[2] = {x, y};
         drawPoints(points, 2, paint);
     }
     virtual void drawPoints(const float* points, int floatCount, const SkPaint& paint) override;
     virtual void drawLine(float startX, float startY, float stopX, float stopY,
-            const SkPaint& paint) override {
-        float points[4] = { startX, startY, stopX, stopY };
+                          const SkPaint& paint) override {
+        float points[4] = {startX, startY, stopX, stopY};
         drawLines(points, 4, paint);
     }
     virtual void drawLines(const float* points, int floatCount, const SkPaint& paint) override;
-    virtual void drawRect(float left, float top, float right, float bottom, const SkPaint& paint) override;
+    virtual void drawRect(float left, float top, float right, float bottom,
+                          const SkPaint& paint) override;
     virtual void drawRegion(const SkRegion& region, const SkPaint& paint) override;
-    virtual void drawRoundRect(float left, float top, float right, float bottom,
-            float rx, float ry, const SkPaint& paint) override;
+    virtual void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
+                               const SkPaint& paint) override;
     virtual void drawCircle(float x, float y, float radius, const SkPaint& paint) override;
-    virtual void drawOval(float left, float top, float right, float bottom, const SkPaint& paint) override;
-    virtual void drawArc(float left, float top, float right, float bottom,
-            float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) override;
+    virtual void drawOval(float left, float top, float right, float bottom,
+                          const SkPaint& paint) override;
+    virtual void drawArc(float left, float top, float right, float bottom, float startAngle,
+                         float sweepAngle, bool useCenter, const SkPaint& paint) override;
     virtual void drawPath(const SkPath& path, const SkPaint& paint) override;
-    virtual void drawVertices(const SkVertices*, SkBlendMode, const SkPaint& paint) override
-        { /* RecordingCanvas does not support drawVertices(); ignore */ }
+    virtual void drawVertices(const SkVertices*, SkBlendMode, const SkPaint& paint)
+            override { /* RecordingCanvas does not support drawVertices(); ignore */
+    }
 
     virtual void drawVectorDrawable(VectorDrawableRoot* tree) override;
 
     // Bitmap-based
     virtual void drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) override;
     virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const SkPaint* paint) override;
-    virtual void drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop,
-            float srcRight, float srcBottom, float dstLeft, float dstTop,
-            float dstRight, float dstBottom, const SkPaint* paint) override;
+    virtual void drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float srcRight,
+                            float srcBottom, float dstLeft, float dstTop, float dstRight,
+                            float dstBottom, const SkPaint* paint) override;
     virtual void drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
-            const float* vertices, const int* colors, const SkPaint* paint) override;
-    virtual void drawNinePatch(Bitmap& bitmap, const android::Res_png_9patch& chunk,
-            float dstLeft, float dstTop, float dstRight, float dstBottom,
-            const SkPaint* paint) override;
+                                const float* vertices, const int* colors,
+                                const SkPaint* paint) override;
+    virtual void drawNinePatch(Bitmap& bitmap, const android::Res_png_9patch& chunk, float dstLeft,
+                               float dstTop, float dstRight, float dstBottom,
+                               const SkPaint* paint) override;
+    virtual double drawAnimatedImage(AnimatedImageDrawable*) override;
 
     // Text
     virtual bool drawTextAbsolutePos() const override { return false; }
 
 protected:
     virtual void drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& paint, float x,
-            float y, float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
-            float totalAdvance) override;
+                            float y, float boundsLeft, float boundsTop, float boundsRight,
+                            float boundsBottom, float totalAdvance) override;
     virtual void drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
-            const SkPaint& paint, const SkPath& path, size_t start, size_t end) override;
+                                  const SkPaint& paint, const SkPath& path, size_t start,
+                                  size_t end) override;
 
 private:
     const ClipBase* getRecordedClip() {
@@ -203,20 +204,19 @@ private:
     void drawBitmap(Bitmap& bitmap, const SkPaint* paint);
     void drawSimpleRects(const float* rects, int vertexCount, const SkPaint* paint);
 
-
     int addOp(RecordedOp* op);
-// ----------------------------------------------------------------------------
-// lazy object copy
-// ----------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------
+    // lazy object copy
+    // ----------------------------------------------------------------------------
     LinearAllocator& alloc() { return mDisplayList->allocator; }
 
     void refBitmapsInShader(const SkShader* shader);
 
-    template<class T>
+    template <class T>
     inline const T* refBuffer(const T* srcBuffer, int32_t count) {
         if (!srcBuffer) return nullptr;
 
-        T* dstBuffer = (T*) mDisplayList->allocator.alloc<T>(count * sizeof(T));
+        T* dstBuffer = (T*)mDisplayList->allocator.alloc<T>(count * sizeof(T));
         memcpy(dstBuffer, srcBuffer, count * sizeof(T));
         return dstBuffer;
     }
@@ -311,11 +311,10 @@ private:
     DeferredBarrierType mDeferredBarrierType = DeferredBarrierType::None;
     const ClipBase* mDeferredBarrierClip = nullptr;
     DisplayList* mDisplayList = nullptr;
-    bool mHighContrastText = false;
     sk_sp<SkDrawFilter> mDrawFilter;
-}; // class RecordingCanvas
+};  // class RecordingCanvas
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_RECORDING_CANVAS_H
+#endif  // ANDROID_HWUI_RECORDING_CANVAS_H

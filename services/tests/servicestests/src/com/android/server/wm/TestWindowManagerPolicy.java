@@ -19,94 +19,45 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doAnswer;
-
-import android.os.PowerSaveState;
-import org.mockito.invocation.InvocationOnMock;
 
 import android.annotation.Nullable;
-import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.hardware.display.DisplayManagerInternal;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.proto.ProtoOutputStream;
 import android.view.Display;
+import android.view.DisplayCutout;
+import android.view.IWindow;
 import android.view.IWindowManager;
-import android.view.InputChannel;
 import android.view.KeyEvent;
 import android.view.WindowManager;
-import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
-import android.os.PowerManagerInternal;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
-import com.android.server.input.InputManagerService;
-import com.android.server.LocalServices;
+import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
+import java.util.function.Supplier;
 
 class TestWindowManagerPolicy implements WindowManagerPolicy {
     private static final String TAG = "TestWindowManagerPolicy";
 
-    private static WindowManagerService sWm = null;
+    private final Supplier<WindowManagerService> mWmSupplier;
 
     int rotationToReport = 0;
+    boolean keyguardShowingAndNotOccluded = false;
 
     private Runnable mRunnableWhenAddingSplashScreen;
 
-    static synchronized WindowManagerService getWindowManagerService(Context context) {
-        if (sWm == null) {
-            // We only want to do this once for the test process as we don't want WM to try to
-            // register a bunch of local services again.
-            if (LocalServices.getService(DisplayManagerInternal.class) == null) {
-                LocalServices.addService(DisplayManagerInternal.class,
-                        mock(DisplayManagerInternal.class));
-            }
-            if (LocalServices.getService(PowerManagerInternal.class) == null) {
-                LocalServices.addService(PowerManagerInternal.class,
-                        mock(PowerManagerInternal.class));
-                final PowerManagerInternal pm =
-                        LocalServices.getService(PowerManagerInternal.class);
-                PowerSaveState state = new PowerSaveState.Builder().build();
-                doReturn(state).when(pm).getLowPowerState(anyInt());
-            }
-            if (LocalServices.getService(ActivityManagerInternal.class) == null) {
-                LocalServices.addService(ActivityManagerInternal.class,
-                        mock(ActivityManagerInternal.class));
-                final ActivityManagerInternal am =
-                        LocalServices.getService(ActivityManagerInternal.class);
-                doAnswer((InvocationOnMock invocationOnMock) -> {
-                    final Runnable runnable = invocationOnMock.<Runnable>getArgument(0);
-                    if (runnable != null) {
-                        runnable.run();
-                    }
-                    return null;
-                }).when(am).notifyKeyguardFlagsChanged(any());
-            }
+    public TestWindowManagerPolicy(Supplier<WindowManagerService> wmSupplier) {
 
-            InputManagerService ims = mock(InputManagerService.class);
-            // InputChannel is final and can't be mocked.
-            InputChannel[] input = InputChannel.openInputChannelPair(TAG_WM);
-            if (input != null && input.length > 1) {
-                doReturn(input[1]).when(ims).monitorInput(anyString());
-            }
-
-            sWm = WindowManagerService.main(context, ims, true, false,
-                    false, new TestWindowManagerPolicy());
-        }
-        return sWm;
+        mWmSupplier = wmSupplier;
     }
 
     @Override
@@ -132,11 +83,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void setDisplayOverscan(Display display, int left, int top, int right, int bottom) {
-
-    }
-
-    @Override
     public int checkAddPermission(WindowManager.LayoutParams attrs, int[] outAppOp) {
         return 0;
     }
@@ -147,8 +93,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void adjustWindowParamsLw(WindowManager.LayoutParams attrs) {
-
+    public void adjustWindowParamsLw(WindowState win, WindowManager.LayoutParams attrs,
+            boolean hasStatusBarServicePermission) {
     }
 
     @Override
@@ -164,25 +110,25 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode,
-            int displayId) {
+            int displayId, DisplayCutout displayCutout) {
         return 0;
     }
 
     @Override
     public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode,
-            int displayId) {
+            int displayId, DisplayCutout displayCutout) {
         return 0;
     }
 
     @Override
     public int getConfigDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode,
-            int displayId) {
+            int displayId, DisplayCutout displayCutout) {
         return 0;
     }
 
     @Override
     public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode,
-            int displayId) {
+            int displayId, DisplayCutout displayCutout) {
         return 0;
     }
 
@@ -210,10 +156,12 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             int logo, int windowFlags, Configuration overrideConfig, int displayId) {
         final com.android.server.wm.WindowState window;
         final AppWindowToken atoken;
-        synchronized (sWm.mWindowMap) {
-            atoken = sWm.mRoot.getAppWindowToken(appToken);
+        final WindowManagerService wm = mWmSupplier.get();
+        synchronized (wm.mWindowMap) {
+            atoken = wm.mRoot.getAppWindowToken(appToken);
             window = WindowTestsBase.createWindow(null, TYPE_APPLICATION_STARTING, atoken,
-                    "Starting window");
+                    "Starting window", 0 /* ownerId */, false /* internalWindows */, wm,
+                    mock(Session.class), mock(IWindow.class));
             atoken.startingWindow = window;
         }
         if (mRunnableWhenAddingSplashScreen != null) {
@@ -221,7 +169,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             mRunnableWhenAddingSplashScreen = null;
         }
         return () -> {
-            synchronized (sWm.mWindowMap) {
+            synchronized (wm.mWindowMap) {
                 atoken.removeChild(window);
                 atoken.startingWindow = null;
             }
@@ -289,37 +237,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void beginLayoutLw(boolean isDefaultDisplay, int displayWidth, int displayHeight,
-            int displayRotation, int uiMode) {
-
-    }
-
-    @Override
     public int getSystemDecorLayerLw() {
         return 0;
-    }
-
-    @Override
-    public void getContentRectLw(Rect r) {
-
-    }
-
-    @Override
-    public void layoutWindowLw(WindowState win,
-            WindowState attached) {
-
-    }
-
-    @Override
-    public boolean getInsetHintLw(WindowManager.LayoutParams attrs, Rect taskBounds,
-            int displayRotation, int displayWidth, int displayHeight, Rect outContentInsets,
-            Rect outStableInsets, Rect outOutsets) {
-        return false;
-    }
-
-    @Override
-    public void finishLayoutLw() {
-
     }
 
     @Override
@@ -420,7 +339,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public boolean isKeyguardLocked() {
-        return false;
+        return keyguardShowingAndNotOccluded;
     }
 
     @Override
@@ -440,7 +359,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public boolean isKeyguardShowingAndNotOccluded() {
-        return false;
+        return keyguardShowingAndNotOccluded;
     }
 
     @Override
@@ -449,7 +368,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void dismissKeyguardLw(@Nullable IKeyguardDismissCallback callback) {
+    public void dismissKeyguardLw(@Nullable IKeyguardDismissCallback callback,
+            CharSequence message) {
     }
 
     @Override
@@ -467,8 +387,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public int rotationForOrientationLw(int orientation,
-            int lastRotation) {
+    public int rotationForOrientationLw(int orientation, int lastRotation, boolean defaultDisplay) {
         return rotationToReport;
     }
 
@@ -571,18 +490,13 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void showRecentApps(boolean fromHome) {
+    public void showRecentApps() {
 
     }
 
     @Override
     public void showGlobalActions() {
 
-    }
-
-    @Override
-    public int getInputMethodWindowVisibleHeightLw() {
-        return 0;
     }
 
     @Override
@@ -596,13 +510,13 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void dump(String prefix, PrintWriter writer, String[] args) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
 
     }
 
     @Override
-    public boolean canMagnifyWindow(int windowType) {
-        return false;
+    public void dump(String prefix, PrintWriter writer, String[] args) {
+
     }
 
     @Override
@@ -617,7 +531,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void getStableInsetsLw(int displayRotation, int displayWidth, int displayHeight,
-            Rect outInsets) {
+            DisplayCutout cutout, Rect outInsets) {
 
     }
 
@@ -626,6 +540,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
         return false;
     }
 
+    @NavigationBarPosition
     @Override
     public int getNavBarPosition() {
         return NAV_BAR_BOTTOM;
@@ -633,12 +548,13 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void getNonDecorInsetsLw(int displayRotation, int displayWidth, int displayHeight,
-            Rect outInsets) {
+            DisplayCutout cutout, Rect outInsets) {
 
     }
 
     @Override
-    public boolean isDockSideAllowed(int dockSide) {
+    public boolean isDockSideAllowed(int dockSide, int originalDockSide, int displayWidth,
+            int displayHeight, int displayRotation) {
         return false;
     }
 
@@ -663,6 +579,10 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
+    public void setNavBarVirtualKeyHapticFeedbackEnabledLw(boolean enabled) {
+    }
+
+    @Override
     public void onSystemUiStarted() {
     }
 
@@ -673,5 +593,14 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void requestUserActivityNotification() {
+    }
+
+    @Override
+    public void onLockTaskStateChangedLw(int lockTaskState) {
+    }
+
+    @Override
+    public boolean setAodShowing(boolean aodShowing) {
+        return false;
     }
 }

@@ -16,15 +16,16 @@
 
 #include "SkiaOpenGLReadback.h"
 
-#include "Matrix.h"
-#include "Properties.h"
-#include <SkCanvas.h>
-#include <SkSurface.h>
-#include <GrBackendSurface.h>
-#include <gl/GrGLInterface.h>
-#include <gl/GrGLTypes.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#include <GrBackendSurface.h>
+#include <SkCanvas.h>
+#include <SkSurface.h>
+#include <gl/GrGLInterface.h>
+#include <gl/GrGLTypes.h>
+#include "DeviceInfo.h"
+#include "Matrix.h"
+#include "Properties.h"
 
 using namespace android::uirenderer::renderthread;
 
@@ -33,8 +34,8 @@ namespace uirenderer {
 namespace skiapipeline {
 
 CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4& imgTransform,
-        int imgWidth, int imgHeight, const Rect& srcRect, SkBitmap* bitmap) {
-
+                                             int imgWidth, int imgHeight, const Rect& srcRect,
+                                             SkBitmap* bitmap) {
     GLuint sourceTexId;
     glGenTextures(1, &sourceTexId);
     glBindTexture(GL_TEXTURE_EXTERNAL_OES, sourceTexId);
@@ -44,8 +45,7 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
         sk_sp<const GrGLInterface> glInterface(GrGLCreateNativeInterface());
         LOG_ALWAYS_FATAL_IF(!glInterface.get());
-        grContext.reset(GrContext::Create(GrBackend::kOpenGL_GrBackend,
-                (GrBackendContext)glInterface.get()));
+        grContext = GrContext::MakeGL(std::move(glInterface));
     } else {
         grContext->resetContext();
     }
@@ -54,56 +54,76 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
     externalTexture.fTarget = GL_TEXTURE_EXTERNAL_OES;
     externalTexture.fID = sourceTexId;
 
-    GrBackendTexture backendTexture(imgWidth, imgHeight, kRGBA_8888_GrPixelConfig, externalTexture);
+    GrPixelConfig pixelConfig;
+    switch (bitmap->colorType()) {
+        case kRGBA_F16_SkColorType:
+            pixelConfig = kRGBA_half_GrPixelConfig;
+            break;
+        case kN32_SkColorType:
+        default:
+            pixelConfig = kRGBA_8888_GrPixelConfig;
+            break;
+    }
+
+    if (pixelConfig == kRGBA_half_GrPixelConfig &&
+            !grContext->caps()->isConfigRenderable(kRGBA_half_GrPixelConfig, false)) {
+        ALOGW("Can't copy surface into bitmap, RGBA_F16 config is not supported");
+        return CopyResult::DestinationInvalid;
+    }
+
+    GrBackendTexture backendTexture(imgWidth, imgHeight, pixelConfig, externalTexture);
 
     CopyResult copyResult = CopyResult::UnknownError;
     sk_sp<SkImage> image(SkImage::MakeFromAdoptedTexture(grContext.get(), backendTexture,
-            kTopLeft_GrSurfaceOrigin));
+                                                         kTopLeft_GrSurfaceOrigin));
     if (image) {
-        SkMatrix textureMatrix;
-        imgTransform.copyTo(textureMatrix);
-
-        // remove the y-flip applied to the matrix
-        SkMatrix yFlip = SkMatrix::MakeScale(1, -1);
-        yFlip.postTranslate(0,1);
-        textureMatrix.preConcat(yFlip);
-
-        // multiply by image size, because textureMatrix maps to [0..1] range
-        textureMatrix[SkMatrix::kMTransX] *= imgWidth;
-        textureMatrix[SkMatrix::kMTransY] *= imgHeight;
-
-        // swap rotation and translation part of the matrix, because we convert from
-        // right-handed Cartesian to left-handed coordinate system.
-        std::swap(textureMatrix[SkMatrix::kMTransX], textureMatrix[SkMatrix::kMTransY]);
-        std::swap(textureMatrix[SkMatrix::kMSkewX], textureMatrix[SkMatrix::kMSkewY]);
-
-        // convert to Skia data structures
-        SkRect skiaSrcRect = srcRect.toSkRect();
-        SkMatrix textureMatrixInv;
-        SkRect skiaDestRect = SkRect::MakeWH(bitmap->width(), bitmap->height());
-        bool srcNotEmpty = false;
-        if (textureMatrix.invert(&textureMatrixInv)) {
-            if (skiaSrcRect.isEmpty()) {
-                skiaSrcRect = SkRect::MakeIWH(imgWidth, imgHeight);
-                srcNotEmpty = !skiaSrcRect.isEmpty();
-            } else {
-                // src and dest rectangles need to be converted into texture coordinates before the
-                // rotation matrix is applied (because drawImageRect preconcat its matrix).
-                textureMatrixInv.mapRect(&skiaSrcRect);
-                srcNotEmpty = skiaSrcRect.intersect(SkRect::MakeIWH(imgWidth, imgHeight));
-            }
-            textureMatrixInv.mapRect(&skiaDestRect);
+        int displayedWidth = imgWidth, displayedHeight = imgHeight;
+        // If this is a 90 or 270 degree rotation we need to swap width/height to get the device
+        // size.
+        if (imgTransform[Matrix4::kSkewX] >= 0.5f || imgTransform[Matrix4::kSkewX] <= -0.5f) {
+            std::swap(displayedWidth, displayedHeight);
         }
+        SkRect skiaDestRect = SkRect::MakeWH(bitmap->width(), bitmap->height());
+        SkRect skiaSrcRect = srcRect.toSkRect();
+        if (skiaSrcRect.isEmpty()) {
+            skiaSrcRect = SkRect::MakeIWH(displayedWidth, displayedHeight);
+        }
+        bool srcNotEmpty = skiaSrcRect.intersect(SkRect::MakeIWH(displayedWidth, displayedHeight));
 
         if (srcNotEmpty) {
+            SkMatrix textureMatrixInv;
+            imgTransform.copyTo(textureMatrixInv);
+            // TODO: after skia bug https://bugs.chromium.org/p/skia/issues/detail?id=7075 is fixed
+            // use bottom left origin and remove flipV and invert transformations.
+            SkMatrix flipV;
+            flipV.setAll(1, 0, 0, 0, -1, 1, 0, 0, 1);
+            textureMatrixInv.preConcat(flipV);
+            textureMatrixInv.preScale(1.0f / displayedWidth, 1.0f / displayedHeight);
+            textureMatrixInv.postScale(imgWidth, imgHeight);
+            SkMatrix textureMatrix;
+            if (!textureMatrixInv.invert(&textureMatrix)) {
+                textureMatrix = textureMatrixInv;
+            }
+
+            textureMatrixInv.mapRect(&skiaSrcRect);
+            textureMatrixInv.mapRect(&skiaDestRect);
+
             // we render in an offscreen buffer to scale and to avoid an issue b/62262733
             // with reading incorrect data from EGLImage backed SkImage (likely a driver bug)
-            sk_sp<SkSurface> scaledSurface = SkSurface::MakeRenderTarget(
-                    grContext.get(), SkBudgeted::kYes, bitmap->info());
+            sk_sp<SkSurface> scaledSurface =
+                    SkSurface::MakeRenderTarget(grContext.get(), SkBudgeted::kYes, bitmap->info());
             SkPaint paint;
             paint.setBlendMode(SkBlendMode::kSrc);
+            // Apply a filter, which is matching OpenGL pipeline readback behaviour. Filter usage
+            // is codified by tests using golden images like DecodeAccuracyTest.
+            if (skiaSrcRect.width() != bitmap->width() ||
+                skiaSrcRect.height() != bitmap->height()) {
+                // TODO: apply filter always, but check if tests will be fine
+                paint.setFilterQuality(kLow_SkFilterQuality);
+            }
             scaledSurface->getCanvas()->concat(textureMatrix);
-            scaledSurface->getCanvas()->drawImageRect(image, skiaSrcRect, skiaDestRect, &paint);
+            scaledSurface->getCanvas()->drawImageRect(image, skiaSrcRect, skiaDestRect, &paint,
+                                                      SkCanvas::kFast_SrcRectConstraint);
 
             image = scaledSurface->makeImageSnapshot();
 

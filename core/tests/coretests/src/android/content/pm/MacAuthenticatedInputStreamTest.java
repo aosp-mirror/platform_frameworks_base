@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.support.test.filters.LargeTest;
 import android.test.AndroidTestCase;
 
 import java.io.ByteArrayInputStream;
@@ -27,6 +28,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import libcore.io.Streams;
 
+@LargeTest
 public class MacAuthenticatedInputStreamTest extends AndroidTestCase {
 
     private static final SecretKey HMAC_KEY_1 = new SecretKeySpec("test_key_1".getBytes(), "HMAC");

@@ -26,13 +26,11 @@ namespace skiapipeline {
 /**
  * An offscreen rendering target used to contain the contents a RenderNode.
  */
-struct SkiaLayer
-{
+struct SkiaLayer {
     sk_sp<SkSurface> layerSurface;
     Matrix4 inverseTransformInWindow;
     bool hasRenderedSinceRepaint = false;
 };
-
 
 } /* namespace skiapipeline */
 } /* namespace uirenderer */

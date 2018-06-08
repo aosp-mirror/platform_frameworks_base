@@ -33,13 +33,13 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"Vérifiez le mot de passe et réessayez"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Hors de portée"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Reconnexion automatique impossible"</string>
-    <string name="wifi_no_internet" msgid="3880396223819116454">"Aucun accès à Internet"</string>
+    <string name="wifi_no_internet" msgid="4663834955626848401">"Aucun accès à Internet"</string>
     <string name="saved_network" msgid="4352716707126620811">"Enregistré lors de : <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Connecté automatiquement via %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Connecté automatiquement via un fournisseur d\'évaluation de l\'état du réseau"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Connecté via %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Disponible via %1$s"</string>
-    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Connecté, aucun accès à Internet"</string>
+    <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Connecté, aucun accès à Internet"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Point d\'accès temporairement plein"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Connecté via %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Disponible via %1$s"</string>
@@ -53,16 +53,16 @@
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Déconnecté"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Déconnexion…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Connexion…"</string>
-    <string name="bluetooth_connected" msgid="6038755206916626419">"Connecté"</string>
+    <string name="bluetooth_connected" msgid="5427152882755735944">"Connecté<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_pairing" msgid="1426882272690346242">"Association…"</string>
-    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Connecté (sans audio pour appels tél.)"</string>
-    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Connecté (sans audio contenu mutimédia)"</string>
-    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Connecté (sans accès aux messages)"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Connecté (sans audio tel./multimédia)"</string>
-    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"Connecté, batterie à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"Connecté (aucun téléphone), batterie à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"Connecté (aucun contenu multimédia), batterie à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"Connecté (aucun téléphone ni contenu multimédia), batterie à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset" msgid="616068069034994802">"Connecté (aucun téléphone)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="3736431800395923868">"Connecté (aucun contenu mutimédia)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_map" msgid="3200033913678466453">"Connecté (sans accès aux messages)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2047403011284187056">"Connecté (aucun tél./contenu multimédia)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5162924691231307748">"Connecté, batterie à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Connecté (aucun téléphone), batterie à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Connecté (aucun contenu multimédia), batterie à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Connecté (aucun téléphone ni contenu multimédia), batterie à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Multimédia"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Appels téléphoniques"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transfert de fichier"</string>
@@ -75,6 +75,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Accès à la carte SIM"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"Audio HD : <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"Audio HD"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"Assistance auditive"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"Connecté à la prothèse auditive"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Connecté aux paramètres audio du média"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Connecté aux paramètres audio du téléphone"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Connexion au serveur de transfert de fichiers"</string>
@@ -82,15 +84,16 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Connecté au point d\'accès au service"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Connexion au serveur de transfert de fichiers non établie"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Connecté au périphérique d\'entrée"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Connecté à l\'appareil pour accès Internet"</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Connexion Internet locale partagée"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Utiliser pour l\'accès à Internet"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Connecté à l\'appareil pour accès Internet"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Connexion Internet locale partagée"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Utiliser pour l\'accès à Internet"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Utiliser pour la carte"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Utiliser pour l\'accès à la carte SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Utiliser pour les paramètres audio du média"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Utiliser pour les paramètres audio du téléphone"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Utiliser pour le transfert de fichiers"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Utiliser comme entrée"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"Utiliser pour l\'assistance auditive"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Associer"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ASSOCIER"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Annuler"</string>
@@ -99,6 +102,13 @@
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Impossible d\'établir l\'association avec <xliff:g id="DEVICE_NAME">%1$s</xliff:g> en raison d\'un code ou d\'une clé d\'accès incorrects."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Impossible d\'établir la communication avec <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"Association refusée par <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="bluetooth_talkback_computer" msgid="4875089335641234463">"Ordinateur"</string>
+    <string name="bluetooth_talkback_headset" msgid="5140152177885220949">"Casque"</string>
+    <string name="bluetooth_talkback_phone" msgid="4260255181240622896">"Téléphone"</string>
+    <string name="bluetooth_talkback_imaging" msgid="551146170554589119">"Imagerie"</string>
+    <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Casque audio"</string>
+    <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Périphérique d\'entrée"</string>
+    <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi désactivé"</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi déconnecté"</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Signal Wi-Fi faible"</string>
@@ -189,13 +199,11 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Mise en réseau"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certification affichage sans fil"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Autoriser enreg. infos Wi-Fi détaillées"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Passage forcé Wi-Fi vers données mobiles"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Toujours autoriser la détection de réseaux Wi-Fi en itinérance"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Sélection aléatoire de l\'adresse MAC lors de la connexion"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Données mobiles toujours actives"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Accélération matérielle pour le partage de connexion"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Afficher les appareils Bluetooth sans nom"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Désactiver le volume absolu"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Activer la signalisation intra-bande"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Version Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Sélectionner la version Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Codec audio Bluetooth"</string>
@@ -212,13 +220,13 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS privé"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Sélectionner le mode DNS privé"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Désactivé"</string>
-    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"Opportuniste"</string>
+    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
+    <skip />
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Nom d\'hôte du fournisseur DNS privé"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Saisissez le nom d\'hôte du fournisseur DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Afficher les options de la certification de l\'affichage sans fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Détailler plus infos Wi-Fi, afficher par RSSI de SSID dans outil sélection Wi-Fi"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Si cette option est activée, le passage du Wi-Fi aux données mobiles est forcé en cas de signal Wi-Fi faible."</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Autoriser ou non la détection de réseaux Wi-Fi en itinérance en fonction de l\'importance du trafic de données dans l\'interface"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Sélectionner l\'adresse MAC de manière aléatoire lors de la connexion aux réseaux Wi-Fi"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tailles mémoires tampons enregistr."</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Tailles enreg. par tampon journal"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Effacer l\'espace de stockage persistant de l\'enregistreur ?"</string>
@@ -241,7 +249,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Vérifiez que les applications installées par ADB/ADT ne présentent pas de comportement dangereux."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Les appareils Bluetooth seront affichés sans nom (adresse MAC uniquement)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Désactive la fonctionnalité de volume absolu du Bluetooth en cas de problème de volume sur les appareils à distance, par exemple si le volume est trop élevé ou s\'il ne peut pas être contrôlé."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Autoriser la lecture des sonneries du téléphone sur les casques Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Activer l\'application Terminal permettant l\'accès au shell local"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Vérification HDCP"</string>
@@ -254,8 +261,6 @@
     <string name="no_application" msgid="2813387563129153880">"Aucune"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Attendre l\'intervention du débogueur"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Avant de s\'exécuter, l\'application déboguée doit attendre que le débogueur soit attaché."</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Telephony Monitor"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Telephony Monitor recueille des journaux lorsqu\'il détecte un problème lié à la fonctionnalité de téléphonie ou de modem, puis invite l\'utilisateur à créer un bug"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Saisie"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Tracé"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Accélération matérielle"</string>
@@ -274,7 +279,6 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Mises à jour couches matérielles"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Couches matérielles en vert une fois mises à jour"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Déboguer les conflits GPU"</string>
-    <string name="debug_hw_renderer" msgid="7568529019431785816">"Définir moteur rendu processeur graphique"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Désactiver superpos. matér."</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Toujours utiliser le GPU pour la composition écran"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Simuler espace colori."</string>
@@ -291,6 +295,8 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"Activer MSAA 4x dans les applications OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Déboguer opé. de découpage non rect."</string>
     <string name="track_frame_time" msgid="6146354853663863443">"Rendu GPU du profil"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Activer couches débogage GPU"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Autoriser charg. couches débogage GPU pour applis débogage"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Échelle animation fenêtres"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Échelle anim. transitions"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Échelle durée animation"</string>
@@ -325,9 +331,10 @@
     <item msgid="8280754435979370728">"Couleurs naturelles vues par l\'œil"</item>
     <item msgid="5363960654009010371">"Couleurs optimisées pour les contenus numériques"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"Applications inactives"</string>
+    <string name="inactive_apps_title" msgid="9042996804461901648">"Applications mises en veille"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Application inactive. Appuyez ici pour l\'activer."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Application active. Appuyez ici pour la désactiver."</string>
+    <string name="standby_bucket_summary" msgid="6567835350910684727">"État de mise en veille de l\'application : <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Services en cours d\'exécution"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Afficher et contrôler les services en cours d\'exécution"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Mise en œuvre WebView"</string>
@@ -349,16 +356,43 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Correction couleur"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Cette fonctionnalité est expérimentale et peut affecter les performances."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Remplacé par <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Il reste environ <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Temps restant en fonction de votre utilisation : environ <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">^1</xliff:g> avant charge complète"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Temps restant : <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"Temps restant en fonction de votre utilisation : <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> - encore environ <xliff:g id="TIME">^2</xliff:g>"</string>
-    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> – Temps restant en fonction de votre utilisation : environ <xliff:g id="TIME">^2</xliff:g>"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> – Temps restant : <xliff:g id="TIME">^2</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Il reste environ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
+    <skip />
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Temps restant en fonction de votre utilisation : environ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
+    <skip />
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Temps restant : <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
+    <skip />
+    <!-- no translation found for power_discharge_by (6427074755635635749) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
+    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Il reste moins de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
+    <skip />
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> jusqu\'à la charge complète"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> avant charge complète"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> jusqu\'à la charge complète"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Inconnu"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Batterie en charge"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"chargement…"</string>
@@ -396,4 +430,24 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Échec de l\'ouverture des paramètres de l\'application <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>."</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Ce mode de saisie est susceptible d\'enregistrer le texte que vous saisissez, y compris vos données personnelles, telles que les mots de passe et les numéros de carte de paiement. Il provient de l\'application <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Voulez-vous vraiment l\'activer ?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Remarque : Après un redémarrage, vous ne pouvez pas lancer cette application tant que vous n\'avez pas déverrouillé votre téléphone."</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"État de l\'enregistrement IMS"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Enregistré"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Non enregistré"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Non disponible"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="one">%1$d appareil connecté</item>
+      <item quantity="other">%1$d appareils connectés</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Plus longtemps."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Moins longtemps."</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Activer"</string>
+    <string name="cancel" msgid="6859253417269739139">"Annuler"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Activer le mode \"Ne pas déranger\""</string>
+    <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Jamais"</string>
+    <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Prioritaires uniquement"</string>
+    <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"Vous n\'entendrez pas votre prochaine alarme <xliff:g id="WHEN">%1$s</xliff:g>, sauf si vous désactivez cette option avant"</string>
+    <string name="zen_alarm_warning" msgid="6236690803924413088">"Vous n\'entendrez pas votre prochaine alarme <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template" msgid="4996153414057676512">"à <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="3779172822607461675">"le <xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

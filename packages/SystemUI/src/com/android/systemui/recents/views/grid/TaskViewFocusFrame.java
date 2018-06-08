@@ -23,7 +23,7 @@ import android.view.View;
 
 import android.view.ViewTreeObserver.OnGlobalFocusChangeListener;
 import com.android.systemui.R;
-import com.android.systemui.recents.model.TaskStack;
+import com.android.systemui.shared.recents.model.TaskStack;
 import com.android.systemui.recents.views.TaskStackView;
 
 public class TaskViewFocusFrame extends View implements OnGlobalFocusChangeListener {
@@ -125,7 +125,7 @@ public class TaskViewFocusFrame extends View implements OnGlobalFocusChangeListe
             // We're returning from touch mode, set the focus to the previously focused task.
             final TaskStack stack = mSv.getStack();
             final int taskCount = stack.getTaskCount();
-            final int k = stack.indexOfStackTask(mSv.getFocusedTask());
+            final int k = stack.indexOfTask(mSv.getFocusedTask());
             final int taskIndexToFocus = k == -1 ? (taskCount - 1) : (k % taskCount);
             mSv.setFocusedTask(taskIndexToFocus, false, true);
         }

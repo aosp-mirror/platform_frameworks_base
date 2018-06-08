@@ -67,6 +67,10 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
         return old;
     }
 
+    public static int getThreadSocketStatsUid() {
+        return threadSocketTags.get().statsUid;
+    }
+
     @Override
     public void tag(FileDescriptor fd) throws SocketException {
         final SocketTags options = threadSocketTags.get();

@@ -206,6 +206,8 @@ public abstract class Animation implements Cloneable {
      */
     private boolean mDetachWallpaper = false;
 
+    private boolean mShowWallpaper;
+
     private boolean mMore = true;
     private boolean mOneMoreTime = true;
 
@@ -253,7 +255,10 @@ public abstract class Animation implements Cloneable {
 
         setBackgroundColor(a.getInt(com.android.internal.R.styleable.Animation_background, 0));
 
-        setDetachWallpaper(a.getBoolean(com.android.internal.R.styleable.Animation_detachWallpaper, false));
+        setDetachWallpaper(
+                a.getBoolean(com.android.internal.R.styleable.Animation_detachWallpaper, false));
+        setShowWallpaper(
+                a.getBoolean(com.android.internal.R.styleable.Animation_showWallpaper, false));
 
         final int resID = a.getResourceId(com.android.internal.R.styleable.Animation_interpolator, 0);
 
@@ -661,6 +666,18 @@ public abstract class Animation implements Cloneable {
     }
 
     /**
+     * If this animation is run as a window animation, this will make the wallpaper visible behind
+     * the animation.
+     *
+     * @param showWallpaper Whether the wallpaper should be shown during the animation.
+     * @attr ref android.R.styleable#Animation_detachWallpaper
+     * @hide
+     */
+    public void setShowWallpaper(boolean showWallpaper) {
+        mShowWallpaper = showWallpaper;
+    }
+
+    /**
      * Gets the acceleration curve type for this animation.
      *
      * @return the {@link Interpolator} associated to this animation
@@ -772,6 +789,16 @@ public abstract class Animation implements Cloneable {
      */
     public boolean getDetachWallpaper() {
         return mDetachWallpaper;
+    }
+
+    /**
+     * @return If run as a window animation, returns whether the wallpaper will be shown behind
+     *         during the animation.
+     * @attr ref android.R.styleable#Animation_showWallpaper
+     * @hide
+     */
+    public boolean getShowWallpaper() {
+        return mShowWallpaper;
     }
 
     /**

@@ -26,10 +26,6 @@
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
     <integer name="quick_settings_user_time_settings_tile_span">1</integer>
 
-    <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
-         card. -->
-    <integer name="keyguard_max_notification_count">5</integer>
-
     <!-- Set to true to enable the user switcher on the keyguard. -->
     <bool name="config_keyguardUserSwitcher">true</bool>
 
@@ -38,5 +34,8 @@
 
     <!-- Animation duration when using long press on recents to dock -->
     <integer name="long_press_dock_anim_duration">290</integer>
+
+    <!-- orientation of the dead zone when touches have recently occurred elsewhere on screen -->
+    <integer name="navigation_bar_deadzone_orientation">0</integer>
 
 </resources>

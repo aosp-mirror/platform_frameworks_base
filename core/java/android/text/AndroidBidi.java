@@ -16,6 +16,11 @@
 
 package android.text;
 
+import android.icu.lang.UCharacter;
+import android.icu.lang.UCharacterDirection;
+import android.icu.lang.UProperty;
+import android.icu.text.Bidi;
+import android.icu.text.BidiClassifier;
 import android.text.Layout.Directions;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -27,26 +32,61 @@ import com.android.internal.annotations.VisibleForTesting;
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public class AndroidBidi {
 
-    public static int bidi(int dir, char[] chs, byte[] chInfo, int n, boolean haveInfo) {
+    /**
+     * Overrides ICU {@link BidiClassifier} in order to correctly handle character directions for
+     * newest emoji that ICU is not aware of.
+     */
+    public static class EmojiBidiOverride extends BidiClassifier {
+        public EmojiBidiOverride() {
+            super(null /* No persisting object needed */);
+        }
+
+        // Tells ICU to use the standard Unicode value.
+        private static final int NO_OVERRIDE =
+                UCharacter.getIntPropertyMaxValue(UProperty.BIDI_CLASS) + 1;
+
+        @Override
+        public int classify(int c) {
+            if (Emoji.isNewEmoji(c)) {
+                // All new emoji characters in Unicode 10.0 are of the bidi class ON.
+                return UCharacterDirection.OTHER_NEUTRAL;
+            } else {
+                return NO_OVERRIDE;
+            }
+        }
+    }
+
+    private static final EmojiBidiOverride sEmojiBidiOverride = new EmojiBidiOverride();
+
+    /**
+     * Runs the bidi algorithm on input text.
+     */
+    public static int bidi(int dir, char[] chs, byte[] chInfo) {
         if (chs == null || chInfo == null) {
             throw new NullPointerException();
         }
 
-        if (n < 0 || chs.length < n || chInfo.length < n) {
+        final int length = chs.length;
+        if (chInfo.length < length) {
             throw new IndexOutOfBoundsException();
         }
 
-        switch(dir) {
-            case Layout.DIR_REQUEST_LTR: dir = 0; break;
-            case Layout.DIR_REQUEST_RTL: dir = 1; break;
-            case Layout.DIR_REQUEST_DEFAULT_LTR: dir = -2; break;
-            case Layout.DIR_REQUEST_DEFAULT_RTL: dir = -1; break;
-            default: dir = 0; break;
+        final byte paraLevel;
+        switch (dir) {
+            case Layout.DIR_REQUEST_LTR: paraLevel = Bidi.LTR; break;
+            case Layout.DIR_REQUEST_RTL: paraLevel = Bidi.RTL; break;
+            case Layout.DIR_REQUEST_DEFAULT_LTR: paraLevel = Bidi.LEVEL_DEFAULT_LTR; break;
+            case Layout.DIR_REQUEST_DEFAULT_RTL: paraLevel = Bidi.LEVEL_DEFAULT_RTL; break;
+            default: paraLevel = Bidi.LTR; break;
         }
-
-        int result = runBidi(dir, chs, chInfo, n, haveInfo);
-        result = (result & 0x1) == 0 ? Layout.DIR_LEFT_TO_RIGHT : Layout.DIR_RIGHT_TO_LEFT;
-        return result;
+        final Bidi icuBidi = new Bidi(length /* maxLength */, 0 /* maxRunCount */);
+        icuBidi.setCustomClassifier(sEmojiBidiOverride);
+        icuBidi.setPara(chs, paraLevel, null /* embeddingLevels */);
+        for (int i = 0; i < length; i++) {
+            chInfo[i] = icuBidi.getLevelAt(i);
+        }
+        final byte result = icuBidi.getParaLevel();
+        return (result & 0x1) == 0 ? Layout.DIR_LEFT_TO_RIGHT : Layout.DIR_RIGHT_TO_LEFT;
     }
 
     /**
@@ -178,6 +218,4 @@ public class AndroidBidi {
         }
         return new Directions(ld);
     }
-
-    private native static int runBidi(int dir, char[] chs, byte[] chInfo, int n, boolean haveInfo);
 }

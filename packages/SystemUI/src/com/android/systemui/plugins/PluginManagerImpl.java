@@ -50,6 +50,8 @@ import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 import dalvik.system.PathClassLoader;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Map;
 
@@ -300,6 +302,14 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             Log.setWtfHandler((tag, what, system) -> {
                 throw new CrashWhilePluginActiveException(what);
             });
+        }
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println(String.format("  plugin map (%d):", mPluginMap.size()));
+        for (PluginListener listener: mPluginMap.keySet()) {
+            pw.println(String.format("    %s -> %s",
+                    listener, mPluginMap.get(listener)));
         }
     }
 

@@ -34,6 +34,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.DexoptUtils;
 import com.android.server.pm.dex.PackageDexUsage;
@@ -115,11 +116,6 @@ public class PackageDexOptimizer {
         // We do not dexopt a package with no code.
         if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) == 0) {
             return false;
-        }
-
-        // We do not dexopt a priv-app package when pm.dexopt.priv-apps is false.
-        if (pkg.isPrivilegedApp()) {
-            return SystemProperties.getBoolean("pm.dexopt.priv-apps", true);
         }
 
         return true;
@@ -456,11 +452,9 @@ public class PackageDexOptimizer {
 
             for (String isa : dexCodeInstructionSets) {
                 try {
-                    String[] status = DexFile.getDexFileOptimizationStatus(path, isa);
-                    String compilationStatus = status[0];
-                    String compilationReason = status[1];
-                    pw.println(isa + ": [status=" + compilationStatus
-                            +"] reason=[" + compilationReason + "]");
+                    DexFile.OptimizationInfo info = DexFile.getDexFileOptimizationInfo(path, isa);
+                    pw.println(isa + ": [status=" + info.getStatus()
+                            +"] [reason=" + info.getReason() + "]");
                 } catch (IOException ioe) {
                     pw.println(isa + ": [Exception]: " + ioe.getMessage());
                 }
@@ -502,6 +496,10 @@ public class PackageDexOptimizer {
             boolean isUsedByOtherApps) {
         int flags = info.flags;
         boolean vmSafeMode = (flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
+        // When a priv app is configured to run out of box, only verify it.
+        if (info.isPrivilegedApp() && DexManager.isPackageSelectedToRunOob(info.packageName)) {
+            return "verify";
+        }
         if (vmSafeMode) {
             return getSafeModeCompilerFilter(targetCompilerFilter);
         }

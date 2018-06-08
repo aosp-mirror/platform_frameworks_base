@@ -24,13 +24,13 @@ cc_library_static {
         "com_android_server_connectivity_Vpn.cpp",
         "com_android_server_connectivity_tethering_OffloadHardwareInterface.cpp",
         "com_android_server_ConsumerIrService.cpp",
+        "com_android_server_devicepolicy_CryptoTestHelper.cpp",
         "com_android_server_HardwarePropertiesManagerService.cpp",
         "com_android_server_hdmi_HdmiCecController.cpp",
         "com_android_server_input_InputApplicationHandle.cpp",
         "com_android_server_input_InputManagerService.cpp",
         "com_android_server_input_InputWindowHandle.cpp",
         "com_android_server_lights_LightsService.cpp",
-        "com_android_server_location_ContextHubService.cpp",
         "com_android_server_location_GnssLocationProvider.cpp",
         "com_android_server_locksettings_SyntheticPasswordManager.cpp",
         "com_android_server_net_NetworkStatsService.cpp",
@@ -41,6 +41,7 @@ cc_library_static {
         "com_android_server_tv_TvUinputBridge.cpp",
         "com_android_server_tv_TvInputHal.cpp",
         "com_android_server_vr_VrManagerService.cpp",
+        "com_android_server_UsbAlsaJackDetector.cpp",
         "com_android_server_UsbDeviceManager.cpp",
         "com_android_server_UsbDescriptorParser.cpp",
         "com_android_server_UsbMidiDevice.cpp",
@@ -56,6 +57,17 @@ cc_library_static {
         "frameworks/native/services",
         "system/gatekeeper/include",
     ],
+
+    product_variables: {
+        arc: {
+            cflags: [
+                "-DUSE_ARC",
+            ],
+            srcs: [
+                "com_android_server_ArcVideoService.cpp",
+            ],
+        }
+    }
 }
 
 cc_defaults {
@@ -74,6 +86,7 @@ cc_defaults {
         "libhardware_legacy",
         "libhidlbase",
         "libkeystore_binder",
+        "libmtp",
         "libnativehelper",
         "libutils",
         "libui",
@@ -83,10 +96,10 @@ cc_defaults {
         "libschedulerservicehidl",
         "libsensorservice",
         "libsensorservicehidl",
-        "libskia",
         "libgui",
         "libusbhost",
         "libsuspend",
+        "libtinyalsa",
         "libEGL",
         "libGLESv2",
         "libnetutils",
@@ -102,6 +115,7 @@ cc_defaults {
         "android.hardware.broadcastradio@1.1",
         "android.hardware.contexthub@1.0",
         "android.hardware.gnss@1.0",
+        "android.hardware.gnss@1.1",
         "android.hardware.ir@1.0",
         "android.hardware.light@2.0",
         "android.hardware.power@1.0",
@@ -112,13 +126,26 @@ cc_defaults {
         "android.hardware.tv.input@1.0",
         "android.hardware.vibrator@1.0",
         "android.hardware.vibrator@1.1",
+        "android.hardware.vibrator@1.2",
         "android.hardware.vr@1.0",
         "android.frameworks.schedulerservice@1.0",
         "android.frameworks.sensorservice@1.0",
     ],
 
     static_libs: [
-        "android.hardware.broadcastradio@1.1-utils-lib",
+        "android.hardware.broadcastradio@common-utils-1x-lib",
         "libscrypt_static",
     ],
+
+    product_variables: {
+        arc: {
+            shared_libs: [
+                "libarcbridge",
+                "libarcbridgeservice",
+                "libarcvideobridge",
+                "libchrome",
+                "libmojo",
+            ],
+        }
+    }
 }

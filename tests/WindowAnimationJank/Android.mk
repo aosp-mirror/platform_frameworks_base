@@ -27,8 +27,9 @@ LOCAL_PACKAGE_NAME := WindowAnimationJank
 LOCAL_STATIC_JAVA_LIBRARIES := \
     ub-uiautomator \
     ub-janktesthelper \
-    legacy-android-test \
     junit
+
+LOCAL_JAVA_LIBRARIES := android.test.base.stubs
 
 LOCAL_SDK_VERSION := current
 

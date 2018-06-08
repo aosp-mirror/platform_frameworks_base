@@ -90,17 +90,16 @@ public:
     class ShadowTask : public Task<vertexBuffer_pair_t> {
     public:
         ShadowTask(const Matrix4* drawTransform, const Rect& localClip, bool opaque,
-                const SkPath* casterPerimeter, const Matrix4* transformXY, const Matrix4* transformZ,
-                const Vector3& lightCenter, float lightRadius)
-            : drawTransform(*drawTransform)
-            , localClip(localClip)
-            , opaque(opaque)
-            , casterPerimeter(*casterPerimeter)
-            , transformXY(*transformXY)
-            , transformZ(*transformZ)
-            , lightCenter(lightCenter)
-            , lightRadius(lightRadius) {
-        }
+                   const SkPath* casterPerimeter, const Matrix4* transformXY,
+                   const Matrix4* transformZ, const Vector3& lightCenter, float lightRadius)
+                : drawTransform(*drawTransform)
+                , localClip(localClip)
+                , opaque(opaque)
+                , casterPerimeter(*casterPerimeter)
+                , transformXY(*transformXY)
+                , transformZ(*transformZ)
+                , lightCenter(lightCenter)
+                , lightRadius(lightRadius) {}
 
         /* Note - we deep copy all task parameters, because *even though* pointers into Allocator
          * controlled objects (like the SkPath and Matrix4s) should be safe for the entire frame,
@@ -153,17 +152,17 @@ public:
 
     // TODO: precache/get for Oval, Lines, Points, etc.
 
-    void precacheRoundRect(const Matrix4& transform, const SkPaint& paint,
-            float width, float height, float rx, float ry) {
+    void precacheRoundRect(const Matrix4& transform, const SkPaint& paint, float width,
+                           float height, float rx, float ry) {
         getRoundRectBuffer(transform, paint, width, height, rx, ry);
     }
-    const VertexBuffer* getRoundRect(const Matrix4& transform, const SkPaint& paint,
-            float width, float height, float rx, float ry);
+    const VertexBuffer* getRoundRect(const Matrix4& transform, const SkPaint& paint, float width,
+                                     float height, float rx, float ry);
 
-    sp<ShadowTask> getShadowTask(const Matrix4* drawTransform, const Rect& localClip,
-            bool opaque, const SkPath* casterPerimeter,
-            const Matrix4* transformXY, const Matrix4* transformZ,
-            const Vector3& lightCenter, float lightRadius);
+    sp<ShadowTask> getShadowTask(const Matrix4* drawTransform, const Rect& localClip, bool opaque,
+                                 const SkPath* casterPerimeter, const Matrix4* transformXY,
+                                 const Matrix4* transformZ, const Vector3& lightCenter,
+                                 float lightRadius);
 
 private:
     class Buffer;
@@ -172,15 +171,14 @@ private:
 
     typedef VertexBuffer* (*Tessellator)(const Description&);
 
-    void precacheShadows(const Matrix4* drawTransform, const Rect& localClip,
-                bool opaque, const SkPath* casterPerimeter,
-                const Matrix4* transformXY, const Matrix4* transformZ,
-                const Vector3& lightCenter, float lightRadius);
+    void precacheShadows(const Matrix4* drawTransform, const Rect& localClip, bool opaque,
+                         const SkPath* casterPerimeter, const Matrix4* transformXY,
+                         const Matrix4* transformZ, const Vector3& lightCenter, float lightRadius);
 
-    Buffer* getRectBuffer(const Matrix4& transform, const SkPaint& paint,
-            float width, float height);
-    Buffer* getRoundRectBuffer(const Matrix4& transform, const SkPaint& paint,
-            float width, float height, float rx, float ry);
+    Buffer* getRectBuffer(const Matrix4& transform, const SkPaint& paint, float width,
+                          float height);
+    Buffer* getRoundRectBuffer(const Matrix4& transform, const SkPaint& paint, float width,
+                               float height, float rx, float ry);
 
     Buffer* getOrCreateBuffer(const Description& entry, Tessellator tessellator);
 
@@ -207,21 +205,21 @@ private:
 
     // holds a pointer, and implicit strong ref to each shadow task of the frame
     LruCache<ShadowDescription, Task<vertexBuffer_pair_t>*> mShadowCache;
-    class BufferPairRemovedListener : public OnEntryRemoved<ShadowDescription, Task<vertexBuffer_pair_t>*> {
-        void operator()(ShadowDescription& description, Task<vertexBuffer_pair_t>*& bufferPairTask) override {
+    class BufferPairRemovedListener
+            : public OnEntryRemoved<ShadowDescription, Task<vertexBuffer_pair_t>*> {
+        void operator()(ShadowDescription& description,
+                        Task<vertexBuffer_pair_t>*& bufferPairTask) override {
             bufferPairTask->decStrong(nullptr);
         }
     };
     BufferPairRemovedListener mBufferPairRemovedListener;
 
-}; // class TessellationCache
+};  // class TessellationCache
 
-void tessellateShadows(
-        const Matrix4* drawTransform, const Rect* localClip,
-        bool isCasterOpaque, const SkPath* casterPerimeter,
-        const Matrix4* casterTransformXY, const Matrix4* casterTransformZ,
-        const Vector3& lightCenter, float lightRadius,
-        VertexBuffer& ambientBuffer, VertexBuffer& spotBuffer);
+void tessellateShadows(const Matrix4* drawTransform, const Rect* localClip, bool isCasterOpaque,
+                       const SkPath* casterPerimeter, const Matrix4* casterTransformXY,
+                       const Matrix4* casterTransformZ, const Vector3& lightCenter,
+                       float lightRadius, VertexBuffer& ambientBuffer, VertexBuffer& spotBuffer);
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

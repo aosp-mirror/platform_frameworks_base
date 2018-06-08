@@ -39,6 +39,8 @@ public class SystemServiceManager {
     private final Context mContext;
     private boolean mSafeMode;
     private boolean mRuntimeRestarted;
+    private long mRuntimeStartElapsedTime;
+    private long mRuntimeStartUptime;
 
     // Services that should receive lifecycle events.
     private final ArrayList<SystemService> mServices = new ArrayList<SystemService>();
@@ -287,8 +289,25 @@ public class SystemServiceManager {
         return mRuntimeRestarted;
     }
 
-    void setRuntimeRestarted(boolean runtimeRestarted) {
+    /**
+     * @return Time when SystemServer was started, in elapsed realtime.
+     */
+    public long getRuntimeStartElapsedTime() {
+        return mRuntimeStartElapsedTime;
+    }
+
+    /**
+     * @return Time when SystemServer was started, in uptime.
+     */
+    public long getRuntimeStartUptime() {
+        return mRuntimeStartUptime;
+    }
+
+    void setStartInfo(boolean runtimeRestarted,
+            long runtimeStartElapsedTime, long runtimeStartUptime) {
         mRuntimeRestarted = runtimeRestarted;
+        mRuntimeStartElapsedTime = runtimeStartElapsedTime;
+        mRuntimeStartUptime = runtimeStartUptime;
     }
 
     private void warnIfTooLong(long duration, SystemService service, String operation) {

@@ -429,20 +429,21 @@ class FindAddress {
 
                     // At this point we've matched a state; try to match a zip code after it.
                     Matcher zipMatcher = sWordRe.matcher(content);
-                    if (zipMatcher.find(stateMatch.end())
-                            && isValidZipCode(zipMatcher.group(0), stateMatch)) {
-                        return zipMatcher.end();
+                    if (zipMatcher.find(stateMatch.end())) {
+                        if (isValidZipCode(zipMatcher.group(0), stateMatch)) {
+                            return zipMatcher.end();
+                        }
+                    } else {
+                        // The content ends with a state but no zip
+                        // code. This is a legal match according to the
+                        // documentation. N.B. This is equivalent to the
+                        // original c++ implementation, which only allowed
+                        // the zip code to be optional at the end of the
+                        // string, which presumably is a bug.  We tried
+                        // relaxing this to work in other places but it
+                        // caused too many false positives.
+                        nonZipMatch = stateMatch.end();
                     }
-                    // The content ends with a state but no zip
-                    // code. This is a legal match according to the
-                    // documentation. N.B. This differs from the
-                    // original c++ implementation, which only allowed
-                    // the zip code to be optional at the end of the
-                    // string, which presumably is a bug.  Now we
-                    // prefer to find a match with a zip code, but
-                    // remember non-zip matches and return them if
-                    // necessary.
-                    nonZipMatch = stateMatch.end();
                 }
             }
         }

@@ -51,15 +51,26 @@ int Properties::overrideSpotShadowStrength = -1;
 ProfileType Properties::sProfileType = ProfileType::None;
 bool Properties::sDisableProfileBars = false;
 RenderPipelineType Properties::sRenderPipelineType = RenderPipelineType::NotInitialized;
+bool Properties::enableHighContrastText = false;
 
 bool Properties::waitForGpuCompletion = false;
 bool Properties::forceDrawFrame = false;
 
 bool Properties::filterOutTestOverhead = false;
 bool Properties::disableVsync = false;
+bool Properties::skpCaptureEnabled = false;
+bool Properties::enableRTAnimations = true;
+
+bool Properties::runningInEmulator = false;
+bool Properties::debuggingEnabled = false;
+bool Properties::isolatedProcess = false;
+
+int Properties::contextPriority = 0;
 
 static int property_get_int(const char* key, int defaultValue) {
-    char buf[PROPERTY_VALUE_MAX] = {'\0',};
+    char buf[PROPERTY_VALUE_MAX] = {
+            '\0',
+    };
 
     if (property_get(key, buf, "") > 0) {
         return atoi(buf);
@@ -119,7 +130,7 @@ bool Properties::load() {
 
     showDirtyRegions = property_get_bool(PROPERTY_DEBUG_SHOW_DIRTY_REGIONS, false);
 
-    debugLevel = (DebugLevel) property_get_int(PROPERTY_DEBUG, kDebugDisabled);
+    debugLevel = (DebugLevel)property_get_int(PROPERTY_DEBUG, kDebugDisabled);
 
     skipEmptyFrames = property_get_bool(PROPERTY_SKIP_EMPTY_DAMAGE, true);
     useBufferAge = property_get_bool(PROPERTY_USE_BUFFER_AGE, true);
@@ -127,9 +138,12 @@ bool Properties::load() {
 
     filterOutTestOverhead = property_get_bool(PROPERTY_FILTER_TEST_OVERHEAD, false);
 
-    return (prevDebugLayersUpdates != debugLayersUpdates)
-            || (prevDebugOverdraw != debugOverdraw)
-            || (prevDebugStencilClip != debugStencilClip);
+    skpCaptureEnabled = debuggingEnabled && property_get_bool(PROPERTY_CAPTURE_SKP_ENABLED, false);
+
+    runningInEmulator = property_get_bool(PROPERTY_QEMU_KERNEL, false);
+
+    return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw) ||
+           (prevDebugStencilClip != debugStencilClip);
 }
 
 void Properties::overrideProperty(const char* name, const char* value) {
@@ -172,35 +186,40 @@ ProfileType Properties::getProfileType() {
 }
 
 RenderPipelineType Properties::getRenderPipelineType() {
-    if (RenderPipelineType::NotInitialized != sRenderPipelineType) {
+    if (sRenderPipelineType != RenderPipelineType::NotInitialized) {
         return sRenderPipelineType;
     }
     char prop[PROPERTY_VALUE_MAX];
-    property_get(PROPERTY_RENDERER, prop, "opengl");
-    if (!strcmp(prop, "skiagl") ) {
+    property_get(PROPERTY_RENDERER, prop, "skiagl");
+    if (!strcmp(prop, "skiagl")) {
         ALOGD("Skia GL Pipeline");
         sRenderPipelineType = RenderPipelineType::SkiaGL;
-    } else if (!strcmp(prop, "skiavk") ) {
+    } else if (!strcmp(prop, "skiavk")) {
         ALOGD("Skia Vulkan Pipeline");
         sRenderPipelineType = RenderPipelineType::SkiaVulkan;
-    } else { //"opengl"
+    } else {  //"opengl"
         ALOGD("HWUI GL Pipeline");
         sRenderPipelineType = RenderPipelineType::OpenGL;
     }
     return sRenderPipelineType;
 }
 
-#ifdef HWUI_GLES_WRAP_ENABLED
 void Properties::overrideRenderPipelineType(RenderPipelineType type) {
+#if !defined(HWUI_GLES_WRAP_ENABLED)
+    // If we're doing actual rendering then we can't change the renderer after it's been set.
+    // Unit tests can freely change this as often as it wants, though, as there's no actual
+    // GL rendering happening
+    if (sRenderPipelineType != RenderPipelineType::NotInitialized) {
+        return;
+    }
+#endif
     sRenderPipelineType = type;
 }
-#endif
 
 bool Properties::isSkiaEnabled() {
     auto renderType = getRenderPipelineType();
-    return RenderPipelineType::SkiaGL == renderType
-            || RenderPipelineType::SkiaVulkan == renderType;
+    return RenderPipelineType::SkiaGL == renderType || RenderPipelineType::SkiaVulkan == renderType;
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

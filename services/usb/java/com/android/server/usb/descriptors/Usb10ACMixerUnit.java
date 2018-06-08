@@ -30,7 +30,7 @@ public final class Usb10ACMixerUnit extends UsbACMixerUnit {
     private byte[] mControls;   // bitmasks of which controls are present for each channel
     private byte mNameID;       // string descriptor ID of mixer name
 
-    public Usb10ACMixerUnit(int length, byte type, byte subtype, byte subClass) {
+    public Usb10ACMixerUnit(int length, byte type, byte subtype, int subClass) {
         super(length, type, subtype, subClass);
     }
 

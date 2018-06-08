@@ -16,7 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
@@ -32,6 +31,7 @@ import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.pm.PackageManagerService.DEBUG_DOMAIN_VERIFICATION;
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -59,12 +59,12 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PatternMatcher;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
-import android.os.storage.VolumeInfo;
 import android.service.pm.PackageServiceDumpProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -87,10 +87,11 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
-import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.Installer.InstallerException;
-import com.android.server.pm.PackageManagerService.DumpState;
-import com.android.server.pm.PermissionsState.PermissionState;
+import com.android.server.pm.permission.BasePermission;
+import com.android.server.pm.permission.PermissionSettings;
+import com.android.server.pm.permission.PermissionsState;
+import com.android.server.pm.permission.PermissionsState.PermissionState;
 
 import libcore.io.IoUtils;
 
@@ -127,7 +128,7 @@ import java.util.Set;
 /**
  * Holds information about dynamic settings.
  */
-final class Settings {
+public final class Settings {
     private static final String TAG = "PackageSettings";
 
     /**
@@ -176,7 +177,7 @@ final class Settings {
     private static final String TAG_READ_EXTERNAL_STORAGE = "read-external-storage";
     private static final String ATTR_ENFORCEMENT = "enforcement";
 
-    private static final String TAG_ITEM = "item";
+    public static final String TAG_ITEM = "item";
     private static final String TAG_DISABLED_COMPONENTS = "disabled-components";
     private static final String TAG_ENABLED_COMPONENTS = "enabled-components";
     private static final String TAG_PACKAGE_RESTRICTIONS = "package-restrictions";
@@ -200,8 +201,11 @@ final class Settings {
     private static final String TAG_DEFAULT_BROWSER = "default-browser";
     private static final String TAG_DEFAULT_DIALER = "default-dialer";
     private static final String TAG_VERSION = "version";
+    private static final String TAG_SUSPENDED_APP_EXTRAS = "suspended-app-extras";
+    private static final String TAG_SUSPENDED_LAUNCHER_EXTRAS = "suspended-launcher-extras";
 
-    private static final String ATTR_NAME = "name";
+    public static final String ATTR_NAME = "name";
+    public static final String ATTR_PACKAGE = "package";
     private static final String ATTR_USER = "user";
     private static final String ATTR_CODE = "code";
     private static final String ATTR_GRANTED = "granted";
@@ -217,6 +221,8 @@ final class Settings {
     // New name for the above attribute.
     private static final String ATTR_HIDDEN = "hidden";
     private static final String ATTR_SUSPENDED = "suspended";
+    private static final String ATTR_SUSPENDING_PACKAGE = "suspending-package";
+    private static final String ATTR_SUSPEND_DIALOG_MESSAGE = "suspend_dialog_message";
     // Legacy, uninstall blocks are stored separately.
     @Deprecated
     private static final String ATTR_BLOCK_UNINSTALL = "blockUninstall";
@@ -227,13 +233,13 @@ final class Settings {
     private static final String ATTR_INSTALL_REASON = "install-reason";
     private static final String ATTR_INSTANT_APP = "instant-app";
     private static final String ATTR_VIRTUAL_PRELOAD = "virtual-preload";
+    private static final String ATTR_HARMFUL_APP_WARNING = "harmful-app-warning";
 
     private static final String ATTR_PACKAGE_NAME = "packageName";
     private static final String ATTR_FINGERPRINT = "fingerprint";
     private static final String ATTR_VOLUME_UUID = "volumeUuid";
     private static final String ATTR_SDK_VERSION = "sdkVersion";
     private static final String ATTR_DATABASE_VERSION = "databaseVersion";
-    private static final String ATTR_DONE = "done";
 
     // Bookkeeping for restored permission grants
     private static final String TAG_RESTORED_RUNTIME_PERMISSIONS = "restored-perms";
@@ -379,14 +385,6 @@ final class Settings {
     private final ArrayMap<Long, Integer> mKeySetRefs =
             new ArrayMap<Long, Integer>();
 
-    // Mapping from permission names to info about them.
-    final ArrayMap<String, BasePermission> mPermissions =
-            new ArrayMap<String, BasePermission>();
-
-    // Mapping from permission tree names to info about them.
-    final ArrayMap<String, BasePermission> mPermissionTrees =
-            new ArrayMap<String, BasePermission>();
-
     // Packages that have been uninstalled and still need their external
     // storage data deleted.
     final ArrayList<PackageCleanItem> mPackagesToBeCleaned = new ArrayList<PackageCleanItem>();
@@ -420,14 +418,16 @@ final class Settings {
     private final File mSystemDir;
 
     public final KeySetManagerService mKeySetManagerService = new KeySetManagerService(mPackages);
+    /** Settings and other information about permissions */
+    final PermissionSettings mPermissions;
 
-    Settings(Object lock) {
-        this(Environment.getDataDirectory(), lock);
+    Settings(PermissionSettings permissions, Object lock) {
+        this(Environment.getDataDirectory(), permissions, lock);
     }
 
-    Settings(File dataDir, Object lock) {
+    Settings(File dataDir, PermissionSettings permission, Object lock) {
         mLock = lock;
-
+        mPermissions = permission;
         mRuntimePermissionsPersistence = new RuntimePermissionPersistence(mLock);
 
         mSystemDir = new File(dataDir, "system");
@@ -461,15 +461,6 @@ final class Settings {
         return mRenamedPackages.put(pkgName, origPkgName);
     }
 
-    void setInstallStatus(String pkgName, final int status) {
-        PackageSetting p = mPackages.get(pkgName);
-        if(p != null) {
-            if(p.getInstallStatus() != status) {
-                p.setInstallStatus(status);
-            }
-        }
-    }
-
     void applyPendingPermissionGrantsLPw(String packageName, int userId) {
         ArrayMap<String, ArraySet<RestoredPermissionGrant>> grantsByPackage =
                 mRestoredUserGrants.get(userId);
@@ -490,7 +481,7 @@ final class Settings {
         final PermissionsState perms = ps.getPermissionsState();
 
         for (RestoredPermissionGrant grant : grants) {
-            BasePermission bp = mPermissions.get(grant.permissionName);
+            BasePermission bp = mPermissions.getPermission(grant.permissionName);
             if (bp != null) {
                 if (grant.granted) {
                     perms.grantRuntimePermission(bp, userId);
@@ -505,6 +496,10 @@ final class Settings {
             mRestoredUserGrants.remove(userId);
         }
         writeRuntimePermissionsForUserLPr(userId, false);
+    }
+
+    public boolean canPropagatePermissionToInstantApp(String permName) {
+        return mPermissions.canPropagatePermissionToInstantApp(permName);
     }
 
     void setInstallerPackageName(String pkgName, String installerPkgName) {
@@ -547,7 +542,7 @@ final class Settings {
         }
         final PackageSetting dp = mDisabledSysPackages.get(name);
         // always make sure the system package code and resource paths dont change
-        if (dp == null && p.pkg != null && p.pkg.isSystemApp() && !p.pkg.isUpdatedSystemApp()) {
+        if (dp == null && p.pkg != null && p.pkg.isSystem() && !p.pkg.isUpdatedSystemApp()) {
             if((p.pkg != null) && (p.pkg.applicationInfo != null)) {
                 p.pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
             }
@@ -596,10 +591,10 @@ final class Settings {
 
     PackageSetting addPackageLPw(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
-            String secondaryCpuAbiString, String cpuAbiOverrideString, int uid, int vc, int
+            String secondaryCpuAbiString, String cpuAbiOverrideString, int uid, long vc, int
             pkgFlags, int pkgPrivateFlags, String parentPackageName,
             List<String> childPackageNames, String[] usesStaticLibraries,
-            int[] usesStaticLibraryNames) {
+            long[] usesStaticLibraryNames) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
             if (p.appId == uid) {
@@ -619,6 +614,10 @@ final class Settings {
             return p;
         }
         return null;
+    }
+
+    void addAppOpPackage(String permName, String packageName) {
+        mPermissions.addAppOpPackage(permName, packageName);
     }
 
     SharedUserSetting addSharedUserLPw(String name, int uid, int pkgFlags, int pkgPrivateFlags) {
@@ -664,31 +663,6 @@ final class Settings {
         }
     }
 
-    // Transfer ownership of permissions from one package to another.
-    void transferPermissionsLPw(String origPkg, String newPkg) {
-        // Transfer ownership of permissions to the new package.
-        for (int i=0; i<2; i++) {
-            ArrayMap<String, BasePermission> permissions =
-                    i == 0 ? mPermissionTrees : mPermissions;
-            for (BasePermission bp : permissions.values()) {
-                if (origPkg.equals(bp.sourcePackage)) {
-                    if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG,
-                            "Moving permission " + bp.name
-                            + " from pkg " + bp.sourcePackage
-                            + " to " + newPkg);
-                    bp.sourcePackage = newPkg;
-                    bp.packageSetting = null;
-                    bp.perm = null;
-                    if (bp.pendingInfo != null) {
-                        bp.pendingInfo.packageName = newPkg;
-                    }
-                    bp.uid = 0;
-                    bp.setGids(null, false);
-                }
-            }
-        }
-    }
-
     /**
      * Creates a new {@code PackageSetting} object.
      * Use this method instead of the constructor to ensure a settings object is created
@@ -697,11 +671,11 @@ final class Settings {
     static @NonNull PackageSetting createNewSetting(String pkgName, PackageSetting originalPkg,
             PackageSetting disabledPkg, String realPkgName, SharedUserSetting sharedUser,
             File codePath, File resourcePath, String legacyNativeLibraryPath, String primaryCpuAbi,
-            String secondaryCpuAbi, int versionCode, int pkgFlags, int pkgPrivateFlags,
+            String secondaryCpuAbi, long versionCode, int pkgFlags, int pkgPrivateFlags,
             UserHandle installUser, boolean allowInstall, boolean instantApp,
             boolean virtualPreload, String parentPkgName, List<String> childPkgNames,
             UserManagerService userManager,
-            String[] usesStaticLibraries, int[] usesStaticLibrariesVersions) {
+            String[] usesStaticLibraries, long[] usesStaticLibrariesVersions) {
         final PackageSetting pkgSetting;
         if (originalPkg != null) {
             if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG, "Package "
@@ -711,7 +685,6 @@ final class Settings {
                     (childPkgNames != null) ? new ArrayList<>(childPkgNames) : null;
             pkgSetting.codePath = codePath;
             pkgSetting.legacyNativeLibraryPathString = legacyNativeLibraryPath;
-            pkgSetting.origPackage = originalPkg;
             pkgSetting.parentPackageName = parentPkgName;
             pkgSetting.pkgFlags = pkgFlags;
             pkgSetting.pkgPrivateFlags = pkgPrivateFlags;
@@ -761,13 +734,18 @@ final class Settings {
                                 true /*notLaunched*/,
                                 false /*hidden*/,
                                 false /*suspended*/,
+                                null /*suspendingPackage*/,
+                                null /*dialogMessage*/,
+                                null /*suspendedAppExtras*/,
+                                null /*suspendedLauncherExtras*/,
                                 instantApp,
                                 virtualPreload,
                                 null /*lastDisableAppCaller*/,
                                 null /*enabledComponents*/,
                                 null /*disabledComponents*/,
                                 INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED,
-                                0, PackageManager.INSTALL_REASON_UNKNOWN);
+                                0, PackageManager.INSTALL_REASON_UNKNOWN,
+                                null /*harmfulAppWarning*/);
                     }
                 }
             }
@@ -808,11 +786,12 @@ final class Settings {
      */
     static void updatePackageSetting(@NonNull PackageSetting pkgSetting,
             @Nullable PackageSetting disabledPkg, @Nullable SharedUserSetting sharedUser,
-            @NonNull File codePath, @Nullable String legacyNativeLibraryPath,
-            @Nullable String primaryCpuAbi, @Nullable String secondaryCpuAbi,
-            int pkgFlags, int pkgPrivateFlags, @Nullable List<String> childPkgNames,
-            @NonNull UserManagerService userManager, @Nullable String[] usesStaticLibraries,
-            @Nullable int[] usesStaticLibrariesVersions) throws PackageManagerException {
+            @NonNull File codePath, File resourcePath,
+            @Nullable String legacyNativeLibraryPath, @Nullable String primaryCpuAbi,
+            @Nullable String secondaryCpuAbi, int pkgFlags, int pkgPrivateFlags,
+            @Nullable List<String> childPkgNames, @NonNull UserManagerService userManager,
+            @Nullable String[] usesStaticLibraries, @Nullable long[] usesStaticLibrariesVersions)
+                    throws PackageManagerException {
         final String pkgName = pkgSetting.name;
         if (pkgSetting.sharedUser != sharedUser) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
@@ -824,29 +803,19 @@ final class Settings {
         }
 
         if (!pkgSetting.codePath.equals(codePath)) {
-            // Check to see if its a disabled system app
-            if ((pkgSetting.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                // This is an updated system app with versions in both system
-                // and data partition. Just let the most recent version
-                // take precedence.
-                Slog.w(PackageManagerService.TAG,
-                        "Trying to update system app code path from "
-                        + pkgSetting.codePathString + " to " + codePath.toString());
-            } else {
-                // Just a change in the code path is not an issue, but
-                // let's log a message about it.
-                Slog.i(PackageManagerService.TAG,
-                        "Package " + pkgName + " codePath changed from "
-                        + pkgSetting.codePath + " to " + codePath
-                        + "; Retaining data and using new");
-
-                // The owner user's installed flag is set false
-                // when the application was installed by other user
-                // and the installed flag is not updated
-                // when the application is appended as system app later.
-                if ((pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0
-                        && disabledPkg == null) {
-                    List<UserInfo> allUserInfos = getAllUsers(userManager);
+            final boolean isSystem = pkgSetting.isSystem();
+            Slog.i(PackageManagerService.TAG,
+                    "Update" + (isSystem ? " system" : "")
+                    + " package " + pkgName
+                    + " code path from " + pkgSetting.codePathString
+                    + " to " + codePath.toString()
+                    + "; Retain data and using new");
+            if (!isSystem) {
+                // The package isn't considered as installed if the application was
+                // first installed by another user. Update the installed flag when the
+                // application ever becomes part of the system.
+                if ((pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0 && disabledPkg == null) {
+                    final List<UserInfo> allUserInfos = getAllUsers(userManager);
                     if (allUserInfos != null) {
                         for (UserInfo userInfo : allUserInfos) {
                             pkgSetting.setInstalled(true, userInfo.id);
@@ -854,33 +823,55 @@ final class Settings {
                     }
                 }
 
-                /*
-                 * Since we've changed paths, we need to prefer the new
-                 * native library path over the one stored in the
-                 * package settings since we might have moved from
-                 * internal to external storage or vice versa.
-                 */
+                // Since we've changed paths, prefer the new native library path over
+                // the one stored in the package settings since we might have moved from
+                // internal to external storage or vice versa.
                 pkgSetting.legacyNativeLibraryPathString = legacyNativeLibraryPath;
             }
+            pkgSetting.codePath = codePath;
+            pkgSetting.codePathString = codePath.toString();
+        }
+        if (!pkgSetting.resourcePath.equals(resourcePath)) {
+            final boolean isSystem = pkgSetting.isSystem();
+            Slog.i(PackageManagerService.TAG,
+                    "Update" + (isSystem ? " system" : "")
+                    + " package " + pkgName
+                    + " resource path from " + pkgSetting.resourcePathString
+                    + " to " + resourcePath.toString()
+                    + "; Retain data and using new");
+            pkgSetting.resourcePath = resourcePath;
+            pkgSetting.resourcePathString = resourcePath.toString();
         }
         // If what we are scanning is a system (and possibly privileged) package,
         // then make it so, regardless of whether it was previously installed only
-        // in the data partition.
+        // in the data partition. Reset first.
+        pkgSetting.pkgFlags &= ~ApplicationInfo.FLAG_SYSTEM;
+        pkgSetting.pkgPrivateFlags &= ~(ApplicationInfo.PRIVATE_FLAG_PRIVILEGED
+                | ApplicationInfo.PRIVATE_FLAG_OEM
+                | ApplicationInfo.PRIVATE_FLAG_VENDOR
+                | ApplicationInfo.PRIVATE_FLAG_PRODUCT);
         pkgSetting.pkgFlags |= pkgFlags & ApplicationInfo.FLAG_SYSTEM;
         pkgSetting.pkgPrivateFlags |=
                 pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
+        pkgSetting.pkgPrivateFlags |=
+                pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_OEM;
+        pkgSetting.pkgPrivateFlags |=
+                pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_VENDOR;
+        pkgSetting.pkgPrivateFlags |=
+                pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRODUCT;
         pkgSetting.primaryCpuAbiString = primaryCpuAbi;
         pkgSetting.secondaryCpuAbiString = secondaryCpuAbi;
         if (childPkgNames != null) {
             pkgSetting.childPackageNames = new ArrayList<>(childPkgNames);
         }
-        if (usesStaticLibraries != null) {
-            pkgSetting.usesStaticLibraries = Arrays.copyOf(usesStaticLibraries,
-                    usesStaticLibraries.length);
-        }
-        if (usesStaticLibrariesVersions != null) {
-            pkgSetting.usesStaticLibrariesVersions = Arrays.copyOf(usesStaticLibrariesVersions,
-                    usesStaticLibrariesVersions.length);
+        // Update static shared library dependencies if needed
+        if (usesStaticLibraries != null && usesStaticLibrariesVersions != null
+                && usesStaticLibraries.length == usesStaticLibrariesVersions.length) {
+            pkgSetting.usesStaticLibraries = usesStaticLibraries;
+            pkgSetting.usesStaticLibrariesVersions = usesStaticLibrariesVersions;
+        } else {
+            pkgSetting.usesStaticLibraries = null;
+            pkgSetting.usesStaticLibrariesVersions = null;
         }
     }
 
@@ -933,69 +924,17 @@ final class Settings {
                 userId);
     }
 
+    // TODO: Move to scanPackageOnlyLI() after verifying signatures are setup correctly
+    // by that time.
     void insertPackageSettingLPw(PackageSetting p, PackageParser.Package pkg) {
-        p.pkg = pkg;
-        // pkg.mSetEnabled = p.getEnabled(userId);
-        // pkg.mSetStopped = p.getStopped(userId);
-        final String volumeUuid = pkg.applicationInfo.volumeUuid;
-        final String codePath = pkg.applicationInfo.getCodePath();
-        final String resourcePath = pkg.applicationInfo.getResourcePath();
-        final String legacyNativeLibraryPath = pkg.applicationInfo.nativeLibraryRootDir;
-        // Update volume if needed
-        if (!Objects.equals(volumeUuid, p.volumeUuid)) {
-            Slog.w(PackageManagerService.TAG, "Volume for " + p.pkg.packageName +
-                    " changing from " + p.volumeUuid + " to " + volumeUuid);
-            p.volumeUuid = volumeUuid;
-        }
-        // Update code path if needed
-        if (!Objects.equals(codePath, p.codePathString)) {
-            Slog.w(PackageManagerService.TAG, "Code path for " + p.pkg.packageName +
-                    " changing from " + p.codePathString + " to " + codePath);
-            p.codePath = new File(codePath);
-            p.codePathString = codePath;
-        }
-        //Update resource path if needed
-        if (!Objects.equals(resourcePath, p.resourcePathString)) {
-            Slog.w(PackageManagerService.TAG, "Resource path for " + p.pkg.packageName +
-                    " changing from " + p.resourcePathString + " to " + resourcePath);
-            p.resourcePath = new File(resourcePath);
-            p.resourcePathString = resourcePath;
-        }
-        // Update the native library paths if needed
-        if (!Objects.equals(legacyNativeLibraryPath, p.legacyNativeLibraryPathString)) {
-            p.legacyNativeLibraryPathString = legacyNativeLibraryPath;
-        }
-
-        // Update the required Cpu Abi
-        p.primaryCpuAbiString = pkg.applicationInfo.primaryCpuAbi;
-        p.secondaryCpuAbiString = pkg.applicationInfo.secondaryCpuAbi;
-        p.cpuAbiOverrideString = pkg.cpuAbiOverride;
-        // Update version code if needed
-        if (pkg.mVersionCode != p.versionCode) {
-            p.versionCode = pkg.mVersionCode;
-        }
         // Update signatures if needed.
-        if (p.signatures.mSignatures == null) {
-            p.signatures.assignSignatures(pkg.mSignatures);
-        }
-        // Update flags if needed.
-        if (pkg.applicationInfo.flags != p.pkgFlags) {
-            p.pkgFlags = pkg.applicationInfo.flags;
+        if (p.signatures.mSigningDetails.signatures == null) {
+            p.signatures.mSigningDetails = pkg.mSigningDetails;
         }
         // If this app defines a shared user id initialize
         // the shared user signatures as well.
-        if (p.sharedUser != null && p.sharedUser.signatures.mSignatures == null) {
-            p.sharedUser.signatures.assignSignatures(pkg.mSignatures);
-        }
-        // Update static shared library dependencies if needed
-        if (pkg.usesStaticLibraries != null && pkg.usesStaticLibrariesVersions != null
-                && pkg.usesStaticLibraries.size() == pkg.usesStaticLibrariesVersions.length) {
-            p.usesStaticLibraries = new String[pkg.usesStaticLibraries.size()];
-            pkg.usesStaticLibraries.toArray(p.usesStaticLibraries);
-            p.usesStaticLibrariesVersions = pkg.usesStaticLibrariesVersions;
-        } else {
-            p.usesStaticLibraries = null;
-            p.usesStaticLibrariesVersions = null;
+        if (p.sharedUser != null && p.sharedUser.signatures.mSigningDetails.signatures == null) {
+            p.sharedUser.signatures.mSigningDetails = pkg.mSigningDetails;
         }
         addPackageSettingLPw(p, p.sharedUser);
     }
@@ -1072,7 +1011,7 @@ final class Settings {
 
         // Update permissions
         for (String eachPerm : deletedPs.pkg.requestedPermissions) {
-            BasePermission bp = mPermissions.get(eachPerm);
+            BasePermission bp = mPermissions.getPermission(eachPerm);
             if (bp == null) {
                 continue;
             }
@@ -1695,13 +1634,18 @@ final class Settings {
                                 false /*notLaunched*/,
                                 false /*hidden*/,
                                 false /*suspended*/,
+                                null /*suspendingPackage*/,
+                                null /*dialogMessage*/,
+                                null /*suspendedAppExtras*/,
+                                null /*suspendedLauncherExtras*/,
                                 false /*instantApp*/,
                                 false /*virtualPreload*/,
                                 null /*lastDisableAppCaller*/,
                                 null /*enabledComponents*/,
                                 null /*disabledComponents*/,
                                 INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED,
-                                0, PackageManager.INSTALL_REASON_UNKNOWN);
+                                0, PackageManager.INSTALL_REASON_UNKNOWN,
+                                null /*harmfulAppWarning*/);
                     }
                     return;
                 }
@@ -1766,6 +1710,14 @@ final class Settings {
 
                     final boolean suspended = XmlUtils.readBooleanAttribute(parser, ATTR_SUSPENDED,
                             false);
+                    String suspendingPackage = parser.getAttributeValue(null,
+                            ATTR_SUSPENDING_PACKAGE);
+                    final String dialogMessage = parser.getAttributeValue(null,
+                            ATTR_SUSPEND_DIALOG_MESSAGE);
+                    if (suspended && suspendingPackage == null) {
+                        suspendingPackage = PLATFORM_PACKAGE_NAME;
+                    }
+
                     final boolean blockUninstall = XmlUtils.readBooleanAttribute(parser,
                             ATTR_BLOCK_UNINSTALL, false);
                     final boolean instantApp = XmlUtils.readBooleanAttribute(parser,
@@ -1776,7 +1728,8 @@ final class Settings {
                             COMPONENT_ENABLED_STATE_DEFAULT);
                     final String enabledCaller = parser.getAttributeValue(null,
                             ATTR_ENABLED_CALLER);
-
+                    final String harmfulAppWarning =
+                            parser.getAttributeValue(null, ATTR_HARMFUL_APP_WARNING);
                     final int verifState = XmlUtils.readIntAttribute(parser,
                             ATTR_DOMAIN_VERIFICATON_STATE,
                             PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED);
@@ -1790,6 +1743,8 @@ final class Settings {
 
                     ArraySet<String> enabledComponents = null;
                     ArraySet<String> disabledComponents = null;
+                    PersistableBundle suspendedAppExtras = null;
+                    PersistableBundle suspendedLauncherExtras = null;
 
                     int packageDepth = parser.getDepth();
                     while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
@@ -1799,11 +1754,22 @@ final class Settings {
                                 || type == XmlPullParser.TEXT) {
                             continue;
                         }
-                        tagName = parser.getName();
-                        if (tagName.equals(TAG_ENABLED_COMPONENTS)) {
-                            enabledComponents = readComponentsLPr(parser);
-                        } else if (tagName.equals(TAG_DISABLED_COMPONENTS)) {
-                            disabledComponents = readComponentsLPr(parser);
+                        switch (parser.getName()) {
+                            case TAG_ENABLED_COMPONENTS:
+                                enabledComponents = readComponentsLPr(parser);
+                                break;
+                            case TAG_DISABLED_COMPONENTS:
+                                disabledComponents = readComponentsLPr(parser);
+                                break;
+                            case TAG_SUSPENDED_APP_EXTRAS:
+                                suspendedAppExtras = PersistableBundle.restoreFromXml(parser);
+                                break;
+                            case TAG_SUSPENDED_LAUNCHER_EXTRAS:
+                                suspendedLauncherExtras = PersistableBundle.restoreFromXml(parser);
+                                break;
+                            default:
+                                Slog.wtf(TAG, "Unknown tag " + parser.getName() + " under tag "
+                                        + TAG_PACKAGE);
                         }
                     }
 
@@ -1811,9 +1777,10 @@ final class Settings {
                         setBlockUninstallLPw(userId, name, true);
                     }
                     ps.setUserState(userId, ceDataInode, enabled, installed, stopped, notLaunched,
-                            hidden, suspended, instantApp, virtualPreload, enabledCaller,
+                            hidden, suspended, suspendingPackage, dialogMessage, suspendedAppExtras,
+                            suspendedLauncherExtras, instantApp, virtualPreload, enabledCaller,
                             enabledComponents, disabledComponents, verifState, linkGeneration,
-                            installReason);
+                            installReason, harmfulAppWarning);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
@@ -2020,8 +1987,7 @@ final class Settings {
 
     // Specifically for backup/restore
     public void processRestoredPermissionGrantLPr(String pkgName, String permission,
-            boolean isGranted, int restoredFlagSet, int userId)
-            throws IOException, XmlPullParserException {
+            boolean isGranted, int restoredFlagSet, int userId) {
         mRuntimePermissionsPersistence.rememberRestoredUserGrantLPr(
                 pkgName, permission, isGranted, restoredFlagSet, userId);
     }
@@ -2062,6 +2028,8 @@ final class Settings {
         if (DEBUG_MU) {
             Log.i(TAG, "Writing package restrictions for user=" + userId);
         }
+        final long startTime = SystemClock.uptimeMillis();
+
         // Keep the old stopped packages around until we know the new ones have
         // been successfully written.
         File userPackagesStateFile = getUserPackagesStateFile(userId);
@@ -2119,6 +2087,34 @@ final class Settings {
                 }
                 if (ustate.suspended) {
                     serializer.attribute(null, ATTR_SUSPENDED, "true");
+                    if (ustate.suspendingPackage != null) {
+                        serializer.attribute(null, ATTR_SUSPENDING_PACKAGE,
+                                ustate.suspendingPackage);
+                    }
+                    if (ustate.dialogMessage != null) {
+                        serializer.attribute(null, ATTR_SUSPEND_DIALOG_MESSAGE,
+                                ustate.dialogMessage);
+                    }
+                    if (ustate.suspendedAppExtras != null) {
+                        serializer.startTag(null, TAG_SUSPENDED_APP_EXTRAS);
+                        try {
+                            ustate.suspendedAppExtras.saveToXml(serializer);
+                        } catch (XmlPullParserException xmle) {
+                            Slog.wtf(TAG, "Exception while trying to write suspendedAppExtras for "
+                                    + pkg + ". Will be lost on reboot", xmle);
+                        }
+                        serializer.endTag(null, TAG_SUSPENDED_APP_EXTRAS);
+                    }
+                    if (ustate.suspendedLauncherExtras != null) {
+                        serializer.startTag(null, TAG_SUSPENDED_LAUNCHER_EXTRAS);
+                        try {
+                            ustate.suspendedLauncherExtras.saveToXml(serializer);
+                        } catch (XmlPullParserException xmle) {
+                            Slog.wtf(TAG, "Exception while trying to write suspendedLauncherExtras"
+                                    + " for " + pkg + ". Will be lost on reboot", xmle);
+                        }
+                        serializer.endTag(null, TAG_SUSPENDED_LAUNCHER_EXTRAS);
+                    }
                 }
                 if (ustate.instantApp) {
                     serializer.attribute(null, ATTR_INSTANT_APP, "true");
@@ -2146,6 +2142,10 @@ final class Settings {
                 if (ustate.installReason != PackageManager.INSTALL_REASON_UNKNOWN) {
                     serializer.attribute(null, ATTR_INSTALL_REASON,
                             Integer.toString(ustate.installReason));
+                }
+                if (ustate.harmfulAppWarning != null) {
+                    serializer.attribute(null, ATTR_HARMFUL_APP_WARNING,
+                            ustate.harmfulAppWarning);
                 }
                 if (!ArrayUtils.isEmpty(ustate.enabledComponents)) {
                     serializer.startTag(null, TAG_ENABLED_COMPONENTS);
@@ -2191,6 +2191,9 @@ final class Settings {
                     |FileUtils.S_IRGRP|FileUtils.S_IWGRP,
                     -1, -1);
 
+            com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(
+                    "package-user-" + userId, SystemClock.uptimeMillis() - startTime);
+
             // Done, all is good!
             return;
         } catch(java.io.IOException e) {
@@ -2223,7 +2226,7 @@ final class Settings {
             if (tagName.equals(TAG_ITEM)) {
                 String name = parser.getAttributeValue(null, ATTR_NAME);
 
-                BasePermission bp = mPermissions.get(name);
+                BasePermission bp = mPermissions.getPermission(name);
                 if (bp == null) {
                     Slog.w(PackageManagerService.TAG, "Unknown permission: " + name);
                     XmlUtils.skipCurrentTag(parser);
@@ -2310,9 +2313,9 @@ final class Settings {
             String libName = parser.getAttributeValue(null, ATTR_NAME);
             String libVersionStr = parser.getAttributeValue(null, ATTR_VERSION);
 
-            int libVersion = -1;
+            long libVersion = -1;
             try {
-                libVersion = Integer.parseInt(libVersionStr);
+                libVersion = Long.parseLong(libVersionStr);
             } catch (NumberFormatException e) {
                 // ignore
             }
@@ -2320,7 +2323,7 @@ final class Settings {
             if (libName != null && libVersion >= 0) {
                 outPs.usesStaticLibraries = ArrayUtils.appendElement(String.class,
                         outPs.usesStaticLibraries, libName);
-                outPs.usesStaticLibrariesVersions = ArrayUtils.appendInt(
+                outPs.usesStaticLibrariesVersions = ArrayUtils.appendLong(
                         outPs.usesStaticLibrariesVersions, libVersion);
             }
 
@@ -2329,7 +2332,7 @@ final class Settings {
     }
 
     void writeUsesStaticLibLPw(XmlSerializer serializer, String[] usesStaticLibraries,
-            int[] usesStaticLibraryVersions) throws IOException {
+            long[] usesStaticLibraryVersions) throws IOException {
         if (ArrayUtils.isEmpty(usesStaticLibraries) || ArrayUtils.isEmpty(usesStaticLibraryVersions)
                 || usesStaticLibraries.length != usesStaticLibraryVersions.length) {
             return;
@@ -2337,10 +2340,10 @@ final class Settings {
         final int libCount = usesStaticLibraries.length;
         for (int i = 0; i < libCount; i++) {
             final String libName = usesStaticLibraries[i];
-            final int libVersion = usesStaticLibraryVersions[i];
+            final long libVersion = usesStaticLibraryVersions[i];
             serializer.startTag(null, TAG_USES_STATIC_LIB);
             serializer.attribute(null, ATTR_NAME, libName);
-            serializer.attribute(null, ATTR_VERSION, Integer.toString(libVersion));
+            serializer.attribute(null, ATTR_VERSION, Long.toString(libVersion));
             serializer.endTag(null, TAG_USES_STATIC_LIB);
         }
     }
@@ -2452,6 +2455,8 @@ final class Settings {
     void writeLPr() {
         //Debug.startMethodTracing("/data/system/packageprof", 8 * 1024 * 1024);
 
+        final long startTime = SystemClock.uptimeMillis();
+
         // Keep the old settings around until we know the new ones have
         // been successfully written.
         if (mSettingsFilename.exists()) {
@@ -2512,15 +2517,11 @@ final class Settings {
             }
 
             serializer.startTag(null, "permission-trees");
-            for (BasePermission bp : mPermissionTrees.values()) {
-                writePermissionLPr(serializer, bp);
-            }
+            mPermissions.writePermissionTrees(serializer);
             serializer.endTag(null, "permission-trees");
 
             serializer.startTag(null, "permissions");
-            for (BasePermission bp : mPermissions.values()) {
-                writePermissionLPr(serializer, bp);
-            }
+            mPermissions.writePermissions(serializer);
             serializer.endTag(null, "permissions");
 
             for (final PackageSetting pkg : mPackages.values()) {
@@ -2601,11 +2602,10 @@ final class Settings {
             writePackageListLPr();
             writeAllUsersPackageRestrictionsLPr();
             writeAllRuntimePermissionsLPr();
+            com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(
+                    "package", SystemClock.uptimeMillis() - startTime);
             return;
 
-        } catch(XmlPullParserException e) {
-            Slog.wtf(PackageManagerService.TAG, "Unable to write package manager settings, "
-                    + "current changes will be lost at reboot", e);
         } catch(java.io.IOException e) {
             Slog.wtf(PackageManagerService.TAG, "Unable to write package manager settings, "
                     + "current changes will be lost at reboot", e);
@@ -2899,9 +2899,6 @@ final class Settings {
         if (pkg.uidError) {
             serializer.attribute(null, "uidError", "true");
         }
-        if (pkg.installStatus == PackageSettingBase.PKG_INSTALL_INCOMPLETE) {
-            serializer.attribute(null, "installStatus", "false");
-        }
         if (pkg.installerPackageName != null) {
             serializer.attribute(null, "installer", pkg.installerPackageName);
         }
@@ -2949,7 +2946,6 @@ final class Settings {
 
     void writeUpgradeKeySetsLPr(XmlSerializer serializer,
             PackageKeySetData data) throws IOException {
-        long properSigning = data.getProperSigningKeySet();
         if (data.isUsingUpgradeKeySets()) {
             for (long id : data.getUpgradeKeySets()) {
                 serializer.startTag(null, "upgrade-keyset");
@@ -2969,46 +2965,8 @@ final class Settings {
         }
     }
 
-    void writePermissionLPr(XmlSerializer serializer, BasePermission bp)
-            throws XmlPullParserException, java.io.IOException {
-        if (bp.sourcePackage != null) {
-            serializer.startTag(null, TAG_ITEM);
-            serializer.attribute(null, ATTR_NAME, bp.name);
-            serializer.attribute(null, "package", bp.sourcePackage);
-            if (bp.protectionLevel != PermissionInfo.PROTECTION_NORMAL) {
-                serializer.attribute(null, "protection", Integer.toString(bp.protectionLevel));
-            }
-            if (PackageManagerService.DEBUG_SETTINGS)
-                Log.v(PackageManagerService.TAG, "Writing perm: name=" + bp.name + " type="
-                        + bp.type);
-            if (bp.type == BasePermission.TYPE_DYNAMIC) {
-                final PermissionInfo pi = bp.perm != null ? bp.perm.info : bp.pendingInfo;
-                if (pi != null) {
-                    serializer.attribute(null, "type", "dynamic");
-                    if (pi.icon != 0) {
-                        serializer.attribute(null, "icon", Integer.toString(pi.icon));
-                    }
-                    if (pi.nonLocalizedLabel != null) {
-                        serializer.attribute(null, "label", pi.nonLocalizedLabel.toString());
-                    }
-                }
-            }
-            serializer.endTag(null, TAG_ITEM);
-        }
-    }
-
-    ArrayList<PackageSetting> getListOfIncompleteInstallPackagesLPr() {
-        final ArraySet<String> kList = new ArraySet<String>(mPackages.keySet());
-        final Iterator<String> its = kList.iterator();
-        final ArrayList<PackageSetting> ret = new ArrayList<PackageSetting>();
-        while (its.hasNext()) {
-            final String key = its.next();
-            final PackageSetting ps = mPackages.get(key);
-            if (ps.getInstallStatus() == PackageSettingBase.PKG_INSTALL_INCOMPLETE) {
-                ret.add(ps);
-            }
-        }
-        return ret;
+    void writePermissionLPr(XmlSerializer serializer, BasePermission bp) throws IOException {
+        bp.writeLPr(serializer);
     }
 
     void addPackageToCleanLPw(PackageCleanItem pkg) {
@@ -3086,9 +3044,9 @@ final class Settings {
                 if (tagName.equals("package")) {
                     readPackageLPw(parser);
                 } else if (tagName.equals("permissions")) {
-                    readPermissionsLPw(mPermissions, parser);
+                    mPermissions.readPermissions(parser);
                 } else if (tagName.equals("permission-trees")) {
-                    readPermissionsLPw(mPermissionTrees, parser);
+                    mPermissions.readPermissionTrees(parser);
                 } else if (tagName.equals("shared-user")) {
                     readSharedUserLPw(parser);
                 } else if (tagName.equals("preferred-packages")) {
@@ -3167,7 +3125,8 @@ final class Settings {
                     }
                 } else if (TAG_READ_EXTERNAL_STORAGE.equals(tagName)) {
                     final String enforcement = parser.getAttributeValue(null, ATTR_ENFORCEMENT);
-                    mReadExternalStorageEnforced = "1".equals(enforcement);
+                    mReadExternalStorageEnforced =
+                            "1".equals(enforcement) ? Boolean.TRUE : Boolean.FALSE;
                 } else if (tagName.equals("keyset-settings")) {
                     mKeySetManagerService.readKeySetsLPw(parser, mKeySetRefs);
                 } else if (TAG_VERSION.equals(tagName)) {
@@ -3175,7 +3134,7 @@ final class Settings {
                             ATTR_VOLUME_UUID);
                     final VersionInfo ver = findOrCreateVersion(volumeUuid);
                     ver.sdkVersion = XmlUtils.readIntAttribute(parser, ATTR_SDK_VERSION);
-                    ver.databaseVersion = XmlUtils.readIntAttribute(parser, ATTR_SDK_VERSION);
+                    ver.databaseVersion = XmlUtils.readIntAttribute(parser, ATTR_DATABASE_VERSION);
                     ver.fingerprint = XmlUtils.readStringAttribute(parser, ATTR_FINGERPRINT);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <packages>: "
@@ -3591,72 +3550,6 @@ final class Settings {
         }
     }
 
-    private int readInt(XmlPullParser parser, String ns, String name, int defValue) {
-        String v = parser.getAttributeValue(ns, name);
-        try {
-            if (v == null) {
-                return defValue;
-            }
-            return Integer.parseInt(v);
-        } catch (NumberFormatException e) {
-            PackageManagerService.reportSettingsProblem(Log.WARN,
-                    "Error in package manager settings: attribute " + name
-                            + " has bad integer value " + v + " at "
-                            + parser.getPositionDescription());
-        }
-        return defValue;
-    }
-
-    private void readPermissionsLPw(ArrayMap<String, BasePermission> out, XmlPullParser parser)
-            throws IOException, XmlPullParserException {
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-
-            final String tagName = parser.getName();
-            if (tagName.equals(TAG_ITEM)) {
-                final String name = parser.getAttributeValue(null, ATTR_NAME);
-                final String sourcePackage = parser.getAttributeValue(null, "package");
-                final String ptype = parser.getAttributeValue(null, "type");
-                if (name != null && sourcePackage != null) {
-                    final boolean dynamic = "dynamic".equals(ptype);
-                    BasePermission bp = out.get(name);
-                    // If the permission is builtin, do not clobber it.
-                    if (bp == null || bp.type != BasePermission.TYPE_BUILTIN) {
-                        bp = new BasePermission(name.intern(), sourcePackage,
-                                dynamic ? BasePermission.TYPE_DYNAMIC : BasePermission.TYPE_NORMAL);
-                    }
-                    bp.protectionLevel = readInt(parser, null, "protection",
-                            PermissionInfo.PROTECTION_NORMAL);
-                    bp.protectionLevel = PermissionInfo.fixProtectionLevel(bp.protectionLevel);
-                    if (dynamic) {
-                        PermissionInfo pi = new PermissionInfo();
-                        pi.packageName = sourcePackage.intern();
-                        pi.name = name.intern();
-                        pi.icon = readInt(parser, null, "icon", 0);
-                        pi.nonLocalizedLabel = parser.getAttributeValue(null, "label");
-                        pi.protectionLevel = bp.protectionLevel;
-                        bp.pendingInfo = pi;
-                    }
-                    out.put(bp.name, bp);
-                } else {
-                    PackageManagerService.reportSettingsProblem(Log.WARN,
-                            "Error in package manager settings: permissions has" + " no name at "
-                                    + parser.getPositionDescription());
-                }
-            } else {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Unknown element reading permissions: " + parser.getName() + " at "
-                                + parser.getPositionDescription());
-            }
-            XmlUtils.skipCurrentTag(parser);
-        }
-    }
-
     private void readDisabledSysPackageLPw(XmlPullParser parser) throws XmlPullParserException,
             IOException {
         String name = parser.getAttributeValue(null, ATTR_NAME);
@@ -3681,10 +3574,10 @@ final class Settings {
             resourcePathStr = codePathStr;
         }
         String version = parser.getAttributeValue(null, "version");
-        int versionCode = 0;
+        long versionCode = 0;
         if (version != null) {
             try {
-                versionCode = Integer.parseInt(version);
+                versionCode = Long.parseLong(version);
             } catch (NumberFormatException e) {
             }
         }
@@ -3692,11 +3585,10 @@ final class Settings {
         int pkgFlags = 0;
         int pkgPrivateFlags = 0;
         pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
-        final File codePathFile = new File(codePathStr);
-        if (PackageManagerService.locationIsPrivileged(codePathFile)) {
+        if (PackageManagerService.locationIsPrivileged(codePathStr)) {
             pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
         }
-        PackageSetting ps = new PackageSetting(name, realName, codePathFile,
+        PackageSetting ps = new PackageSetting(name, realName, new File(codePathStr),
                 new File(resourcePathStr), legacyNativeLibraryPathStr, primaryCpuAbiStr,
                 secondaryCpuAbiStr, cpuAbiOverrideStr, versionCode, pkgFlags, pkgPrivateFlags,
                 parentPackageName, null /*childPackageNames*/, 0 /*sharedUserId*/, null, null);
@@ -3798,7 +3690,7 @@ final class Settings {
         long lastUpdateTime = 0;
         PackageSetting packageSetting = null;
         String version = null;
-        int versionCode = 0;
+        long versionCode = 0;
         String parentPackageName;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
@@ -3826,7 +3718,7 @@ final class Settings {
             version = parser.getAttributeValue(null, "version");
             if (version != null) {
                 try {
-                    versionCode = Integer.parseInt(version);
+                    versionCode = Long.parseLong(version);
                 } catch (NumberFormatException e) {
                 }
             }
@@ -4023,15 +3915,6 @@ final class Settings {
 
             if (installerPackageName != null) {
                 mInstallerPackages.add(installerPackageName);
-            }
-
-            final String installStatusStr = parser.getAttributeValue(null, "installStatus");
-            if (installStatusStr != null) {
-                if (installStatusStr.equalsIgnoreCase("false")) {
-                    packageSetting.installStatus = PackageSettingBase.PKG_INSTALL_INCOMPLETE;
-                } else {
-                    packageSetting.installStatus = PackageSettingBase.PKG_INSTALL_COMPLETE;
-                }
             }
 
             int outerDepth = parser.getDepth();
@@ -4383,10 +4266,6 @@ final class Settings {
         return ps;
     }
 
-    private String compToString(ArraySet<String> cmp) {
-        return cmp != null ? Arrays.toString(cmp.toArray()) : "[]";
-    }
-
     boolean isEnabledAndMatchLPr(ComponentInfo componentInfo, int flags, int userId) {
         final PackageSetting ps = mPackages.get(componentInfo.packageName);
         if (ps == null) return false;
@@ -4471,6 +4350,22 @@ final class Settings {
         return false;
     }
 
+    void setHarmfulAppWarningLPw(String packageName, CharSequence warning, int userId) {
+        final PackageSetting pkgSetting = mPackages.get(packageName);
+        if (pkgSetting == null) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+        pkgSetting.setHarmfulAppWarning(userId, warning == null ? null : warning.toString());
+    }
+
+    String getHarmfulAppWarningLPr(String packageName, int userId) {
+        final PackageSetting pkgSetting = mPackages.get(packageName);
+        if (pkgSetting == null) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+        return pkgSetting.getHarmfulAppWarning(userId);
+    }
+
     private static List<UserInfo> getAllUsers(UserManagerService userManager) {
         long id = Binder.clearCallingIdentity();
         try {
@@ -4529,21 +4424,26 @@ final class Settings {
     };
 
     private static final Object[] PRIVATE_FLAG_DUMP_SPEC = new Object[] {
-        ApplicationInfo.PRIVATE_FLAG_HIDDEN, "HIDDEN",
-        ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE, "CANT_SAVE_STATE",
-        ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK, "FORWARD_LOCK",
-        ApplicationInfo.PRIVATE_FLAG_PRIVILEGED, "PRIVILEGED",
-        ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS, "HAS_DOMAIN_URLS",
-        ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE, "DEFAULT_TO_DEVICE_PROTECTED_STORAGE",
-        ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE, "DIRECT_BOOT_AWARE",
-        ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE, "PARTIALLY_DIRECT_BOOT_AWARE",
-        ApplicationInfo.PRIVATE_FLAG_INSTANT, "EPHEMERAL",
-        ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER, "REQUIRED_FOR_SYSTEM_USER",
-        ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE, "PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE",
-        ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE, "PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE",
-        ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION, "PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION",
-        ApplicationInfo.PRIVATE_FLAG_BACKUP_IN_FOREGROUND, "BACKUP_IN_FOREGROUND",
-        ApplicationInfo.PRIVATE_FLAG_STATIC_SHARED_LIBRARY, "STATIC_SHARED_LIBRARY",
+            ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE, "PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE",
+            ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION, "PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION",
+            ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE, "PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE",
+            ApplicationInfo.PRIVATE_FLAG_BACKUP_IN_FOREGROUND, "BACKUP_IN_FOREGROUND",
+            ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE, "CANT_SAVE_STATE",
+            ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE, "DEFAULT_TO_DEVICE_PROTECTED_STORAGE",
+            ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE, "DIRECT_BOOT_AWARE",
+            ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK, "FORWARD_LOCK",
+            ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS, "HAS_DOMAIN_URLS",
+            ApplicationInfo.PRIVATE_FLAG_HIDDEN, "HIDDEN",
+            ApplicationInfo.PRIVATE_FLAG_INSTANT, "EPHEMERAL",
+            ApplicationInfo.PRIVATE_FLAG_ISOLATED_SPLIT_LOADING, "ISOLATED_SPLIT_LOADING",
+            ApplicationInfo.PRIVATE_FLAG_OEM, "OEM",
+            ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE, "PARTIALLY_DIRECT_BOOT_AWARE",
+            ApplicationInfo.PRIVATE_FLAG_PRIVILEGED, "PRIVILEGED",
+            ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER, "REQUIRED_FOR_SYSTEM_USER",
+            ApplicationInfo.PRIVATE_FLAG_STATIC_SHARED_LIBRARY, "STATIC_SHARED_LIBRARY",
+            ApplicationInfo.PRIVATE_FLAG_VENDOR, "VENDOR",
+            ApplicationInfo.PRIVATE_FLAG_PRODUCT, "PRODUCT",
+            ApplicationInfo.PRIVATE_FLAG_VIRTUAL_PRELOAD, "VIRTUAL_PRELOAD",
     };
 
     void dumpVersionLPr(IndentingPrintWriter pw) {
@@ -4613,11 +4513,14 @@ final class Settings {
                 pw.print(ps.getNotLaunched(user.id) ? "l" : "L");
                 pw.print(ps.getInstantApp(user.id) ? "IA" : "ia");
                 pw.print(ps.getVirtulalPreload(user.id) ? "VPI" : "vpi");
+                String harmfulAppWarning = ps.getHarmfulAppWarning(user.id);
+                pw.print(harmfulAppWarning != null ? "HA" : "ha");
                 pw.print(",");
                 pw.print(ps.getEnabled(user.id));
                 String lastDisabledAppCaller = ps.getLastDisabledAppCaller(user.id);
                 pw.print(",");
                 pw.print(lastDisabledAppCaller != null ? lastDisabledAppCaller : "?");
+                pw.print(",");
                 pw.println();
             }
             return;
@@ -4685,10 +4588,8 @@ final class Settings {
             }
             pw.print(prefix); pw.print("  versionName="); pw.println(ps.pkg.mVersionName);
             pw.print(prefix); pw.print("  splits="); dumpSplitNames(pw, ps.pkg); pw.println();
-            final int apkSigningVersion = PackageParser.getApkSigningVersion(ps.pkg);
-            if (apkSigningVersion != PackageParser.APK_SIGNING_UNKNOWN) {
-                pw.print(prefix); pw.print("  apkSigningVersion="); pw.println(apkSigningVersion);
-            }
+            final int apkSigningVersion = ps.pkg.mSigningDetails.signatureSchemeVersion;
+            pw.print(prefix); pw.print("  apkSigningVersion="); pw.println(apkSigningVersion);
             pw.print(prefix); pw.print("  applicationInfo=");
                 pw.println(ps.pkg.applicationInfo.toString());
             pw.print(prefix); pw.print("  flags="); printFlags(pw, ps.pkg.applicationInfo.flags,
@@ -4801,9 +4702,14 @@ final class Settings {
         pw.print(prefix); pw.print("  signatures="); pw.println(ps.signatures);
         pw.print(prefix); pw.print("  installPermissionsFixed=");
                 pw.print(ps.installPermissionsFixed);
-                pw.print(" installStatus="); pw.println(ps.installStatus);
+                pw.println();
         pw.print(prefix); pw.print("  pkgFlags="); printFlags(pw, ps.pkgFlags, FLAG_DUMP_SPEC);
                 pw.println();
+
+        if (ps.pkg != null && ps.pkg.mOverlayTarget != null) {
+            pw.print(prefix); pw.print("  overlayTarget="); pw.println(ps.pkg.mOverlayTarget);
+            pw.print(prefix); pw.print("  overlayCategory="); pw.println(ps.pkg.mOverlayCategory);
+        }
 
         if (ps.pkg != null && ps.pkg.permissions != null && ps.pkg.permissions.size() > 0) {
             final ArrayList<PackageParser.Permission> perms = ps.pkg.permissions;
@@ -4860,6 +4766,13 @@ final class Settings {
             pw.print(ps.getHidden(user.id));
             pw.print(" suspended=");
             pw.print(ps.getSuspended(user.id));
+            if (ps.getSuspended(user.id)) {
+                final PackageUserState pus = ps.readUserState(user.id);
+                pw.print(" suspendingPackage=");
+                pw.print(pus.suspendingPackage);
+                pw.print(" dialogMessage=");
+                pw.print(pus.dialogMessage);
+            }
             pw.print(" stopped=");
             pw.print(ps.getStopped(user.id));
             pw.print(" notLaunched=");
@@ -4890,6 +4803,12 @@ final class Settings {
                 dumpGidsLPr(pw, prefix + "    ", permissionsState.computeGids(user.id));
                 dumpRuntimePermissionsLPr(pw, prefix + "    ", permissionNames, permissionsState
                         .getRuntimePermissionStates(user.id), dumpAll);
+            }
+
+            String harmfulAppWarning = ps.getHarmfulAppWarning(user.id);
+            if (harmfulAppWarning != null) {
+                pw.print(prefix); pw.print("      harmfulAppWarning: ");
+                pw.println(harmfulAppWarning);
             }
 
             if (permissionNames == null) {
@@ -4996,45 +4915,8 @@ final class Settings {
 
     void dumpPermissionsLPr(PrintWriter pw, String packageName, ArraySet<String> permissionNames,
             DumpState dumpState) {
-        boolean printedSomething = false;
-        for (BasePermission p : mPermissions.values()) {
-            if (packageName != null && !packageName.equals(p.sourcePackage)) {
-                continue;
-            }
-            if (permissionNames != null && !permissionNames.contains(p.name)) {
-                continue;
-            }
-            if (!printedSomething) {
-                if (dumpState.onTitlePrinted())
-                    pw.println();
-                pw.println("Permissions:");
-                printedSomething = true;
-            }
-            pw.print("  Permission ["); pw.print(p.name); pw.print("] (");
-                    pw.print(Integer.toHexString(System.identityHashCode(p)));
-                    pw.println("):");
-            pw.print("    sourcePackage="); pw.println(p.sourcePackage);
-            pw.print("    uid="); pw.print(p.uid);
-                    pw.print(" gids="); pw.print(Arrays.toString(
-                            p.computeGids(UserHandle.USER_SYSTEM)));
-                    pw.print(" type="); pw.print(p.type);
-                    pw.print(" prot=");
-                    pw.println(PermissionInfo.protectionToString(p.protectionLevel));
-            if (p.perm != null) {
-                pw.print("    perm="); pw.println(p.perm);
-                if ((p.perm.info.flags & PermissionInfo.FLAG_INSTALLED) == 0
-                        || (p.perm.info.flags & PermissionInfo.FLAG_REMOVED) != 0) {
-                    pw.print("    flags=0x"); pw.println(Integer.toHexString(p.perm.info.flags));
-                }
-            }
-            if (p.packageSetting != null) {
-                pw.print("    packageSetting="); pw.println(p.packageSetting);
-            }
-            if (READ_EXTERNAL_STORAGE.equals(p.name)) {
-                pw.print("    enforced=");
-                pw.println(mReadExternalStorageEnforced);
-            }
-        }
+        mPermissions.dumpPermissions(pw, packageName, permissionNames,
+                (mReadExternalStorageEnforced == Boolean.TRUE), dumpState);
     }
 
     void dumpSharedUsersLPr(PrintWriter pw, String packageName, ArraySet<String> permissionNames,
@@ -5087,11 +4969,7 @@ final class Settings {
     void dumpSharedUsersProto(ProtoOutputStream proto) {
         final int count = mSharedUsers.size();
         for (int i = 0; i < count; i++) {
-            final SharedUserSetting su = mSharedUsers.valueAt(i);
-            final long sharedUserToken = proto.start(PackageServiceDumpProto.SHARED_USERS);
-            proto.write(PackageServiceDumpProto.SharedUserProto.USER_ID, su.userId);
-            proto.write(PackageServiceDumpProto.SharedUserProto.NAME, su.name);
-            proto.end(sharedUserToken);
+            mSharedUsers.valueAt(i).writeToProto(proto, PackageServiceDumpProto.SHARED_USERS);
         }
     }
 
@@ -5243,7 +5121,7 @@ final class Settings {
 
         private final Handler mHandler = new MyHandler();
 
-        private final Object mLock;
+        private final Object mPersistenceLock;
 
         @GuardedBy("mLock")
         private final SparseBooleanArray mWriteScheduled = new SparseBooleanArray();
@@ -5260,8 +5138,8 @@ final class Settings {
         // The mapping keys are user ids.
         private final SparseBooleanArray mDefaultPermissionsGranted = new SparseBooleanArray();
 
-        public RuntimePermissionPersistence(Object lock) {
-            mLock = lock;
+        public RuntimePermissionPersistence(Object persistenceLock) {
+            mPersistenceLock = persistenceLock;
         }
 
         public boolean areDefaultRuntimPermissionsGrantedLPr(int userId) {
@@ -5311,12 +5189,13 @@ final class Settings {
         }
 
         private void writePermissionsSync(int userId) {
-            AtomicFile destination = new AtomicFile(getUserRuntimePermissionsFile(userId));
+            AtomicFile destination = new AtomicFile(getUserRuntimePermissionsFile(userId),
+                    "package-perms-" + userId);
 
             ArrayMap<String, List<PermissionState>> permissionsForPackage = new ArrayMap<>();
             ArrayMap<String, List<PermissionState>> permissionsForSharedUser = new ArrayMap<>();
 
-            synchronized (mLock) {
+            synchronized (mPersistenceLock) {
                 mWriteScheduled.delete(userId);
 
                 final int packageCount = mPackages.size();
@@ -5465,7 +5344,7 @@ final class Settings {
             PermissionsState permissionsState = sb.getPermissionsState();
             for (PermissionState permissionState
                     : permissionsState.getRuntimePermissionStates(userId)) {
-                BasePermission bp = mPermissions.get(permissionState.getName());
+                BasePermission bp = mPermissions.getPermission(permissionState.getName());
                 if (bp != null) {
                     permissionsState.revokeRuntimePermission(bp, userId);
                     permissionsState.updatePermissionFlags(bp, userId,
@@ -5626,7 +5505,7 @@ final class Settings {
                 switch (parser.getName()) {
                     case TAG_ITEM: {
                         String name = parser.getAttributeValue(null, ATTR_NAME);
-                        BasePermission bp = mPermissions.get(name);
+                        BasePermission bp = mPermissions.getPermission(name);
                         if (bp == null) {
                             Slog.w(PackageManagerService.TAG, "Unknown permission:" + name);
                             XmlUtils.skipCurrentTag(parser);

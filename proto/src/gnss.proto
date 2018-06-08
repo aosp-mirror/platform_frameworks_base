@@ -42,4 +42,20 @@ message GnssLog {
 
   // Standard deviation of top 4 average CN0 (dB-Hz)
   optional double standard_deviation_top_four_average_cn0_db_hz = 11;
+
+  // Power metrics
+  optional PowerMetrics power_metrics = 12;
+}
+
+// Power metrics
+message PowerMetrics {
+
+  // Duration of power log (ms)
+  optional int64 logging_duration_ms = 1;
+
+  // Energy consumed (mAh)
+  optional double energy_consumed_mah = 2;
+
+  // Time spent in signal quality level (ms)
+  repeated int64 time_in_signal_quality_level_ms = 3;
 }

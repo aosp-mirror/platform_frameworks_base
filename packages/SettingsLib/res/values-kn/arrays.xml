@@ -234,10 +234,6 @@
     <item msgid="7688197031296835369">"ಓವರ್‌ಡ್ರಾ ಪ್ರದೇಶಗಳನ್ನು ತೋರಿಸು"</item>
     <item msgid="2290859360633824369">"ಡ್ಯೂಟರ್‌ನೋಮಲಿಗಾಗಿ ಪ್ರದೇಶಗಳನ್ನು ತೋರಿಸು"</item>
   </string-array>
-  <string-array name="debug_hw_renderer_entries">
-    <item msgid="2578620445459945681">"OpenGL (ಡೀಫಾಲ್ಟ್)"</item>
-    <item msgid="2839130076198120436">"OpenGL (Skia)"</item>
-  </string-array>
   <string-array name="app_process_limit_entries">
     <item msgid="3401625457385943795">"ಪ್ರಮಾಣಿತ ಮಿತಿ"</item>
     <item msgid="4071574792028999443">"ಹಿನ್ನೆಲೆ ಪ್ರಕ್ರಿಯೆಗಳು ಇಲ್ಲ"</item>

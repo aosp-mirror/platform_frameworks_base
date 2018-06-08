@@ -1,6 +1,11 @@
 package com.android.server.policy.keyguard;
 
 import static android.view.Display.INVALID_DISPLAY;
+import static com.android.server.wm.KeyguardServiceDelegateProto.INTERACTIVE_STATE;
+import static com.android.server.wm.KeyguardServiceDelegateProto.OCCLUDED;
+import static com.android.server.wm.KeyguardServiceDelegateProto.SCREEN_STATE;
+import static com.android.server.wm.KeyguardServiceDelegateProto.SECURE;
+import static com.android.server.wm.KeyguardServiceDelegateProto.SHOWING;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -15,13 +20,15 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
-import android.view.WindowManagerPolicy.OnKeyguardExitResult;
+import android.util.proto.ProtoOutputStream;
+import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.server.UiThread;
+import com.android.server.policy.WindowManagerPolicy.OnKeyguardExitResult;
 
 import java.io.PrintWriter;
 
@@ -206,7 +213,8 @@ public class KeyguardServiceDelegate {
                     // There are no longer any keyguard windows on secondary displays, so pass
                     // INVALID_DISPLAY. All that means is that showWhenLocked activities on
                     // secondary displays now get to show.
-                    ActivityManager.getService().setLockScreenShown(true, INVALID_DISPLAY);
+                    ActivityManager.getService().setLockScreenShown(true /* keyguardShowing */,
+                            false /* aodShowing */, INVALID_DISPLAY);
                 } catch (RemoteException e) {
                     // Local call.
                 }
@@ -260,9 +268,9 @@ public class KeyguardServiceDelegate {
         mKeyguardState.occluded = isOccluded;
     }
 
-    public void dismiss(IKeyguardDismissCallback callback) {
+    public void dismiss(IKeyguardDismissCallback callback, CharSequence message) {
         if (mKeyguardService != null) {
-            mKeyguardService.dismiss(callback);
+            mKeyguardService.dismiss(callback, message);
         }
     }
 
@@ -409,6 +417,16 @@ public class KeyguardServiceDelegate {
         }
     }
 
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(SHOWING, mKeyguardState.showing);
+        proto.write(OCCLUDED, mKeyguardState.occluded);
+        proto.write(SECURE, mKeyguardState.secure);
+        proto.write(SCREEN_STATE, mKeyguardState.screenState);
+        proto.write(INTERACTIVE_STATE, mKeyguardState.interactiveState);
+        proto.end(token);
+    }
+
     public void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + TAG);
         prefix += "  ";
@@ -421,13 +439,45 @@ public class KeyguardServiceDelegate {
         pw.println(prefix + "systemIsReady=" + mKeyguardState.systemIsReady);
         pw.println(prefix + "deviceHasKeyguard=" + mKeyguardState.deviceHasKeyguard);
         pw.println(prefix + "enabled=" + mKeyguardState.enabled);
-        pw.println(prefix + "offReason=" + mKeyguardState.offReason);
+        pw.println(prefix + "offReason=" +
+                WindowManagerPolicyConstants.offReasonToString(mKeyguardState.offReason));
         pw.println(prefix + "currentUser=" + mKeyguardState.currentUser);
         pw.println(prefix + "bootCompleted=" + mKeyguardState.bootCompleted);
-        pw.println(prefix + "screenState=" + mKeyguardState.screenState);
-        pw.println(prefix + "interactiveState=" + mKeyguardState.interactiveState);
+        pw.println(prefix + "screenState=" + screenStateToString(mKeyguardState.screenState));
+        pw.println(prefix + "interactiveState=" +
+                interactiveStateToString(mKeyguardState.interactiveState));
         if (mKeyguardService != null) {
             mKeyguardService.dump(prefix, pw);
+        }
+    }
+
+    private static String screenStateToString(int screen) {
+        switch (screen) {
+            case SCREEN_STATE_OFF:
+                return "SCREEN_STATE_OFF";
+            case SCREEN_STATE_TURNING_ON:
+                return "SCREEN_STATE_TURNING_ON";
+            case SCREEN_STATE_ON:
+                return "SCREEN_STATE_ON";
+            case SCREEN_STATE_TURNING_OFF:
+                return "SCREEN_STATE_TURNING_OFF";
+            default:
+                return Integer.toString(screen);
+        }
+    }
+
+    private static String interactiveStateToString(int interactive) {
+        switch (interactive) {
+            case INTERACTIVE_STATE_SLEEP:
+                return "INTERACTIVE_STATE_SLEEP";
+            case INTERACTIVE_STATE_WAKING:
+                return "INTERACTIVE_STATE_WAKING";
+            case INTERACTIVE_STATE_AWAKE:
+                return "INTERACTIVE_STATE_AWAKE";
+            case INTERACTIVE_STATE_GOING_TO_SLEEP:
+                return "INTERACTIVE_STATE_GOING_TO_SLEEP";
+            default:
+                return Integer.toString(interactive);
         }
     }
 }

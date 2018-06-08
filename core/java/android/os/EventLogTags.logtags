@@ -1,0 +1,6 @@
+# See system/core/logcat/event.logtags for a description of the format of this file.
+
+option java_package android.os
+
+230000 service_manager_stats (call_count|1),(total_time|1|3),(duration|1|3)
+230001 service_manager_slow (time|1|3),(service|3)

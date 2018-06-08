@@ -69,10 +69,11 @@ struct ResolvedBag {
   Entry entries[0];
 };
 
+struct FindEntryResult;
+
 // AssetManager2 is the main entry point for accessing assets and resources.
-// AssetManager2 provides caching of resources retrieved via the underlying
-// ApkAssets.
-class AssetManager2 : public ::AAssetManager {
+// AssetManager2 provides caching of resources retrieved via the underlying ApkAssets.
+class AssetManager2 {
  public:
   struct ResourceName {
     const char* package = nullptr;
@@ -97,24 +98,29 @@ class AssetManager2 : public ::AAssetManager {
   // new resource IDs.
   bool SetApkAssets(const std::vector<const ApkAssets*>& apk_assets, bool invalidate_caches = true);
 
-  inline const std::vector<const ApkAssets*> GetApkAssets() const { return apk_assets_; }
+  inline const std::vector<const ApkAssets*> GetApkAssets() const {
+    return apk_assets_;
+  }
 
   // Returns the string pool for the given asset cookie.
-  // Use the string pool returned here with a valid Res_value object of
-  // type Res_value::TYPE_STRING.
+  // Use the string pool returned here with a valid Res_value object of type Res_value::TYPE_STRING.
   const ResStringPool* GetStringPoolForCookie(ApkAssetsCookie cookie) const;
 
   // Returns the DynamicRefTable for the given package ID.
+  // This may be nullptr if the APK represented by `cookie` has no resource table.
   const DynamicRefTable* GetDynamicRefTableForPackage(uint32_t package_id) const;
 
   // Returns the DynamicRefTable for the ApkAssets represented by the cookie.
+  // This may be nullptr if the APK represented by `cookie` has no resource table.
   const DynamicRefTable* GetDynamicRefTableForCookie(ApkAssetsCookie cookie) const;
 
   // Sets/resets the configuration for this AssetManager. This will cause all
   // caches that are related to the configuration change to be invalidated.
   void SetConfiguration(const ResTable_config& configuration);
 
-  inline const ResTable_config& GetConfiguration() const { return configuration_; }
+  inline const ResTable_config& GetConfiguration() const {
+    return configuration_;
+  }
 
   // Returns all configurations for which there are resources defined. This includes resource
   // configurations in all the ApkAssets set for this AssetManager.
@@ -123,7 +129,7 @@ class AssetManager2 : public ::AAssetManager {
   // If `exclude_mipmap` is set to true, resource configurations defined for resource type 'mipmap'
   // will be excluded from the list.
   std::set<ResTable_config> GetResourceConfigurations(bool exclude_system = false,
-                                                      bool exclude_mipmap = false);
+                                                      bool exclude_mipmap = false) const;
 
   // Returns all the locales for which there are resources defined. This includes resource
   // locales in all the ApkAssets set for this AssetManager.
@@ -132,24 +138,24 @@ class AssetManager2 : public ::AAssetManager {
   // If `merge_equivalent_languages` is set to true, resource locales will be canonicalized
   // and de-duped in the resulting list.
   std::set<std::string> GetResourceLocales(bool exclude_system = false,
-                                           bool merge_equivalent_languages = false);
+                                           bool merge_equivalent_languages = false) const;
 
   // Searches the set of APKs loaded by this AssetManager and opens the first one found located
   // in the assets/ directory.
   // `mode` controls how the file is opened.
   //
   // NOTE: The loaded APKs are searched in reverse order.
-  std::unique_ptr<Asset> Open(const std::string& filename, Asset::AccessMode mode);
+  std::unique_ptr<Asset> Open(const std::string& filename, Asset::AccessMode mode) const;
 
   // Opens a file within the assets/ directory of the APK specified by `cookie`.
   // `mode` controls how the file is opened.
   std::unique_ptr<Asset> Open(const std::string& filename, ApkAssetsCookie cookie,
-                              Asset::AccessMode mode);
+                              Asset::AccessMode mode) const;
 
   // Opens the directory specified by `dirname`. The result is an AssetDir that is the combination
   // of all directories matching `dirname` under the assets/ directory of every ApkAssets loaded.
   // The entries are sorted by their ASCII name.
-  std::unique_ptr<AssetDir> OpenDir(const std::string& dirname);
+  std::unique_ptr<AssetDir> OpenDir(const std::string& dirname) const;
 
   // Searches the set of APKs loaded by this AssetManager and opens the first one found.
   // `mode` controls how the file is opened.
@@ -157,24 +163,24 @@ class AssetManager2 : public ::AAssetManager {
   //
   // NOTE: The loaded APKs are searched in reverse order.
   std::unique_ptr<Asset> OpenNonAsset(const std::string& filename, Asset::AccessMode mode,
-                                      ApkAssetsCookie* out_cookie = nullptr);
+                                      ApkAssetsCookie* out_cookie = nullptr) const;
 
   // Opens a file in the APK specified by `cookie`. `mode` controls how the file is opened.
   // This is typically used to open a specific AndroidManifest.xml, or a binary XML file
   // referenced by a resource lookup with GetResource().
   std::unique_ptr<Asset> OpenNonAsset(const std::string& filename, ApkAssetsCookie cookie,
-                                      Asset::AccessMode mode);
+                                      Asset::AccessMode mode) const;
 
   // Populates the `out_name` parameter with resource name information.
   // Utf8 strings are preferred, and only if they are unavailable are
   // the Utf16 variants populated.
   // Returns false if the resource was not found or the name was missing/corrupt.
-  bool GetResourceName(uint32_t resid, ResourceName* out_name);
+  bool GetResourceName(uint32_t resid, ResourceName* out_name) const;
 
   // Populates `out_flags` with the bitmask of configuration axis that this resource varies with.
   // See ResTable_config for the list of configuration axis.
   // Returns false if the resource was not found.
-  bool GetResourceFlags(uint32_t resid, uint32_t* out_flags);
+  bool GetResourceFlags(uint32_t resid, uint32_t* out_flags) const;
 
   // Finds the resource ID assigned to `resource_name`.
   // `resource_name` must be of the form '[package:][type/]entry'.
@@ -182,7 +188,7 @@ class AssetManager2 : public ::AAssetManager {
   // If no type is specified in `resource_name`, then `fallback_type` is used as the type.
   // Returns 0x0 if no resource by that name was found.
   uint32_t GetResourceId(const std::string& resource_name, const std::string& fallback_type = {},
-                         const std::string& fallback_package = {});
+                         const std::string& fallback_package = {}) const;
 
   // Retrieves the best matching resource with ID `resid`. The resource value is filled into
   // `out_value` and the configuration for the selected value is populated in `out_selected_config`.
@@ -195,7 +201,7 @@ class AssetManager2 : public ::AAssetManager {
   // this function logs if the resource was a map/bag type before returning kInvalidCookie.
   ApkAssetsCookie GetResource(uint32_t resid, bool may_be_bag, uint16_t density_override,
                               Res_value* out_value, ResTable_config* out_selected_config,
-                              uint32_t* out_flags);
+                              uint32_t* out_flags) const;
 
   // Resolves the resource reference in `in_out_value` if the data type is
   // Res_value::TYPE_REFERENCE.
@@ -206,12 +212,12 @@ class AssetManager2 : public ::AAssetManager {
   // are OR'd together with `in_out_flags`.
   // `in_out_config` is populated with the configuration for which the resolved value was defined.
   // `out_last_reference` is populated with the last reference ID before resolving to an actual
-  // value.
+  // value. This is only initialized if the passed in `in_out_value` is a reference.
   // Returns the cookie of the APK the resolved resource was defined in, or kInvalidCookie if
   // it was not found.
   ApkAssetsCookie ResolveReference(ApkAssetsCookie cookie, Res_value* in_out_value,
                                    ResTable_config* in_out_selected_config, uint32_t* in_out_flags,
-                                   uint32_t* out_last_reference);
+                                   uint32_t* out_last_reference) const;
 
   // Retrieves the best matching bag/map resource with ID `resid`.
   // This method will resolve all parent references for this bag and merge keys with the child.
@@ -228,26 +234,35 @@ class AssetManager2 : public ::AAssetManager {
   // Creates a new Theme from this AssetManager.
   std::unique_ptr<Theme> NewTheme();
 
+  template <typename Func>
+  void ForEachPackage(Func func) const {
+    for (const PackageGroup& package_group : package_groups_) {
+      func(package_group.packages_.front().loaded_package_->GetPackageName(),
+           package_group.dynamic_ref_table.mAssignedPackageId);
+    }
+  }
+
   void DumpToLog() const;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(AssetManager2);
 
-  // Finds the best entry for `resid` amongst all the ApkAssets. The entry can be a simple
-  // Res_value, or a complex map/bag type.
+  // Finds the best entry for `resid` from the set of ApkAssets. The entry can be a simple
+  // Res_value, or a complex map/bag type. If successful, it is available in `out_entry`.
+  // Returns kInvalidCookie on failure. Otherwise, the return value is the cookie associated with
+  // the ApkAssets in which the entry was found.
   //
   // `density_override` overrides the density of the current configuration when doing a search.
   //
   // When `stop_at_first_match` is true, the first match found is selected and the search
   // terminates. This is useful for methods that just look up the name of a resource and don't
-  // care about the value. In this case, the value of `out_flags` is incomplete and should not
-  // be used.
+  // care about the value. In this case, the value of `FindEntryResult::type_flags` is incomplete
+  // and should not be used.
   //
-  // `out_flags` stores the resulting bitmask of configuration axis with which the resource
-  // value varies.
+  // NOTE: FindEntry takes care of ensuring that structs within FindEntryResult have been properly
+  // bounds-checked. Callers of FindEntry are free to trust the data if this method succeeds.
   ApkAssetsCookie FindEntry(uint32_t resid, uint16_t density_override, bool stop_at_first_match,
-                            LoadedArscEntry* out_entry, ResTable_config* out_selected_config,
-                            uint32_t* out_flags);
+                            FindEntryResult* out_entry) const;
 
   // Assigns package IDs to all shared library ApkAssets.
   // Should be called whenever the ApkAssets are changed.
@@ -257,13 +272,47 @@ class AssetManager2 : public ::AAssetManager {
   // bitmask `diff`.
   void InvalidateCaches(uint32_t diff);
 
+  // Triggers the re-construction of lists of types that match the set configuration.
+  // This should always be called when mutating the AssetManager's configuration or ApkAssets set.
+  void RebuildFilterList();
+
+  // AssetManager2::GetBag(resid) wraps this function to track which resource ids have already
+  // been seen while traversing bag parents.
+  const ResolvedBag* GetBag(uint32_t resid, std::vector<uint32_t>& child_resids);
+
   // The ordered list of ApkAssets to search. These are not owned by the AssetManager, and must
   // have a longer lifetime.
   std::vector<const ApkAssets*> apk_assets_;
 
+  // A collection of configurations and their associated ResTable_type that match the current
+  // AssetManager configuration.
+  struct FilteredConfigGroup {
+    std::vector<ResTable_config> configurations;
+    std::vector<const ResTable_type*> types;
+  };
+
+  // Represents an single package.
+  struct ConfiguredPackage {
+    // A pointer to the immutable, loaded package info.
+    const LoadedPackage* loaded_package_;
+
+    // A mutable AssetManager-specific list of configurations that match the AssetManager's
+    // current configuration. This is used as an optimization to avoid checking every single
+    // candidate configuration when looking up resources.
+    ByteBucketArray<FilteredConfigGroup> filtered_configs_;
+  };
+
+  // Represents a logical package, which can be made up of many individual packages. Each package
+  // in a PackageGroup shares the same package name and package ID.
   struct PackageGroup {
-    std::vector<const LoadedPackage*> packages_;
+    // The set of packages that make-up this group.
+    std::vector<ConfiguredPackage> packages_;
+
+    // The cookies associated with each package in the group. They share the same order as
+    // packages_.
     std::vector<ApkAssetsCookie> cookies_;
+
+    // A library reference table that contains build-package ID to runtime-package ID mappings.
     DynamicRefTable dynamic_ref_table;
   };
 
@@ -290,6 +339,8 @@ class Theme {
   friend class AssetManager2;
 
  public:
+  ~Theme();
+
   // Applies the style identified by `resid` to this theme. This can be called
   // multiple times with different styles. By default, any theme attributes that
   // are already defined before this call are not overridden. If `force` is set
@@ -304,69 +355,58 @@ class Theme {
 
   void Clear();
 
-  inline const AssetManager2* GetAssetManager() const { return asset_manager_; }
+  inline const AssetManager2* GetAssetManager() const {
+    return asset_manager_;
+  }
 
-  inline AssetManager2* GetAssetManager() { return asset_manager_; }
+  inline AssetManager2* GetAssetManager() {
+    return asset_manager_;
+  }
 
   // Returns a bit mask of configuration changes that will impact this
   // theme (and thus require completely reloading it).
-  inline uint32_t GetChangingConfigurations() const { return type_spec_flags_; }
+  inline uint32_t GetChangingConfigurations() const {
+    return type_spec_flags_;
+  }
 
-  // Retrieve a value in the theme. If the theme defines this value,
-  // returns an asset cookie indicating which ApkAssets it came from
-  // and populates `out_value` with the value. If `out_flags` is non-null,
-  // populates it with a bitmask of the configuration axis the resource
-  // varies with.
+  // Retrieve a value in the theme. If the theme defines this value, returns an asset cookie
+  // indicating which ApkAssets it came from and populates `out_value` with the value.
+  // `out_flags` is populated with a bitmask of the configuration axis with which the resource
+  // varies.
   //
   // If the attribute is not found, returns kInvalidCookie.
   //
-  // NOTE: This function does not do reference traversal. If you want
-  // to follow references to other resources to get the "real" value to
-  // use, you need to call ResolveReference() after this function.
-  ApkAssetsCookie GetAttribute(uint32_t resid, Res_value* out_value,
-                               uint32_t* out_flags = nullptr) const;
+  // NOTE: This function does not do reference traversal. If you want to follow references to other
+  // resources to get the "real" value to use, you need to call ResolveReference() after this
+  // function.
+  ApkAssetsCookie GetAttribute(uint32_t resid, Res_value* out_value, uint32_t* out_flags) const;
 
   // This is like AssetManager2::ResolveReference(), but also takes
   // care of resolving attribute references to the theme.
   ApkAssetsCookie ResolveAttributeReference(ApkAssetsCookie cookie, Res_value* in_out_value,
                                             ResTable_config* in_out_selected_config = nullptr,
                                             uint32_t* in_out_type_spec_flags = nullptr,
-                                            uint32_t* out_last_ref = nullptr);
+                                            uint32_t* out_last_ref = nullptr) const;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Theme);
 
   // Called by AssetManager2.
-  explicit inline Theme(AssetManager2* asset_manager) : asset_manager_(asset_manager) {}
-
-  struct Entry {
-    ApkAssetsCookie cookie;
-    uint32_t type_spec_flags;
-    Res_value value;
-  };
-
-  struct Type {
-    // Use uint32_t for fewer cycles when loading from memory.
-    uint32_t entry_count;
-    uint32_t entry_capacity;
-    Entry entries[0];
-  };
-
-  static constexpr const size_t kPackageCount = std::numeric_limits<uint8_t>::max() + 1;
-  static constexpr const size_t kTypeCount = std::numeric_limits<uint8_t>::max() + 1;
-
-  struct Package {
-    // Each element of Type will be a dynamically sized object
-    // allocated to have the entries stored contiguously with the Type.
-    std::array<util::unique_cptr<Type>, kTypeCount> types;
-  };
+  explicit Theme(AssetManager2* asset_manager);
 
   AssetManager2* asset_manager_;
   uint32_t type_spec_flags_ = 0u;
+
+  // Defined in the cpp.
+  struct Package;
+
+  constexpr static size_t kPackageCount = std::numeric_limits<uint8_t>::max() + 1;
   std::array<std::unique_ptr<Package>, kPackageCount> packages_;
 };
 
-inline const ResolvedBag::Entry* begin(const ResolvedBag* bag) { return bag->entries; }
+inline const ResolvedBag::Entry* begin(const ResolvedBag* bag) {
+  return bag->entries;
+}
 
 inline const ResolvedBag::Entry* end(const ResolvedBag* bag) {
   return bag->entries + bag->entry_count;

@@ -24,9 +24,10 @@
 
 #include "util/Util.h"
 
-namespace aapt {
+using ::android::ResTable_config;
+using ::android::StringPiece;
 
-using android::ResTable_config;
+namespace aapt {
 
 void LocaleValue::set_language(const char* language_chars) {
   size_t i = 0;
@@ -72,7 +73,7 @@ static inline bool is_number(const std::string& str) {
   return std::all_of(std::begin(str), std::end(str), ::isdigit);
 }
 
-bool LocaleValue::InitFromFilterString(const android::StringPiece& str) {
+bool LocaleValue::InitFromFilterString(const StringPiece& str) {
   // A locale (as specified in the filter) is an underscore separated name such
   // as "en_US", "en_Latn_US", or "en_US_POSIX".
   std::vector<std::string> parts = util::SplitAndLowercase(str, '_');
@@ -138,6 +139,71 @@ bool LocaleValue::InitFromFilterString(const android::StringPiece& str) {
   return true;
 }
 
+bool LocaleValue::InitFromBcp47Tag(const StringPiece& bcp47tag) {
+  return InitFromBcp47TagImpl(bcp47tag, '-');
+}
+
+bool LocaleValue::InitFromBcp47TagImpl(const StringPiece& bcp47tag, const char separator) {
+  std::vector<std::string> subtags = util::SplitAndLowercase(bcp47tag, separator);
+  if (subtags.size() == 1) {
+    set_language(subtags[0].c_str());
+  } else if (subtags.size() == 2) {
+    set_language(subtags[0].c_str());
+
+    // The second tag can either be a region, a variant or a script.
+    switch (subtags[1].size()) {
+      case 2:
+      case 3:
+        set_region(subtags[1].c_str());
+        break;
+      case 4:
+        if ('0' <= subtags[1][0] && subtags[1][0] <= '9') {
+          // This is a variant: fall through
+        } else {
+          set_script(subtags[1].c_str());
+          break;
+        }
+      case 5:
+      case 6:
+      case 7:
+      case 8:
+        set_variant(subtags[1].c_str());
+        break;
+      default:
+        return false;
+    }
+  } else if (subtags.size() == 3) {
+    // The language is always the first subtag.
+    set_language(subtags[0].c_str());
+
+    // The second subtag can either be a script or a region code.
+    // If its size is 4, it's a script code, else it's a region code.
+    if (subtags[1].size() == 4) {
+      set_script(subtags[1].c_str());
+    } else if (subtags[1].size() == 2 || subtags[1].size() == 3) {
+      set_region(subtags[1].c_str());
+    } else {
+      return false;
+    }
+
+    // The third tag can either be a region code (if the second tag was
+    // a script), else a variant code.
+    if (subtags[2].size() >= 4) {
+      set_variant(subtags[2].c_str());
+    } else {
+      set_region(subtags[2].c_str());
+    }
+  } else if (subtags.size() == 4) {
+    set_language(subtags[0].c_str());
+    set_script(subtags[1].c_str());
+    set_region(subtags[2].c_str());
+    set_variant(subtags[3].c_str());
+  } else {
+    return false;
+  }
+  return true;
+}
+
 ssize_t LocaleValue::InitFromParts(std::vector<std::string>::iterator iter,
                                    std::vector<std::string>::iterator end) {
   const std::vector<std::string>::iterator start_iter = iter;
@@ -145,71 +211,13 @@ ssize_t LocaleValue::InitFromParts(std::vector<std::string>::iterator iter,
   std::string& part = *iter;
   if (part[0] == 'b' && part[1] == '+') {
     // This is a "modified" BCP 47 language tag. Same semantics as BCP 47 tags,
-    // except that the separator is "+" and not "-".
-    std::vector<std::string> subtags = util::SplitAndLowercase(part, '+');
-    subtags.erase(subtags.begin());
-    if (subtags.size() == 1) {
-      set_language(subtags[0].c_str());
-    } else if (subtags.size() == 2) {
-      set_language(subtags[0].c_str());
-
-      // The second tag can either be a region, a variant or a script.
-      switch (subtags[1].size()) {
-        case 2:
-        case 3:
-          set_region(subtags[1].c_str());
-          break;
-        case 4:
-          if ('0' <= subtags[1][0] && subtags[1][0] <= '9') {
-            // This is a variant: fall through
-          } else {
-            set_script(subtags[1].c_str());
-            break;
-          }
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-          set_variant(subtags[1].c_str());
-          break;
-        default:
-          return -1;
-      }
-    } else if (subtags.size() == 3) {
-      // The language is always the first subtag.
-      set_language(subtags[0].c_str());
-
-      // The second subtag can either be a script or a region code.
-      // If its size is 4, it's a script code, else it's a region code.
-      if (subtags[1].size() == 4) {
-        set_script(subtags[1].c_str());
-      } else if (subtags[1].size() == 2 || subtags[1].size() == 3) {
-        set_region(subtags[1].c_str());
-      } else {
-        return -1;
-      }
-
-      // The third tag can either be a region code (if the second tag was
-      // a script), else a variant code.
-      if (subtags[2].size() >= 4) {
-        set_variant(subtags[2].c_str());
-      } else {
-        set_region(subtags[2].c_str());
-      }
-    } else if (subtags.size() == 4) {
-      set_language(subtags[0].c_str());
-      set_script(subtags[1].c_str());
-      set_region(subtags[2].c_str());
-      set_variant(subtags[3].c_str());
-    } else {
+    // except that the separator is "+" and not "-". Skip the prefix 'b+'.
+    if (!InitFromBcp47TagImpl(StringPiece(part).substr(2), '+')) {
       return -1;
     }
-
     ++iter;
-
   } else {
-    if ((part.length() == 2 || part.length() == 3) && is_alpha(part) &&
-        part != "car") {
+    if ((part.length() == 2 || part.length() == 3) && is_alpha(part) && part != "car") {
       set_language(part.c_str());
       ++iter;
 
@@ -222,7 +230,6 @@ ssize_t LocaleValue::InitFromParts(std::vector<std::string>::iterator iter,
       }
     }
   }
-
   return static_cast<ssize_t>(iter - start_iter);
 }
 

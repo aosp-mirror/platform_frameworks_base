@@ -16,44 +16,101 @@
 
 package android.util;
 
+import android.os.IStatsManager;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+
 /**
- * @hide
- * Temporary dummy class for StatsLog. Will be removed.
+ * StatsLog provides an API for developers to send events to statsd. The events can be used to
+ * define custom metrics inside statsd.
  */
-public final class StatsLog {
-    private static final String TAG = "StatsManager";
+public final class StatsLog extends StatsLogInternal {
+    private static final String TAG = "StatsLog";
+    private static final boolean DEBUG = false;
 
-    public static final int BLUETOOTH_ENABLED_STATE_CHANGED = 0;
-    public static final int BLUETOOTH_ENABLED_STATE_CHANGED__STATE__UNKNOWN = 0;
-    public static final int BLUETOOTH_ENABLED_STATE_CHANGED__STATE__ENABLED = 1;
-    public static final int BLUETOOTH_ENABLED_STATE_CHANGED__STATE__DISABLED = 2;
-
-    public static final int BLUETOOTH_CONNECTION_STATE_CHANGED = 1;
-
-    public static final int BLUETOOTH_A2DP_AUDIO_STATE_CHANGED = 2;
-    public static final int BLUETOOTH_A2DP_AUDIO_STATE_CHANGED__STATE__UNKNOWN = 0;
-    public static final int BLUETOOTH_A2DP_AUDIO_STATE_CHANGED__STATE__PLAY = 1;
-    public static final int BLUETOOTH_A2DP_AUDIO_STATE_CHANGED__STATE__STOP = 2;
-
-    public static final int BLE_SCAN_STATE_CHANGED = 2;
-    public static final int BLE_SCAN_STATE_CHANGED__STATE__OFF = 0;
-    public static final int BLE_SCAN_STATE_CHANGED__STATE__ON = 1;
-    public static final int BLE_SCAN_STATE_CHANGED__STATE__RESET = 2;
+    private static IStatsManager sService;
 
     private StatsLog() {}
 
-    public static void write(int id, int field1) {}
+    /**
+     * Logs a start event.
+     *
+     * @param label developer-chosen label.
+     * @return True if the log request was sent to statsd.
+     */
+    public static boolean logStart(int label) {
+        synchronized (StatsLog.class) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (service == null) {
+                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when logging start");
+                    return false;
+                }
+                service.sendAppBreadcrumbAtom(label,
+                        StatsLog.APP_BREADCRUMB_REPORTED__STATE__START);
+                return true;
+            } catch (RemoteException e) {
+                sService = null;
+                if (DEBUG) Slog.d(TAG, "Failed to connect to statsd when logging start");
+                return false;
+            }
+        }
+    }
 
-    public static void write(int id, int field1, int field2, int field3) {}
+    /**
+     * Logs a stop event.
+     *
+     * @param label developer-chosen label.
+     * @return True if the log request was sent to statsd.
+     */
+    public static boolean logStop(int label) {
+        synchronized (StatsLog.class) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (service == null) {
+                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when logging stop");
+                    return false;
+                }
+                service.sendAppBreadcrumbAtom(label, StatsLog.APP_BREADCRUMB_REPORTED__STATE__STOP);
+                return true;
+            } catch (RemoteException e) {
+                sService = null;
+                if (DEBUG) Slog.d(TAG, "Failed to connect to statsd when logging stop");
+                return false;
+            }
+        }
+    }
 
-    public static void write_non_chained(int id, int uid, String tag,
-            int field1, int field2, String field3) {}
+    /**
+     * Logs an event that does not represent a start or stop boundary.
+     *
+     * @param label developer-chosen label.
+     * @return True if the log request was sent to statsd.
+     */
+    public static boolean logEvent(int label) {
+        synchronized (StatsLog.class) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (service == null) {
+                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when logging event");
+                    return false;
+                }
+                service.sendAppBreadcrumbAtom(
+                        label, StatsLog.APP_BREADCRUMB_REPORTED__STATE__UNSPECIFIED);
+                return true;
+            } catch (RemoteException e) {
+                sService = null;
+                if (DEBUG) Slog.d(TAG, "Failed to connect to statsd when logging event");
+                return false;
+            }
+        }
+    }
 
-    /** I am a dummy javadoc comment. */
-    public static void write(int code, int[] uid, String[] tag, int arg2,
-            boolean arg3, boolean arg4, boolean arg5) {};
-
-    /** I am a dummy javadoc comment. */
-    public static void write_non_chained(int code, int arg1, String arg2, int arg3,
-            boolean arg4, boolean arg5, boolean arg6) {};
+    private static IStatsManager getIStatsManagerLocked() throws RemoteException {
+        if (sService != null) {
+            return sService;
+        }
+        sService = IStatsManager.Stub.asInterface(ServiceManager.getService("stats"));
+        return sService;
+    }
 }

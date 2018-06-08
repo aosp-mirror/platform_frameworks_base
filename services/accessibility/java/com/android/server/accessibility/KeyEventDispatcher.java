@@ -26,7 +26,8 @@ import android.util.Pools.Pool;
 import android.util.Slog;
 import android.view.InputEventConsistencyVerifier;
 import android.view.KeyEvent;
-import android.view.WindowManagerPolicy;
+
+import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.ArrayList;
 import java.util.List;

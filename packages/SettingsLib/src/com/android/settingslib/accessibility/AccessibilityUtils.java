@@ -20,6 +20,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.UserHandle;
@@ -48,6 +49,19 @@ public class AccessibilityUtils {
      */
     public static Set<ComponentName> getEnabledServicesFromSettings(Context context) {
         return getEnabledServicesFromSettings(context, UserHandle.myUserId());
+    }
+
+    public static boolean hasServiceCrashed(String packageName, String serviceName,
+            List<AccessibilityServiceInfo> enabledServiceInfos) {
+        for (int i = 0; i < enabledServiceInfos.size(); i++) {
+            AccessibilityServiceInfo accessibilityServiceInfo = enabledServiceInfos.get(i);
+            final ServiceInfo serviceInfo = enabledServiceInfos.get(i).getResolveInfo().serviceInfo;
+            if (TextUtils.equals(serviceInfo.packageName, packageName)
+                    && TextUtils.equals(serviceInfo.name, serviceName)) {
+                return accessibilityServiceInfo.crashed;
+            }
+        }
+        return false;
     }
 
     /**

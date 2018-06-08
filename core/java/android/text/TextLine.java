@@ -28,6 +28,7 @@ import android.text.style.MetricAffectingSpan;
 import android.text.style.ReplacementSpan;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
@@ -44,7 +45,8 @@ import java.util.ArrayList;
  *
  * @hide
  */
-class TextLine {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+public class TextLine {
     private static final boolean DEBUG = false;
 
     private TextPaint mPaint;
@@ -58,6 +60,7 @@ class TextLine {
     private char[] mChars;
     private boolean mCharsValid;
     private Spanned mSpanned;
+    private PrecomputedText mComputed;
 
     // Additional width of whitespace for justification. This value is per whitespace, thus
     // the line width will increase by mAddedWidth x (number of stretchable whitespaces).
@@ -73,7 +76,7 @@ class TextLine {
             new SpanSet<ReplacementSpan>(ReplacementSpan.class);
 
     private final DecorationInfo mDecorationInfo = new DecorationInfo();
-    private final ArrayList<DecorationInfo> mDecorations = new ArrayList();
+    private final ArrayList<DecorationInfo> mDecorations = new ArrayList<>();
 
     private static final TextLine[] sCached = new TextLine[3];
 
@@ -82,7 +85,8 @@ class TextLine {
      *
      * @return an uninitialized TextLine
      */
-    static TextLine obtain() {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static TextLine obtain() {
         TextLine tl;
         synchronized (sCached) {
             for (int i = sCached.length; --i >= 0;) {
@@ -107,13 +111,15 @@ class TextLine {
      * @return null, as a convenience from clearing references to the provided
      * TextLine
      */
-    static TextLine recycle(TextLine tl) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static TextLine recycle(TextLine tl) {
         tl.mText = null;
         tl.mPaint = null;
         tl.mDirections = null;
         tl.mSpanned = null;
         tl.mTabs = null;
         tl.mChars = null;
+        tl.mComputed = null;
 
         tl.mMetricAffectingSpanSpanSet.recycle();
         tl.mCharacterStyleSpanSet.recycle();
@@ -142,7 +148,8 @@ class TextLine {
      * @param hasTabs true if the line might contain tabs
      * @param tabStops the tabStops. Can be null.
      */
-    void set(TextPaint paint, CharSequence text, int start, int limit, int dir,
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public void set(TextPaint paint, CharSequence text, int start, int limit, int dir,
             Directions directions, boolean hasTabs, TabStops tabStops) {
         mPaint = paint;
         mText = text;
@@ -161,6 +168,16 @@ class TextLine {
             mSpanned = (Spanned) text;
             mReplacementSpanSpanSet.init(mSpanned, start, limit);
             hasReplacement = mReplacementSpanSpanSet.numberOfSpans > 0;
+        }
+
+        mComputed = null;
+        if (text instanceof PrecomputedText) {
+            // Here, no need to check line break strategy or hyphenation frequency since there is no
+            // line break concept here.
+            mComputed = (PrecomputedText) text;
+            if (!mComputed.getParams().getTextPaint().equalsForTextMeasurement(paint)) {
+                mComputed = null;
+            }
         }
 
         mCharsValid = hasReplacement || hasTabs || directions != Layout.DIRS_ALL_LEFT_TO_RIGHT;
@@ -196,7 +213,8 @@ class TextLine {
     /**
      * Justify the line to the given width.
      */
-    void justify(float justifyWidth) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public void justify(float justifyWidth) {
         int end = mLen;
         while (end > 0 && isLineEndSpace(mText.charAt(mStart + end - 1))) {
             end--;
@@ -277,7 +295,8 @@ class TextLine {
      * @param fmi receives font metrics information, can be null
      * @return the signed width of the line
      */
-    float metrics(FontMetricsInt fmi) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public float metrics(FontMetricsInt fmi) {
         return measure(mLen, false, fmi);
     }
 
@@ -340,14 +359,14 @@ class TextLine {
 
                     boolean advance = (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
                     if (inSegment && advance) {
-                        return h += measureRun(segstart, offset, j, runIsRtl, fmi);
+                        return h + measureRun(segstart, offset, j, runIsRtl, fmi);
                     }
 
                     float w = measureRun(segstart, j, j, runIsRtl, fmi);
                     h += advance ? w : -w;
 
                     if (inSegment) {
-                        return h += measureRun(segstart, offset, j, runIsRtl, null);
+                        return h + measureRun(segstart, offset, j, runIsRtl, null);
                     }
 
                     if (codept == '\t') {
@@ -366,6 +385,98 @@ class TextLine {
         }
 
         return h;
+    }
+
+    /**
+     * @see #measure(int, boolean, FontMetricsInt)
+     * @return The measure results for all possible offsets
+     */
+    float[] measureAllOffsets(boolean[] trailing, FontMetricsInt fmi) {
+        float[] measurement = new float[mLen + 1];
+
+        int[] target = new int[mLen + 1];
+        for (int offset = 0; offset < target.length; ++offset) {
+            target[offset] = trailing[offset] ? offset - 1 : offset;
+        }
+        if (target[0] < 0) {
+            measurement[0] = 0;
+        }
+
+        float h = 0;
+
+        if (!mHasTabs) {
+            if (mDirections == Layout.DIRS_ALL_LEFT_TO_RIGHT) {
+                for (int offset = 0; offset <= mLen; ++offset) {
+                    measurement[offset] = measureRun(0, offset, mLen, false, fmi);
+                }
+                return measurement;
+            }
+            if (mDirections == Layout.DIRS_ALL_RIGHT_TO_LEFT) {
+                for (int offset = 0; offset <= mLen; ++offset) {
+                    measurement[offset] = measureRun(0, offset, mLen, true, fmi);
+                }
+                return measurement;
+            }
+        }
+
+        char[] chars = mChars;
+        int[] runs = mDirections.mDirections;
+        for (int i = 0; i < runs.length; i += 2) {
+            int runStart = runs[i];
+            int runLimit = runStart + (runs[i + 1] & Layout.RUN_LENGTH_MASK);
+            if (runLimit > mLen) {
+                runLimit = mLen;
+            }
+            boolean runIsRtl = (runs[i + 1] & Layout.RUN_RTL_FLAG) != 0;
+
+            int segstart = runStart;
+            for (int j = mHasTabs ? runStart : runLimit; j <= runLimit; ++j) {
+                int codept = 0;
+                if (mHasTabs && j < runLimit) {
+                    codept = chars[j];
+                    if (codept >= 0xD800 && codept < 0xDC00 && j + 1 < runLimit) {
+                        codept = Character.codePointAt(chars, j);
+                        if (codept > 0xFFFF) {
+                            ++j;
+                            continue;
+                        }
+                    }
+                }
+
+                if (j == runLimit || codept == '\t') {
+                    float oldh = h;
+                    boolean advance = (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
+                    float w = measureRun(segstart, j, j, runIsRtl, fmi);
+                    h += advance ? w : -w;
+
+                    float baseh = advance ? oldh : h;
+                    FontMetricsInt crtfmi = advance ? fmi : null;
+                    for (int offset = segstart; offset <= j && offset <= mLen; ++offset) {
+                        if (target[offset] >= segstart && target[offset] < j) {
+                            measurement[offset] =
+                                    baseh + measureRun(segstart, offset, j, runIsRtl, crtfmi);
+                        }
+                    }
+
+                    if (codept == '\t') {
+                        if (target[j] == j) {
+                            measurement[j] = h;
+                        }
+                        h = mDir * nextTab(h * mDir);
+                        if (target[j + 1] == j) {
+                            measurement[j + 1] =  h;
+                        }
+                    }
+
+                    segstart = j + 1;
+                }
+            }
+        }
+        if (target[mLen] == mLen) {
+            measurement[mLen] = h;
+        }
+
+        return measurement;
     }
 
     /**
@@ -729,8 +840,13 @@ class TextLine {
             return wp.getRunAdvance(mChars, start, end, contextStart, contextEnd, runIsRtl, offset);
         } else {
             final int delta = mStart;
-            return wp.getRunAdvance(mText, delta + start, delta + end,
-                    delta + contextStart, delta + contextEnd, runIsRtl, delta + offset);
+            if (mComputed == null) {
+                // TODO: Enable measured getRunAdvance for ReplacementSpan and RTL text.
+                return wp.getRunAdvance(mText, delta + start, delta + end,
+                        delta + contextStart, delta + contextEnd, runIsRtl, delta + offset);
+            } else {
+                return mComputed.getWidth(start + delta, end + delta);
+            }
         }
     }
 
@@ -828,14 +944,14 @@ class TextLine {
                     }
                     if (info.isUnderlineText) {
                         final float thickness =
-                                Math.max(((Paint) wp).getUnderlineThickness(), 1.0f);
+                                Math.max(wp.getUnderlineThickness(), 1.0f);
                         drawStroke(wp, c, wp.getColor(), wp.getUnderlinePosition(), thickness,
                                 decorationXLeft, decorationXRight, y);
                     }
 
                     if (info.isStrikeThruText) {
                         final float thickness =
-                                Math.max(((Paint) wp).getStrikeThruThickness(), 1.0f);
+                                Math.max(wp.getStrikeThruThickness(), 1.0f);
                         drawStroke(wp, c, wp.getColor(), wp.getStrikeThruPosition(), thickness,
                                 decorationXLeft, decorationXRight, y);
                     }
@@ -1165,23 +1281,18 @@ class TextLine {
     }
 
     private boolean isStretchableWhitespace(int ch) {
-        // TODO: Support other stretchable whitespace. (Bug: 34013491)
-        return ch == 0x0020 || ch == 0x00A0;
-    }
-
-    private int nextStretchableSpace(int start, int end) {
-        for (int i = start; i < end; i++) {
-            final char c = mCharsValid ? mChars[i] : mText.charAt(i + mStart);
-            if (isStretchableWhitespace(c)) return i;
-        }
-        return end;
+        // TODO: Support NBSP and other stretchable whitespace (b/34013491 and b/68204709).
+        return ch == 0x0020;
     }
 
     /* Return the number of spaces in the text line, for the purpose of justification */
     private int countStretchableSpaces(int start, int end) {
         int count = 0;
-        for (int i = start; i < end; i = nextStretchableSpace(i + 1, end)) {
-            count++;
+        for (int i = start; i < end; i++) {
+            final char c = mCharsValid ? mChars[i] : mText.charAt(i + mStart);
+            if (isStretchableWhitespace(c)) {
+                count++;
+            }
         }
         return count;
     }

@@ -44,7 +44,7 @@ public class TouchDelegate {
 
     /**
      * mBounds inflated to include some slop. This rect is to track whether the motion events
-     * should be considered to be be within the delegate view.
+     * should be considered to be within the delegate view.
      */
     private Rect mSlopBounds;
 
@@ -64,14 +64,12 @@ public class TouchDelegate {
     public static final int BELOW = 2;
 
     /**
-     * The touchable region of the View extends to the left of its
-     * actual extent.
+     * The touchable region of the View extends to the left of its actual extent.
      */
     public static final int TO_LEFT = 4;
 
     /**
-     * The touchable region of the View extends to the right of its
-     * actual extent.
+     * The touchable region of the View extends to the right of its actual extent.
      */
     public static final int TO_RIGHT = 8;
 
@@ -107,29 +105,27 @@ public class TouchDelegate {
         boolean hit = true;
         boolean handled = false;
 
-        switch (event.getAction()) {
-        case MotionEvent.ACTION_DOWN:
-            Rect bounds = mBounds;
-
-            if (bounds.contains(x, y)) {
-                mDelegateTargeted = true;
-                sendToDelegate = true;
-            }
-            break;
-        case MotionEvent.ACTION_UP:
-        case MotionEvent.ACTION_MOVE:
-            sendToDelegate = mDelegateTargeted;
-            if (sendToDelegate) {
-                Rect slopBounds = mSlopBounds;
-                if (!slopBounds.contains(x, y)) {
-                    hit = false;
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                mDelegateTargeted = mBounds.contains(x, y);
+                sendToDelegate = mDelegateTargeted;
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+            case MotionEvent.ACTION_POINTER_UP:
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_MOVE:
+                sendToDelegate = mDelegateTargeted;
+                if (sendToDelegate) {
+                    Rect slopBounds = mSlopBounds;
+                    if (!slopBounds.contains(x, y)) {
+                        hit = false;
+                    }
                 }
-            }
-            break;
-        case MotionEvent.ACTION_CANCEL:
-            sendToDelegate = mDelegateTargeted;
-            mDelegateTargeted = false;
-            break;
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                sendToDelegate = mDelegateTargeted;
+                mDelegateTargeted = false;
+                break;
         }
         if (sendToDelegate) {
             final View delegateView = mDelegateView;

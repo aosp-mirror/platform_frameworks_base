@@ -1,0 +1,176 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+import "frameworks/base/cmds/statsd/src/atoms.proto";
+import "frameworks/base/cmds/statsd/src/atom_field_options.proto";
+
+package android.stats_log_api_gen;
+
+message IntAtom {
+    optional int32 field1 = 1;
+}
+
+message AnotherIntAtom {
+    optional int32 field1 = 1;
+}
+
+message OutOfOrderAtom {
+    optional int32 field2 = 2;
+    optional int32 field1 = 1;
+}
+
+enum AnEnum {
+    VALUE0 = 0;
+    VALUE1 = 1;
+}
+
+message AllTypesAtom {
+  repeated android.os.statsd.AttributionNode attribution_chain = 1;
+  optional double double_field = 2;
+  optional float float_field = 3;
+  optional int64 int64_field = 4;
+  optional uint64 uint64_field = 5;
+  optional int32 int32_field = 6;
+  optional fixed64 fixed64_field = 7;
+  optional fixed32 fixed32_field = 8;
+  optional bool bool_field = 9;
+  optional string string_field = 10;
+  optional uint32 uint32_field = 11;
+  optional AnEnum enum_field = 12;
+  optional sfixed32 sfixed32_field = 13;
+  optional sfixed64 sfixed64_field = 14;
+  optional sint32 sint32_field = 15;
+  optional sint64 sint64_field = 16;
+}
+
+message Event {
+    oneof event {
+        OutOfOrderAtom out_of_order_atom = 2;
+        IntAtom int_atom = 1;
+        AnotherIntAtom another_int_atom = 3;
+        AllTypesAtom all_types_atom = 4;
+    }
+}
+
+message BadTypesAtom {
+    optional IntAtom bad_int_atom = 1;
+    optional bytes bad_bytes = 2;
+}
+
+message BadTypesEvent {
+    oneof event {
+        BadTypesAtom bad_types_atom = 1;
+    }
+}
+
+message BadSkippedFieldSingleAtom {
+    optional int32 field2 = 2;
+}
+
+message BadSkippedFieldSingle {
+    oneof event {
+        BadSkippedFieldSingleAtom bad = 1;
+    }
+}
+
+message BadSkippedFieldMultipleAtom {
+    optional int32 field1 = 1;
+    optional int32 field3 = 3;
+    optional int32 field5 = 5;
+}
+
+message BadSkippedFieldMultiple {
+    oneof event {
+        BadSkippedFieldMultipleAtom bad = 1;
+    }
+}
+
+message BadAttributionNodePositionAtom {
+  optional int32 field1 = 1;
+  repeated android.os.statsd.AttributionNode attribution = 2;
+}
+
+message BadAttributionNodePosition {
+  oneof event { BadAttributionNodePositionAtom bad = 1; }
+}
+
+message BadStateAtoms {
+    oneof event {
+        BadStateAtom1 bad1 = 1;
+        BadStateAtom2 bad2 = 2;
+        BadStateAtom3 bad3 = 3;
+    }
+}
+
+message GoodStateAtoms {
+    oneof event {
+        GoodStateAtom1 good1 = 1;
+        GoodStateAtom2 good2 = 2;
+    }
+}
+
+// The atom has only primary field but no exclusive state field.
+message BadStateAtom1 {
+    optional int32 uid = 1
+            [(android.os.statsd.stateFieldOption).option = PRIMARY];
+}
+
+// Only primative types can be annotated.
+message BadStateAtom2 {
+    repeated android.os.statsd.AttributionNode attribution = 1
+            [(android.os.statsd.stateFieldOption).option = PRIMARY];
+    optional int32 state = 2
+            [(android.os.statsd.stateFieldOption).option = EXCLUSIVE];
+}
+
+// Having 2 exclusive state field in the atom means the atom is badly designed.
+// E.g., putting bluetooth state and wifi state in the same atom.
+message BadStateAtom3 {
+    optional int32 uid = 1
+            [(android.os.statsd.stateFieldOption).option = PRIMARY];
+    optional int32 state = 2
+            [(android.os.statsd.stateFieldOption).option = EXCLUSIVE];
+    optional int32 state2 = 3
+            [(android.os.statsd.stateFieldOption).option = EXCLUSIVE];
+}
+
+message GoodStateAtom1 {
+    optional int32 uid = 1
+            [(android.os.statsd.stateFieldOption).option = PRIMARY];
+    optional int32 state = 2
+            [(android.os.statsd.stateFieldOption).option = EXCLUSIVE];
+}
+
+// Atoms can have exclusive state field, but no primary field. That means
+// the state is globally exclusive (e.g., DisplayState).
+message GoodStateAtom2 {
+    optional int32 uid = 1;
+    optional int32 state = 2
+            [(android.os.statsd.stateFieldOption).option = EXCLUSIVE];
+}
+
+// We can have more than one primary fields. That means their combination is a
+// primary key.
+message GoodStateAtom3 {
+    optional int32 uid = 1
+            [(android.os.statsd.stateFieldOption).option = PRIMARY];
+    optional int32 tid = 2
+            [(android.os.statsd.stateFieldOption).option = PRIMARY];
+    optional int32 state = 3
+            [(android.os.statsd.stateFieldOption).option = EXCLUSIVE];
+}

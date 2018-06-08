@@ -27,7 +27,17 @@ TEST(ResourceUtilsTest, ExtractResourceName) {
   EXPECT_EQ("string", type);
   EXPECT_EQ("foo", entry);
 
+  ASSERT_TRUE(ExtractResourceName("@android:string/foo", &package, &type, &entry));
+  EXPECT_EQ("android", package);
+  EXPECT_EQ("string", type);
+  EXPECT_EQ("foo", entry);
+
   ASSERT_TRUE(ExtractResourceName("string/foo", &package, &type, &entry));
+  EXPECT_EQ("", package);
+  EXPECT_EQ("string", type);
+  EXPECT_EQ("foo", entry);
+
+  ASSERT_TRUE(ExtractResourceName("@string/foo", &package, &type, &entry));
   EXPECT_EQ("", package);
   EXPECT_EQ("string", type);
   EXPECT_EQ("foo", entry);
@@ -37,13 +47,28 @@ TEST(ResourceUtilsTest, ExtractResourceName) {
   EXPECT_EQ("", type);
   EXPECT_EQ("foo", entry);
 
+  ASSERT_TRUE(ExtractResourceName("@foo", &package, &type, &entry));
+  EXPECT_EQ("", package);
+  EXPECT_EQ("", type);
+  EXPECT_EQ("foo", entry);
+
   ASSERT_TRUE(ExtractResourceName("android:foo", &package, &type, &entry));
   EXPECT_EQ("android", package);
   EXPECT_EQ("", type);
   EXPECT_EQ("foo", entry);
 
+//  ASSERT_TRUE(ExtractResourceName("@android:foo", &package, &type, &entry));
+//  EXPECT_EQ("android", package);
+//  EXPECT_EQ("", type);
+//  EXPECT_EQ("foo", entry);
+
   EXPECT_FALSE(ExtractResourceName(":string/foo", &package, &type, &entry));
+
+  EXPECT_FALSE(ExtractResourceName("@:string/foo", &package, &type, &entry));
+
   EXPECT_FALSE(ExtractResourceName("/foo", &package, &type, &entry));
+
+  EXPECT_FALSE(ExtractResourceName("@/foo", &package, &type, &entry));
 }
 
 }  // namespace android

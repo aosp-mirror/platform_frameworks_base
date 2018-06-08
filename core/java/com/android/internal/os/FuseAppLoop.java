@@ -138,7 +138,7 @@ public class FuseAppLoop implements Handler.Callback {
     private static final int FUSE_FSYNC = 20;
 
     // Defined in FuseBuffer.h
-    private static final int FUSE_MAX_WRITE = 256 * 1024;
+    private static final int FUSE_MAX_WRITE = 128 * 1024;
 
     @Override
     public boolean handleMessage(Message msg) {
@@ -283,6 +283,7 @@ public class FuseAppLoop implements Handler.Callback {
         return -OsConstants.EBADF;
     }
 
+    @GuardedBy("mLock")
     private CallbackEntry getCallbackEntryOrThrowLocked(long inode) throws ErrnoException {
         final CallbackEntry entry = mCallbackMap.get(checkInode(inode));
         if (entry == null) {
@@ -291,12 +292,14 @@ public class FuseAppLoop implements Handler.Callback {
         return entry;
     }
 
+    @GuardedBy("mLock")
     private void recycleLocked(Args args) {
         if (mArgsPool.size() < ARGS_POOL_SIZE) {
             mArgsPool.add(args);
         }
     }
 
+    @GuardedBy("mLock")
     private void replySimpleLocked(long unique, int result) {
         if (mInstance != 0) {
             native_replySimple(mInstance, unique, result);

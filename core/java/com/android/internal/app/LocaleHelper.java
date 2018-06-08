@@ -136,7 +136,16 @@ public class LocaleHelper {
      * @return the localized country name.
      */
     public static String getDisplayCountry(Locale locale, Locale displayLocale) {
-        return ULocale.getDisplayCountry(locale.toLanguageTag(), ULocale.forLocale(displayLocale));
+        final String languageTag = locale.toLanguageTag();
+        final ULocale uDisplayLocale = ULocale.forLocale(displayLocale);
+        final String country = ULocale.getDisplayCountry(languageTag, uDisplayLocale);
+        final String numberingSystem = locale.getUnicodeLocaleType("nu");
+        if (numberingSystem != null) {
+            return String.format("%s (%s)", country,
+                    ULocale.getDisplayKeywordValue(languageTag, "numbers", uDisplayLocale));
+        } else {
+            return country;
+        }
     }
 
     /**
@@ -181,7 +190,7 @@ public class LocaleHelper {
             // Hong Kong Traditional Chinese (zh_Hant_HK) and Dzongkha (dz). But that has two
             // problems: it's expensive to extract it, and in case the output string becomes
             // automatically ellipsized, it can result in weird output.
-            localeNames[maxLocales] = TextUtils.ELLIPSIS_STRING;
+            localeNames[maxLocales] = TextUtils.getEllipsisString(TextUtils.TruncateAt.END);
         }
 
         ListFormatter lfn = ListFormatter.getInstance(dispLocale);

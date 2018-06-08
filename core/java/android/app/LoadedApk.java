@@ -32,7 +32,6 @@ import android.content.pm.dex.ArtManager;
 import android.content.pm.split.SplitDependencyLoader;
 import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
@@ -65,6 +64,7 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -91,6 +91,7 @@ final class ServiceConnectionLeaked extends AndroidRuntimeException {
 public final class LoadedApk {
     static final String TAG = "LoadedApk";
     static final boolean DEBUG = false;
+    private static final String PROPERTY_NAME_APPEND_NATIVE = "pi.append_native_lib_paths";
 
     private final ActivityThread mActivityThread;
     final String mPackageName;
@@ -126,6 +127,7 @@ public final class LoadedApk {
         = new ArrayMap<>();
     private final ArrayMap<Context, ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher>> mUnboundServices
         = new ArrayMap<>();
+    private AppComponentFactory mAppComponentFactory;
 
     Application getApplication() {
         return mApplication;
@@ -149,6 +151,7 @@ public final class LoadedApk {
         mIncludeCode = includeCode;
         mRegisterPackage = registerPackage;
         mDisplayAdjustments.setCompatibilityInfo(compatInfo);
+        mAppComponentFactory = createAppFactory(mApplicationInfo, mBaseClassLoader);
     }
 
     private static ApplicationInfo adjustNativeLibraryPaths(ApplicationInfo info) {
@@ -204,6 +207,7 @@ public final class LoadedApk {
         mRegisterPackage = false;
         mClassLoader = ClassLoader.getSystemClassLoader();
         mResources = Resources.getSystem();
+        mAppComponentFactory = createAppFactory(mApplicationInfo, mClassLoader);
     }
 
     /**
@@ -213,6 +217,23 @@ public final class LoadedApk {
         assert info.packageName.equals("android");
         mApplicationInfo = info;
         mClassLoader = classLoader;
+        mAppComponentFactory = createAppFactory(info, classLoader);
+    }
+
+    private AppComponentFactory createAppFactory(ApplicationInfo appInfo, ClassLoader cl) {
+        if (appInfo.appComponentFactory != null && cl != null) {
+            try {
+                return (AppComponentFactory) cl.loadClass(appInfo.appComponentFactory)
+                        .newInstance();
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                Slog.e(TAG, "Unable to instantiate appComponentFactory", e);
+            }
+        }
+        return AppComponentFactory.DEFAULT;
+    }
+
+    public AppComponentFactory getAppFactory() {
+        return mAppComponentFactory;
     }
 
     public String getPackageName() {
@@ -314,6 +335,7 @@ public final class LoadedApk {
                         getClassLoader());
             }
         }
+        mAppComponentFactory = createAppFactory(aInfo, mClassLoader);
     }
 
     private void setApplicationInfo(ApplicationInfo aInfo) {
@@ -593,6 +615,7 @@ public final class LoadedApk {
             } else {
                 mClassLoader = ClassLoader.getSystemClassLoader();
             }
+            mAppComponentFactory = createAppFactory(mApplicationInfo, mClassLoader);
 
             return;
         }
@@ -639,15 +662,24 @@ public final class LoadedApk {
         final String defaultSearchPaths = System.getProperty("java.library.path");
         final boolean treatVendorApkAsUnbundled = !defaultSearchPaths.contains("/vendor/lib");
         if (mApplicationInfo.getCodePath() != null
-                && mApplicationInfo.getCodePath().startsWith("/vendor/")
-                && treatVendorApkAsUnbundled) {
+                && mApplicationInfo.isVendor() && treatVendorApkAsUnbundled) {
             isBundledApp = false;
         }
 
         makePaths(mActivityThread, isBundledApp, mApplicationInfo, zipPaths, libPaths);
 
         String libraryPermittedPath = mDataDir;
+
         if (isBundledApp) {
+            // For bundled apps, add the base directory of the app (e.g.,
+            // /system/app/Foo/) to the permitted paths so that it can load libraries
+            // embedded in module apks under the directory. For now, GmsCore is relying
+            // on this, but this isn't specific to the app. Also note that, we don't
+            // need to do this for unbundled apps as entire /data is already set to
+            // the permitted paths for them.
+            libraryPermittedPath += File.pathSeparator
+                    + Paths.get(getAppDir()).getParent().toString();
+
             // This is necessary to grant bundled apps access to
             // libraries located in subdirectories of /system/lib
             libraryPermittedPath += File.pathSeparator + defaultSearchPaths;
@@ -668,6 +700,7 @@ public final class LoadedApk {
                         librarySearchPath, libraryPermittedPath, mBaseClassLoader,
                         null /* classLoaderName */);
                 StrictMode.setThreadPolicy(oldPolicy);
+                mAppComponentFactory = AppComponentFactory.DEFAULT;
             }
 
             return;
@@ -695,10 +728,59 @@ public final class LoadedApk {
                     mApplicationInfo.targetSdkVersion, isBundledApp, librarySearchPath,
                     libraryPermittedPath, mBaseClassLoader,
                     mApplicationInfo.classLoaderName);
+            mAppComponentFactory = createAppFactory(mApplicationInfo, mClassLoader);
 
             StrictMode.setThreadPolicy(oldPolicy);
             // Setup the class loader paths for profiling.
             needToSetupJitProfiles = true;
+        }
+
+        if (!libPaths.isEmpty() && SystemProperties.getBoolean(PROPERTY_NAME_APPEND_NATIVE, true)) {
+            // Temporarily disable logging of disk reads on the Looper thread as this is necessary
+            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+            try {
+                ApplicationLoaders.getDefault().addNative(mClassLoader, libPaths);
+            } finally {
+                StrictMode.setThreadPolicy(oldPolicy);
+            }
+        }
+
+        // /vendor/lib, /odm/lib and /product/lib are added to the native lib search
+        // paths of the classloader. Note that this is done AFTER the classloader is
+        // created by ApplicationLoaders.getDefault().getClassLoader(...). The
+        // reason is because if we have added the paths when creating the classloader
+        // above, the paths are also added to the search path of the linker namespace
+        // 'classloader-namespace', which will allow ALL libs in the paths to apps.
+        // Since only the libs listed in <partition>/etc/public.libraries.txt can be
+        // available to apps, we shouldn't add the paths then.
+        //
+        // However, we need to add the paths to the classloader (Java) though. This
+        // is because when a native lib is requested via System.loadLibrary(), the
+        // classloader first tries to find the requested lib in its own native libs
+        // search paths. If a lib is not found in one of the paths, dlopen() is not
+        // called at all. This can cause a problem that a vendor public native lib
+        // is accessible when directly opened via dlopen(), but inaccesible via
+        // System.loadLibrary(). In order to prevent the problem, we explicitly
+        // add the paths only to the classloader, and not to the native loader
+        // (linker namespace).
+        List<String> extraLibPaths = new ArrayList<>(3);
+        String abiSuffix = VMRuntime.getRuntime().is64Bit() ? "64" : "";
+        if (!defaultSearchPaths.contains("/vendor/lib")) {
+            extraLibPaths.add("/vendor/lib" + abiSuffix);
+        }
+        if (!defaultSearchPaths.contains("/odm/lib")) {
+            extraLibPaths.add("/odm/lib" + abiSuffix);
+        }
+        if (!defaultSearchPaths.contains("/product/lib")) {
+            extraLibPaths.add("/product/lib" + abiSuffix);
+        }
+        if (!extraLibPaths.isEmpty()) {
+            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
+            try {
+                ApplicationLoaders.getDefault().addNative(mClassLoader, extraLibPaths);
+            } finally {
+                StrictMode.setThreadPolicy(oldPolicy);
+            }
         }
 
         if (addedPaths != null && addedPaths.size() > 0) {
@@ -944,76 +1026,12 @@ public final class LoadedApk {
                 throw new AssertionError("null split not found");
             }
 
-            mResources = ResourcesManager.getInstance().getResources(
-                    null,
-                    mResDir,
-                    splitPaths,
-                    mOverlayDirs,
-                    mApplicationInfo.sharedLibraryFiles,
-                    Display.DEFAULT_DISPLAY,
-                    null,
-                    getCompatibilityInfo(),
+            mResources = ResourcesManager.getInstance().getResources(null, mResDir,
+                    splitPaths, mOverlayDirs, mApplicationInfo.sharedLibraryFiles,
+                    Display.DEFAULT_DISPLAY, null, getCompatibilityInfo(),
                     getClassLoader());
         }
         return mResources;
-    }
-
-    public Resources getOrCreateResourcesForSplit(@NonNull String splitName,
-            @Nullable IBinder activityToken, int displayId) throws NameNotFoundException {
-        return ResourcesManager.getInstance().getResources(
-                activityToken,
-                mResDir,
-                getSplitPaths(splitName),
-                mOverlayDirs,
-                mApplicationInfo.sharedLibraryFiles,
-                displayId,
-                null,
-                getCompatibilityInfo(),
-                getSplitClassLoader(splitName));
-    }
-
-    /**
-     * Creates the top level resources for the given package. Will return an existing
-     * Resources if one has already been created.
-     */
-    public Resources getOrCreateTopLevelResources(@NonNull ApplicationInfo appInfo) {
-        // Request for this app, short circuit
-        if (appInfo.uid == Process.myUid()) {
-            return getResources();
-        }
-
-        // Get resources for a different package
-        return ResourcesManager.getInstance().getResources(
-                null,
-                appInfo.publicSourceDir,
-                appInfo.splitPublicSourceDirs,
-                appInfo.resourceDirs,
-                appInfo.sharedLibraryFiles,
-                Display.DEFAULT_DISPLAY,
-                null,
-                getCompatibilityInfo(),
-                getClassLoader());
-    }
-
-    public Resources createResources(IBinder activityToken, String splitName,
-            int displayId, Configuration overrideConfig, CompatibilityInfo compatInfo) {
-        final String[] splitResDirs;
-        final ClassLoader classLoader;
-        try {
-            splitResDirs = getSplitPaths(splitName);
-            classLoader = getSplitClassLoader(splitName);
-        } catch (NameNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        return ResourcesManager.getInstance().getResources(activityToken,
-                mResDir,
-                splitResDirs,
-                mOverlayDirs,
-                mApplicationInfo.sharedLibraryFiles,
-                displayId,
-                overrideConfig,
-                compatInfo,
-                classLoader);
     }
 
     public Application makeApplication(boolean forceDefaultAppClass,
@@ -1707,9 +1725,12 @@ public final class LoadedApk {
             if (dead) {
                 mConnection.onBindingDied(name);
             }
-            // If there is a new service, it is now connected.
+            // If there is a new viable service, it is now connected.
             if (service != null) {
                 mConnection.onServiceConnected(name, service);
+            } else {
+                // The binding machinery worked, but the remote returned null from onBind().
+                mConnection.onNullBinding(name);
             }
         }
 

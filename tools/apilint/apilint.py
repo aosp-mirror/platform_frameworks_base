@@ -50,6 +50,18 @@ def format(fg=None, bg=None, bright=False, bold=False, dim=False, reset=False):
     return "\033[%sm" % (";".join(codes))
 
 
+def ident(raw):
+    """Strips superficial signature changes, giving us a strong key that
+    can be used to identify members across API levels."""
+    raw = raw.replace(" deprecated ", " ")
+    raw = raw.replace(" synchronized ", " ")
+    raw = raw.replace(" final ", " ")
+    raw = re.sub("<.+?>", "", raw)
+    if " throws " in raw:
+        raw = raw[:raw.index(" throws ")]
+    return raw
+
+
 class Field():
     def __init__(self, clazz, line, raw, blame):
         self.clazz = clazz
@@ -69,8 +81,10 @@ class Field():
             self.value = raw[3].strip(';"')
         else:
             self.value = None
+        self.ident = ident(self.raw)
 
-        self.ident = self.raw.replace(" deprecated ", " ")
+    def __hash__(self):
+        return hash(self.raw)
 
     def __repr__(self):
         return self.raw
@@ -97,18 +111,15 @@ class Method():
         self.typ = raw[0]
         self.name = raw[1]
         self.args = []
+        self.throws = []
+        target = self.args
         for r in raw[2:]:
-            if r == "throws": break
-            self.args.append(r)
+            if r == "throws": target = self.throws
+            else: target.append(r)
+        self.ident = ident(self.raw)
 
-        # identity for compat purposes
-        ident = self.raw
-        ident = ident.replace(" deprecated ", " ")
-        ident = ident.replace(" synchronized ", " ")
-        ident = re.sub("<.+?>", "", ident)
-        if " throws " in ident:
-            ident = ident[:ident.index(" throws ")]
-        self.ident = ident
+    def __hash__(self):
+        return hash(self.raw)
 
     def __repr__(self):
         return self.raw
@@ -144,6 +155,9 @@ class Class():
         self.fullname_path = self.fullname.split(".")
 
         self.name = self.fullname[self.fullname.rindex(".")+1:]
+
+    def __hash__(self):
+        return hash((self.raw, tuple(self.ctors), tuple(self.fields), tuple(self.methods)))
 
     def __repr__(self):
         return self.raw
@@ -256,6 +270,14 @@ def error(clazz, detail, rule, msg):
     _fail(clazz, detail, True, rule, msg)
 
 
+noticed = {}
+
+def notice(clazz):
+    global noticed
+
+    noticed[clazz.fullname] = hash(clazz)
+
+
 def verify_constants(clazz):
     """All static final constants must be FOO_NAME style."""
     if re.match("android\.R\.[a-z]+", clazz.fullname): return
@@ -290,6 +312,8 @@ def verify_class_names(clazz):
         warn(clazz, None, "S1", "Class names with acronyms should be Mtp not MTP")
     if re.match("[^A-Z]", clazz.name):
         error(clazz, None, "S1", "Class must start with uppercase char")
+    if clazz.name.endswith("Impl"):
+        error(clazz, None, None, "Don't expose your implementation details")
 
 
 def verify_method_names(clazz):
@@ -374,7 +398,7 @@ def verify_actions(clazz):
                         prefix = clazz.pkg.name + ".action"
                     expected = prefix + "." + f.name[7:]
                     if f.value != expected:
-                        error(clazz, f, "C4", "Inconsistent action value; expected %s" % (expected))
+                        error(clazz, f, "C4", "Inconsistent action value; expected '%s'" % (expected))
 
 
 def verify_extras(clazz):
@@ -404,7 +428,7 @@ def verify_extras(clazz):
                         prefix = clazz.pkg.name + ".extra"
                     expected = prefix + "." + f.name[6:]
                     if f.value != expected:
-                        error(clazz, f, "C4", "Inconsistent extra value; expected %s" % (expected))
+                        error(clazz, f, "C4", "Inconsistent extra value; expected '%s'" % (expected))
 
 
 def verify_equals(clazz):
@@ -432,6 +456,10 @@ def verify_parcelable(clazz):
         if ((" final class " not in clazz.raw) and
             (" final deprecated class " not in clazz.raw)):
             error(clazz, None, "FW8", "Parcelable classes must be final")
+
+        for c in clazz.ctors:
+            if c.args == ["android.os.Parcel"]:
+                error(clazz, c, "FW3", "Parcelable inflation is exposed through CREATOR, not raw constructors")
 
 
 def verify_protected(clazz):
@@ -555,7 +583,7 @@ def verify_helper_classes(clazz):
             if f.name == "SERVICE_INTERFACE":
                 found = True
                 if f.value != clazz.fullname:
-                    error(clazz, f, "C4", "Inconsistent interface constant; expected %s" % (clazz.fullname))
+                    error(clazz, f, "C4", "Inconsistent interface constant; expected '%s'" % (clazz.fullname))
 
     if "extends android.content.ContentProvider" in clazz.raw:
         test_methods = True
@@ -567,7 +595,7 @@ def verify_helper_classes(clazz):
             if f.name == "PROVIDER_INTERFACE":
                 found = True
                 if f.value != clazz.fullname:
-                    error(clazz, f, "C4", "Inconsistent interface constant; expected %s" % (clazz.fullname))
+                    error(clazz, f, "C4", "Inconsistent interface constant; expected '%s'" % (clazz.fullname))
 
     if "extends android.content.BroadcastReceiver" in clazz.raw:
         test_methods = True
@@ -747,15 +775,19 @@ def verify_flags(clazz):
 def verify_exception(clazz):
     """Verifies that methods don't throw generic exceptions."""
     for m in clazz.methods:
-        if "throws java.lang.Exception" in m.raw or "throws java.lang.Throwable" in m.raw or "throws java.lang.Error" in m.raw:
-            error(clazz, m, "S1", "Methods must not throw generic exceptions")
+        for t in m.throws:
+            if t in ["java.lang.Exception", "java.lang.Throwable", "java.lang.Error"]:
+                error(clazz, m, "S1", "Methods must not throw generic exceptions")
 
-        if "throws android.os.RemoteException" in m.raw:
-            if clazz.name == "android.content.ContentProviderClient": continue
-            if clazz.name == "android.os.Binder": continue
-            if clazz.name == "android.os.IBinder": continue
+            if t in ["android.os.RemoteException"]:
+                if clazz.name == "android.content.ContentProviderClient": continue
+                if clazz.name == "android.os.Binder": continue
+                if clazz.name == "android.os.IBinder": continue
 
-            error(clazz, m, "FW9", "Methods calling into system server should rethrow RemoteException as RuntimeException")
+                error(clazz, m, "FW9", "Methods calling into system server should rethrow RemoteException as RuntimeException")
+
+            if len(m.args) == 0 and t in ["java.lang.IllegalArgumentException", "java.lang.NullPointerException"]:
+                warn(clazz, m, "S1", "Methods taking no arguments should throw IllegalStateException")
 
 
 def verify_google(clazz):
@@ -910,7 +942,8 @@ def verify_callback_handlers(clazz):
 
     found = {}
     by_name = collections.defaultdict(list)
-    for m in clazz.methods:
+    examine = clazz.ctors + clazz.methods
+    for m in examine:
         if m.name.startswith("unregister"): continue
         if m.name.startswith("remove"): continue
         if re.match("on[A-Z]+", m.name): continue
@@ -923,11 +956,14 @@ def verify_callback_handlers(clazz):
 
     for f in found.values():
         takes_handler = False
+        takes_exec = False
         for m in by_name[f.name]:
             if "android.os.Handler" in m.args:
                 takes_handler = True
-        if not takes_handler:
-            warn(clazz, f, "L1", "Registration methods should have overload that accepts delivery Handler")
+            if "java.util.concurrent.Executor" in m.args:
+                takes_exec = True
+        if not takes_exec:
+            warn(clazz, f, "L1", "Registration methods should have overload that accepts delivery Executor")
 
 
 def verify_context_first(clazz):
@@ -951,7 +987,7 @@ def verify_listener_last(clazz):
         for a in m.args:
             if a.endswith("Callback") or a.endswith("Callbacks") or a.endswith("Listener"):
                 found = True
-            elif found and a != "android.os.Handler":
+            elif found:
                 warn(clazz, m, "M3", "Listeners should always be at end of argument list")
 
 
@@ -1058,16 +1094,11 @@ def verify_runtime_exceptions(clazz):
         "java.nio.BufferOverflowException",
     ]
 
-    test = []
-    test.extend(clazz.ctors)
-    test.extend(clazz.methods)
-
-    for t in test:
-        if " throws " not in t.raw: continue
-        throws = t.raw[t.raw.index(" throws "):]
-        for b in banned:
-            if b in throws:
-                error(clazz, t, None, "Methods must not mention RuntimeException subclasses in throws clauses")
+    examine = clazz.ctors + clazz.methods
+    for m in examine:
+        for t in m.throws:
+            if t in banned:
+                error(clazz, m, None, "Methods must not mention RuntimeException subclasses in throws clauses")
 
 
 def verify_error(clazz):
@@ -1127,8 +1158,187 @@ def verify_closable(clazz):
             return
 
 
+def verify_member_name_not_kotlin_keyword(clazz):
+    """Prevent method names which are keywords in Kotlin."""
+
+    # https://kotlinlang.org/docs/reference/keyword-reference.html#hard-keywords
+    # This list does not include Java keywords as those are already impossible to use.
+    keywords = [
+        'as',
+        'fun',
+        'in',
+        'is',
+        'object',
+        'typealias',
+        'val',
+        'var',
+        'when',
+    ]
+
+    for m in clazz.methods:
+        if m.name in keywords:
+            error(clazz, m, None, "Method name must not be a Kotlin keyword")
+    for f in clazz.fields:
+        if f.name in keywords:
+            error(clazz, f, None, "Field name must not be a Kotlin keyword")
+
+
+def verify_method_name_not_kotlin_operator(clazz):
+    """Warn about method names which become operators in Kotlin."""
+
+    binary = set()
+
+    def unique_binary_op(m, op):
+        if op in binary:
+            error(clazz, m, None, "Only one of '{0}' and '{0}Assign' methods should be present for Kotlin".format(op))
+        binary.add(op)
+
+    for m in clazz.methods:
+        if 'static' in m.split:
+            continue
+
+        # https://kotlinlang.org/docs/reference/operator-overloading.html#unary-prefix-operators
+        if m.name in ['unaryPlus', 'unaryMinus', 'not'] and len(m.args) == 0:
+            warn(clazz, m, None, "Method can be invoked as a unary operator from Kotlin")
+
+        # https://kotlinlang.org/docs/reference/operator-overloading.html#increments-and-decrements
+        if m.name in ['inc', 'dec'] and len(m.args) == 0 and m.typ != 'void':
+            # This only applies if the return type is the same or a subtype of the enclosing class, but we have no
+            # practical way of checking that relationship here.
+            warn(clazz, m, None, "Method can be invoked as a pre/postfix inc/decrement operator from Kotlin")
+
+        # https://kotlinlang.org/docs/reference/operator-overloading.html#arithmetic
+        if m.name in ['plus', 'minus', 'times', 'div', 'rem', 'mod', 'rangeTo'] and len(m.args) == 1:
+            warn(clazz, m, None, "Method can be invoked as a binary operator from Kotlin")
+            unique_binary_op(m, m.name)
+
+        # https://kotlinlang.org/docs/reference/operator-overloading.html#in
+        if m.name == 'contains' and len(m.args) == 1 and m.typ == 'boolean':
+            warn(clazz, m, None, "Method can be invoked as a 'in' operator from Kotlin")
+
+        # https://kotlinlang.org/docs/reference/operator-overloading.html#indexed
+        if (m.name == 'get' and len(m.args) > 0) or (m.name == 'set' and len(m.args) > 1):
+            warn(clazz, m, None, "Method can be invoked with an indexing operator from Kotlin")
+
+        # https://kotlinlang.org/docs/reference/operator-overloading.html#invoke
+        if m.name == 'invoke':
+            warn(clazz, m, None, "Method can be invoked with function call syntax from Kotlin")
+
+        # https://kotlinlang.org/docs/reference/operator-overloading.html#assignments
+        if m.name in ['plusAssign', 'minusAssign', 'timesAssign', 'divAssign', 'remAssign', 'modAssign'] \
+                and len(m.args) == 1 \
+                and m.typ == 'void':
+            warn(clazz, m, None, "Method can be invoked as a compound assignment operator from Kotlin")
+            unique_binary_op(m, m.name[:-6])  # Remove 'Assign' suffix
+
+
+def verify_collections_over_arrays(clazz):
+    """Warn that [] should be Collections."""
+
+    safe = ["java.lang.String[]","byte[]","short[]","int[]","long[]","float[]","double[]","boolean[]","char[]"]
+    for m in clazz.methods:
+        if m.typ.endswith("[]") and m.typ not in safe:
+            warn(clazz, m, None, "Method should return Collection<> (or subclass) instead of raw array")
+        for arg in m.args:
+            if arg.endswith("[]") and arg not in safe:
+                warn(clazz, m, None, "Method argument should be Collection<> (or subclass) instead of raw array")
+
+
+def verify_user_handle(clazz):
+    """Methods taking UserHandle should be ForUser or AsUser."""
+    if clazz.name.endswith("Listener") or clazz.name.endswith("Callback") or clazz.name.endswith("Callbacks"): return
+    if clazz.fullname == "android.app.admin.DeviceAdminReceiver": return
+    if clazz.fullname == "android.content.pm.LauncherApps": return
+    if clazz.fullname == "android.os.UserHandle": return
+    if clazz.fullname == "android.os.UserManager": return
+
+    for m in clazz.methods:
+        if m.name.endswith("AsUser") or m.name.endswith("ForUser"): continue
+        if re.match("on[A-Z]+", m.name): continue
+        if "android.os.UserHandle" in m.args:
+            warn(clazz, m, None, "Method taking UserHandle should be named 'doFooAsUser' or 'queryFooForUser'")
+
+
+def verify_params(clazz):
+    """Parameter classes should be 'Params'."""
+    if clazz.name.endswith("Params"): return
+    if clazz.fullname == "android.app.ActivityOptions": return
+    if clazz.fullname == "android.app.BroadcastOptions": return
+    if clazz.fullname == "android.os.Bundle": return
+    if clazz.fullname == "android.os.BaseBundle": return
+    if clazz.fullname == "android.os.PersistableBundle": return
+
+    bad = ["Param","Parameter","Parameters","Args","Arg","Argument","Arguments","Options","Bundle"]
+    for b in bad:
+        if clazz.name.endswith(b):
+            error(clazz, None, None, "Classes holding a set of parameters should be called 'FooParams'")
+
+
+def verify_services(clazz):
+    """Service name should be FOO_BAR_SERVICE = 'foo_bar'."""
+    if clazz.fullname != "android.content.Context": return
+
+    for f in clazz.fields:
+        if f.typ != "java.lang.String": continue
+        found = re.match(r"([A-Z_]+)_SERVICE", f.name)
+        if found:
+            expected = found.group(1).lower()
+            if f.value != expected:
+                error(clazz, f, "C4", "Inconsistent service value; expected '%s'" % (expected))
+
+
+def verify_tense(clazz):
+    """Verify tenses of method names."""
+    if clazz.fullname.startswith("android.opengl"): return
+
+    for m in clazz.methods:
+        if m.name.endswith("Enable"):
+            warn(clazz, m, None, "Unexpected tense; probably meant 'enabled'")
+
+
+def verify_icu(clazz):
+    """Verifies that richer ICU replacements are used."""
+    better = {
+        "java.util.TimeZone": "android.icu.util.TimeZone",
+        "java.util.Calendar": "android.icu.util.Calendar",
+        "java.util.Locale": "android.icu.util.ULocale",
+        "java.util.ResourceBundle": "android.icu.util.UResourceBundle",
+        "java.util.SimpleTimeZone": "android.icu.util.SimpleTimeZone",
+        "java.util.StringTokenizer": "android.icu.util.StringTokenizer",
+        "java.util.GregorianCalendar": "android.icu.util.GregorianCalendar",
+        "java.lang.Character": "android.icu.lang.UCharacter",
+        "java.text.BreakIterator": "android.icu.text.BreakIterator",
+        "java.text.Collator": "android.icu.text.Collator",
+        "java.text.DecimalFormatSymbols": "android.icu.text.DecimalFormatSymbols",
+        "java.text.NumberFormat": "android.icu.text.NumberFormat",
+        "java.text.DateFormatSymbols": "android.icu.text.DateFormatSymbols",
+        "java.text.DateFormat": "android.icu.text.DateFormat",
+        "java.text.SimpleDateFormat": "android.icu.text.SimpleDateFormat",
+        "java.text.MessageFormat": "android.icu.text.MessageFormat",
+        "java.text.DecimalFormat": "android.icu.text.DecimalFormat",
+    }
+
+    for m in clazz.ctors + clazz.methods:
+        types = []
+        types.extend(m.typ)
+        types.extend(m.args)
+        for arg in types:
+            if arg in better:
+                warn(clazz, m, None, "Type %s should be replaced with richer ICU type %s" % (arg, better[arg]))
+
+
+def verify_clone(clazz):
+    """Verify that clone() isn't implemented; see EJ page 61."""
+    for m in clazz.methods:
+        if m.name == "clone":
+            error(clazz, m, None, "Provide an explicit copy constructor instead of implementing clone()")
+
+
 def examine_clazz(clazz):
     """Find all style issues in the given class."""
+
+    notice(clazz)
+
     if clazz.pkg.name.startswith("java"): return
     if clazz.pkg.name.startswith("junit"): return
     if clazz.pkg.name.startswith("org.apache"): return
@@ -1166,7 +1376,7 @@ def examine_clazz(clazz):
     verify_manager(clazz)
     verify_boxed(clazz)
     verify_static_utils(clazz)
-    verify_overload_args(clazz)
+    # verify_overload_args(clazz)
     verify_callback_handlers(clazz)
     verify_context_first(clazz)
     verify_listener_last(clazz)
@@ -1178,14 +1388,24 @@ def examine_clazz(clazz):
     verify_error(clazz)
     verify_units(clazz)
     verify_closable(clazz)
+    verify_member_name_not_kotlin_keyword(clazz)
+    verify_method_name_not_kotlin_operator(clazz)
+    verify_collections_over_arrays(clazz)
+    verify_user_handle(clazz)
+    verify_params(clazz)
+    verify_services(clazz)
+    verify_tense(clazz)
+    verify_icu(clazz)
+    verify_clone(clazz)
 
 
 def examine_stream(stream):
     """Find all style issues in the given API stream."""
-    global failures
+    global failures, noticed
     failures = {}
+    noticed = {}
     _parse_stream(stream, examine_clazz)
-    return failures
+    return (failures, noticed)
 
 
 def examine_api(api):
@@ -1252,6 +1472,40 @@ def verify_compat(cur, prev):
     return failures
 
 
+def show_deprecations_at_birth(cur, prev):
+    """Show API deprecations at birth."""
+    global failures
+
+    # Remove all existing things so we're left with new
+    for prev_clazz in prev.values():
+        cur_clazz = cur[prev_clazz.fullname]
+
+        sigs = { i.ident: i for i in prev_clazz.ctors }
+        cur_clazz.ctors = [ i for i in cur_clazz.ctors if i.ident not in sigs ]
+        sigs = { i.ident: i for i in prev_clazz.methods }
+        cur_clazz.methods = [ i for i in cur_clazz.methods if i.ident not in sigs ]
+        sigs = { i.ident: i for i in prev_clazz.fields }
+        cur_clazz.fields = [ i for i in cur_clazz.fields if i.ident not in sigs ]
+
+        # Forget about class entirely when nothing new
+        if len(cur_clazz.ctors) == 0 and len(cur_clazz.methods) == 0 and len(cur_clazz.fields) == 0:
+            del cur[prev_clazz.fullname]
+
+    for clazz in cur.values():
+        if " deprecated " in clazz.raw and not clazz.fullname in prev:
+            error(clazz, None, None, "Found API deprecation at birth")
+
+        for i in clazz.ctors + clazz.methods + clazz.fields:
+            if " deprecated " in i.raw:
+                error(clazz, i, None, "Found API deprecation at birth")
+
+    print "%s Deprecated at birth %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True),
+                                            format(reset=True)))
+    for f in sorted(failures):
+        print failures[f]
+        print
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Enforces common Android public API design \
             patterns. It ignores lint messages from a previous API level, if provided.")
@@ -1262,6 +1516,10 @@ if __name__ == "__main__":
             help="Disable terminal colors")
     parser.add_argument("--allow-google", action='store_const', const=True,
             help="Allow references to Google")
+    parser.add_argument("--show-noticed", action='store_const', const=True,
+            help="Show API changes noticed")
+    parser.add_argument("--show-deprecations-at-birth", action='store_const', const=True,
+            help="Show API deprecations at birth")
     args = vars(parser.parse_args())
 
     if args['no_color']:
@@ -1273,16 +1531,29 @@ if __name__ == "__main__":
     current_file = args['current.txt']
     previous_file = args['previous.txt']
 
+    if args['show_deprecations_at_birth']:
+        with current_file as f:
+            cur = _parse_stream(f)
+        with previous_file as f:
+            prev = _parse_stream(f)
+        show_deprecations_at_birth(cur, prev)
+        sys.exit()
+
     with current_file as f:
-        cur_fail = examine_stream(f)
+        cur_fail, cur_noticed = examine_stream(f)
     if not previous_file is None:
         with previous_file as f:
-            prev_fail = examine_stream(f)
+            prev_fail, prev_noticed = examine_stream(f)
 
         # ignore errors from previous API level
         for p in prev_fail:
             if p in cur_fail:
                 del cur_fail[p]
+
+        # ignore classes unchanged from previous API level
+        for k, v in prev_noticed.iteritems():
+            if k in cur_noticed and v == cur_noticed[k]:
+                del cur_noticed[k]
 
         """
         # NOTE: disabled because of memory pressure
@@ -1295,7 +1566,15 @@ if __name__ == "__main__":
             print
         """
 
-    print "%s API style issues %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True), format(reset=True)))
-    for f in sorted(cur_fail):
-        print cur_fail[f]
+    if args['show_noticed'] and len(cur_noticed) != 0:
+        print "%s API changes noticed %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True), format(reset=True)))
+        for f in sorted(cur_noticed.keys()):
+            print f
         print
+
+    if len(cur_fail) != 0:
+        print "%s API style issues %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True), format(reset=True)))
+        for f in sorted(cur_fail):
+            print cur_fail[f]
+            print
+        sys.exit(77)

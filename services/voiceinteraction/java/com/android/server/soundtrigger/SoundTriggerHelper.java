@@ -37,12 +37,12 @@ import android.hardware.soundtrigger.SoundTriggerModule;
 import android.os.Binder;
 import android.os.DeadObjectException;
 import android.os.PowerManager;
+import android.os.PowerManager.ServiceType;
 import android.os.RemoteException;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
 import com.android.internal.logging.MetricsLogger;
-import com.android.server.power.BatterySaverPolicy.ServiceType;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -828,7 +828,12 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     // internalClearGlobalStateLocked() cleans up the telephony and power save listeners.
     private void internalClearGlobalStateLocked() {
         // Unregister from call state changes.
-        mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
+        long token = Binder.clearCallingIdentity();
+        try {
+            mTelephonyManager.listen(mPhoneStateListener, PhoneStateListener.LISTEN_NONE);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
 
         // Unregister from power save mode changes.
         if (mPowerSaveModeListener != null) {

@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.NonNull;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.usage.UsageStatsManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -75,6 +76,7 @@ import android.widget.Space;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.ResolverActivity;
 import com.android.internal.app.ResolverActivity.TargetInfo;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -389,6 +391,10 @@ public class ChooserActivity extends ResolverActivity {
 
     @Override
     public void showTargetDetails(ResolveInfo ri) {
+        if (ri == null) {
+            return;
+        }
+
         ComponentName name = ri.activityInfo.getComponentName();
         boolean pinned = mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
         ResolverTargetActionsDialogFragment f =
@@ -927,14 +933,16 @@ public class ChooserActivity extends ResolverActivity {
         public static final int TARGET_SERVICE = 1;
         public static final int TARGET_STANDARD = 2;
 
-        private static final int MAX_SERVICE_TARGETS = 8;
-        private static final int MAX_TARGETS_PER_SERVICE = 4;
+        private static final int MAX_SERVICE_TARGETS = 4;
+        private static final int MAX_TARGETS_PER_SERVICE = 2;
 
         private final List<ChooserTargetInfo> mServiceTargets = new ArrayList<>();
         private final List<TargetInfo> mCallerTargets = new ArrayList<>();
         private boolean mShowServiceTargets;
 
         private float mLateFee = 1.f;
+
+        private boolean mTargetsNeedPruning = false;
 
         private final BaseChooserTargetComparator mBaseTargetComparator
                 = new BaseChooserTargetComparator();
@@ -1018,8 +1026,19 @@ public class ChooserActivity extends ResolverActivity {
 
         @Override
         public void onListRebuilt() {
+            // don't support direct share on low ram devices
+            if (ActivityManager.isLowRamDeviceStatic()) {
+                return;
+            }
+
             if (mServiceTargets != null) {
-                pruneServiceTargets();
+                if (getDisplayInfoCount() == 0) {
+                    // b/109676071: When packages change, onListRebuilt() is called before
+                    // ResolverActivity.mDisplayList is re-populated; pruning now would cause the
+                    // list to disappear briefly, so instead we detect this case (the
+                    // set of targets suddenly dropping to zero) and remember to prune later.
+                    mTargetsNeedPruning = true;
+                }
             }
             if (DEBUG) Log.d(TAG, "List built querying services");
             queryTargetServices(this);
@@ -1106,6 +1125,14 @@ public class ChooserActivity extends ResolverActivity {
         public void addServiceResults(DisplayResolveInfo origTarget, List<ChooserTarget> targets) {
             if (DEBUG) Log.d(TAG, "addServiceResults " + origTarget + ", " + targets.size()
                     + " targets");
+
+            if (mTargetsNeedPruning && targets.size() > 0) {
+                // First proper update since we got an onListRebuilt() with (transient) 0 items.
+                // Clear out the target list and rebuild.
+                mServiceTargets.clear();
+                mTargetsNeedPruning = false;
+            }
+
             final float parentScore = getScore(origTarget);
             Collections.sort(targets, mBaseTargetComparator);
             float lastScore = 0;
@@ -1158,17 +1185,6 @@ public class ChooserActivity extends ResolverActivity {
             }
             mServiceTargets.add(chooserTargetInfo);
         }
-
-        private void pruneServiceTargets() {
-            if (DEBUG) Log.d(TAG, "pruneServiceTargets");
-            for (int i = mServiceTargets.size() - 1; i >= 0; i--) {
-                final ChooserTargetInfo cti = mServiceTargets.get(i);
-                if (!hasResolvedTarget(cti.getResolveInfo())) {
-                    if (DEBUG) Log.d(TAG, " => " + i + " " + cti);
-                    mServiceTargets.remove(i);
-                }
-            }
-        }
     }
 
     static class BaseChooserTargetComparator implements Comparator<ChooserTarget> {
@@ -1179,123 +1195,20 @@ public class ChooserActivity extends ResolverActivity {
         }
     }
 
-    static class RowScale {
-        private static final int DURATION = 400;
-
-        float mScale;
-        ChooserRowAdapter mAdapter;
-        private final ObjectAnimator mAnimator;
-
-        public static final FloatProperty<RowScale> PROPERTY =
-                new FloatProperty<RowScale>("scale") {
-            @Override
-            public void setValue(RowScale object, float value) {
-                object.mScale = value;
-                object.mAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public Float get(RowScale object) {
-                return object.mScale;
-            }
-        };
-
-        public RowScale(@NonNull ChooserRowAdapter adapter, float from, float to) {
-            mAdapter = adapter;
-            mScale = from;
-            if (from == to) {
-                mAnimator = null;
-                return;
-            }
-
-            mAnimator = ObjectAnimator.ofFloat(this, PROPERTY, from, to)
-                .setDuration(DURATION);
-            mAnimator.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    mAdapter.onAnimationStart();
-                }
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mAdapter.onAnimationEnd();
-                }
-            });
-        }
-
-        public RowScale setInterpolator(Interpolator interpolator) {
-            if (mAnimator != null) {
-                mAnimator.setInterpolator(interpolator);
-            }
-            return this;
-        }
-
-        public float get() {
-            return mScale;
-        }
-
-        public void startAnimation() {
-            if (mAnimator != null) {
-                mAnimator.start();
-            }
-        }
-
-        public void cancelAnimation() {
-            if (mAnimator != null) {
-                mAnimator.cancel();
-            }
-        }
-    }
-
     class ChooserRowAdapter extends BaseAdapter {
         private ChooserListAdapter mChooserListAdapter;
         private final LayoutInflater mLayoutInflater;
         private final int mColumnCount = 4;
-        private RowScale[] mServiceTargetScale;
-        private final Interpolator mInterpolator;
         private int mAnimationCount = 0;
 
         public ChooserRowAdapter(ChooserListAdapter wrappedAdapter) {
             mChooserListAdapter = wrappedAdapter;
             mLayoutInflater = LayoutInflater.from(ChooserActivity.this);
 
-            mInterpolator = AnimationUtils.loadInterpolator(ChooserActivity.this,
-                    android.R.interpolator.decelerate_quint);
-
             wrappedAdapter.registerDataSetObserver(new DataSetObserver() {
                 @Override
                 public void onChanged() {
                     super.onChanged();
-                    final int rcount = getServiceTargetRowCount();
-                    if (mServiceTargetScale == null
-                            || mServiceTargetScale.length != rcount) {
-                        RowScale[] old = mServiceTargetScale;
-                        int oldRCount = old != null ? old.length : 0;
-                        mServiceTargetScale = new RowScale[rcount];
-                        if (old != null && rcount > 0) {
-                            System.arraycopy(old, 0, mServiceTargetScale, 0,
-                                    Math.min(old.length, rcount));
-                        }
-
-                        for (int i = rcount; i < oldRCount; i++) {
-                            old[i].cancelAnimation();
-                        }
-
-                        for (int i = oldRCount; i < rcount; i++) {
-                            final RowScale rs = new RowScale(ChooserRowAdapter.this, 0.f, 1.f)
-                                    .setInterpolator(mInterpolator);
-                            mServiceTargetScale[i] = rs;
-                        }
-
-                        // Start the animations in a separate loop.
-                        // The process of starting animations will result in
-                        // binding views to set up initial values, and we must
-                        // have ALL of the new RowScale objects created above before
-                        // we get started.
-                        for (int i = oldRCount; i < rcount; i++) {
-                            mServiceTargetScale[i].startAnimation();
-                        }
-                    }
-
                     notifyDataSetChanged();
                 }
 
@@ -1303,37 +1216,8 @@ public class ChooserActivity extends ResolverActivity {
                 public void onInvalidated() {
                     super.onInvalidated();
                     notifyDataSetInvalidated();
-                    if (mServiceTargetScale != null) {
-                        for (RowScale rs : mServiceTargetScale) {
-                            rs.cancelAnimation();
-                        }
-                    }
                 }
             });
-        }
-
-        private float getRowScale(int rowPosition) {
-            final int start = getCallerTargetRowCount();
-            final int end = start + getServiceTargetRowCount();
-            if (rowPosition >= start && rowPosition < end) {
-                return mServiceTargetScale[rowPosition - start].get();
-            }
-            return 1.f;
-        }
-
-        public void onAnimationStart() {
-            final boolean lock = mAnimationCount == 0;
-            mAnimationCount++;
-            if (lock) {
-                mResolverDrawerLayout.setDismissLocked(true);
-            }
-        }
-
-        public void onAnimationEnd() {
-            mAnimationCount--;
-            if (mAnimationCount == 0) {
-                mResolverDrawerLayout.setDismissLocked(false);
-            }
         }
 
         @Override
@@ -1350,9 +1234,9 @@ public class ChooserActivity extends ResolverActivity {
                     (float) mChooserListAdapter.getCallerTargetCount() / mColumnCount);
         }
 
+        // There can be at most one row of service targets.
         public int getServiceTargetRowCount() {
-            return (int) Math.ceil(
-                    (float) mChooserListAdapter.getServiceTargetCount() / mColumnCount);
+            return (int) mChooserListAdapter.getServiceTargetCount() == 0 ? 0 : 1;
         }
 
         @Override
@@ -1475,8 +1359,7 @@ public class ChooserActivity extends ResolverActivity {
             }
 
             final int oldHeight = holder.row.getLayoutParams().height;
-            holder.row.getLayoutParams().height = Math.max(1,
-                    (int) (holder.measuredRowHeight * getRowScale(rowPosition)));
+            holder.row.getLayoutParams().height = Math.max(1, holder.measuredRowHeight);
             if (holder.row.getLayoutParams().height != oldHeight) {
                 holder.row.requestLayout();
             }
@@ -1718,7 +1601,7 @@ public class ChooserActivity extends ResolverActivity {
                 final View v = mChooserRowAdapter.getView(pos, mCachedView, mListView);
                 int height = ((RowViewHolder) (v.getTag())).measuredRowHeight;
 
-                offset += (int) (height * mChooserRowAdapter.getRowScale(pos));
+                offset += (int) (height);
 
                 if (vt >= 0) {
                     mCachedViewType = vt;

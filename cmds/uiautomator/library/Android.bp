@@ -21,7 +21,7 @@ droiddoc {
     libs: [
         "android.test.runner",
         "junit",
-        "legacy-android-test",
+        "android.test.base",
     ],
     custom_template: "droiddoc-templates-sdk",
     installable: false,
@@ -51,9 +51,9 @@ java_library_static {
     ],
     libs: [
         "android.test.runner",
+        "android.test.base",
     ],
     static_libs: [
         "junit",
-        "legacy-android-test",
     ]
 }

@@ -16,19 +16,28 @@
 
 package com.android.server.pm;
 
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageStats;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.test.AndroidTestCase;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.util.Arrays;
 
-public class InstallerTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class InstallerTest {
     private static final String TAG = "InstallerTest";
 
     private Installer mInstaller;
@@ -64,7 +73,7 @@ public class InstallerTest extends AndroidTestCase {
         }
     }
 
-    @Override
+    @Before
     public void setUp() throws Exception {
         mInstaller = new Installer(getContext());
         mInstaller.onStart();
@@ -72,13 +81,15 @@ public class InstallerTest extends AndroidTestCase {
         mQuota.reset();
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         Log.i(TAG, mManual.toString());
         Log.i(TAG, mQuota.toString());
         mInstaller = null;
     }
 
+    @Test
+    @Ignore("b/68819006")
     public void testGetAppSize() throws Exception {
         int[] appIds = null;
 
@@ -119,6 +130,8 @@ public class InstallerTest extends AndroidTestCase {
         }
     }
 
+    @Test
+    @Ignore("b/68819006")
     public void testGetUserSize() throws Exception {
         final int[] appIds = getAppIds(UserHandle.USER_SYSTEM);
 
@@ -138,6 +151,8 @@ public class InstallerTest extends AndroidTestCase {
         checkEquals(Arrays.toString(appIds), stats, quotaStats);
     }
 
+    @Test
+    @Ignore("b/68819006")
     public void testGetExternalSize() throws Exception {
         final int[] appIds = getAppIds(UserHandle.USER_SYSTEM);
 
@@ -165,6 +180,10 @@ public class InstallerTest extends AndroidTestCase {
             }
         }
         return appIds;
+    }
+
+    private static Context getContext() {
+        return InstrumentationRegistry.getContext();
     }
 
     private static void checkEquals(String msg, PackageStats a, PackageStats b) {

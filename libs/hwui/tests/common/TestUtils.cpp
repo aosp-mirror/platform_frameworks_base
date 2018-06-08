@@ -16,16 +16,17 @@
 
 #include "TestUtils.h"
 
-#include "hwui/Paint.h"
 #include "DeferredLayerUpdater.h"
+#include "hwui/Paint.h"
 
-#include <renderthread/EglManager.h>
-#include <renderthread/OpenGLPipeline.h>
+#include <SkClipStack.h>
+#include <minikin/Layout.h>
 #include <pipeline/skia/SkiaOpenGLPipeline.h>
 #include <pipeline/skia/SkiaVulkanPipeline.h>
+#include <renderthread/EglManager.h>
+#include <renderthread/OpenGLPipeline.h>
 #include <renderthread/VulkanManager.h>
 #include <utils/Unicode.h>
-#include <SkClipStack.h>
 
 #include <SkGlyphCache.h>
 
@@ -43,10 +44,10 @@ SkColor TestUtils::interpolateColor(float fraction, SkColor start, SkColor end) 
     int endG = (end >> 8) & 0xff;
     int endB = end & 0xff;
 
-    return (int)((startA + (int)(fraction * (endA - startA))) << 24)
-            | (int)((startR + (int)(fraction * (endR - startR))) << 16)
-            | (int)((startG + (int)(fraction * (endG - startG))) << 8)
-            | (int)((startB + (int)(fraction * (endB - startB))));
+    return (int)((startA + (int)(fraction * (endA - startA))) << 24) |
+           (int)((startR + (int)(fraction * (endR - startR))) << 16) |
+           (int)((startG + (int)(fraction * (endG - startG))) << 8) |
+           (int)((startB + (int)(fraction * (endB - startB))));
 }
 
 sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
@@ -74,17 +75,18 @@ sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
     layerUpdater->setTransform(&transform);
 
     // updateLayer so it's ready to draw
-    layerUpdater->updateLayer(true, Matrix4::identity().data);
+    layerUpdater->updateLayer(true, Matrix4::identity().data, HAL_DATASPACE_UNKNOWN);
     if (layerUpdater->backingLayer()->getApi() == Layer::Api::OpenGL) {
-        static_cast<GlLayer*>(layerUpdater->backingLayer())->setRenderTarget(
-                GL_TEXTURE_EXTERNAL_OES);
+        static_cast<GlLayer*>(layerUpdater->backingLayer())
+                ->setRenderTarget(GL_TEXTURE_EXTERNAL_OES);
     }
     return layerUpdater;
 }
 
 void TestUtils::layoutTextUnscaled(const SkPaint& paint, const char* text,
-        std::vector<glyph_t>* outGlyphs, std::vector<float>* outPositions,
-        float* outTotalAdvance, Rect* outBounds) {
+                                   std::vector<glyph_t>* outGlyphs,
+                                   std::vector<float>* outPositions, float* outTotalAdvance,
+                                   Rect* outBounds) {
     Rect bounds;
     float totalAdvance = 0;
     SkSurfaceProps surfaceProps(0, kUnknown_SkPixelGeometry);
@@ -117,17 +119,22 @@ void TestUtils::layoutTextUnscaled(const SkPaint& paint, const char* text,
     *outTotalAdvance = totalAdvance;
 }
 
-
-void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text,
-        const SkPaint& paint, float x, float y) {
+void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint, float x,
+                                 float y) {
     auto utf16 = asciiToUtf16(text);
-    canvas->drawText(utf16.get(), 0, strlen(text), strlen(text), x, y, 0, paint, nullptr);
+    SkPaint glyphPaint(paint);
+    glyphPaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+    canvas->drawText(utf16.get(), 0, strlen(text), strlen(text), x, y, minikin::Bidi::LTR,
+            glyphPaint, nullptr, nullptr /* measured text */);
 }
 
-void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text,
-        const SkPaint& paint, const SkPath& path) {
+void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint,
+                                 const SkPath& path) {
     auto utf16 = asciiToUtf16(text);
-    canvas->drawTextOnPath(utf16.get(), strlen(text), 0, path, 0, 0, paint, nullptr);
+    SkPaint glyphPaint(paint);
+    glyphPaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+    canvas->drawTextOnPath(utf16.get(), strlen(text), minikin::Bidi::LTR, path, 0, 0, glyphPaint,
+            nullptr);
 }
 
 void TestUtils::TestTask::run() {

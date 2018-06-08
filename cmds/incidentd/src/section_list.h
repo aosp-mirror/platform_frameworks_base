@@ -13,16 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
 #ifndef SECTION_LIST_H
 #define SECTION_LIST_H
 
+#include <log/log_event_list.h>  // include log_id_t enums.
+
+#include "Privacy.h"
 #include "Section.h"
+
+namespace android {
+namespace os {
+namespace incidentd {
 
 /**
  * This is the mapping of section IDs to the commands that are run to get those commands.
+ * The section IDs are guaranteed in ascending order, NULL-terminated.
  */
 extern const Section* SECTION_LIST[];
 
-#endif // SECTION_LIST_H
+/**
+ * This is the mapping of section IDs to each section's privacy policy.
+ * The section IDs are guaranteed in ascending order, not NULL-terminated since size is provided.
+ */
+extern const Privacy** PRIVACY_POLICY_LIST;
 
+extern const int PRIVACY_POLICY_COUNT;
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android
+
+#endif  // SECTION_LIST_H

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2018, Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+
+<ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/harmful_app_padding_top"
+            android:orientation="vertical">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/harmful_app_name_padding_bottom"
+                android:paddingLeft="@dimen/harmful_app_name_padding_left"
+                android:paddingRight="@dimen/harmful_app_name_padding_right"
+                android:paddingTop="@dimen/harmful_app_name_padding_top"
+                android:orientation="horizontal">
+
+            <ImageView
+                    android:layout_width="@dimen/harmful_app_icon_size"
+                    android:layout_height="@dimen/harmful_app_icon_size"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/red_shield"/>
+
+            <TextView
+                    android:id="@+id/app_name_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/primary_text_material_light"
+                    android:textSize="@dimen/text_size_subhead_material"
+                    android:paddingLeft="@dimen/harmful_app_icon_name_padding">
+            </TextView>
+        </LinearLayout>
+
+        <TextView
+                android:id="@+id/message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="@dimen/harmful_app_message_padding_left"
+                android:paddingRight="@dimen/harmful_app_message_padding_right"
+                android:paddingBottom="@dimen/harmful_app_message_padding_bottom"
+                android:lineSpacingMultiplier="@dimen/harmful_app_message_line_spacing_modifier"
+                android:textSize="@dimen/text_size_body_1_material"/>
+    </LinearLayout>
+</ScrollView>

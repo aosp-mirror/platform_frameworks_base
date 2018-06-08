@@ -92,6 +92,15 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".TrivialAnimationActivityWideGamut"
+            android:label="General/Trivial Animation (Wide Gamut)"
+            android:colorMode="wideColorGamut">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".TrivialListActivity"
             android:label="General/Trivial ListView" >
             <intent-filter>
@@ -200,6 +209,36 @@
                 <category android:name="com.android.test.uibench.TEST" />
             </intent-filter>
         </activity>
+
+        <activity-alias
+            android:name=".InflatingEmojiListActivity"
+            android:label="Inflation/Inflating ListView with Emoji"
+            android:targetActivity=".InflatingListActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".InflatingHanListActivity"
+            android:label="Inflation/Inflating ListView with Han Characters"
+            android:targetActivity=".InflatingListActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".InflatingLongStringListActivity"
+            android:label="Inflation/Inflating ListView with long string"
+            android:targetActivity=".InflatingListActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.android.test.uibench.TEST" />
+            </intent-filter>
+        </activity-alias>
 
         <!-- Text -->
         <activity

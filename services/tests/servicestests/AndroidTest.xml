@@ -14,15 +14,21 @@
      limitations under the License.
 -->
 <configuration description="Runs Frameworks Services Tests.">
-    <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
+    <option name="test-suite-tag" value="apct" />
+    <option name="test-suite-tag" value="apct-instrumentation" />
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
+        <option name="cleanup-apks" value="true" />
+        <option name="install-arg" value="-t" />
         <option name="test-file-name" value="FrameworksServicesTests.apk" />
+        <option name="test-file-name" value="JobTestApp.apk" />
         <option name="test-file-name" value="ConnTestApp.apk" />
+        <option name="test-file-name" value="SuspendTestApp.apk" />
     </target_preparer>
 
-    <option name="test-suite-tag" value="apct" />
     <option name="test-tag" value="FrameworksServicesTests" />
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.frameworks.servicestests" />
         <option name="runner" value="android.support.test.runner.AndroidJUnitRunner" />
+        <option name="hidden-api-checks" value="false"/>
     </test>
 </configuration>

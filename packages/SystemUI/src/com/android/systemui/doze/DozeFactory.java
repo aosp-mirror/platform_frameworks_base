@@ -22,8 +22,10 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Handler;
+import android.os.PowerManager;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
@@ -46,7 +48,7 @@ public class DozeFactory {
 
         DozeHost host = getHost(dozeService);
         AmbientDisplayConfiguration config = new AmbientDisplayConfiguration(context);
-        DozeParameters params = new DozeParameters(context);
+        DozeParameters params = DozeParameters.getInstance(context);
         Handler handler = new Handler();
         WakeLock wakeLock = new DelayedWakeLock(handler,
                 WakeLock.createPartial(context, "Doze"));
@@ -59,13 +61,15 @@ public class DozeFactory {
 
         DozeMachine machine = new DozeMachine(wrappedService, config, wakeLock);
         machine.setParts(new DozeMachine.Part[]{
-                new DozePauser(handler, machine, alarmManager, new AlwaysOnDisplayPolicy(context)),
+                new DozePauser(handler, machine, alarmManager, params.getPolicy()),
                 new DozeFalsingManagerAdapter(FalsingManager.getInstance(context)),
                 createDozeTriggers(context, sensorManager, host, alarmManager, config, params,
                         handler, wakeLock, machine),
-                createDozeUi(context, host, wakeLock, machine, handler, alarmManager),
-                new DozeScreenState(wrappedService, handler),
-                createDozeScreenBrightness(context, wrappedService, sensorManager, host, handler),
+                createDozeUi(context, host, wakeLock, machine, handler, alarmManager, params),
+                new DozeScreenState(wrappedService, handler, params, wakeLock),
+                createDozeScreenBrightness(context, wrappedService, sensorManager, host, params,
+                        handler),
+                new DozeWallpaperState(context)
         });
 
         return machine;
@@ -73,11 +77,11 @@ public class DozeFactory {
 
     private DozeMachine.Part createDozeScreenBrightness(Context context,
             DozeMachine.Service service, SensorManager sensorManager, DozeHost host,
-            Handler handler) {
+            DozeParameters params, Handler handler) {
         Sensor sensor = DozeSensors.findSensorWithType(sensorManager,
                 context.getString(R.string.doze_brightness_sensor_type));
         return new DozeScreenBrightness(context, service, sensorManager, sensor, host, handler,
-                new AlwaysOnDisplayPolicy(context));
+                params.getPolicy());
     }
 
     private DozeTriggers createDozeTriggers(Context context, SensorManager sensorManager,
@@ -89,8 +93,10 @@ public class DozeFactory {
     }
 
     private DozeMachine.Part createDozeUi(Context context, DozeHost host, WakeLock wakeLock,
-            DozeMachine machine, Handler handler, AlarmManager alarmManager) {
-        return new DozeUi(context, alarmManager, machine, wakeLock, host, handler);
+            DozeMachine machine, Handler handler, AlarmManager alarmManager,
+            DozeParameters params) {
+        return new DozeUi(context, alarmManager, machine, wakeLock, host, handler, params,
+                KeyguardUpdateMonitor.getInstance(context));
     }
 
     public static DozeHost getHost(DozeService service) {

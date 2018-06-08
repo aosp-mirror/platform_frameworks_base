@@ -3,6 +3,8 @@ package com.android.systemui.statusbar.policy;
 import android.net.NetworkCapabilities;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 
@@ -14,7 +16,8 @@ import org.mockito.Mockito;
 import static junit.framework.Assert.assertEquals;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@RunWithLooper
 public class NetworkControllerEthernetTest extends NetworkControllerBaseTest {
 
     @Test
@@ -35,7 +38,7 @@ public class NetworkControllerEthernetTest extends NetworkControllerBaseTest {
     }
 
     protected void setEthernetState(boolean connected, boolean validated) {
-        setConnectivity(NetworkCapabilities.TRANSPORT_ETHERNET, validated, connected);
+        setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_ETHERNET, validated, connected);
     }
 
     protected void verifyLastEthernetIcon(boolean visible, int icon) {

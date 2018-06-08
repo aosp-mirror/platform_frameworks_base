@@ -219,7 +219,7 @@ public class DebugUtils {
                     && field.getType().equals(int.class) && field.getName().startsWith(prefix)) {
                 try {
                     if (value == field.getInt(null)) {
-                        return field.getName().substring(prefix.length());
+                        return constNameWithoutPrefix(prefix, field);
                     }
                 } catch (IllegalAccessException ignored) {
                 }
@@ -236,6 +236,7 @@ public class DebugUtils {
      */
     public static String flagsToString(Class<?> clazz, String prefix, int flags) {
         final StringBuilder res = new StringBuilder();
+        boolean flagsWasZero = flags == 0;
 
         for (Field field : clazz.getDeclaredFields()) {
             final int modifiers = field.getModifiers();
@@ -243,9 +244,12 @@ public class DebugUtils {
                     && field.getType().equals(int.class) && field.getName().startsWith(prefix)) {
                 try {
                     final int value = field.getInt(null);
+                    if (value == 0 && flagsWasZero) {
+                        return constNameWithoutPrefix(prefix, field);
+                    }
                     if ((flags & value) != 0) {
                         flags &= ~value;
-                        res.append(field.getName().substring(prefix.length())).append('|');
+                        res.append(constNameWithoutPrefix(prefix, field)).append('|');
                     }
                 } catch (IllegalAccessException ignored) {
                 }
@@ -257,5 +261,9 @@ public class DebugUtils {
             res.deleteCharAt(res.length() - 1);
         }
         return res.toString();
+    }
+
+    private static String constNameWithoutPrefix(String prefix, Field field) {
+        return field.getName().substring(prefix.length());
     }
 }

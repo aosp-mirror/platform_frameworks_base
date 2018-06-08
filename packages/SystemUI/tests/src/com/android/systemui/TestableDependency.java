@@ -18,9 +18,11 @@ import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 
 public class TestableDependency extends Dependency {
     private final ArrayMap<Object, Object> mObjs = new ArrayMap<>();
+    private final ArraySet<Object> mInstantiatedObjects = new ArraySet<>();
 
     public TestableDependency(Context context) {
         mContext = context;
@@ -47,6 +49,11 @@ public class TestableDependency extends Dependency {
     @Override
     protected <T> T createDependency(Object key) {
         if (mObjs.containsKey(key)) return (T) mObjs.get(key);
+        mInstantiatedObjects.add(key);
         return super.createDependency(key);
+    }
+
+    public <T> boolean hasInstantiatedDependency(Class<T> key) {
+        return mObjs.containsKey(key) || mInstantiatedObjects.contains(key);
     }
 }

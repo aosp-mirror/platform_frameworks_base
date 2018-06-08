@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:paddingStart="16dp"
+            android:paddingStart="@*android:dimen/notification_content_margin_start"
             android:textColor="#DD000000"
             android:paddingEnd="4dp"/>
 
@@ -50,13 +50,13 @@
 
         <TextView
             android:id="@+id/undo"
-            style="@style/TextAppearance.NotificationInfo.Button"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginEnd="8dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="@dimen/notification_guts_button_side_margin"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:text="@string/snooze_undo" />
+            android:text="@string/snooze_undo"
+            style="@style/TextAppearance.NotificationInfo.Button" />
     </RelativeLayout>
 
     <View

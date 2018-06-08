@@ -45,7 +45,8 @@ public class TunablePaddingTest extends LeakCheckedTest {
     @Before
     public void setup() {
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
-        mView = mock(View.class, withSettings().spiedInstance(new View(mContext)));
+        mView = mock(View.class);
+        when(mView.getContext()).thenReturn(mContext);
 
         mTunerService = mDependency.injectMockDependency(TunerService.class);
         Tracker tracker = mLeakCheck.getTracker("tuner");

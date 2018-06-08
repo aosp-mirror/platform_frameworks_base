@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -35,6 +37,7 @@ import java.util.HashMap;
  * that doesn't allow the other process to negatively harm your window.
  */
 public class WindowId implements Parcelable {
+    @NonNull
     private final IWindowId mToken;
 
     /**
@@ -74,8 +77,7 @@ public class WindowId implements Parcelable {
             }
         };
 
-        final HashMap<IBinder, WindowId> mRegistrations
-                = new HashMap<IBinder, WindowId>();
+        final HashMap<IBinder, WindowId> mRegistrations = new HashMap<>();
 
         class H extends Handler {
             @Override
@@ -163,10 +165,9 @@ public class WindowId implements Parcelable {
      * same package.
      */
     @Override
-    public boolean equals(Object otherObj) {
+    public boolean equals(@Nullable Object otherObj) {
         if (otherObj instanceof WindowId) {
-            return mToken.asBinder().equals(((WindowId) otherObj)
-                    .mToken.asBinder());
+            return mToken.asBinder().equals(((WindowId) otherObj).mToken.asBinder());
         }
         return false;
     }
@@ -182,7 +183,7 @@ public class WindowId implements Parcelable {
         sb.append("IntentSender{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(": ");
-        sb.append(mToken != null ? mToken.asBinder() : null);
+        sb.append(mToken.asBinder());
         sb.append('}');
         return sb.toString();
     }
@@ -195,30 +196,32 @@ public class WindowId implements Parcelable {
         out.writeStrongBinder(mToken.asBinder());
     }
 
-    public static final Parcelable.Creator<WindowId> CREATOR
-            = new Parcelable.Creator<WindowId>() {
+    public static final Parcelable.Creator<WindowId> CREATOR = new Parcelable.Creator<WindowId>() {
+        @Override
         public WindowId createFromParcel(Parcel in) {
             IBinder target = in.readStrongBinder();
             return target != null ? new WindowId(target) : null;
         }
 
+        @Override
         public WindowId[] newArray(int size) {
             return new WindowId[size];
         }
     };
 
     /** @hide */
+    @NonNull
     public IWindowId getTarget() {
         return mToken;
     }
 
     /** @hide */
-    public WindowId(IWindowId target) {
+    public WindowId(@NonNull IWindowId target) {
         mToken = target;
     }
 
     /** @hide */
-    public WindowId(IBinder target) {
+    public WindowId(@NonNull IBinder target) {
         mToken = IWindowId.Stub.asInterface(target);
     }
 }

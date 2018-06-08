@@ -158,6 +158,12 @@ public class Process {
     public static final int OTA_UPDATE_UID = 1061;
 
     /**
+     * Defines the UID used for incidentd.
+     * @hide
+     */
+    public static final int INCIDENTD_UID = 1067;
+
+    /**
      * Defines the UID/GID for the Secure Element service process.
      * @hide
      */
@@ -279,6 +285,15 @@ public class Process {
      * {@link java.lang.Thread} class.
      */
     public static final int THREAD_PRIORITY_URGENT_DISPLAY = -8;
+
+    /**
+     * Standard priority of video threads.  Applications can not normally
+     * change to this priority.
+     * Use with {@link #setThreadPriority(int)} and
+     * {@link #setThreadPriority(int, int)}, <b>not</b> with the normal
+     * {@link java.lang.Thread} class.
+     */
+    public static final int THREAD_PRIORITY_VIDEO = -10;
 
     /**
      * Standard priority of audio threads.  Applications can not normally
@@ -406,6 +421,13 @@ public class Process {
      * @hide
      **/
     public static final int THREAD_GROUP_RT_APP = 6;
+
+    /**
+     * Thread group for bound foreground services that should
+     * have additional CPU restrictions during screen off
+     * @hide
+     **/
+    public static final int THREAD_GROUP_RESTRICTED = 7;
 
     public static final int SIGNAL_QUIT = 3;
     public static final int SIGNAL_KILL = 9;
@@ -571,6 +593,14 @@ public class Process {
     }
 
     /**
+     * Returns whether the given uid belongs to a system core component or not.
+     * @hide
+     */
+    public static boolean isCoreUid(int uid) {
+        return UserHandle.isCore(uid);
+    }
+
+    /**
      * Returns whether the given uid belongs to an application.
      * @param uid A kernel uid.
      * @return Whether the uid corresponds to an application sandbox running in
@@ -582,7 +612,6 @@ public class Process {
 
     /**
      * Returns whether the current process is in an isolated sandbox.
-     * @hide
      */
     public static final boolean isIsolated() {
         return isIsolated(myUid());

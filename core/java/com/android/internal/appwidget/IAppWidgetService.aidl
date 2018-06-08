@@ -26,6 +26,8 @@ import com.android.internal.appwidget.IAppWidgetHost;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.widget.RemoteViews;
+import android.app.IApplicationThread;
+import android.app.IServiceConnection;
 
 /** {@hide} */
 interface IAppWidgetService {
@@ -54,6 +56,7 @@ interface IAppWidgetService {
     void partiallyUpdateAppWidgetIds(String callingPackage, in int[] appWidgetIds,
             in RemoteViews views);
     void updateAppWidgetProvider(in ComponentName provider, in RemoteViews views);
+    void updateAppWidgetProviderInfo(in ComponentName provider, in String metadataKey);
     void notifyAppWidgetViewDataChanged(String packageName, in int[] appWidgetIds, int viewId);
     ParceledListSlice getInstalledProvidersForProfile(int categoryFilter, int profileId,
             String packageName);
@@ -62,9 +65,9 @@ interface IAppWidgetService {
     void setBindAppWidgetPermission(in String packageName, int userId, in boolean permission);
     boolean bindAppWidgetId(in String callingPackage, int appWidgetId,
             int providerProfileId, in ComponentName providerComponent, in Bundle options);
-    void bindRemoteViewsService(String callingPackage, int appWidgetId, in Intent intent,
-            in IBinder connection);
-    void unbindRemoteViewsService(String callingPackage, int appWidgetId, in Intent intent);
+    boolean bindRemoteViewsService(String callingPackage, int appWidgetId, in Intent intent,
+            IApplicationThread caller, IBinder token, IServiceConnection connection, int flags);
+
     int[] getAppWidgetIds(in ComponentName providerComponent);
     boolean isBoundWidgetPackage(String packageName, int userId);
     boolean requestPinAppWidget(String packageName, in ComponentName providerComponent,

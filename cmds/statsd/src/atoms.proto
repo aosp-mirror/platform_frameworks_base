@@ -1,0 +1,1976 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.os.statsd;
+option java_package = "com.android.os";
+option java_outer_classname = "AtomsProto";
+
+import "frameworks/base/cmds/statsd/src/atom_field_options.proto";
+import "frameworks/base/core/proto/android/app/enums.proto";
+import "frameworks/base/core/proto/android/app/job/enums.proto";
+import "frameworks/base/core/proto/android/bluetooth/enums.proto";
+import "frameworks/base/core/proto/android/os/enums.proto";
+import "frameworks/base/core/proto/android/server/enums.proto";
+import "frameworks/base/core/proto/android/telecomm/enums.proto";
+import "frameworks/base/core/proto/android/telephony/enums.proto";
+import "frameworks/base/core/proto/android/view/enums.proto";
+
+/**
+ * The master atom class. This message defines all of the available
+ * raw stats log events from the Android system, also known as "atoms."
+ *
+ * This field contains a single oneof with all of the available messages.
+ * The stats-log-api-gen tool runs as part of the Android build and
+ * generates the android.util.StatsLog class, which contains the constants
+ * and methods that Android uses to log.
+ *
+ * This Atom class is not actually built into the Android system.
+ * Instead, statsd on Android constructs these messages synthetically,
+ * in the format defined here and in stats_log.proto.
+ */
+message Atom {
+    // Pushed atoms start at 2.
+    oneof pushed {
+        // For StatsLog reasons, 1 is illegal and will not work. Must start at 2.
+        BleScanStateChanged ble_scan_state_changed = 2;
+        // 3 is available for use
+        BleScanResultReceived ble_scan_result_received = 4;
+        SensorStateChanged sensor_state_changed = 5;
+        GpsScanStateChanged gps_scan_state_changed = 6;
+        SyncStateChanged sync_state_changed = 7;
+        ScheduledJobStateChanged scheduled_job_state_changed = 8;
+        ScreenBrightnessChanged screen_brightness_changed = 9;
+        WakelockStateChanged wakelock_state_changed = 10;
+        LongPartialWakelockStateChanged long_partial_wakelock_state_changed = 11;
+        MobileRadioPowerStateChanged mobile_radio_power_state_changed = 12;
+        WifiRadioPowerStateChanged wifi_radio_power_state_changed = 13;
+        // 14 - 19 are available
+        BatterySaverModeStateChanged battery_saver_mode_state_changed = 20;
+        DeviceIdleModeStateChanged device_idle_mode_state_changed = 21;
+        DeviceIdlingModeStateChanged device_idling_mode_state_changed = 22;
+        AudioStateChanged audio_state_changed = 23;
+        MediaCodecStateChanged media_codec_state_changed = 24;
+        CameraStateChanged camera_state_changed = 25;
+        FlashlightStateChanged flashlight_state_changed = 26;
+        UidProcessStateChanged uid_process_state_changed = 27;
+        ProcessLifeCycleStateChanged process_life_cycle_state_changed = 28;
+        ScreenStateChanged screen_state_changed = 29;
+        BatteryLevelChanged battery_level_changed = 30;
+        ChargingStateChanged charging_state_changed = 31;
+        PluggedStateChanged plugged_state_changed = 32;
+        // 33 - 34 are available
+        WakeupAlarmOccurred wakeup_alarm_occurred = 35;
+        KernelWakeupReported kernel_wakeup_reported = 36;
+        WifiLockStateChanged wifi_lock_state_changed = 37;
+        WifiSignalStrengthChanged wifi_signal_strength_changed = 38;
+        WifiScanStateChanged wifi_scan_state_changed = 39;
+        PhoneSignalStrengthChanged phone_signal_strength_changed = 40;
+        SettingChanged setting_changed = 41;
+        ActivityForegroundStateChanged activity_foreground_state_changed = 42;
+        IsolatedUidChanged isolated_uid_changed = 43;
+        PacketWakeupOccurred packet_wakeup_occurred = 44;
+        // 45 is available
+        AnomalyDetected anomaly_detected = 46;
+        AppBreadcrumbReported app_breadcrumb_reported = 47;
+        AppStartOccurred app_start_occurred = 48;
+        AppStartCanceled app_start_canceled = 49;
+        AppStartFullyDrawn app_start_fully_drawn = 50;
+        LmkKillOccurred lmk_kill_occurred = 51;
+        PictureInPictureStateChanged picture_in_picture_state_changed = 52;
+        WifiMulticastLockStateChanged wifi_multicast_lock_state_changed = 53;
+        LmkStateChanged lmk_state_changed = 54;
+        AppStartMemoryStateCaptured app_start_memory_state_captured = 55;
+        ShutdownSequenceReported shutdown_sequence_reported = 56;
+        BootSequenceReported boot_sequence_reported = 57;
+        DaveyOccurred davey_occurred = 58;
+        OverlayStateChanged overlay_state_changed = 59;
+        ForegroundServiceStateChanged foreground_service_state_changed = 60;
+        CallStateChanged call_state_changed = 61;
+        KeyguardStateChanged keyguard_state_changed = 62;
+        KeyguardBouncerStateChanged keyguard_bouncer_state_changed = 63;
+        KeyguardBouncerPasswordEntered keyguard_bouncer_password_entered = 64;
+        AppDied app_died = 65;
+        ResourceConfigurationChanged resource_configuration_changed = 66;
+        BluetoothEnabledStateChanged bluetooth_enabled_state_changed = 67;
+        BluetoothConnectionStateChanged bluetooth_connection_state_changed = 68;
+        // 69 is blank but need not be.
+        UsbConnectorStateChanged usb_connector_state_changed = 70;
+        SpeakerImpedanceReported speaker_impedance_reported = 71;
+        HardwareFailed hardware_failed = 72;
+        PhysicalDropDetected physical_drop_detected = 73;
+        ChargeCyclesReported charge_cycles_reported = 74;
+        MobileConnectionStateChanged mobile_connection_state_changed = 75;
+        MobileRadioTechnologyChanged mobile_radio_technology_changed = 76;
+        UsbDeviceAttached usb_device_attached = 77;
+        AppCrashOccurred app_crash_occurred = 78;
+        ANROccurred anr_occurred = 79;
+        WTFOccurred wtf_occurred = 80;
+        LowMemReported low_mem_reported = 81;
+
+
+    }
+
+    // Pulled events will start at field 10000.
+    // Next: 10022
+    oneof pulled {
+        WifiBytesTransfer wifi_bytes_transfer = 10000;
+        WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
+        MobileBytesTransfer mobile_bytes_transfer = 10002;
+        MobileBytesTransferByFgBg mobile_bytes_transfer_by_fg_bg = 10003;
+        BluetoothBytesTransfer bluetooth_bytes_transfer = 10006;
+        KernelWakelock kernel_wakelock = 10004;
+        SubsystemSleepState subsystem_sleep_state = 10005;
+        CpuTimePerFreq cpu_time_per_freq = 10008;
+        CpuTimePerUid cpu_time_per_uid = 10009;
+        CpuTimePerUidFreq cpu_time_per_uid_freq = 10010;
+        WifiActivityInfo wifi_activity_info = 10011;
+        ModemActivityInfo modem_activity_info = 10012;
+        BluetoothActivityInfo bluetooth_activity_info = 10007;
+        ProcessMemoryState process_memory_state = 10013;
+        SystemElapsedRealtime system_elapsed_realtime = 10014;
+        SystemUptime system_uptime = 10015;
+        CpuActiveTime cpu_active_time = 10016;
+        CpuClusterTime cpu_cluster_time = 10017;
+        DiskSpace disk_space = 10018;
+        RemainingBatteryCapacity remaining_battery_capacity = 10019;
+        FullBatteryCapacity full_battery_capacity = 10020;
+        Temperature temperature = 10021;
+    }
+
+    // DO NOT USE field numbers above 100,000 in AOSP. Field numbers above
+    // 100,000 are reserved for non-AOSP (e.g. OEMs) to use.
+}
+
+/**
+ * This proto represents a node of an attribution chain.
+ * Note: All attribution chains are represented as a repeated field of type
+ * AttributionNode. It is understood that in such arrays, the order is that
+ * of calls, that is [A, B, C] if A calls B that calls C.
+ */
+message AttributionNode {
+    // The uid for a given element in the attribution chain.
+    optional int32 uid = 1;
+
+    // The (optional) string tag for an element in the attribution chain. If the
+    // element has no tag, it is encoded as an empty string.
+    optional string tag = 2;
+}
+
+/*
+ * *****************************************************************************
+ * Below are all of the individual atoms that are logged by Android via statsd.
+ *
+ * RULES:
+ *   - The field ids for each atom must start at 1, and count upwards by 1.
+ *     Skipping field ids is not allowed.
+ *   - These form an API, so renaming, renumbering or removing fields is
+ *     not allowed between android releases.  (This is not currently enforced,
+ *     but there will be a tool to enforce this restriction).
+ *   - The types must be built-in protocol buffer types, namely, no sub-messages
+ *     are allowed (yet).  The bytes type is also not allowed.
+ *   - The CamelCase name of the message type should match the
+ *     underscore_separated name as defined in Atom.
+ *   - If an atom represents work that can be attributed to an app, there can
+ *     be exactly one AttributionChain field. It must be field number 1.
+ *   - A field that is a uid should be a string field, tagged with the [xxx]
+ *     annotation. The generated code on android will be represented by UIDs,
+ *     and those UIDs will be translated in xxx to those strings.
+ *
+ * CONVENTIONS:
+ *   - Events are past tense. e.g. ScreenStateChanged, not ScreenStateChange.
+ *   - If there is a UID, it goes first. Think in an object-oriented fashion.
+ * *****************************************************************************
+ */
+
+/**
+ * Logs when the screen state changes.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message ScreenStateChanged {
+    // New screen state, from frameworks/base/core/proto/android/view/enums.proto.
+    optional android.view.DisplayStateEnum state = 1 [(stateFieldOption).option = EXCLUSIVE];
+}
+
+/**
+ * Logs that the state of a process state, as per the activity manager, has changed.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message UidProcessStateChanged {
+    optional int32 uid = 1 [(stateFieldOption).option = PRIMARY, (is_uid) = true];
+
+    // The state, from frameworks/base/core/proto/android/app/enums.proto.
+    optional android.app.ProcessStateEnum state = 2 [(stateFieldOption).option = EXCLUSIVE];
+}
+
+/**
+ * Logs that a process started, finished, crashed, or ANRed.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message ProcessLifeCycleStateChanged {
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The process name (usually same as the app name).
+    optional string process_name = 2;
+
+    // What lifecycle state the process changed to.
+    // This enum is specific to atoms.proto.
+    enum State {
+        FINISHED = 0;
+        STARTED = 1;
+        CRASHED = 2;
+    }
+    optional State state = 3;
+}
+
+/**
+ * Logs when the ble scan state changes.
+ *
+ * Logged from:
+ *   packages/apps/Bluetooth/src/com/android/bluetooth/gatt/AppScanStats.java
+ */
+message BleScanStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+        // RESET indicates all ble stopped. Used when it (re)starts (e.g. after it crashes).
+        RESET = 2;
+    }
+    optional State state = 2;
+
+    // Does the scan have a filter.
+    optional bool is_filtered = 3;
+    // Whether the scan is a CALLBACK_TYPE_FIRST_MATCH scan. Called 'background' scan internally.
+    optional bool is_first_match = 4;
+    // Whether the scan set to piggy-back off the results of other scans (SCAN_MODE_OPPORTUNISTIC).
+    optional bool is_opportunistic = 5;
+}
+
+/**
+ * Logs reporting of a ble scan finding results.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+// TODO: Consider changing to tracking per-scanner-id (log from AppScanStats).
+message BleScanResultReceived {
+    repeated AttributionNode attribution_node = 1;
+
+    // Number of ble scan results returned.
+    optional int32 num_results = 2;
+}
+
+/**
+ * Logs when a sensor state changes.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message SensorStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    // The id (int) of the sensor.
+    optional int32 sensor_id = 2;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 3;
+}
+
+
+/**
+ * Logs when GPS state changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message GpsScanStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+
+/**
+ * Logs when a sync manager sync state changes.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message SyncStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    // Name of the sync (as named in the app). Can be chosen at run-time.
+    optional string sync_name = 2;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 3;
+}
+
+/**
+ * Logs when a job scheduler job state changes.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message ScheduledJobStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    // Name of the job (as named in the app)
+    optional string job_name = 2;
+
+    enum State {
+        FINISHED = 0;
+        STARTED = 1;
+        SCHEDULED = 2;
+    }
+    optional State state = 3;
+
+    // The reason a job has stopped.
+    // This is only applicable when the state is FINISHED.
+    // The default value is STOP_REASON_UNKNOWN.
+    optional android.app.job.StopReasonEnum stop_reason = 4;
+}
+
+/**
+ * Logs when the audio state changes.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message AudioStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+        // RESET indicates all audio stopped. Used when it (re)starts (e.g. after it crashes).
+        RESET = 2;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs when the video codec state changes.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message MediaCodecStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+        // RESET indicates all mediaCodec stopped. Used when it (re)starts (e.g. after it crashes).
+        RESET = 2;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs when the flashlight state changes.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message FlashlightStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+        // RESET indicates all flashlight stopped. Used when it (re)starts (e.g. after it crashes).
+        RESET = 2;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs when the camera state changes.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message CameraStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+        // RESET indicates all camera stopped. Used when it (re)starts (e.g. after it crashes).
+        RESET = 2;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs that the state of a wakelock (per app and per wakelock name) has changed.
+ *
+ * Logged from:
+ *   TODO
+ */
+message WakelockStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    // The type (level) of the wakelock; e.g. a partial wakelock or a full wakelock.
+    // From frameworks/base/core/proto/android/os/enums.proto.
+    optional android.os.WakeLockLevelEnum level = 2;
+
+    // The wakelock tag (Called tag in the Java API, sometimes name elsewhere).
+    optional string tag = 3;
+
+    enum State {
+        RELEASE = 0;
+        ACQUIRE = 1;
+        CHANGE_RELEASE = 2;
+        CHANGE_ACQUIRE = 3;
+    }
+    optional State state = 4;
+}
+
+/**
+ * Logs when a partial wakelock is considered 'long' (over 1 min).
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message LongPartialWakelockStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    // The wakelock tag (Called tag in the Java API, sometimes name elsewhere).
+    optional string tag = 2;
+
+    // TODO: I have no idea what this is.
+    optional string history_tag = 3;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 4;
+}
+
+/**
+ * Logs Battery Saver state change.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message BatterySaverModeStateChanged {
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 1;
+}
+
+/**
+ * Logs Doze mode state change.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message DeviceIdleModeStateChanged {
+    optional android.server.DeviceIdleModeEnum state = 1;
+}
+
+
+/**
+ * Logs state change of Doze mode including maintenance windows.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message DeviceIdlingModeStateChanged {
+    optional android.server.DeviceIdleModeEnum state = 1;
+}
+
+/**
+ * Logs screen brightness level.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message ScreenBrightnessChanged {
+    // Screen brightness level. Should be in [-1, 255] according to PowerManager.java.
+    optional int32 level = 1;
+}
+
+/**
+ * Logs battery level (percent full, from 0 to 100).
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message BatteryLevelChanged {
+    // Battery level. Should be in [0, 100].
+    optional int32 battery_level = 1;
+}
+
+/**
+ * Logs change in charging status of the device.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message ChargingStateChanged {
+    // State of the battery, from frameworks/base/core/proto/android/os/enums.proto.
+    optional android.os.BatteryStatusEnum state = 1;
+}
+
+/**
+ * Logs whether the device is plugged in, and what power source it is using.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message PluggedStateChanged {
+    // Whether the device is plugged in, from frameworks/base/core/proto/android/os/enums.proto.
+    optional android.os.BatteryPluggedStateEnum state = 1;
+}
+
+/**
+ * Logs when an app's wakeup alarm fires.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message WakeupAlarmOccurred {
+    repeated AttributionNode attribution_node = 1;
+
+    // Name of the wakeup alarm.
+    optional string tag = 2;
+}
+
+/**
+ * Logs when an an app causes the mobile radio to change state.
+ * Changing from LOW to MEDIUM or HIGH can be considered the app waking the mobile radio.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message MobileRadioPowerStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    // Power state, from frameworks/base/core/proto/android/telephony/enums.proto.
+    optional android.telephony.DataConnectionPowerStateEnum state = 2;
+}
+
+/**
+ * Logs when an an app causes the wifi radio to change state.
+ * Changing from LOW to MEDIUM or HIGH can be considered the app waking the wifi radio.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiRadioPowerStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    // Power state, from frameworks/base/core/proto/android/telephony/enums.proto.
+    optional android.telephony.DataConnectionPowerStateEnum state = 2;
+}
+
+/**
+ * Logs kernel wakeup reasons and aborts.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ */
+message KernelWakeupReported {
+    // Name of the kernel wakeup reason (or abort).
+    optional string wakeup_reason_name = 1;
+
+    // Duration (in microseconds) for the wake-up interrupt to be serviced.
+    optional int64 duration_micros = 2;
+}
+
+/**
+ * Logs wifi locks held by an app.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiLockStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs wifi signal strength changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiSignalStrengthChanged {
+    // Signal strength, from frameworks/base/core/proto/android/telephony/enums.proto.
+    optional android.telephony.SignalStrengthEnum signal_strength = 1;
+}
+
+/**
+ * Logs wifi scans performed by an app.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiScanStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs wifi multicast locks held by an app
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiMulticastLockStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs shutdown reason and duration on next boot.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/server/BootReceiver.java
+ */
+message ShutdownSequenceReported {
+    // True if shutdown is for a reboot. Default: false if we do not know.
+    optional bool reboot = 1;
+
+    // Reason for shutdown. Eg: userrequested. Default: "<EMPTY>".
+    optional string reason = 2;
+
+    // Beginning of shutdown time in ms using wall clock time since unix epoch.
+    // Default: 0 if no start time received.
+    optional int64 start_time_millis = 3;
+
+    // Duration of shutdown in ms. Default: 0 if no duration received.
+    optional int64 duration_millis = 4;
+}
+
+
+/**
+ * Logs boot reason and duration.
+ *
+ * Logged from:
+ *   system/core/bootstat/bootstat.cpp
+ */
+message BootSequenceReported {
+    // Reason for bootloader boot. Eg. reboot. See bootstat.cpp for larger list
+    // Default: "<EMPTY>" if not available.
+    optional string bootloader_reason = 1;
+
+    // Reason for system boot. Eg. bootloader, reboot,userrequested
+    // Default: "<EMPTY>" if not available.
+    optional string system_reason = 2;
+
+    // End of boot time in ms from unix epoch using system wall clock.
+    optional int64 end_time_millis = 3;
+
+    // Total boot duration in ms.
+    optional int64 total_duration_millis = 4;
+
+    // Bootloader duration in ms.
+    optional int64 bootloader_duration_millis = 5;
+
+    // Time since last boot in ms. Default: 0 if not available.
+    optional int64 time_since_last_boot = 6;
+}
+
+
+/**
+ * Logs call state and disconnect cause (if applicable).
+ *
+ * Logged from:
+ *   packages/services/Telecomm/src/com/android/server/telecom/Call.java
+ */
+message CallStateChanged {
+    // The state of the call. Eg. DIALING, ACTIVE, ON_HOLD, DISCONNECTED.
+    // From frameworks/base/core/proto/android/telecomm/enums.proto.
+    optional android.telecom.CallStateEnum call_state = 1;
+
+    // The reason the call disconnected. Eg. ERROR, MISSED, REJECTED, BUSY.
+    // This value is only applicable when the call_state is DISCONNECTED, and
+    // should always be UNKNOWN if the call_state is not DISCONNECTED.
+    // From frameworks/base/core/proto/android/telecomm/enums.proto.
+    optional android.telecom.DisconnectCauseEnum disconnect_cause = 2;
+
+    // True if the call is self-managed, which are apps that use the
+    // telecom infrastructure to make their own calls.
+    optional bool self_managed = 3;
+
+    // True if call is external. External calls are calls on connected Wear
+    // devices but show up in Telecom so the user can pull them onto the device.
+    optional bool external_call = 4;
+}
+
+/**
+ * Logs keyguard state. The keyguard is the lock screen.
+ *
+ * Logged from:
+ *   frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/StatusBarKeyguardViewManager.java
+ */
+message KeyguardStateChanged {
+    enum State {
+        UNKNOWN = 0;
+        // The keyguard is hidden when the phone is unlocked.
+        HIDDEN = 1;
+        // The keyguard is shown when the phone is locked (screen turns off).
+        SHOWN= 2;
+        // The keyguard is occluded when something is overlaying the keyguard.
+        // Eg. Opening the camera while on the lock screen.
+        OCCLUDED = 3;
+    }
+    optional State state = 1;
+}
+
+/**
+ * Logs keyguard bouncer state. The bouncer is a part of the keyguard, and
+ * prompts the user to enter a password (pattern, pin, etc).
+ *
+ * Logged from:
+ *   frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBouncer.java
+ */
+
+message KeyguardBouncerStateChanged {
+    enum State {
+        UNKNOWN = 0;
+        // Bouncer is hidden, either as a result of successfully entering the
+        // password, screen timing out, or user going back to lock screen.
+        HIDDEN = 1;
+        // This is when the user is being prompted to enter the password.
+        SHOWN = 2;
+    }
+    optional State state = 1;
+}
+
+/**
+ * Logs the result of entering a password into the keyguard bouncer.
+ *
+ * Logged from:
+ *   frameworks/base/packages/SystemUI/src/com/android/keyguard/KeyguardSecurityContainer.java
+ */
+message KeyguardBouncerPasswordEntered {
+    enum BouncerResult {
+        UNKNOWN = 0;
+        // The password entered was incorrect.
+        FAILURE = 1;
+        // The password entered was correct.
+        SUCCESS = 2;
+    }
+    optional BouncerResult result = 1;
+}
+
+/*
+ * Logs changes to the configuration of the device. The configuration is defined
+ * in frameworks/base/core/java/android/content/res/Configuration.java
+ * More documentation is at https://d.android.com/reference/android/content/res/Configuration.html
+ * Please go there to interpret the possible values each field can be.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message ResourceConfigurationChanged {
+    // Bit mask of color capabilities of the screen.
+    // Contains information about the color gamut and hdr mode of the screen.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#colorMode
+    optional int32 colorMode = 1;
+
+    // The target screen density being rendered to.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#densityDpi
+    optional int32 densityDpi = 2;
+
+    // Current user preference for the scaling factor for fonts,
+    // relative to the base density scaling.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#fontScale
+    optional float fontScale = 3;
+
+    // Flag indicating whether the hard keyboard is hidden.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#hardKeyboardHidden
+    optional int32 hardKeyboardHidden = 4;
+
+    // The type of keyboard attached to the device.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#keyboard
+    optional int32 keyboard = 5;
+
+    // Flag indicating whether any keyboard is available. Takes soft keyboards into account.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#keyboardHidden
+    optional int32 keyboardHideen = 6;
+
+    // IMSI MCC (Mobile Country Code), corresponding to mcc resource qualifier.
+    // 0 if undefined.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#mcc
+    optional int32 mcc = 7;
+
+    // IMSI MNC (Mobile Network Code), corresponding to mnc resource qualifier.
+    // 0 if undefined. Note: the actual MNC may be 0, to check for this use the
+    // MNC_ZERO symbol defined in Configuration.java.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#mnc
+    optional int32 mnc = 8;
+
+    // The kind of navigation available on the device.
+    // See: https://developer.android.com/reference/android/content/res/Configuration.html#navigation
+    optional int32 navigation = 9;
+
+    // Flag indicating whether the navigation is available.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#navigationHidden
+    optional int32 navigationHidden = 10;
+
+    // Overall orientation of the screen.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#orientation
+    optional int32 orientation = 11;
+
+    // The current height of the available screen space, in dp units.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#screenHeightDp
+    optional int32 screenHeightDp = 12;
+
+    // Bit mask of overall layout of the screen.
+    // Contains information about screen size, whether the screen is wider/taller
+    // than normal, whether the screen layout is right-tl-left or left-to-right,
+    // and whether the screen has a rounded shape.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#screenLayout
+    optional int32 screenLayout = 13;
+
+    // Current width of the available screen space, in dp units.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#screenWidthDp
+    optional int32 screenWidthDp = 14;
+
+    // The smallest screen size an application will see in normal operation.
+    // This is the smallest value of both screenWidthDp and screenHeightDp
+    // in portrait and landscape.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#smallestScreenWidthDp
+    optional int32 smallestScreenWidthDp = 15;
+
+    // The type of touch screen attached to the device.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#touchscreen
+    optional int32 touchscreen = 16;
+
+    // Bit mask of the ui mode.
+    // Contains information about the overall ui mode of the device.
+    // Eg: NORMAL, DESK, CAR, TELEVISION, WATCH, VR_HEADSET
+    // Also contains information about whether the device is in night mode.
+    // See: https://d.android.com/reference/android/content/res/Configuration.html#uiMode
+    optional int32 uiMode = 17;
+}
+
+
+/**
+ * Logs changes in the connection state of the mobile radio.
+ *
+ * Logged from:
+ *    frameworks/opt/telephony/src/java/com/android/internal/telephony/dataconnection/DataConnection.java
+ */
+message MobileConnectionStateChanged {
+    // States are from the state machine DataConnection.java.
+    enum State {
+        UNKNOWN = 0;
+        // The connection is inactive, or disconnected.
+        INACTIVE = 1;
+        // The connection is being activated, or connecting.
+        ACTIVATING = 2;
+        // The connection is active, or connected.
+        ACTIVE = 3;
+        // The connection is disconnecting.
+        DISCONNECTING = 4;
+        // The connection is disconnecting after creating a connection.
+        DISCONNECTION_ERROR_CREATING_CONNECTION = 5;
+    }
+    optional State state  = 1;
+    // For multi-sim phones, this distinguishes between the sim cards.
+    optional int32 sim_slot_index = 2;
+    // Used to identify the connection. Starts at 0 and increments by 1 for
+    // every new network created. Resets whenever the device reboots.
+    optional int32 data_connection_id = 3;
+    // A bitmask for the capabilities of this connection.
+    // Eg. DEFAULT (internet), MMS, SUPL, DUN, IMS.
+    // Default value (if we have no information): 0
+    optional int64 capabilities = 4;
+    // If this connection has internet.
+    // This just checks if the DEFAULT bit of capabilities is set.
+    optional bool has_internet = 5;
+}
+
+/**
+ * Logs changes in mobile radio technology. eg: LTE, EDGE, CDMA.
+ *
+ * Logged from:
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/ServiceStateTracker.java
+ */
+message MobileRadioTechnologyChanged {
+    optional android.telephony.NetworkTypeEnum state = 1;
+    // For multi-sim phones, this distinguishes between the sim cards.
+    optional int32 sim_slot_index = 2;
+}
+
+/**
+ * Logs the VID and PID of any connected USB devices.
+ *
+ * Notes if any Audio, HID (input buttons/mouse/keyboard), or Storage interfaces are present.
+ *
+ * Logged by Vendor.
+ */
+message UsbDeviceAttached {
+    optional int32 vid = 1;
+    optional int32 pid = 2;
+    optional bool has_audio = 3;
+    optional bool has_hid = 4;
+    optional bool has_storage = 5;
+}
+
+
+/**
+ * Logs when Bluetooth is enabled and disabled.
+ *
+ * Logged from:
+ *   services/core/java/com/android/server/BluetoothManagerService.java
+ */
+message BluetoothEnabledStateChanged {
+    repeated AttributionNode attribution_node = 1;
+    // Whether or not bluetooth is enabled on the device.
+    enum State {
+        UNKNOWN = 0;
+        ENABLED = 1;
+        DISABLED = 2;
+    }
+    optional State state = 2;
+    // The reason for being enabled/disabled.
+    // Eg. Airplane mode, crash, application request.
+    optional android.bluetooth.EnableDisableReasonEnum reason = 3;
+    // If the reason is an application request, this will be the package name.
+    optional string pkgName = 4;
+}
+
+/**
+ * Logs when a Bluetooth device connects and disconnects.
+ *
+ * Logged from:
+ *    packages/apps/Bluetooth/src/com/android/bluetooth/btservice/AdapterProperties.java
+ */
+message BluetoothConnectionStateChanged {
+    // The state of the connection.
+    // Eg: CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED.
+    optional android.bluetooth.ConnectionStateEnum state = 1;
+    // An identifier that can be used to match connect and disconnect events.
+    // Currently is last two bytes of a hash of a device level ID and
+    // the mac address of the bluetooth device that is connected.
+    optional int32 obfuscated_id = 2;
+    // The profile that is connected. Eg. GATT, A2DP, HEADSET.
+    // From android.bluetooth.BluetoothAdapter.java
+    optional int32 bt_profile = 3;
+}
+
+/**
+ * Logs when something is plugged into or removed from the USB-C connector.
+ *
+ * Logged from:
+ *  Vendor USB HAL.
+ */
+message UsbConnectorStateChanged {
+    enum State {
+      DISCONNECTED = 0;
+      CONNECTED = 1;
+    }
+    optional State state = 1;
+}
+
+/**
+ * Logs the reported speaker impedance.
+ *
+ * Logged from:
+ *  Vendor audio implementation.
+ */
+message SpeakerImpedanceReported {
+    optional int32 speaker_location = 1;
+    optional int32 impedance = 2;
+}
+
+/**
+ * Logs the report of a failed hardware.
+ *
+ * Logged from:
+ *  Vendor HALs.
+ *
+ */
+message HardwareFailed {
+    enum HardwareType {
+        HARDWARE_FAILED_UNKNOWN = 0;
+        HARDWARE_FAILED_MICROPHONE = 1;
+        HARDWARE_FAILED_CODEC = 2;
+        HARDWARE_FAILED_SPEAKER = 3;
+        HARDWARE_FAILED_FINGERPRINT = 4;
+    }
+    optional HardwareType hardware_type = 1;
+
+    /* hardware_location allows vendors to differentiate between multiple instances of
+    * the same hardware_type.  The specific locations are vendor defined integers,
+    * referring to board-specific numbering schemes.
+    */
+    optional int32 hardware_location = 2;
+
+    /* failure_code is specific to the HardwareType of the failed hardware.
+     * It should use the enum values defined below.
+     */
+    enum MicrophoneFailureCode {
+        MICROPHONE_FAILURE_COMPLETE = 0;
+    }
+    enum CodecFailureCode {
+        CODEC_FAILURE_COMPLETE = 0;
+    }
+    enum SpeakerFailureCode {
+        SPEAKER_FAILURE_COMPLETE = 0;
+        SPEAKER_FAILURE_HIGH_Z = 1;
+        SPEAKER_FAILURE_SHORT = 2;
+    }
+    enum FingerprintFailureCode {
+        FINGERPRINT_FAILURE_COMPLETE = 0;
+        FINGERPRINT_SENSOR_BROKEN = 1;
+        FINGERPRINT_TOO_MANY_DEAD_PIXELS = 2;
+    }
+    optional int32 failure_code = 3;
+}
+
+/**
+ * Log an event when the device has been physically dropped.
+ * Reported from the /vendor partition.
+ */
+message PhysicalDropDetected {
+    // Confidence that the event was actually a drop, 0 -> 100
+    optional int32 confidence_pctg = 1;
+    // Peak acceleration of the drop, in 1/1000s of a g.
+    optional int32 accel_peak_thousandths_g = 2;
+    // Duration of freefall in ms
+    optional int32 freefall_time_millis = 3;
+}
+
+/**
+ * Log bucketed battery charge cycles.
+ *
+ * Each bucket represents cycles of the battery past
+ * a given charge point.  For example, bucket 1 is the
+ * lowest 1/8th of the battery, and bucket 8 is 100%.
+ *
+ * Logged from:
+ * /sys/class/power_supply/bms/cycle_count, via Vendor.
+ */
+message ChargeCyclesReported {
+    optional int32 cycle_bucket_1 = 1;
+    optional int32 cycle_bucket_2 = 2;
+    optional int32 cycle_bucket_3 = 3;
+    optional int32 cycle_bucket_4 = 4;
+    optional int32 cycle_bucket_5 = 5;
+    optional int32 cycle_bucket_6 = 6;
+    optional int32 cycle_bucket_7 = 7;
+    optional int32 cycle_bucket_8 = 8;
+}
+
+/**
+ * Logs the duration of a davey (jank of >=700ms) when it occurs
+ *
+ * Logged from:
+ *   frameworks/base/libs/hwui/JankTracker.cpp
+ */
+message DaveyOccurred {
+    // The UID that logged this atom.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Amount of time it took to render the frame. Should be >=700ms.
+    optional int64 jank_duration_millis = 2;
+}
+
+/**
+ * Logs phone signal strength changes.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message PhoneSignalStrengthChanged {
+    // Signal strength, from frameworks/base/core/proto/android/telephony/enums.proto.
+    optional android.telephony.SignalStrengthEnum signal_strength = 1;
+}
+
+/**
+ * Logs that a setting was updated.
+ * Logged from:
+ *   frameworks/base/packages/SettingsProvider/src/com/android/providers/settings/SettingsState.java
+ * The tag and is_default allow resetting of settings to default values based on the specified
+ * tag. See Settings#putString(ContentResolver, String, String, String, boolean) for more details.
+ */
+message SettingChanged {
+    // The name of the setting.
+    optional string setting = 1;
+
+    // The change being imposed on this setting. May represent a number, eg "3".
+    optional string value = 2;
+
+    // The new value of this setting. For most settings, this is same as value. For some settings,
+    // value is +X or -X where X represents an element in a set. For example, if the previous value
+    // is A,B,C and value is -B, then new_value is A,C and prev_value is A,B,C.
+    // The +/- feature is currently only used for location_providers_allowed.
+    optional string new_value = 3;
+
+    // The previous value of this setting.
+    optional string prev_value = 4;
+
+    // The tag used with the is_default for resetting sets of settings. This is generally null.
+    optional string tag = 5;
+
+    // True if this setting with tag should be resettable.
+    optional bool is_default = 6;
+
+    // The associated user (for multi-user feature). Defined in android/os/UserHandle.java
+    optional int32 user = 7;
+
+    enum ChangeReason {
+        UPDATED = 1; // Updated can be an insertion or an update.
+        DELETED = 2;
+    }
+    optional ChangeReason reason = 8;
+}
+
+/**
+ * Logs activity going to foreground or background
+ *
+ * Logged from:
+  *   frameworks/base/services/core/java/com/android/server/am/ActivityRecord.java
+ */
+message ActivityForegroundStateChanged {
+    optional int32 uid = 1 [(is_uid) = true];
+    optional string pkg_name = 2;
+    optional string class_name = 3;
+
+    enum State {
+        BACKGROUND = 0;
+        FOREGROUND = 1;
+    }
+    optional State state = 4;
+}
+
+/**
+ * Logs when an app crashes.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message AppCrashOccurred {
+    optional int32 uid = 1 [(is_uid) = true];
+
+    optional string event_type = 2;
+
+    // The name of the process.
+    // system_server if it is not by an app
+    optional string process_name = 3;
+
+    // The pid if available. -1 means not available.
+    optional sint32 pid = 4;
+
+    optional string package_name = 5;
+
+    enum InstantApp {
+        UNAVAILABLE = 0;
+        FALSE = 1;
+        TRUE = 2;
+    }
+    optional InstantApp is_instant_app = 6;
+
+    enum ForegroundState {
+        UNKNOWN = 0;
+        BACKGROUND = 1;
+        FOREGROUND = 2;
+    }
+    optional ForegroundState foreground_state = 7;
+}
+
+/**
+ * Logs when a WTF (What a Terrible Failure) happened.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message WTFOccurred {
+    optional int32 uid = 1 [(is_uid) = true];
+
+    optional string tag = 2;
+
+    // The name of the process.
+    // system_server if it is not by an app
+    optional string process_name = 3;
+
+    // The pid if available. -1 means not available.
+    optional sint32 pid = 4;
+}
+
+/**
+ * Logs when system server reports low memory.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message LowMemReported {
+}
+
+/**
+ * Logs when an app ANR (App Not Responding) occurs.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/am/AppErrors.java
+ */
+message ANROccurred {
+    optional int32 uid = 1 [(is_uid) = true];
+
+    optional string process_name = 2;
+
+    optional string short_component_name = 3;
+
+    optional string reason = 4;
+
+    enum InstantApp {
+        UNAVAILABLE = 0;
+        FALSE = 1;
+        TRUE = 2;
+    }
+    optional InstantApp is_instant_app = 5;
+
+    enum ForegroundState {
+        UNKNOWN = 0;
+        BACKGROUND = 1;
+        FOREGROUND = 2;
+    }
+    optional ForegroundState foreground_state = 6;
+}
+
+/*
+ * Allows other apps to push events into statsd.
+ * Logged from:
+ *      frameworks/base/core/java/android/util/StatsLog.java
+ */
+message AppBreadcrumbReported {
+    // The uid of the application that sent this custom atom.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // An arbitrary label chosen by the developer. For Android P, the label should be in [0, 16).
+    optional int32 label = 2;
+
+    // Allows applications to easily use a custom event as start/stop boundaries (ie, define custom
+    // predicates for the metrics).
+    enum State {
+        UNKNOWN = 0;
+        UNSPECIFIED = 1;  // For events that are known to not represent START/STOP.
+        STOP = 2;
+        START = 3;
+    }
+    optional State state = 3;
+}
+
+/**
+ * Logs when statsd detects an anomaly.
+ *
+ * Logged from:
+ *   frameworks/base/cmds/statsd/src/anomaly/AnomalyTracker.cpp
+ */
+message AnomalyDetected {
+    // Uid that owns the config whose anomaly detection alert fired.
+    optional int32 config_uid = 1 [(is_uid) = true];
+
+    // Id of the config whose anomaly detection alert fired.
+    optional int64 config_id = 2;
+
+    // Id of the alert (i.e. name of the anomaly that was detected).
+    optional int64 alert_id = 3;
+}
+
+message AppStartOccurred {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The app package name.
+    optional string pkg_name = 2;
+
+    enum TransitionType {
+        UNKNOWN = 0;
+        WARM = 1;
+        HOT = 2;
+        COLD = 3;
+    }
+    // The transition type.
+    optional TransitionType type = 3;
+
+    // The activity name.
+    optional string activity_name = 4;
+
+    // The name of the calling app. Empty if not set.
+    optional string calling_pkg_name = 5;
+
+    // Whether the app is an instant app.
+    optional bool is_instant_app = 6;
+
+    // Device uptime when activity started.
+    optional int64 activity_start_millis = 7;
+
+    optional android.app.AppTransitionReasonEnum reason = 8;
+
+    optional int32 transition_delay_millis = 9;
+    // -1 if not set.
+    optional int32 starting_window_delay_millis = 10;
+    // -1 if not set.
+    optional int32 bind_application_delay_millis = 11;
+    optional int32 windows_drawn_delay_millis = 12;
+
+    // Empty if not set.
+    optional string launch_token = 13;
+
+    // The compiler filter used when when the package was optimized.
+    optional int32 package_optimization_compilation_filter = 14;
+
+    // The reason why the package was optimized.
+    optional int32 package_optimization_compilation_reason = 15;
+}
+
+message AppStartCanceled {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The app package name.
+    optional string pkg_name = 2;
+
+    enum TransitionType {
+        UNKNOWN = 0;
+        WARM = 1;
+        HOT = 2;
+        COLD = 3;
+    }
+    // The transition type.
+    optional TransitionType type = 3;
+
+    // The activity name.
+    optional string activity_name = 4;
+}
+
+message AppStartFullyDrawn {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The app package name.
+    optional string pkg_name = 2;
+
+    enum TransitionType {
+        UNKNOWN = 0;
+        WITH_BUNDLE = 1;
+        WITHOUT_BUNDLE = 2;
+    }
+    // The transition type.
+    optional TransitionType type = 3;
+
+    // The activity name.
+    optional string activity_name = 4;
+
+    optional bool transition_process_running = 5;
+
+    // App startup time (until call to Activity#reportFullyDrawn()).
+    optional int64 app_startup_time_millis = 6;
+}
+
+/**
+ * Logs a picture-in-picture action
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ *      frameworks/base/services/core/java/com/android/server/am/ActivityStackSupervisor.java
+ *      frameworks/base/packages/SystemUI/src/com/android/systemui/pip/phone/PipTouchHandler.java
+ */
+message PictureInPictureStateChanged {
+    // -1 if it is not available
+    optional int32 uid = 1 [(is_uid) = true];
+
+    optional string short_name = 2;
+
+    enum State {
+        ENTERED = 1;
+        EXPANDED_TO_FULL_SCREEN = 2;
+        MINIMIZED = 3;
+        DISMISSED = 4;
+    }
+    optional State state = 3;
+}
+
+/**
+ * Logs overlay action
+ * Logged from:
+ *     services/core/java/com/android/server/wm/Session.java
+ */
+message OverlayStateChanged {
+    optional int32 uid = 1 [(is_uid) = true];
+
+    optional string package_name = 2;
+
+    optional bool using_alert_window = 3;
+
+    enum State {
+        ENTERED = 1;
+        EXITED = 2;
+    }
+    optional State state = 4;
+}
+
+/*
+ * Logs foreground service starts and stops.
+ * Note that this is not when a service starts or stops, but when it is
+ * considered foreground.
+ * Logged from
+ *     //frameworks/base/services/core/java/com/android/server/am/ActiveServices.java
+ */
+message ForegroundServiceStateChanged {
+    optional int32 uid = 1 [(is_uid) = true];
+    // package_name + "/" + class_name
+    optional string short_name = 2;
+
+    enum State {
+        ENTER = 1;
+        EXIT = 2;
+    }
+    optional State state = 3;
+}
+
+/**
+ * Logs creation or removal of an isolated uid. Isolated uid's are temporary uid's to sandbox risky
+ * behavior in its own uid. However, the metrics of these isolated uid's almost always should be
+ * attributed back to the parent (host) uid. One example is Chrome.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message IsolatedUidChanged {
+    // The host UID. Generally, we should attribute metrics from the isolated uid to the host uid.
+    // NOTE: DO NOT annotate uid field in this atom. This atom is specially handled in statsd.
+    optional int32 parent_uid = 1;
+
+    optional int32 isolated_uid = 2;
+
+    // We expect an isolated uid to be removed before if it's used for another parent uid.
+    enum Event {
+        REMOVED = 0;
+        CREATED = 1;
+    }
+    optional Event event = 3;
+}
+
+/*
+ * Logs the reception of an incoming network packet causing the main system to wake up for
+ * processing that packet. These events are notified by the kernel via Netlink NFLOG to Netd
+ * and processed by WakeupController.cpp.
+ */
+message PacketWakeupOccurred {
+    // The uid owning the socket into which the packet was delivered, or -1 if the packet was
+    // delivered nowhere.
+    optional int32 uid = 1 [(is_uid) = true];
+    // The interface name on which the packet was received.
+    optional string iface = 2;
+    // The ethertype value of the packet.
+    optional int32 ethertype = 3;
+    // String representation of the destination MAC address of the packet.
+    optional string destination_hardware_address = 4;
+    // String representation of the source address of the packet if this was an IP packet.
+    optional string source_ip = 5;
+    // String representation of the destination address of the packet if this was an IP packet.
+    optional string destination_ip = 6;
+    // The value of the protocol field if this was an IPv4 packet or the value of the Next Header
+    // field if this was an IPv6 packet. The range of possible values is the same for both IP
+    // families.
+    optional int32 ip_next_header = 7;
+    // The source port if this was a TCP or UDP packet.
+    optional int32 source_port = 8;
+    // The destination port if this was a TCP or UDP packet.
+    optional int32 destination_port = 9;
+}
+
+/*
+ * Logs the memory stats for an app on startup.
+ * Logged from:
+ *     frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message AppStartMemoryStateCaptured {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The process name.
+    optional string process_name = 2;
+
+    // The activity name.
+    optional string activity_name = 3;
+
+    // # of page-faults
+    optional int64 pgfault = 4;
+
+    // # of major page-faults
+    optional int64 pgmajfault = 5;
+
+    // RSS
+    optional int64 rss_in_bytes = 6;
+
+    // CACHE
+    optional int64 cache_in_bytes = 7;
+
+    // SWAP
+    optional int64 swap_in_bytes = 8;
+}
+
+/*
+ * Logs the change in Low Memory Killer Daemon (LMKD) state which is used as start/stop boundaries
+ * for LMK event.
+ * Logged from:
+ *      system/core/lmkd/lmkd.c
+ */
+message LmkStateChanged {
+    enum State {
+        UNKNOWN = 0;
+        START = 1;
+        STOP = 2;
+    }
+    optional State state = 1;
+}
+
+/*
+ * Logs the event when Low Memory Killer Daemon (LMKD) kills a process to reduce memory pressure.
+ * Logged from:
+ *      system/core/lmkd/lmkd.c
+ */
+message LmkKillOccurred {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The process name.
+    optional string process_name = 2;
+
+    // oom adj score.
+    optional int32 oom_score = 3;
+
+    // # of page-faults
+    optional int64 pgfault = 4;
+
+    // # of major page-faults
+    optional int64 pgmajfault = 5;
+
+    // RSS
+    optional int64 rss_in_bytes = 6;
+
+    // CACHE
+    optional int64 cache_in_bytes = 7;
+
+    // SWAP
+    optional int64 swap_in_bytes = 8;
+}
+
+/*
+ * Logs when the ActivityManagerService detects that an app died.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message AppDied {
+    // timestamp(elapsedRealtime) of record creation
+    optional uint64 timestamp_millis = 1 [(stateFieldOption).option = EXCLUSIVE];
+}
+
+//////////////////////////////////////////////////////////////////////
+// Pulled atoms below this line //
+//////////////////////////////////////////////////////////////////////
+
+/**
+ * Pulls bytes transferred via wifi (Sum of foreground and background usage).
+ *
+ * Pulled from:
+ *   StatsCompanionService (using BatteryStats to get which interfaces are wifi)
+ */
+message WifiBytesTransfer {
+    optional int32 uid = 1 [(is_uid) = true];
+
+    optional int64 rx_bytes = 2;
+
+    optional int64 rx_packets = 3;
+
+    optional int64 tx_bytes = 4;
+
+    optional int64 tx_packets = 5;
+}
+
+/**
+ * Pulls bytes transferred via wifi (separated by foreground and background usage).
+ *
+ * Pulled from:
+ *   StatsCompanionService (using BatteryStats to get which interfaces are wifi)
+ */
+message WifiBytesTransferByFgBg {
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // 1 denotes foreground and 0 denotes background. This is called Set in NetworkStats.
+    optional bool is_foreground = 2;
+
+    optional int64 rx_bytes = 3;
+
+    optional int64 rx_packets = 4;
+
+    optional int64 tx_bytes = 5;
+
+    optional int64 tx_packets = 6;
+}
+
+/**
+ * Pulls bytes transferred via mobile networks (Sum of foreground and background usage).
+ *
+ * Pulled from:
+ *   StatsCompanionService (using BatteryStats to get which interfaces are mobile data)
+ */
+message MobileBytesTransfer {
+    optional int32 uid = 1 [(is_uid) = true];
+
+    optional int64 rx_bytes = 2;
+
+    optional int64 rx_packets = 3;
+
+    optional int64 tx_bytes = 4;
+
+    optional int64 tx_packets = 5;
+}
+
+/**
+ * Pulls bytes transferred via mobile networks (separated by foreground and background usage).
+ *
+ * Pulled from:
+ *   StatsCompanionService (using BatteryStats to get which interfaces are mobile data)
+ */
+message MobileBytesTransferByFgBg {
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // 1 denotes foreground and 0 denotes background. This is called Set in
+    // NetworkStats.
+    optional bool is_foreground = 2;
+
+    optional int64 rx_bytes = 3;
+
+    optional int64 rx_packets = 4;
+
+    optional int64 tx_bytes = 5;
+
+    optional int64 tx_packets = 6;
+}
+
+/**
+ * Pulls bytes transferred via bluetooth. It is pulled from Bluetooth controller.
+ *
+ * Pulled from:
+ *   StatsCompanionService
+ */
+message BluetoothBytesTransfer {
+    optional int32 uid = 1 [(is_uid) = true];
+
+    optional int64 rx_bytes = 2;
+
+    optional int64 tx_bytes = 3;
+}
+
+/**
+ * Pulls the kernel wakelock durations. This atom is adapted from
+ * android/internal/os/KernelWakelockStats.java
+ *
+ * Pulled from:
+ *   StatsCompanionService using KernelWakelockReader.
+ */
+message KernelWakelock {
+    optional string name = 1;
+
+    optional int32 count = 2;
+
+    optional int32 version = 3;
+
+    optional int64 time = 4;
+}
+
+/**
+ * Pulls low power state information. This includes platform and subsystem sleep state information,
+ * PowerStatePlatformSleepState, PowerStateVoter or PowerStateSubsystemSleepState as defined in
+ *   hardware/interfaces/power/1.0/types.hal
+ *   hardware/interfaces/power/1.1/types.hal
+ */
+message SubsystemSleepState {
+    // Subsystem name
+    optional string subsystem_name = 1;
+    // For PlatformLowPowerStats (hal 1.0), this is the voter name, which could be empty.
+    // For SubsystemLowPowerStats (hal 1.1), this is the sleep state name.
+    optional string subname = 2;
+    // The number of times it entered, or voted for entering the sleep state
+    optional uint64 count = 3;
+    // The length of time spent in, or spent voting for, the sleep state
+    optional uint64 time_millis = 4;
+}
+
+/**
+ * Pulls Cpu time per frequency.
+ * Pulls the time the cpu spend on the frequency index. Frequency index
+ * starts from highest to lowest. The value should be monotonically
+ * increasing since boot. However, if there is a cpu
+ * hotplug event, the value would be reset as well.
+ */
+message CpuTimePerFreq {
+    optional uint32 cluster = 1;
+    optional uint32 freq_index = 2;
+    optional uint64 time_millis = 3;
+}
+
+/**
+ * Pulls Cpu Time Per Uid.
+ * Note that isolated process uid time should be attributed to host uids.
+ */
+message CpuTimePerUid {
+    optional int32 uid = 1 [(is_uid) = true];
+    optional uint64 user_time_millis = 2;
+    optional uint64 sys_time_millis = 3;
+}
+
+/**
+ * Pulls Cpu Time Per Uid per frequency.
+ * Note that isolated process uid time should be attributed to host uids.
+ * For each uid, we order the time by descending frequencies.
+ */
+message CpuTimePerUidFreq {
+    optional int32 uid = 1 [(is_uid) = true];
+    optional uint32 freq_index = 2;
+    optional uint64 time_millis = 3;
+}
+
+/**
+ * Pulls Wifi Controller Activity Energy Info
+ */
+message WifiActivityInfo {
+    // timestamp(wall clock) of record creation
+    optional uint64 timestamp_millis = 1;
+    // stack reported state
+    // TODO: replace this with proto enum
+    optional int32 stack_state = 2;
+    // tx time in ms
+    optional uint64 controller_tx_time_millis = 3;
+    // rx time in ms
+    optional uint64 controller_rx_time_millis = 4;
+    // idle time in ms
+    optional uint64 controller_idle_time_millis = 5;
+    // product of current(mA), voltage(V) and time(ms)
+    optional uint64 controller_energy_used = 6;
+}
+
+/**
+ * Pulls Modem Activity Energy Info
+ */
+message ModemActivityInfo {
+    // timestamp(wall clock) of record creation
+    optional uint64 timestamp_millis = 1;
+    // sleep time in ms.
+    optional uint64 sleep_time_millis = 2;
+    // idle time in ms
+    optional uint64 controller_idle_time_millis = 3;
+    /**
+     * Tx power index
+     * index 0 = tx_power < 0dBm
+     * index 1 = 0dBm < tx_power < 5dBm
+     * index 2 = 5dBm < tx_power < 15dBm
+     * index 3 = 15dBm < tx_power < 20dBm
+     * index 4 = tx_power > 20dBm
+     */
+    // tx time in ms at power level 0
+    optional uint64 controller_tx_time_pl0_millis = 4;
+    // tx time in ms at power level 1
+    optional uint64 controller_tx_time_pl1_millis = 5;
+    // tx time in ms at power level 2
+    optional uint64 controller_tx_time_pl2_millis = 6;
+    // tx time in ms at power level 3
+    optional uint64 controller_tx_time_pl3_millis = 7;
+    // tx time in ms at power level 4
+    optional uint64 controller_tx_time_pl4_millis = 8;
+    // rx time in ms at power level 5
+    optional uint64 controller_rx_time_millis = 9;
+    // product of current(mA), voltage(V) and time(ms)
+    optional uint64 energy_used = 10;
+}
+
+/**
+ * Pulls Bluetooth Activity Energy Info
+ * Note: BluetoothBytesTransfer is pulled at the same time from the controller.
+ */
+message BluetoothActivityInfo {
+    // timestamp(wall clock) of record creation
+    optional uint64 timestamp_millis = 1;
+    // bluetooth stack state
+    optional int32 bluetooth_stack_state = 2;
+    // tx time in ms
+    optional uint64 controller_tx_time_millis = 3;
+    // rx time in ms
+    optional uint64 controller_rx_time_millis = 4;
+    // idle time in ms
+    optional uint64 controller_idle_time_millis = 5;
+    // product of current(mA), voltage(V) and time(ms)
+    optional uint64 energy_used = 6;
+}
+
+/*
+ * Logs the memory stats for a process.
+ */
+message ProcessMemoryState {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // The process name.
+    optional string process_name = 2;
+
+    // oom adj score.
+    optional int32 oom_score = 3;
+
+    // # of page-faults
+    optional int64 pgfault = 4;
+
+    // # of major page-faults
+    optional int64 pgmajfault = 5;
+
+    // RSS
+    optional int64 rss_in_bytes = 6;
+
+    // CACHE
+    optional int64 cache_in_bytes = 7;
+
+    // SWAP
+    optional int64 swap_in_bytes = 8;
+}
+
+/*
+ * Elapsed real time from SystemClock.
+ */
+message SystemElapsedRealtime {
+    optional uint64 time_millis = 1;
+}
+
+/*
+ * Up time from SystemClock.
+ */
+message SystemUptime {
+    // Milliseconds since the system was booted.
+    // This clock stops when the system enters deep sleep (CPU off, display dark, device waiting
+    // for external input).
+    // It is not affected by clock scaling, idle, or other power saving mechanisms.
+    optional uint64 uptime_millis = 1;
+}
+
+/*
+ * Reads from /proc/uid_concurrent_active_time which has the format:
+ * active: X (X is # cores)
+ * [uid0]: [time-0] [time-1] [time-2] ... (# entries = # cores)
+ * [uid1]: [time-0] [time-1] [time-2] ... ...
+ * ...
+ * Time-N means the CPU time a UID spent running concurrently with N other processes.
+ * The file contains a monotonically increasing count of time for a single boot.
+ */
+message CpuActiveTime {
+    optional int32 uid = 1 [(is_uid) = true];
+    optional uint64 time_millis = 2;
+}
+
+/**
+ * Reads from /proc/uid_concurrent_policy_time which has the format:
+ * policy0: X policy4: Y (there are X cores on policy0, Y cores on policy4)
+ * [uid0]: [time-0-0] [time-0-1] ... [time-1-0] [time-1-1] ...
+ * [uid1]: [time-0-0] [time-0-1] ... [time-1-0] [time-1-1] ...
+ * ...
+ * Time-X-Y means the time a UID spent on clusterX running concurrently with Y other processes.
+ * The file contains a monotonically increasing count of time for a single boot.
+ */
+message CpuClusterTime {
+    optional int32 uid = 1 [(is_uid) = true];
+    optional int32 cluster_index = 2;
+    optional uint64 time_millis = 3;
+}
+
+/*
+ * Pulls free disk space, for data, system partition and temporary directory.
+ */
+message DiskSpace {
+    // available bytes in data partition
+    optional uint64 data_available_bytes = 1;
+    // available bytes in system partition
+    optional uint64 system_available_bytes = 2;
+    // available bytes in download cache or temp directories
+    optional uint64 temp_available_bytes = 3;
+}
+
+/**
+ * Pulls battery coulomb counter, which is the remaining battery charge in uAh.
+ * Pulled from:
+ *   frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
+ */
+message RemainingBatteryCapacity {
+    optional int32 charge_uAh = 1;
+}
+
+/**
+ * Pulls battery capacity, which is the battery capacity when full in uAh.
+ * Pulled from:
+ *   frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
+ */
+message FullBatteryCapacity {
+    optional int32 capacity_uAh = 1;
+}
+
+/**
+ * Pulls the temperature of various parts of the device.
+ * The units are tenths of a degree Celsius. Eg: 30.3C is reported as 303.
+ *
+ * Pulled from:
+ *   frameworks/base/cmds/statsd/src/external/ResourceThermalManagerPuller.cpp
+ */
+message Temperature {
+    // The type of temperature being reported. Eg. CPU, GPU, SKIN, BATTERY.
+    optional android.os.TemperatureTypeEnum sensor_location = 1;
+
+    // The name of the temperature source. Eg. CPU0
+    optional string sensor_name = 2;
+
+    // Temperature in tenths of a degree C.
+    optional int32 temperature_dC = 3;
+}

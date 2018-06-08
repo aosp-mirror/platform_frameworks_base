@@ -16,8 +16,8 @@
 
 #pragma once
 
-#include "renderthread/RenderThread.h"
 #include "Rect.h"
+#include "renderthread/RenderThread.h"
 
 #include <SkBitmap.h>
 
@@ -41,8 +41,7 @@ public:
     /**
      * Copies the surface's most recently queued buffer into the provided bitmap.
      */
-    virtual CopyResult copySurfaceInto(Surface& surface, const Rect& srcRect,
-            SkBitmap* bitmap) = 0;
+    virtual CopyResult copySurfaceInto(Surface& surface, const Rect& srcRect, SkBitmap* bitmap) = 0;
     virtual CopyResult copyGraphicBufferInto(GraphicBuffer* graphicBuffer, SkBitmap* bitmap) = 0;
 
 protected:
@@ -52,5 +51,5 @@ protected:
     renderthread::RenderThread& mRenderThread;
 };
 
-} // namespace uirenderer
-} // namespace android
+}  // namespace uirenderer
+}  // namespace android

@@ -16,11 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
-
-import android.app.ActivityManager.StackId;
-import android.app.RemoteAction;
+import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -28,13 +24,12 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 
-import com.android.server.UiThread;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -50,7 +45,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 public class StackWindowController
         extends WindowContainerController<TaskStack, StackWindowListener> {
 
-    final int mStackId;
+    private final int mStackId;
 
     private final H mHandler;
 
@@ -60,8 +55,8 @@ public class StackWindowController
     private final Rect mTmpNonDecorInsets = new Rect();
     private final Rect mTmpDisplayBounds = new Rect();
 
-    public StackWindowController(int stackId, StackWindowListener listener,
-            int displayId, boolean onTop, Rect outBounds) {
+    public StackWindowController(int stackId, StackWindowListener listener, int displayId,
+            boolean onTop, Rect outBounds) {
         this(stackId, listener, displayId, onTop, outBounds, WindowManagerService.getInstance());
     }
 
@@ -79,8 +74,7 @@ public class StackWindowController
                         + " to unknown displayId=" + displayId);
             }
 
-            final TaskStack stack = dc.addStackToDisplay(stackId, onTop);
-            stack.setController(this);
+            dc.createStack(stackId, onTop, this);
             getRawBounds(outBounds);
         }
     }
@@ -92,12 +86,6 @@ public class StackWindowController
                 mContainer.removeIfPossible();
                 super.removeContainer();
             }
-        }
-    }
-
-    public boolean isVisible() {
-        synchronized (mWindowMap) {
-            return mContainer != null && mContainer.isVisible();
         }
     }
 
@@ -119,8 +107,7 @@ public class StackWindowController
         }
     }
 
-    public void positionChildAt(TaskWindowContainerController child, int position, Rect bounds,
-            Configuration overrideConfig) {
+    public void positionChildAt(TaskWindowContainerController child, int position) {
         synchronized (mWindowMap) {
             if (DEBUG_STACK) Slog.i(TAG_WM, "positionChildAt: positioning task=" + child
                     + " at " + position);
@@ -134,7 +121,7 @@ public class StackWindowController
                         "positionChildAt: could not find stack for task=" + mContainer);
                 return;
             }
-            child.mContainer.positionAt(position, bounds, overrideConfig);
+            child.mContainer.positionAt(position);
             mContainer.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
         }
     }
@@ -160,7 +147,8 @@ public class StackWindowController
         }
     }
 
-    public void positionChildAtBottom(TaskWindowContainerController child) {
+    public void positionChildAtBottom(TaskWindowContainerController child,
+            boolean includingParents) {
         if (child == null) {
             // TODO: Fix the call-points that cause this to happen.
             return;
@@ -172,7 +160,7 @@ public class StackWindowController
                 Slog.e(TAG_WM, "positionChildAtBottom: task=" + child + " not found");
                 return;
             }
-            mContainer.positionChildAt(POSITION_BOTTOM, childTask, false /* includingParents */);
+            mContainer.positionChildAt(POSITION_BOTTOM, childTask, includingParents);
 
             if (mService.mAppTransition.isTransitionSet()) {
                 childTask.setSendingToBottom(true);
@@ -185,24 +173,28 @@ public class StackWindowController
      * Re-sizes a stack and its containing tasks.
      *
      * @param bounds New stack bounds. Passing in null sets the bounds to fullscreen.
-     * @param configs Configurations for tasks in the resized stack, keyed by task id.
      * @param taskBounds Bounds for tasks in the resized stack, keyed by task id.
-     * @return True if the stack is now fullscreen.
+     * @param taskTempInsetBounds Inset bounds for individual tasks, keyed by task id.
      */
-    public boolean resize(Rect bounds, SparseArray<Configuration> configs,
-            SparseArray<Rect> taskBounds, SparseArray<Rect> taskTempInsetBounds) {
+    public void resize(Rect bounds, SparseArray<Rect> taskBounds,
+            SparseArray<Rect> taskTempInsetBounds) {
         synchronized (mWindowMap) {
             if (mContainer == null) {
                 throw new IllegalArgumentException("resizeStack: stack " + this + " not found.");
             }
             // We might trigger a configuration change. Save the current task bounds for freezing.
             mContainer.prepareFreezingTaskBounds();
-            if (mContainer.setBounds(bounds, configs, taskBounds, taskTempInsetBounds)
+            if (mContainer.setBounds(bounds, taskBounds, taskTempInsetBounds)
                     && mContainer.isVisible()) {
                 mContainer.getDisplayContent().setLayoutNeeded();
                 mService.mWindowPlacerLocked.performSurfacePlacement();
             }
-            return mContainer.getRawFullscreen();
+        }
+    }
+
+    public void onPipAnimationEndResize() {
+        synchronized (mService.mWindowMap) {
+            mContainer.onPipAnimationEndResize();
         }
     }
 
@@ -232,11 +224,13 @@ public class StackWindowController
         }
     }
 
-    private void getRawBounds(Rect outBounds) {
-        if (mContainer.getRawFullscreen()) {
-            outBounds.setEmpty();
-        } else {
-            mContainer.getRawBounds(outBounds);
+    public void getRawBounds(Rect outBounds) {
+        synchronized (mWindowMap) {
+            if (mContainer.matchParentBounds()) {
+                outBounds.setEmpty();
+            } else {
+                mContainer.getRawBounds(outBounds);
+            }
         }
     }
 
@@ -257,37 +251,43 @@ public class StackWindowController
     }
 
     /**
-     * Adjusts the screen size in dp's for the {@param config} for the given params.
+     * Adjusts the screen size in dp's for the {@param config} for the given params. The provided
+     * params represent the desired state of a configuration change. Since this utility is used
+     * before mContainer has been updated, any relevant properties (like {@param windowingMode})
+     * need to be passed in.
      */
     public void adjustConfigurationForBounds(Rect bounds, Rect insetBounds,
             Rect nonDecorBounds, Rect stableBounds, boolean overrideWidth,
             boolean overrideHeight, float density, Configuration config,
-            Configuration parentConfig) {
+            Configuration parentConfig, int windowingMode) {
         synchronized (mWindowMap) {
             final TaskStack stack = mContainer;
             final DisplayContent displayContent = stack.getDisplayContent();
             final DisplayInfo di = displayContent.getDisplayInfo();
+            final DisplayCutout displayCutout = di.displayCutout;
 
             // Get the insets and display bounds
             mService.mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                    mTmpStableInsets);
+                    displayCutout, mTmpStableInsets);
             mService.mPolicy.getNonDecorInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                    mTmpNonDecorInsets);
+                    displayCutout, mTmpNonDecorInsets);
             mTmpDisplayBounds.set(0, 0, di.logicalWidth, di.logicalHeight);
 
             int width;
             int height;
 
-            final Rect parentAppBounds = parentConfig.appBounds;
+            final Rect parentAppBounds = parentConfig.windowConfiguration.getAppBounds();
 
-            config.setAppBounds(!bounds.isEmpty() ? bounds : null);
+            config.windowConfiguration.setBounds(bounds);
+            config.windowConfiguration.setAppBounds(!bounds.isEmpty() ? bounds : null);
             boolean intersectParentBounds = false;
 
-            if (StackId.tasksAreFloating(mStackId)) {
+            if (WindowConfiguration.isFloating(windowingMode)) {
                 // Floating tasks should not be resized to the screen's bounds.
 
-                if (mStackId == PINNED_STACK_ID && bounds.width() == mTmpDisplayBounds.width() &&
-                        bounds.height() == mTmpDisplayBounds.height()) {
+                if (windowingMode == WindowConfiguration.WINDOWING_MODE_PINNED
+                        && bounds.width() == mTmpDisplayBounds.width()
+                        && bounds.height() == mTmpDisplayBounds.height()) {
                     // If the bounds we are animating is the same as the fullscreen stack
                     // dimensions, then apply the same inset calculations that we normally do for
                     // the fullscreen stack, without intersecting it with the display bounds
@@ -295,7 +295,7 @@ public class StackWindowController
                     nonDecorBounds.inset(mTmpNonDecorInsets);
                     // Move app bounds to zero to apply intersection with parent correctly. They are
                     // used only for evaluating width and height, so it's OK to move them around.
-                    config.appBounds.offsetTo(0, 0);
+                    config.windowConfiguration.getAppBounds().offsetTo(0, 0);
                     intersectParentBounds = true;
                 }
                 width = (int) (stableBounds.width() / density);
@@ -319,14 +319,14 @@ public class StackWindowController
                 intersectParentBounds = true;
             }
 
-            if (intersectParentBounds && config.appBounds != null) {
-                config.appBounds.intersect(parentAppBounds);
+            if (intersectParentBounds && config.windowConfiguration.getAppBounds() != null) {
+                config.windowConfiguration.getAppBounds().intersect(parentAppBounds);
             }
 
             config.screenWidthDp = width;
             config.screenHeightDp = height;
             config.smallestScreenWidthDp = getSmallestWidthForTaskBounds(
-                    insetBounds != null ? insetBounds : bounds, density);
+                    insetBounds != null ? insetBounds : bounds, density, windowingMode);
         }
     }
 
@@ -348,11 +348,12 @@ public class StackWindowController
     }
 
     /**
-     * Calculates the smallest width for a task given the {@param bounds}.
+     * Calculates the smallest width for a task given the target {@param bounds} and
+     * {@param windowingMode}. Avoid using values from mContainer since they can be out-of-date.
      *
      * @return the smallest width to be used in the Configuration, in dips
      */
-    private int getSmallestWidthForTaskBounds(Rect bounds, float density) {
+    private int getSmallestWidthForTaskBounds(Rect bounds, float density, int windowingMode) {
         final DisplayContent displayContent = mContainer.getDisplayContent();
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
 
@@ -360,7 +361,7 @@ public class StackWindowController
                 bounds.height() == displayInfo.logicalHeight)) {
             // If the bounds are fullscreen, return the value of the fullscreen configuration
             return displayContent.getConfiguration().smallestScreenWidthDp;
-        } else if (StackId.tasksAreFloating(mStackId)) {
+        } else if (WindowConfiguration.isFloating(windowingMode)) {
             // For floating tasks, calculate the smallest width from the bounds of the task
             return (int) (Math.min(bounds.width(), bounds.height()) / density);
         } else {

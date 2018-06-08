@@ -33,8 +33,8 @@ import com.android.internal.telephony.ITelephonyRegistry;
  * To extend this class, you must declare the service in your manifest file to require the
  * {@link android.Manifest.permission#BIND_CARRIER_SERVICES} permission and include an intent
  * filter with the {@link #CARRIER_SERVICE_INTERFACE}. If the service should have a long-lived
- * binding, set android.service.carrier.LONG_LIVED_BINDING to true in the service's metadata.
- * For example:
+ * binding, set <code>android.service.carrier.LONG_LIVED_BINDING</code> to <code>true</code> in the
+ * service's metadata. For example:
  * </p>
  *
  * <pre>{@code

@@ -21,18 +21,15 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Paint.Align;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.graphics.Paint.Align;
-import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.Keyboard.Key;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Message;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.GestureDetector;
@@ -61,6 +58,7 @@ import java.util.Map;
  * @attr ref android.R.styleable#KeyboardView_keyBackground
  * @attr ref android.R.styleable#KeyboardView_keyPreviewLayout
  * @attr ref android.R.styleable#KeyboardView_keyPreviewOffset
+ * @attr ref android.R.styleable#KeyboardView_keyPreviewHeight
  * @attr ref android.R.styleable#KeyboardView_labelTextSize
  * @attr ref android.R.styleable#KeyboardView_keyTextSize
  * @attr ref android.R.styleable#KeyboardView_keyTextColor
@@ -661,10 +659,12 @@ public class KeyboardView extends View implements View.OnClickListener {
             invalidateAllKeys();
             mKeyboardChanged = false;
         }
-        final Canvas canvas = mCanvas;
-        canvas.clipRect(mDirtyRect, Op.REPLACE);
 
         if (mKeyboard == null) return;
+
+        mCanvas.save();
+        final Canvas canvas = mCanvas;
+        canvas.clipRect(mDirtyRect);
 
         final Paint paint = mPaint;
         final Drawable keyBackground = mKeyBackground;
@@ -757,7 +757,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             paint.setColor(0xFF00FF00);
             canvas.drawCircle((mStartX + mLastX) / 2, (mStartY + mLastY) / 2, 2, paint);
         }
-
+        mCanvas.restore();
         mDrawPending = false;
         mDirtyRect.setEmpty();
     }

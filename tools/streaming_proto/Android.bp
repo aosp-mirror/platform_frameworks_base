@@ -17,13 +17,35 @@
 // ==========================================================
 // Build the host executable: protoc-gen-javastream
 // ==========================================================
-cc_binary_host {
-    name: "protoc-gen-javastream",
+cc_defaults {
+    name: "protoc-gen-stream-defaults",
     srcs: [
         "Errors.cpp",
+        "stream_proto_utils.cpp",
         "string_utils.cpp",
-        "main.cpp",
+    ],
+    cflags: [
+        "-Wall",
+        "-Werror",
     ],
 
     shared_libs: ["libprotoc"],
+}
+
+cc_binary_host {
+    name: "protoc-gen-javastream",
+    srcs: [
+        "java/main.cpp",
+    ],
+
+    defaults: ["protoc-gen-stream-defaults"],
+}
+
+cc_binary_host {
+    name: "protoc-gen-cppstream",
+    srcs: [
+        "cpp/main.cpp",
+    ],
+
+    defaults: ["protoc-gen-stream-defaults"],
 }

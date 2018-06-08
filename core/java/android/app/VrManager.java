@@ -4,6 +4,7 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.Handler;
@@ -194,6 +195,40 @@ public class VrManager {
         try {
             mService.setAndBindCompositor(
                     (componentName == null) ? null : componentName.flattenToString());
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the current standby status of the VR device. Standby mode is only used on standalone vr
+     * devices. Standby mode is a deep sleep state where it's appropriate to turn off vr mode.
+     *
+     * @param standby True if the device is entering standby, false if it's exiting standby.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_VR_MANAGER)
+    public void setStandbyEnabled(boolean standby) {
+        try {
+            mService.setStandbyEnabled(standby);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Start VR Input method for the packageName in {@link ComponentName}.
+     * This method notifies InputMethodManagerService to use VR IME instead of
+     * regular phone IME.
+     * @param componentName ComponentName of a VR InputMethod that should be set as selected
+     * input by InputMethodManagerService.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
+    public void setVrInputMethod(ComponentName componentName) {
+        try {
+            mService.setVrInputMethod(componentName);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

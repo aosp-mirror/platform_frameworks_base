@@ -19,6 +19,7 @@ package com.android.server.am;
 import android.content.IntentFilter;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
+import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
 
@@ -44,27 +45,38 @@ final class BroadcastFilter extends IntentFilter {
         instantApp = _instantApp;
         visibleToInstantApp = _visibleToInstantApp;
     }
-    
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        super.writeToProto(proto, BroadcastFilterProto.INTENT_FILTER);
+        if (requiredPermission != null) {
+            proto.write(BroadcastFilterProto.REQUIRED_PERMISSION, requiredPermission);
+        }
+        proto.write(BroadcastFilterProto.HEX_HASH, Integer.toHexString(System.identityHashCode(this)));
+        proto.write(BroadcastFilterProto.OWNING_USER_ID, owningUserId);
+        proto.end(token);
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         dumpInReceiverList(pw, new PrintWriterPrinter(pw), prefix);
         receiverList.dumpLocal(pw, prefix);
     }
-    
+
     public void dumpBrief(PrintWriter pw, String prefix) {
         dumpBroadcastFilterState(pw, prefix);
     }
-    
+
     public void dumpInReceiverList(PrintWriter pw, Printer pr, String prefix) {
         super.dump(pr, prefix);
         dumpBroadcastFilterState(pw, prefix);
     }
-    
+
     void dumpBroadcastFilterState(PrintWriter pw, String prefix) {
         if (requiredPermission != null) {
             pw.print(prefix); pw.print("requiredPermission="); pw.println(requiredPermission);
         }
     }
-    
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("BroadcastFilter{");

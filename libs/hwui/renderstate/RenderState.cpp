@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "renderstate/RenderState.h"
+#include <GpuMemoryTracker.h>
 #include "DeferredLayerUpdater.h"
 #include "GlLayer.h"
 #include "VkLayer.h"
-#include <GpuMemoryTracker.h>
-#include "renderstate/RenderState.h"
 
 #include "renderthread/CanvasContext.h"
 #include "renderthread/EglManager.h"
@@ -31,21 +31,18 @@ namespace android {
 namespace uirenderer {
 
 RenderState::RenderState(renderthread::RenderThread& thread)
-        : mRenderThread(thread)
-        , mViewportWidth(0)
-        , mViewportHeight(0)
-        , mFramebuffer(0) {
+        : mRenderThread(thread), mViewportWidth(0), mViewportHeight(0), mFramebuffer(0) {
     mThreadId = pthread_self();
 }
 
 RenderState::~RenderState() {
     LOG_ALWAYS_FATAL_IF(mBlend || mMeshState || mScissor || mStencil,
-            "State object lifecycle not managed correctly");
+                        "State object lifecycle not managed correctly");
 }
 
 void RenderState::onGLContextCreated() {
     LOG_ALWAYS_FATAL_IF(mBlend || mMeshState || mScissor || mStencil,
-            "State object lifecycle not managed correctly");
+                        "State object lifecycle not managed correctly");
     GpuMemoryTracker::onGpuContextCreated();
 
     mBlend = new Blend();
@@ -67,7 +64,7 @@ void RenderState::onGLContextCreated() {
 
 static void layerLostGlContext(Layer* layer) {
     LOG_ALWAYS_FATAL_IF(layer->getApi() != Layer::Api::OpenGL,
-            "layerLostGlContext on non GL layer");
+                        "layerLostGlContext on non GL layer");
     static_cast<GlLayer*>(layer)->onGlContextLost();
 }
 
@@ -94,7 +91,7 @@ void RenderState::onGLContextDestroyed() {
 
 void RenderState::onVkContextCreated() {
     LOG_ALWAYS_FATAL_IF(mBlend || mMeshState || mScissor || mStencil,
-            "State object lifecycle not managed correctly");
+                        "State object lifecycle not managed correctly");
     GpuMemoryTracker::onGpuContextCreated();
 }
 
@@ -105,8 +102,8 @@ static void layerDestroyedVkContext(Layer* layer) {
 }
 
 void RenderState::onVkContextDestroyed() {
-    mLayerPool->clear();
     std::for_each(mActiveLayers.begin(), mActiveLayers.end(), layerDestroyedVkContext);
+    destroyLayersInUpdater();
     GpuMemoryTracker::onGpuContextDestroyed();
 }
 
@@ -117,9 +114,9 @@ GrContext* RenderState::getGrContext() const {
 void RenderState::flush(Caches::FlushMode mode) {
     switch (mode) {
         case Caches::FlushMode::Full:
-            // fall through
+        // fall through
         case Caches::FlushMode::Moderate:
-            // fall through
+        // fall through
         case Caches::FlushMode::Layers:
             if (mLayerPool) mLayerPool->clear();
             break;
@@ -139,7 +136,6 @@ void RenderState::setViewport(GLsizei width, GLsizei height) {
     mViewportHeight = height;
     glViewport(0, 0, mViewportWidth, mViewportHeight);
 }
-
 
 void RenderState::getViewport(GLsizei* outWidth, GLsizei* outHeight) {
     *outWidth = mViewportWidth;
@@ -189,15 +185,13 @@ void RenderState::interruptForFunctorInvoke() {
     meshState().disableTexCoordsVertexArray();
     debugOverdraw(false, false);
     // TODO: We need a way to know whether the functor is sRGB aware (b/32072673)
-    if (mCaches->extensions().hasLinearBlending() &&
-            mCaches->extensions().hasSRGBWriteControl()) {
+    if (mCaches->extensions().hasLinearBlending() && mCaches->extensions().hasSRGBWriteControl()) {
         glDisable(GL_FRAMEBUFFER_SRGB_EXT);
     }
 }
 
 void RenderState::resumeFromFunctorInvoke() {
-    if (mCaches->extensions().hasLinearBlending() &&
-            mCaches->extensions().hasSRGBWriteControl()) {
+    if (mCaches->extensions().hasLinearBlending() && mCaches->extensions().hasSRGBWriteControl()) {
         glEnable(GL_FRAMEBUFFER_SRGB_EXT);
     }
 
@@ -236,25 +230,11 @@ void RenderState::destroyLayersInUpdater() {
     std::for_each(mActiveLayerUpdaters.begin(), mActiveLayerUpdaters.end(), destroyLayerInUpdater);
 }
 
-class DecStrongTask : public renderthread::RenderTask {
-public:
-    explicit DecStrongTask(VirtualLightRefBase* object) : mObject(object) {}
-
-    virtual void run() override {
-        mObject->decStrong(nullptr);
-        mObject = nullptr;
-        delete this;
-    }
-
-private:
-    VirtualLightRefBase* mObject;
-};
-
 void RenderState::postDecStrong(VirtualLightRefBase* object) {
     if (pthread_equal(mThreadId, pthread_self())) {
         object->decStrong(nullptr);
     } else {
-        mRenderThread.queue(new DecStrongTask(object));
+        mRenderThread.queue().post([object]() { object->decStrong(nullptr); });
     }
 }
 
@@ -263,7 +243,7 @@ void RenderState::postDecStrong(VirtualLightRefBase* object) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix,
-        bool overrideDisableBlending) {
+                         bool overrideDisableBlending) {
     const Glop::Mesh& mesh = glop.mesh;
     const Glop::Mesh::Vertices& vertices = mesh.vertices;
     const Glop::Mesh::Indices& indices = mesh.indices;
@@ -280,21 +260,19 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix,
         fill.program->setColor(fill.color);
     }
 
-    fill.program->set(orthoMatrix,
-            glop.transform.modelView,
-            glop.transform.meshTransform(),
-            glop.transform.transformFlags & TransformFlags::OffsetByFudgeFactor);
+    fill.program->set(orthoMatrix, glop.transform.modelView, glop.transform.meshTransform(),
+                      glop.transform.transformFlags & TransformFlags::OffsetByFudgeFactor);
 
     // Color filter uniforms
     if (fill.filterMode == ProgramDescription::ColorFilterMode::Blend) {
         const FloatColor& color = fill.filter.color;
-        glUniform4f(mCaches->program().getUniform("colorBlend"),
-                color.r, color.g, color.b, color.a);
+        glUniform4f(mCaches->program().getUniform("colorBlend"), color.r, color.g, color.b,
+                    color.a);
     } else if (fill.filterMode == ProgramDescription::ColorFilterMode::Matrix) {
         glUniformMatrix4fv(mCaches->program().getUniform("colorMatrix"), 1, GL_FALSE,
-                fill.filter.matrix.matrix);
+                           fill.filter.matrix.matrix);
         glUniform4fv(mCaches->program().getUniform("colorMatrixVector"), 1,
-                fill.filter.matrix.vector);
+                     fill.filter.matrix.vector);
     }
 
     // Round rect clipping uniforms
@@ -309,15 +287,14 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix,
         // Divide by the radius to simplify the calculations in the fragment shader
         // roundRectPos is also passed from vertex shader relative to top/left & radius
         glUniform4f(fill.program->getUniform("roundRectInnerRectLTWH"),
-                innerRect.left / roundedOutRadius, innerRect.top / roundedOutRadius,
-                (innerRect.right - innerRect.left) / roundedOutRadius,
-                (innerRect.bottom - innerRect.top) / roundedOutRadius);
+                    innerRect.left / roundedOutRadius, innerRect.top / roundedOutRadius,
+                    (innerRect.right - innerRect.left) / roundedOutRadius,
+                    (innerRect.bottom - innerRect.top) / roundedOutRadius);
 
-        glUniformMatrix4fv(fill.program->getUniform("roundRectInvTransform"),
-                1, GL_FALSE, &state->matrix.data[0]);
+        glUniformMatrix4fv(fill.program->getUniform("roundRectInvTransform"), 1, GL_FALSE,
+                           &state->matrix.data[0]);
 
-        glUniform1f(fill.program->getUniform("roundRectRadius"),
-                roundedOutRadius);
+        glUniform1f(fill.program->getUniform("roundRectRadius"), roundedOutRadius);
     }
 
     GL_CHECKPOINT(MODERATE);
@@ -347,8 +324,8 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix,
         }
 
         if (texture.textureTransform) {
-            glUniformMatrix4fv(fill.program->getUniform("mainTextureTransform"), 1,
-                    GL_FALSE, &texture.textureTransform->data[0]);
+            glUniformMatrix4fv(fill.program->getUniform("mainTextureTransform"), 1, GL_FALSE,
+                               &texture.textureTransform->data[0]);
         }
     }
 
@@ -363,12 +340,13 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix,
     if (vertices.attribFlags & VertexAttribFlags::Color) {
         colorLocation = fill.program->getAttrib("colors");
         glEnableVertexAttribArray(colorLocation);
-        glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, vertices.stride, vertices.color);
+        glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, vertices.stride,
+                              vertices.color);
     }
     int alphaLocation = -1;
     if (vertices.attribFlags & VertexAttribFlags::Alpha) {
         // NOTE: alpha vertex position is computed assuming no VBO
-        const void* alphaCoords = ((const GLbyte*) vertices.position) + kVertexAlphaOffset;
+        const void* alphaCoords = ((const GLbyte*)vertices.position) + kVertexAlphaOffset;
         alphaLocation = fill.program->getAttrib("vtxAlpha");
         glEnableVertexAttribArray(alphaLocation);
         glVertexAttribPointer(alphaLocation, 1, GL_FLOAT, GL_FALSE, vertices.stride, alphaCoords);
@@ -377,8 +355,9 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix,
     SkiaShader::apply(*mCaches, fill.skiaShaderData, mViewportWidth, mViewportHeight);
 
     GL_CHECKPOINT(MODERATE);
-    Texture* texture = (fill.skiaShaderData.skiaShaderType & kBitmap_SkiaShaderType) ?
-            fill.skiaShaderData.bitmapData.bitmapTexture : nullptr;
+    Texture* texture = (fill.skiaShaderData.skiaShaderType & kBitmap_SkiaShaderType)
+                               ? fill.skiaShaderData.bitmapData.bitmapTexture
+                               : nullptr;
     const AutoTexture autoCleanup(texture);
 
     // If we have a shader and a base texture, the base texture is assumed to be an alpha mask
@@ -387,8 +366,8 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix,
     if (colorSpaceTexture != nullptr) {
         if (colorSpaceTexture->hasColorSpaceConversion()) {
             const ColorSpaceConnector* connector = colorSpaceTexture->getColorSpaceConnector();
-            glUniformMatrix3fv(fill.program->getUniform("colorSpaceMatrix"), 1,
-                    GL_FALSE, connector->getTransform().asArray());
+            glUniformMatrix3fv(fill.program->getUniform("colorSpaceMatrix"), 1, GL_FALSE,
+                               connector->getTransform().asArray());
         }
 
         TransferFunctionType transferFunction = colorSpaceTexture->getTransferFunctionType();
@@ -401,15 +380,15 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix,
                     break;
                 case TransferFunctionType::Full:
                     glUniform1fv(fill.program->getUniform("transferFunction"), 7,
-                            reinterpret_cast<const float*>(&source.getTransferParameters().g));
+                                 reinterpret_cast<const float*>(&source.getTransferParameters().g));
                     break;
                 case TransferFunctionType::Limited:
                     glUniform1fv(fill.program->getUniform("transferFunction"), 5,
-                            reinterpret_cast<const float*>(&source.getTransferParameters().g));
+                                 reinterpret_cast<const float*>(&source.getTransferParameters().g));
                     break;
                 case TransferFunctionType::Gamma:
                     glUniform1f(fill.program->getUniform("transferFunctionGamma"),
-                            source.getTransferParameters().g);
+                                source.getTransferParameters().g);
                     break;
             }
         }
@@ -435,16 +414,17 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix,
         GLsizei elementsCount = mesh.elementCount;
         const GLbyte* vertexData = static_cast<const GLbyte*>(vertices.position);
         while (elementsCount > 0) {
-            GLsizei drawCount = std::min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
+            GLsizei drawCount = std::min(elementsCount, (GLsizei)kMaxNumberOfQuads * 6);
             GLsizei vertexCount = (drawCount / 6) * 4;
             meshState().bindPositionVertexPointer(vertexData, vertices.stride);
             if (vertices.attribFlags & VertexAttribFlags::TextureCoord) {
-                meshState().bindTexCoordsVertexPointer(
-                        vertexData + kMeshTextureOffset, vertices.stride);
+                meshState().bindTexCoordsVertexPointer(vertexData + kMeshTextureOffset,
+                                                       vertices.stride);
             }
 
             if (mCaches->extensions().getMajorGlVersion() >= 3) {
-                glDrawRangeElements(mesh.primitiveMode, 0, vertexCount-1, drawCount, GL_UNSIGNED_SHORT, nullptr);
+                glDrawRangeElements(mesh.primitiveMode, 0, vertexCount - 1, drawCount,
+                                    GL_UNSIGNED_SHORT, nullptr);
             } else {
                 glDrawElements(mesh.primitiveMode, drawCount, GL_UNSIGNED_SHORT, nullptr);
             }
@@ -453,10 +433,13 @@ void RenderState::render(const Glop& glop, const Matrix4& orthoMatrix,
         }
     } else if (indices.bufferObject || indices.indices) {
         if (mCaches->extensions().getMajorGlVersion() >= 3) {
-            // use glDrawRangeElements to reduce CPU overhead (otherwise the driver has to determine the min/max index values)
-            glDrawRangeElements(mesh.primitiveMode, 0, mesh.vertexCount-1, mesh.elementCount, GL_UNSIGNED_SHORT, indices.indices);
+            // use glDrawRangeElements to reduce CPU overhead (otherwise the driver has to determine
+            // the min/max index values)
+            glDrawRangeElements(mesh.primitiveMode, 0, mesh.vertexCount - 1, mesh.elementCount,
+                                GL_UNSIGNED_SHORT, indices.indices);
         } else {
-            glDrawElements(mesh.primitiveMode, mesh.elementCount, GL_UNSIGNED_SHORT, indices.indices);
+            glDrawElements(mesh.primitiveMode, mesh.elementCount, GL_UNSIGNED_SHORT,
+                           indices.indices);
         }
     } else {
         glDrawArrays(mesh.primitiveMode, 0, mesh.elementCount);

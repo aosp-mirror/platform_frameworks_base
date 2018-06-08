@@ -17,12 +17,12 @@
 #include "SkiaVulkanPipeline.h"
 
 #include "DeferredLayerUpdater.h"
-#include "renderthread/Frame.h"
 #include "Readback.h"
-#include "renderstate/RenderState.h"
 #include "SkiaPipeline.h"
 #include "SkiaProfileRenderer.h"
 #include "VkLayer.h"
+#include "renderstate/RenderState.h"
+#include "renderthread/Frame.h"
 
 #include <SkSurface.h>
 #include <SkTypes.h>
@@ -41,8 +41,7 @@ namespace uirenderer {
 namespace skiapipeline {
 
 SkiaVulkanPipeline::SkiaVulkanPipeline(renderthread::RenderThread& thread)
-        : SkiaPipeline(thread)
-        , mVkManager(thread.vulkanManager()) {}
+        : SkiaPipeline(thread), mVkManager(thread.vulkanManager()) {}
 
 MakeCurrentResult SkiaVulkanPipeline::makeCurrent() {
     return MakeCurrentResult::AlreadyCurrent;
@@ -50,7 +49,7 @@ MakeCurrentResult SkiaVulkanPipeline::makeCurrent() {
 
 Frame SkiaVulkanPipeline::getFrame() {
     LOG_ALWAYS_FATAL_IF(mVkSurface == nullptr,
-                "drawRenderNode called on a context with no surface!");
+                        "drawRenderNode called on a context with no surface!");
 
     SkSurface* backBuffer = mVkManager.getBackbufferSurface(mVkSurface);
     if (backBuffer == nullptr) {
@@ -62,27 +61,25 @@ Frame SkiaVulkanPipeline::getFrame() {
     return frame;
 }
 
-bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty,
-        const SkRect& dirty,
-        const FrameBuilder::LightGeometry& lightGeometry,
-        LayerUpdateQueue* layerUpdateQueue,
-        const Rect& contentDrawBounds, bool opaque, bool wideColorGamut,
-        const BakedOpRenderer::LightInfo& lightInfo,
-        const std::vector<sp<RenderNode>>& renderNodes,
-        FrameInfoVisualizer* profiler) {
-
+bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
+                              const FrameBuilder::LightGeometry& lightGeometry,
+                              LayerUpdateQueue* layerUpdateQueue, const Rect& contentDrawBounds,
+                              bool opaque, bool wideColorGamut,
+                              const BakedOpRenderer::LightInfo& lightInfo,
+                              const std::vector<sp<RenderNode>>& renderNodes,
+                              FrameInfoVisualizer* profiler) {
     sk_sp<SkSurface> backBuffer = mVkSurface->getBackBufferSurface();
     if (backBuffer.get() == nullptr) {
         return false;
     }
     SkiaPipeline::updateLighting(lightGeometry, lightInfo);
-    renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, wideColorGamut,
-            contentDrawBounds, backBuffer);
+    renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, wideColorGamut, contentDrawBounds,
+                backBuffer);
     layerUpdateQueue->clear();
 
     // Draw visual debugging features
-    if (CC_UNLIKELY(Properties::showDirtyRegions
-            || ProfileType::None != Properties::getProfileType())) {
+    if (CC_UNLIKELY(Properties::showDirtyRegions ||
+                    ProfileType::None != Properties::getProfileType())) {
         SkCanvas* profileCanvas = backBuffer->getCanvas();
         SkiaProfileRenderer profileRenderer(profileCanvas);
         profiler->draw(profileRenderer);
@@ -97,9 +94,8 @@ bool SkiaVulkanPipeline::draw(const Frame& frame, const SkRect& screenDirty,
     return true;
 }
 
-bool SkiaVulkanPipeline::swapBuffers(const Frame& frame, bool drew,
-        const SkRect& screenDirty, FrameInfo* currentFrameInfo, bool* requireSwap) {
-
+bool SkiaVulkanPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
+                                     FrameInfo* currentFrameInfo, bool* requireSwap) {
     *requireSwap = drew;
 
     // Even if we decided to cancel the frame, from the perspective of jank
@@ -119,7 +115,8 @@ bool SkiaVulkanPipeline::copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bi
 }
 
 static Layer* createLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
-        SkColorFilter* colorFilter, int alpha, SkBlendMode mode, bool blend) {
+                          sk_sp<SkColorFilter> colorFilter, int alpha, SkBlendMode mode,
+                          bool blend) {
     return new VkLayer(renderState, layerWidth, layerHeight, colorFilter, alpha, mode, blend);
 }
 
@@ -129,11 +126,10 @@ DeferredLayerUpdater* SkiaVulkanPipeline::createTextureLayer() {
     return new DeferredLayerUpdater(mRenderThread.renderState(), createLayer, Layer::Api::Vulkan);
 }
 
-void SkiaVulkanPipeline::onStop() {
-}
+void SkiaVulkanPipeline::onStop() {}
 
 bool SkiaVulkanPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior,
-        ColorMode colorMode) {
+                                    ColorMode colorMode) {
     if (mVkSurface) {
         mVkManager.destroySurface(mVkSurface);
         mVkSurface = nullptr;
@@ -162,16 +158,15 @@ void SkiaVulkanPipeline::invokeFunctor(const RenderThread& thread, Functor* func
 }
 
 sk_sp<Bitmap> SkiaVulkanPipeline::allocateHardwareBitmap(renderthread::RenderThread& renderThread,
-        SkBitmap& skBitmap) {
-    //TODO: implement this function for Vulkan pipeline
-    //code below is a hack to avoid crashing because of missing HW Bitmap support
-    sp<GraphicBuffer> buffer = new GraphicBuffer(skBitmap.info().width(), skBitmap.info().height(),
-            PIXEL_FORMAT_RGBA_8888,
-            GraphicBuffer::USAGE_HW_TEXTURE |
-            GraphicBuffer::USAGE_SW_WRITE_NEVER |
-            GraphicBuffer::USAGE_SW_READ_NEVER,
-            std::string("SkiaVulkanPipeline::allocateHardwareBitmap pid [")
-            + std::to_string(getpid()) + "]");
+                                                         SkBitmap& skBitmap) {
+    // TODO: implement this function for Vulkan pipeline
+    // code below is a hack to avoid crashing because of missing HW Bitmap support
+    sp<GraphicBuffer> buffer = new GraphicBuffer(
+            skBitmap.info().width(), skBitmap.info().height(), PIXEL_FORMAT_RGBA_8888,
+            GraphicBuffer::USAGE_HW_TEXTURE | GraphicBuffer::USAGE_SW_WRITE_NEVER |
+                    GraphicBuffer::USAGE_SW_READ_NEVER,
+            std::string("SkiaVulkanPipeline::allocateHardwareBitmap pid [") +
+                    std::to_string(getpid()) + "]");
     status_t error = buffer->initCheck();
     if (error < 0) {
         ALOGW("SkiaVulkanPipeline::allocateHardwareBitmap() failed in GraphicBuffer.create()");

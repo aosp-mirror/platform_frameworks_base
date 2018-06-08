@@ -15,10 +15,13 @@
  */
 package com.android.server.devicepolicy;
 
+import android.app.ActivityManagerInternal;
+import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.backup.IBackupManager;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
@@ -34,12 +37,15 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.security.KeyChain;
+import android.support.annotation.NonNull;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Pair;
 import android.view.IWindowManager;
 
+import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.net.NetworkPolicyManagerInternal;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,40 +60,33 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
      */
     public static class OwnersTestable extends Owners {
         public static final String LEGACY_FILE = "legacy.xml";
-        public static final String DEVICE_OWNER_FILE = "device_owner2.xml";
-        public static final String PROFILE_OWNER_FILE = "profile_owner.xml";
-
-        private final File mLegacyFile;
-        private final File mDeviceOwnerFile;
-        private final File mUsersDataDir;
 
         public OwnersTestable(MockSystemServices services) {
             super(services.userManager, services.userManagerInternal,
-                    services.packageManagerInternal);
-            mLegacyFile = new File(services.dataDir, LEGACY_FILE);
-            mDeviceOwnerFile = new File(services.dataDir, DEVICE_OWNER_FILE);
-            mUsersDataDir = new File(services.dataDir, "users");
+                    services.packageManagerInternal, new MockInjector(services));
         }
 
-        @Override
-        File getLegacyConfigFileWithTestOverride() {
-            return mLegacyFile;
-        }
+        static class MockInjector extends Injector {
+            private final MockSystemServices mServices;
 
-        @Override
-        File getDeviceOwnerFileWithTestOverride() {
-            return mDeviceOwnerFile;
-        }
+            private MockInjector(MockSystemServices services) {
+                mServices = services;
+            }
 
-        @Override
-        File getProfileOwnerFileWithTestOverride(int userId) {
-            final File userDir = new File(mUsersDataDir, String.valueOf(userId));
-            return new File(userDir, PROFILE_OWNER_FILE);
+            @Override
+            File environmentGetDataSystemDirectory() {
+                return mServices.dataDir;
+            }
+
+            @Override
+            File environmentGetUserSystemDirectory(int userId) {
+                return mServices.environment.getUserSystemDirectory(userId);
+            }
         }
     }
 
     public final DpmMockContext context;
-    private final MockInjector mMockInjector;
+    protected final MockInjector mMockInjector;
 
     public DevicePolicyManagerServiceTestable(MockSystemServices services, DpmMockContext context) {
         this(new MockInjector(services, context));
@@ -98,7 +97,6 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         mMockInjector = injector;
         this.context = injector.context;
     }
-
 
     public void notifyChangeToContentObserver(Uri uri, int userHandle) {
         ContentObserver co = mMockInjector.mContentObservers.get(new Pair<>(uri, userHandle));
@@ -113,8 +111,7 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
     }
 
-
-    private static class MockInjector extends Injector {
+    static class MockInjector extends Injector {
 
         public final DpmMockContext context;
         private final MockSystemServices services;
@@ -122,7 +119,7 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         // Key is a pair of uri and userId
         private final Map<Pair<Uri, Integer>, ContentObserver> mContentObservers = new ArrayMap<>();
 
-        private MockInjector(MockSystemServices services, DpmMockContext context) {
+        public MockInjector(MockSystemServices services, DpmMockContext context) {
             super(context);
             this.services = services;
             this.context = context;
@@ -141,6 +138,16 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         UserManagerInternal getUserManagerInternal() {
             return services.userManagerInternal;
+        }
+
+        @Override
+        UsageStatsManagerInternal getUsageStatsManagerInternal() {
+            return services.usageStatsManagerInternal;
+        }
+
+        @Override
+        NetworkPolicyManagerInternal getNetworkPolicyManagerInternal() {
+            return services.networkPolicyManagerInternal;
         }
 
         @Override
@@ -174,6 +181,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        ActivityManagerInternal getActivityManagerInternal() {
+            return services.activityManagerInternal;
+        }
+
+        @Override
         IPackageManager getIPackageManager() {
             return services.ipackageManager;
         }
@@ -192,6 +204,9 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         Looper getMyLooper() {
             return Looper.getMainLooper();
         }
+
+        @Override
+        AlarmManager getAlarmManager() {return services.alarmManager;}
 
         @Override
         LockPatternUtils newLockPatternUtils() {
@@ -231,6 +246,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         void binderRestoreCallingIdentity(long token) {
             context.binder.restoreCallingIdentity(token);
+        }
+
+        @Override
+        void binderWithCleanCallingIdentity(@NonNull ThrowingRunnable action) {
+            context.binder.withCleanCallingIdentity(action);
         }
 
         @Override
@@ -362,6 +382,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
+        void settingsSystemPutStringForUser(String name, String value, int userId) {
+            services.settings.settingsSystemPutStringForUser(name, value, userId);
+        }
+
+        @Override
         int settingsGlobalGetInt(String name, int def) {
             return services.settings.settingsGlobalGetInt(name, def);
         }
@@ -400,5 +425,19 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         KeyChain.KeyChainConnection keyChainBindAsUser(UserHandle user) {
             return services.keyChainConnection;
         }
+
+        @Override
+        void postOnSystemServerInitThreadPool(Runnable runnable) {
+            runnable.run();
+        }
+
+        @Override
+        public TransferOwnershipMetadataManager newTransferOwnershipMetadataManager() {
+            return new TransferOwnershipMetadataManager(
+                    new TransferOwnershipMetadataManagerTest.MockInjector());
+        }
+
+        @Override
+        public void runCryptoSelfTest() {}
     }
 }

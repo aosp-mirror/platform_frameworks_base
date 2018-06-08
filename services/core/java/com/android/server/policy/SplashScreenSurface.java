@@ -23,11 +23,10 @@ import android.os.IBinder;
 import android.util.Slog;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.WindowManagerPolicy;
-import android.view.WindowManagerPolicy.StartingSurface;
 
 import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneWindow;
+import com.android.server.policy.WindowManagerPolicy.StartingSurface;
 
 /**
  * Holds the contents of a splash screen starting window, i.e. the {@link DecorView} of a

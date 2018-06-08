@@ -20,6 +20,8 @@ import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Objects;
+
 /**
  * {@hide}
  */
@@ -78,5 +80,30 @@ public class ResultInfo implements Parcelable {
         } else {
             mData = null;
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof ResultInfo)) {
+            return false;
+        }
+        final ResultInfo other = (ResultInfo) obj;
+        final boolean intentsEqual = mData == null ? (other.mData == null)
+                : mData.filterEquals(other.mData);
+        return intentsEqual && Objects.equals(mResultWho, other.mResultWho)
+                && mResultCode == other.mResultCode
+                && mRequestCode == other.mRequestCode;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + mRequestCode;
+        result = 31 * result + mResultCode;
+        result = 31 * result + Objects.hashCode(mResultWho);
+        if (mData != null) {
+            result = 31 * result + mData.filterHashCode();
+        }
+        return result;
     }
 }

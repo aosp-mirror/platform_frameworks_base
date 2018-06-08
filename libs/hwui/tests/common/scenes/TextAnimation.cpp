@@ -15,25 +15,20 @@
  */
 
 #include "TestSceneBase.h"
-#include "utils/Color.h"
 
 class TextAnimation;
 
-static TestScene::Registrar _Text(TestScene::Info{
-    "text",
-    "Draws a bunch of text.",
-    TestScene::simpleCreateScene<TextAnimation>
-});
+static TestScene::Registrar _Text(TestScene::Info{"text", "Draws a bunch of text.",
+                                                  TestScene::simpleCreateScene<TextAnimation>});
 
 class TextAnimation : public TestScene {
 public:
     sp<RenderNode> card;
     void createContent(int width, int height, Canvas& canvas) override {
         canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
-        card = TestUtils::createNode(0, 0, width, height,
-                [](RenderProperties& props, Canvas& canvas) {
+        card = TestUtils::createNode(0, 0, width, height, [](RenderProperties& props,
+                                                             Canvas& canvas) {
             SkPaint paint;
-            paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
             paint.setAntiAlias(true);
             paint.setTextSize(50);
 

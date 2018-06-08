@@ -51,12 +51,12 @@ public class TestableLooper {
         this(acquireLooperManager(l), l);
     }
 
-    private TestableLooper(TestLooperManager wrapper, Looper l) throws Exception {
+    private TestableLooper(TestLooperManager wrapper, Looper l) {
         mQueueWrapper = wrapper;
         setupQueue(l);
     }
 
-    private TestableLooper(Looper looper, boolean b) throws Exception {
+    private TestableLooper(Looper looper, boolean b) {
         setupQueue(looper);
     }
 
@@ -64,7 +64,7 @@ public class TestableLooper {
         return mLooper;
     }
 
-    private void setupQueue(Looper l) throws Exception {
+    private void setupQueue(Looper l) {
         mLooper = l;
         mQueue = mLooper.getQueue();
         mHandler = new Handler(mLooper);
@@ -75,7 +75,7 @@ public class TestableLooper {
      * the looper will not be available for any subsequent tests. This is
      * automatically handled for tests using {@link RunWithLooper}.
      */
-    public void destroy() throws NoSuchFieldException, IllegalAccessException {
+    public void destroy() {
         mQueueWrapper.release();
         if (mLooper == Looper.getMainLooper()) {
             TestableInstrumentation.releaseMain();
@@ -133,7 +133,7 @@ public class TestableLooper {
 
                 if (mMessageHandler != null) {
                     if (mMessageHandler.onMessageHandled(result)) {
-                        result.getTarget().dispatchMessage(result);
+                        mQueueWrapper.execute(result);
                         mQueueWrapper.recycle(result);
                     } else {
                         mQueueWrapper.recycle(result);
@@ -141,7 +141,7 @@ public class TestableLooper {
                         return false;
                     }
                 } else {
-                    result.getTarget().dispatchMessage(result);
+                    mQueueWrapper.execute(result);
                     mQueueWrapper.recycle(result);
                 }
             } else {
@@ -238,7 +238,7 @@ public class TestableLooper {
             super(base.getMethod());
             mLooper = other.mLooper;
             mTestableLooper = other;
-            mHandler = new Handler(mLooper);
+            mHandler = Handler.createAsync(mLooper);
         }
 
         public static FrameworkMethod get(FrameworkMethod base, boolean setAsMain, Object test) {

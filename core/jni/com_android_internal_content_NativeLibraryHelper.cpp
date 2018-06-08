@@ -555,6 +555,23 @@ com_android_internal_content_NativeLibraryHelper_openApk(JNIEnv *env, jclass, js
     return reinterpret_cast<jlong>(zipFile);
 }
 
+static jlong
+com_android_internal_content_NativeLibraryHelper_openApkFd(JNIEnv *env, jclass,
+        jobject fileDescriptor, jstring debugPathName)
+{
+    ScopedUtfChars debugFilePath(env, debugPathName);
+
+    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
+    if (fd < 0) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", "Bad FileDescriptor");
+        return 0;
+    }
+
+    ZipFileRO* zipFile = ZipFileRO::openFd(fd, debugFilePath.c_str());
+
+    return reinterpret_cast<jlong>(zipFile);
+}
+
 static void
 com_android_internal_content_NativeLibraryHelper_close(JNIEnv *env, jclass, jlong apkHandle)
 {
@@ -565,6 +582,9 @@ static const JNINativeMethod gMethods[] = {
     {"nativeOpenApk",
             "(Ljava/lang/String;)J",
             (void *)com_android_internal_content_NativeLibraryHelper_openApk},
+    {"nativeOpenApkFd",
+            "(Ljava/io/FileDescriptor;Ljava/lang/String;)J",
+            (void *)com_android_internal_content_NativeLibraryHelper_openApkFd},
     {"nativeClose",
             "(J)V",
             (void *)com_android_internal_content_NativeLibraryHelper_close},

@@ -29,7 +29,7 @@ public final class Usb20ACHeader extends UsbACHeaderInterface {
                                 // See audio20.pdf Appendix A.7, “Audio Function Category Codes.”
     private byte mControls;     // 8:1 See audio20.pdf Table 4-5.
 
-    public Usb20ACHeader(int length, byte type, byte subtype, byte subclass, int spec) {
+    public Usb20ACHeader(int length, byte type, byte subtype, int subclass, int spec) {
         super(length, type, subtype, subclass, spec);
     }
 

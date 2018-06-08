@@ -207,8 +207,12 @@ public class AssistManager implements ConfigurationChangedReceiver {
         boolean structureEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.ASSIST_STRUCTURE_ENABLED, 1, UserHandle.USER_CURRENT) != 0;
 
-        final Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                .getAssistIntent(structureEnabled);
+        final SearchManager searchManager =
+            (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
+        if (searchManager == null) {
+            return;
+        }
+        final Intent intent = searchManager.getAssistIntent(structureEnabled);
         if (intent == null) {
             return;
         }

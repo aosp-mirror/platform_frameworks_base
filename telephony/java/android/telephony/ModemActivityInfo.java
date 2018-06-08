@@ -36,12 +36,12 @@ public class ModemActivityInfo implements Parcelable {
      */
     public static final int TX_POWER_LEVELS = 5;
 
-    private final long mTimestamp;
-    private final int mSleepTimeMs;
-    private final int mIdleTimeMs;
-    private final int [] mTxTimeMs = new int[TX_POWER_LEVELS];
-    private final int mRxTimeMs;
-    private final int mEnergyUsed;
+    private long mTimestamp;
+    private int mSleepTimeMs;
+    private int mIdleTimeMs;
+    private int [] mTxTimeMs = new int[TX_POWER_LEVELS];
+    private int mRxTimeMs;
+    private int mEnergyUsed;
 
     public ModemActivityInfo(long timestamp, int sleepTimeMs, int idleTimeMs,
                         int[] txTimeMs, int rxTimeMs, int energyUsed) {
@@ -110,12 +110,20 @@ public class ModemActivityInfo implements Parcelable {
         return mTimestamp;
     }
 
+    public void setTimestamp(long timestamp) {
+        mTimestamp = timestamp;
+    }
+
     /**
      * @return tx time in ms. It's an array of tx times
      * with each index...
      */
     public int [] getTxTimeMillis() {
         return mTxTimeMs;
+    }
+
+    public void setTxTimeMillis(int[] txTimeMs) {
+        mTxTimeMs = txTimeMs;
     }
 
     /**
@@ -125,11 +133,19 @@ public class ModemActivityInfo implements Parcelable {
         return mSleepTimeMs;
     }
 
+    public void setSleepTimeMillis(int sleepTimeMillis) {
+        mSleepTimeMs = sleepTimeMillis;
+    }
+
     /**
      * @return idle time in ms.
      */
     public int getIdleTimeMillis() {
         return mIdleTimeMs;
+    }
+
+    public void setIdleTimeMillis(int idleTimeMillis) {
+        mIdleTimeMs = idleTimeMillis;
     }
 
     /**
@@ -139,12 +155,20 @@ public class ModemActivityInfo implements Parcelable {
         return mRxTimeMs;
     }
 
+    public void setRxTimeMillis(int rxTimeMillis) {
+        mRxTimeMs = rxTimeMillis;
+    }
+
     /**
      * product of current(mA), voltage(V) and time(ms)
      * @return energy used
      */
     public int getEnergyUsed () {
         return mEnergyUsed;
+    }
+
+    public void setEnergyUsed(int energyUsed) {
+        mEnergyUsed = energyUsed;
     }
 
     /**

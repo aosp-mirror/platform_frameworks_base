@@ -18,6 +18,7 @@ package android.text;
 
 import static android.text.Layout.Alignment.ALIGN_NORMAL;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -25,13 +26,16 @@ import static org.junit.Assert.assertTrue;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.style.ReplacementSpan;
+import android.util.ArraySet;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DynamicLayoutTest {
@@ -111,5 +115,189 @@ public class DynamicLayoutTest {
         builder.delete(builder.length() -5, builder.length());
         assertFalse(layout.getBlocksAlwaysNeedToBeRedrawn().contains(0));
         assertTrue(layout.getBlocksAlwaysNeedToBeRedrawn().isEmpty());
+    }
+
+    @Test
+    public void testGetLineExtra_withoutLinespacing() {
+        final SpannableStringBuilder text = new SpannableStringBuilder("a\nb\nc");
+        final TextPaint textPaint = new TextPaint();
+
+        // create a StaticLayout to check against
+        final StaticLayout staticLayout = StaticLayout.Builder.obtain(text, 0,
+                text.length(), textPaint, WIDTH)
+                .setAlignment(ALIGN_NORMAL)
+                .setIncludePad(false)
+                .build();
+
+        // create the DynamicLayout
+        final DynamicLayout dynamicLayout = new DynamicLayout(text,
+                textPaint,
+                WIDTH,
+                ALIGN_NORMAL,
+                1f /*spacingMultiplier*/,
+                0 /*spacingAdd*/,
+                false /*includepad*/);
+
+        final int lineCount = staticLayout.getLineCount();
+        assertEquals(lineCount, dynamicLayout.getLineCount());
+        for (int i = 0; i < lineCount; i++) {
+            assertEquals(staticLayout.getLineExtra(i), dynamicLayout.getLineExtra(i));
+        }
+    }
+
+    @Test
+    public void testGetLineExtra_withLinespacing() {
+        final SpannableStringBuilder text = new SpannableStringBuilder("a\nb\nc");
+        final TextPaint textPaint = new TextPaint();
+        final float spacingMultiplier = 2f;
+        final float spacingAdd = 4;
+
+        // create a StaticLayout to check against
+        final StaticLayout staticLayout = StaticLayout.Builder.obtain(text, 0,
+                text.length(), textPaint, WIDTH)
+                .setAlignment(ALIGN_NORMAL)
+                .setIncludePad(false)
+                .setLineSpacing(spacingAdd, spacingMultiplier)
+                .build();
+
+        // create the DynamicLayout
+        final DynamicLayout dynamicLayout = new DynamicLayout(text,
+                textPaint,
+                WIDTH,
+                ALIGN_NORMAL,
+                spacingMultiplier,
+                spacingAdd,
+                false /*includepad*/);
+
+        final int lineCount = staticLayout.getLineCount();
+        assertEquals(lineCount, dynamicLayout.getLineCount());
+        for (int i = 0; i < lineCount - 1; i++) {
+            assertEquals(staticLayout.getLineExtra(i), dynamicLayout.getLineExtra(i));
+        }
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testGetLineExtra_withNegativeValue() {
+        final DynamicLayout layout = new DynamicLayout("", new TextPaint(), 10 /*width*/,
+                ALIGN_NORMAL, 1.0f /*spacingMultiplier*/, 0f /*spacingAdd*/, false /*includepad*/);
+        layout.getLineExtra(-1);
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testGetLineExtra_withParamGreaterThanLineCount() {
+        final DynamicLayout layout = new DynamicLayout("", new TextPaint(), 10 /*width*/,
+                ALIGN_NORMAL, 1.0f /*spacingMultiplier*/, 0f /*spacingAdd*/, false /*includepad*/);
+        layout.getLineExtra(100);
+    }
+
+    @Test
+    public void testReflow_afterSpannableEdit() {
+        final String text = "a\nb:\uD83C\uDF1A c \n\uD83C\uDF1A";
+        final int length = text.length();
+        final SpannableStringBuilder spannable = new SpannableStringBuilder(text);
+        spannable.setSpan(new MockReplacementSpan(), 4, 6, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new MockReplacementSpan(), 10, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        final DynamicLayout layout = new DynamicLayout(spannable, new TextPaint(), WIDTH,
+                ALIGN_NORMAL, 1.0f /*spacingMultiplier*/, 0f /*spacingAdd*/, false /*includepad*/);
+
+        spannable.delete(8, 9);
+        spannable.replace(7, 8, "ch");
+
+        layout.reflow(spannable, 0, length, length);
+        final ArraySet<Integer> blocks = layout.getBlocksAlwaysNeedToBeRedrawn();
+        for (Integer value : blocks) {
+            assertTrue("Block index should not be negative", value >= 0);
+        }
+    }
+
+    @Test
+    public void testFallbackLineSpacing() {
+        // All glyphs in the fonts are 1em wide.
+        final String[] testFontFiles = {
+            // ascent == 1em, descent == 2em, only supports 'a' and space
+            "ascent1em-descent2em.ttf",
+            // ascent == 3em, descent == 4em, only supports 'b'
+            "ascent3em-descent4em.ttf"
+        };
+        final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font weight='400' style='normal'>ascent1em-descent2em.ttf</font>"
+                + "  </family>"
+                + "  <family>"
+                + "    <font weight='400' style='normal'>ascent3em-descent4em.ttf</font>"
+                + "  </family>"
+                + "</familyset>";
+
+        try (FontFallbackSetup setup =
+                new FontFallbackSetup("DynamicLayout", testFontFiles, xml)) {
+            final TextPaint paint = setup.getPaintFor("sans-serif");
+            final int textSize = 100;
+            paint.setTextSize(textSize);
+            assertEquals(-textSize, paint.ascent(), 0.0f);
+            assertEquals(2 * textSize, paint.descent(), 0.0f);
+
+            final int paraWidth = 5 * textSize;
+            final String text = "aaaaa aabaa aaaaa"; // This should result in three lines.
+
+            // Old line spacing. All lines should get their ascent and descents from the first font.
+            DynamicLayout layout = DynamicLayout.Builder
+                    .obtain(text, paint, paraWidth)
+                    .setIncludePad(false)
+                    .setUseLineSpacingFromFallbacks(false)
+                    .build();
+            assertEquals(3, layout.getLineCount());
+            assertEquals(-textSize, layout.getLineAscent(0));
+            assertEquals(2 * textSize, layout.getLineDescent(0));
+            assertEquals(-textSize, layout.getLineAscent(1));
+            assertEquals(2 * textSize, layout.getLineDescent(1));
+            assertEquals(-textSize, layout.getLineAscent(2));
+            assertEquals(2 * textSize, layout.getLineDescent(2));
+
+            // New line spacing. The second line has a 'b', so it needs more ascent and descent.
+            layout = DynamicLayout.Builder
+                    .obtain(text, paint, paraWidth)
+                    .setIncludePad(false)
+                    .setUseLineSpacingFromFallbacks(true)
+                    .build();
+            assertEquals(3, layout.getLineCount());
+            assertEquals(-textSize, layout.getLineAscent(0));
+            assertEquals(2 * textSize, layout.getLineDescent(0));
+            assertEquals(-3 * textSize, layout.getLineAscent(1));
+            assertEquals(4 * textSize, layout.getLineDescent(1));
+            assertEquals(-textSize, layout.getLineAscent(2));
+            assertEquals(2 * textSize, layout.getLineDescent(2));
+
+            // The default is the old line spacing, for backward compatibility.
+            layout = DynamicLayout.Builder
+                    .obtain(text, paint, paraWidth)
+                    .setIncludePad(false)
+                    .build();
+            assertEquals(3, layout.getLineCount());
+            assertEquals(-textSize, layout.getLineAscent(0));
+            assertEquals(2 * textSize, layout.getLineDescent(0));
+            assertEquals(-textSize, layout.getLineAscent(1));
+            assertEquals(2 * textSize, layout.getLineDescent(1));
+            assertEquals(-textSize, layout.getLineAscent(2));
+            assertEquals(2 * textSize, layout.getLineDescent(2));
+        }
+    }
+
+    @Test
+    public void testBuilder_defaultTextDirection() {
+        final DynamicLayout.Builder builder = DynamicLayout.Builder
+                .obtain("", new TextPaint(), WIDTH);
+        final DynamicLayout layout = builder.build();
+        assertEquals(TextDirectionHeuristics.FIRSTSTRONG_LTR, layout.getTextDirectionHeuristic());
+    }
+
+    @Test
+    public void testBuilder_setTextDirection() {
+        final DynamicLayout.Builder builder = DynamicLayout.Builder
+                .obtain("", new TextPaint(), WIDTH)
+                .setTextDirection(TextDirectionHeuristics.ANYRTL_LTR);
+        final DynamicLayout layout = builder.build();
+        assertEquals(TextDirectionHeuristics.ANYRTL_LTR, layout.getTextDirectionHeuristic());
     }
 }

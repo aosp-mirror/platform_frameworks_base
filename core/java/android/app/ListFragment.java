@@ -144,7 +144,12 @@ import android.widget.TextView;
  *
  * @see #setListAdapter
  * @see android.widget.ListView
+ *
+ * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
+ *      {@link android.support.v4.app.ListFragment} for consistent behavior across all devices
+ *      and access to <a href="{@docRoot}topic/libraries/architecture/lifecycle.html">Lifecycle</a>.
  */
+@Deprecated
 public class ListFragment extends Fragment {
     final private Handler mHandler = new Handler();
 

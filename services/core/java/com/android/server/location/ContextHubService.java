@@ -16,17 +16,29 @@
 
 package com.android.server.location;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
+import android.hardware.contexthub.V1_0.AsyncEventType;
+import android.hardware.contexthub.V1_0.ContextHub;
+import android.hardware.contexthub.V1_0.ContextHubMsg;
+import android.hardware.contexthub.V1_0.HubAppInfo;
+import android.hardware.contexthub.V1_0.IContexthub;
+import android.hardware.contexthub.V1_0.IContexthubCallback;
+import android.hardware.contexthub.V1_0.Result;
+import android.hardware.contexthub.V1_0.TransactionResult;
 import android.hardware.location.ContextHubInfo;
-import android.hardware.location.ContextHubManager;
 import android.hardware.location.ContextHubMessage;
-import android.hardware.location.IContextHubService;
+import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.IContextHubCallback;
-import android.hardware.location.NanoAppFilter;
+import android.hardware.location.IContextHubClient;
+import android.hardware.location.IContextHubClientCallback;
+import android.hardware.location.IContextHubService;
+import android.hardware.location.IContextHubTransactionCallback;
 import android.hardware.location.NanoApp;
+import android.hardware.location.NanoAppBinary;
+import android.hardware.location.NanoAppFilter;
 import android.hardware.location.NanoAppInstanceInfo;
+import android.hardware.location.NanoAppMessage;
+import android.hardware.location.NanoAppState;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
@@ -38,179 +50,368 @@ import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * @hide
  */
 public class ContextHubService extends IContextHubService.Stub {
     private static final String TAG = "ContextHubService";
-    private static final String HARDWARE_PERMISSION = Manifest.permission.LOCATION_HARDWARE;
-    private static final String ENFORCE_HW_PERMISSION_MESSAGE = "Permission '"
-        + HARDWARE_PERMISSION + "' not granted to access ContextHub Hardware";
 
-    public static final int ANY_HUB             = -1;
-    public static final int MSG_LOAD_NANO_APP   = 3;
+    /*
+     * Constants for the type of transaction that is defined by ContextHubService.
+     * This is used to report the transaction callback to clients, and is different from
+     * ContextHubTransaction.Type.
+     */
+    public static final int MSG_ENABLE_NANO_APP = 1;
+    public static final int MSG_DISABLE_NANO_APP = 2;
+    public static final int MSG_LOAD_NANO_APP = 3;
     public static final int MSG_UNLOAD_NANO_APP = 4;
-
-    private static final String PRE_LOADED_GENERIC_UNKNOWN = "Preloaded app, unknown";
-    private static final String PRE_LOADED_APP_NAME = PRE_LOADED_GENERIC_UNKNOWN;
-    private static final String PRE_LOADED_APP_PUBLISHER = PRE_LOADED_GENERIC_UNKNOWN;
-    private static final int PRE_LOADED_APP_MEM_REQ = 0;
-
-    private static final int MSG_HEADER_SIZE = 4;
-    private static final int HEADER_FIELD_MSG_TYPE = 0;
-    private static final int HEADER_FIELD_MSG_VERSION = 1;
-    private static final int HEADER_FIELD_HUB_HANDLE = 2;
-    private static final int HEADER_FIELD_APP_INSTANCE = 3;
-
-    private static final int HEADER_FIELD_LOAD_APP_ID_LO = MSG_HEADER_SIZE;
-    private static final int HEADER_FIELD_LOAD_APP_ID_HI = MSG_HEADER_SIZE + 1;
-    private static final int MSG_LOAD_APP_HEADER_SIZE = MSG_HEADER_SIZE + 2;
+    public static final int MSG_QUERY_NANO_APPS = 5;
+    public static final int MSG_QUERY_MEMORY = 6;
+    public static final int MSG_HUB_RESET = 7;
 
     private static final int OS_APP_INSTANCE = -1;
 
     private final Context mContext;
-    private final ConcurrentHashMap<Integer, NanoAppInstanceInfo> mNanoAppHash =
-            new ConcurrentHashMap<>();
-    private final ContextHubInfo[] mContextHubInfo;
+
+    private final Map<Integer, ContextHubInfo> mContextHubIdToInfoMap;
+    private final List<ContextHubInfo> mContextHubInfoList;
     private final RemoteCallbackList<IContextHubCallback> mCallbacksList =
             new RemoteCallbackList<>();
 
-    private native int nativeSendMessage(int[] header, byte[] data);
-    private native ContextHubInfo[] nativeInitialize();
+    // Proxy object to communicate with the Context Hub HAL
+    private final IContexthub mContextHubProxy;
+
+    // The manager for transaction queue
+    private final ContextHubTransactionManager mTransactionManager;
+
+    // The manager for sending messages to/from clients
+    private final ContextHubClientManager mClientManager;
+
+    // The default client for old API clients
+    private final Map<Integer, IContextHubClient> mDefaultClientMap;
+
+    // The manager for the internal nanoapp state cache
+    private final NanoAppStateManager mNanoAppStateManager = new NanoAppStateManager();
+
+    /**
+     * Class extending the callback to register with a Context Hub.
+     */
+    private class ContextHubServiceCallback extends IContexthubCallback.Stub {
+        private final int mContextHubId;
+
+        ContextHubServiceCallback(int contextHubId) {
+            mContextHubId = contextHubId;
+        }
+
+        @Override
+        public void handleClientMsg(ContextHubMsg message) {
+            handleClientMessageCallback(mContextHubId, message);
+        }
+
+        @Override
+        public void handleTxnResult(int transactionId, int result) {
+            handleTransactionResultCallback(mContextHubId, transactionId, result);
+        }
+
+        @Override
+        public void handleHubEvent(int eventType) {
+            handleHubEventCallback(mContextHubId, eventType);
+        }
+
+        @Override
+        public void handleAppAbort(long nanoAppId, int abortCode) {
+            handleAppAbortCallback(mContextHubId, nanoAppId, abortCode);
+        }
+
+        @Override
+        public void handleAppsInfo(ArrayList<HubAppInfo> nanoAppInfoList) {
+            handleQueryAppsCallback(mContextHubId, nanoAppInfoList);
+        }
+    }
 
     public ContextHubService(Context context) {
         mContext = context;
-        mContextHubInfo = nativeInitialize();
 
-        for (int i = 0; i < mContextHubInfo.length; i++) {
-            Log.d(TAG, "ContextHub[" + i + "] id: " + mContextHubInfo[i].getId()
-                  + ", name:  " + mContextHubInfo[i].getName());
+        mContextHubProxy = getContextHubProxy();
+        if (mContextHubProxy == null) {
+            mTransactionManager = null;
+            mClientManager = null;
+            mDefaultClientMap = Collections.emptyMap();
+            mContextHubIdToInfoMap = Collections.emptyMap();
+            mContextHubInfoList = Collections.emptyList();
+            return;
         }
+
+        mClientManager = new ContextHubClientManager(mContext, mContextHubProxy);
+        mTransactionManager = new ContextHubTransactionManager(
+                mContextHubProxy, mClientManager, mNanoAppStateManager);
+
+        List<ContextHub> hubList;
+        try {
+            hubList = mContextHubProxy.getHubs();
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException while getting Context Hub info", e);
+            hubList = Collections.emptyList();
+        }
+        mContextHubIdToInfoMap = Collections.unmodifiableMap(
+                ContextHubServiceUtil.createContextHubInfoMap(hubList));
+        mContextHubInfoList = new ArrayList<>(mContextHubIdToInfoMap.values());
+
+        HashMap<Integer, IContextHubClient> defaultClientMap = new HashMap<>();
+        for (int contextHubId : mContextHubIdToInfoMap.keySet()) {
+            IContextHubClient client = mClientManager.registerClient(
+                    createDefaultClientCallback(contextHubId), contextHubId);
+            defaultClientMap.put(contextHubId, client);
+
+            try {
+                mContextHubProxy.registerCallback(
+                        contextHubId, new ContextHubServiceCallback(contextHubId));
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while registering service callback for hub (ID = "
+                        + contextHubId + ")", e);
+            }
+
+            // Do a query to initialize the service cache list of nanoapps
+            // TODO(b/69270990): Remove this when old API is deprecated
+            queryNanoAppsInternal(contextHubId);
+        }
+        mDefaultClientMap = Collections.unmodifiableMap(defaultClientMap);
+    }
+
+    /**
+     * Creates a default client callback for old API clients.
+     *
+     * @param contextHubId the ID of the hub to attach this client to
+     * @return the internal callback interface
+     */
+    private IContextHubClientCallback createDefaultClientCallback(int contextHubId) {
+        return new IContextHubClientCallback.Stub() {
+            @Override
+            public void onMessageFromNanoApp(NanoAppMessage message) {
+                int nanoAppHandle = mNanoAppStateManager.getNanoAppHandle(
+                        contextHubId, message.getNanoAppId());
+
+                onMessageReceiptOldApi(
+                        message.getMessageType(), contextHubId, nanoAppHandle,
+                        message.getMessageBody());
+            }
+
+            @Override
+            public void onHubReset() {
+                byte[] data = {TransactionResult.SUCCESS};
+                onMessageReceiptOldApi(MSG_HUB_RESET, contextHubId, OS_APP_INSTANCE, data);
+            }
+
+            @Override
+            public void onNanoAppAborted(long nanoAppId, int abortCode) {
+            }
+
+            @Override
+            public void onNanoAppLoaded(long nanoAppId) {
+            }
+
+            @Override
+            public void onNanoAppUnloaded(long nanoAppId) {
+            }
+
+            @Override
+            public void onNanoAppEnabled(long nanoAppId) {
+            }
+
+            @Override
+            public void onNanoAppDisabled(long nanoAppId) {
+            }
+        };
+    }
+
+    /**
+     * @return the IContexthub proxy interface
+     */
+    private IContexthub getContextHubProxy() {
+        IContexthub proxy = null;
+        try {
+            proxy = IContexthub.getService(true /* retry */);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException while attaching to Context Hub HAL proxy", e);
+        } catch (NoSuchElementException e) {
+            Log.i(TAG, "Context Hub HAL service not found");
+        }
+
+        return proxy;
     }
 
     @Override
     public int registerCallback(IContextHubCallback callback) throws RemoteException {
         checkPermissions();
         mCallbacksList.register(callback);
+
         Log.d(TAG, "Added callback, total callbacks " +
-              mCallbacksList.getRegisteredCallbackCount());
+                mCallbacksList.getRegisteredCallbackCount());
         return 0;
     }
 
     @Override
     public int[] getContextHubHandles() throws RemoteException {
         checkPermissions();
-        int[] returnArray = new int[mContextHubInfo.length];
-
-        Log.d(TAG, "System supports " + returnArray.length + " hubs");
-        for (int i = 0; i < returnArray.length; ++i) {
-            returnArray[i] = i;
-            Log.d(TAG, String.format("Hub %s is mapped to %d",
-                                     mContextHubInfo[i].getName(), returnArray[i]));
-        }
-
-        return returnArray;
+        return ContextHubServiceUtil.createPrimitiveIntArray(mContextHubIdToInfoMap.keySet());
     }
 
     @Override
     public ContextHubInfo getContextHubInfo(int contextHubHandle) throws RemoteException {
         checkPermissions();
-        if (!(contextHubHandle >= 0 && contextHubHandle < mContextHubInfo.length)) {
-            Log.e(TAG, "Invalid context hub handle " + contextHubHandle);
-            return null; // null means fail
-        }
-
-        return mContextHubInfo[contextHubHandle];
-    }
-
-    @Override
-    public int loadNanoApp(int contextHubHandle, NanoApp app) throws RemoteException {
-        checkPermissions();
-
-        if (!(contextHubHandle >= 0 && contextHubHandle < mContextHubInfo.length)) {
-            Log.e(TAG, "Invalid contextHubhandle " + contextHubHandle);
-            return -1;
-        }
-        if (app == null) {
-            Log.e(TAG, "Invalid null app");
-            return -1;
-        }
-
-        int[] msgHeader = new int[MSG_LOAD_APP_HEADER_SIZE];
-        msgHeader[HEADER_FIELD_HUB_HANDLE] = contextHubHandle;
-        msgHeader[HEADER_FIELD_APP_INSTANCE] = OS_APP_INSTANCE;
-        msgHeader[HEADER_FIELD_MSG_VERSION] = 0;
-        msgHeader[HEADER_FIELD_MSG_TYPE] = MSG_LOAD_NANO_APP;
-
-        long appId = app.getAppId();
-
-        msgHeader[HEADER_FIELD_LOAD_APP_ID_LO] = (int)(appId & 0xFFFFFFFF);
-        msgHeader[HEADER_FIELD_LOAD_APP_ID_HI] = (int)((appId >> 32) & 0xFFFFFFFF);
-
-        int errVal = nativeSendMessage(msgHeader, app.getAppBinary());
-        if (errVal != 0) {
-            Log.e(TAG, "Send Message returns error" + contextHubHandle);
-            return -1;
-        }
-
-        // Do not add an entry to mNanoAppInstance Hash yet. The HAL may reject the app
-        return 0;
-    }
-
-    @Override
-    public int unloadNanoApp(int nanoAppInstanceHandle) throws RemoteException {
-        checkPermissions();
-        NanoAppInstanceInfo info = mNanoAppHash.get(nanoAppInstanceHandle);
-        if (info == null) {
-            Log.e(TAG, "Cannot find app with handle " + nanoAppInstanceHandle);
-            return -1; //means failed
-        }
-
-        // Call Native interface here
-        int[] msgHeader = new int[MSG_HEADER_SIZE];
-        msgHeader[HEADER_FIELD_HUB_HANDLE] = ANY_HUB;
-        msgHeader[HEADER_FIELD_APP_INSTANCE] = nanoAppInstanceHandle;
-        msgHeader[HEADER_FIELD_MSG_VERSION] = 0;
-        msgHeader[HEADER_FIELD_MSG_TYPE] = MSG_UNLOAD_NANO_APP;
-
-        byte msg[] = new byte[0];
-
-        if (nativeSendMessage(msgHeader, msg) != 0) {
-            Log.e(TAG, "native send message fails");
-            return -1;
-        }
-
-        // Do not add an entry to mNanoAppInstance Hash yet. The HAL may reject the app
-        return 0;
-    }
-
-    @Override
-    public NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppInstanceHandle)
-                                                      throws RemoteException {
-        checkPermissions();
-        // This assumes that all the nanoAppInfo is current. This is reasonable
-        // for the use cases for tightly controlled nanoApps.
-        if (mNanoAppHash.containsKey(nanoAppInstanceHandle)) {
-            return mNanoAppHash.get(nanoAppInstanceHandle);
-        } else {
-            Log.e(TAG, "Could not find nanoApp with handle " + nanoAppInstanceHandle);
+        if (!mContextHubIdToInfoMap.containsKey(contextHubHandle)) {
+            Log.e(TAG, "Invalid Context Hub handle " + contextHubHandle + " in getContextHubInfo");
             return null;
         }
+
+        return mContextHubIdToInfoMap.get(contextHubHandle);
+    }
+
+    /**
+     * Returns a List of ContextHubInfo object describing the available hubs.
+     *
+     * @return the List of ContextHubInfo objects
+     */
+    @Override
+    public List<ContextHubInfo> getContextHubs() throws RemoteException {
+        checkPermissions();
+        return mContextHubInfoList;
+    }
+
+    /**
+     * Creates an internal load transaction callback to be used for old API clients
+     *
+     * @param contextHubId  the ID of the hub to load the binary
+     * @param nanoAppBinary the binary to load
+     * @return the callback interface
+     */
+    private IContextHubTransactionCallback createLoadTransactionCallback(
+            int contextHubId, NanoAppBinary nanoAppBinary) {
+        return new IContextHubTransactionCallback.Stub() {
+            @Override
+            public void onTransactionComplete(int result) {
+                handleLoadResponseOldApi(contextHubId, result, nanoAppBinary);
+            }
+
+            @Override
+            public void onQueryResponse(int result, List<NanoAppState> nanoAppStateList) {
+            }
+        };
+    }
+
+    /**
+     * Creates an internal unload transaction callback to be used for old API clients
+     *
+     * @param contextHubId the ID of the hub to unload the nanoapp
+     * @return the callback interface
+     */
+    private IContextHubTransactionCallback createUnloadTransactionCallback(int contextHubId) {
+        return new IContextHubTransactionCallback.Stub() {
+            @Override
+            public void onTransactionComplete(int result) {
+                handleUnloadResponseOldApi(contextHubId, result);
+            }
+
+            @Override
+            public void onQueryResponse(int result, List<NanoAppState> nanoAppStateList) {
+            }
+        };
+    }
+
+    /**
+     * Creates an internal query transaction callback to be used for old API clients
+     *
+     * @param contextHubId the ID of the hub to query
+     * @return the callback interface
+     */
+    private IContextHubTransactionCallback createQueryTransactionCallback(int contextHubId) {
+        return new IContextHubTransactionCallback.Stub() {
+            @Override
+            public void onTransactionComplete(int result) {
+            }
+
+            @Override
+            public void onQueryResponse(int result, List<NanoAppState> nanoAppStateList) {
+                byte[] data = {(byte) result};
+                onMessageReceiptOldApi(MSG_QUERY_NANO_APPS, contextHubId, OS_APP_INSTANCE, data);
+            }
+        };
     }
 
     @Override
-    public int[] findNanoAppOnHub(int hubHandle, NanoAppFilter filter) throws RemoteException {
+    public int loadNanoApp(int contextHubHandle, NanoApp nanoApp) throws RemoteException {
         checkPermissions();
-        ArrayList<Integer> foundInstances = new ArrayList<Integer>();
+        if (mContextHubProxy == null) {
+            return -1;
+        }
+        if (!isValidContextHubId(contextHubHandle)) {
+            Log.e(TAG, "Invalid Context Hub handle " + contextHubHandle + " in loadNanoApp");
+            return -1;
+        }
+        if (nanoApp == null) {
+            Log.e(TAG, "NanoApp cannot be null in loadNanoApp");
+            return -1;
+        }
 
-        for (Integer nanoAppInstance: mNanoAppHash.keySet()) {
-            NanoAppInstanceInfo info = mNanoAppHash.get(nanoAppInstance);
+        // Create an internal IContextHubTransactionCallback for the old API clients
+        NanoAppBinary nanoAppBinary = new NanoAppBinary(nanoApp.getAppBinary());
+        IContextHubTransactionCallback onCompleteCallback =
+                createLoadTransactionCallback(contextHubHandle, nanoAppBinary);
 
+        ContextHubServiceTransaction transaction = mTransactionManager.createLoadTransaction(
+                contextHubHandle, nanoAppBinary, onCompleteCallback);
+
+        mTransactionManager.addTransaction(transaction);
+        return 0;
+    }
+
+    @Override
+    public int unloadNanoApp(int nanoAppHandle) throws RemoteException {
+        checkPermissions();
+        if (mContextHubProxy == null) {
+            return -1;
+        }
+
+        NanoAppInstanceInfo info =
+                mNanoAppStateManager.getNanoAppInstanceInfo(nanoAppHandle);
+        if (info == null) {
+            Log.e(TAG, "Invalid nanoapp handle " + nanoAppHandle + " in unloadNanoApp");
+            return -1;
+        }
+
+        int contextHubId = info.getContexthubId();
+        long nanoAppId = info.getAppId();
+        IContextHubTransactionCallback onCompleteCallback =
+                createUnloadTransactionCallback(contextHubId);
+        ContextHubServiceTransaction transaction = mTransactionManager.createUnloadTransaction(
+                contextHubId, nanoAppId, onCompleteCallback);
+
+        mTransactionManager.addTransaction(transaction);
+        return 0;
+    }
+
+    @Override
+    public NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppHandle) throws RemoteException {
+        checkPermissions();
+
+        return mNanoAppStateManager.getNanoAppInstanceInfo(nanoAppHandle);
+    }
+
+    @Override
+    public int[] findNanoAppOnHub(
+            int contextHubHandle, NanoAppFilter filter) throws RemoteException {
+        checkPermissions();
+
+        ArrayList<Integer> foundInstances = new ArrayList<>();
+        for (NanoAppInstanceInfo info : mNanoAppStateManager.getNanoAppInstanceInfoCollection()) {
             if (filter.testMatch(info)) {
-                foundInstances.add(nanoAppInstance);
+                foundInstances.add(info.getHandle());
             }
         }
 
@@ -218,28 +419,330 @@ public class ContextHubService extends IContextHubService.Stub {
         for (int i = 0; i < foundInstances.size(); i++) {
             retArray[i] = foundInstances.get(i).intValue();
         }
-
-        Log.w(TAG, "Found " + retArray.length + " apps on hub handle " + hubHandle);
         return retArray;
     }
 
-    @Override
-    public int sendMessage(int hubHandle, int nanoAppHandle, ContextHubMessage msg)
-                           throws RemoteException {
-        checkPermissions();
+    /**
+     * Performs a query at the specified hub.
+     *
+     * This method should only be invoked internally by the service, either to update the service
+     * cache or as a result of an explicit query requested by a client through the sendMessage API.
+     *
+     * @param contextHubId the ID of the hub to do the query
+     * @return the result of the query
+     *
+     * @throws IllegalStateException if the transaction queue is full
+     */
+    private int queryNanoAppsInternal(int contextHubId) {
+        if (mContextHubProxy == null) {
+            return Result.UNKNOWN_FAILURE;
+        }
 
-        if (msg == null || msg.getData() == null) {
-            Log.w(TAG, "null ptr");
+        IContextHubTransactionCallback onCompleteCallback =
+                createQueryTransactionCallback(contextHubId);
+        ContextHubServiceTransaction transaction = mTransactionManager.createQueryTransaction(
+                contextHubId, onCompleteCallback);
+
+        mTransactionManager.addTransaction(transaction);
+        return Result.OK;
+    }
+
+    @Override
+    public int sendMessage(int contextHubHandle, int nanoAppHandle, ContextHubMessage msg)
+            throws RemoteException {
+        checkPermissions();
+        if (mContextHubProxy == null) {
+            return -1;
+        }
+        if (msg == null) {
+            Log.e(TAG, "ContextHubMessage cannot be null in sendMessage");
+            return -1;
+        }
+        if (msg.getData() == null) {
+            Log.e(TAG, "ContextHubMessage message body cannot be null in sendMessage");
+            return -1;
+        }
+        if (!isValidContextHubId(contextHubHandle)) {
+            Log.e(TAG, "Invalid Context Hub handle " + contextHubHandle + " in sendMessage");
             return -1;
         }
 
-        int[] msgHeader = new int[MSG_HEADER_SIZE];
-        msgHeader[HEADER_FIELD_HUB_HANDLE] = hubHandle;
-        msgHeader[HEADER_FIELD_APP_INSTANCE] = nanoAppHandle;
-        msgHeader[HEADER_FIELD_MSG_VERSION] = msg.getVersion();
-        msgHeader[HEADER_FIELD_MSG_TYPE] = msg.getMsgType();
+        boolean success = false;
+        if (nanoAppHandle == OS_APP_INSTANCE) {
+            if (msg.getMsgType() == MSG_QUERY_NANO_APPS) {
+                success = (queryNanoAppsInternal(contextHubHandle) == Result.OK);
+            } else {
+                Log.e(TAG, "Invalid OS message params of type " + msg.getMsgType());
+            }
+        } else {
+            NanoAppInstanceInfo info = getNanoAppInstanceInfo(nanoAppHandle);
+            if (info != null) {
+                NanoAppMessage message = NanoAppMessage.createMessageToNanoApp(
+                        info.getAppId(), msg.getMsgType(), msg.getData());
 
-        return nativeSendMessage(msgHeader, msg.getData());
+                IContextHubClient client = mDefaultClientMap.get(contextHubHandle);
+                success = (client.sendMessageToNanoApp(message) ==
+                        ContextHubTransaction.RESULT_SUCCESS);
+            } else {
+                Log.e(TAG, "Failed to send nanoapp message - nanoapp with handle "
+                        + nanoAppHandle + " does not exist.");
+            }
+        }
+
+        return success ? 0 : -1;
+    }
+
+    /**
+     * Handles a unicast or broadcast message from a nanoapp.
+     *
+     * @param contextHubId the ID of the hub the message came from
+     * @param message      the message contents
+     */
+    private void handleClientMessageCallback(int contextHubId, ContextHubMsg message) {
+        mClientManager.onMessageFromNanoApp(contextHubId, message);
+    }
+
+    /**
+     * A helper function to handle a load response from the Context Hub for the old API.
+     *
+     * TODO(b/69270990): Remove this once the old APIs are obsolete.
+     */
+    private void handleLoadResponseOldApi(
+            int contextHubId, int result, NanoAppBinary nanoAppBinary) {
+        if (nanoAppBinary == null) {
+            Log.e(TAG, "Nanoapp binary field was null for a load transaction");
+            return;
+        }
+
+        byte[] data = new byte[5];
+        data[0] = (byte) result;
+        int nanoAppHandle = mNanoAppStateManager.getNanoAppHandle(
+                contextHubId, nanoAppBinary.getNanoAppId());
+        ByteBuffer.wrap(data, 1, 4).order(ByteOrder.nativeOrder()).putInt(nanoAppHandle);
+
+        onMessageReceiptOldApi(MSG_LOAD_NANO_APP, contextHubId, OS_APP_INSTANCE, data);
+    }
+
+    /**
+     * A helper function to handle an unload response from the Context Hub for the old API.
+     *
+     * TODO(b/69270990): Remove this once the old APIs are obsolete.
+     */
+    private void handleUnloadResponseOldApi(int contextHubId, int result) {
+        byte[] data = new byte[1];
+        data[0] = (byte) result;
+        onMessageReceiptOldApi(MSG_UNLOAD_NANO_APP, contextHubId, OS_APP_INSTANCE, data);
+    }
+
+    /**
+     * Handles a transaction response from a Context Hub.
+     *
+     * @param contextHubId  the ID of the hub the response came from
+     * @param transactionId the ID of the transaction
+     * @param result        the result of the transaction reported by the hub
+     */
+    private void handleTransactionResultCallback(int contextHubId, int transactionId, int result) {
+        mTransactionManager.onTransactionResponse(transactionId, result);
+    }
+
+    /**
+     * Handles an asynchronous event from a Context Hub.
+     *
+     * @param contextHubId the ID of the hub the response came from
+     * @param eventType    the type of the event as defined in Context Hub HAL AsyncEventType
+     */
+    private void handleHubEventCallback(int contextHubId, int eventType) {
+        if (eventType == AsyncEventType.RESTARTED) {
+            mTransactionManager.onHubReset();
+            queryNanoAppsInternal(contextHubId);
+
+            mClientManager.onHubReset(contextHubId);
+        } else {
+            Log.i(TAG, "Received unknown hub event (hub ID = " + contextHubId + ", type = "
+                    + eventType + ")");
+        }
+    }
+
+    /**
+     * Handles an asynchronous abort event of a nanoapp.
+     *
+     * @param contextHubId the ID of the hub that the nanoapp aborted in
+     * @param nanoAppId    the ID of the aborted nanoapp
+     * @param abortCode    the nanoapp-specific abort code
+     */
+    private void handleAppAbortCallback(int contextHubId, long nanoAppId, int abortCode) {
+        mClientManager.onNanoAppAborted(contextHubId, nanoAppId, abortCode);
+    }
+
+    /**
+     * Handles a query response from a Context Hub.
+     *
+     * @param contextHubId    the ID of the hub of the response
+     * @param nanoAppInfoList the list of loaded nanoapps
+     */
+    private void handleQueryAppsCallback(int contextHubId, List<HubAppInfo> nanoAppInfoList) {
+        List<NanoAppState> nanoAppStateList =
+                ContextHubServiceUtil.createNanoAppStateList(nanoAppInfoList);
+
+        mNanoAppStateManager.updateCache(contextHubId, nanoAppInfoList);
+        mTransactionManager.onQueryResponse(nanoAppStateList);
+    }
+
+    /**
+     * @param contextHubId the hub ID to validate
+     * @return {@code true} if the ID represents that of an available hub, {@code false} otherwise
+     */
+    private boolean isValidContextHubId(int contextHubId) {
+        return mContextHubIdToInfoMap.containsKey(contextHubId);
+    }
+
+    /**
+     * Creates and registers a client at the service for the specified Context Hub.
+     *
+     * @param clientCallback the client interface to register with the service
+     * @param contextHubId   the ID of the hub this client is attached to
+     * @return the generated client interface, null if registration was unsuccessful
+     *
+     * @throws IllegalArgumentException if contextHubId is not a valid ID
+     * @throws IllegalStateException if max number of clients have already registered
+     * @throws NullPointerException if clientCallback is null
+     */
+    @Override
+    public IContextHubClient createClient(
+            IContextHubClientCallback clientCallback, int contextHubId) throws RemoteException {
+        checkPermissions();
+        if (!isValidContextHubId(contextHubId)) {
+            throw new IllegalArgumentException("Invalid context hub ID " + contextHubId);
+        }
+        if (clientCallback == null) {
+            throw new NullPointerException("Cannot register client with null callback");
+        }
+
+        return mClientManager.registerClient(clientCallback, contextHubId);
+    }
+
+    /**
+     * Loads a nanoapp binary at the specified Context hub.
+     *
+     * @param contextHubId        the ID of the hub to load the binary
+     * @param transactionCallback the client-facing transaction callback interface
+     * @param nanoAppBinary       the binary to load
+     *
+     * @throws IllegalStateException if the transaction queue is full
+     */
+    @Override
+    public void loadNanoAppOnHub(
+            int contextHubId, IContextHubTransactionCallback transactionCallback,
+            NanoAppBinary nanoAppBinary) throws RemoteException {
+        checkPermissions();
+        if (!checkHalProxyAndContextHubId(
+                contextHubId, transactionCallback, ContextHubTransaction.TYPE_LOAD_NANOAPP)) {
+            return;
+        }
+        if (nanoAppBinary == null) {
+            Log.e(TAG, "NanoAppBinary cannot be null in loadNanoAppOnHub");
+            transactionCallback.onTransactionComplete(
+                    ContextHubTransaction.RESULT_FAILED_BAD_PARAMS);
+            return;
+        }
+
+        ContextHubServiceTransaction transaction = mTransactionManager.createLoadTransaction(
+                contextHubId, nanoAppBinary, transactionCallback);
+        mTransactionManager.addTransaction(transaction);
+    }
+
+    /**
+     * Unloads a nanoapp from the specified Context Hub.
+     *
+     * @param contextHubId        the ID of the hub to unload the nanoapp
+     * @param transactionCallback the client-facing transaction callback interface
+     * @param nanoAppId           the ID of the nanoapp to unload
+     *
+     * @throws IllegalStateException if the transaction queue is full
+     */
+    @Override
+    public void unloadNanoAppFromHub(
+            int contextHubId, IContextHubTransactionCallback transactionCallback, long nanoAppId)
+            throws RemoteException {
+        checkPermissions();
+        if (!checkHalProxyAndContextHubId(
+                contextHubId, transactionCallback, ContextHubTransaction.TYPE_UNLOAD_NANOAPP)) {
+            return;
+        }
+
+        ContextHubServiceTransaction transaction = mTransactionManager.createUnloadTransaction(
+                contextHubId, nanoAppId, transactionCallback);
+        mTransactionManager.addTransaction(transaction);
+    }
+
+    /**
+     * Enables a nanoapp at the specified Context Hub.
+     *
+     * @param contextHubId        the ID of the hub to enable the nanoapp
+     * @param transactionCallback the client-facing transaction callback interface
+     * @param nanoAppId           the ID of the nanoapp to enable
+     *
+     * @throws IllegalStateException if the transaction queue is full
+     */
+    @Override
+    public void enableNanoApp(
+            int contextHubId, IContextHubTransactionCallback transactionCallback, long nanoAppId)
+            throws RemoteException {
+        checkPermissions();
+        if (!checkHalProxyAndContextHubId(
+                contextHubId, transactionCallback, ContextHubTransaction.TYPE_ENABLE_NANOAPP)) {
+            return;
+        }
+
+        ContextHubServiceTransaction transaction = mTransactionManager.createEnableTransaction(
+                contextHubId, nanoAppId, transactionCallback);
+        mTransactionManager.addTransaction(transaction);
+    }
+
+    /**
+     * Disables a nanoapp at the specified Context Hub.
+     *
+     * @param contextHubId        the ID of the hub to disable the nanoapp
+     * @param transactionCallback the client-facing transaction callback interface
+     * @param nanoAppId           the ID of the nanoapp to disable
+     *
+     * @throws IllegalStateException if the transaction queue is full
+     */
+    @Override
+    public void disableNanoApp(
+            int contextHubId, IContextHubTransactionCallback transactionCallback, long nanoAppId)
+            throws RemoteException {
+        checkPermissions();
+        if (!checkHalProxyAndContextHubId(
+                contextHubId, transactionCallback, ContextHubTransaction.TYPE_DISABLE_NANOAPP)) {
+            return;
+        }
+
+        ContextHubServiceTransaction transaction = mTransactionManager.createDisableTransaction(
+                contextHubId, nanoAppId, transactionCallback);
+        mTransactionManager.addTransaction(transaction);
+    }
+
+    /**
+     * Queries for a list of nanoapps from the specified Context hub.
+     *
+     * @param contextHubId        the ID of the hub to query
+     * @param transactionCallback the client-facing transaction callback interface
+     *
+     * @throws IllegalStateException if the transaction queue is full
+     */
+    @Override
+    public void queryNanoApps(int contextHubId, IContextHubTransactionCallback transactionCallback)
+            throws RemoteException {
+        checkPermissions();
+        if (!checkHalProxyAndContextHubId(
+                contextHubId, transactionCallback, ContextHubTransaction.TYPE_QUERY_NANOAPPS)) {
+            return;
+        }
+
+        ContextHubServiceTransaction transaction = mTransactionManager.createQueryTransaction(
+                contextHubId, transactionCallback);
+        mTransactionManager.addTransaction(transaction);
     }
 
     @Override
@@ -251,36 +754,34 @@ public class ContextHubService extends IContextHubService.Stub {
         pw.println("");
         // dump ContextHubInfo
         pw.println("=================== CONTEXT HUBS ====================");
-        for (int i = 0; i < mContextHubInfo.length; i++) {
-            pw.println("Handle " + i + " : " + mContextHubInfo[i].toString());
+        for (ContextHubInfo hubInfo : mContextHubIdToInfoMap.values()) {
+            pw.println(hubInfo);
         }
         pw.println("");
         pw.println("=================== NANOAPPS ====================");
         // Dump nanoAppHash
-        for (Integer nanoAppInstance: mNanoAppHash.keySet()) {
-            pw.println(nanoAppInstance + " : " + mNanoAppHash.get(nanoAppInstance).toString());
+        for (NanoAppInstanceInfo info : mNanoAppStateManager.getNanoAppInstanceInfoCollection()) {
+            pw.println(info);
         }
 
         // dump eventLog
     }
 
     private void checkPermissions() {
-        mContext.enforceCallingPermission(HARDWARE_PERMISSION, ENFORCE_HW_PERMISSION_MESSAGE);
+        ContextHubServiceUtil.checkPermissions(mContext);
     }
 
-    private int onMessageReceipt(int[] header, byte[] data) {
-        if (header == null || data == null || header.length < MSG_HEADER_SIZE) {
-            return  -1;
+    private int onMessageReceiptOldApi(
+            int msgType, int contextHubHandle, int appInstance, byte[] data) {
+        if (data == null) {
+            return -1;
         }
 
+        int msgVersion = 0;
         int callbacksCount = mCallbacksList.beginBroadcast();
-        int msgType = header[HEADER_FIELD_MSG_TYPE];
-        int msgVersion = header[HEADER_FIELD_MSG_VERSION];
-        int hubHandle = header[HEADER_FIELD_HUB_HANDLE];
-        int appInstance = header[HEADER_FIELD_APP_INSTANCE];
-
         Log.d(TAG, "Sending message " + msgType + " version " + msgVersion + " from hubHandle " +
-              hubHandle + ", appInstance " + appInstance + ", callBackCount " + callbacksCount);
+                contextHubHandle + ", appInstance " + appInstance + ", callBackCount "
+                + callbacksCount);
 
         if (callbacksCount < 1) {
             Log.v(TAG, "No message callbacks registered.");
@@ -291,7 +792,7 @@ public class ContextHubService extends IContextHubService.Stub {
         for (int i = 0; i < callbacksCount; ++i) {
             IContextHubCallback callback = mCallbacksList.getBroadcastItem(i);
             try {
-                callback.onMessageReceipt(hubHandle, appInstance, msg);
+                callback.onMessageReceipt(contextHubHandle, appInstance, msg);
             } catch (RemoteException e) {
                 Log.i(TAG, "Exception (" + e + ") calling remote callback (" + callback + ").");
                 continue;
@@ -301,39 +802,39 @@ public class ContextHubService extends IContextHubService.Stub {
         return 0;
     }
 
-    private int addAppInstance(int hubHandle, int appInstanceHandle, long appId, int appVersion) {
-        // App Id encodes vendor & version
-        NanoAppInstanceInfo appInfo = new NanoAppInstanceInfo();
-
-        appInfo.setAppId(appId);
-        appInfo.setAppVersion(appVersion);
-        appInfo.setName(PRE_LOADED_APP_NAME);
-        appInfo.setContexthubId(hubHandle);
-        appInfo.setHandle(appInstanceHandle);
-        appInfo.setPublisher(PRE_LOADED_APP_PUBLISHER);
-        appInfo.setNeededExecMemBytes(PRE_LOADED_APP_MEM_REQ);
-        appInfo.setNeededReadMemBytes(PRE_LOADED_APP_MEM_REQ);
-        appInfo.setNeededWriteMemBytes(PRE_LOADED_APP_MEM_REQ);
-
-        String action;
-        if (mNanoAppHash.containsKey(appInstanceHandle)) {
-            action = "Updated";
-        } else {
-            action = "Added";
+    /**
+     * Validates the HAL proxy state and context hub ID to see if we can start the transaction.
+     *
+     * @param contextHubId    the ID of the hub to start the transaction
+     * @param callback        the client transaction callback interface
+     * @param transactionType the type of the transaction
+     *
+     * @return {@code true} if mContextHubProxy and contextHubId is valid, {@code false} otherwise
+     */
+    private boolean checkHalProxyAndContextHubId(
+            int contextHubId, IContextHubTransactionCallback callback,
+            @ContextHubTransaction.Type int transactionType) {
+        if (mContextHubProxy == null) {
+            try {
+                callback.onTransactionComplete(
+                        ContextHubTransaction.RESULT_FAILED_HAL_UNAVAILABLE);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while calling onTransactionComplete", e);
+            }
+            return false;
+        }
+        if (!isValidContextHubId(contextHubId)) {
+            Log.e(TAG, "Cannot start "
+                    + ContextHubTransaction.typeToString(transactionType, false /* upperCase */)
+                    + " transaction for invalid hub ID " + contextHubId);
+            try {
+                callback.onTransactionComplete(ContextHubTransaction.RESULT_FAILED_BAD_PARAMS);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while calling onTransactionComplete", e);
+            }
+            return false;
         }
 
-        mNanoAppHash.put(appInstanceHandle, appInfo);
-        Log.d(TAG, action + " app instance " + appInstanceHandle + " with id "
-              + appId + " version " + appVersion);
-
-        return 0;
-    }
-
-    private int deleteAppInstance(int appInstanceHandle) {
-        if (mNanoAppHash.remove(appInstanceHandle) == null) {
-            return -1;
-        }
-
-        return 0;
+        return true;
     }
 }

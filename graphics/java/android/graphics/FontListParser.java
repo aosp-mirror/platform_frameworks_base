@@ -16,15 +16,12 @@
 
 package android.graphics;
 
-import android.text.FontConfig;
 import android.graphics.fonts.FontVariationAxis;
+import android.text.FontConfig;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-
-import android.annotation.Nullable;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,13 +71,14 @@ public class FontListParser {
 
     private static FontConfig.Family readFamily(XmlPullParser parser)
             throws XmlPullParserException, IOException {
-        String name = parser.getAttributeValue(null, "name");
-        String lang = parser.getAttributeValue(null, "lang");
-        String variant = parser.getAttributeValue(null, "variant");
-        List<FontConfig.Font> fonts = new ArrayList<FontConfig.Font>();
+        final String name = parser.getAttributeValue(null, "name");
+        final String lang = parser.getAttributeValue(null, "lang");
+        final String[] langs = lang == null ? null : lang.split("\\s+");
+        final String variant = parser.getAttributeValue(null, "variant");
+        final List<FontConfig.Font> fonts = new ArrayList<FontConfig.Font>();
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
-            String tag = parser.getName();
+            final String tag = parser.getName();
             if (tag.equals("font")) {
                 fonts.add(readFont(parser));
             } else {
@@ -95,7 +93,7 @@ public class FontListParser {
                 intVariant = FontConfig.Family.VARIANT_ELEGANT;
             }
         }
-        return new FontConfig.Family(name, fonts.toArray(new FontConfig.Font[fonts.size()]), lang,
+        return new FontConfig.Family(name, fonts.toArray(new FontConfig.Font[fonts.size()]), langs,
                 intVariant);
     }
 
@@ -111,6 +109,7 @@ public class FontListParser {
         String weightStr = parser.getAttributeValue(null, "weight");
         int weight = weightStr == null ? 400 : Integer.parseInt(weightStr);
         boolean isItalic = "italic".equals(parser.getAttributeValue(null, "style"));
+        String fallbackFor = parser.getAttributeValue(null, "fallbackFor");
         StringBuilder filename = new StringBuilder();
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() == XmlPullParser.TEXT) {
@@ -126,7 +125,7 @@ public class FontListParser {
         }
         String sanitizedName = FILENAME_WHITESPACE_PATTERN.matcher(filename).replaceAll("");
         return new FontConfig.Font(sanitizedName, index,
-                axes.toArray(new FontVariationAxis[axes.size()]), weight, isItalic);
+                axes.toArray(new FontVariationAxis[axes.size()]), weight, isItalic, fallbackFor);
     }
 
     private static FontVariationAxis readAxis(XmlPullParser parser)

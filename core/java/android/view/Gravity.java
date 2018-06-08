@@ -440,4 +440,60 @@ public class Gravity
         }
         return result;
     }
+
+    /**
+     * @hide
+     */
+    public static String toString(int gravity) {
+        final StringBuilder result = new StringBuilder();
+        if ((gravity & FILL) == FILL) {
+            result.append("FILL").append(' ');
+        } else {
+            if ((gravity & FILL_VERTICAL) == FILL_VERTICAL) {
+                result.append("FILL_VERTICAL").append(' ');
+            } else {
+                if ((gravity & TOP) == TOP) {
+                    result.append("TOP").append(' ');
+                }
+                if ((gravity & BOTTOM) == BOTTOM) {
+                    result.append("BOTTOM").append(' ');
+                }
+            }
+            if ((gravity & FILL_HORIZONTAL) == FILL_HORIZONTAL) {
+                result.append("FILL_HORIZONTAL").append(' ');
+            } else {
+                if ((gravity & START) == START) {
+                    result.append("START").append(' ');
+                } else if ((gravity & LEFT) == LEFT) {
+                    result.append("LEFT").append(' ');
+                }
+                if ((gravity & END) == END) {
+                    result.append("END").append(' ');
+                } else if ((gravity & RIGHT) == RIGHT) {
+                    result.append("RIGHT").append(' ');
+                }
+            }
+        }
+        if ((gravity & CENTER) == CENTER) {
+            result.append("CENTER").append(' ');
+        } else {
+            if ((gravity & CENTER_VERTICAL) == CENTER_VERTICAL) {
+                result.append("CENTER_VERTICAL").append(' ');
+            }
+            if ((gravity & CENTER_HORIZONTAL) == CENTER_HORIZONTAL) {
+                result.append("CENTER_HORIZONTAL").append(' ');
+            }
+        }
+        if (result.length() == 0) {
+            result.append("NO GRAVITY").append(' ');
+        }
+        if ((gravity & DISPLAY_CLIP_VERTICAL) == DISPLAY_CLIP_VERTICAL) {
+            result.append("DISPLAY_CLIP_VERTICAL").append(' ');
+        }
+        if ((gravity & DISPLAY_CLIP_HORIZONTAL) == DISPLAY_CLIP_HORIZONTAL) {
+            result.append("DISPLAY_CLIP_HORIZONTAL").append(' ');
+        }
+        result.deleteCharAt(result.length() - 1);
+        return result.toString();
+    }
 }

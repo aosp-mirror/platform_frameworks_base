@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 Copyright (C) 2016 The Android Open Source Project
 
@@ -20,5 +21,5 @@ Copyright (C) 2016 The Android Open Source Project
         android:viewportHeight="20.0">
     <path
         android:pathData="M10.0,10.0m-10.0,0.0a10.0,10.0 0.0,1.0 1.0,20.0 0.0a10.0,10.0 0.0,1.0 1.0,-20.0 0.0"
-        android:fillColor="#FFFFFF"/>
+        android:fillColor="#fcfcfc"/>
 </vector>

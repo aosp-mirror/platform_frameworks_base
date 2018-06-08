@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-#include "TestSceneBase.h"
-#include <string>
 #include <hwui/Paint.h>
 #include <minikin/Layout.h>
+#include <string>
+#include "TestSceneBase.h"
 
 class SaveLayer2Animation;
 
 static TestScene::Registrar _SaveLayer(TestScene::Info{
-    "savelayer2",
-    "Interleaving 20 drawText/drawRect ops with saveLayer"
-    "Tests the clipped saveLayer performance and FBO switching overhead.",
-    TestScene::simpleCreateScene<SaveLayer2Animation>
-});
+        "savelayer2",
+        "Interleaving 20 drawText/drawRect ops with saveLayer"
+        "Tests the clipped saveLayer performance and FBO switching overhead.",
+        TestScene::simpleCreateScene<SaveLayer2Animation>});
 
 class SaveLayer2Animation : public TestScene {
 public:
@@ -37,7 +36,7 @@ public:
         canvas.drawColor(SkColorSetARGB(255, 255, 0, 0), SkBlendMode::kSrcOver);
         SkIRect bounds = SkIRect::MakeWH(width, height);
         int regions = 20;
-        int smallRectHeight = (bounds.height()/regions);
+        int smallRectHeight = (bounds.height() / regions);
         int padding = smallRectHeight / 4;
         int top = bounds.fTop;
 
@@ -46,27 +45,23 @@ public:
         mGreenPaint.setColor(SkColorSetARGB(255, 0, 255, 0));
         mGreenPaint.setTextSize(padding);
 
-        //interleave drawText and drawRect with saveLayer ops
+        // interleave drawText and drawRect with saveLayer ops
         for (int i = 0; i < regions; i++, top += smallRectHeight) {
-            canvas.saveLayer(bounds.fLeft, top, bounds.fRight, top + padding,
-                    &mBluePaint, SaveFlags::ClipToLayer | SaveFlags::MatrixClip);
+            canvas.saveLayer(bounds.fLeft, top, bounds.fRight, top + padding, &mBluePaint,
+                             SaveFlags::ClipToLayer | SaveFlags::MatrixClip);
             canvas.drawColor(SkColorSetARGB(255, 255, 255, 0), SkBlendMode::kSrcOver);
             std::string stri = std::to_string(i);
             std::string offscreen = "offscreen line " + stri;
-            std::unique_ptr<uint16_t[]> offtext = TestUtils::asciiToUtf16(offscreen.c_str());
-            canvas.drawText(offtext.get(), 0, offscreen.length(), offscreen.length(),
-                    bounds.fLeft, top + padding, minikin::kBidi_Force_LTR, mBluePaint, nullptr);
+            TestUtils::drawUtf8ToCanvas(&canvas, offscreen.c_str(), mBluePaint, bounds.fLeft,
+                    top + padding);
             canvas.restore();
 
             canvas.drawRect(bounds.fLeft, top + padding, bounds.fRight,
-                    top + smallRectHeight - padding, mBluePaint);
+                            top + smallRectHeight - padding, mBluePaint);
             std::string onscreen = "onscreen line " + stri;
-            std::unique_ptr<uint16_t[]> ontext = TestUtils::asciiToUtf16(onscreen.c_str());
-            canvas.drawText(ontext.get(), 0, onscreen.length(), onscreen.length(), bounds.fLeft,
-                    top + smallRectHeight - padding, minikin::kBidi_Force_LTR, mGreenPaint,
-                    nullptr);
+            TestUtils::drawUtf8ToCanvas(&canvas, onscreen.c_str(), mGreenPaint, bounds.fLeft,
+                    top + smallRectHeight - padding);
         }
     }
-    void doFrame(int frameNr) override {
-    }
+    void doFrame(int frameNr) override {}
 };

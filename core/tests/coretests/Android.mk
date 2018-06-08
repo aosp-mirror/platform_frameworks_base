@@ -19,12 +19,18 @@ LOCAL_SRC_FILES := \
 	$(call all-java-files-under, src) \
 	$(call all-Iaidl-files-under, src) \
 	$(call all-java-files-under, DisabledTestApp/src) \
-	$(call all-java-files-under, EnabledTestApp/src)
+	$(call all-java-files-under, EnabledTestApp/src) \
+	$(call all-java-files-under, BinderProxyCountingTestApp/src) \
+	$(call all-java-files-under, BinderProxyCountingTestService/src) \
+	$(call all-Iaidl-files-under, aidl)
+
+LOCAL_AIDL_INCLUDES := $(LOCAL_PATH)/aidl
 
 LOCAL_DX_FLAGS := --core-library
 LOCAL_JACK_FLAGS := --multi-dex native
 LOCAL_AAPT_FLAGS = -0 dat -0 gld -c fa
 LOCAL_STATIC_JAVA_LIBRARIES := \
+    frameworks-base-testutils \
     core-tests-support \
     android-common \
     frameworks-core-util-lib \
@@ -36,9 +42,19 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     ub-uiautomator \
     platform-test-annotations \
     compatibility-device-util \
-    truth-prebuilt
+    truth-prebuilt \
+    print-test-util-lib
 
-LOCAL_JAVA_LIBRARIES := android.test.runner conscrypt telephony-common org.apache.http.legacy
+LOCAL_JAVA_LIBRARIES := \
+    android.test.runner \
+    conscrypt \
+    telephony-common \
+    org.apache.http.legacy \
+    android.test.base \
+    android.test.mock \
+    framework-oahl-backward-compatibility \
+    framework-atb-backward-compatibility \
+
 LOCAL_PACKAGE_NAME := FrameworksCoreTests
 LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_COMPATIBILITY_SUITE := device-tests

@@ -603,6 +603,14 @@ public class TelecomManager {
             "android.telecom.extra.CALL_BACK_INTENT";
 
     /**
+     * The dialer activity responsible for placing emergency calls from, for example, a locked
+     * keyguard.
+     * @hide
+     */
+    public static final ComponentName EMERGENCY_DIALER_COMPONENT =
+            ComponentName.createRelative("com.android.phone", ".EmergencyDialer");
+
+    /**
      * The boolean indicated by this extra controls whether or not a call is eligible to undergo
      * assisted dialing. This extra is stored under {@link #EXTRA_OUTGOING_CALL_EXTRAS}.
      * @hide
@@ -617,7 +625,7 @@ public class TelecomManager {
 
     /**
      * Indicates that the address or number of a call is allowed to be displayed for caller ID.
-    */
+     */
     public static final int PRESENTATION_ALLOWED = 1;
 
     /**

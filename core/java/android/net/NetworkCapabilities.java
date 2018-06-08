@@ -265,9 +265,8 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * Indicates that this network is not congested.
      * <p>
-     * When a network is congested, the device should defer network traffic that
-     * can be done at a later time without breaking developer contracts.
-     * @hide
+     * When a network is congested, applications should defer network traffic
+     * that can be done at a later time, such as uploading analytics.
      */
     public static final int NET_CAPABILITY_NOT_CONGESTED = 20;
 
@@ -1290,9 +1289,7 @@ public final class NetworkCapabilities implements Parcelable {
 
         // Ignore NOT_METERED being added or removed as it is effectively dynamic. http://b/63326103
         // TODO: properly support NOT_METERED as a mutable and requestable capability.
-        // Ignore DUN being added or removed. http://b/65257223.
-        final long mask = ~MUTABLE_CAPABILITIES
-                & ~(1 << NET_CAPABILITY_NOT_METERED) & ~(1 << NET_CAPABILITY_DUN);
+        final long mask = ~MUTABLE_CAPABILITIES & ~(1 << NET_CAPABILITY_NOT_METERED);
         long oldImmutableCapabilities = this.mNetworkCapabilities & mask;
         long newImmutableCapabilities = that.mNetworkCapabilities & mask;
         if (oldImmutableCapabilities != newImmutableCapabilities) {
@@ -1472,6 +1469,31 @@ public final class NetworkCapabilities implements Parcelable {
             bitMask >>= 1;
             ++bitPos;
         }
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
+        for (int transport : getTransportTypes()) {
+            proto.write(NetworkCapabilitiesProto.TRANSPORTS, transport);
+        }
+
+        for (int capability : getCapabilities()) {
+            proto.write(NetworkCapabilitiesProto.CAPABILITIES, capability);
+        }
+
+        proto.write(NetworkCapabilitiesProto.LINK_UP_BANDWIDTH_KBPS, mLinkUpBandwidthKbps);
+        proto.write(NetworkCapabilitiesProto.LINK_DOWN_BANDWIDTH_KBPS, mLinkDownBandwidthKbps);
+
+        if (mNetworkSpecifier != null) {
+            proto.write(NetworkCapabilitiesProto.NETWORK_SPECIFIER, mNetworkSpecifier.toString());
+        }
+
+        proto.write(NetworkCapabilitiesProto.CAN_REPORT_SIGNAL_STRENGTH, hasSignalStrength());
+        proto.write(NetworkCapabilitiesProto.SIGNAL_STRENGTH, mSignalStrength);
+
+        proto.end(token);
     }
 
     /**

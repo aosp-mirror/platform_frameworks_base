@@ -19,13 +19,15 @@ package com.android.internal.app;
 import android.app.AppOpsManager;
 import android.os.Bundle;
 import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.app.IAppOpsActiveCallback;
 
 interface IAppOpsService {
     // These first methods are also called by native code, so must
-    // be kept in sync with frameworks/native/include/binder/IAppOpsService.h
+    // be kept in sync with frameworks/native/libs/binder/include/binder/IAppOpsService.h
     int checkOperation(int code, int uid, String packageName);
     int noteOperation(int code, int uid, String packageName);
-    int startOperation(IBinder token, int code, int uid, String packageName);
+    int startOperation(IBinder token, int code, int uid, String packageName,
+            boolean startIfModeDefault);
     void finishOperation(IBinder token, int code, int uid, String packageName);
     void startWatchingMode(int op, String packageName, IAppOpsCallback callback);
     void stopWatchingMode(IAppOpsCallback callback);
@@ -49,5 +51,9 @@ interface IAppOpsService {
     void setUserRestriction(int code, boolean restricted, IBinder token, int userHandle, in String[] exceptionPackages);
     void removeUser(int userHandle);
 
+    void startWatchingActive(in int[] ops, IAppOpsActiveCallback callback);
+    void stopWatchingActive(IAppOpsActiveCallback callback);
     boolean isOperationActive(int code, int uid, String packageName);
+
+    void startWatchingModeWithFlags(int op, String packageName, int flags, IAppOpsCallback callback);
 }

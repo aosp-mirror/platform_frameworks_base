@@ -15,13 +15,16 @@
  */
 package com.android.settingslib.core.lifecycle;
 
+import static android.arch.lifecycle.Lifecycle.Event.ON_START;
+import static com.google.common.truth.Truth.assertThat;
+
+import android.arch.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.android.settingslib.SettingLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.core.lifecycle.events.OnAttach;
 import com.android.settingslib.core.lifecycle.events.OnCreateOptionsMenu;
 import com.android.settingslib.core.lifecycle.events.OnDestroy;
@@ -32,18 +35,18 @@ import com.android.settingslib.core.lifecycle.events.OnResume;
 import com.android.settingslib.core.lifecycle.events.OnStart;
 import com.android.settingslib.core.lifecycle.events.OnStop;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
-import org.robolectric.annotation.Config;
-import org.robolectric.util.ActivityController;
-import org.robolectric.util.FragmentController;
+import org.robolectric.android.controller.ActivityController;
+import org.robolectric.android.controller.FragmentController;
 
-import static com.google.common.truth.Truth.assertThat;
-
-@RunWith(SettingLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class LifecycleTest {
+
+    private LifecycleOwner mLifecycleOwner;
+    private Lifecycle mLifecycle;
 
     public static class TestDialogFragment extends ObservableDialogFragment {
 
@@ -139,6 +142,12 @@ public class LifecycleTest {
         }
     }
 
+    @Before
+    public void setUp() {
+        mLifecycleOwner = () -> mLifecycle;
+        mLifecycle = new Lifecycle(mLifecycleOwner);
+    }
+
     @Test
     public void runThroughActivityLifecycles_shouldObserveEverything() {
         ActivityController<TestActivity> ac = Robolectric.buildActivity(TestActivity.class);
@@ -168,7 +177,7 @@ public class LifecycleTest {
                 Robolectric.buildFragment(TestDialogFragment.class);
         TestDialogFragment fragment = fragmentController.get();
 
-        fragmentController.attach().create().start().resume();
+        fragmentController.create().start().resume();
         fragment.onCreateOptionsMenu(null, null);
         fragment.onPrepareOptionsMenu(null);
         fragment.onOptionsItemSelected(null);
@@ -192,7 +201,7 @@ public class LifecycleTest {
                 Robolectric.buildFragment(TestFragment.class);
         TestFragment fragment = fragmentController.get();
 
-        fragmentController.attach().create().start().resume();
+        fragmentController.create().start().resume();
         fragment.onCreateOptionsMenu(null, null);
         fragment.onPrepareOptionsMenu(null);
         fragment.onOptionsItemSelected(null);
@@ -212,9 +221,8 @@ public class LifecycleTest {
 
     @Test
     public void addObserverDuringObserve_shoudNotCrash() {
-        Lifecycle lifecycle = new Lifecycle();
-        lifecycle.addObserver(new OnStartObserver(lifecycle));
-        lifecycle.onStart();
+        mLifecycle.addObserver(new OnStartObserver(mLifecycle));
+        mLifecycle.handleLifecycleEvent(ON_START);
     }
 
     private static class OptionItemAccepter implements LifecycleObserver, OnOptionsItemSelected {
@@ -235,7 +243,7 @@ public class LifecycleTest {
         OptionItemAccepter accepter = new OptionItemAccepter();
         fragment.getLifecycle().addObserver(accepter);
 
-        fragmentController.attach().create().start().resume();
+        fragmentController.create().start().resume();
         fragment.onCreateOptionsMenu(null, null);
         fragment.onPrepareOptionsMenu(null);
         fragment.onOptionsItemSelected(null);

@@ -16,12 +16,17 @@
 
 package android.text;
 
+import android.annotation.FloatRange;
+import android.annotation.IntRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.text.style.ReplacementSpan;
 import android.text.style.UpdateLayout;
 import android.text.style.WrapTogetherSpan;
 import android.util.ArraySet;
+import android.util.Pools.SynchronizedPool;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -37,135 +42,425 @@ import java.lang.ref.WeakReference;
  * {@link android.graphics.Canvas#drawText(java.lang.CharSequence, int, int, float, float, android.graphics.Paint)
  *  Canvas.drawText()} directly.</p>
  */
-public class DynamicLayout extends Layout
-{
+public class DynamicLayout extends Layout {
     private static final int PRIORITY = 128;
     private static final int BLOCK_MINIMUM_CHARACTER_LENGTH = 400;
 
     /**
-     * Make a layout for the specified text that will be updated as
-     * the text is changed.
+     * Builder for dynamic layouts. The builder is the preferred pattern for constructing
+     * DynamicLayout objects and should be preferred over the constructors, particularly to access
+     * newer features. To build a dynamic layout, first call {@link #obtain} with the required
+     * arguments (base, paint, and width), then call setters for optional parameters, and finally
+     * {@link #build} to build the DynamicLayout object. Parameters not explicitly set will get
+     * default values.
      */
-    public DynamicLayout(CharSequence base,
-                         TextPaint paint,
-                         int width, Alignment align,
-                         float spacingmult, float spacingadd,
+    public static final class Builder {
+        private Builder() {
+        }
+
+        /**
+         * Obtain a builder for constructing DynamicLayout objects.
+         */
+        @NonNull
+        public static Builder obtain(@NonNull CharSequence base, @NonNull TextPaint paint,
+                @IntRange(from = 0) int width) {
+            Builder b = sPool.acquire();
+            if (b == null) {
+                b = new Builder();
+            }
+
+            // set default initial values
+            b.mBase = base;
+            b.mDisplay = base;
+            b.mPaint = paint;
+            b.mWidth = width;
+            b.mAlignment = Alignment.ALIGN_NORMAL;
+            b.mTextDir = TextDirectionHeuristics.FIRSTSTRONG_LTR;
+            b.mSpacingMult = DEFAULT_LINESPACING_MULTIPLIER;
+            b.mSpacingAdd = DEFAULT_LINESPACING_ADDITION;
+            b.mIncludePad = true;
+            b.mFallbackLineSpacing = false;
+            b.mEllipsizedWidth = width;
+            b.mEllipsize = null;
+            b.mBreakStrategy = Layout.BREAK_STRATEGY_SIMPLE;
+            b.mHyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE;
+            b.mJustificationMode = Layout.JUSTIFICATION_MODE_NONE;
+            return b;
+        }
+
+        /**
+         * This method should be called after the layout is finished getting constructed and the
+         * builder needs to be cleaned up and returned to the pool.
+         */
+        private static void recycle(@NonNull Builder b) {
+            b.mBase = null;
+            b.mDisplay = null;
+            b.mPaint = null;
+            sPool.release(b);
+        }
+
+        /**
+         * Set the transformed text (password transformation being the primary example of a
+         * transformation) that will be updated as the base text is changed. The default is the
+         * 'base' text passed to the builder's constructor.
+         *
+         * @param display the transformed text
+         * @return this builder, useful for chaining
+         */
+        @NonNull
+        public Builder setDisplayText(@NonNull CharSequence display) {
+            mDisplay = display;
+            return this;
+        }
+
+        /**
+         * Set the alignment. The default is {@link Layout.Alignment#ALIGN_NORMAL}.
+         *
+         * @param alignment Alignment for the resulting {@link DynamicLayout}
+         * @return this builder, useful for chaining
+         */
+        @NonNull
+        public Builder setAlignment(@NonNull Alignment alignment) {
+            mAlignment = alignment;
+            return this;
+        }
+
+        /**
+         * Set the text direction heuristic. The text direction heuristic is used to resolve text
+         * direction per-paragraph based on the input text. The default is
+         * {@link TextDirectionHeuristics#FIRSTSTRONG_LTR}.
+         *
+         * @param textDir text direction heuristic for resolving bidi behavior.
+         * @return this builder, useful for chaining
+         */
+        @NonNull
+        public Builder setTextDirection(@NonNull TextDirectionHeuristic textDir) {
+            mTextDir = textDir;
+            return this;
+        }
+
+        /**
+         * Set line spacing parameters. Each line will have its line spacing multiplied by
+         * {@code spacingMult} and then increased by {@code spacingAdd}. The default is 0.0 for
+         * {@code spacingAdd} and 1.0 for {@code spacingMult}.
+         *
+         * @param spacingAdd the amount of line spacing addition
+         * @param spacingMult the line spacing multiplier
+         * @return this builder, useful for chaining
+         * @see android.widget.TextView#setLineSpacing
+         */
+        @NonNull
+        public Builder setLineSpacing(float spacingAdd, @FloatRange(from = 0.0) float spacingMult) {
+            mSpacingAdd = spacingAdd;
+            mSpacingMult = spacingMult;
+            return this;
+        }
+
+        /**
+         * Set whether to include extra space beyond font ascent and descent (which is needed to
+         * avoid clipping in some languages, such as Arabic and Kannada). The default is
+         * {@code true}.
+         *
+         * @param includePad whether to include padding
+         * @return this builder, useful for chaining
+         * @see android.widget.TextView#setIncludeFontPadding
+         */
+        @NonNull
+        public Builder setIncludePad(boolean includePad) {
+            mIncludePad = includePad;
+            return this;
+        }
+
+        /**
+         * Set whether to respect the ascent and descent of the fallback fonts that are used in
+         * displaying the text (which is needed to avoid text from consecutive lines running into
+         * each other). If set, fallback fonts that end up getting used can increase the ascent
+         * and descent of the lines that they are used on.
+         *
+         * <p>For backward compatibility reasons, the default is {@code false}, but setting this to
+         * true is strongly recommended. It is required to be true if text could be in languages
+         * like Burmese or Tibetan where text is typically much taller or deeper than Latin text.
+         *
+         * @param useLineSpacingFromFallbacks whether to expand linespacing based on fallback fonts
+         * @return this builder, useful for chaining
+         */
+        @NonNull
+        public Builder setUseLineSpacingFromFallbacks(boolean useLineSpacingFromFallbacks) {
+            mFallbackLineSpacing = useLineSpacingFromFallbacks;
+            return this;
+        }
+
+        /**
+         * Set the width as used for ellipsizing purposes, if it differs from the normal layout
+         * width. The default is the {@code width} passed to {@link #obtain}.
+         *
+         * @param ellipsizedWidth width used for ellipsizing, in pixels
+         * @return this builder, useful for chaining
+         * @see android.widget.TextView#setEllipsize
+         */
+        @NonNull
+        public Builder setEllipsizedWidth(@IntRange(from = 0) int ellipsizedWidth) {
+            mEllipsizedWidth = ellipsizedWidth;
+            return this;
+        }
+
+        /**
+         * Set ellipsizing on the layout. Causes words that are longer than the view is wide, or
+         * exceeding the number of lines (see #setMaxLines) in the case of
+         * {@link android.text.TextUtils.TruncateAt#END} or
+         * {@link android.text.TextUtils.TruncateAt#MARQUEE}, to be ellipsized instead of broken.
+         * The default is {@code null}, indicating no ellipsis is to be applied.
+         *
+         * @param ellipsize type of ellipsis behavior
+         * @return this builder, useful for chaining
+         * @see android.widget.TextView#setEllipsize
+         */
+        public Builder setEllipsize(@Nullable TextUtils.TruncateAt ellipsize) {
+            mEllipsize = ellipsize;
+            return this;
+        }
+
+        /**
+         * Set break strategy, useful for selecting high quality or balanced paragraph layout
+         * options. The default is {@link Layout#BREAK_STRATEGY_SIMPLE}.
+         *
+         * @param breakStrategy break strategy for paragraph layout
+         * @return this builder, useful for chaining
+         * @see android.widget.TextView#setBreakStrategy
+         */
+        @NonNull
+        public Builder setBreakStrategy(@BreakStrategy int breakStrategy) {
+            mBreakStrategy = breakStrategy;
+            return this;
+        }
+
+        /**
+         * Set hyphenation frequency, to control the amount of automatic hyphenation used. The
+         * possible values are defined in {@link Layout}, by constants named with the pattern
+         * {@code HYPHENATION_FREQUENCY_*}. The default is
+         * {@link Layout#HYPHENATION_FREQUENCY_NONE}.
+         *
+         * @param hyphenationFrequency hyphenation frequency for the paragraph
+         * @return this builder, useful for chaining
+         * @see android.widget.TextView#setHyphenationFrequency
+         */
+        @NonNull
+        public Builder setHyphenationFrequency(@HyphenationFrequency int hyphenationFrequency) {
+            mHyphenationFrequency = hyphenationFrequency;
+            return this;
+        }
+
+        /**
+         * Set paragraph justification mode. The default value is
+         * {@link Layout#JUSTIFICATION_MODE_NONE}. If the last line is too short for justification,
+         * the last line will be displayed with the alignment set by {@link #setAlignment}.
+         *
+         * @param justificationMode justification mode for the paragraph.
+         * @return this builder, useful for chaining.
+         */
+        @NonNull
+        public Builder setJustificationMode(@JustificationMode int justificationMode) {
+            mJustificationMode = justificationMode;
+            return this;
+        }
+
+        /**
+         * Build the {@link DynamicLayout} after options have been set.
+         *
+         * <p>Note: the builder object must not be reused in any way after calling this method.
+         * Setting parameters after calling this method, or calling it a second time on the same
+         * builder object, will likely lead to unexpected results.
+         *
+         * @return the newly constructed {@link DynamicLayout} object
+         */
+        @NonNull
+        public DynamicLayout build() {
+            final DynamicLayout result = new DynamicLayout(this);
+            Builder.recycle(this);
+            return result;
+        }
+
+        private CharSequence mBase;
+        private CharSequence mDisplay;
+        private TextPaint mPaint;
+        private int mWidth;
+        private Alignment mAlignment;
+        private TextDirectionHeuristic mTextDir;
+        private float mSpacingMult;
+        private float mSpacingAdd;
+        private boolean mIncludePad;
+        private boolean mFallbackLineSpacing;
+        private int mBreakStrategy;
+        private int mHyphenationFrequency;
+        private int mJustificationMode;
+        private TextUtils.TruncateAt mEllipsize;
+        private int mEllipsizedWidth;
+
+        private final Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
+
+        private static final SynchronizedPool<Builder> sPool = new SynchronizedPool<>(3);
+    }
+
+    /**
+     * @deprecated Use {@link Builder} instead.
+     */
+    @Deprecated
+    public DynamicLayout(@NonNull CharSequence base,
+                         @NonNull TextPaint paint,
+                         @IntRange(from = 0) int width, @NonNull Alignment align,
+                         @FloatRange(from = 0.0) float spacingmult, float spacingadd,
                          boolean includepad) {
         this(base, base, paint, width, align, spacingmult, spacingadd,
              includepad);
     }
 
     /**
-     * Make a layout for the transformed text (password transformation
-     * being the primary example of a transformation)
-     * that will be updated as the base text is changed.
+     * @deprecated Use {@link Builder} instead.
      */
-    public DynamicLayout(CharSequence base, CharSequence display,
-                         TextPaint paint,
-                         int width, Alignment align,
-                         float spacingmult, float spacingadd,
+    @Deprecated
+    public DynamicLayout(@NonNull CharSequence base, @NonNull CharSequence display,
+                         @NonNull TextPaint paint,
+                         @IntRange(from = 0) int width, @NonNull Alignment align,
+                         @FloatRange(from = 0.0) float spacingmult, float spacingadd,
                          boolean includepad) {
         this(base, display, paint, width, align, spacingmult, spacingadd,
              includepad, null, 0);
     }
 
     /**
-     * Make a layout for the transformed text (password transformation
-     * being the primary example of a transformation)
-     * that will be updated as the base text is changed.
-     * If ellipsize is non-null, the Layout will ellipsize the text
-     * down to ellipsizedWidth.
+     * @deprecated Use {@link Builder} instead.
      */
-    public DynamicLayout(CharSequence base, CharSequence display,
-                         TextPaint paint,
-                         int width, Alignment align,
-                         float spacingmult, float spacingadd,
+    @Deprecated
+    public DynamicLayout(@NonNull CharSequence base, @NonNull CharSequence display,
+                         @NonNull TextPaint paint,
+                         @IntRange(from = 0) int width, @NonNull Alignment align,
+                         @FloatRange(from = 0.0) float spacingmult, float spacingadd,
                          boolean includepad,
-                         TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
+                         @Nullable TextUtils.TruncateAt ellipsize,
+                         @IntRange(from = 0) int ellipsizedWidth) {
         this(base, display, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
                 spacingmult, spacingadd, includepad,
-                StaticLayout.BREAK_STRATEGY_SIMPLE, StaticLayout.HYPHENATION_FREQUENCY_NONE,
+                Layout.BREAK_STRATEGY_SIMPLE, Layout.HYPHENATION_FREQUENCY_NONE,
                 Layout.JUSTIFICATION_MODE_NONE, ellipsize, ellipsizedWidth);
     }
 
     /**
-     * Make a layout for the transformed text (password transformation
-     * being the primary example of a transformation)
-     * that will be updated as the base text is changed.
-     * If ellipsize is non-null, the Layout will ellipsize the text
-     * down to ellipsizedWidth.
-     * *
-     * *@hide
+     * Make a layout for the transformed text (password transformation being the primary example of
+     * a transformation) that will be updated as the base text is changed. If ellipsize is non-null,
+     * the Layout will ellipsize the text down to ellipsizedWidth.
+     *
+     * @hide
+     * @deprecated Use {@link Builder} instead.
      */
-    public DynamicLayout(CharSequence base, CharSequence display,
-                         TextPaint paint,
-                         int width, Alignment align, TextDirectionHeuristic textDir,
-                         float spacingmult, float spacingadd,
-                         boolean includepad, int breakStrategy, int hyphenationFrequency,
-                         int justificationMode, TextUtils.TruncateAt ellipsize,
-                         int ellipsizedWidth) {
-        super((ellipsize == null)
-                ? display
-                : (display instanceof Spanned)
-                    ? new SpannedEllipsizer(display)
-                    : new Ellipsizer(display),
+    @Deprecated
+    public DynamicLayout(@NonNull CharSequence base, @NonNull CharSequence display,
+                         @NonNull TextPaint paint,
+                         @IntRange(from = 0) int width,
+                         @NonNull Alignment align, @NonNull TextDirectionHeuristic textDir,
+                         @FloatRange(from = 0.0) float spacingmult, float spacingadd,
+                         boolean includepad, @BreakStrategy int breakStrategy,
+                         @HyphenationFrequency int hyphenationFrequency,
+                         @JustificationMode int justificationMode,
+                         @Nullable TextUtils.TruncateAt ellipsize,
+                         @IntRange(from = 0) int ellipsizedWidth) {
+        super(createEllipsizer(ellipsize, display),
               paint, width, align, textDir, spacingmult, spacingadd);
 
-        mBase = base;
+        final Builder b = Builder.obtain(base, paint, width)
+                .setAlignment(align)
+                .setTextDirection(textDir)
+                .setLineSpacing(spacingadd, spacingmult)
+                .setEllipsizedWidth(ellipsizedWidth)
+                .setEllipsize(ellipsize);
         mDisplay = display;
-
-        if (ellipsize != null) {
-            mInts = new PackedIntVector(COLUMNS_ELLIPSIZE);
-            mEllipsizedWidth = ellipsizedWidth;
-            mEllipsizeAt = ellipsize;
-        } else {
-            mInts = new PackedIntVector(COLUMNS_NORMAL);
-            mEllipsizedWidth = width;
-            mEllipsizeAt = null;
-        }
-
-        mObjects = new PackedObjectVector<Directions>(1);
-
         mIncludePad = includepad;
         mBreakStrategy = breakStrategy;
         mJustificationMode = justificationMode;
         mHyphenationFrequency = hyphenationFrequency;
 
-        /*
-         * This is annoying, but we can't refer to the layout until
-         * superclass construction is finished, and the superclass
-         * constructor wants the reference to the display text.
-         *
-         * This will break if the superclass constructor ever actually
-         * cares about the content instead of just holding the reference.
-         */
-        if (ellipsize != null) {
-            Ellipsizer e = (Ellipsizer) getText();
+        generate(b);
 
+        Builder.recycle(b);
+    }
+
+    private DynamicLayout(@NonNull Builder b) {
+        super(createEllipsizer(b.mEllipsize, b.mDisplay),
+                b.mPaint, b.mWidth, b.mAlignment, b.mTextDir, b.mSpacingMult, b.mSpacingAdd);
+
+        mDisplay = b.mDisplay;
+        mIncludePad = b.mIncludePad;
+        mBreakStrategy = b.mBreakStrategy;
+        mJustificationMode = b.mJustificationMode;
+        mHyphenationFrequency = b.mHyphenationFrequency;
+
+        generate(b);
+    }
+
+    @NonNull
+    private static CharSequence createEllipsizer(@Nullable TextUtils.TruncateAt ellipsize,
+            @NonNull CharSequence display) {
+        if (ellipsize == null) {
+            return display;
+        } else if (display instanceof Spanned) {
+            return new SpannedEllipsizer(display);
+        } else {
+            return new Ellipsizer(display);
+        }
+    }
+
+    private void generate(@NonNull Builder b) {
+        mBase = b.mBase;
+        mFallbackLineSpacing = b.mFallbackLineSpacing;
+        if (b.mEllipsize != null) {
+            mInts = new PackedIntVector(COLUMNS_ELLIPSIZE);
+            mEllipsizedWidth = b.mEllipsizedWidth;
+            mEllipsizeAt = b.mEllipsize;
+
+            /*
+             * This is annoying, but we can't refer to the layout until superclass construction is
+             * finished, and the superclass constructor wants the reference to the display text.
+             *
+             * In other words, the two Ellipsizer classes in Layout.java need a
+             * (Dynamic|Static)Layout as a parameter to do their calculations, but the Ellipsizers
+             * also need to be the input to the superclass's constructor (Layout). In order to go
+             * around the circular dependency, we construct the Ellipsizer with only one of the
+             * parameters, the text (in createEllipsizer). And we fill in the rest of the needed
+             * information (layout, width, and method) later, here.
+             *
+             * This will break if the superclass constructor ever actually cares about the content
+             * instead of just holding the reference.
+             */
+            final Ellipsizer e = (Ellipsizer) getText();
             e.mLayout = this;
-            e.mWidth = ellipsizedWidth;
-            e.mMethod = ellipsize;
+            e.mWidth = b.mEllipsizedWidth;
+            e.mMethod = b.mEllipsize;
             mEllipsize = true;
+        } else {
+            mInts = new PackedIntVector(COLUMNS_NORMAL);
+            mEllipsizedWidth = b.mWidth;
+            mEllipsizeAt = null;
         }
 
-        // Initial state is a single line with 0 characters (0 to 0),
-        // with top at 0 and bottom at whatever is natural, and
-        // undefined ellipsis.
+        mObjects = new PackedObjectVector<>(1);
+
+        // Initial state is a single line with 0 characters (0 to 0), with top at 0 and bottom at
+        // whatever is natural, and undefined ellipsis.
 
         int[] start;
 
-        if (ellipsize != null) {
+        if (b.mEllipsize != null) {
             start = new int[COLUMNS_ELLIPSIZE];
             start[ELLIPSIS_START] = ELLIPSIS_UNDEFINED;
         } else {
             start = new int[COLUMNS_NORMAL];
         }
 
-        Directions[] dirs = new Directions[] { DIRS_ALL_LEFT_TO_RIGHT };
+        final Directions[] dirs = new Directions[] { DIRS_ALL_LEFT_TO_RIGHT };
 
-        Paint.FontMetricsInt fm = paint.getFontMetricsInt();
-        int asc = fm.ascent;
-        int desc = fm.descent;
+        final Paint.FontMetricsInt fm = b.mFontMetricsInt;
+        b.mPaint.getFontMetricsInt(fm);
+        final int asc = fm.ascent;
+        final int desc = fm.descent;
 
         start[DIR] = DIR_LEFT_TO_RIGHT << DIR_SHIFT;
         start[TOP] = 0;
@@ -177,26 +472,30 @@ public class DynamicLayout extends Layout
 
         mObjects.insertAt(0, dirs);
 
+        final int baseLength = mBase.length();
         // Update from 0 characters to whatever the real text is
-        reflow(base, 0, 0, base.length());
+        reflow(mBase, 0, 0, baseLength);
 
-        if (base instanceof Spannable) {
+        if (mBase instanceof Spannable) {
             if (mWatcher == null)
                 mWatcher = new ChangeWatcher(this);
 
             // Strip out any watchers for other DynamicLayouts.
-            Spannable sp = (Spannable) base;
-            ChangeWatcher[] spans = sp.getSpans(0, sp.length(), ChangeWatcher.class);
-            for (int i = 0; i < spans.length; i++)
+            final Spannable sp = (Spannable) mBase;
+            final ChangeWatcher[] spans = sp.getSpans(0, baseLength, ChangeWatcher.class);
+            for (int i = 0; i < spans.length; i++) {
                 sp.removeSpan(spans[i]);
+            }
 
-            sp.setSpan(mWatcher, 0, base.length(),
+            sp.setSpan(mWatcher, 0, baseLength,
                        Spannable.SPAN_INCLUSIVE_INCLUSIVE |
                        (PRIORITY << Spannable.SPAN_PRIORITY_SHIFT));
         }
     }
 
-    private void reflow(CharSequence s, int where, int before, int after) {
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public void reflow(CharSequence s, int where, int before, int after) {
         if (s != mBase)
             return;
 
@@ -299,12 +598,15 @@ public class DynamicLayout extends Layout
                 .setWidth(getWidth())
                 .setTextDirection(getTextDirectionHeuristic())
                 .setLineSpacing(getSpacingAdd(), getSpacingMultiplier())
+                .setUseLineSpacingFromFallbacks(mFallbackLineSpacing)
                 .setEllipsizedWidth(mEllipsizedWidth)
                 .setEllipsize(mEllipsizeAt)
                 .setBreakStrategy(mBreakStrategy)
                 .setHyphenationFrequency(mHyphenationFrequency)
-                .setJustificationMode(mJustificationMode);
-        reflowed.generate(b, false, true);
+                .setJustificationMode(mJustificationMode)
+                .setAddLastLineLineSpacing(!islast);
+
+        reflowed.generate(b, false /*includepad*/, true /*trackpad*/);
         int n = reflowed.getLineCount();
         // If the new layout has a blank line at the end, but it is not
         // the very end of the buffer, then we already have a line that
@@ -365,6 +667,7 @@ public class DynamicLayout extends Layout
                 desc += botpad;
 
             ints[DESCENT] = desc;
+            ints[EXTRA] = reflowed.getLineExtra(i);
             objects[0] = reflowed.getLineDirections(i);
 
             final int end = (i == n - 1) ? where + after : reflowed.getLineStart(i + 1);
@@ -401,7 +704,12 @@ public class DynamicLayout extends Layout
         // Spans other than ReplacementSpan can be ignored because line top and bottom are
         // disjunction of all tops and bottoms, although it's not optimal.
         final Paint paint = getPaint();
-        paint.getTextBounds(text, start, end, mTempRect);
+        if (text instanceof PrecomputedText) {
+            PrecomputedText precomputed = (PrecomputedText) text;
+            precomputed.getBounds(start, end, mTempRect);
+        } else {
+            paint.getTextBounds(text, start, end, mTempRect);
+        }
         final Paint.FontMetricsInt fm = paint.getFontMetricsInt();
         return mTempRect.top < fm.top || mTempRect.bottom > fm.bottom;
     }
@@ -505,8 +813,8 @@ public class DynamicLayout extends Layout
             return;
         }
 
-        int firstBlock = -1;
-        int lastBlock = -1;
+        /*final*/ int firstBlock = -1;
+        /*final*/ int lastBlock = -1;
         for (int i = 0; i < mNumberOfBlocks; i++) {
             if (mBlockEndLines[i] >= startLine) {
                 firstBlock = i;
@@ -521,10 +829,10 @@ public class DynamicLayout extends Layout
         }
         final int lastBlockEndLine = mBlockEndLines[lastBlock];
 
-        boolean createBlockBefore = startLine > (firstBlock == 0 ? 0 :
+        final boolean createBlockBefore = startLine > (firstBlock == 0 ? 0 :
                 mBlockEndLines[firstBlock - 1] + 1);
-        boolean createBlock = newLineCount > 0;
-        boolean createBlockAfter = endLine < mBlockEndLines[lastBlock];
+        final boolean createBlock = newLineCount > 0;
+        final boolean createBlockAfter = endLine < mBlockEndLines[lastBlock];
 
         int numAddedBlocks = 0;
         if (createBlockBefore) numAddedBlocks++;
@@ -563,12 +871,18 @@ public class DynamicLayout extends Layout
 
         if (numAddedBlocks + numRemovedBlocks != 0 && mBlocksAlwaysNeedToBeRedrawn != null) {
             final ArraySet<Integer> set = new ArraySet<>();
+            final int changedBlockCount = numAddedBlocks - numRemovedBlocks;
             for (int i = 0; i < mBlocksAlwaysNeedToBeRedrawn.size(); i++) {
                 Integer block = mBlocksAlwaysNeedToBeRedrawn.valueAt(i);
-                if (block > firstBlock) {
-                    block += numAddedBlocks - numRemovedBlocks;
+                if (block < firstBlock) {
+                    // block index is before firstBlock add it since it did not change
+                    set.add(block);
                 }
-                set.add(block);
+                if (block > lastBlock) {
+                    // block index is after lastBlock, the index reduced to += changedBlockCount
+                    block += changedBlockCount;
+                    set.add(block);
+                }
             }
             mBlocksAlwaysNeedToBeRedrawn = set;
         }
@@ -692,6 +1006,14 @@ public class DynamicLayout extends Layout
         return mInts.getValue(line, DESCENT);
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public int getLineExtra(int line) {
+        return mInts.getValue(line, EXTRA);
+    }
+
     @Override
     public int getLineStart(int line) {
         return mInts.getValue(line, START) & START_MASK;
@@ -742,16 +1064,17 @@ public class DynamicLayout extends Layout
 
     private static class ChangeWatcher implements TextWatcher, SpanWatcher {
         public ChangeWatcher(DynamicLayout layout) {
-            mLayout = new WeakReference<DynamicLayout>(layout);
+            mLayout = new WeakReference<>(layout);
         }
 
         private void reflow(CharSequence s, int where, int before, int after) {
             DynamicLayout ml = mLayout.get();
 
-            if (ml != null)
+            if (ml != null) {
                 ml.reflow(s, where, before, after);
-            else if (s instanceof Spannable)
+            } else if (s instanceof Spannable) {
                 ((Spannable) s).removeSpan(this);
+            }
         }
 
         public void beforeTextChanged(CharSequence s, int where, int before, int after) {
@@ -778,6 +1101,11 @@ public class DynamicLayout extends Layout
 
         public void onSpanChanged(Spannable s, Object o, int start, int end, int nstart, int nend) {
             if (o instanceof UpdateLayout) {
+                if (start > end) {
+                    // Bug: 67926915 start cannot be determined, fallback to reflow from start
+                    // instead of causing an exception
+                    start = 0;
+                }
                 reflow(s, start, end - start, end - start);
                 reflow(s, nstart, nend - nstart, nend - nstart);
             }
@@ -808,6 +1136,7 @@ public class DynamicLayout extends Layout
     private CharSequence mDisplay;
     private ChangeWatcher mWatcher;
     private boolean mIncludePad;
+    private boolean mFallbackLineSpacing;
     private boolean mEllipsize;
     private int mEllipsizedWidth;
     private TextUtils.TruncateAt mEllipsizeAt;
@@ -851,14 +1180,15 @@ public class DynamicLayout extends Layout
     private static final int TAB = START;
     private static final int TOP = 1;
     private static final int DESCENT = 2;
+    private static final int EXTRA = 3;
     // HYPHEN and MAY_PROTRUDE_FROM_TOP_OR_BOTTOM share the same entry.
-    private static final int HYPHEN = 3;
+    private static final int HYPHEN = 4;
     private static final int MAY_PROTRUDE_FROM_TOP_OR_BOTTOM = HYPHEN;
-    private static final int COLUMNS_NORMAL = 4;
+    private static final int COLUMNS_NORMAL = 5;
 
-    private static final int ELLIPSIS_START = 4;
-    private static final int ELLIPSIS_COUNT = 5;
-    private static final int COLUMNS_ELLIPSIZE = 6;
+    private static final int ELLIPSIS_START = 5;
+    private static final int ELLIPSIS_COUNT = 6;
+    private static final int COLUMNS_ELLIPSIZE = 7;
 
     private static final int START_MASK = 0x1FFFFFFF;
     private static final int DIR_SHIFT  = 30;

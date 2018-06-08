@@ -12,32 +12,27 @@ final class GestureUtils {
         /* cannot be instantiated */
     }
 
-    public static boolean isTap(MotionEvent down, MotionEvent up, int tapTimeSlop,
-            int tapDistanceSlop, int actionIndex) {
-        return eventsWithinTimeAndDistanceSlop(down, up, tapTimeSlop, tapDistanceSlop, actionIndex);
-    }
-
     public static boolean isMultiTap(MotionEvent firstUp, MotionEvent secondUp,
-            int multiTapTimeSlop, int multiTapDistanceSlop, int actionIndex) {
+            int multiTapTimeSlop, int multiTapDistanceSlop) {
+        if (firstUp == null || secondUp == null) return false;
         return eventsWithinTimeAndDistanceSlop(firstUp, secondUp, multiTapTimeSlop,
-                multiTapDistanceSlop, actionIndex);
+                multiTapDistanceSlop);
     }
 
     private static boolean eventsWithinTimeAndDistanceSlop(MotionEvent first, MotionEvent second,
-            int timeout, int distance, int actionIndex) {
+            int timeout, int distance) {
         if (isTimedOut(first, second, timeout)) {
             return false;
         }
-        final double deltaMove = computeDistance(first, second, actionIndex);
+        final double deltaMove = distance(first, second);
         if (deltaMove >= distance) {
             return false;
         }
         return true;
     }
 
-    public static double computeDistance(MotionEvent first, MotionEvent second, int pointerIndex) {
-         return MathUtils.dist(first.getX(pointerIndex), first.getY(pointerIndex),
-                 second.getX(pointerIndex), second.getY(pointerIndex));
+    public static double distance(MotionEvent first, MotionEvent second) {
+        return MathUtils.dist(first.getX(), first.getY(), second.getX(), second.getY());
     }
 
     public static boolean isTimedOut(MotionEvent firstUp, MotionEvent secondUp, int timeout) {
@@ -45,16 +40,9 @@ final class GestureUtils {
         return (deltaTime >= timeout);
     }
 
-    public static boolean isSamePointerContext(MotionEvent first, MotionEvent second) {
-        return (first.getPointerIdBits() == second.getPointerIdBits()
-                && first.getPointerId(first.getActionIndex())
-                        == second.getPointerId(second.getActionIndex()));
-    }
-
     /**
      * Determines whether a two pointer gesture is a dragging one.
      *
-     * @param event The event with the pointer data.
      * @return True if the gesture is a dragging one.
      */
     public static boolean isDraggingGesture(float firstPtrDownX, float firstPtrDownY,

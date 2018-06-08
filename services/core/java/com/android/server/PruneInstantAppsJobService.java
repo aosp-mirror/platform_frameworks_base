@@ -23,6 +23,7 @@ import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
+import android.os.AsyncTask;
 
 import java.util.concurrent.TimeUnit;
 
@@ -47,10 +48,12 @@ public class PruneInstantAppsJobService extends JobService {
 
     @Override
     public boolean onStartJob(JobParameters params) {
-        PackageManagerInternal packageManagerInternal = LocalServices.getService(
-                PackageManagerInternal.class);
-        packageManagerInternal.pruneInstantApps();
-        jobFinished(params, false);
+        AsyncTask.execute(() -> {
+            PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                    PackageManagerInternal.class);
+            packageManagerInternal.pruneInstantApps();
+            jobFinished(params, false);
+        });
         return true;
     }
 

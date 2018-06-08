@@ -33,32 +33,36 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"Праверце пароль і паўтарыце спробу"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Не ў зоне дасягальнасці"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"Не будзе аўтаматычна падключацца"</string>
-    <string name="wifi_no_internet" msgid="3880396223819116454">"Няма доступу да інтэрнэту"</string>
+    <string name="wifi_no_internet" msgid="4663834955626848401">"Няма доступу да інтэрнэту"</string>
     <string name="saved_network" msgid="4352716707126620811">"Хто захаваў: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Аўтаматычна падключана праз %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Аўтаматычна падключана праз пастаўшчыка паслугі ацэнкі сеткі"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Падлучана праз %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Даступна праз %1$s"</string>
-    <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Падлучана, няма інтэрнэту"</string>
+    <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Падключана, без доступу да інтэрнэту"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Пункт доступу часова заняты"</string>
+    <string name="connected_via_carrier" msgid="7583780074526041912">"Падлучана праз %1$s"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"Даступна праз %1$s"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Вельмі павольная"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Павольная"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"ОК"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"Сярэдняя"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"Хуткая"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"Вельмі хуткая"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Адключана"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Адключэнне..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Злучэнне..."</string>
-    <string name="bluetooth_connected" msgid="6038755206916626419">"Падключаны"</string>
+    <string name="bluetooth_connected" msgid="5427152882755735944">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_pairing" msgid="1426882272690346242">"Спарванне..."</string>
-    <string name="bluetooth_connected_no_headset" msgid="2866994875046035609">"Падключана (без тэлефона)"</string>
-    <string name="bluetooth_connected_no_a2dp" msgid="4576188601581440337">"Падключэнне (без носьбіта)"</string>
-    <string name="bluetooth_connected_no_map" msgid="6504436917057479986">"Падлучана (без доступу да паведамленняў)"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="9195757766755553810">"Падключаны (без тэлефона або носьбіта)"</string>
-    <string name="bluetooth_connected_battery_level" msgid="7049181126136692368">"Падключана, узровень зараду акумулятара: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_battery_level" msgid="5504193961248406027">"Падключана (без тэлефона), узровень зараду акумулятара: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="4751724026365870779">"Падключана (без носьбіта), узровень зараду акумулятара: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1549265779323455261">"Падключана (без тэлефона ці носьбіта), узровень зараду акумулятара: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset" msgid="616068069034994802">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без званкоў)"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="3736431800395923868">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без аўдыя)"</string>
+    <string name="bluetooth_connected_no_map" msgid="3200033913678466453">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без паведамленняў)"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2047403011284187056">"Падкл. прылада <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> (без званкоў і аўдыя)"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5162924691231307748">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>. Узровень зараду яе акумулятара: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (без званкоў). Узровень зараду яе акумулятара: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (без аўдыя). Узровень зараду яе акумулятара: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Падключана прылада <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (без званкоў і аўдыя). Узровень зараду яе акумулятара: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Аўдыё медыяпрылады"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Тэлефонныя выклікі"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Перадача файлаў"</string>
@@ -71,6 +75,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"Доступ да SIM-карты"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"Аўдыя ў HD: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"Аўдыя ў HD"</string>
+    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"Слыхавы апарат"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"Падключана да слыхавога апарата"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Падключана да аўдыё медыа"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Падключана да аўдыё тэлефона"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Падключаны да серверу перадачы файлаў"</string>
@@ -78,15 +84,16 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Падключана да SAP"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Няма падключэння да серверу перадачы файлаў"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Падключана да прылады ўводу"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="4602294638909590612">"Прылада для дост. ў Iнт."</string>
-    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1561383706411975199">"Сумеснае выкарыстанне лакальнага падключэння да інтэрнэту з прыладай"</string>
-    <string name="bluetooth_pan_profile_summary_use_for" msgid="5664884523822068653">"Выкарыстоўвайце для доступу ў Інтэрнэт"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Падключэнне да прылады для доступу ў інтэрнэт"</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Абагульванне лакальнага падключэння да інтэрнэту з прыладай"</string>
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Выкарыстоўваць для доступу ў інтэрнэт"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Выкарыстоўваць для карты"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Выкарыстоўваць для доступу да SIM-карты"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Выкарыстоўваць для аўдыё-медыя"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"Выкарыстоўваць для аўдыё тэлефона"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"Выкарыстоўваць для перадачы файлаў"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"Выкарыстоўваць для ўводу"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"Выкарыстоўваць для слыхавога апарата"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Падлучыць"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"СПАЛУЧЫЦЬ"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Скасаваць"</string>
@@ -95,12 +102,21 @@
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Не атрымалася спалучыцца з прыладай <xliff:g id="DEVICE_NAME">%1$s</xliff:g>, таму што PIN-код або пароль няправiльныя."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Не магу размаўляць з прыладай <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"Злучэнне адхілена прыладай <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_talkback_computer" msgid="4875089335641234463">"Камп\'ютар"</string>
+    <string name="bluetooth_talkback_headset" msgid="5140152177885220949">"Гарнітура"</string>
+    <string name="bluetooth_talkback_phone" msgid="4260255181240622896">"Тэлефон"</string>
+    <string name="bluetooth_talkback_imaging" msgid="551146170554589119">"Прылада апрацоўкі відарысаў"</string>
+    <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Навушнікі"</string>
+    <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Перыферыйная прылада ўводу"</string>
+    <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi выключаны."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi адлучаны."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Адзiн слупок Wi-Fi."</string>
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Два слупкi Wi-Fi."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Тры слупкi Wi-Fi."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Поўны сігнал Wi-Fi."</string>
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"Адкрытая сетка"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"Бяспечная сетка"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"АС Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Выдаленыя прыкладанні"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Выдаленыя прыкладанні і карыстальнiкi"</string>
@@ -113,7 +129,7 @@
     <string name="user_guest" msgid="8475274842845401871">"Госць"</string>
     <string name="unknown" msgid="1592123443519355854">"Невядома"</string>
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Карыстальнiк: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
-    <string name="launch_defaults_some" msgid="313159469856372621">"Некат. параметры па змаўч. усталяваныя"</string>
+    <string name="launch_defaults_some" msgid="313159469856372621">"Усталяваны некаторыя стандартныя налады"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Параметры па змаўчанні не ўсталяваныя"</string>
     <string name="tts_settings" msgid="8186971894801348327">"Налады Text-to-speech"</string>
     <string name="tts_settings_title" msgid="1237820681016639683">"Сінтэз маўлення"</string>
@@ -183,12 +199,11 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Сеткі"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Сертыфікацыя бесправаднога дысплея"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Уключыць падрабязны журнал Wi‑Fi"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Інтэнсіўны пераход з Wi‑Fi на маб. сетку"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Заўсёды дазваляць роўмінгавае сканіраванне Wi‑Fi"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Стварэнне выпадковых MAC-адрасоў пры падключэнні па Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Мабільная перадача даных заўсёды актыўная"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Апаратнае паскарэнне ў рэжыме мадэма"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Паказваць прылады Bluetooth без назваў"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Адключыць абсалютны гук"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Уключыць унутрыпалосны празвон"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версія Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Выбраць версію Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Кодэк Bluetooth Audio"</string>
@@ -202,10 +217,16 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Аўдыякодэк Bluetooth LDAC: якасць прайгравання"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Выбраць аўдыякодэк Bluetooth LDAC:\nякасць прайгравання"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Перадача плынню: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Прыватная DNS"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Выберыце рэжым прыватнай DNS"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"Выключана"</string>
+    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
+    <skip />
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Імя вузла аператара прыватнай DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Увядзіце імя вузла аператара DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Паказаць опцыі сертыфікацыі бесправаднога дысплея"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Падвыс. узровень дэтал-цыі журнала Wi‑Fi у залежн. ад SSID RSSI у Wi‑Fi Picker"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Калі гэта функцыя ўключана, Wi-Fi будзе больш інтэнсіўна імкнуцца перайсці на падключ. маб. перад. даных пры слабым сігнале Wi‑Fi"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Дазволіць/забараніць роўмінгавае сканіраванне Wi‑Fi ў залежнасці ад аб\'ёму трафіку даных у інтэрфейсе"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Генерыраваць выпадковы MAC-адрас пры падключэнні да сетак Wi‑Fi"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Памеры буфера для сродку вядзення журнала"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Выберыце памеры сродку вядзення журнала для буфераў журнала"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Ачысціць пастаяннае сховішча журнала?"</string>
@@ -226,8 +247,8 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Гэтыя налады прызначаны толькi для распрацоўшыкаў. Яны могуць выклікаць збоi прылад i ўсталяваных на iх прыкладанняў, а таксама перашкаджаць iх працы."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Праверце прыкладаннi па USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Праверце прыкладаннi, усталяваныя з дапамогай ADB/ADT, на нестабiльныя паводзiны."</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Прылады Bluetooth будуць паказаны без назваў (толькі MAC-адрасы)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Адключыць функцыю абсалютнага гуку Bluetooth у выпадку праблем з гукам на аддаленых прыладах, напр., пры непрымальна высокай гучнасці або адсутнасці кіравання."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Дазволіць прайграванне рынгтонаў на тэлефоне праз гарнітуры Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Лакальны тэрмінал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Уключэнне прыкладання тэрмінала, якое прапануе доступ да лакальнай абалонкі"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Праверка HDCP"</string>
@@ -240,8 +261,6 @@
     <string name="no_application" msgid="2813387563129153880">"Нічога"</string>
     <string name="wait_for_debugger" msgid="1202370874528893091">"Пачакайце адладчык"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Адладжанае прыкладанне чакае далучэння да iнструмента для адладкi перад працай"</string>
-    <string name="telephony_monitor_switch" msgid="1764958220062121194">"Сродак адсочвання тэлефаніі"</string>
-    <string name="telephony_monitor_switch_summary" msgid="7695552966547975635">"Праграма TelephonyMonitor будзе заносіць у журналы выпадкі выяўлення праблем, што датычацца фукнцый тэлефаніі/мадэма, а таксама паказваць карыстальніку адпаведнае апавяшчэнне з прапановай адпраўкі паведамлення пра памылку"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Увод"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Чарцёж"</string>
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Апаратнае паскарэнне рэндэрынгу"</string>
@@ -260,7 +279,6 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Паказаць абнаўленнi апаратнага пласта"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Апаратныя пласты набываюць зялёны колер, калi абнаўляюцца"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Адладка перамалёўкі GPU"</string>
-    <string name="debug_hw_renderer" msgid="7568529019431785816">"Задаць рэндэрар графікі"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Адкл. апаратн. накладання"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Заўсёды выкарыстоўваць GPU для экраннай кампаноўкі"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Сімуляцыя каляр. прасторы"</string>
@@ -277,6 +295,8 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"Уключыць 4x MSAA у прыкладаннях з OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Адладка аперацый непрамавугольнага кліпа"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"Профіль рэндэрынгу GPU"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Уключыць слаі адладкі GPU"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Дазв. загр. слаёў адладкі GPU для праграм адладкі"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Маштаб анімацыі акна"</string>
     <string name="transition_animation_scale_title" msgid="387527540523595875">"Маштаб перадачы анімацыі"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Шкала працягласці анiматара"</string>
@@ -311,9 +331,10 @@
     <item msgid="8280754435979370728">"Натуральныя колеры (такія, як яны ўспрымаюцца вокам)"</item>
     <item msgid="5363960654009010371">"Колеры, аптымізаваныя для лічбавага змесціва"</item>
   </string-array>
-    <string name="inactive_apps_title" msgid="1317817863508274533">"Неактыўныя дадаткі"</string>
+    <string name="inactive_apps_title" msgid="9042996804461901648">"Праграмы ў рэжыме чакання"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"Неактыўная. Краніце, каб пераключыць."</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"Актыўная. Краніце, каб пераключыць."</string>
+    <string name="standby_bucket_summary" msgid="6567835350910684727">"Стан праграмы ў рэжыме чакання: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"Запушчаныя службы"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"Прагляд запушчаных службаў i кіраванне iмi"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"Рэалізацыя WebView"</string>
@@ -335,22 +356,48 @@
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Карэкцыя колеру"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Гэта функцыя з\'яўляецца эксперыментальнай і можа паўплываць на прадукцыйнасць."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Перавызначаны <xliff:g id="TITLE">%1$s</xliff:g>"</string>
-    <string name="power_remaining_duration_only" msgid="845431008899029842">"Засталося каля <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Засталося каля <xliff:g id="TIME">^1</xliff:g> на аснове вашага выкарыстання"</string>
-    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Да поўнай зарадкі засталося <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Засталося <xliff:g id="TIME">^1</xliff:g>"</string>
-    <string name="power_remaining_duration_only_short_enhanced" msgid="7450425624026394823">"Засталося <xliff:g id="TIME">^1</xliff:g> на аснове вашага выкарыстання"</string>
-    <string name="power_discharging_duration" msgid="2843747179907396142">"<xliff:g id="LEVEL">^1</xliff:g> – засталося каля <xliff:g id="TIME">^2</xliff:g>"</string>
-    <string name="power_discharging_duration_enhanced" msgid="4401782117770255046">"<xliff:g id="LEVEL">^1</xliff:g> – засталося каля <xliff:g id="TIME">^2</xliff:g> на аснове вашага выкарыстання"</string>
-    <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> – засталося <xliff:g id="TIME">^2</xliff:g>"</string>
+    <string name="power_remaining_duration_only" msgid="845431008899029842">"Засталося каля <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
+    <skip />
+    <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Засталося каля <xliff:g id="TIME">%1$s</xliff:g> на аснове вашага выкарыстання"</string>
+    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
+    <skip />
+    <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Засталося <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
+    <skip />
+    <!-- no translation found for power_discharge_by (6427074755635635749) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
+    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Засталося менш за <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
+    <skip />
+    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
+    <skip />
+    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
+    <skip />
+    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
+    <skip />
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g> да поўнай зарадкі"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g>"</string>
+    <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Да поўнай зарадкі засталося <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> да поўнай зарадкі"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Невядома"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Зарадка"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ідзе зарадка"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Не зараджаецца"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Не зараджаецца"</string>
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Падключана да сеткі сілкавання, зарадзіць зараз немагчыма"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Поўная"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Кантралюецца адміністратарам"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Уключана адміністратарам"</string>
@@ -375,7 +422,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Карыстальніцкі (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Даведка і водгукі"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Меню"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Каб выканаць скід да заводскіх налад у дэманстрацыйным рэжыме, увядзіце пароль"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Далей"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Патрабуецца пароль"</string>
@@ -384,4 +430,26 @@
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Не атрымалася адкрыць параметры <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Гэты метад уводу можа збіраць увесь тэкст, які ўводзіцца, у тым лiку такiя персанальныя дадзеныя, як паролі і нумары крэдытных карт. Ён выкарыстоўваецца прыкладаннем <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Выкарыстоўваць гэты метад уводу?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Заўвага. Пасля перазагрузкі гэта праграма не зможа запусціцца, пакуль вы не разблакіруеце тэлефон"</string>
+    <string name="ims_reg_title" msgid="7609782759207241443">"Стан рэгістрацыі IMS"</string>
+    <string name="ims_reg_status_registered" msgid="933003316932739188">"Зарэгістраваны"</string>
+    <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Не зарэгістраваны"</string>
+    <string name="status_unavailable" msgid="7862009036663793314">"Адсутнічае"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="one">%1$d прылада падключана</item>
+      <item quantity="few">%1$d прылады падключаны</item>
+      <item quantity="many">%1$d прылад падключана</item>
+      <item quantity="other">%1$d прылады падключана</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Больш часу."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Менш часу."</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Уключыць"</string>
+    <string name="cancel" msgid="6859253417269739139">"Скасаваць"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Уключэнне рэжыму \"Не турбаваць\""</string>
+    <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Ніколі"</string>
+    <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Толькі прыярытэтныя"</string>
+    <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"Наступны будзільнік (<xliff:g id="WHEN">%1$s</xliff:g>) не зазвініць, пакуль вы не выключыце гэту функцыю"</string>
+    <string name="zen_alarm_warning" msgid="6236690803924413088">"Наступны будзільнік не зазвініць: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template" msgid="4996153414057676512">"у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="alarm_template_far" msgid="3779172822607461675">"у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
 </resources>

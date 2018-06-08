@@ -21,8 +21,10 @@ import static android.text.Layout.Alignment.ALIGN_NORMAL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.graphics.Canvas;
 import android.graphics.Paint.FontMetricsInt;
 import android.os.LocaleList;
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.Layout.Alignment;
@@ -42,6 +44,7 @@ import java.util.Locale;
 /**
  * Tests StaticLayout vertical metrics behavior.
  */
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class StaticLayoutTest {
@@ -71,7 +74,7 @@ public class StaticLayoutTest {
     }
 
     @Test
-    public void testBuilder() {
+    public void testBuilder_textDirection() {
         {
             // Obtain.
             final StaticLayout.Builder builder = StaticLayout.Builder.obtain(LAYOUT_TEXT, 0,
@@ -87,8 +90,7 @@ public class StaticLayoutTest {
                     LAYOUT_TEXT.length(), mDefaultPaint, DEFAULT_OUTER_WIDTH);
             builder.setTextDirection(TextDirectionHeuristics.RTL);
             final StaticLayout layout = builder.build();
-            // Always returns TextDirectionHeuristics.FIRSTSTRONG_LTR.
-            assertEquals(TextDirectionHeuristics.FIRSTSTRONG_LTR,
+            assertEquals(TextDirectionHeuristics.RTL,
                     layout.getTextDirectionHeuristic());
         }
     }
@@ -107,7 +109,7 @@ public class StaticLayoutTest {
 
         Layout l = b.build();
         assertVertMetrics(l, 0, 0,
-                fmi.ascent, fmi.descent);
+                new int[][]{{fmi.ascent, fmi.descent, 0}});
 
         // other quick metrics
         assertEquals(0, l.getLineStart(0));
@@ -124,14 +126,14 @@ public class StaticLayoutTest {
      * Top and bottom padding are affected, as is the line descent and height.
      */
     @Test
-    public void testGetters2() {
+    public void testLineMetrics_withPadding() {
         LayoutBuilder b = builder()
             .setIncludePad(true);
         FontMetricsInt fmi = b.paint.getFontMetricsInt();
 
         Layout l = b.build();
         assertVertMetrics(l, fmi.top - fmi.ascent, fmi.bottom - fmi.descent,
-                fmi.top, fmi.bottom);
+                new int[][]{{fmi.top, fmi.bottom, 0}});
     }
 
     /**
@@ -139,16 +141,18 @@ public class StaticLayoutTest {
      * Ascent of top line and descent of bottom line are affected.
      */
     @Test
-    public void testGetters3() {
+    public void testLineMetrics_withPaddingAndWidth() {
         LayoutBuilder b = builder()
             .setIncludePad(true)
             .setWidth(50);
         FontMetricsInt fmi = b.paint.getFontMetricsInt();
 
-        Layout l =  b.build();
+        Layout l = b.build();
         assertVertMetrics(l, fmi.top - fmi.ascent, fmi.bottom - fmi.descent,
-            fmi.top, fmi.descent,
-            fmi.ascent, fmi.bottom);
+                new int[][]{
+                        {fmi.top, fmi.descent, 0},
+                        {fmi.ascent, fmi.bottom, 0}
+                });
     }
 
     /**
@@ -156,7 +160,7 @@ public class StaticLayoutTest {
      * First line ascent is top, bottom line descent is bottom.
      */
     @Test
-    public void testGetters4() {
+    public void testLineMetrics_withThreeLines() {
         LayoutBuilder b = builder()
             .setText("This is a longer test")
             .setIncludePad(true)
@@ -165,9 +169,11 @@ public class StaticLayoutTest {
 
         Layout l = b.build();
         assertVertMetrics(l, fmi.top - fmi.ascent, fmi.bottom - fmi.descent,
-                fmi.top, fmi.descent,
-                fmi.ascent, fmi.descent,
-                fmi.ascent, fmi.bottom);
+                new int[][]{
+                        {fmi.top, fmi.descent, 0},
+                        {fmi.ascent, fmi.descent, 0},
+                        {fmi.ascent, fmi.bottom, 0}
+                });
     }
 
     /**
@@ -176,7 +182,7 @@ public class StaticLayoutTest {
      * even be non-zero leading.
      */
     @Test
-    public void testGetters5() {
+    public void testLineMetrics_withLargeText() {
         LayoutBuilder b = builder()
             .setText("This is a longer test")
             .setIncludePad(true)
@@ -193,9 +199,11 @@ public class StaticLayoutTest {
         // using leading, this will fail.
         Layout l = b.build();
         assertVertMetrics(l, fmi.top - fmi.ascent, fmi.bottom - fmi.descent,
-                fmi.top, fmi.descent,
-                fmi.ascent, fmi.descent,
-                fmi.ascent, fmi.bottom);
+                new int[][]{
+                        {fmi.top, fmi.descent, 0},
+                        {fmi.ascent, fmi.descent, 0},
+                        {fmi.ascent, fmi.bottom, 0}
+                });
     }
 
     /**
@@ -203,7 +211,7 @@ public class StaticLayoutTest {
      * to 3 lines.
      */
     @Test
-    public void testGetters6() {
+    public void testLineMetrics_withSpacingAdd() {
         int spacingAdd = 2; // int so expressions return int
         LayoutBuilder b = builder()
             .setText("This is a longer test")
@@ -214,9 +222,11 @@ public class StaticLayoutTest {
 
         Layout l = b.build();
         assertVertMetrics(l, fmi.top - fmi.ascent, fmi.bottom - fmi.descent,
-                fmi.top, fmi.descent + spacingAdd,
-                fmi.ascent, fmi.descent + spacingAdd,
-                fmi.ascent, fmi.bottom);
+                new int[][]{
+                        {fmi.top, fmi.descent + spacingAdd, spacingAdd},
+                        {fmi.ascent, fmi.descent + spacingAdd, spacingAdd},
+                        {fmi.ascent, fmi.bottom, 0}
+                });
     }
 
     /**
@@ -224,7 +234,7 @@ public class StaticLayoutTest {
      * spacingMult = 1.5, wrapping to 3 lines.
      */
     @Test
-    public void testGetters7() {
+    public void testLineMetrics_withSpacingMult() {
         LayoutBuilder b = builder()
             .setText("This is a longer test")
             .setIncludePad(true)
@@ -236,9 +246,13 @@ public class StaticLayoutTest {
 
         Layout l = b.build();
         assertVertMetrics(l, fmi.top - fmi.ascent, fmi.bottom - fmi.descent,
-                fmi.top, fmi.descent + s.scale(fmi.descent - fmi.top),
-                fmi.ascent, fmi.descent + s.scale(fmi.descent - fmi.ascent),
-                fmi.ascent, fmi.bottom);
+                new int[][]{
+                        {fmi.top, fmi.descent + s.scale(fmi.descent - fmi.top),
+                                s.scale(fmi.descent - fmi.top)},
+                        {fmi.ascent, fmi.descent + s.scale(fmi.descent - fmi.ascent),
+                                s.scale(fmi.descent - fmi.ascent)},
+                        {fmi.ascent, fmi.bottom, 0}
+                });
     }
 
     /**
@@ -246,7 +260,7 @@ public class StaticLayoutTest {
      * spacingMult = 0.8 when wrapping to 3 lines.
      */
     @Test
-    public void testGetters8() {
+    public void testLineMetrics_withUnitIntervalSpacingMult() {
         LayoutBuilder b = builder()
             .setText("This is a longer test")
             .setIncludePad(true)
@@ -258,9 +272,25 @@ public class StaticLayoutTest {
 
         Layout l = b.build();
         assertVertMetrics(l, fmi.top - fmi.ascent, fmi.bottom - fmi.descent,
-                fmi.top, fmi.descent + s.scale(fmi.descent - fmi.top),
-                fmi.ascent, fmi.descent + s.scale(fmi.descent - fmi.ascent),
-                fmi.ascent, fmi.bottom);
+                new int[][]{
+                        {fmi.top, fmi.descent + s.scale(fmi.descent - fmi.top),
+                                s.scale(fmi.descent - fmi.top)},
+                        {fmi.ascent, fmi.descent + s.scale(fmi.descent - fmi.ascent),
+                                s.scale(fmi.descent - fmi.ascent)},
+                        {fmi.ascent, fmi.bottom, 0}
+                });
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testGetLineExtra_withNegativeValue() {
+        final Layout layout = builder().build();
+        layout.getLineExtra(-1);
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testGetLineExtra_withParamGreaterThanLineCount() {
+        final Layout layout = builder().build();
+        layout.getLineExtra(100);
     }
 
     // ----- test utility classes and methods -----
@@ -341,26 +371,39 @@ public class StaticLayoutTest {
         }
     }
 
-    private void assertVertMetrics(Layout l, int topPad, int botPad, int... values) {
+    /**
+     * Assert vertical metrics such as top, bottom, ascent, descent.
+     * @param l layout instance
+     * @param topPad top padding
+     * @param botPad bottom padding
+     * @param values values for each line where first is ascent, second is descent, and last one is
+     *               extra
+     */
+    private void assertVertMetrics(Layout l, int topPad, int botPad, int[][] values) {
         assertTopBotPadding(l, topPad, botPad);
         assertLinesMetrics(l, values);
     }
 
-    private void assertLinesMetrics(Layout l, int... values) {
-        // sanity check
-        if ((values.length & 0x1) != 0) {
-            throw new IllegalArgumentException(String.valueOf(values.length));
-        }
-
-        int lines = values.length >> 1;
+    /**
+     * Check given expected values against the Layout values.
+     * @param l layout instance
+     * @param values values for each line where first is ascent, second is descent, and last one is
+     *               extra
+     */
+    private void assertLinesMetrics(Layout l, int[][] values) {
+        final int lines = values.length;
         assertEquals(lines, l.getLineCount());
 
         int t = 0;
-        for (int i = 0, n = 0; i < lines; ++i, n += 2) {
-            int a = values[n];
-            int d = values[n+1];
+        for (int i = 0, n = 0; i < lines; ++i, n += 3) {
+            if (values[i].length != 3) {
+                throw new IllegalArgumentException(String.valueOf(values.length));
+            }
+            int a = values[i][0];
+            int d = values[i][1];
+            int extra = values[i][2];
             int h = -a + d;
-            assertLineMetrics(l, i, t, a, d, h);
+            assertLineMetrics(l, i, t, a, d, h, extra);
             t += h;
         }
 
@@ -368,12 +411,13 @@ public class StaticLayoutTest {
     }
 
     private void assertLineMetrics(Layout l, int line,
-            int top, int ascent, int descent, int height) {
+            int top, int ascent, int descent, int height, int extra) {
         String info = "line " + line;
         assertEquals(info, top, l.getLineTop(line));
         assertEquals(info, ascent, l.getLineAscent(line));
         assertEquals(info, descent, l.getLineDescent(line));
         assertEquals(info, height, l.getLineBottom(line) - top);
+        assertEquals(info, extra, l.getLineExtra(line));
     }
 
     private void assertTopBotPadding(Layout l, int topPad, int botPad) {
@@ -653,9 +697,13 @@ public class StaticLayoutTest {
     public void testGetOffset_UNICODE_Hebrew() {
         String testString = "\u05DE\u05E1\u05E2\u05D3\u05D4"; // Hebrew Characters
         for (CharSequence seq: buildTestCharSequences(testString, Normalizer.Form.values())) {
-            StaticLayout layout = new StaticLayout(seq, mDefaultPaint,
-                    DEFAULT_OUTER_WIDTH, DEFAULT_ALIGN,
-                    TextDirectionHeuristics.RTL, SPACE_MULTI, SPACE_ADD, true);
+            StaticLayout.Builder b = StaticLayout.Builder.obtain(
+                    seq, 0, seq.length(), mDefaultPaint, DEFAULT_OUTER_WIDTH)
+                    .setAlignment(DEFAULT_ALIGN)
+                    .setTextDirection(TextDirectionHeuristics.RTL)
+                    .setLineSpacing(SPACE_ADD, SPACE_MULTI)
+                    .setIncludePad(true);
+            StaticLayout layout = b.build();
 
             String testLabel = buildTestMessage(seq);
 
@@ -744,6 +792,122 @@ public class StaticLayoutTest {
             // Since the first word is not hyphenated anyway (there's enough width), the LocaleSpan
             // should not affect the layout.
             assertEquals(numEnglishLines, numPrivateLocaleLines);
+        }
+    }
+
+    @Test
+    public void testLayoutDoesntModifyPaint() {
+        final TextPaint paint = new TextPaint();
+        paint.setHyphenEdit(31);
+        final StaticLayout layout = StaticLayout.Builder.obtain("", 0, 0, paint, 100).build();
+        final Canvas canvas = new Canvas();
+        layout.drawText(canvas, 0, 0);
+        assertEquals(31, paint.getHyphenEdit());
+    }
+
+    @Test
+    public void testFallbackLineSpacing() {
+        // All glyphs in the fonts are 1em wide.
+        final String[] testFontFiles = {
+            // ascent == 1em, descent == 2em, only supports 'a' and space
+            "ascent1em-descent2em.ttf",
+            // ascent == 3em, descent == 4em, only supports 'b'
+            "ascent3em-descent4em.ttf"
+        };
+        final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font weight='400' style='normal'>ascent1em-descent2em.ttf</font>"
+                + "  </family>"
+                + "  <family>"
+                + "    <font weight='400' style='normal'>ascent3em-descent4em.ttf</font>"
+                + "  </family>"
+                + "  <family>"
+                + "    <font weight='400' style='normal'>ascent10em-descent10em.ttf</font>"
+                + "  </family>"
+                + "</familyset>";
+
+        try (FontFallbackSetup setup =
+                new FontFallbackSetup("StaticLayout", testFontFiles, xml)) {
+            final TextPaint paint = setup.getPaintFor("sans-serif");
+            final int textSize = 100;
+            paint.setTextSize(textSize);
+            assertEquals(-textSize, paint.ascent(), 0.0f);
+            assertEquals(2 * textSize, paint.descent(), 0.0f);
+
+            final int paraWidth = 5 * textSize;
+            final String text = "aaaaa\naabaa\naaaaa\n"; // This should result in three lines.
+
+            // Old line spacing. All lines should get their ascent and descents from the first font.
+            StaticLayout layout = StaticLayout.Builder
+                    .obtain(text, 0, text.length(), paint, paraWidth)
+                    .setIncludePad(false)
+                    .setUseLineSpacingFromFallbacks(false)
+                    .build();
+            assertEquals(4, layout.getLineCount());
+            assertEquals(-textSize, layout.getLineAscent(0));
+            assertEquals(2 * textSize, layout.getLineDescent(0));
+            assertEquals(-textSize, layout.getLineAscent(1));
+            assertEquals(2 * textSize, layout.getLineDescent(1));
+            assertEquals(-textSize, layout.getLineAscent(2));
+            assertEquals(2 * textSize, layout.getLineDescent(2));
+            // The last empty line spacing should be the default line spacing.
+            // Maybe good to be a previous line spacing?
+            assertEquals(-textSize, layout.getLineAscent(3));
+            assertEquals(2 * textSize, layout.getLineDescent(3));
+
+            // New line spacing. The second line has a 'b', so it needs more ascent and descent.
+            layout = StaticLayout.Builder
+                    .obtain(text, 0, text.length(), paint, paraWidth)
+                    .setIncludePad(false)
+                    .setUseLineSpacingFromFallbacks(true)
+                    .build();
+            assertEquals(4, layout.getLineCount());
+            assertEquals(-textSize, layout.getLineAscent(0));
+            assertEquals(2 * textSize, layout.getLineDescent(0));
+            assertEquals(-3 * textSize, layout.getLineAscent(1));
+            assertEquals(4 * textSize, layout.getLineDescent(1));
+            assertEquals(-textSize, layout.getLineAscent(2));
+            assertEquals(2 * textSize, layout.getLineDescent(2));
+            assertEquals(-textSize, layout.getLineAscent(3));
+            assertEquals(2 * textSize, layout.getLineDescent(3));
+
+            // The default is the old line spacing, for backward compatibility.
+            layout = StaticLayout.Builder
+                    .obtain(text, 0, text.length(), paint, paraWidth)
+                    .setIncludePad(false)
+                    .build();
+            assertEquals(4, layout.getLineCount());
+            assertEquals(-textSize, layout.getLineAscent(0));
+            assertEquals(2 * textSize, layout.getLineDescent(0));
+            assertEquals(-textSize, layout.getLineAscent(1));
+            assertEquals(2 * textSize, layout.getLineDescent(1));
+            assertEquals(-textSize, layout.getLineAscent(2));
+            assertEquals(2 * textSize, layout.getLineDescent(2));
+            assertEquals(-textSize, layout.getLineAscent(3));
+            assertEquals(2 * textSize, layout.getLineDescent(3));
+
+            layout = StaticLayout.Builder
+                    .obtain("\n", 0, 1, paint, textSize)
+                    .setIncludePad(false)
+                    .setUseLineSpacingFromFallbacks(false)
+                    .build();
+            assertEquals(2, layout.getLineCount());
+            assertEquals(-textSize, layout.getLineAscent(0));
+            assertEquals(2 * textSize, layout.getLineDescent(0));
+            assertEquals(-textSize, layout.getLineAscent(1));
+            assertEquals(2 * textSize, layout.getLineDescent(1));
+
+            layout = StaticLayout.Builder
+                    .obtain("\n", 0, 1, paint, textSize)
+                    .setIncludePad(false)
+                    .setUseLineSpacingFromFallbacks(true)
+                    .build();
+            assertEquals(2, layout.getLineCount());
+            assertEquals(-textSize, layout.getLineAscent(0));
+            assertEquals(2 * textSize, layout.getLineDescent(0));
+            assertEquals(-textSize, layout.getLineAscent(1));
+            assertEquals(2 * textSize, layout.getLineDescent(1));
         }
     }
 

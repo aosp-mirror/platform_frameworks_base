@@ -657,6 +657,7 @@ public class ListPopupWindow implements ShowableListMenu {
             mPopup.update(getAnchorView(), mDropDownHorizontalOffset,
                             mDropDownVerticalOffset, (widthSpec < 0)? -1 : widthSpec,
                             (heightSpec < 0)? -1 : heightSpec);
+            mPopup.getContentView().restoreDefaultFocus();
         } else {
             final int widthSpec;
             if (mDropDownWidth == ViewGroup.LayoutParams.MATCH_PARENT) {
@@ -695,6 +696,7 @@ public class ListPopupWindow implements ShowableListMenu {
             mPopup.showAsDropDown(getAnchorView(), mDropDownHorizontalOffset,
                     mDropDownVerticalOffset, mDropDownGravity);
             mDropDownList.setSelection(ListView.INVALID_POSITION);
+            mPopup.getContentView().restoreDefaultFocus();
 
             if (!mModal || mDropDownList.isInTouchMode()) {
                 clearListSelection();

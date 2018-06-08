@@ -16,62 +16,19 @@
 
 package android.widget;
 
-import com.android.frameworks.coretests.R;
-
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.SystemClock;
-import android.util.Log;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * An activity for testing the TextView widget.
- *
- * This class is copied from {@link android.text.method.cts.KeyListenerCtsActivity} in
- * CtsTextTestCase.  The original class is located at
- * cts/tests/tests/text/src/android/text/method/cts/KeyListenerCtsActivity.java
  */
 public class TextViewActivity extends Activity {
-    private boolean mHasWindowFocus = false;
-    private Object mHasWindowFocusLock = new Object();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_text_view);
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (!hasFocus) {
-            Log.w("TextViewActivity", "TextViewActivity lost window focus");
-        }
-        synchronized(mHasWindowFocusLock) {
-            mHasWindowFocus = hasFocus;
-            mHasWindowFocusLock.notify();
-        }
-    }
-
-    /**
-     * Blocks the calling thread until the {@link KeyListenerCtsActivity} has window focus or the
-     * specified duration (in milliseconds) has passed.
-     */
-    public boolean waitForWindowFocus(long durationMillis) {
-        long elapsedMillis = SystemClock.elapsedRealtime();
-        synchronized(mHasWindowFocusLock) {
-            mHasWindowFocus = hasWindowFocus();
-            while (!mHasWindowFocus && durationMillis > 0) {
-                long newElapsedMillis = SystemClock.elapsedRealtime();
-                durationMillis -= (newElapsedMillis - elapsedMillis);
-                elapsedMillis = newElapsedMillis;
-                if (durationMillis > 0) {
-                    try {
-                        mHasWindowFocusLock.wait(durationMillis);
-                    } catch (InterruptedException e) {
-                    }
-                }
-            }
-            return mHasWindowFocus;
-        }
     }
 }

@@ -122,6 +122,7 @@ public class MultinetworkPolicyTracker {
         return mAvoidBadWifi;
     }
 
+    // TODO: move this to MultipathPolicyTracker.
     public int getMeteredMultipathPreference() {
         return mMeteredMultipathPreference;
     }

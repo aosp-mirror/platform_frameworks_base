@@ -51,6 +51,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
@@ -75,6 +76,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.service.wallpaper.IWallpaperConnection;
 import android.service.wallpaper.IWallpaperEngine;
 import android.service.wallpaper.IWallpaperService;
@@ -99,6 +101,7 @@ import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
 
+import java.lang.reflect.InvocationTargetException;
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -119,14 +122,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import com.android.internal.R;
 
-public class WallpaperManagerService extends IWallpaperManager.Stub {
+public class WallpaperManagerService extends IWallpaperManager.Stub
+        implements IWallpaperManagerService {
     static final String TAG = "WallpaperManagerService";
     static final boolean DEBUG = false;
     static final boolean DEBUG_LIVE = DEBUG || true;
 
     public static class Lifecycle extends SystemService {
-        private WallpaperManagerService mService;
+        private IWallpaperManagerService mService;
 
         public Lifecycle(Context context) {
             super(context);
@@ -134,22 +139,30 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
         @Override
         public void onStart() {
-            mService = new WallpaperManagerService(getContext());
-            publishBinderService(Context.WALLPAPER_SERVICE, mService);
+            try {
+                final Class<? extends IWallpaperManagerService> klass =
+                        (Class<? extends IWallpaperManagerService>)Class.forName(
+                                getContext().getResources().getString(
+                                        R.string.config_wallpaperManagerServiceName));
+                mService = klass.getConstructor(Context.class).newInstance(getContext());
+                publishBinderService(Context.WALLPAPER_SERVICE, mService);
+            } catch (Exception exp) {
+                Slog.wtf(TAG, "Failed to instantiate WallpaperManagerService", exp);
+            }
         }
 
         @Override
         public void onBootPhase(int phase) {
-            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
-                mService.systemReady();
-            } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
-                mService.switchUser(UserHandle.USER_SYSTEM, null);
+            if (mService != null) {
+                mService.onBootPhase(phase);
             }
         }
 
         @Override
         public void onUnlockUser(int userHandle) {
-            mService.onUnlockUser(userHandle);
+            if (mService != null) {
+                mService.onUnlockUser(userHandle);
+            }
         }
     }
 
@@ -325,6 +338,102 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
+    /**
+     * Observes changes of theme settings. It will check whether to call
+     * notifyWallpaperColorsChanged by the current theme and updated theme.
+     * The light theme and dark theme are controlled by the hint values in Wallpaper colors,
+     * threrfore, if light theme mode is chosen, HINT_SUPPORTS_DARK_THEME in hint will be
+     * removed and then notify listeners.
+     */
+    private class ThemeSettingsObserver extends ContentObserver {
+
+        public ThemeSettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        public void startObserving(Context context) {
+            context.getContentResolver().registerContentObserver(
+                    Settings.Secure.getUriFor(Settings.Secure.THEME_MODE),
+                    false,
+                    this);
+        }
+
+        public void stopObserving(Context context) {
+            context.getContentResolver().unregisterContentObserver(this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            onThemeSettingsChanged();
+        }
+    }
+
+    /**
+     * Check whether to call notifyWallpaperColorsChanged. Assumed that the theme mode
+     * was wallpaper theme mode and dark wallpaper was set, therefoe, the theme was dark.
+     * Then theme mode changing to dark theme mode, however, theme should not update since
+     * theme was dark already.
+     */
+    private boolean needUpdateLocked(WallpaperColors colors, int themeMode) {
+        if (colors == null) {
+            return false;
+        }
+
+        if (themeMode == mThemeMode) {
+            return false;
+        }
+
+        boolean result = true;
+        boolean supportDarkTheme =
+                (colors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_THEME) != 0;
+        switch (themeMode) {
+            case Settings.Secure.THEME_MODE_WALLPAPER:
+                if (mThemeMode == Settings.Secure.THEME_MODE_LIGHT) {
+                    result = supportDarkTheme;
+                } else {
+                    result = !supportDarkTheme;
+                }
+                break;
+            case Settings.Secure.THEME_MODE_LIGHT:
+                if (mThemeMode == Settings.Secure.THEME_MODE_WALLPAPER) {
+                    result = supportDarkTheme;
+                }
+                break;
+            case Settings.Secure.THEME_MODE_DARK:
+                if (mThemeMode == Settings.Secure.THEME_MODE_WALLPAPER) {
+                    result = !supportDarkTheme;
+                }
+                break;
+            default:
+                Slog.w(TAG, "unkonwn theme mode " + themeMode);
+                return false;
+        }
+        mThemeMode = themeMode;
+        return result;
+    }
+
+    void onThemeSettingsChanged() {
+        WallpaperData wallpaper;
+        synchronized (mLock) {
+            wallpaper = mWallpaperMap.get(mCurrentUserId);
+            int updatedThemeMode = Settings.Secure.getInt(
+                    mContext.getContentResolver(), Settings.Secure.THEME_MODE,
+                    Settings.Secure.THEME_MODE_WALLPAPER);
+
+            if (DEBUG) {
+                Slog.v(TAG, "onThemeSettingsChanged, mode = " + updatedThemeMode);
+            }
+
+            if (!needUpdateLocked(wallpaper.primaryColors, updatedThemeMode)) {
+                return;
+            }
+        }
+
+        if (wallpaper != null) {
+            notifyWallpaperColorsChanged(wallpaper, FLAG_SYSTEM);
+        }
+    }
+
     void notifyLockWallpaperChanged() {
         final IWallpaperManagerCallback cb = mKeyguardListener;
         if (cb != null) {
@@ -402,6 +511,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 }
                 userAllColorListeners.finishBroadcast();
             }
+            wallpaperColors = getThemeColorsLocked(wallpaperColors);
         }
 
         final int count = colorListeners.size();
@@ -467,6 +577,40 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 Slog.w(TAG, "Not setting primary colors since wallpaper changed");
             }
         }
+    }
+
+    /**
+     * We can easily change theme by modified colors hint. This function will check
+     * current theme mode and return the WallpaperColors fit current theme mode.
+     * If color need modified, it will return a copied WallpaperColors which
+     * its ColorsHint is modified to fit current theme mode.
+     *
+     * @param colors a wallpaper primary colors representation
+     */
+    private WallpaperColors getThemeColorsLocked(WallpaperColors colors) {
+        if (colors == null) {
+            Slog.w(TAG, "Cannot get theme colors because WallpaperColors is null.");
+            return null;
+        }
+
+        int colorHints = colors.getColorHints();
+        boolean supportDarkTheme = (colorHints & WallpaperColors.HINT_SUPPORTS_DARK_THEME) != 0;
+        if (mThemeMode == Settings.Secure.THEME_MODE_WALLPAPER ||
+                (mThemeMode == Settings.Secure.THEME_MODE_LIGHT && !supportDarkTheme) ||
+                (mThemeMode == Settings.Secure.THEME_MODE_DARK && supportDarkTheme)) {
+            return colors;
+        }
+
+        WallpaperColors themeColors = new WallpaperColors(colors.getPrimaryColor(),
+                colors.getSecondaryColor(), colors.getTertiaryColor());
+
+        if (mThemeMode == Settings.Secure.THEME_MODE_LIGHT) {
+            colorHints &= ~WallpaperColors.HINT_SUPPORTS_DARK_THEME;
+        } else if (mThemeMode == Settings.Secure.THEME_MODE_DARK) {
+            colorHints |= WallpaperColors.HINT_SUPPORTS_DARK_THEME;
+        }
+        themeColors.setColorHints(colorHints);
+        return themeColors;
     }
 
     /**
@@ -663,7 +807,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     final SparseArray<WallpaperData> mLockWallpaperMap = new SparseArray<WallpaperData>();
 
     final SparseArray<Boolean> mUserRestorecon = new SparseArray<Boolean>();
-    int mCurrentUserId;
+    int mCurrentUserId = UserHandle.USER_NULL;
+    boolean mInAmbientMode;
+    int mThemeMode;
 
     static class WallpaperData {
 
@@ -722,6 +868,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         long lastDiedTime;
         boolean wallpaperUpdating;
         WallpaperObserver wallpaperObserver;
+        ThemeSettingsObserver themeSettingsObserver;
 
         /**
          * List of callbacks registered they should each be notified when the wallpaper is changed.
@@ -953,6 +1100,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                     }
                     mPaddingChanged = false;
                 }
+                if (mInfo != null && mInfo.getSupportsAmbientMode()) {
+                    try {
+                        mEngine.setInAmbientMode(mInAmbientMode, false /* animated */);
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Failed to set ambient mode state", e);
+                    }
+                }
                 try {
                     // This will trigger onComputeColors in the wallpaper engine.
                     // It's fine to be locked in here since the binder is oneway.
@@ -1147,7 +1301,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         mIPackageManager = AppGlobals.getPackageManager();
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mMonitor = new MyPackageMonitor();
-        mMonitor.register(context, null, UserHandle.ALL, true);
+        mColorsChangedListeners = new SparseArray<>();
+    }
+
+    void initialize() {
+        mMonitor.register(mContext, null, UserHandle.ALL, true);
         getWallpaperDir(UserHandle.USER_SYSTEM).mkdirs();
 
         // Initialize state from the persistent store, then guarantee that the
@@ -1155,8 +1313,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         // it from defaults if necessary.
         loadSettingsLocked(UserHandle.USER_SYSTEM, false);
         getWallpaperSafeLocked(UserHandle.USER_SYSTEM, FLAG_SYSTEM);
-
-        mColorsChangedListeners = new SparseArray<>();
     }
 
     private static File getWallpaperDir(int userId) {
@@ -1174,6 +1330,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
     void systemReady() {
         if (DEBUG) Slog.v(TAG, "systemReady");
+        initialize();
+
         WallpaperData wallpaper = mWallpaperMap.get(UserHandle.USER_SYSTEM);
         // If we think we're going to be using the system image wallpaper imagery, make
         // sure we have something to render
@@ -1256,6 +1414,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 wallpaper.wallpaperObserver.stopWatching();
                 wallpaper.wallpaperObserver = null;
             }
+            if (wallpaper.themeSettingsObserver != null) {
+                wallpaper.themeSettingsObserver.stopObserving(mContext);
+                wallpaper.themeSettingsObserver = null;
+            }
         }
     }
 
@@ -1266,12 +1428,24 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         mLockWallpaperMap.remove(userId);
     }
 
-    void onUnlockUser(final int userId) {
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+            systemReady();
+        } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
+            switchUser(UserHandle.USER_SYSTEM, null);
+        }
+    }
+
+    @Override
+    public void onUnlockUser(final int userId) {
         synchronized (mLock) {
             if (mCurrentUserId == userId) {
                 if (mWaitingForUnlock) {
-                    // If we're switching users, now is when we transition the wallpaper
-                    switchUser(userId, null);
+                    // the desired wallpaper is not direct-boot aware, load it now
+                    final WallpaperData systemWallpaper =
+                            getWallpaperSafeLocked(userId, FLAG_SYSTEM);
+                    switchWallpaper(systemWallpaper, null);
                 }
 
                 // Make sure that the SELinux labeling of all the relevant files is correct.
@@ -1315,6 +1489,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         final WallpaperData systemWallpaper;
         final WallpaperData lockWallpaper;
         synchronized (mLock) {
+            if (mCurrentUserId == userId) {
+                return;
+            }
             mCurrentUserId = userId;
             systemWallpaper = getWallpaperSafeLocked(userId, FLAG_SYSTEM);
             final WallpaperData tmpLockWallpaper = mLockWallpaperMap.get(userId);
@@ -1324,6 +1501,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 systemWallpaper.wallpaperObserver = new WallpaperObserver(systemWallpaper);
                 systemWallpaper.wallpaperObserver.startWatching();
             }
+            if (systemWallpaper.themeSettingsObserver == null) {
+                systemWallpaper.themeSettingsObserver = new ThemeSettingsObserver(null);
+                systemWallpaper.themeSettingsObserver.startObserving(mContext);
+            }
+            mThemeMode = Settings.Secure.getInt(
+                    mContext.getContentResolver(), Settings.Secure.THEME_MODE,
+                    Settings.Secure.THEME_MODE_WALLPAPER);
             switchWallpaper(systemWallpaper, reply);
         }
 
@@ -1399,7 +1583,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
     void clearWallpaperLocked(boolean defaultFailed, int which, int userId, IRemoteCallback reply) {
         if (which != FLAG_SYSTEM && which != FLAG_LOCK) {
-            throw new IllegalArgumentException("Must specify exactly one kind of wallpaper to read");
+            throw new IllegalArgumentException("Must specify exactly one kind of wallpaper to clear");
         }
 
         WallpaperData wallpaper = null;
@@ -1733,6 +1917,28 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
+    public void setInAmbientMode(boolean inAmbienMode, boolean animated) {
+        final IWallpaperEngine engine;
+        synchronized (mLock) {
+            mInAmbientMode = inAmbienMode;
+            final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
+            if (data != null && data.connection != null && data.connection.mInfo != null
+                    && data.connection.mInfo.getSupportsAmbientMode()) {
+                engine = data.connection.mEngine;
+            } else {
+                engine = null;
+            }
+        }
+
+        if (engine != null) {
+            try {
+                engine.setInAmbientMode(inAmbienMode, animated);
+            } catch (RemoteException e) {
+                // Cannot talk to wallpaper engine.
+            }
+        }
+    }
+
     @Override
     public boolean setLockWallpaperCallback(IWallpaperManagerCallback cb) {
         checkPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW);
@@ -1775,7 +1981,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
 
         synchronized (mLock) {
-            return wallpaperData.primaryColors;
+            return getThemeColorsLocked(wallpaperData.primaryColors);
         }
     }
 

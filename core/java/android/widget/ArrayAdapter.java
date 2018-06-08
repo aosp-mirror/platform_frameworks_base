@@ -152,7 +152,8 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
     }
 
     /**
-     * Constructor
+     * Constructor. This constructor will result in the underlying data collection being
+     * immutable, so methods such as {@link #clear()} will throw an exception.
      *
      * @param context The current context.
      * @param resource The resource ID for a layout file containing a TextView to use when
@@ -164,7 +165,8 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
     }
 
     /**
-     * Constructor
+     * Constructor. This constructor will result in the underlying data collection being
+     * immutable, so methods such as {@link #clear()} will throw an exception.
      *
      * @param context The current context.
      * @param resource The resource ID for a layout file containing a layout to use when
@@ -218,6 +220,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
      * Adds the specified object at the end of the array.
      *
      * @param object The object to add at the end of the array.
+     * @throws UnsupportedOperationException if the underlying data collection is immutable
      */
     public void add(@Nullable T object) {
         synchronized (mLock) {
@@ -261,6 +264,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
      * Adds the specified items at the end of the array.
      *
      * @param items The items to add at the end of the array.
+     * @throws UnsupportedOperationException if the underlying data collection is immutable
      */
     public void addAll(T ... items) {
         synchronized (mLock) {
@@ -279,6 +283,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
      *
      * @param object The object to insert into the array.
      * @param index The index at which the object must be inserted.
+     * @throws UnsupportedOperationException if the underlying data collection is immutable
      */
     public void insert(@Nullable T object, int index) {
         synchronized (mLock) {
@@ -296,6 +301,7 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
      * Removes the specified object from the array.
      *
      * @param object The object to remove.
+     * @throws UnsupportedOperationException if the underlying data collection is immutable
      */
     public void remove(@Nullable T object) {
         synchronized (mLock) {
@@ -311,6 +317,8 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable, ThemedSp
 
     /**
      * Remove all elements from the list.
+     *
+     * @throws UnsupportedOperationException if the underlying data collection is immutable
      */
     public void clear() {
         synchronized (mLock) {

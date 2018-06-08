@@ -21,7 +21,6 @@ import android.security.net.config.UserCertificateSource;
 
 import com.android.org.conscrypt.TrustManagerImpl;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.cert.CertificateException;
@@ -133,8 +132,6 @@ public class X509TrustManagerExtensions {
     /**
      * Returns {@code true} if the TrustManager uses the same trust configuration for the provided
      * hostnames.
-     *
-     * @hide
      */
     @SystemApi
     public boolean isSameTrustConfiguration(String hostname1, String hostname2) {

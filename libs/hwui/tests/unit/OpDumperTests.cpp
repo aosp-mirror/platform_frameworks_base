@@ -16,8 +16,8 @@
 
 #include <gtest/gtest.h>
 
-#include "tests/common/TestUtils.h"
 #include "OpDumper.h"
+#include "tests/common/TestUtils.h"
 
 using namespace android;
 using namespace android::uirenderer;

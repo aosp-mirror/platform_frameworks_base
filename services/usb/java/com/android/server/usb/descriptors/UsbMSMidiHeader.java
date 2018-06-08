@@ -25,7 +25,7 @@ import com.android.server.usb.descriptors.report.ReportCanvas;
 public final class UsbMSMidiHeader extends UsbACInterface {
     private static final String TAG = "UsbMSMidiHeader";
 
-    public UsbMSMidiHeader(int length, byte type, byte subtype, byte subclass) {
+    public UsbMSMidiHeader(int length, byte type, byte subtype, int subclass) {
         super(length, type, subtype, subclass);
     }
 

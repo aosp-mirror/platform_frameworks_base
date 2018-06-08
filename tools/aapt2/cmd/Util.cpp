@@ -72,7 +72,6 @@ bool ParseSplitParameter(const StringPiece& arg, IDiagnostics* diag, std::string
   }
 
   *out_path = parts[0];
-  std::vector<ConfigDescription> configs;
   for (const StringPiece& config_str : util::Tokenize(parts[1], ',')) {
     ConfigDescription config;
     if (!ConfigDescription::Parse(config_str, &config)) {
@@ -141,6 +140,31 @@ static xml::NamespaceDecl CreateAndroidNamespaceDecl() {
   return decl;
 }
 
+// Returns a copy of 'name' which conforms to the regex '[a-zA-Z]+[a-zA-Z0-9_]*' by
+// replacing nonconforming characters with underscores.
+//
+// See frameworks/base/core/java/android/content/pm/PackageParser.java which
+// checks this at runtime.
+static std::string MakePackageSafeName(const std::string &name) {
+  std::string result(name);
+  bool first = true;
+  for (char &c : result) {
+    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+      first = false;
+      continue;
+    }
+    if (!first) {
+      if (c >= '0' && c <= '9') {
+        continue;
+      }
+    }
+
+    c = '_';
+    first = false;
+  }
+  return result;
+}
+
 std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
                                                         const SplitConstraints& constraints) {
   const ResourceId kVersionCode(0x0101021b);
@@ -172,7 +196,11 @@ std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
   if (app_info.split_name) {
     split_name << app_info.split_name.value() << ".";
   }
-  split_name << "config." << util::Joiner(constraints.configs, "_");
+  std::vector<std::string> sanitized_config_names;
+  for (const auto &config : constraints.configs) {
+    sanitized_config_names.push_back(MakePackageSafeName(config.toString().string()));
+  }
+  split_name << "config." << util::Joiner(sanitized_config_names, "_");
 
   manifest_el->attributes.push_back(xml::Attribute{"", "split", split_name.str()});
 
@@ -201,9 +229,10 @@ std::unique_ptr<xml::XmlResource> GenerateSplitManifest(const AppInfo& app_info,
   return doc;
 }
 
-static Maybe<std::string> ExtractCompiledString(xml::Attribute* attr, std::string* out_error) {
-  if (attr->compiled_value != nullptr) {
-    String* compiled_str = ValueCast<String>(attr->compiled_value.get());
+static Maybe<std::string> ExtractCompiledString(const xml::Attribute& attr,
+                                                std::string* out_error) {
+  if (attr.compiled_value != nullptr) {
+    const String* compiled_str = ValueCast<String>(attr.compiled_value.get());
     if (compiled_str != nullptr) {
       if (!compiled_str->value->empty()) {
         return *compiled_str->value;
@@ -217,16 +246,16 @@ static Maybe<std::string> ExtractCompiledString(xml::Attribute* attr, std::strin
   }
 
   // Fallback to the plain text value if there is one.
-  if (!attr->value.empty()) {
-    return attr->value;
+  if (!attr.value.empty()) {
+    return attr.value;
   }
   *out_error = "value is an empty string";
   return {};
 }
 
-static Maybe<uint32_t> ExtractCompiledInt(xml::Attribute* attr, std::string* out_error) {
-  if (attr->compiled_value != nullptr) {
-    BinaryPrimitive* compiled_prim = ValueCast<BinaryPrimitive>(attr->compiled_value.get());
+static Maybe<uint32_t> ExtractCompiledInt(const xml::Attribute& attr, std::string* out_error) {
+  if (attr.compiled_value != nullptr) {
+    const BinaryPrimitive* compiled_prim = ValueCast<BinaryPrimitive>(attr.compiled_value.get());
     if (compiled_prim != nullptr) {
       if (compiled_prim->value.dataType >= android::Res_value::TYPE_FIRST_INT &&
           compiled_prim->value.dataType <= android::Res_value::TYPE_LAST_INT) {
@@ -238,19 +267,19 @@ static Maybe<uint32_t> ExtractCompiledInt(xml::Attribute* attr, std::string* out
   }
 
   // Fallback to the plain text value if there is one.
-  Maybe<uint32_t> integer = ResourceUtils::ParseInt(attr->value);
+  Maybe<uint32_t> integer = ResourceUtils::ParseInt(attr.value);
   if (integer) {
     return integer;
   }
   std::stringstream error_msg;
-  error_msg << "'" << attr->value << "' is not a valid integer";
+  error_msg << "'" << attr.value << "' is not a valid integer";
   *out_error = error_msg.str();
   return {};
 }
 
-static Maybe<int> ExtractSdkVersion(xml::Attribute* attr, std::string* out_error) {
-  if (attr->compiled_value != nullptr) {
-    BinaryPrimitive* compiled_prim = ValueCast<BinaryPrimitive>(attr->compiled_value.get());
+static Maybe<int> ExtractSdkVersion(const xml::Attribute& attr, std::string* out_error) {
+  if (attr.compiled_value != nullptr) {
+    const BinaryPrimitive* compiled_prim = ValueCast<BinaryPrimitive>(attr.compiled_value.get());
     if (compiled_prim != nullptr) {
       if (compiled_prim->value.dataType >= android::Res_value::TYPE_FIRST_INT &&
           compiled_prim->value.dataType <= android::Res_value::TYPE_LAST_INT) {
@@ -260,7 +289,7 @@ static Maybe<int> ExtractSdkVersion(xml::Attribute* attr, std::string* out_error
       return {};
     }
 
-    String* compiled_str = ValueCast<String>(attr->compiled_value.get());
+    const String* compiled_str = ValueCast<String>(attr.compiled_value.get());
     if (compiled_str != nullptr) {
       Maybe<int> sdk_version = ResourceUtils::ParseSdkVersion(*compiled_str->value);
       if (sdk_version) {
@@ -275,19 +304,20 @@ static Maybe<int> ExtractSdkVersion(xml::Attribute* attr, std::string* out_error
   }
 
   // Fallback to the plain text value if there is one.
-  Maybe<int> sdk_version = ResourceUtils::ParseSdkVersion(attr->value);
+  Maybe<int> sdk_version = ResourceUtils::ParseSdkVersion(attr.value);
   if (sdk_version) {
     return sdk_version;
   }
   std::stringstream error_msg;
-  error_msg << "'" << attr->value << "' is not a valid SDK version";
+  error_msg << "'" << attr.value << "' is not a valid SDK version";
   *out_error = error_msg.str();
   return {};
 }
 
-Maybe<AppInfo> ExtractAppInfoFromBinaryManifest(xml::XmlResource* xml_res, IDiagnostics* diag) {
+Maybe<AppInfo> ExtractAppInfoFromBinaryManifest(const xml::XmlResource& xml_res,
+                                                IDiagnostics* diag) {
   // Make sure the first element is <manifest> with package attribute.
-  xml::Element* manifest_el = xml_res->root.get();
+  const xml::Element* manifest_el = xml_res.root.get();
   if (manifest_el == nullptr) {
     return {};
   }
@@ -295,63 +325,63 @@ Maybe<AppInfo> ExtractAppInfoFromBinaryManifest(xml::XmlResource* xml_res, IDiag
   AppInfo app_info;
 
   if (!manifest_el->namespace_uri.empty() || manifest_el->name != "manifest") {
-    diag->Error(DiagMessage(xml_res->file.source) << "root tag must be <manifest>");
+    diag->Error(DiagMessage(xml_res.file.source) << "root tag must be <manifest>");
     return {};
   }
 
-  xml::Attribute* package_attr = manifest_el->FindAttribute({}, "package");
+  const xml::Attribute* package_attr = manifest_el->FindAttribute({}, "package");
   if (!package_attr) {
-    diag->Error(DiagMessage(xml_res->file.source) << "<manifest> must have a 'package' attribute");
+    diag->Error(DiagMessage(xml_res.file.source) << "<manifest> must have a 'package' attribute");
     return {};
   }
 
   std::string error_msg;
-  Maybe<std::string> maybe_package = ExtractCompiledString(package_attr, &error_msg);
+  Maybe<std::string> maybe_package = ExtractCompiledString(*package_attr, &error_msg);
   if (!maybe_package) {
-    diag->Error(DiagMessage(xml_res->file.source.WithLine(manifest_el->line_number))
+    diag->Error(DiagMessage(xml_res.file.source.WithLine(manifest_el->line_number))
                 << "invalid package name: " << error_msg);
     return {};
   }
   app_info.package = maybe_package.value();
 
-  if (xml::Attribute* version_code_attr =
+  if (const xml::Attribute* version_code_attr =
           manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCode")) {
-    Maybe<uint32_t> maybe_code = ExtractCompiledInt(version_code_attr, &error_msg);
+    Maybe<uint32_t> maybe_code = ExtractCompiledInt(*version_code_attr, &error_msg);
     if (!maybe_code) {
-      diag->Error(DiagMessage(xml_res->file.source.WithLine(manifest_el->line_number))
+      diag->Error(DiagMessage(xml_res.file.source.WithLine(manifest_el->line_number))
                   << "invalid android:versionCode: " << error_msg);
       return {};
     }
     app_info.version_code = maybe_code.value();
   }
 
-  if (xml::Attribute* revision_code_attr =
+  if (const xml::Attribute* revision_code_attr =
           manifest_el->FindAttribute(xml::kSchemaAndroid, "revisionCode")) {
-    Maybe<uint32_t> maybe_code = ExtractCompiledInt(revision_code_attr, &error_msg);
+    Maybe<uint32_t> maybe_code = ExtractCompiledInt(*revision_code_attr, &error_msg);
     if (!maybe_code) {
-      diag->Error(DiagMessage(xml_res->file.source.WithLine(manifest_el->line_number))
+      diag->Error(DiagMessage(xml_res.file.source.WithLine(manifest_el->line_number))
                   << "invalid android:revisionCode: " << error_msg);
       return {};
     }
     app_info.revision_code = maybe_code.value();
   }
 
-  if (xml::Attribute* split_name_attr = manifest_el->FindAttribute({}, "split")) {
-    Maybe<std::string> maybe_split_name = ExtractCompiledString(split_name_attr, &error_msg);
+  if (const xml::Attribute* split_name_attr = manifest_el->FindAttribute({}, "split")) {
+    Maybe<std::string> maybe_split_name = ExtractCompiledString(*split_name_attr, &error_msg);
     if (!maybe_split_name) {
-      diag->Error(DiagMessage(xml_res->file.source.WithLine(manifest_el->line_number))
+      diag->Error(DiagMessage(xml_res.file.source.WithLine(manifest_el->line_number))
                   << "invalid split name: " << error_msg);
       return {};
     }
     app_info.split_name = maybe_split_name.value();
   }
 
-  if (xml::Element* uses_sdk_el = manifest_el->FindChild({}, "uses-sdk")) {
-    if (xml::Attribute* min_sdk =
+  if (const xml::Element* uses_sdk_el = manifest_el->FindChild({}, "uses-sdk")) {
+    if (const xml::Attribute* min_sdk =
             uses_sdk_el->FindAttribute(xml::kSchemaAndroid, "minSdkVersion")) {
-      Maybe<int> maybe_sdk = ExtractSdkVersion(min_sdk, &error_msg);
+      Maybe<int> maybe_sdk = ExtractSdkVersion(*min_sdk, &error_msg);
       if (!maybe_sdk) {
-        diag->Error(DiagMessage(xml_res->file.source.WithLine(uses_sdk_el->line_number))
+        diag->Error(DiagMessage(xml_res.file.source.WithLine(uses_sdk_el->line_number))
                     << "invalid android:minSdkVersion: " << error_msg);
         return {};
       }

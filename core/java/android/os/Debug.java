@@ -56,10 +56,10 @@ import java.util.Map;
  * <p><strong>Logging Trace Files</strong></p>
  * <p>Debug can create log files that give details about an application, such as
  * a call stack and start/stop times for any running methods. See <a
-href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Log Viewer</a> for
- * information about reading trace files. To start logging trace files, call one
- * of the startMethodTracing() methods. To stop tracing, call
- * {@link #stopMethodTracing()}.
+ * href="{@docRoot}studio/profile/traceview.html">Inspect Trace Logs with
+ * Traceview</a> for information about reading trace files. To start logging
+ * trace files, call one of the startMethodTracing() methods. To stop tracing,
+ * call {@link #stopMethodTracing()}.
  */
 public final class Debug
 {
@@ -116,6 +116,8 @@ public final class Debug
         /** The proportional set size that is swappable for dalvik heap. */
         /** @hide We may want to expose this, eventually. */
         public int dalvikSwappablePss;
+        /** @hide The resident set size for dalvik heap.  (Without other Dalvik overhead.) */
+        public int dalvikRss;
         /** The private dirty pages used by dalvik heap. */
         public int dalvikPrivateDirty;
         /** The shared dirty pages used by dalvik heap. */
@@ -138,6 +140,8 @@ public final class Debug
         /** The proportional set size that is swappable for the native heap. */
         /** @hide We may want to expose this, eventually. */
         public int nativeSwappablePss;
+        /** @hide The resident set size for the native heap. */
+        public int nativeRss;
         /** The private dirty pages used by the native heap. */
         public int nativePrivateDirty;
         /** The shared dirty pages used by the native heap. */
@@ -160,6 +164,8 @@ public final class Debug
         /** The proportional set size that is swappable for everything else. */
         /** @hide We may want to expose this, eventually. */
         public int otherSwappablePss;
+        /** @hide The resident set size for everything else. */
+        public int otherRss;
         /** The private dirty pages used by everything else. */
         public int otherPrivateDirty;
         /** The shared dirty pages used by everything else. */
@@ -288,24 +294,26 @@ public final class Debug
         public static final int NUM_DVK_STATS = 14;
 
         /** @hide */
-        public static final int NUM_CATEGORIES = 8;
+        public static final int NUM_CATEGORIES = 9;
 
         /** @hide */
-        public static final int offsetPss = 0;
+        public static final int OFFSET_PSS = 0;
         /** @hide */
-        public static final int offsetSwappablePss = 1;
+        public static final int OFFSET_SWAPPABLE_PSS = 1;
         /** @hide */
-        public static final int offsetPrivateDirty = 2;
+        public static final int OFFSET_RSS = 2;
         /** @hide */
-        public static final int offsetSharedDirty = 3;
+        public static final int OFFSET_PRIVATE_DIRTY = 3;
         /** @hide */
-        public static final int offsetPrivateClean = 4;
+        public static final int OFFSET_SHARED_DIRTY = 4;
         /** @hide */
-        public static final int offsetSharedClean = 5;
+        public static final int OFFSET_PRIVATE_CLEAN = 5;
         /** @hide */
-        public static final int offsetSwappedOut = 6;
+        public static final int OFFSET_SHARED_CLEAN = 6;
         /** @hide */
-        public static final int offsetSwappedOutPss = 7;
+        public static final int OFFSET_SWAPPED_OUT = 7;
+        /** @hide */
+        public static final int OFFSET_SWAPPED_OUT_PSS = 8;
 
         private int[] otherStats = new int[(NUM_OTHER_STATS+NUM_DVK_STATS)*NUM_CATEGORIES];
 
@@ -334,6 +342,13 @@ public final class Debug
          */
         public int getTotalSwappablePss() {
             return dalvikSwappablePss + nativeSwappablePss + otherSwappablePss;
+        }
+
+        /**
+         * @hide Return total RSS memory usage in kB.
+         */
+        public int getTotalRss() {
+            return dalvikRss + nativeRss + otherRss;
         }
 
         /**
@@ -382,29 +397,32 @@ public final class Debug
 
         /** @hide */
         public int getOtherPss(int which) {
-            return otherStats[which*NUM_CATEGORIES + offsetPss];
+            return otherStats[which * NUM_CATEGORIES + OFFSET_PSS];
         }
-
 
         /** @hide */
         public int getOtherSwappablePss(int which) {
-            return otherStats[which*NUM_CATEGORIES + offsetSwappablePss];
+            return otherStats[which * NUM_CATEGORIES + OFFSET_SWAPPABLE_PSS];
         }
 
+        /** @hide */
+        public int getOtherRss(int which) {
+            return otherStats[which * NUM_CATEGORIES + OFFSET_RSS];
+        }
 
         /** @hide */
         public int getOtherPrivateDirty(int which) {
-            return otherStats[which*NUM_CATEGORIES + offsetPrivateDirty];
+            return otherStats[which * NUM_CATEGORIES + OFFSET_PRIVATE_DIRTY];
         }
 
         /** @hide */
         public int getOtherSharedDirty(int which) {
-            return otherStats[which*NUM_CATEGORIES + offsetSharedDirty];
+            return otherStats[which * NUM_CATEGORIES + OFFSET_SHARED_DIRTY];
         }
 
         /** @hide */
         public int getOtherPrivateClean(int which) {
-            return otherStats[which*NUM_CATEGORIES + offsetPrivateClean];
+            return otherStats[which * NUM_CATEGORIES + OFFSET_PRIVATE_CLEAN];
         }
 
         /** @hide */
@@ -414,17 +432,17 @@ public final class Debug
 
         /** @hide */
         public int getOtherSharedClean(int which) {
-            return otherStats[which*NUM_CATEGORIES + offsetSharedClean];
+            return otherStats[which * NUM_CATEGORIES + OFFSET_SHARED_CLEAN];
         }
 
         /** @hide */
         public int getOtherSwappedOut(int which) {
-            return otherStats[which*NUM_CATEGORIES + offsetSwappedOut];
+            return otherStats[which * NUM_CATEGORIES + OFFSET_SWAPPED_OUT];
         }
 
         /** @hide */
         public int getOtherSwappedOutPss(int which) {
-            return otherStats[which*NUM_CATEGORIES + offsetSwappedOutPss];
+            return otherStats[which * NUM_CATEGORIES + OFFSET_SWAPPED_OUT_PSS];
         }
 
         /** @hide */
@@ -741,6 +759,7 @@ public final class Debug
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(dalvikPss);
             dest.writeInt(dalvikSwappablePss);
+            dest.writeInt(dalvikRss);
             dest.writeInt(dalvikPrivateDirty);
             dest.writeInt(dalvikSharedDirty);
             dest.writeInt(dalvikPrivateClean);
@@ -749,6 +768,7 @@ public final class Debug
             dest.writeInt(dalvikSwappedOutPss);
             dest.writeInt(nativePss);
             dest.writeInt(nativeSwappablePss);
+            dest.writeInt(nativeRss);
             dest.writeInt(nativePrivateDirty);
             dest.writeInt(nativeSharedDirty);
             dest.writeInt(nativePrivateClean);
@@ -757,6 +777,7 @@ public final class Debug
             dest.writeInt(nativeSwappedOutPss);
             dest.writeInt(otherPss);
             dest.writeInt(otherSwappablePss);
+            dest.writeInt(otherRss);
             dest.writeInt(otherPrivateDirty);
             dest.writeInt(otherSharedDirty);
             dest.writeInt(otherPrivateClean);
@@ -770,6 +791,7 @@ public final class Debug
         public void readFromParcel(Parcel source) {
             dalvikPss = source.readInt();
             dalvikSwappablePss = source.readInt();
+            dalvikRss = source.readInt();
             dalvikPrivateDirty = source.readInt();
             dalvikSharedDirty = source.readInt();
             dalvikPrivateClean = source.readInt();
@@ -778,6 +800,7 @@ public final class Debug
             dalvikSwappedOutPss = source.readInt();
             nativePss = source.readInt();
             nativeSwappablePss = source.readInt();
+            nativeRss = source.readInt();
             nativePrivateDirty = source.readInt();
             nativeSharedDirty = source.readInt();
             nativePrivateClean = source.readInt();
@@ -786,6 +809,7 @@ public final class Debug
             nativeSwappedOutPss = source.readInt();
             otherPss = source.readInt();
             otherSwappablePss = source.readInt();
+            otherRss = source.readInt();
             otherPrivateDirty = source.readInt();
             otherSharedDirty = source.readInt();
             otherPrivateClean = source.readInt();
@@ -1001,8 +1025,8 @@ public final class Debug
      * under your package-specific directory on primary shared/external storage,
      * as returned by {@link Context#getExternalFilesDir(String)}.
      * <p>
-     * See <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview:
-     * A Graphical Log Viewer</a> for information about reading trace files.
+     * See <a href="{@docRoot}studio/profile/traceview.html">Inspect Trace Logs
+     * with Traceview</a> for information about reading trace files.
      * <p class="note">
      * When method tracing is enabled, the VM will run more slowly than usual,
      * so the timings from the trace files should only be considered in relative
@@ -1025,8 +1049,8 @@ public final class Debug
      * your package-specific directory on primary shared/external storage, as
      * returned by {@link Context#getExternalFilesDir(String)}.
      * <p>
-     * See <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview:
-     * A Graphical Log Viewer</a> for information about reading trace files.
+     * See <a href="{@docRoot}studio/profile/traceview.html">Inspect Trace Logs
+     * with Traceview</a> for information about reading trace files.
      * <p class="note">
      * When method tracing is enabled, the VM will run more slowly than usual,
      * so the timings from the trace files should only be considered in relative
@@ -1055,8 +1079,8 @@ public final class Debug
      * your package-specific directory on primary shared/external storage, as
      * returned by {@link Context#getExternalFilesDir(String)}.
      * <p>
-     * See <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview:
-     * A Graphical Log Viewer</a> for information about reading trace files.
+     * See <a href="{@docRoot}studio/profile/traceview.html">Inspect Trace Logs
+     * with Traceview</a> for information about reading trace files.
      * <p class="note">
      * When method tracing is enabled, the VM will run more slowly than usual,
      * so the timings from the trace files should only be considered in relative
@@ -1087,8 +1111,8 @@ public final class Debug
      * your package-specific directory on primary shared/external storage, as
      * returned by {@link Context#getExternalFilesDir(String)}.
      * <p>
-     * See <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview:
-     * A Graphical Log Viewer</a> for information about reading trace files.
+     * See <a href="{@docRoot}studio/profile/traceview.html">Inspect Trace Logs
+     * with Traceview</a> for information about reading trace files.
      * <p class="note">
      * When method tracing is enabled, the VM will run more slowly than usual,
      * so the timings from the trace files should only be considered in relative
@@ -1121,8 +1145,8 @@ public final class Debug
      * your package-specific directory on primary shared/external storage, as
      * returned by {@link Context#getExternalFilesDir(String)}.
      * <p>
-     * See <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview:
-     * A Graphical Log Viewer</a> for information about reading trace files.
+     * See <a href="{@docRoot}studio/profile/traceview.html">Inspect Trace Logs
+     * with Traceview</a> for information about reading trace files.
      *
      * @param tracePath Path to the trace log file to create. If {@code null},
      *            this will default to "dmtrace.trace". If the file already
@@ -1706,11 +1730,11 @@ public final class Debug
      * Retrieves information about this processes memory usages. This information is broken down by
      * how much is in use by dalvik, the native heap, and everything else.
      *
-     * <p><b>Note:</b> this method directly retrieves memory information for the give process
+     * <p><b>Note:</b> this method directly retrieves memory information for the given process
      * from low-level data available to it.  It may not be able to retrieve information about
      * some protected allocations, such as graphics.  If you want to be sure you can see
-     * all information about allocations by the process, use instead
-     * {@link android.app.ActivityManager#getProcessMemoryInfo(int[])}.</p>
+     * all information about allocations by the process, use
+     * {@link android.app.ActivityManager#getProcessMemoryInfo(int[])} instead.</p>
      */
     public static native void getMemoryInfo(MemoryInfo memoryInfo);
 

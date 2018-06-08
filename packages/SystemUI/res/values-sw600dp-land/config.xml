@@ -15,10 +15,6 @@
   ~ limitations under the License
   -->
 <resources>
-    <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
-         card. -->
-    <integer name="keyguard_max_notification_count">3</integer>
-
     <!-- Whether QuickSettings is in a phone landscape -->
     <bool name="quick_settings_wide">false</bool>
 

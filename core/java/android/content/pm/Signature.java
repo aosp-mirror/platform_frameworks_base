@@ -285,6 +285,29 @@ public class Signature implements Parcelable {
     }
 
     /**
+     * Test if given {@link Signature} objects are effectively equal. In rare
+     * cases, certificates can have slightly malformed encoding which causes
+     * exact-byte checks to fail.
+     * <p>
+     * To identify effective equality, we bounce the certificates through an
+     * decode/encode pass before doing the exact-byte check. To reduce attack
+     * surface area, we only allow a byte size delta of a few bytes.
+     *
+     * @throws CertificateException if the before/after length differs
+     *             substantially, usually a signal of something fishy going on.
+     * @hide
+     */
+    public static boolean areEffectiveMatch(Signature a, Signature b)
+            throws CertificateException {
+        final CertificateFactory cf = CertificateFactory.getInstance("X.509");
+
+        final Signature aPrime = bounce(cf, a);
+        final Signature bPrime = bounce(cf, b);
+
+        return aPrime.equals(bPrime);
+    }
+
+    /**
      * Bounce the given {@link Signature} through a decode/encode cycle.
      *
      * @throws CertificateException if the before/after length differs

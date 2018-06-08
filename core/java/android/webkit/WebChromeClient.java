@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -52,7 +53,7 @@ public class WebChromeClient {
      * Notify the host application of the url for an apple-touch-icon.
      * @param view The WebView that initiated the callback.
      * @param url The icon url.
-     * @param precomposed True if the url is for a precomposed touch icon.
+     * @param precomposed {@code true} if the url is for a precomposed touch icon.
      */
     public void onReceivedTouchIconUrl(WebView view, String url,
             boolean precomposed) {}
@@ -106,17 +107,31 @@ public class WebChromeClient {
 
     /**
      * Request the host application to create a new window. If the host
-     * application chooses to honor this request, it should return true from
+     * application chooses to honor this request, it should return {@code true} from
      * this method, create a new WebView to host the window, insert it into the
      * View system and send the supplied resultMsg message to its target with
      * the new WebView as an argument. If the host application chooses not to
-     * honor the request, it should return false from this method. The default
-     * implementation of this method does nothing and hence returns false.
+     * honor the request, it should return {@code false} from this method. The default
+     * implementation of this method does nothing and hence returns {@code false}.
+     * <p>
+     * Applications should typically not allow windows to be created when the
+     * {@code isUserGesture} flag is false, as this may be an unwanted popup.
+     * <p>
+     * Applications should be careful how they display the new window: don't simply
+     * overlay it over the existing WebView as this may mislead the user about which
+     * site they are viewing. If your application displays the URL of the main page,
+     * make sure to also display the URL of the new window in a similar fashion. If
+     * your application does not display URLs, consider disallowing the creation of
+     * new windows entirely.
+     * <p class="note"><b>Note:</b> There is no trustworthy way to tell which page
+     * requested the new window: the request might originate from a third-party iframe
+     * inside the WebView.
+     *
      * @param view The WebView from which the request for a new window
      *             originated.
-     * @param isDialog True if the new window should be a dialog, rather than
+     * @param isDialog {@code true} if the new window should be a dialog, rather than
      *                 a full-size window.
-     * @param isUserGesture True if the request was initiated by a user gesture,
+     * @param isUserGesture {@code true} if the request was initiated by a user gesture,
      *                      such as the user clicking a link.
      * @param resultMsg The message to send when once a new WebView has been
      *                  created. resultMsg.obj is a
@@ -124,10 +139,10 @@ public class WebChromeClient {
      *                  used to transport the new WebView, by calling
      *                  {@link WebView.WebViewTransport#setWebView(WebView)
      *                  WebView.WebViewTransport.setWebView(WebView)}.
-     * @return This method should return true if the host application will
+     * @return This method should return {@code true} if the host application will
      *         create a new window, in which case resultMsg should be sent to
-     *         its target. Otherwise, this method should return false. Returning
-     *         false from this method but also sending resultMsg will result in
+     *         its target. Otherwise, this method should return {@code false}. Returning
+     *         {@code false} from this method but also sending resultMsg will result in
      *         undefined behavior.
      */
     public boolean onCreateWindow(WebView view, boolean isDialog,
@@ -148,14 +163,19 @@ public class WebChromeClient {
      * from the view system if necessary. At this point, WebCore has stopped
      * any loading in this window and has removed any cross-scripting ability
      * in javascript.
+     * <p>
+     * As with {@link #onCreateWindow}, the application should ensure that any
+     * URL or security indicator displayed is updated so that the user can tell
+     * that the page they were interacting with has been closed.
+     *
      * @param window The WebView that needs to be closed.
      */
     public void onCloseWindow(WebView window) {}
 
     /**
      * Tell the client to display a javascript alert dialog.  If the client
-     * returns true, WebView will assume that the client will handle the
-     * dialog.  If the client returns false, it will continue execution.
+     * returns {@code true}, WebView will assume that the client will handle the
+     * dialog.  If the client returns {@code false}, it will continue execution.
      * @param view The WebView that initiated the callback.
      * @param url The url of the page requesting the dialog.
      * @param message Message to be displayed in the window.
@@ -169,10 +189,10 @@ public class WebChromeClient {
 
     /**
      * Tell the client to display a confirm dialog to the user. If the client
-     * returns true, WebView will assume that the client will handle the
+     * returns {@code true}, WebView will assume that the client will handle the
      * confirm dialog and call the appropriate JsResult method. If the
-     * client returns false, a default value of false will be returned to
-     * javascript. The default behavior is to return false.
+     * client returns false, a default value of {@code false} will be returned to
+     * javascript. The default behavior is to return {@code false}.
      * @param view The WebView that initiated the callback.
      * @param url The url of the page requesting the dialog.
      * @param message Message to be displayed in the window.
@@ -187,10 +207,10 @@ public class WebChromeClient {
 
     /**
      * Tell the client to display a prompt dialog to the user. If the client
-     * returns true, WebView will assume that the client will handle the
+     * returns {@code true}, WebView will assume that the client will handle the
      * prompt dialog and call the appropriate JsPromptResult method. If the
-     * client returns false, a default value of false will be returned to to
-     * javascript. The default behavior is to return false.
+     * client returns false, a default value of {@code false} will be returned to to
+     * javascript. The default behavior is to return {@code false}.
      * @param view The WebView that initiated the callback.
      * @param url The url of the page requesting the dialog.
      * @param message Message to be displayed in the window.
@@ -207,12 +227,12 @@ public class WebChromeClient {
     /**
      * Tell the client to display a dialog to confirm navigation away from the
      * current page. This is the result of the onbeforeunload javascript event.
-     * If the client returns true, WebView will assume that the client will
+     * If the client returns {@code true}, WebView will assume that the client will
      * handle the confirm dialog and call the appropriate JsResult method. If
-     * the client returns false, a default value of true will be returned to
+     * the client returns {@code false}, a default value of {@code true} will be returned to
      * javascript to accept navigation away from the current page. The default
-     * behavior is to return false. Setting the JsResult to true will navigate
-     * away from the current page, false will cancel the navigation.
+     * behavior is to return {@code false}. Setting the JsResult to {@code true} will navigate
+     * away from the current page, {@code false} will cancel the navigation.
      * @param view The WebView that initiated the callback.
      * @param url The url of the page requesting the dialog.
      * @param message Message to be displayed in the window.
@@ -289,7 +309,7 @@ public class WebChromeClient {
      * (API level > {@link android.os.Build.VERSION_CODES#M})
      * this method is only called for requests originating from secure
      * origins such as https. On non-secure origins geolocation requests
-     * are automatically denied.</p>
+     * are automatically denied.
      *
      * @param origin The origin of the web content attempting to use the
      *               Geolocation API.
@@ -332,8 +352,8 @@ public class WebChromeClient {
     /**
      * Tell the client that a JavaScript execution timeout has occured. And the
      * client may decide whether or not to interrupt the execution. If the
-     * client returns true, the JavaScript will be interrupted. If the client
-     * returns false, the execution will continue. Note that in the case of
+     * client returns {@code true}, the JavaScript will be interrupted. If the client
+     * returns {@code false}, the execution will continue. Note that in the case of
      * continuing execution, the timeout counter will be reset, and the callback
      * will continue to occur if the script does not finish at the next check
      * point.
@@ -365,7 +385,7 @@ public class WebChromeClient {
      * Report a JavaScript console message to the host application. The ChromeClient
      * should override this to process the log message as they see fit.
      * @param consoleMessage Object containing details of the console message.
-     * @return true if the message is handled by the client.
+     * @return {@code true} if the message is handled by the client.
      */
     public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
         // Call the old version of this function for backwards compatability.
@@ -380,9 +400,10 @@ public class WebChromeClient {
      * HTML. If the attribute is absent, then a default poster will be used. This
      * method allows the ChromeClient to provide that default image.
      *
-     * @return Bitmap The image to use as a default poster, or null if no such image is
+     * @return Bitmap The image to use as a default poster, or {@code null} if no such image is
      * available.
      */
+    @Nullable
     public Bitmap getDefaultVideoPoster() {
         return null;
     }
@@ -394,6 +415,7 @@ public class WebChromeClient {
      *
      * @return View The View to be displayed whilst the video is loading.
      */
+    @Nullable
     public View getVideoLoadingProgressView() {
         return null;
     }
@@ -409,15 +431,16 @@ public class WebChromeClient {
      * This is called to handle HTML forms with 'file' input type, in response to the
      * user pressing the "Select File" button.
      * To cancel the request, call <code>filePathCallback.onReceiveValue(null)</code> and
-     * return true.
+     * return {@code true}.
      *
      * @param webView The WebView instance that is initiating the request.
      * @param filePathCallback Invoke this callback to supply the list of paths to files to upload,
-     *                         or NULL to cancel. Must only be called if the
-     *                         <code>showFileChooser</code> implementations returns true.
+     *                         or {@code null} to cancel. Must only be called if the
+     *                         {@link #onShowFileChooser} implementation returns {@code true}.
      * @param fileChooserParams Describes the mode of file chooser to be opened, and options to be
      *                          used with it.
-     * @return true if filePathCallback will be invoked, false to use default handling.
+     * @return {@code true} if filePathCallback will be invoked, {@code false} to use default
+     *         handling.
      *
      * @see FileChooserParams
      */
@@ -448,9 +471,10 @@ public class WebChromeClient {
          *
          * @param resultCode the integer result code returned by the file picker activity.
          * @param data the intent returned by the file picker activity.
-         * @return the Uris of selected file(s) or null if the resultCode indicates
+         * @return the Uris of selected file(s) or {@code null} if the resultCode indicates
          *         activity canceled or any other error.
          */
+        @Nullable
         public static Uri[] parseResult(int resultCode, Intent data) {
             return WebViewFactory.getProvider().getStatics().parseFileChooserResult(resultCode, data);
         }
@@ -469,21 +493,23 @@ public class WebChromeClient {
 
         /**
          * Returns preference for a live media captured value (e.g. Camera, Microphone).
-         * True indicates capture is enabled, false disabled.
+         * True indicates capture is enabled, {@code false} disabled.
          *
          * Use <code>getAcceptTypes</code> to determine suitable capture devices.
          */
         public abstract boolean isCaptureEnabled();
 
         /**
-         * Returns the title to use for this file selector, or null. If null a default
-         * title should be used.
+         * Returns the title to use for this file selector. If {@code null} a default title should
+         * be used.
          */
+        @Nullable
         public abstract CharSequence getTitle();
 
         /**
-         * The file name of a default selection if specified, or null.
+         * The file name of a default selection if specified, or {@code null}.
          */
+        @Nullable
         public abstract String getFilenameHint();
 
         /**
@@ -517,7 +543,7 @@ public class WebChromeClient {
      * @param capture The value of the 'capture' attribute of the input tag
      *         associated with this file picker.
      *
-     * @deprecated Use {@link #showFileChooser} instead.
+     * @deprecated Use {@link #onShowFileChooser} instead.
      * @hide This method was not published in any SDK version.
      */
     @SystemApi
@@ -525,15 +551,4 @@ public class WebChromeClient {
     public void openFileChooser(ValueCallback<Uri> uploadFile, String acceptType, String capture) {
         uploadFile.onReceiveValue(null);
     }
-
-    /**
-     * Tell the client that the page being viewed has an autofillable
-     * form and the user would like to set a profile up.
-     * @param msg A Message to send once the user has successfully
-     *      set up a profile and to inform the WebTextView it should
-     *      now autofill using that new profile.
-     * @hide
-     */
-    public void setupAutoFill(Message msg) { }
-
 }

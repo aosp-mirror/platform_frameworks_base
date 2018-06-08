@@ -42,6 +42,9 @@ import android.service.trust.ITrustAgentServiceCallback;
 import android.service.trust.TrustAgentService;
 import android.util.Log;
 import android.util.Slog;
+
+import com.android.internal.policy.IKeyguardDismissCallback;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -67,6 +70,7 @@ public class TrustAgentWrapper {
     private static final int MSG_REMOVE_ESCROW_TOKEN = 8;
     private static final int MSG_ESCROW_TOKEN_STATE = 9;
     private static final int MSG_UNLOCK_USER = 10;
+    private static final int MSG_SHOW_KEYGUARD_ERROR_MESSAGE = 11;
 
     /**
      * Time in uptime millis that we wait for the service connection, both when starting
@@ -81,6 +85,7 @@ public class TrustAgentWrapper {
     private static final String DATA_ESCROW_TOKEN = "escrow_token";
     private static final String DATA_HANDLE = "handle";
     private static final String DATA_USER_ID = "user_id";
+    private static final String DATA_MESSAGE = "message";
 
     private final TrustManagerService mTrustManagerService;
     private final int mUserId;
@@ -255,6 +260,11 @@ public class TrustAgentWrapper {
                     mTrustManagerService.unlockUserWithToken(handle, eToken, userId);
                     break;
                 }
+                case MSG_SHOW_KEYGUARD_ERROR_MESSAGE: {
+                    CharSequence message = msg.getData().getCharSequence(DATA_MESSAGE);
+                    mTrustManagerService.showKeyguardErrorMessage(message);
+                    break;
+                }
             }
         }
     };
@@ -345,6 +355,14 @@ public class TrustAgentWrapper {
             msg.getData().putInt(DATA_USER_ID, userId);
             msg.getData().putLong(DATA_HANDLE, handle);
             msg.getData().putByteArray(DATA_ESCROW_TOKEN, token);
+            msg.sendToTarget();
+        }
+
+        @Override
+        public void showKeyguardErrorMessage(CharSequence message) {
+            if (DEBUG) Slog.d(TAG, "Showing keyguard error message: " + message);
+            Message msg = mHandler.obtainMessage(MSG_SHOW_KEYGUARD_ERROR_MESSAGE);
+            msg.getData().putCharSequence(DATA_MESSAGE, message);
             msg.sendToTarget();
         }
     };
@@ -512,7 +530,7 @@ public class TrustAgentWrapper {
                 } else {
                     mTrustAgentService.onConfigure(Collections.EMPTY_LIST, null);
                 }
-                final long maxTimeToLock = dpm.getMaximumTimeToLockForUserAndProfiles(mUserId);
+                final long maxTimeToLock = dpm.getMaximumTimeToLock(null, mUserId);
                 if (maxTimeToLock != mMaximumTimeToLock) {
                     // If the timeout changes, cancel the alarm and send a timeout event to have
                     // the agent re-evaluate trust.

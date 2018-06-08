@@ -41,13 +41,13 @@ IDiagnostics* GetDiagnostics();
 
 inline ResourceName ParseNameOrDie(const android::StringPiece& str) {
   ResourceNameRef ref;
-  CHECK(ResourceUtils::ParseResourceName(str, &ref)) << "invalid resource name";
+  CHECK(ResourceUtils::ParseResourceName(str, &ref)) << "invalid resource name: " << str;
   return ref.ToResourceName();
 }
 
 inline ConfigDescription ParseConfigOrDie(const android::StringPiece& str) {
   ConfigDescription config;
-  CHECK(ConfigDescription::Parse(str, &config)) << "invalid configuration";
+  CHECK(ConfigDescription::Parse(str, &config)) << "invalid configuration: " << str;
   return config;
 }
 
@@ -88,6 +88,10 @@ class TestFile : public io::IFile {
 
   std::unique_ptr<io::IData> OpenAsData() override {
     return {};
+  }
+
+  std::unique_ptr<io::InputStream> OpenInputStream() override {
+    return OpenAsData();
   }
 
   const Source& GetSource() const override {
@@ -142,97 +146,70 @@ MATCHER_P(StrEq, a,
   return android::StringPiece16(arg) == a;
 }
 
-class ValueEq {
+template <typename T>
+class ValueEqImpl : public ::testing::MatcherInterface<T> {
  public:
-  template <typename arg_type>
-  class BaseImpl : public ::testing::MatcherInterface<arg_type> {
-    BaseImpl(const BaseImpl&) = default;
-
-    void DescribeTo(::std::ostream* os) const override {
-      *os << "is equal to " << *expected_;
-    }
-
-    void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "is not equal to " << *expected_;
-    }
-
-   protected:
-    BaseImpl(const Value* expected) : expected_(expected) {
-    }
-
-    const Value* expected_;
-  };
-
-  template <typename T, bool>
-  class Impl {};
-
-  template <typename T>
-  class Impl<T, false> : public ::testing::MatcherInterface<T> {
-   public:
-    explicit Impl(const Value* expected) : expected_(expected) {
-    }
-
-    bool MatchAndExplain(T x, ::testing::MatchResultListener* listener) const override {
-      return expected_->Equals(&x);
-    }
-
-    void DescribeTo(::std::ostream* os) const override {
-      *os << "is equal to " << *expected_;
-    }
-
-    void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "is not equal to " << *expected_;
-    }
-
-   private:
-    DISALLOW_COPY_AND_ASSIGN(Impl);
-
-    const Value* expected_;
-  };
-
-  template <typename T>
-  class Impl<T, true> : public ::testing::MatcherInterface<T> {
-   public:
-    explicit Impl(const Value* expected) : expected_(expected) {
-    }
-
-    bool MatchAndExplain(T x, ::testing::MatchResultListener* listener) const override {
-      return expected_->Equals(x);
-    }
-
-    void DescribeTo(::std::ostream* os) const override {
-      *os << "is equal to " << *expected_;
-    }
-
-    void DescribeNegationTo(::std::ostream* os) const override {
-      *os << "is not equal to " << *expected_;
-    }
-
-   private:
-    DISALLOW_COPY_AND_ASSIGN(Impl);
-
-    const Value* expected_;
-  };
-
-  ValueEq(const Value& expected) : expected_(&expected) {
+  explicit ValueEqImpl(const Value* expected) : expected_(expected) {
   }
-  ValueEq(const Value* expected) : expected_(expected) {
-  }
-  ValueEq(const ValueEq&) = default;
 
-  template <typename T>
-  operator ::testing::Matcher<T>() const {
-    return ::testing::Matcher<T>(new Impl<T, std::is_pointer<T>::value>(expected_));
+  bool MatchAndExplain(T x, ::testing::MatchResultListener* listener) const override {
+    return expected_->Equals(&x);
+  }
+
+  void DescribeTo(::std::ostream* os) const override {
+    *os << "is equal to " << *expected_;
+  }
+
+  void DescribeNegationTo(::std::ostream* os) const override {
+    *os << "is not equal to " << *expected_;
   }
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(ValueEqImpl);
+
   const Value* expected_;
 };
 
-// MATCHER_P(ValueEq, a,
-//          std::string(negation ? "isn't" : "is") + " equal to " + ::testing::PrintToString(a)) {
-//  return arg.Equals(&a);
-//}
+template <typename TValue>
+class ValueEqMatcher {
+ public:
+  ValueEqMatcher(TValue expected) : expected_(std::move(expected)) {
+  }
+
+  template <typename T>
+  operator ::testing::Matcher<T>() const {
+    return ::testing::Matcher<T>(new ValueEqImpl<T>(&expected_));
+  }
+
+ private:
+  TValue expected_;
+};
+
+template <typename TValue>
+class ValueEqPointerMatcher {
+ public:
+  ValueEqPointerMatcher(const TValue* expected) : expected_(expected) {
+  }
+
+  template <typename T>
+  operator ::testing::Matcher<T>() const {
+    return ::testing::Matcher<T>(new ValueEqImpl<T>(expected_));
+  }
+
+ private:
+  const TValue* expected_;
+};
+
+template <typename TValue,
+          typename = typename std::enable_if<!std::is_pointer<TValue>::value, void>::type>
+inline ValueEqMatcher<TValue> ValueEq(TValue value) {
+  return ValueEqMatcher<TValue>(std::move(value));
+}
+
+template <typename TValue>
+inline ValueEqPointerMatcher<TValue> ValueEq(const TValue* value) {
+  return ValueEqPointerMatcher<TValue>(value);
+}
 
 MATCHER_P(StrValueEq, a,
           std::string(negation ? "isn't" : "is") + " equal to " + ::testing::PrintToString(a)) {

@@ -22,7 +22,9 @@ import android.os.Build;
 
 /**
  * Class representing a sensor. Use {@link SensorManager#getSensorList} to get
- * the list of available Sensors.
+ * the list of available sensors. For more information about Android sensors,
+ * read the
+ * <a href="/guide/topics/sensors/sensors_motion.html">Motion Sensors guide</a>.</p>
  *
  * @see SensorManager
  * @see SensorEventListener

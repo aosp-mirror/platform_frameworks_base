@@ -183,4 +183,6 @@ interface IContentService {
 
     void putCache(in String packageName, in Uri key, in Bundle value, int userId);
     Bundle getCache(in String packageName, in Uri key, int userId);
+
+    void resetTodayStats();
 }

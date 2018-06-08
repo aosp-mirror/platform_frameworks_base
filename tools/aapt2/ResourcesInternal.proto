@@ -14,39 +14,40 @@
  * limitations under the License.
  */
 
-syntax = "proto2";
+syntax = "proto3";
 
-option java_package = "android.aapt.pb.internal";
-option optimize_for = LITE_RUNTIME;
-
+import "frameworks/base/tools/aapt2/Configuration.proto";
 import "frameworks/base/tools/aapt2/Resources.proto";
 
 package aapt.pb.internal;
+
+option java_package = "android.aapt.pb.internal";
+option optimize_for = LITE_RUNTIME;
 
 // The top level message representing an external resource file (layout XML, PNG, etc).
 // This is used to represent a compiled file before it is linked. Only useful to aapt2.
 message CompiledFile {
   message Symbol {
     // The name of the symbol (in the form package:type/name).
-    optional string resource_name = 1;
+    string resource_name = 1;
 
     // The position in the file at which this symbol is defined. For debug use.
-    optional aapt.pb.SourcePosition source = 2;
+    aapt.pb.SourcePosition source = 2;
   }
 
   // The name of the resource (in the form package:type/name).
-  optional string resource_name = 1;
+  string resource_name = 1;
 
   // The configuration for which the resource is defined.
-  optional aapt.pb.ConfigDescription config = 2;
+  aapt.pb.Configuration config = 2;
+
+  // The type of the file.
+  aapt.pb.FileReference.Type type = 3;
 
   // The filesystem path to where the source file originated.
   // Mainly used to display helpful error messages.
-  optional string source_path = 3;
+  string source_path = 4;
 
   // Any symbols this file auto-generates/exports (eg. @+id/foo in an XML file).
-  repeated Symbol exported_symbol = 4;
-
-  // If this is a compiled XML file, this is the root node.
-  optional aapt.pb.XmlNode xml_root = 5;
+  repeated Symbol exported_symbol = 5;
 }

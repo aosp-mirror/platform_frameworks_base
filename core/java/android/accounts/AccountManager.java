@@ -290,8 +290,13 @@ public class AccountManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({VISIBILITY_UNDEFINED, VISIBILITY_VISIBLE, VISIBILITY_USER_MANAGED_VISIBLE,
-            VISIBILITY_NOT_VISIBLE, VISIBILITY_USER_MANAGED_NOT_VISIBLE})
+    @IntDef(prefix = { "VISIBILITY_" }, value = {
+            VISIBILITY_UNDEFINED,
+            VISIBILITY_VISIBLE,
+            VISIBILITY_USER_MANAGED_VISIBLE,
+            VISIBILITY_NOT_VISIBLE,
+            VISIBILITY_USER_MANAGED_NOT_VISIBLE
+    })
     public @interface AccountVisibility {
     }
 
@@ -675,7 +680,7 @@ public class AccountManager {
      */
     @NonNull
     public Account[] getAccountsByType(String type) {
-        return getAccountsByTypeAsUser(type, Process.myUserHandle());
+        return getAccountsByTypeAsUser(type, mContext.getUser());
     }
 
     /** @hide Same as {@link #getAccountsByType(String)} but for a specific user. */
@@ -2001,7 +2006,7 @@ public class AccountManager {
             final AccountManagerCallback<Bundle> callback,
             final Handler handler) {
         return confirmCredentialsAsUser(account, options, activity, callback, handler,
-                Process.myUserHandle());
+                mContext.getUser());
     }
 
     /**
@@ -3203,7 +3208,7 @@ public class AccountManager {
         return finishSessionAsUser(
                 sessionBundle,
                 activity,
-                Process.myUserHandle(),
+                mContext.getUser(),
                 callback,
                 handler);
     }

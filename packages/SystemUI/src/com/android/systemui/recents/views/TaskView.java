@@ -16,8 +16,6 @@
 
 package com.android.systemui.recents.views;
 
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -53,10 +51,11 @@ import com.android.systemui.recents.events.ui.dragndrop.DragEndEvent;
 import com.android.systemui.recents.events.ui.dragndrop.DragStartEvent;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.model.TaskStack;
-import com.android.systemui.recents.model.ThumbnailData;
+import com.android.systemui.shared.recents.utilities.AnimationProps;
+import com.android.systemui.shared.recents.utilities.Utilities;
+import com.android.systemui.shared.recents.model.Task;
+import com.android.systemui.shared.recents.model.ThumbnailData;
+import com.android.systemui.shared.recents.view.AnimateableViewBounds;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -196,9 +195,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
      * Called from RecentsActivity when it is relaunched.
      */
     void onReload(boolean isResumingFromVisible) {
-        if (!Recents.getSystemServices().hasFreeformWorkspaceSupport()) {
-            resetNoUserInteractionState();
-        }
+        resetNoUserInteractionState();
         if (!isResumingFromVisible) {
             resetViewProperties();
         }
@@ -415,9 +412,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
      * view.
      */
     boolean shouldClipViewInStack() {
-        // Never clip for freeform tasks or if invisible
-        if (mTask.isFreeformTask() || getVisibility() != View.VISIBLE ||
-                Recents.getConfiguration().isLowRamDevice) {
+        if (getVisibility() != View.VISIBLE || Recents.getConfiguration().isLowRamDevice) {
             return false;
         }
         return mClipViewInStack;
@@ -647,7 +642,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     }
 
     @Override
-    public void onTaskStackIdChanged() {
+    public void onTaskWindowingModeChanged() {
         // Force rebind the header, the thumbnail does not change due to stack changes
         mHeaderView.bindToTask(mTask, mTouchExplorationEnabled, mIsDisabledInSafeMode);
         mHeaderView.onTaskDataLoaded();
@@ -674,8 +669,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
             mActionButtonView.setTranslationZ(0f);
             screenPinningRequested = true;
         }
-        EventBus.getDefault().send(new LaunchTaskEvent(this, mTask, null, INVALID_STACK_ID,
-                screenPinningRequested));
+        EventBus.getDefault().send(new LaunchTaskEvent(this, mTask, null, screenPinningRequested));
 
         MetricsLogger.action(v.getContext(), MetricsEvent.ACTION_OVERVIEW_SELECT,
                 mTask.key.getComponent().toString());
@@ -690,7 +684,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
         }
         SystemServicesProxy ssp = Recents.getSystemServices();
         boolean inBounds = false;
-        Rect clipBounds = new Rect(mViewBounds.mClipBounds);
+        Rect clipBounds = new Rect(mViewBounds.getClipBounds());
         if (!clipBounds.isEmpty()) {
             // If we are clipping the view to the bounds, manually do the hit test.
             clipBounds.scale(getScaleX());
@@ -716,7 +710,7 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
     /**** Events ****/
 
     public final void onBusEvent(DragEndEvent event) {
-        if (!(event.dropTarget instanceof TaskStack.DockState)) {
+        if (!(event.dropTarget instanceof DockState)) {
             event.addPostAnimationCallback(() -> {
                 // Reset the clip state for the drag view after the end animation completes
                 setClipViewInStack(true);

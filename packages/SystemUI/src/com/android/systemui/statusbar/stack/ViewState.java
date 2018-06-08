@@ -21,7 +21,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
-import android.app.Notification;
 import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
@@ -29,9 +28,9 @@ import android.view.animation.Interpolator;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableView;
-import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.HeadsUpUtil;
 
 /**
  * A state of a view. This can be used to apply a set of view properties to a view with
@@ -64,8 +63,8 @@ public class ViewState {
     private static final int TAG_START_TRANSLATION_Z = R.id.translation_z_animator_start_value_tag;
     private static final int TAG_START_ALPHA = R.id.alpha_animator_start_value_tag;
 
-    private static final PropertyAnimator.AnimatableProperty SCALE_X_PROPERTY
-            = new PropertyAnimator.AnimatableProperty() {
+    private static final AnimatableProperty SCALE_X_PROPERTY
+            = new AnimatableProperty() {
 
         @Override
         public int getAnimationStartTag() {
@@ -88,8 +87,8 @@ public class ViewState {
         }
     };
 
-    private static final PropertyAnimator.AnimatableProperty SCALE_Y_PROPERTY
-            = new PropertyAnimator.AnimatableProperty() {
+    private static final AnimatableProperty SCALE_Y_PROPERTY
+            = new AnimatableProperty() {
 
         @Override
         public int getAnimationStartTag() {
@@ -251,7 +250,7 @@ public class ViewState {
         return getChildTag(view, tag) != null;
     }
 
-    public static boolean isAnimating(View view, PropertyAnimator.AnimatableProperty property) {
+    public static boolean isAnimating(View view, AnimatableProperty property) {
         return getChildTag(view, property.getAnimatorTag()) != null;
     }
 
@@ -403,7 +402,7 @@ public class ViewState {
         startZTranslationAnimation(view, NO_NEW_ANIMATIONS);
     }
 
-    private void updateAnimation(View view, PropertyAnimator.AnimatableProperty property,
+    private void updateAnimation(View view, AnimatableProperty property,
             float endValue) {
         PropertyAnimator.startAnimation(view, property, endValue, NO_NEW_ANIMATIONS);
     }
@@ -583,7 +582,7 @@ public class ViewState {
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                HeadsUpManager.setIsClickedNotification(child, false);
+                HeadsUpUtil.setIsClickedHeadsUpNotification(child, false);
                 child.setTag(TAG_ANIMATOR_TRANSLATION_Y, null);
                 child.setTag(TAG_START_TRANSLATION_Y, null);
                 child.setTag(TAG_END_TRANSLATION_Y, null);
@@ -639,6 +638,22 @@ public class ViewState {
             previousAnimator.cancel();
         }
         return newDuration;
+    }
+
+    /**
+     * Get the end value of the xTranslation animation running on a view or the xTranslation
+     * if no animation is running.
+     */
+    public static float getFinalTranslationX(View view) {
+        if (view == null) {
+            return 0;
+        }
+        ValueAnimator xAnimator = getChildTag(view, TAG_ANIMATOR_TRANSLATION_X);
+        if (xAnimator == null) {
+            return view.getTranslationX();
+        } else {
+            return getChildTag(view, TAG_END_TRANSLATION_X);
+        }
     }
 
     /**

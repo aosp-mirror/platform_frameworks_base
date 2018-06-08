@@ -184,8 +184,33 @@ message SystemMessage {
     NOTE_USB_AUDIO_ACCESSORY_NOT_SUPPORTED = 41;
 
     // Inform the user that a wrong password was detected while attempting to connect
-    // to a Wi-Fi network
+    // to a wifi network
     NOTE_WIFI_WRONG_PASSWORD = 42;
+
+    // Inform the user that Wifi Wake will re-enable wifi when possible
+    NOTE_WIFI_WAKE_ONBOARD = 43;
+
+    // Inform the user that Wifi Wake has automatically re-enabled wifi
+    NOTE_WIFI_WAKE_TURNED_BACK_ON = 44;
+
+    // Inform the user that unexpectedly rapid network usage is happening
+    NOTE_NET_RAPID = 45;
+
+    // Notify the user that carrier wifi networks are available.
+    // Package: android
+    NOTE_CARRIER_NETWORK_AVAILABLE = 46;
+
+    // Inform that USB is configured for Tethering
+    // Package: android
+    NOTE_USB_TETHER = 47;
+
+    // Inform that DND settings have changed on OS upgrade
+    // Package: android
+    NOTE_ZEN_UPGRADE = 48;
+
+    // Notification to suggest automatic battery saver.
+    // Package: android
+    NOTE_AUTO_SAVER_SUGGESTION = 49;
 
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
@@ -223,7 +248,10 @@ message SystemMessage {
     // Package: com.android.systemui
     NOTE_TV_PIP = 1100;
 
-    // Notify the user that open Wi-Fi networks are available.
+    // Extreme battery saver notification.
+    NOTE_BATTERY_SAVER_WARNING = 1200;
+
+    // Notify the user that open wifi networks are available.
     // Package: android
     NOTE_NETWORK_AVAILABLE = 17303299;
 

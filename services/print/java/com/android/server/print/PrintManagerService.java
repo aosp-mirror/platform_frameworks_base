@@ -18,9 +18,14 @@ package com.android.server.print;
 
 import static android.content.pm.PackageManager.GET_SERVICES;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+import static android.content.pm.PackageManager.MATCH_INSTANT;
+import static android.os.Process.ROOT_UID;
+import static android.os.Process.SHELL_UID;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -32,8 +37,11 @@ import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.print.IPrintDocumentAdapter;
@@ -50,17 +58,24 @@ import android.printservice.PrintServiceInfo;
 import android.printservice.recommendation.IRecommendationsChangeListener;
 import android.printservice.recommendation.RecommendationInfo;
 import android.provider.Settings;
+import android.service.print.PrintServiceDumpProto;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
+import android.widget.Toast;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.dump.DualDumpOutputStream;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -113,10 +128,44 @@ public final class PrintManagerService extends SystemService {
         }
 
         @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out,
+                FileDescriptor err, String[] args, ShellCallback callback,
+                ResultReceiver resultReceiver) {
+            new PrintShellCommand(this).exec(this, in, out, err, args, callback, resultReceiver);
+        }
+
+        @Override
         public Bundle print(String printJobName, IPrintDocumentAdapter adapter,
                 PrintAttributes attributes, String packageName, int appId, int userId) {
-            printJobName = Preconditions.checkStringNotEmpty(printJobName);
             adapter = Preconditions.checkNotNull(adapter);
+            if (!isPrintingEnabled()) {
+                CharSequence disabledMessage = null;
+                DevicePolicyManagerInternal dpmi =
+                        LocalServices.getService(DevicePolicyManagerInternal.class);
+                final int callingUserId = UserHandle.getCallingUserId();
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    disabledMessage = dpmi.getPrintingDisabledReasonForUser(callingUserId);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+                if (disabledMessage != null) {
+                    Toast.makeText(mContext, Looper.getMainLooper(), disabledMessage,
+                            Toast.LENGTH_LONG).show();
+                }
+                try {
+                    adapter.start();
+                } catch (RemoteException re) {
+                    Log.e(LOG_TAG, "Error calling IPrintDocumentAdapter.start()");
+                }
+                try {
+                    adapter.finish();
+                } catch (RemoteException re) {
+                    Log.e(LOG_TAG, "Error calling IPrintDocumentAdapter.finish()");
+                }
+                return null;
+            }
+            printJobName = Preconditions.checkStringNotEmpty(printJobName);
             packageName = Preconditions.checkStringNotEmpty(packageName);
 
             final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
@@ -235,7 +284,8 @@ public final class PrintManagerService extends SystemService {
 
         @Override
         public void restartPrintJob(PrintJobId printJobId, int appId, int userId) {
-            if (printJobId == null) {
+            if (printJobId == null || !isPrintingEnabled()) {
+                // if printing is disabled the state just remains "failed".
                 return;
             }
 
@@ -638,24 +688,103 @@ public final class PrintManagerService extends SystemService {
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             fd = Preconditions.checkNotNull(fd);
-            pw = Preconditions.checkNotNull(pw);
 
             if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
 
-            synchronized (mLock) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    pw.println("PRINT MANAGER STATE (dumpsys print)");
-                    final int userStateCount = mUserStates.size();
-                    for (int i = 0; i < userStateCount; i++) {
-                        UserState userState = mUserStates.valueAt(i);
-                        userState.dump(fd, pw, "");
-                        pw.println();
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
+            int opti = 0;
+            boolean dumpAsProto = false;
+            while (opti < args.length) {
+                String opt = args[opti];
+                if (opt == null || opt.length() <= 0 || opt.charAt(0) != '-') {
+                    break;
+                }
+                opti++;
+                if ("--proto".equals(opt)) {
+                    dumpAsProto = true;
+                } else {
+                    pw.println("Unknown argument: " + opt + "; use -h for help");
                 }
             }
+
+            ArrayList<UserState> userStatesToDump = new ArrayList<>();
+            synchronized (mLock) {
+                int numUserStates = mUserStates.size();
+                for (int i = 0; i < numUserStates; i++) {
+                    userStatesToDump.add(mUserStates.valueAt(i));
+                }
+            }
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (dumpAsProto) {
+                    dump(new DualDumpOutputStream(new ProtoOutputStream(fd)),
+                            userStatesToDump);
+                } else {
+                    pw.println("PRINT MANAGER STATE (dumpsys print)");
+
+                    dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
+                            userStatesToDump);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public boolean getBindInstantServiceAllowed(@UserIdInt int userId) {
+            int callingUid = Binder.getCallingUid();
+            if (callingUid != SHELL_UID && callingUid != ROOT_UID) {
+                throw new SecurityException("Can only be called by uid " + SHELL_UID
+                        + " or " + ROOT_UID);
+            }
+
+            final UserState userState;
+            synchronized (mLock) {
+                userState = getOrCreateUserStateLocked(userId, false);
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return userState.getBindInstantServiceAllowed();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void setBindInstantServiceAllowed(@UserIdInt int userId, boolean allowed) {
+            int callingUid = Binder.getCallingUid();
+            if (callingUid != SHELL_UID && callingUid != ROOT_UID) {
+                throw new SecurityException("Can only be called by uid " + SHELL_UID
+                        + " or " + ROOT_UID);
+            }
+
+            final UserState userState;
+            synchronized (mLock) {
+                userState = getOrCreateUserStateLocked(userId, false);
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                userState.setBindInstantServiceAllowed(allowed);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        private boolean isPrintingEnabled() {
+            return !mUserManager.hasUserRestriction(UserManager.DISALLOW_PRINTING,
+                    Binder.getCallingUserHandle());
+        }
+
+        private void dump(@NonNull DualDumpOutputStream dumpStream,
+                @NonNull ArrayList<UserState> userStatesToDump) {
+            final int userStateCount = userStatesToDump.size();
+            for (int i = 0; i < userStateCount; i++) {
+                long token = dumpStream.start("user_states", PrintServiceDumpProto.USER_STATES);
+                userStatesToDump.get(i).dump(dumpStream);
+                dumpStream.end(token);
+            }
+
+            dumpStream.flush();
         }
 
         private void registerContentObservers() {
@@ -697,7 +826,7 @@ public final class PrintManagerService extends SystemService {
 
                     List<ResolveInfo> installedServices = mContext.getPackageManager()
                             .queryIntentServicesAsUser(intent,
-                                    GET_SERVICES | MATCH_DEBUG_TRIAGED_MISSING,
+                                    GET_SERVICES | MATCH_DEBUG_TRIAGED_MISSING | MATCH_INSTANT,
                                     getChangingUserId());
 
                     return installedServices != null && !installedServices.isEmpty();
@@ -912,7 +1041,7 @@ public final class PrintManagerService extends SystemService {
                 return appId;
             }
             final int callingAppId = UserHandle.getAppId(callingUid);
-            if (appId == callingAppId || callingAppId == Process.SHELL_UID
+            if (appId == callingAppId || callingAppId == SHELL_UID
                     || callingAppId == Process.SYSTEM_UID) {
                 return appId;
             }

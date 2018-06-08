@@ -74,6 +74,7 @@ import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
 import android.net.NetworkState;
 import android.net.NetworkUtils;
+import android.net.NetworkWatchlistManager;
 import android.net.Proxy;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
@@ -147,6 +148,7 @@ import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.connectivity.KeepaliveTracker;
 import com.android.server.connectivity.LingerMonitor;
 import com.android.server.connectivity.MockableSystemProperties;
+import com.android.server.connectivity.MultipathPolicyTracker;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkDiagnostics;
 import com.android.server.connectivity.NetworkMonitor;
@@ -161,6 +163,7 @@ import com.android.server.net.BaseNetdEventCallback;
 import com.android.server.net.BaseNetworkObserver;
 import com.android.server.net.LockdownVpnTracker;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.utils.PriorityDump;
 
 import com.google.android.collect.Lists;
 
@@ -523,6 +526,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @VisibleForTesting
     final MultinetworkPolicyTracker mMultinetworkPolicyTracker;
 
+    @VisibleForTesting
+    final MultipathPolicyTracker mMultipathPolicyTracker;
+
     /**
      * Implements support for the legacy "one network per network type" model.
      *
@@ -712,6 +718,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
     private LegacyTypeTracker mLegacyTypeTracker = new LegacyTypeTracker();
 
+    /**
+     * Helper class which parses out priority arguments and dumps sections according to their
+     * priority. If priority arguments are omitted, function calls the legacy dump command.
+     */
+    private final PriorityDump.PriorityDumper mPriorityDumper = new PriorityDump.PriorityDumper() {
+        @Override
+        public void dumpHigh(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
+            doDump(fd, pw, new String[] {DIAG_ARG}, asProto);
+            doDump(fd, pw, new String[] {SHORT_ARG}, asProto);
+        }
+
+        @Override
+        public void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
+            doDump(fd, pw, args, asProto);
+        }
+
+        @Override
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
+           doDump(fd, pw, args, asProto);
+        }
+    };
+
     public ConnectivityService(Context context, INetworkManagementService netManager,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
         this(context, netManager, statsService, policyManager, new IpConnectivityLog());
@@ -883,6 +911,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mMultinetworkPolicyTracker = createMultinetworkPolicyTracker(
                 mContext, mHandler, () -> rematchForAvoidBadWifiUpdate());
         mMultinetworkPolicyTracker.start();
+
+        mMultipathPolicyTracker = new MultipathPolicyTracker(mContext, mHandler);
 
         mDnsManager = new DnsManager(mContext, mNetd, mSystemProperties);
         registerPrivateDnsSettingsCallbacks();
@@ -1983,8 +2013,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        PriorityDump.dump(mPriorityDumper, fd, writer, args);
+    }
+
+    private void doDump(FileDescriptor fd, PrintWriter writer, String[] args, boolean asProto) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+        if (asProto) return;
 
         if (ArrayUtils.contains(args, DIAG_ARG)) {
             dumpNetworkDiagnostics(pw);
@@ -2053,6 +2088,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         pw.println();
         dumpAvoidBadWifiSettings(pw);
+
+        pw.println();
+        mMultipathPolicyTracker.dump(pw);
 
         if (ArrayUtils.contains(args, SHORT_ARG) == false) {
             pw.println();
@@ -2942,6 +2980,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return ConnectivityManager.MULTIPATH_PREFERENCE_UNMETERED;
         }
 
+        Integer networkPreference = mMultipathPolicyTracker.getMultipathPreference(network);
+        if (networkPreference != null) {
+            return networkPreference;
+        }
+
         return mMultinetworkPolicyTracker.getMeteredMultipathPreference();
     }
 
@@ -3035,6 +3078,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
                         nai.networkMonitor.systemReady = true;
                     }
+                    mMultipathPolicyTracker.start();
                     break;
                 }
                 case EVENT_REVALIDATE_NETWORK: {
@@ -4646,7 +4690,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // The NetworkAgentInfo does not know whether clatd is running on its network or not. Before
         // we do anything else, make sure its LinkProperties are accurate.
         if (networkAgent.clatd != null) {
-            networkAgent.clatd.fixupLinkProperties(oldLp);
+            networkAgent.clatd.fixupLinkProperties(oldLp, newLp);
         }
 
         updateInterfaces(newLp, oldLp, netId, networkAgent.networkCapabilities);
@@ -4824,7 +4868,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     private NetworkCapabilities mixInCapabilities(NetworkAgentInfo nai, NetworkCapabilities nc) {
         // Once a NetworkAgent is connected, complain if some immutable capabilities are removed.
+         // Don't complain for VPNs since they're not driven by requests and there is no risk of
+         // causing a connect/teardown loop.
+         // TODO: remove this altogether and make it the responsibility of the NetworkFactories to
+         // avoid connect/teardown loops.
         if (nai.everConnected &&
+                !nai.isVPN() &&
                 !nai.networkCapabilities.satisfiedByImmutableNetworkCapabilities(nc)) {
             // TODO: consider not complaining when a network agent degrades its capabilities if this
             // does not cause any request (that is not a listen) currently matching that agent to
@@ -5848,6 +5897,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         Settings.Global.putString(mContext.getContentResolver(),
                 Settings.Global.NETWORK_AVOID_BAD_WIFI, null);
+    }
+
+    @Override
+    public byte[] getNetworkWatchlistConfigHash() {
+        NetworkWatchlistManager nwm = mContext.getSystemService(NetworkWatchlistManager.class);
+        if (nwm == null) {
+            loge("Unable to get NetworkWatchlistManager");
+            return null;
+        }
+        // Redirect it to network watchlist service to access watchlist file and calculate hash.
+        return nwm.getWatchlistConfigHash();
     }
 
     @VisibleForTesting

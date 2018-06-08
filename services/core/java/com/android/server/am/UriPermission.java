@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.app.GrantedUriPermission;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.UserHandle;
@@ -386,5 +387,9 @@ final class UriPermission {
 
     public android.content.UriPermission buildPersistedPublicApiObject() {
         return new android.content.UriPermission(uri.uri, persistedModeFlags, persistedCreateTime);
+    }
+
+    public GrantedUriPermission buildGrantedUriPermission() {
+        return new GrantedUriPermission(uri.uri, targetPkg);
     }
 }

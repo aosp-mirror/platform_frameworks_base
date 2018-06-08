@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.net.wifi.hotspot2.omadm.XMLNode;
 import android.net.wifi.hotspot2.omadm.XMLParser;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;

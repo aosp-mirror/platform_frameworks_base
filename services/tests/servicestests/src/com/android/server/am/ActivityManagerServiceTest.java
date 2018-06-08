@@ -258,7 +258,7 @@ public class ActivityManagerServiceTest {
         uidRec.hasInternetPermission = true;
         mAms.mActiveUids.put(uid, uidRec);
 
-        final ProcessRecord appRec = new ProcessRecord(mBatteryStatsImpl,
+        final ProcessRecord appRec = new ProcessRecord(null, mBatteryStatsImpl,
                 new ApplicationInfo(), TAG, uid);
         appRec.thread = Mockito.mock(IApplicationThread.class);
         mAms.mLruProcesses.add(appRec);
@@ -360,7 +360,7 @@ public class ActivityManagerServiceTest {
      */
     @Test
     public void testDispatchUids_dispatchNeededChanges() throws RemoteException {
-        when(mAppOpsService.checkOperation(AppOpsManager.OP_GET_USAGE_STATS, Process.myUid(), null))
+        when(mAppOpsService.noteOperation(AppOpsManager.OP_GET_USAGE_STATS, Process.myUid(), null))
                 .thenReturn(AppOpsManager.MODE_ALLOWED);
 
         final int[] changesToObserve = {

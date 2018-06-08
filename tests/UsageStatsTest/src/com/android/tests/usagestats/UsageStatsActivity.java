@@ -18,6 +18,7 @@ package com.android.tests.usagestats;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.app.PendingIntent;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
@@ -36,14 +37,17 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class UsageStatsActivity extends ListActivity {
     private static final long USAGE_STATS_PERIOD = 1000 * 60 * 60 * 24 * 14;
+    private static final String EXTRA_KEY_TIMEOUT = "com.android.tests.usagestats.extra.TIMEOUT";
     private UsageStatsManager mUsageStatsManager;
     private Adapter mAdapter;
     private Comparator<UsageStats> mComparator = new Comparator<UsageStats>() {
@@ -59,6 +63,20 @@ public class UsageStatsActivity extends ListActivity {
         mUsageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
         mAdapter = new Adapter();
         setListAdapter(mAdapter);
+        Bundle extras = getIntent().getExtras();
+        if (extras != null && extras.containsKey(UsageStatsManager.EXTRA_TIME_USED)) {
+            System.err.println("UsageStatsActivity " + extras);
+            Toast.makeText(this, "Timeout of observed app\n" + extras, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        Bundle extras = intent.getExtras();
+        if (extras != null && extras.containsKey(UsageStatsManager.EXTRA_TIME_USED)) {
+            System.err.println("UsageStatsActivity " + extras);
+            Toast.makeText(this, "Timeout of observed app\n" + extras, Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -77,7 +95,9 @@ public class UsageStatsActivity extends ListActivity {
             case R.id.call_is_app_inactive:
                 callIsAppInactive();
                 return true;
-
+            case R.id.set_app_limit:
+                callSetAppLimit();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -103,6 +123,40 @@ public class UsageStatsActivity extends ListActivity {
                 final String packageName = input.getText().toString().trim();
                 if (!TextUtils.isEmpty(packageName)) {
                     showInactive(packageName);
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
+    private void callSetAppLimit() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Enter package name");
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setHint("com.android.tests.usagestats");
+        builder.setView(input);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                final String packageName = input.getText().toString().trim();
+                if (!TextUtils.isEmpty(packageName)) {
+                    String[] packages = packageName.split(",");
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.setClass(UsageStatsActivity.this, UsageStatsActivity.class);
+                    intent.setPackage(getPackageName());
+                    intent.putExtra(EXTRA_KEY_TIMEOUT, true);
+                    mUsageStatsManager.registerAppUsageObserver(1, packages,
+                            30, TimeUnit.SECONDS, PendingIntent.getActivity(UsageStatsActivity.this,
+                                    1, intent, 0));
                 }
             }
         });

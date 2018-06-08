@@ -20,5 +20,6 @@ package android.view;
 /** {@hide} */
 interface IApplicationToken
 {
+  String getName();
 }
 

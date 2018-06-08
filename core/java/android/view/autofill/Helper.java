@@ -16,11 +16,10 @@
 
 package android.view.autofill;
 
-import android.os.Bundle;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Set;
+import java.util.Collection;
 
 /** @hide */
 public final class Helper {
@@ -29,25 +28,51 @@ public final class Helper {
     public static boolean sDebug = false;
     public static boolean sVerbose = false;
 
-    public static final String REDACTED = "[REDACTED]";
+    /**
+     * Appends {@code value} to the {@code builder} redacting its contents.
+     */
+    public static void appendRedacted(@NonNull StringBuilder builder,
+            @Nullable CharSequence value) {
+        builder.append(getRedacted(value));
+    }
 
-    static StringBuilder append(StringBuilder builder, Bundle bundle) {
-        if (bundle == null || !sDebug) {
+    /**
+     * Gets the redacted version of a value.
+     */
+    @NonNull
+    public static String getRedacted(@Nullable CharSequence value) {
+        return (value == null) ? "null" : value.length() + "_chars";
+    }
+
+    /**
+     * Appends {@code values} to the {@code builder} redacting its contents.
+     */
+    public static void appendRedacted(@NonNull StringBuilder builder, @Nullable String[] values) {
+        if (values == null) {
             builder.append("N/A");
-        } else if (!sVerbose) {
-            builder.append(REDACTED);
-        } else {
-            final Set<String> keySet = bundle.keySet();
-            builder.append("[Bundle with ").append(keySet.size()).append(" extras:");
-            for (String key : keySet) {
-                final Object value = bundle.get(key);
-                builder.append(' ').append(key).append('=');
-                builder.append((value instanceof Object[])
-                        ? Arrays.toString((Objects[]) value) : value);
-            }
-            builder.append(']');
+            return;
         }
-        return builder;
+        builder.append("[");
+        for (String value : values) {
+            builder.append(" '");
+            appendRedacted(builder, value);
+            builder.append("'");
+        }
+        builder.append(" ]");
+    }
+
+    /**
+     * Convers a collaction of {@link AutofillId AutofillIds} to an array.
+     * @param collection The collection.
+     * @return The array.
+     */
+    public static @NonNull AutofillId[] toArray(Collection<AutofillId> collection) {
+        if (collection == null) {
+            return new AutofillId[0];
+        }
+        final AutofillId[] array = new AutofillId[collection.size()];
+        collection.toArray(array);
+        return array;
     }
 
     private Helper() {

@@ -25,7 +25,8 @@ import android.util.Slog;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
-import android.view.WindowManagerPolicy.WindowState;
+
+import com.android.server.policy.WindowManagerPolicy.WindowState;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -36,7 +37,7 @@ import java.io.StringWriter;
  * This includes forcing immersive mode behavior for one or both system bars (based on a package
  * list) and permanently disabling immersive mode confirmations for specific packages.
  *
- * Control by setting {@link Settings.Global.POLICY_CONTROL} to one or more name-value pairs.
+ * Control by setting {@link Settings.Global#POLICY_CONTROL} to one or more name-value pairs.
  * e.g.
  *   to force immersive mode everywhere:
  *     "immersive.full=*"
@@ -64,7 +65,8 @@ public class PolicyControl {
 
     public static int getSystemUiVisibility(WindowState win, LayoutParams attrs) {
         attrs = attrs != null ? attrs : win.getAttrs();
-        int vis = win != null ? win.getSystemUiVisibility() : attrs.systemUiVisibility;
+        int vis = win != null ? win.getSystemUiVisibility()
+                : (attrs.systemUiVisibility | attrs.subtreeSystemUiVisibility);
         if (sImmersiveStatusFilter != null && sImmersiveStatusFilter.matches(attrs)) {
             vis |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.SYSTEM_UI_FLAG_FULLSCREEN

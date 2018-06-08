@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 
 import android.app.IActivityManager;
 import android.content.Context;
+import android.hardware.authsecret.V1_0.IAuthSecret;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
@@ -42,10 +43,12 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         private LockPatternUtils mLockPatternUtils;
         private IStorageManager mStorageManager;
         private SyntheticPasswordManager mSpManager;
+        private IAuthSecret mAuthSecretService;
 
         public MockInjector(Context context, LockSettingsStorage storage, KeyStore keyStore,
                 IActivityManager activityManager, LockPatternUtils lockPatternUtils,
-                IStorageManager storageManager, SyntheticPasswordManager spManager) {
+                IStorageManager storageManager, SyntheticPasswordManager spManager,
+                IAuthSecret authSecretService) {
             super(context);
             mLockSettingsStorage = storage;
             mKeyStore = keyStore;
@@ -109,10 +112,11 @@ public class LockSettingsServiceTestable extends LockSettingsService {
     protected LockSettingsServiceTestable(Context context, LockPatternUtils lockPatternUtils,
             LockSettingsStorage storage, FakeGateKeeperService gatekeeper, KeyStore keystore,
             IStorageManager storageManager, IActivityManager mActivityManager,
-            SyntheticPasswordManager spManager) {
+            SyntheticPasswordManager spManager, IAuthSecret authSecretService) {
         super(new MockInjector(context, storage, keystore, mActivityManager, lockPatternUtils,
-                storageManager, spManager));
+                storageManager, spManager, authSecretService));
         mGateKeeperService = gatekeeper;
+        mAuthSecretService = authSecretService;
     }
 
     @Override

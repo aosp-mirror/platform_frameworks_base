@@ -38,12 +38,6 @@ public class KeyValueBackupJob extends JobService {
             new ComponentName("android", KeyValueBackupJob.class.getName());
     private static final int JOB_ID = 0x5039;
 
-    // Minimum wait time between backups even while we're on charger
-    static final long BATCH_INTERVAL = 4 * AlarmManager.INTERVAL_HOUR;
-
-    // Random variation in next-backup scheduling time to avoid server load spikes
-    private static final int FUZZ_MILLIS = 10 * 60 * 1000;
-
     // Once someone asks for a backup, this is how long we hold off until we find
     // an on-charging opportunity.  If we hit this max latency we will run the operation
     // regardless.  Privileged callers can always trigger an immediate pass via
@@ -53,31 +47,43 @@ public class KeyValueBackupJob extends JobService {
     private static boolean sScheduled = false;
     private static long sNextScheduled = 0;
 
-    public static void schedule(Context ctx) {
-        schedule(ctx, 0);
+    public static void schedule(Context ctx, BackupManagerConstants constants) {
+        schedule(ctx, 0, constants);
     }
 
-    public static void schedule(Context ctx, long delay) {
+    public static void schedule(Context ctx, long delay, BackupManagerConstants constants) {
         synchronized (KeyValueBackupJob.class) {
-            if (!sScheduled) {
-                if (delay <= 0) {
-                    delay = BATCH_INTERVAL + new Random().nextInt(FUZZ_MILLIS);
-                }
-                if (BackupManagerService.DEBUG_SCHEDULING) {
-                    Slog.v(TAG, "Scheduling k/v pass in "
-                            + (delay / 1000 / 60) + " minutes");
-                }
-                JobScheduler js = (JobScheduler) ctx.getSystemService(Context.JOB_SCHEDULER_SERVICE);
-                JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, sKeyValueJobService)
-                        .setMinimumLatency(delay)
-                        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                        .setRequiresCharging(true)
-                        .setOverrideDeadline(MAX_DEFERRAL);
-                js.schedule(builder.build());
-
-                sNextScheduled = System.currentTimeMillis() + delay;
-                sScheduled = true;
+            if (sScheduled) {
+                return;
             }
+
+            final long interval;
+            final long fuzz;
+            final int networkType;
+            final boolean needsCharging;
+
+            synchronized (constants) {
+                interval = constants.getKeyValueBackupIntervalMilliseconds();
+                fuzz = constants.getKeyValueBackupFuzzMilliseconds();
+                networkType = constants.getKeyValueBackupRequiredNetworkType();
+                needsCharging = constants.getKeyValueBackupRequireCharging();
+            }
+            if (delay <= 0) {
+                delay = interval + new Random().nextInt((int) fuzz);
+            }
+            if (BackupManagerService.DEBUG_SCHEDULING) {
+                Slog.v(TAG, "Scheduling k/v pass in " + (delay / 1000 / 60) + " minutes");
+            }
+            JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, sKeyValueJobService)
+                    .setMinimumLatency(delay)
+                    .setRequiredNetworkType(networkType)
+                    .setRequiresCharging(needsCharging)
+                    .setOverrideDeadline(MAX_DEFERRAL);
+            JobScheduler js = (JobScheduler) ctx.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+            js.schedule(builder.build());
+
+            sNextScheduled = System.currentTimeMillis() + delay;
+            sScheduled = true;
         }
     }
 

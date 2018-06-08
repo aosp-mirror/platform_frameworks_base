@@ -16,7 +16,7 @@
 
 package com.android.server.backup.utils;
 
-import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.app.backup.IFullBackupRestoreObserver;
 import android.os.RemoteException;

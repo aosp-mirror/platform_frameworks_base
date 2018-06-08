@@ -26,7 +26,6 @@ import android.content.pm.ChangedPackages;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IDexModuleRegisterCallback;
-import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDeleteObserver2;
@@ -51,8 +50,8 @@ import android.content.pm.VersionedPackage;
 import android.content.pm.dex.IArtManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.content.IntentSender;
 
 /**
@@ -222,13 +221,6 @@ interface IPackageManager {
     ParceledListSlice queryInstrumentation(
             String targetPackage, int flags);
 
-    /** @deprecated Use PackageInstaller instead */
-    void installPackageAsUser(in String originPath,
-            in IPackageInstallObserver2 observer,
-            int flags,
-            in String installerPackageName,
-            int userId);
-
     void finishPackageInstall(int token, boolean didLaunch);
 
     void setInstallerPackageName(in String targetPackage, in String installerPackageName);
@@ -280,8 +272,13 @@ interface IPackageManager {
 
     void clearCrossProfileIntentFilters(int sourceUserId, String ownerPackage);
 
-    String[] setPackagesSuspendedAsUser(in String[] packageNames, boolean suspended, int userId);
+    String[] setPackagesSuspendedAsUser(in String[] packageNames, boolean suspended,
+            in PersistableBundle appExtras, in PersistableBundle launcherExtras,
+            String dialogMessage, String callingPackage, int userId);
+
     boolean isPackageSuspendedForUser(String packageName, int userId);
+
+    PersistableBundle getSuspendedPackageAppExtras(String packageName, int userId);
 
     /**
      * Backup/restore support - only the system uid may use these.
@@ -544,9 +541,10 @@ interface IPackageManager {
     void forceDexOpt(String packageName);
 
     /**
-     * Execute the background dexopt job immediately.
+     * Execute the background dexopt job immediately on packages in packageNames.
+     * If null, then execute on all packages.
      */
-    boolean runBackgroundDexoptJob();
+    boolean runBackgroundDexoptJob(in List<String> packageNames);
 
     /**
      * Reconcile the information we have about the secondary dex files belonging to
@@ -554,14 +552,6 @@ interface IPackageManager {
      * deleted, update the internal records and delete the generated oat files.
      */
     void reconcileSecondaryDexFiles(String packageName);
-
-    /**
-     * Update status of external media on the package manager to scan and
-     * install packages installed on the external media. Like say the
-     * StorageManagerService uses this to call into the package manager to update
-     * status of sdcard.
-     */
-    void updateExternalMediaStatus(boolean mounted, boolean reportStatus);
 
     PackageCleanItem nextPackageToClean(in PackageCleanItem lastPackage);
 
@@ -622,6 +612,12 @@ interface IPackageManager {
     void removeOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
     void grantDefaultPermissionsToEnabledCarrierApps(in String[] packageNames, int userId);
     void grantDefaultPermissionsToEnabledImsServices(in String[] packageNames, int userId);
+    void grantDefaultPermissionsToEnabledTelephonyDataServices(
+            in String[] packageNames, int userId);
+    void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
+            in String[] packageNames, int userId);
+    void grantDefaultPermissionsToActiveLuiApp(in String packageName, int userId);
+    void revokeDefaultPermissionsFromLuiApps(in String[] packageNames, int userId);
 
     boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId);
 
@@ -648,8 +644,6 @@ interface IPackageManager {
 
     boolean isPackageDeviceAdminOnAnyUser(String packageName);
 
-    List<String> getPreviousCodePaths(in String packageName);
-
     int getInstallReason(String packageName, int userId);
 
     ParceledListSlice getSharedLibraries(in String packageName, int flags, int userId);
@@ -667,4 +661,16 @@ interface IPackageManager {
     String getInstantAppAndroidId(String packageName, int userId);
 
     IArtManager getArtManager();
+
+    void setHarmfulAppWarning(String packageName, CharSequence warning, int userId);
+
+    CharSequence getHarmfulAppWarning(String packageName, int userId);
+
+    boolean hasSigningCertificate(String packageName, in byte[] signingCertificate, int flags);
+
+    boolean hasUidSigningCertificate(int uid, in byte[] signingCertificate, int flags);
+
+    String getSystemTextClassifierPackageName();
+
+    boolean isPackageStateProtected(String packageName, int userId);
 }

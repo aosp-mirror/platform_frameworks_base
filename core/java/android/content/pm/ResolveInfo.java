@@ -222,6 +222,40 @@ public class ResolveInfo implements Parcelable {
     }
 
     /**
+     * @return The resource that would be used when loading
+     * the label for this resolve info.
+     *
+     * @hide
+     */
+    public int resolveLabelResId() {
+        if (labelRes != 0) {
+            return labelRes;
+        }
+        final ComponentInfo componentInfo = getComponentInfo();
+        if (componentInfo.labelRes != 0) {
+            return componentInfo.labelRes;
+        }
+        return componentInfo.applicationInfo.labelRes;
+    }
+
+    /**
+     * @return The resource that would be used when loading
+     * the icon for this resolve info.
+     *
+     * @hide
+     */
+    public int resolveIconResId() {
+        if (icon != 0) {
+            return icon;
+        }
+        final ComponentInfo componentInfo = getComponentInfo();
+        if (componentInfo.icon != 0) {
+            return componentInfo.icon;
+        }
+        return componentInfo.applicationInfo.icon;
+    }
+
+    /**
      * Retrieve the current graphical icon associated with this resolution.  This
      * will call back on the given PackageManager to load the icon from
      * the application.
@@ -243,7 +277,7 @@ public class ResolveInfo implements Parcelable {
             dr = pm.getDrawable(ci.packageName, iconResourceId, ai);
         }
         if (dr != null) {
-            return pm.getUserBadgedIcon(dr, new UserHandle(UserHandle.myUserId()));
+            return pm.getUserBadgedIcon(dr, new UserHandle(pm.getUserId()));
         }
         return ci.loadIcon(pm);
     }

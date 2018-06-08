@@ -202,7 +202,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      * The last selected position we used when notifying
      */
     int mOldSelectedPosition = INVALID_POSITION;
-    
+
     /**
      * The id of the last selected position we used when notifying
      */
@@ -382,7 +382,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
          * position is different from the previously selected position or if
          * there was no selected item.</p>
          *
-         * Impelmenters can call getItemAtPosition(position) if they need to access the
+         * Implementers can call getItemAtPosition(position) if they need to access the
          * data associated with the selected item.
          *
          * @param parent The AdapterView where the selection happened
@@ -778,8 +778,8 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
             // We are now GONE, so pending layouts will not be dispatched.
             // Force one here to make sure that the state of the list matches
             // the state of the adapter.
-            if (mDataChanged) {           
-                this.onLayout(false, mLeft, mTop, mRight, mBottom); 
+            if (mDataChanged) {
+                this.onLayout(false, mLeft, mTop, mRight, mBottom);
             }
         } else {
             if (mEmptyView != null) mEmptyView.setVisibility(View.GONE);

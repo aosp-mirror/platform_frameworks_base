@@ -21,10 +21,10 @@ import android.app.PendingIntent;
 import android.net.wifi.aware.ConfigRequest;
 import android.net.wifi.aware.IWifiAwareDiscoverySessionCallback;
 import android.net.wifi.aware.IWifiAwareEventCallback;
+import android.net.wifi.aware.IWifiAwareMacAddressProvider;
 import android.net.wifi.aware.PublishConfig;
 import android.net.wifi.aware.SubscribeConfig;
 import android.net.wifi.aware.Characteristics;
-import android.net.wifi.RttManager;
 
 /**
  * Interface that WifiAwareService implements
@@ -42,9 +42,9 @@ interface IWifiAwareManager
             in ConfigRequest configRequest, boolean notifyOnIdentityChanged);
     void disconnect(int clientId, in IBinder binder);
 
-    void publish(int clientId, in PublishConfig publishConfig,
+    void publish(in String callingPackage, int clientId, in PublishConfig publishConfig,
             in IWifiAwareDiscoverySessionCallback callback);
-    void subscribe(int clientId, in SubscribeConfig subscribeConfig,
+    void subscribe(in String callingPackage, int clientId, in SubscribeConfig subscribeConfig,
             in IWifiAwareDiscoverySessionCallback callback);
 
     // session API
@@ -53,5 +53,7 @@ interface IWifiAwareManager
     void sendMessage(int clientId, int discoverySessionId, int peerId, in byte[] message,
         int messageId, int retryCount);
     void terminateSession(int clientId, int discoverySessionId);
-    int startRanging(int clientId, int discoverySessionId, in RttManager.ParcelableRttParams parms);
+
+    // internal APIs: intended to be used between System Services (restricted permissions)
+    void requestMacAddresses(int uid, in List peerIds, in IWifiAwareMacAddressProvider callback);
 }

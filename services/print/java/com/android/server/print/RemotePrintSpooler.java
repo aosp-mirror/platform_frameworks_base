@@ -40,17 +40,17 @@ import android.print.PrintJobInfo;
 import android.print.PrintManager;
 import android.print.PrinterId;
 import android.printservice.PrintService;
+import android.service.print.PrintSpoolerStateProto;
 import android.util.Slog;
 import android.util.TimedRemoteCaller;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.util.dump.DualDumpOutputStream;
 
 import libcore.io.IoUtils;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -363,7 +363,7 @@ final class RemotePrintSpooler {
      *
      * @param printerId the id of the printer the icon belongs to
      * @param icon the icon that was loaded
-     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon
      */
     public final void onCustomPrinterIconLoaded(@NonNull PrinterId printerId,
             @Nullable Icon icon) {
@@ -396,7 +396,7 @@ final class RemotePrintSpooler {
      * @param printerId the id of the printer the icon should be loaded for
      * @return the custom icon to be used for the printer or null if the icon is
      *         not yet available
-     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon()
+     * @see android.print.PrinterInfo.Builder#setHasCustomPrinterIcon
      */
     public final @Nullable Icon getCustomPrinterIcon(@NonNull PrinterId printerId) {
         throwIfCalledOnMainThread();
@@ -556,20 +556,22 @@ final class RemotePrintSpooler {
         }
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String prefix) {
+    public void dump(@NonNull DualDumpOutputStream dumpStream) {
         synchronized (mLock) {
-            pw.append(prefix).append("destroyed=")
-                    .append(String.valueOf(mDestroyed)).println();
-            pw.append(prefix).append("bound=")
-                    .append((mRemoteInstance != null) ? "true" : "false").println();
+            dumpStream.write("is_destroyed", PrintSpoolerStateProto.IS_DESTROYED, mDestroyed);
+            dumpStream.write("is_bound", PrintSpoolerStateProto.IS_BOUND, mRemoteInstance != null);
+        }
 
-            pw.flush();
-            try {
-                TransferPipe.dumpAsync(getRemoteInstanceLazy().asBinder(), fd,
-                        new String[] { prefix });
-            } catch (IOException | TimeoutException | RemoteException | InterruptedException e) {
-                pw.println("Failed to dump remote instance: " + e);
+        try {
+            if (dumpStream.isProto()) {
+                dumpStream.write(null, PrintSpoolerStateProto.INTERNAL_STATE,
+                        TransferPipe.dumpAsync(getRemoteInstanceLazy().asBinder(), "--proto"));
+            } else {
+                dumpStream.writeNested("internal_state", TransferPipe.dumpAsync(
+                        getRemoteInstanceLazy().asBinder()));
             }
+        } catch (IOException | TimeoutException | RemoteException | InterruptedException e) {
+            Slog.e(LOG_TAG, "Failed to dump remote instance", e);
         }
     }
 
@@ -594,6 +596,7 @@ final class RemotePrintSpooler {
         }
     }
 
+    @GuardedBy("mLock")
     private void bindLocked() throws TimeoutException, InterruptedException {
         while (mIsBinding) {
             mLock.wait();

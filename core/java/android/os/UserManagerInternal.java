@@ -16,6 +16,7 @@
 package android.os;
 
 import android.annotation.Nullable;
+import android.content.Context;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
 
@@ -130,7 +131,8 @@ public abstract class UserManagerInternal {
      * <p>Called by the {@link com.android.server.devicepolicy.DevicePolicyManagerService} when
      * createAndManageUser is called by the device owner.
      */
-    public abstract UserInfo createUserEvenWhenDisallowed(String name, int flags);
+    public abstract UserInfo createUserEvenWhenDisallowed(String name, int flags,
+            String[] disallowedPackages);
 
     /**
      * Same as {@link UserManager#removeUser(int userHandle)}, but bypasses the check for
@@ -154,9 +156,19 @@ public abstract class UserManagerInternal {
     public abstract boolean isUserUnlocked(int userId);
 
     /**
-     * Return whether the given user is running
+     * Returns whether the given user is running
      */
     public abstract boolean isUserRunning(int userId);
+
+    /**
+     * Returns whether the given user is initialized
+     */
+    public abstract boolean isUserInitialized(int userId);
+
+    /**
+     * Returns whether the given user exists
+     */
+    public abstract boolean exists(int userId);
 
     /**
      * Set user's running state
@@ -175,4 +187,38 @@ public abstract class UserManagerInternal {
      * @return the array of user ids.
      */
     public abstract int[] getUserIds();
+
+    /**
+     * Checks if the {@code callingUserId} and {@code targetUserId} are same or in same group
+     * and that the {@code callingUserId} is not a managed profile and
+     * {@code targetUserId} is enabled.
+     *
+     * @return TRUE if the {@code callingUserId} can access {@code targetUserId}. FALSE
+     * otherwise
+     *
+     * @throws SecurityException if the calling user and {@code targetUser} are not in the same
+     * group and {@code throwSecurityException} is true, otherwise if will simply return false.
+     */
+    public abstract boolean isProfileAccessible(int callingUserId, int targetUserId,
+            String debugMsg, boolean throwSecurityException);
+
+    /**
+     * If {@code userId} is of a managed profile, return the parent user ID. Otherwise return
+     * itself.
+     */
+    public abstract int getProfileParentId(int userId);
+
+    /**
+     * Checks whether changing a setting to a value is prohibited by the corresponding user
+     * restriction.
+     *
+     * <p>See also {@link com.android.server.pm.UserRestrictionsUtils#applyUserRestriction(
+     * Context, int, String, boolean)}, which should be in sync with this method.
+     *
+     * @return {@code true} if the change is prohibited, {@code false} if the change is allowed.
+     *
+     * @hide
+     */
+    public abstract boolean isSettingRestrictedForUser(String setting, int userId, String value,
+            int callingUid);
 }

@@ -17,7 +17,8 @@
 #ifndef ANDROIDFW_ATTRIBUTERESOLUTION_H
 #define ANDROIDFW_ATTRIBUTERESOLUTION_H
 
-#include <androidfw/ResourceTypes.h>
+#include "androidfw/AssetManager2.h"
+#include "androidfw/ResourceTypes.h"
 
 namespace android {
 
@@ -42,19 +43,19 @@ enum {
 
 // `out_values` must NOT be nullptr.
 // `out_indices` may be nullptr.
-bool ResolveAttrs(ResTable::Theme* theme, uint32_t def_style_attr, uint32_t def_style_res,
+bool ResolveAttrs(Theme* theme, uint32_t def_style_attr, uint32_t def_style_resid,
                   uint32_t* src_values, size_t src_values_length, uint32_t* attrs,
                   size_t attrs_length, uint32_t* out_values, uint32_t* out_indices);
 
 // `out_values` must NOT be nullptr.
 // `out_indices` is NOT optional and must NOT be nullptr.
-void ApplyStyle(ResTable::Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
-                uint32_t def_style_res, const uint32_t* attrs, size_t attrs_length,
+void ApplyStyle(Theme* theme, ResXMLParser* xml_parser, uint32_t def_style_attr,
+                uint32_t def_style_resid, const uint32_t* attrs, size_t attrs_length,
                 uint32_t* out_values, uint32_t* out_indices);
 
 // `out_values` must NOT be nullptr.
 // `out_indices` may be nullptr.
-bool RetrieveAttributes(const ResTable* res, ResXMLParser* xml_parser, uint32_t* attrs,
+bool RetrieveAttributes(AssetManager2* assetmanager, ResXMLParser* xml_parser, uint32_t* attrs,
                         size_t attrs_length, uint32_t* out_values, uint32_t* out_indices);
 
 }  // namespace android

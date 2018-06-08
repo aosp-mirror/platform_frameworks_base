@@ -16,6 +16,12 @@
 
 package com.android.server.net;
 
+import android.net.Network;
+import android.net.NetworkTemplate;
+import android.telephony.SubscriptionPlan;
+
+import java.util.Set;
+
 /**
  * Network Policy Manager local system service interface.
  *
@@ -38,4 +44,56 @@ public abstract class NetworkPolicyManagerInternal {
      * to current networking policies.
      */
     public abstract boolean isUidNetworkingBlocked(int uid, String ifname);
+
+    /**
+     * Informs that an appId has been added or removed from the temp-powersave-whitelist so that
+     * that network rules for that appId can be updated.
+     *
+     * @param appId The appId which has been updated in the whitelist.
+     * @param added Denotes whether the {@param appId} has been added or removed from the whitelist.
+     */
+    public abstract void onTempPowerSaveWhitelistChange(int appId, boolean added);
+
+    /**
+     * Return the active {@link SubscriptionPlan} for the given network.
+     */
+    public abstract SubscriptionPlan getSubscriptionPlan(Network network);
+
+    /**
+     * Return the active {@link SubscriptionPlan} for the given template.
+     */
+    public abstract SubscriptionPlan getSubscriptionPlan(NetworkTemplate template);
+
+    public static final int QUOTA_TYPE_JOBS = 1;
+    public static final int QUOTA_TYPE_MULTIPATH = 2;
+
+    /**
+     * Return the daily quota (in bytes) that can be opportunistically used on
+     * the given network to improve the end user experience. It's called
+     * "opportunistic" because it's traffic that would typically not use the
+     * given network.
+     */
+    public abstract long getSubscriptionOpportunisticQuota(Network network, int quotaType);
+
+    /**
+     * Informs that admin data is loaded and available.
+     */
+    public abstract void onAdminDataAvailable();
+
+    /**
+     * Sets a list of packages which are restricted by admin from accessing metered data.
+     *
+     * @param packageNames the list of restricted packages.
+     * @param userId the userId in which {@param packagesNames} are restricted.
+     */
+    public abstract void setMeteredRestrictedPackages(
+            Set<String> packageNames, int userId);
+
+
+    /**
+     * Similar to {@link #setMeteredRestrictedPackages(Set, int)} but updates the restricted
+     * packages list asynchronously.
+     */
+    public abstract void setMeteredRestrictedPackagesAsync(
+            Set<String> packageNames, int userId);
 }

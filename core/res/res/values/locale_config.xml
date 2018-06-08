@@ -23,33 +23,60 @@
         <item>ak-GH</item> <!-- Akan (Ghana) -->
         <item>am-ET</item> <!-- Amharic (Ethiopia) -->
         <item>ar-AE</item> <!-- Arabic (United Arab Emirates) -->
+        <item>ar-AE-u-nu-latn</item> <!-- Arabic (United Arab Emirates,Western Digits) -->
         <item>ar-BH</item> <!-- Arabic (Bahrain) -->
+        <item>ar-BH-u-nu-latn</item> <!-- Arabic (Bahrain,Western Digits) -->
         <item>ar-DJ</item> <!-- Arabic (Djibouti) -->
+        <item>ar-DJ-u-nu-latn</item> <!-- Arabic (Djibouti,Western Digits) -->
         <item>ar-DZ</item> <!-- Arabic (Algeria) -->
+        <item>ar-DZ-u-nu-arab</item> <!-- Arabic (Algeria,Arabic-Indic Digits) -->
         <item>ar-EG</item> <!-- Arabic (Egypt) -->
+        <item>ar-EG-u-nu-latn</item> <!-- Arabic (Egypt,Western Digits) -->
         <item>ar-EH</item> <!-- Arabic (Western Sahara) -->
+        <item>ar-EH-u-nu-arab</item> <!-- Arabic (Western Sahara,Arabic-Indic Digits) -->
         <item>ar-ER</item> <!-- Arabic (Eritrea) -->
+        <item>ar-ER-u-nu-latn</item> <!-- Arabic (Eritrea,Western Digits) -->
         <item>ar-IL</item> <!-- Arabic (Israel) -->
+        <item>ar-IL-u-nu-latn</item> <!-- Arabic (Israel,Western Digits) -->
         <item>ar-IQ</item> <!-- Arabic (Iraq) -->
+        <item>ar-IQ-u-nu-latn</item> <!-- Arabic (Iraq,Western Digits) -->
         <item>ar-JO</item> <!-- Arabic (Jordan) -->
+        <item>ar-JO-u-nu-latn</item> <!-- Arabic (Jordan,Western Digits) -->
         <item>ar-KM</item> <!-- Arabic (Comoros) -->
+        <item>ar-KM-u-nu-latn</item> <!-- Arabic (Comoros,Western Digits) -->
         <item>ar-KW</item> <!-- Arabic (Kuwait) -->
+        <item>ar-KW-u-nu-latn</item> <!-- Arabic (Kuwait,Western Digits) -->
         <item>ar-LB</item> <!-- Arabic (Lebanon) -->
+        <item>ar-LB-u-nu-latn</item> <!-- Arabic (Lebanon,Western Digits) -->
         <item>ar-LY</item> <!-- Arabic (Libya) -->
+        <item>ar-LY-u-nu-arab</item> <!-- Arabic (Libya,Arabic-Indic Digits) -->
         <item>ar-MA</item> <!-- Arabic (Morocco) -->
+        <item>ar-MA-u-nu-arab</item> <!-- Arabic (Morocco,Arabic-Indic Digits) -->
         <item>ar-MR</item> <!-- Arabic (Mauritania) -->
+        <item>ar-MR-u-nu-latn</item> <!-- Arabic (Mauritania,Western Digits) -->
         <item>ar-OM</item> <!-- Arabic (Oman) -->
+        <item>ar-OM-u-nu-latn</item> <!-- Arabic (Oman,Western Digits) -->
         <item>ar-PS</item> <!-- Arabic (Palestine) -->
+        <item>ar-PS-u-nu-latn</item> <!-- Arabic (Palestine,Western Digits) -->
         <item>ar-QA</item> <!-- Arabic (Qatar) -->
+        <item>ar-QA-u-nu-latn</item> <!-- Arabic (Qatar,Western Digits) -->
         <item>ar-SA</item> <!-- Arabic (Saudi Arabia) -->
+        <item>ar-SA-u-nu-latn</item> <!-- Arabic (Saudi Arabia,Western Digits) -->
         <item>ar-SD</item> <!-- Arabic (Sudan) -->
+        <item>ar-SD-u-nu-latn</item> <!-- Arabic (Sudan,Western Digits) -->
         <item>ar-SO</item> <!-- Arabic (Somalia) -->
+        <item>ar-SO-u-nu-latn</item> <!-- Arabic (Somalia,Western Digits) -->
         <item>ar-SS</item> <!-- Arabic (South Sudan) -->
+        <item>ar-SS-u-nu-latn</item> <!-- Arabic (South Sudan,Western Digits) -->
         <item>ar-SY</item> <!-- Arabic (Syria) -->
+        <item>ar-SY-u-nu-latn</item> <!-- Arabic (Syria,Western Digits) -->
         <item>ar-TD</item> <!-- Arabic (Chad) -->
+        <item>ar-TD-u-nu-latn</item> <!-- Arabic (Chad,Western Digits) -->
         <item>ar-TN</item> <!-- Arabic (Tunisia) -->
+        <item>ar-TN-u-nu-arab</item> <!-- Arabic (Tunisia,Arabic-Indic Digits) -->
         <item>ar-XB</item> <!-- Right-to-left pseudolocale -->
         <item>ar-YE</item> <!-- Arabic (Yemen) -->
+        <item>ar-YE-u-nu-latn</item> <!-- Arabic (Yemen,Western Digits) -->
         <item>as-IN</item> <!-- Assamese (India) -->
         <item>asa-TZ</item> <!-- Asu (Tanzania) -->
         <item>az-Cyrl-AZ</item> <!-- Azerbaijani (Cyrillic,Azerbaijan) -->
@@ -61,7 +88,9 @@
         <item>bg-BG</item> <!-- Bulgarian (Bulgaria) -->
         <item>bm-ML</item> <!-- Bambara (Mali) -->
         <item>bn-BD</item> <!-- Bengali (Bangladesh) -->
+        <item>bn-BD-u-nu-latn</item> <!-- Bengali (Bangladesh,Western Digits) -->
         <item>bn-IN</item> <!-- Bengali (India) -->
+        <item>bn-IN-u-nu-latn</item> <!-- Bengali (India,Western Digits) -->
         <item>bo-CN</item> <!-- Tibetan (China) -->
         <item>bo-IN</item> <!-- Tibetan (India) -->
         <item>br-FR</item> <!-- Breton (France) -->
@@ -228,7 +257,9 @@
         <item>eu-ES</item> <!-- Basque (Spain) -->
         <item>ewo-CM</item> <!-- Ewondo (Cameroon) -->
         <item>fa-AF</item> <!-- Persian (Afghanistan) -->
+        <item>fa-AF-u-nu-latn</item> <!-- Persian (Afghanistan,Western Digits) -->
         <item>fa-IR</item> <!-- Persian (Iran) -->
+        <item>fa-IR-u-nu-latn</item> <!-- Persian (Iran,Western Digits) -->
         <item>ff-CM</item> <!-- Fulah (Cameroon) -->
         <item>ff-GN</item> <!-- Fulah (Guinea) -->
         <item>ff-MR</item> <!-- Fulah (Mauritania) -->
@@ -366,6 +397,7 @@
         <item>ms-SG</item> <!-- Malay (Singapore) -->
         <item>mt-MT</item> <!-- Maltese (Malta) -->
         <item>my-MM</item> <!-- Burmese (Myanmar (Burma)) -->
+        <item>my-MM-u-nu-latn</item> <!-- Burmese (Myanmar (Burma), Western Digits) -->
         <item>mzn-IR</item> <!-- Mazanderani (Iran) -->
         <item>naq-NA</item> <!-- Nama (Namibia) -->
         <item>nb-NO</item> <!-- Norwegian Bokmål (Norway) -->
@@ -470,7 +502,9 @@
         <item>ug-CN</item> <!-- Uyghur (China) -->
         <item>uk-UA</item> <!-- Ukrainian (Ukraine) -->
         <item>ur-IN</item> <!-- Urdu (India) -->
+        <item>ur-IN-u-nu-latn</item> <!-- Urdu (India,Western Digits) -->
         <item>ur-PK</item> <!-- Urdu (Pakistan) -->
+        <item>ur-PK-u-nu-arabext</item> <!-- Urdu (Pakistan,Extended Arabic-Indic Digits) -->
         <item>uz-Arab-AF</item> <!-- Uzbek (Arabic,Afghanistan) -->
         <item>uz-Cyrl-UZ</item> <!-- Uzbek (Cyrillic,Uzbekistan) -->
         <item>uz-Latn-UZ</item> <!-- Uzbek (Latin,Uzbekistan) -->

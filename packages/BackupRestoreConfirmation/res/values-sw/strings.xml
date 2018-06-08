@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="backup_confirm_title" msgid="827563724209303345">"Kuhifadhi kikamilifu"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Kurejesha kila kitu"</string>
-    <string name="backup_confirm_text" msgid="1878021282758896593">"Ombi la kuhifadhi nakala rudufu kamili za data kwenye eneo kazi la kompyuta iliyounganishwa limewasilishwa. Ungependa shughuli hii ufanyike?\n\n Ikiwa sio wewe uliyewasilisha ombi hili, usikubali shughuli hii iendelee."</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"Ombi la kuhifadhi nakala kamili za data kwenye eneo kazi la kompyuta iliyounganishwa limewasilishwa. Ungependa shughuli hii ufanyike?\n\n Ikiwa si wewe uliyewasilisha ombi hili, usikubali shughuli hii iendelee."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Hifadhi nakala ya data yangu"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Usicheleze"</string>
     <string name="restore_confirm_text" msgid="7499866728030461776">"Kurejesha kamili kwa data nzima kutoka kwa eneo kazi la kompyuta lililounganishwa limeombwa. Unataka kuruhusu hii kutendeka?\n\n Ikiwa hukuweza kurejesha upya mwenyewe, usiruhusu uendeshaji huu kuendelea. Hii itaweka upya data yoyote iliyo kwenye kifaa hiki sasa!"</string>

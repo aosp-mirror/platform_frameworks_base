@@ -27,8 +27,8 @@ else
   LOCAL_SRC_FILES := src/android/hardware/soundtrigger/SoundTriggerTest.java
 endif
 
-LOCAL_STATIC_JAVA_LIBRARIES := mockito-target legacy-android-test
-LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_STATIC_JAVA_LIBRARIES := mockito-target
+LOCAL_JAVA_LIBRARIES := android.test.runner android.test.base
 
 LOCAL_PACKAGE_NAME := SoundTriggerTests
 LOCAL_PRIVATE_PLATFORM_APIS := true

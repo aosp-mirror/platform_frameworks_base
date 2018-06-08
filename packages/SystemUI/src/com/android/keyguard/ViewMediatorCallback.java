@@ -76,6 +76,12 @@ public interface ViewMediatorCallback {
     void playTrustedSound();
 
     /**
+     * When the bouncer is shown or hides
+     * @param shown
+     */
+    void onBouncerVisiblityChanged(boolean shown);
+
+    /**
      * @return true if the screen is on
      */
     boolean isScreenOn();
@@ -93,4 +99,10 @@ public interface ViewMediatorCallback {
      * Invoked when the secondary display showing a keyguard window changes.
      */
     void onSecondaryDisplayShowingChanged(int displayId);
+
+    /**
+     * Consumes a message that was enqueued to be displayed on the next time the bouncer shows up.
+     * @return Message that should be displayed above the challenge.
+     */
+    CharSequence consumeCustomMessage();
 }

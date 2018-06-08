@@ -129,12 +129,6 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
         // Get an instance of WifiManager
         mWifiManager =(WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);
 
-        if (mWifiManager.isWifiApEnabled()) {
-            // if soft AP is enabled, disable it
-            mWifiManager.setWifiApEnabled(null, false);
-            logv("Disable soft ap");
-        }
-
         // register a connectivity receiver for CONNECTIVITY_ACTION;
         mConnectivityReceiver = new ConnectivityReceiver();
         mContext.registerReceiver(mConnectivityReceiver,

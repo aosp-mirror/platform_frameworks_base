@@ -27,6 +27,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.WebViewFactory;
 import android.webkit.WebViewFactoryProvider;
+import android.webkit.WebViewLibraryLoader;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -71,7 +72,8 @@ class WebViewZygoteInit {
         }
 
         @Override
-        protected void handlePreloadPackage(String packagePath, String libsPath, String cacheKey) {
+        protected void handlePreloadPackage(String packagePath, String libsPath, String libFileName,
+                String cacheKey) {
             Log.i(TAG, "Beginning package preload");
             // Ask ApplicationLoaders to create and cache a classloader for the WebView APK so that
             // our children will reuse the same classloader instead of creating their own.
@@ -79,6 +81,10 @@ class WebViewZygoteInit {
             // have the preloaded versions actually be used post-fork.
             ClassLoader loader = ApplicationLoaders.getDefault().createAndCacheWebViewClassLoader(
                     packagePath, libsPath, cacheKey);
+
+            // Load the native library using WebViewLibraryLoader to share the RELRO data with other
+            // processes.
+            WebViewLibraryLoader.loadNativeLibrary(loader, libFileName);
 
             // Add the APK to the Zygote's list of allowed files for children.
             String[] packageList = TextUtils.split(packagePath, File.pathSeparator);

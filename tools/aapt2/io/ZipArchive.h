@@ -28,23 +28,20 @@
 namespace aapt {
 namespace io {
 
-/**
- * An IFile representing a file within a ZIP archive. If the file is compressed,
- * it is uncompressed
- * and copied into memory when opened. Otherwise it is mmapped from the ZIP
- * archive.
- */
+// An IFile representing a file within a ZIP archive. If the file is compressed, it is uncompressed
+// and copied into memory when opened. Otherwise it is mmapped from the ZIP archive.
 class ZipFile : public IFile {
  public:
-  ZipFile(ZipArchiveHandle handle, const ZipEntry& entry, const Source& source);
+  ZipFile(::ZipArchiveHandle handle, const ::ZipEntry& entry, const Source& source);
 
   std::unique_ptr<IData> OpenAsData() override;
+  std::unique_ptr<io::InputStream> OpenInputStream() override;
   const Source& GetSource() const override;
   bool WasCompressed() override;
 
  private:
-  ZipArchiveHandle zip_handle_;
-  ZipEntry zip_entry_;
+  ::ZipArchiveHandle zip_handle_;
+  ::ZipEntry zip_entry_;
   Source source_;
 };
 
@@ -61,9 +58,7 @@ class ZipFileCollectionIterator : public IFileCollectionIterator {
   std::vector<std::unique_ptr<IFile>>::const_iterator current_, end_;
 };
 
-/**
- * An IFileCollection that represents a ZIP archive and the entries within it.
- */
+// An IFileCollection that represents a ZIP archive and the entries within it.
 class ZipFileCollection : public IFileCollection {
  public:
   static std::unique_ptr<ZipFileCollection> Create(const android::StringPiece& path,

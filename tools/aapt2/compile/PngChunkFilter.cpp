@@ -21,8 +21,8 @@
 
 #include "io/Io.h"
 
-using android::StringPiece;
-using android::base::StringPrintf;
+using ::android::StringPiece;
+using ::android::base::StringPrintf;
 
 namespace aapt {
 

@@ -28,6 +28,7 @@ import android.os.Parcelable;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.Preconditions;
 
@@ -75,6 +76,7 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_CONTENT_TYPE = "content_type";
     private static final String ATT_SHOW_BADGE = "show_badge";
     private static final String ATT_USER_LOCKED = "locked";
+    private static final String ATT_FG_SERVICE_SHOWN = "fgservice";
     private static final String ATT_GROUP = "group";
     private static final String ATT_BLOCKABLE_SYSTEM = "blockable_system";
     private static final String DELIMITER = ",";
@@ -140,12 +142,16 @@ public final class NotificationChannel implements Parcelable {
     private boolean mLights;
     private int mLightColor = DEFAULT_LIGHT_COLOR;
     private long[] mVibration;
+    // Bitwise representation of fields that have been changed by the user, preventing the app from
+    // making changes to these fields.
     private int mUserLockedFields;
+    private boolean mFgServiceShown;
     private boolean mVibrationEnabled;
     private boolean mShowBadge = DEFAULT_SHOW_BADGE;
     private boolean mDeleted = DEFAULT_DELETED;
     private String mGroup;
     private AudioAttributes mAudioAttributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
+    // If this is a blockable system notification channel.
     private boolean mBlockableSystem = false;
 
     /**
@@ -196,6 +202,7 @@ public final class NotificationChannel implements Parcelable {
         mLights = in.readByte() != 0;
         mVibration = in.createLongArray();
         mUserLockedFields = in.readInt();
+        mFgServiceShown = in.readByte() != 0;
         mVibrationEnabled = in.readByte() != 0;
         mShowBadge = in.readByte() != 0;
         mDeleted = in.readByte() != 0;
@@ -241,6 +248,7 @@ public final class NotificationChannel implements Parcelable {
         dest.writeByte(mLights ? (byte) 1 : (byte) 0);
         dest.writeLongArray(mVibration);
         dest.writeInt(mUserLockedFields);
+        dest.writeByte(mFgServiceShown ? (byte) 1 : (byte) 0);
         dest.writeByte(mVibrationEnabled ? (byte) 1 : (byte) 0);
         dest.writeByte(mShowBadge ? (byte) 1 : (byte) 0);
         dest.writeByte(mDeleted ? (byte) 1 : (byte) 0);
@@ -272,6 +280,13 @@ public final class NotificationChannel implements Parcelable {
      */
     public void unlockFields(int field) {
         mUserLockedFields &= ~field;
+    }
+
+    /**
+     * @hide
+     */
+    public void setFgServiceShown(boolean shown) {
+        mFgServiceShown = shown;
     }
 
     /**
@@ -324,7 +339,8 @@ public final class NotificationChannel implements Parcelable {
      * Group information is only used for presentation, not for behavior.
      *
      * Only modifiable before the channel is submitted to
-     * {@link NotificationManager#notify(String, int, Notification)}.
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}, unless the
+     * channel is not currently part of a group.
      *
      * @param groupId the id of a group created by
      * {@link NotificationManager#createNotificationChannelGroup(NotificationChannelGroup)}.
@@ -336,6 +352,9 @@ public final class NotificationChannel implements Parcelable {
     /**
      * Sets whether notifications posted to this channel can appear as application icon badges
      * in a Launcher.
+     *
+     * Only modifiable before the channel is submitted to
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      *
      * @param showBadge true if badges should be allowed to be shown.
      */
@@ -349,7 +368,7 @@ public final class NotificationChannel implements Parcelable {
      * least {@link NotificationManager#IMPORTANCE_DEFAULT} should have a sound.
      *
      * Only modifiable before the channel is submitted to
-     * {@link NotificationManager#notify(String, int, Notification)}.
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      */
     public void setSound(Uri sound, AudioAttributes audioAttributes) {
         this.mSound = sound;
@@ -361,7 +380,7 @@ public final class NotificationChannel implements Parcelable {
      * on devices that support that feature.
      *
      * Only modifiable before the channel is submitted to
-     * {@link NotificationManager#notify(String, int, Notification)}.
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      */
     public void enableLights(boolean lights) {
         this.mLights = lights;
@@ -372,7 +391,7 @@ public final class NotificationChannel implements Parcelable {
      * {@link #enableLights(boolean) enabled} on this channel and the device supports that feature.
      *
      * Only modifiable before the channel is submitted to
-     * {@link NotificationManager#notify(String, int, Notification)}.
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      */
     public void setLightColor(int argb) {
         this.mLightColor = argb;
@@ -383,7 +402,7 @@ public final class NotificationChannel implements Parcelable {
      * be set with {@link #setVibrationPattern(long[])}.
      *
      * Only modifiable before the channel is submitted to
-     * {@link NotificationManager#notify(String, int, Notification)}.
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      */
     public void enableVibration(boolean vibration) {
         this.mVibrationEnabled = vibration;
@@ -395,7 +414,7 @@ public final class NotificationChannel implements Parcelable {
      * vibration} as well. Otherwise, vibration will be disabled.
      *
      * Only modifiable before the channel is submitted to
-     * {@link NotificationManager#notify(String, int, Notification)}.
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      */
     public void setVibrationPattern(long[] vibrationPattern) {
         this.mVibrationEnabled = vibrationPattern != null && vibrationPattern.length > 0;
@@ -403,9 +422,10 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * Sets the level of interruption of this notification channel. Only
-     * modifiable before the channel is submitted to
-     * {@link NotificationManager#notify(String, int, Notification)}.
+     * Sets the level of interruption of this notification channel.
+     *
+     * Only modifiable before the channel is submitted to
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      *
      * @param importance the amount the user should be interrupted by
      *            notifications from this channel.
@@ -459,7 +479,11 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Returns the user specified importance e.g. {@link NotificationManager#IMPORTANCE_LOW} for
-     * notifications posted to this channel.
+     * notifications posted to this channel. Note: This value might be >
+     * {@link NotificationManager#IMPORTANCE_NONE}, but notifications posted to this channel will
+     * not be shown to the user if the parent {@link NotificationChannelGroup} or app is blocked.
+     * See {@link NotificationChannelGroup#isBlocked()} and
+     * {@link NotificationManager#areNotificationsEnabled()}.
      */
     public int getImportance() {
         return mImportance;
@@ -563,6 +587,13 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    public boolean isFgServiceShown() {
+        return mFgServiceShown;
+    }
+
+    /**
+     * @hide
+     */
     public boolean isBlockableSystem() {
         return mBlockableSystem;
     }
@@ -607,6 +638,7 @@ public final class NotificationChannel implements Parcelable {
         setDeleted(safeBool(parser, ATT_DELETED, false));
         setGroup(parser.getAttributeValue(null, ATT_GROUP));
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
+        setFgServiceShown(safeBool(parser, ATT_FG_SERVICE_SHOWN, false));
         setBlockableSystem(safeBool(parser, ATT_BLOCKABLE_SYSTEM, false));
     }
 
@@ -711,6 +743,9 @@ public final class NotificationChannel implements Parcelable {
         if (getUserLockedFields() != 0) {
             out.attribute(null, ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
         }
+        if (isFgServiceShown()) {
+            out.attribute(null, ATT_FG_SERVICE_SHOWN, Boolean.toString(isFgServiceShown()));
+        }
         if (canShowBadge()) {
             out.attribute(null, ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
         }
@@ -759,6 +794,7 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_LIGHT_COLOR, Integer.toString(getLightColor()));
         record.put(ATT_VIBRATION_ENABLED, Boolean.toString(shouldVibrate()));
         record.put(ATT_USER_LOCKED, Integer.toString(getUserLockedFields()));
+        record.put(ATT_FG_SERVICE_SHOWN, Boolean.toString(isFgServiceShown()));
         record.put(ATT_VIBRATION, longArrayToString(getVibrationPattern()));
         record.put(ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
         record.put(ATT_DELETED, Boolean.toString(isDeleted()));
@@ -908,24 +944,59 @@ public final class NotificationChannel implements Parcelable {
 
     @Override
     public String toString() {
-        return "NotificationChannel{" +
-                "mId='" + mId + '\'' +
-                ", mName=" + mName +
-                ", mDescription=" + (!TextUtils.isEmpty(mDesc) ? "hasDescription " : "") +
-                ", mImportance=" + mImportance +
-                ", mBypassDnd=" + mBypassDnd +
-                ", mLockscreenVisibility=" + mLockscreenVisibility +
-                ", mSound=" + mSound +
-                ", mLights=" + mLights +
-                ", mLightColor=" + mLightColor +
-                ", mVibration=" + Arrays.toString(mVibration) +
-                ", mUserLockedFields=" + mUserLockedFields +
-                ", mVibrationEnabled=" + mVibrationEnabled +
-                ", mShowBadge=" + mShowBadge +
-                ", mDeleted=" + mDeleted +
-                ", mGroup='" + mGroup + '\'' +
-                ", mAudioAttributes=" + mAudioAttributes +
-                ", mBlockableSystem=" + mBlockableSystem +
-                '}';
+        return "NotificationChannel{"
+                + "mId='" + mId + '\''
+                + ", mName=" + mName
+                + ", mDescription=" + (!TextUtils.isEmpty(mDesc) ? "hasDescription " : "")
+                + ", mImportance=" + mImportance
+                + ", mBypassDnd=" + mBypassDnd
+                + ", mLockscreenVisibility=" + mLockscreenVisibility
+                + ", mSound=" + mSound
+                + ", mLights=" + mLights
+                + ", mLightColor=" + mLightColor
+                + ", mVibration=" + Arrays.toString(mVibration)
+                + ", mUserLockedFields=" + Integer.toHexString(mUserLockedFields)
+                + ", mFgServiceShown=" + mFgServiceShown
+                + ", mVibrationEnabled=" + mVibrationEnabled
+                + ", mShowBadge=" + mShowBadge
+                + ", mDeleted=" + mDeleted
+                + ", mGroup='" + mGroup + '\''
+                + ", mAudioAttributes=" + mAudioAttributes
+                + ", mBlockableSystem=" + mBlockableSystem
+                + '}';
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
+        proto.write(NotificationChannelProto.ID, mId);
+        proto.write(NotificationChannelProto.NAME, mName);
+        proto.write(NotificationChannelProto.DESCRIPTION, mDesc);
+        proto.write(NotificationChannelProto.IMPORTANCE, mImportance);
+        proto.write(NotificationChannelProto.CAN_BYPASS_DND, mBypassDnd);
+        proto.write(NotificationChannelProto.LOCKSCREEN_VISIBILITY, mLockscreenVisibility);
+        if (mSound != null) {
+            proto.write(NotificationChannelProto.SOUND, mSound.toString());
+        }
+        proto.write(NotificationChannelProto.USE_LIGHTS, mLights);
+        proto.write(NotificationChannelProto.LIGHT_COLOR, mLightColor);
+        if (mVibration != null) {
+            for (long v : mVibration) {
+                proto.write(NotificationChannelProto.VIBRATION, v);
+            }
+        }
+        proto.write(NotificationChannelProto.USER_LOCKED_FIELDS, mUserLockedFields);
+        proto.write(NotificationChannelProto.FG_SERVICE_SHOWN, mFgServiceShown);
+        proto.write(NotificationChannelProto.IS_VIBRATION_ENABLED, mVibrationEnabled);
+        proto.write(NotificationChannelProto.SHOW_BADGE, mShowBadge);
+        proto.write(NotificationChannelProto.IS_DELETED, mDeleted);
+        proto.write(NotificationChannelProto.GROUP, mGroup);
+        if (mAudioAttributes != null) {
+            mAudioAttributes.writeToProto(proto, NotificationChannelProto.AUDIO_ATTRIBUTES);
+        }
+        proto.write(NotificationChannelProto.IS_BLOCKABLE_SYSTEM, mBlockableSystem);
+
+        proto.end(token);
     }
 }

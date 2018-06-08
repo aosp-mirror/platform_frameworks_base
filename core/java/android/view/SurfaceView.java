@@ -16,15 +16,15 @@
 
 package android.view;
 
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
-import static android.view.WindowManagerPolicy.APPLICATION_MEDIA_OVERLAY_SUBLAYER;
-import static android.view.WindowManagerPolicy.APPLICATION_MEDIA_SUBLAYER;
-import static android.view.WindowManagerPolicy.APPLICATION_PANEL_SUBLAYER;
+import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_OVERLAY_SUBLAYER;
+import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_SUBLAYER;
+import static android.view.WindowManagerPolicyConstants.APPLICATION_PANEL_SUBLAYER;
 
 import android.content.Context;
 import android.content.res.CompatibilityInfo.Translator;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
@@ -114,7 +114,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     final Rect mScreenRect = new Rect();
     SurfaceSession mSurfaceSession;
 
-    SurfaceControl mSurfaceControl;
+    SurfaceControlWithBackground mSurfaceControl;
     // In the case of format changes we switch out the surface in-place
     // we need to preserve the old one until the new one has drawn.
     SurfaceControl mDeferredDestroySurfaceControl;
@@ -178,6 +178,8 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     private int mSurfaceFlags = SurfaceControl.HIDDEN;
 
     private int mPendingReportDraws;
+
+    private SurfaceControl.Transaction mRtTransaction = new SurfaceControl.Transaction();
 
     public SurfaceView(Context context) {
         this(context, null);
@@ -532,10 +534,15 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                     mDeferredDestroySurfaceControl = mSurfaceControl;
 
                     updateOpaqueFlag();
-                    mSurfaceControl = new SurfaceControlWithBackground(mSurfaceSession,
-                            "SurfaceView - " + viewRoot.getTitle().toString(),
-                            mSurfaceWidth, mSurfaceHeight, mFormat,
-                            mSurfaceFlags);
+                    final String name = "SurfaceView - " + viewRoot.getTitle().toString();
+
+                    mSurfaceControl = new SurfaceControlWithBackground(
+                            name,
+                            (mSurfaceFlags & SurfaceControl.OPAQUE) != 0,
+                            new SurfaceControl.Builder(mSurfaceSession)
+                                    .setSize(mSurfaceWidth, mSurfaceHeight)
+                                    .setFormat(mFormat)
+                                    .setFlags(mSurfaceFlags));
                 } else if (mSurfaceControl == null) {
                     return;
                 }
@@ -693,15 +700,9 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                     mIsCreating = false;
                     if (mSurfaceControl != null && !mSurfaceCreated) {
                         mSurface.release();
-                        // If we are not in the stopped state, then the destruction of the Surface
-                        // represents a visual change we need to display, and we should go ahead
-                        // and destroy the SurfaceControl. However if we are in the stopped state,
-                        // we can just leave the Surface around so it can be a part of animations,
-                        // and we let the life-time be tied to the parent surface.
-                        if (!mWindowStopped) {
-                            mSurfaceControl.destroy();
-                            mSurfaceControl = null;
-                        }
+
+                        mSurfaceControl.destroy();
+                        mSurfaceControl = null;
                     }
                 }
             } catch (Exception ex) {
@@ -769,21 +770,42 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         });
     }
 
-    private void setParentSpaceRectangle(Rect position, long frameNumber) {
-        ViewRootImpl viewRoot = getViewRootImpl();
+    /**
+     * A place to over-ride for applying child-surface transactions.
+     * These can be synchronized with the viewroot surface using deferTransaction.
+     *
+     * Called from RenderWorker while UI thread is paused.
+     * @hide
+     */
+    protected void applyChildSurfaceTransaction_renderWorker(SurfaceControl.Transaction t,
+            Surface viewRootSurface, long nextViewRootFrameNumber) {
+    }
 
-        SurfaceControl.openTransaction();
-        try {
-            if (frameNumber > 0) {
-                mSurfaceControl.deferTransactionUntil(viewRoot.mSurface, frameNumber);
-            }
-            mSurfaceControl.setPosition(position.left, position.top);
-            mSurfaceControl.setMatrix(position.width() / (float) mSurfaceWidth,
-                    0.0f, 0.0f,
-                    position.height() / (float) mSurfaceHeight);
-        } finally {
-            SurfaceControl.closeTransaction();
+    private void applySurfaceTransforms(SurfaceControl surface, Rect position, long frameNumber) {
+        if (frameNumber > 0) {
+            final ViewRootImpl viewRoot = getViewRootImpl();
+
+            mRtTransaction.deferTransactionUntilSurface(surface, viewRoot.mSurface,
+                    frameNumber);
         }
+
+        mRtTransaction.setPosition(surface, position.left, position.top);
+        mRtTransaction.setMatrix(surface,
+                position.width() / (float) mSurfaceWidth,
+                0.0f, 0.0f,
+                position.height() / (float) mSurfaceHeight);
+    }
+
+    private void setParentSpaceRectangle(Rect position, long frameNumber) {
+        final ViewRootImpl viewRoot = getViewRootImpl();
+
+        applySurfaceTransforms(mSurfaceControl, position, frameNumber);
+        applySurfaceTransforms(mSurfaceControl.mBackgroundControl, position, frameNumber);
+
+        applyChildSurfaceTransaction_renderWorker(mRtTransaction, viewRoot.mSurface,
+                frameNumber);
+
+        mRtTransaction.apply();
     }
 
     private Rect mRTLastReportedPosition = new Rect();
@@ -871,31 +893,6 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         return callbacks;
     }
 
-    /**
-     * This method still exists only for compatibility reasons because some applications have relied
-     * on this method via reflection. See Issue 36345857 for details.
-     *
-     * @deprecated No platform code is using this method anymore.
-     * @hide
-     */
-    @Deprecated
-    public void setWindowType(int type) {
-        if (getContext().getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.O) {
-            throw new UnsupportedOperationException(
-                    "SurfaceView#setWindowType() has never been a public API.");
-        }
-
-        if (type == TYPE_APPLICATION_PANEL) {
-            Log.e(TAG, "If you are calling SurfaceView#setWindowType(TYPE_APPLICATION_PANEL) "
-                    + "just to make the SurfaceView to be placed on top of its window, you must "
-                    + "call setZOrderOnTop(true) instead.", new Throwable());
-            setZOrderOnTop(true);
-            return;
-        }
-        Log.e(TAG, "SurfaceView#setWindowType(int) is deprecated and now does nothing. "
-                + "type=" + type, new Throwable());
-    }
-
     private void runOnUiThread(Runnable runnable) {
         Handler handler = getHandler();
         if (handler != null && handler.getLooper() != Looper.myLooper()) {
@@ -918,6 +915,17 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
     private boolean isAboveParent() {
         return mSubLayer >= 0;
+    }
+
+    /**
+     * Set an opaque background color to use with this {@link SurfaceView} when it's being resized
+     * and size of the content hasn't updated yet. This color will fill the expanded area when the
+     * view becomes larger.
+     * @param bgColor An opaque color to fill the background. Alpha component will be ignored.
+     * @hide
+     */
+    public void setResizeBackgroundColor(int bgColor) {
+        mSurfaceControl.setBackgroundColor(bgColor);
     }
 
     private final SurfaceHolder mSurfaceHolder = new SurfaceHolder() {
@@ -1094,17 +1102,19 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     };
 
     class SurfaceControlWithBackground extends SurfaceControl {
-        private SurfaceControl mBackgroundControl;
+        SurfaceControl mBackgroundControl;
         private boolean mOpaque = true;
         public boolean mVisible = false;
 
-        public SurfaceControlWithBackground(SurfaceSession s,
-                        String name, int w, int h, int format, int flags)
+        public SurfaceControlWithBackground(String name, boolean opaque, SurfaceControl.Builder b)
                        throws Exception {
-            super(s, name, w, h, format, flags);
-            mBackgroundControl = new SurfaceControl(s, "Background for - " + name, w, h,
-                    PixelFormat.OPAQUE, flags | SurfaceControl.FX_SURFACE_DIM);
-            mOpaque = (flags & SurfaceControl.OPAQUE) != 0;
+            super(b.setName(name).build());
+
+            mBackgroundControl = b.setName("Background for -" + name)
+                    .setFormat(OPAQUE)
+                    .setColorLayer(true)
+                    .build();
+            mOpaque = opaque;
         }
 
         @Override
@@ -1210,6 +1220,19 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         public void deferTransactionUntil(Surface barrier, long frame) {
             super.deferTransactionUntil(barrier, frame);
             mBackgroundControl.deferTransactionUntil(barrier, frame);
+        }
+
+        /** Set the color to fill the background with. */
+        private void setBackgroundColor(int bgColor) {
+            final float[] colorComponents = new float[] { Color.red(bgColor) / 255.f,
+                    Color.green(bgColor) / 255.f, Color.blue(bgColor) / 255.f };
+
+            SurfaceControl.openTransaction();
+            try {
+                mBackgroundControl.setColor(colorComponents);
+            } finally {
+                SurfaceControl.closeTransaction();
+            }
         }
 
         void updateBackgroundVisibility() {

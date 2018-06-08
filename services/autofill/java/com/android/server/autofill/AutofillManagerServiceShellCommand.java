@@ -16,11 +16,15 @@
 
 package com.android.server.autofill;
 
+import static android.service.autofill.AutofillFieldClassificationService.EXTRA_SCORES;
+
 import static com.android.server.autofill.AutofillManagerService.RECEIVER_BUNDLE_EXTRA_SESSIONS;
 
 import android.os.Bundle;
+import android.os.RemoteCallback;
 import android.os.ShellCommand;
 import android.os.UserHandle;
+import android.service.autofill.AutofillFieldClassificationService.Scores;
 import android.view.autofill.AutofillManager;
 
 import com.android.internal.os.IResultReceiver;
@@ -73,20 +77,41 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
             pw.println("  get max_partitions");
             pw.println("    Gets the maximum number of partitions per session.");
             pw.println("");
+            pw.println("  get max_visible_datasets");
+            pw.println("    Gets the maximum number of visible datasets in the UI.");
+            pw.println("");
+            pw.println("  get full_screen_mode");
+            pw.println("    Gets the Fill UI full screen mode");
+            pw.println("");
+            pw.println("  get fc_score [--algorithm ALGORITHM] value1 value2");
+            pw.println("    Gets the field classification score for 2 fields.");
+            pw.println("");
+            pw.println("  get bind-instant-service-allowed");
+            pw.println("    Gets whether binding to services provided by instant apps is allowed");
+            pw.println("");
             pw.println("  set log_level [off | debug | verbose]");
             pw.println("    Sets the Autofill log level.");
             pw.println("");
             pw.println("  set max_partitions number");
             pw.println("    Sets the maximum number of partitions per session.");
             pw.println("");
+            pw.println("  set max_visible_datasets number");
+            pw.println("    Sets the maximum number of visible datasets in the UI.");
+            pw.println("");
+            pw.println("  set full_screen_mode [true | false | default]");
+            pw.println("    Sets the Fill UI full screen mode");
+            pw.println("");
+            pw.println("  set bind-instant-service-allowed [true | false]");
+            pw.println("    Sets whether binding to services provided by instant apps is allowed");
+            pw.println("");
             pw.println("  list sessions [--user USER_ID]");
-            pw.println("    List all pending sessions.");
+            pw.println("    Lists all pending sessions.");
             pw.println("");
             pw.println("  destroy sessions [--user USER_ID]");
-            pw.println("    Destroy all pending sessions.");
+            pw.println("    Destroys all pending sessions.");
             pw.println("");
             pw.println("  reset");
-            pw.println("    Reset all pending sessions and cached service connections.");
+            pw.println("    Resets all pending sessions and cached service connections.");
             pw.println("");
         }
     }
@@ -98,6 +123,14 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 return getLogLevel(pw);
             case "max_partitions":
                 return getMaxPartitions(pw);
+            case "max_visible_datasets":
+                return getMaxVisibileDatasets(pw);
+            case "fc_score":
+                return getFieldClassificationScore(pw);
+            case "full_screen_mode":
+                return getFullScreenMode(pw);
+            case "bind-instant-service-allowed":
+                return getBindInstantService(pw);
             default:
                 pw.println("Invalid set: " + what);
                 return -1;
@@ -112,6 +145,12 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 return setLogLevel(pw);
             case "max_partitions":
                 return setMaxPartitions();
+            case "max_visible_datasets":
+                return setMaxVisibileDatasets();
+            case "full_screen_mode":
+                return setFullScreenMode(pw);
+            case "bind-instant-service-allowed":
+                return setBindInstantService(pw);
             default:
                 pw.println("Invalid set: " + what);
                 return -1;
@@ -164,6 +203,96 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int getMaxVisibileDatasets(PrintWriter pw) {
+        pw.println(mService.getMaxVisibleDatasets());
+        return 0;
+    }
+
+    private int setMaxVisibileDatasets() {
+        mService.setMaxVisibleDatasets(Integer.parseInt(getNextArgRequired()));
+        return 0;
+    }
+
+    private int getFieldClassificationScore(PrintWriter pw) {
+        final String nextArg = getNextArgRequired();
+        final String algorithm, value1;
+        if ("--algorithm".equals(nextArg)) {
+            algorithm = getNextArgRequired();
+            value1 = getNextArgRequired();
+        } else {
+            algorithm = null;
+            value1 = nextArg;
+        }
+        final String value2 = getNextArgRequired();
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        mService.getScore(algorithm, value1, value2, new RemoteCallback((result) -> {
+            final Scores scores = result.getParcelable(EXTRA_SCORES);
+            if (scores == null) {
+                pw.println("no score");
+            } else {
+                pw.println(scores.scores[0][0]);
+            }
+            latch.countDown();
+        }));
+
+        return waitForLatch(pw, latch);
+    }
+
+    private int getFullScreenMode(PrintWriter pw) {
+        final Boolean mode = mService.getFullScreenMode();
+        if (mode == null) {
+            pw.println("default");
+        } else if (mode) {
+            pw.println("true");
+        } else {
+            pw.println("false");
+        }
+        return 0;
+    }
+
+    private int setFullScreenMode(PrintWriter pw) {
+        final String mode = getNextArgRequired();
+        switch (mode.toLowerCase()) {
+            case "true":
+                mService.setFullScreenMode(Boolean.TRUE);
+                return 0;
+            case "false":
+                mService.setFullScreenMode(Boolean.FALSE);
+                return 0;
+            case "default":
+                mService.setFullScreenMode(null);
+                return 0;
+            default:
+                pw.println("Invalid mode: " + mode);
+                return -1;
+        }
+    }
+
+    private int getBindInstantService(PrintWriter pw) {
+        if (mService.getAllowInstantService()) {
+            pw.println("true");
+        } else {
+            pw.println("false");
+        }
+        return 0;
+    }
+
+    private int setBindInstantService(PrintWriter pw) {
+        final String mode = getNextArgRequired();
+        switch (mode.toLowerCase()) {
+            case "true":
+                mService.setAllowInstantService(true);
+                return 0;
+            case "false":
+                mService.setAllowInstantService(false);
+                return 0;
+            default:
+                pw.println("Invalid mode: " + mode);
+                return -1;
+        }
+    }
+
     private int requestDestroy(PrintWriter pw) {
         if (!isNextArgSessions(pw)) {
             return -1;
@@ -210,19 +339,13 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
         return true;
     }
 
-    private boolean isNextArgLogLevel(PrintWriter pw, String cmd) {
-        final String type = getNextArgRequired();
-        if (!type.equals("log_level")) {
-            pw.println("Error: invalid " + cmd + " type: " + type);
-            return false;
-        }
-        return true;
-    }
-
     private int requestSessionCommon(PrintWriter pw, CountDownLatch latch,
             Runnable command) {
         command.run();
+        return waitForLatch(pw, latch);
+    }
 
+    private int waitForLatch(PrintWriter pw, CountDownLatch latch) {
         try {
             final boolean received = latch.await(5, TimeUnit.SECONDS);
             if (!received) {

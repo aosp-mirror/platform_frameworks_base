@@ -20,7 +20,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.IActivityManager;
-import android.app.RemoteAction;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -46,14 +45,17 @@ import android.view.WindowManagerGlobal;
 
 import com.android.systemui.R;
 import com.android.systemui.pip.BasePipManager;
+import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 /**
@@ -121,6 +123,7 @@ public class PipManager implements BasePipManager {
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
     private boolean mInitialized;
     private int mPipTaskId = TASK_ID_NO_PIP;
+    private int mPinnedStackId = INVALID_STACK_ID;
     private ComponentName mPipComponentName;
     private MediaController mPipMediaController;
     private String[] mLastPackagesResourceGranted;
@@ -197,11 +200,15 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
+        public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {}
+
+        @Override
         public void onMinimizedStateChanged(boolean isMinimized) {}
 
         @Override
         public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
-                Rect animatingBounds, boolean fromImeAdjustement, int displayRotation) {
+                Rect animatingBounds, boolean fromImeAdjustment, boolean fromShelfAdjustment,
+                int displayRotation) {
             mHandler.post(() -> {
                 mDefaultPipBounds.set(normalBounds);
             });
@@ -232,7 +239,7 @@ public class PipManager implements BasePipManager {
 
         mActivityManager = ActivityManager.getService();
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
-        SystemServicesProxy.getInstance(context).registerTaskStackListener(mTaskStackListener);
+        ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_MEDIA_RESOURCE_GRANTED);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter);
@@ -336,9 +343,11 @@ public class PipManager implements BasePipManager {
         mMediaSessionManager.removeOnActiveSessionsChangedListener(mActiveMediaSessionListener);
         if (removePipStack) {
             try {
-                mActivityManager.removeStack(PINNED_STACK_ID);
+                mActivityManager.removeStack(mPinnedStackId);
             } catch (RemoteException e) {
                 Log.e(TAG, "removeStack failed", e);
+            } finally {
+                mPinnedStackId = INVALID_STACK_ID;
             }
         }
         for (int i = mListeners.size() - 1; i >= 0; --i) {
@@ -424,7 +433,7 @@ public class PipManager implements BasePipManager {
         }
         try {
             int animationDurationMs = -1;
-            mActivityManager.resizeStack(PINNED_STACK_ID, mCurrentPipBounds,
+            mActivityManager.resizeStack(mPinnedStackId, mCurrentPipBounds,
                     true, true, true, animationDurationMs);
         } catch (RemoteException e) {
             Log.e(TAG, "resizeStack failed", e);
@@ -502,7 +511,8 @@ public class PipManager implements BasePipManager {
     private StackInfo getPinnedStackInfo() {
         StackInfo stackInfo = null;
         try {
-            stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
+            stackInfo = mActivityManager.getStackInfo(
+                    WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
         } catch (RemoteException e) {
             Log.e(TAG, "getStackInfo failed", e);
         }
@@ -594,8 +604,8 @@ public class PipManager implements BasePipManager {
     private boolean isSettingsShown() {
         List<RunningTaskInfo> runningTasks;
         try {
-            runningTasks = mActivityManager.getTasks(1, 0);
-            if (runningTasks == null || runningTasks.size() == 0) {
+            runningTasks = mActivityManager.getTasks(1);
+            if (runningTasks.isEmpty()) {
                 return false;
             }
         } catch (RemoteException e) {
@@ -615,7 +625,7 @@ public class PipManager implements BasePipManager {
         return false;
     }
 
-    private TaskStackListener mTaskStackListener = new TaskStackListener() {
+    private SysUiTaskStackChangeListener mTaskStackListener = new SysUiTaskStackChangeListener() {
         @Override
         public void onTaskStackChanged() {
             if (DEBUG) Log.d(TAG, "onTaskStackChanged()");
@@ -652,7 +662,7 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
-        public void onActivityPinned(String packageName, int userId, int taskId) {
+        public void onActivityPinned(String packageName, int userId, int taskId, int stackId) {
             if (DEBUG) Log.d(TAG, "onActivityPinned()");
 
             StackInfo stackInfo = getPinnedStackInfo();
@@ -661,6 +671,7 @@ public class PipManager implements BasePipManager {
                 return;
             }
             if (DEBUG) Log.d(TAG, "PINNED_STACK:" + stackInfo);
+            mPinnedStackId = stackInfo.stackId;
             mPipTaskId = stackInfo.taskIds[stackInfo.taskIds.length - 1];
             mPipComponentName = ComponentName.unflattenFromString(
                     stackInfo.taskNames[stackInfo.taskNames.length - 1]);

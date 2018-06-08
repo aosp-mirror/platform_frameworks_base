@@ -62,7 +62,11 @@ public interface DeviceFilter<D extends Parcelable> extends Parcelable {
     }
 
     /** @hide */
-    @IntDef({MEDIUM_TYPE_BLUETOOTH, MEDIUM_TYPE_BLUETOOTH_LE, MEDIUM_TYPE_WIFI})
+    @IntDef(prefix = { "MEDIUM_TYPE_" }, value = {
+            MEDIUM_TYPE_BLUETOOTH,
+            MEDIUM_TYPE_BLUETOOTH_LE,
+            MEDIUM_TYPE_WIFI
+    })
     @Retention(RetentionPolicy.SOURCE)
     @interface MediumType {}
 }

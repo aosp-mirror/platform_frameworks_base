@@ -16,11 +16,11 @@
 
 #include "AnimationContext.h"
 #include "RenderNode.h"
+#include "renderthread/RenderProxy.h"
+#include "renderthread/RenderTask.h"
 #include "tests/common/TestContext.h"
 #include "tests/common/TestScene.h"
 #include "tests/common/scenes/TestSceneBase.h"
-#include "renderthread/RenderProxy.h"
-#include "renderthread/RenderTask.h"
 
 #include <benchmark/benchmark.h>
 #include <gui/Surface.h>
@@ -39,7 +39,7 @@ public:
     }
 };
 
-template<class T>
+template <class T>
 class ModifiedMovingAverage {
 public:
     explicit ModifiedMovingAverage(int weight) : mWeight(weight) {}
@@ -53,9 +53,7 @@ public:
         return mAverage;
     }
 
-    T average() {
-        return mAverage;
-    }
+    T average() { return mAverage; }
 
 private:
     bool mHasValue = false;
@@ -64,8 +62,8 @@ private:
 };
 
 void outputBenchmarkReport(const TestScene::Info& info, const TestScene::Options& opts,
-        benchmark::BenchmarkReporter* reporter, RenderProxy* proxy,
-        double durationInS) {
+                           benchmark::BenchmarkReporter* reporter, RenderProxy* proxy,
+                           double durationInS) {
     using namespace benchmark;
 
     struct ReportInfo {
@@ -74,10 +72,8 @@ void outputBenchmarkReport(const TestScene::Info& info, const TestScene::Options
     };
 
     static std::array<ReportInfo, 4> REPORTS = {
-        ReportInfo { 50, "_50th" },
-        ReportInfo { 90, "_90th" },
-        ReportInfo { 95, "_95th" },
-        ReportInfo { 99, "_99th" },
+            ReportInfo{50, "_50th"}, ReportInfo{90, "_90th"}, ReportInfo{95, "_95th"},
+            ReportInfo{99, "_99th"},
     };
 
     // Although a vector is used, it must stay with only a single element
@@ -111,11 +107,9 @@ void outputBenchmarkReport(const TestScene::Info& info, const TestScene::Options
 }
 
 void run(const TestScene::Info& info, const TestScene::Options& opts,
-        benchmark::BenchmarkReporter* reporter) {
+         benchmark::BenchmarkReporter* reporter) {
     // Switch to the real display
     gDisplay = getBuiltInDisplay();
-
-    std::unique_ptr<TestScene> scene(info.createScene(opts));
 
     Properties::forceDrawFrame = true;
     TestContext testContext;
@@ -126,15 +120,17 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
     const int height = gDisplay.h;
     sp<Surface> surface = testContext.surface();
 
-    sp<RenderNode> rootNode = TestUtils::createNode(0, 0, width, height,
-            [&scene, width, height](RenderProperties& props, Canvas& canvas) {
-        props.setClipToBounds(false);
-        scene->createContent(width, height, canvas);
-    });
+    std::unique_ptr<TestScene> scene(info.createScene(opts));
+    scene->renderTarget = surface;
+
+    sp<RenderNode> rootNode = TestUtils::createNode(
+            0, 0, width, height, [&scene, width, height](RenderProperties& props, Canvas& canvas) {
+                props.setClipToBounds(false);
+                scene->createContent(width, height, canvas);
+            });
 
     ContextFactory factory;
-    std::unique_ptr<RenderProxy> proxy(new RenderProxy(false,
-            rootNode.get(), &factory));
+    std::unique_ptr<RenderProxy> proxy(new RenderProxy(false, rootNode.get(), &factory));
     proxy->loadSystemProperties();
     proxy->initialize(surface);
     float lightX = width / 2.0;
@@ -182,8 +178,7 @@ void run(const TestScene::Info& info, const TestScene::Options& opts,
     nsecs_t end = systemTime(CLOCK_MONOTONIC);
 
     if (reporter) {
-        outputBenchmarkReport(info, opts, reporter, proxy.get(),
-                (end - start) / (double) s2ns(1));
+        outputBenchmarkReport(info, opts, reporter, proxy.get(), (end - start) / (double)s2ns(1));
     } else {
         proxy->dumpProfileInfo(STDOUT_FILENO, DumpFlags::JankStats);
     }

@@ -165,7 +165,7 @@ public class TestSystemImpl implements SystemInterface {
     }
 
     @Override
-    public int getFactoryPackageVersion(String packageName) throws NameNotFoundException {
+    public long getFactoryPackageVersion(String packageName) throws NameNotFoundException {
         PackageInfo pi = null;
         Map<Integer, PackageInfo> userPackages = mPackages.get(packageName);
         if (userPackages == null) throw new NameNotFoundException();

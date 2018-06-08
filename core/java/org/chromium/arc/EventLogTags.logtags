@@ -1,0 +1,11 @@
+# See system/core/logcat/event.logtags for a description of the format of this file.
+
+option java_package org.chromium.arc
+
+# We use ID range 300000-399999 for ARC.
+# In case of conflicts build will fail, so we do not need to worry too much
+# about it.
+
+# Emitted in ARC system events, such as start of ARC services.
+# These events will be watched in automations like autotests.
+300000 arc_system_event (event|3)

@@ -16,10 +16,9 @@
 
 package com.android.server.backup.fullbackup;
 
-import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT;
-import static com.android.server.backup.RefactoredBackupManagerService.TAG;
-import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
+import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.app.backup.IBackupManager;
 import android.content.ComponentName;
@@ -33,7 +32,9 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.backup.IObbBackupService;
-import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.internal.util.Preconditions;
+import com.android.server.backup.BackupAgentTimeoutParameters;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.utils.FullBackupUtils;
 
 import java.io.IOException;
@@ -44,12 +45,16 @@ import java.io.OutputStream;
  */
 public class FullBackupObbConnection implements ServiceConnection {
 
-    private RefactoredBackupManagerService backupManagerService;
+    private BackupManagerService backupManagerService;
     volatile IObbBackupService mService;
+    private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
-    public FullBackupObbConnection(RefactoredBackupManagerService backupManagerService) {
+    public FullBackupObbConnection(BackupManagerService backupManagerService) {
         this.backupManagerService = backupManagerService;
         mService = null;
+        mAgentTimeoutParameters = Preconditions.checkNotNull(
+                backupManagerService.getAgentTimeoutParameters(),
+                "Timeout parameters cannot be null");
     }
 
     public void establish() {
@@ -75,8 +80,10 @@ public class FullBackupObbConnection implements ServiceConnection {
         try {
             pipes = ParcelFileDescriptor.createPipe();
             int token = backupManagerService.generateRandomIntegerToken();
+            long fullBackupAgentTimeoutMillis =
+                    mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis();
             backupManagerService.prepareOperationTimeout(
-                    token, TIMEOUT_FULL_BACKUP_INTERVAL, null, OP_TYPE_BACKUP_WAIT);
+                    token, fullBackupAgentTimeoutMillis, null, OP_TYPE_BACKUP_WAIT);
             mService.backupObbs(pkg.packageName, pipes[1], token,
                     backupManagerService.getBackupManagerBinder());
             FullBackupUtils.routeSocketDataToOutput(pipes[0], out);

@@ -1453,13 +1453,12 @@ interface ITelephony {
      * Returns a list of Forbidden PLMNs from the specified SIM App
      * Returns null if the query fails.
      *
-     *
-     * <p>Requires that the calling app has READ_PRIVILEGED_PHONE_STATE
+     * <p>Requires that the calling app has READ_PRIVILEGED_PHONE_STATE or READ_PHONE_STATE
      *
      * @param subId subscription ID used for authentication
      * @param appType the icc application type, like {@link #APPTYPE_USIM}
      */
-    String[] getForbiddenPlmns(int subId, int appType);
+    String[] getForbiddenPlmns(int subId, int appType, String callingPackage);
 
     /**
      * Check if phone is in emergency callback mode
@@ -1515,4 +1514,10 @@ interface ITelephony {
      * A test API to return installed carrier id list version.
      */
     int getCarrierIdListVersion(int subId);
+
+    /**
+     * A test API to reload the UICC profile.
+     * @hide
+     */
+    void refreshUiccProfile(int subId);
 }

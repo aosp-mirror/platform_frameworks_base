@@ -17,11 +17,13 @@
 package android.hardware.hdmi;
 
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.os.RemoteException;
@@ -42,6 +44,7 @@ import android.util.Log;
  */
 @SystemApi
 @SystemService(Context.HDMI_CONTROL_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_HDMI_CEC)
 public final class HdmiControlManager {
     private static final String TAG = "HdmiControlManager";
 

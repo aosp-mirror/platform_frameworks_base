@@ -14,6 +14,7 @@
 
 package com.android.systemui.plugins.qs;
 
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -63,6 +64,18 @@ public interface QS extends FragmentBase {
     View getHeader();
 
     default void setHasNotifications(boolean hasNotifications) {
+    }
+
+    /**
+     * We need this to handle nested scrolling for QS..
+     * Normally we would do this with requestDisallowInterceptTouchEvent, but when both the
+     * scroll containers are using the same touch slop, they try to start scrolling at the
+     * same time and NotificationPanelView wins, this lets QS win.
+     *
+     * TODO: Do this using NestedScroll capabilities.
+     */
+    default boolean onInterceptTouchEvent(MotionEvent event) {
+        return isCustomizing();
     }
 
     @ProvidesInterface(version = HeightListener.VERSION)

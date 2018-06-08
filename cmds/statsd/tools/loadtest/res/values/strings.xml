@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+** Copyright 2007, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources>
+    <string name="app_name">Statsd Loadtest</string>
+    <string name="bucket_label">bucket size (mins):&#160;</string>
+    <string name="burst_label">burst:&#160;</string>
+    <string name="bucket_default">FIVE_MINUTES</string>
+    <string name="placebo">placebo</string>
+    <string name="period_label">logging period (secs):&#160;</string>
+    <string name="replication_label">metric replication:&#160;</string>
+    <string name="duration_label">test duration (mins):&#160;</string>
+    <string name="start"> &#160;Start&#160; </string>
+    <string name="stop"> &#160;Stop&#160; </string>
+    <string name="count"> count </string>
+    <string name="duration"> duration </string>
+    <string name="event"> event </string>
+    <string name="value"> value </string>
+    <string name="gauge"> gauge </string>
+
+</resources>

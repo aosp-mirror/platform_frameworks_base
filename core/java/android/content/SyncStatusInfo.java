@@ -21,23 +21,102 @@ import android.os.Parcelable;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /** @hide */
 public class SyncStatusInfo implements Parcelable {
     private static final String TAG = "Sync";
 
-    static final int VERSION = 4;
+    static final int VERSION = 6;
 
     private static final int MAX_EVENT_COUNT = 10;
 
+    /**
+     * Number of sync sources. KEEP THIS AND SyncStorageEngine.SOURCES IN SYNC.
+     */
+    private static final int SOURCE_COUNT = 6;
+
     public final int authorityId;
-    public long totalElapsedTime;
-    public int numSyncs;
-    public int numSourcePoll;
-    public int numSourceServer;
-    public int numSourceLocal;
-    public int numSourceUser;
-    public int numSourcePeriodic;
+
+    /**
+     * # of syncs for each sync source, etc.
+     */
+    public static class Stats {
+        public long totalElapsedTime;
+        public int numSyncs;
+        public int numSourcePoll;
+        public int numSourceOther;
+        public int numSourceLocal;
+        public int numSourceUser;
+        public int numSourcePeriodic;
+        public int numSourceFeed;
+        public int numFailures;
+        public int numCancels;
+
+        /** Copy all the stats to another instance. */
+        public void copyTo(Stats to) {
+            to.totalElapsedTime = totalElapsedTime;
+            to.numSyncs = numSyncs;
+            to.numSourcePoll = numSourcePoll;
+            to.numSourceOther = numSourceOther;
+            to.numSourceLocal = numSourceLocal;
+            to.numSourceUser = numSourceUser;
+            to.numSourcePeriodic = numSourcePeriodic;
+            to.numSourceFeed = numSourceFeed;
+            to.numFailures = numFailures;
+            to.numCancels = numCancels;
+        }
+
+        /** Clear all the stats. */
+        public void clear() {
+            totalElapsedTime = 0;
+            numSyncs = 0;
+            numSourcePoll = 0;
+            numSourceOther = 0;
+            numSourceLocal = 0;
+            numSourceUser = 0;
+            numSourcePeriodic = 0;
+            numSourceFeed = 0;
+            numFailures = 0;
+            numCancels = 0;
+        }
+
+        /** Write all the stats to a parcel. */
+        public void writeToParcel(Parcel parcel) {
+            parcel.writeLong(totalElapsedTime);
+            parcel.writeInt(numSyncs);
+            parcel.writeInt(numSourcePoll);
+            parcel.writeInt(numSourceOther);
+            parcel.writeInt(numSourceLocal);
+            parcel.writeInt(numSourceUser);
+            parcel.writeInt(numSourcePeriodic);
+            parcel.writeInt(numSourceFeed);
+            parcel.writeInt(numFailures);
+            parcel.writeInt(numCancels);
+        }
+
+        /** Read all the stats from a parcel. */
+        public void readFromParcel(Parcel parcel) {
+            totalElapsedTime = parcel.readLong();
+            numSyncs = parcel.readInt();
+            numSourcePoll = parcel.readInt();
+            numSourceOther = parcel.readInt();
+            numSourceLocal = parcel.readInt();
+            numSourceUser = parcel.readInt();
+            numSourcePeriodic = parcel.readInt();
+            numSourceFeed = parcel.readInt();
+            numFailures = parcel.readInt();
+            numCancels = parcel.readInt();
+        }
+    }
+
+    public long lastTodayResetTime;
+
+    public final Stats totalStats = new Stats();
+    public final Stats todayStats = new Stats();
+    public final Stats yesterdayStats = new Stats();
+
     public long lastSuccessTime;
     public int lastSuccessSource;
     public long lastFailureTime;
@@ -46,7 +125,10 @@ public class SyncStatusInfo implements Parcelable {
     public long initialFailureTime;
     public boolean pending;
     public boolean initialize;
-    
+
+    public final long[] perSourceLastSuccessTimes = new long[SOURCE_COUNT];
+    public final long[] perSourceLastFailureTimes = new long[SOURCE_COUNT];
+
   // Warning: It is up to the external caller to ensure there are
   // no race conditions when accessing this list
   private ArrayList<Long> periodicSyncTimes;
@@ -75,12 +157,15 @@ public class SyncStatusInfo implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(VERSION);
         parcel.writeInt(authorityId);
-        parcel.writeLong(totalElapsedTime);
-        parcel.writeInt(numSyncs);
-        parcel.writeInt(numSourcePoll);
-        parcel.writeInt(numSourceServer);
-        parcel.writeInt(numSourceLocal);
-        parcel.writeInt(numSourceUser);
+
+        // Note we can't use Stats.writeToParcel() here; see the below constructor for the reason.
+        parcel.writeLong(totalStats.totalElapsedTime);
+        parcel.writeInt(totalStats.numSyncs);
+        parcel.writeInt(totalStats.numSourcePoll);
+        parcel.writeInt(totalStats.numSourceOther);
+        parcel.writeInt(totalStats.numSourceLocal);
+        parcel.writeInt(totalStats.numSourceUser);
+
         parcel.writeLong(lastSuccessTime);
         parcel.writeInt(lastSuccessSource);
         parcel.writeLong(lastFailureTime);
@@ -102,7 +187,22 @@ public class SyncStatusInfo implements Parcelable {
             parcel.writeLong(mLastEventTimes.get(i));
             parcel.writeString(mLastEvents.get(i));
         }
-        parcel.writeInt(numSourcePeriodic);
+        // Version 4
+        parcel.writeInt(totalStats.numSourcePeriodic);
+
+        // Version 5
+        parcel.writeInt(totalStats.numSourceFeed);
+        parcel.writeInt(totalStats.numFailures);
+        parcel.writeInt(totalStats.numCancels);
+
+        parcel.writeLong(lastTodayResetTime);
+
+        todayStats.writeToParcel(parcel);
+        yesterdayStats.writeToParcel(parcel);
+
+        // Version 6.
+        parcel.writeLongArray(perSourceLastSuccessTimes);
+        parcel.writeLongArray(perSourceLastFailureTimes);
     }
 
     public SyncStatusInfo(Parcel parcel) {
@@ -111,12 +211,15 @@ public class SyncStatusInfo implements Parcelable {
             Log.w("SyncStatusInfo", "Unknown version: " + version);
         }
         authorityId = parcel.readInt();
-        totalElapsedTime = parcel.readLong();
-        numSyncs = parcel.readInt();
-        numSourcePoll = parcel.readInt();
-        numSourceServer = parcel.readInt();
-        numSourceLocal = parcel.readInt();
-        numSourceUser = parcel.readInt();
+
+        // Note we can't use Stats.writeToParcel() here because the data is persisted and we need
+        // to be able to read from the old format too.
+        totalStats.totalElapsedTime = parcel.readLong();
+        totalStats.numSyncs = parcel.readInt();
+        totalStats.numSourcePoll = parcel.readInt();
+        totalStats.numSourceOther = parcel.readInt();
+        totalStats.numSourceLocal = parcel.readInt();
+        totalStats.numSourceUser = parcel.readInt();
         lastSuccessTime = parcel.readLong();
         lastSuccessSource = parcel.readInt();
         lastFailureTime = parcel.readLong();
@@ -149,25 +252,41 @@ public class SyncStatusInfo implements Parcelable {
         }
         if (version < 4) {
             // Before version 4, numSourcePeriodic wasn't persisted.
-            numSourcePeriodic = numSyncs - numSourceLocal - numSourcePoll - numSourceServer
-                    - numSourceUser;
-            if (numSourcePeriodic < 0) { // Sanity check.
-                numSourcePeriodic = 0;
+            totalStats.numSourcePeriodic =
+                    totalStats.numSyncs - totalStats.numSourceLocal - totalStats.numSourcePoll
+                            - totalStats.numSourceOther
+                            - totalStats.numSourceUser;
+            if (totalStats.numSourcePeriodic < 0) { // Sanity check.
+                totalStats.numSourcePeriodic = 0;
             }
         } else {
-            numSourcePeriodic = parcel.readInt();
+            totalStats.numSourcePeriodic = parcel.readInt();
+        }
+        if (version >= 5) {
+            totalStats.numSourceFeed = parcel.readInt();
+            totalStats.numFailures = parcel.readInt();
+            totalStats.numCancels = parcel.readInt();
+
+            lastTodayResetTime = parcel.readLong();
+
+            todayStats.readFromParcel(parcel);
+            yesterdayStats.readFromParcel(parcel);
+        }
+        if (version >= 6) {
+            parcel.readLongArray(perSourceLastSuccessTimes);
+            parcel.readLongArray(perSourceLastFailureTimes);
         }
     }
 
     public SyncStatusInfo(SyncStatusInfo other) {
         authorityId = other.authorityId;
-        totalElapsedTime = other.totalElapsedTime;
-        numSyncs = other.numSyncs;
-        numSourcePoll = other.numSourcePoll;
-        numSourceServer = other.numSourceServer;
-        numSourceLocal = other.numSourceLocal;
-        numSourceUser = other.numSourceUser;
-        numSourcePeriodic = other.numSourcePeriodic;
+
+        other.totalStats.copyTo(totalStats);
+        other.todayStats.copyTo(todayStats);
+        other.yesterdayStats.copyTo(yesterdayStats);
+
+        lastTodayResetTime = other.lastTodayResetTime;
+
         lastSuccessTime = other.lastSuccessTime;
         lastSuccessSource = other.lastSuccessSource;
         lastFailureTime = other.lastFailureTime;
@@ -181,6 +300,13 @@ public class SyncStatusInfo implements Parcelable {
         }
         mLastEventTimes.addAll(other.mLastEventTimes);
         mLastEvents.addAll(other.mLastEvents);
+
+        copy(perSourceLastSuccessTimes, other.perSourceLastSuccessTimes);
+        copy(perSourceLastFailureTimes, other.perSourceLastFailureTimes);
+    }
+
+    private static void copy(long[] to, long[] from) {
+        System.arraycopy(from, 0, to, 0, to.length);
     }
 
     public void setPeriodicSyncTime(int index, long when) {
@@ -229,6 +355,34 @@ public class SyncStatusInfo implements Parcelable {
         return mLastEvents.get(i);
     }
 
+    /** Call this when a sync has succeeded. */
+    public void setLastSuccess(int source, long lastSyncTime) {
+        lastSuccessTime = lastSyncTime;
+        lastSuccessSource = source;
+        lastFailureTime = 0;
+        lastFailureSource = -1;
+        lastFailureMesg = null;
+        initialFailureTime = 0;
+
+        if (0 <= source && source < perSourceLastSuccessTimes.length) {
+            perSourceLastSuccessTimes[source] = lastSyncTime;
+        }
+    }
+
+    /** Call this when a sync has failed. */
+    public void setLastFailure(int source, long lastSyncTime, String failureMessage) {
+        lastFailureTime = lastSyncTime;
+        lastFailureSource = source;
+        lastFailureMesg = failureMessage;
+        if (initialFailureTime == 0) {
+            initialFailureTime = lastSyncTime;
+        }
+
+        if (0 <= source && source < perSourceLastFailureTimes.length) {
+            perSourceLastFailureTimes[source] = lastSyncTime;
+        }
+    }
+
     public static final Creator<SyncStatusInfo> CREATOR = new Creator<SyncStatusInfo>() {
         public SyncStatusInfo createFromParcel(Parcel in) {
             return new SyncStatusInfo(in);
@@ -250,5 +404,42 @@ public class SyncStatusInfo implements Parcelable {
                 periodicSyncTimes.add((long) 0);
             }
         }
+    }
+
+    /**
+     * If the last reset was not today, move today's stats to yesterday's and clear today's.
+     */
+    public void maybeResetTodayStats(boolean clockValid, boolean force) {
+        final long now = System.currentTimeMillis();
+
+        if (!force) {
+            // Last reset was the same day, nothing to do.
+            if (areSameDates(now, lastTodayResetTime)) {
+                return;
+            }
+
+            // Hack -- on devices with no RTC, until the NTP kicks in, the device won't have the
+            // correct time. So if the time goes back, don't reset, unless we're sure the current
+            // time is correct.
+            if (now < lastTodayResetTime && !clockValid) {
+                return;
+            }
+        }
+
+        lastTodayResetTime = now;
+
+        todayStats.copyTo(yesterdayStats);
+        todayStats.clear();
+    }
+
+    private static boolean areSameDates(long time1, long time2) {
+        final Calendar c1 = new GregorianCalendar();
+        final Calendar c2 = new GregorianCalendar();
+
+        c1.setTimeInMillis(time1);
+        c2.setTimeInMillis(time2);
+
+        return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR)
+                && c1.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR);
     }
 }

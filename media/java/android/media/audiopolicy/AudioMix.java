@@ -162,6 +162,24 @@ public class AudioMix {
     }
 
     /** @hide */
+    public boolean isAffectingUsage(int usage) {
+        return mRule.isAffectingUsage(usage);
+    }
+
+    /** @hide */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final AudioMix that = (AudioMix) o;
+        return (this.mRouteFlags == that.mRouteFlags)
+                && (this.mRule == that.mRule)
+                && (this.mMixType == that.mMixType)
+                && (this.mFormat == that.mFormat);
+    }
+
+    /** @hide */
     @Override
     public int hashCode() {
         return Objects.hash(mRouteFlags, mRule, mMixType, mFormat);

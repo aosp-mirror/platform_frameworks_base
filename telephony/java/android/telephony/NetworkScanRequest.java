@@ -20,10 +20,11 @@ import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Defines a request to peform a network scan.
  *

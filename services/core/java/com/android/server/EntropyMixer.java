@@ -70,7 +70,10 @@ public class EntropyMixer extends Binder {
     /**
      * Handler that periodically updates the entropy on disk.
      */
-    private final Handler mHandler = new Handler() {
+    private final Handler mHandler = new Handler(IoThread.getHandler().getLooper()) {
+        // IMPLEMENTATION NOTE: This handler runs on the I/O thread to avoid I/O on the main thread.
+        // The reason we're using our own Handler instead of IoThread.getHandler() is to create our
+        // own ID space for the "what" parameter of messages seen by the handler.
         @Override
         public void handleMessage(Message msg) {
             if (msg.what != ENTROPY_WHAT) {
@@ -115,7 +118,12 @@ public class EntropyMixer extends Binder {
         IntentFilter broadcastFilter = new IntentFilter(Intent.ACTION_SHUTDOWN);
         broadcastFilter.addAction(Intent.ACTION_POWER_CONNECTED);
         broadcastFilter.addAction(Intent.ACTION_REBOOT);
-        context.registerReceiver(mBroadcastReceiver, broadcastFilter);
+        context.registerReceiver(
+                mBroadcastReceiver,
+                broadcastFilter,
+                null, // do not require broadcaster to hold any permissions
+                mHandler // process received broadcasts on the I/O thread instead of the main thread
+                );
     }
 
     private void scheduleEntropyWriter() {
@@ -188,11 +196,14 @@ public class EntropyMixer extends Binder {
      * Mixes in the output from HW RNG (if present) into the Linux RNG.
      */
     private void addHwRandomEntropy() {
+        if (!new File(hwRandomDevice).exists()) {
+            // HW RNG not present/exposed -- ignore
+            return;
+        }
+
         try {
             RandomBlock.fromFile(hwRandomDevice).toFile(randomDevice, false);
             Slog.i(TAG, "Added HW RNG output to entropy pool");
-        } catch (FileNotFoundException ignored) {
-            // HW RNG not present/exposed -- ignore
         } catch (IOException e) {
             Slog.w(TAG, "Failed to add HW RNG output to entropy pool", e);
         }

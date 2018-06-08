@@ -26,27 +26,14 @@ namespace uirenderer {
 
 class Outline {
 public:
-    enum class Type {
-        None = 0,
-        Empty = 1,
-        ConvexPath = 2,
-        RoundRect = 3
-    };
+    enum class Type { None = 0, Empty = 1, ConvexPath = 2, RoundRect = 3 };
 
-    Outline()
-            : mShouldClip(false)
-            , mType(Type::None)
-            , mRadius(0)
-            , mAlpha(0.0f) {}
+    Outline() : mShouldClip(false), mType(Type::None), mRadius(0), mAlpha(0.0f) {}
 
     void setRoundRect(int left, int top, int right, int bottom, float radius, float alpha) {
         mAlpha = alpha;
-        if (mType == Type::RoundRect
-                && left == mBounds.left
-                && right == mBounds.right
-                && top == mBounds.top
-                && bottom == mBounds.bottom
-                && radius == mRadius) {
+        if (mType == Type::RoundRect && left == mBounds.left && right == mBounds.right &&
+            top == mBounds.top && bottom == mBounds.bottom && radius == mRadius) {
             // nothing to change, don't do any work
             return;
         }
@@ -55,11 +42,17 @@ public:
         mBounds.set(left, top, right, bottom);
         mRadius = radius;
 
+
+        // Reuse memory if previous outline was the same shape (rect or round rect).
+        if ( mPath.countVerbs() > 10) {
+            mPath.reset();
+        } else {
+            mPath.rewind();
+        }
+
         // update mPath to reflect new outline
-        mPath.reset();
         if (MathUtils::isPositive(radius)) {
-            mPath.addRoundRect(SkRect::MakeLTRB(left, top, right, bottom),
-                    radius, radius);
+            mPath.addRoundRect(SkRect::MakeLTRB(left, top, right, bottom), radius, radius);
         } else {
             mPath.addRect(left, top, right, bottom);
         }
@@ -88,21 +81,13 @@ public:
         mAlpha = 0.0f;
     }
 
-    bool isEmpty() const {
-        return mType == Type::Empty;
-    }
+    bool isEmpty() const { return mType == Type::Empty; }
 
-    float getAlpha() const {
-        return mAlpha;
-    }
+    float getAlpha() const { return mAlpha; }
 
-    void setShouldClip(bool clip) {
-        mShouldClip = clip;
-    }
+    void setShouldClip(bool clip) { mShouldClip = clip; }
 
-    bool getShouldClip() const {
-        return mShouldClip;
-    }
+    bool getShouldClip() const { return mShouldClip; }
 
     bool willClip() const {
         // only round rect outlines can be used for clipping
@@ -129,17 +114,11 @@ public:
         return &mPath;
     }
 
-    Type getType() const {
-        return mType;
-    }
+    Type getType() const { return mType; }
 
-    const Rect& getBounds() const {
-        return mBounds;
-    }
+    const Rect& getBounds() const { return mBounds; }
 
-    float getRadius() const {
-        return mRadius;
-    }
+    float getRadius() const { return mRadius; }
 
 private:
     bool mShouldClip;

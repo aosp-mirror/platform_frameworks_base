@@ -173,6 +173,18 @@ TEST(ConfigLocaleTest, IsMoreSpecificThan) {
     fillIn("en", "US", NULL, "POSIX", &r);
     EXPECT_FALSE(l.isMoreSpecificThan(r));
     EXPECT_TRUE(r.isMoreSpecificThan(l));
+
+    fillIn("ar", "EG", NULL, NULL, &l);
+    fillIn("ar", "EG", NULL, NULL, &r);
+    memcpy(&r.localeNumberingSystem, "latn", 4);
+    EXPECT_FALSE(l.isMoreSpecificThan(r));
+    EXPECT_TRUE(r.isMoreSpecificThan(l));
+
+    fillIn("en", "US", NULL, NULL, &l);
+    fillIn("es", "ES", NULL, NULL, &r);
+
+    EXPECT_FALSE(l.isMoreSpecificThan(r));
+    EXPECT_FALSE(r.isMoreSpecificThan(l));
 }
 
 TEST(ConfigLocaleTest, setLocale) {
@@ -185,6 +197,7 @@ TEST(ConfigLocaleTest, setLocale) {
     EXPECT_TRUE(test.localeScriptWasComputed);
     EXPECT_EQ(0, memcmp("Latn", test.localeScript, 4));
     EXPECT_EQ(0, test.localeVariant[0]);
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
 
     test.setBcp47Locale("eng-419");
     char out[4] = {1, 1, 1, 1};
@@ -198,6 +211,7 @@ TEST(ConfigLocaleTest, setLocale) {
     EXPECT_EQ('4', out[0]);
     EXPECT_EQ('1', out[1]);
     EXPECT_EQ('9', out[2]);
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
 
     test.setBcp47Locale("en-Latn-419");
     EXPECT_EQ('e', test.language[0]);
@@ -209,6 +223,7 @@ TEST(ConfigLocaleTest, setLocale) {
     EXPECT_EQ('4', out[0]);
     EXPECT_EQ('1', out[1]);
     EXPECT_EQ('9', out[2]);
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
 
     test.setBcp47Locale("de-1901");
     memset(out, 1, 4);
@@ -222,6 +237,7 @@ TEST(ConfigLocaleTest, setLocale) {
     test.unpackRegion(out);
     EXPECT_EQ('\0', out[0]);
     EXPECT_EQ(0, strcmp("1901", test.localeVariant));
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
 
     test.setBcp47Locale("de-Latn-1901");
     memset(out, 1, 4);
@@ -235,6 +251,44 @@ TEST(ConfigLocaleTest, setLocale) {
     test.unpackRegion(out);
     EXPECT_EQ('\0', out[0]);
     EXPECT_EQ(0, strcmp("1901", test.localeVariant));
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
+
+    test.setBcp47Locale("ar-EG-u-nu-latn");
+    EXPECT_EQ('a', test.language[0]);
+    EXPECT_EQ('r', test.language[1]);
+    EXPECT_EQ('E', test.country[0]);
+    EXPECT_EQ('G', test.country[1]);
+    EXPECT_TRUE(test.localeScriptWasComputed);
+    EXPECT_EQ(0, memcmp("Arab", test.localeScript, 4));
+    EXPECT_EQ(0, test.localeVariant[0]);
+    EXPECT_EQ(0, memcmp("latn", test.localeNumberingSystem, 4));
+
+    test.setBcp47Locale("ar-EG-u");
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
+
+    test.setBcp47Locale("ar-EG-u-nu");
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
+
+    test.setBcp47Locale("ar-EG-u-attr-nu-latn");
+    EXPECT_EQ(0, memcmp("latn", test.localeNumberingSystem, 4));
+
+    test.setBcp47Locale("ar-EG-u-ca-gregory-nu-latn");
+    EXPECT_EQ(0, memcmp("latn", test.localeNumberingSystem, 4));
+
+    test.setBcp47Locale("ar-EG-u-nu-latn-ca-gregory");
+    EXPECT_EQ(0, memcmp("latn", test.localeNumberingSystem, 4));
+
+    test.setBcp47Locale("ar-EG-u-nu-toolongnumsys");
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
+
+    test.setBcp47Locale("ar-EG-u-nu-latn-nu-arab");
+    EXPECT_EQ(0, memcmp("latn", test.localeNumberingSystem, 4));
+
+    test.setBcp47Locale("ar-EG-u-co-nu-latn");
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
+
+    test.setBcp47Locale("ar-u-co-abcd-attr-nu-latn");
+    EXPECT_EQ(0, test.localeNumberingSystem[0]);
 }
 
 TEST(ConfigLocaleTest, computeScript) {
@@ -277,6 +331,22 @@ TEST(ConfigLocaleTest, getBcp47Locale_script) {
     config.localeScriptWasComputed = true;
     config.getBcp47Locale(out);
     EXPECT_EQ(0, strcmp("en", out));
+}
+
+TEST(ConfigLocaleTest, getBcp47Locale_numberingSystem) {
+    ResTable_config config;
+    fillIn("en", NULL, NULL, NULL, &config);
+
+    char out[RESTABLE_MAX_LOCALE_LEN];
+
+    memcpy(&config.localeNumberingSystem, "latn", 4);
+    config.getBcp47Locale(out);
+    EXPECT_EQ(0, strcmp("en-u-nu-latn", out));
+
+    fillIn("sr", "SR", "Latn", NULL, &config);
+    memcpy(&config.localeNumberingSystem, "latn", 4);
+    config.getBcp47Locale(out);
+    EXPECT_EQ(0, strcmp("sr-Latn-SR-u-nu-latn", out));
 }
 
 TEST(ConfigLocaleTest, getBcp47Locale_canonicalize) {
@@ -390,6 +460,11 @@ TEST(ConfigLocaleTest, match) {
     fillIn("ar", "XB", NULL, NULL, &supported);
     fillIn("ar", "XB", NULL, NULL, &requested);
     // Even if they are pseudo-locales, exactly equal locales match.
+    EXPECT_TRUE(supported.match(requested));
+
+    fillIn("ar", "EG", NULL, NULL, &supported);
+    fillIn("ar", "TN", NULL, NULL, &requested);
+    memcpy(&supported.localeNumberingSystem, "latn", 4);
     EXPECT_TRUE(supported.match(requested));
 }
 
@@ -714,6 +789,26 @@ TEST(ConfigLocaleTest, isLocaleBetterThan_regionComparison) {
     // letters are better than numbers.
     EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
     EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+}
+
+TEST(ConfigLocaleTest, isLocaleBetterThan_numberingSystem) {
+    ResTable_config config1, config2, request;
+
+    fillIn("ar", "EG", NULL, NULL, &request);
+    memcpy(&request.localeNumberingSystem, "latn", 4);
+    fillIn("ar", NULL, NULL, NULL, &config1);
+    memcpy(&config1.localeNumberingSystem, "latn", 4);
+    fillIn("ar", NULL, NULL, NULL, &config2);
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("ar", "EG", NULL, NULL, &request);
+    memcpy(&request.localeNumberingSystem, "latn", 4);
+    fillIn("ar", "TN", NULL, NULL, &config1);
+    memcpy(&config1.localeNumberingSystem, "latn", 4);
+    fillIn("ar", NULL, NULL, NULL, &config2);
+    EXPECT_TRUE(config2.isLocaleBetterThan(config1, &request));
+    EXPECT_FALSE(config1.isLocaleBetterThan(config2, &request));
 }
 
 // Default resources are considered better matches for US English

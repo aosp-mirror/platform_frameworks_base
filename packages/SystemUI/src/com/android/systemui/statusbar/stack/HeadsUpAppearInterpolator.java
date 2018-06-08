@@ -23,6 +23,11 @@ import android.view.animation.PathInterpolator;
  * An interpolator specifically designed for the appear animation of heads up notifications.
  */
 public class HeadsUpAppearInterpolator extends PathInterpolator {
+
+    private static float X1 = 250f;
+    private static float X2 = 200f;
+    private static float XTOT = (X1 + X2);;
+
     public HeadsUpAppearInterpolator() {
         super(getAppearPath());
     }
@@ -30,22 +35,18 @@ public class HeadsUpAppearInterpolator extends PathInterpolator {
     private static Path getAppearPath() {
         Path path = new Path();
         path.moveTo(0, 0);
-        float x1 = 250f;
-        float x2 = 150f;
-        float x3 = 100f;
         float y1 = 90f;
-        float y2 = 78f;
-        float y3 = 80f;
-        float xTot = (x1 + x2 + x3);
-        path.cubicTo(x1 * 0.9f / xTot, 0f,
-                x1 * 0.8f / xTot, y1 / y3,
-                x1 / xTot , y1 / y3);
-        path.cubicTo((x1 + x2 * 0.4f) / xTot, y1 / y3,
-                (x1 + x2 * 0.2f) / xTot, y2 / y3,
-                (x1 + x2) / xTot, y2 / y3);
-        path.cubicTo((x1 + x2 + x3 * 0.4f) / xTot, y2 / y3,
-                (x1 + x2 + x3 * 0.2f) / xTot, 1f,
-                1f, 1f);
+        float y2 = 80f;
+        path.cubicTo(X1 * 0.8f / XTOT, y1 / y2,
+                X1 * 0.8f / XTOT, y1 / y2,
+                X1 / XTOT, y1 / y2);
+        path.cubicTo((X1 + X2 * 0.4f) / XTOT, y1 / y2,
+                (X1 + X2 * 0.2f) / XTOT, 1.0f,
+                1.0f , 1.0f);
         return path;
+    }
+
+    public static float getFractionUntilOvershoot() {
+        return X1 / XTOT;
     }
 }

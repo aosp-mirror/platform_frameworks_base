@@ -16,34 +16,50 @@
 
 package com.android.systemui.qs.tiles;
 
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_MODE;
+
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Intent;
+import android.metrics.LogMaker;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
+import android.support.annotation.StringRes;
+import android.util.Log;
 import android.widget.Switch;
 
-import com.android.internal.app.NightDisplayController;
-import com.android.internal.logging.MetricsLogger;
+import com.android.internal.app.ColorDisplayController;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
-public class NightDisplayTile extends QSTileImpl<BooleanState>
-        implements NightDisplayController.Callback {
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
-    private NightDisplayController mController;
+public class NightDisplayTile extends QSTileImpl<BooleanState>
+        implements ColorDisplayController.Callback {
+
+    /**
+     * Pattern for {@link java.time.format.DateTimeFormatter} used to approximate the time to the
+     * nearest hour and add on the AM/PM indicator.
+     */
+    private static final String PATTERN_HOUR = "h a";
+    private static final String PATTERN_HOUR_MINUTE = "h:mm a";
+
+
+    private ColorDisplayController mController;
     private boolean mIsListening;
 
     public NightDisplayTile(QSHost host) {
         super(host);
-        mController = new NightDisplayController(mContext, ActivityManager.getCurrentUser());
+        mController = new ColorDisplayController(mContext, ActivityManager.getCurrentUser());
     }
 
     @Override
     public boolean isAvailable() {
-        return NightDisplayController.isAvailable(mContext);
+        return ColorDisplayController.isAvailable(mContext);
     }
 
     @Override
@@ -53,6 +69,15 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
 
     @Override
     protected void handleClick() {
+        // Enroll in forced auto mode if eligible.
+        if ("1".equals(Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE))
+                && mController.getAutoModeRaw() == -1) {
+            mController.setAutoMode(ColorDisplayController.AUTO_MODE_CUSTOM);
+            Log.i("NightDisplayTile", "Enrolled in forced night display auto mode");
+        }
+
+        // Change current activation state.
         final boolean activated = !mState.value;
         mController.setActivated(activated);
     }
@@ -65,7 +90,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
         }
 
         // Make a new controller for the new user.
-        mController = new NightDisplayController(mContext, newUserId);
+        mController = new ColorDisplayController(mContext, newUserId);
         if (mIsListening) {
             mController.setListener(this);
         }
@@ -75,18 +100,66 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        final boolean isActivated = mController.isActivated();
-        state.value = isActivated;
+        state.value = mController.isActivated();
         state.label = state.contentDescription =
                 mContext.getString(R.string.quick_settings_night_display_label);
         state.icon = ResourceIcon.get(R.drawable.ic_qs_night_display_on);
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        state.secondaryLabel = getSecondaryLabel(state.value);
+    }
+
+    /**
+     * Returns a {@link String} for the secondary label that reflects when the light will be turned
+     * on or off based on the current auto mode and night light activated status.
+     */
+    @Nullable
+    private String getSecondaryLabel(boolean isNightLightActivated) {
+        switch(mController.getAutoMode()) {
+            case ColorDisplayController.AUTO_MODE_TWILIGHT:
+                // Auto mode related to sunrise & sunset. If the light is on, it's guaranteed to be
+                // turned off at sunrise. If it's off, it's guaranteed to be turned on at sunset.
+                return isNightLightActivated
+                        ? mContext.getString(
+                                R.string.quick_settings_night_secondary_label_until_sunrise)
+                        : mContext.getString(
+                                R.string.quick_settings_night_secondary_label_on_at_sunset);
+
+            case ColorDisplayController.AUTO_MODE_CUSTOM:
+                // User-specified time, approximated to the nearest hour.
+                final @StringRes int toggleTimeStringRes;
+                final LocalTime toggleTime;
+                final DateTimeFormatter toggleTimeFormat;
+
+                if (isNightLightActivated) {
+                    toggleTime = mController.getCustomEndTime();
+                    toggleTimeStringRes = R.string.quick_settings_secondary_label_until;
+                } else {
+                    toggleTime = mController.getCustomStartTime();
+                    toggleTimeStringRes = R.string.quick_settings_night_secondary_label_on_at;
+                }
+
+                // Choose between just showing the hour or also showing the minutes (based on the
+                // user-selected toggle time). This helps reduce how much space the label takes.
+                toggleTimeFormat = DateTimeFormatter.ofPattern(
+                        toggleTime.getMinute() == 0 ? PATTERN_HOUR : PATTERN_HOUR_MINUTE);
+
+                return mContext.getString(toggleTimeStringRes, toggleTime.format(toggleTimeFormat));
+
+            default:
+                // No secondary label when auto mode is disabled.
+                return null;
+        }
     }
 
     @Override
     public int getMetricsCategory() {
         return MetricsEvent.QS_NIGHT_DISPLAY;
+    }
+
+    @Override
+    public LogMaker populate(LogMaker logMaker) {
+        return super.populate(logMaker).addTaggedData(FIELD_QS_MODE, mController.getAutoModeRaw());
     }
 
     @Override

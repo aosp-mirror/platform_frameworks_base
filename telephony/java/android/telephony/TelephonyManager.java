@@ -850,6 +850,17 @@ public class TelephonyManager {
             "android.telephony.event.EVENT_HANDOVER_VIDEO_FROM_WIFI_TO_LTE";
 
     /**
+     * {@link android.telecom.Connection} event used to indicate that an IMS call has be
+     * successfully handed over from LTE to WIFI.
+     * <p>
+     * Sent via {@link android.telecom.Connection#sendConnectionEvent(String, Bundle)}.
+     * The {@link Bundle} parameter is expected to be null when this connection event is used.
+     * @hide
+     */
+    public static final String EVENT_HANDOVER_VIDEO_FROM_LTE_TO_WIFI =
+            "android.telephony.event.EVENT_HANDOVER_VIDEO_FROM_LTE_TO_WIFI";
+
+    /**
      * {@link android.telecom.Connection} event used to indicate that an IMS call failed to be
      * handed over from LTE to WIFI.
      * <p>
@@ -1031,6 +1042,27 @@ public class TelephonyManager {
     public static final int USSD_ERROR_SERVICE_UNAVAIL = -2;
 
     /**
+     * Value for {@link CarrierConfigManager#KEY_CDMA_ROAMING_MODE_INT} which leaves the roaming
+     * mode set to the radio default or to the user's preference if they've indicated one.
+     */
+    public static final int CDMA_ROAMING_MODE_RADIO_DEFAULT = -1;
+    /**
+     * Value for {@link CarrierConfigManager#KEY_CDMA_ROAMING_MODE_INT} which only permits
+     * connections on home networks.
+     */
+    public static final int CDMA_ROAMING_MODE_HOME = 0;
+    /**
+     * Value for {@link CarrierConfigManager#KEY_CDMA_ROAMING_MODE_INT} which permits roaming on
+     * affiliated networks.
+     */
+    public static final int CDMA_ROAMING_MODE_AFFILIATED = 1;
+    /**
+     * Value for {@link CarrierConfigManager#KEY_CDMA_ROAMING_MODE_INT} which permits roaming on
+     * any network.
+     */
+    public static final int CDMA_ROAMING_MODE_ANY = 2;
+
+    /**
      * An unknown carrier id. It could either be subscription unavailable or the subscription
      * carrier cannot be recognized. Unrecognized carriers here means
      * {@link #getSimOperator() MCC+MNC} cannot be identified.
@@ -1094,6 +1126,40 @@ public class TelephonyManager {
      */
     public static final String EXTRA_SUBSCRIPTION_ID = "android.telephony.extra.SUBSCRIPTION_ID";
 
+    /**
+     * Broadcast intent action indicating that when data stall recovery is attempted by Telephony,
+     * intended for report every data stall recovery step attempted.
+     *
+     * <p>
+     * The {@link #EXTRA_RECOVERY_ACTION} extra indicates the action associated with the data
+     * stall recovery.
+     * The phone id where the data stall recovery is attempted.
+     *
+     * <p class="note">
+     * Requires the READ_PHONE_STATE permission.
+     *
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
+     *
+     * @see #EXTRA_RECOVERY_ACTION
+     *
+     * @hide
+     */
+    // TODO(b/78370030) : Restrict this to system applications only
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    public static final String ACTION_DATA_STALL_DETECTED =
+            "android.intent.action.DATA_STALL_DETECTED";
+
+    /**
+     * An int extra used with {@link #ACTION_DATA_STALL_DETECTED} to indicate the
+     * action associated with the data stall recovery.
+     *
+     * @see #ACTION_DATA_STALL_DETECTED
+     *
+     * @hide
+     */
+    public static final String EXTRA_RECOVERY_ACTION = "recoveryAction";
 
     //
     //
@@ -1851,58 +1917,62 @@ public class TelephonyManager {
     public String getNetworkCountryIsoForPhone(int phoneId) {
         try {
             ITelephony telephony = getITelephony();
-            if (telephony == null)
-                return "";
+            if (telephony == null) return "";
             return telephony.getNetworkCountryIsoForPhone(phoneId);
         } catch (RemoteException ex) {
-                return "";
+            return "";
         }
     }
 
     /*
      * When adding a network type to the list below, make sure to add the correct icon to
      * MobileSignalController.mapIconSets().
+     * Do not add negative types.
      */
     /** Network type is unknown */
-    public static final int NETWORK_TYPE_UNKNOWN = 0;
+    public static final int NETWORK_TYPE_UNKNOWN = TelephonyProtoEnums.NETWORK_TYPE_UNKNOWN; // = 0.
     /** Current network is GPRS */
-    public static final int NETWORK_TYPE_GPRS = 1;
+    public static final int NETWORK_TYPE_GPRS = TelephonyProtoEnums.NETWORK_TYPE_GPRS; // = 1.
     /** Current network is EDGE */
-    public static final int NETWORK_TYPE_EDGE = 2;
+    public static final int NETWORK_TYPE_EDGE = TelephonyProtoEnums.NETWORK_TYPE_EDGE; // = 2.
     /** Current network is UMTS */
-    public static final int NETWORK_TYPE_UMTS = 3;
+    public static final int NETWORK_TYPE_UMTS = TelephonyProtoEnums.NETWORK_TYPE_UMTS; // = 3.
     /** Current network is CDMA: Either IS95A or IS95B*/
-    public static final int NETWORK_TYPE_CDMA = 4;
+    public static final int NETWORK_TYPE_CDMA = TelephonyProtoEnums.NETWORK_TYPE_CDMA; // = 4.
     /** Current network is EVDO revision 0*/
-    public static final int NETWORK_TYPE_EVDO_0 = 5;
+    public static final int NETWORK_TYPE_EVDO_0 = TelephonyProtoEnums.NETWORK_TYPE_EVDO_0; // = 5.
     /** Current network is EVDO revision A*/
-    public static final int NETWORK_TYPE_EVDO_A = 6;
+    public static final int NETWORK_TYPE_EVDO_A = TelephonyProtoEnums.NETWORK_TYPE_EVDO_A; // = 6.
     /** Current network is 1xRTT*/
-    public static final int NETWORK_TYPE_1xRTT = 7;
+    public static final int NETWORK_TYPE_1xRTT = TelephonyProtoEnums.NETWORK_TYPE_1XRTT; // = 7.
     /** Current network is HSDPA */
-    public static final int NETWORK_TYPE_HSDPA = 8;
+    public static final int NETWORK_TYPE_HSDPA = TelephonyProtoEnums.NETWORK_TYPE_HSDPA; // = 8.
     /** Current network is HSUPA */
-    public static final int NETWORK_TYPE_HSUPA = 9;
+    public static final int NETWORK_TYPE_HSUPA = TelephonyProtoEnums.NETWORK_TYPE_HSUPA; // = 9.
     /** Current network is HSPA */
-    public static final int NETWORK_TYPE_HSPA = 10;
+    public static final int NETWORK_TYPE_HSPA = TelephonyProtoEnums.NETWORK_TYPE_HSPA; // = 10.
     /** Current network is iDen */
-    public static final int NETWORK_TYPE_IDEN = 11;
+    public static final int NETWORK_TYPE_IDEN = TelephonyProtoEnums.NETWORK_TYPE_IDEN; // = 11.
     /** Current network is EVDO revision B*/
-    public static final int NETWORK_TYPE_EVDO_B = 12;
+    public static final int NETWORK_TYPE_EVDO_B = TelephonyProtoEnums.NETWORK_TYPE_EVDO_B; // = 12.
     /** Current network is LTE */
-    public static final int NETWORK_TYPE_LTE = 13;
+    public static final int NETWORK_TYPE_LTE = TelephonyProtoEnums.NETWORK_TYPE_LTE; // = 13.
     /** Current network is eHRPD */
-    public static final int NETWORK_TYPE_EHRPD = 14;
+    public static final int NETWORK_TYPE_EHRPD = TelephonyProtoEnums.NETWORK_TYPE_EHRPD; // = 14.
     /** Current network is HSPA+ */
-    public static final int NETWORK_TYPE_HSPAP = 15;
+    public static final int NETWORK_TYPE_HSPAP = TelephonyProtoEnums.NETWORK_TYPE_HSPAP; // = 15.
     /** Current network is GSM */
-    public static final int NETWORK_TYPE_GSM = 16;
+    public static final int NETWORK_TYPE_GSM = TelephonyProtoEnums.NETWORK_TYPE_GSM; // = 16.
     /** Current network is TD_SCDMA */
-    public static final int NETWORK_TYPE_TD_SCDMA = 17;
+    public static final int NETWORK_TYPE_TD_SCDMA =
+            TelephonyProtoEnums.NETWORK_TYPE_TD_SCDMA; // = 17.
     /** Current network is IWLAN */
-    public static final int NETWORK_TYPE_IWLAN = 18;
+    public static final int NETWORK_TYPE_IWLAN = TelephonyProtoEnums.NETWORK_TYPE_IWLAN; // = 18.
     /** Current network is LTE_CA {@hide} */
-    public static final int NETWORK_TYPE_LTE_CA = 19;
+    public static final int NETWORK_TYPE_LTE_CA = TelephonyProtoEnums.NETWORK_TYPE_LTE_CA; // = 19.
+
+    /** Max network type number. Update as new types are added. Don't add negative types. {@hide} */
+    public static final int MAX_NETWORK_TYPE = NETWORK_TYPE_LTE_CA;
     /**
      * @return the NETWORK_TYPE_xxxx for current data connection.
      */
@@ -2718,14 +2788,30 @@ public class TelephonyManager {
     }
 
     /**
+     * Test method to reload the UICC profile.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void refreshUiccProfile() {
+        try {
+            ITelephony telephony = getITelephony();
+            telephony.refreshUiccProfile(mSubId);
+        } catch (RemoteException ex) {
+            Rlog.w(TAG, "RemoteException", ex);
+        }
+    }
+
+    /**
      * Map logicalSlot to physicalSlot, and activate the physicalSlot if it is inactive. For
      * example, passing the physicalSlots array [1, 0] means mapping the first item 1, which is
      * physical slot index 1, to the logical slot 0; and mapping the second item 0, which is
      * physical slot index 0, to the logical slot 1. The index of the array means the index of the
      * logical slots.
      *
-     * @param physicalSlots Index i in the array representing physical slot for phone i. The array
-     *        size should be same as {@link #getPhoneCount()}.
+     * @param physicalSlots The content of the array represents the physical slot index. The array
+     *        size should be same as {@link #getUiccSlotsInfo()}.
      * @return boolean Return true if the switch succeeds, false if the switch fails.
      * @hide
      */
@@ -3357,14 +3443,13 @@ public class TelephonyManager {
      * to the TelephonyManager.
      * When the filter is enabled, {@link
      * VisualVoicemailService#onSmsReceived(VisualVoicemailTask, VisualVoicemailSms)} will be
-     * called when a SMS matching the settings is received. The caller should have
-     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} and implement a
-     * VisualVoicemailService.
-     *
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * called when a SMS matching the settings is received. Caller must be the default dialer,
+     * system dialer, or carrier visual voicemail app.
      *
      * @param settings The settings for the filter, or {@code null} to disable the filter.
+     *
+     * @see {@link TelecomManager#getDefaultDialerPackage()}
+     * @see {@link CarrierConfigManager#KEY_CARRIER_VVM_PACKAGE_NAME_STRING_ARRAY}
      */
     public void setVisualVoicemailSmsFilterSettings(VisualVoicemailSmsFilterSettings settings) {
         if (settings == null) {
@@ -5228,7 +5313,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony == null)
                 return null;
-            return telephony.getForbiddenPlmns(subId, appType);
+            return telephony.getForbiddenPlmns(subId, appType, mContext.getOpPackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
@@ -5516,6 +5601,7 @@ public class TelephonyManager {
      * @deprecated
      * Use {@link
      * #requestNetworkScan(NetworkScanRequest, Executor, TelephonyScanManager.NetworkScanCallback)}
+     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
@@ -6529,7 +6615,7 @@ public class TelephonyManager {
     }
 
     /**
-     * @deprecated Use {link@ android.telecom.TelecomManager#isTtySupported} instead
+     * @deprecated Use {@link TelecomManager#isTtySupported()} instead
      * Whether the phone supports TTY mode.
      *
      * @return {@code true} if the device supports TTY mode, and {@code false} otherwise.
@@ -6793,8 +6879,10 @@ public class TelephonyManager {
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      *
-     * @hide
+     * {@hide}
      **/
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setSimPowerState(int state) {
         setSimPowerStateForSlot(getSlotIndex(), state);
     }
@@ -6813,8 +6901,10 @@ public class TelephonyManager {
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      *
-     * @hide
+     * {@hide}
      **/
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setSimPowerStateForSlot(int slotIndex, int state) {
         try {
             ITelephony telephony = getITelephony();
@@ -6847,11 +6937,48 @@ public class TelephonyManager {
      * @hide
      */
     public void setBasebandVersionForPhone(int phoneId, String version) {
+        setTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_BASEBAND_VERSION, version);
+    }
+
+    /**
+     * Get baseband version for the default phone.
+     *
+     * @return baseband version.
+     * @hide
+     */
+    public String getBasebandVersion() {
+        int phoneId = getPhoneId();
+        return getBasebandVersionForPhone(phoneId);
+    }
+
+    /**
+     * Get baseband version for the default phone using the legacy approach.
+     * This change was added in P, to ensure backward compatiblity.
+     *
+     * @return baseband version.
+     * @hide
+     */
+    private String getBasebandVersionLegacy(int phoneId) {
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
             String prop = TelephonyProperties.PROPERTY_BASEBAND_VERSION +
                     ((phoneId == 0) ? "" : Integer.toString(phoneId));
-            SystemProperties.set(prop, version);
+            return SystemProperties.get(prop);
         }
+        return null;
+    }
+
+    /**
+     * Get baseband version by phone id.
+     *
+     * @return baseband version.
+     * @hide
+     */
+    public String getBasebandVersionForPhone(int phoneId) {
+        String version = getBasebandVersionLegacy(phoneId);
+        if (version != null && !version.isEmpty()) {
+            setBasebandVersionForPhone(phoneId, version);
+        }
+        return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_BASEBAND_VERSION, "");
     }
 
     /**
@@ -7392,6 +7519,7 @@ public class TelephonyManager {
      * @return PRLVersion or null if error.
      * @hide
      */
+    @SystemApi
     public String getCdmaPrlVersion() {
         return getCdmaPrlVersion(getSubId());
     }
@@ -7617,6 +7745,8 @@ public class TelephonyManager {
      * @return true if phone is in emergency callback mode
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean getEmergencyCallbackMode() {
         return getEmergencyCallbackMode(getSubId());
     }

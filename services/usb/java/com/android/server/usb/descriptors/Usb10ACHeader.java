@@ -32,7 +32,7 @@ public final class Usb10ACHeader extends UsbACHeaderInterface {
                                             // numbers associate with this endpoint
     private byte mControls;                 // Vers 2.0 thing
 
-    public Usb10ACHeader(int length, byte type, byte subtype, byte subclass, int spec) {
+    public Usb10ACHeader(int length, byte type, byte subtype, int subclass, int spec) {
         super(length, type, subtype, subclass, spec);
     }
 

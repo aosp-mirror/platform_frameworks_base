@@ -21,6 +21,7 @@ import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.WorkerThread;
 import android.content.res.ResourcesImpl;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -28,6 +29,10 @@ import android.os.StrictMode;
 import android.os.Trace;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.DisplayListCanvas;
+import android.view.RenderNode;
+import android.view.ThreadedRenderer;
+
 import libcore.util.NativeAllocationRegistry;
 
 import java.io.OutputStream;
@@ -456,6 +461,11 @@ public final class Bitmap implements Parcelable {
          *
          * This configuration may be useful when using opaque bitmaps
          * that do not require high color fidelity.
+         *
+         * <p>Use this formula to pack into 16 bits:</p>
+         * <pre class="prettyprint">
+         * short color = (R & 0x1f) << 11 | (G & 0x3f) << 5 | (B & 0x1f);
+         * </pre>
          */
         RGB_565     (3),
 
@@ -488,6 +498,11 @@ public final class Bitmap implements Parcelable {
          *
          * This configuration is very flexible and offers the best
          * quality. It should be used whenever possible.
+         *
+         * <p>Use this formula to pack into 32 bits:</p>
+         * <pre class="prettyprint">
+         * int color = (A & 0xff) << 24 | (B & 0xff) << 16 | (G & 0xff) << 8 | (R & 0xff);
+         * </pre>
          */
         ARGB_8888   (5),
 
@@ -498,6 +513,11 @@ public final class Bitmap implements Parcelable {
          *
          * This configuration is particularly suited for wide-gamut and
          * HDR content.
+         *
+         * <p>Use this formula to pack into 64 bits:</p>
+         * <pre class="prettyprint">
+         * long color = (A & 0xffff) << 48 | (B & 0xffff) << 32 | (G & 0xffff) << 16 | (R & 0xffff);
+         * </pre>
          */
         RGBA_F16    (6),
 
@@ -1170,6 +1190,83 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
+     * Creates a Bitmap from the given {@link Picture} source of recorded drawing commands.
+     *
+     * Equivalent to calling {@link #createBitmap(Picture, int, int, Config)} with
+     * width and height the same as the Picture's width and height and a Config.HARDWARE
+     * config.
+     *
+     * @param source The recorded {@link Picture} of drawing commands that will be
+     *               drawn into the returned Bitmap.
+     * @return An immutable bitmap with a HARDWARE config whose contents are created
+     * from the recorded drawing commands in the Picture source.
+     */
+    public static @NonNull Bitmap createBitmap(@NonNull Picture source) {
+        return createBitmap(source, source.getWidth(), source.getHeight(), Config.HARDWARE);
+    }
+
+    /**
+     * Creates a Bitmap from the given {@link Picture} source of recorded drawing commands.
+     *
+     * The bitmap will be immutable with the given width and height. If the width and height
+     * are not the same as the Picture's width & height, the Picture will be scaled to
+     * fit the given width and height.
+     *
+     * @param source The recorded {@link Picture} of drawing commands that will be
+     *               drawn into the returned Bitmap.
+     * @param width The width of the bitmap to create. The picture's width will be
+     *              scaled to match if necessary.
+     * @param height The height of the bitmap to create. The picture's height will be
+     *              scaled to match if necessary.
+     * @param config The {@link Config} of the created bitmap. If this is null then
+     *               the bitmap will be {@link Config#HARDWARE}.
+     *
+     * @return An immutable bitmap with a HARDWARE config whose contents are created
+     * from the recorded drawing commands in the Picture source.
+     */
+    public static @NonNull Bitmap createBitmap(@NonNull Picture source, int width, int height,
+            @NonNull Config config) {
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("width & height must be > 0");
+        }
+        if (config == null) {
+            throw new IllegalArgumentException("Config must not be null");
+        }
+        source.endRecording();
+        if (source.requiresHardwareAcceleration() && config != Config.HARDWARE) {
+            StrictMode.noteSlowCall("GPU readback");
+        }
+        if (config == Config.HARDWARE || source.requiresHardwareAcceleration()) {
+            final RenderNode node = RenderNode.create("BitmapTemporary", null);
+            node.setLeftTopRightBottom(0, 0, width, height);
+            node.setClipToBounds(false);
+            final DisplayListCanvas canvas = node.start(width, height);
+            if (source.getWidth() != width || source.getHeight() != height) {
+                canvas.scale(width / (float) source.getWidth(),
+                        height / (float) source.getHeight());
+            }
+            canvas.drawPicture(source);
+            node.end(canvas);
+            Bitmap bitmap = ThreadedRenderer.createHardwareBitmap(node, width, height);
+            if (config != Config.HARDWARE) {
+                bitmap = bitmap.copy(config, false);
+            }
+            return bitmap;
+        } else {
+            Bitmap bitmap = Bitmap.createBitmap(width, height, config);
+            Canvas canvas = new Canvas(bitmap);
+            if (source.getWidth() != width || source.getHeight() != height) {
+                canvas.scale(width / (float) source.getWidth(),
+                        height / (float) source.getHeight());
+            }
+            canvas.drawPicture(source);
+            canvas.setBitmap(null);
+            bitmap.makeImmutable();
+            return bitmap;
+        }
+    }
+
+    /**
      * Returns an optional array of private data, used by the UI system for
      * some bitmaps. Not intended to be called by applications.
      */
@@ -1233,6 +1330,7 @@ public final class Bitmap implements Parcelable {
      * @param stream   The outputstream to write the compressed data.
      * @return true if successfully compressed to the specified stream.
      */
+    @WorkerThread
     public boolean compress(CompressFormat format, int quality, OutputStream stream) {
         checkRecycled("Can't compress a recycled bitmap");
         // do explicit check before calling the native method
@@ -1255,6 +1353,12 @@ public final class Bitmap implements Parcelable {
      */
     public final boolean isMutable() {
         return mIsMutable;
+    }
+
+    /** @hide */
+    public final void makeImmutable() {
+        // todo mIsMutable = false;
+        // todo nMakeImmutable();
     }
 
     /**
@@ -1566,6 +1670,8 @@ public final class Bitmap implements Parcelable {
         if (mColorSpace == null) {
             if (nativeIsSRGB(mNativePtr)) {
                 mColorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
+            } else if (getConfig() == Config.HARDWARE && nativeIsSRGBLinear(mNativePtr)) {
+                mColorSpace = ColorSpace.get(ColorSpace.Named.LINEAR_EXTENDED_SRGB);
             } else {
                 float[] xyz = new float[9];
                 float[] params = new float[7];
@@ -1989,5 +2095,6 @@ public final class Bitmap implements Parcelable {
     private static native GraphicBuffer nativeCreateGraphicBufferHandle(long nativeBitmap);
     private static native boolean nativeGetColorSpace(long nativePtr, float[] xyz, float[] params);
     private static native boolean nativeIsSRGB(long nativePtr);
+    private static native boolean nativeIsSRGBLinear(long nativePtr);
     private static native void nativeCopyColorSpace(long srcBitmap, long dstBitmap);
 }

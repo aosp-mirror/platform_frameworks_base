@@ -222,6 +222,36 @@ interface IBackupManager {
             IFullBackupRestoreObserver observer);
 
     /**
+     * Update the attributes of the transport identified by {@code transportComponent}. If the
+     * specified transport has not been bound at least once (for registration), this call will be
+     * ignored. Only the host process of the transport can change its description, otherwise a
+     * {@link SecurityException} will be thrown.
+     *
+     * @param transportComponent The identity of the transport being described.
+     * @param name A {@link String} with the new name for the transport. This is NOT for
+     *     identification. MUST NOT be {@code null}.
+     * @param configurationIntent An {@link Intent} that can be passed to
+     *     {@link Context#startActivity} in order to launch the transport's configuration UI. It may
+     *     be {@code null} if the transport does not offer any user-facing configuration UI.
+     * @param currentDestinationString A {@link String} describing the destination to which the
+     *     transport is currently sending data. MUST NOT be {@code null}.
+     * @param dataManagementIntent An {@link Intent} that can be passed to
+     *     {@link Context#startActivity} in order to launch the transport's data-management UI. It
+     *     may be {@code null} if the transport does not offer any user-facing data
+     *     management UI.
+     * @param dataManagementLabel A {@link String} to be used as the label for the transport's data
+     *     management affordance. This MUST be {@code null} when dataManagementIntent is
+     *     {@code null} and MUST NOT be {@code null} when dataManagementIntent is not {@code null}.
+     * @throws SecurityException If the UID of the calling process differs from the package UID of
+     *     {@code transportComponent} or if the caller does NOT have BACKUP permission.
+     *
+     * @hide
+     */
+    void updateTransportAttributes(in ComponentName transportComponent, in String name,
+            in Intent configurationIntent, in String currentDestinationString,
+            in Intent dataManagementIntent, in String dataManagementLabel);
+
+    /**
      * Identify the currently selected transport.  Callers must hold the
      * android.permission.BACKUP permission to use this method.
      */
@@ -264,7 +294,8 @@ interface IBackupManager {
      *
      * @param transport ComponentName of the service hosting the transport. This is different from
      *                  the transport's name that is returned by {@link BackupTransport#name()}.
-     * @param listener A listener object to get a callback on the transport being selected.
+     * @param listener A listener object to get a callback on the transport being selected. It may
+     *                 be {@code null}.
      *
      * @hide
      */
@@ -372,12 +403,25 @@ interface IBackupManager {
     /**
      * Ask the framework whether this app is eligible for backup.
      *
+     * <p>If you are calling this method multiple times, you should instead use
+     * {@link #filterAppsEligibleForBackup(String[])} to save resources.
+     *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
      *
      * @param packageName The name of the package.
      * @return Whether this app is eligible for backup.
      */
     boolean isAppEligibleForBackup(String packageName);
+
+    /**
+     * Filter the packages that are eligible for backup and return the result.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @param packages The list of packages to filter.
+     * @return The packages eligible for backup.
+     */
+    String[] filterAppsEligibleForBackup(in String[] packages);
 
     /**
      * Request an immediate backup, providing an observer to which results of the backup operation

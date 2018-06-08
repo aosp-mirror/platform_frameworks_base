@@ -984,6 +984,8 @@
         <attr name="dialogTitleDecorLayout" format="reference" />
         <!-- Preferred padding for dialog content. -->
         <attr name="dialogPreferredPadding" format="dimension" />
+        <!-- Corner radius of dialogs. -->
+        <attr name="dialogCornerRadius" format="dimension" />
 
         <!-- Theme to use for alert dialogs spawned from this theme. -->
         <attr name="alertDialogTheme" format="reference" />
@@ -1013,6 +1015,12 @@
 
         <!-- Style for the "neutral" buttons within button bars. -->
         <attr name="buttonBarNeutralButtonStyle" format="reference" />
+
+        <!-- Corner radius of buttons. -->
+        <attr name="buttonCornerRadius" format="dimension" />
+
+        <!-- Corner radius of progress bars. -->
+        <attr name="progressBarCornerRadius" format="dimension" />
 
         <!-- Style for the search query widget. -->
         <attr name="searchViewStyle" format="reference" />
@@ -1105,6 +1113,9 @@
 
         <!-- The color applied to framework switch thumbs in their normal state. -->
         <attr name="colorSwitchThumbNormal" format="color" />
+
+        <!-- The color applied to framework progress and seek bar backgrounds in their normal state. -->
+        <attr name="colorProgressBackgroundNormal" format="color" />
 
         <!-- The color applied to the edge effect on scrolling containers. -->
         <attr name="colorEdgeEffect" format="color" />
@@ -1892,6 +1903,7 @@
         <enum name="KEYCODE_SYSTEM_NAVIGATION_LEFT" value="282" />
         <enum name="KEYCODE_SYSTEM_NAVIGATION_RIGHT" value="283" />
         <enum name="KEYCODE_ALL_APPS" value="284" />
+        <enum name="KEYCODE_REFRESH" value="285" />
     </attr>
 
     <!-- ***************************************************************** -->
@@ -2061,7 +2073,8 @@
              <p>For this to take effect, the window must be drawing the system bar backgrounds with
              {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the navigation bar must not
              have been requested to be translucent with
-             {@link android.R.attr#windowTranslucentNavigation}. -->
+             {@link android.R.attr#windowTranslucentNavigation}.
+             Corresponds to {@link android.view.Window#setNavigationBarDividerColor(int)}. -->
         <attr name="navigationBarDividerColor" format="color" />
 
         <!-- The duration, in milliseconds, of the window background fade duration
@@ -2097,15 +2110,61 @@
              -->
         <attr name="windowSplashscreenContent" format="reference" />
 
-        <!-- If set, the navigation bar will be drawn such that it is
-             compatible with a light navigation bar background.
+        <!-- If set, the navigation bar will be drawn such that it is compatible with a light
+             navigation bar background.
              <p>For this to take effect, the window must be drawing the system bar backgrounds with
              {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the navigation bar must not
              have been requested to be translucent with
              {@link android.R.attr#windowTranslucentNavigation}.
              Corresponds to setting {@link android.view.View#SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR} on
              the decor view. -->
-         <attr name="windowLightNavigationBar" format="boolean" />
+        <attr name="windowLightNavigationBar" format="boolean" />
+
+        <!-- Controls how the window is laid out if there is a {@code DisplayCutout}.
+        <p>
+        Defaults to {@code default}.
+        <p>
+        See also
+        {@link android.view.WindowManager.LayoutParams#layoutInDisplayCutoutMode
+                WindowManager.LayoutParams.layoutInDisplayCutoutMode},
+        {@link android.view.WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT},
+        {@link android.view.WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES},
+        {@link android.view.WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER},
+        and {@link android.view.DisplayCutout DisplayCutout}
+        -->
+        <attr name="windowLayoutInDisplayCutoutMode">
+            <!-- <p>
+            The window is allowed to extend into the <code>DisplayCutout</code> area, only if
+            the <code>DisplayCutout</code> is fully contained within a system bar. Otherwise, the
+            window is laid out such that it does not overlap with the <code>DisplayCutout</code>
+            area.
+            <p>
+            Corresponds to <code>LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT</code>.
+            -->
+            <enum name="default" value="0" />
+            <!-- <p>
+            The window is always allowed to extend into the <code>DisplayCutout</code> areas on the
+            short edges of the screen even if fullscreen or in landscape.
+            The window will never extend into a <code>DisplayCutout</code> area on the long edges of
+            the screen.
+            <p>
+            The window must make sure that no important content overlaps with the
+            <code>DisplayCutout</code>.
+            <p>
+            Corresponds to <code>LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES</code>.
+            -->
+            <enum name="shortEdges" value="1" />
+            <!-- <p>
+            The window is never allowed to overlap with the <code>DisplayCutout</code> area.
+            <p>
+            This should be used with windows that transiently set
+            <code>SYSTEM_UI_FLAG_FULLSCREEN</code> to avoid a relayout of the window when the
+            flag is set or cleared.
+            <p>
+            Corresponds to <code>LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER</code>.
+            -->
+            <enum name="never" value="2" />
+        </attr>
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
@@ -2546,16 +2605,24 @@
         <attr name="filterTouchesWhenObscured" format="boolean" />
 
         <!-- Defines the quality of translucent drawing caches. This property is used
-             only when the drawing cache is enabled and translucent. The default value is auto. -->
+             only when the drawing cache is enabled and translucent. The default value is auto.
+             Deprecated: The view drawing cache was largely made obsolete with the introduction of
+             hardware-accelerated rendering in API 11. -->
         <attr name="drawingCacheQuality">
             <!-- Lets the framework decide what quality level should be used
-                 for the drawing cache. -->
+                 for the drawing cache.
+                 Deprecated: The view drawing cache was largely made obsolete with the introduction
+                 of hardware-accelerated rendering in API 11. -->
             <enum name="auto" value="0" />
             <!-- Low quality. When set to low quality, the drawing cache uses a lower color
-                 depth, thus losing precision in rendering gradients, but uses less memory. -->
+                 depth, thus losing precision in rendering gradients, but uses less memory.
+                 Deprecated: The view drawing cache was largely made obsolete with the introduction
+                 of hardware-accelerated rendering in API 11. -->
             <enum name="low" value="1" />
             <!-- High quality. When set to high quality, the drawing cache uses a higher
-                 color depth but uses more memory. -->
+                 color depth but uses more memory.
+                 Deprecated: The view drawing cache was largely made obsolete with the introduction
+                 of hardware-accelerated rendering in API 11. -->
             <enum name="high" value="2" />
         </attr>
 
@@ -3011,6 +3078,41 @@
         <!-- Whether this View should use a default focus highlight when it gets focused but
              doesn't have {@link android.R.attr#state_focused} defined in its background. -->
         <attr name="defaultFocusHighlightEnabled" format="boolean" />
+
+        <!-- Whether this view should be treated as a focusable unit by screen reader accessibility
+             tools. See {@link android.view.View#setScreenReaderFocusable(boolean)}. The default
+             value, {@code false}, leaves the screen reader to consider other signals, such as
+             focusability or the presence of text, to decide what it focus.-->
+        <attr name="screenReaderFocusable" format="boolean" />
+
+        <!-- The title this view should present to accessibility as a pane title.
+             See {@link android.view.View#setAccessibilityPaneTitle(CharSequence)} -->
+        <attr name="accessibilityPaneTitle" format="string" />
+
+        <!-- Whether or not this view is a heading for accessibility purposes. -->
+        <attr name="accessibilityHeading" format="boolean"/>
+
+        <!-- Sets the color of the spot shadow that is drawn when the view has a positive Z or
+             elevation value.
+             <p>
+             By default the shadow color is black. Generally, this color will be opaque so the
+             intensity of the shadow is consistent between different views with different colors.
+             <p>
+             The opacity of the final spot shadow is a function of the shadow caster height, the
+             alpha channel of the outlineSpotShadowColor (typically opaque), and the
+             {@link android.R.attr#spotShadowAlpha} theme attribute. -->
+        <attr name="outlineSpotShadowColor" format="color" />
+
+        <!-- Sets the color of the ambient shadow that is drawn when the view has a positive Z
+             or elevation value.
+             <p>
+             By default the shadow color is black. Generally, this color will be opaque so the
+             intensity of the shadow is consistent between different views with different colors.
+             <p>
+             The opacity of the final ambient shadow is a function of the shadow caster height,
+             the alpha channel of the outlineAmbientShadowColor (typically opaque), and the
+             {@link android.R.attr#ambientShadowAlpha} theme attribute. -->
+        <attr name="outlineAmbientShadowColor" format="color" />
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
@@ -3060,7 +3162,9 @@
              instance during a scrolling.) This property lets you persist the cache
              in memory after its initial usage. Persisting the cache consumes more
              memory but may prevent frequent garbage collection is the cache is created
-             over and over again. By default the persistence is set to scrolling. -->
+             over and over again. By default the persistence is set to scrolling.
+             Deprecated: The view drawing cache was largely made obsolete with the introduction of
+             hardware-accelerated rendering in API 11. -->
         <attr name="persistentDrawingCache">
             <!-- The drawing cache is not persisted after use. -->
             <flag name="none" value="0x0" />
@@ -3072,7 +3176,9 @@
             <flag name="all" value="0x3" />
         </attr>
         <!-- Defines whether the ViewGroup should always draw its children using their
-             drawing cache or not. The default value is true. -->
+             drawing cache or not. The default value is true.
+             Deprecated: The view drawing cache was largely made obsolete with the introduction of
+             hardware-accelerated rendering in API 11. -->
         <attr name="alwaysDrawnWithCache" format="boolean" />
         <!-- Sets whether this ViewGroup's drawable states also include
              its children's drawable states.  This is used, for example, to
@@ -3271,6 +3377,9 @@
              and subtype in order to provide the consistent user experience in switching
              between IMEs and subtypes. -->
         <attr name="supportsSwitchingToNextInputMethod" format="boolean" />
+        <!-- Specifies if an IME can only be used while a device is in VR mode or on a dedicated
+             device -->
+        <attr name="isVrOnly" format="boolean"/>
         <attr name="__removed2" format="boolean" />
     </declare-styleable>
 
@@ -3642,7 +3751,7 @@
     </declare-styleable>
 
     <!-- Specify one or more <code>t3tPmm-filter</code> elements inside a
-         <code>host-nfcf-service</code> element to specify a LF_T3T_PMM -->
+         <code>host-nfcf-service</code> element to specify a LF_T3T_PMM. -->
     <declare-styleable name="T3tPmmFilter">
         <attr name="name" />
 
@@ -4416,11 +4525,13 @@
         <attr name="textColor" />
         <!-- Size of the text. Recommended dimension type for text is "sp" for scaled-pixels (example: 15sp). -->
         <attr name="textSize" />
-        <!-- Style (bold, italic, bolditalic) for the text. -->
+        <!-- Style (normal, bold, italic, bold|italic) for the text. -->
         <attr name="textStyle" />
+        <!-- Weight for the font used in the TextView. -->
+        <attr name="textFontWeight" />
         <!-- Typeface (normal, sans, serif, monospace) for the text. -->
         <attr name="typeface" />
-        <!-- Font family (named by string) for the text. -->
+        <!-- Font family (named by string or as a font resource reference) for the text. -->
         <attr name="fontFamily" />
         <!-- Color of the text selection highlight. -->
         <attr name="textColorHighlight" />
@@ -4444,6 +4555,10 @@
         <attr name="shadowRadius" format="float" />
         <!-- Elegant text height, especially for less compacted complex script text. -->
         <attr name="elegantTextHeight" format="boolean" />
+        <!-- Whether to respect the ascent and descent of the fallback fonts that are used in
+        displaying the text. When true, fallback fonts that end up getting used can increase
+        the ascent and descent of the lines that they are used on. -->
+        <attr name="fallbackLineSpacing" format="boolean"/>
         <!-- Text letter-spacing. -->
         <attr name="letterSpacing" format="float" />
         <!-- Font feature settings. -->
@@ -4501,9 +4616,11 @@
         <attr name="textScaleX" format="float" />
         <!-- Typeface (normal, sans, serif, monospace) for the text. -->
         <attr name="typeface" />
-        <!-- Style (bold, italic, bolditalic) for the text. -->
+        <!-- Style (normal, bold, italic, bold|italic) for the text. -->
         <attr name="textStyle" />
-        <!-- Font family (named by string) for the text. -->
+        <!-- Weight for the font used in the TextView. -->
+        <attr name="textFontWeight" />
+        <!-- Font family (named by string or as a font resource reference) for the text. -->
         <attr name="fontFamily" />
         <!-- Text color for links. -->
         <attr name="textColorLink" />
@@ -4518,7 +4635,7 @@
         <attr name="maxHeight" />
         <!-- Makes the TextView be exactly this many lines tall. -->
         <attr name="lines" format="integer" min="0" />
-        <!-- Makes the TextView be exactly this many pixels tall.
+        <!-- Makes the TextView be exactly this tall.
              You could get the same effect by specifying this number in the
              layout parameters. -->
         <attr name="height" format="dimension" />
@@ -4535,7 +4652,7 @@
         <attr name="maxWidth" />
         <!-- Makes the TextView be exactly this many ems wide. -->
         <attr name="ems" format="integer" min="0" />
-        <!-- Makes the TextView be exactly this many pixels wide.
+        <!-- Makes the TextView be exactly this wide.
              You could get the same effect by specifying this number in the
              layout parameters. -->
         <attr name="width" format="dimension" />
@@ -4699,10 +4816,21 @@
                  result to valid color values. Saturate(S + D) -->
             <enum name="add" value="16" />
         </attr>
-        <!-- Extra spacing between lines of text. -->
+        <!-- Extra spacing between lines of text. The value will not be applied for the last
+             line of text. -->
         <attr name="lineSpacingExtra" format="dimension" />
-        <!-- Extra spacing between lines of text, as a multiplier. -->
+        <!-- Extra spacing between lines of text, as a multiplier. The value will not be applied
+             for the last line of text.-->
         <attr name="lineSpacingMultiplier" format="float" />
+        <!-- Explicit height between lines of text. If set, this will override the values set
+             for lineSpacingExtra and lineSpacingMultiplier. -->
+        <attr name="lineHeight" format="dimension" />
+        <!-- Distance from the top of the TextView to the first text baseline. If set, this
+             overrides the value set for paddingTop. -->
+        <attr name="firstBaselineToTopHeight" format="dimension" />
+        <!-- Distance from the bottom of the TextView to the last text baseline. If set, this
+             overrides the value set for paddingBottom. -->
+        <attr name="lastBaselineToBottomHeight" format="dimension" />
         <!-- The number of times to repeat the marquee animation. Only applied if the
              TextView has marquee enabled. -->
         <attr name="marqueeRepeatLimit" format="integer">
@@ -4775,6 +4903,10 @@
         <attr name="textAllCaps" />
         <!-- Elegant text height, especially for less compacted complex script text. -->
         <attr name="elegantTextHeight" />
+        <!-- Whether to respect the ascent and descent of the fallback fonts that are used in
+        displaying the text. When true, fallback fonts that end up getting used can increase
+        the ascent and descent of the lines that they are used on. -->
+        <attr name="fallbackLineSpacing" format="boolean"/>
         <!-- Text letter-spacing. -->
         <attr name="letterSpacing" />
         <!-- Font feature settings. -->
@@ -5825,6 +5957,24 @@
         <attr name="insetBottom" format="fraction|dimension" />
     </declare-styleable>
 
+    <!-- Drawable used to draw animated images (gif) -->
+    <declare-styleable name="AnimatedImageDrawable">
+        <!-- Identifier of the image file. This attribute is mandatory.
+             It must be an image file with multiple frames, e.g. gif or webp -->
+        <attr name="src" />
+        <!-- Indicates if the drawable needs to be mirrored when its layout direction is
+             RTL (right-to-left). -->
+        <attr name="autoMirrored" />
+        <!-- Replace the loop count in the encoded data. A repeat count of 0 means that
+             the animation will play once, regardless of the number of times specified
+             in the encoded data. Setting this to infinite (-1) will result in the
+             animation repeating as long as it is displayed (once start() is called). -->
+        <attr name="repeatCount"/>
+        <!-- When true, automatically start animating. The default is false, meaning
+             that the animation will not start until start() is called. -->
+        <attr name="autoStart" />
+    </declare-styleable>
+
     <!-- Drawable used to draw bitmaps. -->
     <declare-styleable name="BitmapDrawable">
         <!-- Identifier of the bitmap file. This attribute is mandatory. -->
@@ -6246,6 +6396,9 @@
         <!-- Special option for window animations: if this window is on top
              of a wallpaper, don't animate the wallpaper with it. -->
         <attr name="detachWallpaper" format="boolean" />
+        <!-- Special option for window animations: show the wallpaper behind when running this
+             animation. -->
+        <attr name="showWallpaper" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="AnimationSet">
@@ -6283,6 +6436,17 @@
     <declare-styleable name="AlphaAnimation">
         <attr name="fromAlpha" format="float" />
         <attr name="toAlpha" format="float" />
+    </declare-styleable>
+
+    <declare-styleable name="ClipRectAnimation">
+        <attr name="fromLeft" format="fraction" />
+        <attr name="fromTop" format="fraction" />
+        <attr name="fromRight" format="fraction" />
+        <attr name="fromBottom" format="fraction" />
+        <attr name="toLeft" format="fraction" />
+        <attr name="toTop" format="fraction" />
+        <attr name="toRight" format="fraction" />
+        <attr name="toBottom" format="fraction" />
     </declare-styleable>
 
     <declare-styleable name="LayoutAnimation">
@@ -7543,6 +7707,15 @@
             <flag name="keyguard" value="0x2" />
             <flag name="searchbox" value="0x4" />
         </attr>
+        <!-- Flags indicating various features supported by the widget. These are hints to the
+         widget host, and do not actually change the behavior of the widget. -->
+        <attr name="widgetFeatures" format="integer">
+            <!-- The widget can be reconfigured anytime after it is bound -->
+            <flag name="reconfigurable" value="0x1" />
+            <!-- The widget is added directly by the app, and does not need to appear in
+                 the global list of available widgets -->
+            <flag name="hide_from_picker" value="0x2" />
+        </attr>
     </declare-styleable>
 
     <!-- =============================== -->
@@ -7692,6 +7865,10 @@
              wallpaper. -->
         <attr name="showMetadataInPreview" format="boolean" />
 
+        <!-- Wallpapers optimized and capable of drawing in ambient mode will return true.
+            @hide -->
+        <attr name="supportsAmbientMode" format="boolean" />
+
     </declare-styleable>
 
     <!-- Use <code>dream</code> as the root tag of the XML resource that
@@ -7707,21 +7884,21 @@
         <attr name="settingsActivity" />
     </declare-styleable>
 
-    <!-- @SystemApi Use <code>trust-agent</code> as the root tag of the XML resource that
+    <!--  Use <code>trust-agent</code> as the root tag of the XML resource that
          describes an {@link android.service.trust.TrustAgentService}, which is
          referenced from its {@link android.service.trust.TrustAgentService#TRUST_AGENT_META_DATA}
          meta-data entry.  Described here are the attributes that can be included in that tag.
          @hide -->
     <declare-styleable name="TrustAgent">
-        <!-- @SystemApi Component name of an activity that allows the user to modify
+        <!--  Component name of an activity that allows the user to modify
              the settings for this trust agent. @hide -->
         <attr name="settingsActivity" />
-        <!-- @SystemApi Title for a preference that allows that user to launch the
+        <!--  Title for a preference that allows that user to launch the
              activity to modify trust agent settings. @hide -->
         <attr name="title" />
-        <!-- @SystemApi Summary for the same preference as the title. @hide -->
+        <!--  Summary for the same preference as the title. @hide -->
         <attr name="summary" />
-        <!-- @SystemApi Whether trust agent can unlock a user profile @hide -->
+        <!--  Whether trust agent can unlock a user profile @hide -->
         <attr name="unlockProfile" format="boolean"/>
     </declare-styleable>
 
@@ -7795,6 +7972,23 @@
         <!-- Fully qualified class name of an activity that allows the user to modify
              the settings for this service. -->
         <attr name="settingsActivity" />
+    </declare-styleable>
+
+    <!-- Use <code>compatibility-package</code> as a child tag of <code>autofill-service</code>
+         in the XML resource that describes an {@link android.service.autofill.AutofillService}
+         to specify a package and an optional max version code for which to request compatibility
+         mode. If no max version code is specified compatibility mode is requested for all package
+         versions. The max version code is useful to avoid requesting compatibility mode for newer
+         package versions that are known to natively support autofill.
+    -->
+    <declare-styleable name="AutofillService_CompatibilityPackage">
+        <!-- The package name for which compatibility mode is requested. -->
+        <attr name="name" />
+        <!-- The max version code of the package for which compatibility mode is
+             requested. This corresponds to the long value returned by {@link
+             android.content.pm.PackageInfo#getLongVersionCode()} for the target package.
+        -->
+        <attr name="maxLongVersionCode" format="string" />
     </declare-styleable>
 
     <!-- =============================== -->
@@ -7873,6 +8067,8 @@
         <attr name="icon"/>
         <!-- The activity to launch when the setting is clicked on. -->
         <attr name="settingsActivity"/>
+        <!-- The user restriction for this preference. -->
+        <attr name="userRestriction"/>
     </declare-styleable>
 
     <!-- =============================== -->
@@ -7931,16 +8127,16 @@
          by the enrollment application.
          Described here are the attributes that can be included in that tag.
          @hide
-         @SystemApi -->
+          -->
     <declare-styleable name="VoiceEnrollmentApplication">
-        <!-- A globally unique ID for the keyphrase. @hide @SystemApi -->
+        <!-- A globally unique ID for the keyphrase. @hide  -->
         <attr name="searchKeyphraseId" format="integer" />
-        <!-- The actual keyphrase/hint text, or empty if not keyphrase dependent. @hide @SystemApi -->
+        <!-- The actual keyphrase/hint text, or empty if not keyphrase dependent. @hide  -->
         <attr name="searchKeyphrase" format="string" />
         <!-- A comma separated list of BCP-47 language tag for locales that are supported
-             for this keyphrase, or empty if not locale dependent. @hide @SystemApi -->
+             for this keyphrase, or empty if not locale dependent. @hide  -->
         <attr name="searchKeyphraseSupportedLocales" format="string" />
-        <!-- Flags for supported recognition modes. @hide @SystemApi -->
+        <!-- Flags for supported recognition modes. @hide  -->
         <attr name="searchKeyphraseRecognitionFlags">
             <flag name="none" value="0" />
             <flag name="voiceTrigger" value="0x1" />
@@ -8513,6 +8709,8 @@
         <attr name="maxWidth" />
         <attr name="maxCollapsedHeight" format="dimension" />
         <attr name="maxCollapsedHeightSmall" format="dimension" />
+        <!-- Whether the Drawer should be positioned at the top rather than at the bottom. -->
+        <attr name="showAtTop" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="MessagingLinearLayout">
@@ -8656,6 +8854,17 @@
          common values are 400 for regular weight and 700 for bold weight. If unspecified, the value
          in the font's header tables will be used. -->
         <attr name="fontWeight" format="integer" />
+        <!-- The index of the font in the ttc (TrueType Collection) font file. If the font file
+         referenced is not in the ttc format, this attribute needs not be specified.
+         {@see android.graphics.Typeface#Builder.setTtcIndex(int)}.
+         The default value is 0. More details about the TrueType Collection font format can be found
+         here: https://en.wikipedia.org/wiki/TrueType#TrueType_Collection. -->
+        <attr name="ttcIndex" format="integer" />
+        <!-- The variation settings to be applied to the font. The string should be in the following
+         format: "'tag1' value1, 'tag2' value2, ...". If the default variation settings should be
+         used, or the font used does not support variation settings, this attribute needs not be
+         specified. -->
+        <attr name="fontVariationSettings" format="string" />
     </declare-styleable>
 
     <!-- Attributes that are read when parsing a <fontfamily> tag. -->
@@ -8676,6 +8885,16 @@
         <attr name="fontProviderCerts" format="reference" />
     </declare-styleable>
 
+    <!-- Attributes that are read when parsing a  tag. -->
+    <declare-styleable name="VideoView2">
+        <attr name="enableControlView" format="boolean" />
+        <attr name="enableSubtitle" format="boolean" />
+        <attr name="viewType" format="enum">
+            <enum name="surfaceView" value="0" />
+            <enum name="textureView" value="1" />
+        </attr>
+    </declare-styleable>
+
     <!-- @hide -->
     <declare-styleable name="RecyclerView">
         <attr name="layoutManager" format="string" />
@@ -8691,6 +8910,14 @@
         <attr name="notificationHeaderStyle" format="reference" />
         <attr name="notificationHeaderTextAppearance" format="reference" />
         <attr name="notificationHeaderIconSize" format="dimension" />
+        <attr name="notificationHeaderAppNameVisibility" format="enum">
+            <!-- Visible on screen; the default value. -->
+            <enum name="visible" value="0" />
+            <!-- Not displayed, but taken into account during layout (space is left for it). -->
+            <enum name="invisible" value="1" />
+            <!-- Completely hidden, as if the view had not been added. -->
+            <enum name="gone" value="2" />
+        </attr>
     </declare-styleable>
 
     <attr name="lockPatternStyle" format="reference" />

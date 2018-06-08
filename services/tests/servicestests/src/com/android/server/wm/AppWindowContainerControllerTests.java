@@ -16,14 +16,13 @@
 
 package com.android.server.wm;
 
+import android.support.test.filters.FlakyTest;
 import org.junit.Test;
 
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.SecurityTest;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.view.WindowManager;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -35,16 +34,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import java.util.function.Consumer;
+import com.android.server.wm.WindowTestUtils.TestTaskWindowContainerController;
 
 /**
  * Test class for {@link AppWindowContainerController}.
  *
- * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.AppWindowContainerControllerTests
+ * atest FrameworksServicesTests:com.android.server.wm.AppWindowContainerControllerTests
  */
 @SmallTest
 @Presubmit
+@FlakyTest(bugId = 74078662)
 @org.junit.runner.RunWith(AndroidJUnit4.class)
 public class AppWindowContainerControllerTests extends WindowTestsBase {
 
@@ -129,6 +128,8 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
             controller.removeStartingWindow();
             waitUntilHandlersIdle();
             assertNoStartingWindow(controller.getAppWindowToken(mDisplayContent));
+
+            controller.getAppWindowToken(mDisplayContent).getParent().getParent().removeImmediately();
         }
     }
 
@@ -169,6 +170,33 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
         waitUntilHandlersIdle();
         assertNoStartingWindow(controller1.getAppWindowToken(mDisplayContent));
         assertHasStartingWindow(controller2.getAppWindowToken(mDisplayContent));
+    }
+
+    @Test
+    public void testTryTransferStartingWindowFromHiddenAboveToken() throws Exception {
+
+        // Add two tasks on top of each other.
+        TestTaskWindowContainerController taskController =
+                new WindowTestUtils.TestTaskWindowContainerController(this);
+        final WindowTestUtils.TestAppWindowContainerController controllerTop =
+                createAppWindowController(taskController);
+        final WindowTestUtils.TestAppWindowContainerController controllerBottom =
+                createAppWindowController(taskController);
+
+        // Add a starting window.
+        controllerTop.addStartingWindow(InstrumentationRegistry.getContext().getPackageName(),
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
+                false, false);
+        waitUntilHandlersIdle();
+
+        // Make the top one invisible, and try transfering the starting window from the top to the
+        // bottom one.
+        controllerTop.setVisibility(false, false);
+        controllerBottom.mContainer.transferStartingWindowFromHiddenAboveTokenIfNeeded();
+
+        // Assert that the bottom window now has the starting window.
+        assertNoStartingWindow(controllerTop.getAppWindowToken(mDisplayContent));
+        assertHasStartingWindow(controllerBottom.getAppWindowToken(mDisplayContent));
     }
 
     @Test

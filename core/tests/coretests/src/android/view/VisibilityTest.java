@@ -16,16 +16,16 @@
 
 package android.view;
 
-import android.view.Visibility;
-import com.android.frameworks.coretests.R;
+import static android.view.KeyEvent.KEYCODE_DPAD_CENTER;
+import static android.view.KeyEvent.KEYCODE_DPAD_LEFT;
 
 import android.test.ActivityInstrumentationTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.widget.Button;
 import android.widget.TextView;
-import android.view.View;
-import static android.view.KeyEvent.*;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * Exercises {@link android.view.View}'s ability to change visibility between
@@ -64,14 +64,12 @@ public class VisibilityTest extends ActivityInstrumentationTestCase<Visibility> 
         assertNotNull(mVisible);
         assertNotNull(mInvisible);
         assertNotNull(mGone);
-
-        assertTrue(mVisible.hasFocus());
     }
 
     @MediumTest
     public void testVisibleToInvisible() throws Exception {
-        sendKeys("DPAD_RIGHT");
-        assertTrue(mInvisible.hasFocus());
+        getActivity().runOnUiThread(() -> mInvisible.requestFocus());
+        getInstrumentation().waitForIdleSync();
 
         int oldTop = mVictim.getTop();
 
@@ -84,9 +82,8 @@ public class VisibilityTest extends ActivityInstrumentationTestCase<Visibility> 
 
     @MediumTest
     public void testVisibleToGone() throws Exception {
-        //sendKeys("2*DPAD_RIGHT");
-        sendRepeatedKeys(2, KEYCODE_DPAD_RIGHT);
-        assertTrue(mGone.hasFocus());
+        getActivity().runOnUiThread(() -> mGone.requestFocus());
+        getInstrumentation().waitForIdleSync();
 
         int oldTop = mVictim.getTop();
 
@@ -99,8 +96,8 @@ public class VisibilityTest extends ActivityInstrumentationTestCase<Visibility> 
 
     @LargeTest
     public void testGoneToVisible() throws Exception {
-        sendKeys("2*DPAD_RIGHT");
-        assertTrue(mGone.hasFocus());
+        getActivity().runOnUiThread(() -> mGone.requestFocus());
+        getInstrumentation().waitForIdleSync();
 
         int oldTop = mVictim.getTop();
 
@@ -119,8 +116,8 @@ public class VisibilityTest extends ActivityInstrumentationTestCase<Visibility> 
 
     @MediumTest
     public void testGoneToInvisible() throws Exception {
-        sendKeys("2*DPAD_RIGHT");
-        assertTrue(mGone.hasFocus());
+        getActivity().runOnUiThread(() -> mGone.requestFocus());
+        getInstrumentation().waitForIdleSync();
 
         int oldTop = mVictim.getTop();
 
@@ -139,8 +136,8 @@ public class VisibilityTest extends ActivityInstrumentationTestCase<Visibility> 
 
     @MediumTest
     public void testInvisibleToVisible() throws Exception {
-        sendKeys("DPAD_RIGHT");
-        assertTrue(mInvisible.hasFocus());
+        getActivity().runOnUiThread(() -> mInvisible.requestFocus());
+        getInstrumentation().waitForIdleSync();
 
         int oldTop = mVictim.getTop();
 
@@ -159,8 +156,8 @@ public class VisibilityTest extends ActivityInstrumentationTestCase<Visibility> 
 
     @MediumTest
     public void testInvisibleToGone() throws Exception {
-        sendKeys("DPAD_RIGHT");        
-        assertTrue(mInvisible.hasFocus());
+        getActivity().runOnUiThread(() -> mInvisible.requestFocus());
+        getInstrumentation().waitForIdleSync();
 
         int oldTop = mVictim.getTop();
 

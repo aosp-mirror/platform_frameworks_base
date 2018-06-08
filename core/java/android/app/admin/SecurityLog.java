@@ -17,6 +17,8 @@
 package android.app.admin;
 
 import android.annotation.IntDef;
+import android.annotation.TestApi;
+import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemProperties;
@@ -26,6 +28,7 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Definitions for working with security logs.
@@ -43,63 +46,402 @@ public class SecurityLog {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({TAG_ADB_SHELL_INTERACTIVE, TAG_ADB_SHELL_CMD, TAG_SYNC_RECV_FILE, TAG_SYNC_SEND_FILE,
-        TAG_APP_PROCESS_START, TAG_KEYGUARD_DISMISSED, TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT,
-        TAG_KEYGUARD_SECURED})
-    public @interface SECURITY_LOG_TAG {}
+    @IntDef(prefix = { "TAG_" }, value = {
+            TAG_ADB_SHELL_INTERACTIVE,
+            TAG_ADB_SHELL_CMD,
+            TAG_SYNC_RECV_FILE,
+            TAG_SYNC_SEND_FILE,
+            TAG_APP_PROCESS_START,
+            TAG_KEYGUARD_DISMISSED,
+            TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT,
+            TAG_KEYGUARD_SECURED,
+            TAG_OS_STARTUP,
+            TAG_OS_SHUTDOWN,
+            TAG_LOGGING_STARTED,
+            TAG_LOGGING_STOPPED,
+            TAG_MEDIA_MOUNT,
+            TAG_MEDIA_UNMOUNT,
+            TAG_LOG_BUFFER_SIZE_CRITICAL,
+            TAG_PASSWORD_EXPIRATION_SET,
+            TAG_PASSWORD_COMPLEXITY_SET,
+            TAG_PASSWORD_HISTORY_LENGTH_SET,
+            TAG_MAX_SCREEN_LOCK_TIMEOUT_SET,
+            TAG_MAX_PASSWORD_ATTEMPTS_SET,
+            TAG_KEYGUARD_DISABLED_FEATURES_SET,
+            TAG_REMOTE_LOCK,
+            TAG_USER_RESTRICTION_ADDED,
+            TAG_USER_RESTRICTION_REMOVED,
+            TAG_WIPE_FAILURE,
+            TAG_KEY_GENERATED,
+            TAG_KEY_IMPORT,
+            TAG_KEY_DESTRUCTION,
+            TAG_CERT_AUTHORITY_INSTALLED,
+            TAG_CERT_AUTHORITY_REMOVED,
+            TAG_CRYPTO_SELF_TEST_COMPLETED,
+            TAG_KEY_INTEGRITY_VIOLATION,
+            TAG_CERT_VALIDATION_FAILURE,
+    })
+    public @interface SecurityLogTag {}
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "LEVEL_" }, value = {
+            LEVEL_INFO,
+            LEVEL_WARNING,
+            LEVEL_ERROR
+    })
+    public @interface SecurityLogLevel {}
 
     /**
-     * Indicate that an ADB interactive shell was opened via "adb shell".
+     * Indicates that an ADB interactive shell was opened via "adb shell".
      * There is no extra payload in the log event.
      */
     public static final int TAG_ADB_SHELL_INTERACTIVE =
             SecurityLogTags.SECURITY_ADB_SHELL_INTERACTIVE;
+
     /**
-     * Indicate that an shell command was issued over ADB via "adb shell command"
-     * The log entry contains a string data of the shell command, accessible via
-     * {@link SecurityEvent#getData()}
+     * Indicates that a shell command was issued over ADB via {@code adb shell <command>}
+     * The log entry contains a {@code String} payload containing the shell command, accessible
+     * via {@link SecurityEvent#getData()}.
      */
     public static final int TAG_ADB_SHELL_CMD = SecurityLogTags.SECURITY_ADB_SHELL_COMMAND;
+
     /**
-     * Indicate that a file was pulled from the device via the adb daemon, for example via
-     * "adb pull". The log entry contains a string data of the path of the pulled file,
-     * accessible via {@link SecurityEvent#getData()}
+     * Indicates that a file was pulled from the device via the adb daemon, for example via
+     * {@code adb pull}. The log entry contains a {@code String} payload containing the path of the
+     * pulled file on the device, accessible via {@link SecurityEvent#getData()}.
      */
     public static final int TAG_SYNC_RECV_FILE = SecurityLogTags.SECURITY_ADB_SYNC_RECV;
+
     /**
-     * Indicate that a file was pushed to the device via the adb daemon, for example via
-     * "adb push". The log entry contains a string data of the destination path of the
-     * pushed file, accessible via {@link SecurityEvent#getData()}
+     * Indicates that a file was pushed to the device via the adb daemon, for example via
+     * {@code adb push}. The log entry contains a {@code String} payload containing the destination
+     * path of the pushed file, accessible via {@link SecurityEvent#getData()}.
      */
     public static final int TAG_SYNC_SEND_FILE = SecurityLogTags.SECURITY_ADB_SYNC_SEND;
+
     /**
-     * Indicate that an app process was started. The log entry contains the following
+     * Indicates that an app process was started. The log entry contains the following
      * information about the process encapsulated in an {@link Object} array, accessible via
      * {@link SecurityEvent#getData()}:
-     * process name (String), exact start time (long), app Uid (integer), app Pid (integer),
-     * seinfo tag (String), SHA-256 hash of the base APK in hexadecimal (String)
+     * <li> [0] process name ({@code String})
+     * <li> [1] exact start time in milliseconds according to {@code System.currentTimeMillis()}
+     *      ({@code Long})
+     * <li> [2] app uid ({@code Integer})
+     * <li> [3] app pid ({@code Integer})
+     * <li> [4] seinfo tag ({@code String})
+     * <li> [5] SHA-256 hash of the base APK in hexadecimal ({@code String})
      */
     public static final int TAG_APP_PROCESS_START = SecurityLogTags.SECURITY_APP_PROCESS_START;
+
     /**
-     * Indicate that keyguard is being dismissed.
+     * Indicates that keyguard has been dismissed.
      * There is no extra payload in the log event.
      */
-    public static final int TAG_KEYGUARD_DISMISSED =
-            SecurityLogTags.SECURITY_KEYGUARD_DISMISSED;
+    public static final int TAG_KEYGUARD_DISMISSED = SecurityLogTags.SECURITY_KEYGUARD_DISMISSED;
+
     /**
-     * Indicate that there has been an authentication attempt to dismiss the keyguard. The log entry
-     * contains the following information about the attempt encapsulated in an {@link Object} array,
-     * accessible via {@link SecurityEvent#getData()}:
-     * attempt result (integer, 1 for successful, 0 for unsuccessful), strength of auth method
-     * (integer, 1 if strong auth method was used, 0 otherwise)
+     * Indicates that there has been an authentication attempt to dismiss the keyguard. The log
+     * entry contains the following information about the attempt encapsulated in an {@link Object}
+     * array, accessible via {@link SecurityEvent#getData()}:
+     * <li> [0] attempt result ({@code Integer}, 1 for successful, 0 for unsuccessful)
+     * <li> [1] strength of authentication method ({@code Integer}, 1 if strong authentication
+     *      method was used, 0 otherwise)
      */
     public static final int TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT =
             SecurityLogTags.SECURITY_KEYGUARD_DISMISS_AUTH_ATTEMPT;
+
     /**
-     * Indicate that the device has been locked, either by user or by timeout.
-     * There is no extra payload in the log event.
+     * Indicates that the device has been locked, either by the user or by a timeout. There is no
+     * extra payload in the log event.
      */
     public static final int TAG_KEYGUARD_SECURED = SecurityLogTags.SECURITY_KEYGUARD_SECURED;
+
+    /**
+     * Indicates that the Android OS has started. The log entry contains the following information
+     * about the startup time software integrity check encapsulated in an {@link Object} array,
+     * accessible via {@link SecurityEvent#getData()}:
+     * <li> [0] Verified Boot state ({@code String})
+     * <li> [1] dm-verity mode ({@code String}).
+     * <p>Verified Boot state can be one of the following:
+     * <li> {@code green} indicates that there is a full chain of trust extending from the
+     * bootloader to verified partitions including the bootloader, boot partition, and all verified
+     * partitions.
+     * <li> {@code yellow} indicates that the boot partition has been verified using the embedded
+     * certificate and the signature is valid.
+     * <li> {@code orange} indicates that the device may be freely modified. Device integrity is
+     * left to the user to verify out-of-band.
+     * <p>dm-verity mode can be one of the following:
+     * <li> {@code enforcing} indicates that the device will be restarted when corruption is
+     * detected.
+     * <li> {@code eio} indicates that an I/O error will be returned for an attempt to read
+     * corrupted data blocks.
+     * For details see Verified Boot documentation.
+     */
+    public static final int TAG_OS_STARTUP = SecurityLogTags.SECURITY_OS_STARTUP;
+
+    /**
+     * Indicates that the Android OS has shutdown. There is no extra payload in the log event.
+     */
+    public static final int TAG_OS_SHUTDOWN = SecurityLogTags.SECURITY_OS_SHUTDOWN;
+
+    /**
+     * Indicates start-up of audit logging. There is no extra payload in the log event.
+     */
+    public static final int TAG_LOGGING_STARTED = SecurityLogTags.SECURITY_LOGGING_STARTED;
+
+    /**
+     * Indicates shutdown of audit logging. There is no extra payload in the log event.
+     */
+    public static final int TAG_LOGGING_STOPPED = SecurityLogTags.SECURITY_LOGGING_STOPPED;
+
+    /**
+     * Indicates that removable media has been mounted on the device. The log entry contains the
+     * following information about the event, encapsulated in an {@link Object} array and
+     * accessible via {@link SecurityEvent#getData()}:
+     * <li> [0] mount point ({@code String})
+     * <li> [1] volume label ({@code String}).
+     */
+    public static final int TAG_MEDIA_MOUNT = SecurityLogTags.SECURITY_MEDIA_MOUNTED;
+
+    /**
+     * Indicates that removable media was unmounted from the device. The log entry contains the
+     * following information about the event, encapsulated in an {@link Object} array and
+     * accessible via {@link SecurityEvent#getData()}:
+     * <li> [0] mount point ({@code String})
+     * <li> [1] volume label ({@code String}).
+     */
+    public static final int TAG_MEDIA_UNMOUNT = SecurityLogTags.SECURITY_MEDIA_UNMOUNTED;
+
+    /**
+     * Indicates that the audit log buffer has reached 90% of its capacity. There is no extra
+     * payload in the log event.
+     */
+    public static final int TAG_LOG_BUFFER_SIZE_CRITICAL =
+            SecurityLogTags.SECURITY_LOG_BUFFER_SIZE_CRITICAL;
+
+    /**
+     * Indicates that an admin has set a password expiration timeout. The log entry contains the
+     * following information about the event, encapsulated in an {@link Object} array and accessible
+     * via {@link SecurityEvent#getData()}:
+     * <li> [0] admin package name ({@code String})
+     * <li> [1] admin user ID ({@code Integer})
+     * <li> [2] target user ID ({@code Integer})
+     * <li> [3] new password expiration timeout in milliseconds ({@code Long}).
+     * @see DevicePolicyManager#setPasswordExpirationTimeout(ComponentName, long)
+     */
+    public static final int TAG_PASSWORD_EXPIRATION_SET =
+            SecurityLogTags.SECURITY_PASSWORD_EXPIRATION_SET;
+
+    /**
+     * Indicates that an admin has set a requirement for password complexity. The log entry contains
+     * the following information about the event, encapsulated in an {@link Object} array and
+     * accessible via {@link SecurityEvent#getData()}:
+     * <li> [0] admin package name ({@code String})
+     * <li> [1] admin user ID ({@code Integer})
+     * <li> [2] target user ID ({@code Integer})
+     * <li> [3] minimum password length ({@code Integer})
+     * <li> [4] password quality constraint ({@code Integer})
+     * <li> [5] minimum number of letters ({@code Integer})
+     * <li> [6] minimum number of non-letters ({@code Integer})
+     * <li> [7] minimum number of digits ({@code Integer})
+     * <li> [8] minimum number of uppercase letters ({@code Integer})
+     * <li> [9] minimum number of lowercase letters ({@code Integer})
+     * <li> [10] minimum number of symbols ({@code Integer})
+     *
+     * @see DevicePolicyManager#setPasswordMinimumLength(ComponentName, int)
+     * @see DevicePolicyManager#setPasswordQuality(ComponentName, int)
+     * @see DevicePolicyManager#setPasswordMinimumLetters(ComponentName, int)
+     * @see DevicePolicyManager#setPasswordMinimumNonLetter(ComponentName, int)
+     * @see DevicePolicyManager#setPasswordMinimumLowerCase(ComponentName, int)
+     * @see DevicePolicyManager#setPasswordMinimumUpperCase(ComponentName, int)
+     * @see DevicePolicyManager#setPasswordMinimumNumeric(ComponentName, int)
+     * @see DevicePolicyManager#setPasswordMinimumSymbols(ComponentName, int)
+     */
+    public static final int TAG_PASSWORD_COMPLEXITY_SET =
+            SecurityLogTags.SECURITY_PASSWORD_COMPLEXITY_SET;
+
+    /**
+     * Indicates that an admin has set a password history length. The log entry contains the
+     * following information about the event encapsulated in an {@link Object} array, accessible
+     * via {@link SecurityEvent#getData()}:
+     * <li> [0] admin package name ({@code String})
+     * <li> [1] admin user ID ({@code Integer})
+     * <li> [2] target user ID ({@code Integer})
+     * <li> [3] new password history length value ({@code Integer})
+     * @see DevicePolicyManager#setPasswordHistoryLength(ComponentName, int)
+     */
+    public static final int TAG_PASSWORD_HISTORY_LENGTH_SET =
+            SecurityLogTags.SECURITY_PASSWORD_HISTORY_LENGTH_SET;
+
+    /**
+     * Indicates that an admin has set a maximum screen lock timeout. The log entry contains the
+     * following information about the event encapsulated in an {@link Object} array, accessible
+     * via {@link SecurityEvent#getData()}:
+     * <li> [0] admin package name ({@code String})
+     * <li> [1] admin user ID ({@code Integer})
+     * <li> [2] target user ID ({@code Integer})
+     * <li> [3] new screen lock timeout in milliseconds ({@code Long})
+     * @see DevicePolicyManager#setMaximumTimeToLock(ComponentName, long)
+     */
+    public static final int TAG_MAX_SCREEN_LOCK_TIMEOUT_SET =
+            SecurityLogTags.SECURITY_MAX_SCREEN_LOCK_TIMEOUT_SET;
+
+    /**
+     * Indicates that an admin has set a maximum number of failed password attempts before wiping
+     * data. The log entry contains the following information about the event encapsulated in an
+     * {@link Object} array, accessible via {@link SecurityEvent#getData()}:
+     * <li> [0] admin package name ({@code String})
+     * <li> [1] admin user ID ({@code Integer})
+     * <li> [2] target user ID ({@code Integer})
+     * <li> [3] new maximum number of failed password attempts ({@code Integer})
+     * @see DevicePolicyManager#setMaximumFailedPasswordsForWipe(ComponentName, int)
+     */
+    public static final int TAG_MAX_PASSWORD_ATTEMPTS_SET =
+            SecurityLogTags.SECURITY_MAX_PASSWORD_ATTEMPTS_SET;
+
+    /**
+     * Indicates that an admin has set disabled keyguard features. The log entry contains the
+     * following information about the event encapsulated in an {@link Object} array, accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] admin package name ({@code String})
+     * <li> [1] admin user ID ({@code Integer})
+     * <li> [2] target user ID ({@code Integer})
+     * <li> [3] disabled keyguard feature mask ({@code Integer}).
+     * @see DevicePolicyManager#setKeyguardDisabledFeatures(ComponentName, int)
+     */
+    public static final int TAG_KEYGUARD_DISABLED_FEATURES_SET =
+            SecurityLogTags.SECURITY_KEYGUARD_DISABLED_FEATURES_SET;
+
+    /**
+     * Indicates that an admin remotely locked the device or profile. The log entry contains the
+     * following information about the event encapsulated in an {@link Object} array, accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] admin package name ({@code String}),
+     * <li> [1] admin user ID ({@code Integer}).
+     * <li> [2] target user ID ({@code Integer})
+     */
+    public static final int TAG_REMOTE_LOCK = SecurityLogTags.SECURITY_REMOTE_LOCK;
+
+    /**
+     * Indicates a failure to wipe device or user data. There is no extra payload in the log event.
+     */
+    public static final int TAG_WIPE_FAILURE = SecurityLogTags.SECURITY_WIPE_FAILED;
+
+    /**
+     * Indicates that an authentication key was generated. The log entry contains the following
+     * information about the event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] result ({@code Integer}, 0 if operation failed, 1 if succeeded)
+     * <li> [1] alias of the key ({@code String})
+     * <li> [2] requesting process uid ({@code Integer}).
+     */
+    public static final int TAG_KEY_GENERATED =
+            SecurityLogTags.SECURITY_KEY_GENERATED;
+
+    /**
+     * Indicates that a cryptographic key was imported. The log entry contains the following
+     * information about the event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] result ({@code Integer}, 0 if operation failed, 1 if succeeded)
+     * <li> [1] alias of the key ({@code String})
+     * <li> [2] requesting process uid ({@code Integer}).
+     */
+    public static final int TAG_KEY_IMPORT = SecurityLogTags.SECURITY_KEY_IMPORTED;
+
+    /**
+     * Indicates that a cryptographic key was destroyed. The log entry contains the following
+     * information about the event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] result ({@code Integer}, 0 if operation failed, 1 if succeeded)
+     * <li> [1] alias of the key ({@code String})
+     * <li> [2] requesting process uid ({@code Integer}).
+     */
+    public static final int TAG_KEY_DESTRUCTION = SecurityLogTags.SECURITY_KEY_DESTROYED;
+
+    /**
+     * Indicates that a new root certificate has been installed into system's trusted credential
+     * storage. The log entry contains the following information about the event, encapsulated in an
+     * {@link Object} array and accessible via {@link SecurityEvent#getData()}:
+     * <li> [0] result ({@code Integer}, 0 if operation failed, 1 if succeeded)
+     * <li> [1] subject of the certificate ({@code String}).
+     */
+    public static final int TAG_CERT_AUTHORITY_INSTALLED =
+            SecurityLogTags.SECURITY_CERT_AUTHORITY_INSTALLED;
+
+    /**
+     * Indicates that a new root certificate has been removed from system's trusted credential
+     * storage. The log entry contains the following information about the event, encapsulated in an
+     * {@link Object} array and accessible via {@link SecurityEvent#getData()}:
+     * <li> [0] result ({@code Integer}, 0 if operation failed, 1 if succeeded)
+     * <li> [1] subject of the certificate ({@code String}).
+     */
+    public static final int TAG_CERT_AUTHORITY_REMOVED =
+            SecurityLogTags.SECURITY_CERT_AUTHORITY_REMOVED;
+
+    /**
+     * Indicates that an admin has set a user restriction. The log entry contains the following
+     * information about the event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] admin package name ({@code String})
+     * <li> [1] admin user ID ({@code Integer})
+     * <li> [2] user restriction ({@code String})
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     */
+    public static final int TAG_USER_RESTRICTION_ADDED =
+            SecurityLogTags.SECURITY_USER_RESTRICTION_ADDED;
+
+    /**
+     * Indicates that an admin has removed a user restriction. The log entry contains the following
+     * information about the event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] admin package name ({@code String})
+     * <li> [1] admin user ID ({@code Integer})
+     * <li> [2] user restriction ({@code String})
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     */
+    public static final int TAG_USER_RESTRICTION_REMOVED =
+            SecurityLogTags.SECURITY_USER_RESTRICTION_REMOVED;
+
+    /**
+     * Indicates that cryptographic functionality self test has completed. The log entry contains an
+     * {@code Integer} payload, indicating the result of the test (0 if the test failed, 1 if
+     * succeeded) and accessible via {@link SecurityEvent#getData()}.
+     */
+    public static final int TAG_CRYPTO_SELF_TEST_COMPLETED =
+            SecurityLogTags.SECURITY_CRYPTO_SELF_TEST_COMPLETED;
+
+    /**
+     * Indicates a failed cryptographic key integrity check. The log entry contains the following
+     * information about the event, encapsulated in an {@link Object} array and accessible via
+     * {@link SecurityEvent#getData()}:
+     * <li> [0] alias of the key ({@code String})
+     * <li> [1] owner application uid ({@code Integer}).
+     */
+    public static final int TAG_KEY_INTEGRITY_VIOLATION =
+            SecurityLogTags.SECURITY_KEY_INTEGRITY_VIOLATION;
+
+    /**
+     * Indicates a failure to validate X.509v3 certificate. The log entry contains a {@code String}
+     * payload indicating the failure reason, accessible via {@link SecurityEvent#getData()}.
+     */
+    public static final int TAG_CERT_VALIDATION_FAILURE =
+            SecurityLogTags.SECURITY_CERT_VALIDATION_FAILURE;
+
+    /**
+     * Event severity level indicating that the event corresponds to normal workflow.
+     */
+    public static final int LEVEL_INFO = 1;
+
+    /**
+     * Event severity level indicating that the event may require admin attention.
+     */
+    public static final int LEVEL_WARNING = 2;
+
+    /**
+     * Event severity level indicating that the event requires urgent admin action.
+     */
+    public static final int LEVEL_ERROR = 3;
 
     /**
      * Returns if security logging is enabled. Log producers should only write new logs if this is
@@ -128,9 +470,28 @@ public class SecurityLog {
      */
     public static final class SecurityEvent implements Parcelable {
         private Event mEvent;
+        private long mId;
+
+        /**
+         * Constructor used by native classes to generate SecurityEvent instances.
+         * @hide
+         */
+        /* package */ SecurityEvent(byte[] data) {
+            this(0, data);
+        }
+
+        /**
+         * Constructor used by Parcelable.Creator to generate SecurityEvent instances.
+         * @hide
+         */
+        /* package */ SecurityEvent(Parcel source) {
+            this(source.readLong(), source.createByteArray());
+        }
 
         /** @hide */
-        /*package*/ SecurityEvent(byte[] data) {
+        @TestApi
+        public SecurityEvent(long id, byte[] data) {
+            mId = id;
             mEvent = Event.fromBytes(data);
         }
 
@@ -143,13 +504,8 @@ public class SecurityLog {
 
         /**
          * Returns the tag of this log entry, which specifies entry's semantics.
-         * Could be one of {@link SecurityLog#TAG_SYNC_RECV_FILE},
-         * {@link SecurityLog#TAG_SYNC_SEND_FILE}, {@link SecurityLog#TAG_ADB_SHELL_CMD},
-         * {@link SecurityLog#TAG_ADB_SHELL_INTERACTIVE}, {@link SecurityLog#TAG_APP_PROCESS_START},
-         * {@link SecurityLog#TAG_KEYGUARD_DISMISSED}, {@link SecurityLog#TAG_KEYGUARD_SECURED},
-         * {@link SecurityLog#TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT}.
          */
-        public @SECURITY_LOG_TAG int getTag() {
+        public @SecurityLogTag int getTag() {
             return mEvent.getTag();
         }
 
@@ -160,6 +516,79 @@ public class SecurityLog {
             return mEvent.getData();
         }
 
+        /**
+         * @hide
+         */
+        public void setId(long id) {
+            this.mId = id;
+        }
+
+        /**
+         * Returns the id of the event, where the id monotonically increases for each event. The id
+         * is reset when the device reboots, and when security logging is enabled.
+         */
+        public long getId() {
+            return mId;
+        }
+
+        /**
+         * Returns severity level for the event.
+         */
+        public @SecurityLogLevel int getLogLevel() {
+            switch (mEvent.getTag()) {
+                case TAG_ADB_SHELL_INTERACTIVE:
+                case TAG_ADB_SHELL_CMD:
+                case TAG_SYNC_RECV_FILE:
+                case TAG_SYNC_SEND_FILE:
+                case TAG_APP_PROCESS_START:
+                case TAG_KEYGUARD_DISMISSED:
+                case TAG_KEYGUARD_SECURED:
+                case TAG_OS_STARTUP:
+                case TAG_OS_SHUTDOWN:
+                case TAG_LOGGING_STARTED:
+                case TAG_LOGGING_STOPPED:
+                case TAG_MEDIA_MOUNT:
+                case TAG_MEDIA_UNMOUNT:
+                case TAG_PASSWORD_EXPIRATION_SET:
+                case TAG_PASSWORD_COMPLEXITY_SET:
+                case TAG_PASSWORD_HISTORY_LENGTH_SET:
+                case TAG_MAX_SCREEN_LOCK_TIMEOUT_SET:
+                case TAG_MAX_PASSWORD_ATTEMPTS_SET:
+                case TAG_USER_RESTRICTION_ADDED:
+                case TAG_USER_RESTRICTION_REMOVED:
+                    return LEVEL_INFO;
+                case TAG_CERT_AUTHORITY_REMOVED:
+                case TAG_CRYPTO_SELF_TEST_COMPLETED:
+                    return getSuccess() ? LEVEL_INFO : LEVEL_ERROR;
+                case TAG_CERT_AUTHORITY_INSTALLED:
+                case TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT:
+                case TAG_KEY_IMPORT:
+                case TAG_KEY_DESTRUCTION:
+                case TAG_KEY_GENERATED:
+                    return getSuccess() ? LEVEL_INFO : LEVEL_WARNING;
+                case TAG_LOG_BUFFER_SIZE_CRITICAL:
+                case TAG_WIPE_FAILURE:
+                case TAG_KEY_INTEGRITY_VIOLATION:
+                    return LEVEL_ERROR;
+                case TAG_CERT_VALIDATION_FAILURE:
+                    return LEVEL_WARNING;
+                default:
+                    return LEVEL_INFO;
+            }
+        }
+
+        // Success/failure if present is encoded as an integer in the first (0th) element of data.
+        private boolean getSuccess() {
+            final Object data = getData();
+            if (data == null || !(data instanceof Object[])) {
+                return false;
+            }
+
+            final Object[] array = (Object[]) data;
+            return array.length >= 1 && array[0] instanceof Integer && (Integer) array[0] != 0;
+        }
+
+
         @Override
         public int describeContents() {
             return 0;
@@ -167,6 +596,7 @@ public class SecurityLog {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
+            dest.writeLong(mId);
             dest.writeByteArray(mEvent.getBytes());
         }
 
@@ -174,7 +604,7 @@ public class SecurityLog {
                 new Parcelable.Creator<SecurityEvent>() {
             @Override
             public SecurityEvent createFromParcel(Parcel source) {
-                return new SecurityEvent(source.createByteArray());
+                return new SecurityEvent(source);
             }
 
             @Override
@@ -191,7 +621,7 @@ public class SecurityLog {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             SecurityEvent other = (SecurityEvent) o;
-            return mEvent.equals(other.mEvent);
+            return mEvent.equals(other.mEvent) && mId == other.mId;
         }
 
         /**
@@ -199,7 +629,7 @@ public class SecurityLog {
          */
         @Override
         public int hashCode() {
-            return mEvent.hashCode();
+            return Objects.hash(mEvent, mId);
         }
     }
     /**
@@ -224,8 +654,8 @@ public class SecurityLog {
             throws IOException;
 
     /**
-     * Retrieve all security logs whose timestamp (in nanosceonds) is equal to or greater than the
-     * given timestamp. This method will block until either the last log earlier than the given
+     * Retrieve all security logs whose timestamp is equal to or greater than the given timestamp in
+     * nanoseconds. This method will block until either the last log earlier than the given
      * timestamp is about to be pruned, or after a 2-hour timeout has passed.
      * @hide
      */

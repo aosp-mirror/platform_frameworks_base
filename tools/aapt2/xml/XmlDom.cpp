@@ -215,8 +215,8 @@ std::unique_ptr<XmlResource> Inflate(InputStream* in, IDiagnostics* diag, const 
       return {};
     }
   }
-  return util::make_unique<XmlResource>(ResourceFile{{}, {}, source}, StringPool{},
-                                        std::move(stack.root));
+  return util::make_unique<XmlResource>(ResourceFile{{}, {}, ResourceFile::Type::kUnknown, source},
+                                        StringPool{}, std::move(stack.root));
 }
 
 static void CopyAttributes(Element* el, android::ResXMLParser* parser, StringPool* out_pool) {
@@ -236,6 +236,11 @@ static void CopyAttributes(Element* el, android::ResXMLParser* parser, StringPoo
         attr.name = util::Utf16ToUtf8(StringPiece16(str16, len));
       }
 
+      uint32_t res_id = parser->getAttributeNameResID(i);
+      if (res_id > 0) {
+        attr.compiled_attribute = AaptAttribute(::aapt::Attribute(), {res_id});
+      }
+
       str16 = parser->getAttributeStringValue(i, &len);
       if (str16) {
         attr.value = util::Utf16ToUtf8(StringPiece16(str16, len));
@@ -243,8 +248,14 @@ static void CopyAttributes(Element* el, android::ResXMLParser* parser, StringPoo
 
       android::Res_value res_value;
       if (parser->getAttributeValue(i, &res_value) > 0) {
-        attr.compiled_value = ResourceUtils::ParseBinaryResValue(
-            ResourceType::kAnim, {}, parser->getStrings(), res_value, out_pool);
+        // Only compile the value if it is not a string, or it is a string that differs from
+        // the raw attribute value.
+        int32_t raw_value_idx = parser->getAttributeValueStringID(i);
+        if (res_value.dataType != android::Res_value::TYPE_STRING || raw_value_idx < 0 ||
+            static_cast<uint32_t>(raw_value_idx) != res_value.data) {
+          attr.compiled_value = ResourceUtils::ParseBinaryResValue(
+              ResourceType::kAnim, {}, parser->getStrings(), res_value, out_pool);
+        }
       }
 
       el->attributes.push_back(std::move(attr));
@@ -252,19 +263,21 @@ static void CopyAttributes(Element* el, android::ResXMLParser* parser, StringPoo
   }
 }
 
-std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnostics* diag,
-                                     const Source& source) {
+std::unique_ptr<XmlResource> Inflate(const void* data, size_t len, std::string* out_error) {
   // We import the android namespace because on Windows NO_ERROR is a macro, not
   // an enum, which causes errors when qualifying it with android::
   using namespace android;
 
-  StringPool string_pool;
-  std::unique_ptr<Element> root;
+  std::unique_ptr<XmlResource> xml_resource = util::make_unique<XmlResource>();
+
   std::stack<Element*> node_stack;
   std::unique_ptr<Element> pending_element;
 
   ResXMLTree tree;
-  if (tree.setTo(data, data_len) != NO_ERROR) {
+  if (tree.setTo(data, len) != NO_ERROR) {
+    if (out_error != nullptr) {
+      *out_error = "failed to initialize ResXMLTree";
+    }
     return {};
   }
 
@@ -315,12 +328,12 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnos
         }
 
         Element* this_el = el.get();
-        CopyAttributes(el.get(), &tree, &string_pool);
+        CopyAttributes(el.get(), &tree, &xml_resource->string_pool);
 
         if (!node_stack.empty()) {
           node_stack.top()->AppendChild(std::move(el));
         } else {
-          root = std::move(el);
+          xml_resource->root = std::move(el);
         }
         node_stack.push(this_el);
         break;
@@ -352,7 +365,28 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t data_len, IDiagnos
         break;
     }
   }
-  return util::make_unique<XmlResource>(ResourceFile{}, std::move(string_pool), std::move(root));
+  return xml_resource;
+}
+
+std::unique_ptr<XmlResource> XmlResource::Clone() const {
+  std::unique_ptr<XmlResource> cloned = util::make_unique<XmlResource>(file);
+  if (root != nullptr) {
+    cloned->root = root->CloneElement([&](const xml::Element& src, xml::Element* dst) {
+      dst->attributes.reserve(src.attributes.size());
+      for (const xml::Attribute& attr : src.attributes) {
+        xml::Attribute cloned_attr;
+        cloned_attr.name = attr.name;
+        cloned_attr.namespace_uri = attr.namespace_uri;
+        cloned_attr.value = attr.value;
+        cloned_attr.compiled_attribute = attr.compiled_attribute;
+        if (attr.compiled_value != nullptr) {
+          cloned_attr.compiled_value.reset(attr.compiled_value->Clone(&cloned->string_pool));
+        }
+        dst->attributes.push_back(std::move(cloned_attr));
+      }
+    });
+  }
+  return cloned;
 }
 
 Element* FindRootElement(Node* node) {
@@ -377,12 +411,7 @@ void Element::InsertChild(size_t index, std::unique_ptr<Node> child) {
 }
 
 Attribute* Element::FindAttribute(const StringPiece& ns, const StringPiece& name) {
-  for (auto& attr : attributes) {
-    if (ns == attr.namespace_uri && name == attr.name) {
-      return &attr;
-    }
-  }
-  return nullptr;
+  return const_cast<Attribute*>(static_cast<const Element*>(this)->FindAttribute(ns, name));
 }
 
 const Attribute* Element::FindAttribute(const StringPiece& ns, const StringPiece& name) const {
@@ -403,21 +432,42 @@ void Element::RemoveAttribute(const StringPiece& ns, const StringPiece& name) {
   attributes.erase(new_attr_end, attributes.end());
 }
 
+Attribute* Element::FindOrCreateAttribute(const StringPiece& ns, const StringPiece& name) {
+  Attribute* attr = FindAttribute(ns, name);
+  if (attr == nullptr) {
+    attributes.push_back(Attribute{ns.to_string(), name.to_string()});
+    attr = &attributes.back();
+  }
+  return attr;
+}
+
 Element* Element::FindChild(const StringPiece& ns, const StringPiece& name) {
+  return FindChildWithAttribute(ns, name, {}, {}, {});
+}
+
+const Element* Element::FindChild(const StringPiece& ns, const StringPiece& name) const {
   return FindChildWithAttribute(ns, name, {}, {}, {});
 }
 
 Element* Element::FindChildWithAttribute(const StringPiece& ns, const StringPiece& name,
                                          const StringPiece& attr_ns, const StringPiece& attr_name,
                                          const StringPiece& attr_value) {
-  for (auto& child : children) {
-    if (Element* el = NodeCast<Element>(child.get())) {
+  return const_cast<Element*>(static_cast<const Element*>(this)->FindChildWithAttribute(
+      ns, name, attr_ns, attr_name, attr_value));
+}
+
+const Element* Element::FindChildWithAttribute(const StringPiece& ns, const StringPiece& name,
+                                               const StringPiece& attr_ns,
+                                               const StringPiece& attr_name,
+                                               const StringPiece& attr_value) const {
+  for (const auto& child : children) {
+    if (const Element* el = NodeCast<Element>(child.get())) {
       if (ns == el->namespace_uri && name == el->name) {
         if (attr_ns.empty() && attr_name.empty()) {
           return el;
         }
 
-        Attribute* attr = el->FindAttribute(attr_ns, attr_name);
+        const Attribute* attr = el->FindAttribute(attr_ns, attr_name);
         if (attr && attr_value == attr->value) {
           return el;
         }
@@ -464,6 +514,12 @@ void Element::Accept(Visitor* visitor) {
   visitor->AfterVisitElement(this);
 }
 
+void Element::Accept(ConstVisitor* visitor) const {
+  visitor->BeforeVisitElement(this);
+  visitor->Visit(this);
+  visitor->AfterVisitElement(this);
+}
+
 std::unique_ptr<Node> Text::Clone(const ElementCloneFunc&) const {
   auto t = util::make_unique<Text>();
   t->comment = comment;
@@ -474,6 +530,10 @@ std::unique_ptr<Node> Text::Clone(const ElementCloneFunc&) const {
 }
 
 void Text::Accept(Visitor* visitor) {
+  visitor->Visit(this);
+}
+
+void Text::Accept(ConstVisitor* visitor) const {
   visitor->Visit(this);
 }
 
@@ -491,10 +551,9 @@ void PackageAwareVisitor::AfterVisitElement(Element* el) {
   package_decls_.pop_back();
 }
 
-Maybe<ExtractedPackage> PackageAwareVisitor::TransformPackageAlias(
-    const StringPiece& alias, const StringPiece& local_package) const {
+Maybe<ExtractedPackage> PackageAwareVisitor::TransformPackageAlias(const StringPiece& alias) const {
   if (alias.empty()) {
-    return ExtractedPackage{local_package.to_string(), false /* private */};
+    return ExtractedPackage{{}, false /*private*/};
   }
 
   const auto rend = package_decls_.rend();
@@ -505,7 +564,7 @@ Maybe<ExtractedPackage> PackageAwareVisitor::TransformPackageAlias(
       const PackageDecl& decl = *iter2;
       if (alias == decl.prefix) {
         if (decl.package.package.empty()) {
-          return ExtractedPackage{local_package.to_string(), decl.package.private_namespace};
+          return ExtractedPackage{{}, decl.package.private_namespace};
         }
         return decl.package;
       }

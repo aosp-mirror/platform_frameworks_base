@@ -18,6 +18,7 @@
 
 #include "android-base/stringprintf.h"
 #include "androidfw/AssetManager.h"
+#include "androidfw/AssetManager2.h"
 
 namespace android {
 
@@ -32,19 +33,53 @@ void GetResourceBenchmarkOld(const std::vector<std::string>& paths, const ResTab
     }
   }
 
+  // Make sure to force creation of the ResTable first, or else the configuration doesn't get set.
+  const ResTable& table = assetmanager.getResources(true);
   if (config != nullptr) {
     assetmanager.setConfiguration(*config);
   }
 
-  const ResTable& table = assetmanager.getResources(true);
+  Res_value value;
+  ResTable_config selected_config;
+  uint32_t flags;
+  uint32_t last_ref = 0u;
+
+  while (state.KeepRunning()) {
+    ssize_t block = table.getResource(resid, &value, false /*may_be_bag*/, 0u /*density*/, &flags,
+                                      &selected_config);
+    table.resolveReference(&value, block, &last_ref, &flags, &selected_config);
+  }
+}
+
+void GetResourceBenchmark(const std::vector<std::string>& paths, const ResTable_config* config,
+                          uint32_t resid, benchmark::State& state) {
+  std::vector<std::unique_ptr<const ApkAssets>> apk_assets;
+  std::vector<const ApkAssets*> apk_assets_ptrs;
+  for (const std::string& path : paths) {
+    std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(path);
+    if (apk == nullptr) {
+      state.SkipWithError(base::StringPrintf("Failed to load assets %s", path.c_str()).c_str());
+      return;
+    }
+    apk_assets_ptrs.push_back(apk.get());
+    apk_assets.push_back(std::move(apk));
+  }
+
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets(apk_assets_ptrs);
+  if (config != nullptr) {
+    assetmanager.SetConfiguration(*config);
+  }
 
   Res_value value;
   ResTable_config selected_config;
   uint32_t flags;
+  uint32_t last_id = 0u;
 
   while (state.KeepRunning()) {
-    table.getResource(resid, &value, false /*may_be_bag*/, 0u /*density*/, &flags,
-                      &selected_config);
+    ApkAssetsCookie cookie = assetmanager.GetResource(
+        resid, false /* may_be_bag */, 0u /* density_override */, &value, &selected_config, &flags);
+    assetmanager.ResolveReference(cookie, &value, &selected_config, &flags, &last_id);
   }
 }
 

@@ -94,7 +94,7 @@ interface IBackupTransport {
      * "live" backup services without interfering with the live bookkeeping.  The
      * returned string should be a name that is expected to be unambiguous among all
      * available backup transports; the name of the class implementing the transport
-     * is a good choice.
+     * is a good choice.  This MUST be constant.
      *
      * @return A unique name, suitable for use as a file or directory name, that the
      *         Backup Manager could use to disambiguate state files associated with
@@ -306,4 +306,13 @@ interface IBackupTransport {
      *    operation will immediately be finished with no further attempts to restore app data.
      */
     int abortFullRestore();
+
+    /**
+     * Returns flags with additional information about the transport, which is accessible to the
+     * {@link android.app.backup.BackupAgent}. This allows the agent to decide what to backup or
+     * restore based on properties of the transport.
+     *
+     * <p>For supported flags see {@link android.app.backup.BackupAgent}.
+     */
+    int getTransportFlags();
 }

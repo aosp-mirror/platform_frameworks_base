@@ -15,8 +15,8 @@
  */
 package com.android.keyguard;
 
-import static com.android.keyguard.LatencyTracker.ACTION_CHECK_CREDENTIAL;
-import static com.android.keyguard.LatencyTracker.ACTION_CHECK_CREDENTIAL_UNLOCKED;
+import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL;
+import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL_UNLOCKED;
 
 import android.content.Context;
 import android.graphics.Rect;
@@ -33,6 +33,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
 
+import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
@@ -155,6 +156,13 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         EmergencyButton button = findViewById(R.id.emergency_call_button);
         if (button != null) {
             button.setCallback(this);
+        }
+
+        View cancelBtn = findViewById(R.id.cancel_button);
+        if (cancelBtn != null) {
+            cancelBtn.setOnClickListener(view -> {
+                mCallback.reset();
+            });
         }
     }
 
@@ -332,8 +340,9 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             @Override
             public void onTick(long millisUntilFinished) {
                 final int secondsRemaining = (int) Math.round(millisUntilFinished / 1000.0);
-                mSecurityMessageDisplay.formatMessage(
-                        R.string.kg_too_many_failed_attempts_countdown, secondsRemaining);
+                mSecurityMessageDisplay.setMessage(mContext.getResources().getQuantityString(
+                                R.plurals.kg_too_many_failed_attempts_countdown,
+                                secondsRemaining, secondsRemaining));
             }
 
             @Override
@@ -364,7 +373,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
     @Override
     public void onResume(int reason) {
-        reset();
     }
 
     @Override
@@ -396,7 +404,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     }
 
     @Override
-    public void showMessage(String message, int color) {
+    public void showMessage(CharSequence message, int color) {
         mSecurityMessageDisplay.setNextMessageColor(color);
         mSecurityMessageDisplay.setMessage(message);
     }
@@ -488,5 +496,11 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     @Override
     public boolean hasOverlappingRendering() {
         return false;
+    }
+
+    @Override
+    public CharSequence getTitle() {
+        return getContext().getString(
+                com.android.internal.R.string.keyguard_accessibility_pattern_unlock);
     }
 }

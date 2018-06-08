@@ -41,6 +41,6 @@ sk_sp<const GrGLInterface> GlesDriver::getSkiaInterface() {
     return skiaInterface;
 }
 
-} // namespace debug
-} // namespace uirenderer
-} // namespace android
+}  // namespace debug
+}  // namespace uirenderer
+}  // namespace android

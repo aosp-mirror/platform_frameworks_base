@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.statusbar.policy.DarkIconDispatcher.getTint;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -23,11 +25,11 @@ import android.animation.ValueAnimator;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -43,7 +45,6 @@ import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Property;
 import android.util.TypedValue;
-import android.view.View;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Interpolator;
@@ -58,7 +59,7 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import java.text.NumberFormat;
 import java.util.Arrays;
 
-public class StatusBarIconView extends AnimatedImageView {
+public class StatusBarIconView extends AnimatedImageView implements StatusIconDisplayable {
     public static final int NO_COLOR = 0;
 
     /**
@@ -66,6 +67,12 @@ public class StatusBarIconView extends AnimatedImageView {
      * everything above 30% to 50%, making it appear on 1bit color depths.
      */
     private static final float DARK_ALPHA_BOOST = 0.67f;
+    /**
+     * Status icons are currently drawn with the intention of being 17dp tall, but we
+     * want to scale them (in a way that doesn't require an asset dump) down 2dp. So
+     * 17dp * (15 / 17) = 15dp, the new height.
+     */
+    private static final float SYSTEM_ICON_SCALE = 15.f / 17.f;
     private final int ANIMATION_DURATION_FAST = 100;
 
     public static final int STATE_ICON = 0;
@@ -115,7 +122,7 @@ public class StatusBarIconView extends AnimatedImageView {
     private final boolean mBlocked;
     private int mDensity;
     private float mIconScale = 1.0f;
-    private final Paint mDotPaint = new Paint();
+    private final Paint mDotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private float mDotRadius;
     private int mStaticDotRadius;
     private int mVisibleState = STATE_ICON;
@@ -144,6 +151,8 @@ public class StatusBarIconView extends AnimatedImageView {
     private ColorMatrixColorFilter mMatrixColorFilter;
     private boolean mIsInShelf;
     private Runnable mLayoutRunnable;
+    private boolean mDismissed;
+    private Runnable mOnDismissListener;
 
     public StatusBarIconView(Context context, String slot, StatusBarNotification sbn) {
         this(context, slot, sbn, false);
@@ -160,41 +169,38 @@ public class StatusBarIconView extends AnimatedImageView {
         mNumberPain.setColor(context.getColor(R.drawable.notification_number_text_color));
         mNumberPain.setAntiAlias(true);
         setNotification(sbn);
-        maybeUpdateIconScaleDimens();
         setScaleType(ScaleType.CENTER);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
         if (mNotification != null) {
             setDecorColor(getContext().getColor(
-                    com.android.internal.R.color.notification_icon_default_color));
+                    com.android.internal.R.color.notification_default_color_light));
         }
         reloadDimens();
+        maybeUpdateIconScaleDimens();
     }
 
+    /** Should always be preceded by {@link #reloadDimens()} */
     private void maybeUpdateIconScaleDimens() {
         // We do not resize and scale system icons (on the right), only notification icons (on the
         // left).
         if (mNotification != null || mAlwaysScaleIcon) {
-            updateIconScaleDimens();
+            updateIconScaleForNotifications();
+        } else {
+            updateIconScaleForSystemIcons();
         }
     }
 
-    private void updateIconScaleDimens() {
-        Resources res = mContext.getResources();
-        mStatusBarIconSize = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
-        mStatusBarIconDrawingSizeDark =
-                res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size_dark);
-        mStatusBarIconDrawingSize =
-                res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
-        updateIconScale();
-    }
-
-    private void updateIconScale() {
+    private void updateIconScaleForNotifications() {
         final float imageBounds = NotificationUtils.interpolate(
                 mStatusBarIconDrawingSize,
                 mStatusBarIconDrawingSizeDark,
                 mDarkAmount);
         final int outerBounds = mStatusBarIconSize;
         mIconScale = (float)imageBounds / (float)outerBounds;
+    }
+
+    private void updateIconScaleForSystemIcons() {
+        mIconScale = SYSTEM_ICON_SCALE;
     }
 
     public float getIconScaleFullyDark() {
@@ -211,15 +217,21 @@ public class StatusBarIconView extends AnimatedImageView {
         int density = newConfig.densityDpi;
         if (density != mDensity) {
             mDensity = density;
+            reloadDimens();
             maybeUpdateIconScaleDimens();
             updateDrawable();
-            reloadDimens();
         }
     }
 
     private void reloadDimens() {
         boolean applyRadius = mDotRadius == mStaticDotRadius;
-        mStaticDotRadius = getResources().getDimensionPixelSize(R.dimen.overflow_dot_radius);
+        Resources res = getResources();
+        mStaticDotRadius = res.getDimensionPixelSize(R.dimen.overflow_dot_radius);
+        mStatusBarIconSize = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
+        mStatusBarIconDrawingSizeDark =
+                res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size_dark);
+        mStatusBarIconDrawingSize =
+                res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
         if (applyRadius) {
             mDotRadius = mStaticDotRadius;
         }
@@ -237,7 +249,8 @@ public class StatusBarIconView extends AnimatedImageView {
         mDozer = new NotificationIconDozeHelper(context);
         mBlocked = false;
         mAlwaysScaleIcon = true;
-        updateIconScaleDimens();
+        reloadDimens();
+        updateIconScaleForNotifications();
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
     }
 
@@ -412,17 +425,16 @@ public class StatusBarIconView extends AnimatedImageView {
         }
         if (mDotAppearAmount != 0.0f) {
             float radius;
-            float alpha;
+            float alpha = Color.alpha(mDecorColor) / 255.f;
             if (mDotAppearAmount <= 1.0f) {
                 radius = mDotRadius * mDotAppearAmount;
-                alpha = 1.0f;
             } else {
                 float fadeOutAmount = mDotAppearAmount - 1.0f;
-                alpha = 1.0f - fadeOutAmount;
+                alpha = alpha * (1.0f - fadeOutAmount);
                 radius = NotificationUtils.interpolate(mDotRadius, getWidth() / 4, fadeOutAmount);
             }
             mDotPaint.setAlpha((int) (alpha * 255));
-            canvas.drawCircle(getWidth() / 2, getHeight() / 2, radius, mDotPaint);
+            canvas.drawCircle(mStatusBarIconSize / 2, getHeight() / 2, radius, mDotPaint);
         }
     }
 
@@ -654,6 +666,7 @@ public class StatusBarIconView extends AnimatedImageView {
         mContrastedDrawableColor = contrastedColor;
     }
 
+    @Override
     public void setVisibleState(int state) {
         setVisibleState(state, true /* animate */, null /* endRunnable */);
     }
@@ -668,6 +681,19 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     public void setVisibleState(int visibleState, boolean animate, Runnable endRunnable) {
+        setVisibleState(visibleState, animate, endRunnable, 0);
+    }
+
+    /**
+     * Set the visibleState of this view.
+     *
+     * @param visibleState The new state.
+     * @param animate Should we animate?
+     * @param endRunnable The runnable to run at the end.
+     * @param duration The duration of an animation or 0 if the default should be taken.
+     */
+    public void setVisibleState(int visibleState, boolean animate, Runnable endRunnable,
+            long duration) {
         boolean runnableAdded = false;
         if (visibleState != mVisibleState) {
             mVisibleState = visibleState;
@@ -689,7 +715,8 @@ public class StatusBarIconView extends AnimatedImageView {
                     mIconAppearAnimator = ObjectAnimator.ofFloat(this, ICON_APPEAR_AMOUNT,
                             currentAmount, targetAmount);
                     mIconAppearAnimator.setInterpolator(interpolator);
-                    mIconAppearAnimator.setDuration(ANIMATION_DURATION_FAST);
+                    mIconAppearAnimator.setDuration(duration == 0 ? ANIMATION_DURATION_FAST
+                            : duration);
                     mIconAppearAnimator.addListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
@@ -711,8 +738,9 @@ public class StatusBarIconView extends AnimatedImageView {
                 if (targetAmount != currentAmount) {
                     mDotAnimator = ObjectAnimator.ofFloat(this, DOT_APPEAR_AMOUNT,
                             currentAmount, targetAmount);
-                    mDotAnimator.setInterpolator(interpolator);
-                    mDotAnimator.setDuration(ANIMATION_DURATION_FAST);
+                    mDotAnimator.setInterpolator(interpolator);;
+                    mDotAnimator.setDuration(duration == 0 ? ANIMATION_DURATION_FAST
+                            : duration);
                     final boolean runRunnable = !runnableAdded;
                     mDotAnimator.addListener(new AnimatorListenerAdapter() {
                         @Override
@@ -785,11 +813,11 @@ public class StatusBarIconView extends AnimatedImageView {
     public void setDark(boolean dark, boolean fade, long delay) {
         mDozer.setIntensityDark(f -> {
             mDarkAmount = f;
-            updateIconScale();
+            updateIconScaleForNotifications();
             updateDecorColor();
             updateIconColor();
             updateAllowAnimation();
-        }, dark, fade, delay);
+        }, dark, fade, delay, this);
     }
 
     private void updateAllowAnimation() {
@@ -835,6 +863,39 @@ public class StatusBarIconView extends AnimatedImageView {
 
     public void executeOnLayout(Runnable runnable) {
         mLayoutRunnable = runnable;
+    }
+
+    public void setDismissed() {
+        mDismissed = true;
+        if (mOnDismissListener != null) {
+            mOnDismissListener.run();
+        }
+    }
+
+    public boolean isDismissed() {
+        return mDismissed;
+    }
+
+    public void setOnDismissListener(Runnable onDismissListener) {
+        mOnDismissListener = onDismissListener;
+    }
+
+    @Override
+    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
+        int areaTint = getTint(area, this, tint);
+        ColorStateList color = ColorStateList.valueOf(areaTint);
+        setImageTintList(color);
+        setDecorColor(areaTint);
+    }
+
+    @Override
+    public boolean isIconVisible() {
+        return mIcon != null && mIcon.visible;
+    }
+
+    @Override
+    public boolean isIconBlocked() {
+        return mBlocked;
     }
 
     public interface OnVisibilityChangedListener {

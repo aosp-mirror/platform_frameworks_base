@@ -15,6 +15,8 @@
  */
 package android.service.autofill;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -22,6 +24,7 @@ import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.Intent;
 import android.os.CancellationSignal;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.Looper;
@@ -33,9 +36,6 @@ import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
-
-import com.android.internal.os.HandlerCaller;
-import com.android.internal.os.SomeArgs;
 
 /**
  * An {@code AutofillService} is a service used to automatically fill the contents of the screen
@@ -65,7 +65,7 @@ import com.android.internal.os.SomeArgs;
  *   <li>The service replies through {@link FillCallback#onSuccess(FillResponse)}.
  *   <li>The Android System calls {@link #onDisconnected()} and unbinds from the
  *       {@code AutofillService}.
- *   <li>The Android System displays an UI affordance with the options sent by the service.
+ *   <li>The Android System displays an autofill UI with the options sent by the service.
  *   <li>The user picks an option.
  *   <li>The proper views are autofilled.
  * </ol>
@@ -187,7 +187,7 @@ import com.android.internal.os.SomeArgs;
  * protect a dataset that contains sensitive information by requiring dataset authentication
  * (see {@link Dataset.Builder#setAuthentication(android.content.IntentSender)}), and to include
  * info about the "primary" field of the partition in the custom presentation for "secondary"
- * fields &mdash; that would prevent a malicious app from getting the "primary" fields without the
+ * fields&mdash;that would prevent a malicious app from getting the "primary" fields without the
  * user realizing they're being released (for example, a malicious app could have fields for a
  * credit card number, verification code, and expiration date crafted in a way that just the latter
  * is visible; by explicitly indicating the expiration date is related to a given credit card
@@ -438,8 +438,116 @@ import com.android.internal.os.SomeArgs;
  *  AutofillValue password = passwordNode.getAutofillValue().getTextValue().toString();
  *
  *  save(username, password);
+ *  </pre>
  *
- * </pre>
+ * <a name="Privacy"></a>
+ * <h3>Privacy</h3>
+ *
+ * <p>The {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback)} method is called
+ * without the user content. The Android system strips some properties of the
+ * {@link android.app.assist.AssistStructure.ViewNode view nodes} passed to this call, but not all
+ * of them. For example, the data provided in the {@link android.view.ViewStructure.HtmlInfo}
+ * objects set by {@link android.webkit.WebView} is never stripped out.
+ *
+ * <p>Because this data could contain PII (Personally Identifiable Information, such as username or
+ * email address), the service should only use it locally (i.e., in the app's process) for
+ * heuristics purposes, but it should not be sent to external servers.
+ *
+ * <a name="FieldClassification"></a>
+ * <h3>Metrics and field classification</h3
+ *
+ * <p>The service can call {@link #getFillEventHistory()} to get metrics representing the user
+ * actions, and then use these metrics to improve its heuristics.
+ *
+ * <p>Prior to Android {@link android.os.Build.VERSION_CODES#P}, the metrics covered just the
+ * scenarios where the service knew how to autofill an activity, but Android
+ * {@link android.os.Build.VERSION_CODES#P} introduced a new mechanism called field classification,
+ * which allows the service to dinamically classify the meaning of fields based on the existing user
+ * data known by the service.
+ *
+ * <p>Typically, field classification can be used to detect fields that can be autofilled with
+ * user data that is not associated with a specific app&mdash;such as email and physical
+ * address. Once the service identifies that a such field was manually filled by the user, the
+ * service could use this signal to improve its heuristics on subsequent requests (for example, by
+ * infering which resource ids are associated with known fields).
+ *
+ * <p>The field classification workflow involves 4 steps:
+ *
+ * <ol>
+ *   <li>Set the user data through {@link AutofillManager#setUserData(UserData)}. This data is
+ *   cached until the system restarts (or the service is disabled), so it doesn't need to be set for
+ *   all requests.
+ *   <li>Identify which fields should be analysed by calling
+ *   {@link FillResponse.Builder#setFieldClassificationIds(AutofillId...)}.
+ *   <li>Verify the results through {@link FillEventHistory.Event#getFieldsClassification()}.
+ *   <li>Use the results to dynamically create {@link Dataset} or {@link SaveInfo} objects in
+ *   subsequent requests.
+ * </ol>
+ *
+ * <p>The field classification is an expensive operation and should be used carefully, otherwise it
+ * can reach its rate limit and get blocked by the Android System. Ideally, it should be used just
+ * in cases where the service could not determine how an activity can be autofilled, but it has a
+ * strong suspicious that it could. For example, if an activity has four or more fields and one of
+ * them is a list, chances are that these are address fields (like address, city, state, and
+ * zip code).
+ *
+ * <a name="CompatibilityMode"></a>
+ * <h3>Compatibility mode</h3>
+ *
+ * <p>Apps that use standard Android widgets support autofill out-of-the-box and need to do
+ * very little to improve their user experience (annotating autofillable views and providing
+ * autofill hints). However, some apps (typically browsers) do their own rendering and the rendered
+ * content may contain semantic structure that needs to be surfaced to the autofill framework. The
+ * platform exposes APIs to achieve this, however it could take some time until these apps implement
+ * autofill support.
+ *
+ * <p>To enable autofill for such apps the platform provides a compatibility mode in which the
+ * platform would fall back to the accessibility APIs to generate the state reported to autofill
+ * services and fill data. This mode needs to be explicitly requested for a given package up
+ * to a specified max version code allowing clean migration path when the target app begins to
+ * support autofill natively. Note that enabling compatibility may degrade performance for the
+ * target package and should be used with caution. The platform supports whitelisting which packages
+ * can be targeted in compatibility mode to ensure this mode is used only when needed and as long
+ * as needed.
+ *
+ * <p>You can request compatibility mode for packages of interest in the meta-data resource
+ * associated with your service. Below is a sample service declaration:
+ *
+ * <pre> &lt;service android:name=".MyAutofillService"
+ *              android:permission="android.permission.BIND_AUTOFILL_SERVICE"&gt;
+ *     &lt;intent-filter&gt;
+ *         &lt;action android:name="android.service.autofill.AutofillService" /&gt;
+ *     &lt;/intent-filter&gt;
+ *     &lt;meta-data android:name="android.autofill" android:resource="@xml/autofillservice" /&gt;
+ * &lt;/service&gt;</pre>
+ *
+ * <p>In the XML file you can specify one or more packages for which to enable compatibility
+ * mode. Below is a sample meta-data declaration:
+ *
+ * <pre> &lt;autofill-service xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+ *     &lt;compatibility-package android:name="foo.bar.baz" android:maxLongVersionCode="1000000000"/&gt;
+ * &lt;/autofill-service&gt;</pre>
+ *
+ * <p>Notice that compatibility mode has limitations such as:
+ * <ul>
+ * <li>No manual autofill requests. Hence, the {@link FillRequest}
+ * {@link FillRequest#getFlags() flags} never have the {@link FillRequest#FLAG_MANUAL_REQUEST} flag.
+ * <li>The value of password fields are most likely masked&mdash;for example, {@code ****} instead
+ * of {@code 1234}. Hence, you must be careful when using these values to avoid updating the user
+ * data with invalid input. For example, when you parse the {@link FillRequest} and detect a
+ * password field, you could check if its
+ * {@link android.app.assist.AssistStructure.ViewNode#getInputType()
+ * input type} has password flags and if so, don't add it to the {@link SaveInfo} object.
+ * <li>The autofill context is not always {@link AutofillManager#commit() committed} when an HTML
+ * form is submitted. Hence, you must use other mechanisms to trigger save, such as setting the
+ * {@link SaveInfo#FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE} flag on {@link SaveInfo.Builder#setFlags(int)}
+ * or using {@link SaveInfo.Builder#setTriggerId(AutofillId)}.
+ * <li>Browsers often provide their own autofill management system. When both the browser and
+ * the platform render an autofill dialog at the same time, the result can be confusing to the user.
+ * Such browsers typically offer an option for users to disable autofill, so your service should
+ * also allow users to disable compatiblity mode for specific apps. That way, it is up to the user
+ * to decide which autofill mechanism&mdash;the browser's or the platform's&mdash;should be used.
+ * </ul>
  */
 public abstract class AutofillService extends Service {
     private static final String TAG = "AutofillService";
@@ -466,20 +574,12 @@ public abstract class AutofillService extends Service {
      */
     public static final String SERVICE_META_DATA = "android.autofill";
 
-    // Handler messages.
-    private static final int MSG_CONNECT = 1;
-    private static final int MSG_DISCONNECT = 2;
-    private static final int MSG_ON_FILL_REQUEST = 3;
-    private static final int MSG_ON_SAVE_REQUEST = 4;
-
     private final IAutoFillService mInterface = new IAutoFillService.Stub() {
         @Override
         public void onConnectedStateChanged(boolean connected) {
-            if (connected) {
-                mHandlerCaller.obtainMessage(MSG_CONNECT).sendToTarget();
-            } else {
-                mHandlerCaller.obtainMessage(MSG_DISCONNECT).sendToTarget();
-            }
+            mHandler.sendMessage(obtainMessage(
+                    connected ? AutofillService::onConnected : AutofillService::onDisconnected,
+                    AutofillService.this));
         }
 
         @Override
@@ -490,56 +590,27 @@ public abstract class AutofillService extends Service {
             } catch (RemoteException e) {
                 e.rethrowFromSystemServer();
             }
-            mHandlerCaller.obtainMessageOOO(MSG_ON_FILL_REQUEST, request,
-                    CancellationSignal.fromTransport(transport), callback)
-                    .sendToTarget();
+            mHandler.sendMessage(obtainMessage(
+                    AutofillService::onFillRequest,
+                    AutofillService.this, request, CancellationSignal.fromTransport(transport),
+                    new FillCallback(callback, request.getId())));
         }
 
         @Override
         public void onSaveRequest(SaveRequest request, ISaveCallback callback) {
-            mHandlerCaller.obtainMessageOO(MSG_ON_SAVE_REQUEST, request,
-                    callback).sendToTarget();
+            mHandler.sendMessage(obtainMessage(
+                    AutofillService::onSaveRequest,
+                    AutofillService.this, request, new SaveCallback(callback)));
         }
     };
 
-    private final HandlerCaller.Callback mHandlerCallback = (msg) -> {
-        switch (msg.what) {
-            case MSG_CONNECT: {
-                onConnected();
-                break;
-            } case MSG_ON_FILL_REQUEST: {
-                final SomeArgs args = (SomeArgs) msg.obj;
-                final FillRequest request = (FillRequest) args.arg1;
-                final CancellationSignal cancellation = (CancellationSignal) args.arg2;
-                final IFillCallback callback = (IFillCallback) args.arg3;
-                final FillCallback fillCallback = new FillCallback(callback, request.getId());
-                args.recycle();
-                onFillRequest(request, cancellation, fillCallback);
-                break;
-            } case MSG_ON_SAVE_REQUEST: {
-                final SomeArgs args = (SomeArgs) msg.obj;
-                final SaveRequest request = (SaveRequest) args.arg1;
-                final ISaveCallback callback = (ISaveCallback) args.arg2;
-                final SaveCallback saveCallback = new SaveCallback(callback);
-                args.recycle();
-                onSaveRequest(request, saveCallback);
-                break;
-            } case MSG_DISCONNECT: {
-                onDisconnected();
-                break;
-            } default: {
-                Log.w(TAG, "MyCallbacks received invalid message type: " + msg);
-            }
-        }
-    };
-
-    private HandlerCaller mHandlerCaller;
+    private Handler mHandler;
 
     @CallSuper
     @Override
     public void onCreate() {
         super.onCreate();
-        mHandlerCaller = new HandlerCaller(null, Looper.getMainLooper(), mHandlerCallback, true);
+        mHandler = new Handler(Looper.getMainLooper(), null, true);
     }
 
     @Override

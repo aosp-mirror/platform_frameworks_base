@@ -16,52 +16,45 @@
 package com.android.settingslib.wifi;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 
-import com.android.settingslib.SettingLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
-@RunWith(SettingLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class AccessPointPreferenceTest {
 
     private Context mContext = RuntimeEnvironment.application;
 
-    @Test
-    public void generatePreferenceKey_returnsSsidPlusSecurity() {
-        String ssid = "ssid";
-        String bssid = "00:00:00:00:00:00";
-        int security = AccessPoint.SECURITY_WEP;
-        String expectedKey = ssid + ',' + security;
+    @Mock
+    private AccessPoint mockAccessPoint;
+    @Mock
+    private AccessPointPreference.UserBadgeCache mockUserBadgeCache;
+    @Mock
+    private AccessPointPreference.IconInjector mockIconInjector;
 
-        TestAccessPointBuilder builder = new TestAccessPointBuilder(mContext);
-        builder.setBssid(bssid).setSsid(ssid).setSecurity(security);
-
-        assertThat(AccessPointPreference.generatePreferenceKey(builder.build()))
-                .isEqualTo(expectedKey);
+    private AccessPointPreference createWithAccessPoint(AccessPoint accessPoint) {
+        return new AccessPointPreference(accessPoint, mContext, mockUserBadgeCache,
+                0, true, null, -1, mockIconInjector);
     }
 
-    @Test
-    public void generatePreferenceKey_emptySsidReturnsBssidPlusSecurity() {
-        String ssid = "";
-        String bssid = "00:00:00:00:00:00";
-        int security = AccessPoint.SECURITY_WEP;
-        String expectedKey = bssid + ',' + security;
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
 
-        TestAccessPointBuilder builder = new TestAccessPointBuilder(mContext);
-        builder.setBssid(bssid).setSsid(ssid).setSecurity(security);
-
-        assertThat(AccessPointPreference.generatePreferenceKey(builder.build()))
-                .isEqualTo(expectedKey);
+        when(mockIconInjector.getIcon(anyInt())).thenReturn(new ColorDrawable());
     }
 
     @Test
@@ -80,6 +73,18 @@ public class AccessPointPreferenceTest {
         assertThat(AccessPointPreference.buildContentDescription(
                 RuntimeEnvironment.application, pref, ap))
                 .isEqualTo("ssid,connected,Wifi signal full.,Secure network");
+    }
+
+    @Test
+    public void refresh_shouldUpdateIcon() {
+        int level = 1;
+        when(mockAccessPoint.getSpeed()).thenReturn(0);
+        when(mockAccessPoint.getLevel()).thenReturn(level);
+
+        AccessPointPreference pref = createWithAccessPoint(mockAccessPoint);
+        pref.refresh();
+
+        verify(mockIconInjector).getIcon(level);
     }
 
     @Test

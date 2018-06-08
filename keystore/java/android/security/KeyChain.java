@@ -40,6 +40,7 @@ import android.security.keystore.KeyProperties;
 
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
+import java.security.KeyPair;
 import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
@@ -245,6 +246,82 @@ public final class KeyChain {
     public static final String EXTRA_KEY_ACCESSIBLE = "android.security.extra.KEY_ACCESSIBLE";
 
     /**
+     * Indicates that a call to {@link #generateKeyPair} was successful.
+     * @hide
+     */
+    public static final int KEY_GEN_SUCCESS = 0;
+
+    /**
+     * An alias was missing from the key specifications when calling {@link #generateKeyPair}.
+     * @hide
+     */
+    public static final int KEY_GEN_MISSING_ALIAS = 1;
+
+    /**
+     * A key attestation challenge was provided to {@link #generateKeyPair}, but it shouldn't
+     * have been provided.
+     * @hide
+     */
+    public static final int KEY_GEN_SUPERFLUOUS_ATTESTATION_CHALLENGE = 2;
+
+    /**
+     * Algorithm not supported by {@link #generateKeyPair}
+     * @hide
+     */
+    public static final int KEY_GEN_NO_SUCH_ALGORITHM = 3;
+
+    /**
+     * Invalid algorithm parameters when calling {@link #generateKeyPair}
+     * @hide
+     */
+    public static final int KEY_GEN_INVALID_ALGORITHM_PARAMETERS = 4;
+
+    /**
+     * Keystore is not available when calling {@link #generateKeyPair}
+     * @hide
+     */
+    public static final int KEY_GEN_NO_KEYSTORE_PROVIDER = 5;
+
+    /**
+     * General failure while calling {@link #generateKeyPair}
+     * @hide
+     */
+    public static final int KEY_GEN_FAILURE = 6;
+
+    /**
+     * Successful call to {@link #attestKey}
+     * @hide
+     */
+    public static final int KEY_ATTESTATION_SUCCESS = 0;
+
+    /**
+     * Attestation challenge missing when calling {@link #attestKey}
+     * @hide
+     */
+    public static final int KEY_ATTESTATION_MISSING_CHALLENGE = 1;
+
+    /**
+     * The caller requested Device ID attestation when calling {@link #attestKey}, but has no
+     * permissions to get device identifiers.
+     * @hide
+     */
+    public static final int KEY_ATTESTATION_CANNOT_COLLECT_DATA = 2;
+
+    /**
+     * The underlying hardware does not support Device ID attestation or cannot attest to the
+     * identifiers that are stored on the device. This indicates permanent inability
+     * to get attestation records on the device.
+     * @hide
+     */
+    public static final int KEY_ATTESTATION_CANNOT_ATTEST_IDS = 3;
+
+    /**
+     * General failure when calling {@link #attestKey}
+     * @hide
+     */
+    public static final int KEY_ATTESTATION_FAILURE = 4;
+
+    /**
      * Returns an {@code Intent} that can be used for credential
      * installation. The intent may be used without any extras, in
      * which case the user will be able to install credentials from
@@ -275,8 +352,11 @@ public final class KeyChain {
      * selected alias or null will be returned via the
      * KeyChainAliasCallback callback.
      *
-     * <p>The device or profile owner can intercept this before the activity
-     * is shown, to pick a specific private key alias.
+     * <p>A device policy controller (as a device or profile owner) can
+     * intercept the request before the activity is shown, to pick a
+     * specific private key alias by implementing
+     * {@link android.app.admin.DeviceAdminReceiver#onChoosePrivateKeyAlias
+     * onChoosePrivateKeyAlias}.
      *
      * <p>{@code keyTypes} and {@code issuers} may be used to
      * highlight suggested choices to the user, although to cope with
@@ -286,7 +366,7 @@ public final class KeyChain {
      * <p>{@code host} and {@code port} may be used to give the user
      * more context about the server requesting the credentials.
      *
-     * <p>{@code alias} allows the chooser to preselect an existing
+     * <p>{@code alias} allows the caller to preselect an existing
      * alias which will still be subject to user confirmation.
      *
      * @param activity The {@link Activity} context to use for
@@ -294,9 +374,9 @@ public final class KeyChain {
      *     a private key; used only to call startActivity(); must not
      *     be null.
      * @param response Callback to invoke when the request completes;
-     *     must not be null
+     *     must not be null.
      * @param keyTypes The acceptable types of asymmetric keys such as
-     *     "RSA" or "DSA", or a null array.
+     *     "RSA" or "DSA", or null.
      * @param issuers The acceptable certificate issuers for the
      *     certificate matching the private key, or null.
      * @param host The host name of the server requesting the
@@ -308,7 +388,8 @@ public final class KeyChain {
      */
     public static void choosePrivateKeyAlias(@NonNull Activity activity,
             @NonNull KeyChainAliasCallback response,
-            @KeyProperties.KeyAlgorithmEnum String[] keyTypes, Principal[] issuers,
+            @Nullable @KeyProperties.KeyAlgorithmEnum String[] keyTypes,
+            @Nullable Principal[] issuers,
             @Nullable String host, int port, @Nullable String alias) {
         Uri uri = null;
         if (host != null) {
@@ -325,18 +406,21 @@ public final class KeyChain {
      * selected alias or null will be returned via the
      * KeyChainAliasCallback callback.
      *
-     * <p>The device or profile owner can intercept this before the activity
-     * is shown, to pick a specific private key alias.</p>
+     * <p>A device policy controller (as a device or profile owner) can
+     * intercept the request before the activity is shown, to pick a
+     * specific private key alias by implementing
+     * {@link android.app.admin.DeviceAdminReceiver#onChoosePrivateKeyAlias
+     * onChoosePrivateKeyAlias}.
      *
      * <p>{@code keyTypes} and {@code issuers} may be used to
      * highlight suggested choices to the user, although to cope with
      * sometimes erroneous values provided by servers, the user may be
      * able to override these suggestions.
      *
-     * <p>{@code host} and {@code port} may be used to give the user
-     * more context about the server requesting the credentials.
+     * <p>{@code uri} may be used to give the user more context about
+     * the server requesting the credentials.
      *
-     * <p>{@code alias} allows the chooser to preselect an existing
+     * <p>{@code alias} allows the caller to preselect an existing
      * alias which will still be subject to user confirmation.
      *
      * @param activity The {@link Activity} context to use for
@@ -344,9 +428,9 @@ public final class KeyChain {
      *     a private key; used only to call startActivity(); must not
      *     be null.
      * @param response Callback to invoke when the request completes;
-     *     must not be null
+     *     must not be null.
      * @param keyTypes The acceptable types of asymmetric keys such as
-     *     "EC" or "RSA", or a null array.
+     *     "EC" or "RSA", or null.
      * @param issuers The acceptable certificate issuers for the
      *     certificate matching the private key, or null.
      * @param uri The full URI the server is requesting the certificate
@@ -356,7 +440,8 @@ public final class KeyChain {
      */
     public static void choosePrivateKeyAlias(@NonNull Activity activity,
             @NonNull KeyChainAliasCallback response,
-            @KeyProperties.KeyAlgorithmEnum String[] keyTypes, Principal[] issuers,
+            @Nullable @KeyProperties.KeyAlgorithmEnum String[] keyTypes,
+            @Nullable Principal[] issuers,
             @Nullable Uri uri, @Nullable String alias) {
         /*
          * TODO currently keyTypes, issuers are unused. They are meant
@@ -418,6 +503,18 @@ public final class KeyChain {
     @Nullable @WorkerThread
     public static PrivateKey getPrivateKey(@NonNull Context context, @NonNull String alias)
             throws KeyChainException, InterruptedException {
+        KeyPair keyPair = getKeyPair(context, alias);
+        if (keyPair != null) {
+            return keyPair.getPrivate();
+        }
+
+        return null;
+    }
+
+    /** @hide */
+    @Nullable @WorkerThread
+    public static KeyPair getKeyPair(@NonNull Context context, @NonNull String alias)
+            throws KeyChainException, InterruptedException {
         if (alias == null) {
             throw new NullPointerException("alias == null");
         }
@@ -439,7 +536,7 @@ public final class KeyChain {
             return null;
         } else {
             try {
-                return AndroidKeyStoreProvider.loadAndroidKeyStorePrivateKeyFromKeystore(
+                return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyPairFromKeystore(
                         KeyStore.getInstance(), keyId, KeyStore.UID_SELF);
             } catch (RuntimeException | UnrecoverableKeyException e) {
                 throw new KeyChainException(e);

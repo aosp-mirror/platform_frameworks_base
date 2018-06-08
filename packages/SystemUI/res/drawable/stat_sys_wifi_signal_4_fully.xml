@@ -14,8 +14,8 @@ Copyright (C) 2017 The Android Open Source Project
     limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="18.41dp"
-    android:height="17dp"
+    android:width="16.31dp"
+    android:height="15dp"
     android:viewportWidth="21.75"
     android:viewportHeight="20.0">
     <group

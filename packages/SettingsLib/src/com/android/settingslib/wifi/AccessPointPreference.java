@@ -15,13 +15,13 @@
  */
 package com.android.settingslib.wifi;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
-import android.net.NetworkBadging;
 import android.net.wifi.WifiConfiguration;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -31,12 +31,15 @@ import android.support.v7.preference.PreferenceViewHolder;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.SparseArray;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.settingslib.R;
 import com.android.settingslib.TronUtils;
+import com.android.settingslib.TwoTargetPreference;
 import com.android.settingslib.Utils;
+import com.android.settingslib.wifi.AccessPoint.Speed;
 
 public class AccessPointPreference extends Preference {
 
@@ -60,10 +63,12 @@ public class AccessPointPreference extends Preference {
             R.string.accessibility_wifi_signal_full
     };
 
-    private final StateListDrawable mFrictionSld;
+    @Nullable private final StateListDrawable mFrictionSld;
     private final int mBadgePadding;
     private final UserBadgeCache mBadgeCache;
+    private final IconInjector mIconInjector;
     private TextView mTitleView;
+    private boolean mShowDivider;
 
     private boolean mForSavedNetworks = false;
     private AccessPoint mAccessPoint;
@@ -71,19 +76,18 @@ public class AccessPointPreference extends Preference {
     private int mLevel;
     private CharSequence mContentDescription;
     private int mDefaultIconResId;
-    private int mWifiSpeed = NetworkBadging.BADGING_NONE;
+    private int mWifiSpeed = Speed.NONE;
 
-    public static String generatePreferenceKey(AccessPoint accessPoint) {
-        StringBuilder builder = new StringBuilder();
-
-        if (TextUtils.isEmpty(accessPoint.getSsidStr())) {
-            builder.append(accessPoint.getBssid());
-        } else {
-            builder.append(accessPoint.getSsidStr());
+    @Nullable
+    private static StateListDrawable getFrictionStateListDrawable(Context context) {
+        TypedArray frictionSld;
+        try {
+            frictionSld = context.getTheme().obtainStyledAttributes(FRICTION_ATTRS);
+        } catch (Resources.NotFoundException e) {
+            // Fallback for platforms that do not need friction icon resources.
+            frictionSld = null;
         }
-
-        builder.append(',').append(accessPoint.getSecurity());
-        return builder.toString();
+        return frictionSld != null ? (StateListDrawable) frictionSld.getDrawable(0) : null;
     }
 
     // Used for dummy pref.
@@ -92,56 +96,42 @@ public class AccessPointPreference extends Preference {
         mFrictionSld = null;
         mBadgePadding = 0;
         mBadgeCache = null;
+        mIconInjector = new IconInjector(context);
     }
 
     public AccessPointPreference(AccessPoint accessPoint, Context context, UserBadgeCache cache,
             boolean forSavedNetworks) {
-        super(context);
-        setWidgetLayoutResource(R.layout.access_point_friction_widget);
-        mBadgeCache = cache;
-        mAccessPoint = accessPoint;
-        mForSavedNetworks = forSavedNetworks;
-        mAccessPoint.setTag(this);
-        mLevel = -1;
-
-        TypedArray frictionSld;
-        try {
-            frictionSld = context.getTheme().obtainStyledAttributes(FRICTION_ATTRS);
-        } catch (Resources.NotFoundException e) {
-            // Fallback for platforms that do not need friction icon resources.
-            frictionSld = null;
-        }
-        mFrictionSld = frictionSld != null ? (StateListDrawable) frictionSld.getDrawable(0) : null;
-
-        // Distance from the end of the title at which this AP's user badge should sit.
-        mBadgePadding = context.getResources()
-                .getDimensionPixelSize(R.dimen.wifi_preference_badge_padding);
+        this(accessPoint, context, cache, 0 /* iconResId */, forSavedNetworks);
         refresh();
     }
 
     public AccessPointPreference(AccessPoint accessPoint, Context context, UserBadgeCache cache,
             int iconResId, boolean forSavedNetworks) {
+        this(accessPoint, context, cache, iconResId, forSavedNetworks,
+                getFrictionStateListDrawable(context), -1 /* level */, new IconInjector(context));
+    }
+
+    @VisibleForTesting
+    AccessPointPreference(AccessPoint accessPoint, Context context, UserBadgeCache cache,
+                          int iconResId, boolean forSavedNetworks, StateListDrawable frictionSld,
+                          int level, IconInjector iconInjector) {
         super(context);
-        setWidgetLayoutResource(R.layout.access_point_friction_widget);
+        setLayoutResource(R.layout.preference_access_point);
+        setWidgetLayoutResource(getWidgetLayoutResourceId());
         mBadgeCache = cache;
         mAccessPoint = accessPoint;
         mForSavedNetworks = forSavedNetworks;
         mAccessPoint.setTag(this);
-        mLevel = -1;
+        mLevel = level;
         mDefaultIconResId = iconResId;
-
-        TypedArray frictionSld;
-        try {
-            frictionSld = context.getTheme().obtainStyledAttributes(FRICTION_ATTRS);
-        } catch (Resources.NotFoundException e) {
-            // Fallback for platforms that do not need friction icon resources.
-            frictionSld = null;
-        }
-        mFrictionSld = frictionSld != null ? (StateListDrawable) frictionSld.getDrawable(0) : null;
-
-        // Distance from the end of the title at which this AP's user badge should sit.
+        mFrictionSld = frictionSld;
+        mIconInjector = iconInjector;
         mBadgePadding = context.getResources()
                 .getDimensionPixelSize(R.dimen.wifi_preference_badge_padding);
+    }
+
+    protected int getWidgetLayoutResourceId() {
+        return R.layout.access_point_friction_widget;
     }
 
     public AccessPoint getAccessPoint() {
@@ -170,6 +160,18 @@ public class AccessPointPreference extends Preference {
 
         ImageView frictionImageView = (ImageView) view.findViewById(R.id.friction_icon);
         bindFrictionImage(frictionImageView);
+
+        final View divider = view.findViewById(R.id.two_target_divider);
+        divider.setVisibility(shouldShowDivider() ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    public boolean shouldShowDivider() {
+        return mShowDivider;
+    }
+
+    public void setShowDivider(boolean showDivider) {
+        mShowDivider = showDivider;
+        notifyChanged();
     }
 
     protected void updateIcon(int level, Context context) {
@@ -179,9 +181,7 @@ public class AccessPointPreference extends Preference {
         }
         TronUtils.logWifiSettingsSpeed(context, mWifiSpeed);
 
-        // TODO(b/62355275): Revert this to N code after deleting NetworkBadging API
-        Drawable drawable = NetworkBadging.getWifiIcon(
-                level, NetworkBadging.BADGING_NONE, getContext().getTheme());
+        Drawable drawable = mIconInjector.getIcon(level);
         if (!mForSavedNetworks && drawable != null) {
             drawable.setTint(Utils.getColorAttr(context, android.R.attr.colorControlNormal));
             setIcon(drawable);
@@ -323,6 +323,18 @@ public class AccessPointPreference extends Preference {
                 return badge;
             }
             return mBadges.valueAt(index);
+        }
+    }
+
+    static class IconInjector {
+        private final Context mContext;
+
+        public IconInjector(Context context) {
+            mContext = context;
+        }
+
+        public Drawable getIcon(int level) {
+            return mContext.getDrawable(Utils.getWifiIconResource(level));
         }
     }
 }

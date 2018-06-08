@@ -17,18 +17,16 @@
 package com.android.systemui.statusbar.policy;
 
 import android.animation.ObjectAnimator;
-import android.content.Context;
-import android.content.res.TypedArray;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.os.SystemClock;
-import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.Surface;
-import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 /**
@@ -38,7 +36,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
  * outside the navigation bar (since this is when accidental taps are more likely), then contracts
  * back over time (since a later tap might be intended for the top of the bar).
  */
-public class DeadZone extends View {
+public class DeadZone {
     public static final String TAG = "DeadZone";
 
     public static final boolean DEBUG = false;
@@ -47,6 +45,7 @@ public class DeadZone extends View {
 
     private static final boolean CHATTY = true; // print to logcat when we eat a click
     private final StatusBar mStatusBar;
+    private final NavigationBarView mNavigationBarView;
 
     private boolean mShouldFlash;
     private float mFlashFrac = 0f;
@@ -67,31 +66,11 @@ public class DeadZone extends View {
         }
     };
 
-    public DeadZone(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public DeadZone(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs);
-
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.DeadZone,
-                defStyle, 0);
-
-        mHold = a.getInteger(R.styleable.DeadZone_holdTime, 0);
-        mDecay = a.getInteger(R.styleable.DeadZone_decayTime, 0);
-
-        mSizeMin = a.getDimensionPixelSize(R.styleable.DeadZone_minSize, 0);
-        mSizeMax = a.getDimensionPixelSize(R.styleable.DeadZone_maxSize, 0);
-
-        int index = a.getInt(R.styleable.DeadZone_orientation, -1);
-        mVertical = (index == VERTICAL);
-
-        if (DEBUG)
-            Slog.v(TAG, this + " size=[" + mSizeMin + "-" + mSizeMax + "] hold=" + mHold
-                    + (mVertical ? " vertical" : " horizontal"));
-
-        setFlashOnTouchCapture(context.getResources().getBoolean(R.bool.config_dead_zone_flash));
-        mStatusBar = SysUiServiceProvider.getComponent(context, StatusBar.class);
+    public DeadZone(NavigationBarView view) {
+        mNavigationBarView = view;
+        mStatusBar = SysUiServiceProvider.getComponent(mNavigationBarView.getContext(),
+                StatusBar.class);
+        onConfigurationChanged(HORIZONTAL);
     }
 
     static float lerp(float a, float b, float f) {
@@ -112,11 +91,29 @@ public class DeadZone extends View {
     public void setFlashOnTouchCapture(boolean dbg) {
         mShouldFlash = dbg;
         mFlashFrac = 0f;
-        postInvalidate();
+        mNavigationBarView.postInvalidate();
+    }
+
+    public void onConfigurationChanged(int rotation) {
+        mDisplayRotation = rotation;
+
+        final Resources res = mNavigationBarView.getResources();
+        mHold = res.getInteger(R.integer.navigation_bar_deadzone_hold);
+        mDecay = res.getInteger(R.integer.navigation_bar_deadzone_decay);
+
+        mSizeMin = res.getDimensionPixelSize(R.dimen.navigation_bar_deadzone_size);
+        mSizeMax = res.getDimensionPixelSize(R.dimen.navigation_bar_deadzone_size_max);
+        int index = res.getInteger(R.integer.navigation_bar_deadzone_orientation);
+        mVertical = (index == VERTICAL);
+
+        if (DEBUG) {
+            Slog.v(TAG, this + " size=[" + mSizeMin + "-" + mSizeMax + "] hold=" + mHold
+                    + (mVertical ? " vertical" : " horizontal"));
+        }
+        setFlashOnTouchCapture(res.getBoolean(R.bool.config_dead_zone_flash));
     }
 
     // I made you a touch event...
-    @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (DEBUG) {
             Slog.v(TAG, this + " onTouch: " + MotionEvent.actionToString(event.getAction()));
@@ -143,7 +140,7 @@ public class DeadZone extends View {
             final boolean consumeEvent;
             if (mVertical) {
                 if (mDisplayRotation == Surface.ROTATION_270) {
-                    consumeEvent = event.getX() > getWidth() - size;
+                    consumeEvent = event.getX() > mNavigationBarView.getWidth() - size;
                 } else {
                     consumeEvent = event.getX() < size;
                 }
@@ -155,8 +152,8 @@ public class DeadZone extends View {
                     Slog.v(TAG, "consuming errant click: (" + event.getX() + "," + event.getY() + ")");
                 }
                 if (mShouldFlash) {
-                    post(mDebugFlash);
-                    postInvalidate();
+                    mNavigationBarView.post(mDebugFlash);
+                    mNavigationBarView.postInvalidate();
                 }
                 return true; // ...but I eated it
             }
@@ -168,19 +165,18 @@ public class DeadZone extends View {
         mLastPokeTime = event.getEventTime();
         if (DEBUG)
             Slog.v(TAG, "poked! size=" + getSize(mLastPokeTime));
-        if (mShouldFlash) postInvalidate();
+        if (mShouldFlash) mNavigationBarView.postInvalidate();
     }
 
     public void setFlash(float f) {
         mFlashFrac = f;
-        postInvalidate();
+        mNavigationBarView.postInvalidate();
     }
 
     public float getFlash() {
         return mFlashFrac;
     }
 
-    @Override
     public void onDraw(Canvas can) {
         if (!mShouldFlash || mFlashFrac <= 0f) {
             return;
@@ -202,10 +198,6 @@ public class DeadZone extends View {
 
         if (DEBUG && size > mSizeMin)
             // crazy aggressive redrawing here, for debugging only
-            postInvalidateDelayed(100);
-    }
-
-    public void setDisplayRotation(int rotation) {
-        mDisplayRotation = rotation;
+            mNavigationBarView.postInvalidateDelayed(100);
     }
 }

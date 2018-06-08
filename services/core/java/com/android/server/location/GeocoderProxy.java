@@ -21,6 +21,7 @@ import android.location.Address;
 import android.location.GeocoderParams;
 import android.location.IGeocodeProvider;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -63,42 +64,47 @@ public class GeocoderProxy {
         return mServiceWatcher.start();
     }
 
-    private IGeocodeProvider getService() {
-        return IGeocodeProvider.Stub.asInterface(mServiceWatcher.getBinder());
-    }
-
     public String getConnectedPackageName() {
         return mServiceWatcher.getBestPackageName();
     }
 
     public String getFromLocation(double latitude, double longitude, int maxResults,
             GeocoderParams params, List<Address> addrs) {
-        IGeocodeProvider provider = getService();
-        if (provider != null) {
-            try {
-                return provider.getFromLocation(latitude, longitude, maxResults, params, addrs);
-            } catch (RemoteException e) {
-                Log.w(TAG, e);
+        final String[] result = new String[] {"Service not Available"};
+        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
+            @Override
+            public void run(IBinder binder) {
+                IGeocodeProvider provider = IGeocodeProvider.Stub.asInterface(binder);
+                try {
+                    result[0] = provider.getFromLocation(
+                            latitude, longitude, maxResults, params, addrs);
+                } catch (RemoteException e) {
+                    Log.w(TAG, e);
+                }
             }
-        }
-        return "Service not Available";
+        });
+        return result[0];
     }
 
     public String getFromLocationName(String locationName,
             double lowerLeftLatitude, double lowerLeftLongitude,
             double upperRightLatitude, double upperRightLongitude, int maxResults,
             GeocoderParams params, List<Address> addrs) {
-        IGeocodeProvider provider = getService();
-        if (provider != null) {
-            try {
-                return provider.getFromLocationName(locationName, lowerLeftLatitude,
-                        lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
-                        maxResults, params, addrs);
-            } catch (RemoteException e) {
-                Log.w(TAG, e);
+        final String[] result = new String[] {"Service not Available"};
+        mServiceWatcher.runOnBinder(new ServiceWatcher.BinderRunner() {
+            @Override
+            public void run(IBinder binder) {
+                IGeocodeProvider provider = IGeocodeProvider.Stub.asInterface(binder);
+                try {
+                    result[0] = provider.getFromLocationName(locationName, lowerLeftLatitude,
+                            lowerLeftLongitude, upperRightLatitude, upperRightLongitude,
+                            maxResults, params, addrs);
+                } catch (RemoteException e) {
+                    Log.w(TAG, e);
+                }
             }
-        }
-        return "Service not Available";
+        });
+        return result[0];
     }
 
 }

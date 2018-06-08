@@ -21,42 +21,38 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.location.LocationManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Process;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
-import android.util.SparseBooleanArray;
+import android.util.Log;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Helper for performing location access checks.
  * @hide
  */
 public final class LocationAccessPolicy {
+    private static final String LOG_TAG = LocationAccessPolicy.class.getSimpleName();
+
     /**
      * API to determine if the caller has permissions to get cell location.
      *
      * @param pkgName Package name of the application requesting access
      * @param uid The uid of the package
      * @param pid The pid of the package
+     * @param throwOnDeniedPermission Whether to throw if the location permission is denied.
      * @return boolean true or false if permissions is granted
      */
     public static boolean canAccessCellLocation(@NonNull Context context, @NonNull String pkgName,
-            int uid, int pid) throws SecurityException {
-        Trace.beginSection("TelephonyLocationCheck");
+            int uid, int pid, boolean throwOnDeniedPermission) throws SecurityException {
+        Trace.beginSection("TelephonyLohcationCheck");
         try {
             // Always allow the phone process to access location. This avoid breaking legacy code
             // that rely on public-facing APIs to access cell location, and it doesn't create a
@@ -71,9 +67,11 @@ public final class LocationAccessPolicy {
             // where a legacy app the user is not using tracks their location.
             // Granting ACCESS_FINE_LOCATION to an app automatically grants it
             // ACCESS_COARSE_LOCATION.
-
-            if (context.checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION, pid, uid) ==
-                    PackageManager.PERMISSION_DENIED) {
+            if (throwOnDeniedPermission) {
+                context.enforcePermission(Manifest.permission.ACCESS_COARSE_LOCATION,
+                        pid, uid, "canAccessCellLocation");
+            } else if (context.checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
+                    pid, uid) == PackageManager.PERMISSION_DENIED) {
                 return false;
             }
             final int opCode = AppOpsManager.permissionToOpCode(
@@ -94,10 +92,12 @@ public final class LocationAccessPolicy {
     }
 
     private static boolean isLocationModeEnabled(@NonNull Context context, @UserIdInt int userId) {
-        int locationMode = Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF, userId);
-        return locationMode != Settings.Secure.LOCATION_MODE_OFF
-                && locationMode != Settings.Secure.LOCATION_MODE_SENSORS_ONLY;
+        LocationManager locationManager = context.getSystemService(LocationManager.class);
+        if (locationManager == null) {
+            Log.w(LOG_TAG, "Couldn't get location manager, denying location access");
+            return false;
+        }
+        return locationManager.isLocationEnabledForUser(UserHandle.of(userId));
     }
 
     private static boolean checkInteractAcrossUsersFull(@NonNull Context context) {

@@ -106,6 +106,14 @@ public abstract class BaseCommand {
     }
 
     /**
+     * Peek the next argument on the command line, whatever it is; if there are
+     * no arguments left, return null.
+     */
+    public String peekNextArg() {
+        return mArgs.peekNextArg();
+    }
+
+    /**
      * Return the next argument on the command line, whatever it is; if there are
      * no arguments left, throws an IllegalArgumentException to report this to the user.
      */

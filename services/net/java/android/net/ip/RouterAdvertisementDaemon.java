@@ -268,6 +268,7 @@ public class RouterAdvertisementDaemon {
         mUnicastResponder = null;
     }
 
+    @GuardedBy("mLock")
     private void assembleRaLocked() {
         final ByteBuffer ra = ByteBuffer.wrap(mRA);
         ra.order(ByteOrder.BIG_ENDIAN);

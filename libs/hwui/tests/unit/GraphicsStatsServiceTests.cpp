@@ -16,14 +16,13 @@
 
 #include <gtest/gtest.h>
 
+#include "protos/graphicsstats.pb.h"
 #include "service/GraphicsStatsService.h"
 
-#include <frameworks/base/core/proto/android/service/graphicsstats.pb.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 using namespace android;
@@ -35,8 +34,8 @@ std::string findRootPath() {
     // < 1023 because we need room for the null terminator
     if (r <= 0 || r > 1023) {
         int err = errno;
-        fprintf(stderr, "Failed to read from /proc/self/exe; r=%zd, err=%d (%s)\n",
-                r, err, strerror(err));
+        fprintf(stderr, "Failed to read from /proc/self/exe; r=%zd, err=%d (%s)\n", r, err,
+                strerror(err));
         exit(EXIT_FAILURE);
     }
     while (--r > 0) {
@@ -74,7 +73,7 @@ TEST(GraphicsStats, saveLoad) {
         mockData.editSlowFrameCounts()[i] = (i % 5) + 1;
     }
     GraphicsStatsService::saveBuffer(path, packageName, 5, 3000, 7000, &mockData);
-    service::GraphicsStatsProto loadedProto;
+    protos::GraphicsStatsProto loadedProto;
     EXPECT_TRUE(GraphicsStatsService::parseFromFile(path, &loadedProto));
     // Clean up the file
     unlink(path.c_str());
@@ -88,8 +87,8 @@ TEST(GraphicsStats, saveLoad) {
     EXPECT_EQ(20, loadedProto.summary().janky_frames());
     EXPECT_EQ(100, loadedProto.summary().total_frames());
     EXPECT_EQ(mockData.editFrameCounts().size() + mockData.editSlowFrameCounts().size(),
-            (size_t) loadedProto.histogram_size());
-    for (size_t i = 0; i < (size_t) loadedProto.histogram_size(); i++) {
+              (size_t)loadedProto.histogram_size());
+    for (size_t i = 0; i < (size_t)loadedProto.histogram_size(); i++) {
         int expectedCount, expectedBucket;
         if (i < mockData.editFrameCounts().size()) {
             expectedCount = ((i % 10) + 1) * 2;
@@ -130,7 +129,7 @@ TEST(GraphicsStats, merge) {
     }
     GraphicsStatsService::saveBuffer(path, packageName, 5, 7050, 10000, &mockData);
 
-    service::GraphicsStatsProto loadedProto;
+    protos::GraphicsStatsProto loadedProto;
     EXPECT_TRUE(GraphicsStatsService::parseFromFile(path, &loadedProto));
     // Clean up the file
     unlink(path.c_str());
@@ -144,8 +143,8 @@ TEST(GraphicsStats, merge) {
     EXPECT_EQ(20 + 50, loadedProto.summary().janky_frames());
     EXPECT_EQ(100 + 500, loadedProto.summary().total_frames());
     EXPECT_EQ(mockData.editFrameCounts().size() + mockData.editSlowFrameCounts().size(),
-            (size_t) loadedProto.histogram_size());
-    for (size_t i = 0; i < (size_t) loadedProto.histogram_size(); i++) {
+              (size_t)loadedProto.histogram_size());
+    for (size_t i = 0; i < (size_t)loadedProto.histogram_size(); i++) {
         int expectedCount, expectedBucket;
         if (i < mockData.editFrameCounts().size()) {
             expectedCount = ((i % 10) + 1) * 2;

@@ -77,7 +77,7 @@
     <!-- Summary for the network but no internet connection was detected. -->
     <string name="wifi_no_internet_no_reconnect">Won\'t automatically connect</string>
     <!-- Summary for the remembered network but no internet connection was detected. -->
-    <string name="wifi_no_internet">No Internet access</string>
+    <string name="wifi_no_internet">No internet access</string>
     <!-- Summary for saved networks -->
     <string name="saved_network">Saved by <xliff:g id="name">%1$s</xliff:g></string>
 
@@ -95,7 +95,13 @@
     <string name="certinstaller_package" translatable="false">com.android.certinstaller</string>
 
     <!-- Summary for Connected wifi network without internet -->
-    <string name="wifi_connected_no_internet">Connected, no Internet</string>
+    <string name="wifi_connected_no_internet">Connected, no internet</string>
+
+    <!-- Wi-Fi status indicating that the current network is connected, but has no internet access. -->
+    <string name="wifi_status_no_internet">No internet</string>
+
+    <!-- Wi-Fi status indicating that the current network is connected requires sign in to access the internet. -->
+    <string name="wifi_status_sign_in_required">Sign in required</string>
 
     <!-- Summary for networks failing to connect due to association rejection status 17, AP full -->
     <string name="wifi_ap_unable_to_handle_new_sta">Access point temporarily full</string>
@@ -150,6 +156,13 @@
     <!-- Bluetooth settings.  Message when connected to a device, except for phone/media audio, showing remote device battery level. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level">Connected (no phone or media), battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g><xliff:g id="active_device">%2$s</xliff:g></string>
 
+    <!-- Connected devices settings. Message when Bluetooth is connected and active, showing remote device status and battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_battery_level">Active, <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level"><xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected and active but no battery information, showing remote device status. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_no_battery_level">Active</string>
+
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the A2DP profile. -->
     <string name="bluetooth_profile_a2dp">Media audio</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the headset or handsfree profile. -->
@@ -197,14 +210,14 @@
     <!-- Bluetooth settings. Connection options screen. The summary for the HID checkbox preference when HID is connected. -->
     <string name="bluetooth_hid_profile_summary_connected">Connected to input device</string>
     <!-- Bluetooth settings. Connection options screen. The summary for the checkbox preference when PAN is connected (user role). [CHAR LIMIT=25]-->
-    <string name="bluetooth_pan_user_profile_summary_connected">Connected to device for Internet access</string>
+    <string name="bluetooth_pan_user_profile_summary_connected">Connected to device for internet access</string>
     <!-- Bluetooth settings. Connection options screen. The summary for the checkbox preference when PAN is connected (NAP role). [CHAR LIMIT=25]-->
-    <string name="bluetooth_pan_nap_profile_summary_connected">Sharing local Internet connection with device</string>
+    <string name="bluetooth_pan_nap_profile_summary_connected">Sharing local internet connection with device</string>
 
     <!-- Bluetooth settings. Connection options screen. The summary
          for the PAN checkbox preference that describes how checking it
          will set the PAN profile as preferred. -->
-    <string name="bluetooth_pan_profile_summary_use_for">Use for Internet access</string>
+    <string name="bluetooth_pan_profile_summary_use_for">Use for internet access</string>
     <!-- Bluetooth settings. Connection options screen.  The summary for the map checkbox preference that describes how checking it will set the map profile as preferred. -->
     <string name="bluetooth_map_profile_summary_use_for">Use for map</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the sap checkbox preference that describes how checking it will set the sap profile as preferred. -->
@@ -241,6 +254,36 @@
     <string name="bluetooth_pairing_device_down_error_message">Can\'t communicate with <xliff:g id="device_name">%1$s</xliff:g>.</string>
     <!-- Message for the error dialog when BT pairing fails because the other device rejected the pairing. -->
     <string name="bluetooth_pairing_rejected_error_message">Pairing rejected by <xliff:g id="device_name">%1$s</xliff:g>.</string>
+
+    <!-- Message for telling the user the kind of BT device being displayed in list. [CHAR LIMIT=30 BACKUP_MESSAGE_ID=4875089335641234463] -->
+    <string name="bluetooth_talkback_computer">Computer</string>
+
+    <!-- Message for telling the user the kind of BT device being displayed in list. [CHAR LIMIT=30 BACKUP_MESSAGE_ID=5140152177885220949] -->
+    <string name="bluetooth_talkback_headset">Headset</string>
+
+    <!-- Message for telling the user the kind of BT device being displayed in list. [CHAR LIMIT=30 BACKUP_MESSAGE_ID=4260255181240622896] -->
+    <string name="bluetooth_talkback_phone">Phone</string>
+
+    <!-- Message for telling the user the kind of BT device being displayed in list. [CHAR LIMIT=30 BACKUP_MESSAGE_ID=551146170554589119] -->
+    <string name="bluetooth_talkback_imaging">Imaging</string>
+
+    <!-- Message for telling the user the kind of BT device being displayed in list. [CHAR LIMIT=30 BACKUP_MESSAGE_ID=26580326066627664] -->
+    <string name="bluetooth_talkback_headphone">Headphone</string>
+
+    <!-- Message for telling the user the kind of BT device being displayed in list. [CHAR LIMIT=30 BACKUP_MESSAGE_ID=5165842622743212268] -->
+    <string name="bluetooth_talkback_input_peripheral">Input Peripheral</string>
+
+    <!-- Message for telling the user the kind of BT device being displayed in list. [CHAR LIMIT=30 BACKUP_MESSAGE_ID=5615463912185280812] -->
+    <string name="bluetooth_talkback_bluetooth">Bluetooth</string>
+
+    <!-- Message for telling the user the left-side hearing aid device is doing its pairing operation [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearingaid_left_pairing_message">Pairing left hearing aid\u2026</string>
+    <!-- Message for telling the user the right-side hearing aid device is doing its pairing operation [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearingaid_right_pairing_message">Pairing right hearing aid\u2026</string>
+    <!-- Bluetooth settings.  Message when connected to a left-side Hearing Aid device, showing remote device battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearingaid_left_battery_level">Left - <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Bluetooth settings.  Message when connected to a right-side Hearing Aid device, showing remote device battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearingaid_right_battery_level">Right - <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
 
     <!-- Content description of the WIFI signal when WIFI is disabled for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wifi_off">Wifi off.</string>
@@ -296,7 +339,8 @@
     <string name="launch_defaults_some">Some defaults set</string>
     <!-- Launch defaults preference summary with none set [CHAR LIMIT=40] -->
     <string name="launch_defaults_none">No defaults set</string>
-
+    <!-- DO NOT TRANSLATE Empty summary for dynamic preferences -->
+    <string name="summary_empty" translatable="false"></string>
     <!-- Text-To-Speech (TTS) settings --><skip />
     <!-- Name of the TTS package as listed by the package manager. -->
     <string name="tts_settings">Text-to-speech settings</string>
@@ -483,10 +527,8 @@
     <string name="wifi_display_certification">Wireless display certification</string>
     <!-- Setting Checkbox title whether to enable WiFi Verbose Logging. [CHAR LIMIT=40] -->
     <string name="wifi_verbose_logging">Enable Wi\u2011Fi Verbose Logging</string>
-    <!-- Setting Checkbox title whether to enable WiFi Aggressive Handover (more actively switch from wifi to mobile data). [CHAR LIMIT=40] -->
-    <string name="wifi_aggressive_handover">Aggressive Wi\u2011Fi to mobile handover</string>
-    <!-- Setting Checkbox title whether to enable WiFi Scanning in the presence of traffic. [CHAR LIMIT=80] -->
-    <string name="wifi_allow_scan_with_traffic">Always allow Wi\u2011Fi Roam Scans</string>
+    <!-- Setting Checkbox title whether to enable connected MAC randomization -->
+    <string name="wifi_connected_mac_randomization">Connected MAC Randomization</string>
     <!-- Setting Checkbox title whether to always keep mobile data active. [CHAR LIMIT=80] -->
     <string name="mobile_data_always_on">Mobile data always active</string>
     <!-- Setting Checkbox title whether to enable hardware acceleration for tethering. [CHAR LIMIT=80] -->
@@ -524,7 +566,7 @@
     <!-- UI debug setting: Trigger Bluetooth Audio LDAC Playback Quality Selection -->
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality">Bluetooth Audio LDAC Codec: Playback Quality</string>
     <!-- UI debug setting: Select Bluetooth Audio LDAC Codec: LDAC Playback Quality -->
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title">Trigger Bluetooth Audio LDAC Codec\u000ASelection: Playback Quality</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title">Trigger Bluetooth Audio LDAC\u000ACodec Selection: Playback Quality</string>
 
     <!-- [CHAR LIMIT=NONE] Label for displaying Bluetooth Audio Codec Parameters while streaming -->
     <string name="bluetooth_select_a2dp_codec_streaming_label">Streaming: <xliff:g id="streaming_parameter">%1$s</xliff:g></string>
@@ -533,18 +575,21 @@
     <string name="select_private_dns_configuration_title">Private DNS</string>
     <string name="select_private_dns_configuration_dialog_title">Select Private DNS Mode</string>
     <string name="private_dns_mode_off">Off</string>
-    <string name="private_dns_mode_opportunistic">Opportunistic</string>
+    <string name="private_dns_mode_opportunistic">Automatic</string>
     <string name="private_dns_mode_provider">Private DNS provider hostname</string>
     <string name="private_dns_mode_provider_hostname_hint">Enter hostname of DNS provider</string>
+    <string name="private_dns_mode_provider_failure">Couldn\'t connect</string>
 
     <!-- setting Checkbox summary whether to show options for wireless display certification  -->
     <string name="wifi_display_certification_summary">Show options for wireless display certification</string>
     <!-- Setting Checkbox summary whether to enable Wifi verbose Logging [CHAR LIMIT=80] -->
     <string name="wifi_verbose_logging_summary">Increase Wi\u2011Fi logging level, show per SSID RSSI in Wi\u2011Fi Picker</string>
-    <!-- Setting Checkbox summary whether to enable Wifi aggressive handover [CHAR LIMIT=130] -->
-    <string name="wifi_aggressive_handover_summary">When enabled, Wi\u2011Fi will be more aggressive in handing over the data connection to mobile, when Wi\u2011Fi signal is low</string>
-    <!-- Setting Checkbox summary whether to always allow WiFi Roam Scans [CHAR LIMIT=130] -->
-    <string name="wifi_allow_scan_with_traffic_summary">Allow/Disallow Wi\u2011Fi Roam Scans based on the amount of data traffic present at the interface</string>
+    <!-- Setting Checkbox title whether to enable connected MAC randomization -->
+    <string name="wifi_connected_mac_randomization_summary">Randomize MAC address when connecting to Wi\u2011Fi networks</string>
+    <!-- Label indicating network has been manually marked as metered -->
+    <string name="wifi_metered_label">Metered</string>
+    <!-- Label indicating network has been manually marked as unmetered -->
+    <string name="wifi_unmetered_label">Unmetered</string>
     <!-- UI debug setting: limit size of Android logger buffers -->
     <string name="select_logd_size_title">Logger buffer sizes</string>
     <!-- UI debug setting: limit size of Android logger buffers [CHAR LIMIT=59] -->
@@ -619,11 +664,6 @@
     <string name="wait_for_debugger_summary">Debugged application waits for debugger to
         attach before executing</string>
 
-    <!-- UI debug setting: title for Telephonymonitor switch [CHAR LIMIT=50] -->
-    <string name="telephony_monitor_switch">Telephony Monitor</string>
-    <!-- UI debug setting: summary for switch of Telephonymonitor [CHAR LIMIT=500] -->
-    <string name="telephony_monitor_switch_summary">TelephonyMonitor will collect logs when it detects a problem with telephony/modem functionality and prompt notification to user to file a bug</string>
-
     <!-- Preference category for input debugging development settings. [CHAR LIMIT=25] -->
     <string name="debug_input_category">Input</string>
 
@@ -673,9 +713,6 @@
     <!-- UI debug setting: show the amount of overdraw in apps using the GPU [CHAR LIMIT=25] -->
     <string name="debug_hw_overdraw">Debug GPU overdraw</string>
 
-    <!-- UI debug setting: select the renderer to use by RenderThread [CHAR LIMIT=25] -->
-    <string name="debug_hw_renderer">Set GPU Renderer</string>
-
     <!-- UI debug setting: disable use of overlays? [CHAR LIMIT=25] -->
     <string name="disable_overlays">Disable HW overlays</string>
     <!-- UI debug setting: disable use of overlays summary [CHAR LIMIT=50] -->
@@ -718,6 +755,11 @@
     <!-- UI debug setting: profile time taken by hardware acceleration to render apps [CHAR LIMIT=25] -->
     <string name="track_frame_time">Profile GPU rendering</string>
 
+    <!-- UI debug setting: enable gpu debug layers [CHAR LIMIT=25] -->
+    <string name="enable_gpu_debug_layers">Enable GPU debug layers</string>
+    <!-- UI debug setting: enable gpu debug layers summary [CHAR LIMIT=50] -->
+    <string name="enable_gpu_debug_layers_summary">Allow loading GPU debug layers for debug apps</string>
+
     <!-- UI debug setting: scaling factor for window animations [CHAR LIMIT=25] -->
     <string name="window_animation_scale_title">Window animation scale</string>
 
@@ -743,10 +785,9 @@
     <string name="app_process_limit_title">Background process limit</string>
 
     <!-- UI debug setting: show all ANRs? [CHAR LIMIT=25] -->
-    <string name="show_all_anrs">Show all ANRs</string>
-    <!-- UI debug setting: show all ANRs summary [CHAR LIMIT=50] -->
-    <string name="show_all_anrs_summary">Show App Not Responding dialog
-        for background apps</string>
+    <string name="show_all_anrs">Show background ANRs</string>
+    <!-- UI debug setting: show all ANRs summary [CHAR LIMIT=100] -->
+    <string name="show_all_anrs_summary">Display App Not Responding dialog for background apps</string>
 
     <!-- UI debug setting: show all ANRs? [CHAR LIMIT=25] -->
     <string name="show_notification_channel_warnings">Show notification channel warnings</string>
@@ -797,12 +838,16 @@
         <item>Colors optimized for digital content</item>
     </string-array>
 
-    <!-- Settings item title for inactive apps [CHAR LIMIT=35] -->
-    <string name="inactive_apps_title">Inactive apps</string>
+    <!-- Settings item title for apps in standby (limiting background activity) [CHAR LIMIT=35] -->
+    <string name="inactive_apps_title">Standby apps</string>
     <!-- Settings item summary for inactive app [CHAR LIMIT=100] -->
     <string name="inactive_app_inactive_summary">Inactive. Tap to toggle.</string>
     <!-- Settings item summary for active app [CHAR LIMIT=100] -->
     <string name="inactive_app_active_summary">Active. Tap to toggle.</string>
+
+    <!-- Settings item summary for standby bucket value of an app. [CHAR LIMIT=100] -->
+    <string name="standby_bucket_summary">App standby
+        state:<xliff:g id="bucket"> %s</xliff:g></string>
 
     <!-- Services settings screen, setting option name for the user to go to the screen to view running services -->
     <string name="runningservices_settings_title">Running services</string>
@@ -857,30 +902,57 @@
     <!-- Summary shown for color space correction preference when its value is overridden by another preference [CHAR LIMIT=35] -->
     <string name="daltonizer_type_overridden">Overridden by <xliff:g id="title" example="Simulate color space">%1$s</xliff:g></string>
 
+    <!-- [CHAR_LIMIT=NONE] Label for battery on main page of settings -->
+    <string name="power_remaining_settings_home_page"><xliff:g id="percentage" example="10%">%1$s</xliff:g> - <xliff:g id="time_string" example="1 hour left based on your usage">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery discharging -->
-    <string name="power_remaining_duration_only">About <xliff:g id="time">^1</xliff:g> left</string>
+    <string name="power_remaining_duration_only">About <xliff:g id="time_remaining">%1$s</xliff:g> left</string>
+    <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
+    <string name="power_discharging_duration">About <xliff:g id="time_remaining">%1$s</xliff:g> left (<xliff:g id="level">%2$s</xliff:g>)</string>
     <!-- [CHAR_LIMIT=60] Label for estimated remaining duration of battery discharging -->
-    <string name="power_remaining_duration_only_enhanced">About <xliff:g id="time">^1</xliff:g> left based on your usage</string>
-    <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging -->
-    <string name="power_remaining_charging_duration_only"><xliff:g id="time">^1</xliff:g> left until fully charged</string>
-
-    <!-- [CHAR_LIMIT=40] Short label for estimated remaining duration of battery charging/discharging -->
-    <string name="power_remaining_duration_only_short"><xliff:g id="time">^1</xliff:g> left</string>
-    <!-- [CHAR_LIMIT=60] Short label for estimated remaining duration of battery charging/discharging -->
-    <string name="power_remaining_duration_only_short_enhanced"><xliff:g id="time">^1</xliff:g> left based on your usage</string>
-
-    <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
-    <string name="power_discharging_duration"><xliff:g id="level">^1</xliff:g> - about <xliff:g id="time">^2</xliff:g> left</string>
+    <string name="power_remaining_duration_only_enhanced">About <xliff:g id="time_remaining">%1$s</xliff:g> left based on your usage</string>
     <!-- [CHAR_LIMIT=60] Label for battery level chart when discharging with duration and using enhanced estimate -->
-    <string name="power_discharging_duration_enhanced"><xliff:g id="level">^1</xliff:g> - about <xliff:g id="time">^2</xliff:g> left based on your usage</string>
+    <string name="power_discharging_duration_enhanced">About <xliff:g id="time_remaining">%1$s</xliff:g> left based on your usage (<xliff:g id="level">%2$s</xliff:g>)</string>
+    <!-- [CHAR_LIMIT=40] Short label for estimated remaining duration of battery charging/discharging -->
+    <string name="power_remaining_duration_only_short"><xliff:g id="time_remaining">%1$s</xliff:g> left</string>
 
-    <!-- [CHAR_LIMIT=40] Label for battery level chart when discharging with duration -->
-    <string name="power_discharging_duration_short"><xliff:g id="level">^1</xliff:g> - <xliff:g id="time">^2</xliff:g> left</string>
+    <!-- [CHAR_LIMIT=100] Label for enhanced estimated time that phone will run out of battery -->
+    <string name="power_discharge_by_enhanced">Should last until about <xliff:g id="time">%1$s</xliff:g> based on your usage (<xliff:g id="level">%2$s</xliff:g>)</string>
+    <!-- [CHAR_LIMIT=100] Label for enhanced estimated time that phone will run out of battery with no percentage -->
+    <string name="power_discharge_by_only_enhanced">Should last until about <xliff:g id="time">%1$s</xliff:g> based on your usage</string>
+    <!-- [CHAR_LIMIT=100] Label for estimated time that phone will run out of battery -->
+    <string name="power_discharge_by">Should last until about <xliff:g id="time">%1$s</xliff:g> (<xliff:g id="level">%2$s</xliff:g>)</string>
+    <!-- [CHAR_LIMIT=100] Label for estimated time that phone will run out of battery -->
+    <string name="power_discharge_by_only">Should last until about <xliff:g id="time">%1$s</xliff:g></string>
+
+    <!-- [CHAR_LIMIT=60] label for estimated remaining duration of battery when under a certain amount -->
+    <string name="power_remaining_less_than_duration_only">Less than <xliff:g id="threshold">%1$s</xliff:g> remaining</string>
+    <!-- [CHAR_LIMIT=60] label for estimated remaining duration of battery when under a certain amount with the percentage -->
+    <string name="power_remaining_less_than_duration">Less than <xliff:g id="threshold">%1$s</xliff:g> remaining (<xliff:g id="level">%2$s</xliff:g>)</string>
+
+    <!-- Used to let users know that they have more than some amount of battery life remaining with percentage. ex: 75% - more than 1 day remaining [CHAR LIMIT = 80] -->
+    <string name="power_remaining_more_than_subtext">More than <xliff:g id="time_remaining">%1$s</xliff:g> remaining (<xliff:g id="level">%2$s</xliff:g>)</string>
+    <!-- Used to let users know that they have more than some amount of battery life remaining. ex: more than 1 day remaining [CHAR LIMIT = 40] -->
+    <string name="power_remaining_only_more_than_subtext">More than <xliff:g id="time_remaining">%1$s</xliff:g> remaining</string>
+
+    <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default">Phone may shutdown soon</string>
+    <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet">Tablet may shutdown soon</string>
+    <!-- [CHAR_LIMIT=50] Short label for imminent shutdown warning of device -->
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device">Device may shutdown soon</string>
+    <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
+    <string name="power_remaining_duration_shutdown_imminent" product="default">Phone may shutdown soon (<xliff:g id="level">%1$s</xliff:g>)</string>
+    <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet">Tablet may shutdown soon (<xliff:g id="level">%1$s</xliff:g>)</string>
+    <!-- [CHAR_LIMIT=60] Label for battery level chart when shutdown is imminent-->
+    <string name="power_remaining_duration_shutdown_imminent" product="device">Device may shutdown soon (<xliff:g id="level">%1$s</xliff:g>)</string>
 
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging -->
     <string name="power_charging"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="state">%2$s</xliff:g></string>
+    <!-- [CHAR_LIMIT=40] Label for estimated remaining duration of battery charging -->
+    <string name="power_remaining_charging_duration_only"><xliff:g id="time">%1$s</xliff:g> left until fully charged</string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
-    <string name="power_charging_duration"><xliff:g id="level">^1</xliff:g> - <xliff:g id="time">^2</xliff:g> until fully charged</string>
+    <string name="power_charging_duration"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="time">%2$s</xliff:g> until fully charged</string>
 
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_unknown">Unknown</string>
@@ -998,4 +1070,59 @@
     <!-- [CHAR LIMIT=NONE] Dialog body explaining that the app just selected by the user will not work after a reboot until until after the user enters their credentials, such as a PIN or password. -->
     <string name="direct_boot_unaware_dialog_message">Note: After a reboot, this app can\'t start until you unlock your phone</string>
 
+    <!--Label of IMS registration header -->
+    <string name="ims_reg_title">"IMS registration state"</string>
+    <!--Used when IMS registration state is registered -->
+    <string name="ims_reg_status_registered">"Registered"</string>
+    <!--Used when IMS registration state is not registered -->
+    <string name="ims_reg_status_not_registered">"Not registered"</string>
+
+    <!-- About phone, status item value if the actual value is not available. -->
+    <string name="status_unavailable">Unavailable</string>
+
+    <!-- About phone, status value for MAC address when MAC randomization feature is enabled and the device is disconnected. -->
+    <string name="wifi_status_mac_randomized">MAC is randomized</string>
+
+    <!-- Summary to show how many devices are connected in wifi hotspot [CHAR LIMIT=NONE] -->
+    <plurals name="wifi_tether_connected_summary">
+        <item quantity="one">%1$d device connected</item>
+        <item quantity="other">%1$d devices connected</item>
+    </plurals>
+
+    <!-- Content description of zen mode time condition plus button (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_manual_zen_more_time">More time.</string>
+    <!-- Content description of zen mode time condition minus button (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_manual_zen_less_time">Less time.</string>
+
+    <!-- Button label for generic cancel action [CHAR LIMIT=20] -->
+    <string name="cancel">Cancel</string>
+    <!-- Button label for generic OK action [CHAR LIMIT=20] -->
+    <string name="okay">OK</string>
+
+    <!--  Do not disturb: Label for button in enable zen dialog that will turn on zen mode. [CHAR LIMIT=30] -->
+    <string name="zen_mode_enable_dialog_turn_on">Turn on</string>
+    <!-- Do not disturb: Title for the Do not Disturb dialog to turn on Do not disturb. [CHAR LIMIT=50]-->
+    <string name="zen_mode_settings_turn_on_dialog_title">Turn on Do Not Disturb</string>
+    <!-- Sound: Summary for the Do not Disturb option when there is no automatic rules turned on. [CHAR LIMIT=NONE]-->
+    <string name="zen_mode_settings_summary_off">Never</string>
+    <!--[CHAR LIMIT=40] Zen Interruption level: Priority.  -->
+    <string name="zen_interruption_level_priority">Priority only</string>
+    <!-- [CHAR LIMIT=20] Accessibility string for current zen mode and selected exit condition. A template that simply concatenates existing mode string and the current condition description.  -->
+    <string name="zen_mode_and_condition"><xliff:g id="zen_mode" example="Priority interruptions only">%1$s</xliff:g>. <xliff:g id="exit_condition" example="For one hour">%2$s</xliff:g></string>
+    <!-- Warning text when an alarm might be silenced by Do Not Disturb [CHAR LIMIT=NONE] -->
+    <string name="zen_alarm_warning_indef">You won\'t hear your next alarm <xliff:g id="when" example="at 7:00 AM">%1$s</xliff:g> unless you turn this off before then</string>
+    <!-- Warning text when an alarm might be silenced by Do Not Disturb due to a time-based condition [CHAR LIMIT=NONE] -->
+    <string name="zen_alarm_warning">You won\'t hear your next alarm <xliff:g id="when" example="at 7:00 AM">%1$s</xliff:g></string>
+    <!-- Alarm template for near alarms [CHAR LIMIT=25] -->
+    <string name="alarm_template">at <xliff:g id="when" example="7:00 AM">%1$s</xliff:g></string>
+    <!-- Alarm template for far in the future alarms [CHAR LIMIT=25] -->
+    <string name="alarm_template_far">on <xliff:g id="when" example="Fri 7:00 AM">%1$s</xliff:g></string>
+
+    <!-- Do not disturb: Title for the dnd duration setting (user can specify how long dnd will last when toggling dnd on from qs or settings) [CHAR LIMIT=30] -->
+    <string name="zen_mode_duration_settings_title">Duration</string>
+    <!-- Do not disturb: Duration option to always prompt for the duration of dnd -->
+    <string name="zen_mode_duration_always_prompt_title">Ask every time</string>
+
+    <!-- time label for event have that happened very recently [CHAR LIMIT=60] -->
+    <string name="time_unit_just_now">Just now</string>
 </resources>

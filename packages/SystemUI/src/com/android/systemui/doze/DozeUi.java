@@ -16,6 +16,8 @@
 
 package com.android.systemui.doze;
 
+import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSED;
+
 import android.app.AlarmManager;
 import android.content.Context;
 import android.os.Handler;
@@ -23,6 +25,10 @@ import android.os.SystemClock;
 import android.text.format.Formatter;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.AlarmTimeout;
 import com.android.systemui.util.wakelock.WakeLock;
 
@@ -41,18 +47,46 @@ public class DozeUi implements DozeMachine.Part {
     private final WakeLock mWakeLock;
     private final DozeMachine mMachine;
     private final AlarmTimeout mTimeTicker;
+    private final boolean mCanAnimateTransition;
+    private final DozeParameters mDozeParameters;
+
+    private boolean mKeyguardShowing;
+    private final KeyguardUpdateMonitorCallback mKeyguardVisibilityCallback =
+            new KeyguardUpdateMonitorCallback() {
+
+                @Override
+                public void onKeyguardVisibilityChanged(boolean showing) {
+                    mKeyguardShowing = showing;
+                    updateAnimateScreenOff();
+                }
+            };
 
     private long mLastTimeTickElapsed = 0;
 
     public DozeUi(Context context, AlarmManager alarmManager, DozeMachine machine,
-            WakeLock wakeLock, DozeHost host, Handler handler) {
+            WakeLock wakeLock, DozeHost host, Handler handler,
+            DozeParameters params, KeyguardUpdateMonitor keyguardUpdateMonitor) {
         mContext = context;
         mMachine = machine;
         mWakeLock = wakeLock;
         mHost = host;
         mHandler = handler;
-
+        mCanAnimateTransition = !params.getDisplayNeedsBlanking();
+        mDozeParameters = params;
         mTimeTicker = new AlarmTimeout(alarmManager, this::onTimeTick, "doze_time_tick", handler);
+        keyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
+    }
+
+    /**
+     * Decide if we're taking over the screen-off animation
+     * when the device was configured to skip doze after screen off.
+     */
+    private void updateAnimateScreenOff() {
+        if (mCanAnimateTransition) {
+            final boolean controlScreenOff = mDozeParameters.getAlwaysOn() && mKeyguardShowing;
+            mDozeParameters.setControlScreenOffAnimation(controlScreenOff);
+            mHost.setAnimateScreenOff(controlScreenOff);
+        }
     }
 
     private void pulseWhileDozing(int reason) {
@@ -74,6 +108,17 @@ public class DozeUi implements DozeMachine.Part {
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         switch (newState) {
             case DOZE_AOD:
+                if (oldState == DOZE_AOD_PAUSED) {
+                    // Whenever turning on the display, it's necessary to push a new frame.
+                    // The display buffers will be empty and need to be filled.
+                    mHost.dozeTimeTick();
+                    // The first frame may arrive when the display isn't ready yet.
+                    mHandler.postDelayed(mWakeLock.wrap(mHost::dozeTimeTick), 100);
+                    // The the delayed frame may arrive when the display isn't ready yet either.
+                    mHandler.postDelayed(mWakeLock.wrap(mHost::dozeTimeTick), 1000);
+                }
+                scheduleTimeTick();
+                break;
             case DOZE_AOD_PAUSING:
                 scheduleTimeTick();
                 break;
@@ -106,7 +151,7 @@ public class DozeUi implements DozeMachine.Part {
                 // Keep current state.
                 break;
             default:
-                mHost.setAnimateWakeup(false);
+                mHost.setAnimateWakeup(mCanAnimateTransition && mDozeParameters.getAlwaysOn());
                 break;
         }
     }
@@ -157,5 +202,10 @@ public class DozeUi implements DozeMachine.Part {
         mHandler.post(mWakeLock.wrap(() -> {}));
 
         scheduleTimeTick();
+    }
+
+    @VisibleForTesting
+    KeyguardUpdateMonitorCallback getKeyguardCallback() {
+        return mKeyguardVisibilityCallback;
     }
 }

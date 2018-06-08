@@ -24,16 +24,16 @@
 
 namespace aapt {
 
-struct SingleReferenceVisitor : public ValueVisitor {
-  using ValueVisitor::Visit;
+struct SingleReferenceVisitor : public DescendingValueVisitor {
+  using DescendingValueVisitor::Visit;
 
   Reference* visited = nullptr;
 
   void Visit(Reference* ref) override { visited = ref; }
 };
 
-struct StyleVisitor : public ValueVisitor {
-  using ValueVisitor::Visit;
+struct StyleVisitor : public DescendingValueVisitor {
+  using DescendingValueVisitor::Visit;
 
   std::list<Reference*> visited_refs;
   Style* visited_style = nullptr;
@@ -42,7 +42,7 @@ struct StyleVisitor : public ValueVisitor {
 
   void Visit(Style* style) override {
     visited_style = style;
-    ValueVisitor::Visit(style);
+    DescendingValueVisitor::Visit(style);
   }
 };
 

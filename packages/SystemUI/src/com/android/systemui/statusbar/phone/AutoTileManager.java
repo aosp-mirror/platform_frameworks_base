@@ -16,14 +16,10 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.os.Handler;
-import android.os.Looper;
 import android.provider.Settings.Secure;
-
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.NightDisplayController;
+import com.android.internal.app.ColorDisplayController;
 import com.android.systemui.Dependency;
-import com.android.systemui.Prefs;
-import com.android.systemui.Prefs.Key;
 import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.qs.SecureSetting;
@@ -36,22 +32,29 @@ import com.android.systemui.statusbar.policy.HotspotController.Callback;
  * Manages which tiles should be automatically added to QS.
  */
 public class AutoTileManager {
-
     public static final String HOTSPOT = "hotspot";
     public static final String SAVER = "saver";
     public static final String INVERSION = "inversion";
     public static final String WORK = "work";
     public static final String NIGHT = "night";
+
     private final Context mContext;
     private final QSTileHost mHost;
     private final Handler mHandler;
     private final AutoAddTracker mAutoTracker;
 
     public AutoTileManager(Context context, QSTileHost host) {
-        mAutoTracker = new AutoAddTracker(context);
+        this(context, new AutoAddTracker(context), host,
+            new Handler(Dependency.get(Dependency.BG_LOOPER)));
+    }
+
+    @VisibleForTesting
+    AutoTileManager(Context context, AutoAddTracker autoAddTracker, QSTileHost host,
+            Handler handler) {
+        mAutoTracker = autoAddTracker;
         mContext = context;
         mHost = host;
-        mHandler = new Handler((Looper) Dependency.get(Dependency.BG_LOOPER));
+        mHandler = handler;
         if (!mAutoTracker.isAdded(HOTSPOT)) {
             Dependency.get(HotspotController.class).addCallback(mHotspotCallback);
         }
@@ -76,20 +79,21 @@ public class AutoTileManager {
         if (!mAutoTracker.isAdded(WORK)) {
             Dependency.get(ManagedProfileController.class).addCallback(mProfileCallback);
         }
-
         if (!mAutoTracker.isAdded(NIGHT)
-                && NightDisplayController.isAvailable(mContext)) {
-            Dependency.get(NightDisplayController.class).setListener(mNightDisplayCallback);
+            && ColorDisplayController.isAvailable(mContext)) {
+            Dependency.get(ColorDisplayController.class).setListener(mColorDisplayCallback);
         }
     }
 
     public void destroy() {
-        mColorsSetting.setListening(false);
+        if (mColorsSetting != null) {
+            mColorsSetting.setListening(false);
+        }
         mAutoTracker.destroy();
         Dependency.get(HotspotController.class).removeCallback(mHotspotCallback);
         Dependency.get(DataSaverController.class).removeCallback(mDataSaverListener);
         Dependency.get(ManagedProfileController.class).removeCallback(mProfileCallback);
-        Dependency.get(NightDisplayController.class).setListener(null);
+        Dependency.get(ColorDisplayController.class).setListener(null);
     }
 
     private final ManagedProfileController.Callback mProfileCallback =
@@ -127,7 +131,7 @@ public class AutoTileManager {
 
     private final HotspotController.Callback mHotspotCallback = new Callback() {
         @Override
-        public void onHotspotChanged(boolean enabled) {
+        public void onHotspotChanged(boolean enabled, int numDevices) {
             if (mAutoTracker.isAdded(HOTSPOT)) return;
             if (enabled) {
                 mHost.addTile(HOTSPOT);
@@ -139,8 +143,8 @@ public class AutoTileManager {
     };
 
     @VisibleForTesting
-    final NightDisplayController.Callback mNightDisplayCallback =
-            new NightDisplayController.Callback() {
+    final ColorDisplayController.Callback mColorDisplayCallback =
+            new ColorDisplayController.Callback() {
         @Override
         public void onActivated(boolean activated) {
             if (activated) {
@@ -150,8 +154,8 @@ public class AutoTileManager {
 
         @Override
         public void onAutoModeChanged(int autoMode) {
-            if (autoMode == NightDisplayController.AUTO_MODE_CUSTOM
-                    || autoMode == NightDisplayController.AUTO_MODE_TWILIGHT) {
+            if (autoMode == ColorDisplayController.AUTO_MODE_CUSTOM
+                    || autoMode == ColorDisplayController.AUTO_MODE_TWILIGHT) {
                 addNightTile();
             }
         }
@@ -160,7 +164,7 @@ public class AutoTileManager {
             if (mAutoTracker.isAdded(NIGHT)) return;
             mHost.addTile(NIGHT);
             mAutoTracker.setTileAdded(NIGHT);
-            mHandler.post(() -> Dependency.get(NightDisplayController.class)
+            mHandler.post(() -> Dependency.get(ColorDisplayController.class)
                     .setListener(null));
         }
     };

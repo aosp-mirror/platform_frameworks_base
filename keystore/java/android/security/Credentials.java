@@ -60,10 +60,12 @@ public class Credentials {
     /** Key prefix for user certificates. */
     public static final String USER_CERTIFICATE = "USRCERT_";
 
-    /** Key prefix for user private keys. */
+    /** Key prefix for user private and secret keys. */
     public static final String USER_PRIVATE_KEY = "USRPKEY_";
 
-    /** Key prefix for user secret keys. */
+    /** Key prefix for user secret keys.
+     *  @deprecated use {@code USER_PRIVATE_KEY} for this category instead.
+     */
     public static final String USER_SECRET_KEY = "USRSKEY_";
 
     /** Key prefix for VPN. */
@@ -235,8 +237,7 @@ public class Credentials {
          * Make sure every type is deleted. There can be all three types, so
          * don't use a conditional here.
          */
-        return deletePrivateKeyTypeForAlias(keystore, alias, uid)
-                & deleteSecretKeyTypeForAlias(keystore, alias, uid)
+        return deleteUserKeyTypeForAlias(keystore, alias, uid)
                 & deleteCertificateTypesForAlias(keystore, alias, uid);
     }
 
@@ -264,34 +265,27 @@ public class Credentials {
     }
 
     /**
-     * Delete private key for a particular {@code alias}.
+     * Delete user key for a particular {@code alias}.
      * Returns {@code true} if the entry no longer exists.
      */
-    static boolean deletePrivateKeyTypeForAlias(KeyStore keystore, String alias) {
-        return deletePrivateKeyTypeForAlias(keystore, alias, KeyStore.UID_SELF);
+    public static boolean deleteUserKeyTypeForAlias(KeyStore keystore, String alias) {
+        return deleteUserKeyTypeForAlias(keystore, alias, KeyStore.UID_SELF);
     }
 
     /**
-     * Delete private key for a particular {@code alias}.
+     * Delete user key for a particular {@code alias}.
      * Returns {@code true} if the entry no longer exists.
      */
-    static boolean deletePrivateKeyTypeForAlias(KeyStore keystore, String alias, int uid) {
-        return keystore.delete(Credentials.USER_PRIVATE_KEY + alias, uid);
+    public static boolean deleteUserKeyTypeForAlias(KeyStore keystore, String alias, int uid) {
+        return keystore.delete(Credentials.USER_PRIVATE_KEY + alias, uid) ||
+                keystore.delete(Credentials.USER_SECRET_KEY + alias, uid);
     }
 
     /**
-     * Delete secret key for a particular {@code alias}.
+     * Delete legacy prefixed entry for a particular {@code alias}
      * Returns {@code true} if the entry no longer exists.
      */
-    public static boolean deleteSecretKeyTypeForAlias(KeyStore keystore, String alias) {
-        return deleteSecretKeyTypeForAlias(keystore, alias, KeyStore.UID_SELF);
-    }
-
-    /**
-     * Delete secret key for a particular {@code alias}.
-     * Returns {@code true} if the entry no longer exists.
-     */
-    public static boolean deleteSecretKeyTypeForAlias(KeyStore keystore, String alias, int uid) {
+    public static boolean deleteLegacyKeyForAlias(KeyStore keystore, String alias, int uid) {
         return keystore.delete(Credentials.USER_SECRET_KEY + alias, uid);
     }
 }

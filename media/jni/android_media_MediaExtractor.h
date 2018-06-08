@@ -18,8 +18,8 @@
 #define _ANDROID_MEDIA_MEDIAEXTRACTOR_H_
 
 #include <media/stagefright/foundation/ABase.h>
-#include <media/stagefright/MediaSource.h>
-#include <media/stagefright/DataSource.h>
+#include <media/MediaSource.h>
+#include <media/DataSource.h>
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
 #include <utils/RefBase.h>
@@ -60,6 +60,7 @@ struct JMediaExtractor : public RefBase {
     status_t readSampleData(jobject byteBuf, size_t offset, size_t *sampleSize);
     status_t getSampleTrackIndex(size_t *trackIndex);
     status_t getSampleTime(int64_t *sampleTimeUs);
+    status_t getSampleSize(size_t *sampleSize);
     status_t getSampleFlags(uint32_t *sampleFlags);
     status_t getSampleMeta(sp<MetaData> *sampleMeta);
     status_t getMetrics(Parcel *reply) const;

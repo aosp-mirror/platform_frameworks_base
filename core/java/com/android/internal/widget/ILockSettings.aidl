@@ -16,9 +16,17 @@
 
 package com.android.internal.widget;
 
+import android.app.PendingIntent;
 import android.app.trust.IStrongAuthTracker;
+import android.os.Bundle;
+import android.security.keystore.recovery.WrappedApplicationKey;
+import android.security.keystore.recovery.KeyChainSnapshot;
+import android.security.keystore.recovery.KeyChainProtectionParams;
+import android.security.keystore.recovery.RecoveryCertPath;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.VerifyCredentialResponse;
+
+import java.util.Map;
 
 /** {@hide} */
 interface ILockSettings {
@@ -37,6 +45,7 @@ interface ILockSettings {
     boolean checkVoldPassword(int userId);
     boolean havePattern(int userId);
     boolean havePassword(int userId);
+    byte[] getHashFactor(String currentCredential, int userId);
     void setSeparateProfileChallengeEnabled(int userId, boolean enabled, String managedUserPassword);
     boolean getSeparateProfileChallengeEnabled(int userId);
     void registerStrongAuthTracker(in IStrongAuthTracker tracker);
@@ -46,10 +55,28 @@ interface ILockSettings {
     void userPresent(int userId);
     int getStrongAuthForUser(int userId);
 
-    long addEscrowToken(in byte[] token, int userId);
-    boolean removeEscrowToken(long handle, int userId);
-    boolean isEscrowTokenActive(long handle, int userId);
-    boolean setLockCredentialWithToken(String credential, int type, long tokenHandle,
-            in byte[] token, int requestedQuality, int userId);
-    void unlockUserWithToken(long tokenHandle, in byte[] token, int userId);
+    // Keystore RecoveryController methods.
+    // {@code ServiceSpecificException} may be thrown to signal an error, which caller can
+    // convert to  {@code RecoveryManagerException}.
+    void initRecoveryServiceWithSigFile(in String rootCertificateAlias,
+            in byte[] recoveryServiceCertFile, in byte[] recoveryServiceSigFile);
+    KeyChainSnapshot getKeyChainSnapshot();
+    String generateKey(String alias);
+    String importKey(String alias, in byte[] keyBytes);
+    String getKey(String alias);
+    void removeKey(String alias);
+    void setSnapshotCreatedPendingIntent(in PendingIntent intent);
+    void setServerParams(in byte[] serverParams);
+    void setRecoveryStatus(in String alias, int status);
+    Map getRecoveryStatus();
+    void setRecoverySecretTypes(in int[] secretTypes);
+    int[] getRecoverySecretTypes();
+    byte[] startRecoverySessionWithCertPath(in String sessionId, in String rootCertificateAlias,
+            in RecoveryCertPath verifierCertPath, in byte[] vaultParams, in byte[] vaultChallenge,
+            in List<KeyChainProtectionParams> secrets);
+    Map/*<String, String>*/ recoverKeyChainSnapshot(
+            in String sessionId,
+            in byte[] recoveryKeyBlob,
+            in List<WrappedApplicationKey> applicationKeys);
+    void closeSession(in String sessionId);
 }

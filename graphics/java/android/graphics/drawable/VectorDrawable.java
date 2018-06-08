@@ -213,12 +213,79 @@ import dalvik.system.VMRuntime;
  * &lt;/vector&gt;
  * </pre>
  * </li>
- * <li>And here is an example of linear gradient color, which is supported in SDK 24+.
+ * <h4>Gradient support</h4>
+ * We support 3 types of gradients: {@link android.graphics.LinearGradient},
+ * {@link android.graphics.RadialGradient}, or {@link android.graphics.SweepGradient}.
+ * <p/>
+ * And we support all of 3 types of tile modes {@link android.graphics.Shader.TileMode}:
+ * CLAMP, REPEAT, MIRROR.
+ * <p/>
+ * All of the attributes are listed in {@link android.R.styleable#GradientColor}.
+ * Note that different attributes are relevant for different types of gradient.
+ * <table border="2" align="center" cellpadding="5">
+ *     <thead>
+ *         <tr>
+ *             <th>LinearGradient</th>
+ *             <th>RadialGradient</th>
+ *             <th>SweepGradient</th>
+ *         </tr>
+ *     </thead>
+ *     <tr>
+ *         <td>startColor </td>
+ *         <td>startColor</td>
+ *         <td>startColor</td>
+ *     </tr>
+ *     <tr>
+ *         <td>centerColor</td>
+ *         <td>centerColor</td>
+ *         <td>centerColor</td>
+ *     </tr>
+ *     <tr>
+ *         <td>endColor</td>
+ *         <td>endColor</td>
+ *         <td>endColor</td>
+ *     </tr>
+ *     <tr>
+ *         <td>type</td>
+ *         <td>type</td>
+ *         <td>type</td>
+ *     </tr>
+ *     <tr>
+ *         <td>tileMode</td>
+ *         <td>tileMode</td>
+ *         <td>tileMode</td>
+ *     </tr>
+ *     <tr>
+ *         <td>startX</td>
+ *         <td>centerX</td>
+ *         <td>centerX</td>
+ *     </tr>
+ *     <tr>
+ *         <td>startY</td>
+ *         <td>centerY</td>
+ *         <td>centerY</td>
+ *     </tr>
+ *     <tr>
+ *         <td>endX</td>
+ *         <td>gradientRadius</td>
+ *         <td></td>
+ *     </tr>
+ *     <tr>
+ *         <td>endY</td>
+ *         <td></td>
+ *         <td></td>
+ *     </tr>
+ * </table>
+ * <p/>
+ * Also note that if any color item {@link android.R.styleable#GradientColorItem} is defined, then
+ * startColor, centerColor and endColor will be ignored.
+ * <p/>
  * See more details in {@link android.R.styleable#GradientColor} and
  * {@link android.R.styleable#GradientColorItem}.
+ * <p/>
+ * Here is a simple example that defines a linear gradient.
  * <pre>
  * &lt;gradient xmlns:android="http://schemas.android.com/apk/res/android"
- *     android:angle="90"
  *     android:startColor="?android:attr/colorPrimary"
  *     android:endColor="?android:attr/colorControlActivated"
  *     android:centerColor="#f00"
@@ -229,7 +296,18 @@ import dalvik.system.VMRuntime;
  *     android:type="linear"&gt;
  * &lt;/gradient&gt;
  * </pre>
- * </li>
+ * And here is a simple example that defines a radial gradient using color items.
+ * <pre>
+ * &lt;gradient xmlns:android="http://schemas.android.com/apk/res/android"
+ *     android:centerX="300"
+ *     android:centerY="300"
+ *     android:gradientRadius="100"
+ *     android:type="radial"&gt;
+ *     &lt;item android:offset="0.1" android:color="#0ff"/&gt;
+ *     &lt;item android:offset="0.4" android:color="#fff"/&gt;
+ *     &lt;item android:offset="0.9" android:color="#ff0"/&gt;
+ * &lt;/gradient&gt;
+ * </pre>
  *
  */
 
@@ -816,6 +894,13 @@ public class VectorDrawable extends Drawable {
      */
     public long getNativeTree() {
         return mVectorState.getNativeRenderer();
+    }
+
+    /**
+     * @hide
+     */
+    public void setAntiAlias(boolean aa) {
+        nSetAntiAlias(mVectorState.mNativeTree.get(), aa);
     }
 
     static class VectorDrawableState extends ConstantState {
@@ -2190,6 +2275,8 @@ public class VectorDrawable extends Drawable {
     private static native boolean nSetRootAlpha(long rendererPtr, float alpha);
     @FastNative
     private static native float nGetRootAlpha(long rendererPtr);
+    @FastNative
+    private static native void nSetAntiAlias(long rendererPtr, boolean aa);
     @FastNative
     private static native void nSetAllowCaching(long rendererPtr, boolean allowCaching);
 

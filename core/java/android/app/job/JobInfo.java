@@ -16,14 +16,23 @@
 
 package android.app.job;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.util.TimeUtils.formatDuration;
 
+import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.content.ClipData;
 import android.content.ComponentName;
+import android.net.NetworkRequest;
+import android.net.NetworkSpecifier;
 import android.net.Uri;
 import android.os.BaseBundle;
 import android.os.Bundle;
@@ -55,7 +64,7 @@ public class JobInfo implements Parcelable {
             NETWORK_TYPE_ANY,
             NETWORK_TYPE_UNMETERED,
             NETWORK_TYPE_NOT_ROAMING,
-            NETWORK_TYPE_METERED,
+            NETWORK_TYPE_CELLULAR,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NetworkType {}
@@ -68,8 +77,24 @@ public class JobInfo implements Parcelable {
     public static final int NETWORK_TYPE_UNMETERED = 2;
     /** This job requires network connectivity that is not roaming. */
     public static final int NETWORK_TYPE_NOT_ROAMING = 3;
-    /** This job requires metered connectivity such as most cellular data networks. */
-    public static final int NETWORK_TYPE_METERED = 4;
+    /** This job requires network connectivity that is a cellular network. */
+    public static final int NETWORK_TYPE_CELLULAR = 4;
+
+    /**
+     * This job requires metered connectivity such as most cellular data
+     * networks.
+     *
+     * @deprecated Cellular networks may be unmetered, or Wi-Fi networks may be
+     *             metered, so this isn't a good way of selecting a specific
+     *             transport. Instead, use {@link #NETWORK_TYPE_CELLULAR} or
+     *             {@link android.net.NetworkRequest.Builder#addTransportType(int)}
+     *             if your job requires a specific network transport.
+     */
+    @Deprecated
+    public static final int NETWORK_TYPE_METERED = NETWORK_TYPE_CELLULAR;
+
+    /** Sentinel value indicating that bytes are unknown. */
+    public static final int NETWORK_BYTES_UNKNOWN = -1;
 
     /**
      * Amount of backoff a job has initially by default, in milliseconds.
@@ -218,6 +243,26 @@ public class JobInfo implements Parcelable {
     public static final int FLAG_WILL_BE_FOREGROUND = 1 << 0;
 
     /**
+     * Allows this job to run despite doze restrictions as long as the app is in the foreground
+     * or on the temporary whitelist
+     * @hide
+     */
+    public static final int FLAG_IMPORTANT_WHILE_FOREGROUND = 1 << 1;
+
+    /**
+     * @hide
+     */
+    public static final int FLAG_PREFETCH = 1 << 2;
+
+    /**
+     * This job needs to be exempted from the app standby throttling. Only the system (UID 1000)
+     * can set it. Jobs with a time constrant must not have it.
+     *
+     * @hide
+     */
+    public static final int FLAG_EXEMPT_FROM_APP_STANDBY = 1 << 3;
+
+    /**
      * @hide
      */
     public static final int CONSTRAINT_FLAG_CHARGING = 1 << 0;
@@ -249,7 +294,9 @@ public class JobInfo implements Parcelable {
     private final long triggerContentMaxDelay;
     private final boolean hasEarlyConstraint;
     private final boolean hasLateConstraint;
-    private final int networkType;
+    private final NetworkRequest networkRequest;
+    private final long networkDownloadBytes;
+    private final long networkUploadBytes;
     private final long minLatencyMillis;
     private final long maxExecutionDelayMillis;
     private final boolean isPeriodic;
@@ -270,30 +317,28 @@ public class JobInfo implements Parcelable {
     }
 
     /**
-     * Bundle of extras which are returned to your application at execution time.
+     * @see JobInfo.Builder#setExtras(PersistableBundle)
      */
     public @NonNull PersistableBundle getExtras() {
         return extras;
     }
 
     /**
-     * Bundle of transient extras which are returned to your application at execution time,
-     * but not persisted by the system.
+     * @see JobInfo.Builder#setTransientExtras(Bundle)
      */
     public @NonNull Bundle getTransientExtras() {
         return transientExtras;
     }
 
     /**
-     * ClipData of information that is returned to your application at execution time,
-     * but not persisted by the system.
+     * @see JobInfo.Builder#setClipData(ClipData, int)
      */
     public @Nullable ClipData getClipData() {
         return clipData;
     }
 
     /**
-     * Permission grants that go along with {@link #getClipData}.
+     * @see JobInfo.Builder#setClipData(ClipData, int)
      */
     public int getClipGrantFlags() {
         return clipGrantFlags;
@@ -316,29 +361,34 @@ public class JobInfo implements Parcelable {
         return flags;
     }
 
+    /** @hide */
+    public boolean isExemptedFromAppStandby() {
+        return ((flags & FLAG_EXEMPT_FROM_APP_STANDBY) != 0) && !isPeriodic();
+    }
+
     /**
-     * Whether this job needs the device to be plugged in.
+     * @see JobInfo.Builder#setRequiresCharging(boolean)
      */
     public boolean isRequireCharging() {
         return (constraintFlags & CONSTRAINT_FLAG_CHARGING) != 0;
     }
 
     /**
-     * Whether this job needs the device's battery level to not be at below the critical threshold.
+     * @see JobInfo.Builder#setRequiresBatteryNotLow(boolean)
      */
     public boolean isRequireBatteryNotLow() {
         return (constraintFlags & CONSTRAINT_FLAG_BATTERY_NOT_LOW) != 0;
     }
 
     /**
-     * Whether this job needs the device to be in an Idle maintenance window.
+     * @see JobInfo.Builder#setRequiresDeviceIdle(boolean)
      */
     public boolean isRequireDeviceIdle() {
         return (constraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0;
     }
 
     /**
-     * Whether this job needs the device's storage to not be low.
+     * @see JobInfo.Builder#setRequiresStorageNotLow(boolean)
      */
     public boolean isRequireStorageNotLow() {
         return (constraintFlags & CONSTRAINT_FLAG_STORAGE_NOT_LOW) != 0;
@@ -354,6 +404,7 @@ public class JobInfo implements Parcelable {
     /**
      * Which content: URIs must change for the job to be scheduled.  Returns null
      * if there are none required.
+     * @see JobInfo.Builder#addTriggerContentUri(TriggerContentUri)
      */
     public @Nullable TriggerContentUri[] getTriggerContentUris() {
         return triggerContentUris;
@@ -362,6 +413,7 @@ public class JobInfo implements Parcelable {
     /**
      * When triggering on content URI changes, this is the delay from when a change
      * is detected until the job is scheduled.
+     * @see JobInfo.Builder#setTriggerContentUpdateDelay(long)
      */
     public long getTriggerContentUpdateDelay() {
         return triggerContentUpdateDelay;
@@ -370,29 +422,100 @@ public class JobInfo implements Parcelable {
     /**
      * When triggering on content URI changes, this is the maximum delay we will
      * use before scheduling the job.
+     * @see JobInfo.Builder#setTriggerContentMaxDelay(long)
      */
     public long getTriggerContentMaxDelay() {
         return triggerContentMaxDelay;
     }
 
     /**
-     * The kind of connectivity requirements that the job has.
+     * Return the basic description of the kind of network this job requires.
+     *
+     * @deprecated This method attempts to map {@link #getRequiredNetwork()}
+     *             into the set of simple constants, which results in a loss of
+     *             fidelity. Callers should move to using
+     *             {@link #getRequiredNetwork()} directly.
+     * @see Builder#setRequiredNetworkType(int)
      */
+    @Deprecated
     public @NetworkType int getNetworkType() {
-        return networkType;
+        if (networkRequest == null) {
+            return NETWORK_TYPE_NONE;
+        } else if (networkRequest.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)) {
+            return NETWORK_TYPE_UNMETERED;
+        } else if (networkRequest.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_ROAMING)) {
+            return NETWORK_TYPE_NOT_ROAMING;
+        } else if (networkRequest.networkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
+            return NETWORK_TYPE_CELLULAR;
+        } else {
+            return NETWORK_TYPE_ANY;
+        }
+    }
+
+    /**
+     * Return the detailed description of the kind of network this job requires,
+     * or {@code null} if no specific kind of network is required.
+     *
+     * @see Builder#setRequiredNetwork(NetworkRequest)
+     */
+    public @Nullable NetworkRequest getRequiredNetwork() {
+        return networkRequest;
+    }
+
+    /**
+     * @deprecated replaced by {@link #getEstimatedNetworkDownloadBytes()} and
+     *             {@link #getEstimatedNetworkUploadBytes()}.
+     * @removed
+     */
+    @Deprecated
+    public @BytesLong long getEstimatedNetworkBytes() {
+        if (networkDownloadBytes == NETWORK_BYTES_UNKNOWN
+                && networkUploadBytes == NETWORK_BYTES_UNKNOWN) {
+            return NETWORK_BYTES_UNKNOWN;
+        } else if (networkDownloadBytes == NETWORK_BYTES_UNKNOWN) {
+            return networkUploadBytes;
+        } else if (networkUploadBytes == NETWORK_BYTES_UNKNOWN) {
+            return networkDownloadBytes;
+        } else {
+            return networkDownloadBytes + networkUploadBytes;
+        }
+    }
+
+    /**
+     * Return the estimated size of download traffic that will be performed by
+     * this job, in bytes.
+     *
+     * @return Estimated size of download traffic, or
+     *         {@link #NETWORK_BYTES_UNKNOWN} when unknown.
+     * @see Builder#setEstimatedNetworkBytes(long, long)
+     */
+    public @BytesLong long getEstimatedNetworkDownloadBytes() {
+        return networkDownloadBytes;
+    }
+
+    /**
+     * Return the estimated size of upload traffic that will be performed by
+     * this job, in bytes.
+     *
+     * @return Estimated size of upload traffic, or
+     *         {@link #NETWORK_BYTES_UNKNOWN} when unknown.
+     * @see Builder#setEstimatedNetworkBytes(long, long)
+     */
+    public @BytesLong long getEstimatedNetworkUploadBytes() {
+        return networkUploadBytes;
     }
 
     /**
      * Set for a job that does not recur periodically, to specify a delay after which the job
      * will be eligible for execution. This value is not set if the job recurs periodically.
+     * @see JobInfo.Builder#setMinimumLatency(long)
      */
     public long getMinLatencyMillis() {
         return minLatencyMillis;
     }
 
     /**
-     * See {@link Builder#setOverrideDeadline(long)}. This value is not set if the job recurs
-     * periodically.
+     * @see JobInfo.Builder#setOverrideDeadline(long)
      */
     public long getMaxExecutionDelayMillis() {
         return maxExecutionDelayMillis;
@@ -400,13 +523,15 @@ public class JobInfo implements Parcelable {
 
     /**
      * Track whether this job will repeat with a given period.
+     * @see JobInfo.Builder#setPeriodic(long)
+     * @see JobInfo.Builder#setPeriodic(long, long)
      */
     public boolean isPeriodic() {
         return isPeriodic;
     }
 
     /**
-     * @return Whether or not this job should be persisted across device reboots.
+     * @see JobInfo.Builder#setPersisted(boolean)
      */
     public boolean isPersisted() {
         return isPersisted;
@@ -415,38 +540,53 @@ public class JobInfo implements Parcelable {
     /**
      * Set to the interval between occurrences of this job. This value is <b>not</b> set if the
      * job does not recur periodically.
+     * @see JobInfo.Builder#setPeriodic(long)
+     * @see JobInfo.Builder#setPeriodic(long, long)
      */
     public long getIntervalMillis() {
-        final long minInterval = getMinPeriodMillis();
-        return intervalMillis >= minInterval ? intervalMillis : minInterval;
+        return intervalMillis;
     }
 
     /**
      * Flex time for this job. Only valid if this is a periodic job.  The job can
      * execute at any time in a window of flex length at the end of the period.
+     * @see JobInfo.Builder#setPeriodic(long)
+     * @see JobInfo.Builder#setPeriodic(long, long)
      */
     public long getFlexMillis() {
-        long interval = getIntervalMillis();
-        long percentClamp = 5 * interval / 100;
-        long clampedFlex = Math.max(flexMillis, Math.max(percentClamp, getMinFlexMillis()));
-        return clampedFlex <= interval ? clampedFlex : interval;
+        return flexMillis;
     }
 
     /**
      * The amount of time the JobScheduler will wait before rescheduling a failed job. This value
      * will be increased depending on the backoff policy specified at job creation time. Defaults
      * to 30 seconds, minimum is currently 10 seconds.
+     * @see JobInfo.Builder#setBackoffCriteria(long, int)
      */
     public long getInitialBackoffMillis() {
-        final long minBackoff = getMinBackoffMillis();
-        return initialBackoffMillis >= minBackoff ? initialBackoffMillis : minBackoff;
+        return initialBackoffMillis;
     }
 
     /**
      * Return the backoff policy of this job.
+     * @see JobInfo.Builder#setBackoffCriteria(long, int)
      */
     public @BackoffPolicy int getBackoffPolicy() {
         return backoffPolicy;
+    }
+
+    /**
+     * @see JobInfo.Builder#setImportantWhileForeground(boolean)
+     */
+    public boolean isImportantWhileForeground() {
+        return (flags & FLAG_IMPORTANT_WHILE_FOREGROUND) != 0;
+    }
+
+    /**
+     * @see JobInfo.Builder#setPrefetch(boolean)
+     */
+    public boolean isPrefetch() {
+        return (flags & FLAG_PREFETCH) != 0;
     }
 
     /**
@@ -517,7 +657,13 @@ public class JobInfo implements Parcelable {
         if (hasLateConstraint != j.hasLateConstraint) {
             return false;
         }
-        if (networkType != j.networkType) {
+        if (!Objects.equals(networkRequest, j.networkRequest)) {
+            return false;
+        }
+        if (networkDownloadBytes != j.networkDownloadBytes) {
+            return false;
+        }
+        if (networkUploadBytes != j.networkUploadBytes) {
             return false;
         }
         if (minLatencyMillis != j.minLatencyMillis) {
@@ -577,7 +723,11 @@ public class JobInfo implements Parcelable {
         hashCode = 31 * hashCode + Long.hashCode(triggerContentMaxDelay);
         hashCode = 31 * hashCode + Boolean.hashCode(hasEarlyConstraint);
         hashCode = 31 * hashCode + Boolean.hashCode(hasLateConstraint);
-        hashCode = 31 * hashCode + networkType;
+        if (networkRequest != null) {
+            hashCode = 31 * hashCode + networkRequest.hashCode();
+        }
+        hashCode = 31 * hashCode + Long.hashCode(networkDownloadBytes);
+        hashCode = 31 * hashCode + Long.hashCode(networkUploadBytes);
         hashCode = 31 * hashCode + Long.hashCode(minLatencyMillis);
         hashCode = 31 * hashCode + Long.hashCode(maxExecutionDelayMillis);
         hashCode = 31 * hashCode + Boolean.hashCode(isPeriodic);
@@ -607,7 +757,13 @@ public class JobInfo implements Parcelable {
         triggerContentUris = in.createTypedArray(TriggerContentUri.CREATOR);
         triggerContentUpdateDelay = in.readLong();
         triggerContentMaxDelay = in.readLong();
-        networkType = in.readInt();
+        if (in.readInt() != 0) {
+            networkRequest = NetworkRequest.CREATOR.createFromParcel(in);
+        } else {
+            networkRequest = null;
+        }
+        networkDownloadBytes = in.readLong();
+        networkUploadBytes = in.readLong();
         minLatencyMillis = in.readLong();
         maxExecutionDelayMillis = in.readLong();
         isPeriodic = in.readInt() == 1;
@@ -635,7 +791,9 @@ public class JobInfo implements Parcelable {
                 : null;
         triggerContentUpdateDelay = b.mTriggerContentUpdateDelay;
         triggerContentMaxDelay = b.mTriggerContentMaxDelay;
-        networkType = b.mNetworkType;
+        networkRequest = b.mNetworkRequest;
+        networkDownloadBytes = b.mNetworkDownloadBytes;
+        networkUploadBytes = b.mNetworkUploadBytes;
         minLatencyMillis = b.mMinLatencyMillis;
         maxExecutionDelayMillis = b.mMaxExecutionDelayMillis;
         isPeriodic = b.mIsPeriodic;
@@ -672,7 +830,14 @@ public class JobInfo implements Parcelable {
         out.writeTypedArray(triggerContentUris, flags);
         out.writeLong(triggerContentUpdateDelay);
         out.writeLong(triggerContentMaxDelay);
-        out.writeInt(networkType);
+        if (networkRequest != null) {
+            out.writeInt(1);
+            networkRequest.writeToParcel(out, flags);
+        } else {
+            out.writeInt(0);
+        }
+        out.writeLong(networkDownloadBytes);
+        out.writeLong(networkUploadBytes);
         out.writeLong(minLatencyMillis);
         out.writeLong(maxExecutionDelayMillis);
         out.writeInt(isPeriodic ? 1 : 0);
@@ -805,7 +970,9 @@ public class JobInfo implements Parcelable {
         private int mFlags;
         // Requirements.
         private int mConstraintFlags;
-        private int mNetworkType;
+        private NetworkRequest mNetworkRequest;
+        private long mNetworkDownloadBytes = NETWORK_BYTES_UNKNOWN;
+        private long mNetworkUploadBytes = NETWORK_BYTES_UNKNOWN;
         private ArrayList<TriggerContentUri> mTriggerContentUris;
         private long mTriggerContentUpdateDelay = -1;
         private long mTriggerContentMaxDelay = -1;
@@ -856,6 +1023,7 @@ public class JobInfo implements Parcelable {
         /**
          * Set optional extras. This is persisted, so we only allow primitive types.
          * @param extras Bundle containing extras you want the scheduler to hold on to for you.
+         * @see JobInfo#getExtras()
          */
         public Builder setExtras(@NonNull PersistableBundle extras) {
             mExtras = extras;
@@ -870,6 +1038,7 @@ public class JobInfo implements Parcelable {
          * {@link android.app.job.JobInfo.Builder#build()} is called.</p>
          *
          * @param extras Bundle containing extras you want the scheduler to hold on to for you.
+         * @see JobInfo#getTransientExtras()
          */
         public Builder setTransientExtras(@NonNull Bundle extras) {
             mTransientExtras = extras;
@@ -897,6 +1066,8 @@ public class JobInfo implements Parcelable {
          * a combination of {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION},
          * {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}, and
          * {@link android.content.Intent#FLAG_GRANT_PREFIX_URI_PERMISSION}.
+         * @see JobInfo#getClipData()
+         * @see JobInfo#getClipGrantFlags()
          */
         public Builder setClipData(@Nullable ClipData clip, int grantFlags) {
             mClipData = clip;
@@ -905,22 +1076,156 @@ public class JobInfo implements Parcelable {
         }
 
         /**
-         * Set some description of the kind of network type your job needs to have.
-         * Not calling this function means the network is not necessary, as the default is
-         * {@link #NETWORK_TYPE_NONE}.
-         * Bear in mind that calling this function defines network as a strict requirement for your
-         * job. If the network requested is not available your job will never run. See
-         * {@link #setOverrideDeadline(long)} to change this behaviour.
+         * Set basic description of the kind of network your job requires. If
+         * you need more precise control over network capabilities, see
+         * {@link #setRequiredNetwork(NetworkRequest)}.
+         * <p>
+         * If your job doesn't need a network connection, you don't need to call
+         * this method, as the default value is {@link #NETWORK_TYPE_NONE}.
+         * <p>
+         * Calling this method defines network as a strict requirement for your
+         * job. If the network requested is not available your job will never
+         * run. See {@link #setOverrideDeadline(long)} to change this behavior.
+         * Calling this method will override any requirements previously defined
+         * by {@link #setRequiredNetwork(NetworkRequest)}; you typically only
+         * want to call one of these methods.
+         * <p class="note">
+         * When your job executes in
+         * {@link JobService#onStartJob(JobParameters)}, be sure to use the
+         * specific network returned by {@link JobParameters#getNetwork()},
+         * otherwise you'll use the default network which may not meet this
+         * constraint.
+         *
+         * @see #setRequiredNetwork(NetworkRequest)
+         * @see JobInfo#getNetworkType()
+         * @see JobParameters#getNetwork()
          */
         public Builder setRequiredNetworkType(@NetworkType int networkType) {
-            mNetworkType = networkType;
+            if (networkType == NETWORK_TYPE_NONE) {
+                return setRequiredNetwork(null);
+            } else {
+                final NetworkRequest.Builder builder = new NetworkRequest.Builder();
+
+                // All types require validated Internet
+                builder.addCapability(NET_CAPABILITY_INTERNET);
+                builder.addCapability(NET_CAPABILITY_VALIDATED);
+                builder.removeCapability(NET_CAPABILITY_NOT_VPN);
+
+                if (networkType == NETWORK_TYPE_ANY) {
+                    // No other capabilities
+                } else if (networkType == NETWORK_TYPE_UNMETERED) {
+                    builder.addCapability(NET_CAPABILITY_NOT_METERED);
+                } else if (networkType == NETWORK_TYPE_NOT_ROAMING) {
+                    builder.addCapability(NET_CAPABILITY_NOT_ROAMING);
+                } else if (networkType == NETWORK_TYPE_CELLULAR) {
+                    builder.addTransportType(TRANSPORT_CELLULAR);
+                }
+
+                return setRequiredNetwork(builder.build());
+            }
+        }
+
+        /**
+         * Set detailed description of the kind of network your job requires.
+         * <p>
+         * If your job doesn't need a network connection, you don't need to call
+         * this method, as the default is {@code null}.
+         * <p>
+         * Calling this method defines network as a strict requirement for your
+         * job. If the network requested is not available your job will never
+         * run. See {@link #setOverrideDeadline(long)} to change this behavior.
+         * Calling this method will override any requirements previously defined
+         * by {@link #setRequiredNetworkType(int)}; you typically only want to
+         * call one of these methods.
+         * <p class="note">
+         * When your job executes in
+         * {@link JobService#onStartJob(JobParameters)}, be sure to use the
+         * specific network returned by {@link JobParameters#getNetwork()},
+         * otherwise you'll use the default network which may not meet this
+         * constraint.
+         *
+         * @param networkRequest The detailed description of the kind of network
+         *            this job requires, or {@code null} if no specific kind of
+         *            network is required. Defining a {@link NetworkSpecifier}
+         *            is only supported for jobs that aren't persisted.
+         * @see #setRequiredNetworkType(int)
+         * @see JobInfo#getRequiredNetwork()
+         * @see JobParameters#getNetwork()
+         */
+        public Builder setRequiredNetwork(@Nullable NetworkRequest networkRequest) {
+            mNetworkRequest = networkRequest;
             return this;
         }
 
         /**
-         * Specify that to run this job, the device needs to be plugged in. This defaults to
-         * false.
-         * @param requiresCharging Whether or not the device is plugged in.
+         * @deprecated replaced by
+         *             {@link #setEstimatedNetworkBytes(long, long)}.
+         * @removed
+         */
+        @Deprecated
+        public Builder setEstimatedNetworkBytes(@BytesLong long networkBytes) {
+            return setEstimatedNetworkBytes(networkBytes, NETWORK_BYTES_UNKNOWN);
+        }
+
+        /**
+         * Set the estimated size of network traffic that will be performed by
+         * this job, in bytes.
+         * <p>
+         * Apps are encouraged to provide values that are as accurate as
+         * possible, but when the exact size isn't available, an
+         * order-of-magnitude estimate can be provided instead. Here are some
+         * specific examples:
+         * <ul>
+         * <li>A job that is backing up a photo knows the exact size of that
+         * photo, so it should provide that size as the estimate.
+         * <li>A job that refreshes top news stories wouldn't know an exact
+         * size, but if the size is expected to be consistently around 100KB, it
+         * can provide that order-of-magnitude value as the estimate.
+         * <li>A job that synchronizes email could end up using an extreme range
+         * of data, from under 1KB when nothing has changed, to dozens of MB
+         * when there are new emails with attachments. Jobs that cannot provide
+         * reasonable estimates should use the sentinel value
+         * {@link JobInfo#NETWORK_BYTES_UNKNOWN}.
+         * </ul>
+         * Note that the system may choose to delay jobs with large network
+         * usage estimates when the device has a poor network connection, in
+         * order to save battery.
+         * <p>
+         * The values provided here only reflect the traffic that will be
+         * performed by the base job; if you're using {@link JobWorkItem} then
+         * you also need to define the network traffic used by each work item
+         * when constructing them.
+         *
+         * @param downloadBytes The estimated size of network traffic that will
+         *            be downloaded by this job, in bytes.
+         * @param uploadBytes The estimated size of network traffic that will be
+         *            uploaded by this job, in bytes.
+         * @see JobInfo#getEstimatedNetworkDownloadBytes()
+         * @see JobInfo#getEstimatedNetworkUploadBytes()
+         * @see JobWorkItem#JobWorkItem(android.content.Intent, long, long)
+         */
+        public Builder setEstimatedNetworkBytes(@BytesLong long downloadBytes,
+                @BytesLong long uploadBytes) {
+            mNetworkDownloadBytes = downloadBytes;
+            mNetworkUploadBytes = uploadBytes;
+            return this;
+        }
+
+        /**
+         * Specify that to run this job, the device must be charging (or be a
+         * non-battery-powered device connected to permanent power, such as Android TV
+         * devices). This defaults to {@code false}.
+         *
+         * <p class="note">For purposes of running jobs, a battery-powered device
+         * "charging" is not quite the same as simply being connected to power.  If the
+         * device is so busy that the battery is draining despite a power connection, jobs
+         * with this constraint will <em>not</em> run.  This can happen during some
+         * common use cases such as video chat, particularly if the device is plugged in
+         * to USB rather than to wall power.
+         *
+         * @param requiresCharging Pass {@code true} to require that the device be
+         *     charging in order to run the job.
+         * @see JobInfo#isRequireCharging()
          */
         public Builder setRequiresCharging(boolean requiresCharging) {
             mConstraintFlags = (mConstraintFlags&~CONSTRAINT_FLAG_CHARGING)
@@ -934,6 +1239,7 @@ public class JobInfo implements Parcelable {
          * is not low, which is generally the point where the user is given a "low battery"
          * warning.
          * @param batteryNotLow Whether or not the device's battery level must not be low.
+         * @see JobInfo#isRequireBatteryNotLow()
          */
         public Builder setRequiresBatteryNotLow(boolean batteryNotLow) {
             mConstraintFlags = (mConstraintFlags&~CONSTRAINT_FLAG_BATTERY_NOT_LOW)
@@ -942,14 +1248,23 @@ public class JobInfo implements Parcelable {
         }
 
         /**
-         * Specify that to run, the job needs the device to be in idle mode. This defaults to
-         * false.
-         * <p>Idle mode is a loose definition provided by the system, which means that the device
-         * is not in use, and has not been in use for some time. As such, it is a good time to
-         * perform resource heavy jobs. Bear in mind that battery usage will still be attributed
-         * to your application, and surfaced to the user in battery stats.</p>
-         * @param requiresDeviceIdle Whether or not the device need be within an idle maintenance
-         *                           window.
+         * When set {@code true}, ensure that this job will not run if the device is in active use.
+         * The default state is {@code false}: that is, the for the job to be runnable even when
+         * someone is interacting with the device.
+         *
+         * <p>This state is a loose definition provided by the system. In general, it means that
+         * the device is not currently being used interactively, and has not been in use for some
+         * time. As such, it is a good time to perform resource heavy jobs. Bear in mind that
+         * battery usage will still be attributed to your application, and surfaced to the user in
+         * battery stats.</p>
+         *
+         * <p class="note">Despite the similar naming, this job constraint is <em>not</em>
+         * related to the system's "device idle" or "doze" states.  This constraint only
+         * determines whether a job is allowed to run while the device is directly in use.
+         *
+         * @param requiresDeviceIdle Pass {@code true} to prevent the job from running
+         *     while the device is being used interactively.
+         * @see JobInfo#isRequireDeviceIdle()
          */
         public Builder setRequiresDeviceIdle(boolean requiresDeviceIdle) {
             mConstraintFlags = (mConstraintFlags&~CONSTRAINT_FLAG_DEVICE_IDLE)
@@ -963,6 +1278,7 @@ public class JobInfo implements Parcelable {
          * in a low storage state, which is generally the point where the user is given a
          * "low storage" warning.
          * @param storageNotLow Whether or not the device's available storage must not be low.
+         * @see JobInfo#isRequireStorageNotLow()
          */
         public Builder setRequiresStorageNotLow(boolean storageNotLow) {
             mConstraintFlags = (mConstraintFlags&~CONSTRAINT_FLAG_STORAGE_NOT_LOW)
@@ -995,6 +1311,7 @@ public class JobInfo implements Parcelable {
          *      job}
          *
          * @param uri The content: URI to monitor.
+         * @see JobInfo#getTriggerContentUris()
          */
         public Builder addTriggerContentUri(@NonNull TriggerContentUri uri) {
             if (mTriggerContentUris == null) {
@@ -1009,6 +1326,7 @@ public class JobInfo implements Parcelable {
          * the job is scheduled.  If there are more changes during that time, the delay
          * will be reset to start at the time of the most recent change.
          * @param durationMs Delay after most recent content change, in milliseconds.
+         * @see JobInfo#getTriggerContentUpdateDelay()
          */
         public Builder setTriggerContentUpdateDelay(long durationMs) {
             mTriggerContentUpdateDelay = durationMs;
@@ -1019,6 +1337,7 @@ public class JobInfo implements Parcelable {
          * Set the maximum total delay (in milliseconds) that is allowed from the first
          * time a content change is detected until the job is scheduled.
          * @param durationMs Delay after initial content change, in milliseconds.
+         * @see JobInfo#getTriggerContentMaxDelay()
          */
         public Builder setTriggerContentMaxDelay(long durationMs) {
             mTriggerContentMaxDelay = durationMs;
@@ -1032,6 +1351,8 @@ public class JobInfo implements Parcelable {
          * Setting this function on the builder with {@link #setMinimumLatency(long)} or
          * {@link #setOverrideDeadline(long)} will result in an error.
          * @param intervalMillis Millisecond interval for which this job will repeat.
+         * @see JobInfo#getIntervalMillis()
+         * @see JobInfo#getFlexMillis()
          */
         public Builder setPeriodic(long intervalMillis) {
             return setPeriodic(intervalMillis, intervalMillis);
@@ -1045,8 +1366,25 @@ public class JobInfo implements Parcelable {
          * @param flexMillis Millisecond flex for this job. Flex is clamped to be at least
          *                   {@link #getMinFlexMillis()} or 5 percent of the period, whichever is
          *                   higher.
+         * @see JobInfo#getIntervalMillis()
+         * @see JobInfo#getFlexMillis()
          */
         public Builder setPeriodic(long intervalMillis, long flexMillis) {
+            final long minPeriod = getMinPeriodMillis();
+            if (intervalMillis < minPeriod) {
+                Log.w(TAG, "Requested interval " + formatDuration(intervalMillis) + " for job "
+                        + mJobId + " is too small; raising to " + formatDuration(minPeriod));
+                intervalMillis = minPeriod;
+            }
+
+            final long percentClamp = 5 * intervalMillis / 100;
+            final long minFlex = Math.max(percentClamp, getMinFlexMillis());
+            if (flexMillis < minFlex) {
+                Log.w(TAG, "Requested flex " + formatDuration(flexMillis) + " for job " + mJobId
+                        + " is too small; raising to " + formatDuration(minFlex));
+                flexMillis = minFlex;
+            }
+
             mIsPeriodic = true;
             mIntervalMillis = intervalMillis;
             mFlexMillis = flexMillis;
@@ -1061,6 +1399,7 @@ public class JobInfo implements Parcelable {
          * {@link android.app.job.JobInfo.Builder#build()} is called.
          * @param minLatencyMillis Milliseconds before which this job will not be considered for
          *                         execution.
+         * @see JobInfo#getMinLatencyMillis()
          */
         public Builder setMinimumLatency(long minLatencyMillis) {
             mMinLatencyMillis = minLatencyMillis;
@@ -1074,6 +1413,7 @@ public class JobInfo implements Parcelable {
          * this property on a periodic job, doing so will throw an
          * {@link java.lang.IllegalArgumentException} when
          * {@link android.app.job.JobInfo.Builder#build()} is called.
+         * @see JobInfo#getMaxExecutionDelayMillis()
          */
         public Builder setOverrideDeadline(long maxExecutionDelayMillis) {
             mMaxExecutionDelayMillis = maxExecutionDelayMillis;
@@ -1093,12 +1433,78 @@ public class JobInfo implements Parcelable {
          * mode.
          * @param initialBackoffMillis Millisecond time interval to wait initially when job has
          *                             failed.
+         * @see JobInfo#getInitialBackoffMillis()
+         * @see JobInfo#getBackoffPolicy()
          */
         public Builder setBackoffCriteria(long initialBackoffMillis,
                 @BackoffPolicy int backoffPolicy) {
+            final long minBackoff = getMinBackoffMillis();
+            if (initialBackoffMillis < minBackoff) {
+                Log.w(TAG, "Requested backoff " + formatDuration(initialBackoffMillis) + " for job "
+                        + mJobId + " is too small; raising to " + formatDuration(minBackoff));
+                initialBackoffMillis = minBackoff;
+            }
+
             mBackoffPolicySet = true;
             mInitialBackoffMillis = initialBackoffMillis;
             mBackoffPolicy = backoffPolicy;
+            return this;
+        }
+
+        /**
+         * Setting this to true indicates that this job is important while the scheduling app
+         * is in the foreground or on the temporary whitelist for background restrictions.
+         * This means that the system will relax doze restrictions on this job during this time.
+         *
+         * Apps should use this flag only for short jobs that are essential for the app to function
+         * properly in the foreground.
+         *
+         * Note that once the scheduling app is no longer whitelisted from background restrictions
+         * and in the background, or the job failed due to unsatisfied constraints,
+         * this job should be expected to behave like other jobs without this flag.
+         *
+         * @param importantWhileForeground whether to relax doze restrictions for this job when the
+         *                                 app is in the foreground. False by default.
+         * @see JobInfo#isImportantWhileForeground()
+         */
+        public Builder setImportantWhileForeground(boolean importantWhileForeground) {
+            if (importantWhileForeground) {
+                mFlags |= FLAG_IMPORTANT_WHILE_FOREGROUND;
+            } else {
+                mFlags &= (~FLAG_IMPORTANT_WHILE_FOREGROUND);
+            }
+            return this;
+        }
+
+        /**
+         * @removed
+         * @deprecated replaced with {@link #setPrefetch(boolean)}
+         */
+        @Deprecated
+        public Builder setIsPrefetch(boolean isPrefetch) {
+            return setPrefetch(isPrefetch);
+        }
+
+        /**
+         * Setting this to true indicates that this job is designed to prefetch
+         * content that will make a material improvement to the experience of
+         * the specific user of this device. For example, fetching top headlines
+         * of interest to the current user.
+         * <p>
+         * The system may use this signal to relax the network constraints you
+         * originally requested, such as allowing a
+         * {@link JobInfo#NETWORK_TYPE_UNMETERED} job to run over a metered
+         * network when there is a surplus of metered data available. The system
+         * may also use this signal in combination with end user usage patterns
+         * to ensure data is prefetched before the user launches your app.
+         * @see JobInfo#isPrefetch()
+         */
+        public Builder setPrefetch(boolean prefetch) {
+            if (prefetch) {
+                mFlags |= FLAG_PREFETCH;
+            } else {
+                mFlags &= (~FLAG_PREFETCH);
+            }
             return this;
         }
 
@@ -1107,6 +1513,7 @@ public class JobInfo implements Parcelable {
          *
          * @param isPersisted True to indicate that the job will be written to
          *            disk and loaded at boot.
+         * @see JobInfo#isPersisted()
          */
         @RequiresPermission(android.Manifest.permission.RECEIVE_BOOT_COMPLETED)
         public Builder setPersisted(boolean isPersisted) {
@@ -1120,10 +1527,21 @@ public class JobInfo implements Parcelable {
         public JobInfo build() {
             // Allow jobs with no constraints - What am I, a database?
             if (!mHasEarlyConstraint && !mHasLateConstraint && mConstraintFlags == 0 &&
-                    mNetworkType == NETWORK_TYPE_NONE &&
+                    mNetworkRequest == null &&
                     mTriggerContentUris == null) {
                 throw new IllegalArgumentException("You're trying to build a job with no " +
                         "constraints, this is not allowed.");
+            }
+            // Check that network estimates require network type
+            if ((mNetworkDownloadBytes > 0 || mNetworkUploadBytes > 0) && mNetworkRequest == null) {
+                throw new IllegalArgumentException(
+                        "Can't provide estimated network usage without requiring a network");
+            }
+            // We can't serialize network specifiers
+            if (mIsPersisted && mNetworkRequest != null
+                    && mNetworkRequest.networkCapabilities.getNetworkSpecifier() != null) {
+                throw new IllegalArgumentException(
+                        "Network specifiers aren't supported for persistent jobs");
             }
             // Check that a deadline was not set on a periodic job.
             if (mIsPeriodic) {
@@ -1154,36 +1572,16 @@ public class JobInfo implements Parcelable {
                             "persisted job");
                 }
             }
+            if ((mFlags & FLAG_IMPORTANT_WHILE_FOREGROUND) != 0 && mHasEarlyConstraint) {
+                throw new IllegalArgumentException("An important while foreground job cannot "
+                        + "have a time delay");
+            }
             if (mBackoffPolicySet && (mConstraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0) {
                 throw new IllegalArgumentException("An idle mode job will not respect any" +
                         " back-off policy, so calling setBackoffCriteria with" +
                         " setRequiresDeviceIdle is an error.");
             }
-            JobInfo job = new JobInfo(this);
-            if (job.isPeriodic()) {
-                if (job.intervalMillis != job.getIntervalMillis()) {
-                    StringBuilder builder = new StringBuilder();
-                    builder.append("Specified interval for ")
-                            .append(String.valueOf(mJobId))
-                            .append(" is ");
-                    formatDuration(mIntervalMillis, builder);
-                    builder.append(". Clamped to ");
-                    formatDuration(job.getIntervalMillis(), builder);
-                    Log.w(TAG, builder.toString());
-                }
-                if (job.flexMillis != job.getFlexMillis()) {
-                    StringBuilder builder = new StringBuilder();
-                    builder.append("Specified flex for ")
-                            .append(String.valueOf(mJobId))
-                            .append(" is ");
-                    formatDuration(mFlexMillis, builder);
-                    builder.append(". Clamped to ");
-                    formatDuration(job.getFlexMillis(), builder);
-                    Log.w(TAG, builder.toString());
-                }
-            }
-            return job;
+            return new JobInfo(this);
         }
     }
-
 }

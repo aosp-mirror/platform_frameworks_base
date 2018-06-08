@@ -16,7 +16,8 @@
 
 #include "NinePatchPeeker.h"
 
-#include "SkBitmap.h"
+#include <SkBitmap.h>
+#include <cutils/compiler.h>
 
 using namespace android;
 
@@ -45,4 +46,48 @@ bool NinePatchPeeker::readChunk(const char tag[], const void* data, size_t lengt
         mOutlineAlpha = ((const int32_t*)data)[5] & 0xff;
     }
     return true;    // keep on decoding
+}
+
+static void scaleDivRange(int32_t* divs, int count, float scale, int maxValue) {
+    for (int i = 0; i < count; i++) {
+        divs[i] = int32_t(divs[i] * scale + 0.5f);
+        if (i > 0 && divs[i] == divs[i - 1]) {
+            divs[i]++; // avoid collisions
+        }
+    }
+
+    if (CC_UNLIKELY(divs[count - 1] > maxValue)) {
+        // if the collision avoidance above put some divs outside the bounds of the bitmap,
+        // slide outer stretchable divs inward to stay within bounds
+        int highestAvailable = maxValue;
+        for (int i = count - 1; i >= 0; i--) {
+            divs[i] = highestAvailable;
+            if (i > 0 && divs[i] <= divs[i-1]) {
+                // keep shifting
+                highestAvailable = divs[i] - 1;
+            } else {
+                break;
+            }
+        }
+    }
+}
+
+void NinePatchPeeker::scale(float scaleX, float scaleY, int scaledWidth, int scaledHeight) {
+    if (!mPatch) {
+        return;
+    }
+
+    // The max value for the divRange is one pixel less than the actual max to ensure that the size
+    // of the last div is not zero. A div of size 0 is considered invalid input and will not render.
+    if (!SkScalarNearlyEqual(scaleX, 1.0f)) {
+        mPatch->paddingLeft   = int(mPatch->paddingLeft   * scaleX + 0.5f);
+        mPatch->paddingRight  = int(mPatch->paddingRight  * scaleX + 0.5f);
+        scaleDivRange(mPatch->getXDivs(), mPatch->numXDivs, scaleX, scaledWidth - 1);
+    }
+
+    if (!SkScalarNearlyEqual(scaleY, 1.0f)) {
+        mPatch->paddingTop    = int(mPatch->paddingTop    * scaleY + 0.5f);
+        mPatch->paddingBottom = int(mPatch->paddingBottom * scaleY + 0.5f);
+        scaleDivRange(mPatch->getYDivs(), mPatch->numYDivs, scaleY, scaledHeight - 1);
+    }
 }

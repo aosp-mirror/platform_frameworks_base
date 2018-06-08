@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include "CanvasContext.h"
 #include "BakedOpDispatcher.h"
 #include "BakedOpRenderer.h"
+#include "CanvasContext.h"
 #include "FrameBuilder.h"
 #include "IRenderPipeline.h"
 
@@ -34,14 +34,13 @@ public:
     MakeCurrentResult makeCurrent() override;
     Frame getFrame() override;
     bool draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
-            const FrameBuilder::LightGeometry& lightGeometry,
-            LayerUpdateQueue* layerUpdateQueue,
-            const Rect& contentDrawBounds, bool opaque, bool wideColorGamut,
-            const BakedOpRenderer::LightInfo& lightInfo,
-            const std::vector< sp<RenderNode> >& renderNodes,
-            FrameInfoVisualizer* profiler) override;
+              const FrameBuilder::LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
+              const Rect& contentDrawBounds, bool opaque, bool wideColorGamut,
+              const BakedOpRenderer::LightInfo& lightInfo,
+              const std::vector<sp<RenderNode>>& renderNodes,
+              FrameInfoVisualizer* profiler) override;
     bool swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
-            FrameInfo* currentFrameInfo, bool* requireSwap) override;
+                     FrameInfo* currentFrameInfo, bool* requireSwap) override;
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap) override;
     DeferredLayerUpdater* createTextureLayer() override;
     bool setSurface(Surface* window, SwapBehavior swapBehavior, ColorMode colorMode) override;
@@ -50,19 +49,19 @@ public:
     bool isContextReady() override;
     void onDestroyHardwareResources() override;
     void renderLayers(const FrameBuilder::LightGeometry& lightGeometry,
-            LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
-            const BakedOpRenderer::LightInfo& lightInfo) override;
+                      LayerUpdateQueue* layerUpdateQueue, bool opaque, bool wideColorGamut,
+                      const BakedOpRenderer::LightInfo& lightInfo) override;
     TaskManager* getTaskManager() override;
-    bool createOrUpdateLayer(RenderNode* node,
-            const DamageAccumulator& damageAccumulator, bool wideColorGamut) override;
+    bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
+                             bool wideColorGamut, ErrorHandler* errorHandler) override;
     bool pinImages(std::vector<SkImage*>& mutableImages) override { return false; }
     bool pinImages(LsaVector<sk_sp<Bitmap>>& images) override;
     void unpinImages() override;
+    void onPrepareTree() override {}
     static void destroyLayer(RenderNode* node);
     static void prepareToDraw(const RenderThread& thread, Bitmap* bitmap);
     static void invokeFunctor(const RenderThread& thread, Functor* functor);
-    static sk_sp<Bitmap> allocateHardwareBitmap(RenderThread& thread,
-            SkBitmap& skBitmap);
+    static sk_sp<Bitmap> allocateHardwareBitmap(RenderThread& thread, SkBitmap& skBitmap);
 
 private:
     EglManager& mEglManager;

@@ -132,7 +132,7 @@ import dalvik.annotation.optimization.FastNative;
  *         <td>translateY</td>
  *     </tr>
  *     <tr>
- *         <td rowspan="8">&lt;path&gt;</td>
+ *         <td rowspan="9">&lt;path&gt;</td>
  *         <td>pathData</td>
  *     </tr>
  *     <tr>
@@ -152,6 +152,9 @@ import dalvik.annotation.optimization.FastNative;
  *     </tr>
  *     <tr>
  *         <td>trimPathStart</td>
+ *     </tr>
+ *     <tr>
+ *         <td>trimPathEnd</td>
  *     </tr>
  *     <tr>
  *         <td>trimPathOffset</td>
@@ -198,10 +201,10 @@ import dalvik.annotation.optimization.FastNative;
  *     android:drawable=&quot;@drawable/vectordrawable&quot; &gt;
  *     &lt;target
  *         android:name=&quot;rotationGroup&quot;
- *         android:animation=&quot;@anim/rotation&quot; /&gt;
+ *         android:animation=&quot;@animator/rotation&quot; /&gt;
  *     &lt;target
  *         android:name=&quot;v&quot;
- *         android:animation=&quot;@anim/path_morph&quot; /&gt;
+ *         android:animation=&quot;@animator/path_morph&quot; /&gt;
  * &lt;/animated-vector&gt;
  * </pre>
  * </li>

@@ -36,27 +36,33 @@ import java.util.Map;
  */
 public final class MetadataReader {
 
-    private MetadataReader() {
-    }
+    private MetadataReader() {}
 
     private static final String[] DEFAULT_EXIF_TAGS = {
-            ExifInterface.TAG_IMAGE_WIDTH,
-            ExifInterface.TAG_IMAGE_LENGTH,
+            ExifInterface.TAG_APERTURE,
+            ExifInterface.TAG_COPYRIGHT,
             ExifInterface.TAG_DATETIME,
+            ExifInterface.TAG_EXPOSURE_TIME,
+            ExifInterface.TAG_FOCAL_LENGTH,
+            ExifInterface.TAG_F_NUMBER,
             ExifInterface.TAG_GPS_LATITUDE,
+            ExifInterface.TAG_GPS_LATITUDE_REF,
             ExifInterface.TAG_GPS_LONGITUDE,
+            ExifInterface.TAG_GPS_LONGITUDE_REF,
+            ExifInterface.TAG_IMAGE_LENGTH,
+            ExifInterface.TAG_IMAGE_WIDTH,
+            ExifInterface.TAG_ISO_SPEED_RATINGS,
             ExifInterface.TAG_MAKE,
             ExifInterface.TAG_MODEL,
-            ExifInterface.TAG_APERTURE,
-            ExifInterface.TAG_SHUTTER_SPEED_VALUE
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.TAG_SHUTTER_SPEED_VALUE,
     };
 
-    private static final Map<String, Integer> TYPE_MAPPING = new HashMap<>();
-    private static final String[] ALL_KNOWN_EXIF_KEYS;
     private static final int TYPE_INT = 0;
     private static final int TYPE_DOUBLE = 1;
     private static final int TYPE_STRING = 2;
 
+    private static final Map<String, Integer> TYPE_MAPPING = new HashMap<>();
     static {
         // TODO: Move this over to ExifInterface.java
         // Since each ExifInterface item has a type, and there's currently no way to get the type
@@ -166,9 +172,9 @@ public final class MetadataReader {
         TYPE_MAPPING.put(ExifInterface.TAG_GPS_DIFFERENTIAL, TYPE_INT);
         TYPE_MAPPING.put(ExifInterface.TAG_GPS_IMG_DIRECTION, TYPE_DOUBLE);
         TYPE_MAPPING.put(ExifInterface.TAG_GPS_IMG_DIRECTION_REF, TYPE_STRING);
-        TYPE_MAPPING.put(ExifInterface.TAG_GPS_LATITUDE, TYPE_DOUBLE);
+        TYPE_MAPPING.put(ExifInterface.TAG_GPS_LATITUDE, TYPE_STRING);
         TYPE_MAPPING.put(ExifInterface.TAG_GPS_LATITUDE_REF, TYPE_STRING);
-        TYPE_MAPPING.put(ExifInterface.TAG_GPS_LONGITUDE, TYPE_DOUBLE);
+        TYPE_MAPPING.put(ExifInterface.TAG_GPS_LONGITUDE, TYPE_STRING);
         TYPE_MAPPING.put(ExifInterface.TAG_GPS_LONGITUDE_REF, TYPE_STRING);
         TYPE_MAPPING.put(ExifInterface.TAG_GPS_MAP_DATUM, TYPE_STRING);
         TYPE_MAPPING.put(ExifInterface.TAG_GPS_MEASURE_MODE, TYPE_STRING);
@@ -196,10 +202,18 @@ public final class MetadataReader {
         TYPE_MAPPING.put(ExifInterface.TAG_RW2_SENSOR_RIGHT_BORDER, TYPE_INT);
         TYPE_MAPPING.put(ExifInterface.TAG_RW2_SENSOR_TOP_BORDER, TYPE_INT);
         TYPE_MAPPING.put(ExifInterface.TAG_RW2_ISO, TYPE_INT);
-        ALL_KNOWN_EXIF_KEYS = TYPE_MAPPING.keySet().toArray(new String[TYPE_MAPPING.size()]);
     }
     private static final String JPG_MIME_TYPE = "image/jpg";
     private static final String JPEG_MIME_TYPE = "image/jpeg";
+
+
+    /**
+     * Returns true if caller can generally expect to get metadata results
+     * for the supplied mimetype.
+     */
+    public static boolean isSupportedMimeType(String mimeType) {
+        return JPG_MIME_TYPE.equals(mimeType) || JPEG_MIME_TYPE.equals(mimeType);
+    }
 
     /**
      * Generic metadata retrieval method that can retrieve any available metadata from a given doc
@@ -209,25 +223,14 @@ public final class MetadataReader {
      * @param stream InputStream containing a file
      * @param mimeType type of the given file
      * @param tags a variable amount of keys to differentiate which tags the user wants
-     *             if null, returns a default set of data from the following keys:
-     *             Exif data:
-     *             ExifInterface.TAG_IMAGE_WIDTH,
-     *             ExifInterface.TAG_IMAGE_LENGTH,
-     *             ExifInterface.TAG_DATETIME,
-     *             ExifInterface.TAG_GPS_LATITUDE,
-     *             ExifInterface.TAG_GPS_LONGITUDE,
-     *             ExifInterface.TAG_MAKE,
-     *             ExifInterface.TAG_MODEL,
-     *             ExifInterface.TAG_APERTURE,
-     *             ExifInterface.TAG_SHUTTER_SPEED_VALUE
+     *             if null, returns a default set of data. See {@link DEFAULT_EXIF_TAGS}.
      * @throws IOException when the file doesn't exist
      */
     public static void getMetadata(Bundle metadata, InputStream stream, String mimeType,
             @Nullable String[] tags) throws IOException {
-        List<String> metadataTypes = new ArrayList();
-        if (mimeType.equals(JPG_MIME_TYPE) || mimeType.equals(JPEG_MIME_TYPE)) {
-            ExifInterface exifInterface = new ExifInterface(stream);
-            Bundle exifData = getExifData(exifInterface, tags);
+        List<String> metadataTypes = new ArrayList<>();
+        if (isSupportedMimeType(mimeType)) {
+            Bundle exifData = getExifData(stream, tags);
             if (exifData.size() > 0) {
                 metadata.putBundle(DocumentsContract.METADATA_EXIF, exifData);
                 metadataTypes.add(DocumentsContract.METADATA_EXIF);
@@ -242,41 +245,33 @@ public final class MetadataReader {
     /**
      * Helper method that is called if getMetadata is called for an image mimeType.
      *
-     * @param exif the bundle to which we add exif data.
-     * @param exifInterface an ExifInterface for an image
+     * @param stream the input stream from which to extra data.
      * @param tags a list of ExifInterface tags that are used to retrieve data.
-     *             if null, returns a default set of data from the following keys:
-     *             ExifInterface.TAG_IMAGE_WIDTH,
-     *             ExifInterface.TAG_IMAGE_LENGTH,
-     *             ExifInterface.TAG_DATETIME,
-     *             ExifInterface.TAG_GPS_LATITUDE,
-     *             ExifInterface.TAG_GPS_LONGITUDE,
-     *             ExifInterface.TAG_MAKE,
-     *             ExifInterface.TAG_MODEL,
-     *             ExifInterface.TAG_APERTURE,
-     *             ExifInterface.TAG_SHUTTER_SPEED_VALUE
+     *             if null, returns a default set of data. See {@link DEFAULT_EXIF_TAGS}.
      */
-    private static Bundle getExifData(ExifInterface exifInterface, @Nullable String[] tags)
+    private static Bundle getExifData(InputStream stream, @Nullable String[] tags)
             throws IOException {
         if (tags == null) {
             tags = DEFAULT_EXIF_TAGS;
         }
+
+        ExifInterface exifInterface = new ExifInterface(stream);
         Bundle exif = new Bundle();
-        for (int i = 0; i < tags.length; i++) {
-            if (TYPE_MAPPING.get(tags[i]).equals(TYPE_INT)) {
-                int data = exifInterface.getAttributeInt(tags[i], Integer.MIN_VALUE);
+        for (String tag : tags) {
+            if (TYPE_MAPPING.get(tag).equals(TYPE_INT)) {
+                int data = exifInterface.getAttributeInt(tag, Integer.MIN_VALUE);
                 if (data != Integer.MIN_VALUE) {
-                    exif.putInt(tags[i], data);
+                    exif.putInt(tag, data);
                 }
-            } else if (TYPE_MAPPING.get(tags[i]).equals(TYPE_DOUBLE)) {
-                double data = exifInterface.getAttributeDouble(tags[i], Double.MIN_VALUE);
+            } else if (TYPE_MAPPING.get(tag).equals(TYPE_DOUBLE)) {
+                double data = exifInterface.getAttributeDouble(tag, Double.MIN_VALUE);
                 if (data != Double.MIN_VALUE) {
-                    exif.putDouble(tags[i], data);
+                    exif.putDouble(tag, data);
                 }
-            } else if (TYPE_MAPPING.get(tags[i]).equals(TYPE_STRING)) {
-                String data = exifInterface.getAttribute(tags[i]);
+            } else if (TYPE_MAPPING.get(tag).equals(TYPE_STRING)) {
+                String data = exifInterface.getAttribute(tag);
                 if (data != null) {
-                    exif.putString(tags[i], data);
+                    exif.putString(tag, data);
                 }
             }
         }

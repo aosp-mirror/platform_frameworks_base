@@ -114,7 +114,7 @@ void BM_DisplayListCanvas_record_simpleBitmapView(benchmark::State& benchState) 
 }
 BENCHMARK(BM_DisplayListCanvas_record_simpleBitmapView);
 
-class NullClient: public CanvasStateClient {
+class NullClient : public CanvasStateClient {
     void onViewportInitialized() override {}
     void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {}
     GLuint getTargetFbo() const override { return 0; }
@@ -161,8 +161,7 @@ void BM_CanvasState_translate(benchmark::State& benchState) {
 BENCHMARK(BM_CanvasState_translate);
 
 void BM_DisplayListCanvas_basicViewGroupDraw(benchmark::State& benchState) {
-    sp<RenderNode> child = TestUtils::createNode(50, 50, 100, 100,
-            [](auto& props, auto& canvas) {
+    sp<RenderNode> child = TestUtils::createNode(50, 50, 100, 100, [](auto& props, auto& canvas) {
         canvas.drawColor(0xFFFFFFFF, SkBlendMode::kSrcOver);
     });
 
@@ -171,8 +170,7 @@ void BM_DisplayListCanvas_basicViewGroupDraw(benchmark::State& benchState) {
 
     while (benchState.KeepRunning()) {
         canvas->resetRecording(200, 200);
-        canvas->setHighContrastText(false);
-        canvas->translate(0, 0); // mScrollX, mScrollY
+        canvas->translate(0, 0);  // mScrollX, mScrollY
 
         // Clip to padding
         // Can expect ~25% of views to have clip to padding with a non-null padding

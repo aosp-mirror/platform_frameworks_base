@@ -19,7 +19,9 @@
 #include "thread/Task.h"
 #include "thread/TaskManager.h"
 #include "thread/TaskProcessor.h"
+#include "thread/ThreadBase.h"
 
+#include <atomic>
 #include <vector>
 
 using namespace android;
@@ -29,17 +31,18 @@ class TrivialTask : public Task<char> {};
 
 class TrivialProcessor : public TaskProcessor<char> {
 public:
-    explicit TrivialProcessor(TaskManager* manager)
-            : TaskProcessor(manager) {}
+    explicit TrivialProcessor(TaskManager* manager) : TaskProcessor(manager) {}
     virtual ~TrivialProcessor() {}
-    virtual void onProcess(const sp<Task<char> >& task) override {
+    virtual void onProcess(const sp<Task<char>>& task) override {
         TrivialTask* t = static_cast<TrivialTask*>(task.get());
         t->setResult(reinterpret_cast<intptr_t>(t) % 16 == 0 ? 'a' : 'b');
     }
 };
 
+class TestThread : public ThreadBase, public virtual RefBase {};
+
 void BM_TaskManager_allocateTask(benchmark::State& state) {
-    std::vector<sp<TrivialTask> > tasks;
+    std::vector<sp<TrivialTask>> tasks;
     tasks.reserve(state.max_iterations);
 
     while (state.KeepRunning()) {
@@ -52,7 +55,7 @@ BENCHMARK(BM_TaskManager_allocateTask);
 void BM_TaskManager_enqueueTask(benchmark::State& state) {
     TaskManager taskManager;
     sp<TrivialProcessor> processor(new TrivialProcessor(&taskManager));
-    std::vector<sp<TrivialTask> > tasks;
+    std::vector<sp<TrivialTask>> tasks;
     tasks.reserve(state.max_iterations);
 
     while (state.KeepRunning()) {
@@ -70,7 +73,7 @@ BENCHMARK(BM_TaskManager_enqueueTask);
 void BM_TaskManager_enqueueRunDeleteTask(benchmark::State& state) {
     TaskManager taskManager;
     sp<TrivialProcessor> processor(new TrivialProcessor(&taskManager));
-    std::vector<sp<TrivialTask> > tasks;
+    std::vector<sp<TrivialTask>> tasks;
     tasks.reserve(state.max_iterations);
 
     while (state.KeepRunning()) {
@@ -86,3 +89,46 @@ void BM_TaskManager_enqueueRunDeleteTask(benchmark::State& state) {
     state.PauseTiming();
 }
 BENCHMARK(BM_TaskManager_enqueueRunDeleteTask);
+
+void BM_Thread_enqueueTask(benchmark::State& state) {
+    sp<TestThread> thread{new TestThread};
+    thread->start();
+
+    atomic_int counter(0);
+    int expected = 0;
+    while (state.KeepRunning()) {
+        expected++;
+        thread->queue().post([&counter]() { counter++; });
+    }
+    thread->queue().runSync([]() {});
+
+    thread->requestExit();
+    thread->join();
+    if (counter != expected) {
+        printf("Ran %d lambads, should have been %d\n", counter.load(), expected);
+    }
+}
+BENCHMARK(BM_Thread_enqueueTask);
+
+void BM_Thread_enqueueRunDeleteTask(benchmark::State& state) {
+    sp<TestThread> thread{new TestThread};
+    thread->start();
+    std::vector<std::future<int>> tasks;
+    tasks.reserve(state.max_iterations);
+
+    int expected = 0;
+    while (state.KeepRunning()) {
+        tasks.emplace_back(thread->queue().async([expected]() -> int { return expected + 1; }));
+        expected++;
+    }
+    state.ResumeTiming();
+    expected = 0;
+    for (auto& future : tasks) {
+        if (future.get() != ++expected) {
+            printf("Mismatch expected %d vs. observed %d\n", expected, future.get());
+        }
+    }
+    tasks.clear();
+    state.PauseTiming();
+}
+BENCHMARK(BM_Thread_enqueueRunDeleteTask);

@@ -220,6 +220,7 @@ public abstract class PersistentConnection<T> {
         }
     }
 
+    @GuardedBy("mLock")
     public final void bindInnerLocked(boolean resetBackoff) {
         unscheduleRebindLocked();
 
@@ -260,6 +261,7 @@ public abstract class PersistentConnection<T> {
         }
     }
 
+    @GuardedBy("mLock")
     private void cleanUpConnectionLocked() {
         mIsConnected = false;
         mService = null;
@@ -276,6 +278,7 @@ public abstract class PersistentConnection<T> {
         }
     }
 
+    @GuardedBy("mLock")
     private final void unbindLocked() {
         unscheduleRebindLocked();
 
@@ -289,11 +292,13 @@ public abstract class PersistentConnection<T> {
         cleanUpConnectionLocked();
     }
 
+    @GuardedBy("mLock")
     void unscheduleRebindLocked() {
         injectRemoveCallbacks(mBindForBackoffRunnable);
         mRebindScheduled = false;
     }
 
+    @GuardedBy("mLock")
     void scheduleRebindLocked() {
         unbindLocked();
 

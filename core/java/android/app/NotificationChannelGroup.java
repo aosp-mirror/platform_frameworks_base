@@ -16,13 +16,16 @@
 package android.app;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.proto.ProtoOutputStream;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
@@ -42,10 +45,14 @@ public final class NotificationChannelGroup implements Parcelable {
 
     private static final String TAG_GROUP = "channelGroup";
     private static final String ATT_NAME = "name";
+    private static final String ATT_DESC = "desc";
     private static final String ATT_ID = "id";
+    private static final String ATT_BLOCKED = "blocked";
 
     private final String mId;
     private CharSequence mName;
+    private String mDescription;
+    private boolean mBlocked;
     private List<NotificationChannel> mChannels = new ArrayList<>();
 
     /**
@@ -73,7 +80,13 @@ public final class NotificationChannelGroup implements Parcelable {
             mId = null;
         }
         mName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        if (in.readByte() != 0) {
+            mDescription = in.readString();
+        } else {
+            mDescription = null;
+        }
         in.readParcelableList(mChannels, NotificationChannel.class.getClassLoader());
+        mBlocked = in.readBoolean();
     }
 
     private String getTrimmedString(String input) {
@@ -92,21 +105,35 @@ public final class NotificationChannelGroup implements Parcelable {
             dest.writeByte((byte) 0);
         }
         TextUtils.writeToParcel(mName, dest, flags);
+        if (mDescription != null) {
+            dest.writeByte((byte) 1);
+            dest.writeString(mDescription);
+        } else {
+            dest.writeByte((byte) 0);
+        }
         dest.writeParcelableList(mChannels, flags);
+        dest.writeBoolean(mBlocked);
     }
 
     /**
-     * Returns the id of this channel.
+     * Returns the id of this group.
      */
     public String getId() {
         return mId;
     }
 
     /**
-     * Returns the user visible name of this channel.
+     * Returns the user visible name of this group.
      */
     public CharSequence getName() {
         return mName;
+    }
+
+    /**
+     * Returns the user visible description of this group.
+     */
+    public String getDescription() {
+        return mDescription;
     }
 
     /**
@@ -114,6 +141,34 @@ public final class NotificationChannelGroup implements Parcelable {
      */
     public List<NotificationChannel> getChannels() {
         return mChannels;
+    }
+
+    /**
+     * Returns whether or not notifications posted to {@link NotificationChannel channels} belonging
+     * to this group are blocked. This value is independent of
+     * {@link NotificationManager#areNotificationsEnabled()} and
+     * {@link NotificationChannel#getImportance()}.
+     */
+    public boolean isBlocked() {
+        return mBlocked;
+    }
+
+    /**
+     * Sets the user visible description of this group.
+     *
+     * <p>The recommended maximum length is 300 characters; the value may be truncated if it is too
+     * long.
+     */
+    public void setDescription(String description) {
+        mDescription = getTrimmedString(description);
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public void setBlocked(boolean blocked) {
+        mBlocked = blocked;
     }
 
     /**
@@ -126,6 +181,28 @@ public final class NotificationChannelGroup implements Parcelable {
     /**
      * @hide
      */
+    public void setChannels(List<NotificationChannel> channels) {
+        mChannels = channels;
+    }
+
+    /**
+     * @hide
+     */
+    public void populateFromXml(XmlPullParser parser) {
+        // Name, id, and importance are set in the constructor.
+        setDescription(parser.getAttributeValue(null, ATT_DESC));
+        setBlocked(safeBool(parser, ATT_BLOCKED, false));
+    }
+
+    private static boolean safeBool(XmlPullParser parser, String att, boolean defValue) {
+        final String value = parser.getAttributeValue(null, att);
+        if (TextUtils.isEmpty(value)) return defValue;
+        return Boolean.parseBoolean(value);
+    }
+
+    /**
+     * @hide
+     */
     public void writeXml(XmlSerializer out) throws IOException {
         out.startTag(null, TAG_GROUP);
 
@@ -133,6 +210,10 @@ public final class NotificationChannelGroup implements Parcelable {
         if (getName() != null) {
             out.attribute(null, ATT_NAME, getName().toString());
         }
+        if (getDescription() != null) {
+            out.attribute(null, ATT_DESC, getDescription().toString());
+        }
+        out.attribute(null, ATT_BLOCKED, Boolean.toString(isBlocked()));
 
         out.endTag(null, TAG_GROUP);
     }
@@ -145,6 +226,8 @@ public final class NotificationChannelGroup implements Parcelable {
         JSONObject record = new JSONObject();
         record.put(ATT_ID, getId());
         record.put(ATT_NAME, getName());
+        record.put(ATT_DESC, getDescription());
+        record.put(ATT_BLOCKED, isBlocked());
         return record;
     }
 
@@ -173,31 +256,61 @@ public final class NotificationChannelGroup implements Parcelable {
 
         NotificationChannelGroup that = (NotificationChannelGroup) o;
 
+        if (isBlocked() != that.isBlocked()) return false;
         if (getId() != null ? !getId().equals(that.getId()) : that.getId() != null) return false;
         if (getName() != null ? !getName().equals(that.getName()) : that.getName() != null) {
             return false;
         }
-        return true;
-    }
-
-    @Override
-    public NotificationChannelGroup clone() {
-        return new NotificationChannelGroup(getId(), getName());
+        if (getDescription() != null ? !getDescription().equals(that.getDescription())
+                : that.getDescription() != null) {
+            return false;
+        }
+        return getChannels() != null ? getChannels().equals(that.getChannels())
+                : that.getChannels() == null;
     }
 
     @Override
     public int hashCode() {
         int result = getId() != null ? getId().hashCode() : 0;
         result = 31 * result + (getName() != null ? getName().hashCode() : 0);
+        result = 31 * result + (getDescription() != null ? getDescription().hashCode() : 0);
+        result = 31 * result + (isBlocked() ? 1 : 0);
+        result = 31 * result + (getChannels() != null ? getChannels().hashCode() : 0);
         return result;
     }
 
     @Override
+    public NotificationChannelGroup clone() {
+        NotificationChannelGroup cloned = new NotificationChannelGroup(getId(), getName());
+        cloned.setDescription(getDescription());
+        cloned.setBlocked(isBlocked());
+        cloned.setChannels(getChannels());
+        return cloned;
+    }
+
+    @Override
     public String toString() {
-        return "NotificationChannelGroup{" +
-                "mId='" + mId + '\'' +
-                ", mName=" + mName +
-                ", mChannels=" + mChannels +
-                '}';
+        return "NotificationChannelGroup{"
+                + "mId='" + mId + '\''
+                + ", mName=" + mName
+                + ", mDescription=" + (!TextUtils.isEmpty(mDescription) ? "hasDescription " : "")
+                + ", mBlocked=" + mBlocked
+                + ", mChannels=" + mChannels
+                + '}';
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
+        proto.write(NotificationChannelGroupProto.ID, mId);
+        proto.write(NotificationChannelGroupProto.NAME, mName.toString());
+        proto.write(NotificationChannelGroupProto.DESCRIPTION, mDescription);
+        proto.write(NotificationChannelGroupProto.IS_BLOCKED, mBlocked);
+        for (NotificationChannel channel : mChannels) {
+            channel.writeToProto(proto, NotificationChannelGroupProto.CHANNELS);
+        }
+
+        proto.end(token);
     }
 }

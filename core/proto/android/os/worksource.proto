@@ -14,17 +14,29 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 package android.os;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 option java_multiple_files = true;
 
 message WorkSourceProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     message WorkSourceContentProto {
-        int32 uid = 1;
-        string name = 2;
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 uid = 1;
+        optional string name = 2;
+    }
+
+    message WorkChain {
+      option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+      repeated WorkSourceContentProto nodes = 1;
     }
 
     repeated WorkSourceContentProto work_source_contents = 1;
+    repeated WorkChain work_chains = 2;
 }

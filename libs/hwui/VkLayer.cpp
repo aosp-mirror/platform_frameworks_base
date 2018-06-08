@@ -36,5 +36,5 @@ void VkLayer::onVkContextDestroyed() {
     mImage = nullptr;
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

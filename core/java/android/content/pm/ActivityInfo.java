@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.annotation.IntDef;
+import android.annotation.TestApi;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Configuration.NativeConfig;
@@ -34,8 +35,7 @@ import java.lang.annotation.RetentionPolicy;
  * from the AndroidManifest.xml's &lt;activity&gt; and
  * &lt;receiver&gt; tags.
  */
-public class ActivityInfo extends ComponentInfo
-        implements Parcelable {
+public class ActivityInfo extends ComponentInfo implements Parcelable {
 
      // NOTE: When adding new data members be sure to update the copy-constructor, Parcel
      // constructor, and writeToParcel.
@@ -181,6 +181,7 @@ public class ActivityInfo extends ComponentInfo
      * Activity explicitly requested to be resizeable.
      * @hide
      */
+    @TestApi
     public static final int RESIZE_MODE_RESIZEABLE = 2;
     /**
      * Activity is resizeable and supported picture-in-picture mode.  This flag is now deprecated
@@ -261,10 +262,10 @@ public class ActivityInfo extends ComponentInfo
     public static final int COLOR_MODE_HDR = 2;
 
     /** @hide */
-    @IntDef({
-        COLOR_MODE_DEFAULT,
-        COLOR_MODE_WIDE_COLOR_GAMUT,
-        COLOR_MODE_HDR,
+    @IntDef(prefix = { "COLOR_MODE_" }, value = {
+            COLOR_MODE_DEFAULT,
+            COLOR_MODE_WIDE_COLOR_GAMUT,
+            COLOR_MODE_HDR,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ColorMode {}
@@ -454,7 +455,6 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int FLAG_TURN_SCREEN_ON = 0x1000000;
 
-
     /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the system user.  Only works with broadcast receivers.  Set from the
@@ -492,7 +492,7 @@ public class ActivityInfo extends ComponentInfo
     public int flags;
 
     /** @hide */
-    @IntDef({
+    @IntDef(prefix = { "SCREEN_ORIENTATION_" }, value = {
             SCREEN_ORIENTATION_UNSET,
             SCREEN_ORIENTATION_UNSPECIFIED,
             SCREEN_ORIENTATION_LANDSCAPE,
@@ -638,25 +638,24 @@ public class ActivityInfo extends ComponentInfo
     public int screenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                    CONFIG_MCC,
-                    CONFIG_MNC,
-                    CONFIG_LOCALE,
-                    CONFIG_TOUCHSCREEN,
-                    CONFIG_KEYBOARD,
-                    CONFIG_KEYBOARD_HIDDEN,
-                    CONFIG_NAVIGATION,
-                    CONFIG_ORIENTATION,
-                    CONFIG_SCREEN_LAYOUT,
-                    CONFIG_UI_MODE,
-                    CONFIG_SCREEN_SIZE,
-                    CONFIG_SMALLEST_SCREEN_SIZE,
-                    CONFIG_DENSITY,
-                    CONFIG_LAYOUT_DIRECTION,
-                    CONFIG_COLOR_MODE,
-                    CONFIG_FONT_SCALE,
-            })
+    @IntDef(flag = true, prefix = { "CONFIG_" }, value = {
+            CONFIG_MCC,
+            CONFIG_MNC,
+            CONFIG_LOCALE,
+            CONFIG_TOUCHSCREEN,
+            CONFIG_KEYBOARD,
+            CONFIG_KEYBOARD_HIDDEN,
+            CONFIG_NAVIGATION,
+            CONFIG_ORIENTATION,
+            CONFIG_SCREEN_LAYOUT,
+            CONFIG_UI_MODE,
+            CONFIG_SCREEN_SIZE,
+            CONFIG_SMALLEST_SCREEN_SIZE,
+            CONFIG_DENSITY,
+            CONFIG_LAYOUT_DIRECTION,
+            CONFIG_COLOR_MODE,
+            CONFIG_FONT_SCALE,
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Config {}
 
@@ -780,6 +779,13 @@ public class ActivityInfo extends ComponentInfo
      * constant starts at the high bits.
      */
     public static final int CONFIG_FONT_SCALE = 0x40000000;
+    /**
+     * Bit indicating changes to window configuration that isn't exposed to apps.
+     * This is for internal use only and apps don't handle it.
+     * @hide
+     * {@link Configuration}.
+     */
+    public static final int CONFIG_WINDOW_CONFIGURATION = 0x20000000;
 
     /** @hide
      * Unfortunately the constants for config changes in native code are
@@ -993,17 +999,9 @@ public class ActivityInfo extends ComponentInfo
      * Returns true if the activity's orientation is fixed.
      * @hide
      */
-    public boolean isFixedOrientation() {
+    boolean isFixedOrientation() {
         return isFixedOrientationLandscape() || isFixedOrientationPortrait()
                 || screenOrientation == SCREEN_ORIENTATION_LOCKED;
-    }
-
-    /**
-     * Returns true if the specified orientation is considered fixed.
-     * @hide
-     */
-    static public boolean isFixedOrientation(int orientation) {
-        return isFixedOrientationLandscape(orientation) || isFixedOrientationPortrait(orientation);
     }
 
     /**
@@ -1157,6 +1155,7 @@ public class ActivityInfo extends ComponentInfo
         dest.writeString(permission);
         dest.writeString(taskAffinity);
         dest.writeString(targetActivity);
+        dest.writeString(launchToken);
         dest.writeInt(flags);
         dest.writeInt(screenOrientation);
         dest.writeInt(configChanges);
@@ -1189,6 +1188,7 @@ public class ActivityInfo extends ComponentInfo
      * Determines whether the {@link Activity} is considered translucent or floating.
      * @hide
      */
+    @TestApi
     public static boolean isTranslucentOrFloating(TypedArray attributes) {
         final boolean isTranslucent =
                 attributes.getBoolean(com.android.internal.R.styleable.Window_windowIsTranslucent,
@@ -1202,6 +1202,67 @@ public class ActivityInfo extends ComponentInfo
                         false);
 
         return isFloating || isTranslucent || isSwipeToDismiss;
+    }
+
+    /**
+     * Convert the screen orientation constant to a human readable format.
+     * @hide
+     */
+    public static String screenOrientationToString(int orientation) {
+        switch (orientation) {
+            case SCREEN_ORIENTATION_UNSET:
+                return "SCREEN_ORIENTATION_UNSET";
+            case SCREEN_ORIENTATION_UNSPECIFIED:
+                return "SCREEN_ORIENTATION_UNSPECIFIED";
+            case SCREEN_ORIENTATION_LANDSCAPE:
+                return "SCREEN_ORIENTATION_LANDSCAPE";
+            case SCREEN_ORIENTATION_PORTRAIT:
+                return "SCREEN_ORIENTATION_PORTRAIT";
+            case SCREEN_ORIENTATION_USER:
+                return "SCREEN_ORIENTATION_USER";
+            case SCREEN_ORIENTATION_BEHIND:
+                return "SCREEN_ORIENTATION_BEHIND";
+            case SCREEN_ORIENTATION_SENSOR:
+                return "SCREEN_ORIENTATION_SENSOR";
+            case SCREEN_ORIENTATION_NOSENSOR:
+                return "SCREEN_ORIENTATION_NOSENSOR";
+            case SCREEN_ORIENTATION_SENSOR_LANDSCAPE:
+                return "SCREEN_ORIENTATION_SENSOR_LANDSCAPE";
+            case SCREEN_ORIENTATION_SENSOR_PORTRAIT:
+                return "SCREEN_ORIENTATION_SENSOR_PORTRAIT";
+            case SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
+                return "SCREEN_ORIENTATION_REVERSE_LANDSCAPE";
+            case SCREEN_ORIENTATION_REVERSE_PORTRAIT:
+                return "SCREEN_ORIENTATION_REVERSE_PORTRAIT";
+            case SCREEN_ORIENTATION_FULL_SENSOR:
+                return "SCREEN_ORIENTATION_FULL_SENSOR";
+            case SCREEN_ORIENTATION_USER_LANDSCAPE:
+                return "SCREEN_ORIENTATION_USER_LANDSCAPE";
+            case SCREEN_ORIENTATION_USER_PORTRAIT:
+                return "SCREEN_ORIENTATION_USER_PORTRAIT";
+            case SCREEN_ORIENTATION_FULL_USER:
+                return "SCREEN_ORIENTATION_FULL_USER";
+            case SCREEN_ORIENTATION_LOCKED:
+                return "SCREEN_ORIENTATION_LOCKED";
+            default:
+                return Integer.toString(orientation);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static String colorModeToString(@ColorMode int colorMode) {
+        switch (colorMode) {
+            case COLOR_MODE_DEFAULT:
+                return "COLOR_MODE_DEFAULT";
+            case COLOR_MODE_WIDE_COLOR_GAMUT:
+                return "COLOR_MODE_WIDE_COLOR_GAMUT";
+            case COLOR_MODE_HDR:
+                return "COLOR_MODE_HDR";
+            default:
+                return Integer.toString(colorMode);
+        }
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR
@@ -1222,6 +1283,7 @@ public class ActivityInfo extends ComponentInfo
         permission = source.readString();
         taskAffinity = source.readString();
         targetActivity = source.readString();
+        launchToken = source.readString();
         flags = source.readInt();
         screenOrientation = source.readInt();
         configChanges = source.readInt();

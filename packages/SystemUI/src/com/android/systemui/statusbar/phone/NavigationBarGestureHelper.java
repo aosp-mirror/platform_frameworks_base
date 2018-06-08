@@ -16,36 +16,34 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.WindowManager.DOCKED_INVALID;
+import static android.view.WindowManager.DOCKED_LEFT;
+import static android.view.WindowManager.DOCKED_TOP;
+
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
-import android.view.ViewConfiguration;
-
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.tuner.TunerService;
 
-import static android.view.WindowManager.DOCKED_INVALID;
-import static android.view.WindowManager.DOCKED_LEFT;
-import static android.view.WindowManager.DOCKED_TOP;
-
 /**
  * Class to detect gestures on the navigation bar.
  */
-public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureListener
-        implements TunerService.Tunable, GestureHelper {
+public class NavigationBarGestureHelper implements TunerService.Tunable, GestureHelper {
 
+    private static final String TAG = "NavBarGestureHelper";
     private static final String KEY_DOCK_WINDOW_GESTURE = "overview_nav_bar_gesture";
     /**
      * When dragging from the navigation bar, we drag in recents.
@@ -67,15 +65,16 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
     private Context mContext;
     private NavigationBarView mNavigationBarView;
     private boolean mIsVertical;
-    private boolean mIsRTL;
 
-    private final GestureDetector mTaskSwitcherDetector;
+    private final QuickStepController mQuickStepController;
     private final int mScrollTouchSlop;
-    private final int mMinFlingVelocity;
+    private final StatusBar mStatusBar;
     private int mTouchDownX;
     private int mTouchDownY;
     private boolean mDownOnRecents;
     private VelocityTracker mVelocityTracker;
+    private boolean mIsInScreenPinning;
+    private boolean mNotificationsVisibleOnDown;
 
     private boolean mDockWindowEnabled;
     private boolean mDockWindowTouchSlopExceeded;
@@ -83,11 +82,10 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
 
     public NavigationBarGestureHelper(Context context) {
         mContext = context;
-        ViewConfiguration configuration = ViewConfiguration.get(context);
+        mStatusBar = SysUiServiceProvider.getComponent(context, StatusBar.class);
         Resources r = context.getResources();
         mScrollTouchSlop = r.getDimensionPixelSize(R.dimen.navigation_bar_min_swipe_distance);
-        mMinFlingVelocity = configuration.getScaledMinimumFlingVelocity();
-        mTaskSwitcherDetector = new GestureDetector(context, this);
+        mQuickStepController = new QuickStepController(context);
         Dependency.get(TunerService.class).addTunable(this, KEY_DOCK_WINDOW_GESTURE);
     }
 
@@ -100,42 +98,54 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
         mRecentsComponent = recentsComponent;
         mDivider = divider;
         mNavigationBarView = navigationBarView;
+        mQuickStepController.setComponents(mNavigationBarView);
     }
 
     public void setBarState(boolean isVertical, boolean isRTL) {
         mIsVertical = isVertical;
-        mIsRTL = isRTL;
+        mQuickStepController.setBarState(isVertical, isRTL);
     }
 
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        // If we move more than a fixed amount, then start capturing for the
-        // task switcher detector
-        mTaskSwitcherDetector.onTouchEvent(event);
-        int action = event.getAction();
-        switch (action & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_DOWN: {
-                mTouchDownX = (int) event.getX();
-                mTouchDownY = (int) event.getY();
-                break;
-            }
-            case MotionEvent.ACTION_MOVE: {
-                int x = (int) event.getX();
-                int y = (int) event.getY();
-                int xDiff = Math.abs(x - mTouchDownX);
-                int yDiff = Math.abs(y - mTouchDownY);
-                boolean exceededTouchSlop = !mIsVertical
-                        ? xDiff > mScrollTouchSlop && xDiff > yDiff
-                        : yDiff > mScrollTouchSlop && yDiff > xDiff;
-                if (exceededTouchSlop) {
-                    return true;
-                }
-                break;
-            }
-            case MotionEvent.ACTION_CANCEL:
-            case MotionEvent.ACTION_UP:
-                break;
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            mIsInScreenPinning = mNavigationBarView.inScreenPinning();
+            mNotificationsVisibleOnDown = !mStatusBar.isPresenterFullyCollapsed();
         }
-        return mDockWindowEnabled && interceptDockWindowEvent(event);
+        if (!canHandleGestures()) {
+            return false;
+        }
+        boolean result = mQuickStepController.onInterceptTouchEvent(event);
+        if (mDockWindowEnabled) {
+            result |= interceptDockWindowEvent(event);
+        }
+        return result;
+    }
+
+    public boolean onTouchEvent(MotionEvent event) {
+        if (!canHandleGestures()) {
+            return false;
+        }
+        boolean result = mQuickStepController.onTouchEvent(event);
+        if (mDockWindowEnabled) {
+            result |= handleDockWindowEvent(event);
+        }
+        return result;
+    }
+
+    public void onDraw(Canvas canvas) {
+        mQuickStepController.onDraw(canvas);
+    }
+
+    public void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        mQuickStepController.onLayout(changed, left, top, right, bottom);
+    }
+
+    public void onDarkIntensityChange(float intensity) {
+        mQuickStepController.onDarkIntensityChange(intensity);
+    }
+
+    public void onNavigationButtonLongPress(View v) {
+        mQuickStepController.onNavigationButtonLongPress(v);
     }
 
     private boolean interceptDockWindowEvent(MotionEvent event) {
@@ -206,7 +216,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                     && mDivider.getView().getWindowManagerProxy().getDockSide() == DOCKED_INVALID) {
                 Rect initialBounds = null;
                 int dragMode = calculateDragMode();
-                int createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_TOP_OR_LEFT;
+                int createMode = ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
                 if (dragMode == DRAG_MODE_DIVIDER) {
                     initialBounds = new Rect();
                     mDivider.getView().calculateBoundsForPosition(mIsVertical
@@ -218,10 +228,10 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
                             initialBounds);
                 } else if (dragMode == DRAG_MODE_RECENTS && mTouchDownX
                         < mContext.getResources().getDisplayMetrics().widthPixels / 2) {
-                    createMode = ActivityManager.DOCKED_STACK_CREATE_MODE_BOTTOM_OR_RIGHT;
+                    createMode = ActivityManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
                 }
-                boolean docked = mRecentsComponent.dockTopTask(dragMode, createMode, initialBounds,
-                        MetricsEvent.ACTION_WINDOW_DOCK_SWIPE);
+                boolean docked = mRecentsComponent.splitPrimaryTask(dragMode, createMode,
+                        initialBounds, MetricsEvent.ACTION_WINDOW_DOCK_SWIPE);
                 if (docked) {
                     mDragMode = dragMode;
                     if (mDragMode == DRAG_MODE_DIVIDER) {
@@ -264,6 +274,11 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
         mVelocityTracker = null;
     }
 
+    private boolean canHandleGestures() {
+        return !mIsInScreenPinning && !mStatusBar.isKeyguardShowing()
+                && !mNotificationsVisibleOnDown;
+    }
+
     private int calculateDragMode() {
         if (mIsVertical && !mDivider.getView().isHorizontalDivision()) {
             return DRAG_MODE_DIVIDER;
@@ -272,37 +287,6 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
             return DRAG_MODE_DIVIDER;
         }
         return DRAG_MODE_RECENTS;
-    }
-
-    public boolean onTouchEvent(MotionEvent event) {
-        boolean result = mTaskSwitcherDetector.onTouchEvent(event);
-        if (mDockWindowEnabled) {
-            result |= handleDockWindowEvent(event);
-        }
-        return result;
-    }
-
-    @Override
-    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        float absVelX = Math.abs(velocityX);
-        float absVelY = Math.abs(velocityY);
-        boolean isValidFling = absVelX > mMinFlingVelocity &&
-                mIsVertical ? (absVelY > absVelX) : (absVelX > absVelY);
-        if (isValidFling && mRecentsComponent != null) {
-            boolean showNext;
-            if (!mIsRTL) {
-                showNext = mIsVertical ? (velocityY < 0) : (velocityX < 0);
-            } else {
-                // In RTL, vertical is still the same, but horizontal is flipped
-                showNext = mIsVertical ? (velocityY < 0) : (velocityX > 0);
-            }
-            if (showNext) {
-                mRecentsComponent.showNextAffiliatedTask();
-            } else {
-                mRecentsComponent.showPrevAffiliatedTask();
-            }
-        }
-        return true;
     }
 
     @Override

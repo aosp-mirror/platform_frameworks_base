@@ -529,14 +529,32 @@ public class SurfaceTextureRenderer {
     private boolean swapBuffers(EGLSurface surface)
             throws LegacyExceptionUtils.BufferQueueAbandonedException {
         boolean result = EGL14.eglSwapBuffers(mEGLDisplay, surface);
+
         int error = EGL14.eglGetError();
-        if (error == EGL14.EGL_BAD_SURFACE) {
-            throw new LegacyExceptionUtils.BufferQueueAbandonedException();
-        } else if (error != EGL14.EGL_SUCCESS) {
-            throw new IllegalStateException("swapBuffers: EGL error: 0x" +
-                    Integer.toHexString(error));
+        switch (error) {
+            case EGL14.EGL_SUCCESS:
+                return result;
+
+            // Check for an abandoned buffer queue, or other error conditions out
+            // of the user's control.
+            //
+            // From the EGL 1.4 spec (2013-12-04), Section 3.9.4 Posting Errors:
+            //
+            //   If eglSwapBuffers is called and the native window associated with
+            //   surface is no longer valid, an EGL_BAD_NATIVE_WINDOW error is
+            //   generated.
+            //
+            // We also interpret EGL_BAD_SURFACE as indicating an abandoned
+            // surface, even though the EGL spec does not document it as such, for
+            // backwards compatibility with older versions of this file.
+            case EGL14.EGL_BAD_NATIVE_WINDOW:
+            case EGL14.EGL_BAD_SURFACE:
+                throw new LegacyExceptionUtils.BufferQueueAbandonedException();
+
+            default:
+                throw new IllegalStateException(
+                        "swapBuffers: EGL error: 0x" + Integer.toHexString(error));
         }
-        return result;
     }
 
     private void checkEglError(String msg) {

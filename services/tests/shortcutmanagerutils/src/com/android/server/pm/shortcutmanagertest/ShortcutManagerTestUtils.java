@@ -22,6 +22,7 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
@@ -59,9 +60,7 @@ import org.hamcrest.Matcher;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.mockito.hamcrest.MockitoHamcrest;
 
 import java.io.BufferedReader;
@@ -210,6 +209,9 @@ public class ShortcutManagerTestUtils {
     public static void setDefaultLauncher(Instrumentation instrumentation, String component) {
         runCommand(instrumentation, "cmd package set-home-activity --user "
                 + instrumentation.getContext().getUserId() + " " + component,
+                result -> result.contains("Success"));
+        runCommand(instrumentation, "cmd shortcut clear-default-launcher --user "
+                        + instrumentation.getContext().getUserId(),
                 result -> result.contains("Success"));
     }
 
@@ -898,11 +900,14 @@ public class ShortcutManagerTestUtils {
 
         public ShortcutListAsserter areAllEnabled() {
             forAllShortcuts(s -> assertTrue("id=" + s.getId(), s.isEnabled()));
+            areAllWithDisabledReason(ShortcutInfo.DISABLED_REASON_NOT_DISABLED);
             return this;
         }
 
         public ShortcutListAsserter areAllDisabled() {
             forAllShortcuts(s -> assertFalse("id=" + s.getId(), s.isEnabled()));
+            forAllShortcuts(s -> assertNotEquals("id=" + s.getId(),
+                    ShortcutInfo.DISABLED_REASON_NOT_DISABLED, s.getDisabledReason()));
             return this;
         }
 
@@ -927,6 +932,16 @@ public class ShortcutManagerTestUtils {
         public ShortcutListAsserter areAllNotOrphan() {
             forAllShortcuts(s -> assertTrue("id=" + s.getId(),
                     s.isPinned() || s.isDeclaredInManifest() || s.isDynamic()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllVisibleToPublisher() {
+            forAllShortcuts(s -> assertTrue("id=" + s.getId(), s.isVisibleToPublisher()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllNotVisibleToPublisher() {
+            forAllShortcuts(s -> assertFalse("id=" + s.getId(), s.isVisibleToPublisher()));
             return this;
         }
 
@@ -957,6 +972,17 @@ public class ShortcutManagerTestUtils {
 
         public ShortcutListAsserter areAllWithNoIntent() {
             forAllShortcuts(s -> assertNull("id=" + s.getId(), s.getIntent()));
+            return this;
+        }
+
+        public ShortcutListAsserter areAllWithDisabledReason(int disabledReason) {
+            forAllShortcuts(s -> assertEquals("id=" + s.getId(),
+                    disabledReason, s.getDisabledReason()));
+            if (disabledReason >= ShortcutInfo.DISABLED_REASON_VERSION_LOWER) {
+                areAllNotVisibleToPublisher();
+            } else {
+                areAllVisibleToPublisher();
+            }
             return this;
         }
 

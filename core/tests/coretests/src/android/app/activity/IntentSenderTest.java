@@ -20,10 +20,10 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.test.suitebuilder.annotation.Suppress;
 import android.os.Bundle;
-import android.test.suitebuilder.annotation.Suppress;
+import android.support.test.filters.LargeTest;
 
+@LargeTest
 public class IntentSenderTest extends BroadcastTest {
 
     public void testRegisteredReceivePermissionGranted() throws Exception {

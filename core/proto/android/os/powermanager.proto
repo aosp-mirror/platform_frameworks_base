@@ -1,0 +1,74 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.os;
+
+option java_multiple_files = true;
+
+import "frameworks/base/core/proto/android/os/worksource.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+message PowerManagerProto {
+    /* User activity events in PowerManager.java. */
+    enum UserActivityEvent {
+        // Unspecified event type.
+        USER_ACTIVITY_EVENT_OTHER = 0;
+        // Button or key pressed or released.
+        USER_ACTIVITY_EVENT_BUTTON = 1;
+        // Touch down, move or up.
+        USER_ACTIVITY_EVENT_TOUCH = 2;
+        // Accessibility taking action on behalf of user.
+        USER_ACTIVITY_EVENT_ACCESSIBILITY = 3;
+    }
+
+    // WakeLock class in android.os.PowerManager, it is the one used by sdk
+    message WakeLock {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string tag = 1;
+        optional string package_name = 2;
+        optional bool held = 3;
+        optional int32 internal_count = 4;
+        optional WorkSourceProto work_source = 5;
+    }
+}
+
+message PowerManagerInternalProto {
+    // Enum values gotten from PowerManagerInternal.java
+    enum Wakefulness {
+        // The device is asleep. It can only be awoken by a call to wakeUp().
+        // The screen should be off or in the process of being turned off by the
+        // display controller. The device typically passes through the dozing
+        // state first.
+        WAKEFULNESS_ASLEEP = 0;
+        // The device is fully awake. It can be put to sleep by a call to
+        // goToSleep(). When the user activity timeout expires, the device may
+        // start dreaming or go to sleep.
+        WAKEFULNESS_AWAKE = 1;
+        // The device is dreaming. It can be awoken by a call to wakeUp(), which
+        // ends the dream. The device goes to sleep when goToSleep() is called,
+        // when the dream ends, or when unplugged. User activity may brighten
+        // the screen but does not end the dream.
+        WAKEFULNESS_DREAMING = 2;
+        // The device is dozing. It is almost asleep but is allowing a special
+        // low-power "doze" dream to run which keeps the display on but lets the
+        // application processor suspend. It can be awoken by a call to wakeUp()
+        // which ends the dream. The device fully goes to sleep if the dream
+        // cannot be started or ends on its own.
+        WAKEFULNESS_DOZING = 3;
+    }
+}

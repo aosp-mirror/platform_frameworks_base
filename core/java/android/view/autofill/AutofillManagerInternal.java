@@ -15,6 +15,9 @@
  */
 package android.view.autofill;
 
+import android.annotation.NonNull;
+import android.annotation.UserIdInt;
+
 /**
  * Autofill Manager local system service interface.
  *
@@ -26,4 +29,14 @@ public abstract class AutofillManagerInternal {
      * Notifies the manager that the back key was pressed.
      */
     public abstract void onBackKeyPressed();
+
+    /**
+     * Gets whether compatibility mode is enabled for a package
+     *
+     * @param packageName The package for which to query.
+     * @param versionCode The package version code.
+     * @param userId The user id for which to query.
+     */
+    public abstract boolean isCompatibilityModeRequested(@NonNull String packageName,
+            long versionCode, @UserIdInt int userId);
 }

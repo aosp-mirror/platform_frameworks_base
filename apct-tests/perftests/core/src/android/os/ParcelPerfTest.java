@@ -27,6 +27,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class ParcelPerfTest {
@@ -167,4 +171,80 @@ public class ParcelPerfTest {
             Parcel.obtain().recycle();
         }
     }
+
+    @Test
+    public void timeWriteException() {
+        timeWriteException(false);
+    }
+
+    @Test
+    public void timeWriteExceptionWithStackTraceParceling() {
+        timeWriteException(true);
+    }
+
+    @Test
+    public void timeReadException() {
+        timeReadException(false);
+    }
+
+    @Test
+    public void timeReadExceptionWithStackTraceParceling() {
+        timeReadException(true);
+    }
+
+    private void timeWriteException(boolean enableParceling) {
+        if (enableParceling) {
+            Parcel.setStackTraceParceling(true);
+        }
+        try {
+            final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            Parcel p = Parcel.obtain();
+            SecurityException e = new SecurityException("TestMessage");
+            while (state.keepRunning()) {
+                p.setDataPosition(0);
+                p.writeException(e);
+            }
+        } finally {
+            if (enableParceling) {
+                Parcel.setStackTraceParceling(false);
+            }
+        }
+    }
+
+    private void timeReadException(boolean enableParceling) {
+        if (enableParceling) {
+            Parcel.setStackTraceParceling(true);
+        }
+        try {
+            final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            Parcel p = Parcel.obtain();
+            String msg = "TestMessage";
+            p.writeException(new SecurityException(msg));
+            p.setDataPosition(0);
+            // First verify that remote cause is set (if parceling is enabled)
+            try {
+                p.readException();
+            } catch (SecurityException e) {
+                assertEquals(e.getMessage(), msg);
+                if (enableParceling) {
+                    assertTrue(e.getCause() instanceof RemoteException);
+                } else {
+                    assertNull(e.getCause());
+                }
+            }
+
+            while (state.keepRunning()) {
+                p.setDataPosition(0);
+                try {
+                    p.readException();
+                } catch (SecurityException expected) {
+                }
+            }
+        } finally {
+            if (enableParceling) {
+                Parcel.setStackTraceParceling(false);
+            }
+        }
+    }
+
 }

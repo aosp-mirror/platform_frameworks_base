@@ -16,8 +16,10 @@
 
 #include "ProfileDataContainer.h"
 
-#include <log/log.h>
+#include <errno.h>
+
 #include <cutils/ashmem.h>
+#include <log/log.h>
 
 #include <errno.h>
 #include <sys/mman.h>
@@ -51,21 +53,20 @@ void ProfileDataContainer::switchStorageToAshmem(int ashmemfd) {
     int regionSize = ashmem_get_size_region(ashmemfd);
     if (regionSize < 0) {
         int err = errno;
-        ALOGW("Failed to get ashmem region size from fd %d, err %d %s", ashmemfd, err, strerror(err));
+        ALOGW("Failed to get ashmem region size from fd %d, err %d %s", ashmemfd, err,
+              strerror(err));
         return;
     }
     if (regionSize < static_cast<int>(sizeof(ProfileData))) {
-        ALOGW("Ashmem region is too small! Received %d, required %u",
-                regionSize, static_cast<unsigned int>(sizeof(ProfileData)));
+        ALOGW("Ashmem region is too small! Received %d, required %u", regionSize,
+              static_cast<unsigned int>(sizeof(ProfileData)));
         return;
     }
     ProfileData* newData = reinterpret_cast<ProfileData*>(
-            mmap(NULL, sizeof(ProfileData), PROT_READ | PROT_WRITE,
-                    MAP_SHARED, ashmemfd, 0));
+            mmap(NULL, sizeof(ProfileData), PROT_READ | PROT_WRITE, MAP_SHARED, ashmemfd, 0));
     if (newData == MAP_FAILED) {
         int err = errno;
-        ALOGW("Failed to move profile data to ashmem fd %d, error = %d",
-                ashmemfd, err);
+        ALOGW("Failed to move profile data to ashmem fd %d, error = %d", ashmemfd, err);
         return;
     }
 

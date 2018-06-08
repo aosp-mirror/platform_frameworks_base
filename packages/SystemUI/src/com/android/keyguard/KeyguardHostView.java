@@ -34,6 +34,7 @@ import android.widget.FrameLayout;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityContainer.SecurityCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.settingslib.Utils;
 
 import java.io.File;
 
@@ -136,6 +137,10 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         mCancelAction = cancelAction;
     }
 
+    public boolean hasDismissActions() {
+        return mDismissAction != null || mCancelAction != null;
+    }
+
     public void cancelDismissAction() {
         setOnDismissAction(null, null);
     }
@@ -148,7 +153,6 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         mSecurityContainer.setLockPatternUtils(mLockPatternUtils);
         mSecurityContainer.setSecurityCallback(this);
         mSecurityContainer.showPrimarySecurityScreen(false);
-        // mSecurityContainer.updateSecurityViews(false /* not bouncing */);
     }
 
     /**
@@ -171,8 +175,12 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         mSecurityContainer.showPromptReason(reason);
     }
 
-    public void showMessage(String message, int color) {
+    public void showMessage(CharSequence message, int color) {
         mSecurityContainer.showMessage(message, color);
+    }
+
+    public void showErrorMessage(CharSequence message) {
+        showMessage(message, Utils.getColorError(mContext));
     }
 
     /**
@@ -190,16 +198,6 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
             return true;
         }
         return false;
-    }
-
-    @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            event.getText().add(mSecurityContainer.getCurrentSecurityModeContentDescription());
-            return true;
-        } else {
-            return super.dispatchPopulateAccessibilityEvent(event);
-        }
     }
 
     protected KeyguardSecurityContainer getSecurityContainer() {
@@ -243,11 +241,19 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         mViewMediatorCallback.resetKeyguard();
     }
 
+    public void resetSecurityContainer() {
+        mSecurityContainer.reset();
+    }
+
     @Override
     public void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput) {
         if (mViewMediatorCallback != null) {
             mViewMediatorCallback.setNeedsInput(needsInput);
         }
+    }
+
+    public CharSequence getAccessibilityTitleForCurrentMode() {
+        return mSecurityContainer.getTitle();
     }
 
     public void userActivity() {

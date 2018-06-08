@@ -255,6 +255,8 @@ public class DozeSensors {
 
         @Override
         public void onSensorChanged(SensorEvent event) {
+            if (DEBUG) Log.d(TAG, "onSensorChanged " + event);
+
             mCurrentlyFar = event.values[0] >= event.sensor.getMaximumRange();
             mProxCallback.accept(mCurrentlyFar);
 

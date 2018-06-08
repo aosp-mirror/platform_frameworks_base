@@ -85,14 +85,17 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Няма сэрвісу галасавых / экстранных выклікаў"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Часова не прапаноўваецца сеткай мабільнай сувязі ў вашым месцазанходжанні"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Немагчыма падключыцца да сеткі"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Каб палепшыць якасць прыёму, паспрабуйце змяніць тып, выбраны ў меню \"Налады &gt; Сетка і інтэрнэт &gt; Мабільныя сеткі &gt; Прыярытэтны тып сеткі\"."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Каб палепшыць якасць прыёму, паспрабуйце змяніць тып, выбраны ў меню \"Налады &gt; Сетка і інтэрнэт &gt; Мабільныя сеткі &gt; Прыярытэтны тып сеткі\"."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi-Fi-тэлефанія актыўная"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Для экстранных выклікаў патрабуецца мабільная сетка."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Абвесткі"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Пераадрасацыя выкліку"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Рэжым экстраннага зваротнага выкліку"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Абвесткі пра мабільныя даныя"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Стан мабільнай перадачы даных"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS-паведамленні"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Паведамленні галасавой пошты"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi-тэлефанія"</string>
+    <string name="notification_channel_sim" msgid="4052095493875188564">"Статус SIM-карты"</string>
     <string name="peerTtyModeFull" msgid="6165351790010341421">"Аднарангавая прылада запытала рэжым TTY FULL"</string>
     <string name="peerTtyModeHco" msgid="5728602160669216784">"Аднарангавая прылада запытала рэжым TTY НСО"</string>
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Аднарангавая прылада запытала рэжым TTY VCO"</string>
@@ -124,7 +127,7 @@
     <item msgid="3910386316304772394">"Каб рабіць выклікі і адпраўляць паведамленні па Wi-Fi, спачатку папрасіце свайго аператара наладзіць гэту паслугу. Затым зноў уключыце Wi-Fi-тэлефанію ў меню Налады. (Код памылкі: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="6177300162212449033">"Зарэгіструйцеся ў свайго аператара"</item>
+    <item msgid="7472393097168811593">"Зарэгіструйцеся ў свайго аператара (Код памылкі: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
@@ -178,10 +181,12 @@
     <string name="work_profile_deleted_description" msgid="1100529432509639864">"Працоўны профіль выдалены з-за адсутнасці праграмы адміністратара"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Праграма адміністратара для працоўнага профілю адсутнічае або пашкоджана. У выніку гэтага ваш працоўны профіль і звязаныя з ім даныя былі выдалены. Звярніцеся па дапамогу да адміністратара."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Ваш працоўны профіль больш не даступны на гэтай прыладзе"</string>
+    <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Занадта шмат спроб уводу пароля"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Прылада знаходзіцца пад кіраваннем"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Ваша арганізацыя кіруе гэтай прыладай і можа сачыць за сеткавым трафікам. Дакраніцеся для атрымання дадатковай інфармацыі."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Даныя вашай прылады будуць сцерты"</string>
     <string name="factory_reset_message" msgid="7972496262232832457">"Немагчыма выкарыстоўваць праграму адміністратара. Зараз звесткі на вашай прыладзе будуць выдалены.\n\nКалі ў вас ёсць пытанні, звярніцеся да адміністратара вашай арганізацыі."</string>
+    <string name="printing_disabled_by" msgid="8936832919072486965">"Друк адключаны ўладальнікам праграмы <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Параметры планшэта"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Параметры ТБ"</string>
@@ -217,6 +222,8 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Выключыць"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"SOS-выклік"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Справаздача пра памылкі"</string>
+    <string name="global_action_logout" msgid="935179188218826050">"Скончыць сеанс"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Здымак экрана"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Справаздача пра памылку"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Будзе збiрацца iнфармацыя пра бягучы стан прылады, якая будзе адпраўляцца на электронную пошту. Стварэнне справаздачы пра памылкi зойме некаторы час."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Інтэрактыўная справаздача"</string>
@@ -238,10 +245,9 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Налады"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Дапамога"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Галас. дапамога"</string>
-    <string name="global_action_lockdown" msgid="8751542514724332873">"Заблакір. зараз"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Блакіроўка"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Змесціва схавана"</string>
-    <string name="notification_hidden_by_policy_text" msgid="9004631276932584600">"Змесціва, схаванае ў адпаведнасці з палітыкай"</string>
+    <string name="notification_hidden_text" msgid="6351207030447943784">"Новае апавяшчэнне"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Віртуальная клавіятура"</string>
     <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"Фізічная клавіятура"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"Бяспека"</string>
@@ -257,33 +263,43 @@
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Абвесткi"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Дэманстрацыйны рэжым для пунктаў продажу"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Падключэнне USB"</string>
-    <string name="notification_channel_foreground_service" msgid="6665375982962336520">"Праграмы, якія працуюць у фонавым рэжыме"</string>
-    <string name="foreground_service_app_in_background" msgid="6826789589341671842">"<xliff:g id="APP_NAME">%1$s</xliff:g> працуе ў фонавым рэжыме"</string>
-    <string name="foreground_service_apps_in_background" msgid="7150914856893450380">"Праграмы (<xliff:g id="NUMBER">%1$d</xliff:g>) працуюць у фонавым рэжыме"</string>
+    <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"Праграма працуе"</string>
+    <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Праграмы, якія выкарыстоўваюць акумулятар"</string>
+    <string name="foreground_service_app_in_background" msgid="1060198778219731292">"<xliff:g id="APP_NAME">%1$s</xliff:g> выкарыстоўвае акумулятар"</string>
+    <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"Наступная колькасць праграм выкарыстоўваюць акумулятар: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Дакраніцеся, каб даведацца пра выкарыстанне трафіка і акумулятара"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Бяспечны рэжым"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Сістэма Android"</string>
-    <string name="user_owner_label" msgid="1119010402169916617">"Пераключыцца на асабісты"</string>
-    <string name="managed_profile_label" msgid="5289992269827577857">"Пераключыцца на працоўны"</string>
+    <string name="user_owner_label" msgid="8836124313744349203">"Пераключыцца на асабісты профіль"</string>
+    <string name="managed_profile_label" msgid="8947929265267690522">"Пераключыцца на працоўны профіль"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Кантакты"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"атрымліваць доступ да вашых кантактаў"</string>
+    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Дазволіць &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; атрымліваць доступ да вашых кантактаў"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Месцазнаходжанне"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"атрымліваць доступ да месцазнаходжання гэтай прылады"</string>
+    <string name="permgrouprequest_location" msgid="8903573681261610809">"Дазволіць праграме &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; атрымліваць доступ да звестак аб месцазнаходжанні гэтай прылады"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Каляндар"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"атрымліваць доступ да вашага календара"</string>
+    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"Дазволіць &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; атрымліваць доступ да вашага календара"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"адпраўляць і праглядаць SMS-паведамленні"</string>
+    <string name="permgrouprequest_sms" msgid="605618939583628306">"Дазволіць &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; адпраўляць і праглядваць SMS-паведамленні"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Сховішча"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"атрымліваць доступ да фатаграфій, медыяфайлаў і файлаў на вашай прыладзе"</string>
+    <string name="permgrouprequest_storage" msgid="7429669910547860218">"Дазволіць &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; атрымліваць доступ да фота, мультымедыя і файлаў на вашай прыладзе"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Мікрафон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"запісваць аўдыя"</string>
+    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"Дазволіць &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; запісваць аўдыя"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"рабіць фатаздымкі і запісваць відэа"</string>
+    <string name="permgrouprequest_camera" msgid="810824326507258410">"Дазволіць &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; рабіць фота і запісваць відэа"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Тэлефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"рабіць тэлефонныя выклікі і кіраваць імі"</string>
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"Дазволіць &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; рабіць тэлефонныя выклікі і кіраваць імі"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Датчыкі цела"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"атрымліваць з датчыка даныя асноўных фізіялагічных паказчыкаў"</string>
+    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"Дазволіць &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; атрымліваць доступ да даных з датчыкаў пра вашы асноўныя фізіялагічныя паказчыкі"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Атрымліваць змесціва вакна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Аналізаваць змесціва актыўнага вакна."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Уключаць Азнаямленне дотыкам"</string>
@@ -408,6 +424,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Дазваляе прыкладанням атрымлiваць доступ да функцый тэлефона на прыладзе. Дзякуючы гэтаму дазволу прыкладанне можа вызначаць iдэнтыфiкатары нумару тэлефона i прылады, незалежна ад таго, цi актыўны выклiк, i аддалены нумар, на якi робiцца выклiк."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"перанакіраванне выклікаў праз сістэму"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Дазваляе праграме перанакіроўваць выклікі праз сістэму ў мэтах паляпшэння выклікаў."</string>
+    <string name="permlab_acceptHandover" msgid="2661534649736022409">"працяг выкліку з іншай праграмы"</string>
+    <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Дазваляе праграме працягваць выклік, які пачаўся ў іншай праграме."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"счытваць нумары тэлефонаў"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Дазваляе праграме атрымліваць доступ да нумароў тэлефонаў на прыладзе."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"прадухіліць планшэт ад пераходу ў рэжым сну"</string>
@@ -477,13 +495,17 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Палец рухаўся занадта павольна. Паспрабуйце яшчэ раз."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Не распазнаны"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Апаратныя сродкі адбіткаў пальцаў недаступныя."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Адбіткі пальцаў нельга захаваць. Выдаліце існы адбітак."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Час чакання адбіткаў пальцаў выйшаў. Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Аперацыя з адбіткамі пальцаў скасавана."</string>
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Аўтэнтыфікацыя па адбітках пальцаў скасавана карыстальнікам."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Занадта шмат спроб. Паспрабуйце яшчэ раз пазней."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Занадта шмат спроб. Сканер адбіткаў пальцаў адключаны."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Паспрабуйце яшчэ раз."</string>
+    <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Адбіткі пальцаў не зарэгістраваны."</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"На гэтай прыладзе няма сканера адбіткаў пальцаў"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Палец <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -810,6 +832,7 @@
     <string name="double_tap_toast" msgid="4595046515400268881">"Падказка: двойчы націсніце, каб павялічыць або паменшыць."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Аўтазапаўненне"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"Усталяванне аўтазапаўнення"</string>
+    <string name="autofill_window_title" msgid="921006636895825007">"Аўтазапаўненне"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
@@ -995,6 +1018,7 @@
     <string name="selectAll" msgid="6876518925844129331">"Вылучыць усё"</string>
     <string name="cut" msgid="3092569408438626261">"Выразаць"</string>
     <string name="copy" msgid="2681946229533511987">"Капіяваць"</string>
+    <string name="failed_to_copy_to_clipboard" msgid="1833662432489814471">"Не атрымалася скапіраваць у буфер абмену"</string>
     <string name="paste" msgid="5629880836805036433">"Уставіць"</string>
     <string name="paste_as_plain_text" msgid="5427792741908010675">"Уставіць як звычайны тэкст"</string>
     <string name="replace" msgid="5781686059063148930">"Замяніць..."</string>
@@ -1010,9 +1034,14 @@
     <string name="inputMethod" msgid="1653630062304567879">"Метад уводу"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Дзеянні з тэкстам"</string>
     <string name="email" msgid="4560673117055050403">"Электронная пошта"</string>
-    <string name="dial" msgid="4204975095406423102">"Тэлефон"</string>
-    <string name="map" msgid="6068210738233985748">"Карты"</string>
-    <string name="browse" msgid="6993590095938149861">"Браўзер"</string>
+    <string name="dial" msgid="1253998302767701559">"Выклікаць"</string>
+    <string name="map" msgid="6521159124535543457">"Знайсці"</string>
+    <string name="browse" msgid="1245903488306147205">"Адкрыць"</string>
+    <string name="sms" msgid="4560537514610063430">"Паведамленне"</string>
+    <string name="add_contact" msgid="7867066569670597203">"Дадаць"</string>
+    <string name="view_calendar" msgid="979609872939597838">"Прагледзець"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Графік"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Сачыць"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Месца для захавання на зыходзе"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Некаторыя сістэмныя функцыі могуць не працаваць"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Не хапае сховішча для сістэмы. Пераканайцеся, што ў вас ёсць 250 МБ свабоднага месца, і перазапусціце."</string>
@@ -1080,6 +1109,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Зноў уключыце гэта ў раздзеле \"Сістэмныя налады &gt; Прыкладанні &gt; Спампаваныя\"."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> не падтрымлівае бягучую наладу Памеру дысплэя і можа паводзіць сябе непрадказальным чынам."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Заўсёды паказваць"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Праграма <xliff:g id="APP_NAME">%1$s</xliff:g> была створана для несумяшчальнай версии АС Android і можа паводзіць сябе неспадзявана. Можа быць даступна абноўленая версія праграмы."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Заўсёды паказваць"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Праверыць на наяўнасць абнаўленняў"</string>
     <string name="smv_application" msgid="3307209192155442829">"Прыкладанне <xliff:g id="APPLICATION">%1$s</xliff:g> (працэс <xliff:g id="PROCESS">%2$s</xliff:g>) парушыла ўласную палітыку StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Працэс <xliff:g id="PROCESS">%1$s</xliff:g> парушыў уласную палітыку StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Абнаўленне Android..."</string>
@@ -1093,13 +1125,18 @@
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Запуск прыкладанняў."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Завяршэнне загрузкі."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Прыкладанне \"<xliff:g id="APP">%1$s</xliff:g>\" запушчанае"</string>
-    <string name="heavy_weight_notification_detail" msgid="867643381388543170">"Дакраніцеся, каб пераключыцца на праграму"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Пераключыць прыкладанні?"</string>
-    <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"Ужо запушчана іншае прыкладанне, якое павінна быць спынена перад запускам новага."</string>
-    <string name="old_app_action" msgid="493129172238566282">"Вярнуцца да <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="old_app_description" msgid="2082094275580358049">"Не запускайце новыя прыкладанні."</string>
-    <string name="new_app_action" msgid="5472756926945440706">"Запусціць <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="new_app_description" msgid="1932143598371537340">"Спыніць старыя прыкладанні без захавання."</string>
+    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
+    <skip />
+    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
+    <skip />
+    <!-- no translation found for old_app_action (3044685170829526403) -->
+    <skip />
+    <!-- no translation found for new_app_action (6694851182870774403) -->
+    <skip />
+    <!-- no translation found for new_app_description (5894852887817332322) -->
+    <skip />
     <string name="dump_heap_notification" msgid="2618183274836056542">"Працэс <xliff:g id="PROC">%1$s</xliff:g> перавысіў ліміт памяці"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Быў сабраны дамп кучы; дакраніцеся, каб абагуліць"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Абагуліць дамп дынамічнай вобласці?"</string>
@@ -1139,20 +1176,26 @@
       <item quantity="other">адкрытай сеткі Wi-Fi даступна</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Падключыцеся да адкрытай сеткі Wi-Fi"</string>
+    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Падключэнне да сеткі Wi‑Fi аператара"</string>
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Ідзе падключэнне да адкрытай сеткі Wi‑Fi"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Выканана падключэнне да адкрытай сеткі Wi‑Fi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Не атрымалася падключыцца да адкрытай сеткі Wi‑Fi"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Дакраніцеся, каб убачыць усе сеткі"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Падключыцца"</string>
     <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Усе сеткі"</string>
+    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi уключыцца аўтаматычна"</string>
+    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Побач з захаванай сеткай з высакаякасным сігналам"</string>
+    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Не ўключаць зноў"</string>
+    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi уключыўся аўтаматычна"</string>
+    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Вы знаходзіцеся побач з захаванай сеткай: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Уваход у сетку Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Увайдзіце ў сетку"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"У Wi-Fi няма доступу да Інтэрнэту"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"У Wi-Fi няма доступу да інтэрнэту"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Дакраніцеся, каб убачыць параметры"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Выкананы пераход да <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Прылада выкарыстоўвае <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, калі ў <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> няма доступу да інтэрнэту. Можа спаганяцца дадатковая плата."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Прылада выкарыстоўвае сетку <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, калі ў сетцы <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> няма доступу да інтэрнэту. Можа спаганяцца плата."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Выкананы пераход з <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> да <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"мабільная перадача даных"</item>
@@ -1163,7 +1206,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"невядомы тып сеткі"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Немагчыма падключыцца да Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" дрэннае падключэнне да Інтэрнэту."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" дрэннае падключэнне да Інтэрнэту."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Дазволіць падключэнне?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Праграма %1$s хоча падлучыцца да сеткі Wi-Fi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Праграма"</string>
@@ -1203,9 +1246,9 @@
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-карта дадазеная"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Перазагрузіце прыладу, каб атрымаць доступ да мабільнай сеткі."</string>
     <string name="sim_restart_button" msgid="4722407842815232347">"Перазапусціць"</string>
-    <string name="carrier_app_dialog_message" msgid="7066156088266319533">"Каб ваша новая SIM-карта працавала належным чынам, вам неабходна ўсталяваць і адкрыць праграму ад вашага аператара."</string>
-    <string name="carrier_app_dialog_button" msgid="7900235513678617329">"АТРЫМАЦЬ ПРАГРАМУ"</string>
-    <string name="carrier_app_dialog_not_now" msgid="6361378684292268027">"НЕ ЗАРАЗ"</string>
+    <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Уключыць мабільную сувязь"</string>
+    <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Спампаваць праграму аператара для актывацыі новай SIM-карты"</string>
+    <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Спампаваць праграму"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Устаўлена новая SIM-карта"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Краніце, каб наладзіць"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Задаць час"</string>
@@ -1217,15 +1260,17 @@
     <string name="no_permissions" msgid="7283357728219338112">"Дазволу не патрабуецца"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"за гэта можа спаганяцца плата"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ОК"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Праз USB зараджаецца гэта прылада"</string>
-    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"Па USB падачецца сілкаванне падключанай прыладзе"</string>
-    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB для перадачы файлаў"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB для перадачы фота"</string>
-    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB для MIDI"</string>
-    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Падключаны да USB-прылады"</string>
+    <string name="usb_charging_notification_title" msgid="1595122345358177163">"Зарадка гэтай прылады праз USB"</string>
+    <string name="usb_supplying_notification_title" msgid="4631045789893086181">"Зарадка падключанай прылады праз USB"</string>
+    <string name="usb_mtp_notification_title" msgid="4238227258391151029">"Перадача файлаў праз USB"</string>
+    <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Перадача фота (PTP) праз USB"</string>
+    <string name="usb_tether_notification_title" msgid="3716143122035802501">"Рэжым USB-мадэма"</string>
+    <string name="usb_midi_notification_title" msgid="5356040379749154805">"MIDI праз USB"</string>
+    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"Рэжым USB-прылады"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Дакраніцеся, каб атрымаць іншыя параметры."</string>
-    <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"Аксесуар аўдыя не падтрымліваецца"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Націсніце, каб атрымаць дадатковую інфармацыю"</string>
+    <string name="usb_power_notification_message" msgid="4647527153291917218">"Зарадка падключанай прылады. Націсніце, каб убачыць іншыя параметры."</string>
+    <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Выяўлены аксесуар аналагавага аўдыя"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Далучаная прылада не сумяшчальная з гэтым тэлефонам. Націсніце, каб даведацца больш."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Адладка па USB падключана"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Дакраніцеся, каб адключыць адладку па USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Выберыце, каб адключыць адладку USB."</string>
@@ -1331,9 +1376,9 @@
     <string name="vpn_text_long" msgid="4907843483284977618">"Падлучаны да <xliff:g id="SESSION">%s</xliff:g>. Націсніце, каб кiраваць сеткай."</string>
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Падключэнне заўсёды ўключанага VPN..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Заўсёды ўключаны i падключаны VPN"</string>
-    <string name="vpn_lockdown_disconnected" msgid="4532298952570796327">"Заўсёды ўключаны VPN адключаны"</string>
+    <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Адключана ад заўсёды ўключанай VPN"</string>
     <string name="vpn_lockdown_error" msgid="6009249814034708175">"Памылка заўсёды ўключанага VPN"</string>
-    <string name="vpn_lockdown_config" msgid="5099330695245008680">"Дакраніцеся, каб наладзіць"</string>
+    <string name="vpn_lockdown_config" msgid="8151951501116759194">"Змяніць налады сеткі ці VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"Выберыце файл"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Файл не выбраны"</string>
     <string name="reset" msgid="2448168080964209908">"Скінуць"</string>
@@ -1342,6 +1387,8 @@
     <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Дакраніцеся, каб выйсці з рэжыму \"У машыне\"."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"USB-мадэм або кропка доступу Wi-Fi актыўныя"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Дакраніцеся, каб наладзіць."</string>
+    <string name="disable_tether_notification_title" msgid="7526977944111313195">"Рэжым мадэма адключаны"</string>
+    <string name="disable_tether_notification_message" msgid="2913366428516852495">"Звярніцеся да адміністратара па падрабязную інфармацыю"</string>
     <string name="back_button_label" msgid="2300470004503343439">"Назад"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Далей"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"Прапусціць"</string>
@@ -1431,6 +1478,8 @@
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Аб\'ём <xliff:g id="SIZE">%s</xliff:g> перавышае устаноўл. мяжу."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Зыходныя дадзеныя абмежаваныя"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Дакраніцеся, каб зняць абмежав."</string>
+    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Значнае выкарыстанне трафіка"</string>
+    <string name="data_usage_rapid_body" msgid="4899922842674185567">"У апошнія некалькі дзён вы выкарысталі больш трафіку, чым звычайна. Націсніце для прагляду выкарыстання і налад."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Сертыфікат бяспекі"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Гэты сертыфікат сапраўдны."</string>
     <string name="issued_to" msgid="454239480274921032">"Каму выдадзена:"</string>
@@ -1457,9 +1506,10 @@
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Планшэт"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"ТБ"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Тэлефон"</string>
-    <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Навушнікі"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Дынамікі станцыi"</string>
-    <string name="default_media_route_name_hdmi" msgid="2450970399023478055">"HDMI"</string>
+    <string name="default_audio_route_name_hdmi" msgid="1486254205617081251">"HDMI"</string>
+    <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Навушнікі"</string>
+    <string name="default_audio_route_name_usb" msgid="1234984851352637769">"USB"</string>
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Сістэма"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-аўдыё"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Бесправадны дысплей"</string>
@@ -1483,7 +1533,12 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Няправільны ўзор"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Няправiльны пароль"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Няправільны PIN-код"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Паўтарыце спробу праз <xliff:g id="NUMBER">%1$d</xliff:g> с."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="8790651267324125694">
+      <item quantity="one">Паўтарыце спробу праз <xliff:g id="NUMBER">%d</xliff:g> секунду.</item>
+      <item quantity="few">Паўтарыце спробу праз <xliff:g id="NUMBER">%d</xliff:g> секунды.</item>
+      <item quantity="many">Паўтарыце спробу праз <xliff:g id="NUMBER">%d</xliff:g> секунд.</item>
+      <item quantity="other">Паўтарыце спробу праз <xliff:g id="NUMBER">%d</xliff:g> секунды.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Намалюйце ключ"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Увядзіце PIN-код SIM-карты"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Увядзіце PIN-код"</string>
@@ -1524,6 +1579,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Калі камбінацыя хуткага доступу ўключана, вы можаце націснуць абедзве кнопкі гучнасці і ўтрымліваць іх 3 секунды, каб уключыць функцыю спецыяльных магчымасцей.\n\n Бягучая функцыя спецыяльных магчымасцей:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Вы можаце змяніць гэту функцыю ў меню \"Налады &gt; Спецыяльныя магчымасці\"."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Дэактываваць камбінацыю хуткага доступу"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Выкарыстоўваць камбінацыю хуткага доступу"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"Інверсія колеру"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"Карэкцыя колеру"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> быў уключаны з дапамогай камбінацыі хуткага доступу для спецыяльных магчымасцей"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> быў адключаны з дапамогай камбінацыі хуткага доступу для спецыяльных магчымасцей"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Выберыце функцыю для выкарыстання пры націску кнопкі \"Спецыяльныя магчымасці\":"</string>
@@ -1656,17 +1713,13 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> (праца)"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Другая праца <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Трэцяя праца <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="6820571533009838261">"Каб адмацаваць гэты экран, краніце і ўтрымлівайце кнопкі \"Назад\" і \"Агляд\""</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Гэту праграму нельга адмацаваць"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"Экран замацаваны"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"Экран адмацаваны"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Запытваць PIN-код перад адмацаваннем"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Запытваць узор разблакіроўкі перад адмацаваннем"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Запытваць пароль перад адмацаваннем"</string>
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Усталяваны вашым адміністратарам"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Абноўлены вашым адміністратарам"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Выдалены вашым адміністратарам"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Каб падоўжыць час працы акумулятара, у рэжыме эканоміі зараду памяншаецца прадукцыйнасць вашай прылады, абмяжоўваецца выкарыстанне вібрацыі, службаў вызначэння месцазнаходжання і большасці задач фонавай перадачы даных. Электронная пошта, абмен паведамленнямі і іншыя праграмы, якія выкарыстоўваюць сінхранізацыю, могуць не абнаўляцца, пакуль вы іх не адкрыеце.\n\nРэжым эканоміі зараду адключаецца аўтаматычна, калі прылада зараджаецца."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Каб падоўжыць час працы акумулятара, у рэжыме эканоміі зараду памяншаецца прадукцыйнасць вашай прылады, абмяжоўваецца выкарыстанне вібрацыі, службаў вызначэння месцазнаходжання і большасці задач фонавай перадачы даных. Электронная пошта, абмен паведамленнямі і іншыя праграмы, якія выкарыстоўваюць сінхранізацыю, могуць не абнаўляцца, пакуль вы іх не адкрыеце.\n\nРэжым эканоміі зараду адключаецца аўтаматычна, калі прылада зараджаецца."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Каб паменшыць выкарыстанне даных, Эканомія трафіку не дазваляе некаторым праграмам адпраўляць ці атрымліваць даныя ў фонавым рэжыме. Праграма, якую вы зараз выкарыстоўваеце, можа атрымліваць доступ да даных, але можа рабіць гэта радзей. Гэта можа азначаць, напрыклад, што відарысы не паказваюцца, пакуль вы не дакраняцеся да іх."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Уключыць Эканомію трафіка?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Уключыць"</string>
@@ -1720,7 +1773,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Да <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Да <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (наступны будзільнік)"</string>
-    <string name="zen_mode_forever" msgid="1916263162129197274">"Пакуль вы не выключыце рэжым \"Не турбаваць\""</string>
+    <string name="zen_mode_forever" msgid="931849471004038757">"Пакуль не выключыце"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Пакуль вы не выключыце рэжым «Не турбаваць»"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Згарнуць"</string>
@@ -1729,13 +1782,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Будні вечар"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Выхадныя"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Падзея"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Рэжым сну"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> адключыў(-ла) гук"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"На вашай прыладзе ўзнікла ўнутраная праблема, і яна можа працаваць нестабільна, пакуль вы не зробіце скід да заводскіх налад."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"На вашай прыладзе ўзнікла ўнутраная праблема. Для атрымання дадатковай інфармацыі звярніцеся да вытворцы."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"Запыт USSD зменены на запыт DIAL."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"Запыт USSD зменены на запыт SS."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"Запыт USSD зменены на новы запыт USSD."</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"Запыт USSD зменены на запыт Video DIAL."</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"Запыт SS зменены на запыт DIAL."</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"Запыт SS зменены на запыт Video DIAL."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Запыт SS зменены на запыт USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Запыт SS зменены на новы запыт SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Працоўны профіль"</string>
@@ -1768,9 +1824,11 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Усе мовы"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Усе рэгіёны"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Шукаць"</string>
-    <string name="work_mode_off_title" msgid="2615362773958585967">"Уключыць працоўны рэжым?"</string>
-    <string name="work_mode_off_message" msgid="2961559609199223594">"Гэта прывядзе да ўключэння вашага працоўнага профілю, у тым ліку праграм, фонавай сінхранізацыі і звязаных з імі функцый"</string>
+    <string name="work_mode_off_title" msgid="1118691887588435530">"Уключыць працоўны профіль?"</string>
+    <string name="work_mode_off_message" msgid="5130856710614337649">"Будуць уключаны вашы рабочыя праграмы, апавяшчэнні, даныя і іншыя функцыі працоўнага профілю"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Уключыць"</string>
+    <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"Гэта праграма была створана для больш старой версіі Android і можа не працаваць належным чынам. Праверце наяўнасць абнаўленняў або звярніцеся да распрацоўшчыка."</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Праверыць на наяўнасць абнаўленняў"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"У вас ёсць новыя паведамленні"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Праглядзець праз праграму для SMS"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Частка функц. можа быць абмеж."</string>
@@ -1784,14 +1842,8 @@
     <string name="unpin_target" msgid="3556545602439143442">"Адмацаваць"</string>
     <string name="app_info" msgid="6856026610594615344">"Інфармацыя пра праграму"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Скінуць налады прылады?"</string>
-    <string name="reset_retail_demo_mode_text" msgid="5481925817590883246">"Дакраніцеся, каб скінуць налады прылады"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Ідзе запуск дэманстрацыі…"</string>
     <string name="demo_restarting_message" msgid="952118052531642451">"Ідзе скід налад прылады…"</string>
-    <string name="demo_user_inactivity_timeout_title" msgid="6596109959002331334">"Скінуць налады прылады?"</string>
-    <string name="demo_user_inactivity_timeout_countdown" msgid="5675588824402569506">"Усе змены будуць страчаны, і дэманстрацыя пачнецца зноў праз <xliff:g id="TIMEOUT">%1$s</xliff:g> с…"</string>
-    <string name="demo_user_inactivity_timeout_left_button" msgid="5314271347014802475">"Скасаваць"</string>
-    <string name="demo_user_inactivity_timeout_right_button" msgid="5019306703066964808">"Выканаць скід"</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"Адключаны <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"Канферэнц-выклік"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"Падказка"</string>
@@ -1839,9 +1891,23 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Праверка экстранных паведамленняў"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Адказаць"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM-карта не дапускаецца"</string>
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM-карты няма"</string>
-    <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM-карта не дапускаецца"</string>
-    <string name="mmcc_illegal_me" msgid="4438696681169345015">"Тэлефон не дапускаецца"</string>
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"Дзеянні з голасам для гэтай SIM-карты не дапускаюцца"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Няма SIM-карты для дзеянняў з голасам"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"Дзеянні з голасам для гэтай SIM-карты не дапускаюцца"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Дзеянні з голасам для гэтага тэлефона не дапускаюцца"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Выплыўное акно"</string>
+    <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
+    <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Ярлык адносіцца да старэйшай версіі праграмы або несумяшчальны з ёю"</string>
+    <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Не атрымалася аднавіць ярлык, бо праграма не падтрымлівае рэзервовае капіраванне і аднаўленне"</string>
+    <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Не атрымалася аднавіць ярлык з-за несупадзення подпісаў праграм"</string>
+    <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Не атрымалася аднавіць ярлык"</string>
+    <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Ярлык адключаны"</string>
+    <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"ВЫДАЛІЦЬ"</string>
+    <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"УСЁ РОЎНА АДКРЫЦЬ"</string>
+    <string name="harmful_app_warning_title" msgid="8982527462829423432">"Выяўлена шкодная праграма"</string>
+    <string name="slices_permission_request" msgid="8484943441501672932">"Праграма <xliff:g id="APP_0">%1$s</xliff:g> запытвае дазвол на паказ зрэзаў праграмы <xliff:g id="APP_2">%2$s</xliff:g>"</string>
+    <string name="screenshot_edit" msgid="7867478911006447565">"Рэдагаваць"</string>
+    <string name="notification_channel_system_changes" msgid="5072715579030948646">"Сістэмныя змены"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Зменены налады рэжыму \"Не турбаваць\""</string>
+    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Націсніце, каб праверыць налады апавяшчэнняў"</string>
 </resources>

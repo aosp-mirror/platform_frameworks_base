@@ -83,15 +83,34 @@ interface IOverlayManager {
      * @param packageName The name of the overlay package.
      * @param enable true to enable the overlay, false to disable it.
      * @param userId The user for which to change the overlay.
-     * @return true if the system successfully registered the request, false
-     *         otherwise.
+     * @return true if the system successfully registered the request, false otherwise.
      */
     boolean setEnabled(in String packageName, in boolean enable, in int userId);
 
     /**
-     * Version of setEnabled that will also disable any other overlays for the target package.
+     * Request that an overlay package is enabled and any other overlay packages with the same
+     * target package are disabled.
+     *
+     * See {@link #setEnabled} for the details on overlay packages.
+     *
+     * @param packageName the name of the overlay package to enable.
+     * @param enabled must be true, otherwise the operation fails.
+     * @param userId The user for which to change the overlay.
+     * @return true if the system successfully registered the request, false otherwise.
      */
     boolean setEnabledExclusive(in String packageName, in boolean enable, in int userId);
+
+    /**
+     * Request that an overlay package is enabled and any other overlay packages with the same
+     * target package and category are disabled.
+     *
+     * See {@link #setEnabled} for the details on overlay packages.
+     *
+     * @param packageName the name of the overlay package to enable.
+     * @param userId The user for which to change the overlay.
+     * @return true if the system successfully registered the request, false otherwise.
+     */
+    boolean setEnabledExclusiveInCategory(in String packageName, in int userId);
 
     /**
      * Change the priority of the given overlay to be just higher than the

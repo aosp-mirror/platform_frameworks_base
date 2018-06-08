@@ -117,7 +117,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     }
 
     @Override
-    protected int getPromtReasonStringRes(int reason) {
+    protected int getPromptReasonStringRes(int reason) {
         switch (reason) {
             case PROMPT_REASON_RESTART:
                 return R.string.kg_prompt_reason_restart_password;
@@ -138,12 +138,6 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
     public void onPause() {
         super.onPause();
         mImm.hideSoftInputFromWindow(getWindowToken(), 0);
-    }
-
-    @Override
-    public void reset() {
-        super.reset();
-        mPasswordEntry.requestFocus();
     }
 
     private void updateSwitchImeButton() {
@@ -193,8 +187,6 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         // Set selected property on so the view can send accessibility events.
         mPasswordEntry.setSelected(true);
 
-        mPasswordEntry.requestFocus();
-
         mSwitchImeButton = findViewById(R.id.switch_ime_button);
         mSwitchImeButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -204,6 +196,13 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
                 mImm.showInputMethodPicker(false /* showAuxiliarySubtypes */);
             }
         });
+
+        View cancelBtn = findViewById(R.id.cancel_button);
+        if (cancelBtn != null) {
+            cancelBtn.setOnClickListener(view -> {
+                mCallback.reset();
+            });
+        }
 
         // If there's more than one IME, enable the IME switcher button
         updateSwitchImeButton();
@@ -360,5 +359,11 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
             return true;
         }
         return false;
+    }
+
+    @Override
+    public CharSequence getTitle() {
+        return getContext().getString(
+                com.android.internal.R.string.keyguard_accessibility_password_unlock);
     }
 }

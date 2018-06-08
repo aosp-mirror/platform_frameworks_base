@@ -45,6 +45,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         mCallback = mock(VolumeDialogControllerImpl.C.class);
         mStatusBar = mock(StatusBar.class);
         mVolumeController = new TestableVolumeDialogControllerImpl(mContext, mCallback, mStatusBar);
+        mVolumeController.setEnableDialogs(true, true);
     }
 
     @Test
@@ -72,6 +73,16 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         when(mStatusBar.getWakefulnessState()).thenReturn(WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP);
         mVolumeController.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
         verify(mCallback, times(1)).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED);
+    }
+
+    @Test
+    public void testVolumeChangeW_nullStatusBar() {
+        VolumeDialogControllerImpl.C callback = mock(VolumeDialogControllerImpl.C.class);
+        TestableVolumeDialogControllerImpl nullStatusBarTestableDialog =  new
+                TestableVolumeDialogControllerImpl(mContext, callback, null);
+        nullStatusBarTestableDialog.setEnableDialogs(true, true);
+        nullStatusBarTestableDialog.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
+        verify(callback, times(1)).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED);
     }
 
     @Test

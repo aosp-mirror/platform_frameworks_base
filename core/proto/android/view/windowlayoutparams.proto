@@ -1,0 +1,71 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+import "frameworks/base/core/proto/android/graphics/pixelformat.proto";
+import "frameworks/base/core/proto/android/view/display.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+package android.view;
+option java_multiple_files = true;
+
+/* represents WindowManager.LayoutParams */
+message WindowLayoutParamsProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 type = 1;
+    optional int32 x = 2;
+    optional int32 y = 3;
+    optional int32 width = 4;
+    optional int32 height = 5;
+    optional float horizontal_margin = 6;
+    optional float vertical_margin = 7;
+    optional int32 gravity = 8;
+    optional int32 soft_input_mode = 9;
+    optional .android.graphics.PixelFormatProto.Format format = 10;
+    optional int32 window_animations = 11;
+    optional float alpha = 12;
+    optional float screen_brightness = 13;
+    optional float button_brightness = 14;
+
+    enum RotationAnimation {
+        ROTATION_ANIMATION_UNSPECIFIED = -1;
+        ROTATION_ANIMATION_CROSSFADE = 1;
+        ROTATION_ANIMATION_JUMPCUT = 2;
+        ROTATION_ANIMATION_SEAMLESS = 3;
+    }
+    optional RotationAnimation rotation_animation = 15;
+
+    optional float preferred_refresh_rate = 16;
+    optional int32 preferred_display_mode_id = 17;
+    optional bool has_system_ui_listeners = 18;
+    optional uint32 input_feature_flags = 19;
+    optional int64 user_activity_timeout = 20;
+
+    enum NeedsMenuState {
+        NEEDS_MENU_UNSET = 0;
+        NEEDS_MENU_SET_TRUE = 1;
+        NEEDS_MENU_SET_FALSE = 2;
+    }
+    optional NeedsMenuState needs_menu_key = 22;
+
+    optional .android.view.DisplayProto.ColorMode color_mode = 23;
+    optional uint32 flags = 24;
+    optional uint32 private_flags = 26;
+    optional uint32 system_ui_visibility_flags = 27;
+    optional uint32 subtree_system_ui_visibility_flags = 28;
+}

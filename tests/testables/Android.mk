@@ -23,11 +23,9 @@ LOCAL_MODULE_TAG := tests
 
 LOCAL_SRC_FILES := $(call all-java-files-under,src)
 
-LOCAL_STATIC_JAVA_LIBRARIES := \
+LOCAL_JAVA_LIBRARIES := android.test.runner android.test.mock \
     android-support-test \
-    legacy-android-test
-
-LOCAL_JAVA_LIBRARIES := android.test.runner mockito-target-minus-junit4
+    mockito-target-inline-minus-junit4
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 

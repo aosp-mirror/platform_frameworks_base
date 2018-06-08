@@ -16,8 +16,8 @@
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
         android:autoMirrored="true"
-        android:width="18.41dp"
-        android:height="17dp"
+        android:width="16.25dp"
+        android:height="15dp"
         android:viewportWidth="26.0"
         android:viewportHeight="24.0">
     <path

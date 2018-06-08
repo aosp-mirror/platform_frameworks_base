@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 package android.os;
 
 option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/os/messagequeue.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 message LooperProto {
-    string thread_name = 1;
-    int64 thread_id = 2;
-    int32 identity_hash_code = 3;
-    android.os.MessageQueueProto queue = 4;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // the thread name, usually set by developers.
+    optional string thread_name = 1;
+    optional int64 thread_id = 2;
+    optional android.os.MessageQueueProto queue = 3;
 }

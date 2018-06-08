@@ -2,9 +2,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.perftests.core">
 
+    <permission android:name="com.android.perftests.core.TestPermission" />
+    <uses-permission android:name="com.android.perftests.core.TestPermission" />
+
+    <uses-permission
+        android:name="android.permission.GET_ACCOUNTS" />
+
     <application>
         <uses-library android:name="android.test.runner" />
-        <activity android:name="android.perftests.utils.StubActivity" />
+        <activity android:name="android.perftests.utils.StubActivity">
+          <intent-filter>
+            <action android:name="com.android.perftests.core.PERFTEST" />
+          </intent-filter>
+        </activity>
+        <service android:name="android.os.SomeService" android:exported="false" android:process=":some_service" />
     </application>
 
     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"

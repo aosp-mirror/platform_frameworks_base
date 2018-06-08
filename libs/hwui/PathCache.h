@@ -47,9 +47,9 @@ class Caches;
 
 // Debug
 #if DEBUG_PATHS
-    #define PATH_LOGD(...) ALOGD(__VA_ARGS__)
+#define PATH_LOGD(...) ALOGD(__VA_ARGS__)
 #else
-    #define PATH_LOGD(...)
+#define PATH_LOGD(...)
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,11 +57,10 @@ class Caches;
 ///////////////////////////////////////////////////////////////////////////////
 
 struct PathTexture;
-class PathTask: public Task<sk_sp<Bitmap>> {
+class PathTask : public Task<sk_sp<Bitmap>> {
 public:
-    PathTask(const SkPath* path, const SkPaint* paint, PathTexture* texture):
-        path(*path), paint(*paint), texture(texture) {
-    }
+    PathTask(const SkPath* path, const SkPaint* paint, PathTexture* texture)
+            : path(*path), paint(*paint), texture(texture) {}
 
     // copied, since input path not guaranteed to survive for duration of task
     const SkPath path;
@@ -74,15 +73,10 @@ public:
 /**
  * Alpha texture used to represent a path.
  */
-struct PathTexture: public Texture {
-    PathTexture(Caches& caches, int generation)
-        : Texture(caches) {
-        this->generation = generation;
-    }
+struct PathTexture : public Texture {
+    PathTexture(Caches& caches, int generation) : Texture(caches) { this->generation = generation; }
 
-    ~PathTexture() {
-        clearTask();
-    }
+    ~PathTexture() { clearTask(); }
 
     /**
      * Left coordinate of the path bounds.
@@ -97,13 +91,9 @@ struct PathTexture: public Texture {
      */
     float offset = 0;
 
-    sp<PathTask> task() const {
-        return mTask;
-    }
+    sp<PathTask> task() const { return mTask; }
 
-    void setTask(const sp<PathTask>& task) {
-        mTask = task;
-    }
+    void setTask(const sp<PathTask>& task) { mTask = task; }
 
     void clearTask() {
         if (mTask != nullptr) {
@@ -113,17 +103,9 @@ struct PathTexture: public Texture {
 
 private:
     sp<PathTask> mTask;
-}; // struct PathTexture
+};  // struct PathTexture
 
-enum class ShapeType {
-    None,
-    Rect,
-    RoundRect,
-    Circle,
-    Oval,
-    Arc,
-    Path
-};
+enum class ShapeType { None, Rect, RoundRect, Circle, Oval, Arc, Path };
 
 struct PathDescription {
     HASHABLE_TYPE(PathDescription);
@@ -173,7 +155,7 @@ struct PathDescription {
  * Any texture added to the cache causing the cache to grow beyond the maximum
  * allowed size will also cause the oldest texture to be kicked out.
  */
-class PathCache: public OnEntryRemoved<PathDescription, PathTexture*> {
+class PathCache : public OnEntryRemoved<PathDescription, PathTexture*> {
 public:
     PathCache();
     ~PathCache();
@@ -203,9 +185,9 @@ public:
     PathTexture* getOval(float width, float height, const SkPaint* paint);
     PathTexture* getRect(float width, float height, const SkPaint* paint);
     PathTexture* getArc(float width, float height, float startAngle, float sweepAngle,
-            bool useCenter, const SkPaint* paint);
+                        bool useCenter, const SkPaint* paint);
     PathTexture* get(const SkPath* path, const SkPaint* paint);
-    void         remove(const SkPath* path, const SkPaint* paint);
+    void remove(const SkPath* path, const SkPaint* paint);
 
     /**
      * Removes the specified path. This is meant to be called from threads
@@ -234,19 +216,16 @@ public:
     void precache(const SkPath* path, const SkPaint* paint);
 
 private:
-    PathTexture* addTexture(const PathDescription& entry,
-            const SkPath *path, const SkPaint* paint);
+    PathTexture* addTexture(const PathDescription& entry, const SkPath* path, const SkPaint* paint);
 
     /**
      * Generates the texture from a bitmap into the specified texture structure.
      */
     void generateTexture(Bitmap& bitmap, Texture* texture);
     void generateTexture(const PathDescription& entry, Bitmap& bitmap, PathTexture* texture,
-            bool addToCache = true);
+                         bool addToCache = true);
 
-    PathTexture* get(const PathDescription& entry) {
-        return mCache.get(entry);
-    }
+    PathTexture* get(const PathDescription& entry) { return mCache.get(entry); }
 
     /**
      * Ensures there is enough space in the cache for a texture of the specified
@@ -258,13 +237,12 @@ private:
 
     void init();
 
-
-    class PathProcessor: public TaskProcessor<sk_sp<Bitmap> > {
+    class PathProcessor : public TaskProcessor<sk_sp<Bitmap>> {
     public:
         explicit PathProcessor(Caches& caches);
-        ~PathProcessor() { }
+        ~PathProcessor() {}
 
-        virtual void onProcess(const sp<Task<sk_sp<Bitmap> > >& task) override;
+        virtual void onProcess(const sp<Task<sk_sp<Bitmap>>>& task) override;
 
     private:
         uint32_t mMaxTextureSize;
@@ -281,9 +259,9 @@ private:
 
     std::vector<uint32_t> mGarbage;
     mutable Mutex mLock;
-}; // class PathCache
+};  // class PathCache
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_PATH_CACHE_H
+#endif  // ANDROID_HWUI_PATH_CACHE_H

@@ -18,9 +18,9 @@
 
 #include "Matrix.h"
 #include "Rect.h"
+#include "TessellationCache.h"
 #include "Vector.h"
 #include "VertexBuffer.h"
-#include "TessellationCache.h"
 
 #include <SkPath.h>
 
@@ -40,22 +40,13 @@ struct ShadowTestData {
 
 void createShadowTestData(ShadowTestData* out) {
     static float SAMPLE_DRAW_TRANSFORM[] = {
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1,
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
     };
     static float SAMPLE_CASTERXY[] = {
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            32, 32, 0, 1,
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 32, 32, 0, 1,
     };
     static float SAMPLE_CASTERZ[] = {
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            32, 32, 32, 1,
+            1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 32, 32, 32, 1,
     };
     static Rect SAMPLE_CLIP(0, 0, 1536, 2048);
     static Vector3 SAMPLE_LIGHT_CENTER{768, -400, 1600};
@@ -69,12 +60,11 @@ void createShadowTestData(ShadowTestData* out) {
     out->lightRadius = SAMPLE_LIGHT_RADIUS;
 }
 
-static inline void tessellateShadows(ShadowTestData& testData, bool opaque,
-        const SkPath& shape, VertexBuffer* ambient, VertexBuffer* spot) {
-    tessellateShadows(&testData.drawTransform, &testData.localClip,
-            opaque, &shape, &testData.casterTransformXY,
-            &testData.casterTransformZ, testData.lightCenter,
-            testData.lightRadius, *ambient, *spot);
+static inline void tessellateShadows(ShadowTestData& testData, bool opaque, const SkPath& shape,
+                                     VertexBuffer* ambient, VertexBuffer* spot) {
+    tessellateShadows(&testData.drawTransform, &testData.localClip, opaque, &shape,
+                      &testData.casterTransformXY, &testData.casterTransformZ, testData.lightCenter,
+                      testData.lightRadius, *ambient, *spot);
 }
 
 void BM_TessellateShadows_roundrect_opaque(benchmark::State& state) {

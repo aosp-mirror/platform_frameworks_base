@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 package android.os;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 option java_multiple_files = true;
 
 message MessageProto {
-    int64 when = 1;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int64 when = 1;
     // Name of callback class.
-    string callback = 2;
+    optional string callback = 2;
     // User-defined message code so that the recipient can identify what this
     // message is about.
-    int32 what = 3;
-    int32 arg1 = 4;
-    int32 arg2 = 5;
+    optional int32 what = 3;
+    optional int32 arg1 = 4;
+    optional int32 arg2 = 5;
     // String representation of an arbitrary object to send to the recipient.
-    string obj = 6;
+    optional string obj = 6 [ (.android.privacy).dest = DEST_EXPLICIT ];
     // Name of target class.
-    string target = 7;
-    int32 barrier = 8;
+    optional string target = 7;
+    optional int32 barrier = 8;
 }

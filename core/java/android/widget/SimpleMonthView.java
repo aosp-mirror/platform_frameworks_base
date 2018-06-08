@@ -517,6 +517,8 @@ class SimpleMonthView extends View {
     private int findClosestRow(@Nullable Rect previouslyFocusedRect) {
         if (previouslyFocusedRect == null) {
             return 3;
+        } else if (mDayHeight == 0) {
+            return 0; // There hasn't been a layout, so just choose the first row
         } else {
             int centerY = previouslyFocusedRect.centerY();
 
@@ -545,6 +547,8 @@ class SimpleMonthView extends View {
     private int findClosestColumn(@Nullable Rect previouslyFocusedRect) {
         if (previouslyFocusedRect == null) {
             return DAYS_IN_WEEK / 2;
+        } else if (mCellWidth == 0) {
+            return 0; // There hasn't been a layout, so we can just choose the first column
         } else {
             int centerX = previouslyFocusedRect.centerX() - mPaddingLeft;
             final int columnFromLeft =

@@ -218,8 +218,7 @@ public final class GnssStatus {
     }
 
     /**
-     * Reports whether {@link #getCarrierFrequencyHz(int satIndex)} is available (i.e. carrier
-     * frequency is available for the satellite at the specified index).
+     * Reports whether a valid {@link #getCarrierFrequencyHz(int satIndex)} is available.
      *
      * @param satIndex the index of the satellite in the list.
      */

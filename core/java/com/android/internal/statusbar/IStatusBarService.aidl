@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
+import android.hardware.biometrics.IBiometricPromptReceiver;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -53,15 +54,20 @@ interface IStatusBarService
     void onPanelHidden();
     // Mark current notifications as "seen" and stop ringing, vibrating, blinking.
     void clearNotificationEffects();
-    void onNotificationClick(String key);
-    void onNotificationActionClick(String key, int actionIndex);
+    void onNotificationClick(String key, in NotificationVisibility nv);
+    void onNotificationActionClick(String key, int actionIndex, in NotificationVisibility nv);
     void onNotificationError(String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId);
     void onClearAllNotifications(int userId);
-    void onNotificationClear(String pkg, String tag, int id, int userId);
+    void onNotificationClear(String pkg, String tag, int id, int userId, String key,
+            int dismissalSurface, in NotificationVisibility nv);
     void onNotificationVisibilityChanged( in NotificationVisibility[] newlyVisibleKeys,
             in NotificationVisibility[] noLongerVisibleKeys);
     void onNotificationExpansionChanged(in String key, in boolean userAction, in boolean expanded);
+    void onNotificationDirectReplied(String key);
+    void onNotificationSmartRepliesAdded(in String key, in int replyCount);
+    void onNotificationSmartReplySent(in String key, in int replyIndex);
+    void onNotificationSettingsViewed(String key);
     void setSystemUiVisibility(int vis, int mask, String cause);
 
     void onGlobalActionsShown();
@@ -77,4 +83,21 @@ interface IStatusBarService
     void remTile(in ComponentName tile);
     void clickTile(in ComponentName tile);
     void handleSystemKey(in int key);
+
+    /**
+     * Methods to show toast messages for screen pinning
+     */
+    void showPinningEnterExitToast(boolean entering);
+    void showPinningEscapeToast();
+
+    // Used to show the dialog when FingerprintService starts authentication
+    void showFingerprintDialog(in Bundle bundle, IBiometricPromptReceiver receiver);
+    // Used to hide the dialog when a finger is authenticated
+    void onFingerprintAuthenticated();
+    // Used to set a temporary message, e.g. fingerprint not recognized, finger moved too fast, etc
+    void onFingerprintHelp(String message);
+    // Used to set a message - the dialog will dismiss after a certain amount of time
+    void onFingerprintError(String error);
+    // Used to hide the fingerprint dialog when the authenticationclient is stopped
+    void hideFingerprintDialog();
 }

@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.ArraySet;
+import android.util.proto.ProtoOutputStream;
 
 import com.google.android.collect.Sets;
 
@@ -137,6 +138,26 @@ final class UriPermissionOwner {
         if (mWritePerms != null) {
             pw.print(prefix); pw.print("writeUriPermissions="); pw.println(mWritePerms);
         }
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        proto.write(UriPermissionOwnerProto.OWNER, owner.toString());
+        if (mReadPerms != null) {
+            synchronized (mReadPerms) {
+                for (UriPermission p : mReadPerms) {
+                    p.uri.writeToProto(proto, UriPermissionOwnerProto.READ_PERMS);
+                }
+            }
+        }
+        if (mWritePerms != null) {
+            synchronized (mWritePerms) {
+                for (UriPermission p : mWritePerms) {
+                    p.uri.writeToProto(proto, UriPermissionOwnerProto.WRITE_PERMS);
+                }
+            }
+        }
+        proto.end(token);
     }
 
     @Override

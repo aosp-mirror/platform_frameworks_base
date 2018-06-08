@@ -16,6 +16,9 @@
 
 package android.content.pm;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
@@ -23,8 +26,11 @@ import android.content.pm.PackageManager.ComponentInfoFlags;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManager.ResolveInfoFlags;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.util.SparseArray;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -33,6 +39,30 @@ import java.util.List;
  * @hide Only for use within the system server.
  */
 public abstract class PackageManagerInternal {
+    public static final int PACKAGE_SYSTEM = 0;
+    public static final int PACKAGE_SETUP_WIZARD = 1;
+    public static final int PACKAGE_INSTALLER = 2;
+    public static final int PACKAGE_VERIFIER = 3;
+    public static final int PACKAGE_BROWSER = 4;
+    public static final int PACKAGE_SYSTEM_TEXT_CLASSIFIER = 5;
+    @IntDef(value = {
+        PACKAGE_SYSTEM,
+        PACKAGE_SETUP_WIZARD,
+        PACKAGE_INSTALLER,
+        PACKAGE_VERIFIER,
+        PACKAGE_BROWSER,
+        PACKAGE_SYSTEM_TEXT_CLASSIFIER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface KnownPackage {}
+
+    /** Observer called whenever the list of packages changes */
+    public interface PackageListObserver {
+        /** A package was added to the system. */
+        void onPackageAdded(@NonNull String packageName);
+        /** A package was removed from the system. */
+        void onPackageRemoved(@NonNull String packageName);
+    }
 
     /**
      * Provider for package names.
@@ -92,6 +122,12 @@ public abstract class PackageManagerInternal {
     public abstract void setSimCallManagerPackagesProvider(PackagesProvider provider);
 
     /**
+     * Sets the Use Open Wifi packages provider.
+     * @param provider The packages provider.
+     */
+    public abstract void setUseOpenWifiAppPackagesProvider(PackagesProvider provider);
+
+    /**
      * Sets the sync adapter packages provider.
      * @param provider The provider.
      */
@@ -120,6 +156,14 @@ public abstract class PackageManagerInternal {
             int userId);
 
     /**
+     * Requests granting of the default permissions to the current default Use Open Wifi app.
+     * @param packageName The default use open wifi package name.
+     * @param userId The user for which to grant the permissions.
+     */
+    public abstract void grantDefaultPermissionsToDefaultUseOpenWifiApp(String packageName,
+            int userId);
+
+    /**
      * Sets a list of apps to keep in PM's internal data structures and as APKs even if no user has
      * currently installed it. The apps are not preloaded.
      * @param packageList List of package names to keep cached.
@@ -143,6 +187,62 @@ public abstract class PackageManagerInternal {
      */
     public abstract PackageInfo getPackageInfo(String packageName,
             @PackageInfoFlags int flags, int filterCallingUid, int userId);
+
+    /**
+     * Retrieve launcher extras for a suspended package provided to the system in
+     * {@link PackageManager#setPackagesSuspended(String[], boolean, PersistableBundle,
+     * PersistableBundle, String)}.
+     *
+     * @param packageName The package for which to return launcher extras.
+     * @param userId The user for which to check.
+     * @return The launcher extras.
+     *
+     * @see PackageManager#setPackagesSuspended(String[], boolean, PersistableBundle,
+     * PersistableBundle, String)
+     * @see PackageManager#isPackageSuspended()
+     */
+    public abstract Bundle getSuspendedPackageLauncherExtras(String packageName,
+            int userId);
+
+    /**
+     * Internal api to query the suspended state of a package.
+     * @param packageName The package to check.
+     * @param userId The user id to check for.
+     * @return {@code true} if the package is suspended, {@code false} otherwise.
+     * @see PackageManager#isPackageSuspended(String)
+     */
+    public abstract boolean isPackageSuspended(String packageName, int userId);
+
+    /**
+     * Get the name of the package that suspended the given package. Packages can be suspended by
+     * device administrators or apps holding {@link android.Manifest.permission#MANAGE_USERS} or
+     * {@link android.Manifest.permission#SUSPEND_APPS}.
+     *
+     * @param suspendedPackage The package that has been suspended.
+     * @param userId The user for which to check.
+     * @return Name of the package that suspended the given package. Returns {@code null} if the
+     * given package is not currently suspended and the platform package name - i.e.
+     * {@code "android"} - if the package was suspended by a device admin.
+     */
+    public abstract String getSuspendingPackage(String suspendedPackage, int userId);
+
+    /**
+     * Get the dialog message to be shown to the user when they try to launch a suspended
+     * application.
+     *
+     * @param suspendedPackage The package that has been suspended.
+     * @param userId The user for which to check.
+     * @return The dialog message to be shown to the user.
+     */
+    public abstract String getSuspendedDialogMessage(String suspendedPackage, int userId);
+
+    /**
+     * Do a straight uid lookup for the given package/application in the given user.
+     * @see PackageManager#getPackageUidAsUser(String, int, int)
+     * @return The app's uid, or < 0 if the package was not found in that user
+     */
+    public abstract int getPackageUid(String packageName,
+            @PackageInfoFlags int flags, int userId);
 
     /**
      * Retrieve all of the information we know about a particular package/application.
@@ -172,10 +272,22 @@ public abstract class PackageManagerInternal {
             @ResolveInfoFlags int flags, int filterCallingUid, int userId);
 
     /**
+     * Retrieve all services that can be performed for the given intent.
+     * @see PackageManager#queryIntentServices(Intent, int)
+     */
+    public abstract List<ResolveInfo> queryIntentServices(
+            Intent intent, int flags, int callingUid, int userId);
+
+    /**
      * Interface to {@link com.android.server.pm.PackageManagerService#getHomeActivitiesAsUser}.
      */
     public abstract ComponentName getHomeActivitiesAsUser(List<ResolveInfo> allHomeCandidates,
             int userId);
+
+    /**
+     * @return The default home activity component name.
+     */
+    public abstract ComponentName getDefaultHomeActivity(int userId);
 
     /**
      * Called by DeviceOwnerManagerService to set the package names of device owner and profile
@@ -188,6 +300,12 @@ public abstract class PackageManagerInternal {
      * Returns {@code true} if a given package can't be wiped. Otherwise, returns {@code false}.
      */
     public abstract boolean isPackageDataProtected(int userId, String packageName);
+
+    /**
+     * Returns {@code true} if a given package's state is protected, e.g. it cannot be force
+     * stopped, suspended, disabled or hidden. Otherwise, returns {@code false}.
+     */
+    public abstract boolean isPackageStateProtected(String packageName, int userId);
 
     /**
      * Returns {@code true} if a given package is installed as ephemeral. Otherwise, returns
@@ -311,6 +429,12 @@ public abstract class PackageManagerInternal {
     public abstract boolean isPackagePersistent(String packageName);
 
     /**
+     * Returns whether or not the given package represents a legacy system application released
+     * prior to runtime permissions.
+     */
+    public abstract boolean isLegacySystemApp(PackageParser.Package pkg);
+
+    /**
      * Get all overlay packages for a user.
      * @param userId The user for which to get the overlays.
      * @return A list of overlay packages. An empty list is returned if the
@@ -343,13 +467,18 @@ public abstract class PackageManagerInternal {
      * Resolves an activity intent, allowing instant apps to be resolved.
      */
     public abstract ResolveInfo resolveIntent(Intent intent, String resolvedType,
-            int flags, int userId);
+            int flags, int userId, boolean resolveForStart, int filterCallingUid);
 
     /**
     * Resolves a service intent, allowing instant apps to be resolved.
     */
-   public abstract ResolveInfo resolveService(Intent intent, String resolvedType,
+    public abstract ResolveInfo resolveService(Intent intent, String resolvedType,
            int flags, int userId, int callingUid);
+
+   /**
+    * Resolves a content provider intent.
+    */
+    public abstract ProviderInfo resolveContentProvider(String name, int flags, int userId);
 
     /**
      * Track the creator of a new isolated uid.
@@ -369,8 +498,16 @@ public abstract class PackageManagerInternal {
      */
     public abstract int getUidTargetSdkVersion(int uid);
 
+    /**
+     * Return the taget SDK version for the app with the given package name.
+     */
+    public abstract int getPackageTargetSdkVersion(String packageName);
+
     /** Whether the binder caller can access instant apps. */
     public abstract boolean canAccessInstantApps(int callingUid, int userId);
+
+    /** Whether the binder caller can access the given component. */
+    public abstract boolean canAccessComponent(int callingUid, ComponentName component, int userId);
 
     /**
      * Returns {@code true} if a given package has instant application meta-data.
@@ -383,4 +520,112 @@ public abstract class PackageManagerInternal {
      * Updates a package last used time.
      */
     public abstract void notifyPackageUse(String packageName, int reason);
+
+    /**
+     * Returns a package object for the given package name.
+     */
+    public abstract @Nullable PackageParser.Package getPackage(@NonNull String packageName);
+
+    /**
+     * Returns a list without a change observer.
+     *
+     * {@see #getPackageList(PackageListObserver)}
+     */
+    public @NonNull PackageList getPackageList() {
+        return getPackageList(null);
+    }
+
+    /**
+     * Returns the list of packages installed at the time of the method call.
+     * <p>The given observer is notified when the list of installed packages
+     * changes [eg. a package was installed or uninstalled]. It will not be
+     * notified if a package is updated.
+     * <p>The package list will not be updated automatically as packages are
+     * installed / uninstalled. Any changes must be handled within the observer.
+     */
+    public abstract @NonNull PackageList getPackageList(@Nullable PackageListObserver observer);
+
+    /**
+     * Removes the observer.
+     * <p>Generally not needed. {@link #getPackageList(PackageListObserver)} will automatically
+     * remove the observer.
+     * <p>Does nothing if the observer isn't currently registered.
+     * <p>Observers are notified asynchronously and it's possible for an observer to be
+     * invoked after its been removed.
+     */
+    public abstract void removePackageListObserver(@NonNull PackageListObserver observer);
+
+    /**
+     * Returns a package object for the disabled system package name.
+     */
+    public abstract @Nullable PackageParser.Package getDisabledPackage(@NonNull String packageName);
+
+    /**
+     * Returns whether or not the component is the resolver activity.
+     */
+    public abstract boolean isResolveActivityComponent(@NonNull ComponentInfo component);
+
+    /**
+     * Returns the package name for a known package.
+     */
+    public abstract @Nullable String getKnownPackageName(
+            @KnownPackage int knownPackage, int userId);
+
+    /**
+     * Returns whether the package is an instant app.
+     */
+    public abstract boolean isInstantApp(String packageName, int userId);
+
+    /**
+     * Returns whether the package is an instant app.
+     */
+    public abstract @Nullable String getInstantAppPackageName(int uid);
+
+    /**
+     * Returns whether or not access to the application should be filtered.
+     * <p>
+     * Access may be limited based upon whether the calling or target applications
+     * are instant applications.
+     *
+     * @see #canAccessInstantApps(int)
+     */
+    public abstract boolean filterAppAccess(
+            @Nullable PackageParser.Package pkg, int callingUid, int userId);
+
+    /*
+     * NOTE: The following methods are temporary until permissions are extracted from
+     * the package manager into a component specifically for handling permissions.
+     */
+    /** Returns the flags for the given permission. */
+    public abstract @Nullable int getPermissionFlagsTEMP(@NonNull String permName,
+            @NonNull String packageName, int userId);
+    /** Updates the flags for the given permission. */
+    public abstract void updatePermissionFlagsTEMP(@NonNull String permName,
+            @NonNull String packageName, int flagMask, int flagValues, int userId);
+
+    /**
+     * Returns true if it's still safe to restore data backed up from this app's version
+     * that was signed with restoringFromSigHash.
+     */
+    public abstract boolean isDataRestoreSafe(@NonNull byte[] restoringFromSigHash,
+            @NonNull String packageName);
+
+    /**
+     * Returns true if it's still safe to restore data backed up from this app's version
+     * that was signed with restoringFromSig.
+     */
+    public abstract boolean isDataRestoreSafe(@NonNull Signature restoringFromSig,
+            @NonNull String packageName);
+
+
+    /**
+     * Returns true if the the signing information for {@code clientUid} is sufficient to gain
+     * access gated by {@code capability}.  This can happen if the two UIDs have the same signing
+     * information, if the signing information {@code clientUid} indicates that it has the signing
+     * certificate for {@code serverUid} in its signing history (if it was previously signed by it),
+     * or if the signing certificate for {@code clientUid} is in ths signing history for {@code
+     * serverUid} and with the {@code capability} specified.
+     */
+    public abstract boolean hasSignatureCapability(int serverUid, int clientUid,
+            @PackageParser.SigningDetails.CertCapabilities int capability);
 }

@@ -75,20 +75,20 @@ public abstract class ActivityManagerNative {
      */
     static public void noteWakeupAlarm(PendingIntent ps, int sourceUid, String sourcePkg,
             String tag) {
-        ActivityManager.noteWakeupAlarm(ps, sourceUid, sourcePkg, tag);
+        ActivityManager.noteWakeupAlarm(ps, null, sourceUid, sourcePkg, tag);
     }
 
     /**
      * @deprecated use ActivityManager.noteAlarmStart instead.
      */
     static public void noteAlarmStart(PendingIntent ps, int sourceUid, String tag) {
-        ActivityManager.noteAlarmStart(ps, sourceUid, tag);
+        ActivityManager.noteAlarmStart(ps, null, sourceUid, tag);
     }
 
     /**
      * @deprecated use ActivityManager.noteAlarmFinish instead.
      */
     static public void noteAlarmFinish(PendingIntent ps, int sourceUid, String tag) {
-        ActivityManager.noteAlarmFinish(ps, sourceUid, tag);
+        ActivityManager.noteAlarmFinish(ps, null, sourceUid, tag);
     }
 }

@@ -16,8 +16,14 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.annotation.Nullable;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -26,55 +32,86 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Switch;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.NotificationCounters;
 
-import java.lang.IllegalArgumentException;
 import java.util.List;
-import java.util.Set;
 
 /**
- * The guts of a notification revealed when performing a long press.
+ * The guts of a notification revealed when performing a long press. This also houses the blocking
+ * helper affordance that allows a user to keep/stop notifications after swiping one away.
  */
 public class NotificationInfo extends LinearLayout implements NotificationGuts.GutsContent {
     private static final String TAG = "InfoGuts";
 
     private INotificationManager mINotificationManager;
-    private String mPkg;
+    private PackageManager mPm;
+    private MetricsLogger mMetricsLogger;
+
+    private String mPackageName;
     private String mAppName;
     private int mAppUid;
-    private List<NotificationChannel> mNotificationChannels;
+    private int mNumUniqueChannelsInRow;
     private NotificationChannel mSingleNotificationChannel;
-    private boolean mIsSingleDefaultChannel;
-    private StatusBarNotification mSbn;
     private int mStartingUserImportance;
+    private int mChosenImportance;
+    private boolean mIsSingleDefaultChannel;
+    private boolean mIsNonblockable;
+    private StatusBarNotification mSbn;
+    private AnimatorSet mExpandAnimation;
+    private boolean mIsForeground;
 
-    private TextView mNumChannelsView;
-    private View mChannelDisabledView;
-    private TextView mSettingsLinkView;
-    private Switch mChannelEnabledSwitch;
     private CheckSaveListener mCheckSaveListener;
+    private OnSettingsClickListener mOnSettingsClickListener;
     private OnAppSettingsClickListener mAppSettingsClickListener;
-    private PackageManager mPm;
-
     private NotificationGuts mGutsContainer;
+
+    /** Whether this view is being shown as part of the blocking helper. */
+    private boolean mIsForBlockingHelper;
+    private boolean mNegativeUserSentiment;
+
+    /**
+     * String that describes how the user exit or quit out of this view, also used as a counter tag.
+     */
+    private String mExitReason = NotificationCounters.BLOCKING_HELPER_DISMISSED;
+
+    private OnClickListener mOnKeepShowing = v -> {
+        mExitReason = NotificationCounters.BLOCKING_HELPER_KEEP_SHOWING;
+        closeControls(v);
+    };
+
+    private OnClickListener mOnStopOrMinimizeNotifications = v -> {
+        mExitReason = NotificationCounters.BLOCKING_HELPER_STOP_NOTIFICATIONS;
+        swapContent(false);
+    };
+
+    private OnClickListener mOnUndo = v -> {
+        // Reset exit counter that we'll log and record an undo event separately (not an exit event)
+        mExitReason = NotificationCounters.BLOCKING_HELPER_DISMISSED;
+        logBlockingHelperCounter(NotificationCounters.BLOCKING_HELPER_UNDO);
+        swapContent(true);
+    };
 
     public NotificationInfo(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -84,7 +121,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     public interface CheckSaveListener {
         // Invoked when importance has changed and the NotificationInfo wants to try to save it.
         // Listener should run saveImportance unless the change should be canceled.
-        void checkSave(Runnable saveImportance);
+        void checkSave(Runnable saveImportance, StatusBarNotification sbn);
     }
 
     public interface OnSettingsClickListener {
@@ -95,144 +132,109 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         void onClick(View v, Intent intent);
     }
 
-    public void bindNotification(final PackageManager pm,
+    @VisibleForTesting
+    void bindNotification(
+            final PackageManager pm,
             final INotificationManager iNotificationManager,
             final String pkg,
-            final List<NotificationChannel> notificationChannels,
-            int startingUserImportance,
+            final NotificationChannel notificationChannel,
+            final int numUniqueChannelsInRow,
             final StatusBarNotification sbn,
+            final CheckSaveListener checkSaveListener,
+            final OnSettingsClickListener onSettingsClick,
+            final OnAppSettingsClickListener onAppSettingsClick,
+            boolean isNonblockable)
+            throws RemoteException {
+        bindNotification(pm, iNotificationManager, pkg, notificationChannel,
+                numUniqueChannelsInRow, sbn, checkSaveListener, onSettingsClick,
+                onAppSettingsClick, isNonblockable, false /* isBlockingHelper */,
+                false /* isUserSentimentNegative */);
+    }
+
+    public void bindNotification(
+            PackageManager pm,
+            INotificationManager iNotificationManager,
+            String pkg,
+            NotificationChannel notificationChannel,
+            int numUniqueChannelsInRow,
+            StatusBarNotification sbn,
+            CheckSaveListener checkSaveListener,
             OnSettingsClickListener onSettingsClick,
             OnAppSettingsClickListener onAppSettingsClick,
-            OnClickListener onDoneClick,
-            CheckSaveListener checkSaveListener,
-            final Set<String> nonBlockablePkgs)
+            boolean isNonblockable,
+            boolean isForBlockingHelper,
+            boolean isUserSentimentNegative)
             throws RemoteException {
         mINotificationManager = iNotificationManager;
-        mPkg = pkg;
-        mNotificationChannels = notificationChannels;
-        mCheckSaveListener = checkSaveListener;
+        mMetricsLogger = Dependency.get(MetricsLogger.class);
+        mPackageName = pkg;
+        mNumUniqueChannelsInRow = numUniqueChannelsInRow;
         mSbn = sbn;
         mPm = pm;
         mAppSettingsClickListener = onAppSettingsClick;
-        mStartingUserImportance = startingUserImportance;
-        mAppName = mPkg;
+        mAppName = mPackageName;
+        mCheckSaveListener = checkSaveListener;
+        mOnSettingsClickListener = onSettingsClick;
+        mSingleNotificationChannel = notificationChannel;
+        mStartingUserImportance = mChosenImportance = mSingleNotificationChannel.getImportance();
+        mNegativeUserSentiment = isUserSentimentNegative;
+        mIsNonblockable = isNonblockable;
+        mIsForeground =
+                (mSbn.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
+        mIsForBlockingHelper = isForBlockingHelper;
+        mAppUid = mSbn.getUid();
+
+        int numTotalChannels = mINotificationManager.getNumNotificationChannelsForPackage(
+                pkg, mAppUid, false /* includeDeleted */);
+        if (mNumUniqueChannelsInRow == 0) {
+            throw new IllegalArgumentException("bindNotification requires at least one channel");
+        } else  {
+            // Special behavior for the Default channel if no other channels have been defined.
+            mIsSingleDefaultChannel = mNumUniqueChannelsInRow == 1
+                    && mSingleNotificationChannel.getId().equals(
+                            NotificationChannel.DEFAULT_CHANNEL_ID)
+                    && numTotalChannels == 1;
+        }
+
+        bindHeader();
+        bindPrompt();
+        bindButtons();
+    }
+
+    private void bindHeader() throws RemoteException {
+        // Package name
         Drawable pkgicon = null;
-        CharSequence channelNameText = "";
-        ApplicationInfo info = null;
+        ApplicationInfo info;
         try {
-            info = pm.getApplicationInfo(mPkg,
+            info = mPm.getApplicationInfo(
+                    mPackageName,
                     PackageManager.MATCH_UNINSTALLED_PACKAGES
                             | PackageManager.MATCH_DISABLED_COMPONENTS
                             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                             | PackageManager.MATCH_DIRECT_BOOT_AWARE);
             if (info != null) {
-                mAppUid = sbn.getUid();
-                mAppName = String.valueOf(pm.getApplicationLabel(info));
-                pkgicon = pm.getApplicationIcon(info);
+                mAppName = String.valueOf(mPm.getApplicationLabel(info));
+                pkgicon = mPm.getApplicationIcon(info);
             }
         } catch (PackageManager.NameNotFoundException e) {
             // app is gone, just show package name and generic icon
-            pkgicon = pm.getDefaultActivityIcon();
+            pkgicon = mPm.getDefaultActivityIcon();
         }
         ((ImageView) findViewById(R.id.pkgicon)).setImageDrawable(pkgicon);
-
-        int numTotalChannels = iNotificationManager.getNumNotificationChannelsForPackage(
-                pkg, mAppUid, false /* includeDeleted */);
-        if (mNotificationChannels.isEmpty()) {
-            throw new IllegalArgumentException("bindNotification requires at least one channel");
-        } else  {
-            if (mNotificationChannels.size() == 1) {
-                mSingleNotificationChannel = mNotificationChannels.get(0);
-                // Special behavior for the Default channel if no other channels have been defined.
-                mIsSingleDefaultChannel =
-                        (mSingleNotificationChannel.getId()
-                                .equals(NotificationChannel.DEFAULT_CHANNEL_ID) &&
-                        numTotalChannels <= 1);
-            } else {
-                mSingleNotificationChannel = null;
-                mIsSingleDefaultChannel = false;
-            }
-        }
-
-        boolean nonBlockable = false;
-        try {
-            final PackageInfo pkgInfo = pm.getPackageInfo(pkg, PackageManager.GET_SIGNATURES);
-            if (Utils.isSystemPackage(getResources(), pm, pkgInfo)) {
-                final int numChannels = mNotificationChannels.size();
-                for (int i = 0; i < numChannels; i++) {
-                    final NotificationChannel notificationChannel = mNotificationChannels.get(i);
-                    // If any of the system channels is not blockable, the bundle is nonblockable
-                    if (!notificationChannel.isBlockableSystem()) {
-                        nonBlockable = true;
-                        break;
-                    }
-                }
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            // unlikely.
-        }
-        if (nonBlockablePkgs != null) {
-            nonBlockable |= nonBlockablePkgs.contains(pkg);
-        }
-
-        String channelsDescText;
-        mNumChannelsView = findViewById(R.id.num_channels_desc);
-        if (nonBlockable) {
-            channelsDescText = mContext.getString(R.string.notification_unblockable_desc);
-        } else if (mIsSingleDefaultChannel) {
-            channelsDescText = mContext.getString(R.string.notification_default_channel_desc);
-        } else {
-            switch (mNotificationChannels.size()) {
-                case 1:
-                    channelsDescText = String.format(mContext.getResources().getQuantityString(
-                            R.plurals.notification_num_channels_desc, numTotalChannels),
-                            numTotalChannels);
-                    break;
-                case 2:
-                    channelsDescText = mContext.getString(
-                            R.string.notification_channels_list_desc_2,
-                            mNotificationChannels.get(0).getName(),
-                            mNotificationChannels.get(1).getName());
-                    break;
-                default:
-                    final int numOthers = mNotificationChannels.size() - 2;
-                    channelsDescText = String.format(
-                            mContext.getResources().getQuantityString(
-                                    R.plurals.notification_channels_list_desc_2_and_others,
-                                    numOthers),
-                            mNotificationChannels.get(0).getName(),
-                            mNotificationChannels.get(1).getName(),
-                            numOthers);
-            }
-        }
-        mNumChannelsView.setText(channelsDescText);
-
-        if (mSingleNotificationChannel == null) {
-            // Multiple channels don't use a channel name for the title.
-            channelNameText = mContext.getString(R.string.notification_num_channels,
-                    mNotificationChannels.size());
-        } else if (mIsSingleDefaultChannel || nonBlockable) {
-            // If this is the default channel or the app is unblockable,
-            // don't use our channel-specific text.
-            channelNameText = mContext.getString(R.string.notification_header_default_channel);
-        } else {
-            channelNameText = mSingleNotificationChannel.getName();
-        }
         ((TextView) findViewById(R.id.pkgname)).setText(mAppName);
-        ((TextView) findViewById(R.id.channel_name)).setText(channelNameText);
 
         // Set group information if this channel has an associated group.
         CharSequence groupName = null;
         if (mSingleNotificationChannel != null && mSingleNotificationChannel.getGroup() != null) {
             final NotificationChannelGroup notificationChannelGroup =
-                    iNotificationManager.getNotificationChannelGroupForPackage(
-                            mSingleNotificationChannel.getGroup(), pkg, mAppUid);
+                    mINotificationManager.getNotificationChannelGroupForPackage(
+                            mSingleNotificationChannel.getGroup(), mPackageName, mAppUid);
             if (notificationChannelGroup != null) {
                 groupName = notificationChannelGroup.getName();
             }
         }
-        TextView groupNameView = ((TextView) findViewById(R.id.group_name));
-        TextView groupDividerView = ((TextView) findViewById(R.id.pkg_group_divider));
+        TextView groupNameView = findViewById(R.id.group_name);
+        TextView groupDividerView = findViewById(R.id.pkg_group_divider);
         if (groupName != null) {
             groupNameView.setText(groupName);
             groupNameView.setVisibility(View.VISIBLE);
@@ -242,86 +244,178 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             groupDividerView.setVisibility(View.GONE);
         }
 
-        bindButtons(nonBlockable);
-
-        // Top-level importance group
-        mChannelDisabledView = findViewById(R.id.channel_disabled);
-        updateSecondaryText();
-
         // Settings button.
-        final TextView settingsButton = (TextView) findViewById(R.id.more_settings);
-        if (mAppUid >= 0 && onSettingsClick != null) {
+        final View settingsButton = findViewById(R.id.info);
+        if (mAppUid >= 0 && mOnSettingsClickListener != null) {
             settingsButton.setVisibility(View.VISIBLE);
             final int appUidF = mAppUid;
             settingsButton.setOnClickListener(
                     (View view) -> {
-                        onSettingsClick.onClick(view, mSingleNotificationChannel, appUidF);
+                        logBlockingHelperCounter(
+                                NotificationCounters.BLOCKING_HELPER_NOTIF_SETTINGS);
+                        mOnSettingsClickListener.onClick(view,
+                                mNumUniqueChannelsInRow > 1 ? null : mSingleNotificationChannel,
+                                appUidF);
                     });
-            if (numTotalChannels <= 1 || nonBlockable) {
-                settingsButton.setText(R.string.notification_more_settings);
-            } else {
-                settingsButton.setText(R.string.notification_all_categories);
-            }
         } else {
             settingsButton.setVisibility(View.GONE);
         }
+    }
 
-        // Done button.
-        final TextView doneButton = (TextView) findViewById(R.id.done);
-        doneButton.setText(R.string.notification_done);
-        doneButton.setOnClickListener(onDoneClick);
+    private void bindPrompt() {
+        final TextView blockPrompt = findViewById(R.id.block_prompt);
+        bindName();
+        if (mIsNonblockable) {
+            blockPrompt.setText(R.string.notification_unblockable_desc);
+        } else {
+            if (mNegativeUserSentiment) {
+                blockPrompt.setText(R.string.inline_blocking_helper);
+            }  else if (mIsSingleDefaultChannel || mNumUniqueChannelsInRow > 1) {
+                blockPrompt.setText(R.string.inline_keep_showing_app);
+            } else {
+                blockPrompt.setText(R.string.inline_keep_showing);
+            }
+        }
+    }
 
-        // Optional settings link
-        updateAppSettingsLink();
+    private void bindName() {
+        final TextView channelName = findViewById(R.id.channel_name);
+        if (mIsSingleDefaultChannel || mNumUniqueChannelsInRow > 1) {
+            channelName.setVisibility(View.GONE);
+        } else {
+            channelName.setText(mSingleNotificationChannel.getName());
+        }
+    }
+
+    @VisibleForTesting
+    void logBlockingHelperCounter(String counterTag) {
+        if (mIsForBlockingHelper) {
+            mMetricsLogger.count(counterTag, 1);
+        }
     }
 
     private boolean hasImportanceChanged() {
-        return mSingleNotificationChannel != null &&
-                mChannelEnabledSwitch != null &&
-                mStartingUserImportance != getSelectedImportance();
+        return mSingleNotificationChannel != null && mStartingUserImportance != mChosenImportance;
     }
 
     private void saveImportance() {
-        if (!hasImportanceChanged()) {
-            return;
-        }
-        final int selectedImportance = getSelectedImportance();
-        MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
-                selectedImportance - mStartingUserImportance);
-        mSingleNotificationChannel.setImportance(selectedImportance);
-        mSingleNotificationChannel.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
-        try {
-            mINotificationManager.updateNotificationChannelForPackage(
-                    mPkg, mAppUid, mSingleNotificationChannel);
-        } catch (RemoteException e) {
-            // :(
-        }
-    }
-
-    private int getSelectedImportance() {
-        if (!mChannelEnabledSwitch.isChecked()) {
-            return IMPORTANCE_NONE;
-        } else {
-            return mStartingUserImportance;
-        }
-    }
-
-    private void bindButtons(final boolean nonBlockable) {
-        // Enabled Switch
-        mChannelEnabledSwitch = (Switch) findViewById(R.id.channel_enabled_switch);
-        mChannelEnabledSwitch.setChecked(
-                mStartingUserImportance != IMPORTANCE_NONE);
-        final boolean visible = !nonBlockable && mSingleNotificationChannel != null;
-        mChannelEnabledSwitch.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-
-        // Callback when checked.
-        mChannelEnabledSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (mGutsContainer != null) {
-                mGutsContainer.resetFalsingCheck();
+        if (!mIsNonblockable) {
+            // Only go through the lock screen/bouncer if the user hit 'Stop notifications'.
+            // Otherwise, update the importance immediately.
+            if (mCheckSaveListener != null
+                    && NotificationCounters.BLOCKING_HELPER_STOP_NOTIFICATIONS.equals(
+                            mExitReason)) {
+                mCheckSaveListener.checkSave(this::updateImportance, mSbn);
+            } else {
+                updateImportance();
             }
-            updateSecondaryText();
-            updateAppSettingsLink();
+        }
+    }
+
+    /**
+     * Commits the updated importance values on the background thread.
+     */
+    private void updateImportance() {
+        MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
+                mChosenImportance - mStartingUserImportance);
+
+        Handler bgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
+        bgHandler.post(new UpdateImportanceRunnable(mINotificationManager, mPackageName, mAppUid,
+                mNumUniqueChannelsInRow == 1 ? mSingleNotificationChannel : null,
+                mStartingUserImportance, mChosenImportance));
+    }
+
+    private void bindButtons() {
+        // Set up stay-in-notification actions
+        View block =  findViewById(R.id.block);
+        TextView keep = findViewById(R.id.keep);
+        View minimize = findViewById(R.id.minimize);
+
+        findViewById(R.id.undo).setOnClickListener(mOnUndo);
+        block.setOnClickListener(mOnStopOrMinimizeNotifications);
+        keep.setOnClickListener(mOnKeepShowing);
+        minimize.setOnClickListener(mOnStopOrMinimizeNotifications);
+
+        if (mIsNonblockable) {
+            keep.setText(android.R.string.ok);
+            block.setVisibility(GONE);
+            minimize.setVisibility(GONE);
+        } else if (mIsForeground) {
+            block.setVisibility(GONE);
+            minimize.setVisibility(VISIBLE);
+        } else if (!mIsForeground) {
+            block.setVisibility(VISIBLE);
+            minimize.setVisibility(GONE);
+        }
+
+        // Set up app settings link (i.e. Customize)
+        TextView settingsLinkView = findViewById(R.id.app_settings);
+        Intent settingsIntent = getAppSettingsIntent(mPm, mPackageName, mSingleNotificationChannel,
+                mSbn.getId(), mSbn.getTag());
+        if (!mIsForBlockingHelper
+                && settingsIntent != null
+                && !TextUtils.isEmpty(mSbn.getNotification().getSettingsText())) {
+            settingsLinkView.setVisibility(VISIBLE);
+            settingsLinkView.setText(mContext.getString(R.string.notification_app_settings));
+            settingsLinkView.setOnClickListener((View view) -> {
+                mAppSettingsClickListener.onClick(view, settingsIntent);
+            });
+        } else {
+            settingsLinkView.setVisibility(View.GONE);
+        }
+    }
+
+    private void swapContent(boolean showPrompt) {
+        if (mExpandAnimation != null) {
+            mExpandAnimation.cancel();
+        }
+
+        View prompt = findViewById(R.id.prompt);
+        ViewGroup confirmation = findViewById(R.id.confirmation);
+        TextView confirmationText = findViewById(R.id.confirmation_text);
+        View header = findViewById(R.id.header);
+
+        if (showPrompt) {
+            mChosenImportance = mStartingUserImportance;
+        } else if (mIsForeground) {
+            mChosenImportance = IMPORTANCE_MIN;
+            confirmationText.setText(R.string.notification_channel_minimized);
+        } else {
+            mChosenImportance = IMPORTANCE_NONE;
+            confirmationText.setText(R.string.notification_channel_disabled);
+        }
+
+        ObjectAnimator promptAnim = ObjectAnimator.ofFloat(prompt, View.ALPHA,
+                prompt.getAlpha(), showPrompt ? 1f : 0f);
+        promptAnim.setInterpolator(showPrompt ? Interpolators.ALPHA_IN : Interpolators.ALPHA_OUT);
+        ObjectAnimator confirmAnim = ObjectAnimator.ofFloat(confirmation, View.ALPHA,
+                confirmation.getAlpha(), showPrompt ? 0f : 1f);
+        confirmAnim.setInterpolator(showPrompt ? Interpolators.ALPHA_OUT : Interpolators.ALPHA_IN);
+
+        prompt.setVisibility(showPrompt ? VISIBLE : GONE);
+        confirmation.setVisibility(showPrompt ? GONE : VISIBLE);
+        header.setVisibility(showPrompt ? VISIBLE : GONE);
+
+        mExpandAnimation = new AnimatorSet();
+        mExpandAnimation.playTogether(promptAnim, confirmAnim);
+        mExpandAnimation.setDuration(150);
+        mExpandAnimation.addListener(new AnimatorListenerAdapter() {
+            boolean cancelled = false;
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                cancelled = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (!cancelled) {
+                    prompt.setVisibility(showPrompt ? VISIBLE : GONE);
+                    confirmation.setVisibility(showPrompt ? GONE : VISIBLE);
+                }
+            }
         });
+        mExpandAnimation.start();
     }
 
     @Override
@@ -336,35 +430,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                 event.getText().add(mContext.getString(
                         R.string.notification_channel_controls_closed_accessibility, mAppName));
             }
-        }
-    }
-
-    private void updateSecondaryText() {
-        final boolean disabled = mSingleNotificationChannel != null &&
-                getSelectedImportance() == IMPORTANCE_NONE;
-        if (disabled) {
-            mChannelDisabledView.setVisibility(View.VISIBLE);
-            mNumChannelsView.setVisibility(View.GONE);
-        } else {
-            mChannelDisabledView.setVisibility(View.GONE);
-            mNumChannelsView.setVisibility(mIsSingleDefaultChannel ? View.INVISIBLE : View.VISIBLE);
-        }
-    }
-
-    private void updateAppSettingsLink() {
-        mSettingsLinkView = findViewById(R.id.app_settings);
-        Intent settingsIntent = getAppSettingsIntent(mPm, mPkg, mSingleNotificationChannel,
-                mSbn.getId(), mSbn.getTag());
-        if (settingsIntent != null && getSelectedImportance() != IMPORTANCE_NONE
-                && !TextUtils.isEmpty(mSbn.getNotification().getSettingsText())) {
-            mSettingsLinkView.setVisibility(View.VISIBLE);
-            mSettingsLinkView.setText(mContext.getString(R.string.notification_app_settings,
-                    mSbn.getNotification().getSettingsText()));
-            mSettingsLinkView.setOnClickListener((View view) -> {
-                mAppSettingsClickListener.onClick(view, settingsIntent);
-            });
-        } else {
-            mSettingsLinkView.setVisibility(View.GONE);
         }
     }
 
@@ -390,6 +455,28 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         return intent;
     }
 
+    /**
+     * Closes the controls and commits the updated importance values (indirectly). If this view is
+     * being used to show the blocking helper, this will immediately dismiss the blocking helper and
+     * commit the updated importance.
+     *
+     * <p><b>Note,</b> this will only get called once the view is dismissing. This means that the
+     * user does not have the ability to undo the action anymore. See {@link #swapContent(boolean)}
+     * for where undo is handled.
+     */
+    @VisibleForTesting
+    void closeControls(View v) {
+        int[] parentLoc = new int[2];
+        int[] targetLoc = new int[2];
+        mGutsContainer.getLocationOnScreen(parentLoc);
+        v.getLocationOnScreen(targetLoc);
+        final int centerX = v.getWidth() / 2;
+        final int centerY = v.getHeight() / 2;
+        final int x = targetLoc[0] - parentLoc[0] + centerX;
+        final int y = targetLoc[1] - parentLoc[1] + centerY;
+        mGutsContainer.closeControls(x, y, true /* save */, false /* force */);
+    }
+
     @Override
     public void setGutsParent(NotificationGuts guts) {
         mGutsContainer = guts;
@@ -397,7 +484,12 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     @Override
     public boolean willBeRemoved() {
-        return mChannelEnabledSwitch != null && !mChannelEnabledSwitch.isChecked();
+        return hasImportanceChanged();
+    }
+
+    @Override
+    public boolean shouldBeSaved() {
+        return hasImportanceChanged();
     }
 
     @Override
@@ -407,18 +499,61 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     @Override
     public boolean handleCloseControls(boolean save, boolean force) {
-        if (save && hasImportanceChanged()) {
-            if (mCheckSaveListener != null) {
-                mCheckSaveListener.checkSave(() -> { saveImportance(); });
-            } else {
-                saveImportance();
-            }
+        // Save regardless of the importance so we can lock the importance field if the user wants
+        // to keep getting notifications
+        if (save) {
+            saveImportance();
         }
+        logBlockingHelperCounter(mExitReason);
         return false;
     }
 
     @Override
     public int getActualHeight() {
         return getHeight();
+    }
+
+    /**
+     * Runnable to either update the given channel (with a new importance value) or, if no channel
+     * is provided, update notifications enabled state for the package.
+     */
+    private static class UpdateImportanceRunnable implements Runnable {
+        private final INotificationManager mINotificationManager;
+        private final String mPackageName;
+        private final int mAppUid;
+        private final @Nullable NotificationChannel mChannelToUpdate;
+        private final int mCurrentImportance;
+        private final int mNewImportance;
+
+
+        public UpdateImportanceRunnable(INotificationManager notificationManager,
+                String packageName, int appUid, @Nullable NotificationChannel channelToUpdate,
+                int currentImportance, int newImportance) {
+            mINotificationManager = notificationManager;
+            mPackageName = packageName;
+            mAppUid = appUid;
+            mChannelToUpdate = channelToUpdate;
+            mCurrentImportance = currentImportance;
+            mNewImportance = newImportance;
+        }
+
+        @Override
+        public void run() {
+            try {
+                if (mChannelToUpdate != null) {
+                    mChannelToUpdate.setImportance(mNewImportance);
+                    mChannelToUpdate.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
+                    mINotificationManager.updateNotificationChannelForPackage(
+                            mPackageName, mAppUid, mChannelToUpdate);
+                } else {
+                    // For notifications with more than one channel, update notification enabled
+                    // state. If the importance was lowered, we disable notifications.
+                    mINotificationManager.setNotificationsEnabledWithImportanceLockForPackage(
+                            mPackageName, mAppUid, mNewImportance >= mCurrentImportance);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Unable to update notification importance", e);
+            }
+        }
     }
 }

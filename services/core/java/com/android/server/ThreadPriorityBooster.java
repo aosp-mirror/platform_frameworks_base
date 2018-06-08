@@ -25,6 +25,8 @@ import static android.os.Process.setThreadPriority;
  */
 public class ThreadPriorityBooster {
 
+    private static final boolean ENABLE_LOCK_GUARD = false;
+
     private volatile int mBoostToPriority;
     private final int mLockGuardIndex;
 
@@ -50,7 +52,7 @@ public class ThreadPriorityBooster {
             }
         }
         state.regionCounter++;
-        if (LockGuard.ENABLED) {
+        if (ENABLE_LOCK_GUARD) {
             LockGuard.guard(mLockGuardIndex);
         }
     }

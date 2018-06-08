@@ -22,6 +22,8 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * An base implementation for GPS navigation messages provider.
  * It abstracts out the responsibility of handling listeners, while still allowing technology
@@ -32,9 +34,53 @@ import android.util.Log;
 public abstract class GnssNavigationMessageProvider
         extends RemoteListenerHelper<IGnssNavigationMessageListener> {
     private static final String TAG = "GnssNavigationMessageProvider";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    private final GnssNavigationMessageProviderNative mNative;
+    private boolean mCollectionStarted;
 
     protected GnssNavigationMessageProvider(Handler handler) {
+        this(handler, new GnssNavigationMessageProviderNative());
+    }
+
+    @VisibleForTesting
+    GnssNavigationMessageProvider(Handler handler, GnssNavigationMessageProviderNative aNative) {
         super(handler, TAG);
+        mNative = aNative;
+    }
+
+    // TODO(b/37460011): Use this with death recovery logic.
+    void resumeIfStarted() {
+        if (DEBUG) {
+            Log.d(TAG, "resumeIfStarted");
+        }
+        if (mCollectionStarted) {
+            mNative.startNavigationMessageCollection();
+        }
+    }
+
+    @Override
+    protected boolean isAvailableInPlatform() {
+        return mNative.isNavigationMessageSupported();
+    }
+
+    @Override
+    protected int registerWithService() {
+        boolean result = mNative.startNavigationMessageCollection();
+        if (result) {
+            mCollectionStarted = true;
+            return RemoteListenerHelper.RESULT_SUCCESS;
+        } else {
+            return RemoteListenerHelper.RESULT_INTERNAL_ERROR;
+        }
+    }
+
+    @Override
+    protected void unregisterFromService() {
+        boolean stopped = mNative.stopNavigationMessageCollection();
+        if (stopped) {
+            mCollectionStarted = false;
+        }
     }
 
     public void onNavigationMessageAvailable(final GnssNavigationMessage event) {
@@ -96,4 +142,25 @@ public abstract class GnssNavigationMessageProvider
             listener.onStatusChanged(mStatus);
         }
     }
+
+    @VisibleForTesting
+    static class GnssNavigationMessageProviderNative {
+        public boolean isNavigationMessageSupported() {
+            return native_is_navigation_message_supported();
+        }
+
+        public boolean startNavigationMessageCollection() {
+            return native_start_navigation_message_collection();
+        }
+
+        public boolean stopNavigationMessageCollection() {
+            return native_stop_navigation_message_collection();
+        }
+    }
+
+    private static native boolean native_is_navigation_message_supported();
+
+    private static native boolean native_start_navigation_message_collection();
+
+    private static native boolean native_stop_navigation_message_collection();
 }

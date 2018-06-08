@@ -16,11 +16,12 @@
 
 package android.webkit;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.Uri;
 
 import java.security.KeyPair;
-import java.security.spec.AlgorithmParameterSpec;
 
 /**
  * Enables the token binding procotol, and provides access to the keys. See
@@ -82,34 +83,33 @@ public abstract class TokenBindingService {
      * If no key pair exists, WebView chooses an algorithm from the list, in
      * the order given, to generate a key.
      *
-     * The user can pass a null if any algorithm is acceptable.
+     * The user can pass {@code null} if any algorithm is acceptable.
      *
      * @param origin The origin for the server.
-     * @param algorithm The list of algorithms. Can be null. An
-     *        IllegalArgumentException is thrown if array is empty.
+     * @param algorithm The list of algorithms. An IllegalArgumentException is thrown if array is
+     *                  empty.
      * @param callback The callback that will be called when key is available.
-     *        Cannot be null.
      */
     public abstract void getKey(Uri origin,
-                                String[] algorithm,
-                                ValueCallback<TokenBindingKey> callback);
+                                @Nullable String[] algorithm,
+                                @NonNull ValueCallback<TokenBindingKey> callback);
     /**
      * Deletes specified key (for use when associated cookie is cleared).
      *
      * @param origin The origin of the server.
      * @param callback The callback that will be called when key is deleted. The
      *        callback parameter (Boolean) will indicate if operation is
-     *        successful or if failed. The callback can be null.
+     *        successful or if failed.
      */
     public abstract void deleteKey(Uri origin,
-                                   ValueCallback<Boolean> callback);
+                                   @Nullable ValueCallback<Boolean> callback);
 
      /**
       * Deletes all the keys (for use when cookies are cleared).
       *
       * @param callback The callback that will be called when keys are deleted.
       *        The callback parameter (Boolean) will indicate if operation is
-      *        successful or if failed. The callback can be null.
+      *        successful or if failed.
       */
-    public abstract void deleteAllKeys(ValueCallback<Boolean> callback);
+    public abstract void deleteAllKeys(@Nullable ValueCallback<Boolean> callback);
 }

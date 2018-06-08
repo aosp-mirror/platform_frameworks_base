@@ -41,7 +41,7 @@ public final class Usb20ASGeneral extends UsbACInterface {
     private byte mChannelNames; // 15:1 Index of a string descriptor, describing the
                                 // name of the first physical channel.
 
-    public Usb20ASGeneral(int length, byte type, byte subtype, byte subclass) {
+    public Usb20ASGeneral(int length, byte type, byte subtype, int subclass) {
         super(length, type, subtype, subclass);
     }
 

@@ -20,14 +20,14 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
-import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
-import android.net.wifi.RttManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -35,9 +35,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
-import android.util.SparseArray;
-
-import com.android.internal.annotations.GuardedBy;
 
 import libcore.util.HexEncoding;
 
@@ -45,7 +42,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.nio.BufferOverflowException;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -172,9 +168,6 @@ public class WifiAwareManager {
 
     private final Object mLock = new Object(); // lock access to the following vars
 
-    @GuardedBy("mLock")
-    private SparseArray<RttManager.RttListener> mRangingListeners = new SparseArray<>();
-
     /** @hide */
     public WifiAwareManager(Context context, IWifiAwareManager service) {
         mContext = context;
@@ -277,6 +270,10 @@ public class WifiAwareManager {
                     + identityChangedListener);
         }
 
+        if (attachCallback == null) {
+            throw new IllegalArgumentException("Null callback provided");
+        }
+
         synchronized (mLock) {
             Looper looper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();
 
@@ -308,8 +305,12 @@ public class WifiAwareManager {
             DiscoverySessionCallback callback) {
         if (VDBG) Log.v(TAG, "publish(): clientId=" + clientId + ", config=" + publishConfig);
 
+        if (callback == null) {
+            throw new IllegalArgumentException("Null callback provided");
+        }
+
         try {
-            mService.publish(clientId, publishConfig,
+            mService.publish(mContext.getOpPackageName(), clientId, publishConfig,
                     new WifiAwareDiscoverySessionCallbackProxy(this, looper, true, callback,
                             clientId));
         } catch (RemoteException e) {
@@ -341,8 +342,12 @@ public class WifiAwareManager {
             }
         }
 
+        if (callback == null) {
+            throw new IllegalArgumentException("Null callback provided");
+        }
+
         try {
-            mService.subscribe(clientId, subscribeConfig,
+            mService.subscribe(mContext.getOpPackageName(), clientId, subscribeConfig,
                     new WifiAwareDiscoverySessionCallbackProxy(this, looper, false, callback,
                             clientId));
         } catch (RemoteException e) {
@@ -401,29 +406,8 @@ public class WifiAwareManager {
     }
 
     /** @hide */
-    public void startRanging(int clientId, int sessionId, RttManager.RttParams[] params,
-                             RttManager.RttListener listener) {
-        if (VDBG) {
-            Log.v(TAG, "startRanging: clientId=" + clientId + ", sessionId=" + sessionId + ", "
-                    + "params=" + Arrays.toString(params) + ", listener=" + listener);
-        }
-
-        int rangingKey = 0;
-        try {
-            rangingKey = mService.startRanging(clientId, sessionId,
-                    new RttManager.ParcelableRttParams(params));
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-
-        synchronized (mLock) {
-            mRangingListeners.put(rangingKey, listener);
-        }
-    }
-
-    /** @hide */
     public NetworkSpecifier createNetworkSpecifier(int clientId, int role, int sessionId,
-            PeerHandle peerHandle, @Nullable byte[] pmk, @Nullable String passphrase) {
+            @NonNull PeerHandle peerHandle, @Nullable byte[] pmk, @Nullable String passphrase) {
         if (VDBG) {
             Log.v(TAG, "createNetworkSpecifier: role=" + role + ", sessionId=" + sessionId
                     + ", peerHandle=" + ((peerHandle == null) ? peerHandle : peerHandle.peerId)
@@ -437,11 +421,11 @@ public class WifiAwareManager {
                     "createNetworkSpecifier: Invalid 'role' argument when creating a network "
                             + "specifier");
         }
-        if (role == WIFI_AWARE_DATA_PATH_ROLE_INITIATOR) {
+        if (role == WIFI_AWARE_DATA_PATH_ROLE_INITIATOR || !WifiAwareUtils.isLegacyVersion(mContext,
+                Build.VERSION_CODES.P)) {
             if (peerHandle == null) {
                 throw new IllegalArgumentException(
-                        "createNetworkSpecifier: Invalid peer handle (value of null) - not "
-                                + "permitted on INITIATOR");
+                        "createNetworkSpecifier: Invalid peer handle - cannot be null");
             }
         }
 
@@ -460,7 +444,7 @@ public class WifiAwareManager {
 
     /** @hide */
     public NetworkSpecifier createNetworkSpecifier(int clientId, @DataPathRole int role,
-            @Nullable byte[] peer, @Nullable byte[] pmk, @Nullable String passphrase) {
+            @NonNull byte[] peer, @Nullable byte[] pmk, @Nullable String passphrase) {
         if (VDBG) {
             Log.v(TAG, "createNetworkSpecifier: role=" + role
                     + ", pmk=" + ((pmk == null) ? "null" : "non-null")
@@ -473,10 +457,11 @@ public class WifiAwareManager {
                     "createNetworkSpecifier: Invalid 'role' argument when creating a network "
                             + "specifier");
         }
-        if (role == WIFI_AWARE_DATA_PATH_ROLE_INITIATOR) {
+        if (role == WIFI_AWARE_DATA_PATH_ROLE_INITIATOR || !WifiAwareUtils.isLegacyVersion(mContext,
+                Build.VERSION_CODES.P)) {
             if (peer == null) {
-                throw new IllegalArgumentException("createNetworkSpecifier: Invalid peer MAC "
-                        + "address - null not permitted on INITIATOR");
+                throw new IllegalArgumentException(
+                        "createNetworkSpecifier: Invalid peer MAC - cannot be null");
             }
         }
         if (peer != null && peer.length != 6) {
@@ -500,28 +485,11 @@ public class WifiAwareManager {
         private static final int CALLBACK_CONNECT_SUCCESS = 0;
         private static final int CALLBACK_CONNECT_FAIL = 1;
         private static final int CALLBACK_IDENTITY_CHANGED = 2;
-        private static final int CALLBACK_RANGING_SUCCESS = 3;
-        private static final int CALLBACK_RANGING_FAILURE = 4;
-        private static final int CALLBACK_RANGING_ABORTED = 5;
 
         private final Handler mHandler;
         private final WeakReference<WifiAwareManager> mAwareManager;
         private final Binder mBinder;
         private final Looper mLooper;
-
-        RttManager.RttListener getAndRemoveRangingListener(int rangingId) {
-            WifiAwareManager mgr = mAwareManager.get();
-            if (mgr == null) {
-                Log.w(TAG, "getAndRemoveRangingListener: called post GC");
-                return null;
-            }
-
-            synchronized (mgr.mLock) {
-                RttManager.RttListener listener = mgr.mRangingListeners.get(rangingId);
-                mgr.mRangingListeners.delete(rangingId);
-                return listener;
-            }
-        }
 
         /**
          * Constructs a {@link AttachCallback} using the specified looper.
@@ -567,37 +535,6 @@ public class WifiAwareManager {
                                 identityChangedListener.onIdentityChanged((byte[]) msg.obj);
                             }
                             break;
-                        case CALLBACK_RANGING_SUCCESS: {
-                            RttManager.RttListener listener = getAndRemoveRangingListener(msg.arg1);
-                            if (listener == null) {
-                                Log.e(TAG, "CALLBACK_RANGING_SUCCESS rangingId=" + msg.arg1
-                                        + ": no listener registered (anymore)");
-                            } else {
-                                listener.onSuccess(
-                                        ((RttManager.ParcelableRttResults) msg.obj).mResults);
-                            }
-                            break;
-                        }
-                        case CALLBACK_RANGING_FAILURE: {
-                            RttManager.RttListener listener = getAndRemoveRangingListener(msg.arg1);
-                            if (listener == null) {
-                                Log.e(TAG, "CALLBACK_RANGING_SUCCESS rangingId=" + msg.arg1
-                                        + ": no listener registered (anymore)");
-                            } else {
-                                listener.onFailure(msg.arg2, (String) msg.obj);
-                            }
-                            break;
-                        }
-                        case CALLBACK_RANGING_ABORTED: {
-                            RttManager.RttListener listener = getAndRemoveRangingListener(msg.arg1);
-                            if (listener == null) {
-                                Log.e(TAG, "CALLBACK_RANGING_SUCCESS rangingId=" + msg.arg1
-                                        + ": no listener registered (anymore)");
-                            } else {
-                                listener.onAborted();
-                            }
-                            break;
-                        }
                     }
                 }
             };
@@ -629,43 +566,6 @@ public class WifiAwareManager {
             msg.obj = mac;
             mHandler.sendMessage(msg);
         }
-
-        @Override
-        public void onRangingSuccess(int rangingId, RttManager.ParcelableRttResults results) {
-            if (VDBG) {
-                Log.v(TAG, "onRangingSuccess: rangingId=" + rangingId + ", results=" + results);
-            }
-
-            Message msg = mHandler.obtainMessage(CALLBACK_RANGING_SUCCESS);
-            msg.arg1 = rangingId;
-            msg.obj = results;
-            mHandler.sendMessage(msg);
-        }
-
-        @Override
-        public void onRangingFailure(int rangingId, int reason, String description) {
-            if (VDBG) {
-                Log.v(TAG, "onRangingSuccess: rangingId=" + rangingId + ", reason=" + reason
-                        + ", description=" + description);
-            }
-
-            Message msg = mHandler.obtainMessage(CALLBACK_RANGING_FAILURE);
-            msg.arg1 = rangingId;
-            msg.arg2 = reason;
-            msg.obj = description;
-            mHandler.sendMessage(msg);
-
-        }
-
-        @Override
-        public void onRangingAborted(int rangingId) {
-            if (VDBG) Log.v(TAG, "onRangingAborted: rangingId=" + rangingId);
-
-            Message msg = mHandler.obtainMessage(CALLBACK_RANGING_ABORTED);
-            msg.arg1 = rangingId;
-            mHandler.sendMessage(msg);
-
-        }
     }
 
     private static class WifiAwareDiscoverySessionCallbackProxy extends
@@ -678,6 +578,7 @@ public class WifiAwareManager {
         private static final int CALLBACK_MESSAGE_SEND_SUCCESS = 5;
         private static final int CALLBACK_MESSAGE_SEND_FAIL = 6;
         private static final int CALLBACK_MESSAGE_RECEIVED = 7;
+        private static final int CALLBACK_MATCH_WITH_DISTANCE = 8;
 
         private static final String MESSAGE_BUNDLE_KEY_MESSAGE = "message";
         private static final String MESSAGE_BUNDLE_KEY_MESSAGE2 = "message2";
@@ -732,7 +633,9 @@ public class WifiAwareManager {
                         case CALLBACK_SESSION_TERMINATED:
                             onProxySessionTerminated(msg.arg1);
                             break;
-                        case CALLBACK_MATCH: {
+                        case CALLBACK_MATCH:
+                        case CALLBACK_MATCH_WITH_DISTANCE:
+                            {
                             List<byte[]> matchFilter = null;
                             byte[] arg = msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2);
                             try {
@@ -743,9 +646,16 @@ public class WifiAwareManager {
                                         + new String(HexEncoding.encode(arg))
                                         + "' - cannot be parsed: e=" + e);
                             }
-                            mOriginalCallback.onServiceDiscovered(new PeerHandle(msg.arg1),
-                                    msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE),
-                                    matchFilter);
+                            if (msg.what == CALLBACK_MATCH) {
+                                mOriginalCallback.onServiceDiscovered(new PeerHandle(msg.arg1),
+                                        msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE),
+                                        matchFilter);
+                            } else {
+                                mOriginalCallback.onServiceDiscoveredWithinRange(
+                                        new PeerHandle(msg.arg1),
+                                        msg.getData().getByteArray(MESSAGE_BUNDLE_KEY_MESSAGE),
+                                        matchFilter, msg.arg2);
+                            }
                             break;
                         }
                         case CALLBACK_MESSAGE_SEND_SUCCESS:
@@ -798,18 +708,35 @@ public class WifiAwareManager {
             mHandler.sendMessage(msg);
         }
 
-        @Override
-        public void onMatch(int peerId, byte[] serviceSpecificInfo, byte[] matchFilter) {
-            if (VDBG) Log.v(TAG, "onMatch: peerId=" + peerId);
-
+        private void onMatchCommon(int messageType, int peerId, byte[] serviceSpecificInfo,
+                byte[] matchFilter, int distanceMm) {
             Bundle data = new Bundle();
             data.putByteArray(MESSAGE_BUNDLE_KEY_MESSAGE, serviceSpecificInfo);
             data.putByteArray(MESSAGE_BUNDLE_KEY_MESSAGE2, matchFilter);
 
-            Message msg = mHandler.obtainMessage(CALLBACK_MATCH);
+            Message msg = mHandler.obtainMessage(messageType);
             msg.arg1 = peerId;
+            msg.arg2 = distanceMm;
             msg.setData(data);
             mHandler.sendMessage(msg);
+        }
+
+        @Override
+        public void onMatch(int peerId, byte[] serviceSpecificInfo, byte[] matchFilter) {
+            if (VDBG) Log.v(TAG, "onMatch: peerId=" + peerId);
+
+            onMatchCommon(CALLBACK_MATCH, peerId, serviceSpecificInfo, matchFilter, 0);
+        }
+
+        @Override
+        public void onMatchWithDistance(int peerId, byte[] serviceSpecificInfo, byte[] matchFilter,
+                int distanceMm) {
+            if (VDBG) {
+                Log.v(TAG, "onMatchWithDistance: peerId=" + peerId + ", distanceMm=" + distanceMm);
+            }
+
+            onMatchCommon(CALLBACK_MATCH_WITH_DISTANCE, peerId, serviceSpecificInfo, matchFilter,
+                    distanceMm);
         }
 
         @Override

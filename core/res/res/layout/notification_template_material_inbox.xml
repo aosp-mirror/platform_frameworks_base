@@ -20,6 +20,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:tag="inbox"
+    android:clipChildren="false"
     >
     <include layout="@layout/notification_template_header" />
     <LinearLayout
@@ -38,8 +39,8 @@
             android:layout_gravity="top"
             android:paddingStart="@dimen/notification_content_margin_start"
             android:paddingEnd="@dimen/notification_content_margin_end"
-            android:paddingBottom="@dimen/notification_content_margin_bottom"
             android:minHeight="@dimen/notification_min_content_height"
+            android:layout_weight="1"
             android:clipToPadding="false"
             android:orientation="vertical"
             >
@@ -52,7 +53,7 @@
                 android:layout_marginTop="@dimen/notification_progress_margin_top"
                 android:layout_marginBottom="2dp"/>
             <TextView android:id="@+id/inbox_text0"
-                android:textAppearance="@style/TextAppearance.Material.Notification"
+                style="@style/Widget.Material.Notification.Text"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:singleLine="true"
@@ -61,7 +62,7 @@
                 android:layout_weight="1"
                 />
             <TextView android:id="@+id/inbox_text1"
-                android:textAppearance="@style/TextAppearance.Material.Notification"
+                style="@style/Widget.Material.Notification.Text"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:singleLine="true"
@@ -70,7 +71,7 @@
                 android:layout_weight="1"
                 />
             <TextView android:id="@+id/inbox_text2"
-                android:textAppearance="@style/TextAppearance.Material.Notification"
+                style="@style/Widget.Material.Notification.Text"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:singleLine="true"
@@ -79,7 +80,7 @@
                 android:layout_weight="1"
                 />
             <TextView android:id="@+id/inbox_text3"
-                android:textAppearance="@style/TextAppearance.Material.Notification"
+                style="@style/Widget.Material.Notification.Text"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:singleLine="true"
@@ -88,7 +89,7 @@
                 android:layout_weight="1"
                 />
             <TextView android:id="@+id/inbox_text4"
-                android:textAppearance="@style/TextAppearance.Material.Notification"
+                style="@style/Widget.Material.Notification.Text"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:singleLine="true"
@@ -97,7 +98,7 @@
                 android:layout_weight="1"
                 />
             <TextView android:id="@+id/inbox_text5"
-                android:textAppearance="@style/TextAppearance.Material.Notification"
+                style="@style/Widget.Material.Notification.Text"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:singleLine="true"
@@ -106,7 +107,7 @@
                 android:layout_weight="1"
                 />
             <TextView android:id="@+id/inbox_text6"
-                android:textAppearance="@style/TextAppearance.Material.Notification"
+                style="@style/Widget.Material.Notification.Text"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:singleLine="true"
@@ -119,7 +120,13 @@
                 android:id="@+id/notification_material_reply_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
+        <include layout="@layout/notification_template_smart_reply_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/notification_content_margin_start"
+            android:layout_marginEnd="@dimen/notification_content_margin_end"
+            android:layout_marginTop="@dimen/notification_content_margin" />
+        <include layout="@layout/notification_material_action_list" />
     </LinearLayout>
-    <include layout="@layout/notification_material_action_list" />
     <include layout="@layout/notification_template_right_icon" />
 </FrameLayout>

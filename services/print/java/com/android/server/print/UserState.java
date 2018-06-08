@@ -19,6 +19,14 @@ package com.android.server.print;
 import static android.content.pm.PackageManager.GET_META_DATA;
 import static android.content.pm.PackageManager.GET_SERVICES;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+import static android.content.pm.PackageManager.MATCH_INSTANT;
+
+import static com.android.internal.print.DumpUtils.writePrintJobInfo;
+import static com.android.internal.print.DumpUtils.writePrinterId;
+import static com.android.internal.print.DumpUtils.writePrinterInfo;
+import static com.android.internal.util.dump.DumpUtils.writeComponentName;
+import static com.android.internal.util.dump.DumpUtils.writeStringIfNotNull;
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -31,7 +39,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,7 +46,6 @@ import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.IInterface;
 import android.os.Looper;
-import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -58,6 +64,10 @@ import android.printservice.recommendation.IRecommendationsChangeListener;
 import android.printservice.recommendation.RecommendationInfo;
 import android.provider.DocumentsContract;
 import android.provider.Settings;
+import android.service.print.CachedPrintJobProto;
+import android.service.print.InstalledPrintServiceProto;
+import android.service.print.PrintUserStateProto;
+import android.service.print.PrinterDiscoverySessionProto;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.util.ArrayMap;
@@ -70,14 +80,13 @@ import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.os.SomeArgs;
+import com.android.internal.util.dump.DualDumpOutputStream;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.print.RemotePrintService.PrintServiceCallbacks;
 import com.android.server.print.RemotePrintServiceRecommendationService
         .RemotePrintServiceRecommendationServiceCallbacks;
 import com.android.server.print.RemotePrintSpooler.PrintSpoolerCallbacks;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -85,6 +94,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.IntSupplier;
 
 /**
  * Represents the print state for a user.
@@ -126,8 +136,6 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
 
     private final RemotePrintSpooler mSpooler;
 
-    private final Handler mHandler;
-
     private PrinterDiscoverySessionMediator mPrinterDiscoverySession;
 
     private List<PrintJobStateChangeListenerRecord> mPrintJobStateChangeListenerRecords;
@@ -148,12 +156,16 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
      */
     private RemotePrintServiceRecommendationService mPrintServiceRecommendationsService;
 
+    /**
+     * Can services from instant apps be bound? (usually disabled, only used by testing)
+     */
+    private boolean mIsInstantServiceAllowed;
+
     public UserState(Context context, int userId, Object lock, boolean lowPriority) {
         mContext = context;
         mUserId = userId;
         mLock = lock;
         mSpooler = new RemotePrintSpooler(context, userId, lowPriority, this);
-        mHandler = new UserStateHandler(context.getMainLooper());
 
         synchronized (mLock) {
             readInstalledPrintServicesLocked();
@@ -164,9 +176,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
         // Some print services might have gotten installed before the User State came up
         prunePrintServices();
 
-        synchronized (mLock) {
-            onConfigurationChangedLocked();
-        }
+        onConfigurationChanged();
     }
 
     public void increasePriority() {
@@ -226,15 +236,6 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
             // Not adding a print job means the client is dead - done.
             return null;
         }
-
-        // Spin the spooler to add the job and show the config UI.
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                mSpooler.createPrintJob(printJob);
-                return null;
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
 
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -451,7 +452,7 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
 
             if (mPrinterDiscoverySession == null) {
                 // If we do not have a session, tell all service to create one.
-                mPrinterDiscoverySession = new PrinterDiscoverySessionMediator(mContext) {
+                mPrinterDiscoverySession = new PrinterDiscoverySessionMediator() {
                     @Override
                     public void onDestroyed() {
                         mPrinterDiscoverySession = null;
@@ -696,18 +697,22 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
     @Override
     public void onPrintJobStateChanged(PrintJobInfo printJob) {
         mPrintJobForAppCache.onPrintJobStateChanged(printJob);
-        mHandler.obtainMessage(UserStateHandler.MSG_DISPATCH_PRINT_JOB_STATE_CHANGED,
-                printJob.getAppId(), 0, printJob.getId()).sendToTarget();
+        Handler.getMain().sendMessage(obtainMessage(
+                UserState::handleDispatchPrintJobStateChanged,
+                this, printJob.getId(),
+                PooledLambda.obtainSupplier(printJob.getAppId()).recycleOnUse()));
     }
 
     public void onPrintServicesChanged() {
-        mHandler.obtainMessage(UserStateHandler.MSG_DISPATCH_PRINT_SERVICES_CHANGED).sendToTarget();
+        Handler.getMain().sendMessage(obtainMessage(
+                UserState::handleDispatchPrintServicesChanged, this));
     }
 
     @Override
     public void onPrintServiceRecommendationsUpdated(List<RecommendationInfo> recommendations) {
-        mHandler.obtainMessage(UserStateHandler.MSG_DISPATCH_PRINT_SERVICES_RECOMMENDATIONS_UPDATED,
-                0, 0, recommendations).sendToTarget();
+        Handler.getMain().sendMessage(obtainMessage(
+                UserState::handleDispatchPrintServiceRecommendationsUpdated,
+                this, recommendations));
     }
 
     @Override
@@ -772,8 +777,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
             mActiveServices.remove(service.getComponentName());
 
             // The service might need to be restarted if it died because of an update
-            mHandler.sendMessageDelayed(
-                    mHandler.obtainMessage(UserStateHandler.MSG_CHECK_CONFIG_CHANGED),
+            Handler.getMain().sendMessageDelayed(obtainMessage(
+                    UserState::onConfigurationChanged, this),
                     SERVICE_RESTART_DELAY_MILLIS);
 
             // No session - nothing to do.
@@ -806,60 +811,63 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
         mDestroyed = true;
     }
 
-    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String prefix) {
-        pw.append(prefix).append("user state ").append(String.valueOf(mUserId)).append(":");
-        pw.println();
+    public void dump(@NonNull DualDumpOutputStream dumpStream) {
+        synchronized (mLock) {
+            dumpStream.write("user_id", PrintUserStateProto.USER_ID, mUserId);
 
-        String tab = "  ";
+            final int installedServiceCount = mInstalledServices.size();
+            for (int i = 0; i < installedServiceCount; i++) {
+                long token = dumpStream.start("installed_services",
+                        PrintUserStateProto.INSTALLED_SERVICES);
+                PrintServiceInfo installedService = mInstalledServices.get(i);
 
-        pw.append(prefix).append(tab).append("installed services:").println();
-        final int installedServiceCount = mInstalledServices.size();
-        for (int i = 0; i < installedServiceCount; i++) {
-            PrintServiceInfo installedService = mInstalledServices.get(i);
-            String installedServicePrefix = prefix + tab + tab;
-            pw.append(installedServicePrefix).append("service:").println();
-            ResolveInfo resolveInfo = installedService.getResolveInfo();
-            ComponentName componentName = new ComponentName(
-                    resolveInfo.serviceInfo.packageName,
-                    resolveInfo.serviceInfo.name);
-            pw.append(installedServicePrefix).append(tab).append("componentName=")
-                    .append(componentName.flattenToString()).println();
-            pw.append(installedServicePrefix).append(tab).append("settingsActivity=")
-                    .append(installedService.getSettingsActivityName()).println();
-            pw.append(installedServicePrefix).append(tab).append("addPrintersActivity=")
-                    .append(installedService.getAddPrintersActivityName()).println();
-            pw.append(installedServicePrefix).append(tab).append("avancedOptionsActivity=")
-                   .append(installedService.getAdvancedOptionsActivityName()).println();
+                ResolveInfo resolveInfo = installedService.getResolveInfo();
+                writeComponentName(dumpStream, "component_name",
+                        InstalledPrintServiceProto.COMPONENT_NAME,
+                        new ComponentName(resolveInfo.serviceInfo.packageName,
+                                resolveInfo.serviceInfo.name));
+
+                writeStringIfNotNull(dumpStream, "settings_activity",
+                        InstalledPrintServiceProto.SETTINGS_ACTIVITY,
+                        installedService.getSettingsActivityName());
+                writeStringIfNotNull(dumpStream, "add_printers_activity",
+                        InstalledPrintServiceProto.ADD_PRINTERS_ACTIVITY,
+                        installedService.getAddPrintersActivityName());
+                writeStringIfNotNull(dumpStream, "advanced_options_activity",
+                        InstalledPrintServiceProto.ADVANCED_OPTIONS_ACTIVITY,
+                        installedService.getAdvancedOptionsActivityName());
+
+                dumpStream.end(token);
+            }
+
+            for (ComponentName disabledService : mDisabledServices) {
+                writeComponentName(dumpStream, "disabled_services",
+                        PrintUserStateProto.DISABLED_SERVICES, disabledService);
+            }
+
+            final int activeServiceCount = mActiveServices.size();
+            for (int i = 0; i < activeServiceCount; i++) {
+                long token = dumpStream.start("actives_services",
+                        PrintUserStateProto.ACTIVE_SERVICES);
+                mActiveServices.valueAt(i).dump(dumpStream);
+                dumpStream.end(token);
+            }
+
+            mPrintJobForAppCache.dumpLocked(dumpStream);
+
+            if (mPrinterDiscoverySession != null) {
+                long token = dumpStream.start("discovery_service",
+                        PrintUserStateProto.DISCOVERY_SESSIONS);
+                mPrinterDiscoverySession.dumpLocked(dumpStream);
+                dumpStream.end(token);
+            }
+
         }
 
-        pw.append(prefix).append(tab).append("disabled services:").println();
-        for (ComponentName disabledService : mDisabledServices) {
-            String disabledServicePrefix = prefix + tab + tab;
-            pw.append(disabledServicePrefix).append("service:").println();
-            pw.append(disabledServicePrefix).append(tab).append("componentName=")
-                    .append(disabledService.flattenToString());
-            pw.println();
-        }
-
-        pw.append(prefix).append(tab).append("active services:").println();
-        final int activeServiceCount = mActiveServices.size();
-        for (int i = 0; i < activeServiceCount; i++) {
-            RemotePrintService activeService = mActiveServices.valueAt(i);
-            activeService.dump(pw, prefix + tab + tab);
-            pw.println();
-        }
-
-        pw.append(prefix).append(tab).append("cached print jobs:").println();
-        mPrintJobForAppCache.dump(pw, prefix + tab + tab);
-
-        pw.append(prefix).append(tab).append("discovery mediator:").println();
-        if (mPrinterDiscoverySession != null) {
-            mPrinterDiscoverySession.dump(pw, prefix + tab + tab);
-        }
-
-        pw.append(prefix).append(tab).append("print spooler:").println();
-        mSpooler.dump(fd, pw, prefix + tab + tab);
-        pw.println();
+        long token = dumpStream.start("print_spooler_state",
+                PrintUserStateProto.PRINT_SPOOLER_STATE);
+        mSpooler.dump(dumpStream);
+        dumpStream.end(token);
     }
 
     private void readConfigurationLocked() {
@@ -870,9 +878,14 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
     private void readInstalledPrintServicesLocked() {
         Set<PrintServiceInfo> tempPrintServices = new HashSet<PrintServiceInfo>();
 
+        int queryIntentFlags = GET_SERVICES | GET_META_DATA | MATCH_DEBUG_TRIAGED_MISSING;
+
+        if (mIsInstantServiceAllowed) {
+            queryIntentFlags |= MATCH_INSTANT;
+        }
+
         List<ResolveInfo> installedServices = mContext.getPackageManager()
-                .queryIntentServicesAsUser(mQueryIntent,
-                        GET_SERVICES | GET_META_DATA | MATCH_DEBUG_TRIAGED_MISSING, mUserId);
+                .queryIntentServicesAsUser(mQueryIntent, queryIntentFlags, mUserId);
 
         final int installedCount = installedServices.size();
         for (int i = 0, count = installedCount; i < count; i++) {
@@ -1078,12 +1091,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
         // just died. Do this off the main thread since we do to allow
         // calls into the spooler on the main thread.
         if (Looper.getMainLooper().isCurrentThread()) {
-            BackgroundThread.getHandler().post(new Runnable() {
-                @Override
-                public void run() {
-                    failScheduledPrintJobsForServiceInternal(serviceName);
-                }
-            });
+            BackgroundThread.getHandler().sendMessage(obtainMessage(
+                    UserState::failScheduledPrintJobsForServiceInternal, this, serviceName));
         } else {
             failScheduledPrintJobsForServiceInternal(serviceName);
         }
@@ -1114,24 +1123,26 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
         }
     }
 
-    private void handleDispatchPrintJobStateChanged(PrintJobId printJobId, int appId) {
+    private void handleDispatchPrintJobStateChanged(
+            PrintJobId printJobId, IntSupplier appIdSupplier) {
+        int appId = appIdSupplier.getAsInt();
         final List<PrintJobStateChangeListenerRecord> records;
         synchronized (mLock) {
             if (mPrintJobStateChangeListenerRecords == null) {
                 return;
             }
-            records = new ArrayList<PrintJobStateChangeListenerRecord>(
-                    mPrintJobStateChangeListenerRecords);
+            records = new ArrayList<>(mPrintJobStateChangeListenerRecords);
         }
         final int recordCount = records.size();
         for (int i = 0; i < recordCount; i++) {
             PrintJobStateChangeListenerRecord record = records.get(i);
             if (record.appId == PrintManager.APP_ID_ANY
-                    || record.appId == appId)
-            try {
-                record.listener.onPrintJobStateChanged(printJobId);
-            } catch (RemoteException re) {
-                Log.e(LOG_TAG, "Error notifying for print job state change", re);
+                    || record.appId == appId) {
+                try {
+                    record.listener.onPrintJobStateChanged(printJobId);
+                } catch (RemoteException re) {
+                    Log.e(LOG_TAG, "Error notifying for print job state change", re);
+                }
             }
         }
     }
@@ -1179,38 +1190,21 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
         }
     }
 
-    private final class UserStateHandler extends Handler {
-        public static final int MSG_DISPATCH_PRINT_JOB_STATE_CHANGED = 1;
-        public static final int MSG_DISPATCH_PRINT_SERVICES_CHANGED = 2;
-        public static final int MSG_DISPATCH_PRINT_SERVICES_RECOMMENDATIONS_UPDATED = 3;
-        public static final int MSG_CHECK_CONFIG_CHANGED = 4;
-
-        public UserStateHandler(Looper looper) {
-            super(looper, null, false);
+    private void onConfigurationChanged() {
+        synchronized (mLock) {
+            onConfigurationChangedLocked();
         }
+    }
 
-        @Override
-        public void handleMessage(Message message) {
-            switch (message.what) {
-                case MSG_DISPATCH_PRINT_JOB_STATE_CHANGED:
-                    PrintJobId printJobId = (PrintJobId) message.obj;
-                    final int appId = message.arg1;
-                    handleDispatchPrintJobStateChanged(printJobId, appId);
-                    break;
-                case MSG_DISPATCH_PRINT_SERVICES_CHANGED:
-                    handleDispatchPrintServicesChanged();
-                    break;
-                case MSG_DISPATCH_PRINT_SERVICES_RECOMMENDATIONS_UPDATED:
-                    handleDispatchPrintServiceRecommendationsUpdated(
-                            (List<RecommendationInfo>) message.obj);
-                    break;
-                case MSG_CHECK_CONFIG_CHANGED:
-                    synchronized (mLock) {
-                        onConfigurationChangedLocked();
-                    }
-                default:
-                    // not reached
-            }
+    public boolean getBindInstantServiceAllowed() {
+        return mIsInstantServiceAllowed;
+    }
+
+    public void setBindInstantServiceAllowed(boolean allowed) {
+        synchronized (mLock) {
+            mIsInstantServiceAllowed = allowed;
+
+            updateIfNeededLocked();
         }
     }
 
@@ -1278,18 +1272,13 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
 
         private final List<PrinterId> mStateTrackedPrinters = new ArrayList<PrinterId>();
 
-        private final Handler mSessionHandler;
-
         private boolean mIsDestroyed;
 
-        public PrinterDiscoverySessionMediator(Context context) {
-            mSessionHandler = new SessionHandler(context.getMainLooper());
+        PrinterDiscoverySessionMediator() {
             // Kick off the session creation.
-            List<RemotePrintService> services = new ArrayList<RemotePrintService>(
-                    mActiveServices.values());
-            mSessionHandler.obtainMessage(SessionHandler
-                    .MSG_DISPATCH_CREATE_PRINTER_DISCOVERY_SESSION, services)
-                    .sendToTarget();
+            Handler.getMain().sendMessage(obtainMessage(UserState.PrinterDiscoverySessionMediator::
+                    handleDispatchCreatePrinterDiscoverySession,
+                    this, new ArrayList<>(mActiveServices.values())));
         }
 
         public void addObserverLocked(@NonNull IPrinterDiscoveryObserver observer) {
@@ -1298,12 +1287,9 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
 
             // Bring the added observer up to speed with the printers.
             if (!mPrinters.isEmpty()) {
-                List<PrinterInfo> printers = new ArrayList<PrinterInfo>(mPrinters.values());
-                SomeArgs args = SomeArgs.obtain();
-                args.arg1 = observer;
-                args.arg2 = printers;
-                mSessionHandler.obtainMessage(SessionHandler.MSG_PRINTERS_ADDED,
-                        args).sendToTarget();
+                Handler.getMain().sendMessage(obtainMessage(
+                        UserState.PrinterDiscoverySessionMediator::handlePrintersAdded,
+                        this, observer, new ArrayList<>(mPrinters.values())));
             }
         }
 
@@ -1340,14 +1326,9 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                 return;
             }
 
-            List<RemotePrintService> services = new ArrayList<RemotePrintService>(
-                    mActiveServices.values());
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = services;
-            args.arg2 = priorityList;
-            mSessionHandler.obtainMessage(SessionHandler
-                    .MSG_DISPATCH_START_PRINTER_DISCOVERY, args)
-                    .sendToTarget();
+            Handler.getMain().sendMessage(obtainMessage(UserState.PrinterDiscoverySessionMediator::
+                    handleDispatchStartPrinterDiscovery, this,
+                    new ArrayList<>(mActiveServices.values()), priorityList));
         }
 
         public final void stopPrinterDiscoveryLocked(@NonNull IPrinterDiscoveryObserver observer) {
@@ -1363,11 +1344,9 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
             if (!mStartedPrinterDiscoveryTokens.isEmpty()) {
                 return;
             }
-            List<RemotePrintService> services = new ArrayList<RemotePrintService>(
-                    mActiveServices.values());
-            mSessionHandler.obtainMessage(SessionHandler
-                    .MSG_DISPATCH_STOP_PRINTER_DISCOVERY, services)
-                    .sendToTarget();
+            Handler.getMain().sendMessage(obtainMessage(UserState.PrinterDiscoverySessionMediator::
+                    handleDispatchStopPrinterDiscovery,
+                    this, new ArrayList<>(mActiveServices.values())));
         }
 
         public void validatePrintersLocked(@NonNull List<PrinterId> printerIds) {
@@ -1398,12 +1377,9 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                 // Schedule a notification of the service.
                 RemotePrintService service = mActiveServices.get(serviceName);
                 if (service != null) {
-                    SomeArgs args = SomeArgs.obtain();
-                    args.arg1 = service;
-                    args.arg2 = updateList;
-                    mSessionHandler.obtainMessage(SessionHandler
-                            .MSG_VALIDATE_PRINTERS, args)
-                            .sendToTarget();
+                    Handler.getMain().sendMessage(obtainMessage(
+                            UserState.PrinterDiscoverySessionMediator::handleValidatePrinters,
+                            this, service, updateList));
                 }
             }
         }
@@ -1430,12 +1406,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                 return;
             }
             // Ask the service to start tracking.
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = service;
-            args.arg2 = printerId;
-            mSessionHandler.obtainMessage(SessionHandler
-                    .MSG_START_PRINTER_STATE_TRACKING, args)
-                    .sendToTarget();
+            Handler.getMain().sendMessage(obtainMessage(UserState.PrinterDiscoverySessionMediator::
+                    handleStartPrinterStateTracking, this, service, printerId));
         }
 
         public final void stopPrinterStateTrackingLocked(PrinterId printerId) {
@@ -1457,12 +1429,8 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                 return;
             }
             // Ask the service to start tracking.
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = service;
-            args.arg2 = printerId;
-            mSessionHandler.obtainMessage(SessionHandler
-                    .MSG_STOP_PRINTER_STATE_TRACKING, args)
-                    .sendToTarget();
+            Handler.getMain().sendMessage(obtainMessage(UserState.PrinterDiscoverySessionMediator::
+                    handleStopPrinterStateTracking, this, service, printerId));
         }
 
         public void onDestroyed() {
@@ -1488,11 +1456,9 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                 stopPrinterDiscoveryLocked(IPrinterDiscoveryObserver.Stub.asInterface(token));
             }
             // Tell the services we are done.
-            List<RemotePrintService> services = new ArrayList<RemotePrintService>(
-                    mActiveServices.values());
-            mSessionHandler.obtainMessage(SessionHandler
-                    .MSG_DISPATCH_DESTROY_PRINTER_DISCOVERY_SESSION, services)
-                    .sendToTarget();
+            Handler.getMain().sendMessage(obtainMessage(UserState.PrinterDiscoverySessionMediator::
+                    handleDispatchDestroyPrinterDiscoverySession,
+                    this, new ArrayList<>(mActiveServices.values())));
         }
 
         public void onPrintersAddedLocked(List<PrinterInfo> printers) {
@@ -1516,8 +1482,9 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                 }
             }
             if (addedPrinters != null) {
-                mSessionHandler.obtainMessage(SessionHandler.MSG_DISPATCH_PRINTERS_ADDED,
-                        addedPrinters).sendToTarget();
+                Handler.getMain().sendMessage(obtainMessage(
+                        UserState.PrinterDiscoverySessionMediator::handleDispatchPrintersAdded,
+                        this, addedPrinters));
             }
         }
 
@@ -1541,8 +1508,9 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                 }
             }
             if (removedPrinterIds != null) {
-                mSessionHandler.obtainMessage(SessionHandler.MSG_DISPATCH_PRINTERS_REMOVED,
-                        removedPrinterIds).sendToTarget();
+                Handler.getMain().sendMessage(obtainMessage(
+                        UserState.PrinterDiscoverySessionMediator::handleDispatchPrintersRemoved,
+                        this, removedPrinterIds));
             }
         }
 
@@ -1583,8 +1551,9 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
 
                 ArrayList<PrinterInfo> addedPrinters = new ArrayList<>(1);
                 addedPrinters.add(newPrinter);
-                mSessionHandler.obtainMessage(SessionHandler.MSG_DISPATCH_PRINTERS_ADDED,
-                        addedPrinters).sendToTarget();
+                Handler.getMain().sendMessage(obtainMessage(
+                        UserState.PrinterDiscoverySessionMediator::handleDispatchPrintersAdded,
+                        this, addedPrinters));
             }
         }
 
@@ -1598,68 +1567,58 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                 return;
             }
             // Tell the service to create a session.
-            mSessionHandler.obtainMessage(
-                    SessionHandler.MSG_CREATE_PRINTER_DISCOVERY_SESSION,
-                    service).sendToTarget();
+            Handler.getMain().sendMessage(obtainMessage(
+                    RemotePrintService::createPrinterDiscoverySession, service));
             // Start printer discovery if necessary.
             if (!mStartedPrinterDiscoveryTokens.isEmpty()) {
-                mSessionHandler.obtainMessage(
-                        SessionHandler.MSG_START_PRINTER_DISCOVERY,
-                        service).sendToTarget();
+                Handler.getMain().sendMessage(obtainMessage(
+                        RemotePrintService::startPrinterDiscovery, service, null));
             }
             // Start tracking printers if necessary
             final int trackedPrinterCount = mStateTrackedPrinters.size();
             for (int i = 0; i < trackedPrinterCount; i++) {
                 PrinterId printerId = mStateTrackedPrinters.get(i);
                 if (printerId.getServiceName().equals(service.getComponentName())) {
-                    SomeArgs args = SomeArgs.obtain();
-                    args.arg1 = service;
-                    args.arg2 = printerId;
-                    mSessionHandler.obtainMessage(SessionHandler
-                            .MSG_START_PRINTER_STATE_TRACKING, args)
-                            .sendToTarget();
+                    Handler.getMain().sendMessage(obtainMessage(
+                            RemotePrintService::startPrinterStateTracking, service, printerId));
                 }
             }
         }
 
-        public void dump(PrintWriter pw, String prefix) {
-            pw.append(prefix).append("destroyed=")
-                    .append(String.valueOf(mDestroyed)).println();
+        public void dumpLocked(@NonNull DualDumpOutputStream dumpStream) {
+            dumpStream.write("is_destroyed", PrinterDiscoverySessionProto.IS_DESTROYED, mDestroyed);
+            dumpStream.write("is_printer_discovery_in_progress",
+                    PrinterDiscoverySessionProto.IS_PRINTER_DISCOVERY_IN_PROGRESS,
+                    !mStartedPrinterDiscoveryTokens.isEmpty());
 
-            pw.append(prefix).append("printDiscoveryInProgress=")
-                    .append(String.valueOf(!mStartedPrinterDiscoveryTokens.isEmpty())).println();
-
-            String tab = "  ";
-
-            pw.append(prefix).append(tab).append("printer discovery observers:").println();
             final int observerCount = mDiscoveryObservers.beginBroadcast();
             for (int i = 0; i < observerCount; i++) {
                 IPrinterDiscoveryObserver observer = mDiscoveryObservers.getBroadcastItem(i);
-                pw.append(prefix).append(prefix).append(observer.toString());
-                pw.println();
+                dumpStream.write("printer_discovery_observers",
+                        PrinterDiscoverySessionProto.PRINTER_DISCOVERY_OBSERVERS,
+                        observer.toString());
             }
             mDiscoveryObservers.finishBroadcast();
 
-            pw.append(prefix).append(tab).append("start discovery requests:").println();
             final int tokenCount = this.mStartedPrinterDiscoveryTokens.size();
             for (int i = 0; i < tokenCount; i++) {
                 IBinder token = mStartedPrinterDiscoveryTokens.get(i);
-                pw.append(prefix).append(tab).append(tab).append(token.toString()).println();
+                dumpStream.write("discovery_requests",
+                        PrinterDiscoverySessionProto.DISCOVERY_REQUESTS, token.toString());
             }
 
-            pw.append(prefix).append(tab).append("tracked printer requests:").println();
             final int trackedPrinters = mStateTrackedPrinters.size();
             for (int i = 0; i < trackedPrinters; i++) {
                 PrinterId printer = mStateTrackedPrinters.get(i);
-                pw.append(prefix).append(tab).append(tab).append(printer.toString()).println();
+                writePrinterId(dumpStream, "tracked_printer_requests",
+                        PrinterDiscoverySessionProto.TRACKED_PRINTER_REQUESTS, printer);
             }
 
-            pw.append(prefix).append(tab).append("printers:").println();
-            final int pritnerCount = mPrinters.size();
-            for (int i = 0; i < pritnerCount; i++) {
+            final int printerCount = mPrinters.size();
+            for (int i = 0; i < printerCount; i++) {
                 PrinterInfo printer = mPrinters.valueAt(i);
-                pw.append(prefix).append(tab).append(tab).append(
-                        printer.toString()).println();
+                writePrinterInfo(mContext, dumpStream, "printer",
+                        PrinterDiscoverySessionProto.PRINTER, printer);
             }
         }
 
@@ -1685,9 +1644,9 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                 for (int i = 0; i < removedPrinterCount; i++) {
                     mPrinters.remove(removedPrinterIds.get(i));
                 }
-                mSessionHandler.obtainMessage(
-                        SessionHandler.MSG_DISPATCH_PRINTERS_REMOVED,
-                        removedPrinterIds).sendToTarget();
+                Handler.getMain().sendMessage(obtainMessage(
+                        UserState.PrinterDiscoverySessionMediator::handleDispatchPrintersRemoved,
+                        this, removedPrinterIds));
             }
         }
 
@@ -1775,134 +1734,6 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
                 observer.onPrintersRemoved(new ParceledListSlice<PrinterId>(printerIds));
             } catch (RemoteException re) {
                 Log.e(LOG_TAG, "Error sending removed printers", re);
-            }
-        }
-
-        private final class SessionHandler extends Handler {
-            public static final int MSG_PRINTERS_ADDED = 1;
-            public static final int MSG_PRINTERS_REMOVED = 2;
-            public static final int MSG_DISPATCH_PRINTERS_ADDED = 3;
-            public static final int MSG_DISPATCH_PRINTERS_REMOVED = 4;
-
-            public static final int MSG_CREATE_PRINTER_DISCOVERY_SESSION = 5;
-            public static final int MSG_DESTROY_PRINTER_DISCOVERY_SESSION = 6;
-            public static final int MSG_START_PRINTER_DISCOVERY = 7;
-            public static final int MSG_STOP_PRINTER_DISCOVERY = 8;
-            public static final int MSG_DISPATCH_CREATE_PRINTER_DISCOVERY_SESSION = 9;
-            public static final int MSG_DISPATCH_DESTROY_PRINTER_DISCOVERY_SESSION = 10;
-            public static final int MSG_DISPATCH_START_PRINTER_DISCOVERY = 11;
-            public static final int MSG_DISPATCH_STOP_PRINTER_DISCOVERY = 12;
-            public static final int MSG_VALIDATE_PRINTERS = 13;
-            public static final int MSG_START_PRINTER_STATE_TRACKING = 14;
-            public static final int MSG_STOP_PRINTER_STATE_TRACKING = 15;
-            public static final int MSG_DESTROY_SERVICE = 16;
-
-            SessionHandler(Looper looper) {
-                super(looper, null, false);
-            }
-
-            @Override
-            @SuppressWarnings("unchecked")
-            public void handleMessage(Message message) {
-                switch (message.what) {
-                    case MSG_PRINTERS_ADDED: {
-                        SomeArgs args = (SomeArgs) message.obj;
-                        IPrinterDiscoveryObserver observer = (IPrinterDiscoveryObserver) args.arg1;
-                        List<PrinterInfo> addedPrinters = (List<PrinterInfo>) args.arg2;
-                        args.recycle();
-                        handlePrintersAdded(observer, addedPrinters);
-                    } break;
-
-                    case MSG_PRINTERS_REMOVED: {
-                        SomeArgs args = (SomeArgs) message.obj;
-                        IPrinterDiscoveryObserver observer = (IPrinterDiscoveryObserver) args.arg1;
-                        List<PrinterId> removedPrinterIds = (List<PrinterId>) args.arg2;
-                        args.recycle();
-                        handlePrintersRemoved(observer, removedPrinterIds);
-                    }
-
-                    case MSG_DISPATCH_PRINTERS_ADDED: {
-                        List<PrinterInfo> addedPrinters = (List<PrinterInfo>) message.obj;
-                        handleDispatchPrintersAdded(addedPrinters);
-                    } break;
-
-                    case MSG_DISPATCH_PRINTERS_REMOVED: {
-                        List<PrinterId> removedPrinterIds = (List<PrinterId>) message.obj;
-                        handleDispatchPrintersRemoved(removedPrinterIds);
-                    } break;
-
-                    case MSG_CREATE_PRINTER_DISCOVERY_SESSION: {
-                        RemotePrintService service = (RemotePrintService) message.obj;
-                        service.createPrinterDiscoverySession();
-                    } break;
-
-                    case MSG_DESTROY_PRINTER_DISCOVERY_SESSION: {
-                        RemotePrintService service = (RemotePrintService) message.obj;
-                        service.destroyPrinterDiscoverySession();
-                    } break;
-
-                    case MSG_START_PRINTER_DISCOVERY: {
-                        RemotePrintService service = (RemotePrintService) message.obj;
-                        service.startPrinterDiscovery(null);
-                    } break;
-
-                    case MSG_STOP_PRINTER_DISCOVERY: {
-                        RemotePrintService service = (RemotePrintService) message.obj;
-                        service.stopPrinterDiscovery();
-                    } break;
-
-                    case MSG_DISPATCH_CREATE_PRINTER_DISCOVERY_SESSION: {
-                        List<RemotePrintService> services = (List<RemotePrintService>) message.obj;
-                        handleDispatchCreatePrinterDiscoverySession(services);
-                    } break;
-
-                    case MSG_DISPATCH_DESTROY_PRINTER_DISCOVERY_SESSION: {
-                        List<RemotePrintService> services = (List<RemotePrintService>) message.obj;
-                        handleDispatchDestroyPrinterDiscoverySession(services);
-                    } break;
-
-                    case MSG_DISPATCH_START_PRINTER_DISCOVERY: {
-                        SomeArgs args = (SomeArgs) message.obj;
-                        List<RemotePrintService> services = (List<RemotePrintService>) args.arg1;
-                        List<PrinterId> printerIds = (List<PrinterId>) args.arg2;
-                        args.recycle();
-                        handleDispatchStartPrinterDiscovery(services, printerIds);
-                    } break;
-
-                    case MSG_DISPATCH_STOP_PRINTER_DISCOVERY: {
-                        List<RemotePrintService> services = (List<RemotePrintService>) message.obj;
-                        handleDispatchStopPrinterDiscovery(services);
-                    } break;
-
-                    case MSG_VALIDATE_PRINTERS: {
-                        SomeArgs args = (SomeArgs) message.obj;
-                        RemotePrintService service = (RemotePrintService) args.arg1;
-                        List<PrinterId> printerIds = (List<PrinterId>) args.arg2;
-                        args.recycle();
-                        handleValidatePrinters(service, printerIds);
-                    } break;
-
-                    case MSG_START_PRINTER_STATE_TRACKING: {
-                        SomeArgs args = (SomeArgs) message.obj;
-                        RemotePrintService service = (RemotePrintService) args.arg1;
-                        PrinterId printerId = (PrinterId) args.arg2;
-                        args.recycle();
-                        handleStartPrinterStateTracking(service, printerId);
-                    } break;
-
-                    case MSG_STOP_PRINTER_STATE_TRACKING: {
-                        SomeArgs args = (SomeArgs) message.obj;
-                        RemotePrintService service = (RemotePrintService) args.arg1;
-                        PrinterId printerId = (PrinterId) args.arg2;
-                        args.recycle();
-                        handleStopPrinterStateTracking(service, printerId);
-                    } break;
-
-                    case MSG_DESTROY_SERVICE: {
-                        RemotePrintService service = (RemotePrintService) message.obj;
-                        service.destroy();
-                    } break;
-                }
             }
         }
     }
@@ -2000,19 +1831,22 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
             }
         }
 
-        public void dump(PrintWriter pw, String prefix) {
-            synchronized (mLock) {
-                String tab = "  ";
-                final int bucketCount = mPrintJobsForRunningApp.size();
-                for (int i = 0; i < bucketCount; i++) {
-                    final int appId = mPrintJobsForRunningApp.keyAt(i);
-                    pw.append(prefix).append("appId=" + appId).append(':').println();
-                    List<PrintJobInfo> bucket = mPrintJobsForRunningApp.valueAt(i);
-                    final int printJobCount = bucket.size();
-                    for (int j = 0; j < printJobCount; j++) {
-                        PrintJobInfo printJob = bucket.get(j);
-                        pw.append(prefix).append(tab).append(printJob.toString()).println();
-                    }
+        public void dumpLocked(@NonNull DualDumpOutputStream dumpStream) {
+            final int bucketCount = mPrintJobsForRunningApp.size();
+            for (int i = 0; i < bucketCount; i++) {
+                final int appId = mPrintJobsForRunningApp.keyAt(i);
+                List<PrintJobInfo> bucket = mPrintJobsForRunningApp.valueAt(i);
+                final int printJobCount = bucket.size();
+                for (int j = 0; j < printJobCount; j++) {
+                    long token = dumpStream.start("cached_print_jobs",
+                            PrintUserStateProto.CACHED_PRINT_JOBS);
+
+                    dumpStream.write("app_id", CachedPrintJobProto.APP_ID, appId);
+
+                    writePrintJobInfo(mContext, dumpStream, "print_job",
+                            CachedPrintJobProto.PRINT_JOB, bucket.get(j));
+
+                    dumpStream.end(token);
                 }
             }
         }

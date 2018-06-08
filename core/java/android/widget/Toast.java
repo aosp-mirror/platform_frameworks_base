@@ -71,7 +71,10 @@ public class Toast {
     static final boolean localLOGV = false;
 
     /** @hide */
-    @IntDef({LENGTH_SHORT, LENGTH_LONG})
+    @IntDef(prefix = { "LENGTH_" }, value = {
+            LENGTH_SHORT,
+            LENGTH_LONG
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Duration {}
 
@@ -526,6 +529,14 @@ public class Toast {
                 if (mView.getParent() != null) {
                     if (localLOGV) Log.v(TAG, "REMOVE! " + mView + " in " + this);
                     mWM.removeViewImmediate(mView);
+                }
+
+
+                // Now that we've removed the view it's safe for the server to release
+                // the resources.
+                try {
+                    getService().finishToken(mPackageName, this);
+                } catch (RemoteException e) {
                 }
 
                 mView = null;

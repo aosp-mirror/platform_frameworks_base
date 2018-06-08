@@ -17,6 +17,9 @@ package android.util;
 
 import android.text.TextUtils;
 
+import java.time.Duration;
+import java.time.format.DateTimeParseException;
+
 /**
  * Parses a list of key=value pairs, separated by some delimiter, and puts the results in
  * an internal Map. Values can be then queried by key, or if not found, a default value
@@ -142,6 +145,68 @@ public class KeyValueListParser {
             try {
                 return Boolean.parseBoolean(value);
             } catch (NumberFormatException e) {
+                // fallthrough
+            }
+        }
+        return def;
+    }
+
+    /**
+     * Get the value for key as an integer array.
+     *
+     * The value should be encoded as "0:1:2:3:4"
+     *
+     * @param key The key to lookup.
+     * @param def The value to return if the key was not found.
+     * @return the int[] value associated with the key.
+     */
+    public int[] getIntArray(String key, int[] def) {
+        String value = mValues.get(key);
+        if (value != null) {
+            try {
+                String[] parts = value.split(":");
+                if (parts.length > 0) {
+                    int[] ret = new int[parts.length];
+                    for (int i = 0; i < parts.length; i++) {
+                        ret[i] = Integer.parseInt(parts[i]);
+                    }
+                    return ret;
+                }
+            } catch (NumberFormatException e) {
+                // fallthrough
+            }
+        }
+        return def;
+    }
+
+    /**
+     * @return the number of keys.
+     */
+    public int size() {
+        return mValues.size();
+    }
+
+    /**
+     * @return the key at {@code index}. Use with {@link #size()} to enumerate all key-value pairs.
+     */
+    public String keyAt(int index) {
+        return mValues.keyAt(index);
+    }
+
+    /**
+     * {@hide}
+     * Parse a duration in millis based on java.time.Duration or just a number (millis)
+     */
+    public long getDurationMillis(String key, long def) {
+        String value = mValues.get(key);
+        if (value != null) {
+            try {
+                if (value.startsWith("P") || value.startsWith("p")) {
+                    return Duration.parse(value).toMillis();
+                } else {
+                    return Long.parseLong(value);
+                }
+            } catch (NumberFormatException | DateTimeParseException e) {
                 // fallthrough
             }
         }

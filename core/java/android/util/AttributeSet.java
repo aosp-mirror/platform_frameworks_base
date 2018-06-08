@@ -17,6 +17,8 @@
 package android.util;
 
 
+import org.xmlpull.v1.XmlPullParser;
+
 /**
  * A collection of attributes, as found associated with a tag in an XML
  * document.  Often you will not want to use this interface directly, instead
@@ -54,18 +56,42 @@ package android.util;
  * compiled XML resource that is not available in a normal XML file, such
  * as {@link #getAttributeNameResource(int)} which returns the resource
  * identifier associated with a particular XML attribute name.
+ *
+ * @see XmlPullParser
  */
 public interface AttributeSet {
     /**
      * Returns the number of attributes available in the set.
-     * 
+     *
+     * <p>See also {@link XmlPullParser#getAttributeCount XmlPullParser.getAttributeCount()},
+     * which this method corresponds to when parsing a compiled XML file.</p>
+     *
      * @return A positive integer, or 0 if the set is empty.
      */
     public int getAttributeCount();
 
     /**
+     * Returns the namespace of the specified attribute.
+     *
+     * <p>See also {@link XmlPullParser#getAttributeNamespace XmlPullParser.getAttributeNamespace()},
+     * which this method corresponds to when parsing a compiled XML file.</p>
+     *
+     * @param index Index of the desired attribute, 0...count-1.
+     *
+     * @return A String containing the namespace of the attribute, or null if th
+     *         attribute cannot be found.
+     */
+    default String getAttributeNamespace (int index) {
+        // This is a new method since the first interface definition, so add stub impl.
+        return null;
+    }
+
+    /**
      * Returns the name of the specified attribute.
-     * 
+     *
+     * <p>See also {@link XmlPullParser#getAttributeName XmlPullParser.getAttributeName()},
+     * which this method corresponds to when parsing a compiled XML file.</p>
+     *
      * @param index Index of the desired attribute, 0...count-1.
      * 
      * @return A String containing the name of the attribute, or null if the

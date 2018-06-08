@@ -42,6 +42,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
+import android.graphics.Xfermode;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -812,6 +813,24 @@ public class GradientDrawable extends Drawable {
                 mStrokePaint.setAlpha(prevStrokeAlpha);
             }
         }
+    }
+
+    /**
+     * @param mode to draw this drawable with
+     * @hide
+     */
+    @Override
+    public void setXfermode(@Nullable Xfermode mode) {
+        super.setXfermode(mode);
+        mFillPaint.setXfermode(mode);
+    }
+
+    /**
+     * @param aa to draw this drawable with
+     * @hide
+     */
+    public void setAntiAlias(boolean aa) {
+        mFillPaint.setAntiAlias(aa);
     }
 
     private void buildPathIfDirty() {
@@ -2074,6 +2093,7 @@ public class GradientDrawable extends Drawable {
             }
             mRadius = radius;
             mRadiusArray = null;
+            computeOpacity();
         }
 
         public void setCornerRadii(float[] radii) {
@@ -2081,6 +2101,7 @@ public class GradientDrawable extends Drawable {
             if (radii == null) {
                 mRadius = 0;
             }
+            computeOpacity();
         }
 
         public void setSize(int width, int height) {

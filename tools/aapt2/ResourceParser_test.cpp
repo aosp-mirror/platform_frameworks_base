@@ -22,15 +22,15 @@
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
-#include "io/StringInputStream.h"
+#include "io/StringStream.h"
 #include "test/Test.h"
 #include "xml/XmlPullParser.h"
 
 using ::aapt::io::StringInputStream;
 using ::aapt::test::StrValueEq;
 using ::aapt::test::ValueEq;
-using ::android::ResTable_map;
 using ::android::Res_value;
+using ::android::ResTable_map;
 using ::android::StringPiece;
 using ::testing::Eq;
 using ::testing::IsEmpty;
@@ -38,6 +38,7 @@ using ::testing::IsNull;
 using ::testing::NotNull;
 using ::testing::Pointee;
 using ::testing::SizeIs;
+using ::testing::StrEq;
 
 namespace aapt {
 
@@ -94,6 +95,16 @@ TEST_F(ResourceParserTest, ParseQuotedString) {
   ASSERT_THAT(str, NotNull());
   EXPECT_THAT(*str, StrValueEq("  hey there "));
   EXPECT_THAT(str->untranslatable_sections, IsEmpty());
+
+  ASSERT_TRUE(TestParse(R"(<string name="bar">Isn\'t it cool?</string>)"));
+  str = test::GetValue<String>(&table_, "string/bar");
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(*str, StrValueEq("Isn't it cool?"));
+
+  ASSERT_TRUE(TestParse(R"(<string name="baz">"Isn't it cool?"</string>)"));
+  str = test::GetValue<String>(&table_, "string/baz");
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(*str, StrValueEq("Isn't it cool?"));
 }
 
 TEST_F(ResourceParserTest, ParseEscapedString) {
@@ -125,16 +136,16 @@ TEST_F(ResourceParserTest, ParseStyledString) {
   StyledString* str = test::GetValue<StyledString>(&table_, "string/foo");
   ASSERT_THAT(str, NotNull());
 
-  EXPECT_THAT(str->value->value, Eq("This is my aunt\u2019s fickle string"));
+  EXPECT_THAT(str->value->value, StrEq("This is my aunt\u2019s fickle string"));
   EXPECT_THAT(str->value->spans, SizeIs(2));
   EXPECT_THAT(str->untranslatable_sections, IsEmpty());
 
-  EXPECT_THAT(*str->value->spans[0].name, Eq("b"));
-  EXPECT_THAT(str->value->spans[0].first_char, Eq(17u));
+  EXPECT_THAT(*str->value->spans[0].name, StrEq("b"));
+  EXPECT_THAT(str->value->spans[0].first_char, Eq(18u));
   EXPECT_THAT(str->value->spans[0].last_char, Eq(30u));
 
-  EXPECT_THAT(*str->value->spans[1].name, Eq("small"));
-  EXPECT_THAT(str->value->spans[1].first_char, Eq(24u));
+  EXPECT_THAT(*str->value->spans[1].name, StrEq("small"));
+  EXPECT_THAT(str->value->spans[1].first_char, Eq(25u));
   EXPECT_THAT(str->value->spans[1].last_char, Eq(30u));
 }
 
@@ -143,7 +154,7 @@ TEST_F(ResourceParserTest, ParseStringWithWhitespace) {
 
   String* str = test::GetValue<String>(&table_, "string/foo");
   ASSERT_THAT(str, NotNull());
-  EXPECT_THAT(*str->value, Eq("This is what I think"));
+  EXPECT_THAT(*str->value, StrEq("This is what I think"));
   EXPECT_THAT(str->untranslatable_sections, IsEmpty());
 
   ASSERT_TRUE(TestParse(R"(<string name="foo2">"  This is what  I think  "</string>)"));
@@ -151,6 +162,58 @@ TEST_F(ResourceParserTest, ParseStringWithWhitespace) {
   str = test::GetValue<String>(&table_, "string/foo2");
   ASSERT_THAT(str, NotNull());
   EXPECT_THAT(*str, StrValueEq("  This is what  I think  "));
+}
+
+TEST_F(ResourceParserTest, ParseStringTruncateASCII) {
+  // Tuncate leading and trailing whitespace
+  EXPECT_TRUE(TestParse(R"(<string name="foo">&#32;Hello&#32;</string>)"));
+
+  String* str = test::GetValue<String>(&table_, "string/foo");
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(*str->value, StrEq("Hello"));
+  EXPECT_THAT(str->untranslatable_sections, IsEmpty());
+
+  // AAPT does not truncate unicode whitespace
+  EXPECT_TRUE(TestParse(R"(<string name="foo2">\u0020\Hello\u0020</string>)"));
+
+  str = test::GetValue<String>(&table_, "string/foo2");
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(*str->value, StrEq(" Hello "));
+  EXPECT_THAT(str->untranslatable_sections, IsEmpty());
+
+  // Preserve non-ASCII whitespace including extended ASCII characters
+  EXPECT_TRUE(TestParse(R"(<string name="foo3">&#160;Hello&#160;</string>)"));
+
+  str = test::GetValue<String>(&table_, "string/foo3");
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(*str->value, StrEq("\xC2\xA0Hello\xC2\xA0"));
+  EXPECT_THAT(str->untranslatable_sections, IsEmpty());
+
+  EXPECT_TRUE(TestParse(R"(<string name="foo4">2005年6月1日</string>)"));
+
+  str = test::GetValue<String>(&table_, "string/foo4");
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(*str->value, StrEq("2005年6月1日"));
+  EXPECT_THAT(str->untranslatable_sections, IsEmpty());
+}
+
+TEST_F(ResourceParserTest, ParseStyledStringWithWhitespace) {
+  std::string input = R"(<string name="foo">  <b> My <i> favorite</i> string </b>  </string>)";
+  ASSERT_TRUE(TestParse(input));
+
+  StyledString* str = test::GetValue<StyledString>(&table_, "string/foo");
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(str->value->value, StrEq("  My  favorite string  "));
+  EXPECT_THAT(str->untranslatable_sections, IsEmpty());
+
+  ASSERT_THAT(str->value->spans, SizeIs(2u));
+  EXPECT_THAT(*str->value->spans[0].name, StrEq("b"));
+  EXPECT_THAT(str->value->spans[0].first_char, Eq(1u));
+  EXPECT_THAT(str->value->spans[0].last_char, Eq(21u));
+
+  EXPECT_THAT(*str->value->spans[1].name, StrEq("i"));
+  EXPECT_THAT(str->value->spans[1].first_char, Eq(5u));
+  EXPECT_THAT(str->value->spans[1].last_char, Eq(13u));
 }
 
 TEST_F(ResourceParserTest, IgnoreXliffTagsOtherThanG) {
@@ -181,12 +244,9 @@ TEST_F(ResourceParserTest, RecordUntranslateableXliffSectionsInString) {
   String* str = test::GetValue<String>(&table_, "string/foo");
   ASSERT_THAT(str, NotNull());
   EXPECT_THAT(*str, StrValueEq("There are %1$d apples"));
-  ASSERT_THAT(str->untranslatable_sections, SizeIs(1));
 
-  // We expect indices and lengths that span to include the whitespace
-  // before %1$d. This is due to how the StringBuilder withholds whitespace unless
-  // needed (to deal with line breaks, etc.).
-  EXPECT_THAT(str->untranslatable_sections[0].start, Eq(9u));
+  ASSERT_THAT(str->untranslatable_sections, SizeIs(1));
+  EXPECT_THAT(str->untranslatable_sections[0].start, Eq(10u));
   EXPECT_THAT(str->untranslatable_sections[0].end, Eq(14u));
 }
 
@@ -198,14 +258,16 @@ TEST_F(ResourceParserTest, RecordUntranslateableXliffSectionsInStyledString) {
 
   StyledString* str = test::GetValue<StyledString>(&table_, "string/foo");
   ASSERT_THAT(str, NotNull());
-  EXPECT_THAT(str->value->value, Eq("There are %1$d apples"));
-  ASSERT_THAT(str->untranslatable_sections, SizeIs(1));
+  EXPECT_THAT(str->value->value, Eq(" There are %1$d apples"));
 
-  // We expect indices and lengths that span to include the whitespace
-  // before %1$d. This is due to how the StringBuilder withholds whitespace unless
-  // needed (to deal with line breaks, etc.).
-  EXPECT_THAT(str->untranslatable_sections[0].start, Eq(9u));
-  EXPECT_THAT(str->untranslatable_sections[0].end, Eq(14u));
+  ASSERT_THAT(str->untranslatable_sections, SizeIs(1));
+  EXPECT_THAT(str->untranslatable_sections[0].start, Eq(11u));
+  EXPECT_THAT(str->untranslatable_sections[0].end, Eq(15u));
+
+  ASSERT_THAT(str->value->spans, SizeIs(1u));
+  EXPECT_THAT(*str->value->spans[0].name, StrEq("b"));
+  EXPECT_THAT(str->value->spans[0].first_char, Eq(11u));
+  EXPECT_THAT(str->value->spans[0].last_char, Eq(14u));
 }
 
 TEST_F(ResourceParserTest, ParseNull) {
@@ -482,7 +544,7 @@ TEST_F(ResourceParserTest, ParseAttributesDeclareStyleable) {
   Maybe<ResourceTable::SearchResult> result =
       table_.FindResource(test::ParseNameOrDie("styleable/foo"));
   ASSERT_TRUE(result);
-  EXPECT_THAT(result.value().entry->symbol_status.state, Eq(SymbolState::kPublic));
+  EXPECT_THAT(result.value().entry->visibility.level, Eq(Visibility::Level::kPublic));
 
   Attribute* attr = test::GetValue<Attribute>(&table_, "attr/bar");
   ASSERT_THAT(attr, NotNull());
@@ -718,6 +780,26 @@ TEST_F(ResourceParserTest, AutoIncrementIdsInPublicGroup) {
   EXPECT_THAT(actual_id, Eq(ResourceId(0x01010041)));
 }
 
+TEST_F(ResourceParserTest, StrongestSymbolVisibilityWins) {
+  std::string input = R"(
+      <!-- private -->
+      <java-symbol type="string" name="foo" />
+      <!-- public -->
+      <public type="string" name="foo" id="0x01020000" />
+      <!-- private2 -->
+      <java-symbol type="string" name="foo" />)";
+  ASSERT_TRUE(TestParse(input));
+
+  Maybe<ResourceTable::SearchResult> result =
+      table_.FindResource(test::ParseNameOrDie("string/foo"));
+  ASSERT_TRUE(result);
+
+  ResourceEntry* entry = result.value().entry;
+  ASSERT_THAT(entry, NotNull());
+  EXPECT_THAT(entry->visibility.level, Eq(Visibility::Level::kPublic));
+  EXPECT_THAT(entry->visibility.comment, StrEq("public"));
+}
+
 TEST_F(ResourceParserTest, ExternalTypesShouldOnlyBeReferences) {
   ASSERT_TRUE(TestParse(R"(<item type="layout" name="foo">@layout/bar</item>)"));
   ASSERT_FALSE(TestParse(R"(<item type="layout" name="bar">"this is a string"</item>)"));
@@ -731,8 +813,8 @@ TEST_F(ResourceParserTest, AddResourcesElementShouldAddEntryWithUndefinedSymbol)
   ASSERT_TRUE(result);
   const ResourceEntry* entry = result.value().entry;
   ASSERT_THAT(entry, NotNull());
-  EXPECT_THAT(entry->symbol_status.state, Eq(SymbolState::kUndefined));
-  EXPECT_TRUE(entry->symbol_status.allow_new);
+  EXPECT_THAT(entry->visibility.level, Eq(Visibility::Level::kUndefined));
+  EXPECT_TRUE(entry->allow_new);
 }
 
 TEST_F(ResourceParserTest, ParseItemElementWithFormat) {
@@ -788,6 +870,105 @@ TEST_F(ResourceParserTest, ParseElementWithNoValue) {
 
 TEST_F(ResourceParserTest, ParsePlatformIndependentNewline) {
   ASSERT_TRUE(TestParse(R"(<string name="foo">%1$s %n %2$s</string>)"));
+}
+
+TEST_F(ResourceParserTest, ParseOverlayableTagWithSystemPolicy) {
+  std::string input = R"(
+      <overlayable policy="illegal_policy">
+        <item type="string" name="foo" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable policy="system">
+        <item name="foo" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable policy="system">
+        <item type="attr" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(
+      <overlayable policy="system">
+        <item type="bad_type" name="foo" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+
+  input = R"(<overlayable policy="system" />)";
+  EXPECT_TRUE(TestParse(input));
+
+  input = R"(<overlayable />)";
+  EXPECT_TRUE(TestParse(input));
+
+  input = R"(
+      <overlayable policy="system">
+        <item type="string" name="foo" />
+        <item type="dimen" name="foo" />
+      </overlayable>)";
+  ASSERT_TRUE(TestParse(input));
+
+  input = R"(
+      <overlayable>
+        <item type="string" name="bar" />
+      </overlayable>)";
+  ASSERT_TRUE(TestParse(input));
+
+  Maybe<ResourceTable::SearchResult> search_result =
+      table_.FindResource(test::ParseNameOrDie("string/bar"));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kUndefined));
+  EXPECT_TRUE(search_result.value().entry->overlayable);
+}
+
+TEST_F(ResourceParserTest, DuplicateOverlayableIsError) {
+  std::string input = R"(
+      <overlayable>
+        <item type="string" name="foo" />
+        <item type="string" name="foo" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
+}
+
+TEST_F(ResourceParserTest, ParseIdItem) {
+  std::string input = R"(
+    <item name="foo" type="id">@id/bar</item>
+    <item name="bar" type="id"/>
+    <item name="baz" type="id"></item>)";
+  ASSERT_TRUE(TestParse(input));
+
+  ASSERT_THAT(test::GetValue<Reference>(&table_, "id/foo"), NotNull());
+  ASSERT_THAT(test::GetValue<Id>(&table_, "id/bar"), NotNull());
+  ASSERT_THAT(test::GetValue<Id>(&table_, "id/baz"), NotNull());
+
+  input = R"(
+    <id name="foo2">@id/bar</id>
+    <id name="bar2"/>
+    <id name="baz2"></id>)";
+  ASSERT_TRUE(TestParse(input));
+
+  ASSERT_THAT(test::GetValue<Reference>(&table_, "id/foo2"), NotNull());
+  ASSERT_THAT(test::GetValue<Id>(&table_, "id/bar2"), NotNull());
+  ASSERT_THAT(test::GetValue<Id>(&table_, "id/baz2"), NotNull());
+
+  // Reject attribute references
+  input = R"(<item name="foo3" type="id">?attr/bar"</item>)";
+  ASSERT_FALSE(TestParse(input));
+
+  // Reject non-references
+  input = R"(<item name="foo4" type="id">0x7f010001</item>)";
+  ASSERT_FALSE(TestParse(input));
+  input = R"(<item name="foo5" type="id">@drawable/my_image</item>)";
+  ASSERT_FALSE(TestParse(input));
+  input = R"(<item name="foo6" type="id"><string name="biz"></string></item>)";
+  ASSERT_FALSE(TestParse(input));
+
+  // Ids that reference other resource ids cannot be public
+  input = R"(<public name="foo7" type="id">@id/bar7</item>)";
+  ASSERT_FALSE(TestParse(input));
 }
 
 }  // namespace aapt

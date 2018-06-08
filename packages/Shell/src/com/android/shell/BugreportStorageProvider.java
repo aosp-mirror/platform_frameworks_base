@@ -60,7 +60,7 @@ public class BugreportStorageProvider extends FileSystemProvider {
         final MatrixCursor result = new MatrixCursor(resolveRootProjection(projection));
         final RowBuilder row = result.newRow();
         row.add(Root.COLUMN_ROOT_ID, DOC_ID_ROOT);
-        row.add(Root.COLUMN_FLAGS, Root.FLAG_LOCAL_ONLY | Root.FLAG_ADVANCED);
+        row.add(Root.COLUMN_FLAGS, Root.FLAG_LOCAL_ONLY);
         row.add(Root.COLUMN_ICON, android.R.mipmap.sym_def_app_icon);
         row.add(Root.COLUMN_TITLE, getContext().getString(R.string.bugreport_storage_title));
         row.add(Root.COLUMN_DOCUMENT_ID, DOC_ID_ROOT);

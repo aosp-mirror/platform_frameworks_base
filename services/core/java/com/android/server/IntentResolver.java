@@ -38,6 +38,8 @@ import android.util.Printer;
 
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.proto.ProtoOutputStream;
+
 import com.android.internal.util.FastPrintWriter;
 
 /**
@@ -70,7 +72,7 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
         }
     }
 
-    private boolean filterEquals(IntentFilter f1, IntentFilter f2) {
+    public static boolean filterEquals(IntentFilter f1, IntentFilter f2) {
         int s1 = f1.countActions();
         int s2 = f2.countActions();
         if (s1 != s2) {
@@ -277,6 +279,31 @@ public abstract class IntentResolver<F extends IntentFilter, R extends Object> {
             }
         }
         return printedSomething;
+    }
+
+    void writeProtoMap(ProtoOutputStream proto, long fieldId, ArrayMap<String, F[]> map) {
+        int N = map.size();
+        for (int mapi = 0; mapi < N; mapi++) {
+            long token = proto.start(fieldId);
+            proto.write(IntentResolverProto.ArrayMapEntry.KEY, map.keyAt(mapi));
+            for (F f : map.valueAt(mapi)) {
+                if (f != null) {
+                    proto.write(IntentResolverProto.ArrayMapEntry.VALUES, f.toString());
+                }
+            }
+            proto.end(token);
+        }
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        writeProtoMap(proto, IntentResolverProto.FULL_MIME_TYPES, mTypeToFilter);
+        writeProtoMap(proto, IntentResolverProto.BASE_MIME_TYPES, mBaseTypeToFilter);
+        writeProtoMap(proto, IntentResolverProto.WILD_MIME_TYPES, mWildTypeToFilter);
+        writeProtoMap(proto, IntentResolverProto.SCHEMES, mSchemeToFilter);
+        writeProtoMap(proto, IntentResolverProto.NON_DATA_ACTIONS, mActionToFilter);
+        writeProtoMap(proto, IntentResolverProto.MIME_TYPED_ACTIONS, mTypedActionToFilter);
+        proto.end(token);
     }
 
     public boolean dump(PrintWriter out, String title, String prefix, String packageName,

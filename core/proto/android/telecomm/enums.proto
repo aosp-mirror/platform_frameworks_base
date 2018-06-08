@@ -1,0 +1,185 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.telecom;
+
+option java_outer_classname = "TelecomProtoEnums";
+option java_multiple_files = true;
+
+/**
+ * Call states, primarily used in CallState.java,
+ * Call.java, and CallsManager.java in packages/services.
+ */
+enum CallStateEnum {
+    /**
+     * Indicates that a call is new and not connected. This is used as the default state internally
+     * within Telecom and should not be used between Telecom and call services. Call services are
+     * not expected to ever interact with NEW calls, but {@link android.telecom.InCallService}s will
+     * see calls in this state.
+     */
+    NEW = 0;
+
+    /**
+     * The initial state of an outgoing {@code Call}.
+     * Common transitions are to {@link #DIALING} state for a successful call or
+     * {@link #DISCONNECTED} if it failed.
+     */
+    CONNECTING = 1;
+
+    /**
+     * The state of an outgoing {@code Call} when waiting on user to select a
+     * {@link android.telecom.PhoneAccount} through which to place the call.
+     */
+    SELECT_PHONE_ACCOUNT = 2;
+
+    /**
+     * Indicates that a call is outgoing and in the dialing state. A call transitions to this state
+     * once an outgoing call has begun (e.g., user presses the dial button in Dialer). Calls in this
+     * state usually transition to {@link #ACTIVE} if the call was answered or {@link #DISCONNECTED}
+     * if the call was disconnected somehow (e.g., failure or cancellation of the call by the user).
+     */
+    DIALING = 3;
+
+    /**
+     * Indicates that a call is incoming and the user still has the option of answering, rejecting,
+     * or doing nothing with the call. This state is usually associated with some type of audible
+     * ringtone. Normal transitions are to {@link #ACTIVE} if answered or {@link #DISCONNECTED}
+     * otherwise.
+     */
+    RINGING = 4;
+
+    /**
+     * Indicates that a call is currently connected to another party and a communication channel is
+     * open between them. The normal transition to this state is by the user answering a
+     * {@link #DIALING} call or a {@link #RINGING} call being answered by the other party.
+     */
+    ACTIVE = 5;
+
+    /**
+     * Indicates that the call is currently on hold. In this state, the call is not terminated
+     * but no communication is allowed until the call is no longer on hold. The typical transition
+     * to this state is by the user putting an {@link #ACTIVE} call on hold by explicitly performing
+     * an action, such as clicking the hold button.
+     */
+    ON_HOLD = 6;
+
+    /**
+     * Indicates that a call is currently disconnected. All states can transition to this state
+     * by the call service giving notice that the connection has been severed. When the user
+     * explicitly ends a call, it will not transition to this state until the call service confirms
+     * the disconnection or communication was lost to the call service currently responsible for
+     * this call (e.g., call service crashes).
+     */
+    DISCONNECTED = 7;
+
+    /**
+     * Indicates that the call was attempted (mostly in the context of outgoing, at least at the
+     * time of writing) but cancelled before it was successfully connected.
+     */
+    ABORTED = 8;
+
+    /**
+     * Indicates that the call is in the process of being disconnected and will transition next
+     * to a {@link #DISCONNECTED} state.
+     * <p>
+     * This state is not expected to be communicated from the Telephony layer, but will be reported
+     * to the InCall UI for calls where disconnection has been initiated by the user but the
+     * ConnectionService has confirmed the call as disconnected.
+     */
+    DISCONNECTING = 9;
+
+    /**
+     * Indicates that the call is in the process of being pulled to the local device.
+     * <p>
+     * This state should only be set on a call with
+     * {@link android.telecom.Connection#PROPERTY_IS_EXTERNAL_CALL} and
+     * {@link android.telecom.Connection#CAPABILITY_CAN_PULL_CALL}.
+     */
+    PULLING = 10;
+}
+
+// Disconnect causes for a call. Primarily used by android/telecom/DisconnectCause.java
+enum DisconnectCauseEnum {
+    /**
+     * Disconnected because of an unknown or unspecified reason.
+     */
+    UNKNOWN = 0;
+
+    /**
+     * Disconnected because there was an error, such as a problem with the network.
+     */
+    ERROR = 1;
+
+    /**
+     * Disconnected because of a local user-initiated action, such as hanging up.
+     */
+    LOCAL = 2;
+
+    /**
+     * Disconnected because of a remote user-initiated action, such as the other party hanging up
+     * up.
+     */
+    REMOTE = 3;
+
+    /**
+     * Disconnected because it has been canceled.
+     */
+    CANCELED = 4;
+
+    /**
+     * Disconnected because there was no response to an incoming call.
+     */
+    MISSED = 5;
+
+    /**
+     * Disconnected because the user rejected an incoming call.
+     */
+    REJECTED = 6;
+
+    /**
+     * Disconnected because the other party was busy.
+     */
+    BUSY = 7;
+
+    /**
+     * Disconnected because of a restriction on placing the call, such as dialing in airplane
+     * mode.
+     */
+    RESTRICTED = 8;
+
+    /**
+     * Disconnected for reason not described by other disconnect codes.
+     */
+    OTHER = 9;
+
+    /**
+     * Disconnected because the connection manager did not support the call. The call will be tried
+     * again without a connection manager. See {@link PhoneAccount#CAPABILITY_CONNECTION_MANAGER}.
+     */
+    CONNECTION_MANAGER_NOT_SUPPORTED = 10;
+
+    /**
+     * Disconnected because the user did not locally answer the incoming call, but it was answered
+     * on another device where the call was ringing.
+     */
+    ANSWERED_ELSEWHERE = 11;
+
+    /**
+     * Disconnected because the call was pulled from the current device to another device.
+     */
+    CALL_PULLED = 12;
+}

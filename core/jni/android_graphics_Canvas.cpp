@@ -18,6 +18,7 @@
 #include "GraphicsJNI.h"
 #include "core_jni_helpers.h"
 
+#include <android/api-level.h>
 #include <androidfw/ResourceTypes.h>
 #include <hwui/Canvas.h>
 #include <hwui/Paint.h>
@@ -29,6 +30,10 @@
 #include "SkGraphics.h"
 #include "SkRegion.h"
 #include "SkVertices.h"
+
+namespace minikin {
+class MeasuredText;
+}  // namespace minikin
 
 namespace android {
 
@@ -75,11 +80,6 @@ static jint getWidth(jlong canvasHandle) {
 
 static jint getHeight(jlong canvasHandle) {
     return static_cast<jint>(get_canvas(canvasHandle)->height());
-}
-
-static void setHighContrastText(jlong canvasHandle, jboolean highContrastText) {
-    Canvas* canvas = get_canvas(canvasHandle);
-    canvas->setHighContrastText(highContrastText);
 }
 
 static jint save(jlong canvasHandle, jint flagsHandle) {
@@ -448,8 +448,9 @@ static void drawBitmapArray(JNIEnv* env, jobject, jlong canvasHandle,
                             jboolean hasAlpha, jlong paintHandle) {
     // Note: If hasAlpha is false, kRGB_565_SkColorType will be used, which will
     // correct the alphaType to kOpaque_SkAlphaType.
-    SkImageInfo info = SkImageInfo::MakeN32(width, height, kPremul_SkAlphaType,
-            GraphicsJNI::defaultColorSpace());
+    SkImageInfo info = SkImageInfo::Make(width, height,
+                           hasAlpha ? kN32_SkColorType : kRGB_565_SkColorType,
+                           kPremul_SkAlphaType);
     SkBitmap bitmap;
     bitmap.setInfo(info);
     sk_sp<Bitmap> androidBitmap = Bitmap::allocateHeapBitmap(&bitmap);
@@ -468,6 +469,13 @@ static void drawBitmapArray(JNIEnv* env, jobject, jlong canvasHandle,
 static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap,
                            jint meshWidth, jint meshHeight, jfloatArray jverts,
                            jint vertIndex, jintArray jcolors, jint colorIndex, jlong paintHandle) {
+    if (Canvas::GetApiLevel() < __ANDROID_API_P__) {
+        // Before P we forgot to respect these. Now that we do respect them, explicitly
+        // zero them for backward compatibility.
+        vertIndex = 0;
+        colorIndex = 0;
+    }
+
     const int ptCount = (meshWidth + 1) * (meshHeight + 1);
     AutoJavaFloatArray vertA(env, jverts, vertIndex + (ptCount << 1));
     AutoJavaIntArray colorA(env, jcolors, colorIndex + ptCount);
@@ -475,89 +483,89 @@ static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jobject jbi
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     Bitmap& bitmap = android::bitmap::toBitmap(env, jbitmap);
     get_canvas(canvasHandle)->drawBitmapMesh(bitmap, meshWidth, meshHeight,
-                                             vertA.ptr(), colorA.ptr(), paint);
+                                             vertA.ptr() + vertIndex*2,
+                                             colorA.ptr() + colorIndex, paint);
 }
 
 static void drawTextChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray text,
                           jint index, jint count, jfloat x, jfloat y, jint bidiFlags,
-                          jlong paintHandle, jlong typefaceHandle) {
+                          jlong paintHandle) {
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+    const Typeface* typeface = paint->getAndroidTypeface();
     jchar* jchars = env->GetCharArrayElements(text, NULL);
     get_canvas(canvasHandle)->drawText(jchars + index, 0, count, count, x, y,
-                                       bidiFlags, *paint, typeface);
+            static_cast<minikin::Bidi>(bidiFlags), *paint, typeface, nullptr);
     env->ReleaseCharArrayElements(text, jchars, JNI_ABORT);
 }
 
 static void drawTextString(JNIEnv* env, jobject, jlong canvasHandle, jstring text,
                            jint start, jint end, jfloat x, jfloat y, jint bidiFlags,
-                           jlong paintHandle, jlong typefaceHandle) {
+                           jlong paintHandle) {
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+    const Typeface* typeface = paint->getAndroidTypeface();
     const int count = end - start;
     const jchar* jchars = env->GetStringChars(text, NULL);
     get_canvas(canvasHandle)->drawText(jchars + start, 0, count, count, x, y,
-                                       bidiFlags, *paint, typeface);
+            static_cast<minikin::Bidi>(bidiFlags), *paint, typeface, nullptr);
     env->ReleaseStringChars(text, jchars);
 }
 
 static void drawTextRunChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray text, jint index,
                              jint count, jint contextIndex, jint contextCount, jfloat x, jfloat y,
-                             jboolean isRtl, jlong paintHandle, jlong typefaceHandle) {
+                             jboolean isRtl, jlong paintHandle, jlong mtHandle) {
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+    minikin::MeasuredText* mt = reinterpret_cast<minikin::MeasuredText*>(mtHandle);
+    const Typeface* typeface = paint->getAndroidTypeface();
 
-    const int bidiFlags = isRtl ? minikin::kBidi_Force_RTL : minikin::kBidi_Force_LTR;
+    const minikin::Bidi bidiFlags = isRtl ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
     jchar* jchars = env->GetCharArrayElements(text, NULL);
     get_canvas(canvasHandle)->drawText(jchars + contextIndex, index - contextIndex, count,
-                                       contextCount, x, y, bidiFlags, *paint, typeface);
+                                       contextCount, x, y, bidiFlags, *paint, typeface, mt);
     env->ReleaseCharArrayElements(text, jchars, JNI_ABORT);
 }
 
 static void drawTextRunString(JNIEnv* env, jobject obj, jlong canvasHandle, jstring text,
                               jint start, jint end, jint contextStart, jint contextEnd,
-                              jfloat x, jfloat y, jboolean isRtl, jlong paintHandle,
-                              jlong typefaceHandle) {
+                              jfloat x, jfloat y, jboolean isRtl, jlong paintHandle) {
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+    const Typeface* typeface = paint->getAndroidTypeface();
 
-    int bidiFlags = isRtl ? minikin::kBidi_Force_RTL : minikin::kBidi_Force_LTR;
+    const minikin::Bidi bidiFlags = isRtl ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
     jint count = end - start;
     jint contextCount = contextEnd - contextStart;
     const jchar* jchars = env->GetStringChars(text, NULL);
     get_canvas(canvasHandle)->drawText(jchars + contextStart, start - contextStart, count,
-                                       contextCount, x, y, bidiFlags, *paint, typeface);
+                                       contextCount, x, y, bidiFlags, *paint, typeface, nullptr);
     env->ReleaseStringChars(text, jchars);
 }
 
 static void drawTextOnPathChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray text,
                                 jint index, jint count, jlong pathHandle, jfloat hOffset,
-                                jfloat vOffset, jint bidiFlags, jlong paintHandle,
-                                jlong typefaceHandle) {
+                                jfloat vOffset, jint bidiFlags, jlong paintHandle) {
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+    const Typeface* typeface = paint->getAndroidTypeface();
 
     jchar* jchars = env->GetCharArrayElements(text, NULL);
 
-    get_canvas(canvasHandle)->drawTextOnPath(jchars + index, count, bidiFlags, *path,
-                   hOffset, vOffset, *paint, typeface);
+    get_canvas(canvasHandle)->drawTextOnPath(jchars + index, count,
+            static_cast<minikin::Bidi>(bidiFlags), *path, hOffset, vOffset, *paint, typeface);
 
     env->ReleaseCharArrayElements(text, jchars, 0);
 }
 
 static void drawTextOnPathString(JNIEnv* env, jobject, jlong canvasHandle, jstring text,
                                  jlong pathHandle, jfloat hOffset, jfloat vOffset,
-                                 jint bidiFlags, jlong paintHandle, jlong typefaceHandle) {
+                                 jint bidiFlags, jlong paintHandle) {
     SkPath* path = reinterpret_cast<SkPath*>(pathHandle);
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
-    Typeface* typeface = reinterpret_cast<Typeface*>(typefaceHandle);
+    const Typeface* typeface = paint->getAndroidTypeface();
 
     const jchar* jchars = env->GetStringChars(text, NULL);
     int count = env->GetStringLength(text);
 
-    get_canvas(canvasHandle)->drawTextOnPath(jchars, count, bidiFlags, *path,
-                   hOffset, vOffset, *paint, typeface);
+    get_canvas(canvasHandle)->drawTextOnPath(jchars, count, static_cast<minikin::Bidi>(bidiFlags),
+            *path, hOffset, vOffset, *paint, typeface);
 
     env->ReleaseStringChars(text, jchars);
 }
@@ -574,6 +582,11 @@ static void freeTextLayoutCaches(JNIEnv* env, jobject) {
     minikin::Layout::purgeCaches();
 }
 
+static void setCompatibilityVersion(JNIEnv* env, jobject, jint apiLevel) {
+    Canvas::setCompatibilityVersion(apiLevel);
+}
+
+
 }; // namespace CanvasJNI
 
 static const JNINativeMethod gMethods[] = {
@@ -581,6 +594,7 @@ static const JNINativeMethod gMethods[] = {
     {"nInitRaster", "(Landroid/graphics/Bitmap;)J", (void*) CanvasJNI::initRaster},
     {"nFreeCaches", "()V", (void*) CanvasJNI::freeCaches},
     {"nFreeTextLayoutCaches", "()V", (void*) CanvasJNI::freeTextLayoutCaches},
+    {"nSetCompatibilityVersion", "(I)V", (void*) CanvasJNI::setCompatibilityVersion},
 
     // ------------ @FastNative ----------------
     {"nSetBitmap", "(JLandroid/graphics/Bitmap;)V", (void*) CanvasJNI::setBitmap},
@@ -590,7 +604,6 @@ static const JNINativeMethod gMethods[] = {
     {"nIsOpaque","(J)Z", (void*) CanvasJNI::isOpaque},
     {"nGetWidth","(J)I", (void*) CanvasJNI::getWidth},
     {"nGetHeight","(J)I", (void*) CanvasJNI::getHeight},
-    {"nSetHighContrastText","(JZ)V", (void*) CanvasJNI::setHighContrastText},
     {"nSave","(JI)I", (void*) CanvasJNI::save},
     {"nSaveLayer","(JFFFFJI)I", (void*) CanvasJNI::saveLayer},
     {"nSaveLayerAlpha","(JFFFFII)I", (void*) CanvasJNI::saveLayerAlpha},
@@ -634,12 +647,12 @@ static const JNINativeMethod gDrawMethods[] = {
     {"nDrawBitmap","(JLandroid/graphics/Bitmap;FFJIII)V", (void*) CanvasJNI::drawBitmap},
     {"nDrawBitmap","(JLandroid/graphics/Bitmap;FFFFFFFFJII)V", (void*) CanvasJNI::drawBitmapRect},
     {"nDrawBitmap", "(J[IIIFFIIZJ)V", (void*)CanvasJNI::drawBitmapArray},
-    {"nDrawText","(J[CIIFFIJJ)V", (void*) CanvasJNI::drawTextChars},
-    {"nDrawText","(JLjava/lang/String;IIFFIJJ)V", (void*) CanvasJNI::drawTextString},
+    {"nDrawText","(J[CIIFFIJ)V", (void*) CanvasJNI::drawTextChars},
+    {"nDrawText","(JLjava/lang/String;IIFFIJ)V", (void*) CanvasJNI::drawTextString},
     {"nDrawTextRun","(J[CIIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunChars},
-    {"nDrawTextRun","(JLjava/lang/String;IIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunString},
-    {"nDrawTextOnPath","(J[CIIJFFIJJ)V", (void*) CanvasJNI::drawTextOnPathChars},
-    {"nDrawTextOnPath","(JLjava/lang/String;JFFIJJ)V", (void*) CanvasJNI::drawTextOnPathString},
+    {"nDrawTextRun","(JLjava/lang/String;IIIIFFZJ)V", (void*) CanvasJNI::drawTextRunString},
+    {"nDrawTextOnPath","(J[CIIJFFIJ)V", (void*) CanvasJNI::drawTextOnPathChars},
+    {"nDrawTextOnPath","(JLjava/lang/String;JFFIJ)V", (void*) CanvasJNI::drawTextOnPathString},
 };
 
 int register_android_graphics_Canvas(JNIEnv* env) {

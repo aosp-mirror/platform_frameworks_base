@@ -14,14 +14,16 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.internal.widget.MessagingLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clipChildren="false"
     android:tag="messaging"
     >
-    <include layout="@layout/notification_template_header" />
-    <LinearLayout
+    <include layout="@layout/notification_template_header"/>
+    <com.android.internal.widget.RemeasuringLinearLayout
             android:id="@+id/notification_action_list_margin_target"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -30,51 +32,30 @@
             android:clipToPadding="false"
             android:orientation="vertical">
 
-        <LinearLayout
+        <com.android.internal.widget.RemeasuringLinearLayout
             android:id="@+id/notification_main_column"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            android:paddingStart="@dimen/notification_content_margin_start"
-            android:paddingEnd="@dimen/notification_content_margin_end"
+            android:layout_weight="1"
+            android:layout_marginStart="@dimen/notification_content_margin_start"
+            android:layout_marginEnd="@dimen/notification_content_margin_end"
             android:minHeight="@dimen/notification_min_content_height"
-            android:layout_marginBottom="@dimen/notification_content_margin_bottom"
-            android:clipToPadding="false"
             android:orientation="vertical"
             >
-            <include layout="@layout/notification_template_part_line1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
             <com.android.internal.widget.MessagingLinearLayout
                 android:id="@+id/notification_messaging"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:spacing="@dimen/notification_messaging_spacing" >
-                <com.android.internal.widget.ImageFloatingTextView android:id="@+id/inbox_text0"
-                    style="@style/Widget.Material.Notification.MessagingText"
-                    />
-                <com.android.internal.widget.ImageFloatingTextView android:id="@+id/inbox_text1"
-                    style="@style/Widget.Material.Notification.MessagingText"
-                    />
-                <com.android.internal.widget.ImageFloatingTextView android:id="@+id/inbox_text2"
-                    style="@style/Widget.Material.Notification.MessagingText"
-                    />
-                <com.android.internal.widget.ImageFloatingTextView android:id="@+id/inbox_text3"
-                    style="@style/Widget.Material.Notification.MessagingText"
-                    />
-                <com.android.internal.widget.ImageFloatingTextView android:id="@+id/inbox_text4"
-                    style="@style/Widget.Material.Notification.MessagingText"
-                    />
-                <com.android.internal.widget.ImageFloatingTextView android:id="@+id/inbox_text5"
-                    style="@style/Widget.Material.Notification.MessagingText"
-                    />
-                <com.android.internal.widget.ImageFloatingTextView android:id="@+id/inbox_text6"
-                    style="@style/Widget.Material.Notification.MessagingText"
-                    />
-            </com.android.internal.widget.MessagingLinearLayout>
-        </LinearLayout>
-    </LinearLayout>
-    <include layout="@layout/notification_material_action_list" />
-    <include layout="@layout/notification_template_right_icon" />
-</FrameLayout>
+                android:spacing="@dimen/notification_messaging_spacing" />
+        </com.android.internal.widget.RemeasuringLinearLayout>
+        <include layout="@layout/notification_template_smart_reply_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/notification_content_margin"
+                android:layout_marginStart="@dimen/notification_content_margin_start"
+                android:layout_marginEnd="@dimen/notification_content_margin_end" />
+        <include layout="@layout/notification_material_action_list" />
+    </com.android.internal.widget.RemeasuringLinearLayout>
+    <include layout="@layout/notification_template_right_icon"/>
+</com.android.internal.widget.MessagingLayout>

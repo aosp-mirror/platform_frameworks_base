@@ -18,6 +18,7 @@
 
 #include <graphicsenv/GraphicsEnv.h>
 #include <nativehelper/ScopedUtfChars.h>
+#include <nativeloader/native_loader.h>
 #include "core_jni_helpers.h"
 
 namespace {
@@ -27,8 +28,23 @@ void setDriverPath(JNIEnv* env, jobject clazz, jstring path) {
     android::GraphicsEnv::getInstance().setDriverPath(pathChars.c_str());
 }
 
+void setLayerPaths_native(JNIEnv* env, jobject clazz, jobject classLoader, jstring layerPaths) {
+    android_namespace_t* appNamespace = android::FindNamespaceByClassLoader(env, classLoader);
+    ScopedUtfChars layerPathsChars(env, layerPaths);
+    android::GraphicsEnv::getInstance().setLayerPaths(appNamespace, layerPathsChars.c_str());
+}
+
+void setDebugLayers_native(JNIEnv* env, jobject clazz, jstring layers) {
+    if (layers != nullptr) {
+        ScopedUtfChars layersChars(env, layers);
+        android::GraphicsEnv::getInstance().setDebugLayers(layersChars.c_str());
+    }
+}
+
 const JNINativeMethod g_methods[] = {
     { "setDriverPath", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDriverPath) },
+    { "setLayerPaths", "(Ljava/lang/ClassLoader;Ljava/lang/String;)V", reinterpret_cast<void*>(setLayerPaths_native) },
+    { "setDebugLayers", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDebugLayers_native) },
 };
 
 const char* const kGraphicsEnvironmentName = "android/os/GraphicsEnvironment";

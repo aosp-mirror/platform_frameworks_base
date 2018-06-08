@@ -21,12 +21,12 @@ import android.util.Property;
 import android.view.View;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 /**
  * Filters the animations for only a certain type of properties.
  */
 public class AnimationFilter {
+    public static final int NO_DELAY = -1;
     boolean animateAlpha;
     boolean animateX;
     boolean animateY;
@@ -40,7 +40,7 @@ public class AnimationFilter {
     public boolean animateShadowAlpha;
     boolean hasDelays;
     boolean hasGoToFullShadeEvent;
-    boolean hasHeadsUpDisappearClickEvent;
+    long customDelay;
     private ArraySet<Property> mAnimatedProperties = new ArraySet<>();
 
     public AnimationFilter animateAlpha() {
@@ -129,8 +129,14 @@ public class AnimationFilter {
                 hasGoToFullShadeEvent = true;
             }
             if (ev.animationType == NotificationStackScrollLayout.AnimationEvent
+                    .ANIMATION_TYPE_HEADS_UP_DISAPPEAR) {
+                customDelay = StackStateAnimator.ANIMATION_DELAY_HEADS_UP;
+            } else if (ev.animationType == NotificationStackScrollLayout.AnimationEvent
                     .ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK) {
-                hasHeadsUpDisappearClickEvent = true;
+                // We need both timeouts when clicking, one to delay it and one for the animation
+                // to look nice
+                customDelay = StackStateAnimator.ANIMATION_DELAY_HEADS_UP_CLICKED
+                        + StackStateAnimator.ANIMATION_DELAY_HEADS_UP;
             }
         }
     }
@@ -165,7 +171,7 @@ public class AnimationFilter {
         animateHideSensitive = false;
         hasDelays = false;
         hasGoToFullShadeEvent = false;
-        hasHeadsUpDisappearClickEvent = false;
+        customDelay = NO_DELAY;
         mAnimatedProperties.clear();
     }
 

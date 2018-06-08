@@ -26,9 +26,9 @@
 
 #include <binder/IServiceManager.h>
 #include <cutils/properties.h>
-#include <media/ICrypto.h>
-#include <media/IMediaDrmService.h>
 #include <media/stagefright/foundation/ADebug.h>
+#include <mediadrm/ICrypto.h>
+#include <mediadrm/IMediaDrmService.h>
 
 namespace android {
 

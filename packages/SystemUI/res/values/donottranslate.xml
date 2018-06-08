@@ -20,4 +20,6 @@
     <!-- Date format for display: should match the lockscreen in /policy.  -->
     <string name="system_ui_date_pattern">@*android:string/system_ui_date_pattern</string>
 
+    <!-- Date format for the always on display.  -->
+    <item type="string" name="system_ui_aod_date_pattern">eeeMMMd</item>
 </resources>

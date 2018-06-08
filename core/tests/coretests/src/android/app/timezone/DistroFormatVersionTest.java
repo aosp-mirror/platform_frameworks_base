@@ -21,12 +21,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
+import android.support.test.filters.LargeTest;
 
 import org.junit.Test;
 
 /**
  * Tests for {@link DistroFormatVersion}.
  */
+@LargeTest
 public class DistroFormatVersionTest {
 
     @Test

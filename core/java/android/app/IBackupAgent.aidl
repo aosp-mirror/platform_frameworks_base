@@ -49,11 +49,13 @@ oneway interface IBackupAgent {
      *
      * @param callbackBinder Binder on which to indicate operation completion,
      *        passed here as a convenience to the agent.
+     *
+     * @param transportFlags Flags with additional information about the transport.
      */
     void doBackup(in ParcelFileDescriptor oldState,
             in ParcelFileDescriptor data,
             in ParcelFileDescriptor newState,
-            long quotaBytes, int token, IBackupManager callbackBinder);
+            long quotaBytes, int token, IBackupManager callbackBinder, int transportFlags);
 
     /**
      * Restore an entire data snapshot to the application.
@@ -79,7 +81,7 @@ oneway interface IBackupAgent {
      *        passed here as a convenience to the agent.
      */
     void doRestore(in ParcelFileDescriptor data,
-            int appVersionCode, in ParcelFileDescriptor newState,
+            long appVersionCode, in ParcelFileDescriptor newState,
             int token, IBackupManager callbackBinder);
 
     /**
@@ -100,13 +102,17 @@ oneway interface IBackupAgent {
      *
      * @param callbackBinder Binder on which to indicate operation completion,
      *        passed here as a convenience to the agent.
+     *
+     * @param transportFlags Flags with additional information about transport.
      */
-    void doFullBackup(in ParcelFileDescriptor data, long quotaBytes, int token, IBackupManager callbackBinder);
+    void doFullBackup(in ParcelFileDescriptor data, long quotaBytes, int token,
+            IBackupManager callbackBinder, int transportFlags);
 
     /**
      * Estimate how much data a full backup will deliver
      */
-    void doMeasureFullBackup(long quotaBytes, int token, IBackupManager callbackBinder);
+    void doMeasureFullBackup(long quotaBytes, int token, IBackupManager callbackBinder,
+            int transportFlags);
 
     /**
      * Tells the application agent that the backup data size exceeded current transport quota.

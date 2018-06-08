@@ -45,6 +45,8 @@ interface INotificationManager
     void clearData(String pkg, int uid, boolean fromApp);
     void enqueueToast(String pkg, ITransientNotification callback, int duration);
     void cancelToast(String pkg, ITransientNotification callback);
+    void finishToken(String pkg, ITransientNotification callback);
+
     void enqueueNotificationWithTag(String pkg, String opPkg, String tag, int id,
             in Notification notification, int userId);
     void cancelNotificationWithTag(String pkg, String tag, int id, int userId);
@@ -52,6 +54,13 @@ interface INotificationManager
     void setShowBadge(String pkg, int uid, boolean showBadge);
     boolean canShowBadge(String pkg, int uid);
     void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled);
+    /**
+     * Updates the notification's enabled state. Additionally locks importance for all of the
+     * notifications belonging to the app, such that future notifications aren't reconsidered for
+     * blocking helper.
+     */
+    void setNotificationsEnabledWithImportanceLockForPackage(String pkg, int uid, boolean enabled);
+
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
     boolean areNotificationsEnabled(String pkg);
     int getPackageImportance(String pkg);
@@ -61,6 +70,8 @@ interface INotificationManager
     void createNotificationChannelsForPackage(String pkg, int uid, in ParceledListSlice channelsList);
     ParceledListSlice getNotificationChannelGroupsForPackage(String pkg, int uid, boolean includeDeleted);
     NotificationChannelGroup getNotificationChannelGroupForPackage(String groupId, String pkg, int uid);
+    NotificationChannelGroup getPopulatedNotificationChannelGroupForPackage(String pkg, int uid, String groupId, boolean includeDeleted);
+    void updateNotificationChannelGroupForPackage(String pkg, int uid, in NotificationChannelGroup group);
     void updateNotificationChannelForPackage(String pkg, int uid, in NotificationChannel channel);
     NotificationChannel getNotificationChannel(String pkg, String channelId);
     NotificationChannel getNotificationChannelForPackage(String pkg, int uid, String channelId, boolean includeDeleted);
@@ -69,9 +80,14 @@ interface INotificationManager
     ParceledListSlice getNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted);
     int getNumNotificationChannelsForPackage(String pkg, int uid, boolean includeDeleted);
     int getDeletedChannelCount(String pkg, int uid);
+    int getBlockedChannelCount(String pkg, int uid);
     void deleteNotificationChannelGroup(String pkg, String channelGroupId);
+    NotificationChannelGroup getNotificationChannelGroup(String pkg, String channelGroupId);
     ParceledListSlice getNotificationChannelGroups(String pkg);
     boolean onlyHasDefaultChannel(String pkg, int uid);
+    ParceledListSlice getRecentNotifyingAppsForUser(int userId);
+    int getBlockedAppCount(int userId);
+    boolean areChannelsBypassingDnd();
 
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.
@@ -103,6 +119,7 @@ interface INotificationManager
     void setOnNotificationPostedTrimFromListener(in INotificationListener token, int trim);
     void setInterruptionFilter(String pkg, int interruptionFilter);
 
+    void updateNotificationChannelGroupFromPrivilegedListener(in INotificationListener token, String pkg, in UserHandle user, in NotificationChannelGroup group);
     void updateNotificationChannelFromPrivilegedListener(in INotificationListener token, String pkg, in UserHandle user, in NotificationChannel channel);
     ParceledListSlice getNotificationChannelsFromPrivilegedListener(in INotificationListener token, String pkg, in UserHandle user);
     ParceledListSlice getNotificationChannelGroupsFromPrivilegedListener(in INotificationListener token, String pkg, in UserHandle user);
@@ -135,6 +152,7 @@ interface INotificationManager
     void setNotificationPolicy(String pkg, in NotificationManager.Policy policy);
     boolean isNotificationPolicyAccessGrantedForPackage(String pkg);
     void setNotificationPolicyAccessGranted(String pkg, boolean granted);
+    void setNotificationPolicyAccessGrantedForUser(String pkg, int userId, boolean granted);
     AutomaticZenRule getAutomaticZenRule(String id);
     List<ZenModeConfig.ZenRule> getZenRules();
     String addAutomaticZenRule(in AutomaticZenRule automaticZenRule);

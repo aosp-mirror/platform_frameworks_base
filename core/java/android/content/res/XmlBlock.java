@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.annotation.Nullable;
 import android.util.TypedValue;
 
 import com.android.internal.util.XmlUtils;
@@ -33,7 +34,7 @@ import java.io.Reader;
  * 
  * {@hide}
  */
-final class XmlBlock {
+final class XmlBlock implements AutoCloseable {
     private static final boolean DEBUG=false;
 
     public XmlBlock(byte[] data) {
@@ -48,6 +49,7 @@ final class XmlBlock {
         mStrings = new StringBlock(nativeGetStringBlock(mNative), false);
     }
 
+    @Override
     public void close() {
         synchronized (this) {
             if (mOpen) {
@@ -478,13 +480,13 @@ final class XmlBlock {
      *  are doing!  The given native object must exist for the entire lifetime
      *  of this newly creating XmlBlock.
      */
-    XmlBlock(AssetManager assets, long xmlBlock) {
+    XmlBlock(@Nullable AssetManager assets, long xmlBlock) {
         mAssets = assets;
         mNative = xmlBlock;
         mStrings = new StringBlock(nativeGetStringBlock(xmlBlock), false);
     }
 
-    private final AssetManager mAssets;
+    private @Nullable final AssetManager mAssets;
     private final long mNative;
     /*package*/ final StringBlock mStrings;
     private boolean mOpen = true;

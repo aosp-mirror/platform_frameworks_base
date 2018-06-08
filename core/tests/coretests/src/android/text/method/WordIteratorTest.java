@@ -21,6 +21,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -31,6 +32,7 @@ import java.text.BreakIterator;
 import java.util.Locale;
 
 // TODO(Bug: 24062099): Add more tests for non-ascii text.
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class WordIteratorTest {

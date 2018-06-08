@@ -18,11 +18,13 @@ package android.widget.espresso;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.RootMatchers.isPlatformPopup;
 import static android.support.test.espresso.matcher.RootMatchers.withDecorView;
 import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
+
 import static org.hamcrest.Matchers.allOf;
 
 import android.support.test.espresso.NoMatchingRootException;
@@ -30,29 +32,32 @@ import android.support.test.espresso.NoMatchingViewException;
 import android.support.test.espresso.ViewInteraction;
 import android.widget.Editor;
 
-public class DragHandleUtils {
-    private DragHandleUtils() {
+public final class DragHandleUtils {
 
-    }
+    private DragHandleUtils() {}
 
+    /**
+     * @deprecated Negative assertions are taking too long to timeout in Espresso.
+     */
+    @Deprecated
     public static void assertNoSelectionHandles() {
         try {
-            onHandleView(com.android.internal.R.id.selection_start_handle)
+            onView(isAssignableFrom(Editor.SelectionHandleView.class))
+                    .inRoot(isPlatformPopup())
                     .check(matches(isDisplayed()));
         } catch (NoMatchingRootException | NoMatchingViewException | AssertionError e) {
-            try {
-                onHandleView(com.android.internal.R.id.selection_end_handle)
-                        .check(matches(isDisplayed()));
-            } catch (NoMatchingRootException | NoMatchingViewException | AssertionError e1) {
-                return;
-            }
+            return;
         }
         throw new AssertionError("Selection handle found");
     }
 
     public static ViewInteraction onHandleView(int id)
             throws NoMatchingRootException, NoMatchingViewException, AssertionError {
-        return onView(allOf(withId(id), isAssignableFrom(Editor.HandleView.class)))
-                .inRoot(withDecorView(hasDescendant(withId(id))));
+        return onView(allOf(
+                        withId(id),
+                        isAssignableFrom(Editor.HandleView.class)))
+                .inRoot(allOf(
+                        isPlatformPopup(),
+                        withDecorView(hasDescendant(withId(id)))));
     }
 }

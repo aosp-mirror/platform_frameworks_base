@@ -1,0 +1,36 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package com.android.service;
+
+option java_multiple_files = true;
+
+// It will be used by com.android.server.net.watchlist.ReportEncoder to
+// generate network watchlist report.
+message NetworkWatchlistReportProto {
+
+    optional int32 report_version = 1;
+
+    optional string watchlist_config_hash = 2;
+
+    repeated NetworkWatchlistAppResultProto app_result = 3;
+}
+
+message NetworkWatchlistAppResultProto {
+    optional string app_digest = 1;
+    optional bool encoded_result = 2;
+}

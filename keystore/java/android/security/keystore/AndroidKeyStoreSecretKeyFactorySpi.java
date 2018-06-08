@@ -64,7 +64,10 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
         AndroidKeyStoreKey keystoreKey = (AndroidKeyStoreKey) key;
         String keyAliasInKeystore = keystoreKey.getAlias();
         String entryAlias;
-        if (keyAliasInKeystore.startsWith(Credentials.USER_SECRET_KEY)) {
+        if (keyAliasInKeystore.startsWith(Credentials.USER_PRIVATE_KEY)) {
+            entryAlias = keyAliasInKeystore.substring(Credentials.USER_PRIVATE_KEY.length());
+        } else if (keyAliasInKeystore.startsWith(Credentials.USER_SECRET_KEY)){
+            // key has legacy prefix
             entryAlias = keyAliasInKeystore.substring(Credentials.USER_SECRET_KEY.length());
         } else {
             throw new InvalidKeySpecException("Invalid key alias: " + keyAliasInKeystore);
@@ -174,6 +177,9 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 && (keymasterSwEnforcedUserAuthenticators == 0);
         boolean userAuthenticationValidWhileOnBody =
                 keyCharacteristics.hwEnforced.getBoolean(KeymasterDefs.KM_TAG_ALLOW_WHILE_ON_BODY);
+        boolean trustedUserPresenceRequred =
+                keyCharacteristics.hwEnforced.getBoolean(
+                    KeymasterDefs.KM_TAG_TRUSTED_USER_PRESENCE_REQUIRED);
 
         boolean invalidatedByBiometricEnrollment = false;
         if (keymasterSwEnforcedUserAuthenticators == KeymasterDefs.HW_AUTH_FINGERPRINT
@@ -183,6 +189,8 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                     && !keymasterSecureUserIds.isEmpty()
                     && !keymasterSecureUserIds.contains(getGateKeeperSecureUserId());
         }
+
+        boolean userConfirmationRequired = keyCharacteristics.hwEnforced.getBoolean(KeymasterDefs.KM_TAG_TRUSTED_CONFIRMATION_REQUIRED);
 
         return new KeyInfo(entryAlias,
                 insideSecureHardware,
@@ -200,7 +208,9 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 (int) userAuthenticationValidityDurationSeconds,
                 userAuthenticationRequirementEnforcedBySecureHardware,
                 userAuthenticationValidWhileOnBody,
-                invalidatedByBiometricEnrollment);
+                trustedUserPresenceRequred,
+                invalidatedByBiometricEnrollment,
+                userConfirmationRequired);
     }
 
     private static BigInteger getGateKeeperSecureUserId() throws ProviderException {

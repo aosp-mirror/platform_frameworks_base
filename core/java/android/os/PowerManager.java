@@ -21,8 +21,10 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -109,7 +111,7 @@ public final class PowerManager {
     /* NOTE: Wake lock levels were previously defined as a bit field, except that only a few
      * combinations were actually supported so the bit field was removed.  This explains
      * why the numbering scheme is so odd.  If adding a new wake lock level, any unused
-     * value can be used.
+     * value (in frameworks/base/core/proto/android/os/enums.proto) can be used.
      */
 
     /**
@@ -120,7 +122,7 @@ public final class PowerManager {
      * but the CPU will be kept on until all partial wake locks have been released.
      * </p>
      */
-    public static final int PARTIAL_WAKE_LOCK = 0x00000001;
+    public static final int PARTIAL_WAKE_LOCK = OsProtoEnums.PARTIAL_WAKE_LOCK; // 0x00000001
 
     /**
      * Wake lock level: Ensures that the screen is on (but may be dimmed);
@@ -137,7 +139,7 @@ public final class PowerManager {
      * as the user moves between applications and doesn't require a special permission.
      */
     @Deprecated
-    public static final int SCREEN_DIM_WAKE_LOCK = 0x00000006;
+    public static final int SCREEN_DIM_WAKE_LOCK = OsProtoEnums.SCREEN_DIM_WAKE_LOCK; // 0x00000006
 
     /**
      * Wake lock level: Ensures that the screen is on at full brightness;
@@ -154,7 +156,8 @@ public final class PowerManager {
      * as the user moves between applications and doesn't require a special permission.
      */
     @Deprecated
-    public static final int SCREEN_BRIGHT_WAKE_LOCK = 0x0000000a;
+    public static final int SCREEN_BRIGHT_WAKE_LOCK =
+            OsProtoEnums.SCREEN_BRIGHT_WAKE_LOCK; // 0x0000000a
 
     /**
      * Wake lock level: Ensures that the screen and keyboard backlight are on at
@@ -171,7 +174,7 @@ public final class PowerManager {
      * as the user moves between applications and doesn't require a special permission.
      */
     @Deprecated
-    public static final int FULL_WAKE_LOCK = 0x0000001a;
+    public static final int FULL_WAKE_LOCK = OsProtoEnums.FULL_WAKE_LOCK; // 0x0000001a
 
     /**
      * Wake lock level: Turns the screen off when the proximity sensor activates.
@@ -192,7 +195,8 @@ public final class PowerManager {
      * Cannot be used with {@link #ACQUIRE_CAUSES_WAKEUP}.
      * </p>
      */
-    public static final int PROXIMITY_SCREEN_OFF_WAKE_LOCK = 0x00000020;
+    public static final int PROXIMITY_SCREEN_OFF_WAKE_LOCK =
+            OsProtoEnums.PROXIMITY_SCREEN_OFF_WAKE_LOCK; // 0x00000020
 
     /**
      * Wake lock level: Put the screen in a low power state and allow the CPU to suspend
@@ -206,7 +210,7 @@ public final class PowerManager {
      *
      * {@hide}
      */
-    public static final int DOZE_WAKE_LOCK = 0x00000040;
+    public static final int DOZE_WAKE_LOCK = OsProtoEnums.DOZE_WAKE_LOCK; // 0x00000040
 
     /**
      * Wake lock level: Keep the device awake enough to allow drawing to occur.
@@ -220,7 +224,7 @@ public final class PowerManager {
      *
      * {@hide}
      */
-    public static final int DRAW_WAKE_LOCK = 0x00000080;
+    public static final int DRAW_WAKE_LOCK = OsProtoEnums.DRAW_WAKE_LOCK; // 0x00000080
 
     /**
      * Mask for the wake lock level component of a combined wake lock level and flags integer.
@@ -387,6 +391,12 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_REASON_SLEEP_BUTTON = 6;
 
     /**
+     * Go to sleep reason code: Going to sleep by request of an accessibility service
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_ACCESSIBILITY = 7;
+
+    /**
      * Go to sleep flag: Skip dozing state and directly go to full sleep.
      * @hide
      */
@@ -443,15 +453,31 @@ public final class PowerManager {
     public static final String SHUTDOWN_USER_REQUESTED = "userrequested";
 
     /**
+     * The value to pass as the 'reason' argument to android_reboot() when battery temperature
+     * is too high.
+     * @hide
+     */
+    public static final String SHUTDOWN_BATTERY_THERMAL_STATE = "thermal,battery";
+
+    /**
+     * The value to pass as the 'reason' argument to android_reboot() when device is running
+     * critically low on battery.
+     * @hide
+     */
+    public static final String SHUTDOWN_LOW_BATTERY = "battery";
+
+    /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
+    @IntDef(prefix = { "SHUTDOWN_REASON_" }, value = {
             SHUTDOWN_REASON_UNKNOWN,
             SHUTDOWN_REASON_SHUTDOWN,
             SHUTDOWN_REASON_REBOOT,
             SHUTDOWN_REASON_USER_REQUESTED,
-            SHUTDOWN_REASON_THERMAL_SHUTDOWN
+            SHUTDOWN_REASON_THERMAL_SHUTDOWN,
+            SHUTDOWN_REASON_LOW_BATTERY,
+            SHUTDOWN_REASON_BATTERY_THERMAL
     })
     public @interface ShutdownReason {}
 
@@ -484,6 +510,102 @@ public final class PowerManager {
      * @hide
      */
     public static final int SHUTDOWN_REASON_THERMAL_SHUTDOWN = 4;
+
+    /**
+     * constant for shutdown reason being low battery.
+     * @hide
+     */
+    public static final int SHUTDOWN_REASON_LOW_BATTERY = 5;
+
+    /**
+     * constant for shutdown reason being critical battery thermal state.
+     * @hide
+     */
+    public static final int SHUTDOWN_REASON_BATTERY_THERMAL = 6;
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({ServiceType.GPS,
+            ServiceType.VIBRATION,
+            ServiceType.ANIMATION,
+            ServiceType.FULL_BACKUP,
+            ServiceType.KEYVALUE_BACKUP,
+            ServiceType.NETWORK_FIREWALL,
+            ServiceType.SCREEN_BRIGHTNESS,
+            ServiceType.SOUND,
+            ServiceType.BATTERY_STATS,
+            ServiceType.DATA_SAVER,
+            ServiceType.FORCE_ALL_APPS_STANDBY,
+            ServiceType.OPTIONAL_SENSORS,
+            ServiceType.AOD,
+    })
+    public @interface ServiceType {
+        int NULL = 0;
+        int GPS = 1;
+        int VIBRATION = 2;
+        int ANIMATION = 3;
+        int FULL_BACKUP = 4;
+        int KEYVALUE_BACKUP = 5;
+        int NETWORK_FIREWALL = 6;
+        int SCREEN_BRIGHTNESS = 7;
+        int SOUND = 8;
+        int BATTERY_STATS = 9;
+        int DATA_SAVER = 10;
+        int AOD = 14;
+
+        /**
+         * Whether to enable force-app-standby on all apps or not.
+         */
+        int FORCE_ALL_APPS_STANDBY = 11;
+
+        /**
+         * Whether to enable background check on all apps or not.
+         */
+        int FORCE_BACKGROUND_CHECK = 12;
+
+        /**
+         * Whether to disable non-essential sensors. (e.g. edge sensors.)
+         */
+        int OPTIONAL_SENSORS = 13;
+    }
+
+    /**
+     * Either the location providers shouldn't be affected by battery saver,
+     * or battery saver is off.
+     */
+    public static final int LOCATION_MODE_NO_CHANGE = 0;
+
+    /**
+     * In this mode, the GPS based location provider should be disabled when battery saver is on and
+     * the device is non-interactive.
+     */
+    public static final int LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF = 1;
+
+    /**
+     * All location providers should be disabled when battery saver is on and
+     * the device is non-interactive.
+     */
+    public static final int LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF = 2;
+
+    /**
+     * In this mode, all the location providers will be kept available, but location fixes
+     * should only be provided to foreground apps.
+     */
+    public static final int LOCATION_MODE_FOREGROUND_ONLY = 3;
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"LOCATION_MODE_"}, value = {
+            LOCATION_MODE_NO_CHANGE,
+            LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF,
+            LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF,
+            LOCATION_MODE_FOREGROUND_ONLY,
+    })
+    public @interface LocationPowerSaveMode {}
 
     final Context mContext;
     final IPowerManager mService;
@@ -598,6 +720,26 @@ public final class PowerManager {
      * {@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON} instead.
      * This window flag will be correctly managed by the platform
      * as the user moves between applications and doesn't require a special permission.
+     * </p>
+     *
+     * <p>
+     * Recommended naming conventions for tags to make debugging easier:
+     * <ul>
+     * <li>use a unique prefix delimited by a colon for your app/library (e.g.
+     * gmail:mytag) to make it easier to understand where the wake locks comes
+     * from. This namespace will also avoid collision for tags inside your app
+     * coming from different libraries which will make debugging easier.
+     * <li>use constants (e.g. do not include timestamps in the tag) to make it
+     * easier for tools to aggregate similar wake locks. When collecting
+     * debugging data, the platform only monitors a finite number of tags,
+     * using constants will help tools to provide better debugging data.
+     * <li>avoid using Class#getName() or similar method since this class name
+     * can be transformed by java optimizer and obfuscator tools.
+     * <li>avoid wrapping the tag or a prefix to avoid collision with wake lock
+     * tags from the platform (e.g. *alarm*).
+     * <li>never include personnally identifiable information for privacy
+     * reasons.
+     * </ul>
      * </p>
      *
      * @param levelAndFlags Combination of wake lock level and flag values defining
@@ -819,6 +961,7 @@ public final class PowerManager {
      *
      * @hide Requires signature permission.
      */
+    @TestApi
     public void nap(long time) {
         try {
             mService.nap(time);
@@ -862,24 +1005,6 @@ public final class PowerManager {
     @SystemApi @Deprecated
     public boolean isScreenBrightnessBoosted() {
         return false;
-    }
-
-    /**
-     * Sets the brightness of the backlights (screen, keyboard, button).
-     * <p>
-     * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
-     * </p>
-     *
-     * @param brightness The brightness value from 0 to 255.
-     *
-     * @hide Requires signature permission.
-     */
-    public void setBacklightBrightness(int brightness) {
-        try {
-            mService.setTemporaryScreenBrightnessSettingOverride(brightness);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
     }
 
    /**
@@ -1027,20 +1152,37 @@ public final class PowerManager {
 
     /**
      * Get data about the battery saver mode for a specific service
-     * @param serviceType unique key for the service, one of
-     *             {@link com.android.server.power.BatterySaverPolicy.ServiceType}
+     * @param serviceType unique key for the service, one of {@link ServiceType}
      * @return Battery saver state data.
      *
      * @hide
      * @see com.android.server.power.BatterySaverPolicy
      * @see PowerSaveState
      */
-    public PowerSaveState getPowerSaveState(int serviceType) {
+    public PowerSaveState getPowerSaveState(@ServiceType int serviceType) {
         try {
             return mService.getPowerSaveState(serviceType);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns how location features should behave when battery saver is on. When battery saver
+     * is off, this will always return {@link #LOCATION_MODE_NO_CHANGE}.
+     *
+     * <p>This API is normally only useful for components that provide location features.
+     *
+     * @see #isPowerSaveMode()
+     * @see #ACTION_POWER_SAVE_MODE_CHANGED
+     */
+    @LocationPowerSaveMode
+    public int getLocationPowerSaveMode() {
+        final PowerSaveState powerSaveState = getPowerSaveState(ServiceType.GPS);
+        if (!powerSaveState.globalBatterySaverEnabled) {
+            return LOCATION_MODE_NO_CHANGE;
+        }
+        return powerSaveState.gpsMode;
     }
 
     /**
@@ -1137,6 +1279,19 @@ public final class PowerManager {
     public boolean isSustainedPerformanceModeSupported() {
         return mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_sustainedPerformanceModeSupported);
+    }
+
+    /**
+     * If true, the doze component is not started until after the screen has been
+     * turned off and the screen off animation has been performed.
+     * @hide
+     */
+    public void setDozeAfterScreenOff(boolean dozeAfterScreenOf) {
+        try {
+            mService.setDozeAfterScreenOff(dozeAfterScreenOf);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1384,7 +1539,11 @@ public final class PowerManager {
          */
         public void release(int flags) {
             synchronized (mToken) {
-                mInternalCount--;
+                if (mInternalCount > 0) {
+                    // internal count must only be decreased if it is > 0 or state of
+                    // the WakeLock object is broken.
+                    mInternalCount--;
+                }
                 if ((flags & RELEASE_FLAG_TIMEOUT) == 0) {
                     mExternalCount--;
                 }
@@ -1426,11 +1585,18 @@ public final class PowerManager {
          * cost of that work can be accounted to the application.
          * </p>
          *
+         * <p>
+         * Make sure to follow the tag naming convention when using WorkSource
+         * to make it easier for app developers to understand wake locks
+         * attributed to them. See {@link PowerManager#newWakeLock(int, String)}
+         * documentation.
+         * </p>
+         *
          * @param ws The work source, or null if none.
          */
         public void setWorkSource(WorkSource ws) {
             synchronized (mToken) {
-                if (ws != null && ws.size() == 0) {
+                if (ws != null && ws.isEmpty()) {
                     ws = null;
                 }
 
@@ -1442,7 +1608,7 @@ public final class PowerManager {
                     changed = true;
                     mWorkSource = new WorkSource(ws);
                 } else {
-                    changed = mWorkSource.diff(ws);
+                    changed = !mWorkSource.equals(ws);
                     if (changed) {
                         mWorkSource.set(ws);
                     }
@@ -1485,6 +1651,21 @@ public final class PowerManager {
                 return "WakeLock{"
                     + Integer.toHexString(System.identityHashCode(this))
                     + " held=" + mHeld + ", refCount=" + mInternalCount + "}";
+            }
+        }
+
+        /** @hide */
+        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+            synchronized (mToken) {
+                final long token = proto.start(fieldId);
+                proto.write(PowerManagerProto.WakeLock.TAG, mTag);
+                proto.write(PowerManagerProto.WakeLock.PACKAGE_NAME, mPackageName);
+                proto.write(PowerManagerProto.WakeLock.HELD, mHeld);
+                proto.write(PowerManagerProto.WakeLock.INTERNAL_COUNT, mInternalCount);
+                if (mWorkSource != null) {
+                    mWorkSource.writeToProto(proto, PowerManagerProto.WakeLock.WORK_SOURCE);
+                }
+                proto.end(token);
             }
         }
 

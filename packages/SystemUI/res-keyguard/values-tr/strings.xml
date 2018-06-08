@@ -53,16 +53,21 @@
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Sonraki alarm <xliff:g id="ALARM">%1$s</xliff:g> olarak ayarlandı"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Delete"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"eSIM\'i devre dışı bırak"</string>
+    <string name="error_disable_esim_title" msgid="4852978431156228006">"eSIM devre dışı bırakılamıyor"</string>
+    <string name="error_disable_esim_msg" msgid="676694908770135639">"Bir hata nedeniyle eSIM devre dışı bırakılamıyor."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Deseni unuttunuz mu?"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Yanlış Desen"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"Yanlış Şifre"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Yanlış PIN"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"<xliff:g id="NUMBER">%d</xliff:g> saniye içinde yeniden deneyin."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> saniye içinde tekrar deneyin.</item>
+      <item quantity="one">1 saniye içinde tekrar deneyin.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Deseninizi çizin"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"SIM PIN kodunu girin."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" için SIM PIN kodunu girin."</string>
-    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"Cihazı mobil hizmet olmadan kullanmak için eSIM\'i devre dışı bırakın."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Cihazı mobil hizmet olmadan kullanmak için eSIM\'i devre dışı bırakın."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"PIN\'i girin"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Şifreyi Girin"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM kart artık devre dışı bırakıldı. Devam etmek için PUK kodunu girin. Ayrıntılı bilgi için operatörle bağlantı kurun."</string>
@@ -132,4 +137,12 @@
       <item quantity="one">Cihazın kilidi son <xliff:g id="NUMBER_0">%d</xliff:g> saattir açılmadı. Şifreyi doğrulayın.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Tanınmadı"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
+      <item quantity="other">SIM PIN\'inizi girin. <xliff:g id="NUMBER_1">%d</xliff:g> deneme hakkınız kaldı.</item>
+      <item quantity="one">SIM PIN\'inizi girin. Cihazınızın kilidini açmak için operatörünüzle bağlantı kurmak zorunda kalmadan önce <xliff:g id="NUMBER_0">%d</xliff:g> deneme hakkınız kaldı.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
+      <item quantity="other">SIM artık devre dışı. Devam etmek için PUK kodunu girin. SIM kalıcı olarak kullanım dışı kalmadan önce <xliff:g id="_NUMBER_1">%d</xliff:g> deneme hakkınız kaldı. Ayrıntılı bilgi için operatörünüzle iletişim kurun.</item>
+      <item quantity="one">SIM artık devre dışı. Devam etmek için PUK kodunu girin. SIM kalıcı olarak kullanım dışı kalmadan önce <xliff:g id="_NUMBER_0">%d</xliff:g> deneme hakkınız kaldı. Ayrıntılı bilgi için operatörünüzle iletişim kurun.</item>
+    </plurals>
 </resources>

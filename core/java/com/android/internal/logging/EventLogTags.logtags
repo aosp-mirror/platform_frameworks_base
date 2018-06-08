@@ -8,3 +8,11 @@ option java_package com.android.internal.logging;
 524292 sysui_multi_action (content|4)
 524290 sysui_count (name|3),(increment|1)
 524291 sysui_histogram (name|3),(bucket|1)
+
+# ---------------------------
+# LatencyTracker.java
+# ---------------------------
+36070 sysui_latency (action|1|6),(latency|1|3)
+
+# Generic event for logging when we write system files.
+525000 commit_sys_config_file (name|3),(time|2|3)

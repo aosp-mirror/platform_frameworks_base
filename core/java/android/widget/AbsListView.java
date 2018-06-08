@@ -19,6 +19,7 @@ package android.widget;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -88,7 +89,7 @@ import java.util.List;
 
 /**
  * Base class that can be used to implement virtualized lists of items. A list does
- * not have a spatial definition here. For instance, subclases of this class can
+ * not have a spatial definition here. For instance, subclasses of this class can
  * display the content of the list in a grid, in a carousel, as stack, etc.
  *
  * @attr ref android.R.styleable#AbsListView_listSelector
@@ -1480,11 +1481,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     /** @hide */
     @Override
-    public void sendAccessibilityEventInternal(int eventType) {
+    public void sendAccessibilityEventUnchecked(AccessibilityEvent event) {
         // Since this class calls onScrollChanged even if the mFirstPosition and the
         // child count have not changed we will avoid sending duplicate accessibility
         // events.
-        if (eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
             final int firstVisiblePosition = getFirstVisiblePosition();
             final int lastVisiblePosition = getLastVisiblePosition();
             if (mLastAccessibilityScrollEventFromIndex == firstVisiblePosition
@@ -1495,7 +1496,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mLastAccessibilityScrollEventToIndex = lastVisiblePosition;
             }
         }
-        super.sendAccessibilityEventInternal(eventType);
+        super.sendAccessibilityEventUnchecked(event);
     }
 
     @Override
@@ -2744,11 +2745,19 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void drawSelector(Canvas canvas) {
-        if (!mSelectorRect.isEmpty()) {
+        if (shouldDrawSelector()) {
             final Drawable selector = mSelector;
             selector.setBounds(mSelectorRect);
             selector.draw(canvas);
         }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public final boolean shouldDrawSelector() {
+        return !mSelectorRect.isEmpty();
     }
 
     /**
@@ -3866,6 +3875,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private void onTouchDown(MotionEvent ev) {
         mHasPerformedLongPress = false;
         mActivePointerId = ev.getPointerId(0);
+        hideSelector();
 
         if (mTouchMode == TOUCH_MODE_OVERFLING) {
             // Stopped the fling. It is a scroll.
@@ -5226,17 +5236,21 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         mRecycler.fullyDetachScrapViews();
+        boolean selectorOnScreen = false;
         if (!inTouchMode && mSelectedPosition != INVALID_POSITION) {
             final int childIndex = mSelectedPosition - mFirstPosition;
             if (childIndex >= 0 && childIndex < getChildCount()) {
                 positionSelector(mSelectedPosition, getChildAt(childIndex));
+                selectorOnScreen = true;
             }
         } else if (mSelectorPosition != INVALID_POSITION) {
             final int childIndex = mSelectorPosition - mFirstPosition;
             if (childIndex >= 0 && childIndex < getChildCount()) {
-                positionSelector(INVALID_POSITION, getChildAt(childIndex));
+                positionSelector(mSelectorPosition, getChildAt(childIndex));
+                selectorOnScreen = true;
             }
-        } else {
+        }
+        if (!selectorOnScreen) {
             mSelectorRect.setEmpty();
         }
 

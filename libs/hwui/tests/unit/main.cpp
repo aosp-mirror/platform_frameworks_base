@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "Caches.h"
 #include "debug/GlesDriver.h"
 #include "debug/NullGlesDriver.h"
 #include "hwui/Typeface.h"
-#include "thread/TaskManager.h"
+#include "Properties.h"
 #include "tests/common/LeakChecker.h"
+#include "thread/TaskManager.h"
 
 #include <signal.h>
 
@@ -31,17 +32,14 @@ using namespace android;
 using namespace android::uirenderer;
 
 static auto CRASH_SIGNALS = {
-        SIGABRT,
-        SIGSEGV,
-        SIGBUS,
+        SIGABRT, SIGSEGV, SIGBUS,
 };
 
 static map<int, struct sigaction> gSigChain;
 
 static void gtestSigHandler(int sig, siginfo_t* siginfo, void* context) {
     auto testinfo = ::testing::UnitTest::GetInstance()->current_test_info();
-    printf("[  FAILED  ] %s.%s\n", testinfo->test_case_name(),
-            testinfo->name());
+    printf("[  FAILED  ] %s.%s\n", testinfo->test_case_name(), testinfo->name());
     printf("[  FATAL!  ] Process crashed, aborting tests!\n");
     fflush(stdout);
 
@@ -53,9 +51,7 @@ static void gtestSigHandler(int sig, siginfo_t* siginfo, void* context) {
 
 class TypefaceEnvironment : public testing::Environment {
 public:
-    virtual void SetUp() {
-        Typeface::setRobotoTypefaceForTest();
-    }
+    virtual void SetUp() { Typeface::setRobotoTypefaceForTest(); }
 };
 
 int main(int argc, char* argv[]) {
@@ -72,6 +68,7 @@ int main(int argc, char* argv[]) {
 
     // Replace the default GLES driver
     debug::GlesDriver::replace(std::make_unique<debug::NullGlesDriver>());
+    Properties::isolatedProcess = true;
 
     // Run the tests
     testing::InitGoogleTest(&argc, argv);
@@ -83,4 +80,3 @@ int main(int argc, char* argv[]) {
     test::LeakChecker::checkForLeaks();
     return ret;
 }
-

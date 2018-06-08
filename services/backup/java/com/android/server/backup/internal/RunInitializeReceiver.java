@@ -16,41 +16,49 @@
 
 package com.android.server.backup.internal;
 
-import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.RUN_INITIALIZE_ACTION;
-import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.RUN_INITIALIZE_ACTION;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.PowerManager;
+import android.util.ArraySet;
 import android.util.Slog;
 
-import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.BackupManagerService;
 
 public class RunInitializeReceiver extends BroadcastReceiver {
+    private final BackupManagerService mBackupManagerService;
 
-    private RefactoredBackupManagerService backupManagerService;
-
-    public RunInitializeReceiver(RefactoredBackupManagerService backupManagerService) {
-        this.backupManagerService = backupManagerService;
+    public RunInitializeReceiver(BackupManagerService backupManagerService) {
+        mBackupManagerService = backupManagerService;
     }
 
     public void onReceive(Context context, Intent intent) {
         if (RUN_INITIALIZE_ACTION.equals(intent.getAction())) {
-            synchronized (backupManagerService.getQueueLock()) {
+            synchronized (mBackupManagerService.getQueueLock()) {
+                final ArraySet<String> pendingInits = mBackupManagerService.getPendingInits();
                 if (DEBUG) {
-                    Slog.v(TAG, "Running a device init");
+                    Slog.v(TAG, "Running a device init; " + pendingInits.size() + " pending");
                 }
 
-                String[] pendingInits = (String[]) backupManagerService.getPendingInits().toArray();
-                backupManagerService.clearPendingInits();
-                PerformInitializeTask initTask = new PerformInitializeTask(backupManagerService,
-                        pendingInits, null);
+                if (pendingInits.size() > 0) {
+                    final String[] transports =
+                            pendingInits.toArray(new String[pendingInits.size()]);
 
-                // Acquire the wakelock and pass it to the init thread.  it will
-                // be released once init concludes.
-                backupManagerService.getWakelock().acquire();
-                backupManagerService.getBackupHandler().post(initTask);
+                    mBackupManagerService.clearPendingInits();
+
+                    PowerManager.WakeLock wakelock = mBackupManagerService.getWakelock();
+                    wakelock.acquire();
+                    OnTaskFinishedListener listener = caller -> wakelock.release();
+
+                    Runnable task =
+                            new PerformInitializeTask(
+                                    mBackupManagerService, transports, null, listener);
+                    mBackupManagerService.getBackupHandler().post(task);
+                }
             }
         }
     }

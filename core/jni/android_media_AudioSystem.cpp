@@ -21,17 +21,20 @@
 #include <utils/Log.h>
 
 #include <sstream>
+#include <vector>
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 
 #include <media/AudioSystem.h>
 #include <media/AudioPolicy.h>
+#include <media/MicrophoneInfo.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <system/audio.h>
 #include <system/audio_policy.h>
 #include "android_media_AudioFormat.h"
 #include "android_media_AudioErrors.h"
+#include "android_media_MicrophoneInfo.h"
 
 // ----------------------------------------------------------------------------
 
@@ -44,6 +47,15 @@ static struct {
     jmethodID    add;
     jmethodID    toArray;
 } gArrayListMethods;
+
+static jclass gBooleanClass;
+static jmethodID gBooleanCstor;
+
+static jclass gIntegerClass;
+static jmethodID gIntegerCstor;
+
+static jclass gMapClass;
+static jmethodID gMapPut;
 
 static jclass gAudioHandleClass;
 static jmethodID gAudioHandleCstor;
@@ -142,7 +154,6 @@ static struct {
     jfieldID    mUsage;
     jfieldID    mSource;
 } gAudioAttributesFields;
-
 
 static const char* const kEventHandlerClassPathName =
         "android/media/AudioPortEventHandler";
@@ -608,9 +619,10 @@ android_media_AudioSystem_getOutputLatency(JNIEnv *env, jobject clazz, jint stre
 }
 
 static jint
-android_media_AudioSystem_setLowRamDevice(JNIEnv *env, jobject clazz, jboolean isLowRamDevice)
+android_media_AudioSystem_setLowRamDevice(
+        JNIEnv *env, jobject clazz, jboolean isLowRamDevice, jlong totalMemory)
 {
-    return (jint) AudioSystem::setLowRamDevice((bool) isLowRamDevice);
+    return (jint) AudioSystem::setLowRamDevice((bool) isLowRamDevice, (int64_t) totalMemory);
 }
 
 static jint
@@ -1156,7 +1168,6 @@ exit:
 
     return jStatus;
 }
-
 
 static jint
 android_media_AudioSystem_listAudioPorts(JNIEnv *env, jobject clazz,
@@ -1770,6 +1781,129 @@ android_media_AudioSystem_getStreamVolumeDB(JNIEnv *env, jobject thiz,
                                                   (audio_devices_t)device);
 }
 
+static jboolean
+android_media_AudioSystem_isOffloadSupported(JNIEnv *env, jobject thiz,
+        jint encoding, jint sampleRate, jint channelMask, jint channelIndexMask)
+{
+    audio_offload_info_t format = AUDIO_INFO_INITIALIZER;
+    format.format = (audio_format_t) audioFormatToNative(encoding);
+    format.sample_rate = (uint32_t) sampleRate;
+    format.channel_mask = nativeChannelMaskFromJavaChannelMasks(channelMask, channelIndexMask);
+    format.stream_type = AUDIO_STREAM_MUSIC;
+    format.has_video = false;
+    format.is_streaming = false;
+    // offload duration unknown at this point:
+    // client side code cannot access "audio.offload.min.duration.secs" property to make a query
+    // agnostic of duration, so using acceptable estimate of 2mn
+    format.duration_us = 120 * 1000000;
+    return AudioSystem::isOffloadSupported(format);
+}
+
+static jint
+android_media_AudioSystem_getMicrophones(JNIEnv *env, jobject thiz, jobject jMicrophonesInfo)
+{
+    ALOGV("getMicrophones");
+
+    if (jMicrophonesInfo == NULL) {
+        ALOGE("jMicrophonesInfo NULL MicrophoneInfo ArrayList");
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+    if (!env->IsInstanceOf(jMicrophonesInfo, gArrayListClass)) {
+        ALOGE("getMicrophones not an arraylist");
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+
+    jint jStatus;
+    std::vector<media::MicrophoneInfo> microphones;
+    status_t status = AudioSystem::getMicrophones(&microphones);
+    if (status != NO_ERROR) {
+        ALOGE_IF(status != NO_ERROR, "AudioSystem::getMicrophones error %d", status);
+        jStatus = nativeToJavaStatus(status);
+        return jStatus;
+    }
+    if (microphones.size() == 0) {
+        jStatus = (jint)AUDIO_JAVA_SUCCESS;
+        return jStatus;
+    }
+    for (size_t i = 0; i < microphones.size(); i++) {
+        jobject jMicrophoneInfo;
+        jStatus = convertMicrophoneInfoFromNative(env, &jMicrophoneInfo, &microphones[i]);
+        if (jStatus != AUDIO_JAVA_SUCCESS) {
+            return jStatus;
+        }
+        env->CallBooleanMethod(jMicrophonesInfo, gArrayListMethods.add, jMicrophoneInfo);
+        env->DeleteLocalRef(jMicrophoneInfo);
+    }
+
+    return jStatus;
+}
+
+static jint
+android_media_AudioSystem_getSurroundFormats(JNIEnv *env, jobject thiz,
+                                             jobject jSurroundFormats, jboolean reported)
+{
+    ALOGV("getSurroundFormats");
+
+    if (jSurroundFormats == NULL) {
+        ALOGE("jSurroundFormats is NULL");
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+    if (!env->IsInstanceOf(jSurroundFormats, gMapClass)) {
+        ALOGE("getSurroundFormats not a map");
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+
+    jint jStatus;
+    unsigned int numSurroundFormats = 0;
+    audio_format_t *surroundFormats = NULL;
+    bool *surroundFormatsEnabled = NULL;
+    status_t status = AudioSystem::getSurroundFormats(
+            &numSurroundFormats, surroundFormats, surroundFormatsEnabled, reported);
+    if (status != NO_ERROR) {
+        ALOGE_IF(status != NO_ERROR, "AudioSystem::getSurroundFormats error %d", status);
+        jStatus = nativeToJavaStatus(status);
+        goto exit;
+    }
+    if (numSurroundFormats == 0) {
+        jStatus = (jint)AUDIO_JAVA_SUCCESS;
+        goto exit;
+    }
+    surroundFormats = (audio_format_t *)calloc(numSurroundFormats, sizeof(audio_format_t));
+    surroundFormatsEnabled = (bool *)calloc(numSurroundFormats, sizeof(bool));
+    status = AudioSystem::getSurroundFormats(
+            &numSurroundFormats, surroundFormats, surroundFormatsEnabled, reported);
+    jStatus = nativeToJavaStatus(status);
+    if (status != NO_ERROR) {
+        ALOGE_IF(status != NO_ERROR, "AudioSystem::getSurroundFormats error %d", status);
+        goto exit;
+    }
+    for (size_t i = 0; i < numSurroundFormats; i++) {
+        jobject surroundFormat = env->NewObject(gIntegerClass, gIntegerCstor,
+                                                audioFormatFromNative(surroundFormats[i]));
+        jobject enabled = env->NewObject(gBooleanClass, gBooleanCstor, surroundFormatsEnabled[i]);
+        env->CallObjectMethod(jSurroundFormats, gMapPut, surroundFormat, enabled);
+        env->DeleteLocalRef(surroundFormat);
+        env->DeleteLocalRef(enabled);
+    }
+
+exit:
+    free(surroundFormats);
+    free(surroundFormatsEnabled);
+    return jStatus;
+}
+
+static jint
+android_media_AudioSystem_setSurroundFormatEnabled(JNIEnv *env, jobject thiz,
+                                                   jint audioFormat, jboolean enabled)
+{
+    status_t status = AudioSystem::setSurroundFormatEnabled(audioFormatToNative(audioFormat),
+                                                            (bool)enabled);
+    if (status != NO_ERROR) {
+        ALOGE_IF(status != NO_ERROR, "AudioSystem::setSurroundFormatEnabled error %d", status);
+    }
+    return (jint)nativeToJavaStatus(status);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -1801,7 +1935,7 @@ static const JNINativeMethod gMethods[] = {
     {"getPrimaryOutputSamplingRate", "()I", (void *)android_media_AudioSystem_getPrimaryOutputSamplingRate},
     {"getPrimaryOutputFrameCount",   "()I", (void *)android_media_AudioSystem_getPrimaryOutputFrameCount},
     {"getOutputLatency",    "(I)I",     (void *)android_media_AudioSystem_getOutputLatency},
-    {"setLowRamDevice",     "(Z)I",     (void *)android_media_AudioSystem_setLowRamDevice},
+    {"setLowRamDevice",     "(ZJ)I",    (void *)android_media_AudioSystem_setLowRamDevice},
     {"checkAudioFlinger",    "()I",     (void *)android_media_AudioSystem_checkAudioFlinger},
     {"listAudioPorts",      "(Ljava/util/ArrayList;[I)I",
                                                 (void *)android_media_AudioSystem_listAudioPorts},
@@ -1823,6 +1957,10 @@ static const JNINativeMethod gMethods[] = {
                                     (void *)android_media_AudioSystem_registerRecordingCallback},
     {"systemReady", "()I", (void *)android_media_AudioSystem_systemReady},
     {"getStreamVolumeDB", "(III)F", (void *)android_media_AudioSystem_getStreamVolumeDB},
+    {"native_is_offload_supported", "(IIII)Z", (void *)android_media_AudioSystem_isOffloadSupported},
+    {"getMicrophones", "(Ljava/util/ArrayList;)I", (void *)android_media_AudioSystem_getMicrophones},
+    {"getSurroundFormats", "(Ljava/util/Map;Z)I", (void *)android_media_AudioSystem_getSurroundFormats},
+    {"setSurroundFormatEnabled", "(IZ)I", (void *)android_media_AudioSystem_setSurroundFormatEnabled},
 };
 
 
@@ -1841,6 +1979,18 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gArrayListClass = MakeGlobalRefOrDie(env, arrayListClass);
     gArrayListMethods.add = GetMethodIDOrDie(env, arrayListClass, "add", "(Ljava/lang/Object;)Z");
     gArrayListMethods.toArray = GetMethodIDOrDie(env, arrayListClass, "toArray", "()[Ljava/lang/Object;");
+
+    jclass booleanClass = FindClassOrDie(env, "java/lang/Boolean");
+    gBooleanClass = MakeGlobalRefOrDie(env, booleanClass);
+    gBooleanCstor = GetMethodIDOrDie(env, booleanClass, "<init>", "(Z)V");
+
+    jclass integerClass = FindClassOrDie(env, "java/lang/Integer");
+    gIntegerClass = MakeGlobalRefOrDie(env, integerClass);
+    gIntegerCstor = GetMethodIDOrDie(env, integerClass, "<init>", "(I)V");
+
+    jclass mapClass = FindClassOrDie(env, "java/util/Map");
+    gMapClass = MakeGlobalRefOrDie(env, mapClass);
+    gMapPut = GetMethodIDOrDie(env, mapClass, "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 
     jclass audioHandleClass = FindClassOrDie(env, "android/media/AudioHandle");
     gAudioHandleClass = MakeGlobalRefOrDie(env, audioHandleClass);

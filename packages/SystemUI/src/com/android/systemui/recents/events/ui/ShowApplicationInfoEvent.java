@@ -17,7 +17,7 @@
 package com.android.systemui.recents.events.ui;
 
 import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.model.Task;
+import com.android.systemui.shared.recents.model.Task;
 
 /**
  * This is sent when a user wants to show the application info for a {@link Task}.

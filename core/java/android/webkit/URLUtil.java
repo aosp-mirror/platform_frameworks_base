@@ -16,15 +16,16 @@
 
 package android.webkit;
 
+import android.annotation.Nullable;
+import android.net.ParseException;
+import android.net.Uri;
+import android.net.WebAddress;
+import android.util.Log;
+
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import android.net.Uri;
-import android.net.ParseException;
-import android.net.WebAddress;
-import android.util.Log;
 
 public final class URLUtil {
 
@@ -38,7 +39,7 @@ public final class URLUtil {
     // "file:///android_res/drawable/bar.png". Use "drawable" to refer to
     // "drawable-hdpi" directory as well.
     static final String RESOURCE_BASE = "file:///android_res/";
-    static final String FILE_BASE = "file://";
+    static final String FILE_BASE = "file:";
     static final String PROXY_BASE = "file:///cookieless_proxy/";
     static final String CONTENT_BASE = "content:";
 
@@ -136,7 +137,7 @@ public final class URLUtil {
     }
 
     /**
-     * @return True iff the url is correctly URL encoded
+     * @return {@code true} if the url is correctly URL encoded
      */
     static boolean verifyURLEncoding(String url) {
         int count = url.length();
@@ -170,14 +171,14 @@ public final class URLUtil {
     }
 
     /**
-     * @return True iff the url is an asset file.
+     * @return {@code true} if the url is an asset file.
      */
     public static boolean isAssetUrl(String url) {
         return (null != url) && url.startsWith(ASSET_BASE);
     }
 
     /**
-     * @return True iff the url is a resource file.
+     * @return {@code true} if the url is a resource file.
      * @hide
      */
     public static boolean isResourceUrl(String url) {
@@ -185,7 +186,7 @@ public final class URLUtil {
     }
 
     /**
-     * @return True iff the url is a proxy url to allow cookieless network
+     * @return {@code true} if the url is a proxy url to allow cookieless network
      * requests from a file url.
      * @deprecated Cookieless proxy is no longer supported.
      */
@@ -195,7 +196,7 @@ public final class URLUtil {
     }
 
     /**
-     * @return True iff the url is a local file.
+     * @return {@code true} if the url is a local file.
      */
     public static boolean isFileUrl(String url) {
         return (null != url) && (url.startsWith(FILE_BASE) &&
@@ -204,28 +205,28 @@ public final class URLUtil {
     }
 
     /**
-     * @return True iff the url is an about: url.
+     * @return {@code true} if the url is an about: url.
      */
     public static boolean isAboutUrl(String url) {
         return (null != url) && url.startsWith("about:");
     }
 
     /**
-     * @return True iff the url is a data: url.
+     * @return {@code true} if the url is a data: url.
      */
     public static boolean isDataUrl(String url) {
         return (null != url) && url.startsWith("data:");
     }
 
     /**
-     * @return True iff the url is a javascript: url.
+     * @return {@code true} if the url is a javascript: url.
      */
     public static boolean isJavaScriptUrl(String url) {
         return (null != url) && url.startsWith("javascript:");
     }
 
     /**
-     * @return True iff the url is an http: url.
+     * @return {@code true} if the url is an http: url.
      */
     public static boolean isHttpUrl(String url) {
         return (null != url) &&
@@ -234,7 +235,7 @@ public final class URLUtil {
     }
 
     /**
-     * @return True iff the url is an https: url.
+     * @return {@code true} if the url is an https: url.
      */
     public static boolean isHttpsUrl(String url) {
         return (null != url) &&
@@ -243,7 +244,7 @@ public final class URLUtil {
     }
 
     /**
-     * @return True iff the url is a network url.
+     * @return {@code true} if the url is a network url.
      */
     public static boolean isNetworkUrl(String url) {
         if (url == null || url.length() == 0) {
@@ -253,14 +254,14 @@ public final class URLUtil {
     }
 
     /**
-     * @return True iff the url is a content: url.
+     * @return {@code true} if the url is a content: url.
      */
     public static boolean isContentUrl(String url) {
         return (null != url) && url.startsWith(CONTENT_BASE);
     }
 
     /**
-     * @return True iff the url is valid.
+     * @return {@code true} if the url is valid.
      */
     public static boolean isValidUrl(String url) {
         if (url == null || url.length() == 0) {
@@ -293,15 +294,15 @@ public final class URLUtil {
      * the URL and contentDisposition. File extension, if not defined,
      * is added based on the mimetype
      * @param url Url to the content
-     * @param contentDisposition Content-Disposition HTTP header or null
-     * @param mimeType Mime-type of the content or null
+     * @param contentDisposition Content-Disposition HTTP header or {@code null}
+     * @param mimeType Mime-type of the content or {@code null}
      *
      * @return suggested filename
      */
     public static final String guessFileName(
             String url,
-            String contentDisposition,
-            String mimeType) {
+            @Nullable String contentDisposition,
+            @Nullable String mimeType) {
         String filename = null;
         String extension = null;
 
@@ -388,7 +389,7 @@ public final class URLUtil {
             Pattern.compile("attachment;\\s*filename\\s*=\\s*(\"?)([^\"]*)\\1\\s*$",
             Pattern.CASE_INSENSITIVE);
 
-    /*
+    /**
      * Parse the Content-Disposition HTTP Header. The format of the header
      * is defined here: http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html
      * This header provides a filename for content that is going to be

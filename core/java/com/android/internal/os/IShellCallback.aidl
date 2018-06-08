@@ -20,5 +20,5 @@ import android.os.ParcelFileDescriptor;
 
 /** @hide */
 interface IShellCallback {
-    ParcelFileDescriptor openOutputFile(String path, String seLinuxContext);
+    ParcelFileDescriptor openFile(String path, String seLinuxContext, String mode);
 }

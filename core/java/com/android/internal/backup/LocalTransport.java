@@ -16,6 +16,7 @@
 
 package com.android.internal.backup;
 
+import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupTransport;
@@ -98,6 +99,7 @@ public class LocalTransport extends BackupTransport {
     private FileInputStream mCurFullRestoreStream;
     private FileOutputStream mFullRestoreSocketStream;
     private byte[] mFullRestoreBuffer;
+    private final LocalTransportParameters mParameters;
 
     private void makeDataDirs() {
         mCurrentSetDir.mkdirs();
@@ -105,9 +107,14 @@ public class LocalTransport extends BackupTransport {
         mCurrentSetIncrementalDir.mkdir();
     }
 
-    public LocalTransport(Context context) {
+    public LocalTransport(Context context, LocalTransportParameters parameters) {
         mContext = context;
+        mParameters = parameters;
         makeDataDirs();
+    }
+
+    LocalTransportParameters getParameters() {
+        return mParameters;
     }
 
     @Override
@@ -143,6 +150,17 @@ public class LocalTransport extends BackupTransport {
     }
 
     @Override
+    public int getTransportFlags() {
+        int flags = super.getTransportFlags();
+        // Testing for a fake flag and having it set as a boolean in settings prevents anyone from
+        // using this it to pull data from the agent
+        if (mParameters.isFakeEncryptionFlag()) {
+            flags |= BackupAgent.FLAG_FAKE_CLIENT_SIDE_ENCRYPTION_ENABLED;
+        }
+        return flags;
+    }
+
+    @Override
     public long requestBackupTime() {
         // any time is a good time for local backup
         return 0;
@@ -169,11 +187,27 @@ public class LocalTransport extends BackupTransport {
 
     @Override
     public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor data) {
+        return performBackup(packageInfo, data, /*flags=*/ 0);
+    }
+
+    @Override
+    public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor data, int flags) {
+        boolean isIncremental = (flags & FLAG_INCREMENTAL) != 0;
+        boolean isNonIncremental = (flags & FLAG_NON_INCREMENTAL) != 0;
+
+        if (isIncremental) {
+            Log.i(TAG, "Performing incremental backup for " + packageInfo.packageName);
+        } else if (isNonIncremental) {
+            Log.i(TAG, "Performing non-incremental backup for " + packageInfo.packageName);
+        } else {
+            Log.i(TAG, "Performing backup for " + packageInfo.packageName);
+        }
+
         if (DEBUG) {
             try {
-            StructStat ss = Os.fstat(data.getFileDescriptor());
-            Log.v(TAG, "performBackup() pkg=" + packageInfo.packageName
-                    + " size=" + ss.st_size);
+                StructStat ss = Os.fstat(data.getFileDescriptor());
+                Log.v(TAG, "performBackup() pkg=" + packageInfo.packageName
+                        + " size=" + ss.st_size + " flags=" + flags);
             } catch (ErrnoException e) {
                 Log.w(TAG, "Unable to stat input file in performBackup() on "
                         + packageInfo.packageName);
@@ -181,7 +215,26 @@ public class LocalTransport extends BackupTransport {
         }
 
         File packageDir = new File(mCurrentSetIncrementalDir, packageInfo.packageName);
-        packageDir.mkdirs();
+        boolean hasDataForPackage = !packageDir.mkdirs();
+
+        if (isIncremental) {
+            if (mParameters.isNonIncrementalOnly() || !hasDataForPackage) {
+                if (mParameters.isNonIncrementalOnly()) {
+                    Log.w(TAG, "Transport is in non-incremental only mode.");
+
+                } else {
+                    Log.w(TAG,
+                            "Requested incremental, but transport currently stores no data for the "
+                                    + "package, requesting non-incremental retry.");
+                }
+                return TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED;
+            }
+        }
+        if (isNonIncremental && hasDataForPackage) {
+            Log.w(TAG, "Requested non-incremental, deleting existing data.");
+            clearBackupData(packageInfo);
+            packageDir.mkdirs();
+        }
 
         // Each 'record' in the restore set is kept in its own file, named by
         // the record key.  Wind through the data file, extracting individual

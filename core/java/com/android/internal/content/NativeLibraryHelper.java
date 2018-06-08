@@ -43,6 +43,7 @@ import dalvik.system.VMRuntime;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.List;
 
@@ -118,6 +119,17 @@ public class NativeLibraryHelper {
             return new Handle(apkHandles, multiArch, extractNativeLibs, debuggable);
         }
 
+        public static Handle createFd(PackageLite lite, FileDescriptor fd) throws IOException {
+            final long[] apkHandles = new long[1];
+            final String path = lite.baseCodePath;
+            apkHandles[0] = nativeOpenApkFd(fd, path);
+            if (apkHandles[0] == 0) {
+                throw new IOException("Unable to open APK " + path + " from fd " + fd);
+            }
+
+            return new Handle(apkHandles, lite.multiArch, lite.extractNativeLibs, lite.debuggable);
+        }
+
         Handle(long[] apkHandles, boolean multiArch, boolean extractNativeLibs,
                 boolean debuggable) {
             this.apkHandles = apkHandles;
@@ -152,6 +164,7 @@ public class NativeLibraryHelper {
     }
 
     private static native long nativeOpenApk(String path);
+    private static native long nativeOpenApkFd(FileDescriptor fd, String debugPath);
     private static native void nativeClose(long handle);
 
     private static native long nativeSumNativeBinaries(long handle, String cpuAbi,
@@ -269,7 +282,10 @@ public class NativeLibraryHelper {
         }
     }
 
-    private static void createNativeLibrarySubdir(File path) throws IOException {
+    /**
+     * @hide
+     */
+    public static void createNativeLibrarySubdir(File path) throws IOException {
         if (!path.isDirectory()) {
             path.delete();
 

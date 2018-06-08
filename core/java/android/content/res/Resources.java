@@ -128,6 +128,14 @@ public class Resources {
     private final ArrayList<WeakReference<Theme>> mThemeRefs = new ArrayList<>();
 
     /**
+     * To avoid leaking WeakReferences to garbage collected Themes on the
+     * mThemeRefs list, we flush the list of stale references any time the
+     * mThemeRefNextFlushSize is reached.
+     */
+    private static final int MIN_THEME_REFS_FLUSH_SIZE = 32;
+    private int mThemeRefsNextFlushSize = MIN_THEME_REFS_FLUSH_SIZE;
+
+    /**
      * Returns the most appropriate default theme for the specified target SDK version.
      * <ul>
      * <li>Below API 11: Gingerbread
@@ -590,7 +598,7 @@ public class Resources {
      */
     @NonNull
     public int[] getIntArray(@ArrayRes int id) throws NotFoundException {
-        int[] res = mResourcesImpl.getAssets().getArrayIntResource(id);
+        int[] res = mResourcesImpl.getAssets().getResourceIntArray(id);
         if (res != null) {
             return res;
         }
@@ -613,13 +621,13 @@ public class Resources {
     @NonNull
     public TypedArray obtainTypedArray(@ArrayRes int id) throws NotFoundException {
         final ResourcesImpl impl = mResourcesImpl;
-        int len = impl.getAssets().getArraySize(id);
+        int len = impl.getAssets().getResourceArraySize(id);
         if (len < 0) {
             throw new NotFoundException("Array resource ID #0x" + Integer.toHexString(id));
         }
         
         TypedArray array = TypedArray.obtain(this, len);
-        array.mLength = impl.getAssets().retrieveArray(id, array.mData);
+        array.mLength = impl.getAssets().getResourceArray(id, array.mData);
         array.mIndices[0] = 0;
         
         return array;
@@ -847,6 +855,7 @@ public class Resources {
      * @see #getDrawableForDensity(int, int, Theme)
      * @deprecated Use {@link #getDrawableForDensity(int, int, Theme)} instead.
      */
+    @Nullable
     @Deprecated
     public Drawable getDrawableForDensity(@DrawableRes int id, int density)
             throws NotFoundException {
@@ -864,11 +873,13 @@ public class Resources {
      *            found in {@link DisplayMetrics}. A value of 0 means to use the
      *            density returned from {@link #getConfiguration()}.
      *            This is equivalent to calling {@link #getDrawable(int, Theme)}.
-     * @param theme The theme used to style the drawable attributes, may be {@code null}.
+     * @param theme The theme used to style the drawable attributes, may be {@code null} if the
+     *              drawable cannot be decoded.
      * @return Drawable An object that can be used to draw this resource.
      * @throws NotFoundException Throws NotFoundException if the given ID does
      *             not exist.
      */
+    @Nullable
     public Drawable getDrawableForDensity(@DrawableRes int id, int density, @Nullable Theme theme) {
         final TypedValue value = obtainTempTypedValue();
         try {
@@ -980,7 +991,7 @@ public class Resources {
      *         or multiple colors that can be selected based on a state.
      * @deprecated Use {@link #getColorStateList(int, Theme)} instead.
      */
-    @Nullable
+    @NonNull
     @Deprecated
     public ColorStateList getColorStateList(@ColorRes int id) throws NotFoundException {
         final ColorStateList csl = getColorStateList(id, null);
@@ -1011,7 +1022,7 @@ public class Resources {
      * @return A themed ColorStateList object containing either a single solid
      *         color or multiple colors that can be selected based on a state.
      */
-    @Nullable
+    @NonNull
     public ColorStateList getColorStateList(@ColorRes int id, @Nullable Theme theme)
             throws NotFoundException {
         final TypedValue value = obtainTempTypedValue();
@@ -1024,7 +1035,7 @@ public class Resources {
         }
     }
 
-    @Nullable
+    @NonNull
     ColorStateList loadColorStateList(@NonNull TypedValue value, int id, @Nullable Theme theme)
             throws NotFoundException {
         return mResourcesImpl.loadColorStateList(this, value, id, theme);
@@ -1033,7 +1044,7 @@ public class Resources {
     /**
      * @hide
      */
-    @Nullable
+    @NonNull
     public ComplexColor loadComplexColor(@NonNull TypedValue value, int id, @Nullable Theme theme) {
         return mResourcesImpl.loadComplexColor(this, value, id, theme);
     }
@@ -1139,6 +1150,7 @@ public class Resources {
      *         
      * @see #getXml
      */
+    @NonNull
     public XmlResourceParser getLayout(@LayoutRes int id) throws NotFoundException {
         return loadXmlResourceParser(id, "layout");
     }
@@ -1163,6 +1175,7 @@ public class Resources {
      *         
      * @see #getXml
      */
+    @NonNull
     public XmlResourceParser getAnimation(@AnimatorRes @AnimRes int id) throws NotFoundException {
         return loadXmlResourceParser(id, "anim");
     }
@@ -1188,6 +1201,7 @@ public class Resources {
      *         
      * @see android.util.AttributeSet
      */
+    @NonNull
     public XmlResourceParser getXml(@XmlRes int id) throws NotFoundException {
         return loadXmlResourceParser(id, "xml");
     }
@@ -1203,8 +1217,8 @@ public class Resources {
      * @return InputStream Access to the resource data.
      *
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     * 
      */
+    @NonNull
     public InputStream openRawResource(@RawRes int id) throws NotFoundException {
         final TypedValue value = obtainTempTypedValue();
         try {
@@ -1261,6 +1275,7 @@ public class Resources {
      *
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      */
+    @NonNull
     public InputStream openRawResource(@RawRes int id, TypedValue value)
             throws NotFoundException {
         return mResourcesImpl.openRawResource(id, value);
@@ -1763,6 +1778,13 @@ public class Resources {
         theme.setImpl(mResourcesImpl.newThemeImpl());
         synchronized (mThemeRefs) {
             mThemeRefs.add(new WeakReference<>(theme));
+
+            // Clean up references to garbage collected themes
+            if (mThemeRefs.size() > mThemeRefsNextFlushSize) {
+                mThemeRefs.removeIf(ref -> ref.get() == null);
+                mThemeRefsNextFlushSize = Math.max(MIN_THEME_REFS_FLUSH_SIZE,
+                        2 * mThemeRefs.size());
+            }
         }
         return theme;
     }
@@ -1789,8 +1811,7 @@ public class Resources {
         // out the attributes from the XML file (applying type information
         // contained in the resources and such).
         XmlBlock.Parser parser = (XmlBlock.Parser)set;
-        mResourcesImpl.getAssets().retrieveAttributes(parser.mParseState, attrs,
-                array.mData, array.mIndices);
+        mResourcesImpl.getAssets().retrieveAttributes(parser, attrs, array.mData, array.mIndices);
 
         array.mXml = parser;
 

@@ -51,9 +51,44 @@ public class BackupTransport {
     public static final int AGENT_UNKNOWN = -1004;
     public static final int TRANSPORT_QUOTA_EXCEEDED = -1005;
 
+    /**
+     * Indicates that the transport cannot accept a diff backup for this package.
+     *
+     * <p>Backup manager should clear its state for this package and immediately retry a
+     * non-incremental backup. This might be used if the transport no longer has data for this
+     * package in its backing store.
+     *
+     * <p>This is only valid when backup manager called {@link
+     * #performBackup(PackageInfo, ParcelFileDescriptor, int)} with {@link #FLAG_INCREMENTAL}.
+     */
+    public static final int TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED = -1006;
+
     // Indicates that operation was initiated by user, not a scheduled one.
     // Transport should ignore its own moratoriums for call with this flag set.
     public static final int FLAG_USER_INITIATED = 1;
+
+    /**
+     * For key value backup, indicates that the backup data is a diff from a previous backup. The
+     * transport must apply this diff to an existing backup to build the new backup set.
+     *
+     * @see #performBackup(PackageInfo, ParcelFileDescriptor, int)
+     */
+    public static final int FLAG_INCREMENTAL = 1 << 1;
+
+    /**
+     * For key value backup, indicates that the backup data is a complete set, not a diff from a
+     * previous backup. The transport should clear any previous backup when storing this backup.
+     *
+     * @see #performBackup(PackageInfo, ParcelFileDescriptor, int)
+     */
+    public static final int FLAG_NON_INCREMENTAL = 1 << 2;
+
+    /**
+     * Used as a boolean extra in the binding intent of transports. We pass {@code true} to
+     * notify transports that the current connection is used for registering the transport.
+     */
+    public static final String EXTRA_TRANSPORT_REGISTRATION =
+            "android.app.backup.extra.TRANSPORT_REGISTRATION";
 
     IBackupTransport mBinderImpl = new TransportImpl();
 
@@ -231,18 +266,33 @@ public class BackupTransport {
      * {@link #TRANSPORT_OK}, {@link #finishBackup} will then be called to ensure the data
      * is sent and recorded successfully.
      *
+     * If the backup data is a diff against the previous backup then the flag {@link
+     * BackupTransport#FLAG_INCREMENTAL} will be set. Otherwise, if the data is a complete backup
+     * set then {@link BackupTransport#FLAG_NON_INCREMENTAL} will be set. Before P neither flag will
+     * be set regardless of whether the backup is incremental or not.
+     *
+     * <p>If {@link BackupTransport#FLAG_INCREMENTAL} is set and the transport does not have data
+     * for this package in its storage backend then it cannot apply the incremental diff. Thus it
+     * should return {@link BackupTransport#TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED} to indicate
+     * that backup manager should delete its state and retry the package as a non-incremental
+     * backup. Before P, or if this is a non-incremental backup, then this return code is equivalent
+     * to {@link BackupTransport#TRANSPORT_ERROR}.
+     *
      * @param packageInfo The identity of the application whose data is being backed up.
      *   This specifically includes the signature list for the package.
      * @param inFd Descriptor of file with data that resulted from invoking the application's
      *   BackupService.doBackup() method.  This may be a pipe rather than a file on
      *   persistent media, so it may not be seekable.
-     * @param flags {@link BackupTransport#FLAG_USER_INITIATED} or 0.
+     * @param flags a combination of {@link BackupTransport#FLAG_USER_INITIATED}, {@link
+     *   BackupTransport#FLAG_NON_INCREMENTAL}, {@link BackupTransport#FLAG_INCREMENTAL}, or 0.
      * @return one of {@link BackupTransport#TRANSPORT_OK} (OK so far),
      *  {@link BackupTransport#TRANSPORT_PACKAGE_REJECTED} (to suppress backup of this
      *  specific package, but allow others to proceed),
-     *  {@link BackupTransport#TRANSPORT_ERROR} (on network error or other failure), or
-     *  {@link BackupTransport#TRANSPORT_NOT_INITIALIZED} (if the backend dataset has
-     *  become lost due to inactivity purge or some other reason and needs re-initializing)
+     *  {@link BackupTransport#TRANSPORT_ERROR} (on network error or other failure), {@link
+     *  BackupTransport#TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED} (if the transport cannot accept
+     *  an incremental backup for this package), or {@link
+     *  BackupTransport#TRANSPORT_NOT_INITIALIZED} (if the backend dataset has become lost due to
+     *  inactivity purge or some other reason and needs re-initializing)
      */
     public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor inFd, int flags) {
         return performBackup(packageInfo, inFd);
@@ -564,6 +614,15 @@ public class BackupTransport {
     }
 
     /**
+     * Returns flags with additional information about the transport, which is accessible to the
+     * {@link android.app.backup.BackupAgent}. This allows the agent to decide what to do based on
+     * properties of the transport.
+     */
+    public int getTransportFlags() {
+        return 0;
+    }
+
+    /**
      * Bridge between the actual IBackupTransport implementation and the stable API.  If the
      * binder interface needs to change, we use this layer to translate so that we can
      * (if appropriate) decouple those framework-side changes from the BackupTransport
@@ -692,6 +751,11 @@ public class BackupTransport {
         @Override
         public long getBackupQuota(String packageName, boolean isFullBackup) {
             return BackupTransport.this.getBackupQuota(packageName, isFullBackup);
+        }
+
+        @Override
+        public int getTransportFlags() {
+            return BackupTransport.this.getTransportFlags();
         }
 
         @Override

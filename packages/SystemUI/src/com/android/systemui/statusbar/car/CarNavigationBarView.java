@@ -16,13 +16,18 @@
 
 package com.android.systemui.statusbar.car;
 
+import android.app.UiModeManager;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import com.android.keyguard.AlphaOptimizedImageButton;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.NavigationBarView;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
 
 /**
  * A custom navigation bar for the automotive use case.
@@ -30,46 +35,69 @@ import com.android.systemui.statusbar.phone.NavigationBarView;
  * The navigation bar in the automotive use case is more like a list of shortcuts, rendered
  * in a linear layout.
  */
-class CarNavigationBarView extends NavigationBarView {
-    private LinearLayout mNavButtons;
-    private LinearLayout mLightsOutButtons;
+class CarNavigationBarView extends LinearLayout {
+    private View mNavButtons;
+    private AlphaOptimizedImageButton mNotificationsButton;
+    private CarStatusBar mCarStatusBar;
+    private Context mContext;
+    private View mLockScreenButtons;
 
     public CarNavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mContext = context;
     }
 
     @Override
     public void onFinishInflate() {
         mNavButtons = findViewById(R.id.nav_buttons);
-        mLightsOutButtons = findViewById(R.id.lights_out);
+        mLockScreenButtons = findViewById(R.id.lock_screen_nav_buttons);
+
+        mNotificationsButton = findViewById(R.id.notifications);
+        if (mNotificationsButton != null) {
+            mNotificationsButton.setOnClickListener(this::onNotificationsClick);
+        }
+        View mStatusIcons = findViewById(R.id.statusIcons);
+        if (mStatusIcons != null) {
+            // Attach the controllers for Status icons such as wifi and bluetooth if the standard
+            // container is in the view.
+            StatusBarIconController.DarkIconManager mDarkIconManager =
+                    new StatusBarIconController.DarkIconManager(
+                            mStatusIcons.findViewById(R.id.statusIcons));
+            mDarkIconManager.setShouldLog(true);
+            Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
+        }
+
     }
 
-    public void addButton(CarNavigationButton button, CarNavigationButton lightsOutButton){
-        mNavButtons.addView(button);
-        mLightsOutButtons.addView(lightsOutButton);
+    void setStatusBar(CarStatusBar carStatusBar) {
+        mCarStatusBar = carStatusBar;
     }
 
-    @Override
-    public void setDisabledFlags(int disabledFlags, boolean force) {
-        // TODO: Populate.
+    protected void onNotificationsClick(View v) {
+        mCarStatusBar.togglePanel();
     }
 
-    @Override
-    public void reorient() {
-        // We expect the car head unit to always have a fixed rotation so we ignore this. The super
-        // class implentation expects mRotatedViews to be populated, so if you call into it, there
-        // is a possibility of a NullPointerException.
+    /**
+     * If there are buttons declared in the layout they will be shown and the normal
+     * Nav buttons will be hidden.
+     */
+    public void showKeyguardButtons() {
+        if (mLockScreenButtons == null) {
+            return;
+        }
+        mLockScreenButtons.setVisibility(View.VISIBLE);
+        mNavButtons.setVisibility(View.GONE);
     }
 
-    @Override
-    public View getCurrentView() {
-        return this;
-    }
-
-    @Override
-    public void setNavigationIconHints(int hints, boolean force) {
-        // We do not need to set the navigation icon hints for a vehicle
-        // Calling setNavigationIconHints in the base class will result in a NPE as the car
-        // navigation bar does not have a back button.
+    /**
+     * If there are buttons declared in the layout they will be hidden and the normal
+     * Nav buttons will be shown.
+     */
+    public void hideKeyguardButtons() {
+        if (mLockScreenButtons == null) {
+            return;
+        }
+        mNavButtons.setVisibility(View.VISIBLE);
+        mLockScreenButtons.setVisibility(View.GONE);
     }
 }

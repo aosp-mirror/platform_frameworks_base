@@ -56,7 +56,7 @@
     <string name="print_select_printer" msgid="7388760939873368698">"حدد الطابعة"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"تجاهل الطابعة"</string>
     <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
-      <item quantity="zero">لم يتم العثور على أية طابعة (<xliff:g id="COUNT_1">%1$s</xliff:g>)</item>
+      <item quantity="zero">لم يتم العثور على أي طابعة (<xliff:g id="COUNT_1">%1$s</xliff:g>)</item>
       <item quantity="two">تم العثور على طابعتين (<xliff:g id="COUNT_1">%1$s</xliff:g>)</item>
       <item quantity="few">تم العثور على <xliff:g id="COUNT_1">%1$s</xliff:g> طابعات</item>
       <item quantity="many">تم العثور على <xliff:g id="COUNT_1">%1$s</xliff:g> طابعة</item>

@@ -95,6 +95,10 @@ public class DiscoverySessionCallback {
     /**
      * Called when a discovery (publish or subscribe) operation results in a
      * service discovery.
+     * <p>
+     * Note that this method and
+     * {@link #onServiceDiscoveredWithinRange(PeerHandle, byte[], List, int)} may be called
+     * multiple times per service discovery.
      *
      * @param peerHandle An opaque handle to the peer matching our discovery operation.
      * @param serviceSpecificInfo The service specific information (arbitrary
@@ -109,6 +113,38 @@ public class DiscoverySessionCallback {
      */
     public void onServiceDiscovered(PeerHandle peerHandle,
             byte[] serviceSpecificInfo, List<byte[]> matchFilter) {
+        /* empty */
+    }
+
+    /**
+     * Called when a discovery (publish or subscribe) operation results in a
+     * service discovery. Called when a Subscribe service was configured with a range requirement
+     * {@link SubscribeConfig.Builder#setMinDistanceMm(int)} and/or
+     * {@link SubscribeConfig.Builder#setMaxDistanceMm(int)} and the Publish service was configured
+     * with {@link PublishConfig.Builder#setRangingEnabled(boolean)}.
+     * <p>
+     * If either Publisher or Subscriber does not enable Ranging, or if Ranging is temporarily
+     * disabled by the underlying device, service discovery proceeds without ranging and the
+     * {@link #onServiceDiscovered(PeerHandle, byte[], List)} is called.
+     * <p>
+     * Note that this method and {@link #onServiceDiscovered(PeerHandle, byte[], List)} may be
+     * called multiple times per service discovery.
+     *
+     * @param peerHandle An opaque handle to the peer matching our discovery operation.
+     * @param serviceSpecificInfo The service specific information (arbitrary
+     *            byte array) provided by the peer as part of its discovery
+     *            configuration.
+     * @param matchFilter The filter which resulted in this service discovery. For
+     * {@link PublishConfig#PUBLISH_TYPE_UNSOLICITED},
+     * {@link SubscribeConfig#SUBSCRIBE_TYPE_PASSIVE} discovery sessions this is the publisher's
+     *                    match filter. For {@link PublishConfig#PUBLISH_TYPE_SOLICITED},
+     *                    {@link SubscribeConfig#SUBSCRIBE_TYPE_ACTIVE} discovery sessions this
+     *                    is the subscriber's match filter.
+     * @param distanceMm The measured distance to the Publisher in mm. Note: the measured distance
+     *                   may be negative for very close devices.
+     */
+    public void onServiceDiscoveredWithinRange(PeerHandle peerHandle,
+        byte[] serviceSpecificInfo, List<byte[]> matchFilter, int distanceMm) {
         /* empty */
     }
 

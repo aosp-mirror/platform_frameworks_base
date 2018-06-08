@@ -12,37 +12,80 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
+import android.location.LocationManager;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
-import android.net.NetworkBadging;
 import android.os.BatteryManager;
+import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.print.PrintManager;
 import android.provider.Settings;
-import android.view.View;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
-
+import com.android.settingslib.wrapper.LocationManagerWrapper;
 import java.text.NumberFormat;
 
 public class Utils {
+
+    private static final String CURRENT_MODE_KEY = "CURRENT_MODE";
+    private static final String NEW_MODE_KEY = "NEW_MODE";
+    @VisibleForTesting
+    static final String STORAGE_MANAGER_SHOW_OPT_IN_PROPERTY =
+            "ro.storage_manager.show_opt_in";
+
     private static Signature[] sSystemSignature;
     private static String sPermissionControllerPackageName;
     private static String sServicesSystemSharedLibPackageName;
     private static String sSharedSystemSharedLibPackageName;
 
-    static final int[] WIFI_PIE_FOR_BADGING = {
-          com.android.internal.R.drawable.ic_signal_wifi_badged_0_bars,
-          com.android.internal.R.drawable.ic_signal_wifi_badged_1_bar,
-          com.android.internal.R.drawable.ic_signal_wifi_badged_2_bars,
-          com.android.internal.R.drawable.ic_signal_wifi_badged_3_bars,
-          com.android.internal.R.drawable.ic_signal_wifi_badged_4_bars
+    static final int[] WIFI_PIE = {
+            com.android.internal.R.drawable.ic_wifi_signal_0,
+            com.android.internal.R.drawable.ic_wifi_signal_1,
+            com.android.internal.R.drawable.ic_wifi_signal_2,
+            com.android.internal.R.drawable.ic_wifi_signal_3,
+            com.android.internal.R.drawable.ic_wifi_signal_4
     };
+
+    public static void updateLocationEnabled(Context context, boolean enabled, int userId,
+            int source) {
+        Settings.Secure.putIntForUser(
+                context.getContentResolver(), Settings.Secure.LOCATION_CHANGER, source,
+                userId);
+        Intent intent = new Intent(LocationManager.MODE_CHANGING_ACTION);
+
+        final int oldMode = Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF, userId);
+        final int newMode = enabled
+                ? Settings.Secure.LOCATION_MODE_HIGH_ACCURACY
+                : Settings.Secure.LOCATION_MODE_OFF;
+        intent.putExtra(CURRENT_MODE_KEY, oldMode);
+        intent.putExtra(NEW_MODE_KEY, newMode);
+        context.sendBroadcastAsUser(
+                intent, UserHandle.of(userId), android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        LocationManager locationManager =
+                (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        LocationManagerWrapper wrapper = new LocationManagerWrapper(locationManager);
+        wrapper.setLocationEnabledForUser(enabled, UserHandle.of(userId));
+    }
+
+    public static boolean updateLocationMode(Context context, int oldMode, int newMode, int userId,
+            int source) {
+        Settings.Secure.putIntForUser(
+                context.getContentResolver(), Settings.Secure.LOCATION_CHANGER, source,
+                userId);
+        Intent intent = new Intent(LocationManager.MODE_CHANGING_ACTION);
+        intent.putExtra(CURRENT_MODE_KEY, oldMode);
+        intent.putExtra(NEW_MODE_KEY, newMode);
+        context.sendBroadcastAsUser(
+                intent, UserHandle.of(userId), android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        return Settings.Secure.putIntForUser(
+                context.getContentResolver(), Settings.Secure.LOCATION_MODE, newMode, userId);
+    }
 
     /**
      * Return string resource that best describes combination of tethering
@@ -99,7 +142,7 @@ public class Utils {
     public static Drawable getUserIcon(Context context, UserManager um, UserInfo user) {
         final int iconSize = UserIconDrawable.getSizeForList(context);
         if (user.isManagedProfile()) {
-            Drawable drawable = context.getDrawable(com.android.internal.R.drawable.ic_corp_icon);
+            Drawable drawable =  UserIconDrawable.getManagedUserDrawable(context);
             drawable.setBounds(0, 0, iconSize, iconSize);
             return drawable;
         }
@@ -110,7 +153,8 @@ public class Utils {
             }
         }
         return new UserIconDrawable(iconSize).setIconDrawable(
-                UserIcons.getDefaultUserIcon(user.id, /* light= */ false)).bake();
+                UserIcons.getDefaultUserIcon(context.getResources(), user.id, /* light= */ false))
+                .bake();
     }
 
     /** Formats a double from 0.0..100.0 with an option to round **/
@@ -225,7 +269,7 @@ public class Utils {
      */
     public static boolean isSystemPackage(Resources resources, PackageManager pm, PackageInfo pkg) {
         if (sSystemSignature == null) {
-            sSystemSignature = new Signature[]{ getSystemSignature(pm) };
+            sSystemSignature = new Signature[]{getSystemSignature(pm)};
         }
         if (sPermissionControllerPackageName == null) {
             sPermissionControllerPackageName = pm.getPermissionControllerPackageName();
@@ -237,7 +281,7 @@ public class Utils {
             sSharedSystemSharedLibPackageName = pm.getSharedSystemSharedLibraryPackageName();
         }
         return (sSystemSignature[0] != null
-                        && sSystemSignature[0].equals(getFirstSignature(pkg)))
+                && sSystemSignature[0].equals(getFirstSignature(pkg)))
                 || pkg.packageName.equals(sPermissionControllerPackageName)
                 || pkg.packageName.equals(sServicesSystemSharedLibPackageName)
                 || pkg.packageName.equals(sSharedSystemSharedLibPackageName)
@@ -272,42 +316,16 @@ public class Utils {
     }
 
     /**
-     * Returns a badged Wifi icon drawable.
+     * Returns the Wifi icon resource for a given RSSI level.
      *
-     * <p>The first layer contains the Wifi pie and the second layer contains the badge. Callers
-     * should set the drawable to the appropriate size and tint color.
-     *
-     * @param context The caller's context (must have access to internal resources)
      * @param level The number of bars to show (0-4)
-     * @param badge The badge enum {@see android.net.ScoredNetwork}
-     *
-     * @throws IllegalArgumentException if an invalid badge enum is given
-     *
-     * @deprecated TODO(sghuman): Finalize the form of this method and then move it to a new
-     *         location.
+     * @throws IllegalArgumentException if an invalid RSSI level is given.
      */
-    public static LayerDrawable getBadgedWifiIcon(Context context, int level, int badge) {
-        return new LayerDrawable(
-                new Drawable[] {
-                        context.getDrawable(WIFI_PIE_FOR_BADGING[level]),
-                        context.getDrawable(getWifiBadgeResource(badge))
-                });
-    }
-
-    private static int getWifiBadgeResource(int badge) {
-        switch (badge) {
-            case NetworkBadging.BADGING_NONE:
-                return View.NO_ID;
-            case NetworkBadging.BADGING_SD:
-                return com.android.internal.R.drawable.ic_signal_wifi_badged_sd;
-            case NetworkBadging.BADGING_HD:
-                return com.android.internal.R.drawable.ic_signal_wifi_badged_hd;
-            case NetworkBadging.BADGING_4K:
-                return com.android.internal.R.drawable.ic_signal_wifi_badged_4k;
-            default:
-                throw new IllegalArgumentException(
-                    "No badge resource found for badge value: " + badge);
+    public static int getWifiIconResource(int level) {
+        if (level < 0 || level >= WIFI_PIE.length) {
+            throw new IllegalArgumentException("No Wifi icon found for level: " + level);
         }
+        return WIFI_PIE[level];
     }
 
     public static int getDefaultStorageManagerDaysToRetain(Resources resources) {
@@ -324,5 +342,36 @@ public class Utils {
             // We are likely in a test environment.
         }
         return defaultDays;
+    }
+
+    public static boolean isWifiOnly(Context context) {
+        return !context.getSystemService(ConnectivityManager.class)
+                .isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+    }
+
+    /** Returns if the automatic storage management feature is turned on or not. **/
+    public static boolean isStorageManagerEnabled(Context context) {
+        boolean isDefaultOn;
+        try {
+            // Turn off by default if the opt-in was shown.
+            isDefaultOn = !SystemProperties.getBoolean(STORAGE_MANAGER_SHOW_OPT_IN_PROPERTY, true);
+        } catch (Resources.NotFoundException e) {
+            isDefaultOn = false;
+        }
+        return Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
+                isDefaultOn ? 1 : 0)
+                != 0;
+    }
+
+    /**
+     * get that {@link AudioManager#getMode()} is in ringing/call/communication(VoIP) status.
+     */
+    public static boolean isAudioModeOngoingCall(Context context) {
+        final AudioManager audioManager = context.getSystemService(AudioManager.class);
+        final int audioMode = audioManager.getMode();
+        return audioMode == AudioManager.MODE_RINGTONE
+                || audioMode == AudioManager.MODE_IN_CALL
+                || audioMode == AudioManager.MODE_IN_COMMUNICATION;
     }
 }

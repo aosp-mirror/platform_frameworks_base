@@ -17,8 +17,10 @@
 package android.app;
 
 import android.os.Bundle;
+import android.support.test.filters.LargeTest;
 import android.test.InstrumentationTestCase;
 
+@LargeTest
 public class InstrumentationTest extends InstrumentationTestCase {
 
     /**

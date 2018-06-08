@@ -69,8 +69,7 @@ class NameMangler {
    * The mangled name should contain symbols that are illegal to define in XML,
    * so that there will never be name mangling collisions.
    */
-  static std::string MangleEntry(const std::string& package,
-                                 const std::string& name) {
+  static std::string MangleEntry(const std::string& package, const std::string& name) {
     return package + "$" + name;
   }
 
@@ -86,8 +85,8 @@ class NameMangler {
     }
 
     out_package->assign(out_name->data(), pivot);
-    out_name->assign(out_name->data() + pivot + 1,
-                     out_name->size() - (pivot + 1));
+    std::string new_name = out_name->substr(pivot + 1);
+    *out_name = std::move(new_name);
     return true;
   }
 

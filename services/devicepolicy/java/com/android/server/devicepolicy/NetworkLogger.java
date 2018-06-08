@@ -109,7 +109,7 @@ final class NetworkLogger {
         }
         try {
            if (mIpConnectivityMetrics.addNetdEventCallback(
-                    INetdEventCallback.CALLBACK_CALLER_DEVICE_POLICY, mNetdEventCallback)) {
+                   INetdEventCallback.CALLBACK_CALLER_DEVICE_POLICY, mNetdEventCallback)) {
                 mHandlerThread = new ServiceThread(TAG, Process.THREAD_PRIORITY_BACKGROUND,
                         /* allowIo */ false);
                 mHandlerThread.start();

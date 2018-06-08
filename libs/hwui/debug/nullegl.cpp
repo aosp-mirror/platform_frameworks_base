@@ -21,8 +21,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-static EGLDisplay gDisplay = (EGLDisplay) 1;
-static EGLSyncKHR gFence = (EGLSyncKHR) 1;
+static EGLDisplay gDisplay = (EGLDisplay)1;
+static EGLSyncKHR gFence = (EGLSyncKHR)1;
 
 typedef struct {
     EGLSurface surface;
@@ -43,8 +43,8 @@ static void makeThreadState() {
 ThreadState* getThreadState() {
     ThreadState* ptr;
     pthread_once(&ThreadStateSetupOnce, makeThreadState);
-    if ((ptr = (ThreadState*) pthread_getspecific(ThreadStateKey)) == NULL) {
-        ptr = (ThreadState*) calloc(1, sizeof(ThreadState));
+    if ((ptr = (ThreadState*)pthread_getspecific(ThreadStateKey)) == NULL) {
+        ptr = (ThreadState*)calloc(1, sizeof(ThreadState));
         ptr->context = EGL_NO_CONTEXT;
         ptr->surface = EGL_NO_SURFACE;
         pthread_setspecific(ThreadStateKey, ptr);
@@ -60,7 +60,7 @@ EGLDisplay eglGetDisplay(EGLNativeDisplayType display_id) {
     return gDisplay;
 }
 
-EGLBoolean eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor) {
+EGLBoolean eglInitialize(EGLDisplay dpy, EGLint* major, EGLint* minor) {
     return EGL_TRUE;
 }
 
@@ -68,30 +68,27 @@ EGLBoolean eglTerminate(EGLDisplay dpy) {
     return EGL_TRUE;
 }
 
-const char * eglQueryString(EGLDisplay dpy, EGLint name) {
+const char* eglQueryString(EGLDisplay dpy, EGLint name) {
     if (name == EGL_EXTENSIONS) {
         return "EGL_KHR_swap_buffers_with_damage";
     }
     return "";
 }
 
-EGLBoolean eglChooseConfig(EGLDisplay dpy, const EGLint *attrib_list,
-               EGLConfig *configs, EGLint config_size,
-               EGLint *num_config) {
+EGLBoolean eglChooseConfig(EGLDisplay dpy, const EGLint* attrib_list, EGLConfig* configs,
+                           EGLint config_size, EGLint* num_config) {
     memset(configs, 9, sizeof(EGLConfig) * config_size);
     *num_config = config_size;
     return EGL_TRUE;
 }
 
-EGLSurface eglCreateWindowSurface(EGLDisplay dpy, EGLConfig config,
-                  EGLNativeWindowType win,
-                  const EGLint *attrib_list) {
-    return (EGLSurface) malloc(sizeof(void*));
+EGLSurface eglCreateWindowSurface(EGLDisplay dpy, EGLConfig config, EGLNativeWindowType win,
+                                  const EGLint* attrib_list) {
+    return (EGLSurface)malloc(sizeof(void*));
 }
 
-EGLSurface eglCreatePbufferSurface(EGLDisplay dpy, EGLConfig config,
-                   const EGLint *attrib_list) {
-    return (EGLSurface) malloc(sizeof(void*));
+EGLSurface eglCreatePbufferSurface(EGLDisplay dpy, EGLConfig config, const EGLint* attrib_list) {
+    return (EGLSurface)malloc(sizeof(void*));
 }
 
 EGLBoolean eglDestroySurface(EGLDisplay dpy, EGLSurface surface) {
@@ -99,8 +96,7 @@ EGLBoolean eglDestroySurface(EGLDisplay dpy, EGLSurface surface) {
     return EGL_TRUE;
 }
 
-EGLBoolean eglQuerySurface(EGLDisplay dpy, EGLSurface surface,
-               EGLint attribute, EGLint *value) {
+EGLBoolean eglQuerySurface(EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint* value) {
     *value = 1000;
     return EGL_TRUE;
 }
@@ -109,8 +105,7 @@ EGLBoolean eglReleaseThread(void) {
     return EGL_TRUE;
 }
 
-EGLBoolean eglSurfaceAttrib(EGLDisplay dpy, EGLSurface surface,
-                EGLint attribute, EGLint value) {
+EGLBoolean eglSurfaceAttrib(EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint value) {
     return EGL_TRUE;
 }
 
@@ -118,18 +113,16 @@ EGLBoolean eglSwapInterval(EGLDisplay dpy, EGLint interval) {
     return EGL_TRUE;
 }
 
-EGLContext eglCreateContext(EGLDisplay dpy, EGLConfig config,
-                EGLContext share_context,
-                const EGLint *attrib_list) {
-    return (EGLContext) malloc(sizeof(void*));
+EGLContext eglCreateContext(EGLDisplay dpy, EGLConfig config, EGLContext share_context,
+                            const EGLint* attrib_list) {
+    return (EGLContext)malloc(sizeof(void*));
 }
 EGLBoolean eglDestroyContext(EGLDisplay dpy, EGLContext ctx) {
     free(ctx);
     return EGL_TRUE;
 }
 
-EGLBoolean eglMakeCurrent(EGLDisplay dpy, EGLSurface draw,
-              EGLSurface read, EGLContext ctx) {
+EGLBoolean eglMakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContext ctx) {
     ThreadState* state = getThreadState();
     state->surface = draw;
     state->context = ctx;
@@ -152,15 +145,17 @@ EGLBoolean eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
     return EGL_TRUE;
 }
 
-EGLBoolean eglSwapBuffersWithDamageKHR(EGLDisplay dpy, EGLSurface surface, EGLint *rects, EGLint rectCount) {
+EGLBoolean eglSwapBuffersWithDamageKHR(EGLDisplay dpy, EGLSurface surface, EGLint* rects,
+                                       EGLint rectCount) {
     return EGL_TRUE;
 }
 
-EGLImageKHR eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list) {
-    return (EGLImageKHR) malloc(sizeof(EGLImageKHR));
+EGLImageKHR eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target,
+                              EGLClientBuffer buffer, const EGLint* attrib_list) {
+    return (EGLImageKHR)malloc(sizeof(EGLImageKHR));
 }
 
-EGLSyncKHR eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint *attrib_list) {
+EGLSyncKHR eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint* attrib_list) {
     return gFence;
 }
 

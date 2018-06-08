@@ -16,13 +16,12 @@
 
 #include "SkiaDisplayList.h"
 
-#include "renderthread/CanvasContext.h"
-#include "VectorDrawable.h"
 #include "DumpOpsCanvas.h"
 #include "SkiaPipeline.h"
+#include "VectorDrawable.h"
+#include "renderthread/CanvasContext.h"
 
 #include <SkImagePriv.h>
-
 
 namespace android {
 namespace uirenderer {
@@ -31,6 +30,9 @@ namespace skiapipeline {
 void SkiaDisplayList::syncContents() {
     for (auto& functor : mChildFunctors) {
         functor.syncFunctor();
+    }
+    for (auto& animatedImage : mAnimatedImages) {
+        animatedImage->syncProperties();
     }
     for (auto& vectorDrawable : mVectorDrawables) {
         vectorDrawable->syncProperties();
@@ -49,8 +51,8 @@ void SkiaDisplayList::updateChildren(std::function<void(RenderNode*)> updateFn) 
     }
 }
 
-bool SkiaDisplayList::prepareListAndChildren(TreeObserver& observer, TreeInfo& info,
-        bool functorsNeedLayer,
+bool SkiaDisplayList::prepareListAndChildren(
+        TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
         std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn) {
     // If the prepare tree is triggered by the UI thread and no previous call to
     // pinImages has failed then we must pin all mutable images in the GPU cache
@@ -64,7 +66,7 @@ bool SkiaDisplayList::prepareListAndChildren(TreeObserver& observer, TreeInfo& i
     }
 
     bool hasBackwardProjectedNodesHere = false;
-    bool hasBackwardProjectedNodesSubtree= false;
+    bool hasBackwardProjectedNodesSubtree = false;
 
     for (auto& child : mChildNodes) {
         hasBackwardProjectedNodesHere |= child.getNodeProperties().getProjectBackwards();
@@ -78,23 +80,41 @@ bool SkiaDisplayList::prepareListAndChildren(TreeObserver& observer, TreeInfo& i
         info.damageAccumulator->popTransform();
     }
 
-    //The purpose of next block of code is to reset projected display list if there are no
-    //backward projected nodes. This speeds up drawing, by avoiding an extra walk of the tree
+    // The purpose of next block of code is to reset projected display list if there are no
+    // backward projected nodes. This speeds up drawing, by avoiding an extra walk of the tree
     if (mProjectionReceiver) {
-        mProjectionReceiver->setProjectedDisplayList(hasBackwardProjectedNodesSubtree ? this : nullptr);
+        mProjectionReceiver->setProjectedDisplayList(hasBackwardProjectedNodesSubtree ? this
+                                                                                      : nullptr);
         info.hasBackwardProjectedNodes = hasBackwardProjectedNodesHere;
     } else {
-        info.hasBackwardProjectedNodes = hasBackwardProjectedNodesSubtree
-                || hasBackwardProjectedNodesHere;
+        info.hasBackwardProjectedNodes =
+                hasBackwardProjectedNodesSubtree || hasBackwardProjectedNodesHere;
     }
 
     bool isDirty = false;
+    for (auto& animatedImage : mAnimatedImages) {
+        nsecs_t timeTilNextFrame = TreeInfo::Out::kNoAnimatedImageDelay;
+        // If any animated image in the display list needs updated, then damage the node.
+        if (animatedImage->isDirty(&timeTilNextFrame)) {
+            isDirty = true;
+        }
+
+        if (animatedImage->isRunning() &&
+            timeTilNextFrame != TreeInfo::Out::kNoAnimatedImageDelay) {
+            auto& delay = info.out.animatedImageDelay;
+            if (delay == TreeInfo::Out::kNoAnimatedImageDelay || timeTilNextFrame < delay) {
+                delay = timeTilNextFrame;
+            }
+        }
+    }
+
     for (auto& vectorDrawable : mVectorDrawables) {
         // If any vector drawable in the display list needs update, damage the node.
         if (vectorDrawable->isDirty()) {
             isDirty = true;
             static_cast<SkiaPipeline*>(info.canvasContext.getRenderPipeline())
-                ->getVectorDrawables()->push_back(vectorDrawable);
+                    ->getVectorDrawables()
+                    ->push_back(vectorDrawable);
         }
         vectorDrawable->setPropertyChangeWillBeConsumed(true);
     }
@@ -108,6 +128,7 @@ void SkiaDisplayList::reset() {
 
     mMutableImages.clear();
     mVectorDrawables.clear();
+    mAnimatedImages.clear();
     mChildFunctors.clear();
     mChildNodes.clear();
 
@@ -121,6 +142,6 @@ void SkiaDisplayList::output(std::ostream& output, uint32_t level) {
     mDisplayList.draw(&canvas);
 }
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace skiapipeline
+};  // namespace uirenderer
+};  // namespace android

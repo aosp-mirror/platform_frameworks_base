@@ -16,6 +16,7 @@
 
 package android.database;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -59,6 +60,10 @@ public class SQLiteOpenHelperTest {
 
         TestHelper(Context context, String name) {
             super(context, name, null, 1);
+        }
+
+        TestHelper(Context context, String name, int version, SQLiteDatabase.OpenParams params) {
+            super(context, name, version, params);
         }
 
         @Override
@@ -168,4 +173,25 @@ public class SQLiteOpenHelperTest {
         }
         assertTrue("No dbstat found for " + dbName, dbStatFound);
     }
+
+    @Test
+    public void testOpenParamsConstructor() {
+        SQLiteDatabase.OpenParams params = new SQLiteDatabase.OpenParams.Builder()
+                .setJournalMode("DELETE")
+                .setSynchronousMode("OFF")
+                .build();
+
+        TestHelper helper = new TestHelper(mContext, "openhelper_test_constructor", 1, params);
+        mHelpersToClose.add(helper);
+
+        String journalMode = DatabaseUtils
+                .stringForQuery(helper.getReadableDatabase(), "PRAGMA journal_mode", null);
+
+        assertEquals("DELETE", journalMode.toUpperCase());
+        String syncMode = DatabaseUtils
+                .stringForQuery(helper.getReadableDatabase(), "PRAGMA synchronous", null);
+
+        assertEquals("0", syncMode);
+    }
+
 }

@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 import android.view.autofill.AutofillId;
@@ -31,6 +30,8 @@ import android.widget.TextView;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,7 +63,9 @@ import java.util.regex.Pattern;
 public final class CharSequenceTransformation extends InternalTransformation implements
         Transformation, Parcelable {
     private static final String TAG = "CharSequenceTransformation";
-    @NonNull private final ArrayMap<AutofillId, Pair<Pattern, String>> mFields;
+
+    // Must use LinkedHashMap to preserve insertion order.
+    @NonNull private final LinkedHashMap<AutofillId, Pair<Pattern, String>> mFields;
 
     private CharSequenceTransformation(Builder builder) {
         mFields = builder.mFields;
@@ -76,9 +79,9 @@ public final class CharSequenceTransformation extends InternalTransformation imp
         final StringBuilder converted = new StringBuilder();
         final int size = mFields.size();
         if (sDebug) Log.d(TAG, size + " multiple fields on id " + childViewId);
-        for (int i = 0; i < size; i++) {
-            final AutofillId id = mFields.keyAt(i);
-            final Pair<Pattern, String> field = mFields.valueAt(i);
+        for (Entry<AutofillId, Pair<Pattern, String>> entry : mFields.entrySet()) {
+            final AutofillId id = entry.getKey();
+            final Pair<Pattern, String> field = entry.getValue();
             final String value = finder.findByAutofillId(id);
             if (value == null) {
                 Log.w(TAG, "No value for id " + id);
@@ -107,8 +110,10 @@ public final class CharSequenceTransformation extends InternalTransformation imp
      * Builder for {@link CharSequenceTransformation} objects.
      */
     public static class Builder {
-        @NonNull private final ArrayMap<AutofillId, Pair<Pattern, String>> mFields =
-                new ArrayMap<>();
+
+        // Must use LinkedHashMap to preserve insertion order.
+        @NonNull private final LinkedHashMap<AutofillId, Pair<Pattern, String>> mFields =
+                new LinkedHashMap<>();
         private boolean mDestroyed;
 
         /**
@@ -186,12 +191,15 @@ public final class CharSequenceTransformation extends InternalTransformation imp
         final Pattern[] regexs = new Pattern[size];
         final String[] substs = new String[size];
         Pair<Pattern, String> pair;
-        for (int i = 0; i < size; i++) {
-            ids[i] = mFields.keyAt(i);
-            pair = mFields.valueAt(i);
+        int i = 0;
+        for (Entry<AutofillId, Pair<Pattern, String>> entry : mFields.entrySet()) {
+            ids[i] = entry.getKey();
+            pair = entry.getValue();
             regexs[i] = pair.first;
             substs[i] = pair.second;
+            i++;
         }
+
         parcel.writeParcelableArray(ids, flags);
         parcel.writeSerializable(regexs);
         parcel.writeStringArray(substs);

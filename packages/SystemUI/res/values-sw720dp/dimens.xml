@@ -28,11 +28,5 @@
     <dimen name="notification_panel_min_height">770dp</dimen>
     <!-- Bottom margin (from display edge) for status bar panels -->
     <dimen name="panel_float">56dp</dimen>
-
-    <!-- The fraction of the screen height where the clock on the Keyguard has its center. The
-     max value is used when no notifications are displaying, and the min value is when the
-     highest possible number of notifications are showing. -->
-    <fraction name="keyguard_clock_y_fraction_max">35%</fraction>
-    <fraction name="keyguard_clock_y_fraction_min">25%</fraction>
 </resources>
 

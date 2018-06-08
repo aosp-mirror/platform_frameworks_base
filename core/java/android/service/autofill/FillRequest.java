@@ -69,9 +69,9 @@ public final class FillRequest implements Parcelable {
     public static final int INVALID_REQUEST_ID = Integer.MIN_VALUE;
 
     /** @hide */
-    @IntDef(
-        flag = true,
-        value = {FLAG_MANUAL_REQUEST})
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            FLAG_MANUAL_REQUEST
+    })
     @Retention(RetentionPolicy.SOURCE)
     @interface RequestFlags{}
 
@@ -127,12 +127,15 @@ public final class FillRequest implements Parcelable {
     }
 
     /**
-     * Gets the extra client state returned from the last {@link
-     * AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)
-     * fill request}, so the service can use it for state management.
+     * Gets the latest client state bundle set by the service in a
+     * {@link FillResponse.Builder#setClientState(Bundle) fill response}.
      *
-     * <p>Once a {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)
-     * save request} is made, the client state is cleared.
+     * <p><b>Note:</b> Prior to Android {@link android.os.Build.VERSION_CODES#P}, only client state
+     * bundles set by {@link FillResponse.Builder#setClientState(Bundle)} were considered. On
+     * Android {@link android.os.Build.VERSION_CODES#P} and higher, bundles set in the result of
+     * an authenticated request through the
+     * {@link android.view.autofill.AutofillManager#EXTRA_CLIENT_STATE} extra are
+     * also considered (and take precedence when set).
      *
      * @return The client state.
      */

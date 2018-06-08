@@ -16,9 +16,10 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
-import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_GOING_AWAY;
-import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_UNOCCLUDE;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static org.junit.Assert.assertEquals;
 
 import android.content.Context;
@@ -28,25 +29,28 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
  * Test class for {@link AppTransition}.
  *
- * runtest frameworks-services -c com.android.server.wm.AppTransitionTests
+ * atest AppTransitionTests
  */
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class AppTransitionTests {
 
+    @Rule
+    public final WindowManagerServiceRule mRule = new WindowManagerServiceRule();
     private WindowManagerService mWm;
 
     @Before
     public void setUp() throws Exception {
         final Context context = InstrumentationRegistry.getTargetContext();
-        mWm = TestWindowManagerPolicy.getWindowManagerService(context);
+        mWm = mRule.getWindowManagerService();
     }
 
     @Test
@@ -57,10 +61,31 @@ public class AppTransitionTests {
     }
 
     @Test
+    public void testKeyguardKeep() throws Exception {
+        mWm.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, false /* alwaysKeepCurrent */);
+        mWm.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false /* alwaysKeepCurrent */);
+        assertEquals(TRANSIT_KEYGUARD_GOING_AWAY, mWm.mAppTransition.getAppTransition());
+    }
+
+    @Test
     public void testForceOverride() throws Exception {
         mWm.prepareAppTransition(TRANSIT_KEYGUARD_UNOCCLUDE, false /* alwaysKeepCurrent */);
         mWm.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false /* alwaysKeepCurrent */,
                 0 /* flags */, true /* forceOverride */);
         assertEquals(TRANSIT_ACTIVITY_OPEN, mWm.mAppTransition.getAppTransition());
+    }
+
+    @Test
+    public void testCrashing() throws Exception {
+        mWm.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false /* alwaysKeepCurrent */);
+        mWm.prepareAppTransition(TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
+        assertEquals(TRANSIT_CRASHING_ACTIVITY_CLOSE, mWm.mAppTransition.getAppTransition());
+    }
+
+    @Test
+    public void testKeepKeyguard_withCrashing() throws Exception {
+        mWm.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, false /* alwaysKeepCurrent */);
+        mWm.prepareAppTransition(TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
+        assertEquals(TRANSIT_KEYGUARD_GOING_AWAY, mWm.mAppTransition.getAppTransition());
     }
 }

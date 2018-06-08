@@ -111,6 +111,19 @@ public final class SQLiteDatabaseConfiguration {
     public long idleConnectionTimeoutMs = Long.MAX_VALUE;
 
     /**
+     * Journal mode to use when {@link SQLiteDatabase#ENABLE_WRITE_AHEAD_LOGGING} is not set.
+     * <p>Default is returned by {@link SQLiteGlobal#getDefaultJournalMode()}
+     */
+    public String journalMode;
+
+    /**
+     * Synchronous mode to use.
+     * <p>Default is returned by {@link SQLiteGlobal#getDefaultSyncMode()}
+     * or {@link SQLiteGlobal#getWALSyncMode()} depending on journal mode
+     */
+    public String syncMode;
+
+    /**
      * Creates a database configuration with the required parameters for opening a
      * database and default values for all other parameters.
      *
@@ -170,6 +183,8 @@ public final class SQLiteDatabaseConfiguration {
         lookasideSlotSize = other.lookasideSlotSize;
         lookasideSlotCount = other.lookasideSlotCount;
         idleConnectionTimeoutMs = other.idleConnectionTimeoutMs;
+        journalMode = other.journalMode;
+        syncMode = other.syncMode;
     }
 
     /**
@@ -178,6 +193,11 @@ public final class SQLiteDatabaseConfiguration {
      */
     public boolean isInMemoryDb() {
         return path.equalsIgnoreCase(MEMORY_DB_PATH);
+    }
+
+    boolean useCompatibilityWal() {
+        return journalMode == null && syncMode == null
+                && (openFlags & SQLiteDatabase.DISABLE_COMPATIBILITY_WAL) == 0;
     }
 
     private static String stripPathForLogs(String path) {

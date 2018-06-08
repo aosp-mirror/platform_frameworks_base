@@ -16,17 +16,12 @@
 
 package android.graphics.drawable;
 
-import android.animation.Animator;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.graphics.Canvas;
-import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.FloatProperty;
-import android.view.DisplayListCanvas;
-import android.view.RenderNodeAnimator;
 import android.view.animation.LinearInterpolator;
 
 /**
@@ -36,138 +31,72 @@ class RippleBackground extends RippleComponent {
 
     private static final TimeInterpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
 
-    private static final int OPACITY_ENTER_DURATION = 600;
-    private static final int OPACITY_ENTER_DURATION_FAST = 120;
-    private static final int OPACITY_EXIT_DURATION = 480;
+    private static final int OPACITY_DURATION = 80;
 
-    // Hardware rendering properties.
-    private CanvasProperty<Paint> mPropPaint;
-    private CanvasProperty<Float> mPropRadius;
-    private CanvasProperty<Float> mPropX;
-    private CanvasProperty<Float> mPropY;
+    private ObjectAnimator mAnimator;
 
-    // Software rendering properties.
     private float mOpacity = 0;
 
     /** Whether this ripple is bounded. */
     private boolean mIsBounded;
 
-    public RippleBackground(RippleDrawable owner, Rect bounds, boolean isBounded,
-            boolean forceSoftware) {
-        super(owner, bounds, forceSoftware);
+    private boolean mFocused = false;
+    private boolean mHovered = false;
+
+    public RippleBackground(RippleDrawable owner, Rect bounds, boolean isBounded) {
+        super(owner, bounds);
 
         mIsBounded = isBounded;
     }
 
     public boolean isVisible() {
-        return mOpacity > 0 || isHardwareAnimating();
+        return mOpacity > 0;
     }
 
-    @Override
-    protected boolean drawSoftware(Canvas c, Paint p) {
-        boolean hasContent = false;
-
+    public void draw(Canvas c, Paint p) {
         final int origAlpha = p.getAlpha();
-        final int alpha = (int) (origAlpha * mOpacity + 0.5f);
+        final int alpha = Math.min((int) (origAlpha * mOpacity + 0.5f), 255);
         if (alpha > 0) {
             p.setAlpha(alpha);
             c.drawCircle(0, 0, mTargetRadius, p);
             p.setAlpha(origAlpha);
-            hasContent = true;
         }
-
-        return hasContent;
     }
 
-    @Override
-    protected boolean drawHardware(DisplayListCanvas c) {
-        c.drawCircle(mPropX, mPropY, mPropRadius, mPropPaint);
-        return true;
-    }
-
-    @Override
-    protected Animator createSoftwareEnter(boolean fast) {
-        // Linear enter based on current opacity.
-        final int maxDuration = fast ? OPACITY_ENTER_DURATION_FAST : OPACITY_ENTER_DURATION;
-        final int duration = (int) ((1 - mOpacity) * maxDuration);
-
-        final ObjectAnimator opacity = ObjectAnimator.ofFloat(this, OPACITY, 1);
-        opacity.setAutoCancel(true);
-        opacity.setDuration(duration);
-        opacity.setInterpolator(LINEAR_INTERPOLATOR);
-
-        return opacity;
-    }
-
-    @Override
-    protected Animator createSoftwareExit() {
-        final AnimatorSet set = new AnimatorSet();
-
-        // Linear exit after enter is completed.
-        final ObjectAnimator exit = ObjectAnimator.ofFloat(this, RippleBackground.OPACITY, 0);
-        exit.setInterpolator(LINEAR_INTERPOLATOR);
-        exit.setDuration(OPACITY_EXIT_DURATION);
-        exit.setAutoCancel(true);
-
-        final AnimatorSet.Builder builder = set.play(exit);
-
-        // Linear "fast" enter based on current opacity.
-        final int fastEnterDuration = mIsBounded ?
-                (int) ((1 - mOpacity) * OPACITY_ENTER_DURATION_FAST) : 0;
-        if (fastEnterDuration > 0) {
-            final ObjectAnimator enter = ObjectAnimator.ofFloat(this, RippleBackground.OPACITY, 1);
-            enter.setInterpolator(LINEAR_INTERPOLATOR);
-            enter.setDuration(fastEnterDuration);
-            enter.setAutoCancel(true);
-
-            builder.after(enter);
+    public void setState(boolean focused, boolean hovered, boolean pressed) {
+        if (!mFocused) {
+            focused = focused && !pressed;
         }
-
-        return set;
+        if (!mHovered) {
+            hovered = hovered && !pressed;
+        }
+        if (mHovered != hovered || mFocused != focused) {
+            mHovered = hovered;
+            mFocused = focused;
+            onStateChanged();
+        }
     }
 
-    @Override
-    protected RenderNodeAnimatorSet createHardwareExit(Paint p) {
-        final RenderNodeAnimatorSet set = new RenderNodeAnimatorSet();
-
-        final int targetAlpha = p.getAlpha();
-        final int currentAlpha = (int) (mOpacity * targetAlpha + 0.5f);
-        p.setAlpha(currentAlpha);
-
-        mPropPaint = CanvasProperty.createPaint(p);
-        mPropRadius = CanvasProperty.createFloat(mTargetRadius);
-        mPropX = CanvasProperty.createFloat(0);
-        mPropY = CanvasProperty.createFloat(0);
-
-        final int fastEnterDuration = mIsBounded ?
-                (int) ((1 - mOpacity) * OPACITY_ENTER_DURATION_FAST) : 0;
-
-        // Linear exit after enter is completed.
-        final RenderNodeAnimator exit = new RenderNodeAnimator(
-                mPropPaint, RenderNodeAnimator.PAINT_ALPHA, 0);
-        exit.setInterpolator(LINEAR_INTERPOLATOR);
-        exit.setDuration(OPACITY_EXIT_DURATION);
-        if (fastEnterDuration > 0) {
-            exit.setStartDelay(fastEnterDuration);
-            exit.setStartValue(targetAlpha);
+    private void onStateChanged() {
+        // Hover             = .2 * alpha
+        // Focus             = .6 * alpha
+        // Focused + Hovered = .6 * alpha
+        float newOpacity = mFocused ? .6f : mHovered ? .2f : 0f;
+        if (mAnimator != null) {
+            mAnimator.cancel();
+            mAnimator = null;
         }
-        set.add(exit);
-
-        // Linear "fast" enter based on current opacity.
-        if (fastEnterDuration > 0) {
-            final RenderNodeAnimator enter = new RenderNodeAnimator(
-                    mPropPaint, RenderNodeAnimator.PAINT_ALPHA, targetAlpha);
-            enter.setInterpolator(LINEAR_INTERPOLATOR);
-            enter.setDuration(fastEnterDuration);
-            set.add(enter);
-        }
-
-        return set;
+        mAnimator = ObjectAnimator.ofFloat(this, OPACITY, newOpacity);
+        mAnimator.setDuration(OPACITY_DURATION);
+        mAnimator.setInterpolator(LINEAR_INTERPOLATOR);
+        mAnimator.start();
     }
 
-    @Override
-    protected void jumpValuesToExit() {
-        mOpacity = 0;
+    public void jumpToFinal() {
+        if (mAnimator != null) {
+            mAnimator.end();
+            mAnimator = null;
+        }
     }
 
     private static abstract class BackgroundProperty extends FloatProperty<RippleBackground> {

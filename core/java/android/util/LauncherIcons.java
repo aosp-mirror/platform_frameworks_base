@@ -110,9 +110,9 @@ public final class LauncherIcons {
         Drawable badgeColor = sysRes.getDrawable(
                 com.android.internal.R.drawable.ic_corp_icon_badge_color)
                 .getConstantState().newDrawable().mutate();
-        badgeColor.setTint(backgroundColor);
 
         Drawable badgeForeground = sysRes.getDrawable(foregroundRes);
+        badgeForeground.setTint(backgroundColor);
 
         Drawable[] drawables = base == null
                 ? new Drawable[] {badgeShadow, badgeColor, badgeForeground }

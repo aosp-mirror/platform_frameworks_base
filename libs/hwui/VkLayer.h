@@ -28,7 +28,7 @@ namespace uirenderer {
 class VkLayer : public Layer {
 public:
     VkLayer(RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight,
-            SkColorFilter* colorFilter, int alpha, SkBlendMode mode, bool blend)
+            sk_sp<SkColorFilter> colorFilter, int alpha, SkBlendMode mode, bool blend)
             : Layer(renderState, Api::Vulkan, colorFilter, alpha, mode)
             , mWidth(layerWidth)
             , mHeight(layerHeight)
@@ -36,30 +36,20 @@ public:
 
     virtual ~VkLayer() {}
 
-    uint32_t getWidth() const override {
-        return mWidth;
-    }
+    uint32_t getWidth() const override { return mWidth; }
 
-    uint32_t getHeight() const override {
-        return mHeight;
-    }
+    uint32_t getHeight() const override { return mHeight; }
 
     void setSize(uint32_t width, uint32_t height) override {
         mWidth = width;
         mHeight = height;
     }
 
-    void setBlend(bool blend) override {
-        mBlend = blend;
-    }
+    void setBlend(bool blend) override { mBlend = blend; }
 
-    bool isBlend() const override {
-        return mBlend;
-    }
+    bool isBlend() const override { return mBlend; }
 
-    sk_sp<SkImage> getImage() {
-        return mImage;
-    }
+    sk_sp<SkImage> getImage() { return mImage; }
 
     void updateTexture();
 
@@ -72,9 +62,9 @@ private:
     int mHeight;
     bool mBlend;
 
-   sk_sp<SkImage> mImage;
+    sk_sp<SkImage> mImage;
 
-}; // struct VkLayer
+};  // struct VkLayer
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

@@ -35,10 +35,10 @@ public interface DozeHost {
     boolean isBlockingDoze();
 
     void startPendingIntentDismissingKeyguard(PendingIntent intent);
-    void abortPulsing();
     void extendPulse();
 
     void setAnimateWakeup(boolean animateWakeup);
+    void setAnimateScreenOff(boolean animateScreenOff);
 
     void onDoubleTap(float x, float y);
 

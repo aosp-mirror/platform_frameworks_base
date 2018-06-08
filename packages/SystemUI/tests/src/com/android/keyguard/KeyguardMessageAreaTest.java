@@ -20,10 +20,9 @@ import static junit.framework.Assert.assertEquals;
 
 import static org.mockito.Mockito.mock;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.systemui.SysuiTestCase;
 
@@ -32,33 +31,25 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@RunWithLooper
 public class KeyguardMessageAreaTest extends SysuiTestCase {
-    private Handler mHandler = new Handler(Looper.getMainLooper());
     private KeyguardMessageArea mMessageArea;
 
     @Before
     public void setUp() throws Exception {
         KeyguardUpdateMonitor monitor = mock(KeyguardUpdateMonitor.class);
-        mHandler.post(()-> mMessageArea = new KeyguardMessageArea(mContext, null, monitor));
+        mMessageArea = new KeyguardMessageArea(mContext, null, monitor);
         waitForIdleSync();
     }
 
     @Test
     public void clearFollowedByMessage_keepsMessage() {
-        mHandler.post(()-> {
-            mMessageArea.setMessage("");
-            mMessageArea.setMessage("test");
-        });
-
-        waitForIdleSync();
+        mMessageArea.setMessage("");
+        mMessageArea.setMessage("test");
 
         CharSequence[] messageText = new CharSequence[1];
-        mHandler.post(()-> {
-            messageText[0] = mMessageArea.getText();
-        });
-
-        waitForIdleSync();
+        messageText[0] = mMessageArea.getText();
 
         assertEquals("test", messageText[0]);
     }

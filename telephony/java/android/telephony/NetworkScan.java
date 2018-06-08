@@ -120,7 +120,10 @@ public class NetworkScan {
         }
     }
 
-    /** @deprecated Use {@link #stopScan()} */
+    /**
+     * @deprecated Use {@link #stopScan()}
+     * @removed
+     */
     @Deprecated
     public void stop() throws RemoteException {
         try {

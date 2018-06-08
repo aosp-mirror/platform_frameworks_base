@@ -16,6 +16,8 @@
 
 package android.view.accessibility;
 
+import static com.android.internal.util.CollectionUtils.isEmpty;
+
 import android.annotation.Nullable;
 import android.os.Parcelable;
 import android.view.View;
@@ -55,6 +57,8 @@ import java.util.List;
  * @see AccessibilityNodeInfo
  */
 public class AccessibilityRecord {
+    /** @hide */
+    protected static final boolean DEBUG_CONCISE_TOSTRING = false;
 
     private static final int UNDEFINED = -1;
 
@@ -86,6 +90,9 @@ public class AccessibilityRecord {
     int mToIndex = UNDEFINED;
     int mScrollX = UNDEFINED;
     int mScrollY = UNDEFINED;
+
+    int mScrollDeltaX = UNDEFINED;
+    int mScrollDeltaY = UNDEFINED;
     int mMaxScrollX = UNDEFINED;
     int mMaxScrollY = UNDEFINED;
 
@@ -462,6 +469,48 @@ public class AccessibilityRecord {
     public void setScrollY(int scrollY) {
         enforceNotSealed();
         mScrollY = scrollY;
+    }
+
+    /**
+     * Gets the difference in pixels between the horizontal position before the scroll and the
+     * current horizontal position
+     *
+     * @return the scroll delta x
+     */
+    public int getScrollDeltaX() {
+        return mScrollDeltaX;
+    }
+
+    /**
+     * Sets the difference in pixels between the horizontal position before the scroll and the
+     * current horizontal position
+     *
+     * @param scrollDeltaX the scroll delta x
+     */
+    public void setScrollDeltaX(int scrollDeltaX) {
+        enforceNotSealed();
+        mScrollDeltaX = scrollDeltaX;
+    }
+
+    /**
+     * Gets the difference in pixels between the vertical position before the scroll and the
+     * current vertical position
+     *
+     * @return the scroll delta y
+     */
+    public int getScrollDeltaY() {
+        return mScrollDeltaY;
+    }
+
+    /**
+     * Sets the difference in pixels between the vertical position before the scroll and the
+     * current vertical position
+     *
+     * @param scrollDeltaY the scroll delta y
+     */
+    public void setScrollDeltaY(int scrollDeltaY) {
+        enforceNotSealed();
+        mScrollDeltaY = scrollDeltaY;
     }
 
     /**
@@ -843,28 +892,69 @@ public class AccessibilityRecord {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(" [ ClassName: " + mClassName);
-        builder.append("; Text: " + mText);
-        builder.append("; ContentDescription: " + mContentDescription);
-        builder.append("; ItemCount: " + mItemCount);
-        builder.append("; CurrentItemIndex: " + mCurrentItemIndex);
-        builder.append("; IsEnabled: " + getBooleanProperty(PROPERTY_ENABLED));
-        builder.append("; IsPassword: " + getBooleanProperty(PROPERTY_PASSWORD));
-        builder.append("; IsChecked: " + getBooleanProperty(PROPERTY_CHECKED));
-        builder.append("; IsFullScreen: " + getBooleanProperty(PROPERTY_FULL_SCREEN));
-        builder.append("; Scrollable: " + getBooleanProperty(PROPERTY_SCROLLABLE));
-        builder.append("; BeforeText: " + mBeforeText);
-        builder.append("; FromIndex: " + mFromIndex);
-        builder.append("; ToIndex: " + mToIndex);
-        builder.append("; ScrollX: " + mScrollX);
-        builder.append("; ScrollY: " + mScrollY);
-        builder.append("; MaxScrollX: " + mMaxScrollX);
-        builder.append("; MaxScrollY: " + mMaxScrollY);
-        builder.append("; AddedCount: " + mAddedCount);
-        builder.append("; RemovedCount: " + mRemovedCount);
-        builder.append("; ParcelableData: " + mParcelableData);
+        return appendTo(new StringBuilder()).toString();
+    }
+
+    StringBuilder appendTo(StringBuilder builder) {
+        builder.append(" [ ClassName: ").append(mClassName);
+        if (!DEBUG_CONCISE_TOSTRING || !isEmpty(mText)) {
+            appendPropName(builder, "Text").append(mText);
+        }
+        append(builder, "ContentDescription", mContentDescription);
+        append(builder, "ItemCount", mItemCount);
+        append(builder, "CurrentItemIndex", mCurrentItemIndex);
+
+        appendUnless(true, PROPERTY_ENABLED, builder);
+        appendUnless(false, PROPERTY_PASSWORD, builder);
+        appendUnless(false, PROPERTY_CHECKED, builder);
+        appendUnless(false, PROPERTY_FULL_SCREEN, builder);
+        appendUnless(false, PROPERTY_SCROLLABLE, builder);
+
+        append(builder, "BeforeText", mBeforeText);
+        append(builder, "FromIndex", mFromIndex);
+        append(builder, "ToIndex", mToIndex);
+        append(builder, "ScrollX", mScrollX);
+        append(builder, "ScrollY", mScrollY);
+        append(builder, "MaxScrollX", mMaxScrollX);
+        append(builder, "MaxScrollY", mMaxScrollY);
+        append(builder, "AddedCount", mAddedCount);
+        append(builder, "RemovedCount", mRemovedCount);
+        append(builder, "ParcelableData", mParcelableData);
         builder.append(" ]");
-        return builder.toString();
+        return builder;
+    }
+
+    private void appendUnless(boolean defValue, int prop, StringBuilder builder) {
+        boolean value = getBooleanProperty(prop);
+        if (DEBUG_CONCISE_TOSTRING && value == defValue) return;
+        appendPropName(builder, singleBooleanPropertyToString(prop))
+                .append(value);
+    }
+
+    private static String singleBooleanPropertyToString(int prop) {
+        switch (prop) {
+            case PROPERTY_CHECKED: return "Checked";
+            case PROPERTY_ENABLED: return "Enabled";
+            case PROPERTY_PASSWORD: return "Password";
+            case PROPERTY_FULL_SCREEN: return "FullScreen";
+            case PROPERTY_SCROLLABLE: return "Scrollable";
+            case PROPERTY_IMPORTANT_FOR_ACCESSIBILITY:
+                return "ImportantForAccessibility";
+            default: return Integer.toHexString(prop);
+        }
+    }
+
+    private void append(StringBuilder builder, String propName, int propValue) {
+        if (DEBUG_CONCISE_TOSTRING && propValue == UNDEFINED) return;
+        appendPropName(builder, propName).append(propValue);
+    }
+
+    private void append(StringBuilder builder, String propName, Object propValue) {
+        if (DEBUG_CONCISE_TOSTRING && propValue == null) return;
+        appendPropName(builder, propName).append(propValue);
+    }
+
+    private StringBuilder appendPropName(StringBuilder builder, String propName) {
+        return builder.append("; ").append(propName).append(": ");
     }
 }

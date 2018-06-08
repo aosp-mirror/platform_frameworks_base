@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.RectF;
@@ -83,7 +84,6 @@ public class SwipeHelper implements Gefingerpoken {
 
     private boolean mMenuRowIntercepting;
     private boolean mLongPressSent;
-    private LongPressListener mLongPressListener;
     private Runnable mWatchLongPress;
     private final long mLongPressTimeout;
 
@@ -113,10 +113,6 @@ public class SwipeHelper implements Gefingerpoken {
         mFadeDependingOnAmountSwiped = res.getBoolean(R.bool.config_fadeDependingOnAmountSwiped);
         mFalsingManager = FalsingManager.getInstance(context);
         mFlingAnimationUtils = new FlingAnimationUtils(context, getMaxEscapeAnimDuration() / 1000f);
-    }
-
-    public void setLongPressListener(LongPressListener listener) {
-        mLongPressListener = listener;
     }
 
     public void setDensityScale(float densityScale) {
@@ -257,7 +253,7 @@ public class SwipeHelper implements Gefingerpoken {
         }
     }
 
-    public void removeLongPressCallback() {
+    public void cancelLongPress() {
         if (mWatchLongPress != null) {
             mHandler.removeCallbacks(mWatchLongPress);
             mWatchLongPress = null;
@@ -288,33 +284,27 @@ public class SwipeHelper implements Gefingerpoken {
                     mInitialTouchPos = getPos(ev);
                     mPerpendicularInitialTouchPos = getPerpendicularPos(ev);
                     mTranslation = getTranslation(mCurrView);
-                    if (mLongPressListener != null) {
-                        if (mWatchLongPress == null) {
-                            mWatchLongPress = new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (mCurrView != null && !mLongPressSent) {
-                                        mLongPressSent = true;
+                    if (mWatchLongPress == null) {
+                        mWatchLongPress = new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mCurrView != null && !mLongPressSent) {
+                                    mLongPressSent = true;
+                                    mCurrView.getLocationOnScreen(mTmpPos);
+                                    final int x = (int) ev.getRawX() - mTmpPos[0];
+                                    final int y = (int) ev.getRawY() - mTmpPos[1];
+                                    if (mCurrView instanceof ExpandableNotificationRow) {
                                         mCurrView.sendAccessibilityEvent(
                                                 AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
-                                        mCurrView.getLocationOnScreen(mTmpPos);
-                                        final int x = (int) ev.getRawX() - mTmpPos[0];
-                                        final int y = (int) ev.getRawY() - mTmpPos[1];
-                                        MenuItem menuItem = null;
-                                        if (mCurrView instanceof ExpandableNotificationRow) {
-                                            menuItem = ((ExpandableNotificationRow) mCurrView)
-                                                    .getProvider().getLongpressMenuItem(mContext);
-                                        }
-                                        if (menuItem != null) {
-                                            mLongPressListener.onLongPress(mCurrView, x, y,
-                                                    menuItem);
-                                        }
+                                        ExpandableNotificationRow currRow =
+                                                (ExpandableNotificationRow) mCurrView;
+                                        currRow.doLongClickCallback(x, y);
                                     }
                                 }
-                            };
-                        }
-                        mHandler.postDelayed(mWatchLongPress, mLongPressTimeout);
+                            }
+                        };
                     }
+                    mHandler.postDelayed(mWatchLongPress, mLongPressTimeout);
                 }
                 break;
 
@@ -327,11 +317,13 @@ public class SwipeHelper implements Gefingerpoken {
                     float deltaPerpendicular = perpendicularPos - mPerpendicularInitialTouchPos;
                     if (Math.abs(delta) > mPagingTouchSlop
                             && Math.abs(delta) > Math.abs(deltaPerpendicular)) {
-                        mCallback.onBeginDrag(mCurrView);
-                        mDragging = true;
-                        mInitialTouchPos = getPos(ev);
-                        mTranslation = getTranslation(mCurrView);
-                        removeLongPressCallback();
+                        if (mCallback.canChildBeDragged(mCurrView)) {
+                            mCallback.onBeginDrag(mCurrView);
+                            mDragging = true;
+                            mInitialTouchPos = getPos(ev);
+                            mTranslation = getTranslation(mCurrView);
+                        }
+                        cancelLongPress();
                     }
                 }
                 break;
@@ -343,7 +335,7 @@ public class SwipeHelper implements Gefingerpoken {
                 mCurrView = null;
                 mLongPressSent = false;
                 mMenuRowIntercepting = false;
-                removeLongPressCallback();
+                cancelLongPress();
                 if (captured) return true;
                 break;
         }
@@ -586,7 +578,7 @@ public class SwipeHelper implements Gefingerpoken {
 
                 // We are not doing anything, make sure the long press callback
                 // is not still ticking like a bomb waiting to go off.
-                removeLongPressCallback();
+                cancelLongPress();
                 return false;
             }
         }
@@ -733,16 +725,10 @@ public class SwipeHelper implements Gefingerpoken {
          * @return The factor the falsing threshold should be multiplied with
          */
         float getFalsingThresholdFactor();
-    }
 
-    /**
-     * Equivalent to View.OnLongClickListener with coordinates
-     */
-    public interface LongPressListener {
         /**
-         * Equivalent to {@link View.OnLongClickListener#onLongClick(View)} with coordinates
-         * @return whether the longpress was handled
+         * @return If true, the given view is draggable.
          */
-        boolean onLongPress(View v, int x, int y, MenuItem item);
+        default boolean canChildBeDragged(@NonNull View animView) { return true; }
     }
 }

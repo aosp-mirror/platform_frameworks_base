@@ -19,7 +19,9 @@ package android.media;
 import java.nio.ByteBuffer;
 import java.lang.AutoCloseable;
 
+import android.annotation.Nullable;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 
 /**
  * <p>A single complete image buffer to use with a media source such as a
@@ -182,6 +184,38 @@ public abstract class Image implements AutoCloseable {
      * </p>
      */
     public abstract long getTimestamp();
+
+    /**
+     * Get the transformation associated with this frame.
+     * @return The window transformation that needs to be applied for this frame.
+     * @hide
+     */
+    public abstract int getTransform();
+
+    /**
+     * Get the scaling mode associated with this frame.
+     * @return The scaling mode that needs to be applied for this frame.
+     * @hide
+     */
+    public abstract int getScalingMode();
+
+    /**
+     * Get the {@link android.hardware.HardwareBuffer HardwareBuffer} handle of the input image
+     * intended for GPU and/or hardware access.
+     * <p>
+     * The returned {@link android.hardware.HardwareBuffer HardwareBuffer} shall not be used
+     * after  {@link Image#close Image.close()} has been called.
+     * </p>
+     * @return the HardwareBuffer associated with this Image or null if this Image doesn't support
+     * this feature. (Unsupported use cases include Image instances obtained through
+     * {@link android.media.MediaCodec MediaCodec}, and on versions prior to Android P,
+     * {@link android.media.ImageWriter ImageWriter}).
+     */
+    @Nullable
+    public HardwareBuffer getHardwareBuffer() {
+        throwISEIfImageIsInvalid();
+        return null;
+    }
 
     /**
      * Set the timestamp associated with this frame.

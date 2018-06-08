@@ -31,7 +31,7 @@ public final class Usb20ASFormatIII extends UsbASFormat {
     private byte mBitResolution;    // 5:1 The number of effectively used bits from
                                     // the available bits in an audio subframe.
 
-    public Usb20ASFormatIII(int length, byte type, byte subtype, byte formatType, byte subclass) {
+    public Usb20ASFormatIII(int length, byte type, byte subtype, byte formatType, int subclass) {
         super(length, type, subtype, formatType, subclass);
     }
 

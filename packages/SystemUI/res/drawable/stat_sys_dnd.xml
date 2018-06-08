@@ -22,14 +22,13 @@
     <vector
         android:width="17dp"
         android:height="17dp"
-        android:viewportWidth="16.6"
-        android:viewportHeight="16.6">
-        <group
-            android:translateX="-0.2"
-            android:translateY="-0.2">
-            <path
-                android:pathData="M8.5,1.59c-3.81,0 -6.91,3.09 -6.91,6.91s3.09,6.91 6.91,6.91 6.91,-3.09 6.91,-6.91 -3.1,-6.91 -6.91,-6.91zM11.16,9.56L5.84,9.56c-0.59,0 -1.06,-0.48 -1.06,-1.06s0.48,-1.06 1.06,-1.06h5.31a1.06,1.06 0,0 1,0.01 2.12z"
-                android:fillColor="#FFF"/>
-        </group>
+        android:viewportWidth="24.0"
+        android:viewportHeight="24.0">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M12,2C6.48,2 2,6.48 2,12c0,5.52 4.48,10 10,10c5.52,0 10,-4.48 10,-10C22,6.48 17.52,2 12,2zM12,20c-4.41,0 -8,-3.59 -8,-8c0,-4.41 3.59,-8 8,-8c4.41,0 8,3.59 8,8C20,16.41 16.41,20 12,20z"/>
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M7,11h10v2h-10z"/>
     </vector>
 </inset>

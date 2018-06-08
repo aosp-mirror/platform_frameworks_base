@@ -395,7 +395,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
      */
     @Override
     public void setNotificationUri(ContentResolver cr, Uri notifyUri) {
-        setNotificationUri(cr, notifyUri, UserHandle.myUserId());
+        setNotificationUri(cr, notifyUri, cr.getUserId());
     }
 
     /** @hide - set the notification uri but with an observer for a particular user's view */

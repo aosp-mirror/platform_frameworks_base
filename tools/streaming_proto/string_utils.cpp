@@ -3,7 +3,7 @@
 #include <iostream>
 
 namespace android {
-namespace javastream_proto {
+namespace stream_proto {
 
 using namespace std;
 
@@ -89,7 +89,37 @@ replace_string(const string& str, const char replace, const char with)
     return result;
 }
 
-} // namespace javastream_proto
+vector<string>
+split(const string& str, const char delimiter)
+{
+    vector<string> result;
+    size_t base = 0, found = 0;
+    while (true) {
+        found = str.find_first_of(delimiter, base);
+        if (found != base) {
+            string part = str.substr(base, found - base);
+            if (!part.empty()) {
+                result.push_back(part);
+            }
+        }
+        if (found == str.npos) break;
+        base = found + 1;
+    }
+    return result;
+}
+
+string
+stripPrefix(const string& str, const string& prefix)
+{
+    if (str.size() <= prefix.size()) return str;
+    size_t i = 0, len = prefix.size();
+    for (; i<len; i++) {
+        if (str[i] != prefix[i]) return str;
+    }
+    return str.substr(i);
+}
+
+} // namespace stream_proto
 } // namespace android
 
 

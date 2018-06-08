@@ -19,7 +19,7 @@ import android.graphics.Rect;
 import android.support.annotation.IdRes;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.RelativeLayout;
+import android.widget.LinearLayout;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
@@ -30,7 +30,7 @@ import com.android.systemui.statusbar.policy.DarkIconDispatcher;
  * A view that forms the header of the notification panel. This view will ensure that any
  * status icons that are displayed are tinted accordingly to the current theme.
  */
-public class CarStatusBarHeader extends RelativeLayout {
+public class CarStatusBarHeader extends LinearLayout {
     public CarStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -44,7 +44,6 @@ public class CarStatusBarHeader extends RelativeLayout {
         float intensity = colorForeground == Color.WHITE ? 0f : 1f;
         Rect tintArea = new Rect(0, 0, 0, 0);
 
-        applyDarkness(R.id.signal_cluster, tintArea, intensity, colorForeground);
         applyDarkness(R.id.battery, tintArea, intensity, colorForeground);
         applyDarkness(R.id.clock, tintArea, intensity, colorForeground);
 

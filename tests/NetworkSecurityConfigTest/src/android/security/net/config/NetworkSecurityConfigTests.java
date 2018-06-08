@@ -17,6 +17,7 @@
 package android.security.net.config;
 
 import android.app.Activity;
+import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.test.ActivityUnitTestCase;
 import android.util.ArraySet;
@@ -227,7 +228,8 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
     public void testConfigBuilderUsesParents() throws Exception {
         // Check that a builder with a parent uses the parent's values when non is set.
         NetworkSecurityConfig config = new NetworkSecurityConfig.Builder()
-                .setParent(NetworkSecurityConfig.getDefaultBuilder(Build.VERSION_CODES.N, 1))
+                .setParent(NetworkSecurityConfig
+                        .getDefaultBuilder(TestUtils.makeApplicationInfo()))
                 .build();
         assert(!config.getTrustAnchors().isEmpty());
     }
@@ -268,11 +270,22 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
             // Install the test CA.
             store.installCertificate(TEST_CA_CERT);
             NetworkSecurityConfig preNConfig =
-                    NetworkSecurityConfig.getDefaultBuilder(Build.VERSION_CODES.M, 1).build();
+                    NetworkSecurityConfig
+                    .getDefaultBuilder(TestUtils.makeApplicationInfo(Build.VERSION_CODES.M))
+                    .build();
             NetworkSecurityConfig nConfig =
-                    NetworkSecurityConfig.getDefaultBuilder(Build.VERSION_CODES.N, 1).build();
+                    NetworkSecurityConfig
+                    .getDefaultBuilder(TestUtils.makeApplicationInfo(Build.VERSION_CODES.N))
+                    .build();
+            ApplicationInfo privInfo = TestUtils.makeApplicationInfo(Build.VERSION_CODES.M);
+            privInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
+            NetworkSecurityConfig privConfig =
+                    NetworkSecurityConfig
+                    .getDefaultBuilder(privInfo)
+                    .build();
             Set<TrustAnchor> preNAnchors = preNConfig.getTrustAnchors();
             Set<TrustAnchor> nAnchors = nConfig.getTrustAnchors();
+            Set<TrustAnchor> privAnchors = privConfig.getTrustAnchors();
             Set<X509Certificate> preNCerts = new HashSet<X509Certificate>();
             for (TrustAnchor anchor : preNAnchors) {
                 preNCerts.add(anchor.certificate);
@@ -281,8 +294,13 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
             for (TrustAnchor anchor : nAnchors) {
                 nCerts.add(anchor.certificate);
             }
+            Set<X509Certificate> privCerts = new HashSet<X509Certificate>();
+            for (TrustAnchor anchor : privAnchors) {
+                privCerts.add(anchor.certificate);
+            }
             assertTrue(preNCerts.contains(TEST_CA_CERT));
             assertFalse(nCerts.contains(TEST_CA_CERT));
+            assertFalse(privCerts.contains(TEST_CA_CERT));
         } finally {
             // Delete the user added CA. We don't know the alias so just delete them all.
             for (String alias : store.aliases()) {

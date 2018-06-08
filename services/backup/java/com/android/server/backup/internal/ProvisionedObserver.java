@@ -16,22 +16,22 @@
 
 package com.android.server.backup.internal;
 
-import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.util.Slog;
 
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.KeyValueBackupJob;
-import com.android.server.backup.RefactoredBackupManagerService;
 
 public class ProvisionedObserver extends ContentObserver {
 
-    private RefactoredBackupManagerService backupManagerService;
+    private BackupManagerService backupManagerService;
 
     public ProvisionedObserver(
-            RefactoredBackupManagerService backupManagerService, Handler handler) {
+            BackupManagerService backupManagerService, Handler handler) {
         super(handler);
         this.backupManagerService = backupManagerService;
     }
@@ -53,7 +53,8 @@ public class ProvisionedObserver extends ContentObserver {
                 if (MORE_DEBUG) {
                     Slog.d(TAG, "Now provisioned, so starting backups");
                 }
-                KeyValueBackupJob.schedule(backupManagerService.getContext());
+                KeyValueBackupJob.schedule(backupManagerService.getContext(),
+                        backupManagerService.getConstants());
                 backupManagerService.scheduleNextFullBackupJob(0);
             }
         }

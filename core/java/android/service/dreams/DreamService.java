@@ -17,6 +17,7 @@ package android.service.dreams;
 
 import android.annotation.IdRes;
 import android.annotation.LayoutRes;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -54,7 +55,6 @@ import com.android.internal.util.DumpUtils.Dump;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.List;
 
 /**
  * Extend this class to implement a custom dream (available to the user as a "Daydream").
@@ -458,12 +458,47 @@ public class DreamService extends Service implements Window.Callback {
      * was processed in {@link #onCreate}.
      *
      * <p>Note: Requires a window, do not call before {@link #onAttachedToWindow()}</p>
+     * <p>
+     * <strong>Note:</strong> In most cases -- depending on compiler support --
+     * the resulting view is automatically cast to the target class type. If
+     * the target class type is unconstrained, an explicit cast may be
+     * necessary.
      *
+     * @param id the ID to search for
      * @return The view if found or null otherwise.
+     * @see View#findViewById(int)
+     * @see DreamService#requireViewById(int)
      */
     @Nullable
     public <T extends View> T findViewById(@IdRes int id) {
         return getWindow().findViewById(id);
+    }
+
+    /**
+     * Finds a view that was identified by the id attribute from the XML that was processed in
+     * {@link #onCreate}, or throws an IllegalArgumentException if the ID is invalid or there is no
+     * matching view in the hierarchy.
+     *
+     * <p>Note: Requires a window, do not call before {@link #onAttachedToWindow()}</p>
+     * <p>
+     * <strong>Note:</strong> In most cases -- depending on compiler support --
+     * the resulting view is automatically cast to the target class type. If
+     * the target class type is unconstrained, an explicit cast may be
+     * necessary.
+     *
+     * @param id the ID to search for
+     * @return a view with given ID
+     * @see View#requireViewById(int)
+     * @see DreamService#findViewById(int)
+     */
+    @NonNull
+    public final <T extends View> T requireViewById(@IdRes int id) {
+        T view = findViewById(id);
+        if (view == null) {
+            throw new IllegalArgumentException(
+                    "ID does not reference a View inside this DreamService");
+        }
+        return view;
     }
 
     /**
@@ -630,6 +665,11 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     private void updateDoze() {
+        if (mWindowToken == null) {
+            Slog.w(TAG, "Updating doze without a window token.");
+            return;
+        }
+
         if (mDozing) {
             try {
                 mSandman.startDozing(mWindowToken, mDozeScreenState, mDozeScreenBrightness);
@@ -680,8 +720,8 @@ public class DreamService extends Service implements Window.Callback {
      *
      * @return The screen state to use while dozing, such as {@link Display#STATE_ON},
      * {@link Display#STATE_DOZE}, {@link Display#STATE_DOZE_SUSPEND},
-     * or {@link Display#STATE_OFF}, or {@link Display#STATE_UNKNOWN} for the default
-     * behavior.
+     * {@link Display#STATE_ON_SUSPEND}, {@link Display#STATE_OFF}, or {@link Display#STATE_UNKNOWN}
+     * for the default behavior.
      *
      * @see #setDozeScreenState
      * @hide For use by system UI components only.
@@ -700,12 +740,18 @@ public class DreamService extends Service implements Window.Callback {
      * perform transitions between states while dozing to conserve power and
      * achieve various effects.
      * </p><p>
-     * It is recommended that the state be set to {@link Display#STATE_DOZE_SUSPEND}
-     * once the dream has completely finished drawing and before it releases its wakelock
-     * to allow the display hardware to be fully suspended.  While suspended, the
-     * display will preserve its on-screen contents or hand off control to dedicated
-     * doze hardware if the devices supports it.  If the doze suspend state is
-     * used, the dream must make sure to set the mode back
+     * Some devices will have dedicated hardware ("Sidekick") to animate
+     * the display content while the CPU sleeps. If the dream and the hardware support
+     * this, {@link Display#STATE_ON_SUSPEND} or {@link Display#STATE_DOZE_SUSPEND}
+     * will switch control to the Sidekick.
+     * </p><p>
+     * If not using Sidekick, it is recommended that the state be set to
+     * {@link Display#STATE_DOZE_SUSPEND} once the dream has completely
+     * finished drawing and before it releases its wakelock
+     * to allow the display hardware to be fully suspended.  While suspended,
+     * the display will preserve its on-screen contents.
+     * </p><p>
+     * If the doze suspend state is used, the dream must make sure to set the mode back
      * to {@link Display#STATE_DOZE} or {@link Display#STATE_ON} before drawing again
      * since the display updates may be ignored and not seen by the user otherwise.
      * </p><p>
@@ -716,8 +762,8 @@ public class DreamService extends Service implements Window.Callback {
      *
      * @param state The screen state to use while dozing, such as {@link Display#STATE_ON},
      * {@link Display#STATE_DOZE}, {@link Display#STATE_DOZE_SUSPEND},
-     * or {@link Display#STATE_OFF}, or {@link Display#STATE_UNKNOWN} for the default
-     * behavior.
+     * {@link Display#STATE_ON_SUSPEND}, {@link Display#STATE_OFF}, or {@link Display#STATE_UNKNOWN}
+     * for the default behavior.
      *
      * @hide For use by system UI components only.
      */

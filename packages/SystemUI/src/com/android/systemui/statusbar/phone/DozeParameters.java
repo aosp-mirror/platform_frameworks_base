@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -24,32 +25,60 @@ import android.text.TextUtils;
 import android.util.MathUtils;
 import android.util.SparseBooleanArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.hardware.AmbientDisplayConfiguration;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.doze.AlwaysOnDisplayPolicy;
+import com.android.systemui.doze.DozeScreenState;
+import com.android.systemui.tuner.TunerService;
 
 import java.io.PrintWriter;
 
-public class DozeParameters {
+public class DozeParameters implements TunerService.Tunable {
     private static final int MAX_DURATION = 60 * 1000;
     public static final String DOZE_SENSORS_WAKE_UP_FULLY = "doze_sensors_wake_up_fully";
+    public static final boolean FORCE_NO_BLANKING =
+            SystemProperties.getBoolean("debug.force_no_blanking", false);
+
+    private static IntInOutMatcher sPickupSubtypePerformsProxMatcher;
+    private static DozeParameters sInstance;
 
     private final Context mContext;
     private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
+    private final PowerManager mPowerManager;
 
-    private static IntInOutMatcher sPickupSubtypePerformsProxMatcher;
+    private final AlwaysOnDisplayPolicy mAlwaysOnPolicy;
 
-    public DozeParameters(Context context) {
-        mContext = context;
+    private boolean mDozeAlwaysOn;
+    private boolean mControlScreenOffAnimation;
+
+    public static DozeParameters getInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = new DozeParameters(context);
+        }
+        return sInstance;
+    }
+
+    @VisibleForTesting
+    protected DozeParameters(Context context) {
+        mContext = context.getApplicationContext();
         mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
+        mAlwaysOnPolicy = new AlwaysOnDisplayPolicy(mContext);
+
+        mControlScreenOffAnimation = !getDisplayNeedsBlanking();
+        mPowerManager = mContext.getSystemService(PowerManager.class);
+        mPowerManager.setDozeAfterScreenOff(!mControlScreenOffAnimation);
+
+        Dependency.get(TunerService.class).addTunable(this, Settings.Secure.DOZE_ALWAYS_ON,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
     }
 
     public void dump(PrintWriter pw) {
         pw.println("  DozeParameters:");
         pw.print("    getDisplayStateSupported(): "); pw.println(getDisplayStateSupported());
-        pw.print("    getPulseDuration(pickup=false): "); pw.println(getPulseDuration(false));
-        pw.print("    getPulseDuration(pickup=true): "); pw.println(getPulseDuration(true));
-        pw.print("    getPulseInDuration(pickup=false): "); pw.println(getPulseInDuration(false));
-        pw.print("    getPulseInDuration(pickup=true): "); pw.println(getPulseInDuration(true));
+        pw.print("    getPulseDuration(): "); pw.println(getPulseDuration());
+        pw.print("    getPulseInDuration(): "); pw.println(getPulseInDuration());
         pw.print("    getPulseInVisibleDuration(): "); pw.println(getPulseVisibleDuration());
         pw.print("    getPulseOutDuration(): "); pw.println(getPulseOutDuration());
         pw.print("    getPulseOnSigMotion(): "); pw.println(getPulseOnSigMotion());
@@ -81,14 +110,17 @@ public class DozeParameters {
         return mContext.getResources().getBoolean(R.bool.doze_suspend_display_state_supported);
     }
 
-    public int getPulseDuration(boolean pickup) {
-        return getPulseInDuration(pickup) + getPulseVisibleDuration() + getPulseOutDuration();
+    public int getPulseDuration() {
+        return getPulseInDuration() + getPulseVisibleDuration() + getPulseOutDuration();
     }
 
-    public int getPulseInDuration(boolean pickupOrDoubleTap) {
-        return pickupOrDoubleTap
-                ? getInt("doze.pulse.duration.in.pickup", R.integer.doze_pulse_duration_in_pickup)
-                : getInt("doze.pulse.duration.in", R.integer.doze_pulse_duration_in);
+    public float getScreenBrightnessDoze() {
+        return mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_screenBrightnessDoze) / 255f;
+    }
+
+    public int getPulseInDuration() {
+        return getInt("doze.pulse.duration.in", R.integer.doze_pulse_duration_in);
     }
 
     public int getPulseVisibleDuration() {
@@ -119,8 +151,57 @@ public class DozeParameters {
         return getInt("doze.pickup.vibration.threshold", R.integer.doze_pickup_vibration_threshold);
     }
 
+    /**
+     * For how long a wallpaper can be visible in AoD before it fades aways.
+     * @return duration in millis.
+     */
+    public long getWallpaperAodDuration() {
+        return shouldControlScreenOff() ? DozeScreenState.ENTER_DOZE_HIDE_WALLPAPER_DELAY
+                : mAlwaysOnPolicy.wallpaperVisibilityDuration;
+    }
+
+    /**
+     * How long it takes for the wallpaper fade away (Animation duration.)
+     * @return duration in millis.
+     */
+    public long getWallpaperFadeOutDuration() {
+        return mAlwaysOnPolicy.wallpaperFadeOutDuration;
+    }
+
+    /**
+     * Checks if always on is available and enabled for the current user.
+     * @return {@code true} if enabled and available.
+     */
     public boolean getAlwaysOn() {
-        return mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
+        return mDozeAlwaysOn;
+    }
+
+    /**
+     * Some screens need to be completely black before changing the display power mode,
+     * unexpected behavior might happen if this parameter isn't respected.
+     *
+     * @return {@code true} if screen needs to be completely black before a power transition.
+     */
+    public boolean getDisplayNeedsBlanking() {
+        return !FORCE_NO_BLANKING && mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_displayBlanksAfterDoze);
+    }
+
+    public boolean shouldControlScreenOff() {
+        return mControlScreenOffAnimation;
+    }
+
+    public void setControlScreenOffAnimation(boolean controlScreenOffAnimation) {
+        if (mControlScreenOffAnimation == controlScreenOffAnimation) {
+            return;
+        }
+        mControlScreenOffAnimation = controlScreenOffAnimation;
+        getPowerManager().setDozeAfterScreenOff(!controlScreenOffAnimation);
+    }
+
+    @VisibleForTesting
+    protected PowerManager getPowerManager() {
+        return mPowerManager;
     }
 
     private boolean getBoolean(String propName, int resId) {
@@ -161,6 +242,14 @@ public class DozeParameters {
         return mContext.getResources().getBoolean(R.bool.doze_double_tap_reports_touch_coordinates);
     }
 
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
+    }
+
+    public AlwaysOnDisplayPolicy getPolicy() {
+        return mAlwaysOnPolicy;
+    }
 
     /**
      * Parses a spec of the form `1,2,3,!5,*`. The resulting object will match numbers that are

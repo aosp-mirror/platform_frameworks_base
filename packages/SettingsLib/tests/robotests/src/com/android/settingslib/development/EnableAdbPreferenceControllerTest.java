@@ -17,13 +17,9 @@
 package com.android.settingslib.development;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -34,19 +30,16 @@ import android.support.v14.preference.SwitchPreference;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceScreen;
 
-import com.android.settingslib.SettingLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowApplication;
 
-@RunWith(SettingLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class EnableAdbPreferenceControllerTest {
     @Mock(answer = RETURNS_DEEP_STUBS)
     private PreferenceScreen mScreen;
@@ -66,21 +59,19 @@ public class EnableAdbPreferenceControllerTest {
         shadowContext.setSystemService(Context.USER_SERVICE, mUserManager);
         mContext = spy(shadowContext.getApplicationContext());
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
-        mPreference = new SwitchPreference(mContext);
-        when(mScreen.findPreference(anyString())).thenReturn(mPreference);
         mController = new ConcreteEnableAdbPreferenceController(mContext);
+        mPreference = new SwitchPreference(mContext);
         mPreference.setKey(mController.getPreferenceKey());
+        when(mScreen.findPreference(mPreference.getKey())).thenReturn(mPreference);
     }
 
     @Test
     public void displayPreference_isNotAdmin_shouldRemovePreference() {
         when(mUserManager.isAdminUser()).thenReturn(false);
-        when(mScreen.getPreferenceCount()).thenReturn(1);
-        when(mScreen.getPreference(0)).thenReturn(mPreference);
 
         mController.displayPreference(mScreen);
 
-        verify(mScreen).removePreference(any(Preference.class));
+        assertThat(mPreference.isVisible()).isFalse();
     }
 
     @Test
@@ -89,7 +80,7 @@ public class EnableAdbPreferenceControllerTest {
 
         mController.displayPreference(mScreen);
 
-        verify(mScreen, never()).removePreference(any(Preference.class));
+        assertThat(mPreference.isVisible()).isTrue();
     }
 
 
@@ -116,6 +107,18 @@ public class EnableAdbPreferenceControllerTest {
 
         assertThat(Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Global.ADB_ENABLED, 0)).isEqualTo(0);
+    }
+
+    @Test
+    public void handlePreferenceTreeClick_isMonkeyUser_shouldBeFalse() {
+        mController = spy(mController);
+        doReturn(true).when(mController).isUserAMonkey();
+        when(mUserManager.isAdminUser()).thenReturn(true);
+        mController.displayPreference(mScreen);
+
+        final boolean handled = mController.handlePreferenceTreeClick(mPreference);
+
+        assertThat(handled).isFalse();
     }
 
     @Test
@@ -150,9 +153,18 @@ public class EnableAdbPreferenceControllerTest {
         }
 
         @Override
-        public void showConfirmationDialog(SwitchPreference preference) {
+        public void showConfirmationDialog(Preference preference) {
             // Don't show a dialog, just set setting.
             writeAdbSetting(true);
+        }
+
+        @Override
+        public boolean isConfirmationDialogShowing() {
+            return false;
+        }
+
+        @Override
+        public void dismissConfirmationDialog() {
         }
     }
 }

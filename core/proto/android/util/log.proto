@@ -1,0 +1,96 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.util;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+option java_multiple_files = true;
+
+// Represents a Text Log in logd
+// Next Tag: 9
+message TextLogEntry {
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+    optional uint64 sec = 1;
+    optional uint64 nanosec = 2;
+
+    enum LogPriority {
+        LOG_UNKNOWN = 0;
+        LOG_DEFAULT = 1;
+        LOG_VERBOSE = 2;
+        LOG_DEBUG   = 3;
+        LOG_INFO    = 4;
+        LOG_WARN    = 5;
+        LOG_ERROR   = 6;
+        LOG_FATAL   = 7;
+        LOG_SILENT  = 8;
+    }
+    optional LogPriority priority = 3;
+    optional int32 uid = 4;
+    optional int32 pid = 5;
+    optional int32 tid = 6;
+    optional string tag = 7;
+    optional string log = 8;
+}
+
+// Represents a Binary Log in logd, need to look event-log-tags for more info.
+// Next Tag: 8
+message BinaryLogEntry {
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+    optional uint64 sec = 1;
+    optional uint64 nanosec = 2;
+    optional int32 uid = 3;
+    optional int32 pid = 4;
+    optional int32 tid = 5;
+
+    // Index of the event tag, can look up in event-log-tags file
+    optional uint32 tag_index = 6;
+
+    message Elem {
+        // must be sync with AOSP liblog's log.h
+        enum Type {
+            EVENT_TYPE_LIST_STOP = 10; // ascii decimal value of char '\n'
+            EVENT_TYPE_UNKNOWN = 63; // ascii decimal value of char '?'
+
+            EVENT_TYPE_INT = 0;
+            EVENT_TYPE_LONG = 1;
+            EVENT_TYPE_STRING = 2;
+            EVENT_TYPE_LIST = 3;
+            EVENT_TYPE_FLOAT = 4;
+        }
+        optional Type type = 1 [default=EVENT_TYPE_UNKNOWN];
+
+        oneof value {
+            int32 val_int32 = 2;
+            int64 val_int64 = 3;
+            string val_string = 4;
+            float val_float = 5;
+        }
+    }
+    repeated Elem elems = 7;
+}
+
+message LogProto {
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+    repeated TextLogEntry text_logs = 1;
+
+    repeated BinaryLogEntry binary_logs = 2;
+}
+

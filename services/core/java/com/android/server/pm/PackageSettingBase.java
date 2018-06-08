@@ -23,15 +23,17 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
-import android.os.storage.VolumeInfo;
+import android.content.pm.Signature;
+import android.os.BaseBundle;
+import android.os.PersistableBundle;
 import android.service.pm.PackageProto;
 import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.google.android.collect.Lists;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -42,24 +44,11 @@ import java.util.Set;
 /**
  * Settings base class for pending and resolved classes.
  */
-abstract class PackageSettingBase extends SettingBase {
+public abstract class PackageSettingBase extends SettingBase {
 
     private static final int[] EMPTY_INT_ARRAY = new int[0];
 
-    /**
-     * Indicates the state of installation. Used by PackageManager to figure out
-     * incomplete installations. Say a package is being installed (the state is
-     * set to PKG_INSTALL_INCOMPLETE) and remains so till the package
-     * installation is successful or unsuccessful in which case the
-     * PackageManager will no longer maintain state information associated with
-     * the package. If some exception(like device freeze or battery being pulled
-     * out) occurs during installation of a package, the PackageManager needs
-     * this information to clean up the previously failed installation.
-     */
-    static final int PKG_INSTALL_COMPLETE = 1;
-    static final int PKG_INSTALL_INCOMPLETE = 0;
-
-    final String name;
+    public final String name;
     final String realName;
 
     String parentPackageName;
@@ -76,7 +65,7 @@ abstract class PackageSettingBase extends SettingBase {
     String resourcePathString;
 
     String[] usesStaticLibraries;
-    int[] usesStaticLibrariesVersions;
+    long[] usesStaticLibrariesVersions;
 
     /**
      * The path under which native libraries have been unpacked. This path is
@@ -106,7 +95,7 @@ abstract class PackageSettingBase extends SettingBase {
     long timeStamp;
     long firstInstallTime;
     long lastUpdateTime;
-    int versionCode;
+    long versionCode;
 
     boolean uidError;
 
@@ -122,8 +111,6 @@ abstract class PackageSettingBase extends SettingBase {
     // started until explicitly launched by the user.
     private final SparseArray<PackageUserState> userState = new SparseArray<PackageUserState>();
 
-    int installStatus = PKG_INSTALL_COMPLETE;
-
     /**
      * Non-persisted value. During an "upgrade without restart", we need the set
      * of all previous code paths so we can surgically add the new APKs to the
@@ -132,7 +119,6 @@ abstract class PackageSettingBase extends SettingBase {
      * using the full set of code paths when the package's process is started.
      */
     Set<String> oldCodePaths;
-    PackageSettingBase origPackage;
 
     /** Package name of the app that installed this package */
     String installerPackageName;
@@ -150,9 +136,9 @@ abstract class PackageSettingBase extends SettingBase {
     PackageSettingBase(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
-            int pVersionCode, int pkgFlags, int pkgPrivateFlags,
+            long pVersionCode, int pkgFlags, int pkgPrivateFlags,
             String parentPackageName, List<String> childPackageNames,
-            String[] usesStaticLibraries, int[] usesStaticLibrariesVersions) {
+            String[] usesStaticLibraries, long[] usesStaticLibrariesVersions) {
         super(pkgFlags, pkgPrivateFlags);
         this.name = name;
         this.realName = realName;
@@ -181,7 +167,7 @@ abstract class PackageSettingBase extends SettingBase {
 
     void init(File codePath, File resourcePath, String legacyNativeLibraryPathString,
               String primaryCpuAbiString, String secondaryCpuAbiString,
-              String cpuAbiOverrideString, int pVersionCode) {
+              String cpuAbiOverrideString, long pVersionCode) {
         this.codePath = codePath;
         this.codePathString = codePath.toString();
         this.resourcePath = resourcePath;
@@ -210,14 +196,6 @@ abstract class PackageSettingBase extends SettingBase {
         return volumeUuid;
     }
 
-    public void setInstallStatus(int newStatus) {
-        installStatus = newStatus;
-    }
-
-    public int getInstallStatus() {
-        return installStatus;
-    }
-
     public void setTimeStamp(long newStamp) {
         timeStamp = newStamp;
     }
@@ -228,6 +206,18 @@ abstract class PackageSettingBase extends SettingBase {
 
     public boolean isUpdateAvailable() {
         return updateAvailable;
+    }
+
+    public boolean isSharedUser() {
+        return false;
+    }
+
+    public Signature[] getSignatures() {
+        return signatures.mSigningDetails.signatures;
+    }
+
+    public PackageParser.SigningDetails getSigningDetails() {
+        return signatures.mSigningDetails;
     }
 
     /**
@@ -249,14 +239,12 @@ abstract class PackageSettingBase extends SettingBase {
         cpuAbiOverrideString = orig.cpuAbiOverrideString;
         firstInstallTime = orig.firstInstallTime;
         installPermissionsFixed = orig.installPermissionsFixed;
-        installStatus = orig.installStatus;
         installerPackageName = orig.installerPackageName;
         isOrphaned = orig.isOrphaned;
         keySetData = orig.keySetData;
         lastUpdateTime = orig.lastUpdateTime;
         legacyNativeLibraryPathString = orig.legacyNativeLibraryPathString;
         // Intentionally skip oldCodePaths; it's not relevant for copies
-        origPackage = orig.origPackage;
         parentPackageName = orig.parentPackageName;
         primaryCpuAbiString = orig.primaryCpuAbiString;
         resourcePath = orig.resourcePath;
@@ -408,11 +396,17 @@ abstract class PackageSettingBase extends SettingBase {
         return readUserState(userId).suspended;
     }
 
-    void setSuspended(boolean suspended, int userId) {
-        modifyUserState(userId).suspended = suspended;
+    void setSuspended(boolean suspended, String suspendingPackage, String dialogMessage,
+            PersistableBundle appExtras, PersistableBundle launcherExtras, int userId) {
+        final PackageUserState existingUserState = modifyUserState(userId);
+        existingUserState.suspended = suspended;
+        existingUserState.suspendingPackage = suspended ? suspendingPackage : null;
+        existingUserState.dialogMessage = suspended ? dialogMessage : null;
+        existingUserState.suspendedAppExtras = suspended ? appExtras : null;
+        existingUserState.suspendedLauncherExtras = suspended ? launcherExtras : null;
     }
 
-    boolean getInstantApp(int userId) {
+    public boolean getInstantApp(int userId) {
         return readUserState(userId).instantApp;
     }
 
@@ -429,10 +423,13 @@ abstract class PackageSettingBase extends SettingBase {
     }
 
     void setUserState(int userId, long ceDataInode, int enabled, boolean installed, boolean stopped,
-            boolean notLaunched, boolean hidden, boolean suspended, boolean instantApp,
+            boolean notLaunched, boolean hidden, boolean suspended, String suspendingPackage,
+            String dialogMessage, PersistableBundle suspendedAppExtras,
+            PersistableBundle suspendedLauncherExtras, boolean instantApp,
             boolean virtualPreload, String lastDisableAppCaller,
             ArraySet<String> enabledComponents, ArraySet<String> disabledComponents,
-            int domainVerifState, int linkGeneration, int installReason) {
+            int domainVerifState, int linkGeneration, int installReason,
+            String harmfulAppWarning) {
         PackageUserState state = modifyUserState(userId);
         state.ceDataInode = ceDataInode;
         state.enabled = enabled;
@@ -441,6 +438,10 @@ abstract class PackageSettingBase extends SettingBase {
         state.notLaunched = notLaunched;
         state.hidden = hidden;
         state.suspended = suspended;
+        state.suspendingPackage = suspendingPackage;
+        state.dialogMessage = dialogMessage;
+        state.suspendedAppExtras = suspendedAppExtras;
+        state.suspendedLauncherExtras = suspendedLauncherExtras;
         state.lastDisableAppCaller = lastDisableAppCaller;
         state.enabledComponents = enabledComponents;
         state.disabledComponents = disabledComponents;
@@ -449,6 +450,7 @@ abstract class PackageSettingBase extends SettingBase {
         state.installReason = installReason;
         state.instantApp = instantApp;
         state.virtualPreload = virtualPreload;
+        state.harmfulAppWarning = harmfulAppWarning;
     }
 
     ArraySet<String> getEnabledComponents(int userId) {
@@ -606,6 +608,9 @@ abstract class PackageSettingBase extends SettingBase {
             proto.write(PackageProto.UserInfoProto.INSTALL_TYPE, installType);
             proto.write(PackageProto.UserInfoProto.IS_HIDDEN, state.hidden);
             proto.write(PackageProto.UserInfoProto.IS_SUSPENDED, state.suspended);
+            if (state.suspended) {
+                proto.write(PackageProto.UserInfoProto.SUSPENDING_PACKAGE, state.suspendingPackage);
+            }
             proto.write(PackageProto.UserInfoProto.IS_STOPPED, state.stopped);
             proto.write(PackageProto.UserInfoProto.IS_LAUNCHED, !state.notLaunched);
             proto.write(PackageProto.UserInfoProto.ENABLED_STATE, state.enabled);
@@ -614,5 +619,15 @@ abstract class PackageSettingBase extends SettingBase {
                     state.lastDisableAppCaller);
             proto.end(userToken);
         }
+    }
+
+    void setHarmfulAppWarning(int userId, String harmfulAppWarning) {
+        PackageUserState userState = modifyUserState(userId);
+        userState.harmfulAppWarning = harmfulAppWarning;
+    }
+
+    String getHarmfulAppWarning(int userId) {
+        PackageUserState userState = readUserState(userId);
+        return userState.harmfulAppWarning;
     }
 }

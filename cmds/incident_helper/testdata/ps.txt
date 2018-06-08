@@ -1,0 +1,9 @@
+LABEL                          USER           PID   TID  PPID     VSZ    RSS WCHAN            ADDR S PRI  NI RTPRIO SCH PCY     TIME CMD
+u:r:init:s0                    root             1     1     0   15816   2636 SyS_epoll_wait      0 S  19   0      -   0  fg 00:00:01 init
+u:r:kernel:s0                  root             2     2     0       0      0 kthreadd            0 S  19   0      -   0  fg 00:00:00 kthreadd
+u:r:surfaceflinger:s0          system         499   534     1   73940  22024 futex_wait_queue_me 0 S  42  -9      2   1  fg 00:00:00 EventThread
+u:r:hal_gnss_default:s0        gps            670  2004     1   43064   7272 poll_schedule_timeout 0 S 19  0      -   0  fg 00:00:00 Loc_hal_worker
+u:r:platform_app:s0:c512,c768  u0_a48        1660  1976   806 4468612 138328 binder_thread_read  0 S  35 -16      -   0  ta 00:00:00 HwBinder:1660_1
+u:r:perfd:s0                   root          1939  1946     1   18132   2088 __skb_recv_datagram 7b9782fd14 S 19 0 -  0     00:00:00 perfd
+u:r:perfd:s0                   root          1939  1955     1   18132   2088 do_sigtimedwait 7b9782ff6c S 19 0    -   0     00:00:00 POSIX timer 0
+u:r:shell:s0                   shell         2645  2645   802   11664   2972 0          7f67a2f8b4 R  19   0      -   0  fg 00:00:00 ps

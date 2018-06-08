@@ -18,43 +18,49 @@
 
 #include "androidfw/StringPiece.h"
 
-#include "io/StringInputStream.h"
+#include "io/StringStream.h"
 #include "test/Test.h"
 
 using ::aapt::io::StringInputStream;
 using ::android::StringPiece;
+using ::testing::Eq;
+using ::testing::StrEq;
+
+using Event = ::aapt::xml::XmlPullParser::Event;
 
 namespace aapt {
+namespace xml {
 
 TEST(XmlPullParserTest, NextChildNodeTraversesCorrectly) {
   std::string str =
       R"(<?xml version="1.0" encoding="utf-8"?>
          <a><b><c xmlns:a="http://schema.org"><d/></c><e/></b></a>)";
   StringInputStream input(str);
-  xml::XmlPullParser parser(&input);
+  XmlPullParser parser(&input);
 
   const size_t depth_outer = parser.depth();
-  ASSERT_TRUE(xml::XmlPullParser::NextChildNode(&parser, depth_outer));
+  ASSERT_TRUE(XmlPullParser::NextChildNode(&parser, depth_outer));
 
-  EXPECT_EQ(xml::XmlPullParser::Event::kStartElement, parser.event());
-  EXPECT_EQ(StringPiece("a"), StringPiece(parser.element_name()));
+  EXPECT_THAT(parser.event(), Eq(XmlPullParser::Event::kStartElement));
+  EXPECT_THAT(parser.element_name(), StrEq("a"));
 
   const size_t depth_a = parser.depth();
-  ASSERT_TRUE(xml::XmlPullParser::NextChildNode(&parser, depth_a));
-  EXPECT_EQ(xml::XmlPullParser::Event::kStartElement, parser.event());
-  EXPECT_EQ(StringPiece("b"), StringPiece(parser.element_name()));
+  ASSERT_TRUE(XmlPullParser::NextChildNode(&parser, depth_a));
+  EXPECT_THAT(parser.event(), Eq(XmlPullParser::Event::kStartElement));
+  EXPECT_THAT(parser.element_name(), StrEq("b"));
 
   const size_t depth_b = parser.depth();
-  ASSERT_TRUE(xml::XmlPullParser::NextChildNode(&parser, depth_b));
-  EXPECT_EQ(xml::XmlPullParser::Event::kStartElement, parser.event());
-  EXPECT_EQ(StringPiece("c"), StringPiece(parser.element_name()));
+  ASSERT_TRUE(XmlPullParser::NextChildNode(&parser, depth_b));
+  EXPECT_THAT(parser.event(), Eq(XmlPullParser::Event::kStartElement));
+  EXPECT_THAT(parser.element_name(), StrEq("c"));
 
-  ASSERT_TRUE(xml::XmlPullParser::NextChildNode(&parser, depth_b));
-  EXPECT_EQ(xml::XmlPullParser::Event::kStartElement, parser.event());
-  EXPECT_EQ(StringPiece("e"), StringPiece(parser.element_name()));
+  ASSERT_TRUE(XmlPullParser::NextChildNode(&parser, depth_b));
+  EXPECT_THAT(parser.event(), Eq(XmlPullParser::Event::kStartElement));
+  EXPECT_THAT(parser.element_name(), StrEq("e"));
 
-  ASSERT_FALSE(xml::XmlPullParser::NextChildNode(&parser, depth_outer));
-  EXPECT_EQ(xml::XmlPullParser::Event::kEndDocument, parser.event());
+  ASSERT_FALSE(XmlPullParser::NextChildNode(&parser, depth_outer));
+  EXPECT_THAT(parser.event(), Eq(XmlPullParser::Event::kEndDocument));
 }
 
+}  // namespace xml
 }  // namespace aapt

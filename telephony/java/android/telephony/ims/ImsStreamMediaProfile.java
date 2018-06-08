@@ -99,6 +99,62 @@ public final class ImsStreamMediaProfile implements Parcelable {
         readFromParcel(in);
     }
 
+    /**
+     * Constructor.
+     *
+     * @param audioQuality The audio quality. Can be one of the following:
+     *                     {@link #AUDIO_QUALITY_AMR},
+     *                     {@link #AUDIO_QUALITY_AMR_WB},
+     *                     {@link #AUDIO_QUALITY_QCELP13K},
+     *                     {@link #AUDIO_QUALITY_EVRC},
+     *                     {@link #AUDIO_QUALITY_EVRC_B},
+     *                     {@link #AUDIO_QUALITY_EVRC_WB},
+     *                     {@link #AUDIO_QUALITY_EVRC_NW},
+     *                     {@link #AUDIO_QUALITY_GSM_EFR},
+     *                     {@link #AUDIO_QUALITY_GSM_FR},
+     *                     {@link #AUDIO_QUALITY_GSM_HR},
+     *                     {@link #AUDIO_QUALITY_G711U},
+     *                     {@link #AUDIO_QUALITY_G723},
+     *                     {@link #AUDIO_QUALITY_G711A},
+     *                     {@link #AUDIO_QUALITY_G722},
+     *                     {@link #AUDIO_QUALITY_G711AB},
+     *                     {@link #AUDIO_QUALITY_G729},
+     *                     {@link #AUDIO_QUALITY_EVS_NB},
+     *                     {@link #AUDIO_QUALITY_EVS_WB},
+     *                     {@link #AUDIO_QUALITY_EVS_SWB},
+     *                     {@link #AUDIO_QUALITY_EVS_FB},
+     * @param audioDirection The audio direction. Can be one of the following:
+     *                       {@link #DIRECTION_INVALID},
+     *                       {@link #DIRECTION_INACTIVE},
+     *                       {@link #DIRECTION_RECEIVE},
+     *                       {@link #DIRECTION_SEND},
+     *                       {@link #DIRECTION_SEND_RECEIVE},
+     * @param videoQuality The video quality. Can be one of the following:
+     *                     {@link #VIDEO_QUALITY_NONE},
+     *                     {@link #VIDEO_QUALITY_QCIF},
+     *                     {@link #VIDEO_QUALITY_QVGA_LANDSCAPE},
+     *                     {@link #VIDEO_QUALITY_QVGA_PORTRAIT},
+     *                     {@link #VIDEO_QUALITY_VGA_LANDSCAPE},
+     *                     {@link #VIDEO_QUALITY_VGA_PORTRAIT},
+     * @param videoDirection The video direction. Can be one of the following:
+     *                       {@link #DIRECTION_INVALID},
+     *                       {@link #DIRECTION_INACTIVE},
+     *                       {@link #DIRECTION_RECEIVE},
+     *                       {@link #DIRECTION_SEND},
+     *                       {@link #DIRECTION_SEND_RECEIVE},
+     * @param rttMode The rtt mode. Can be one of the following:
+     *                {@link #RTT_MODE_DISABLED},
+     *                {@link #RTT_MODE_FULL}
+     */
+    public ImsStreamMediaProfile(int audioQuality, int audioDirection,
+            int videoQuality, int videoDirection, int rttMode) {
+        mAudioQuality = audioQuality;
+        mAudioDirection = audioDirection;
+        mVideoQuality = videoQuality;
+        mVideoDirection = videoDirection;
+        mRttMode = rttMode;
+    }
+
     /** @hide */
     public ImsStreamMediaProfile() {
         mAudioQuality = AUDIO_QUALITY_NONE;

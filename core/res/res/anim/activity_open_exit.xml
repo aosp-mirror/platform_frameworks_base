@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
 /*
 ** Copyright 2009, The Android Open Source Project
 **
@@ -18,9 +17,15 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:background="#ff000000" android:zAdjustment="normal">
-    <alpha android:fromAlpha="1.0" android:toAlpha="0.7"
-            android:fillEnabled="true" android:fillBefore="false" android:fillAfter="true"
-            android:interpolator="@interpolator/fast_out_slow_in"
-            android:duration="217"/>
+    android:shareInterpolator="false">
+    <translate
+        android:fromYDelta="0"
+        android:toYDelta="-2%"
+        android:interpolator="@interpolator/fast_out_slow_in"
+        android:duration="425"/>
+    <alpha
+        android:fromAlpha="1.0"
+        android:toAlpha="0.9"
+        android:interpolator="@interpolator/linear"
+        android:duration="117"/>
 </set>

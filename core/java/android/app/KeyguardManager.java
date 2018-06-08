@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.trust.ITrustManager;
 import android.content.Context;
@@ -166,24 +167,26 @@ public class KeyguardManager {
      *                             clicking this button, the activity returns
      *                             {@link #RESULT_ALTERNATE}
      *
-     * @return  the intent for launching the activity or null if the credential of the previous
-     * owner can not be verified (e.g. because there was none, or the device does not support
-     * verifying credentials after a factory reset, or device setup has already been completed).
-     *
+     * @return the intent for launching the activity or null if the previous owner of the device
+     *         did not set a credential.
+     * @throws UnsupportedOperationException if the device does not support factory reset
+     *                                       credentials
+     * @throws IllegalStateException if the device has already been provisioned
      * @hide
      */
+    @SystemApi
     public Intent createConfirmFactoryResetCredentialIntent(
             CharSequence title, CharSequence description, CharSequence alternateButtonLabel) {
         if (!LockPatternUtils.frpCredentialEnabled(mContext)) {
             Log.w(TAG, "Factory reset credentials not supported.");
-            return null;
+            throw new UnsupportedOperationException("not supported on this device");
         }
 
         // Cannot verify credential if the device is provisioned
         if (Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
             Log.e(TAG, "Factory reset credential cannot be verified after provisioning.");
-            return null;
+            throw new IllegalStateException("must not be provisioned yet");
         }
 
         // Make sure we have a credential
@@ -192,8 +195,10 @@ public class KeyguardManager {
                     ServiceManager.getService(Context.PERSISTENT_DATA_BLOCK_SERVICE));
             if (pdb == null) {
                 Log.e(TAG, "No persistent data block service");
-                return null;
+                throw new UnsupportedOperationException("not supported on this device");
             }
+            // The following will throw an UnsupportedOperationException if the device does not
+            // support factory reset credentials (or something went wrong retrieving it).
             if (!pdb.hasFrpCredentialHandle()) {
                 Log.i(TAG, "The persistent data block does not have a factory reset credential.");
                 return null;
@@ -382,20 +387,16 @@ public class KeyguardManager {
     }
 
     /**
+     * @deprecated Use {@link #isKeyguardLocked()} instead.
+     *
      * If keyguard screen is showing or in restricted key input mode (i.e. in
      * keyguard password emergency screen). When in such mode, certain keys,
      * such as the Home key and the right soft keys, don't work.
      *
      * @return true if in keyguard restricted input mode.
-     *
-     * @see android.view.WindowManagerPolicy#inKeyguardRestrictedKeyInputMode
      */
     public boolean inKeyguardRestrictedInputMode() {
-        try {
-            return mWM.inKeyguardRestrictedInputMode();
-        } catch (RemoteException ex) {
-            return false;
-        }
+        return isKeyguardLocked();
     }
 
     /**
@@ -406,7 +407,7 @@ public class KeyguardManager {
      * password.
      */
     public boolean isDeviceLocked() {
-        return isDeviceLocked(UserHandle.myUserId());
+        return isDeviceLocked(mContext.getUserId());
     }
 
     /**
@@ -431,7 +432,7 @@ public class KeyguardManager {
      * @return true if a PIN, pattern or password was set.
      */
     public boolean isDeviceSecure() {
-        return isDeviceSecure(UserHandle.myUserId());
+        return isDeviceSecure(mContext.getUserId());
     }
 
     /**
@@ -479,6 +480,39 @@ public class KeyguardManager {
      */
     public void requestDismissKeyguard(@NonNull Activity activity,
             @Nullable KeyguardDismissCallback callback) {
+        requestDismissKeyguard(activity, null /* message */, callback);
+    }
+
+    /**
+     * If the device is currently locked (see {@link #isKeyguardLocked()}, requests the Keyguard to
+     * be dismissed.
+     * <p>
+     * If the Keyguard is not secure or the device is currently in a trusted state, calling this
+     * method will immediately dismiss the Keyguard without any user interaction.
+     * <p>
+     * If the Keyguard is secure and the device is not in a trusted state, this will bring up the
+     * UI so the user can enter their credentials.
+     * <p>
+     * If the value set for the {@link Activity} attr {@link android.R.attr#turnScreenOn} is true,
+     * the screen will turn on when the keyguard is dismissed.
+     *
+     * @param activity The activity requesting the dismissal. The activity must be either visible
+     *                 by using {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} or must be in a state in
+     *                 which it would be visible if Keyguard would not be hiding it. If that's not
+     *                 the case, the request will fail immediately and
+     *                 {@link KeyguardDismissCallback#onDismissError} will be invoked.
+     * @param message  A message that will be shown in the keyguard explaining why the user
+     *                 would want to dismiss it.
+     * @param callback The callback to be called if the request to dismiss Keyguard was successful
+     *                 or {@code null} if the caller isn't interested in knowing the result. The
+     *                 callback will not be invoked if the activity was destroyed before the
+     *                 callback was received.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SHOW_KEYGUARD_MESSAGE)
+    @SystemApi
+    public void requestDismissKeyguard(@NonNull Activity activity, @Nullable CharSequence message,
+            @Nullable KeyguardDismissCallback callback) {
         try {
             mAm.dismissKeyguard(activity.getActivityToken(), new IKeyguardDismissCallback.Stub() {
                 @Override
@@ -501,9 +535,9 @@ public class KeyguardManager {
                         activity.mHandler.post(callback::onDismissCancelled);
                     }
                 }
-            });
+            }, message);
         } catch (RemoteException e) {
-            Log.i(TAG, "Failed to dismiss keyguard: " + e);
+            throw e.rethrowFromSystemServer();
         }
     }
 

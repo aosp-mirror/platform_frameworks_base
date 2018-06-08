@@ -31,8 +31,12 @@ public final class WebViewUpdateService {
      * Fetch all packages that could potentially implement WebView.
      */
     public static WebViewProviderInfo[] getAllWebViewPackages() {
+        IWebViewUpdateService service = getUpdateService();
+        if (service == null) {
+            return new WebViewProviderInfo[0];
+        }
         try {
-            return getUpdateService().getAllWebViewPackages();
+            return service.getAllWebViewPackages();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -42,8 +46,12 @@ public final class WebViewUpdateService {
      * Fetch all packages that could potentially implement WebView and are currently valid.
      */
     public static WebViewProviderInfo[] getValidWebViewPackages() {
+        IWebViewUpdateService service = getUpdateService();
+        if (service == null) {
+            return new WebViewProviderInfo[0];
+        }
         try {
-            return getUpdateService().getValidWebViewPackages();
+            return service.getValidWebViewPackages();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -53,8 +61,12 @@ public final class WebViewUpdateService {
      * Used by DevelopmentSetting to get the name of the WebView provider currently in use.
      */
     public static String getCurrentWebViewPackageName() {
+        IWebViewUpdateService service = getUpdateService();
+        if (service == null) {
+            return null;
+        }
         try {
-            return getUpdateService().getCurrentWebViewPackageName();
+            return service.getCurrentWebViewPackageName();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

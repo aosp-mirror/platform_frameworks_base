@@ -60,6 +60,7 @@ import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
@@ -247,6 +248,10 @@ public class TrustManagerService extends SystemService {
 
     public void unlockUserWithToken(long handle, byte[] token, int userId) {
         mLockPatternUtils.unlockUserWithToken(handle, token, userId);
+    }
+
+    void showKeyguardErrorMessage(CharSequence message) {
+        dispatchOnTrustError(message);
     }
 
     void refreshAgentList(int userIdOrAll) {
@@ -759,6 +764,23 @@ public class TrustManagerService extends SystemService {
         for (int i = 0; i < mTrustListeners.size(); i++) {
             try {
                 mTrustListeners.get(i).onTrustManagedChanged(managed, userId);
+            } catch (DeadObjectException e) {
+                Slog.d(TAG, "Removing dead TrustListener.");
+                mTrustListeners.remove(i);
+                i--;
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Exception while notifying TrustListener.", e);
+            }
+        }
+    }
+
+    private void dispatchOnTrustError(CharSequence message) {
+        if (DEBUG) {
+            Log.i(TAG, "onTrustError(" + message + ")");
+        }
+        for (int i = 0; i < mTrustListeners.size(); i++) {
+            try {
+                mTrustListeners.get(i).onTrustError(message);
             } catch (DeadObjectException e) {
                 Slog.d(TAG, "Removing dead TrustListener.");
                 mTrustListeners.remove(i);

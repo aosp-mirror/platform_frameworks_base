@@ -22,6 +22,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
@@ -42,10 +43,12 @@ import android.database.DatabaseUtils;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.RemoteException;
+import android.telecom.PhoneAccountHandle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.View;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -4237,6 +4240,45 @@ public final class ContactsContract {
          * current carrier. An allowed bitmask of {@link #CARRIER_PRESENCE}.
          */
         public static final int CARRIER_PRESENCE_VT_CAPABLE = 0x01;
+
+        /**
+         * The flattened {@link android.content.ComponentName} of a  {@link
+         * android.telecom.PhoneAccountHandle} that is the preferred {@code PhoneAccountHandle} to
+         * call the contact with.
+         *
+         * <p> On a multi-SIM device this field can be used in a {@link CommonDataKinds.Phone} row
+         * to indicate the {@link PhoneAccountHandle} to call the number with, instead of using
+         * {@link android.telecom.TelecomManager#getDefaultOutgoingPhoneAccount(String)} or asking
+         * every time.
+         *
+         * <p>{@link android.telecom.TelecomManager#placeCall(Uri, android.os.Bundle)}
+         * should be called with {@link android.telecom.TelecomManager#EXTRA_PHONE_ACCOUNT_HANDLE}
+         * set to the {@link PhoneAccountHandle} using the {@link ComponentName} from this field.
+         *
+         * @see #PREFERRED_PHONE_ACCOUNT_ID
+         * @see PhoneAccountHandle#getComponentName()
+         * @see ComponentName#flattenToString()
+         */
+        String PREFERRED_PHONE_ACCOUNT_COMPONENT_NAME = "preferred_phone_account_component_name";
+
+        /**
+         * The ID of a {@link
+         * android.telecom.PhoneAccountHandle} that is the preferred {@code PhoneAccountHandle} to
+         * call the contact with. Used by {@link CommonDataKinds.Phone}.
+         *
+         * <p> On a multi-SIM device this field can be used in a {@link CommonDataKinds.Phone} row
+         * to indicate the {@link PhoneAccountHandle} to call the number with, instead of using
+         * {@link android.telecom.TelecomManager#getDefaultOutgoingPhoneAccount(String)} or asking
+         * every time.
+         *
+         * <p>{@link android.telecom.TelecomManager#placeCall(Uri, android.os.Bundle)}
+         * should be called with {@link android.telecom.TelecomManager#EXTRA_PHONE_ACCOUNT_HANDLE}
+         * set to the {@link PhoneAccountHandle} using the id from this field.
+         *
+         * @see #PREFERRED_PHONE_ACCOUNT_COMPONENT_NAME
+         * @see PhoneAccountHandle#getId()
+         */
+        String PREFERRED_PHONE_ACCOUNT_ID = "preferred_phone_account_id";
     }
 
     /**

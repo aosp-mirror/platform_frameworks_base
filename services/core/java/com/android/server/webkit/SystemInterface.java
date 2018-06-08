@@ -36,7 +36,7 @@ import java.util.List;
 public interface SystemInterface {
     public WebViewProviderInfo[] getWebViewPackages();
     public int onWebViewProviderChanged(PackageInfo packageInfo);
-    public int getFactoryPackageVersion(String packageName) throws NameNotFoundException;
+    public long getFactoryPackageVersion(String packageName) throws NameNotFoundException;
 
     public String getUserChosenWebViewProvider(Context context);
     public void updateUserSetting(Context context, String newProviderName);

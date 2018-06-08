@@ -62,6 +62,9 @@ import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 
 public class StatusBarWindowView extends FrameLayout {
     public static final String TAG = "StatusBarWindowView";
@@ -88,6 +91,8 @@ public class StatusBarWindowView extends FrameLayout {
     private ViewTreeObserver.OnPreDrawListener mFloatingToolbarPreDrawListener;
     private boolean mTouchCancelled;
     private boolean mTouchActive;
+    private boolean mExpandAnimationRunning;
+    private boolean mExpandAnimationPending;
 
     public StatusBarWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -248,7 +253,6 @@ public class StatusBarWindowView extends FrameLayout {
 
     public void setTouchActive(boolean touchActive) {
         mTouchActive = touchActive;
-        mStackScrollLayout.setTouchActive(touchActive);
     }
 
     @Override
@@ -268,7 +272,7 @@ public class StatusBarWindowView extends FrameLayout {
                 || ev.getActionMasked() == MotionEvent.ACTION_CANCEL) {
             setTouchActive(false);
         }
-        if (mTouchCancelled) {
+        if (mTouchCancelled || mExpandAnimationRunning || mExpandAnimationPending) {
             return false;
         }
         mFalsingManager.onTouchEvent(ev, getWidth(), getHeight());
@@ -387,6 +391,21 @@ public class StatusBarWindowView extends FrameLayout {
             event.recycle();
             mTouchCancelled = true;
         }
+    }
+
+    public void setExpandAnimationRunning(boolean expandAnimationRunning) {
+        mExpandAnimationRunning = expandAnimationRunning;
+    }
+
+    public void setExpandAnimationPending(boolean pending) {
+        mExpandAnimationPending = pending;
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.print("  mExpandAnimationPending="); pw.println(mExpandAnimationPending);
+        pw.print("  mExpandAnimationRunning="); pw.println(mExpandAnimationRunning);
+        pw.print("  mTouchCancelled="); pw.println(mTouchCancelled);
+        pw.print("  mTouchActive="); pw.println(mTouchActive);
     }
 
     public class LayoutParams extends FrameLayout.LayoutParams {

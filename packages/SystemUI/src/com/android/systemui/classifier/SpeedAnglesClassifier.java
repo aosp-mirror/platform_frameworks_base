@@ -16,6 +16,8 @@
 
 package com.android.systemui.classifier;
 
+import android.os.Build;
+import android.os.SystemProperties;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
@@ -34,6 +36,10 @@ import java.util.List;
  * should be in this interval.
  */
 public class SpeedAnglesClassifier extends StrokeClassifier {
+    public static final boolean VERBOSE = SystemProperties.getBoolean("debug.falsing_log.spd_ang",
+            Build.IS_DEBUGGABLE);
+    public static final String TAG = "SPD_ANG";
+
     private HashMap<Stroke, Data> mStrokeMap = new HashMap<>();
 
     public SpeedAnglesClassifier(ClassifierData classifierData) {
@@ -42,7 +48,7 @@ public class SpeedAnglesClassifier extends StrokeClassifier {
 
     @Override
     public String getTag() {
-        return "SPD_ANG";
+        return TAG;
     }
 
     @Override
@@ -135,14 +141,24 @@ public class SpeedAnglesClassifier extends StrokeClassifier {
         }
 
         public float getAnglesVariance() {
-            return mSumSquares / mCount - (mSum / mCount) * (mSum / mCount);
+            final float v = mSumSquares / mCount - (mSum / mCount) * (mSum / mCount);
+            if (VERBOSE) {
+                FalsingLog.i(TAG, "getAnglesVariance: sum^2=" + mSumSquares
+                        + " count=" + mCount + " result=" + v);
+            }
+            return v;
         }
 
         public float getAnglesPercentage() {
             if (mAnglesCount == 0.0f) {
                 return 1.0f;
             }
-            return (mAcceleratingAngles) / mAnglesCount;
+            final float v = (mAcceleratingAngles) / mAnglesCount;
+            if (VERBOSE) {
+                FalsingLog.i(TAG, "getAnglesPercentage: angles=" + mAcceleratingAngles
+                        + " count=" + mAnglesCount + " result=" + v);
+            }
+            return v;
         }
     }
 }

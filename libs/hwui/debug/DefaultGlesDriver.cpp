@@ -35,6 +35,6 @@ namespace debug {
 #undef CALL_GL_API
 #undef CALL_GL_API_RETURN
 
-} // namespace debug
-} // namespace uirenderer
-} // namespace android
+}  // namespace debug
+}  // namespace uirenderer
+}  // namespace android

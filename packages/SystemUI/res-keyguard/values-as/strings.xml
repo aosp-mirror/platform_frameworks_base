@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="3171996292755059205">"কীগাৰ্ড"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3420548423949593123">"পিন ক\'ড লিখক"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"ছিমৰ PUK আৰু নতুন পিন ক\'ড লিখক"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"ছিমৰ PUK ক\'ড"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="8188243197504453830">"নতুন ছিমৰ পিন ক\'ড"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"পাছৱৰ্ড লিখিবলৈ স্পৰ্শ কৰক"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"আনলক কৰিবলৈ পাছৱৰ্ড লিখক"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"আনলক কৰিবলৈ পিন লিখক"</string>
+    <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ভুল পিন ক\'ড।"</string>
+    <!-- no translation found for keyguard_sim_error_message_short (592109500618448312) -->
+    <skip />
+    <string name="keyguard_charged" msgid="2222329688813033109">"চ্চার্জ কৰা হ\'ল"</string>
+    <string name="keyguard_plugged_in" msgid="89308975354638682">"চ্চার্জ কৰি থকা হৈছে"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"দ্ৰুত গতিৰে চ্চাৰ্জ কৰি থকা হৈছে"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"লাহে লাহে চ্চাৰ্জ হৈ আছে"</string>
+    <string name="keyguard_low_battery" msgid="9218432555787624490">"আপোনাৰ চ্চার্জাৰ সংযোগ কৰক।"</string>
+    <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"আনলক কৰিবলৈ মেনু টিপক।"</string>
+    <string name="keyguard_network_locked_message" msgid="6743537524631420759">"নেটৱর্ক লক কৰা অৱস্থাত আছে"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="6327533369959764518">"কোনো ছিম কাৰ্ড নাই"</string>
+    <string name="keyguard_missing_sim_message" product="tablet" msgid="4550152848200783542">"টেবলেটত ছিম কার্ড নাই।"</string>
+    <string name="keyguard_missing_sim_message" product="default" msgid="6585414237800161146">"ফ\'নত ছিম কার্ড নাই।"</string>
+    <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"এখন ছিম কাৰ্ড ভৰাওক।"</string>
+    <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"ছিম কাৰ্ডখন নাই বা চিনাক্ত কৰিব নোৱাৰি। এখন ছিম কাৰ্ড ভৰাওক।"</string>
+    <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"ব্যৱহাৰৰ অযোগ্য ছিম কাৰ্ড।"</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"আপোনাৰ ছিম কাৰ্ডখন স্থায়ীভাৱে অক্ষম হৈছে।\n অন্য এখন ছিমৰ বাবে আপোনাৰ ৱায়াৰলেছ সেৱা প্ৰদানকাৰীৰ সৈতে যোগাযোগ কৰক।"</string>
+    <string name="keyguard_sim_locked_message" msgid="953766009432168127">"ছিম কাৰ্ড লক কৰা হৈছে।"</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"ছিম কার্ডখন PUKৰ দ্বাৰা লক কৰা হৈছে।"</string>
+    <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"ছিম কার্ড আনলক কৰি থকা হৈছে…"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"পিনৰ ক্ষেত্ৰ"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"ছিম পিনৰ ক্ষেত্ৰ"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"ছিমৰ PUK ক্ষেত্ৰ"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"পৰৱৰ্তী এলাৰ্ম <xliff:g id="ALARM">%1$s</xliff:g> বজাত ছেট কৰা হৈছে"</string>
+    <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"মচক"</string>
+    <!-- no translation found for disable_carrier_button_text (6914341927421916114) -->
+    <skip />
+    <!-- no translation found for error_disable_esim_title (4852978431156228006) -->
+    <skip />
+    <!-- no translation found for error_disable_esim_msg (676694908770135639) -->
+    <skip />
+    <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"এণ্টাৰ বুটাম"</string>
+    <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"আৰ্হি পাহৰিলে নেকি"</string>
+    <string name="kg_wrong_pattern" msgid="7620081431514773802">"ভুল আৰ্হি"</string>
+    <string name="kg_wrong_password" msgid="4580683060277329277">"ভুল পাছৱৰ্ড"</string>
+    <string name="kg_wrong_pin" msgid="4785660766909463466">"ভুল পিন"</string>
+    <!-- no translation found for kg_too_many_failed_attempts_countdown (4368805541257003755) -->
+    <string name="kg_pattern_instructions" msgid="5547646893001491340">"আপোনাৰ আৰ্হি আঁকক"</string>
+    <!-- no translation found for kg_sim_pin_instructions (6389000973113699187) -->
+    <skip />
+    <!-- no translation found for kg_sim_pin_instructions_multi (1643757228644271861) -->
+    <skip />
+    <!-- no translation found for kg_sim_lock_esim_instructions (4416732549172148542) -->
+    <skip />
+    <string name="kg_pin_instructions" msgid="4069609316644030034">"পিন দিয়ক"</string>
+    <string name="kg_password_instructions" msgid="136952397352976538">"পাছৱৰ্ড দিয়ক"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"ছিমখন বর্তমান অক্ষম অৱস্থাত আছে। অব্যাহত ৰাখিবলৈ PUK ক\'ড লিখক। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।"</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" ছিমখন বর্তমান অক্ষম অৱস্থাত আছে। অব্যাহত ৰাখিবলৈ PUK ক\'ড দিয়ক। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"আপোনাৰ পছন্দৰ পিন ক\'ড লিখক"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"আপোনাৰ পচন্দৰ পিন ক\'ড নিশ্চিত কৰক"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"ছিম কার্ড আনলক কৰি থকা হৈছে…"</string>
+    <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"৪টাৰ পৰা ৮টা সংখ্যাযুক্ত এটা পিন লিখক।"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK ক\'ডটো ৮টা বা তাতকৈ অধিক সংখ্যা থকা হ\'ব লাগিব।"</string>
+    <string name="kg_invalid_puk" msgid="5399287873762592502">"শুদ্ধ PUK ক\'ডটো পুনৰ দিয়ক। বাৰে বাৰে ভুল ক\'ড দিলে ছিমখন স্থায়ীভাৱে অক্ষম হ\'ব।"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"পিন ক\'ড মিলা নাই"</string>
+    <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"বহুতবাৰ ভুলকৈ আর্হি অঁকা হৈছে"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"আপুনি আপোনাৰ পিন <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ লিখিছে। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>ছেকেণ্ডৰ পিছত আকৌ চেষ্টা কৰক।"</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"আপুনি আপোনাৰ পাছৱৰ্ড <xliff:g id="NUMBER_0">%1$d</xliff:g>বাৰ ভুলকৈ লিখিছে। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> ছেকেণ্ডৰ পাছত আকৌ চেষ্টা কৰক।"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"আপুনি আপোনাৰ আনলক আৰ্হি <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ আঁকিছে। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g>ছেকেণ্ডৰ পিছত আকৌ চেষ্টা কৰক।"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"আপুনি টেবলেটটো আনলক কৰিবলৈ <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে আৰু <xliff:g id="NUMBER_1">%2$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিলে টেবলেটটো ৰিছেট কৰা হ\'ব, যি কার্যই টেবলেটটোত থকা সকলো ডেটা মচিব।"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"আপুনি ফ\'নটো আনলক কৰিবলৈ <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে আৰু <xliff:g id="NUMBER_1">%2$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিলে ফ\'নটো ৰিছেট কৰা হ\'ব, যি কার্যই ফ\'নটোত থকা সকলো ডেটা মচিব।"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="4694232971224663735">"আপুনি টেবলেটটো আনলক কৰিবলৈ <xliff:g id="NUMBER">%d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে। এই টেবলেটটো ৰিছেট কৰা হ\'ব, যি কার্যই ইয়াৰ সকলো ডেটা মচিব।"</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="2365964340830006961">"আপুনি ফ\'নটো আনলক কৰিবলৈ <xliff:g id="NUMBER">%d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে। এই ফ\'নটো ৰিছেট কৰা হ\'ব, যিয়ে ইয়াৰ সকলো ডেটা মচিব।"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="1365418870560228936">"আপুনি টেবলেটটো আনলক কৰিবলৈ <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে আৰু <xliff:g id="NUMBER_1">%2$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিলে এই ব্যৱহাৰকাৰীক আঁতৰোৱা হ\'ব, যিয়ে ব্যৱহাৰকাৰীৰ সকলো ডেটা মচিব।"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="2151286957817486128">"আপুনি ফ\'নটো আনলক কৰিবলৈ <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে। আৰু <xliff:g id="NUMBER_1">%2$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিলে এই ব্যৱহাৰকাৰীক আঁতৰোৱা হ\'ব, যিয়ে ব্যৱহাৰকাৰীৰ সকলো ডেটা মচিব।"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="5464020754932560928">"আপুনি টেবলেটটো আনলক কৰিবলৈ <xliff:g id="NUMBER">%d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে। এই ব্যৱহাৰকাৰীক আঁতৰোৱা হ\'ব, যিয়ে ব্যৱহাৰকাৰীৰ সকলো ডেটা মচিব।"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="6171564974118059">"আপুনি ফ\'নটো আনলক কৰিবলৈ <xliff:g id="NUMBER">%d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে। এই ব্যৱহাৰকাৰীক আঁতৰোৱা হ\'ব, যি কার্যই ব্যৱহাৰকাৰীৰ সকলো ডেটা মচিব।"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="9154513795928824239">"আপুনি টেবলেটটো আনলক কৰিবলৈ <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে। আৰু <xliff:g id="NUMBER_1">%2$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিলে কৰ্মস্থানৰ প্ৰ\'ফাইলটো আঁতৰোৱা হ\'ব, যিয়ে প্ৰ\'ফাইলটোৰ সকলো ডেটা মচিব।"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="2162434417489128282">"আপুনি ফ\'নটো আনলক কৰিবলৈ <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে। আৰু <xliff:g id="NUMBER_1">%2$d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিলে কৰ্মস্থানৰ প্ৰ\'ফাইলটো আঁতৰোৱা হ\'ব, যিয়ে প্ৰ\'ফাইলটোৰ সকলো ডেটা মচিব।"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="8966727588974691544">"আপুনি টেবলেটটো আনলক কৰিবলৈ <xliff:g id="NUMBER">%d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে। আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইলটো আঁতৰোৱা হ\'ব, যি কার্যই প্ৰ\'ফাইলটোৰ সকলো ডেটা মচিব।"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="8476407539834855">"আপুনি ফ\'নটো আনলক কৰিবলৈ <xliff:g id="NUMBER">%d</xliff:g> বাৰ ভুল প্ৰয়াস কৰিছে। আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইলটো আঁতৰোৱা হ\'ব, যিয়ে প্ৰ\'ফাইলটোৰ সকলো ডেটা মচিব।"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="956706236554092172">"আপুনি আপোনাৰ আনলক আৰ্হিটো <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ আঁকিছে। <xliff:g id="NUMBER_1">%2$d</xliff:g>তকৈ বেছি বাৰ ভুল আৰ্হি আঁকিলে আপোনাৰ টেবলেটটো কোনো একাউণ্টৰ জৰিয়তে আনলক কৰিবলৈ কোৱা হ\'ব।\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> ছেকেণ্ডৰ পিছত আকৌ চেষ্টা কৰক।"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"আপুনি আপোনাৰ আনলক আৰ্হিটো <xliff:g id="NUMBER_0">%1$d</xliff:g> বাৰ ভুলকৈ আঁকিছে। <xliff:g id="NUMBER_1">%2$d</xliff:g>তকৈ বেছি বাৰ ভুল আৰ্হি আঁকিলে আপোনাৰ ফ\'নটো কোনো একাউণ্টৰ জৰিয়তে আনলক কৰিবলৈ কোৱা হ\'ব।\n\n<xliff:g id="NUMBER_2">%3$d</xliff:g> ছেকেণ্ডৰ পিছত আকৌ চেষ্টা কৰক।"</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"ছিমৰ ভুল পিন ক\'ড, আপোনাৰ ডিভাইচটো আনলক কৰিবলৈ আপুনি এতিয়া আপোনাৰ বাহকৰ সৈতে যোগাযোগ কৰিবই লাগিব।"</string>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
+      <item quantity="one">ছিমৰ ভুল পিন ক’ড, আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g> বাৰ প্ৰয়াস কৰিব পাৰিব।</item>
+      <item quantity="other">ছিমৰ ভুল পিন ক’ড, আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g> বাৰ প্ৰয়াস কৰিব পাৰিব।</item>
+    </plurals>
+    <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"ছিম ব্যৱহাৰযোগ্য নহয়। আপোনাৰ বাহকৰ সৈতে যোগাযোগ কৰক।"</string>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
+      <item quantity="one">ছিমৰ ভুল PUK ক\'ড, আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g> বাৰ ভুল ক’ড দিলে আপোনাৰ ছিম চিৰকালৰ বাবে ব্যৱহাৰৰ অনুপযোগী হ’ব।</item>
+      <item quantity="other">ছিমৰ ভুল PUK ক\'ড, আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g> বাৰ ভুল ক’ড দিলে আপোনাৰ ছিম চিৰকালৰ বাবে ব্যৱহাৰৰ অনুপযোগী হ’ব।</item>
+    </plurals>
+    <string name="kg_password_pin_failed" msgid="8769990811451236223">"ছিম পিনৰ জৰিয়তে আনলক কৰিব পৰা নগ\'ল!"</string>
+    <string name="kg_password_puk_failed" msgid="1331621440873439974">"ছিম PUKৰ জৰিয়তে আনলক কৰিব পৰা নগ\'ল!"</string>
+    <string name="kg_pin_accepted" msgid="7637293533973802143">"ক\'ড গ্ৰহণ কৰা হ\'ল!"</string>
+    <string name="keyguard_carrier_default" msgid="4274828292998453695">"কোনো সেৱা নাই।"</string>
+    <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"ইনপুট পদ্ধতি সলনি কৰক"</string>
+    <string name="airplane_mode" msgid="3807209033737676010">"এয়াৰপ্লেন ম\'ড"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="7246972020562621506">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পিছত আৰ্হি দিয়াটো বাধ্যতামূলক"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="6303592361322290145">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পিছত পিন দিয়াটো বাধ্যতামূলক"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পিছত পাছৱৰ্ড দিয়াটো বাধ্যতামূলক"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"অতিৰিক্ত সুৰক্ষাৰ বাবে আর্হি দিয়াটো বাধ্যতামূলক"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"অতিৰিক্ত সুৰক্ষাৰ বাবে পিন দিয়াটো বাধ্যতামূলক"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"অতিৰিক্ত সুৰক্ষাৰ বাবে পাছৱর্ড দিয়াটো বাধ্যতামূলক"</string>
+    <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"প্ৰ\'ফাইল সলনি কৰোঁতে আৰ্হি দিয়াটো বাধ্যতামূলক"</string>
+    <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"ডিভাইচ ৰিষ্টাৰ্ট হোৱাৰ পিছত পিন দিয়াটো বাধ্যতামূলক"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"প্ৰ\'ফাইল সলনি কৰোঁতে পাছৱৰ্ড দিয়াটো বাধ্যতামূলক"</string>
+    <!-- no translation found for kg_prompt_reason_device_admin (3452168247888906179) -->
+    <skip />
+    <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"ডিভাইচটো মেনুৱেলভাৱে লক কৰা হৈছিল"</string>
+    <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
+      <item quantity="one">ডিভাইচটো <xliff:g id="NUMBER_1">%d</xliff:g> ঘণ্টা ধৰি আনলক কৰা হোৱা নাই। আর্হি নিশ্চিত কৰক।</item>
+      <item quantity="other">ডিভাইচটো <xliff:g id="NUMBER_1">%d</xliff:g> ঘণ্টা ধৰি আনলক কৰা হোৱা নাই। আর্হি নিশ্চিত কৰক।</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="34586942088144385">
+      <item quantity="one">ডিভাইচটো <xliff:g id="NUMBER_1">%d</xliff:g> ঘণ্টা ধৰি আনলক কৰা হোৱা নাই। পিন নিশ্চিত কৰক।</item>
+      <item quantity="other">ডিভাইচটো <xliff:g id="NUMBER_1">%d</xliff:g> ঘণ্টা ধৰি আনলক কৰা হোৱা নাই। পিন নিশ্চিত কৰক।</item>
+    </plurals>
+    <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="257297696215346527">
+      <item quantity="one">ডিভাইচটো <xliff:g id="NUMBER_1">%d</xliff:g> ঘণ্টা ধৰি আনলক কৰা হোৱা নাই। পাছৱৰ্ড নিশ্চিত কৰক।</item>
+      <item quantity="other">ডিভাইচটো <xliff:g id="NUMBER_1">%d</xliff:g> ঘণ্টা ধৰি আনলক কৰা হোৱা নাই। পাছৱৰ্ড নিশ্চিত কৰক।</item>
+    </plurals>
+    <string name="fingerprint_not_recognized" msgid="348813995267914625">"চিনাক্ত কৰিব পৰা নগ\'ল"</string>
+    <!-- no translation found for kg_password_default_pin_message (6203676909479972943) -->
+    <!-- no translation found for kg_password_default_puk_message (8744416410184198352) -->
+</resources>

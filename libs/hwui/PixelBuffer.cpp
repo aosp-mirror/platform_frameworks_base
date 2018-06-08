@@ -31,7 +31,7 @@ namespace uirenderer {
 // CPU pixel buffer
 ///////////////////////////////////////////////////////////////////////////////
 
-class CpuPixelBuffer: public PixelBuffer {
+class CpuPixelBuffer : public PixelBuffer {
 public:
     CpuPixelBuffer(GLenum format, uint32_t width, uint32_t height);
 
@@ -48,8 +48,7 @@ private:
 
 CpuPixelBuffer::CpuPixelBuffer(GLenum format, uint32_t width, uint32_t height)
         : PixelBuffer(format, width, height)
-        , mBuffer(new uint8_t[width * height * formatSize(format)]) {
-}
+        , mBuffer(new uint8_t[width * height * formatSize(format)]) {}
 
 uint8_t* CpuPixelBuffer::map(AccessMode mode) {
     if (mAccessMode == kAccessMode_None) {
@@ -63,15 +62,15 @@ void CpuPixelBuffer::unmap() {
 }
 
 void CpuPixelBuffer::upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset) {
-    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height,
-            mFormat, GL_UNSIGNED_BYTE, &mBuffer[offset]);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, mFormat, GL_UNSIGNED_BYTE,
+                    &mBuffer[offset]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // GPU pixel buffer
 ///////////////////////////////////////////////////////////////////////////////
 
-class GpuPixelBuffer: public PixelBuffer {
+class GpuPixelBuffer : public PixelBuffer {
 public:
     GpuPixelBuffer(GLenum format, uint32_t width, uint32_t height);
     ~GpuPixelBuffer();
@@ -89,11 +88,10 @@ private:
     Caches& mCaches;
 };
 
-GpuPixelBuffer::GpuPixelBuffer(GLenum format,
-        uint32_t width, uint32_t height)
+GpuPixelBuffer::GpuPixelBuffer(GLenum format, uint32_t width, uint32_t height)
         : PixelBuffer(format, width, height)
         , mMappedPointer(nullptr)
-        , mCaches(Caches::getInstance()){
+        , mCaches(Caches::getInstance()) {
     glGenBuffers(1, &mBuffer);
 
     mCaches.pixelBufferState().bind(mBuffer);
@@ -108,7 +106,7 @@ GpuPixelBuffer::~GpuPixelBuffer() {
 uint8_t* GpuPixelBuffer::map(AccessMode mode) {
     if (mAccessMode == kAccessMode_None) {
         mCaches.pixelBufferState().bind(mBuffer);
-        mMappedPointer = (uint8_t*) glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, getSize(), mode);
+        mMappedPointer = (uint8_t*)glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, getSize(), mode);
         if (CC_UNLIKELY(!mMappedPointer)) {
             GLUtils::dumpGLErrors();
             LOG_ALWAYS_FATAL("Failed to map PBO");
@@ -138,8 +136,8 @@ void GpuPixelBuffer::upload(uint32_t x, uint32_t y, uint32_t width, uint32_t hei
     // If the buffer is not mapped, unmap() will not bind it
     mCaches.pixelBufferState().bind(mBuffer);
     unmap();
-    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, mFormat,
-            GL_UNSIGNED_BYTE, reinterpret_cast<void*>(offset));
+    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, mFormat, GL_UNSIGNED_BYTE,
+                    reinterpret_cast<void*>(offset));
     mCaches.pixelBufferState().unbind();
 }
 
@@ -147,13 +145,12 @@ void GpuPixelBuffer::upload(uint32_t x, uint32_t y, uint32_t width, uint32_t hei
 // Factory
 ///////////////////////////////////////////////////////////////////////////////
 
-PixelBuffer* PixelBuffer::create(GLenum format,
-        uint32_t width, uint32_t height, BufferType type) {
+PixelBuffer* PixelBuffer::create(GLenum format, uint32_t width, uint32_t height, BufferType type) {
     if (type == kBufferType_Auto && Caches::getInstance().gpuPixelBuffersEnabled) {
         return new GpuPixelBuffer(format, width, height);
     }
     return new CpuPixelBuffer(format, width, height);
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

@@ -22,14 +22,13 @@ import android.os.SystemClock;
 import android.util.Pools;
 import android.util.Slog;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.WindowManagerPolicy;
-import android.view.accessibility.AccessibilityEvent;
+
+import com.android.server.policy.WindowManagerPolicy;
 
 /**
  * Intercepts key events and forwards them to accessibility manager service.
  */
-public class KeyboardInterceptor implements EventStreamTransformation, Handler.Callback {
+public class KeyboardInterceptor extends BaseEventStreamTransformation implements Handler.Callback {
     private static final int MESSAGE_PROCESS_QUEUED_EVENTS = 1;
     private static final String LOG_TAG = "KeyboardInterceptor";
 
@@ -37,7 +36,6 @@ public class KeyboardInterceptor implements EventStreamTransformation, Handler.C
     private final WindowManagerPolicy mPolicy;
     private final Handler mHandler;
 
-    private EventStreamTransformation mNext;
     private KeyEventHolder mEventQueueStart;
     private KeyEventHolder mEventQueueEnd;
 
@@ -65,13 +63,6 @@ public class KeyboardInterceptor implements EventStreamTransformation, Handler.C
     }
 
     @Override
-    public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-        if (mNext != null) {
-            mNext.onMotionEvent(event, rawEvent, policyFlags);
-        }
-    }
-
-    @Override
     public void onKeyEvent(KeyEvent event, int policyFlags) {
         /*
          * Certain keys have system-level behavior that affects accessibility services.
@@ -87,29 +78,6 @@ public class KeyboardInterceptor implements EventStreamTransformation, Handler.C
         }
 
         mAms.notifyKeyEvent(event, policyFlags);
-    }
-
-    @Override
-    public void onAccessibilityEvent(AccessibilityEvent event) {
-        if (mNext != null) {
-            mNext.onAccessibilityEvent(event);
-        }
-    }
-
-    @Override
-    public void setNext(EventStreamTransformation next) {
-        mNext = next;
-    }
-
-    @Override
-    public void clearEvents(int inputSource) {
-        if (mNext != null) {
-            mNext.clearEvents(inputSource);
-        }
-    }
-
-    @Override
-    public void onDestroy() {
     }
 
     @Override

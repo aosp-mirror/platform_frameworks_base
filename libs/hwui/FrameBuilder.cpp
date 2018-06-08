@@ -20,8 +20,8 @@
 #include "LayerUpdateQueue.h"
 #include "RenderNode.h"
 #include "VectorDrawable.h"
-#include "renderstate/OffscreenBufferPool.h"
 #include "hwui/Canvas.h"
+#include "renderstate/OffscreenBufferPool.h"
 #include "utils/FatVector.h"
 #include "utils/PaintUtils.h"
 #include "utils/TraceUtils.h"
@@ -32,9 +32,8 @@
 namespace android {
 namespace uirenderer {
 
-FrameBuilder::FrameBuilder(const SkRect& clip,
-        uint32_t viewportWidth, uint32_t viewportHeight,
-        const LightGeometry& lightGeometry, Caches& caches)
+FrameBuilder::FrameBuilder(const SkRect& clip, uint32_t viewportWidth, uint32_t viewportHeight,
+                           const LightGeometry& lightGeometry, Caches& caches)
         : mStdAllocator(mAllocator)
         , mLayerBuilders(mStdAllocator)
         , mLayerStack(mStdAllocator)
@@ -42,18 +41,16 @@ FrameBuilder::FrameBuilder(const SkRect& clip,
         , mCaches(caches)
         , mLightRadius(lightGeometry.radius)
         , mDrawFbo0(true) {
-
     // Prepare to defer Fbo0
     auto fbo0 = mAllocator.create<LayerBuilder>(viewportWidth, viewportHeight, Rect(clip));
     mLayerBuilders.push_back(fbo0);
     mLayerStack.push_back(0);
-    mCanvasState.initializeSaveStack(viewportWidth, viewportHeight,
-            clip.fLeft, clip.fTop, clip.fRight, clip.fBottom,
-            lightGeometry.center);
+    mCanvasState.initializeSaveStack(viewportWidth, viewportHeight, clip.fLeft, clip.fTop,
+                                     clip.fRight, clip.fBottom, lightGeometry.center);
 }
 
-FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers,
-        const LightGeometry& lightGeometry, Caches& caches)
+FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers, const LightGeometry& lightGeometry,
+                           Caches& caches)
         : mStdAllocator(mAllocator)
         , mLayerBuilders(mStdAllocator)
         , mLayerStack(mStdAllocator)
@@ -67,9 +64,7 @@ FrameBuilder::FrameBuilder(const LayerUpdateQueue& layers,
     auto fbo0 = mAllocator.create<LayerBuilder>(1, 1, Rect(1, 1));
     mLayerBuilders.push_back(fbo0);
     mLayerStack.push_back(0);
-    mCanvasState.initializeSaveStack(1, 1,
-            0, 0, 1, 1,
-            lightGeometry.center);
+    mCanvasState.initializeSaveStack(1, 1, 0, 0, 1, 1, lightGeometry.center);
 
     deferLayers(layers);
 }
@@ -84,8 +79,8 @@ void FrameBuilder::deferLayers(const LayerUpdateQueue& layers) {
         // as not to lose info on what portion is damaged
         OffscreenBuffer* layer = layerNode->getLayer();
         if (CC_LIKELY(layer)) {
-            ATRACE_FORMAT("Optimize HW Layer DisplayList %s %ux%u",
-                    layerNode->getName(), layerNode->getWidth(), layerNode->getHeight());
+            ATRACE_FORMAT("Optimize HW Layer DisplayList %s %ux%u", layerNode->getName(),
+                          layerNode->getWidth(), layerNode->getHeight());
 
             Rect layerDamage = layers.entries()[i].damage;
             // TODO: ensure layer damage can't be larger than layer
@@ -96,8 +91,8 @@ void FrameBuilder::deferLayers(const LayerUpdateQueue& layers) {
             Vector3 lightCenter = mCanvasState.currentSnapshot()->getRelativeLightCenter();
             layer->inverseTransformInWindow.mapPoint3d(lightCenter);
 
-            saveForLayer(layerNode->getWidth(), layerNode->getHeight(), 0, 0,
-                    layerDamage, lightCenter, nullptr, layerNode);
+            saveForLayer(layerNode->getWidth(), layerNode->getHeight(), 0, 0, layerDamage,
+                         lightCenter, nullptr, layerNode);
 
             if (layerNode->getDisplayList()) {
                 deferNodeOps(*layerNode);
@@ -121,19 +116,18 @@ void FrameBuilder::deferRenderNode(float tx, float ty, Rect clipRect, RenderNode
     mCanvasState.save(SaveFlags::MatrixClip);
     mCanvasState.translate(tx, ty);
     mCanvasState.clipRect(clipRect.left, clipRect.top, clipRect.right, clipRect.bottom,
-            SkClipOp::kIntersect);
+                          SkClipOp::kIntersect);
     deferNodePropsAndOps(renderNode);
     mCanvasState.restore();
 }
 
 static Rect nodeBounds(RenderNode& node) {
     auto& props = node.properties();
-    return Rect(props.getLeft(), props.getTop(),
-            props.getRight(), props.getBottom());
+    return Rect(props.getLeft(), props.getTop(), props.getRight(), props.getBottom());
 }
 
-void FrameBuilder::deferRenderNodeScene(const std::vector< sp<RenderNode> >& nodes,
-        const Rect& contentDrawBounds) {
+void FrameBuilder::deferRenderNodeScene(const std::vector<sp<RenderNode> >& nodes,
+                                        const Rect& contentDrawBounds) {
     if (nodes.size() < 1) return;
     if (nodes.size() == 1) {
         if (!nodes[0]->nothingToDraw()) {
@@ -170,14 +164,16 @@ void FrameBuilder::deferRenderNodeScene(const std::vector< sp<RenderNode> >& nod
         // the backdrop, so this isn't necessary.
         if (content.right < backdrop.right) {
             // draw backdrop to right side of content
-            deferRenderNode(0, 0, Rect(content.right, backdrop.top,
-                    backdrop.right, backdrop.bottom), *nodes[0]);
+            deferRenderNode(0, 0,
+                            Rect(content.right, backdrop.top, backdrop.right, backdrop.bottom),
+                            *nodes[0]);
         }
         if (content.bottom < backdrop.bottom) {
             // draw backdrop to bottom of content
             // Note: bottom fill uses content left/right, to avoid overdrawing left/right fill
-            deferRenderNode(0, 0, Rect(content.left, content.bottom,
-                    content.right, backdrop.bottom), *nodes[0]);
+            deferRenderNode(0, 0,
+                            Rect(content.left, content.bottom, content.right, backdrop.bottom),
+                            *nodes[0]);
         }
     }
 
@@ -210,11 +206,9 @@ void FrameBuilder::onSnapshotRestored(const Snapshot& removed, const Snapshot& r
 void FrameBuilder::deferNodePropsAndOps(RenderNode& node) {
     const RenderProperties& properties = node.properties();
     const Outline& outline = properties.getOutline();
-    if (properties.getAlpha() <= 0
-            || (outline.getShouldClip() && outline.isEmpty())
-            || properties.getScaleX() == 0
-            || properties.getScaleY() == 0) {
-        return; // rejected
+    if (properties.getAlpha() <= 0 || (outline.getShouldClip() && outline.isEmpty()) ||
+        properties.getScaleX() == 0 || properties.getScaleY() == 0) {
+        return;  // rejected
     }
 
     if (properties.getLeft() != 0 || properties.getTop() != 0) {
@@ -236,12 +230,12 @@ void FrameBuilder::deferNodePropsAndOps(RenderNode& node) {
     const int width = properties.getWidth();
     const int height = properties.getHeight();
 
-    Rect saveLayerBounds; // will be set to non-empty if saveLayer needed
+    Rect saveLayerBounds;  // will be set to non-empty if saveLayer needed
     const bool isLayer = properties.effectiveLayerType() != LayerType::None;
     int clipFlags = properties.getClippingFlags();
     if (properties.getAlpha() < 1) {
         if (isLayer) {
-            clipFlags &= ~CLIP_TO_BOUNDS; // bounds clipping done by layer
+            clipFlags &= ~CLIP_TO_BOUNDS;  // bounds clipping done by layer
         }
         if (CC_LIKELY(isLayer || !properties.getHasOverlappingRendering())) {
             // simply scale rendering content's alpha
@@ -251,7 +245,7 @@ void FrameBuilder::deferNodePropsAndOps(RenderNode& node) {
             saveLayerBounds.set(0, 0, width, height);
             if (clipFlags) {
                 properties.getClippingRectForFlags(clipFlags, &saveLayerBounds);
-                clipFlags = 0; // all clipping done by savelayer
+                clipFlags = 0;  // all clipping done by savelayer
             }
         }
 
@@ -265,21 +259,21 @@ void FrameBuilder::deferNodePropsAndOps(RenderNode& node) {
         Rect clipRect;
         properties.getClippingRectForFlags(clipFlags, &clipRect);
         mCanvasState.clipRect(clipRect.left, clipRect.top, clipRect.right, clipRect.bottom,
-                SkClipOp::kIntersect);
+                              SkClipOp::kIntersect);
     }
 
     if (properties.getRevealClip().willClip()) {
         Rect bounds;
         properties.getRevealClip().getBounds(&bounds);
-        mCanvasState.setClippingRoundRect(mAllocator,
-                bounds, properties.getRevealClip().getRadius());
+        mCanvasState.setClippingRoundRect(mAllocator, bounds,
+                                          properties.getRevealClip().getRadius());
     } else if (properties.getOutline().willClip()) {
         mCanvasState.setClippingOutline(mAllocator, &(properties.getOutline()));
     }
 
-    bool quickRejected = mCanvasState.currentSnapshot()->getRenderTargetClip().isEmpty()
-            || (properties.getClipToBounds()
-                    && mCanvasState.quickRejectConservative(0, 0, width, height));
+    bool quickRejected = mCanvasState.currentSnapshot()->getRenderTargetClip().isEmpty() ||
+                         (properties.getClipToBounds() &&
+                          mCanvasState.quickRejectConservative(0, 0, width, height));
     if (!quickRejected) {
         // not rejected, so defer render as either Layer, or direct (possibly wrapped in saveLayer)
         if (node.getLayer()) {
@@ -296,9 +290,8 @@ void FrameBuilder::deferNodePropsAndOps(RenderNode& node) {
             SkPaint saveLayerPaint;
             saveLayerPaint.setAlpha(properties.getAlpha());
             deferBeginLayerOp(*mAllocator.create_trivial<BeginLayerOp>(
-                    saveLayerBounds,
-                    Matrix4::identity(),
-                    nullptr, // no record-time clip - need only respect defer-time one
+                    saveLayerBounds, Matrix4::identity(),
+                    nullptr,  // no record-time clip - need only respect defer-time one
                     &saveLayerPaint));
             deferNodeOps(node);
             deferEndLayerOp(*mAllocator.create_trivial<EndLayerOp>());
@@ -311,8 +304,8 @@ void FrameBuilder::deferNodePropsAndOps(RenderNode& node) {
 typedef key_value_pair_t<float, const RenderNodeOp*> ZRenderNodeOpPair;
 
 template <typename V>
-static void buildZSortedChildList(V* zTranslatedNodes,
-        const DisplayList& displayList, const DisplayList::Chunk& chunk) {
+static void buildZSortedChildList(V* zTranslatedNodes, const DisplayList& displayList,
+                                  const DisplayList::Chunk& chunk) {
     if (chunk.beginChildIndex == chunk.endChildIndex) return;
 
     for (size_t i = chunk.beginChildIndex; i < chunk.endChildIndex; i++) {
@@ -343,11 +336,10 @@ static size_t findNonNegativeIndex(const V& zTranslatedNodes) {
 
 template <typename V>
 void FrameBuilder::defer3dChildren(const ClipBase* reorderClip, ChildrenSelectMode mode,
-        const V& zTranslatedNodes) {
+                                   const V& zTranslatedNodes) {
     const int size = zTranslatedNodes.size();
-    if (size == 0
-            || (mode == ChildrenSelectMode::Negative&& zTranslatedNodes[0].key > 0.0f)
-            || (mode == ChildrenSelectMode::Positive && zTranslatedNodes[size - 1].key < 0.0f)) {
+    if (size == 0 || (mode == ChildrenSelectMode::Negative && zTranslatedNodes[0].key > 0.0f) ||
+        (mode == ChildrenSelectMode::Positive && zTranslatedNodes[size - 1].key < 0.0f)) {
         // no 3d children to draw
         return;
     }
@@ -364,11 +356,11 @@ void FrameBuilder::defer3dChildren(const ClipBase* reorderClip, ChildrenSelectMo
     if (mode == ChildrenSelectMode::Negative) {
         drawIndex = 0;
         endIndex = nonNegativeIndex;
-        shadowIndex = endIndex; // draw no shadows
+        shadowIndex = endIndex;  // draw no shadows
     } else {
         drawIndex = nonNegativeIndex;
         endIndex = size;
-        shadowIndex = drawIndex; // potentially draw shadow for each pos Z child
+        shadowIndex = drawIndex;  // potentially draw shadow for each pos Z child
     }
 
     float lastCasterZ = 0.0f;
@@ -381,7 +373,7 @@ void FrameBuilder::defer3dChildren(const ClipBase* reorderClip, ChildrenSelectMo
             if (shadowIndex == drawIndex || casterZ - lastCasterZ < 0.1f) {
                 deferShadow(reorderClip, *casterNodeOp);
 
-                lastCasterZ = casterZ; // must do this even if current caster not casting a shadow
+                lastCasterZ = casterZ;  // must do this even if current caster not casting a shadow
                 shadowIndex++;
                 continue;
             }
@@ -397,11 +389,9 @@ void FrameBuilder::deferShadow(const ClipBase* reorderClip, const RenderNodeOp& 
     auto& node = *casterNodeOp.renderNode;
     auto& properties = node.properties();
 
-    if (properties.getAlpha() <= 0.0f
-            || properties.getOutline().getAlpha() <= 0.0f
-            || !properties.getOutline().getPath()
-            || properties.getScaleX() == 0
-            || properties.getScaleY() == 0) {
+    if (properties.getAlpha() <= 0.0f || properties.getOutline().getAlpha() <= 0.0f ||
+        !properties.getOutline().getPath() || properties.getScaleX() == 0 ||
+        properties.getScaleY() == 0) {
         // no shadow to draw
         return;
     }
@@ -432,8 +422,8 @@ void FrameBuilder::deferShadow(const ClipBase* reorderClip, const RenderNodeOp& 
         Rect clipBounds;
         properties.getClippingRectForFlags(CLIP_TO_CLIP_BOUNDS, &clipBounds);
         SkPath clipBoundsPath;
-        clipBoundsPath.addRect(clipBounds.left, clipBounds.top,
-                clipBounds.right, clipBounds.bottom);
+        clipBoundsPath.addRect(clipBounds.left, clipBounds.top, clipBounds.right,
+                               clipBounds.bottom);
 
         Op(*casterPath, clipBoundsPath, kIntersect_SkPathOp, frameAllocatedPath);
         casterPath = frameAllocatedPath;
@@ -442,7 +432,7 @@ void FrameBuilder::deferShadow(const ClipBase* reorderClip, const RenderNodeOp& 
     // apply reorder clip to shadow, so it respects clip at beginning of reorderable chunk
     int restoreTo = mCanvasState.save(SaveFlags::MatrixClip);
     mCanvasState.writableSnapshot()->applyClip(reorderClip,
-            *mCanvasState.currentSnapshot()->transform);
+                                               *mCanvasState.currentSnapshot()->transform);
     if (CC_LIKELY(!mCanvasState.getRenderTargetClipBounds().isEmpty())) {
         Matrix4 shadowMatrixXY(casterNodeOp.localMatrix);
         Matrix4 shadowMatrixZ(casterNodeOp.localMatrix);
@@ -450,13 +440,9 @@ void FrameBuilder::deferShadow(const ClipBase* reorderClip, const RenderNodeOp& 
         node.applyViewPropertyTransforms(shadowMatrixZ, true);
 
         sp<TessellationCache::ShadowTask> task = mCaches.tessellationCache.getShadowTask(
-                mCanvasState.currentTransform(),
-                mCanvasState.getLocalClipBounds(),
-                casterAlpha >= 1.0f,
-                casterPath,
-                &shadowMatrixXY, &shadowMatrixZ,
-                mCanvasState.currentSnapshot()->getRelativeLightCenter(),
-                mLightRadius);
+                mCanvasState.currentTransform(), mCanvasState.getLocalClipBounds(),
+                casterAlpha >= 1.0f, casterPath, &shadowMatrixXY, &shadowMatrixZ,
+                mCanvasState.currentSnapshot()->getRelativeLightCenter(), mLightRadius);
         ShadowOp* shadowOp = mAllocator.create<ShadowOp>(task, casterAlpha);
         BakedOpState* bakedOpState = BakedOpState::tryShadowOpConstruct(
                 mAllocator, *mCanvasState.writableSnapshot(), shadowOp);
@@ -471,15 +457,13 @@ void FrameBuilder::deferProjectedChildren(const RenderNode& renderNode) {
     int count = mCanvasState.save(SaveFlags::MatrixClip);
     const SkPath* projectionReceiverOutline = renderNode.properties().getOutline().getPath();
 
-    SkPath transformedMaskPath; // on stack, since BakedOpState makes a deep copy
+    SkPath transformedMaskPath;  // on stack, since BakedOpState makes a deep copy
     if (projectionReceiverOutline) {
         // transform the mask for this projector into render target space
         // TODO: consider combining both transforms by stashing transform instead of applying
         SkMatrix skCurrentTransform;
         mCanvasState.currentTransform()->copyTo(skCurrentTransform);
-        projectionReceiverOutline->transform(
-                skCurrentTransform,
-                &transformedMaskPath);
+        projectionReceiverOutline->transform(skCurrentTransform, &transformedMaskPath);
         mCanvasState.setProjectionPathMask(&transformedMaskPath);
     }
 
@@ -509,10 +493,12 @@ void FrameBuilder::deferProjectedChildren(const RenderNode& renderNode) {
  * This allows opIds embedded in the RecordedOps to be used for dispatching to these lambdas.
  * E.g. a BitmapOp op then would be dispatched to FrameBuilder::onBitmapOp(const BitmapOp&)
  */
-#define OP_RECEIVER(Type) \
-        [](FrameBuilder& frameBuilder, const RecordedOp& op) { frameBuilder.defer##Type(static_cast<const Type&>(op)); },
+#define OP_RECEIVER(Type)                                       \
+    [](FrameBuilder& frameBuilder, const RecordedOp& op) {      \
+        frameBuilder.defer##Type(static_cast<const Type&>(op)); \
+    },
 void FrameBuilder::deferNodeOps(const RenderNode& renderNode) {
-    typedef void (*OpDispatcher) (FrameBuilder& frameBuilder, const RecordedOp& op);
+    typedef void (*OpDispatcher)(FrameBuilder & frameBuilder, const RecordedOp& op);
     static OpDispatcher receivers[] = BUILD_DEFERRABLE_OP_LUT(OP_RECEIVER);
 
     // can't be null, since DL=null node rejection happens before deferNodePropsAndOps
@@ -526,9 +512,9 @@ void FrameBuilder::deferNodeOps(const RenderNode& renderNode) {
             const RecordedOp* op = displayList.getOps()[opIndex];
             receivers[op->opId](*this, *op);
 
-            if (CC_UNLIKELY(!renderNode.mProjectedNodes.empty()
-                    && displayList.projectionReceiveIndex >= 0
-                    && static_cast<int>(opIndex) == displayList.projectionReceiveIndex)) {
+            if (CC_UNLIKELY(!renderNode.mProjectedNodes.empty() &&
+                            displayList.projectionReceiveIndex >= 0 &&
+                            static_cast<int>(opIndex) == displayList.projectionReceiveIndex)) {
                 deferProjectedChildren(renderNode);
             }
         }
@@ -542,7 +528,7 @@ void FrameBuilder::deferRenderNodeOpImpl(const RenderNodeOp& op) {
 
     // apply state from RecordedOp (clip first, since op's clip is transformed by current matrix)
     mCanvasState.writableSnapshot()->applyClip(op.localClip,
-            *mCanvasState.currentSnapshot()->transform);
+                                               *mCanvasState.currentSnapshot()->transform);
     mCanvasState.concatMatrix(op.localMatrix);
 
     // then apply state from node properties, and defer ops
@@ -562,12 +548,12 @@ void FrameBuilder::deferRenderNodeOp(const RenderNodeOp& op) {
  * for paint's style on the bounds being computed.
  */
 BakedOpState* FrameBuilder::deferStrokeableOp(const RecordedOp& op, batchid_t batchId,
-        BakedOpState::StrokeBehavior strokeBehavior, bool expandForPathTexture) {
+                                              BakedOpState::StrokeBehavior strokeBehavior,
+                                              bool expandForPathTexture) {
     // Note: here we account for stroke when baking the op
     BakedOpState* bakedState = BakedOpState::tryStrokeableOpConstruct(
-            mAllocator, *mCanvasState.writableSnapshot(), op,
-            strokeBehavior, expandForPathTexture);
-    if (!bakedState) return nullptr; // quick rejected
+            mAllocator, *mCanvasState.writableSnapshot(), op, strokeBehavior, expandForPathTexture);
+    if (!bakedState) return nullptr;  // quick rejected
 
     if (op.opId == RecordedOpId::RectOp && op.paint->getStyle() != SkPaint::kStroke_Style) {
         bakedState->setupOpacity(op.paint);
@@ -586,8 +572,8 @@ BakedOpState* FrameBuilder::deferStrokeableOp(const RecordedOp& op, batchid_t ba
 static batchid_t tessBatchId(const RecordedOp& op) {
     const SkPaint& paint = *(op.paint);
     return paint.getPathEffect()
-            ? OpBatchType::AlphaMaskTexture
-            : (paint.isAntiAlias() ? OpBatchType::AlphaVertices : OpBatchType::Vertices);
+                   ? OpBatchType::AlphaMaskTexture
+                   : (paint.isAntiAlias() ? OpBatchType::AlphaVertices : OpBatchType::Vertices);
 }
 
 void FrameBuilder::deferArcOp(const ArcOp& op) {
@@ -598,13 +584,13 @@ void FrameBuilder::deferArcOp(const ArcOp& op) {
 }
 
 static bool hasMergeableClip(const BakedOpState& state) {
-    return !state.computedState.clipState
-            || state.computedState.clipState->mode == ClipMode::Rectangle;
+    return !state.computedState.clipState ||
+           state.computedState.clipState->mode == ClipMode::Rectangle;
 }
 
 void FrameBuilder::deferBitmapOp(const BitmapOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
-    if (!bakedState) return; // quick rejected
+    if (!bakedState) return;  // quick rejected
 
     if (op.bitmap->isOpaque()) {
         bakedState->setupOpacity(op.paint);
@@ -613,11 +599,10 @@ void FrameBuilder::deferBitmapOp(const BitmapOp& op) {
     // Don't merge non-simply transformed or neg scale ops, SET_TEXTURE doesn't handle rotation
     // Don't merge A8 bitmaps - the paint's color isn't compared by mergeId, or in
     // MergingDrawBatch::canMergeWith()
-    if (bakedState->computedState.transform.isSimple()
-            && bakedState->computedState.transform.positiveScale()
-            && PaintUtils::getBlendModeDirect(op.paint) == SkBlendMode::kSrcOver
-            && op.bitmap->colorType() != kAlpha_8_SkColorType
-            && hasMergeableClip(*bakedState)) {
+    if (bakedState->computedState.transform.isSimple() &&
+        bakedState->computedState.transform.positiveScale() &&
+        PaintUtils::getBlendModeDirect(op.paint) == SkBlendMode::kSrcOver &&
+        op.bitmap->colorType() != kAlpha_8_SkColorType && hasMergeableClip(*bakedState)) {
         mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.bitmap->getGenerationID());
         currentLayer().deferMergeableOp(mAllocator, bakedState, OpBatchType::Bitmap, mergeId);
     } else {
@@ -627,24 +612,21 @@ void FrameBuilder::deferBitmapOp(const BitmapOp& op) {
 
 void FrameBuilder::deferBitmapMeshOp(const BitmapMeshOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
-    if (!bakedState) return; // quick rejected
+    if (!bakedState) return;  // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
 }
 
 void FrameBuilder::deferBitmapRectOp(const BitmapRectOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
-    if (!bakedState) return; // quick rejected
+    if (!bakedState) return;  // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Bitmap);
 }
 
 void FrameBuilder::deferVectorDrawableOp(const VectorDrawableOp& op) {
     Bitmap& bitmap = op.vectorDrawable->getBitmapUpdateIfDirty();
     SkPaint* paint = op.vectorDrawable->getPaint();
-    const BitmapRectOp* resolvedOp = mAllocator.create_trivial<BitmapRectOp>(op.unmappedBounds,
-            op.localMatrix,
-            op.localClip,
-            paint,
-            &bitmap,
+    const BitmapRectOp* resolvedOp = mAllocator.create_trivial<BitmapRectOp>(
+            op.unmappedBounds, op.localMatrix, op.localClip, paint, &bitmap,
             Rect(bitmap.width(), bitmap.height()));
     deferBitmapRectOp(*resolvedOp);
 }
@@ -656,23 +638,20 @@ void FrameBuilder::deferCirclePropsOp(const CirclePropsOp& op) {
     float y = *(op.y);
     float radius = *(op.radius);
     Rect unmappedBounds(x - radius, y - radius, x + radius, y + radius);
-    const OvalOp* resolvedOp = mAllocator.create_trivial<OvalOp>(
-            unmappedBounds,
-            op.localMatrix,
-            op.localClip,
-            op.paint);
+    const OvalOp* resolvedOp = mAllocator.create_trivial<OvalOp>(unmappedBounds, op.localMatrix,
+                                                                 op.localClip, op.paint);
     deferOvalOp(*resolvedOp);
 }
 
 void FrameBuilder::deferColorOp(const ColorOp& op) {
     BakedOpState* bakedState = tryBakeUnboundedOpState(op);
-    if (!bakedState) return; // quick rejected
+    if (!bakedState) return;  // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Vertices);
 }
 
 void FrameBuilder::deferFunctorOp(const FunctorOp& op) {
     BakedOpState* bakedState = tryBakeUnboundedOpState(op);
-    if (!bakedState) return; // quick rejected
+    if (!bakedState) return;  // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Functor);
 }
 
@@ -687,11 +666,11 @@ void FrameBuilder::deferOvalOp(const OvalOp& op) {
 
 void FrameBuilder::deferPatchOp(const PatchOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
-    if (!bakedState) return; // quick rejected
+    if (!bakedState) return;  // quick rejected
 
-    if (bakedState->computedState.transform.isPureTranslate()
-            && PaintUtils::getBlendModeDirect(op.paint) == SkBlendMode::kSrcOver
-            && hasMergeableClip(*bakedState)) {
+    if (bakedState->computedState.transform.isPureTranslate() &&
+        PaintUtils::getBlendModeDirect(op.paint) == SkBlendMode::kSrcOver &&
+        hasMergeableClip(*bakedState)) {
         mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.bitmap->getGenerationID());
 
         // Only use the MergedPatch batchId when merged, so Bitmap+Patch don't try to merge together
@@ -723,7 +702,8 @@ void FrameBuilder::deferRoundRectOp(const RoundRectOp& op) {
     if (CC_LIKELY(state && !op.paint->getPathEffect())) {
         // TODO: consider storing tessellation task in BakedOpState
         mCaches.tessellationCache.precacheRoundRect(state->computedState.transform, *(op.paint),
-                op.unmappedBounds.getWidth(), op.unmappedBounds.getHeight(), op.rx, op.ry);
+                                                    op.unmappedBounds.getWidth(),
+                                                    op.unmappedBounds.getHeight(), op.rx, op.ry);
     }
 }
 
@@ -731,16 +711,14 @@ void FrameBuilder::deferRoundRectPropsOp(const RoundRectPropsOp& op) {
     // allocate a temporary round rect op (with mAllocator, so it persists until render), so the
     // renderer doesn't have to handle the RoundRectPropsOp type, and so state baking is simple.
     const RoundRectOp* resolvedOp = mAllocator.create_trivial<RoundRectOp>(
-            Rect(*(op.left), *(op.top), *(op.right), *(op.bottom)),
-            op.localMatrix,
-            op.localClip,
+            Rect(*(op.left), *(op.top), *(op.right), *(op.bottom)), op.localMatrix, op.localClip,
             op.paint, *op.rx, *op.ry);
     deferRoundRectOp(*resolvedOp);
 }
 
 void FrameBuilder::deferSimpleRectsOp(const SimpleRectsOp& op) {
     BakedOpState* bakedState = tryBakeOpState(op);
-    if (!bakedState) return; // quick rejected
+    if (!bakedState) return;  // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::Vertices);
 }
 
@@ -753,12 +731,12 @@ void FrameBuilder::deferTextOp(const TextOp& op) {
     BakedOpState* bakedState = BakedOpState::tryStrokeableOpConstruct(
             mAllocator, *mCanvasState.writableSnapshot(), op,
             BakedOpState::StrokeBehavior::StyleDefined, false);
-    if (!bakedState) return; // quick rejected
+    if (!bakedState) return;  // quick rejected
 
     batchid_t batchId = textBatchId(*(op.paint));
-    if (bakedState->computedState.transform.isPureTranslate()
-            && PaintUtils::getBlendModeDirect(op.paint) == SkBlendMode::kSrcOver
-            && hasMergeableClip(*bakedState)) {
+    if (bakedState->computedState.transform.isPureTranslate() &&
+        PaintUtils::getBlendModeDirect(op.paint) == SkBlendMode::kSrcOver &&
+        hasMergeableClip(*bakedState)) {
         mergeid_t mergeId = reinterpret_cast<mergeid_t>(op.paint->getColor());
         currentLayer().deferMergeableOp(mAllocator, bakedState, batchId, mergeId);
     } else {
@@ -773,19 +751,19 @@ void FrameBuilder::deferTextOp(const TextOp& op) {
         // Partial transform case, see BakedOpDispatcher::renderTextOp
         float sx, sy;
         totalTransform.decomposeScale(sx, sy);
-        fontRenderer.precache(op.paint, op.glyphs, op.glyphCount, SkMatrix::MakeScale(
-                roundf(std::max(1.0f, sx)),
-                roundf(std::max(1.0f, sy))));
+        fontRenderer.precache(
+                op.paint, op.glyphs, op.glyphCount,
+                SkMatrix::MakeScale(roundf(std::max(1.0f, sx)), roundf(std::max(1.0f, sy))));
     }
 }
 
 void FrameBuilder::deferTextOnPathOp(const TextOnPathOp& op) {
     BakedOpState* bakedState = tryBakeUnboundedOpState(op);
-    if (!bakedState) return; // quick rejected
+    if (!bakedState) return;  // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, textBatchId(*(op.paint)));
 
-    mCaches.fontRenderer.getFontRenderer().precache(
-            op.paint, op.glyphs, op.glyphCount, SkMatrix::I());
+    mCaches.fontRenderer.getFontRenderer().precache(op.paint, op.glyphs, op.glyphCount,
+                                                    SkMatrix::I());
 }
 
 void FrameBuilder::deferTextureLayerOp(const TextureLayerOp& op) {
@@ -802,28 +780,27 @@ void FrameBuilder::deferTextureLayerOp(const TextureLayerOp& op) {
     }
     BakedOpState* bakedState = tryBakeOpState(*textureLayerOp);
 
-    if (!bakedState) return; // quick rejected
+    if (!bakedState) return;  // quick rejected
     currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::TextureLayer);
 }
 
-void FrameBuilder::saveForLayer(uint32_t layerWidth, uint32_t layerHeight,
-        float contentTranslateX, float contentTranslateY,
-        const Rect& repaintRect,
-        const Vector3& lightCenter,
-        const BeginLayerOp* beginLayerOp, RenderNode* renderNode) {
+void FrameBuilder::saveForLayer(uint32_t layerWidth, uint32_t layerHeight, float contentTranslateX,
+                                float contentTranslateY, const Rect& repaintRect,
+                                const Vector3& lightCenter, const BeginLayerOp* beginLayerOp,
+                                RenderNode* renderNode) {
     mCanvasState.save(SaveFlags::MatrixClip);
     mCanvasState.writableSnapshot()->initializeViewport(layerWidth, layerHeight);
     mCanvasState.writableSnapshot()->roundRectClipState = nullptr;
     mCanvasState.writableSnapshot()->setRelativeLightCenter(lightCenter);
-    mCanvasState.writableSnapshot()->transform->loadTranslate(
-            contentTranslateX, contentTranslateY, 0);
-    mCanvasState.writableSnapshot()->setClip(
-            repaintRect.left, repaintRect.top, repaintRect.right, repaintRect.bottom);
+    mCanvasState.writableSnapshot()->transform->loadTranslate(contentTranslateX, contentTranslateY,
+                                                              0);
+    mCanvasState.writableSnapshot()->setClip(repaintRect.left, repaintRect.top, repaintRect.right,
+                                             repaintRect.bottom);
 
     // create a new layer repaint, and push its index on the stack
     mLayerStack.push_back(mLayerBuilders.size());
-    auto newFbo = mAllocator.create<LayerBuilder>(layerWidth, layerHeight,
-            repaintRect, beginLayerOp, renderNode);
+    auto newFbo = mAllocator.create<LayerBuilder>(layerWidth, layerHeight, repaintRect,
+                                                  beginLayerOp, renderNode);
     mLayerBuilders.push_back(newFbo);
 }
 
@@ -836,8 +813,8 @@ void FrameBuilder::restoreForLayer() {
 // TODO: defer time rejection (when bounds become empty) + tests
 // Option - just skip layers with no bounds at playback + defer?
 void FrameBuilder::deferBeginLayerOp(const BeginLayerOp& op) {
-    uint32_t layerWidth = (uint32_t) op.unmappedBounds.getWidth();
-    uint32_t layerHeight = (uint32_t) op.unmappedBounds.getHeight();
+    uint32_t layerWidth = (uint32_t)op.unmappedBounds.getWidth();
+    uint32_t layerHeight = (uint32_t)op.unmappedBounds.getHeight();
 
     auto previous = mCanvasState.currentSnapshot();
     Vector3 lightCenter = previous->getRelativeLightCenter();
@@ -873,11 +850,8 @@ void FrameBuilder::deferBeginLayerOp(const BeginLayerOp& op) {
     float contentTranslateX = -saveLayerBounds.left;
     float contentTranslateY = -saveLayerBounds.top;
 
-    saveForLayer(layerWidth, layerHeight,
-            contentTranslateX, contentTranslateY,
-            Rect(layerWidth, layerHeight),
-            lightCenter,
-            &op, nullptr);
+    saveForLayer(layerWidth, layerHeight, contentTranslateX, contentTranslateY,
+                 Rect(layerWidth, layerHeight), lightCenter, &op, nullptr);
 }
 
 void FrameBuilder::deferEndLayerOp(const EndLayerOp& /* ignored */) {
@@ -890,8 +864,8 @@ void FrameBuilder::deferEndLayerOp(const EndLayerOp& /* ignored */) {
     // to translate the drawLayer by how much the contents was translated
     // TODO: Unify this with beginLayerOp so we don't have to calculate this
     // twice
-    uint32_t layerWidth = (uint32_t) beginLayerOp.unmappedBounds.getWidth();
-    uint32_t layerHeight = (uint32_t) beginLayerOp.unmappedBounds.getHeight();
+    uint32_t layerWidth = (uint32_t)beginLayerOp.unmappedBounds.getWidth();
+    uint32_t layerHeight = (uint32_t)beginLayerOp.unmappedBounds.getHeight();
 
     auto previous = mCanvasState.currentSnapshot();
     Vector3 lightCenter = previous->getRelativeLightCenter();
@@ -900,8 +874,7 @@ void FrameBuilder::deferEndLayerOp(const EndLayerOp& /* ignored */) {
     // parent content transform * canvas transform * bounds offset
     Matrix4 contentTransform(*(previous->transform));
     contentTransform.multiply(beginLayerOp.localMatrix);
-    contentTransform.translate(beginLayerOp.unmappedBounds.left,
-            beginLayerOp.unmappedBounds.top);
+    contentTransform.translate(beginLayerOp.unmappedBounds.left, beginLayerOp.unmappedBounds.top);
 
     Matrix4 inverseContentTransform;
     inverseContentTransform.loadInverse(contentTransform);
@@ -927,10 +900,7 @@ void FrameBuilder::deferEndLayerOp(const EndLayerOp& /* ignored */) {
     // record the draw operation into the previous layer's list of draw commands
     // uses state from the associated beginLayerOp, since it has all the state needed for drawing
     LayerOp* drawLayerOp = mAllocator.create_trivial<LayerOp>(
-            beginLayerOp.unmappedBounds,
-            localMatrix,
-            beginLayerOp.localClip,
-            beginLayerOp.paint,
+            beginLayerOp.unmappedBounds, localMatrix, beginLayerOp.localClip, beginLayerOp.paint,
             &(mLayerBuilders[finishedLayerIndex]->offscreenBuffer));
     BakedOpState* bakedOpState = tryBakeOpState(*drawLayerOp);
 
@@ -959,15 +929,16 @@ void FrameBuilder::deferBeginUnclippedLayerOp(const BeginUnclippedLayerOp& op) {
         // Unclipped layer rejected - push a null op, so next EndUnclippedLayerOp is ignored
         currentLayer().activeUnclippedSaveLayers.push_back(nullptr);
     } else {
-        // Allocate a holding position for the layer object (copyTo will produce, copyFrom will consume)
+        // Allocate a holding position for the layer object (copyTo will produce, copyFrom will
+        // consume)
         OffscreenBuffer** layerHandle = mAllocator.create<OffscreenBuffer*>(nullptr);
 
         /**
          * First, defer an operation to copy out the content from the rendertarget into a layer.
          */
         auto copyToOp = mAllocator.create_trivial<CopyToLayerOp>(op, layerHandle);
-        BakedOpState* bakedState = BakedOpState::directConstruct(mAllocator,
-                &(currentLayer().repaintClip), dstRect, *copyToOp);
+        BakedOpState* bakedState = BakedOpState::directConstruct(
+                mAllocator, &(currentLayer().repaintClip), dstRect, *copyToOp);
         currentLayer().deferUnmergeableOp(mAllocator, bakedState, OpBatchType::CopyToLayer);
 
         /**
@@ -981,8 +952,8 @@ void FrameBuilder::deferBeginUnclippedLayerOp(const BeginUnclippedLayerOp& op) {
          * a balanced EndUnclippedLayerOp is seen
          */
         auto copyFromOp = mAllocator.create_trivial<CopyFromLayerOp>(op, layerHandle);
-        bakedState = BakedOpState::directConstruct(mAllocator,
-                &(currentLayer().repaintClip), dstRect, *copyFromOp);
+        bakedState = BakedOpState::directConstruct(mAllocator, &(currentLayer().repaintClip),
+                                                   dstRect, *copyFromOp);
         currentLayer().activeUnclippedSaveLayers.push_back(bakedState);
     }
 }
@@ -1001,5 +972,5 @@ void FrameBuilder::finishDefer() {
     mCaches.fontRenderer.endPrecaching();
 }
 
-} // namespace uirenderer
-} // namespace android
+}  // namespace uirenderer
+}  // namespace android

@@ -29,6 +29,7 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
+import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 
@@ -95,6 +96,12 @@ public class ToggleSliderView extends RelativeLayout implements ToggleSlider {
         }
     }
 
+    public void setEnforcedAdmin(RestrictedLockUtils.EnforcedAdmin admin) {
+        mToggle.setEnabled(admin == null);
+        mSlider.setEnabled(admin == null);
+        mSlider.setEnforcedAdmin(admin);
+    }
+
     public void setOnChangedListener(Listener l) {
         mListener = l;
     }
@@ -123,6 +130,11 @@ public class ToggleSliderView extends RelativeLayout implements ToggleSlider {
         if (mMirror != null) {
             mMirror.setValue(value);
         }
+    }
+
+    @Override
+    public int getValue() {
+        return mSlider.getProgress();
     }
 
     @Override

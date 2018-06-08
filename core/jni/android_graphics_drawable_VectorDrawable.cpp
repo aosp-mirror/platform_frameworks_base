@@ -96,6 +96,11 @@ static void setAllowCaching(JNIEnv*, jobject, jlong treePtr, jboolean allowCachi
     tree->setAllowCaching(allowCaching);
 }
 
+static void setAntiAlias(JNIEnv*, jobject, jlong treePtr, jboolean aa) {
+    VectorDrawable::Tree* tree = reinterpret_cast<VectorDrawable::Tree*>(treePtr);
+    tree->setAntiAlias(aa);
+}
+
 /**
  * Draw
  */
@@ -363,6 +368,7 @@ static const JNINativeMethod gMethods[] = {
         {"nSetRendererViewportSize", "(JFF)V", (void*)setTreeViewportSize},
         {"nSetRootAlpha", "(JF)Z", (void*)setRootAlpha},
         {"nGetRootAlpha", "(J)F", (void*)getRootAlpha},
+        {"nSetAntiAlias", "(JZ)V", (void*)setAntiAlias},
         {"nSetAllowCaching", "(JZ)V", (void*)setAllowCaching},
 
         {"nCreateFullPath", "()J", (void*)createEmptyFullPath},

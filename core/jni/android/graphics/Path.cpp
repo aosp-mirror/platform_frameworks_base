@@ -37,6 +37,14 @@ namespace android {
 class SkPathGlue {
 public:
 
+    static void finalizer(SkPath* obj) {
+        // Purge entries from the HWUI path cache if this path's data is unique
+        if (obj->unique() && android::uirenderer::Caches::hasInstance()) {
+            android::uirenderer::Caches::getInstance().pathCache.removeDeferred(obj);
+        }
+        delete obj;
+    }
+
     // ---------------- Regular JNI -----------------------------
 
     static jlong init(JNIEnv* env, jclass clazz) {
@@ -48,13 +56,8 @@ public:
         return reinterpret_cast<jlong>(new SkPath(*val));
     }
 
-    static void finalize(JNIEnv* env, jclass clazz, jlong objHandle) {
-        SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        // Purge entries from the HWUI path cache if this path's data is unique
-        if (obj->unique() && android::uirenderer::Caches::hasInstance()) {
-            android::uirenderer::Caches::getInstance().pathCache.removeDeferred(obj);
-        }
-        delete obj;
+    static jlong getFinalizer(JNIEnv* env, jclass clazz) {
+        return static_cast<jlong>(reinterpret_cast<uintptr_t>(&finalizer));
     }
 
     static void set(JNIEnv* env, jclass clazz, jlong dstHandle, jlong srcHandle) {
@@ -469,7 +472,9 @@ public:
         SkRect rect;
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
         jboolean result = obj->isRect(&rect);
-        GraphicsJNI::rect_to_jrectf(rect, env, jrect);
+        if (jrect) {
+            GraphicsJNI::rect_to_jrectf(rect, env, jrect);
+        }
         return result;
     }
 
@@ -510,7 +515,7 @@ public:
 static const JNINativeMethod methods[] = {
     {"nInit","()J", (void*) SkPathGlue::init},
     {"nInit","(J)J", (void*) SkPathGlue::init_Path},
-    {"nFinalize", "(J)V", (void*) SkPathGlue::finalize},
+    {"nGetFinalizer", "()J", (void*) SkPathGlue::getFinalizer},
     {"nSet","(JJ)V", (void*) SkPathGlue::set},
     {"nComputeBounds","(JLandroid/graphics/RectF;)V", (void*) SkPathGlue::computeBounds},
     {"nIncReserve","(JI)V", (void*) SkPathGlue::incReserve},

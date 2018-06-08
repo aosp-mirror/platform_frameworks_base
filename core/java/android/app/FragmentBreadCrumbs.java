@@ -65,7 +65,10 @@ public class FragmentBreadCrumbs extends ViewGroup
 
     /**
      * Interface to intercept clicks on the bread crumbs.
+     *
+     * @deprecated This widget is no longer supported.
      */
+    @Deprecated
     public interface OnBreadCrumbClickListener {
         /**
          * Called when a bread crumb is clicked.

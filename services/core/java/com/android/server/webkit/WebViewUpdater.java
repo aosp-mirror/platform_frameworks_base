@@ -54,7 +54,7 @@ class WebViewUpdater {
 
     private Context mContext;
     private SystemInterface mSystemInterface;
-    private int mMinimumVersionCode = -1;
+    private long mMinimumVersionCode = -1;
 
     // Keeps track of the number of running relro creations
     private int mNumRelroCreationsStarted = 0;
@@ -430,7 +430,7 @@ class WebViewUpdater {
         if (!UserPackage.hasCorrectTargetSdkVersion(packageInfo)) {
             return VALIDITY_INCORRECT_SDK_VERSION;
         }
-        if (!versionCodeGE(packageInfo.versionCode, getMinimumVersionCode())
+        if (!versionCodeGE(packageInfo.getLongVersionCode(), getMinimumVersionCode())
                 && !mSystemInterface.systemIsDebuggable()) {
             // Webview providers may be downgraded arbitrarily low, prevent that by enforcing
             // minimum version code. This check is only enforced for user builds.
@@ -461,9 +461,9 @@ class WebViewUpdater {
      *
      * @return true if versionCode1 is higher than or equal to versionCode2.
      */
-    private static boolean versionCodeGE(int versionCode1, int versionCode2) {
-        int v1 = versionCode1 / 100000;
-        int v2 = versionCode2 / 100000;
+    private static boolean versionCodeGE(long versionCode1, long versionCode2) {
+        long v1 = versionCode1 / 100000;
+        long v2 = versionCode2 / 100000;
 
         return v1 >= v2;
     }
@@ -478,16 +478,16 @@ class WebViewUpdater {
      * (mMinimumVersionCode) which is shared between threads. Furthermore, this method does not
      * hold mLock meaning that we must take extra care to ensure this method is thread-safe.
      */
-    private int getMinimumVersionCode() {
+    private long getMinimumVersionCode() {
         if (mMinimumVersionCode > 0) {
             return mMinimumVersionCode;
         }
 
-        int minimumVersionCode = -1;
+        long minimumVersionCode = -1;
         for (WebViewProviderInfo provider : mSystemInterface.getWebViewPackages()) {
             if (provider.availableByDefault && !provider.isFallback) {
                 try {
-                    int versionCode =
+                    long versionCode =
                         mSystemInterface.getFactoryPackageVersion(provider.packageName);
                     if (minimumVersionCode < 0 || versionCode < minimumVersionCode) {
                         minimumVersionCode = versionCode;
@@ -507,22 +507,16 @@ class WebViewUpdater {
         if (systemInterface.systemIsDebuggable()) {
             return true;
         }
-        Signature[] packageSignatures;
         // If no signature is declared, instead check whether the package is included in the
         // system.
         if (provider.signatures == null || provider.signatures.length == 0) {
             return packageInfo.applicationInfo.isSystemApp();
         }
-        packageSignatures = packageInfo.signatures;
-        if (packageSignatures.length != 1)
-            return false;
+        if (packageInfo.signatures.length != 1) return false;
 
-        final byte[] packageSignature = packageSignatures[0].toByteArray();
         // Return whether the package signature matches any of the valid signatures
-        for (String signature : provider.signatures) {
-            final byte[] validSignature = Base64.decode(signature, Base64.DEFAULT);
-            if (Arrays.equals(packageSignature, validSignature))
-                return true;
+        for (Signature signature : provider.signatures) {
+            if (signature.equals(packageInfo.signatures[0])) return true;
         }
         return false;
     }
@@ -569,6 +563,7 @@ class WebViewUpdater {
             PackageInfo systemUserPackageInfo =
                     userPackages.get(UserHandle.USER_SYSTEM).getPackageInfo();
             if (systemUserPackageInfo == null) {
+                pw.println(String.format("    %s is NOT installed.", provider.packageName));
                 continue;
             }
 
@@ -576,7 +571,7 @@ class WebViewUpdater {
             String packageDetails = String.format(
                     "versionName: %s, versionCode: %d, targetSdkVersion: %d",
                     systemUserPackageInfo.versionName,
-                    systemUserPackageInfo.versionCode,
+                    systemUserPackageInfo.getLongVersionCode(),
                     systemUserPackageInfo.applicationInfo.targetSdkVersion);
             if (validity == VALIDITY_OK) {
                 boolean installedForAllUsers = isInstalledAndEnabledForAllUsers(

@@ -67,6 +67,7 @@ public class UpdateEngine {
         public static final int PAYLOAD_HASH_MISMATCH_ERROR = 10;
         public static final int PAYLOAD_SIZE_MISMATCH_ERROR = 11;
         public static final int DOWNLOAD_PAYLOAD_VERIFICATION_ERROR = 12;
+        public static final int UPDATED_BUT_NOT_ACTIVE = 52;
     }
 
     /**
@@ -268,6 +269,24 @@ public class UpdateEngine {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
+    }
+
+    /**
+     * Verifies that a payload associated with the given payload metadata
+     * {@code payloadMetadataFilename} can be safely applied to ths device.
+     * Returns {@code true} if the update can successfully be applied and
+     * returns {@code false} otherwise.
+     *
+     * @param payloadMetadataFilename the location of the metadata without the
+     * {@code file://} prefix.
+     */
+    @SystemApi
+    public boolean verifyPayloadMetadata(String payloadMetadataFilename) {
+        try {
+            return mUpdateEngine.verifyPayloadApplicable(payloadMetadataFilename);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }

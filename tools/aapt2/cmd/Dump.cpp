@@ -14,138 +14,247 @@
  * limitations under the License.
  */
 
+#include <cinttypes>
 #include <vector>
 
+#include "android-base/stringprintf.h"
 #include "androidfw/StringPiece.h"
 
 #include "Debug.h"
 #include "Diagnostics.h"
 #include "Flags.h"
+#include "format/Container.h"
+#include "format/binary/BinaryResourceParser.h"
+#include "format/proto/ProtoDeserialize.h"
+#include "io/FileStream.h"
 #include "io/ZipArchive.h"
 #include "process/IResourceTableConsumer.h"
-#include "proto/ProtoSerialize.h"
-#include "unflatten/BinaryResourceParser.h"
+#include "text/Printer.h"
 #include "util/Files.h"
 
+using ::aapt::text::Printer;
 using ::android::StringPiece;
+using ::android::base::StringPrintf;
 
 namespace aapt {
 
-bool DumpCompiledFile(const pb::internal::CompiledFile& pb_file, const void* data, size_t len,
-                      const Source& source, IAaptContext* context) {
-  std::unique_ptr<ResourceFile> file =
-      DeserializeCompiledFileFromPb(pb_file, source, context->GetDiagnostics());
-  if (!file) {
-    context->GetDiagnostics()->Warn(DiagMessage() << "failed to read compiled file");
-    return false;
+struct DumpOptions {
+  DebugPrintTableOptions print_options;
+
+  // The path to a file within an APK to dump.
+  Maybe<std::string> file_to_dump_path;
+};
+
+static const char* ResourceFileTypeToString(const ResourceFile::Type& type) {
+  switch (type) {
+    case ResourceFile::Type::kPng:
+      return "PNG";
+    case ResourceFile::Type::kBinaryXml:
+      return "BINARY_XML";
+    case ResourceFile::Type::kProtoXml:
+      return "PROTO_XML";
+    default:
+      break;
+  }
+  return "UNKNOWN";
+}
+
+static void DumpCompiledFile(const ResourceFile& file, const Source& source, off64_t offset,
+                             size_t len, Printer* printer) {
+  printer->Print("Resource: ");
+  printer->Println(file.name.to_string());
+
+  printer->Print("Config:   ");
+  printer->Println(file.config.to_string());
+
+  printer->Print("Source:   ");
+  printer->Println(file.source.to_string());
+
+  printer->Print("Type:     ");
+  printer->Println(ResourceFileTypeToString(file.type));
+
+  printer->Println(StringPrintf("Data:     offset=%" PRIi64 " length=%zd", offset, len));
+}
+
+static bool DumpXmlFile(IAaptContext* context, io::IFile* file, bool proto,
+                        text::Printer* printer) {
+  std::unique_ptr<xml::XmlResource> doc;
+  if (proto) {
+    std::unique_ptr<io::InputStream> in = file->OpenInputStream();
+    if (in == nullptr) {
+      context->GetDiagnostics()->Error(DiagMessage() << "failed to open file");
+      return false;
+    }
+
+    io::ZeroCopyInputAdaptor adaptor(in.get());
+    pb::XmlNode pb_node;
+    if (!pb_node.ParseFromZeroCopyStream(&adaptor)) {
+      context->GetDiagnostics()->Error(DiagMessage() << "failed to parse file as proto XML");
+      return false;
+    }
+
+    std::string err;
+    doc = DeserializeXmlResourceFromPb(pb_node, &err);
+    if (doc == nullptr) {
+      context->GetDiagnostics()->Error(DiagMessage() << "failed to deserialize proto XML");
+      return false;
+    }
+    printer->Println("Proto XML");
+  } else {
+    std::unique_ptr<io::IData> data = file->OpenAsData();
+    if (data == nullptr) {
+      context->GetDiagnostics()->Error(DiagMessage() << "failed to open file");
+      return false;
+    }
+
+    std::string err;
+    doc = xml::Inflate(data->data(), data->size(), &err);
+    if (doc == nullptr) {
+      context->GetDiagnostics()->Error(DiagMessage() << "failed to parse file as binary XML");
+      return false;
+    }
+    printer->Println("Binary XML");
   }
 
-  std::cout << "Resource: " << file->name << "\n"
-            << "Config:   " << file->config << "\n"
-            << "Source:   " << file->source << "\n";
+  Debug::DumpXml(*doc, printer);
   return true;
 }
 
-bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
-  std::unique_ptr<ResourceTable> table;
+static bool TryDumpFile(IAaptContext* context, const std::string& file_path,
+                        const DumpOptions& options) {
+  // Use a smaller buffer so that there is less latency for dumping to stdout.
+  constexpr size_t kStdOutBufferSize = 1024u;
+  io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
+  Printer printer(&fout);
 
   std::string err;
   std::unique_ptr<io::ZipFileCollection> zip = io::ZipFileCollection::Create(file_path, &err);
   if (zip) {
-    io::IFile* file = zip->FindFile("resources.arsc.flat");
-    if (file) {
+    ResourceTable table;
+    bool proto = false;
+    if (io::IFile* file = zip->FindFile("resources.pb")) {
+      proto = true;
+
       std::unique_ptr<io::IData> data = file->OpenAsData();
-      if (!data) {
-        context->GetDiagnostics()->Error(DiagMessage(file_path)
-                                         << "failed to open resources.arsc.flat");
+      if (data == nullptr) {
+        context->GetDiagnostics()->Error(DiagMessage(file_path) << "failed to open resources.pb");
         return false;
       }
 
       pb::ResourceTable pb_table;
       if (!pb_table.ParseFromArray(data->data(), data->size())) {
-        context->GetDiagnostics()->Error(DiagMessage(file_path) << "invalid resources.arsc.flat");
+        context->GetDiagnostics()->Error(DiagMessage(file_path) << "invalid resources.pb");
         return false;
       }
 
-      table = DeserializeTableFromPb(pb_table, Source(file_path), context->GetDiagnostics());
-      if (!table) {
+      if (!DeserializeTableFromPb(pb_table, zip.get(), &table, &err)) {
+        context->GetDiagnostics()->Error(DiagMessage(file_path)
+                                         << "failed to parse table: " << err);
+        return false;
+      }
+    } else if (io::IFile* file = zip->FindFile("resources.arsc")) {
+      std::unique_ptr<io::IData> data = file->OpenAsData();
+      if (!data) {
+        context->GetDiagnostics()->Error(DiagMessage(file_path) << "failed to open resources.arsc");
+        return false;
+      }
+
+      BinaryResourceParser parser(context->GetDiagnostics(), &table, Source(file_path),
+                                  data->data(), data->size());
+      if (!parser.Parse()) {
         return false;
       }
     }
 
-    if (!table) {
-      file = zip->FindFile("resources.arsc");
-      if (file) {
-        std::unique_ptr<io::IData> data = file->OpenAsData();
-        if (!data) {
-          context->GetDiagnostics()->Error(DiagMessage(file_path)
-                                           << "failed to open resources.arsc");
-          return false;
-        }
-
-        table = util::make_unique<ResourceTable>();
-        BinaryResourceParser parser(context, table.get(), Source(file_path), data->data(),
-                                    data->size());
-        if (!parser.Parse()) {
-          return false;
-        }
+    if (!options.file_to_dump_path) {
+      if (proto) {
+        printer.Println("Proto APK");
+      } else {
+        printer.Println("Binary APK");
       }
+      Debug::PrintTable(table, options.print_options, &printer);
+      return true;
     }
-  }
 
-  if (!table) {
-    Maybe<android::FileMap> file = file::MmapPath(file_path, &err);
-    if (!file) {
-      context->GetDiagnostics()->Error(DiagMessage(file_path) << err);
+    io::IFile* file = zip->FindFile(options.file_to_dump_path.value());
+    if (file == nullptr) {
+      context->GetDiagnostics()->Error(DiagMessage(file_path)
+                                       << "file '" << options.file_to_dump_path.value()
+                                       << "' not found in APK");
       return false;
     }
-
-    android::FileMap* file_map = &file.value();
-
-    // Try as a compiled table.
-    pb::ResourceTable pb_table;
-    if (pb_table.ParseFromArray(file_map->getDataPtr(), file_map->getDataLength())) {
-      table = DeserializeTableFromPb(pb_table, Source(file_path), context->GetDiagnostics());
-    }
-
-    if (!table) {
-      // Try as a compiled file.
-      CompiledFileInputStream input(file_map->getDataPtr(), file_map->getDataLength());
-
-      uint32_t num_files = 0;
-      if (!input.ReadLittleEndian32(&num_files)) {
-        return false;
-      }
-
-      for (uint32_t i = 0; i < num_files; i++) {
-        pb::internal::CompiledFile compiled_file;
-        if (!input.ReadCompiledFile(&compiled_file)) {
-          context->GetDiagnostics()->Warn(DiagMessage() << "failed to read compiled file");
-          return false;
-        }
-
-        uint64_t offset, len;
-        if (!input.ReadDataMetaData(&offset, &len)) {
-          context->GetDiagnostics()->Warn(DiagMessage() << "failed to read meta data");
-          return false;
-        }
-
-        const void* data = static_cast<const uint8_t*>(file_map->getDataPtr()) + offset;
-        if (!DumpCompiledFile(compiled_file, data, len, Source(file_path), context)) {
-          return false;
-        }
-      }
-    }
+    return DumpXmlFile(context, file, proto, &printer);
   }
 
-  if (table) {
-    DebugPrintTableOptions options;
-    options.show_sources = true;
-    Debug::PrintTable(table.get(), options);
+  err.clear();
+
+  io::FileInputStream input(file_path);
+  if (input.HadError()) {
+    context->GetDiagnostics()->Error(DiagMessage(file_path)
+                                     << "failed to open file: " << input.GetError());
+    return false;
   }
 
+  // Try as a compiled file.
+  ContainerReader reader(&input);
+  if (reader.HadError()) {
+    context->GetDiagnostics()->Error(DiagMessage(file_path)
+                                     << "failed to read container: " << reader.GetError());
+    return false;
+  }
+
+  printer.Println("AAPT2 Container (APC)");
+  ContainerReaderEntry* entry;
+  while ((entry = reader.Next()) != nullptr) {
+    if (entry->Type() == ContainerEntryType::kResTable) {
+      printer.Println("kResTable");
+
+      pb::ResourceTable pb_table;
+      if (!entry->GetResTable(&pb_table)) {
+        context->GetDiagnostics()->Error(DiagMessage(file_path)
+                                         << "failed to parse proto table: " << entry->GetError());
+        continue;
+      }
+
+      ResourceTable table;
+      err.clear();
+      if (!DeserializeTableFromPb(pb_table, nullptr /*files*/, &table, &err)) {
+        context->GetDiagnostics()->Error(DiagMessage(file_path)
+                                         << "failed to parse table: " << err);
+        continue;
+      }
+
+      printer.Indent();
+      Debug::PrintTable(table, options.print_options, &printer);
+      printer.Undent();
+    } else if (entry->Type() == ContainerEntryType::kResFile) {
+      printer.Println("kResFile");
+      pb::internal::CompiledFile pb_compiled_file;
+      off64_t offset;
+      size_t length;
+      if (!entry->GetResFileOffsets(&pb_compiled_file, &offset, &length)) {
+        context->GetDiagnostics()->Error(
+            DiagMessage(file_path) << "failed to parse compiled proto file: " << entry->GetError());
+        continue;
+      }
+
+      ResourceFile file;
+      std::string error;
+      if (!DeserializeCompiledFileFromPb(pb_compiled_file, &file, &error)) {
+        context->GetDiagnostics()->Warn(DiagMessage(file_path)
+                                        << "failed to parse compiled file: " << error);
+        continue;
+      }
+
+      printer.Indent();
+      DumpCompiledFile(file, Source(file_path), offset, length, &printer);
+      printer.Undent();
+    }
+  }
   return true;
 }
+
+namespace {
 
 class DumpContext : public IAaptContext {
  public:
@@ -159,7 +268,7 @@ class DumpContext : public IAaptContext {
   }
 
   NameMangler* GetNameMangler() override {
-    abort();
+    UNIMPLEMENTED(FATAL);
     return nullptr;
   }
 
@@ -173,7 +282,7 @@ class DumpContext : public IAaptContext {
   }
 
   SymbolTable* GetExternalSymbols() override {
-    abort();
+    UNIMPLEMENTED(FATAL);
     return nullptr;
   }
 
@@ -194,12 +303,20 @@ class DumpContext : public IAaptContext {
   bool verbose_ = false;
 };
 
-/**
- * Entry point for dump command.
- */
+}  // namespace
+
+// Entry point for dump command.
 int Dump(const std::vector<StringPiece>& args) {
   bool verbose = false;
-  Flags flags = Flags().OptionalSwitch("-v", "increase verbosity of output", &verbose);
+  bool no_values = false;
+  DumpOptions options;
+  Flags flags = Flags()
+                    .OptionalSwitch("--no-values",
+                                    "Suppresses output of values when displaying resource tables.",
+                                    &no_values)
+                    .OptionalFlag("--file", "Dumps the specified file from the APK passed as arg.",
+                                  &options.file_to_dump_path)
+                    .OptionalSwitch("-v", "increase verbosity of output", &verbose);
   if (!flags.Parse("aapt2 dump", args, &std::cerr)) {
     return 1;
   }
@@ -207,12 +324,13 @@ int Dump(const std::vector<StringPiece>& args) {
   DumpContext context;
   context.SetVerbose(verbose);
 
+  options.print_options.show_sources = true;
+  options.print_options.show_values = !no_values;
   for (const std::string& arg : flags.GetArgs()) {
-    if (!TryDumpFile(&context, arg)) {
+    if (!TryDumpFile(&context, arg, options)) {
       return 1;
     }
   }
-
   return 0;
 }
 

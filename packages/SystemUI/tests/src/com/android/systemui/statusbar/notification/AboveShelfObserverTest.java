@@ -21,6 +21,8 @@ import static org.mockito.Mockito.verify;
 
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
 import android.widget.FrameLayout;
 
 import com.android.systemui.SysuiTestCase;
@@ -33,7 +35,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@RunWithLooper(setAsMainLooper = true)
 public class AboveShelfObserverTest extends SysuiTestCase {
 
     private AboveShelfObserver mObserver;

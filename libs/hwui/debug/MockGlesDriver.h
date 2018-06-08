@@ -27,10 +27,11 @@ namespace debug {
 class MockGlesDriver : public FatalBaseDriver {
 public:
     MOCK_METHOD2(glBindBuffer_, void(GLenum target, GLuint buffer));
-    MOCK_METHOD4(glBufferData_, void(GLenum target, GLsizeiptr size, const void *data, GLenum usage));
-    MOCK_METHOD2(glGenBuffers_, void(GLsizei n, GLuint *buffers));
+    MOCK_METHOD4(glBufferData_,
+                 void(GLenum target, GLsizeiptr size, const void* data, GLenum usage));
+    MOCK_METHOD2(glGenBuffers_, void(GLsizei n, GLuint* buffers));
 };
 
-} // namespace debug
-} // namespace uirenderer
-} // namespace android
+}  // namespace debug
+}  // namespace uirenderer
+}  // namespace android

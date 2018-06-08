@@ -32,7 +32,7 @@ public final class UsbACSelectorUnit extends UsbACInterface {
                                 // Input Pin of this Selector Unit is connected.
     private byte mNameIndex;    // Index of a string descriptor, describing the Selector Unit.
 
-    public UsbACSelectorUnit(int length, byte type, byte subtype, byte subClass) {
+    public UsbACSelectorUnit(int length, byte type, byte subtype, int subClass) {
         super(length, type, subtype, subClass);
     }
 

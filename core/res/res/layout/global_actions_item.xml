@@ -13,6 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<!-- Used with LegacyGlobalActions. -->
 
 <!-- RelativeLayouts have an issue enforcing minimum heights, so just
      work around this for now with LinearLayouts. -->

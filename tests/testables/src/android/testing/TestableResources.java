@@ -39,7 +39,8 @@ public class TestableResources {
     private final Resources mResources;
     private final SparseArray<Object> mOverrides = new SparseArray<>();
 
-    TestableResources(Resources realResources) {
+    /** Creates a TestableResources instance that calls through to the given real Resources. */
+    public TestableResources(Resources realResources) {
         mResources = mock(Resources.class, withSettings()
                 .spiedInstance(realResources)
                 .defaultAnswer(this::answer));

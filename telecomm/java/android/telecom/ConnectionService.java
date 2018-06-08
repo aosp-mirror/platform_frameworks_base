@@ -146,9 +146,9 @@ public abstract class ConnectionService extends Service {
     private static final String SESSION_UPDATE_RTT_PIPES = "CS.uRTT";
     private static final String SESSION_STOP_RTT = "CS.-RTT";
     private static final String SESSION_RTT_UPGRADE_RESPONSE = "CS.rTRUR";
-    private static final String SESSION_HANDOVER_FAILED = "CS.haF";
     private static final String SESSION_CONNECTION_SERVICE_FOCUS_LOST = "CS.cSFL";
     private static final String SESSION_CONNECTION_SERVICE_FOCUS_GAINED = "CS.cSFG";
+    private static final String SESSION_HANDOVER_FAILED = "CS.haF";
 
     private static final int MSG_ADD_CONNECTION_SERVICE_ADAPTER = 1;
     private static final int MSG_CREATE_CONNECTION = 2;
@@ -1541,7 +1541,7 @@ public abstract class ConnectionService extends Service {
         }
         connection.setTelecomCallId(callId);
         if (connection.getState() != Connection.STATE_DISCONNECTED) {
-            addConnection(callId, connection);
+            addConnection(request.getAccountHandle(), callId, connection);
         }
 
         Uri address = connection.getAddress();
@@ -2027,6 +2027,7 @@ public abstract class ConnectionService extends Service {
                     mAdapter.setIsConferenced(connectionId, id);
                 }
             }
+            onConferenceAdded(conference);
         }
     }
 
@@ -2360,6 +2361,30 @@ public abstract class ConnectionService extends Service {
     public void onConference(Connection connection1, Connection connection2) {}
 
     /**
+     * Called when a connection is added.
+     * @hide
+     */
+    public void onConnectionAdded(Connection connection) {}
+
+    /**
+     * Called when a connection is removed.
+     * @hide
+     */
+    public void onConnectionRemoved(Connection connection) {}
+
+    /**
+     * Called when a conference is added.
+     * @hide
+     */
+    public void onConferenceAdded(Conference conference) {}
+
+    /**
+     * Called when a conference is removed.
+     * @hide
+     */
+    public void onConferenceRemoved(Conference conference) {}
+
+    /**
      * Indicates that a remote conference has been created for existing {@link RemoteConnection}s.
      * When this method is invoked, this {@link ConnectionService} should create its own
      * representation of the conference call and send it to telecom using {@link #addConference}.
@@ -2440,16 +2465,18 @@ public abstract class ConnectionService extends Service {
             // prefix for a unique incremental call ID.
             id = handle.getComponentName().getClassName() + "@" + getNextCallId();
         }
-        addConnection(id, connection);
+        addConnection(handle, id, connection);
         return id;
     }
 
-    private void addConnection(String callId, Connection connection) {
+    private void addConnection(PhoneAccountHandle handle, String callId, Connection connection) {
         connection.setTelecomCallId(callId);
         mConnectionById.put(callId, connection);
         mIdByConnection.put(connection, callId);
         connection.addConnectionListener(mConnectionListener);
         connection.setConnectionService(this);
+        connection.setPhoneAccountHandle(handle);
+        onConnectionAdded(connection);
     }
 
     /** {@hide} */
@@ -2461,6 +2488,7 @@ public abstract class ConnectionService extends Service {
             mConnectionById.remove(id);
             mIdByConnection.remove(connection);
             mAdapter.removeCall(id);
+            onConnectionRemoved(connection);
         }
     }
 
@@ -2497,6 +2525,8 @@ public abstract class ConnectionService extends Service {
             mConferenceById.remove(id);
             mIdByConference.remove(conference);
             mAdapter.removeCall(id);
+
+            onConferenceRemoved(conference);
         }
     }
 

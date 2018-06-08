@@ -22,12 +22,8 @@ namespace android {
 namespace uirenderer {
 
 static const char* JANK_TYPE_NAMES[] = {
-        "Missed Vsync",
-        "High input latency",
-        "Slow UI thread",
-        "Slow bitmap uploads",
-        "Slow issue draw commands",
-};
+        "Missed Vsync",        "High input latency",       "Slow UI thread",
+        "Slow bitmap uploads", "Slow issue draw commands", "Frame deadline missed"};
 
 // The bucketing algorithm controls so to speak
 // If a frame is <= to this it goes in bucket 0
@@ -54,10 +50,8 @@ static uint32_t frameCountIndexForFrameTime(nsecs_t frameTime) {
     // index = threshold + (amountAboveThreshold / 2)
     // However if index is <= this will do nothing. It will underflow, do
     // a right shift by 0 (no-op), then overflow back to the original value
-    index = ((index - kBucket4msIntervals) >> (index > kBucket4msIntervals))
-            + kBucket4msIntervals;
-    index = ((index - kBucket2msIntervals) >> (index > kBucket2msIntervals))
-            + kBucket2msIntervals;
+    index = ((index - kBucket4msIntervals) >> (index > kBucket4msIntervals)) + kBucket4msIntervals;
+    index = ((index - kBucket2msIntervals) >> (index > kBucket2msIntervals)) + kBucket2msIntervals;
     // If index was < minThreshold at the start of all this it's going to
     // be a pretty garbage value right now. However, mask is 0 so we'll end
     // up with the desired result of 0.
@@ -101,8 +95,7 @@ void ProfileData::mergeWith(const ProfileData& other) {
     mJankFrameCount += other.mJankFrameCount;
     mTotalFrameCount >>= divider;
     mTotalFrameCount += other.mTotalFrameCount;
-    if (mStatStartTime > other.mStatStartTime
-            || mStatStartTime == 0) {
+    if (mStatStartTime > other.mStatStartTime || mStatStartTime == 0) {
         mStatStartTime = other.mStatStartTime;
     }
 }
@@ -111,7 +104,8 @@ void ProfileData::dump(int fd) const {
     dprintf(fd, "\nStats since: %" PRIu64 "ns", mStatStartTime);
     dprintf(fd, "\nTotal frames rendered: %u", mTotalFrameCount);
     dprintf(fd, "\nJanky frames: %u (%.2f%%)", mJankFrameCount,
-            (float) mJankFrameCount / (float) mTotalFrameCount * 100.0f);
+            mTotalFrameCount == 0 ? 0.0f :
+                (float)mJankFrameCount / (float)mTotalFrameCount * 100.0f);
     dprintf(fd, "\n50th percentile: %ums", findPercentile(50));
     dprintf(fd, "\n90th percentile: %ums", findPercentile(90));
     dprintf(fd, "\n95th percentile: %ums", findPercentile(95));

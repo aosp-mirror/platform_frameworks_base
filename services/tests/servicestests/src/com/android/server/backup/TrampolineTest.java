@@ -83,7 +83,6 @@ public class TrampolineTest {
     private final int NON_USER_SYSTEM = UserHandle.USER_SYSTEM + 1;
 
     @Mock private BackupManagerService mBackupManagerServiceMock;
-    @Mock private RefactoredBackupManagerService mRefactoredBackupManagerServiceMock;
     @Mock private Context mContextMock;
     @Mock private File mSuppressFileMock;
     @Mock private File mSuppressFileParentMock;
@@ -102,12 +101,9 @@ public class TrampolineTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        TrampolineTestable.sRefactoredBackupManagerServiceMock =
-                mRefactoredBackupManagerServiceMock;
         TrampolineTestable.sBackupManagerServiceMock = mBackupManagerServiceMock;
         TrampolineTestable.sSuppressFile = mSuppressFileMock;
         TrampolineTestable.sCallingUid = Process.SYSTEM_UID;
-        TrampolineTestable.sRefactoredServiceEnabled = false;
         TrampolineTestable.sBackupDisabled = false;
 
         when(mSuppressFileMock.getParentFile()).thenReturn(mSuppressFileParentMock);
@@ -160,20 +156,6 @@ public class TrampolineTest {
     @Test
     public void isBackupServiceActive_calledBeforeInitialize_returnsFalse() {
         assertFalse(mTrampoline.isBackupServiceActive(UserHandle.USER_SYSTEM));
-    }
-
-    @Test
-    public void createService_refactoredServiceEnabled() {
-        TrampolineTestable.sRefactoredServiceEnabled = true;
-
-        assertEquals(mRefactoredBackupManagerServiceMock, mTrampoline.createService());
-    }
-
-    @Test
-    public void createService_refactoredServiceDisabled() {
-        TrampolineTestable.sRefactoredServiceEnabled = false;
-
-        assertEquals(mBackupManagerServiceMock, mTrampoline.createService());
     }
 
     @Test
@@ -559,6 +541,24 @@ public class TrampolineTest {
     }
 
     @Test
+    public void describeTransport_calledBeforeInitialize_ignored() throws RemoteException {
+        mTrampoline.updateTransportAttributes(TRANSPORT_COMPONENT_NAME, TRANSPORT_NAME, null,
+                "Transport Destination", null, "Data Management");
+        verifyNoMoreInteractions(mBackupManagerServiceMock);
+    }
+
+    @Test
+    public void describeTransport_forwarded() throws RemoteException {
+        when(mBackupManagerServiceMock.getTransportWhitelist()).thenReturn(TRANSPORTS);
+
+        mTrampoline.initialize(UserHandle.USER_SYSTEM);
+        mTrampoline.updateTransportAttributes(TRANSPORT_COMPONENT_NAME, TRANSPORT_NAME, null,
+                "Transport Destination", null, "Data Management");
+        verify(mBackupManagerServiceMock).updateTransportAttributes(TRANSPORT_COMPONENT_NAME,
+                TRANSPORT_NAME, null, "Transport Destination", null, "Data Management");
+    }
+
+    @Test
     public void selectBackupTransport_calledBeforeInitialize_ignored() throws RemoteException {
         mTrampoline.selectBackupTransport(TRANSPORT_NAME);
         verifyNoMoreInteractions(mBackupManagerServiceMock);
@@ -861,21 +861,13 @@ public class TrampolineTest {
 
     private static class TrampolineTestable extends Trampoline {
         static boolean sBackupDisabled = false;
-        static boolean sRefactoredServiceEnabled = false;
         static File sSuppressFile = null;
         static int sCallingUid = -1;
         static BackupManagerService sBackupManagerServiceMock = null;
-        static RefactoredBackupManagerService sRefactoredBackupManagerServiceMock = null;
         private int mCreateServiceCallsCount = 0;
 
         TrampolineTestable(Context context) {
             super(context);
-        }
-
-        @Override
-        protected BackupManagerServiceInterface createService() {
-            mCreateServiceCallsCount++;
-            return super.createService();
         }
 
         @Override
@@ -894,17 +886,8 @@ public class TrampolineTest {
         }
 
         @Override
-        protected boolean isRefactoredServiceEnabled() {
-            return sRefactoredServiceEnabled;
-        }
-
-        @Override
-        protected BackupManagerServiceInterface createRefactoredBackupManagerService() {
-            return sRefactoredBackupManagerServiceMock;
-        }
-
-        @Override
         protected BackupManagerServiceInterface createBackupManagerService() {
+            mCreateServiceCallsCount++;
             return sBackupManagerServiceMock;
         }
 

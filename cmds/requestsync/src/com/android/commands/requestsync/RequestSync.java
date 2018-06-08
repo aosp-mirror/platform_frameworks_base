@@ -19,6 +19,7 @@ package com.android.commands.requestsync;
 
 import android.accounts.Account;
 import android.content.ContentResolver;
+import android.content.SyncRequest;
 import android.os.Bundle;
 
 import java.net.URISyntaxException;
@@ -29,11 +30,28 @@ public class RequestSync {
     private int mNextArg;
     private String mCurArgData;
 
+    private int mExemptionFlag = ContentResolver.SYNC_EXEMPTION_NONE;
+
     enum Operation {
         REQUEST_SYNC {
             @Override
             void invoke(RequestSync caller) {
-                ContentResolver.requestSync(caller.mAccount, caller.mAuthority, caller.mExtras);
+                final int flag = caller.mExemptionFlag;
+                caller.mExtras.putInt(ContentResolver.SYNC_VIRTUAL_EXTRAS_EXEMPTION_FLAG, flag);
+                if (flag == ContentResolver.SYNC_EXEMPTION_NONE) {
+                    System.out.println(
+                            "Making a sync request as a background app.\n"
+                            + "Note: request may be throttled by App Standby.\n"
+                            + "To override this behavior and run a sync immediately,"
+                            + " pass a -f or -F option (use -h for help).\n");
+                }
+                final SyncRequest request =
+                        new SyncRequest.Builder()
+                                .setSyncAdapter(caller.mAccount, caller.mAuthority)
+                                .setExtras(caller.mExtras)
+                                .syncOnce()
+                                .build();
+                ContentResolver.requestSync(request);
             }
         },
         ADD_PERIODIC_SYNC {
@@ -191,6 +209,13 @@ public class RequestSync {
                 final String key = nextArgRequired();
                 final String value = nextArgRequired();
                 mExtras.putBoolean(key, Boolean.valueOf(value));
+
+            } else if (opt.equals("-f") || opt.equals("--foreground")) {
+                mExemptionFlag = ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET;
+
+            } else if (opt.equals("-F") || opt.equals("--top")) {
+                mExemptionFlag = ContentResolver.SYNC_EXEMPTION_PROMOTE_BUCKET_WITH_TEMP;
+
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 showUsage();
@@ -267,6 +292,11 @@ public class RequestSync {
                 "       -n|--account-name <ACCOUNT-NAME>\n" +
                 "       -t|--account-type <ACCOUNT-TYPE>\n" +
                 "       -a|--authority <AUTHORITY>\n" +
+                "    App-standby related options\n" +
+                "\n" +
+                "       -f|--foreground (cause WORKING_SET, FREQUENT sync adapters" +
+                        " to run immediately)\n" +
+                "       -F|--top (cause even RARE sync adapters to run immediately)\n" +
                 "    ContentResolver extra options:\n" +
                 "      --is|--ignore-settings: Add SYNC_EXTRAS_IGNORE_SETTINGS\n" +
                 "      --ib|--ignore-backoff: Add SYNC_EXTRAS_IGNORE_BACKOFF\n" +

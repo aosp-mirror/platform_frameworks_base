@@ -32,7 +32,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-final class ContentProviderRecord {
+final class ContentProviderRecord implements ComponentName.WithComponentName {
     final ActivityManagerService service;
     public final ProviderInfo info;
     final int uid;
@@ -259,5 +259,9 @@ final class ContentProviderRecord {
                 }                        
             }
         }
+    }
+
+    public ComponentName getComponentName() {
+        return name;
     }
 }

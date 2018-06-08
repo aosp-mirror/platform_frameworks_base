@@ -21,7 +21,9 @@ import android.annotation.Nullable;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseIntArray;
 
+import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
@@ -187,11 +189,24 @@ public class Binder implements IBinder {
         try {
             if (binder instanceof BinderProxy) {
                 ((BinderProxy) binder).mWarnOnBlocking = false;
-            } else if (binder != null
+            } else if (binder != null && binder.getInterfaceDescriptor() != null
                     && binder.queryLocalInterface(binder.getInterfaceDescriptor()) == null) {
                 Log.w(TAG, "Unable to allow blocking on interface " + binder);
             }
         } catch (RemoteException ignored) {
+        }
+        return binder;
+    }
+
+    /**
+     * Reset the given interface back to the default blocking behavior,
+     * reverting any changes made by {@link #allowBlocking(IBinder)}.
+     *
+     * @hide
+     */
+    public static IBinder defaultBlocking(IBinder binder) {
+        if (binder instanceof BinderProxy) {
+            ((BinderProxy) binder).mWarnOnBlocking = sWarnOnBlocking;
         }
         return binder;
     }
@@ -289,7 +304,7 @@ public class Binder implements IBinder {
         long callingIdentity = clearCallingIdentity();
         Throwable throwableToPropagate = null;
         try {
-            action.run();
+            action.runOrThrow();
         } catch (Throwable throwable) {
             throwableToPropagate = throwable;
         } finally {
@@ -313,7 +328,7 @@ public class Binder implements IBinder {
         long callingIdentity = clearCallingIdentity();
         Throwable throwableToPropagate = null;
         try {
-            return action.get();
+            return action.getOrThrow();
         } catch (Throwable throwable) {
             throwableToPropagate = throwable;
             return null; // overridden by throwing in finally block
@@ -440,7 +455,7 @@ public class Binder implements IBinder {
      * descriptor.
      */
     public @Nullable IInterface queryLocalInterface(@NonNull String descriptor) {
-        if (mDescriptor.equals(descriptor)) {
+        if (mDescriptor != null && mDescriptor.equals(descriptor)) {
             return mOwner;
         }
         return null;
@@ -698,6 +713,8 @@ public class Binder implements IBinder {
     // Entry point from android_util_Binder.cpp's onTransact
     private boolean execTransact(int code, long dataObj, long replyObj,
             int flags) {
+        BinderCallsStats binderCallsStats = BinderCallsStats.getInstance();
+        BinderCallsStats.CallSession callSession = binderCallsStats.callStarted(this, code);
         Parcel data = Parcel.obtain(dataObj);
         Parcel reply = Parcel.obtain(replyObj);
         // theoretically, we should call transact, which will call onTransact,
@@ -742,6 +759,7 @@ public class Binder implements IBinder {
         // to the main transaction loop to wait for another incoming transaction.  Either
         // way, strict mode begone!
         StrictMode.clearGatheredViolations();
+        binderCallsStats.callEnded(callSession);
 
         return res;
     }
@@ -772,7 +790,7 @@ final class BinderProxy implements IBinder {
         private static final int MAIN_INDEX_SIZE = 1 <<  LOG_MAIN_INDEX_SIZE;
         private static final int MAIN_INDEX_MASK = MAIN_INDEX_SIZE - 1;
         // Debuggable builds will throw an AssertionError if the number of map entries exceeds:
-        private static final int CRASH_AT_SIZE = 5_000;
+        private static final int CRASH_AT_SIZE = 20_000;
 
         /**
          * We next warn when we exceed this bucket size.
@@ -924,6 +942,7 @@ final class BinderProxy implements IBinder {
                     final int totalUnclearedSize = unclearedSize();
                     if (totalUnclearedSize >= CRASH_AT_SIZE) {
                         dumpProxyInterfaceCounts();
+                        dumpPerUidProxyCounts();
                         Runtime.getRuntime().gc();
                         throw new AssertionError("Binder ProxyMap has too many entries: "
                                 + totalSize + " (total), " + totalUnclearedSize + " (uncleared), "
@@ -977,6 +996,20 @@ final class BinderProxy implements IBinder {
             }
         }
 
+        /**
+         * Dump per uid binder proxy counts to the logcat.
+         */
+        private void dumpPerUidProxyCounts() {
+            SparseIntArray counts = BinderInternal.nGetBinderProxyPerUidCounts();
+            if (counts.size() == 0) return;
+            Log.d(Binder.TAG, "Per Uid Binder Proxy Counts:");
+            for (int i = 0; i < counts.size(); i++) {
+                final int uid = counts.keyAt(i);
+                final int binderCount = counts.valueAt(i);
+                Log.d(Binder.TAG, "UID : " + uid + "  count = " + binderCount);
+            }
+        }
+
         // Corresponding ArrayLists in the following two arrays always have the same size.
         // They contain no empty entries. However WeakReferences in the values ArrayLists
         // may have been cleared.
@@ -994,6 +1027,24 @@ final class BinderProxy implements IBinder {
     private static ProxyMap sProxyMap = new ProxyMap();
 
     /**
+      * Dump proxy debug information.
+      *
+      * Note: this method is not thread-safe; callers must serialize with other
+      * accesses to sProxyMap, in particular {@link #getInstance(long, long)}.
+      *
+      * @hide
+      */
+    private static void dumpProxyDebugInfo() {
+        if (Build.IS_DEBUGGABLE) {
+            sProxyMap.dumpProxyInterfaceCounts();
+            // Note that we don't call dumpPerUidProxyCounts(); this is because this
+            // method may be called as part of the uid limit being hit, and calling
+            // back into the UID tracking code would cause us to try to acquire a mutex
+            // that is held during that callback.
+        }
+    }
+
+    /**
      * Return a BinderProxy for IBinder.
      * This method is thread-hostile!  The (native) caller serializes getInstance() calls using
      * gProxyLock.
@@ -1001,22 +1052,33 @@ final class BinderProxy implements IBinder {
      * in use, then we return the same bp.
      *
      * @param nativeData C++ pointer to (possibly still empty) BinderProxyNativeData.
-     * Takes ownership of nativeData iff <result>.mNativeData == nativeData.  Caller will usually
-     * delete nativeData if that's not the case.
+     * Takes ownership of nativeData iff <result>.mNativeData == nativeData, or if
+     * we exit via an exception.  If neither applies, it's the callers responsibility to
+     * recycle nativeData.
      * @param iBinder C++ pointer to IBinder. Does not take ownership of referenced object.
      */
     private static BinderProxy getInstance(long nativeData, long iBinder) {
-        BinderProxy result = sProxyMap.get(iBinder);
-        if (result == null) {
+        BinderProxy result;
+        try {
+            result = sProxyMap.get(iBinder);
+            if (result != null) {
+                return result;
+            }
             result = new BinderProxy(nativeData);
-            sProxyMap.set(iBinder, result);
+        } catch (Throwable e) {
+            // We're throwing an exception (probably OOME); don't drop nativeData.
+            NativeAllocationRegistry.applyFreeFunction(NoImagePreloadHolder.sNativeFinalizer,
+                    nativeData);
+            throw e;
         }
+        NoImagePreloadHolder.sRegistry.registerNativeAllocation(result, nativeData);
+        // The registry now owns nativeData, even if registration threw an exception.
+        sProxyMap.set(iBinder, result);
         return result;
     }
 
     private BinderProxy(long nativeData) {
         mNativeData = nativeData;
-        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativeData);
     }
 
     /**
@@ -1030,8 +1092,9 @@ final class BinderProxy implements IBinder {
     // Use a Holder to allow static initialization of BinderProxy in the boot image, and
     // to avoid some initialization ordering issues.
     private static class NoImagePreloadHolder {
+        public static final long sNativeFinalizer = getNativeFinalizer();
         public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-                BinderProxy.class.getClassLoader(), getNativeFinalizer(), NATIVE_ALLOCATION_SIZE);
+                BinderProxy.class.getClassLoader(), sNativeFinalizer, NATIVE_ALLOCATION_SIZE);
     }
 
     public native boolean pingBinder();

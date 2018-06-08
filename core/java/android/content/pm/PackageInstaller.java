@@ -81,6 +81,9 @@ import java.util.List;
  * <li>All APKs must have unique split names.
  * <li>All installations must contain a single base APK.
  * </ul>
+ * <p>
+ * The ApiDemos project contains examples of using this API:
+ * <code>ApiDemos/src/com/example/android/apis/content/InstallApk*.java</code>.
  */
 public class PackageInstaller {
     private static final String TAG = "PackageInstaller";
@@ -321,7 +324,14 @@ public class PackageInstaller {
      */
     public int createSession(@NonNull SessionParams params) throws IOException {
         try {
-            return mInstaller.createSession(params, mInstallerPackageName, mUserId);
+            final String installerPackage;
+            if (params.installerPackageName == null) {
+                installerPackage = mInstallerPackageName;
+            } else {
+                installerPackage = params.installerPackageName;
+            }
+
+            return mInstaller.createSession(params, installerPackage, mUserId);
         } catch (RuntimeException e) {
             ExceptionUtils.maybeUnwrapIOException(e);
             throw e;
@@ -438,12 +448,21 @@ public class PackageInstaller {
 
     /**
      * Uninstall the given package, removing it completely from the device. This
-     * method is only available to the current "installer of record" for the
-     * package.
+     * method is available to:
+     * <ul>
+     * <li>the current "installer of record" for the package
+     * <li>the device owner
+     * <li>the affiliated profile owner
+     * </ul>
      *
      * @param packageName The package to uninstall.
      * @param statusReceiver Where to deliver the result.
+     *
+     * @see android.app.admin.DevicePolicyManager
      */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.DELETE_PACKAGES,
+            Manifest.permission.REQUEST_DELETE_PACKAGES})
     public void uninstall(@NonNull String packageName, @NonNull IntentSender statusReceiver) {
         uninstall(packageName, 0 /*flags*/, statusReceiver);
     }
@@ -467,15 +486,26 @@ public class PackageInstaller {
 
     /**
      * Uninstall the given package with a specific version code, removing it
-     * completely from the device. This method is only available to the current
-     * "installer of record" for the package. If the version code of the package
+     * completely from the device. If the version code of the package
      * does not match the one passed in the versioned package argument this
      * method is a no-op. Use {@link PackageManager#VERSION_CODE_HIGHEST} to
      * uninstall the latest version of the package.
+     * <p>
+     * This method is available to:
+     * <ul>
+     * <li>the current "installer of record" for the package
+     * <li>the device owner
+     * <li>the affiliated profile owner
+     * </ul>
      *
      * @param versionedPackage The versioned package to uninstall.
      * @param statusReceiver Where to deliver the result.
+     *
+     * @see android.app.admin.DevicePolicyManager
      */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.DELETE_PACKAGES,
+            Manifest.permission.REQUEST_DELETE_PACKAGES})
     public void uninstall(@NonNull VersionedPackage versionedPackage,
             @NonNull IntentSender statusReceiver) {
         uninstall(versionedPackage, 0 /*flags*/, statusReceiver);
@@ -813,7 +843,19 @@ public class PackageInstaller {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
 
+        /** {@hide} */
+        public void write(@NonNull String name, long offsetBytes, long lengthBytes,
+                @NonNull ParcelFileDescriptor fd) throws IOException {
+            try {
+                mSession.write(name, offsetBytes, lengthBytes, fd);
+            } catch (RuntimeException e) {
+                ExceptionUtils.maybeUnwrapIOException(e);
+                throw e;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         /**
@@ -913,9 +955,14 @@ public class PackageInstaller {
          * Once this method is called, the session is sealed and no additional
          * mutations may be performed on the session. If the device reboots
          * before the session has been finalized, you may commit the session again.
+         * <p>
+         * If the installer is the device owner or the affiliated profile owner, there will be no
+         * user intervention.
          *
          * @throws SecurityException if streams opened through
          *             {@link #openWrite(String, long, long)} are still open.
+         *
+         * @see android.app.admin.DevicePolicyManager
          */
         public void commit(@NonNull IntentSender statusReceiver) {
             try {
@@ -1072,6 +1119,8 @@ public class PackageInstaller {
         public String volumeUuid;
         /** {@hide} */
         public String[] grantedRuntimePermissions;
+        /** {@hide} */
+        public String installerPackageName;
 
         /**
          * Construct parameters for a new package install session.
@@ -1100,6 +1149,7 @@ public class PackageInstaller {
             abiOverride = source.readString();
             volumeUuid = source.readString();
             grantedRuntimePermissions = source.readStringArray();
+            installerPackageName = source.readString();
         }
 
         /**
@@ -1184,10 +1234,10 @@ public class PackageInstaller {
         }
 
         /**
-         * Sets the UID that initiated package installation. This is informational
+         * Sets the UID that initiated the package installation. This is informational
          * and may be used as a signal for anti-malware purposes.
          *
-         * @see PackageManager#EXTRA_VERIFICATION_INSTALLER_UID
+         * @see Intent#EXTRA_ORIGINATING_UID
          */
         public void setOriginatingUid(int originatingUid) {
             this.originatingUid = originatingUid;
@@ -1295,6 +1345,18 @@ public class PackageInstaller {
             }
         }
 
+        /**
+         * Set the installer package for the app.
+         *
+         * By default this is the app that created the {@link PackageInstaller} object.
+         *
+         * @param installerPackageName name of the installer package
+         * {@hide}
+         */
+        public void setInstallerPackageName(String installerPackageName) {
+            this.installerPackageName = installerPackageName;
+        }
+
         /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
@@ -1310,6 +1372,7 @@ public class PackageInstaller {
             pw.printPair("abiOverride", abiOverride);
             pw.printPair("volumeUuid", volumeUuid);
             pw.printPair("grantedRuntimePermissions", grantedRuntimePermissions);
+            pw.printPair("installerPackageName", installerPackageName);
             pw.println();
         }
 
@@ -1334,6 +1397,7 @@ public class PackageInstaller {
             dest.writeString(abiOverride);
             dest.writeString(volumeUuid);
             dest.writeStringArray(grantedRuntimePermissions);
+            dest.writeString(installerPackageName);
         }
 
         public static final Parcelable.Creator<SessionParams>

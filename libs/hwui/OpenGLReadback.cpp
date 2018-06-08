@@ -17,30 +17,29 @@
 #include "OpenGLReadback.h"
 
 #include "Caches.h"
-#include "Image.h"
-#include "GlopBuilder.h"
 #include "GlLayer.h"
+#include "GlopBuilder.h"
+#include "Image.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/EglManager.h"
 #include "utils/GLUtils.h"
 
 #include <GLES2/gl2.h>
+#include <gui/Surface.h>
 #include <ui/Fence.h>
 #include <ui/GraphicBuffer.h>
-#include <gui/Surface.h>
 
 namespace android {
 namespace uirenderer {
 
 CopyResult OpenGLReadback::copySurfaceInto(Surface& surface, const Rect& srcRect,
-        SkBitmap* bitmap) {
+                                           SkBitmap* bitmap) {
     ATRACE_CALL();
     // Setup the source
     sp<GraphicBuffer> sourceBuffer;
     sp<Fence> sourceFence;
     Matrix4 texTransform;
-    status_t err = surface.getLastQueuedBuffer(&sourceBuffer, &sourceFence,
-            texTransform.data);
+    status_t err = surface.getLastQueuedBuffer(&sourceBuffer, &sourceFence, texTransform.data);
     texTransform.invalidateType();
     if (err != NO_ERROR) {
         ALOGW("Failed to get last queued buffer, error = %d", err);
@@ -64,7 +63,8 @@ CopyResult OpenGLReadback::copySurfaceInto(Surface& surface, const Rect& srcRect
 }
 
 CopyResult OpenGLReadback::copyGraphicBufferInto(GraphicBuffer* graphicBuffer,
-        Matrix4& texTransform, const Rect& srcRect, SkBitmap* bitmap) {
+                                                 Matrix4& texTransform, const Rect& srcRect,
+                                                 SkBitmap* bitmap) {
     mRenderThread.eglManager().initialize();
     // TODO: Can't use Image helper since it forces GL_TEXTURE_2D usage via
     // GL_OES_EGL_image, which doesn't work since we need samplerExternalOES
@@ -72,11 +72,11 @@ CopyResult OpenGLReadback::copyGraphicBufferInto(GraphicBuffer* graphicBuffer,
 
     // Create the EGLImage object that maps the GraphicBuffer
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    EGLClientBuffer clientBuffer = (EGLClientBuffer) graphicBuffer->getNativeBuffer();
-    EGLint attrs[] = { EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE };
+    EGLClientBuffer clientBuffer = (EGLClientBuffer)graphicBuffer->getNativeBuffer();
+    EGLint attrs[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE};
 
-    EGLImageKHR sourceImage = eglCreateImageKHR(display, EGL_NO_CONTEXT,
-            EGL_NATIVE_BUFFER_ANDROID, clientBuffer, attrs);
+    EGLImageKHR sourceImage = eglCreateImageKHR(display, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID,
+                                                clientBuffer, attrs);
 
     if (sourceImage == EGL_NO_IMAGE_KHR) {
         ALOGW("eglCreateImageKHR failed (%#x)", eglGetError());
@@ -85,8 +85,8 @@ CopyResult OpenGLReadback::copyGraphicBufferInto(GraphicBuffer* graphicBuffer,
 
     uint32_t width = graphicBuffer->getWidth();
     uint32_t height = graphicBuffer->getHeight();
-    CopyResult copyResult = copyImageInto(sourceImage, texTransform, width, height,
-            srcRect, bitmap);
+    CopyResult copyResult =
+            copyImageInto(sourceImage, texTransform, width, height, srcRect, bitmap);
 
     // All we're flushing & finishing is the deletion of the texture since
     // copyImageInto already did a major flush & finish as an implicit
@@ -105,10 +105,7 @@ CopyResult OpenGLReadback::copyGraphicBufferInto(GraphicBuffer* graphicBuffer, S
 }
 
 static float sFlipVInit[16] = {
-    1, 0, 0, 0,
-    0, -1, 0, 0,
-    0, 0, 1, 0,
-    0, 1, 0, 1,
+        1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1,
 };
 
 static const Matrix4 sFlipV(sFlipVInit);
@@ -116,19 +113,19 @@ static const Matrix4 sFlipV(sFlipVInit);
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
-        Texture& sourceTexture, const Matrix4& texTransform, const Rect& srcRect,
-        SkBitmap* bitmap) {
+inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState, Texture& sourceTexture,
+                                  const Matrix4& texTransform, const Rect& srcRect,
+                                  SkBitmap* bitmap) {
     int destWidth = bitmap->width();
     int destHeight = bitmap->height();
-    if (destWidth > caches.maxTextureSize
-                || destHeight > caches.maxTextureSize) {
-        ALOGW("Can't copy surface into bitmap, %dx%d exceeds max texture size %d",
-                destWidth, destHeight, caches.maxTextureSize);
+    if (destWidth > caches.maxTextureSize || destHeight > caches.maxTextureSize) {
+        ALOGW("Can't copy surface into bitmap, %dx%d exceeds max texture size %d", destWidth,
+              destHeight, caches.maxTextureSize);
         return CopyResult::DestinationInvalid;
     }
 
-    if (bitmap->colorType() == kRGBA_F16_SkColorType && !caches.extensions().hasFloatTextures()) {
+    if (bitmap->colorType() == kRGBA_F16_SkColorType &&
+        !caches.extensions().hasRenderableFloatTextures()) {
         ALOGW("Can't copy surface into bitmap, RGBA_F16 config is not supported");
         return CopyResult::DestinationInvalid;
     }
@@ -188,10 +185,8 @@ inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, destWidth, destHeight,
-            0, format, type, nullptr);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-            GL_TEXTURE_2D, texture, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, destWidth, destHeight, 0, format, type, nullptr);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
 
     {
         bool requiresFilter;
@@ -208,15 +203,15 @@ inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
             // GLES coordinates.
             croppedTexTransform.multiply(sFlipV);
             croppedTexTransform.translate(srcRect.left / sourceTexture.width(),
-                    srcRect.top / sourceTexture.height(), 0);
+                                          srcRect.top / sourceTexture.height(), 0);
             croppedTexTransform.scale(srcRect.getWidth() / sourceTexture.width(),
-                    srcRect.getHeight() / sourceTexture.height(), 1);
+                                      srcRect.getHeight() / sourceTexture.height(), 1);
             croppedTexTransform.multiply(sFlipV);
-            requiresFilter = srcRect.getWidth() != (float) destWidth
-                    || srcRect.getHeight() != (float) destHeight;
+            requiresFilter = srcRect.getWidth() != (float)destWidth ||
+                             srcRect.getHeight() != (float)destHeight;
         } else {
-            requiresFilter = sourceTexture.width() != (uint32_t) destWidth
-                    || sourceTexture.height() != (uint32_t) destHeight;
+            requiresFilter = sourceTexture.width() != (uint32_t)destWidth ||
+                             sourceTexture.height() != (uint32_t)destHeight;
         }
         Glop glop;
         GlopBuilder(renderState, caches, &glop)
@@ -231,8 +226,7 @@ inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
         renderState.render(glop, ortho, false);
 
         // TODO: We should convert to linear space when the target is RGBA16F
-        glReadPixels(0, 0, bitmap->width(), bitmap->height(), format,
-                type, bitmap->getPixels());
+        glReadPixels(0, 0, bitmap->width(), bitmap->height(), format, type, bitmap->getPixels());
         bitmap->notifyPixelsChanged();
     }
 
@@ -245,10 +239,9 @@ inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
     return CopyResult::Success;
 }
 
-CopyResult OpenGLReadbackImpl::copyImageInto(EGLImageKHR eglImage,
-        const Matrix4& imgTransform, int imgWidth, int imgHeight, const Rect& srcRect,
-        SkBitmap* bitmap) {
-
+CopyResult OpenGLReadbackImpl::copyImageInto(EGLImageKHR eglImage, const Matrix4& imgTransform,
+                                             int imgWidth, int imgHeight, const Rect& srcRect,
+                                             SkBitmap* bitmap) {
     // If this is a 90 or 270 degree rotation we need to swap width/height
     // This is a fuzzy way of checking that.
     if (imgTransform[Matrix4::kSkewX] >= 0.5f || imgTransform[Matrix4::kSkewX] <= -0.5f) {
@@ -270,26 +263,25 @@ CopyResult OpenGLReadbackImpl::copyImageInto(EGLImageKHR eglImage,
 
     Texture sourceTexture(caches);
     sourceTexture.wrap(sourceTexId, imgWidth, imgHeight, 0, 0 /* total lie */,
-            GL_TEXTURE_EXTERNAL_OES);
+                       GL_TEXTURE_EXTERNAL_OES);
 
-    CopyResult copyResult = copyTextureInto(caches, mRenderThread.renderState(),
-            sourceTexture, imgTransform, srcRect, bitmap);
+    CopyResult copyResult = copyTextureInto(caches, mRenderThread.renderState(), sourceTexture,
+                                            imgTransform, srcRect, bitmap);
     sourceTexture.deleteTexture();
     return copyResult;
 }
 
-bool OpenGLReadbackImpl::copyLayerInto(renderthread::RenderThread& renderThread,
-        GlLayer& layer, SkBitmap* bitmap) {
+bool OpenGLReadbackImpl::copyLayerInto(renderthread::RenderThread& renderThread, GlLayer& layer,
+                                       SkBitmap* bitmap) {
     if (!layer.isRenderable()) {
         // layer has never been updated by DeferredLayerUpdater, abort copy
         return false;
     }
 
-    return CopyResult::Success == copyTextureInto(Caches::getInstance(),
-            renderThread.renderState(), layer.getTexture(), layer.getTexTransform(),
-            Rect(), bitmap);
+    return CopyResult::Success == copyTextureInto(Caches::getInstance(), renderThread.renderState(),
+                                                  layer.getTexture(), layer.getTexTransform(),
+                                                  Rect(), bitmap);
 }
 
-
-} // namespace uirenderer
-} // namespace android
+}  // namespace uirenderer
+}  // namespace android

@@ -256,7 +256,7 @@ public class MenuPopupHelper implements MenuHelper {
             final int hgrav = Gravity.getAbsoluteGravity(mDropDownGravity,
                     mAnchorView.getLayoutDirection()) & Gravity.HORIZONTAL_GRAVITY_MASK;
             if (hgrav == Gravity.RIGHT) {
-                xOffset += mAnchorView.getWidth();
+                xOffset -= mAnchorView.getWidth();
             }
 
             popup.setHorizontalOffset(xOffset);

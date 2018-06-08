@@ -1990,28 +1990,15 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
 
         @Override
         public boolean onKeyPreIme(int keyCode, KeyEvent event) {
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
-                // special case for the back key, we do not even try to send it
-                // to the drop down list but instead, consume it immediately
-                if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
-                    KeyEvent.DispatcherState state = getKeyDispatcherState();
-                    if (state != null) {
-                        state.startTracking(event, this);
-                    }
-                    return true;
-                } else if (event.getAction() == KeyEvent.ACTION_UP) {
-                    KeyEvent.DispatcherState state = getKeyDispatcherState();
-                    if (state != null) {
-                        state.handleUpEvent(event);
-                    }
-                    if (event.isTracking() && !event.isCanceled()) {
-                        mSearchView.clearFocus();
-                        setImeVisibility(false);
-                        return true;
-                    }
-                }
+            final boolean consume = super.onKeyPreIme(keyCode, event);
+            if (consume && keyCode == KeyEvent.KEYCODE_BACK
+                    && event.getAction() == KeyEvent.ACTION_UP) {
+                // If AutoCompleteTextView closed its pop-up, it will return true, in which case
+                // we should also close the IME. Otherwise, the popup is already closed and we can
+                // leave the BACK event alone.
+                setImeVisibility(false);
             }
-            return super.onKeyPreIme(keyCode, event);
+            return consume;
         }
 
         /**

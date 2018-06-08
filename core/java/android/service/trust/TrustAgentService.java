@@ -18,6 +18,7 @@ package android.service.trust;
 
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.app.Service;
@@ -37,6 +38,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 import android.util.Slog;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
@@ -114,11 +116,10 @@ public class TrustAgentService extends Service {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true,
-            value = {
-                    FLAG_GRANT_TRUST_INITIATED_BY_USER,
-                    FLAG_GRANT_TRUST_DISMISS_KEYGUARD,
-            })
+    @IntDef(flag = true, prefix = { "FLAG_GRANT_TRUST_" }, value = {
+            FLAG_GRANT_TRUST_INITIATED_BY_USER,
+            FLAG_GRANT_TRUST_DISMISS_KEYGUARD,
+    })
     public @interface GrantTrustFlags {}
 
 
@@ -138,11 +139,10 @@ public class TrustAgentService extends Service {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true,
-            value = {
-                TOKEN_STATE_ACTIVE,
-                TOKEN_STATE_INACTIVE,
-            })
+    @IntDef(flag = true, prefix = { "TOKEN_STATE_" }, value = {
+            TOKEN_STATE_ACTIVE,
+            TOKEN_STATE_INACTIVE,
+    })
     public @interface TokenState {}
 
     private static final int MSG_UNLOCK_ATTEMPT = 1;
@@ -303,7 +303,7 @@ public class TrustAgentService extends Service {
     public void onDeviceUnlockLockout(long timeoutMs) {
     }
 
-  /**
+    /**
      * Called when an escrow token is added for user userId.
      *
      * @param token the added token
@@ -545,7 +545,7 @@ public class TrustAgentService extends Service {
      */
     public final void unlockUserWithToken(long handle, byte[] token, UserHandle user) {
         UserManager um = (UserManager) getSystemService(Context.USER_SERVICE);
-        if (um.isUserUnlocked()) {
+        if (um.isUserUnlocked(user)) {
             Slog.i(TAG, "User already unlocked");
             return;
         }
@@ -559,6 +559,31 @@ public class TrustAgentService extends Service {
                 mCallback.unlockUserWithToken(handle, token, user.getIdentifier());
             } catch (RemoteException e) {
                 onError("calling unlockUserWithToken");
+            }
+        }
+    }
+
+    /**
+     * Request showing a transient error message on the keyguard.
+     * The message will be visible on the lock screen or always on display if possible but can be
+     * overridden by other keyguard events of higher priority - eg. fingerprint auth error.
+     * Other trust agents may override your message if posted simultaneously.
+     *
+     * @param message Message to show.
+     */
+    public final void showKeyguardErrorMessage(@NonNull CharSequence message) {
+        if (message == null) {
+            throw new IllegalArgumentException("message cannot be null");
+        }
+        synchronized (mLock) {
+            if (mCallback == null) {
+                Slog.w(TAG, "Cannot show message because service is not connected to framework.");
+                throw new IllegalStateException("Trust agent is not connected");
+            }
+            try {
+                mCallback.showKeyguardErrorMessage(message);
+            } catch (RemoteException e) {
+                onError("calling showKeyguardErrorMessage");
             }
         }
     }

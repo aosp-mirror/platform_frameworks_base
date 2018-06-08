@@ -15,17 +15,26 @@
  */
 package android.hardware.location;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.Log;
+
+import com.android.internal.util.Preconditions;
+
+import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * A class that exposes the Context hubs on a device to applications.
@@ -38,7 +47,6 @@ import android.util.Log;
 @SystemApi
 @SystemService(Context.CONTEXTHUB_SERVICE)
 public final class ContextHubManager {
-
     private static final String TAG = "ContextHubManager";
 
     private final Looper mMainLooper;
@@ -54,7 +62,11 @@ public final class ContextHubManager {
 
     /**
      * An interface to receive asynchronous communication from the context hub.
+     *
+     * @deprecated Use the more refined {@link android.hardware.location.ContextHubClientCallback}
+     *             instead for notification callbacks.
      */
+    @Deprecated
     public abstract static class Callback {
         protected Callback() {}
 
@@ -70,7 +82,7 @@ public final class ContextHubManager {
         public abstract void onMessageReceipt(
                 int hubHandle,
                 int nanoAppHandle,
-                ContextHubMessage message);
+                @NonNull ContextHubMessage message);
     }
 
     /**
@@ -93,8 +105,13 @@ public final class ContextHubManager {
 
     /**
      * Get a handle to all the context hubs in the system
+     *
      * @return array of context hub handles
+     *
+     * @deprecated Use {@link #getContextHubs()} instead. The use of handles are deprecated in the
+     *             new APIs.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public int[] getContextHubHandles() {
         try {
@@ -111,7 +128,11 @@ public final class ContextHubManager {
      * @return ContextHubInfo Information about the requested context hub.
      *
      * @see ContextHubInfo
+     *
+     * @deprecated Use {@link #getContextHubs()} instead. The use of handles are deprecated in the
+     *             new APIs.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public ContextHubInfo getContextHubInfo(int hubHandle) {
         try {
@@ -139,9 +160,12 @@ public final class ContextHubManager {
      *         -1 otherwise
      *
      * @see NanoApp
+     *
+     * @deprecated Use {@link #loadNanoApp(ContextHubInfo, NanoAppBinary)} instead.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
-    public int loadNanoApp(int hubHandle, NanoApp app) {
+    public int loadNanoApp(int hubHandle, @NonNull NanoApp app) {
         try {
             return mService.loadNanoApp(hubHandle, app);
         } catch (RemoteException e) {
@@ -163,7 +187,10 @@ public final class ContextHubManager {
      *
      * @return 0 if the command for unloading was sent to the context hub;
      *         -1 otherwise
+     *
+     * @deprecated Use {@link #unloadNanoApp(ContextHubInfo, long)} instead.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public int unloadNanoApp(int nanoAppHandle) {
         try {
@@ -194,13 +221,18 @@ public final class ContextHubManager {
      * TODO(b/30943489): Have the returned NanoAppInstanceInfo contain the
      *     correct information.
      *
-     * @param nanoAppHandle handle of the nanoAppInstance
-     * @return NanoAppInstanceInfo Information about the nano app instance.
+     * @param nanoAppHandle handle of the nanoapp instance
+     * @return NanoAppInstanceInfo the NanoAppInstanceInfo of the nanoapp, or null if the nanoapp
+     *                             does not exist
      *
      * @see NanoAppInstanceInfo
+     *
+     * @deprecated Use {@link #queryNanoApps(ContextHubInfo)} instead to explicitly query the hub
+     *             for loaded nanoapps.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
-    public NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppHandle) {
+    @Nullable public NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppHandle) {
         try {
             return mService.getNanoAppInstanceInfo(nanoAppHandle);
         } catch (RemoteException e) {
@@ -217,9 +249,13 @@ public final class ContextHubManager {
      * @see NanoAppFilter
      *
      * @return int[] Array of handles to any found nano apps
+     *
+     * @deprecated Use {@link #queryNanoApps(ContextHubInfo)} instead to explicitly query the hub
+     *             for loaded nanoapps.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
-    public int[] findNanoAppOnHub(int hubHandle, NanoAppFilter filter) {
+    @NonNull public int[] findNanoAppOnHub(int hubHandle, @NonNull NanoAppFilter filter) {
         try {
             return mService.findNanoAppOnHub(hubHandle, filter);
         } catch (RemoteException e) {
@@ -245,14 +281,235 @@ public final class ContextHubManager {
      * @see ContextHubMessage
      *
      * @return int 0 on success, -1 otherwise
+     *
+     * @deprecated Use {@link android.hardware.location.ContextHubClient#sendMessageToNanoApp(
+     *             NanoAppMessage)} instead, after creating a
+     *             {@link android.hardware.location.ContextHubClient} with
+     *             {@link #createClient(ContextHubInfo, ContextHubClientCallback, Executor)}
+     *             or {@link #createClient(ContextHubInfo, ContextHubClientCallback)}.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
-    public int sendMessage(int hubHandle, int nanoAppHandle, ContextHubMessage message) {
+    public int sendMessage(int hubHandle, int nanoAppHandle, @NonNull ContextHubMessage message) {
         try {
             return mService.sendMessage(hubHandle, nanoAppHandle, message);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns the list of ContextHubInfo objects describing the available Context Hubs.
+     *
+     * @return the list of ContextHubInfo objects
+     *
+     * @see ContextHubInfo
+     */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
+    @NonNull public List<ContextHubInfo> getContextHubs() {
+        try {
+            return mService.getContextHubs();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Helper function to generate a stub for a non-query transaction callback.
+     *
+     * @param transaction the transaction to unblock when complete
+     *
+     * @return the callback
+     *
+     * @hide
+     */
+    private IContextHubTransactionCallback createTransactionCallback(
+            ContextHubTransaction<Void> transaction) {
+        return new IContextHubTransactionCallback.Stub() {
+            @Override
+            public void onQueryResponse(int result, List<NanoAppState> nanoappList) {
+                Log.e(TAG, "Received a query callback on a non-query request");
+                transaction.setResponse(new ContextHubTransaction.Response<Void>(
+                        ContextHubTransaction.RESULT_FAILED_SERVICE_INTERNAL_FAILURE, null));
+            }
+
+            @Override
+            public void onTransactionComplete(int result) {
+                transaction.setResponse(new ContextHubTransaction.Response<Void>(result, null));
+            }
+        };
+    }
+
+   /**
+    * Helper function to generate a stub for a query transaction callback.
+    *
+    * @param transaction the transaction to unblock when complete
+    *
+    * @return the callback
+    *
+    * @hide
+    */
+    private IContextHubTransactionCallback createQueryCallback(
+            ContextHubTransaction<List<NanoAppState>> transaction) {
+        return new IContextHubTransactionCallback.Stub() {
+            @Override
+            public void onQueryResponse(int result, List<NanoAppState> nanoappList) {
+                transaction.setResponse(new ContextHubTransaction.Response<List<NanoAppState>>(
+                        result, nanoappList));
+            }
+
+            @Override
+            public void onTransactionComplete(int result) {
+                Log.e(TAG, "Received a non-query callback on a query request");
+                transaction.setResponse(new ContextHubTransaction.Response<List<NanoAppState>>(
+                        ContextHubTransaction.RESULT_FAILED_SERVICE_INTERNAL_FAILURE, null));
+            }
+        };
+    }
+
+    /**
+     * Loads a nanoapp at the specified Context Hub.
+     *
+     * After the nanoapp binary is successfully loaded at the specified hub, the nanoapp will be in
+     * the enabled state.
+     *
+     * @param hubInfo the hub to load the nanoapp on
+     * @param appBinary The app binary to load
+     *
+     * @return the ContextHubTransaction of the request
+     *
+     * @throws NullPointerException if hubInfo or NanoAppBinary is null
+     *
+     * @see NanoAppBinary
+     */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
+    @NonNull public ContextHubTransaction<Void> loadNanoApp(
+            @NonNull ContextHubInfo hubInfo, @NonNull NanoAppBinary appBinary) {
+        Preconditions.checkNotNull(hubInfo, "ContextHubInfo cannot be null");
+        Preconditions.checkNotNull(appBinary, "NanoAppBinary cannot be null");
+
+        ContextHubTransaction<Void> transaction =
+                new ContextHubTransaction<>(ContextHubTransaction.TYPE_LOAD_NANOAPP);
+        IContextHubTransactionCallback callback = createTransactionCallback(transaction);
+
+        try {
+            mService.loadNanoAppOnHub(hubInfo.getId(), callback, appBinary);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        return transaction;
+    }
+
+    /**
+     * Unloads a nanoapp at the specified Context Hub.
+     *
+     * @param hubInfo the hub to unload the nanoapp from
+     * @param nanoAppId the app to unload
+     *
+     * @return the ContextHubTransaction of the request
+     *
+     * @throws NullPointerException if hubInfo is null
+     */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
+    @NonNull public ContextHubTransaction<Void> unloadNanoApp(
+            @NonNull ContextHubInfo hubInfo, long nanoAppId) {
+        Preconditions.checkNotNull(hubInfo, "ContextHubInfo cannot be null");
+
+        ContextHubTransaction<Void> transaction =
+                new ContextHubTransaction<>(ContextHubTransaction.TYPE_UNLOAD_NANOAPP);
+        IContextHubTransactionCallback callback = createTransactionCallback(transaction);
+
+        try {
+            mService.unloadNanoAppFromHub(hubInfo.getId(), callback, nanoAppId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        return transaction;
+    }
+
+    /**
+     * Enables a nanoapp at the specified Context Hub.
+     *
+     * @param hubInfo the hub to enable the nanoapp on
+     * @param nanoAppId the app to enable
+     *
+     * @return the ContextHubTransaction of the request
+     *
+     * @throws NullPointerException if hubInfo is null
+     */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
+    @NonNull public ContextHubTransaction<Void> enableNanoApp(
+            @NonNull ContextHubInfo hubInfo, long nanoAppId) {
+        Preconditions.checkNotNull(hubInfo, "ContextHubInfo cannot be null");
+
+        ContextHubTransaction<Void> transaction =
+                new ContextHubTransaction<>(ContextHubTransaction.TYPE_ENABLE_NANOAPP);
+        IContextHubTransactionCallback callback = createTransactionCallback(transaction);
+
+        try {
+            mService.enableNanoApp(hubInfo.getId(), callback, nanoAppId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        return transaction;
+    }
+
+    /**
+     * Disables a nanoapp at the specified Context Hub.
+     *
+     * @param hubInfo the hub to disable the nanoapp on
+     * @param nanoAppId the app to disable
+     *
+     * @return the ContextHubTransaction of the request
+     *
+     * @throws NullPointerException if hubInfo is null
+     */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
+    @NonNull public ContextHubTransaction<Void> disableNanoApp(
+            @NonNull ContextHubInfo hubInfo, long nanoAppId) {
+        Preconditions.checkNotNull(hubInfo, "ContextHubInfo cannot be null");
+
+        ContextHubTransaction<Void> transaction =
+                new ContextHubTransaction<>(ContextHubTransaction.TYPE_DISABLE_NANOAPP);
+        IContextHubTransactionCallback callback = createTransactionCallback(transaction);
+
+        try {
+            mService.disableNanoApp(hubInfo.getId(), callback, nanoAppId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        return transaction;
+    }
+
+    /**
+     * Requests a query for nanoapps loaded at the specified Context Hub.
+     *
+     * @param hubInfo the hub to query a list of nanoapps from
+     *
+     * @return the ContextHubTransaction of the request
+     *
+     * @throws NullPointerException if hubInfo is null
+     */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
+    @NonNull public ContextHubTransaction<List<NanoAppState>> queryNanoApps(
+            @NonNull ContextHubInfo hubInfo) {
+        Preconditions.checkNotNull(hubInfo, "ContextHubInfo cannot be null");
+
+        ContextHubTransaction<List<NanoAppState>> transaction =
+                new ContextHubTransaction<>(ContextHubTransaction.TYPE_QUERY_NANOAPPS);
+        IContextHubTransactionCallback callback = createQueryCallback(transaction);
+
+        try {
+            mService.queryNanoApps(hubInfo.getId(), callback);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        return transaction;
     }
 
     /**
@@ -263,9 +520,14 @@ public final class ContextHubManager {
      * @see Callback
      *
      * @return int 0 on success, -1 otherwise
+     *
+     * @deprecated Use {@link #createClient(ContextHubInfo, ContextHubClientCallback, Executor)}
+     *             or {@link #createClient(ContextHubInfo, ContextHubClientCallback)} instead to
+     *             register a {@link android.hardware.location.ContextHubClientCallback}.
      */
+    @Deprecated
     @SuppressLint("Doclava125")
-    public int registerCallback(Callback callback) {
+    public int registerCallback(@NonNull Callback callback) {
         return registerCallback(callback, null);
     }
 
@@ -292,7 +554,12 @@ public final class ContextHubManager {
      * @see Callback
      *
      * @return int 0 on success, -1 otherwise
+     *
+     * @deprecated Use {@link #createClient(ContextHubInfo, ContextHubClientCallback, Executor)}
+     *             or {@link #createClient(ContextHubInfo, ContextHubClientCallback)} instead to
+     *             register a {@link android.hardware.location.ContextHubClientCallback}.
      */
+    @Deprecated
     @SuppressLint("Doclava125")
     public int registerCallback(Callback callback, Handler handler) {
         synchronized(this) {
@@ -307,6 +574,114 @@ public final class ContextHubManager {
     }
 
     /**
+     * Creates an interface to the ContextHubClient to send down to the service.
+     *
+     * @param client the ContextHubClient object associated with this callback
+     * @param callback the callback to invoke at the client process
+     * @param executor the executor to invoke callbacks for this client
+     *
+     * @return the callback interface
+     */
+    private IContextHubClientCallback createClientCallback(
+            ContextHubClient client, ContextHubClientCallback callback, Executor executor) {
+        return new IContextHubClientCallback.Stub() {
+            @Override
+            public void onMessageFromNanoApp(NanoAppMessage message) {
+                executor.execute(() -> callback.onMessageFromNanoApp(client, message));
+            }
+
+            @Override
+            public void onHubReset() {
+                executor.execute(() -> callback.onHubReset(client));
+            }
+
+            @Override
+            public void onNanoAppAborted(long nanoAppId, int abortCode) {
+                executor.execute(() -> callback.onNanoAppAborted(client, nanoAppId, abortCode));
+            }
+
+            @Override
+            public void onNanoAppLoaded(long nanoAppId) {
+                executor.execute(() -> callback.onNanoAppLoaded(client, nanoAppId));
+            }
+
+            @Override
+            public void onNanoAppUnloaded(long nanoAppId) {
+                executor.execute(() -> callback.onNanoAppUnloaded(client, nanoAppId));
+            }
+
+            @Override
+            public void onNanoAppEnabled(long nanoAppId) {
+                executor.execute(() -> callback.onNanoAppEnabled(client, nanoAppId));
+            }
+
+            @Override
+            public void onNanoAppDisabled(long nanoAppId) {
+                executor.execute(() -> callback.onNanoAppDisabled(client, nanoAppId));
+            }
+        };
+    }
+
+    /**
+     * Creates and registers a client and its callback with the Context Hub Service.
+     *
+     * A client is registered with the Context Hub Service for a specified Context Hub. When the
+     * registration succeeds, the client can send messages to nanoapps through the returned
+     * {@link ContextHubClient} object, and receive notifications through the provided callback.
+     *
+     * @param hubInfo  the hub to attach this client to
+     * @param callback the notification callback to register
+     * @param executor the executor to invoke the callback
+     * @return the registered client object
+     *
+     * @throws IllegalArgumentException if hubInfo does not represent a valid hub
+     * @throws IllegalStateException    if there were too many registered clients at the service
+     * @throws NullPointerException     if callback, hubInfo, or executor is null
+     *
+     * @see ContextHubClientCallback
+     */
+    @NonNull public ContextHubClient createClient(
+            @NonNull ContextHubInfo hubInfo, @NonNull ContextHubClientCallback callback,
+            @NonNull @CallbackExecutor Executor executor) {
+        Preconditions.checkNotNull(callback, "Callback cannot be null");
+        Preconditions.checkNotNull(hubInfo, "ContextHubInfo cannot be null");
+        Preconditions.checkNotNull(executor, "Executor cannot be null");
+
+        ContextHubClient client = new ContextHubClient(hubInfo);
+        IContextHubClientCallback clientInterface = createClientCallback(
+                client, callback, executor);
+
+        IContextHubClient clientProxy;
+        try {
+            clientProxy = mService.createClient(clientInterface, hubInfo.getId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        client.setClientProxy(clientProxy);
+        return client;
+    }
+
+    /**
+     * Equivalent to {@link #createClient(ContextHubInfo, ContextHubClientCallback, Executor)}
+     * with the executor using the main thread's Looper.
+     *
+     * @param hubInfo  the hub to attach this client to
+     * @param callback the notification callback to register
+     * @return the registered client object
+     *
+     * @throws IllegalArgumentException if hubInfo does not represent a valid hub
+     * @throws IllegalStateException    if there were too many registered clients at the service
+     * @throws NullPointerException     if callback or hubInfo is null
+     *
+     * @see ContextHubClientCallback
+     */
+    @NonNull public ContextHubClient createClient(
+            @NonNull ContextHubInfo hubInfo, @NonNull ContextHubClientCallback callback) {
+        return createClient(hubInfo, callback, new HandlerExecutor(Handler.getMain()));
+    }
+
+    /**
      * Unregister a callback for receive messages from the context hub.
      *
      * @see Callback
@@ -314,9 +689,13 @@ public final class ContextHubManager {
      * @param callback method to deregister
      *
      * @return int 0 on success, -1 otherwise
+     *
+     * @deprecated Use {@link android.hardware.location.ContextHubClient#close()} to unregister
+     *             a {@link android.hardware.location.ContextHubClientCallback}.
      */
     @SuppressLint("Doclava125")
-    public int unregisterCallback(Callback callback) {
+    @Deprecated
+    public int unregisterCallback(@NonNull Callback callback) {
       synchronized(this) {
           if (callback != mCallback) {
               Log.w(TAG, "Cannot recognize callback!");
@@ -365,8 +744,6 @@ public final class ContextHubManager {
                 synchronized (this) {
                     mLocalCallback.onMessageReceipt(hubId, nanoAppId, message);
                 }
-            } else {
-                Log.d(TAG, "Context hub manager client callback is NULL");
             }
         }
     };
@@ -380,7 +757,7 @@ public final class ContextHubManager {
         try {
             mService.registerCallback(mClientCallback);
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not register callback:" + e);
+            throw e.rethrowFromSystemServer();
         }
     }
 }

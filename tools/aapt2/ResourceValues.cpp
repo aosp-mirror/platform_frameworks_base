@@ -17,9 +17,12 @@
 #include "ResourceValues.h"
 
 #include <algorithm>
+#include <cinttypes>
 #include <limits>
 #include <set>
+#include <sstream>
 
+#include "android-base/stringprintf.h"
 #include "androidfw/ResourceTypes.h"
 
 #include "Resource.h"
@@ -27,7 +30,17 @@
 #include "ValueVisitor.h"
 #include "util/Util.h"
 
+using ::aapt::text::Printer;
+using ::android::StringPiece;
+using ::android::base::StringPrintf;
+
 namespace aapt {
+
+void Value::PrettyPrint(Printer* printer) const {
+  std::ostringstream str_stream;
+  Print(&str_stream);
+  printer->Print(str_stream.str());
+}
 
 std::ostream& operator<<(std::ostream& out, const Value& value) {
   value.Print(&out);
@@ -35,13 +48,23 @@ std::ostream& operator<<(std::ostream& out, const Value& value) {
 }
 
 template <typename Derived>
-void BaseValue<Derived>::Accept(RawValueVisitor* visitor) {
+void BaseValue<Derived>::Accept(ValueVisitor* visitor) {
   visitor->Visit(static_cast<Derived*>(this));
 }
 
 template <typename Derived>
-void BaseItem<Derived>::Accept(RawValueVisitor* visitor) {
+void BaseValue<Derived>::Accept(ConstValueVisitor* visitor) const {
+  visitor->Visit(static_cast<const Derived*>(this));
+}
+
+template <typename Derived>
+void BaseItem<Derived>::Accept(ValueVisitor* visitor) {
   visitor->Visit(static_cast<Derived*>(this));
+}
+
+template <typename Derived>
+void BaseItem<Derived>::Accept(ConstValueVisitor* visitor) const {
+  visitor->Visit(static_cast<const Derived*>(this));
 }
 
 RawString::RawString(const StringPool::Ref& ref) : value(ref) {}
@@ -55,7 +78,7 @@ bool RawString::Equals(const Value* value) const {
 }
 
 RawString* RawString::Clone(StringPool* new_pool) const {
-  RawString* rs = new RawString(new_pool->MakeRef(*value));
+  RawString* rs = new RawString(new_pool->MakeRef(value));
   rs->comment_ = comment_;
   rs->source_ = source_;
   return rs;
@@ -94,8 +117,7 @@ bool Reference::Equals(const Value* value) const {
 
 bool Reference::Flatten(android::Res_value* out_value) const {
   const ResourceId resid = id.value_or_default(ResourceId(0));
-  const bool dynamic = resid.is_valid_dynamic() && resid.package_id() != kFrameworkPackageId &&
-                       resid.package_id() != kAppPackageId;
+  const bool dynamic = resid.is_valid_dynamic() && is_dynamic;
 
   if (reference_type == Reference::Type::kResource) {
     if (dynamic) {
@@ -145,6 +167,49 @@ void Reference::Print(std::ostream* out) const {
   }
 }
 
+static void PrettyPrintReferenceImpl(const Reference& ref, bool print_package, Printer* printer) {
+  switch (ref.reference_type) {
+    case Reference::Type::kResource:
+      printer->Print("@");
+      break;
+
+    case Reference::Type::kAttribute:
+      printer->Print("?");
+      break;
+  }
+
+  if (!ref.name && !ref.id) {
+    printer->Print("null");
+    return;
+  }
+
+  if (ref.private_reference) {
+    printer->Print("*");
+  }
+
+  if (ref.name) {
+    const ResourceName& name = ref.name.value();
+    if (print_package) {
+      printer->Print(name.to_string());
+    } else {
+      printer->Print(to_string(name.type));
+      printer->Print("/");
+      printer->Print(name.entry);
+    }
+  } else if (ref.id && ref.id.value().is_valid_dynamic()) {
+    printer->Print(ref.id.value().to_string());
+  }
+}
+
+void Reference::PrettyPrint(Printer* printer) const {
+  PrettyPrintReferenceImpl(*this, true /*print_package*/, printer);
+}
+
+void Reference::PrettyPrint(const StringPiece& package, Printer* printer) const {
+  const bool print_package = name ? package != name.value().package : true;
+  PrettyPrintReferenceImpl(*this, print_package, printer);
+}
+
 bool Id::Equals(const Value* value) const {
   return ValueCast<Id>(value) != nullptr;
 }
@@ -155,11 +220,16 @@ bool Id::Flatten(android::Res_value* out) const {
   return true;
 }
 
-Id* Id::Clone(StringPool* /*new_pool*/) const { return new Id(*this); }
+Id* Id::Clone(StringPool* /*new_pool*/) const {
+  return new Id(*this);
+}
 
-void Id::Print(std::ostream* out) const { *out << "(id)"; }
+void Id::Print(std::ostream* out) const {
+  *out << "(id)";
+}
 
-String::String(const StringPool::Ref& ref) : value(ref) {}
+String::String(const StringPool::Ref& ref) : value(ref) {
+}
 
 bool String::Equals(const Value* value) const {
   const String* other = ValueCast<String>(value);
@@ -197,7 +267,7 @@ bool String::Flatten(android::Res_value* out_value) const {
 }
 
 String* String::Clone(StringPool* new_pool) const {
-  String* str = new String(new_pool->MakeRef(*value));
+  String* str = new String(new_pool->MakeRef(value));
   str->comment_ = comment_;
   str->source_ = source_;
   str->untranslatable_sections = untranslatable_sections;
@@ -208,7 +278,14 @@ void String::Print(std::ostream* out) const {
   *out << "(string) \"" << *value << "\"";
 }
 
-StyledString::StyledString(const StringPool::StyleRef& ref) : value(ref) {}
+void String::PrettyPrint(Printer* printer) const {
+  printer->Print("\"");
+  printer->Print(*value);
+  printer->Print("\"");
+}
+
+StyledString::StyledString(const StringPool::StyleRef& ref) : value(ref) {
+}
 
 bool StyledString::Equals(const Value* value) const {
   const StyledString* other = ValueCast<StyledString>(value);
@@ -259,7 +336,8 @@ void StyledString::Print(std::ostream* out) const {
   }
 }
 
-FileReference::FileReference(const StringPool::Ref& _path) : path(_path) {}
+FileReference::FileReference(const StringPool::Ref& _path) : path(_path) {
+}
 
 bool FileReference::Equals(const Value* value) const {
   const FileReference* other = ValueCast<FileReference>(value);
@@ -280,8 +358,9 @@ bool FileReference::Flatten(android::Res_value* out_value) const {
 }
 
 FileReference* FileReference::Clone(StringPool* new_pool) const {
-  FileReference* fr = new FileReference(new_pool->MakeRef(*path));
+  FileReference* fr = new FileReference(new_pool->MakeRef(path));
   fr->file = file;
+  fr->type = type;
   fr->comment_ = comment_;
   fr->source_ = source_;
   return fr;
@@ -289,9 +368,23 @@ FileReference* FileReference::Clone(StringPool* new_pool) const {
 
 void FileReference::Print(std::ostream* out) const {
   *out << "(file) " << *path;
+  switch (type) {
+    case ResourceFile::Type::kBinaryXml:
+      *out << " type=XML";
+      break;
+    case ResourceFile::Type::kProtoXml:
+      *out << " type=protoXML";
+      break;
+    case ResourceFile::Type::kPng:
+      *out << " type=PNG";
+      break;
+    default:
+      break;
+  }
 }
 
-BinaryPrimitive::BinaryPrimitive(const android::Res_value& val) : value(val) {}
+BinaryPrimitive::BinaryPrimitive(const android::Res_value& val) : value(val) {
+}
 
 BinaryPrimitive::BinaryPrimitive(uint8_t dataType, uint32_t data) {
   value.dataType = dataType;
@@ -307,7 +400,7 @@ bool BinaryPrimitive::Equals(const Value* value) const {
          this->value.data == other->value.data;
 }
 
-bool BinaryPrimitive::Flatten(android::Res_value* out_value) const {
+bool BinaryPrimitive::Flatten(::android::Res_value* out_value) const {
   out_value->dataType = value.dataType;
   out_value->data = util::HostToDevice32(value.data);
   return true;
@@ -318,47 +411,118 @@ BinaryPrimitive* BinaryPrimitive::Clone(StringPool* /*new_pool*/) const {
 }
 
 void BinaryPrimitive::Print(std::ostream* out) const {
+  *out << StringPrintf("(primitive) type=0x%02x data=0x%08x", value.dataType, value.data);
+}
+
+static std::string ComplexToString(uint32_t complex_value, bool fraction) {
+  using ::android::Res_value;
+
+  constexpr std::array<int, 4> kRadixShifts = {{23, 16, 8, 0}};
+
+  // Determine the radix that was used.
+  const uint32_t radix =
+      (complex_value >> Res_value::COMPLEX_RADIX_SHIFT) & Res_value::COMPLEX_RADIX_MASK;
+  const uint64_t mantissa = uint64_t{(complex_value >> Res_value::COMPLEX_MANTISSA_SHIFT) &
+                                     Res_value::COMPLEX_MANTISSA_MASK}
+                            << kRadixShifts[radix];
+  const float value = mantissa * (1.0f / (1 << 23));
+
+  std::string str = StringPrintf("%f", value);
+
+  const int unit_type =
+      (complex_value >> Res_value::COMPLEX_UNIT_SHIFT) & Res_value::COMPLEX_UNIT_MASK;
+  if (fraction) {
+    switch (unit_type) {
+      case Res_value::COMPLEX_UNIT_FRACTION:
+        str += "%";
+        break;
+      case Res_value::COMPLEX_UNIT_FRACTION_PARENT:
+        str += "%p";
+        break;
+      default:
+        str += "???";
+        break;
+    }
+  } else {
+    switch (unit_type) {
+      case Res_value::COMPLEX_UNIT_PX:
+        str += "px";
+        break;
+      case Res_value::COMPLEX_UNIT_DIP:
+        str += "dp";
+        break;
+      case Res_value::COMPLEX_UNIT_SP:
+        str += "sp";
+        break;
+      case Res_value::COMPLEX_UNIT_PT:
+        str += "pt";
+        break;
+      case Res_value::COMPLEX_UNIT_IN:
+        str += "in";
+        break;
+      case Res_value::COMPLEX_UNIT_MM:
+        str += "mm";
+        break;
+      default:
+        str += "???";
+        break;
+    }
+  }
+  return str;
+}
+
+void BinaryPrimitive::PrettyPrint(Printer* printer) const {
+  using ::android::Res_value;
   switch (value.dataType) {
-    case android::Res_value::TYPE_NULL:
-      if (value.data == android::Res_value::DATA_NULL_EMPTY) {
-        *out << "(empty)";
+    case Res_value::TYPE_NULL:
+      if (value.data == Res_value::DATA_NULL_EMPTY) {
+        printer->Print("@empty");
       } else {
-        *out << "(null)";
+        printer->Print("@null");
       }
       break;
-    case android::Res_value::TYPE_INT_DEC:
-      *out << "(integer) " << static_cast<int32_t>(value.data);
+
+    case Res_value::TYPE_INT_DEC:
+      printer->Print(StringPrintf("%" PRIi32, static_cast<int32_t>(value.data)));
       break;
-    case android::Res_value::TYPE_INT_HEX:
-      *out << "(integer) 0x" << std::hex << value.data << std::dec;
+
+    case Res_value::TYPE_INT_HEX:
+      printer->Print(StringPrintf("0x%08x", value.data));
       break;
-    case android::Res_value::TYPE_INT_BOOLEAN:
-      *out << "(boolean) " << (value.data != 0 ? "true" : "false");
+
+    case Res_value::TYPE_INT_BOOLEAN:
+      printer->Print(value.data != 0 ? "true" : "false");
       break;
-    case android::Res_value::TYPE_INT_COLOR_ARGB8:
-    case android::Res_value::TYPE_INT_COLOR_RGB8:
-    case android::Res_value::TYPE_INT_COLOR_ARGB4:
-    case android::Res_value::TYPE_INT_COLOR_RGB4:
-      *out << "(color) #" << std::hex << value.data << std::dec;
+
+    case Res_value::TYPE_INT_COLOR_ARGB8:
+    case Res_value::TYPE_INT_COLOR_RGB8:
+    case Res_value::TYPE_INT_COLOR_ARGB4:
+    case Res_value::TYPE_INT_COLOR_RGB4:
+      printer->Print(StringPrintf("#%08x", value.data));
       break;
+
+    case Res_value::TYPE_FLOAT:
+      printer->Print(StringPrintf("%g", *reinterpret_cast<const float*>(&value.data)));
+      break;
+
+    case Res_value::TYPE_DIMENSION:
+      printer->Print(ComplexToString(value.data, false /*fraction*/));
+      break;
+
+    case Res_value::TYPE_FRACTION:
+      printer->Print(ComplexToString(value.data, true /*fraction*/));
+      break;
+
     default:
-      *out << "(unknown 0x" << std::hex << (int)value.dataType << ") 0x"
-           << std::hex << value.data << std::dec;
+      printer->Print(StringPrintf("(unknown 0x%02x) 0x%08x", value.dataType, value.data));
       break;
   }
 }
 
-Attribute::Attribute()
-    : type_mask(0u),
-      min_int(std::numeric_limits<int32_t>::min()),
-      max_int(std::numeric_limits<int32_t>::max()) {
-}
-
-Attribute::Attribute(bool w, uint32_t t)
+Attribute::Attribute(uint32_t t)
     : type_mask(t),
       min_int(std::numeric_limits<int32_t>::min()),
       max_int(std::numeric_limits<int32_t>::max()) {
-  weak_ = w;
 }
 
 std::ostream& operator<<(std::ostream& out, const Attribute::Symbol& s) {
@@ -409,111 +573,125 @@ bool Attribute::Equals(const Value* value) const {
                     });
 }
 
+bool Attribute::IsCompatibleWith(const Attribute& attr) const {
+  // If the high bits are set on any of these attribute type masks, then they are incompatible.
+  // We don't check that flags and enums are identical.
+  if ((type_mask & ~android::ResTable_map::TYPE_ANY) != 0 ||
+      (attr.type_mask & ~android::ResTable_map::TYPE_ANY) != 0) {
+    return false;
+  }
+
+  // Every attribute accepts a reference.
+  uint32_t this_type_mask = type_mask | android::ResTable_map::TYPE_REFERENCE;
+  uint32_t that_type_mask = attr.type_mask | android::ResTable_map::TYPE_REFERENCE;
+  return this_type_mask == that_type_mask;
+}
+
 Attribute* Attribute::Clone(StringPool* /*new_pool*/) const {
   return new Attribute(*this);
 }
 
-void Attribute::PrintMask(std::ostream* out) const {
+std::string Attribute::MaskString() const {
   if (type_mask == android::ResTable_map::TYPE_ANY) {
-    *out << "any";
-    return;
+    return "any";
   }
 
+  std::ostringstream out;
   bool set = false;
   if ((type_mask & android::ResTable_map::TYPE_REFERENCE) != 0) {
     if (!set) {
       set = true;
     } else {
-      *out << "|";
+      out << "|";
     }
-    *out << "reference";
+    out << "reference";
   }
 
   if ((type_mask & android::ResTable_map::TYPE_STRING) != 0) {
     if (!set) {
       set = true;
     } else {
-      *out << "|";
+      out << "|";
     }
-    *out << "string";
+    out << "string";
   }
 
   if ((type_mask & android::ResTable_map::TYPE_INTEGER) != 0) {
     if (!set) {
       set = true;
     } else {
-      *out << "|";
+      out << "|";
     }
-    *out << "integer";
+    out << "integer";
   }
 
   if ((type_mask & android::ResTable_map::TYPE_BOOLEAN) != 0) {
     if (!set) {
       set = true;
     } else {
-      *out << "|";
+      out << "|";
     }
-    *out << "boolean";
+    out << "boolean";
   }
 
   if ((type_mask & android::ResTable_map::TYPE_COLOR) != 0) {
     if (!set) {
       set = true;
     } else {
-      *out << "|";
+      out << "|";
     }
-    *out << "color";
+    out << "color";
   }
 
   if ((type_mask & android::ResTable_map::TYPE_FLOAT) != 0) {
     if (!set) {
       set = true;
     } else {
-      *out << "|";
+      out << "|";
     }
-    *out << "float";
+    out << "float";
   }
 
   if ((type_mask & android::ResTable_map::TYPE_DIMENSION) != 0) {
     if (!set) {
       set = true;
     } else {
-      *out << "|";
+      out << "|";
     }
-    *out << "dimension";
+    out << "dimension";
   }
 
   if ((type_mask & android::ResTable_map::TYPE_FRACTION) != 0) {
     if (!set) {
       set = true;
     } else {
-      *out << "|";
+      out << "|";
     }
-    *out << "fraction";
+    out << "fraction";
   }
 
   if ((type_mask & android::ResTable_map::TYPE_ENUM) != 0) {
     if (!set) {
       set = true;
     } else {
-      *out << "|";
+      out << "|";
     }
-    *out << "enum";
+    out << "enum";
   }
 
   if ((type_mask & android::ResTable_map::TYPE_FLAGS) != 0) {
     if (!set) {
       set = true;
     } else {
-      *out << "|";
+      out << "|";
     }
-    *out << "flags";
+    out << "flags";
   }
+  return out.str();
 }
 
 void Attribute::Print(std::ostream* out) const {
-  *out << "(attr) ";
-  PrintMask(out);
+  *out << "(attr) " << MaskString();
 
   if (!symbols.empty()) {
     *out << " [" << util::Joiner(symbols, ", ") << "]";

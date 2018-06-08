@@ -16,10 +16,10 @@
 
 package com.android.systemui.statusbar.notification;
 
+import static com.android.systemui.statusbar.notification.TransformState.TRANSFORM_Y;
+
 import android.app.Notification;
 import android.content.Context;
-import android.graphics.ColorFilter;
-import android.graphics.PorterDuffColorFilter;
 import android.util.ArraySet;
 import android.view.NotificationHeaderView;
 import android.view.View;
@@ -32,15 +32,11 @@ import android.widget.TextView;
 import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.ViewInvertHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.ViewTransformationHelper;
-import com.android.systemui.statusbar.phone.NotificationPanelView;
 
 import java.util.Stack;
-
-import static com.android.systemui.statusbar.notification.TransformState.TRANSFORM_Y;
 
 /**
  * Wraps a notification header view.
@@ -50,8 +46,8 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     private static final Interpolator LOW_PRIORITY_HEADER_CLOSE
             = new PathInterpolator(0.4f, 0f, 0.7f, 1f);
 
-    protected final ViewInvertHelper mInvertHelper;
     protected final ViewTransformationHelper mTransformationHelper;
+    private final int mTranslationForHeader;
 
     protected int mColor;
     private ImageView mIcon;
@@ -63,12 +59,12 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     private boolean mIsLowPriority;
     private boolean mTransformLowPriorityTitle;
     private boolean mShowExpandButtonAtEnd;
+    protected float mHeaderTranslation;
 
     protected NotificationHeaderViewWrapper(Context ctx, View view, ExpandableNotificationRow row) {
         super(ctx, view, row);
         mShowExpandButtonAtEnd = ctx.getResources().getBoolean(
                 R.bool.config_showNotificationExpandButtonAtEnd);
-        mInvertHelper = new ViewInvertHelper(ctx, NotificationPanelView.DOZE_ANIMATION_DURATION);
         mTransformationHelper = new ViewTransformationHelper();
 
         // we want to avoid that the header clashes with the other text when transforming
@@ -97,17 +93,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
                     }
                 }, TRANSFORMING_VIEW_TITLE);
         resolveHeaderViews();
-        updateInvertHelper();
-    }
-
-    @Override
-    protected NotificationDozeHelper createDozer(Context ctx) {
-        return new NotificationIconDozeHelper(ctx);
-    }
-
-    @Override
-    protected NotificationIconDozeHelper getDozer() {
-        return (NotificationIconDozeHelper) super.getDozer();
+        addAppOpsOnClickListener(row);
+        mTranslationForHeader = ctx.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_content_margin)
+                - ctx.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.notification_content_margin_top);
     }
 
     protected void resolveHeaderViews() {
@@ -115,20 +105,13 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mHeaderText = mView.findViewById(com.android.internal.R.id.header_text);
         mExpandButton = mView.findViewById(com.android.internal.R.id.expand_button);
         mWorkProfileImage = mView.findViewById(com.android.internal.R.id.profile_badge);
-        mColor = resolveColor(mExpandButton);
         mNotificationHeader = mView.findViewById(com.android.internal.R.id.notification_header);
         mNotificationHeader.setShowExpandButtonAtEnd(mShowExpandButtonAtEnd);
-        getDozer().setColor(mColor);
+        mColor = mNotificationHeader.getOriginalIconColor();
     }
 
-    private int resolveColor(ImageView icon) {
-        if (icon != null && icon.getDrawable() != null) {
-            ColorFilter filter = icon.getDrawable().getColorFilter();
-            if (filter instanceof PorterDuffColorFilter) {
-                return ((PorterDuffColorFilter) filter).getColor();
-            }
-        }
-        return 0;
+    private void addAppOpsOnClickListener(ExpandableNotificationRow row) {
+        mNotificationHeader.setAppOpsOnClickListener(row.getAppOpsOnClickListener());
     }
 
     @Override
@@ -140,7 +123,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
         // Reinspect the notification.
         resolveHeaderViews();
-        updateInvertHelper();
         updateTransformedTypes();
         addRemainingTransformTypes();
         updateCropToPaddingForImageViews();
@@ -191,16 +173,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         }
     }
 
-    protected void updateInvertHelper() {
-        mInvertHelper.clearTargets();
-        for (int i = 0; i < mNotificationHeader.getChildCount(); i++) {
-            View child = mNotificationHeader.getChildAt(i);
-            if (child != mIcon) {
-                mInvertHelper.addTarget(child);
-            }
-        }
-    }
-
     protected void updateTransformedTypes() {
         mTransformationHelper.reset();
         mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_ICON, mIcon);
@@ -211,30 +183,22 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     }
 
     @Override
-    public void setDark(boolean dark, boolean fade, long delay) {
-        if (dark == mDark && mDarkInitialized) {
-            return;
-        }
-        super.setDark(dark, fade, delay);
-        if (fade) {
-            mInvertHelper.fade(dark, delay);
-        } else {
-            mInvertHelper.update(dark);
-        }
-        if (mIcon != null && !mRow.isChildInGroup()) {
-            // We don't update the color for children views / their icon is invisible anyway.
-            // It also may lead to bugs where the icon isn't correctly greyed out.
-            boolean hadColorFilter = mNotificationHeader.getOriginalIconColor()
-                    != NotificationHeaderView.NO_COLOR;
-
-            getDozer().setImageDark(mIcon, dark, fade, delay, !hadColorFilter);
-        }
-    }
-
-    @Override
     public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {
         mExpandButton.setVisibility(expandable ? View.VISIBLE : View.GONE);
         mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
+    }
+
+    @Override
+    public void setHeaderVisibleAmount(float headerVisibleAmount) {
+        super.setHeaderVisibleAmount(headerVisibleAmount);
+        mNotificationHeader.setAlpha(headerVisibleAmount);
+        mHeaderTranslation = (1.0f - headerVisibleAmount) * mTranslationForHeader;
+        mView.setTranslationY(mHeaderTranslation);
+    }
+
+    @Override
+    public int getHeaderTranslation() {
+        return (int) mHeaderTranslation;
     }
 
     @Override

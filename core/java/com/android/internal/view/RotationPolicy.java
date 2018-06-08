@@ -41,7 +41,8 @@ import com.android.internal.R;
 public final class RotationPolicy {
     private static final String TAG = "RotationPolicy";
     private static final int CURRENT_ROTATION = -1;
-    private static final int NATURAL_ROTATION = Surface.ROTATION_0;
+
+    public static final int NATURAL_ROTATION = Surface.ROTATION_0;
 
     private RotationPolicy() {
     }
@@ -108,11 +109,19 @@ public final class RotationPolicy {
      * Enables or disables rotation lock from the system UI toggle.
      */
     public static void setRotationLock(Context context, final boolean enabled) {
+        final int rotation = areAllRotationsAllowed(context) ? CURRENT_ROTATION : NATURAL_ROTATION;
+        setRotationLockAtAngle(context, enabled, rotation);
+    }
+
+    /**
+     * Enables or disables rotation lock at a specific rotation from system UI.
+     */
+    public static void setRotationLockAtAngle(Context context, final boolean enabled,
+            final int rotation) {
         Settings.System.putIntForUser(context.getContentResolver(),
                 Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY, 0,
                 UserHandle.USER_CURRENT);
 
-        final int rotation = areAllRotationsAllowed(context) ? CURRENT_ROTATION : NATURAL_ROTATION;
         setRotationLock(enabled, rotation);
     }
 

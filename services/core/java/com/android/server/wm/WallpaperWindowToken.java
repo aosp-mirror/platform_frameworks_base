@@ -16,12 +16,9 @@
 
 package com.android.server.wm;
 
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYERS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -56,7 +53,7 @@ class WallpaperWindowToken extends WindowToken {
             final WindowState wallpaper = mChildren.get(j);
             wallpaper.hideWallpaperWindow(wasDeferred, reason);
         }
-        hidden = true;
+        setHidden(true);
     }
 
     void sendWindowWallpaperCommand(
@@ -77,10 +74,6 @@ class WallpaperWindowToken extends WindowToken {
         for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             final WindowState wallpaper = mChildren.get(wallpaperNdx);
             if (wallpaperController.updateWallpaperOffset(wallpaper, dw, dh, sync)) {
-                final WindowStateAnimator winAnimator = wallpaper.mWinAnimator;
-                winAnimator.computeShownFrameLocked();
-                // No need to lay out the windows - we can just set the wallpaper position directly.
-                winAnimator.setWallpaperOffset(wallpaper.mShownPosition);
                 // We only want to be synchronous with one wallpaper.
                 sync = false;
             }
@@ -92,8 +85,9 @@ class WallpaperWindowToken extends WindowToken {
         final int dw = displayInfo.logicalWidth;
         final int dh = displayInfo.logicalHeight;
 
-        if (hidden == visible) {
-            hidden = !visible;
+        if (isHidden() == visible) {
+            setHidden(!visible);
+
             // Need to do a layout to ensure the wallpaper now has the correct size.
             mDisplayContent.setLayoutNeeded();
         }
@@ -115,16 +109,16 @@ class WallpaperWindowToken extends WindowToken {
     void startAnimation(Animation anim) {
         for (int ndx = mChildren.size() - 1; ndx >= 0; ndx--) {
             final WindowState windowState = mChildren.get(ndx);
-            windowState.mWinAnimator.setAnimation(anim);
+            windowState.startAnimation(anim);
         }
     }
 
-    void updateWallpaperWindows(boolean visible, int animLayerAdj) {
+    void updateWallpaperWindows(boolean visible) {
 
-        if (hidden == visible) {
+        if (isHidden() == visible) {
             if (DEBUG_WALLPAPER_LIGHT) Slog.d(TAG,
                     "Wallpaper token " + token + " hidden=" + !visible);
-            hidden = !visible;
+            setHidden(!visible);
             // Need to do a layout to ensure the wallpaper now has the correct size.
             mDisplayContent.setLayoutNeeded();
         }

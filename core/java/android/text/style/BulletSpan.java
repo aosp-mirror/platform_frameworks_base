@@ -16,6 +16,11 @@
 
 package android.text.style;
 
+import android.annotation.ColorInt;
+import android.annotation.IntRange;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.Px;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -26,102 +31,218 @@ import android.text.ParcelableSpan;
 import android.text.Spanned;
 import android.text.TextUtils;
 
+/**
+ * A span which styles paragraphs as bullet points (respecting layout direction).
+ * <p>
+ * BulletSpans must be attached from the first character to the last character of a single
+ * paragraph, otherwise the bullet point will not be displayed but the first paragraph encountered
+ * will have a leading margin.
+ * <p>
+ * BulletSpans allow configuring the following elements:
+ * <ul>
+ * <li><b>gap width</b> - the distance, in pixels, between the bullet point and the paragraph.
+ * Default value is 2px.</li>
+ * <li><b>color</b> - the bullet point color. By default, the bullet point color is 0 - no color,
+ * so it uses the TextView's text color.</li>
+ * <li><b>bullet radius</b> - the radius, in pixels, of the bullet point. Default value is
+ * 4px.</li>
+ * </ul>
+ * For example, a BulletSpan using the default values can be constructed like this:
+ * <pre>{@code
+ *  SpannableString string = new SpannableString("Text with\nBullet point");
+ *string.setSpan(new BulletSpan(), 10, 22, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);}</pre>
+ * <img src="{@docRoot}reference/android/images/text/style/defaultbulletspan.png" />
+ * <figcaption>BulletSpan constructed with default values.</figcaption>
+ * <p>
+ * <p>
+ * To construct a BulletSpan with a gap width of 40px, green bullet point and bullet radius of
+ * 20px:
+ * <pre>{@code
+ *  SpannableString string = new SpannableString("Text with\nBullet point");
+ *string.setSpan(new BulletSpan(40, color, 20), 10, 22, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);}</pre>
+ * <img src="{@docRoot}reference/android/images/text/style/custombulletspan.png" />
+ * <figcaption>Customized BulletSpan.</figcaption>
+ */
 public class BulletSpan implements LeadingMarginSpan, ParcelableSpan {
-    private final int mGapWidth;
-    private final boolean mWantColor;
-    private final int mColor;
-
-    private static final int BULLET_RADIUS = 3;
-    private static Path sBulletPath = null;
+    // Bullet is slightly bigger to avoid aliasing artifacts on mdpi devices.
+    private static final int STANDARD_BULLET_RADIUS = 4;
     public static final int STANDARD_GAP_WIDTH = 2;
+    private static final int STANDARD_COLOR = 0;
 
+    @Px
+    private final int mGapWidth;
+    @Px
+    private final int mBulletRadius;
+    private Path mBulletPath = null;
+    @ColorInt
+    private final int mColor;
+    private final boolean mWantColor;
+
+    /**
+     * Creates a {@link BulletSpan} with the default values.
+     */
     public BulletSpan() {
-        mGapWidth = STANDARD_GAP_WIDTH;
-        mWantColor = false;
-        mColor = 0;
+        this(STANDARD_GAP_WIDTH, STANDARD_COLOR, false, STANDARD_BULLET_RADIUS);
     }
 
+    /**
+     * Creates a {@link BulletSpan} based on a gap width
+     *
+     * @param gapWidth the distance, in pixels, between the bullet point and the paragraph.
+     */
     public BulletSpan(int gapWidth) {
-        mGapWidth = gapWidth;
-        mWantColor = false;
-        mColor = 0;
+        this(gapWidth, STANDARD_COLOR, false, STANDARD_BULLET_RADIUS);
     }
 
-    public BulletSpan(int gapWidth, int color) {
+    /**
+     * Creates a {@link BulletSpan} based on a gap width and a color integer.
+     *
+     * @param gapWidth the distance, in pixels, between the bullet point and the paragraph.
+     * @param color    the bullet point color, as a color integer
+     * @see android.content.res.Resources#getColor(int, Resources.Theme)
+     */
+    public BulletSpan(int gapWidth, @ColorInt int color) {
+        this(gapWidth, color, true, STANDARD_BULLET_RADIUS);
+    }
+
+    /**
+     * Creates a {@link BulletSpan} based on a gap width and a color integer.
+     *
+     * @param gapWidth     the distance, in pixels, between the bullet point and the paragraph.
+     * @param color        the bullet point color, as a color integer.
+     * @param bulletRadius the radius of the bullet point, in pixels.
+     * @see android.content.res.Resources#getColor(int, Resources.Theme)
+     */
+    public BulletSpan(int gapWidth, @ColorInt int color, @IntRange(from = 0) int bulletRadius) {
+        this(gapWidth, color, true, bulletRadius);
+    }
+
+    private BulletSpan(int gapWidth, @ColorInt int color, boolean wantColor,
+            @IntRange(from = 0) int bulletRadius) {
         mGapWidth = gapWidth;
-        mWantColor = true;
+        mBulletRadius = bulletRadius;
         mColor = color;
+        mWantColor = wantColor;
     }
 
-    public BulletSpan(Parcel src) {
+    /**
+     * Creates a {@link BulletSpan} from a parcel.
+     */
+    public BulletSpan(@NonNull Parcel src) {
         mGapWidth = src.readInt();
         mWantColor = src.readInt() != 0;
         mColor = src.readInt();
+        mBulletRadius = src.readInt();
     }
 
+    @Override
     public int getSpanTypeId() {
         return getSpanTypeIdInternal();
     }
 
     /** @hide */
+    @Override
     public int getSpanTypeIdInternal() {
         return TextUtils.BULLET_SPAN;
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
-    public void writeToParcel(Parcel dest, int flags) {
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         writeToParcelInternal(dest, flags);
     }
 
     /** @hide */
-    public void writeToParcelInternal(Parcel dest, int flags) {
+    @Override
+    public void writeToParcelInternal(@NonNull Parcel dest, int flags) {
         dest.writeInt(mGapWidth);
         dest.writeInt(mWantColor ? 1 : 0);
         dest.writeInt(mColor);
+        dest.writeInt(mBulletRadius);
     }
 
+    @Override
     public int getLeadingMargin(boolean first) {
-        return 2 * BULLET_RADIUS + mGapWidth;
+        return 2 * mBulletRadius + mGapWidth;
     }
 
-    public void drawLeadingMargin(Canvas c, Paint p, int x, int dir,
-                                  int top, int baseline, int bottom,
-                                  CharSequence text, int start, int end,
-                                  boolean first, Layout l) {
+    /**
+     * Get the distance, in pixels, between the bullet point and the paragraph.
+     *
+     * @return the distance, in pixels, between the bullet point and the paragraph.
+     */
+    public int getGapWidth() {
+        return mGapWidth;
+    }
+
+    /**
+     * Get the radius, in pixels, of the bullet point.
+     *
+     * @return the radius, in pixels, of the bullet point.
+     */
+    public int getBulletRadius() {
+        return mBulletRadius;
+    }
+
+    /**
+     * Get the bullet point color.
+     *
+     * @return the bullet point color
+     */
+    public int getColor() {
+        return mColor;
+    }
+
+    @Override
+    public void drawLeadingMargin(@NonNull Canvas canvas, @NonNull Paint paint, int x, int dir,
+            int top, int baseline, int bottom,
+            @NonNull CharSequence text, int start, int end,
+            boolean first, @Nullable Layout layout) {
         if (((Spanned) text).getSpanStart(this) == start) {
-            Paint.Style style = p.getStyle();
+            Paint.Style style = paint.getStyle();
             int oldcolor = 0;
 
             if (mWantColor) {
-                oldcolor = p.getColor();
-                p.setColor(mColor);
+                oldcolor = paint.getColor();
+                paint.setColor(mColor);
             }
 
-            p.setStyle(Paint.Style.FILL);
+            paint.setStyle(Paint.Style.FILL);
 
-            if (c.isHardwareAccelerated()) {
-                if (sBulletPath == null) {
-                    sBulletPath = new Path();
-                    // Bullet is slightly better to avoid aliasing artifacts on mdpi devices.
-                    sBulletPath.addCircle(0.0f, 0.0f, 1.2f * BULLET_RADIUS, Direction.CW);
+            if (layout != null) {
+                // "bottom" position might include extra space as a result of line spacing
+                // configuration. Subtract extra space in order to show bullet in the vertical
+                // center of characters.
+                final int line = layout.getLineForOffset(start);
+                bottom = bottom - layout.getLineExtra(line);
+            }
+
+            final float yPosition = (top + bottom) / 2f;
+            final float xPosition = x + dir * mBulletRadius;
+
+            if (canvas.isHardwareAccelerated()) {
+                if (mBulletPath == null) {
+                    mBulletPath = new Path();
+                    mBulletPath.addCircle(0.0f, 0.0f, mBulletRadius, Direction.CW);
                 }
 
-                c.save();
-                c.translate(x + dir * BULLET_RADIUS, (top + bottom) / 2.0f);
-                c.drawPath(sBulletPath, p);
-                c.restore();
+                canvas.save();
+                canvas.translate(xPosition, yPosition);
+                canvas.drawPath(mBulletPath, paint);
+                canvas.restore();
             } else {
-                c.drawCircle(x + dir * BULLET_RADIUS, (top + bottom) / 2.0f, BULLET_RADIUS, p);
+                canvas.drawCircle(xPosition, yPosition, mBulletRadius, paint);
             }
 
             if (mWantColor) {
-                p.setColor(oldcolor);
+                paint.setColor(oldcolor);
             }
 
-            p.setStyle(style);
+            paint.setStyle(style);
         }
     }
 }

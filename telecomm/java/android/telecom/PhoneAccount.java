@@ -129,6 +129,9 @@ public final class PhoneAccount implements Parcelable {
      * <p>
      * By default, Self-Managed {@link PhoneAccount}s do not log their calls to the call log.
      * Setting this extra to {@code true} provides a means for them to log their calls.
+     * <p>
+     * Note: Only calls where the {@link Call.Details#getHandle()} {@link Uri#getScheme()} is
+     * {@link #SCHEME_SIP} or {@link #SCHEME_TEL} will be logged at the current time.
      */
     public static final String EXTRA_LOG_SELF_MANAGED_CALLS =
             "android.telecom.extra.LOG_SELF_MANAGED_CALLS";

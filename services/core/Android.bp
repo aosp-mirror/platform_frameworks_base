@@ -4,7 +4,9 @@ java_library_static {
     aidl: {
         include_dirs: [
             "frameworks/native/aidl/binder",
+            "system/core/storaged/binder",
             "system/netd/server/binder",
+            "system/vold/binder",
         ],
     },
     srcs: [
@@ -12,6 +14,9 @@ java_library_static {
         ":netd_aidl",
         ":netd_metrics_aidl",
         ":installd_aidl",
+        ":storaged_aidl",
+        ":vold_aidl",
+        ":mediaupdateservice_aidl",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
     ],
@@ -27,12 +32,17 @@ java_library_static {
     static_libs: [
         "time_zone_distro",
         "time_zone_distro_installer",
+        "android.hardware.authsecret-V1.0-java",
+        "android.hardware.broadcastradio-V2.0-java",
+        "android.hardware.health-V1.0-java",
+        "android.hardware.health-V2.0-java",
         "android.hardware.weaver-V1.0-java",
         "android.hardware.biometrics.fingerprint-V2.1-java",
         "android.hardware.oemlock-V1.0-java",
         "android.hardware.tetheroffload.control-V1.0-java",
         "android.hardware.vibrator-V1.0-java",
         "android.hardware.configstore-V1.0-java",
+        "android.hardware.contexthub-V1.0-java",
     ],
 }
 

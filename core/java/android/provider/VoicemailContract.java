@@ -16,7 +16,6 @@
 
 package android.provider;
 
-import android.Manifest;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
@@ -50,7 +49,8 @@ import java.util.List;
  * </ul>
  *
  * <P> The minimum permission needed to access this content provider is
- * {@link Manifest.permission#ADD_VOICEMAIL}
+ * {@link android.Manifest.permission#ADD_VOICEMAIL} or carrier privileges (see
+ * {@link android.telephony.TelephonyManager#hasCarrierPrivileges}).
  *
  * <P>Voicemails are inserted by what is called as a "voicemail source"
  * application, which is responsible for syncing voicemail data between a remote
@@ -107,9 +107,12 @@ public class VoicemailContract {
 
     /**
      * Broadcast intent to inform a new visual voicemail SMS has been received. This intent will
-     * only be delivered to the telephony service. {@link #EXTRA_VOICEMAIL_SMS} will be included.
-     */
-    /** @hide */
+     * only be delivered to the telephony service.
+     *
+     * @see #EXTRA_VOICEMAIL_SMS
+     * @see #EXTRA_TARGET_PACKAGE
+     *
+     * @hide */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_VOICEMAIL_SMS_RECEIVED =
             "com.android.internal.provider.action.VOICEMAIL_SMS_RECEIVED";
@@ -120,6 +123,19 @@ public class VoicemailContract {
      * @hide
      */
     public static final String EXTRA_VOICEMAIL_SMS = "android.provider.extra.VOICEMAIL_SMS";
+
+    /**
+     * Extra in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} indicating the target package to bind {@link
+     * android.telephony.VisualVoicemailService}.
+     *
+     * <p>This extra should be set to android.telephony.VisualVoicemailSmsFilterSettings#packageName
+     * while performing filtering. Since the default dialer might change between the filter sending
+     * it and telephony binding to the service, this ensures the service will not receive SMS
+     * filtered by the previous app.
+     *
+     * @hide
+     */
+    public static final String EXTRA_TARGET_PACKAGE = "android.provider.extra.TARGET_PACAKGE";
 
     /**
      * Extra included in {@link Intent#ACTION_PROVIDER_CHANGED} broadcast intents to indicate if the
@@ -172,6 +188,11 @@ public class VoicemailContract {
          * <P>Type: INTEGER (long)</P>
          */
         public static final String DURATION = Calls.DURATION;
+        /**
+         * Whether or not the voicemail has been acknowledged (notification sent to the user).
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String NEW = Calls.NEW;
         /**
          * Whether this item has been read or otherwise consumed by the user.
          * <P>Type: INTEGER (boolean)</P>
@@ -293,9 +314,24 @@ public class VoicemailContract {
          * Flag used to indicate that local, unsynced changes are present.
          * Currently, this is used to indicate that the voicemail was read or deleted.
          * The value will be 1 if dirty is true, 0 if false.
+         *
+         * <p>When a caller updates a voicemail row (either with {@link ContentResolver#update} or
+         * {@link ContentResolver#applyBatch}), and if the {@link ContentValues} doesn't contain
+         * this column, the voicemail provider implicitly sets it to 0 if the calling package is
+         * the {@link #SOURCE_PACKAGE} or to 1 otherwise. To prevent this behavior, explicitly set
+         * {@link #DIRTY_RETAIN} to DIRTY in the {@link ContentValues}.
+         *
          * <P>Type: INTEGER (boolean)</P>
+         *
+         * @see #DIRTY_RETAIN
          */
         public static final String DIRTY = "dirty";
+
+        /**
+         * Value of {@link #DIRTY} when updating to indicate that the value should not be updated
+         * during this operation.
+         */
+        public static final int DIRTY_RETAIN = -1;
 
         /**
          * Flag used to indicate that the voicemail was deleted but not synced to the server.

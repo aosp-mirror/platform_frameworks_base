@@ -18,6 +18,7 @@ package android.widget.focus;
 
 import android.widget.focus.HorizontalFocusSearch;
 
+import android.support.test.filters.LargeTest;
 import android.test.ActivityInstrumentationTestCase;
 import android.test.suitebuilder.annotation.Suppress;
 import android.widget.LinearLayout;
@@ -32,6 +33,7 @@ import static android.widget.focus.VerticalFocusSearchTest.NewFocusSearchAlg;
  * various widths and vertical placements.
  */
 // Suppress until bug http://b/issue?id=1416545 is fixed.
+@LargeTest
 @Suppress
 public class HorizontalFocusSearchTest extends ActivityInstrumentationTestCase<HorizontalFocusSearch> {
 

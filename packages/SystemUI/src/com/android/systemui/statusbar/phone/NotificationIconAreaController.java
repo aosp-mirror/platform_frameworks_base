@@ -12,9 +12,11 @@ import android.widget.FrameLayout;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationColorUtil;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.NotificationEntryManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -31,6 +33,8 @@ import java.util.function.Function;
  */
 public class NotificationIconAreaController implements DarkReceiver {
     private final NotificationColorUtil mNotificationColorUtil;
+    private final NotificationEntryManager mEntryManager;
+    private final Runnable mUpdateStatusBarIcons = this::updateStatusBarIcons;
 
     private int mIconSize;
     private int mIconHPadding;
@@ -48,6 +52,7 @@ public class NotificationIconAreaController implements DarkReceiver {
         mStatusBar = statusBar;
         mNotificationColorUtil = NotificationColorUtil.getInstance(context);
         mContext = context;
+        mEntryManager = Dependency.get(NotificationEntryManager.class);
 
         initializeNotificationAreaViews(context);
     }
@@ -120,7 +125,14 @@ public class NotificationIconAreaController implements DarkReceiver {
         } else {
             mTintArea.set(tintArea);
         }
-        mIconTint = iconTint;
+        if (mNotificationIconArea != null) {
+            if (DarkIconDispatcher.isInArea(tintArea, mNotificationIconArea)) {
+                mIconTint = iconTint;
+            }
+        } else {
+            mIconTint = iconTint;
+        }
+
         applyNotificationIconsTint();
     }
 
@@ -129,14 +141,26 @@ public class NotificationIconAreaController implements DarkReceiver {
     }
 
     protected boolean shouldShowNotificationIcon(NotificationData.Entry entry,
-            NotificationData notificationData, boolean showAmbient) {
-        if (notificationData.isAmbient(entry.key) && !showAmbient) {
+            boolean showAmbient, boolean hideDismissed, boolean hideRepliedMessages) {
+        if (mEntryManager.getNotificationData().isAmbient(entry.key) && !showAmbient) {
             return false;
         }
         if (!StatusBar.isTopLevelChild(entry)) {
             return false;
         }
         if (entry.row.getVisibility() == View.GONE) {
+            return false;
+        }
+        if (entry.row.isDismissed() && hideDismissed) {
+            return false;
+        }
+
+        if (hideRepliedMessages && entry.isLastMessageFromReply()) {
+            return false;
+        }
+
+        // showAmbient == show in shade but not shelf
+        if (!showAmbient && mEntryManager.getNotificationData().shouldSuppressStatusBar(entry)) {
             return false;
         }
 
@@ -146,28 +170,33 @@ public class NotificationIconAreaController implements DarkReceiver {
     /**
      * Updates the notifications with the given list of notifications to display.
      */
-    public void updateNotificationIcons(NotificationData notificationData) {
+    public void updateNotificationIcons() {
 
-        updateIconsForLayout(notificationData, entry -> entry.icon, mNotificationIcons,
-                false /* showAmbient */);
-        updateIconsForLayout(notificationData, entry -> entry.expandedIcon, mShelfIcons,
-                NotificationShelf.SHOW_AMBIENT_ICONS);
+        updateStatusBarIcons();
+        updateIconsForLayout(entry -> entry.expandedIcon, mShelfIcons,
+                NotificationShelf.SHOW_AMBIENT_ICONS, false /* hideDismissed */,
+                false /* hideRepliedMessages */);
 
         applyNotificationIconsTint();
+    }
+
+    public void updateStatusBarIcons() {
+        updateIconsForLayout(entry -> entry.icon, mNotificationIcons,
+                false /* showAmbient */, true /* hideDismissed */, true /* hideRepliedMessages */);
     }
 
     /**
      * Updates the notification icons for a host layout. This will ensure that the notification
      * host layout will have the same icons like the ones in here.
-     *
-     * @param notificationData the notification data to look up which notifications are relevant
      * @param function A function to look up an icon view based on an entry
      * @param hostLayout which layout should be updated
      * @param showAmbient should ambient notification icons be shown
+     * @param hideDismissed should dismissed icons be hidden
+     * @param hideRepliedMessages should messages that have been replied to be hidden
      */
-    private void updateIconsForLayout(NotificationData notificationData,
-            Function<NotificationData.Entry, StatusBarIconView> function,
-            NotificationIconContainer hostLayout, boolean showAmbient) {
+    private void updateIconsForLayout(Function<NotificationData.Entry, StatusBarIconView> function,
+            NotificationIconContainer hostLayout, boolean showAmbient, boolean hideDismissed,
+            boolean hideRepliedMessages) {
         ArrayList<StatusBarIconView> toShow = new ArrayList<>(
                 mNotificationScrollLayout.getChildCount());
 
@@ -176,7 +205,8 @@ public class NotificationIconAreaController implements DarkReceiver {
             View view = mNotificationScrollLayout.getChildAt(i);
             if (view instanceof ExpandableNotificationRow) {
                 NotificationData.Entry ent = ((ExpandableNotificationRow) view).getEntry();
-                if (shouldShowNotificationIcon(ent, notificationData, showAmbient)) {
+                if (shouldShowNotificationIcon(ent, showAmbient, hideDismissed,
+                        hideRepliedMessages)) {
                     toShow.add(function.apply(ent));
                 }
             }
@@ -238,10 +268,13 @@ public class NotificationIconAreaController implements DarkReceiver {
 
         final FrameLayout.LayoutParams params = generateIconLayoutParams();
         for (int i = 0; i < toShow.size(); i++) {
-            View v = toShow.get(i);
+            StatusBarIconView v = toShow.get(i);
             // The view might still be transiently added if it was just removed and added again
             hostLayout.removeTransientView(v);
             if (v.getParent() == null) {
+                if (hideDismissed) {
+                    v.setOnDismissListener(mUpdateStatusBarIcons);
+                }
                 hostLayout.addView(v, i, params);
             }
         }
@@ -290,5 +323,13 @@ public class NotificationIconAreaController implements DarkReceiver {
     public void setDark(boolean dark) {
         mNotificationIcons.setDark(dark, false, 0);
         mShelfIcons.setDark(dark, false, 0);
+    }
+
+    public void showIconIsolated(StatusBarIconView icon, boolean animated) {
+        mNotificationIcons.showIconIsolated(icon, animated);
+    }
+
+    public void setIsolatedIconLocation(Rect iconDrawingRect, boolean requireStateUpdate) {
+        mNotificationIcons.setIsolatedIconLocation(iconDrawingRect, requireStateUpdate);
     }
 }

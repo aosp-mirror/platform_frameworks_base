@@ -16,4 +16,12 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Android Services Library</string>
+
+    <string name="notification_assistant">Notification Assistant</string>
+    <string name="prompt_block_reason">Too many dismissals:views</string>
+
+    <string name="autofill_field_classification_default_algorithm">EDIT_DISTANCE</string>
+    <string-array name="autofill_field_classification_available_algorithms">
+        <item>EDIT_DISTANCE</item>
+    </string-array>
 </resources>

@@ -110,7 +110,6 @@
         <item name="android:paddingStart">@*android:dimen/notification_extra_margin_ambient</item>
         <item name="android:paddingEnd">@*android:dimen/notification_extra_margin_ambient</item>
         <item name="android:orientation">vertical</item>
-        <item name="android:paddingBottom">23.5dp</item>
     </style>
 
     <style name="hybrid_notification">
@@ -119,25 +118,32 @@
     </style>
 
     <style name="hybrid_notification_title_ambient">
+        <item name="android:layout_marginTop">@*android:dimen/notification_header_margin_top_ambient</item>
         <item name="android:paddingStart">@*android:dimen/notification_content_margin_start</item>
         <item name="android:paddingEnd">@*android:dimen/notification_content_margin_end</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textAppearance">@*android:style/Notification.Header.Ambient</item>
+        <item name="android:layout_gravity">top|center_horizontal</item>
+        <item name="android:textSize">@*android:dimen/notification_ambient_title_text_size</item>
         <item name="android:textColor">#ffffffff</item>
     </style>
 
     <style name="hybrid_notification_title">
         <item name="android:paddingEnd">4dp</item>
+        <item name="android:textAppearance">@*android:style/TextAppearance.Material.Notification.Title</item>
     </style>
 
     <style name="hybrid_notification_text_ambient">
         <item name="android:paddingStart">@*android:dimen/notification_content_margin_start</item>
         <item name="android:paddingEnd">@*android:dimen/notification_content_margin_end</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">@*android:dimen/notification_ambient_text_size</item>
         <item name="android:textColor">#eeffffff</item>
-        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:gravity">top|center_horizontal</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">3</item>
     </style>
 
-    <style name="hybrid_notification_text">
+    <style name="hybrid_notification_text"
+           parent="@*android:style/Widget.Material.Notification.Text">
         <item name="android:paddingEnd">4dp</item>
     </style>
 
@@ -270,7 +276,7 @@
 
     <style name="TextAppearance.QS.TileLabel">
         <item name="android:textSize">@dimen/qs_tile_text_size</item>
-        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
 
     <style name="BaseBrightnessDialogContainer">
@@ -306,6 +312,7 @@
         <item name="darkIconTheme">@style/DualToneDarkTheme</item>
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
         <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_dark</item>
+        <item name="android:colorError">@*android:color/error_color_material_dark</item>
         <item name="android:colorControlHighlight">@*android:color/primary_text_material_dark</item>
         <item name="*android:lockPatternStyle">@style/LockPatternStyle</item>
         <item name="passwordStyle">@style/PasswordTheme</item>
@@ -317,7 +324,8 @@
     <style name="Theme.SystemUI.Light" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
         <item name="wallpaperTextColor">@*android:color/primary_text_material_light</item>
         <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_light</item>
-        <item name="android:colorControlHighlight">@*android:color/primary_text_material_light</item>
+        <item name="android:colorError">@*android:color/error_color_material_light</item>
+        <item name="android:colorControlHighlight">#40000000</item>
         <item name="passwordStyle">@style/PasswordTheme.Light</item>
     </style>
 
@@ -333,6 +341,7 @@
     <style name="qs_theme" parent="qs_base">
         <item name="lightIconTheme">@style/QSIconTheme</item>
         <item name="darkIconTheme">@style/QSIconTheme</item>
+        <item name="android:windowIsFloating">true</item>
     </style>
 
     <style name="systemui_theme_remote_input" parent="@android:style/Theme.DeviceDefault.Light">
@@ -343,7 +352,9 @@
 
     <style name="Theme.SystemUI.Dialog.Alert" parent="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert" />
 
-    <style name="Theme.SystemUI.Dialog.GlobalActions" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen" />
+    <style name="Theme.SystemUI.Dialog.GlobalActions" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar.Fullscreen">
+        <item name="android:windowIsFloating">true</item>
+    </style>
 
     <style name="QSBorderlessButton">
         <item name="android:padding">12dp</item>
@@ -353,10 +364,6 @@
 
     <style name="TextAppearance.Material.Notification.HeaderTitle"
         parent="@*android:style/TextAppearance.Material.Notification.Info">
-    </style>
-
-    <style name="TextAppearance.Material.Notification.HybridNotificationDivider"
-        parent="@*android:style/TextAppearance.Material.Notification">
     </style>
 
     <style name="SearchPanelCircle">
@@ -408,16 +415,11 @@
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="TextAppearance.Volume.ZenSummary">
-        <item name="android:textSize">14sp</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+    <style name="TextAppearance.Volume.Header.Secondary">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">?android:attr/textColorTertiary</item>
     </style>
 
-    <style name="TextAppearance.Volume.ZenDetail">
-        <item name="android:textSize">14sp</item>
-        <item name="android:fontFamily">sans-serif</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
-    </style>
 
     <style name="VolumeButtons" parent="@android:style/Widget.Material.Button.Borderless">
         <item name="android:background">@drawable/btn_borderless_rect</item>
@@ -459,6 +461,12 @@
         <item name="android:alpha">0.87</item>
     </style>
 
+    <style name="TextAppearance.NotificationInfo.Confirmation">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:alpha">0.87</item>
+    </style>
+
     <style name="TextAppearance.NotificationInfo.Secondary">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">14sp</item>
@@ -476,17 +484,47 @@
     <style name="TextAppearance.NotificationInfo.Button">
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:textAllCaps">true</item>
         <item name="android:textColor">?android:attr/colorAccent</item>
         <item name="android:background">@drawable/btn_borderless_rect</item>
         <item name="android:gravity">center</item>
         <item name="android:focusable">true</item>
-        <item name="android:paddingStart">8dp</item>
-        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingTop">@dimen/notification_guts_button_vertical_padding</item>
+        <item name="android:paddingBottom">@dimen/notification_guts_button_vertical_padding</item>
+        <item name="android:paddingLeft">@dimen/notification_guts_button_horizontal_padding</item>
+        <item name="android:paddingRight">@dimen/notification_guts_button_horizontal_padding</item>
+    </style>
+
+    <style name="TextAppearance.HeadsUpStatusBarText"
+           parent="@*android:style/TextAppearance.Material.Notification.Info">
     </style>
 
     <style name="edit_theme" parent="qs_base">
         <item name="android:colorBackground">?android:attr/colorSecondary</item>
+    </style>
+
+    <!-- Used to style rotate suggestion button AVD animations -->
+    <style name="RotateButtonCCWStart0">
+        <item name="rotateButtonStartAngle">0</item>
+        <item name="rotateButtonEndAngle">-90</item>
+        <item name="rotateButtonScaleX">1</item>
+    </style>
+
+    <style name="RotateButtonCCWStart90">
+        <item name="rotateButtonStartAngle">90</item>
+        <item name="rotateButtonEndAngle">0</item>
+        <item name="rotateButtonScaleX">1</item>
+    </style>
+
+    <style name="RotateButtonCWStart0">
+        <item name="rotateButtonStartAngle">0</item>
+        <item name="rotateButtonEndAngle">90</item>
+        <item name="rotateButtonScaleX">-1</item>
+    </style>
+
+    <style name="RotateButtonCWStart90">
+        <item name="rotateButtonStartAngle">90</item>
+        <item name="rotateButtonEndAngle">180</item>
+        <item name="rotateButtonScaleX">-1</item>
     </style>
 
 </resources>

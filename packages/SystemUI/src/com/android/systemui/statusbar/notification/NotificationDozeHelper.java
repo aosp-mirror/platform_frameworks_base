@@ -21,14 +21,17 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.android.systemui.Interpolators;
+import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 
 import java.util.function.Consumer;
 
 public class NotificationDozeHelper {
+    private static final int DOZE_ANIMATOR_TAG = R.id.doze_intensity_tag;
     private final ColorMatrix mGrayscaleColorMatrix = new ColorMatrix();
 
     public void fadeGrayscale(final ImageView target, final boolean dark, long delay) {
@@ -76,11 +79,26 @@ public class NotificationDozeHelper {
     }
 
     public void setIntensityDark(Consumer<Float> listener, boolean dark,
-            boolean animate, long delay) {
+            boolean animate, long delay, View view) {
         if (animate) {
             startIntensityAnimation(a -> listener.accept((Float) a.getAnimatedValue()), dark, delay,
-                    null /* listener */);
+                    new AnimatorListenerAdapter() {
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            view.setTag(DOZE_ANIMATOR_TAG, null);
+                        }
+
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                            view.setTag(DOZE_ANIMATOR_TAG, animation);
+                        }
+                    } /* listener */);
         } else {
+            Animator animator = (Animator) view.getTag(DOZE_ANIMATOR_TAG);
+            if (animator != null) {
+                animator.cancel();
+            }
             listener.accept(dark ? 1f : 0f);
         }
     }

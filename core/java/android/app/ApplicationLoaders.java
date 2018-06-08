@@ -17,10 +17,15 @@
 package android.app;
 
 import android.os.Build;
+import android.os.GraphicsEnvironment;
 import android.os.Trace;
 import android.util.ArrayMap;
+
 import com.android.internal.os.ClassLoaderFactory;
+
 import dalvik.system.PathClassLoader;
+
+import java.util.Collection;
 
 /** @hide */
 public class ApplicationLoaders {
@@ -72,8 +77,9 @@ public class ApplicationLoaders {
 
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
-                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "setupVulkanLayerPath");
-                setupVulkanLayerPath(classloader, librarySearchPath);
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "setLayerPaths");
+                GraphicsEnvironment.getInstance().setLayerPaths(
+                        classloader, librarySearchPath, libraryPermittedPath);
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
                 mLoaders.put(cacheKey, classloader);
@@ -105,8 +111,6 @@ public class ApplicationLoaders {
                               cacheKey, null /* classLoaderName */);
     }
 
-    private static native void setupVulkanLayerPath(ClassLoader classLoader, String librarySearchPath);
-
     /**
      * Adds a new path the classpath of the given loader.
      * @throws IllegalStateException if the provided class loader is not a {@link PathClassLoader}.
@@ -117,6 +121,17 @@ public class ApplicationLoaders {
         }
         final PathClassLoader baseDexClassLoader = (PathClassLoader) classLoader;
         baseDexClassLoader.addDexPath(dexPath);
+    }
+
+    /**
+     * @hide
+     */
+    void addNative(ClassLoader classLoader, Collection<String> libPaths) {
+        if (!(classLoader instanceof PathClassLoader)) {
+            throw new IllegalStateException("class loader is not a PathClassLoader");
+        }
+        final PathClassLoader baseDexClassLoader = (PathClassLoader) classLoader;
+        baseDexClassLoader.addNativePath(libPaths);
     }
 
     private final ArrayMap<String, ClassLoader> mLoaders = new ArrayMap<>();

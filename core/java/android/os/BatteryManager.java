@@ -16,9 +16,12 @@
 
 package android.os;
 
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.health.V1_0.Constants;
+
 import com.android.internal.app.IBatteryStats;
 
 /**
@@ -33,39 +36,47 @@ public class BatteryManager {
      * integer containing the current status constant.
      */
     public static final String EXTRA_STATUS = "status";
-    
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer containing the current health constant.
      */
     public static final String EXTRA_HEALTH = "health";
-    
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * boolean indicating whether a battery is present.
      */
     public static final String EXTRA_PRESENT = "present";
-    
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer field containing the current battery level, from 0 to
      * {@link #EXTRA_SCALE}.
      */
     public static final String EXTRA_LEVEL = "level";
-    
+
+    /**
+     * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+     * Boolean field indicating whether the battery is currently considered to be
+     * low, that is whether a {@link Intent#ACTION_BATTERY_LOW} broadcast
+     * has been sent.
+     */
+    public static final String EXTRA_BATTERY_LOW = "battery_low";
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer containing the maximum battery level.
      */
     public static final String EXTRA_SCALE = "scale";
-    
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer containing the resource ID of a small status bar icon
      * indicating the current battery state.
      */
     public static final String EXTRA_ICON_SMALL = "icon-small";
-    
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer indicating whether the device is plugged in to a power
@@ -73,19 +84,19 @@ public class BatteryManager {
      * types of power sources.
      */
     public static final String EXTRA_PLUGGED = "plugged";
-    
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer containing the current battery voltage level.
      */
     public static final String EXTRA_VOLTAGE = "voltage";
-    
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer containing the current battery temperature.
      */
     public static final String EXTRA_TEMPERATURE = "temperature";
-    
+
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * String describing the technology of the current battery.
@@ -128,6 +139,23 @@ public class BatteryManager {
      */
     public static final String EXTRA_SEQUENCE = "seq";
 
+    /**
+     * Extra for {@link android.content.Intent#ACTION_BATTERY_LEVEL_CHANGED}:
+     * Contains list of Bundles representing battery events
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_EVENTS = "android.os.extra.EVENTS";
+
+    /**
+     * Extra for event in {@link android.content.Intent#ACTION_BATTERY_LEVEL_CHANGED}:
+     * Long value representing time when event occurred as returned by
+     * {@link android.os.SystemClock#elapsedRealtime()}
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_EVENT_TIMESTAMP = "android.os.extra.EVENT_TIMESTAMP";
+
     // values for "status" field in the ACTION_BATTERY_CHANGED Intent
     public static final int BATTERY_STATUS_UNKNOWN = Constants.BATTERY_STATUS_UNKNOWN;
     public static final int BATTERY_STATUS_CHARGING = Constants.BATTERY_STATUS_CHARGING;
@@ -147,11 +175,11 @@ public class BatteryManager {
     // values of the "plugged" field in the ACTION_BATTERY_CHANGED intent.
     // These must be powers of 2.
     /** Power source is an AC charger. */
-    public static final int BATTERY_PLUGGED_AC = 1;
+    public static final int BATTERY_PLUGGED_AC = OsProtoEnums.BATTERY_PLUGGED_AC; // = 1
     /** Power source is a USB port. */
-    public static final int BATTERY_PLUGGED_USB = 2;
+    public static final int BATTERY_PLUGGED_USB = OsProtoEnums.BATTERY_PLUGGED_USB; // = 2
     /** Power source is wireless. */
-    public static final int BATTERY_PLUGGED_WIRELESS = 4;
+    public static final int BATTERY_PLUGGED_WIRELESS = OsProtoEnums.BATTERY_PLUGGED_WIRELESS; // = 4
 
     /** @hide */
     public static final int BATTERY_PLUGGED_ANY =
@@ -216,6 +244,7 @@ public class BatteryManager {
      */
     public static final int BATTERY_PROPERTY_STATUS = 6;
 
+    private final Context mContext;
     private final IBatteryStats mBatteryStats;
     private final IBatteryPropertiesRegistrar mBatteryPropertiesRegistrar;
 
@@ -223,6 +252,7 @@ public class BatteryManager {
      * @removed Was previously made visible by accident.
      */
     public BatteryManager() {
+        mContext = null;
         mBatteryStats = IBatteryStats.Stub.asInterface(
                 ServiceManager.getService(BatteryStats.SERVICE_NAME));
         mBatteryPropertiesRegistrar = IBatteryPropertiesRegistrar.Stub.asInterface(
@@ -230,8 +260,10 @@ public class BatteryManager {
     }
 
     /** {@hide} */
-    public BatteryManager(IBatteryStats batteryStats,
+    public BatteryManager(Context context,
+            IBatteryStats batteryStats,
             IBatteryPropertiesRegistrar batteryPropertiesRegistrar) {
+        mContext = context;
         mBatteryStats = batteryStats;
         mBatteryPropertiesRegistrar = batteryPropertiesRegistrar;
     }
@@ -278,16 +310,23 @@ public class BatteryManager {
     }
 
     /**
-     * Return the value of a battery property of integer type.  If the
-     * platform does not provide the property queried, this value will
-     * be Integer.MIN_VALUE.
+     * Return the value of a battery property of integer type.
      *
      * @param id identifier of the requested property
      *
-     * @return the property value, or Integer.MIN_VALUE if not supported.
+     * @return the property value. If the property is not supported or there is any other error,
+     *    return (a) 0 if {@code targetSdkVersion < VERSION_CODES.P} or (b) Integer.MIN_VALUE
+     *    if {@code targetSdkVersion >= VERSION_CODES.P}.
      */
     public int getIntProperty(int id) {
-        return (int)queryProperty(id);
+        long value = queryProperty(id);
+        if (value == Long.MIN_VALUE && mContext != null
+                && mContext.getApplicationInfo().targetSdkVersion
+                    >= android.os.Build.VERSION_CODES.P) {
+            return Integer.MIN_VALUE;
+        }
+
+        return (int) value;
     }
 
     /**
@@ -301,5 +340,33 @@ public class BatteryManager {
      */
     public long getLongProperty(int id) {
         return queryProperty(id);
+    }
+
+    /**
+     * Return true if the plugType given is wired
+     * @param plugType {@link #BATTERY_PLUGGED_AC}, {@link #BATTERY_PLUGGED_USB},
+     *        or {@link #BATTERY_PLUGGED_WIRELESS}
+     *
+     * @return true if plugType is wired
+     * @hide
+     */
+    public static boolean isPlugWired(int plugType) {
+        return plugType == BATTERY_PLUGGED_USB || plugType == BATTERY_PLUGGED_AC;
+    }
+
+    /**
+     * Compute an approximation for how much time (in milliseconds) remains until the battery is
+     * fully charged. Returns -1 if no time can be computed: either there is not enough current
+     * data to make a decision or the battery is currently discharging.
+     *
+     * @return how much time is left, in milliseconds, until the battery is fully charged or -1 if
+     *         the computation fails
+     */
+    public long computeChargeTimeRemaining() {
+        try {
+            return mBatteryStats.computeChargeTimeRemaining();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

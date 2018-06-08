@@ -928,6 +928,12 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public List<TvContentRatingSystemInfo> getTvContentRatingSystemList(int userId) {
+            if (mContext.checkCallingPermission(
+                    android.Manifest.permission.READ_CONTENT_RATING_SYSTEMS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException(
+                        "The caller does not have permission to read content rating systems");
+            }
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
                     Binder.getCallingUid(), userId, "getTvContentRatingSystemList");
             final long identity = Binder.clearCallingIdentity();
@@ -1875,11 +1881,7 @@ public final class TvInputManagerService extends SystemService {
         @Override
         public List<TvStreamConfig> getAvailableTvStreamConfigList(String inputId, int userId)
                 throws RemoteException {
-            if (mContext.checkCallingPermission(
-                    android.Manifest.permission.CAPTURE_TV_INPUT)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires CAPTURE_TV_INPUT permission");
-            }
+            ensureCaptureTvInputPermission();
 
             final long identity = Binder.clearCallingIdentity();
             final int callingUid = Binder.getCallingUid();
@@ -1897,11 +1899,7 @@ public final class TvInputManagerService extends SystemService {
         public boolean captureFrame(String inputId, Surface surface, TvStreamConfig config,
                 int userId)
                 throws RemoteException {
-            if (mContext.checkCallingPermission(
-                    android.Manifest.permission.CAPTURE_TV_INPUT)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException("Requires CAPTURE_TV_INPUT permission");
-            }
+            ensureCaptureTvInputPermission();
 
             final long identity = Binder.clearCallingIdentity();
             final int callingUid = Binder.getCallingUid();
@@ -1934,6 +1932,7 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public boolean isSingleSessionActive(int userId) throws RemoteException {
+            ensureCaptureTvInputPermission();
             final long identity = Binder.clearCallingIdentity();
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
@@ -1956,6 +1955,14 @@ public final class TvInputManagerService extends SystemService {
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        private void ensureCaptureTvInputPermission() {
+            if (mContext.checkCallingPermission(
+                android.Manifest.permission.CAPTURE_TV_INPUT)
+                != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires CAPTURE_TV_INPUT permission");
             }
         }
 

@@ -35,8 +35,8 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
             android:orientation="vertical">
 
             <LinearLayout
@@ -52,7 +52,7 @@
 
                 <TextView
                     android:id="@+id/autofill_save_title"
-                    android:paddingLeft="8dp"
+                    android:paddingStart="8dp"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/autofill_save_title"
@@ -100,7 +100,7 @@
                 android:id="@+id/autofill_save_yes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/Widget.Material.Button.Colored"
+                style="@style/Widget.DeviceDefault.Button.Colored"
                 android:text="@string/autofill_save_yes">
             </Button>
 

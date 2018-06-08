@@ -22,8 +22,10 @@
 #include <cutils/compiler.h>
 #include <array>
 
-#define RETURN_IF_PROFILING_DISABLED() if (CC_LIKELY(mType == ProfileType::None)) return
-#define RETURN_IF_DISABLED() if (CC_LIKELY(mType == ProfileType::None && !mShowDirtyRegions)) return
+#define RETURN_IF_PROFILING_DISABLED() \
+    if (CC_LIKELY(mType == ProfileType::None)) return
+#define RETURN_IF_DISABLED() \
+    if (CC_LIKELY(mType == ProfileType::None && !mShowDirtyRegions)) return
 
 #define PROFILE_DRAW_WIDTH 3
 #define PROFILE_DRAW_THRESHOLD_STROKE_WIDTH 2
@@ -48,22 +50,22 @@ struct BarSegment {
     SkColor color;
 };
 
-static const std::array<BarSegment,7> Bar {{
-    { FrameInfoIndex::IntendedVsync, FrameInfoIndex::HandleInputStart, Color::Teal_700 },
-    { FrameInfoIndex::HandleInputStart, FrameInfoIndex::PerformTraversalsStart, Color::Green_700 },
-    { FrameInfoIndex::PerformTraversalsStart, FrameInfoIndex::DrawStart, Color::LightGreen_700 },
-    { FrameInfoIndex::DrawStart, FrameInfoIndex::SyncStart, Color::Blue_500 },
-    { FrameInfoIndex::SyncStart, FrameInfoIndex::IssueDrawCommandsStart, Color::LightBlue_300 },
-    { FrameInfoIndex::IssueDrawCommandsStart, FrameInfoIndex::SwapBuffers, Color::Red_500},
-    { FrameInfoIndex::SwapBuffers, FrameInfoIndex::FrameCompleted, Color::Orange_500},
+static const std::array<BarSegment, 7> Bar{{
+        {FrameInfoIndex::IntendedVsync, FrameInfoIndex::HandleInputStart, Color::Teal_700},
+        {FrameInfoIndex::HandleInputStart, FrameInfoIndex::PerformTraversalsStart,
+         Color::Green_700},
+        {FrameInfoIndex::PerformTraversalsStart, FrameInfoIndex::DrawStart, Color::LightGreen_700},
+        {FrameInfoIndex::DrawStart, FrameInfoIndex::SyncStart, Color::Blue_500},
+        {FrameInfoIndex::SyncStart, FrameInfoIndex::IssueDrawCommandsStart, Color::LightBlue_300},
+        {FrameInfoIndex::IssueDrawCommandsStart, FrameInfoIndex::SwapBuffers, Color::Red_500},
+        {FrameInfoIndex::SwapBuffers, FrameInfoIndex::FrameCompleted, Color::Orange_500},
 }};
 
 static int dpToPx(int dp, float density) {
-    return (int) (dp * density + 0.5f);
+    return (int)(dp * density + 0.5f);
 }
 
-FrameInfoVisualizer::FrameInfoVisualizer(FrameInfoSource& source)
-        : mFrameSource(source) {
+FrameInfoVisualizer::FrameInfoVisualizer(FrameInfoSource& source) : mFrameSource(source) {
     setDensity(1);
 }
 
@@ -97,8 +99,8 @@ void FrameInfoVisualizer::draw(IProfileRenderer& renderer) {
         if (mFlashToggle) {
             SkPaint paint;
             paint.setColor(0x7fff0000);
-            renderer.drawRect(mDirtyRegion.fLeft, mDirtyRegion.fTop,
-                    mDirtyRegion.fRight, mDirtyRegion.fBottom, paint);
+            renderer.drawRect(mDirtyRegion.fLeft, mDirtyRegion.fTop, mDirtyRegion.fRight,
+                              mDirtyRegion.fBottom, paint);
         }
     }
 
@@ -169,7 +171,8 @@ void FrameInfoVisualizer::initializeRects(const int baseline, const int width) {
 
 void FrameInfoVisualizer::nextBarSegment(FrameInfoIndex start, FrameInfoIndex end) {
     int fast_i = (mNumFastRects - 1) * 4;
-    int janky_i = (mNumJankyRects - 1) * 4;;
+    int janky_i = (mNumJankyRects - 1) * 4;
+    ;
     for (size_t fi = 0; fi < mFrameSource.size(); fi++) {
         if (mFrameSource[fi][FrameInfoIndex::Flags] & FrameInfoFlags::SkippedFrame) {
             continue;
@@ -210,11 +213,8 @@ void FrameInfoVisualizer::drawThreshold(IProfileRenderer& renderer) {
     SkPaint paint;
     paint.setColor(THRESHOLD_COLOR);
     float yLocation = renderer.getViewportHeight() - (FRAME_THRESHOLD * mVerticalUnit);
-    renderer.drawRect(0.0f,
-            yLocation - mThresholdStroke/2,
-            renderer.getViewportWidth(),
-            yLocation + mThresholdStroke/2,
-            paint);
+    renderer.drawRect(0.0f, yLocation - mThresholdStroke / 2, renderer.getViewportWidth(),
+                      yLocation + mThresholdStroke / 2, paint);
 }
 
 bool FrameInfoVisualizer::consumeProperties() {
@@ -245,22 +245,19 @@ void FrameInfoVisualizer::dumpData(int fd) {
     // last call to dumpData(). In other words if there's a dumpData(), draw frame,
     // dumpData(), the last dumpData() should only log 1 frame.
 
-    FILE *file = fdopen(fd, "a");
-    fprintf(file, "\n\tDraw\tPrepare\tProcess\tExecute\n");
+    dprintf(fd, "\n\tDraw\tPrepare\tProcess\tExecute\n");
 
     for (size_t i = 0; i < mFrameSource.size(); i++) {
         if (mFrameSource[i][FrameInfoIndex::IntendedVsync] <= mLastFrameLogged) {
             continue;
         }
         mLastFrameLogged = mFrameSource[i][FrameInfoIndex::IntendedVsync];
-        fprintf(file, "\t%3.2f\t%3.2f\t%3.2f\t%3.2f\n",
+        dprintf(fd, "\t%3.2f\t%3.2f\t%3.2f\t%3.2f\n",
                 durationMS(i, FrameInfoIndex::IntendedVsync, FrameInfoIndex::SyncStart),
                 durationMS(i, FrameInfoIndex::SyncStart, FrameInfoIndex::IssueDrawCommandsStart),
                 durationMS(i, FrameInfoIndex::IssueDrawCommandsStart, FrameInfoIndex::SwapBuffers),
                 durationMS(i, FrameInfoIndex::SwapBuffers, FrameInfoIndex::FrameCompleted));
     }
-
-    fflush(file);
 }
 
 } /* namespace uirenderer */

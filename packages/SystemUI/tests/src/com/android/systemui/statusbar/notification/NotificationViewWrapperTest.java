@@ -20,6 +20,8 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 
 import com.android.systemui.SysuiTestCase;
@@ -30,8 +32,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
 @SmallTest
+@RunWithLooper(setAsMainLooper = true)
 public class NotificationViewWrapperTest extends SysuiTestCase {
 
     @Test

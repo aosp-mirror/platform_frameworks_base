@@ -16,15 +16,17 @@
 
 package android.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import junit.framework.TestCase;
+import android.support.test.filters.LargeTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Random;
+import junit.framework.TestCase;
 
+@LargeTest
 public class Base64Test extends TestCase {
     private static final String TAG = "Base64Test";
 

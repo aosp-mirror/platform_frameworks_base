@@ -1487,10 +1487,16 @@ please see styles_device_defaults.xml.
         <item name="successColor">@color/lock_pattern_view_success_color</item>
     </style>
 
-    <!-- @hide -->
+    <!-- @hide Autofill background for popup window (not for fullscreen) -->
     <style name="AutofillDatasetPicker">
         <item name="elevation">4dp</item>
         <item name="background">@drawable/autofill_dataset_picker_background</item>
+    </style>
+
+    <!-- @hide -->
+    <style name="AutofillHalfScreenAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_in_up</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_down</item>
     </style>
 
     <!-- @hide -->
@@ -1508,6 +1514,12 @@ please see styles_device_defaults.xml.
         <item name="paddingStart">8dp</item>
         <item name="paddingBottom">@dimen/media_notification_actions_padding_bottom</item>
         <item name="gravity">top</item>
+    </style>
+
+    <!-- Colored bordered ink button -->
+    <style name="NotificationEmphasizedAction" parent="Widget.Material.Button">
+        <item name="background">@drawable/btn_notification_emphasized</item>
+        <item name="stateListAnimator">@anim/flat_button_state_list_anim_material</item>
     </style>
 
 </resources>

@@ -71,6 +71,7 @@ interface ILocationManager
     void removeGnssNavigationMessageListener(in IGnssNavigationMessageListener listener);
 
     int getGnssYearOfHardware();
+    String getGnssHardwareModelName();
 
     int getGnssBatchSize(String packageName);
     boolean addGnssBatchingCallback(in IBatchedLocationCallback callback, String packageName);
@@ -78,6 +79,7 @@ interface ILocationManager
     boolean startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName);
     void flushGnssBatch(String packageName);
     boolean stopGnssBatch();
+    boolean injectLocation(in Location location);
 
     // --- deprecated ---
     List<String> getAllProviders();
@@ -86,8 +88,11 @@ interface ILocationManager
     boolean providerMeetsCriteria(String provider, in Criteria criteria);
     ProviderProperties getProviderProperties(String provider);
     String getNetworkProviderPackage();
-    boolean isProviderEnabled(String provider);
 
+    boolean isProviderEnabledForUser(String provider, int userId);
+    boolean setProviderEnabledForUser(String provider, boolean enabled, int userId);
+    boolean isLocationEnabledForUser(int userId);
+    void setLocationEnabledForUser(boolean enabled, int userId);
     void addTestProvider(String name, in ProviderProperties properties, String opPackageName);
     void removeTestProvider(String provider, String opPackageName);
     void setTestProviderLocation(String provider, in Location loc, String opPackageName);

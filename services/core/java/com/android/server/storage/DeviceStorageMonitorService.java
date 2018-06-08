@@ -40,6 +40,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
+import android.util.DataUnit;
 import android.util.Slog;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
@@ -80,13 +81,13 @@ public class DeviceStorageMonitorService extends SystemService {
 
     private static final int MSG_CHECK = 1;
 
-    private static final long DEFAULT_LOG_DELTA_BYTES = 64 * TrafficStats.MB_IN_BYTES;
+    private static final long DEFAULT_LOG_DELTA_BYTES = DataUnit.MEBIBYTES.toBytes(64);
     private static final long DEFAULT_CHECK_INTERVAL = DateUtils.MINUTE_IN_MILLIS;
 
     // com.android.internal.R.string.low_internal_storage_view_text_no_boot
     // hard codes 250MB in the message as the storage space required for the
     // boot image.
-    private static final long BOOT_IMAGE_STORAGE_REQUIREMENT = 250 * TrafficStats.MB_IN_BYTES;
+    private static final long BOOT_IMAGE_STORAGE_REQUIREMENT = DataUnit.MEBIBYTES.toBytes(250);
 
     private NotificationManager mNotifManager;
 

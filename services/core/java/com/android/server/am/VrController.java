@@ -20,6 +20,9 @@ import android.content.ComponentName;
 import android.os.Process;
 import android.service.vr.IPersistentVrStateCallbacks;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoUtils;
+
 import com.android.server.LocalServices;
 import com.android.server.vr.VrManagerInternal;
 
@@ -48,6 +51,18 @@ final class VrController {
     private static final int FLAG_NON_VR_MODE = 0;
     private static final int FLAG_VR_MODE = 1;
     private static final int FLAG_PERSISTENT_VR_MODE = 2;
+
+    // Keep the enum lists in sync
+    private static int[] ORIG_ENUMS = new int[] {
+            FLAG_NON_VR_MODE,
+            FLAG_VR_MODE,
+            FLAG_PERSISTENT_VR_MODE,
+    };
+    private static int[] PROTO_ENUMS = new int[] {
+            VrControllerProto.FLAG_NON_VR_MODE,
+            VrControllerProto.FLAG_VR_MODE,
+            VrControllerProto.FLAG_PERSISTENT_VR_MODE,
+    };
 
     // Invariants maintained for mVrState
     //
@@ -419,5 +434,13 @@ final class VrController {
     @Override
     public String toString() {
       return String.format("[VrState=0x%x,VrRenderThreadTid=%d]", mVrState, mVrRenderThreadTid);
+    }
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        ProtoUtils.writeBitWiseFlagsToProtoEnum(proto, VrControllerProto.VR_MODE,
+                mVrState, ORIG_ENUMS, PROTO_ENUMS);
+        proto.write(VrControllerProto.RENDER_THREAD_ID, mVrRenderThreadTid);
+        proto.end(token);
     }
 }

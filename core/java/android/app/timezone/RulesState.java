@@ -63,11 +63,12 @@ import java.lang.annotation.RetentionPolicy;
 public final class RulesState implements Parcelable {
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
+    @IntDef(prefix = { "STAGED_OPERATION_" }, value = {
             STAGED_OPERATION_UNKNOWN,
             STAGED_OPERATION_NONE,
             STAGED_OPERATION_UNINSTALL,
-            STAGED_OPERATION_INSTALL })
+            STAGED_OPERATION_INSTALL
+    })
     private @interface StagedOperationType {}
 
     /** Staged state could not be determined. */
@@ -80,10 +81,11 @@ public final class RulesState implements Parcelable {
     public static final int STAGED_OPERATION_INSTALL = 3;
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
+    @IntDef(prefix = { "DISTRO_STATUS_" }, value = {
             DISTRO_STATUS_UNKNOWN,
             DISTRO_STATUS_NONE,
-            DISTRO_STATUS_INSTALLED })
+            DISTRO_STATUS_INSTALLED
+    })
     private @interface DistroStatus {}
 
     /** The current distro status could not be determined. */
@@ -124,9 +126,6 @@ public final class RulesState implements Parcelable {
                 mStagedOperationType == STAGED_OPERATION_INSTALL /* requireNotNull */,
                 "stagedDistroRulesVersion", stagedDistroRulesVersion);
 
-        if (operationInProgress && distroStatus != DISTRO_STATUS_UNKNOWN) {
-            throw new IllegalArgumentException("distroInstalled != DISTRO_STATUS_UNKNOWN");
-        }
         this.mDistroStatus = validateDistroStatus(distroStatus);
         this.mInstalledDistroRulesVersion = validateConditionalNull(
                 mDistroStatus == DISTRO_STATUS_INSTALLED/* requireNotNull */,

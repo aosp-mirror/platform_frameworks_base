@@ -16,9 +16,6 @@
 
 package com.android.server.devicepolicy;
 
-import com.google.android.collect.Lists;
-import com.google.android.collect.Sets;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.os.FileUtils;
@@ -28,21 +25,25 @@ import android.test.AndroidTestCase;
 import android.util.Log;
 import android.util.Printer;
 
+import libcore.io.Streams;
+
+import com.google.android.collect.Lists;
+
+import junit.framework.AssertionFailedError;
+
 import org.junit.Assert;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
-import junit.framework.AssertionFailedError;
 
 public class DpmTestUtils extends AndroidTestCase {
     public static void clearDir(File dir) {
@@ -134,6 +135,11 @@ public class DpmTestUtils extends AndroidTestCase {
             Log.i(DpmTestBase.TAG, content);
             writer.write(content);
         }
+    }
+
+    public static void writeInputStreamToFile(InputStream stream, File file)
+            throws IOException {
+        Streams.copy(stream, new FileOutputStream(file));
     }
 
     private static boolean checkAssertRestrictions(Bundle a, Bundle b) {

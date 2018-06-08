@@ -1,0 +1,21 @@
+# People who can approve changes for submission
+asapperstein@google.com
+asargent@google.com
+dehboxturtle@google.com
+dhnishi@google.com
+dling@google.com
+dsandler@google.com
+evanlaird@google.com
+jackqdyulei@google.com
+jmonk@google.com
+mfritze@google.com
+nicoya@google.com
+rogerxue@google.com
+virgild@google.com
+zhfan@google.com
+
+# Emergency approvers in case the above are not available
+miket@google.com
+
+# Exempt resource files (because they are in a flat directory and too hard to manage via OWNERS)
+per-file *.xml=*

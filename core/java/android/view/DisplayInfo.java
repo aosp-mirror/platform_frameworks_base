@@ -16,16 +16,23 @@
 
 package android.view;
 
+import static android.view.DisplayInfoProto.APP_HEIGHT;
+import static android.view.DisplayInfoProto.APP_WIDTH;
+import static android.view.DisplayInfoProto.LOGICAL_HEIGHT;
+import static android.view.DisplayInfoProto.LOGICAL_WIDTH;
+import static android.view.DisplayInfoProto.NAME;
+
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
-
-import libcore.util.Objects;
+import android.util.proto.ProtoOutputStream;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Describes the characteristics of a particular logical display.
@@ -140,6 +147,13 @@ public final class DisplayInfo implements Parcelable {
      * Number of overscan pixels on the bottom side of the display.
      */
     public int overscanBottom;
+
+    /**
+     * The {@link DisplayCutout} if present, otherwise {@code null}.
+     *
+     * @hide
+     */
+    public DisplayCutout displayCutout;
 
     /**
      * The rotation of the display relative to its natural orientation.
@@ -280,8 +294,8 @@ public final class DisplayInfo implements Parcelable {
                 && layerStack == other.layerStack
                 && flags == other.flags
                 && type == other.type
-                && Objects.equal(address, other.address)
-                && Objects.equal(uniqueId, other.uniqueId)
+                && Objects.equals(address, other.address)
+                && Objects.equals(uniqueId, other.uniqueId)
                 && appWidth == other.appWidth
                 && appHeight == other.appHeight
                 && smallestNominalAppWidth == other.smallestNominalAppWidth
@@ -294,12 +308,13 @@ public final class DisplayInfo implements Parcelable {
                 && overscanTop == other.overscanTop
                 && overscanRight == other.overscanRight
                 && overscanBottom == other.overscanBottom
+                && Objects.equals(displayCutout, other.displayCutout)
                 && rotation == other.rotation
                 && modeId == other.modeId
                 && defaultModeId == other.defaultModeId
                 && colorMode == other.colorMode
                 && Arrays.equals(supportedColorModes, other.supportedColorModes)
-                && Objects.equal(hdrCapabilities, other.hdrCapabilities)
+                && Objects.equals(hdrCapabilities, other.hdrCapabilities)
                 && logicalDensityDpi == other.logicalDensityDpi
                 && physicalXDpi == other.physicalXDpi
                 && physicalYDpi == other.physicalYDpi
@@ -307,7 +322,7 @@ public final class DisplayInfo implements Parcelable {
                 && presentationDeadlineNanos == other.presentationDeadlineNanos
                 && state == other.state
                 && ownerUid == other.ownerUid
-                && Objects.equal(ownerPackageName, other.ownerPackageName)
+                && Objects.equals(ownerPackageName, other.ownerPackageName)
                 && removeMode == other.removeMode;
     }
 
@@ -335,6 +350,7 @@ public final class DisplayInfo implements Parcelable {
         overscanTop = other.overscanTop;
         overscanRight = other.overscanRight;
         overscanBottom = other.overscanBottom;
+        displayCutout = other.displayCutout;
         rotation = other.rotation;
         modeId = other.modeId;
         defaultModeId = other.defaultModeId;
@@ -372,6 +388,7 @@ public final class DisplayInfo implements Parcelable {
         overscanTop = source.readInt();
         overscanRight = source.readInt();
         overscanBottom = source.readInt();
+        displayCutout = DisplayCutout.ParcelableWrapper.readCutoutFromParcel(source);
         rotation = source.readInt();
         modeId = source.readInt();
         defaultModeId = source.readInt();
@@ -418,6 +435,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(overscanTop);
         dest.writeInt(overscanRight);
         dest.writeInt(overscanBottom);
+        DisplayCutout.ParcelableWrapper.writeCutoutToParcel(displayCutout, dest, flags);
         dest.writeInt(rotation);
         dest.writeInt(modeId);
         dest.writeInt(defaultModeId);
@@ -562,10 +580,10 @@ public final class DisplayInfo implements Parcelable {
         outMetrics.xdpi = outMetrics.noncompatXdpi = physicalXDpi;
         outMetrics.ydpi = outMetrics.noncompatYdpi = physicalYDpi;
 
-        width = configuration != null && configuration.appBounds != null
-                ? configuration.appBounds.width() : width;
-        height = configuration != null && configuration.appBounds != null
-                ? configuration.appBounds.height() : height;
+        final Rect appBounds = configuration != null
+                ? configuration.windowConfiguration.getAppBounds() : null;
+        width = appBounds != null ? appBounds.width() : width;
+        height = appBounds != null ? appBounds.height() : height;
 
         outMetrics.noncompatWidthPixels  = outMetrics.widthPixels = width;
         outMetrics.noncompatHeightPixels = outMetrics.heightPixels = height;
@@ -652,6 +670,23 @@ public final class DisplayInfo implements Parcelable {
         sb.append(removeMode);
         sb.append("}");
         return sb.toString();
+    }
+
+    /**
+     * Write to a protocol buffer output stream.
+     * Protocol buffer message definition at {@link android.view.DisplayInfoProto}
+     *
+     * @param protoOutputStream Stream to write the Rect object to.
+     * @param fieldId           Field Id of the DisplayInfoProto as defined in the parent message
+     */
+    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
+        final long token = protoOutputStream.start(fieldId);
+        protoOutputStream.write(LOGICAL_WIDTH, logicalWidth);
+        protoOutputStream.write(LOGICAL_HEIGHT, logicalHeight);
+        protoOutputStream.write(APP_WIDTH, appWidth);
+        protoOutputStream.write(APP_HEIGHT, appHeight);
+        protoOutputStream.write(NAME, name);
+        protoOutputStream.end(token);
     }
 
     private static String flagsToString(int flags) {

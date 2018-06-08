@@ -16,11 +16,6 @@
 
 package android.graphics.drawable;
 
-import com.android.internal.R;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ActivityInfo.Config;
@@ -41,6 +36,11 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.util.AttributeSet;
+
+import com.android.internal.R;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -135,9 +135,6 @@ public class RippleDrawable extends LayerDrawable {
     private PorterDuffColorFilter mMaskColorFilter;
     private boolean mHasValidMask;
 
-    /** Whether we expect to draw a background when visible. */
-    private boolean mBackgroundActive;
-
     /** The current ripple. May be actively animating or pending entry. */
     private RippleForeground mRipple;
 
@@ -217,7 +214,7 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         if (mBackground != null) {
-            mBackground.end();
+            mBackground.jumpToFinal();
         }
 
         cancelExitingRipples();
@@ -267,7 +264,7 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         setRippleActive(enabled && pressed);
-        setBackgroundActive(hovered || focused || (enabled && pressed), focused || hovered);
+        setBackgroundActive(hovered, focused, pressed);
 
         return changed;
     }
@@ -283,14 +280,13 @@ public class RippleDrawable extends LayerDrawable {
         }
     }
 
-    private void setBackgroundActive(boolean active, boolean focused) {
-        if (mBackgroundActive != active) {
-            mBackgroundActive = active;
-            if (active) {
-                tryBackgroundEnter(focused);
-            } else {
-                tryBackgroundExit();
-            }
+    private void setBackgroundActive(boolean hovered, boolean focused, boolean pressed) {
+        if (mBackground == null && (hovered || focused)) {
+            mBackground = new RippleBackground(this, mHotspotBounds, isBounded());
+            mBackground.setup(mState.mMaxRadius, mDensity);
+        }
+        if (mBackground != null) {
+            mBackground.setState(focused, hovered, pressed);
         }
     }
 
@@ -301,6 +297,12 @@ public class RippleDrawable extends LayerDrawable {
         if (!mOverrideBounds) {
             mHotspotBounds.set(bounds);
             onHotspotBoundsChanged();
+        }
+
+        final int count = mExitingRipplesCount;
+        final RippleForeground[] ripples = mExitingRipples;
+        for (int i = 0; i < count; i++) {
+            ripples[i].onBoundsChange();
         }
 
         if (mBackground != null) {
@@ -325,10 +327,6 @@ public class RippleDrawable extends LayerDrawable {
             // visibilities are consistent with their internal states.
             if (mRippleActive) {
                 tryRippleEnter();
-            }
-
-            if (mBackgroundActive) {
-                tryBackgroundEnter(false);
             }
 
             // Skip animations, just show the correct final states.
@@ -546,26 +544,6 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     /**
-     * Creates an active hotspot at the specified location.
-     */
-    private void tryBackgroundEnter(boolean focused) {
-        if (mBackground == null) {
-            final boolean isBounded = isBounded();
-            mBackground = new RippleBackground(this, mHotspotBounds, isBounded, mForceSoftware);
-        }
-
-        mBackground.setup(mState.mMaxRadius, mDensity);
-        mBackground.enter(focused);
-    }
-
-    private void tryBackgroundExit() {
-        if (mBackground != null) {
-            // Don't null out the background, we need it to draw!
-            mBackground.exit();
-        }
-    }
-
-    /**
      * Attempts to start an enter animation for the active hotspot. Fails if
      * there are too many animating ripples.
      */
@@ -588,12 +566,11 @@ public class RippleDrawable extends LayerDrawable {
                 y = mHotspotBounds.exactCenterY();
             }
 
-            final boolean isBounded = isBounded();
-            mRipple = new RippleForeground(this, mHotspotBounds, x, y, isBounded, mForceSoftware);
+            mRipple = new RippleForeground(this, mHotspotBounds, x, y, mForceSoftware);
         }
 
         mRipple.setup(mState.mMaxRadius, mDensity);
-        mRipple.enter(false);
+        mRipple.enter();
     }
 
     /**
@@ -623,9 +600,7 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         if (mBackground != null) {
-            mBackground.end();
-            mBackground = null;
-            mBackgroundActive = false;
+            mBackground.setState(false, false, false);
         }
 
         cancelExitingRipples();
@@ -693,7 +668,9 @@ public class RippleDrawable extends LayerDrawable {
         // have a mask or content and the ripple bounds if we're projecting.
         final Rect bounds = getDirtyBounds();
         final int saveCount = canvas.save(Canvas.CLIP_SAVE_FLAG);
-        canvas.clipRect(bounds);
+        if (isBounded()) {
+            canvas.clipRect(bounds);
+        }
 
         drawContent(canvas);
         drawBackgroundAndRipples(canvas);
@@ -856,37 +833,7 @@ public class RippleDrawable extends LayerDrawable {
         final float y = mHotspotBounds.exactCenterY();
         canvas.translate(x, y);
 
-        updateMaskShaderIfNeeded();
-
-        // Position the shader to account for canvas translation.
-        if (mMaskShader != null) {
-            final Rect bounds = getBounds();
-            mMaskMatrix.setTranslate(bounds.left - x, bounds.top - y);
-            mMaskShader.setLocalMatrix(mMaskMatrix);
-        }
-
-        // Grab the color for the current state and cut the alpha channel in
-        // half so that the ripple and background together yield full alpha.
-        final int color = mState.mColor.getColorForState(getState(), Color.BLACK);
-        final int halfAlpha = (Color.alpha(color) / 2) << 24;
         final Paint p = getRipplePaint();
-
-        if (mMaskColorFilter != null) {
-            // The ripple timing depends on the paint's alpha value, so we need
-            // to push just the alpha channel into the paint and let the filter
-            // handle the full-alpha color.
-            final int fullAlphaColor = color | (0xFF << 24);
-            mMaskColorFilter.setColor(fullAlphaColor);
-
-            p.setColor(halfAlpha);
-            p.setColorFilter(mMaskColorFilter);
-            p.setShader(mMaskShader);
-        } else {
-            final int halfAlphaColor = (color & 0xFFFFFF) | halfAlpha;
-            p.setColor(halfAlphaColor);
-            p.setColorFilter(null);
-            p.setShader(null);
-        }
 
         if (background != null && background.isVisible()) {
             background.draw(canvas, p);
@@ -910,13 +857,48 @@ public class RippleDrawable extends LayerDrawable {
         mMask.draw(canvas);
     }
 
-    private Paint getRipplePaint() {
+    Paint getRipplePaint() {
         if (mRipplePaint == null) {
             mRipplePaint = new Paint();
             mRipplePaint.setAntiAlias(true);
             mRipplePaint.setStyle(Paint.Style.FILL);
         }
-        return mRipplePaint;
+
+        final float x = mHotspotBounds.exactCenterX();
+        final float y = mHotspotBounds.exactCenterY();
+
+        updateMaskShaderIfNeeded();
+
+        // Position the shader to account for canvas translation.
+        if (mMaskShader != null) {
+            final Rect bounds = getBounds();
+            mMaskMatrix.setTranslate(bounds.left - x, bounds.top - y);
+            mMaskShader.setLocalMatrix(mMaskMatrix);
+        }
+
+        // Grab the color for the current state and cut the alpha channel in
+        // half so that the ripple and background together yield full alpha.
+        int color = mState.mColor.getColorForState(getState(), Color.BLACK);
+        if (Color.alpha(color) > 128) {
+            color = (color & 0x00FFFFFF) | 0x80000000;
+        }
+        final Paint p = mRipplePaint;
+
+        if (mMaskColorFilter != null) {
+            // The ripple timing depends on the paint's alpha value, so we need
+            // to push just the alpha channel into the paint and let the filter
+            // handle the full-alpha color.
+            mMaskColorFilter.setColor(color | 0xFF000000);
+            p.setColor(color & 0xFF000000);
+            p.setColorFilter(mMaskColorFilter);
+            p.setShader(mMaskShader);
+        } else {
+            p.setColor(color);
+            p.setColorFilter(null);
+            p.setShader(null);
+        }
+
+        return p;
     }
 
     @Override

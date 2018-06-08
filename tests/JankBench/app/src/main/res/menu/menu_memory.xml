@@ -1,0 +1,5 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" tools:context="com.android.benchmark.Memory">
+    <item android:id="@+id/action_settings" android:title="@string/action_export"
+        android:orderInCategory="100" />
+</menu>

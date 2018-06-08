@@ -61,7 +61,7 @@ public class HardwareBgDrawable extends LayerDrawable {
                             : R.drawable.rounded_bg_bottom).mutate(),
             };
         }
-        layers[1].setTint(Utils.getColorAttr(context, android.R.attr.colorPrimaryDark));
+        layers[1].setTint(Utils.getColorAttr(context, android.R.attr.colorPrimary));
         return layers;
     }
 

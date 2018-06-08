@@ -78,6 +78,11 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                     }
                     break;
                 }
+                case READY: {
+                    mRemainingAttempts = -1;
+                    resetState();
+                    break;
+                }
                 default:
                     resetState();
             }
@@ -131,7 +136,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
         }
 
         if (isEsimLocked) {
-            msg = msg + " " + rez.getString(R.string.kg_sim_lock_instructions_esim);
+            msg = rez.getString(R.string.kg_sim_lock_esim_instructions, msg);
         }
 
         mSecurityMessageDisplay.setMessage(msg);
@@ -168,7 +173,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     }
 
     @Override
-    protected int getPromtReasonStringRes(int reason) {
+    protected int getPromptReasonStringRes(int reason) {
         // No message on SIM Pin
         return 0;
     }
@@ -186,6 +191,10 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
         } else {
             msgId = isDefault ? R.string.kg_sim_pin_instructions : R.string.kg_password_pin_failed;
             displayMessage = getContext().getString(msgId);
+        }
+        if (KeyguardEsimArea.isEsimLocked(mContext, mSubId)) {
+            displayMessage = getResources()
+                    .getString(R.string.kg_sim_lock_esim_instructions, displayMessage);
         }
         if (DEBUG) Log.d(LOG_TAG, "getPinPasswordErrorMessage:"
                 + " attemptsRemaining=" + attemptsRemaining + " displayMessage=" + displayMessage);
@@ -385,6 +394,12 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     @Override
     public boolean startDisappearAnimation(Runnable finishRunnable) {
         return false;
+    }
+
+    @Override
+    public CharSequence getTitle() {
+        return getContext().getString(
+                com.android.internal.R.string.keyguard_accessibility_sim_pin_unlock);
     }
 }
 

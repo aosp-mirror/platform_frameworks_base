@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 option java_package = "android.content";
 option java_multiple_files = true;
 
 package android.content;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 /**
  * An android.content.ComponentName object.
  */
 message ComponentNameProto {
-    string package_name = 1;
-    string class_name = 2;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional string package_name = 1;
+    optional string class_name = 2;
 }
 

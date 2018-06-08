@@ -31,7 +31,10 @@ namespace android {
 namespace uirenderer {
 
 Extensions::Extensions() {
-    const char* version = (const char*) glGetString(GL_VERSION);
+    if (Properties::isSkiaEnabled()) {
+        return;
+    }
+    const char* version = (const char*)glGetString(GL_VERSION);
 
     // Section 6.1.5 of the OpenGL ES specification indicates the GL version
     // string strictly follows this format:
@@ -51,7 +54,7 @@ Extensions::Extensions() {
         mVersionMinor = 0;
     }
 
-    auto extensions = StringUtils::split((const char*) glGetString(GL_EXTENSIONS));
+    auto extensions = StringUtils::split((const char*)glGetString(GL_EXTENSIONS));
     mHasNPot = extensions.has("GL_OES_texture_npot");
     mHasFramebufferFetch = extensions.has("GL_NV_shader_framebuffer_fetch");
     mHasDiscardFramebuffer = extensions.has("GL_EXT_discard_framebuffer");
@@ -59,6 +62,7 @@ Extensions::Extensions() {
     mHas1BitStencil = extensions.has("GL_OES_stencil1");
     mHas4BitStencil = extensions.has("GL_OES_stencil4");
     mHasUnpackSubImage = extensions.has("GL_EXT_unpack_subimage");
+    mHasRenderableFloatTexture = extensions.has("GL_OES_texture_half_float");
 
     mHasSRGB = mVersionMajor >= 3 || extensions.has("GL_EXT_sRGB");
     mHasSRGBWriteControl = extensions.has("GL_EXT_sRGB_write_control");
@@ -75,5 +79,5 @@ Extensions::Extensions() {
 #endif
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

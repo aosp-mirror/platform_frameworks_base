@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId.FULLSCREEN_WORKSPACE_STACK_ID;
-
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static com.android.server.wm.BoundsAnimationController.NO_PIP_MODE_CHANGED_CALLBACKS;
 import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_END;
 import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_START;
@@ -25,8 +25,6 @@ import static com.android.server.wm.BoundsAnimationController.SchedulePipModeCha
 
 import android.app.RemoteAction;
 import android.graphics.Rect;
-
-import com.android.server.UiThread;
 
 import java.util.List;
 
@@ -39,8 +37,8 @@ public class PinnedStackWindowController extends StackWindowController {
     private Rect mTmpToBounds = new Rect();
 
     public PinnedStackWindowController(int stackId, PinnedStackWindowListener listener,
-            int displayId, boolean onTop, Rect outBounds) {
-        super(stackId, listener, displayId, onTop, outBounds, WindowManagerService.getInstance());
+            int displayId, boolean onTop, Rect outBounds, WindowManagerService service) {
+        super(stackId, listener, displayId, onTop, outBounds, service);
     }
 
     /**
@@ -63,7 +61,7 @@ public class PinnedStackWindowController extends StackWindowController {
                     displayContent.getPinnedStackController();
             if (stackBounds == null) {
                 // Calculate the aspect ratio bounds from the default bounds
-                stackBounds = pinnedStackController.getDefaultBounds();
+                stackBounds = pinnedStackController.getDefaultOrLastSavedBounds();
             }
 
             if (pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)) {
@@ -100,14 +98,15 @@ public class PinnedStackWindowController extends StackWindowController {
                 }
                 schedulePipModeChangedState = SCHEDULE_PIP_MODE_CHANGED_ON_START;
 
-                mService.getStackBounds(FULLSCREEN_WORKSPACE_STACK_ID, mTmpToBounds);
+                mService.getStackBounds(
+                        WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mTmpToBounds);
                 if (!mTmpToBounds.isEmpty()) {
                     // If there is a fullscreen bounds, use that
                     toBounds = new Rect(mTmpToBounds);
                 } else {
                     // Otherwise, use the display bounds
                     toBounds = new Rect();
-                    mContainer.getDisplayContent().getLogicalDisplayRect(toBounds);
+                    mContainer.getDisplayContent().getBounds(toBounds);
                 }
             } else if (fromFullscreen) {
                 schedulePipModeChangedState = SCHEDULE_PIP_MODE_CHANGED_ON_END;
@@ -174,7 +173,7 @@ public class PinnedStackWindowController extends StackWindowController {
      * from fullscreen to non-fullscreen bounds.
      */
     public boolean deferScheduleMultiWindowModeChanged() {
-        synchronized(mWindowMap) {
+        synchronized (mWindowMap) {
             return mContainer.deferScheduleMultiWindowModeChanged();
         }
     }

@@ -20,6 +20,7 @@ import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 
 import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
+import android.app.KeyguardManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -209,8 +210,8 @@ public final class Display {
      * </p>
      *
      * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD
-     * @see WindowManagerPolicy#isKeyguardSecure(int)
-     * @see WindowManagerPolicy#isKeyguardTrustedLw()
+     * @see KeyguardManager#isDeviceSecure()
+     * @see KeyguardManager#isDeviceLocked()
      * @see #getFlags
      * @hide
      */
@@ -266,21 +267,21 @@ public final class Display {
      *
      * @see #getState
      */
-    public static final int STATE_UNKNOWN = 0;
+    public static final int STATE_UNKNOWN = ViewProtoEnums.DISPLAY_STATE_UNKNOWN; // 0
 
     /**
      * Display state: The display is off.
      *
      * @see #getState
      */
-    public static final int STATE_OFF = 1;
+    public static final int STATE_OFF = ViewProtoEnums.DISPLAY_STATE_OFF; // 1
 
     /**
      * Display state: The display is on.
      *
      * @see #getState
      */
-    public static final int STATE_ON = 2;
+    public static final int STATE_ON = ViewProtoEnums.DISPLAY_STATE_ON; // 2
 
     /**
      * Display state: The display is dozing in a low power state; it is still
@@ -290,20 +291,19 @@ public final class Display {
      * @see #getState
      * @see android.os.PowerManager#isInteractive
      */
-    public static final int STATE_DOZE = 3;
+    public static final int STATE_DOZE = ViewProtoEnums.DISPLAY_STATE_DOZE; // 3
 
     /**
      * Display state: The display is dozing in a suspended low power state; it is still
-     * on but is optimized for showing static system-provided content while the device
-     * is non-interactive.  This mode may be used to conserve even more power by allowing
-     * the hardware to stop applying frame buffer updates from the graphics subsystem or
-     * to take over the display and manage it autonomously to implement low power always-on
-     * display functionality.
+     * on but the CPU is not updating it. This may be used in one of two ways: to show
+     * static system-provided content while the device is non-interactive, or to allow
+     * a "Sidekick" compute resource to update the display. For this reason, the
+     * CPU must not control the display in this mode.
      *
      * @see #getState
      * @see android.os.PowerManager#isInteractive
      */
-    public static final int STATE_DOZE_SUSPEND = 4;
+    public static final int STATE_DOZE_SUSPEND = ViewProtoEnums.DISPLAY_STATE_DOZE_SUSPEND; // 4
 
     /**
      * Display state: The display is on and optimized for VR mode.
@@ -311,7 +311,19 @@ public final class Display {
      * @see #getState
      * @see android.os.PowerManager#isInteractive
      */
-    public static final int STATE_VR = 5;
+    public static final int STATE_VR = ViewProtoEnums.DISPLAY_STATE_VR; // 5
+
+    /**
+     * Display state: The display is in a suspended full power state; it is still
+     * on but the CPU is not updating it. This may be used in one of two ways: to show
+     * static system-provided content while the device is non-interactive, or to allow
+     * a "Sidekick" compute resource to update the display. For this reason, the
+     * CPU must not control the display in this mode.
+     *
+     * @see #getState
+     * @see android.os.PowerManager#isInteractive
+     */
+    public static final int STATE_ON_SUSPEND = ViewProtoEnums.DISPLAY_STATE_ON_SUSPEND; // 6
 
     /* The color mode constants defined below must be kept in sync with the ones in
      * system/core/include/system/graphics-base.h */
@@ -994,7 +1006,7 @@ public final class Display {
      * Gets the state of the display, such as whether it is on or off.
      *
      * @return The state of the display: one of {@link #STATE_OFF}, {@link #STATE_ON},
-     * {@link #STATE_DOZE}, {@link #STATE_DOZE_SUSPEND}, or
+     * {@link #STATE_DOZE}, {@link #STATE_DOZE_SUSPEND}, {@link #STATE_ON_SUSPEND}, or
      * {@link #STATE_UNKNOWN}.
      */
     public int getState() {
@@ -1113,6 +1125,8 @@ public final class Display {
                 return "DOZE_SUSPEND";
             case STATE_VR:
                 return "VR";
+            case STATE_ON_SUSPEND:
+                return "ON_SUSPEND";
             default:
                 return Integer.toString(state);
         }
@@ -1120,11 +1134,11 @@ public final class Display {
 
     /**
      * Returns true if display updates may be suspended while in the specified
-     * display power state.
+     * display power state. In SUSPEND states, updates are absolutely forbidden.
      * @hide
      */
     public static boolean isSuspendedState(int state) {
-        return state == STATE_OFF || state == STATE_DOZE_SUSPEND;
+        return state == STATE_OFF || state == STATE_DOZE_SUSPEND || state == STATE_ON_SUSPEND;
     }
 
     /**
@@ -1309,10 +1323,10 @@ public final class Display {
         public static final int HDR_TYPE_HLG = 3;
 
         /** @hide */
-        @IntDef({
-            HDR_TYPE_DOLBY_VISION,
-            HDR_TYPE_HDR10,
-            HDR_TYPE_HLG,
+        @IntDef(prefix = { "HDR_TYPE_" }, value = {
+                HDR_TYPE_DOLBY_VISION,
+                HDR_TYPE_HDR10,
+                HDR_TYPE_HLG,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface HdrType {}

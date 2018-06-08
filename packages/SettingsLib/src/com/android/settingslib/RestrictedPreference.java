@@ -44,8 +44,7 @@ public class RestrictedPreference extends TwoTargetPreference {
     }
 
     public RestrictedPreference(Context context, AttributeSet attrs) {
-        this(context, attrs, TypedArrayUtils.getAttr(context,
-                android.support.v7.preference.R.attr.preferenceStyle,
+        this(context, attrs, TypedArrayUtils.getAttr(context, R.attr.preferenceStyle,
                 android.R.attr.preferenceStyle));
     }
 

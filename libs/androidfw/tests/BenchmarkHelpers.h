@@ -14,21 +14,25 @@
  * limitations under the License.
  */
 
-#ifndef TESTS_BENCHMARKHELPERS_H_
-#define TESTS_BENCHMARKHELPERS_H_
+#ifndef ANDROIDFW_TESTS_BENCHMARKHELPERS_H
+#define ANDROIDFW_TESTS_BENCHMARKHELPERS_H
 
 #include <string>
 #include <vector>
 
+#include "androidfw/ResourceTypes.h"
 #include "benchmark/benchmark.h"
 
-#include "androidfw/ResourceTypes.h"
+#include "CommonHelpers.h"
 
 namespace android {
 
 void GetResourceBenchmarkOld(const std::vector<std::string>& paths, const ResTable_config* config,
-                             uint32_t resid, benchmark::State& state);
+                             uint32_t resid, ::benchmark::State& state);
+
+void GetResourceBenchmark(const std::vector<std::string>& paths, const ResTable_config* config,
+                          uint32_t resid, benchmark::State& state);
 
 }  // namespace android
 
-#endif /* TESTS_BENCHMARKHELPERS_H_ */
+#endif  // ANDROIDFW_TESTS_BENCHMARKHELPERS_H

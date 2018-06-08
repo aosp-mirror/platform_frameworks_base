@@ -22,5 +22,4 @@ import com.android.systemui.recents.events.EventBus;
  * This is sent when the PiP should be expanded due to being relaunched.
  */
 public class ExpandPipEvent extends EventBus.Event {
-    public final boolean clearThumbnailWindows = true;
 }

@@ -70,8 +70,8 @@ private:
     KeyedVector<uint32_t, uint32_t> mPublishedSeqMap;
     uint32_t mNextPublishedSeq;
 
-    const char* getInputChannelName() {
-        return mInputPublisher.getChannel()->getName().string();
+    const std::string getInputChannelName() {
+        return mInputPublisher.getChannel()->getName();
     }
 
     virtual int handleEvent(int receiveFd, int events, void* data);
@@ -86,7 +86,7 @@ NativeInputEventSender::NativeInputEventSender(JNIEnv* env,
         mInputPublisher(inputChannel), mMessageQueue(messageQueue),
         mNextPublishedSeq(1) {
     if (kDebugDispatchCycle) {
-        ALOGD("channel '%s' ~ Initializing input event sender.", getInputChannelName());
+        ALOGD("channel '%s' ~ Initializing input event sender.", getInputChannelName().c_str());
     }
 }
 
@@ -103,7 +103,7 @@ status_t NativeInputEventSender::initialize() {
 
 void NativeInputEventSender::dispose() {
     if (kDebugDispatchCycle) {
-        ALOGD("channel '%s' ~ Disposing input event sender.", getInputChannelName());
+        ALOGD("channel '%s' ~ Disposing input event sender.", getInputChannelName().c_str());
     }
 
     mMessageQueue->getLooper()->removeFd(mInputPublisher.getChannel()->getFd());
@@ -111,7 +111,7 @@ void NativeInputEventSender::dispose() {
 
 status_t NativeInputEventSender::sendKeyEvent(uint32_t seq, const KeyEvent* event) {
     if (kDebugDispatchCycle) {
-        ALOGD("channel '%s' ~ Sending key event, seq=%u.", getInputChannelName(), seq);
+        ALOGD("channel '%s' ~ Sending key event, seq=%u.", getInputChannelName().c_str(), seq);
     }
 
     uint32_t publishedSeq = mNextPublishedSeq++;
@@ -121,7 +121,7 @@ status_t NativeInputEventSender::sendKeyEvent(uint32_t seq, const KeyEvent* even
             event->getRepeatCount(), event->getDownTime(), event->getEventTime());
     if (status) {
         ALOGW("Failed to send key event on channel '%s'.  status=%d",
-                getInputChannelName(), status);
+                getInputChannelName().c_str(), status);
         return status;
     }
     mPublishedSeqMap.add(publishedSeq, seq);
@@ -130,7 +130,7 @@ status_t NativeInputEventSender::sendKeyEvent(uint32_t seq, const KeyEvent* even
 
 status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent* event) {
     if (kDebugDispatchCycle) {
-        ALOGD("channel '%s' ~ Sending motion event, seq=%u.", getInputChannelName(), seq);
+        ALOGD("channel '%s' ~ Sending motion event, seq=%u.", getInputChannelName().c_str(), seq);
     }
 
     uint32_t publishedSeq;
@@ -148,7 +148,7 @@ status_t NativeInputEventSender::sendMotionEvent(uint32_t seq, const MotionEvent
                 event->getHistoricalRawPointerCoords(0, i));
         if (status) {
             ALOGW("Failed to send motion event sample on channel '%s'.  status=%d",
-                    getInputChannelName(), status);
+                    getInputChannelName().c_str(), status);
             return status;
         }
     }
@@ -163,7 +163,7 @@ int NativeInputEventSender::handleEvent(int receiveFd, int events, void* data) {
         // soon be disposed as well.
         if (kDebugDispatchCycle) {
             ALOGD("channel '%s' ~ Consumer closed input channel or an error occurred.  "
-                    "events=0x%x", getInputChannelName(), events);
+                    "events=0x%x", getInputChannelName().c_str(), events);
         }
 
         return 0; // remove the callback
@@ -171,7 +171,7 @@ int NativeInputEventSender::handleEvent(int receiveFd, int events, void* data) {
 
     if (!(events & ALOOPER_EVENT_INPUT)) {
         ALOGW("channel '%s' ~ Received spurious callback for unhandled poll event.  "
-                "events=0x%x", getInputChannelName(), events);
+                "events=0x%x", getInputChannelName().c_str(), events);
         return 1;
     }
 
@@ -183,7 +183,7 @@ int NativeInputEventSender::handleEvent(int receiveFd, int events, void* data) {
 
 status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
     if (kDebugDispatchCycle) {
-        ALOGD("channel '%s' ~ Receiving finished signals.", getInputChannelName());
+        ALOGD("channel '%s' ~ Receiving finished signals.", getInputChannelName().c_str());
     }
 
     ScopedLocalRef<jobject> senderObj(env, NULL);
@@ -197,7 +197,7 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
                 return OK;
             }
             ALOGE("channel '%s' ~ Failed to consume finished signals.  status=%d",
-                    getInputChannelName(), status);
+                    getInputChannelName().c_str(), status);
             return status;
         }
 
@@ -209,7 +209,7 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
             if (kDebugDispatchCycle) {
                 ALOGD("channel '%s' ~ Received finished signal, seq=%u, handled=%s, "
                         "pendingEvents=%zu.",
-                        getInputChannelName(), seq, handled ? "true" : "false",
+                        getInputChannelName().c_str(), seq, handled ? "true" : "false",
                         mPublishedSeqMap.size());
             }
 
@@ -218,7 +218,7 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
                     senderObj.reset(jniGetReferent(env, mSenderWeakGlobal));
                     if (!senderObj.get()) {
                         ALOGW("channel '%s' ~ Sender object was finalized "
-                                "without being disposed.", getInputChannelName());
+                                "without being disposed.", getInputChannelName().c_str());
                         return DEAD_OBJECT;
                     }
                 }

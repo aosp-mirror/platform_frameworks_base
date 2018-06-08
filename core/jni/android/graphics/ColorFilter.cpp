@@ -30,8 +30,8 @@ using namespace uirenderer;
 
 class SkColorFilterGlue {
 public:
-    static void SafeUnref(SkShader* shader) {
-        SkSafeUnref(shader);
+    static void SafeUnref(SkColorFilter* filter) {
+        SkSafeUnref(filter);
     }
 
     static jlong GetNativeFinalizer(JNIEnv*, jobject) {

@@ -16,7 +16,7 @@
 
 package com.android.server.net;
 
-import static android.net.TrafficStats.MB_IN_BYTES;
+import static android.app.usage.NetworkStatsManager.MIN_THRESHOLD_BYTES;
 
 import static com.android.internal.util.Preconditions.checkArgument;
 
@@ -51,8 +51,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 class NetworkStatsObservers {
     private static final String TAG = "NetworkStatsObservers";
     private static final boolean LOGV = false;
-
-    private static final long MIN_THRESHOLD_BYTES = 2 * MB_IN_BYTES;
 
     private static final int MSG_REGISTER = 1;
     private static final int MSG_UNREGISTER = 2;

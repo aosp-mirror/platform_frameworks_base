@@ -358,6 +358,16 @@ public abstract class AccessibilityService extends Service {
      */
     public static final int GLOBAL_ACTION_TOGGLE_SPLIT_SCREEN = 7;
 
+    /**
+     * Action to lock the screen
+     */
+    public static final int GLOBAL_ACTION_LOCK_SCREEN = 8;
+
+    /**
+     * Action to take a screenshot
+     */
+    public static final int GLOBAL_ACTION_TAKE_SCREENSHOT = 9;
+
     private static final String LOG_TAG = "AccessibilityService";
 
     /**
@@ -386,8 +396,12 @@ public abstract class AccessibilityService extends Service {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({SHOW_MODE_AUTO, SHOW_MODE_HIDDEN})
-    public @interface SoftKeyboardShowMode {};
+    @IntDef(prefix = { "SHOW_MODE_" }, value = {
+            SHOW_MODE_AUTO,
+            SHOW_MODE_HIDDEN
+    })
+    public @interface SoftKeyboardShowMode {}
+
     public static final int SHOW_MODE_AUTO = 0;
     public static final int SHOW_MODE_HIDDEN = 1;
 
@@ -523,7 +537,7 @@ public abstract class AccessibilityService extends Service {
      * anything behind it, then only the modal window will be reported
      * (assuming it is the top one). For convenience the returned windows
      * are ordered in a descending layer order, which is the windows that
-     * are higher in the Z-order are reported first. Since the user can always
+     * are on top are reported first. Since the user can always
      * interact with the window that has input focus by typing, the focused
      * window is always returned (even if covered by a modal window).
      * <p>

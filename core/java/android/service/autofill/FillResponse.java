@@ -16,11 +16,14 @@
 
 package android.service.autofill;
 
+import static android.service.autofill.AutofillServiceHelper.assertValid;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
 import static android.view.autofill.Helper.sDebug;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.Activity;
 import android.content.IntentSender;
 import android.content.pm.ParceledListSlice;
@@ -30,35 +33,71 @@ import android.os.Parcelable;
 import android.view.autofill.AutofillId;
 import android.widget.RemoteViews;
 
+import com.android.internal.util.Preconditions;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * Response for a {@link
+ * Response for an {@link
  * AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)}.
  *
  * <p>See the main {@link AutofillService} documentation for more details and examples.
  */
 public final class FillResponse implements Parcelable {
 
+    /**
+     * Flag used to generate {@link FillEventHistory.Event events} of type
+     * {@link FillEventHistory.Event#TYPE_CONTEXT_COMMITTED}&mdash;if this flag is not passed to
+     * {@link Builder#setFlags(int)}, these events are not generated.
+     */
+    public static final int FLAG_TRACK_CONTEXT_COMMITED = 0x1;
+
+    /**
+     * Flag used to change the behavior of {@link FillResponse.Builder#disableAutofill(long)}&mdash;
+     * when this flag is passed to {@link Builder#setFlags(int)}, autofill is disabled only for the
+     * activiy that generated the {@link FillRequest}, not the whole app.
+     */
+    public static final int FLAG_DISABLE_ACTIVITY_ONLY = 0x2;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            FLAG_TRACK_CONTEXT_COMMITED,
+            FLAG_DISABLE_ACTIVITY_ONLY
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface FillResponseFlags {}
+
     private final @Nullable ParceledListSlice<Dataset> mDatasets;
     private final @Nullable SaveInfo mSaveInfo;
     private final @Nullable Bundle mClientState;
     private final @Nullable RemoteViews mPresentation;
+    private final @Nullable RemoteViews mHeader;
+    private final @Nullable RemoteViews mFooter;
     private final @Nullable IntentSender mAuthentication;
     private final @Nullable AutofillId[] mAuthenticationIds;
     private final @Nullable AutofillId[] mIgnoredIds;
+    private final long mDisableDuration;
+    private final @Nullable AutofillId[] mFieldClassificationIds;
+    private final int mFlags;
     private int mRequestId;
 
     private FillResponse(@NonNull Builder builder) {
         mDatasets = (builder.mDatasets != null) ? new ParceledListSlice<>(builder.mDatasets) : null;
         mSaveInfo = builder.mSaveInfo;
-        mClientState = builder.mCLientState;
+        mClientState = builder.mClientState;
         mPresentation = builder.mPresentation;
+        mHeader = builder.mHeader;
+        mFooter = builder.mFooter;
         mAuthentication = builder.mAuthentication;
         mAuthenticationIds = builder.mAuthenticationIds;
         mIgnoredIds = builder.mIgnoredIds;
+        mDisableDuration = builder.mDisableDuration;
+        mFieldClassificationIds = builder.mFieldClassificationIds;
+        mFlags = builder.mFlags;
         mRequestId = INVALID_REQUEST_ID;
     }
 
@@ -83,6 +122,16 @@ public final class FillResponse implements Parcelable {
     }
 
     /** @hide */
+    public @Nullable RemoteViews getHeader() {
+        return mHeader;
+    }
+
+    /** @hide */
+    public @Nullable RemoteViews getFooter() {
+        return mFooter;
+    }
+
+    /** @hide */
     public @Nullable IntentSender getAuthentication() {
         return mAuthentication;
     }
@@ -95,6 +144,22 @@ public final class FillResponse implements Parcelable {
     /** @hide */
     public @Nullable AutofillId[] getIgnoredIds() {
         return mIgnoredIds;
+    }
+
+    /** @hide */
+    public long getDisableDuration() {
+        return mDisableDuration;
+    }
+
+    /** @hide */
+    public @Nullable AutofillId[] getFieldClassificationIds() {
+        return mFieldClassificationIds;
+    }
+
+    /** @hide */
+    @TestApi
+    public int getFlags() {
+        return mFlags;
     }
 
     /**
@@ -122,16 +187,25 @@ public final class FillResponse implements Parcelable {
     public static final class Builder {
         private ArrayList<Dataset> mDatasets;
         private SaveInfo mSaveInfo;
-        private Bundle mCLientState;
+        private Bundle mClientState;
         private RemoteViews mPresentation;
+        private RemoteViews mHeader;
+        private RemoteViews mFooter;
         private IntentSender mAuthentication;
         private AutofillId[] mAuthenticationIds;
         private AutofillId[] mIgnoredIds;
+        private long mDisableDuration;
+        private AutofillId[] mFieldClassificationIds;
+        private int mFlags;
         private boolean mDestroyed;
 
         /**
-         * Requires a fill response authentication before autofilling the screen with
-         * any data set in this response.
+         * Triggers a custom UI before before autofilling the screen with any data set in this
+         * response.
+         *
+         * <p><b>Note:</b> Although the name of this method suggests that it should be used just for
+         * authentication flow, it can be used for other advanced flows; see {@link AutofillService}
+         * for examples.
          *
          * <p>This is typically useful when a user interaction is required to unlock their
          * data vault if you encrypt the data set labels and data set data. It is recommended
@@ -163,33 +237,48 @@ public final class FillResponse implements Parcelable {
          * which is used to visualize visualize the response for triggering the authentication
          * flow.
          *
-         * <p></><strong>Note:</strong> Do not make the provided pending intent
+         * <p><b>Note:</b> Do not make the provided pending intent
          * immutable by using {@link android.app.PendingIntent#FLAG_IMMUTABLE} as the
          * platform needs to fill in the authentication arguments.
          *
+         * <p>Theme does not work with RemoteViews layout. Avoid hardcoded text color
+         * or background color: Autofill on different platforms may have different themes.
+         *
          * @param authentication Intent to an activity with your authentication flow.
          * @param presentation The presentation to visualize the response.
-         * @param ids id of Views that when focused will display the authentication UI affordance.
+         * @param ids id of Views that when focused will display the authentication UI.
          *
          * @return This builder.
-         * @throws IllegalArgumentException if {@code ids} is {@code null} or empty, or if
-         * neither {@code authentication} nor {@code presentation} is non-{@code null}.
+         *
+         * @throws IllegalArgumentException if any of the following occurs:
+         * <ul>
+         *   <li>{@code ids} is {@code null}</li>
+         *   <li>{@code ids} is empty</li>
+         *   <li>{@code ids} contains a {@code null} element</li>
+         *   <li>both {@code authentication} and {@code presentation} are {@code null}</li>
+         *   <li>both {@code authentication} and {@code presentation} are non-{@code null}</li>
+         * </ul>
+         *
+         * @throws IllegalStateException if a {@link #setHeader(RemoteViews) header} or a
+         * {@link #setFooter(RemoteViews) footer} are already set for this builder.
          *
          * @see android.app.PendingIntent#getIntentSender()
          */
         public @NonNull Builder setAuthentication(@NonNull AutofillId[] ids,
                 @Nullable IntentSender authentication, @Nullable RemoteViews presentation) {
             throwIfDestroyed();
-            if (ids == null || ids.length == 0) {
-                throw new IllegalArgumentException("ids cannot be null or empry");
+            throwIfDisableAutofillCalled();
+            if (mHeader != null || mFooter != null) {
+                throw new IllegalStateException("Already called #setHeader() or #setFooter()");
             }
+
             if (authentication == null ^ presentation == null) {
                 throw new IllegalArgumentException("authentication and presentation"
                         + " must be both non-null or null");
             }
             mAuthentication = authentication;
             mPresentation = presentation;
-            mAuthenticationIds = ids;
+            mAuthenticationIds = assertValid(ids);
             return this;
         }
 
@@ -202,6 +291,7 @@ public final class FillResponse implements Parcelable {
          * text field representing the result of a Captcha challenge.
          */
         public Builder setIgnoredIds(AutofillId...ids) {
+            throwIfDestroyed();
             mIgnoredIds = ids;
             return this;
         }
@@ -222,6 +312,7 @@ public final class FillResponse implements Parcelable {
          */
         public @NonNull Builder addDataset(@Nullable Dataset dataset) {
             throwIfDestroyed();
+            throwIfDisableAutofillCalled();
             if (dataset == null) {
                 return this;
             }
@@ -241,47 +332,208 @@ public final class FillResponse implements Parcelable {
          */
         public @NonNull Builder setSaveInfo(@NonNull SaveInfo saveInfo) {
             throwIfDestroyed();
+            throwIfDisableAutofillCalled();
             mSaveInfo = saveInfo;
             return this;
         }
 
         /**
-         * Sets a {@link Bundle state} that will be passed to subsequent APIs that
-         * manipulate this response. For example, they are passed to subsequent
-         * calls to {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal,
-         * FillCallback)} and {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)}.
-         * You can use this to store intermediate state that is persistent across multiple
-         * fill requests and the subsequent save request.
+         * Sets a bundle with state that is passed to subsequent APIs that manipulate this response.
+         *
+         * <p>You can use this bundle to store intermediate state that is passed to subsequent calls
+         * to {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal,
+         * FillCallback)} and {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)}, and
+         * you can also retrieve it by calling {@link FillEventHistory.Event#getClientState()}.
          *
          * <p>If this method is called on multiple {@link FillResponse} objects for the same
          * screen, just the latest bundle is passed back to the service.
-         *
-         * <p>Once a {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)
-         * save request} is made the client state is cleared.
          *
          * @param clientState The custom client state.
          * @return This builder.
          */
         public Builder setClientState(@Nullable Bundle clientState) {
             throwIfDestroyed();
-            mCLientState = clientState;
+            throwIfDisableAutofillCalled();
+            mClientState = clientState;
+            return this;
+        }
+
+        /**
+         * Sets which fields are used for
+         * <a href="AutofillService.html#FieldClassification">field classification</a>
+         *
+         * <p><b>Note:</b> This method automatically adds the
+         * {@link FillResponse#FLAG_TRACK_CONTEXT_COMMITED} to the {@link #setFlags(int) flags}.
+
+         * @throws IllegalArgumentException is length of {@code ids} args is more than
+         * {@link UserData#getMaxFieldClassificationIdsSize()}.
+         * @throws IllegalStateException if {@link #build()} or {@link #disableAutofill(long)} was
+         * already called.
+         * @throws NullPointerException if {@code ids} or any element on it is {@code null}.
+         */
+        public Builder setFieldClassificationIds(@NonNull AutofillId... ids) {
+            throwIfDestroyed();
+            throwIfDisableAutofillCalled();
+            Preconditions.checkArrayElementsNotNull(ids, "ids");
+            Preconditions.checkArgumentInRange(ids.length, 1,
+                    UserData.getMaxFieldClassificationIdsSize(), "ids length");
+            mFieldClassificationIds = ids;
+            mFlags |= FLAG_TRACK_CONTEXT_COMMITED;
+            return this;
+        }
+
+        /**
+         * Sets flags changing the response behavior.
+         *
+         * @param flags a combination of {@link #FLAG_TRACK_CONTEXT_COMMITED} and
+         * {@link #FLAG_DISABLE_ACTIVITY_ONLY}, or {@code 0}.
+         *
+         * @return This builder.
+         */
+        public Builder setFlags(@FillResponseFlags int flags) {
+            throwIfDestroyed();
+            mFlags = Preconditions.checkFlagsArgument(flags,
+                    FLAG_TRACK_CONTEXT_COMMITED | FLAG_DISABLE_ACTIVITY_ONLY);
+            return this;
+        }
+
+        /**
+         * Disables autofill for the app or activity.
+         *
+         * <p>This method is useful to optimize performance in cases where the service knows it
+         * can not autofill an app&mdash;for example, when the service has a list of "blacklisted"
+         * apps such as office suites.
+         *
+         * <p>By default, it disables autofill for all activities in the app, unless the response is
+         * {@link #setFlags(int) flagged} with {@link #FLAG_DISABLE_ACTIVITY_ONLY}.
+         *
+         * <p>Autofill for the app or activity is automatically re-enabled after any of the
+         * following conditions:
+         *
+         * <ol>
+         *   <li>{@code duration} milliseconds have passed.
+         *   <li>The autofill service for the user has changed.
+         *   <li>The device has rebooted.
+         * </ol>
+         *
+         * <p><b>Note:</b> Activities that are running when autofill is re-enabled remain
+         * disabled for autofill until they finish and restart.
+         *
+         * @param duration duration to disable autofill, in milliseconds.
+         *
+         * @return this builder
+         *
+         * @throws IllegalArgumentException if {@code duration} is not a positive number.
+         * @throws IllegalStateException if either {@link #addDataset(Dataset)},
+         *       {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews)},
+         *       {@link #setSaveInfo(SaveInfo)}, {@link #setClientState(Bundle)}, or
+         *       {@link #setFieldClassificationIds(AutofillId...)} was already called.
+         */
+        public Builder disableAutofill(long duration) {
+            throwIfDestroyed();
+            if (duration <= 0) {
+                throw new IllegalArgumentException("duration must be greater than 0");
+            }
+            if (mAuthentication != null || mDatasets != null || mSaveInfo != null
+                    || mFieldClassificationIds != null || mClientState != null) {
+                throw new IllegalStateException("disableAutofill() must be the only method called");
+            }
+
+            mDisableDuration = duration;
+            return this;
+        }
+
+        /**
+         * Sets a header to be shown as the first element in the list of datasets.
+         *
+         * <p>When this method is called, you must also {@link #addDataset(Dataset) add a dataset},
+         * otherwise {@link #build()} throws an {@link IllegalStateException}. Similarly, this
+         * method should only be used on {@link FillResponse FillResponses} that do not require
+         * authentication (as the header could have been set directly in the main presentation in
+         * these cases).
+         *
+         * <p>Theme does not work with RemoteViews layout. Avoid hardcoded text color
+         * or background color: Autofill on different platforms may have different themes.
+         *
+         * @param header a presentation to represent the header. This presentation is not clickable
+         * &mdash;calling
+         * {@link RemoteViews#setOnClickPendingIntent(int, android.app.PendingIntent)} on it would
+         * have no effect.
+         *
+         * @return this builder
+         *
+         * @throws IllegalStateException if an
+         * {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews) authentication} was
+         * already set for this builder.
+         */
+        // TODO(b/69796626): make it sticky / update javadoc
+        public Builder setHeader(@NonNull RemoteViews header) {
+            throwIfDestroyed();
+            throwIfAuthenticationCalled();
+            mHeader = Preconditions.checkNotNull(header);
+            return this;
+        }
+
+        /**
+         * Sets a footer to be shown as the last element in the list of datasets.
+         *
+         * <p>When this method is called, you must also {@link #addDataset(Dataset) add a dataset},
+         * otherwise {@link #build()} throws an {@link IllegalStateException}. Similarly, this
+         * method should only be used on {@link FillResponse FillResponses} that do not require
+         * authentication (as the footer could have been set directly in the main presentation in
+         * these cases).
+         *
+         * <p>Theme does not work with RemoteViews layout. Avoid hardcoded text color
+         * or background color: Autofill on different platforms may have different themes.
+         *
+         * @param footer a presentation to represent the footer. This presentation is not clickable
+         * &mdash;calling
+         * {@link RemoteViews#setOnClickPendingIntent(int, android.app.PendingIntent)} on it would
+         * have no effect.
+         *
+         * @return this builder
+         *
+         * @throws IllegalStateException if the FillResponse
+         * {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews)
+         * requires authentication}.
+         */
+        // TODO(b/69796626): make it sticky / update javadoc
+        public Builder setFooter(@NonNull RemoteViews footer) {
+            throwIfDestroyed();
+            throwIfAuthenticationCalled();
+            mFooter = Preconditions.checkNotNull(footer);
             return this;
         }
 
         /**
          * Builds a new {@link FillResponse} instance.
          *
-         * <p>You must provide at least one dataset or some savable ids or an authentication with a
-         * presentation view.
+         * @throws IllegalStateException if any of the following conditions occur:
+         * <ol>
+         *   <li>{@link #build()} was already called.
+         *   <li>No call was made to {@link #addDataset(Dataset)},
+         *       {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews)},
+         *       {@link #setSaveInfo(SaveInfo)}, {@link #disableAutofill(long)},
+         *       {@link #setClientState(Bundle)},
+         *       or {@link #setFieldClassificationIds(AutofillId...)}.
+         *   <li>{@link #setHeader(RemoteViews)} or {@link #setFooter(RemoteViews)} is called
+         *       without any previous calls to {@link #addDataset(Dataset)}.
+         * </ol>
          *
          * @return A built response.
          */
         public FillResponse build() {
             throwIfDestroyed();
-
-            if (mAuthentication == null && mDatasets == null && mSaveInfo == null) {
-                throw new IllegalArgumentException("need to provide at least one DataSet or a "
-                        + "SaveInfo or an authentication with a presentation");
+            if (mAuthentication == null && mDatasets == null && mSaveInfo == null
+                    && mDisableDuration == 0 && mFieldClassificationIds == null
+                    && mClientState == null) {
+                throw new IllegalStateException("need to provide: at least one DataSet, or a "
+                        + "SaveInfo, or an authentication with a presentation, "
+                        + "or a FieldsDetection, or a client state, or disable autofill");
+            }
+            if (mDatasets == null && (mHeader != null || mFooter != null)) {
+                throw new IllegalStateException(
+                        "must add at least 1 dataset when using header or footer");
             }
             mDestroyed = true;
             return new FillResponse(this);
@@ -290,6 +542,18 @@ public final class FillResponse implements Parcelable {
         private void throwIfDestroyed() {
             if (mDestroyed) {
                 throw new IllegalStateException("Already called #build()");
+            }
+        }
+
+        private void throwIfDisableAutofillCalled() {
+            if (mDisableDuration > 0) {
+                throw new IllegalStateException("Already called #disableAutofill()");
+            }
+        }
+
+        private void throwIfAuthenticationCalled() {
+            if (mAuthentication != null) {
+                throw new IllegalStateException("Already called #setAuthentication()");
             }
         }
     }
@@ -302,17 +566,40 @@ public final class FillResponse implements Parcelable {
         if (!sDebug) return super.toString();
 
         // TODO: create a dump() method instead
-        return new StringBuilder(
-                "FillResponse : [mRequestId=" + mRequestId)
-                .append(", datasets=").append(mDatasets == null ? "N/A" : mDatasets.getList())
-                .append(", saveInfo=").append(mSaveInfo)
-                .append(", clientState=").append(mClientState != null)
-                .append(", hasPresentation=").append(mPresentation != null)
-                .append(", hasAuthentication=").append(mAuthentication != null)
-                .append(", authenticationIds=").append(Arrays.toString(mAuthenticationIds))
-                .append(", ignoredIds=").append(Arrays.toString(mIgnoredIds))
-                .append("]")
-                .toString();
+        final StringBuilder builder = new StringBuilder(
+                "FillResponse : [mRequestId=" + mRequestId);
+        if (mDatasets != null) {
+            builder.append(", datasets=").append(mDatasets.getList());
+        }
+        if (mSaveInfo != null) {
+            builder.append(", saveInfo=").append(mSaveInfo);
+        }
+        if (mClientState != null) {
+            builder.append(", hasClientState");
+        }
+        if (mPresentation != null) {
+            builder.append(", hasPresentation");
+        }
+        if (mHeader != null) {
+            builder.append(", hasHeader");
+        }
+        if (mFooter != null) {
+            builder.append(", hasFooter");
+        }
+        if (mAuthentication != null) {
+            builder.append(", hasAuthentication");
+        }
+        if (mAuthenticationIds != null) {
+            builder.append(", authenticationIds=").append(Arrays.toString(mAuthenticationIds));
+        }
+        builder.append(", disableDuration=").append(mDisableDuration);
+        if (mFlags != 0) {
+            builder.append(", flags=").append(mFlags);
+        }
+        if (mFieldClassificationIds != null) {
+            builder.append(Arrays.toString(mFieldClassificationIds));
+        }
+        return builder.append("]").toString();
     }
 
     /////////////////////////////////////
@@ -332,7 +619,12 @@ public final class FillResponse implements Parcelable {
         parcel.writeParcelableArray(mAuthenticationIds, flags);
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeParcelable(mPresentation, flags);
+        parcel.writeParcelable(mHeader, flags);
+        parcel.writeParcelable(mFooter, flags);
         parcel.writeParcelableArray(mIgnoredIds, flags);
+        parcel.writeLong(mDisableDuration);
+        parcel.writeParcelableArray(mFieldClassificationIds, flags);
+        parcel.writeInt(mFlags);
         parcel.writeInt(mRequestId);
     }
 
@@ -361,10 +653,28 @@ public final class FillResponse implements Parcelable {
             if (authenticationIds != null) {
                 builder.setAuthentication(authenticationIds, authentication, presentation);
             }
+            final RemoteViews header = parcel.readParcelable(null);
+            if (header != null) {
+                builder.setHeader(header);
+            }
+            final RemoteViews footer = parcel.readParcelable(null);
+            if (footer != null) {
+                builder.setFooter(footer);
+            }
 
             builder.setIgnoredIds(parcel.readParcelableArray(null, AutofillId.class));
-            final FillResponse response = builder.build();
+            final long disableDuration = parcel.readLong();
+            if (disableDuration > 0) {
+                builder.disableAutofill(disableDuration);
+            }
+            final AutofillId[] fieldClassifactionIds =
+                    parcel.readParcelableArray(null, AutofillId.class);
+            if (fieldClassifactionIds != null) {
+                builder.setFieldClassificationIds(fieldClassifactionIds);
+            }
+            builder.setFlags(parcel.readInt());
 
+            final FillResponse response = builder.build();
             response.setRequestId(parcel.readInt());
 
             return response;

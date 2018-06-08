@@ -28,6 +28,7 @@ import android.view.View;
 public class CustomDialogPreference extends DialogPreference {
 
     private CustomPreferenceDialogFragment mFragment;
+    private DialogInterface.OnShowListener mOnShowListener;
 
     public CustomDialogPreference(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
@@ -54,6 +55,10 @@ public class CustomDialogPreference extends DialogPreference {
         return mFragment != null ? mFragment.getDialog() : null;
     }
 
+    public void setOnShowListener(DialogInterface.OnShowListener listner) {
+        mOnShowListener = listner;
+    }
+
     protected void onPrepareDialogBuilder(AlertDialog.Builder builder,
             DialogInterface.OnClickListener listener) {
     }
@@ -69,6 +74,10 @@ public class CustomDialogPreference extends DialogPreference {
 
     private void setFragment(CustomPreferenceDialogFragment fragment) {
         mFragment = fragment;
+    }
+
+    private DialogInterface.OnShowListener getOnShowListener() {
+        return mOnShowListener;
     }
 
     public static class CustomPreferenceDialogFragment extends PreferenceDialogFragment {
@@ -101,6 +110,13 @@ public class CustomDialogPreference extends DialogPreference {
         protected void onBindDialogView(View view) {
             super.onBindDialogView(view);
             getCustomizablePreference().onBindDialogView(view);
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Dialog dialog = super.onCreateDialog(savedInstanceState);
+            dialog.setOnShowListener(getCustomizablePreference().getOnShowListener());
+            return dialog;
         }
 
         @Override

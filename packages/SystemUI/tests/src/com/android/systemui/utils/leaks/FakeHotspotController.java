@@ -44,4 +44,9 @@ public class FakeHotspotController extends BaseLeakChecker<Callback> implements 
     public boolean isHotspotSupported() {
         return false;
     }
+
+    @Override
+    public int getNumConnectedDevices() {
+        return 0;
+    }
 }

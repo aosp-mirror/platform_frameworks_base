@@ -33,7 +33,7 @@ public final class Usb10ASFormatI extends UsbASFormat {
                                     // min & max rates otherwise mSamFreqType rates.
                                     // All 3-byte values. All rates in Hz
 
-    public Usb10ASFormatI(int length, byte type, byte subtype, byte formatType, byte subclass) {
+    public Usb10ASFormatI(int length, byte type, byte subtype, byte formatType, int subclass) {
         super(length, type, subtype, formatType, subclass);
     }
 

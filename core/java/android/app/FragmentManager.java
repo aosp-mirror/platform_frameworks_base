@@ -74,7 +74,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * {@link android.support.v4.app.FragmentActivity}.  See the blog post
  * <a href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">
  * Fragments For All</a> for more details.
+ *
+ * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
+ *      {@link android.support.v4.app.FragmentManager} for consistent behavior across all devices
+ *      and access to <a href="{@docRoot}topic/libraries/architecture/lifecycle.html">Lifecycle</a>.
  */
+@Deprecated
 public abstract class FragmentManager {
     /**
      * Representation of an entry on the fragment back stack, as created
@@ -86,7 +91,11 @@ public abstract class FragmentManager {
      * <p>Note that you should never hold on to a BackStackEntry object;
      * the identifier as returned by {@link #getId} is the only thing that
      * will be persisted across activity instances.
+     *
+     * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">
+     *      Support Library</a> {@link android.support.v4.app.FragmentManager.BackStackEntry}
      */
+    @Deprecated
     public interface BackStackEntry {
         /**
          * Return the unique identifier for the entry.  This is the only
@@ -129,7 +138,12 @@ public abstract class FragmentManager {
 
     /**
      * Interface to watch for changes to the back stack.
+     *
+     * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">
+     *      Support Library</a>
+     *      {@link android.support.v4.app.FragmentManager.OnBackStackChangedListener}
      */
+    @Deprecated
     public interface OnBackStackChangedListener {
         /**
          * Called whenever the contents of the back stack change.
@@ -428,7 +442,12 @@ public abstract class FragmentManager {
     /**
      * Callback interface for listening to fragment state changes that happen
      * within a given FragmentManager.
+     *
+     * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">
+     *      Support Library</a>
+     *      {@link android.support.v4.app.FragmentManager.FragmentLifecycleCallbacks}
      */
+    @Deprecated
     public abstract static class FragmentLifecycleCallbacks {
         /**
          * Called right before the fragment's {@link Fragment#onAttach(Context)} method is called.

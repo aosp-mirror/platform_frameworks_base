@@ -20,11 +20,6 @@
 # directories, despite the fact that it was historically used for that!
 #
 
-# Import path mappings from the support library project. This will set up
-# FRAMEWORKS_SUPPORT_JAVA_SRC_DIRS and FRAMEWORKS_SUPPORT_JAVA_LIBRARIES for
-# use later in this file.
-include $(LOCAL_PATH)/../support/pathmap.mk
-
 #
 # A list of all source roots under frameworks/multidex.
 #

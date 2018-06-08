@@ -441,7 +441,7 @@ public final class ServiceState {
         return totalTime;
     }
 
-    public void dumpTimesCheckin(PrintWriter pw, String pkgName, int uid, int vers,
+    public void dumpTimesCheckin(PrintWriter pw, String pkgName, int uid, long vers,
             String serviceName, long now) {
         dumpTimeCheckin(pw, "pkgsvc-run", pkgName, uid, vers, serviceName,
                 ServiceState.SERVICE_RUN, mRunCount, mRunState, mRunStartTime, now);
@@ -454,7 +454,7 @@ public final class ServiceState {
     }
 
     private void dumpTimeCheckin(PrintWriter pw, String label, String packageName,
-            int uid, int vers, String serviceName, int serviceType, int opCount,
+            int uid, long vers, String serviceName, int serviceType, int opCount,
             int curState, long curStartTime, long now) {
         if (opCount <= 0) {
             return;

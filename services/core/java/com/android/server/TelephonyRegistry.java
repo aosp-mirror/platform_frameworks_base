@@ -351,7 +351,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mCallForwarding[i] =  false;
             mCellLocation[i] = new Bundle();
             mCellInfo.add(i, null);
-            mPhysicalChannelConfigs.add(i, null);
+            mPhysicalChannelConfigs.add(i, new ArrayList<PhysicalChannelConfig>());
         }
 
         // Note that location can be null for non-phone builds like
@@ -1789,7 +1789,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         long token = Binder.clearCallingIdentity();
         try {
             return LocationAccessPolicy.canAccessCellLocation(mContext,
-                    r.callingPackage, r.callerUid, r.callerPid);
+                    r.callingPackage, r.callerUid, r.callerPid,
+                    /*throwOnDeniedPermission*/ false);
         } finally {
             Binder.restoreCallingIdentity(token);
         }

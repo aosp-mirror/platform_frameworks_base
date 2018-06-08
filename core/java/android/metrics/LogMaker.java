@@ -103,7 +103,7 @@ public class LogMaker {
      * @hide // TODO Expose in the future?  Too late for O.
      */
     public LogMaker setLatency(long milliseconds) {
-        entries.put(MetricsEvent.NOTIFICATION_SINCE_CREATE_MILLIS, milliseconds);
+        entries.put(MetricsEvent.RESERVED_FOR_LOGBUILDER_LATENCY_MILLIS, milliseconds);
         return this;
     }
 

@@ -30,7 +30,7 @@ public class LocationRequestStatisticsTest extends AndroidTestCase {
      * Tests that adding a single package works correctly.
      */
     public void testSinglePackage() {
-        mStatistics.startRequesting(PACKAGE1, PROVIDER1, INTERVAL1);
+        mStatistics.startRequesting(PACKAGE1, PROVIDER1, INTERVAL1, true);
 
         assertEquals(1, mStatistics.statistics.size());
         PackageProviderKey key = mStatistics.statistics.keySet().iterator().next();
@@ -47,9 +47,9 @@ public class LocationRequestStatisticsTest extends AndroidTestCase {
      * Tests that adding a single package works correctly when it is stopped and restarted.
      */
     public void testSinglePackage_stopAndRestart() {
-        mStatistics.startRequesting(PACKAGE1, PROVIDER1, INTERVAL1);
+        mStatistics.startRequesting(PACKAGE1, PROVIDER1, INTERVAL1, true);
         mStatistics.stopRequesting(PACKAGE1, PROVIDER1);
-        mStatistics.startRequesting(PACKAGE1, PROVIDER1, INTERVAL1);
+        mStatistics.startRequesting(PACKAGE1, PROVIDER1, INTERVAL1, true);
 
         assertEquals(1, mStatistics.statistics.size());
         PackageProviderKey key = mStatistics.statistics.keySet().iterator().next();
@@ -69,8 +69,8 @@ public class LocationRequestStatisticsTest extends AndroidTestCase {
      * Tests that adding a single package works correctly when multiple intervals are used.
      */
     public void testSinglePackage_multipleIntervals() {
-        mStatistics.startRequesting(PACKAGE1, PROVIDER1, INTERVAL1);
-        mStatistics.startRequesting(PACKAGE1, PROVIDER1, INTERVAL2);
+        mStatistics.startRequesting(PACKAGE1, PROVIDER1, INTERVAL1, true);
+        mStatistics.startRequesting(PACKAGE1, PROVIDER1, INTERVAL2, true);
 
         assertEquals(1, mStatistics.statistics.size());
         PackageProviderKey key = mStatistics.statistics.keySet().iterator().next();
@@ -91,8 +91,8 @@ public class LocationRequestStatisticsTest extends AndroidTestCase {
      * Tests that adding a single package works correctly when multiple providers are used.
      */
     public void testSinglePackage_multipleProviders() {
-        mStatistics.startRequesting(PACKAGE1, PROVIDER1, INTERVAL1);
-        mStatistics.startRequesting(PACKAGE1, PROVIDER2, INTERVAL2);
+        mStatistics.startRequesting(PACKAGE1, PROVIDER1, INTERVAL1, true);
+        mStatistics.startRequesting(PACKAGE1, PROVIDER2, INTERVAL2, true);
 
         assertEquals(2, mStatistics.statistics.size());
         PackageProviderKey key1 = new PackageProviderKey(PACKAGE1, PROVIDER1);
@@ -120,10 +120,10 @@ public class LocationRequestStatisticsTest extends AndroidTestCase {
      * Tests that adding multiple packages works correctly.
      */
     public void testMultiplePackages() {
-        mStatistics.startRequesting(PACKAGE1, PROVIDER1, INTERVAL1);
-        mStatistics.startRequesting(PACKAGE1, PROVIDER2, INTERVAL1);
-        mStatistics.startRequesting(PACKAGE1, PROVIDER2, INTERVAL2);
-        mStatistics.startRequesting(PACKAGE2, PROVIDER1, INTERVAL1);
+        mStatistics.startRequesting(PACKAGE1, PROVIDER1, INTERVAL1, true);
+        mStatistics.startRequesting(PACKAGE1, PROVIDER2, INTERVAL1, true);
+        mStatistics.startRequesting(PACKAGE1, PROVIDER2, INTERVAL2, true);
+        mStatistics.startRequesting(PACKAGE2, PROVIDER1, INTERVAL1, true);
 
         assertEquals(3, mStatistics.statistics.size());
         PackageProviderKey key1 = new PackageProviderKey(PACKAGE1, PROVIDER1);
@@ -165,11 +165,33 @@ public class LocationRequestStatisticsTest extends AndroidTestCase {
         assertFalse(stats3.isActive());
     }
 
+    /**
+     * Tests that switching foreground & background states accmulates time reasonably.
+     */
+    public void testForegroundBackground() {
+        mStatistics.startRequesting(PACKAGE1, PROVIDER1, INTERVAL1, true);
+        mStatistics.startRequesting(PACKAGE1, PROVIDER2, INTERVAL1, true);
+        mStatistics.startRequesting(PACKAGE2, PROVIDER1, INTERVAL1, false);
+
+        mStatistics.updateForeground(PACKAGE1, PROVIDER2, false);
+        mStatistics.updateForeground(PACKAGE2, PROVIDER1, true);
+
+        mStatistics.stopRequesting(PACKAGE1, PROVIDER1);
+
+        for (PackageStatistics stats : mStatistics.statistics.values()) {
+            verifyStatisticsTimes(stats);
+        }
+    }
+
     private void verifyStatisticsTimes(PackageStatistics stats) {
         long durationMs = stats.getDurationMs();
+        long foregroundDurationMs = stats.getForegroundDurationMs();
         long timeSinceFirstRequestMs = stats.getTimeSinceFirstRequestMs();
         long maxDeltaMs = SystemClock.elapsedRealtime() - mStartElapsedRealtimeMs;
+        assertTrue("Duration is too small", durationMs >= 0);
         assertTrue("Duration is too large", durationMs <= maxDeltaMs);
+        assertTrue("Foreground Duration is too small", foregroundDurationMs >= 0);
+        assertTrue("Foreground Duration is too large", foregroundDurationMs <= maxDeltaMs);
         assertTrue("Time since first request is too large", timeSinceFirstRequestMs <= maxDeltaMs);
     }
 }

@@ -17,8 +17,8 @@
 #ifndef SkiaCanvasProxy_DEFINED
 #define SkiaCanvasProxy_DEFINED
 
-#include <cutils/compiler.h>
 #include <SkCanvas.h>
+#include <cutils/compiler.h>
 
 #include "hwui/Canvas.h"
 
@@ -43,7 +43,6 @@ public:
     virtual ~SkiaCanvasProxy() {}
 
 protected:
-
     virtual sk_sp<SkSurface> onNewSurface(const SkImageInfo&, const SkSurfaceProps&) override;
 
     virtual void willSave() override;
@@ -66,15 +65,15 @@ protected:
                               const SkPaint*) override;
     virtual void onDrawBitmapRect(const SkBitmap&, const SkRect* src, const SkRect& dst,
                                   const SkPaint* paint, SrcRectConstraint) override;
-    virtual void onDrawBitmapNine(const SkBitmap& bitmap, const SkIRect& center,
-                                  const SkRect& dst, const SkPaint*) override;
+    virtual void onDrawBitmapNine(const SkBitmap& bitmap, const SkIRect& center, const SkRect& dst,
+                                  const SkPaint*) override;
     virtual void onDrawImage(const SkImage*, SkScalar dx, SkScalar dy, const SkPaint*);
     virtual void onDrawImageRect(const SkImage*, const SkRect*, const SkRect&, const SkPaint*,
-            SrcRectConstraint);
+                                 SrcRectConstraint);
     virtual void onDrawImageNine(const SkImage*, const SkIRect& center, const SkRect& dst,
-            const SkPaint*);
+                                 const SkPaint*);
     virtual void onDrawImageLattice(const SkImage*, const Lattice& lattice, const SkRect& dst,
-            const SkPaint*);
+                                    const SkPaint*);
     virtual void onDrawVerticesObject(const SkVertices*, SkBlendMode, const SkPaint&) override;
 
     virtual void onDrawDRRect(const SkRRect&, const SkRRect&, const SkPaint&) override;
@@ -107,7 +106,7 @@ private:
     typedef SkCanvas INHERITED;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // SkiaCanvasProxy_DEFINED
+#endif  // SkiaCanvasProxy_DEFINED

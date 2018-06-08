@@ -54,6 +54,7 @@ TEST(InlineXmlFormatParserTest, ExtractOneXmlResource) {
       </View1>)");
 
   doc->file.name = test::ParseNameOrDie("layout/main");
+  doc->file.type = ResourceFile::Type::kProtoXml;
 
   InlineXmlFormatParser parser;
   ASSERT_TRUE(parser.Consume(context.get(), doc.get()));
@@ -80,6 +81,9 @@ TEST(InlineXmlFormatParserTest, ExtractOneXmlResource) {
 
   // Make sure the generated reference is correct.
   EXPECT_THAT(extracted_doc->file.name, Eq(name_ref));
+
+  // Make sure the ResourceFile::Type is the same.
+  EXPECT_THAT(extracted_doc->file.type, Eq(ResourceFile::Type::kProtoXml));
 
   // Verify the structure of the extracted XML.
   el = extracted_doc->root.get();
@@ -135,6 +139,87 @@ TEST(InlineXmlFormatParserTest, ExtractTwoXmlResources) {
   ASSERT_THAT(extracted_doc_drawable, NotNull());
   ASSERT_THAT(extracted_doc_drawable->root, NotNull());
   EXPECT_THAT(extracted_doc_drawable->root->name, StrEq("vector"));
+}
+
+TEST(InlineXmlFormatParserTest, ExtractNestedXmlResources) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(
+      <base_root xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:aapt="http://schemas.android.com/aapt">
+          <aapt:attr name="inline_xml">
+              <inline_root>
+                  <aapt:attr name="nested_inline_xml">
+                      <nested_inline_root/>
+                  </aapt:attr>
+                  <aapt:attr name="another_nested_inline_xml">
+                      <root/>
+                  </aapt:attr>
+              </inline_root>
+          </aapt:attr>
+          <aapt:attr name="turtles">
+              <root1>
+                  <aapt:attr name="all">
+                      <root2>
+                          <aapt:attr name="the">
+                              <root3>
+                                  <aapt:attr name="way">
+                                      <root4>
+                                          <aapt:attr name="down">
+                                              <root5/>
+                                          </aapt:attr>
+                                      </root4>
+                                  </aapt:attr>
+                              </root3>
+                          </aapt:attr>
+                      </root2>
+                  </aapt:attr>
+              </root1>
+          </aapt:attr>
+      </base_root>)");
+
+  doc->file.name = test::ParseNameOrDie("layout/main");
+
+  InlineXmlFormatParser parser;
+  ASSERT_TRUE(parser.Consume(context.get(), doc.get()));
+  // Confirm that all of the nested inline xmls are parsed out.
+  ASSERT_THAT(parser.GetExtractedInlineXmlDocuments(), SizeIs(8u));
+}
+
+TEST(InlineXmlFormatParserTest, ExtractIntoAppAttribute) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(
+      <parent xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:aapt="http://schemas.android.com/aapt">
+            <aapt:attr name="app:foo">
+                <child />
+            </aapt:attr>
+      </parent>)");
+
+  doc->file.name = test::ParseNameOrDie("layout/main");
+
+  InlineXmlFormatParser parser;
+  ASSERT_TRUE(parser.Consume(context.get(), doc.get()));
+
+  ASSERT_THAT(doc->root, NotNull());
+  EXPECT_THAT(doc->root->FindAttribute(xml::kSchemaAuto, "foo"), NotNull());
+}
+
+TEST(InlineXmlFormatParserTest, ExtractIntoNoNamespaceAttribute) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(
+      <parent xmlns:aapt="http://schemas.android.com/aapt">
+            <aapt:attr name="foo">
+                <child />
+            </aapt:attr>
+      </parent>)");
+
+  doc->file.name = test::ParseNameOrDie("layout/main");
+
+  InlineXmlFormatParser parser;
+  ASSERT_TRUE(parser.Consume(context.get(), doc.get()));
+
+  ASSERT_THAT(doc->root, NotNull());
+  EXPECT_THAT(doc->root->FindAttribute({}, "foo"), NotNull());
 }
 
 }  // namespace aapt

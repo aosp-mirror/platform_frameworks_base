@@ -43,6 +43,8 @@ class IFile {
   // Returns nullptr on failure.
   virtual std::unique_ptr<IData> OpenAsData() = 0;
 
+  virtual std::unique_ptr<io::InputStream> OpenInputStream() = 0;
+
   // Returns the source of this file. This is for presentation to the user and
   // may not be a valid file system path (for example, it may contain a '@' sign to separate
   // the files within a ZIP archive from the path to the containing ZIP archive.
@@ -71,8 +73,11 @@ class FileSegment : public IFile {
       : file_(file), offset_(offset), len_(len) {}
 
   std::unique_ptr<IData> OpenAsData() override;
+  std::unique_ptr<io::InputStream> OpenInputStream() override;
 
-  const Source& GetSource() const override { return file_->GetSource(); }
+  const Source& GetSource() const override {
+    return file_->GetSource();
+  }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(FileSegment);

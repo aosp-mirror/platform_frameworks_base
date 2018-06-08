@@ -1584,6 +1584,20 @@ final public class MediaCodec {
      */
     public static final int BUFFER_FLAG_PARTIAL_FRAME = 8;
 
+    /**
+     * This indicates that the buffer contains non-media data for the
+     * muxer to process.
+     *
+     * All muxer data should start with a FOURCC header that determines the type of data.
+     *
+     * For example, when it contains Exif data sent to a MediaMuxer track of
+     * {@link MediaFormat#MIMETYPE_IMAGE_ANDROID_HEIC} type, the data must start with
+     * Exif header ("Exif\0\0"), followed by the TIFF header (See JEITA CP-3451C Section 4.5.2.)
+     *
+     * @hide
+     */
+    public static final int BUFFER_FLAG_MUXER_DATA = 16;
+
     /** @hide */
     @IntDef(
         flag = true,
@@ -1593,6 +1607,7 @@ final public class MediaCodec {
             BUFFER_FLAG_CODEC_CONFIG,
             BUFFER_FLAG_END_OF_STREAM,
             BUFFER_FLAG_PARTIAL_FRAME,
+            BUFFER_FLAG_MUXER_DATA,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BufferFlag {}
@@ -1602,7 +1617,9 @@ final public class MediaCodec {
     private EventHandler mCallbackHandler;
     private Callback mCallback;
     private OnFrameRenderedListener mOnFrameRenderedListener;
-    private Object mListenerLock = new Object();
+    private final Object mListenerLock = new Object();
+    private MediaCodecInfo mCodecInfo;
+    private final Object mCodecInfoLock = new Object();
 
     private static final int EVENT_CALLBACK = 1;
     private static final int EVENT_SET_CALLBACK = 2;
@@ -2357,17 +2374,61 @@ final public class MediaCodec {
     public static final int CRYPTO_MODE_AES_CBC     = 2;
 
     /**
-     * Metadata describing the structure of a (at least partially) encrypted
-     * input sample.
-     * A buffer's data is considered to be partitioned into "subSamples",
-     * each subSample starts with a (potentially empty) run of plain,
-     * unencrypted bytes followed by a (also potentially empty) run of
-     * encrypted bytes. If pattern encryption applies, each of the latter runs
-     * is encrypted only partly, according to a repeating pattern of "encrypt"
-     * and "skip" blocks. numBytesOfClearData can be null to indicate that all
-     * data is encrypted. This information encapsulates per-sample metadata as
-     * outlined in ISO/IEC FDIS 23001-7:2011 "Common encryption in ISO base
-     * media file format files".
+     * Metadata describing the structure of an encrypted input sample.
+     * <p>
+     * A buffer's data is considered to be partitioned into "subSamples". Each subSample starts with
+     * a run of plain, unencrypted bytes followed by a run of encrypted bytes. Either of these runs
+     * may be empty. If pattern encryption applies, each of the encrypted runs is encrypted only
+     * partly, according to a repeating pattern of "encrypt" and "skip" blocks.
+     * {@link #numBytesOfClearData} can be null to indicate that all data is encrypted, and
+     * {@link #numBytesOfEncryptedData} can be null to indicate that all data is clear. At least one
+     * of {@link #numBytesOfClearData} and {@link #numBytesOfEncryptedData} must be non-null.
+     * <p>
+     * This information encapsulates per-sample metadata as outlined in ISO/IEC FDIS 23001-7:2016
+     * "Common encryption in ISO base media file format files".
+     * <p>
+     * <h3>ISO-CENC Schemes</h3>
+     * ISO/IEC FDIS 23001-7:2016 defines four possible schemes by which media may be encrypted,
+     * corresponding to each possible combination of an AES mode with the presence or absence of
+     * patterned encryption.
+     *
+     * <table style="width: 0%">
+     *   <thead>
+     *     <tr>
+     *       <th>&nbsp;</th>
+     *       <th>AES-CTR</th>
+     *       <th>AES-CBC</th>
+     *     </tr>
+     *   </thead>
+     *   <tbody>
+     *     <tr>
+     *       <th>Without Patterns</th>
+     *       <td>cenc</td>
+     *       <td>cbc1</td>
+     *     </tr><tr>
+     *       <th>With Patterns</th>
+     *       <td>cens</td>
+     *       <td>cbcs</td>
+     *     </tr>
+     *   </tbody>
+     * </table>
+     *
+     * For {@code CryptoInfo}, the scheme is selected implicitly by the combination of the
+     * {@link #mode} field and the value set with {@link #setPattern}. For the pattern, setting the
+     * pattern to all zeroes (that is, both {@code blocksToEncrypt} and {@code blocksToSkip} are
+     * zero) is interpreted as turning patterns off completely. A scheme that does not use patterns
+     * will be selected, either cenc or cbc1. Setting the pattern to any nonzero value will choose
+     * one of the pattern-supporting schemes, cens or cbcs. The default pattern if
+     * {@link #setPattern} is never called is all zeroes.
+     * <p>
+     * <h4>HLS SAMPLE-AES Audio</h4>
+     * HLS SAMPLE-AES audio is encrypted in a manner compatible with the cbcs scheme, except that it
+     * does not use patterned encryption. However, if {@link #setPattern} is used to set the pattern
+     * to all zeroes, this will be interpreted as selecting the cbc1 scheme. The cbc1 scheme cannot
+     * successfully decrypt HLS SAMPLE-AES audio because of differences in how the IVs are handled.
+     * For this reason, it is recommended that a pattern of {@code 1} encrypted block and {@code 0}
+     * skip blocks be used with HLS SAMPLE-AES audio. This will trigger decryption to use cbcs mode
+     * while still decrypting every block.
      */
     public final static class CryptoInfo {
         /**
@@ -2375,11 +2436,13 @@ final public class MediaCodec {
          */
         public int numSubSamples;
         /**
-         * The number of leading unencrypted bytes in each subSample.
+         * The number of leading unencrypted bytes in each subSample. If null, all bytes are treated
+         * as encrypted and {@link #numBytesOfEncryptedData} must be specified.
          */
         public int[] numBytesOfClearData;
         /**
-         * The number of trailing encrypted bytes in each subSample.
+         * The number of trailing encrypted bytes in each subSample. If null, all bytes are treated
+         * as clear and {@link #numBytesOfClearData} must be specified.
          */
         public int[] numBytesOfEncryptedData;
         /**
@@ -2398,35 +2461,34 @@ final public class MediaCodec {
         public int mode;
 
         /**
-         * Metadata describing an encryption pattern for the protected bytes in
-         * a subsample.  An encryption pattern consists of a repeating sequence
-         * of crypto blocks comprised of a number of encrypted blocks followed
-         * by a number of unencrypted, or skipped, blocks.
+         * Metadata describing an encryption pattern for the protected bytes in a subsample.  An
+         * encryption pattern consists of a repeating sequence of crypto blocks comprised of a
+         * number of encrypted blocks followed by a number of unencrypted, or skipped, blocks.
          */
         public final static class Pattern {
             /**
-             * Number of blocks to be encrypted in the pattern. If zero, pattern
-             * encryption is inoperative.
+             * Number of blocks to be encrypted in the pattern. If both this and
+             * {@link #mSkipBlocks} are zero, pattern encryption is inoperative.
              */
             private int mEncryptBlocks;
 
             /**
-             * Number of blocks to be skipped (left clear) in the pattern. If zero,
-             * pattern encryption is inoperative.
+             * Number of blocks to be skipped (left clear) in the pattern. If both this and
+             * {@link #mEncryptBlocks} are zero, pattern encryption is inoperative.
              */
             private int mSkipBlocks;
 
             /**
-             * Construct a sample encryption pattern given the number of blocks to
-             * encrypt and skip in the pattern.
+             * Construct a sample encryption pattern given the number of blocks to encrypt and skip
+             * in the pattern. If both parameters are zero, pattern encryption is inoperative.
              */
             public Pattern(int blocksToEncrypt, int blocksToSkip) {
                 set(blocksToEncrypt, blocksToSkip);
             }
 
             /**
-             * Set the number of blocks to encrypt and skip in a sample encryption
-             * pattern.
+             * Set the number of blocks to encrypt and skip in a sample encryption pattern. If both
+             * parameters are zero, pattern encryption is inoperative.
              */
             public void set(int blocksToEncrypt, int blocksToSkip) {
                 mEncryptBlocks = blocksToEncrypt;
@@ -2481,6 +2543,10 @@ final public class MediaCodec {
          */
         public void setPattern(Pattern newPattern) {
             pattern = newPattern;
+        }
+
+        private void setPattern(int blocksToEncrypt, int blocksToSkip) {
+            pattern = new Pattern(blocksToEncrypt, blocksToSkip);
         }
 
         @Override
@@ -3469,8 +3535,24 @@ final public class MediaCodec {
      */
     @NonNull
     public MediaCodecInfo getCodecInfo() {
-        return MediaCodecList.getInfoFor(getName());
+        // Get the codec name first. If the codec is already released,
+        // IllegalStateException will be thrown here.
+        String name = getName();
+        synchronized (mCodecInfoLock) {
+            if (mCodecInfo == null) {
+                // Get the codec info for this codec itself first. Only initialize
+                // the full codec list if this somehow fails because it can be slow.
+                mCodecInfo = getOwnCodecInfo();
+                if (mCodecInfo == null) {
+                    mCodecInfo = MediaCodecList.getInfoFor(name);
+                }
+            }
+            return mCodecInfo;
+        }
     }
+
+    @NonNull
+    private native final MediaCodecInfo getOwnCodecInfo();
 
     @NonNull
     private native final ByteBuffer[] getBuffers(boolean input);
@@ -3510,6 +3592,9 @@ final public class MediaCodec {
 
         private final static int TYPE_YUV = 1;
 
+        private final int mTransform = 0; //Default no transform
+        private final int mScalingMode = 0; //Default frozen scaling mode
+
         @Override
         public int getFormat() {
             throwISEIfImageIsInvalid();
@@ -3526,6 +3611,18 @@ final public class MediaCodec {
         public int getWidth() {
             throwISEIfImageIsInvalid();
             return mWidth;
+        }
+
+        @Override
+        public int getTransform() {
+            throwISEIfImageIsInvalid();
+            return mTransform;
+        }
+
+        @Override
+        public int getScalingMode() {
+            throwISEIfImageIsInvalid();
+            return mScalingMode;
         }
 
         @Override

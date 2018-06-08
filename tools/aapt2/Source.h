@@ -20,16 +20,14 @@
 #include <ostream>
 #include <string>
 
+#include "android-base/stringprintf.h"
 #include "androidfw/StringPiece.h"
 
 #include "util/Maybe.h"
 
 namespace aapt {
 
-/**
- * Represents a file on disk. Used for logging and
- * showing errors.
- */
+// Represents a file on disk. Used for logging and showing errors.
 struct Source {
   std::string path;
   Maybe<size_t> line;
@@ -42,7 +40,16 @@ struct Source {
   inline Source(const android::StringPiece& path, size_t line)
       : path(path.to_string()), line(line) {}
 
-  inline Source WithLine(size_t line) const { return Source(path, line); }
+  inline Source WithLine(size_t line) const {
+    return Source(path, line);
+  }
+
+  std::string to_string() const {
+    if (line) {
+      return ::android::base::StringPrintf("%s:%zd", path.c_str(), line.value());
+    }
+    return path;
+  }
 };
 
 //
@@ -50,11 +57,7 @@ struct Source {
 //
 
 inline ::std::ostream& operator<<(::std::ostream& out, const Source& source) {
-  out << source.path;
-  if (source.line) {
-    out << ":" << source.line.value();
-  }
-  return out;
+  return out << source.to_string();
 }
 
 inline bool operator==(const Source& lhs, const Source& rhs) {

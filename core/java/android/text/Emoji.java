@@ -46,44 +46,49 @@ public class Emoji {
         return UCharacter.hasBinaryProperty(codePoint, UProperty.EMOJI_MODIFIER);
     }
 
-    // Returns true if the given code point is emoji modifier base.
-    public static boolean isEmojiModifierBase(int codePoint) {
+    //
+
+    /**
+     * Returns true if the given code point is emoji modifier base.
+     * @param c codepoint to check
+     * @return true if is emoji modifier base
+     */
+    public static boolean isEmojiModifierBase(int c) {
         // These two characters were removed from Emoji_Modifier_Base in Emoji 4.0, but we need to
         // keep them as emoji modifier bases since there are fonts and user-generated text out there
         // that treats these as potential emoji bases.
-        if (codePoint == 0x1F91D || codePoint == 0x1F93C) {
+        if (c == 0x1F91D || c == 0x1F93C) {
             return true;
         }
-        // Emoji Modifier Base characters new in Unicode emoji 5.0.
-        // From http://www.unicode.org/Public/emoji/5.0/emoji-data.txt
-        // TODO: Remove once emoji-data.text 5.0 is in ICU or update to 6.0.
-        if (codePoint == 0x1F91F
-                || (0x1F931 <= codePoint && codePoint <= 0x1F932)
-                || (0x1F9D1 <= codePoint && codePoint <= 0x1F9DD)) {
+        // Emoji Modifier Base characters new in Unicode emoji 11
+        // From https://www.unicode.org/Public/emoji/11.0/emoji-data.txt
+        // TODO: Remove once emoji-data.text 11 is in ICU or update to 11.
+        if ((0x1F9B5 <= c && c <= 0x1F9B6) || (0x1F9B8 <= c && c <= 0x1F9B9)) {
             return true;
         }
-        return UCharacter.hasBinaryProperty(codePoint, UProperty.EMOJI_MODIFIER_BASE);
+        return UCharacter.hasBinaryProperty(c, UProperty.EMOJI_MODIFIER_BASE);
     }
 
     /**
      * Returns true if the character is a new emoji still not supported in our version of ICU.
      */
-    public static boolean isNewEmoji(int codePoint) {
-        // Emoji characters new in Unicode emoji 5.0.
-        // From http://www.unicode.org/Public/emoji/5.0/emoji-data.txt
-        // TODO: Remove once emoji-data.text 5.0 is in ICU or update to 6.0.
-        if (codePoint < 0x1F6F7 || codePoint > 0x1F9E6) {
+    public static boolean isNewEmoji(int c) {
+        // Emoji characters new in Unicode emoji 11
+        // From https://www.unicode.org/Public/emoji/11.0/emoji-data.txt
+        // TODO: Remove once emoji-data.text 11 is in ICU or update to 11.
+        if (c < 0x1F6F9 || c > 0x1F9FF) {
             // Optimization for characters outside the new emoji range.
             return false;
         }
-        return (0x1F6F7 <= codePoint && codePoint <= 0x1F6F8)
-                || codePoint == 0x1F91F
-                || (0x1F928 <= codePoint && codePoint <= 0x1F92F)
-                || (0x1F931 <= codePoint && codePoint <= 0x1F932)
-                || codePoint == 0x1F94C
-                || (0x1F95F <= codePoint && codePoint <= 0x1F96B)
-                || (0x1F992 <= codePoint && codePoint <= 0x1F997)
-                || (0x1F9D0 <= codePoint && codePoint <= 0x1F9E6);
+        return c == 0x265F || c == 0x267E || c == 0x1F6F9 || c == 0x1F97A
+                || (0x1F94D <= c && c <= 0x1F94F)
+                || (0x1F96C <= c && c <= 0x1F970)
+                || (0x1F973 <= c && c <= 0x1F976)
+                || (0x1F97C <= c && c <= 0x1F97F)
+                || (0x1F998 <= c && c <= 0x1F9A2)
+                || (0x1F9B0 <= c && c <= 0x1F9B9)
+                || (0x1F9C1 <= c && c <= 0x1F9C2)
+                || (0x1F9E7 <= c && c <= 0x1F9FF);
     }
 
     /**

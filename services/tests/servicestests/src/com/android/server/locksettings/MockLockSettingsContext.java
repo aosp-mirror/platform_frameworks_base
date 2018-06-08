@@ -16,6 +16,7 @@
 
 package com.android.server.locksettings;
 
+import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
@@ -32,16 +33,19 @@ public class MockLockSettingsContext extends ContextWrapper {
     private DevicePolicyManager mDevicePolicyManager;
     private StorageManager mStorageManager;
     private TrustManager mTrustManager;
+    private KeyguardManager mKeyguardManager;
 
     public MockLockSettingsContext(Context base, UserManager userManager,
             NotificationManager notificationManager, DevicePolicyManager devicePolicyManager,
-            StorageManager storageManager, TrustManager trustManager) {
+            StorageManager storageManager, TrustManager trustManager,
+            KeyguardManager keyguardManager) {
         super(base);
         mUserManager = userManager;
         mNotificationManager = notificationManager;
         mDevicePolicyManager = devicePolicyManager;
         mStorageManager = storageManager;
         mTrustManager = trustManager;
+        mKeyguardManager = keyguardManager;
     }
 
     @Override
@@ -56,6 +60,8 @@ public class MockLockSettingsContext extends ContextWrapper {
             return mStorageManager;
         } else if (TRUST_SERVICE.equals(name)) {
             return mTrustManager;
+        } else if (KEYGUARD_SERVICE.equals(name)) {
+            return mKeyguardManager;
         } else {
             throw new RuntimeException("System service not mocked: " + name);
         }

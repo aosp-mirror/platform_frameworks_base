@@ -19,8 +19,8 @@
 #include "GammaFontRenderer.h"
 #include "GlLayer.h"
 #include "Properties.h"
-#include "renderstate/RenderState.h"
 #include "ShadowTessellator.h"
+#include "renderstate/RenderState.h"
 #ifdef BUGREPORT_FONT_CACHE_USAGE
 #include "font/FontCacheHistoryTracker.h"
 #endif
@@ -40,9 +40,9 @@ Caches* Caches::sInstance = nullptr;
 ///////////////////////////////////////////////////////////////////////////////
 
 #if DEBUG_CACHE_FLUSH
-    #define FLUSH_LOGD(...) ALOGD(__VA_ARGS__)
+#define FLUSH_LOGD(...) ALOGD(__VA_ARGS__)
 #else
-    #define FLUSH_LOGD(...)
+#define FLUSH_LOGD(...)
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -98,8 +98,8 @@ void Caches::initConstraints() {
 
 void Caches::initStaticProperties() {
     // OpenGL ES 3.0+ specific features
-    gpuPixelBuffersEnabled = extensions().hasPixelBufferObjects()
-            && property_get_bool(PROPERTY_ENABLE_GPU_PIXEL_BUFFERS, true);
+    gpuPixelBuffersEnabled = extensions().hasPixelBufferObjects() &&
+                             property_get_bool(PROPERTY_ENABLE_GPU_PIXEL_BUFFERS, true);
 }
 
 void Caches::terminate() {
@@ -143,10 +143,8 @@ void Caches::setProgram(Program* program) {
 ///////////////////////////////////////////////////////////////////////////////
 
 uint32_t Caches::getOverdrawColor(uint32_t amount) const {
-    static uint32_t sOverdrawColors[2][4] = {
-            { 0x2f0000ff, 0x2f00ff00, 0x3fff0000, 0x7fff0000 },
-            { 0x2f0000ff, 0x4fffff00, 0x5fff8ad8, 0x7fff0000 }
-    };
+    static uint32_t sOverdrawColors[2][4] = {{0x2f0000ff, 0x2f00ff00, 0x3fff0000, 0x7fff0000},
+                                             {0x2f0000ff, 0x4fffff00, 0x5fff8ad8, 0x7fff0000}};
     if (amount < 1) amount = 1;
     if (amount > 4) amount = 4;
 
@@ -160,46 +158,44 @@ void Caches::dumpMemoryUsage() {
     ALOGD("%s", stringLog.string());
 }
 
-void Caches::dumpMemoryUsage(String8 &log) {
+void Caches::dumpMemoryUsage(String8& log) {
     uint32_t total = 0;
     log.appendFormat("Current memory usage / total memory usage (bytes):\n");
-    log.appendFormat("  TextureCache         %8d / %8d\n",
-            textureCache.getSize(), textureCache.getMaxSize());
+    log.appendFormat("  TextureCache         %8d / %8d\n", textureCache.getSize(),
+                     textureCache.getMaxSize());
     if (mRenderState) {
         int memused = 0;
         for (std::set<Layer*>::iterator it = mRenderState->mActiveLayers.begin();
-                it != mRenderState->mActiveLayers.end(); it++) {
+             it != mRenderState->mActiveLayers.end(); it++) {
             const Layer* layer = *it;
             LOG_ALWAYS_FATAL_IF(layer->getApi() != Layer::Api::OpenGL);
             const GlLayer* glLayer = static_cast<const GlLayer*>(layer);
-            log.appendFormat("    GlLayer size %dx%d; texid=%u refs=%d\n",
-                    layer->getWidth(), layer->getHeight(),
-                    glLayer->getTextureId(),
-                    layer->getStrongCount());
+            log.appendFormat("    GlLayer size %dx%d; texid=%u refs=%d\n", layer->getWidth(),
+                             layer->getHeight(), glLayer->getTextureId(), layer->getStrongCount());
             memused += layer->getWidth() * layer->getHeight() * 4;
         }
-        log.appendFormat("  Layers total   %8d (numLayers = %zu)\n",
-                memused, mRenderState->mActiveLayers.size());
+        log.appendFormat("  Layers total   %8d (numLayers = %zu)\n", memused,
+                         mRenderState->mActiveLayers.size());
         total += memused;
     }
-    log.appendFormat("  RenderBufferCache    %8d / %8d\n",
-            renderBufferCache.getSize(), renderBufferCache.getMaxSize());
-    log.appendFormat("  GradientCache        %8d / %8d\n",
-            gradientCache.getSize(), gradientCache.getMaxSize());
-    log.appendFormat("  PathCache            %8d / %8d\n",
-            pathCache.getSize(), pathCache.getMaxSize());
-    log.appendFormat("  TessellationCache    %8d / %8d\n",
-            tessellationCache.getSize(), tessellationCache.getMaxSize());
+    log.appendFormat("  RenderBufferCache    %8d / %8d\n", renderBufferCache.getSize(),
+                     renderBufferCache.getMaxSize());
+    log.appendFormat("  GradientCache        %8d / %8d\n", gradientCache.getSize(),
+                     gradientCache.getMaxSize());
+    log.appendFormat("  PathCache            %8d / %8d\n", pathCache.getSize(),
+                     pathCache.getMaxSize());
+    log.appendFormat("  TessellationCache    %8d / %8d\n", tessellationCache.getSize(),
+                     tessellationCache.getMaxSize());
     log.appendFormat("  TextDropShadowCache  %8d / %8d\n", dropShadowCache.getSize(),
-            dropShadowCache.getMaxSize());
-    log.appendFormat("  PatchCache           %8d / %8d\n",
-            patchCache.getSize(), patchCache.getMaxSize());
+                     dropShadowCache.getMaxSize());
+    log.appendFormat("  PatchCache           %8d / %8d\n", patchCache.getSize(),
+                     patchCache.getMaxSize());
 
     fontRenderer.dumpMemoryUsage(log);
 
     log.appendFormat("Other:\n");
-    log.appendFormat("  FboCache             %8d / %8d\n",
-            fboCache.getSize(), fboCache.getMaxSize());
+    log.appendFormat("  FboCache             %8d / %8d\n", fboCache.getSize(),
+                     fboCache.getMaxSize());
 
     total += textureCache.getSize();
     total += renderBufferCache.getSize();
@@ -238,13 +234,13 @@ void Caches::flush(FlushMode mode) {
             gradientCache.clear();
             fontRenderer.clear();
             fboCache.clear();
-            // fall through
+        // fall through
         case FlushMode::Moderate:
             fontRenderer.flush();
             textureCache.flush();
             pathCache.clear();
             tessellationCache.clear();
-            // fall through
+        // fall through
         case FlushMode::Layers:
             renderBufferCache.clear();
             break;
@@ -274,5 +270,5 @@ TextureVertex* Caches::getRegionMesh() {
 // Temporary Properties
 ///////////////////////////////////////////////////////////////////////////////
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

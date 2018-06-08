@@ -50,7 +50,6 @@ static jlong nativeOpenPageAndGetSize(JNIEnv* env, jclass thiz, jlong documentPt
                 "cannot load page");
         return -1;
     }
-    HANDLE_PDFIUM_ERROR_STATE_WITH_RET_CODE(env, -1)
 
     double width = 0;
     double height = 0;
@@ -61,7 +60,6 @@ static jlong nativeOpenPageAndGetSize(JNIEnv* env, jclass thiz, jlong documentPt
                     "cannot get page size");
         return -1;
     }
-    HANDLE_PDFIUM_ERROR_STATE_WITH_RET_CODE(env, -1)
 
     env->SetIntField(outSize, gPointClassInfo.x, width);
     env->SetIntField(outSize, gPointClassInfo.y, height);
@@ -72,7 +70,6 @@ static jlong nativeOpenPageAndGetSize(JNIEnv* env, jclass thiz, jlong documentPt
 static void nativeClosePage(JNIEnv* env, jclass thiz, jlong pagePtr) {
     FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(pagePtr);
     FPDF_ClosePage(page);
-    HANDLE_PDFIUM_ERROR_STATE(env)
 }
 
 static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong pagePtr,
@@ -87,11 +84,6 @@ static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong 
 
     FPDF_BITMAP bitmap = FPDFBitmap_CreateEx(skBitmap.width(), skBitmap.height(),
             FPDFBitmap_BGRA, skBitmap.getPixels(), stride);
-    bool isExceptionPending = forwardPdfiumError(env);
-    if (isExceptionPending || bitmap == NULL) {
-        ALOGE("Error creating bitmap");
-        return;
-    }
 
     int renderFlags = FPDF_REVERSE_BYTE_ORDER;
     if (renderMode == RENDER_MODE_FOR_DISPLAY) {
@@ -100,20 +92,7 @@ static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong 
         renderFlags |= FPDF_PRINTING;
     }
 
-    // PDF's coordinate system origin is left-bottom while in graphics it
-    // is the top-left. So, translate the PDF coordinates to ours.
-    SkMatrix reflectOnX = SkMatrix::MakeScale(1, -1);
-    SkMatrix moveUp = SkMatrix::MakeTrans(0, FPDF_GetPageHeight(page));
-    SkMatrix coordinateChange = SkMatrix::Concat(moveUp, reflectOnX);
-
-    // Apply the transformation
-    SkMatrix matrix;
-    if (transformPtr == 0) {
-        matrix = coordinateChange;
-    } else {
-        matrix = SkMatrix::Concat(*reinterpret_cast<SkMatrix*>(transformPtr), coordinateChange);
-    }
-
+    SkMatrix matrix = *reinterpret_cast<SkMatrix*>(transformPtr);
     SkScalar transformValues[6];
     if (!matrix.asAffine(transformValues)) {
         jniThrowException(env, "java/lang/IllegalArgumentException",
@@ -129,7 +108,6 @@ static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong 
     FS_RECTF clip = {(float) clipLeft, (float) clipTop, (float) clipRight, (float) clipBottom};
 
     FPDF_RenderPageBitmapWithMatrix(bitmap, page, &transform, &clip, renderFlags);
-    HANDLE_PDFIUM_ERROR_STATE(env);
 
     skBitmap.notifyPixelsChanged();
 }

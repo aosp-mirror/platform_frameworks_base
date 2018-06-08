@@ -16,16 +16,14 @@
 
 package android.view;
 
-import android.view.Longpress;
-import com.android.frameworks.coretests.R;
-import android.util.KeyUtils;
+import android.test.ActivityInstrumentationTestCase;
 import android.test.TouchUtils;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.MediumTest;
-
-import android.test.ActivityInstrumentationTestCase;
-import android.view.View;
+import android.util.KeyUtils;
 import android.view.View.OnLongClickListener;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * Exercises {@link android.view.View}'s longpress plumbing by testing the
@@ -34,7 +32,7 @@ import android.view.View.OnLongClickListener;
 public class DisabledLongpressTest extends ActivityInstrumentationTestCase<Longpress> {
     private View mSimpleView;
     private boolean mLongClicked;
-    
+
     public DisabledLongpressTest() {
         super("com.android.frameworks.coretests", Longpress.class);
     }
@@ -66,16 +64,15 @@ public class DisabledLongpressTest extends ActivityInstrumentationTestCase<Longp
     @MediumTest
     public void testSetUpConditions() throws Exception {
         assertNotNull(mSimpleView);
-        assertTrue(mSimpleView.hasFocus());
         assertFalse(mLongClicked);
     }
 
     @LargeTest
     public void testKeypadLongClick() throws Exception {
-        mSimpleView.requestFocus();
+        getActivity().runOnUiThread(() -> mSimpleView.requestFocus());
         getInstrumentation().waitForIdleSync();
         KeyUtils.longClick(this);
-        
+
         getInstrumentation().waitForIdleSync();
         assertFalse(mLongClicked);
     }

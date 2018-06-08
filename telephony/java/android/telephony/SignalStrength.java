@@ -36,15 +36,20 @@ public class SignalStrength implements Parcelable {
     private static final boolean DBG = false;
 
     /** @hide */
-    public static final int SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
+    public static final int SIGNAL_STRENGTH_NONE_OR_UNKNOWN
+            = TelephonyProtoEnums.SIGNAL_STRENGTH_NONE_OR_UNKNOWN; // = 0
     /** @hide */
-    public static final int SIGNAL_STRENGTH_POOR = 1;
+    public static final int SIGNAL_STRENGTH_POOR
+            = TelephonyProtoEnums.SIGNAL_STRENGTH_POOR; // = 1
     /** @hide */
-    public static final int SIGNAL_STRENGTH_MODERATE = 2;
+    public static final int SIGNAL_STRENGTH_MODERATE
+            = TelephonyProtoEnums.SIGNAL_STRENGTH_MODERATE; // = 2
     /** @hide */
-    public static final int SIGNAL_STRENGTH_GOOD = 3;
+    public static final int SIGNAL_STRENGTH_GOOD
+            = TelephonyProtoEnums.SIGNAL_STRENGTH_GOOD; // = 3
     /** @hide */
-    public static final int SIGNAL_STRENGTH_GREAT = 4;
+    public static final int SIGNAL_STRENGTH_GREAT
+            = TelephonyProtoEnums.SIGNAL_STRENGTH_GREAT; // = 4
     /** @hide */
     public static final int NUM_SIGNAL_STRENGTH_BINS = 5;
     /** @hide */
@@ -392,7 +397,7 @@ public class SignalStrength implements Parcelable {
 
         // TS 36.214 Physical Layer Section 5.1.3, TS 36.331 RRC
         mLteRsrp = ((-mLteRsrp >= MIN_LTE_RSRP) && (-mLteRsrp <= MAX_LTE_RSRP)) ? -mLteRsrp
-                : SignalStrength.INVALID;
+                                : SignalStrength.INVALID;
         mLteRsrq = ((mLteRsrq >= 3) && (mLteRsrq <= 20)) ? -mLteRsrq : SignalStrength.INVALID;
         mLteRssnr = ((mLteRssnr >= -200) && (mLteRssnr <= 300)) ? mLteRssnr
                 : SignalStrength.INVALID;

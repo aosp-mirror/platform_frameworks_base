@@ -69,11 +69,10 @@ enum class ResourceType {
   kXml,
 };
 
-android::StringPiece ToString(ResourceType type);
+android::StringPiece to_string(ResourceType type);
 
 /**
- * Returns a pointer to a valid ResourceType, or nullptr if
- * the string was invalid.
+ * Returns a pointer to a valid ResourceType, or nullptr if the string was invalid.
  */
 const ResourceType* ParseResourceType(const android::StringPiece& str);
 
@@ -92,7 +91,7 @@ struct ResourceName {
   int compare(const ResourceName& other) const;
 
   bool is_valid() const;
-  std::string ToString() const;
+  std::string to_string() const;
 };
 
 /**
@@ -115,8 +114,10 @@ struct ResourceNameRef {
   ResourceNameRef& operator=(ResourceNameRef&& rhs) = default;
   ResourceNameRef& operator=(const ResourceName& rhs);
 
-  ResourceName ToResourceName() const;
   bool is_valid() const;
+
+  ResourceName ToResourceName() const;
+  std::string to_string() const;
 };
 
 constexpr const uint8_t kAppPackageId = 0x7fu;
@@ -149,6 +150,8 @@ struct ResourceId {
   uint8_t package_id() const;
   uint8_t type_id() const;
   uint16_t entry_id() const;
+
+  std::string to_string() const;
 };
 
 struct SourcedResourceName {
@@ -157,11 +160,21 @@ struct SourcedResourceName {
 };
 
 struct ResourceFile {
+  enum class Type {
+    kUnknown,
+    kPng,
+    kBinaryXml,
+    kProtoXml,
+  };
+
   // Name
   ResourceName name;
 
   // Configuration
   ConfigDescription config;
+
+  // Type
+  Type type;
 
   // Source
   Source source;
@@ -219,7 +232,9 @@ inline bool ResourceId::is_valid() const {
   return (id & 0xff000000u) != 0 && (id & 0x00ff0000u) != 0;
 }
 
-inline bool ResourceId::is_valid_dynamic() const { return (id & 0x00ff0000u) != 0; }
+inline bool ResourceId::is_valid_dynamic() const {
+  return (id & 0x00ff0000u) != 0;
+}
 
 inline uint8_t ResourceId::package_id() const {
   return static_cast<uint8_t>(id >> 24);
@@ -249,24 +264,21 @@ inline bool operator!=(const ResourceId& lhs, const ResourceId& rhs) {
   return lhs.id != rhs.id;
 }
 
-inline ::std::ostream& operator<<(::std::ostream& out,
-                                  const ResourceId& res_id) {
-  std::ios_base::fmtflags old_flags = out.flags();
-  char old_fill = out.fill();
-  out << "0x" << std::internal << std::setfill('0') << std::setw(8) << std::hex
-      << res_id.id;
-  out.flags(old_flags);
-  out.fill(old_fill);
-  return out;
+inline ::std::ostream& operator<<(::std::ostream& out, const ResourceId& res_id) {
+  return out << res_id.to_string();
+}
+
+// For generic code to call 'using std::to_string; to_string(T);'.
+inline std::string to_string(const ResourceId& id) {
+  return id.to_string();
 }
 
 //
 // ResourceType implementation.
 //
 
-inline ::std::ostream& operator<<(::std::ostream& out,
-                                  const ResourceType& val) {
-  return out << ToString(val);
+inline ::std::ostream& operator<<(::std::ostream& out, const ResourceType& val) {
+  return out << to_string(val);
 }
 
 //
@@ -305,18 +317,8 @@ inline bool operator!=(const ResourceName& lhs, const ResourceName& rhs) {
          std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
-inline ::std::ostream& operator<<(::std::ostream& out,
-                                  const ResourceName& name) {
-  if (!name.package.empty()) {
-    out << name.package << ":";
-  }
-  return out << name.type << "/" << name.entry;
-}
-
-inline std::string ResourceName::ToString() const {
-  std::stringstream stream;
-  stream << *this;
-  return stream.str();
+inline ::std::ostream& operator<<(::std::ostream& out, const ResourceName& name) {
+  return out << name.to_string();
 }
 
 //
@@ -360,12 +362,8 @@ inline bool operator!=(const ResourceNameRef& lhs, const ResourceNameRef& rhs) {
          std::tie(rhs.package, rhs.type, rhs.entry);
 }
 
-inline ::std::ostream& operator<<(::std::ostream& out,
-                                  const ResourceNameRef& name) {
-  if (!name.package.empty()) {
-    out << name.package << ":";
-  }
-  return out << name.type << "/" << name.entry;
+inline ::std::ostream& operator<<(::std::ostream& out, const ResourceNameRef& name) {
+  return out << name.to_string();
 }
 
 inline bool operator<(const ResourceName& lhs, const ResourceNameRef& b) {
@@ -376,8 +374,7 @@ inline bool operator!=(const ResourceName& lhs, const ResourceNameRef& rhs) {
   return ResourceNameRef(lhs) != rhs;
 }
 
-inline bool operator==(const SourcedResourceName& lhs,
-                       const SourcedResourceName& rhs) {
+inline bool operator==(const SourcedResourceName& lhs, const SourcedResourceName& rhs) {
   return lhs.name == rhs.name && lhs.line == rhs.line;
 }
 

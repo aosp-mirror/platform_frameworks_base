@@ -16,6 +16,8 @@
 
 package android.util;
 
+import android.support.test.filters.LargeTest;
+
 import junit.framework.TestCase;
 
 import java.util.HashMap;
@@ -26,6 +28,7 @@ import java.util.Random;
 /**
  * Tests for {@link LongSparseLongArray}.
  */
+@LargeTest
 public class LongSparseLongArrayTest extends TestCase {
     private static final String TAG = "LongSparseLongArrayTest";
 

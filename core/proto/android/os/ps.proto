@@ -1,0 +1,117 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.os;
+
+option java_multiple_files = true;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+message PsProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    message Process {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // Security label, most commonly used for SELinux context data.
+        optional string label = 1;
+        // String representation of uid.
+        optional string user = 2;
+        // Process ID number.
+        optional int32 pid = 3;
+        // The unique number representing a dispatchable entity (alias lwp,
+        // spid).  This value may also appear as: a process ID (pid); a process
+        // group ID (pgrp); a session ID for the session leader (sid); a thread
+        // group ID for the thread group leader (tgid); and a tty process group
+        // ID for the process group leader (tpgid).
+        optional int32 tid = 4;
+        // Parent process ID.
+        optional int32 ppid = 5;
+        // Virtual set size (memory size) of the process, in KiB.
+        optional int32 vsz = 6;
+        // Resident set size. How many physical pages are associated with the
+        // process; real memory usage, in KiB.
+        optional int32 rss = 7;
+        // Name of the kernel function in which the process is sleeping, a "-"
+        // if the process is running, or a "*" if the process is multi-threaded
+        // and ps is not displaying threads.
+        optional string wchan = 8;
+        // Memory address of the process.
+        optional string addr = 9;
+
+        enum ProcessStateCode {
+            STATE_UNKNOWN = 0;
+            // Uninterruptible sleep (usually IO).
+            STATE_D = 1;
+            // Running or runnable (on run queue).
+            STATE_R = 2;
+            // Interruptible sleep (waiting for an event to complete).
+            STATE_S = 3;
+            // Stopped by job control signal.
+            STATE_T = 4;
+            // Stopped by debugger during the tracing.
+            STATE_TRACING = 5;
+            // Dead (should never be seen).
+            STATE_X = 6;
+            // Defunct ("zombie") process. Terminated but not reaped by its
+            // parent.
+            STATE_Z = 7;
+        }
+        // Minimal state display
+        optional ProcessStateCode s = 10;
+        // Priority of the process. Higher number means lower priority.
+        optional int32 pri = 11;
+        // Nice value. This ranges from 19 (nicest) to -20 (not nice to others).
+        optional sint32 ni = 12;
+        // Realtime priority.
+        optional string rtprio = 13; // Number or -
+
+        enum SchedulingPolicy {
+            option allow_alias = true;
+
+            // Regular names conflict with macros defined in
+            // bionic/libc/kernel/uapi/linux/sched.h.
+            SCH_OTHER = 0;
+            SCH_NORMAL = 0;
+
+            SCH_FIFO = 1;
+            SCH_RR = 2;
+            SCH_BATCH = 3;
+            SCH_ISO = 4;
+            SCH_IDLE = 5;
+        }
+        // Scheduling policy of the process.
+        optional SchedulingPolicy sch = 14;
+
+        // How Android memory manager will treat the task
+        enum Policy {
+            POLICY_UNKNOWN = 0;
+            // Foreground.
+            POLICY_FG = 1;
+            // Background.
+            POLICY_BG = 2;
+            POLICY_TA = 3;  // TODO: figure out what this value is
+        }
+        optional Policy pcy = 15;
+        // Total CPU time, "[DD-]HH:MM:SS" format.
+        optional string time = 16;
+        // Command with all its arguments as a string.
+        optional string cmd = 17;
+    }
+    repeated Process processes = 1;
+}

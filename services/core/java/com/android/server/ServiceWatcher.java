@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -198,6 +199,7 @@ public class ServiceWatcher implements ServiceConnection {
      *            bound.
      * @returns {@code true} if a valid package was found to bind to.
      */
+    @GuardedBy("mLock")
     private boolean bindBestPackageLocked(String justCheckThisPackage, boolean forceRebind) {
         Intent intent = new Intent(mAction);
         if (justCheckThisPackage != null) {
@@ -272,6 +274,7 @@ public class ServiceWatcher implements ServiceConnection {
         return true;
     }
 
+    @GuardedBy("mLock")
     private void unbindLocked() {
         ComponentName component;
         component = mBoundComponent;
@@ -281,10 +284,12 @@ public class ServiceWatcher implements ServiceConnection {
         mBoundUserId = UserHandle.USER_NULL;
         if (component != null) {
             if (D) Log.d(mTag, "unbinding " + component);
+            mBoundService = null;
             mContext.unbindService(this);
         }
     }
 
+    @GuardedBy("mLock")
     private void bindToPackageLocked(ComponentName component, int version, int userId) {
         Intent intent = new Intent(mAction);
         intent.setComponent(component);
@@ -397,9 +402,29 @@ public class ServiceWatcher implements ServiceConnection {
         }
     }
 
-    public @Nullable IBinder getBinder() {
+    /**
+     * The runner that runs on the binder retrieved from {@link ServiceWatcher}.
+     */
+    public interface BinderRunner {
+        /**
+         * Runs on the retrieved binder.
+         * @param binder the binder retrieved from the {@link ServiceWatcher}.
+         */
+        public void run(@NonNull IBinder binder);
+    }
+
+    /**
+     * Retrieves the binder from {@link ServiceWatcher} and runs it.
+     * @return whether a valid service exists.
+     */
+    public boolean runOnBinder(@NonNull BinderRunner runner) {
         synchronized (mLock) {
-            return mBoundService;
+            if (mBoundService == null) {
+                return false;
+            } else {
+                runner.run(mBoundService);
+                return true;
+            }
         }
     }
 

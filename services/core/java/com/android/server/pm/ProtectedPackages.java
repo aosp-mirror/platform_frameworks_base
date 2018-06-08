@@ -88,6 +88,13 @@ public class ProtectedPackages {
         return false;
     }
 
+    public synchronized String getDeviceOwnerOrProfileOwnerPackage(int userId) {
+        if (mDeviceOwnerUserId == userId) {
+            return mDeviceOwnerPackage;
+        }
+        return mProfileOwnerPackages.get(userId);
+    }
+
     /**
      * Returns {@code true} if a given package is protected. Otherwise, returns {@code false}.
      *

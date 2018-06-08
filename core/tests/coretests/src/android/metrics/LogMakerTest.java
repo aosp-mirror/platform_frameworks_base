@@ -15,9 +15,13 @@
  */
 package android.metrics;
 
+import android.support.test.filters.LargeTest;
+
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+
 import junit.framework.TestCase;
 
+@LargeTest
 public class LogMakerTest extends TestCase {
 
     public void testSerialize() {

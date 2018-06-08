@@ -16,21 +16,19 @@
 
 package com.android.settingslib.widget;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.app.Activity;
 import android.graphics.drawable.AnimatedRotateDrawable;
 import android.view.View;
-import com.android.settingslib.TestConfig;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-
-import static com.google.common.truth.Truth.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class AnimatedImageViewTest {
     private AnimatedImageView mAnimatedImageView;
 

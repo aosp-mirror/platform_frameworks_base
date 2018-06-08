@@ -16,8 +16,13 @@
 
 package android.service.autofill;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Activity;
+import android.content.IntentSender;
 import android.os.RemoteException;
+
+import com.android.internal.util.Preconditions;
 
 /**
  * Handles save requests from the {@link AutofillService} into the {@link Activity} being
@@ -36,18 +41,33 @@ public final class SaveCallback {
      * Notifies the Android System that an
      * {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)} was successfully handled
      * by the service.
-     *
-     * <p>If the service could not handle the request right away&mdash;for example, because it must
-     * launch an activity asking the user to authenticate first or because the network is
-     * down&mdash;it should still call {@link #onSuccess()}.
-     *
-     * @throws RuntimeException if an error occurred while calling the Android System.
      */
     public void onSuccess() {
+        onSuccessInternal(null);
+    }
+
+    /**
+     * Notifies the Android System that an
+     * {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)} was successfully handled
+     * by the service.
+     *
+     * <p>This method is useful when the service requires extra work&mdash;for example, launching an
+     * activity asking the user to authenticate first &mdash;before it can process the request,
+     * as the intent will be launched from the context of the activity being autofilled and hence
+     * will be part of that activity's stack.
+     *
+     * @param intentSender intent that will be launched from the context of activity being
+     * autofilled.
+     */
+    public void onSuccess(@NonNull IntentSender intentSender) {
+        onSuccessInternal(Preconditions.checkNotNull(intentSender));
+    }
+
+    private void onSuccessInternal(@Nullable IntentSender intentSender) {
         assertNotCalled();
         mCalled = true;
         try {
-            mCallback.onSuccess();
+            mCallback.onSuccess(intentSender);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
@@ -63,11 +83,10 @@ public final class SaveCallback {
      * the {@link SaveRequest} and call {@link #onSuccess()} instead.
      *
      * <p><b>Note:</b> The Android System displays an UI with the supplied error message; if
-     * you prefer to show your own message, call {@link #onSuccess()} instead.
+     * you prefer to show your own message, call {@link #onSuccess()} or
+     * {@link #onSuccess(IntentSender)} instead.
      *
      * @param message error message to be displayed to the user.
-     *
-     * @throws RuntimeException if an error occurred while calling the Android System.
      */
     public void onFailure(CharSequence message) {
         assertNotCalled();

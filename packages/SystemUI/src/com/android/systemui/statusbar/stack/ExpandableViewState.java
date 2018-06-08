@@ -95,6 +95,12 @@ public class ExpandableViewState extends ViewState {
     public boolean inShelf;
 
     /**
+     * A state indicating whether a headsup is currently fully visible, even when not scrolled.
+     * Only valid if the view is heads upped.
+     */
+    public boolean headsUpIsVisible;
+
+    /**
      * How much the child overlaps with the previous child on top. This is used to
      * show the background properly when the child on top is translating away.
      */
@@ -126,6 +132,7 @@ public class ExpandableViewState extends ViewState {
             clipTopAmount = svs.clipTopAmount;
             notGoneIndex = svs.notGoneIndex;
             location = svs.location;
+            headsUpIsVisible = svs.headsUpIsVisible;
         }
     }
 
@@ -175,6 +182,10 @@ public class ExpandableViewState extends ViewState {
 
             expandableView.setTransformingInShelf(false);
             expandableView.setInShelf(inShelf);
+
+            if (headsUpIsVisible) {
+                expandableView.setHeadsUpIsVisible();
+            }
         }
     }
 
@@ -222,13 +233,18 @@ public class ExpandableViewState extends ViewState {
         expandableView.setDark(this.dark, animationFilter.animateDark, properties.delay);
 
         if (properties.wasAdded(child) && !hidden) {
-            expandableView.performAddAnimation(properties.delay, properties.duration);
+            expandableView.performAddAnimation(properties.delay, properties.duration,
+                    false /* isHeadsUpAppear */);
         }
 
         if (!expandableView.isInShelf() && this.inShelf) {
             expandableView.setTransformingInShelf(true);
         }
         expandableView.setInShelf(this.inShelf);
+
+        if (headsUpIsVisible) {
+            expandableView.setHeadsUpIsVisible();
+        }
     }
 
     private void startHeightAnimation(final ExpandableView child, AnimationProperties properties) {
@@ -450,6 +466,23 @@ public class ExpandableViewState extends ViewState {
             return view.getActualHeight();
         } else {
             return getChildTag(view, TAG_END_HEIGHT);
+        }
+    }
+
+    @Override
+    public void cancelAnimations(View view) {
+        super.cancelAnimations(view);
+        Animator animator = getChildTag(view, TAG_ANIMATOR_HEIGHT);
+        if (animator != null) {
+            animator.cancel();
+        }
+        animator = getChildTag(view, TAG_ANIMATOR_SHADOW_ALPHA);
+        if (animator != null) {
+            animator.cancel();
+        }
+        animator = getChildTag(view, TAG_ANIMATOR_TOP_INSET);
+        if (animator != null) {
+            animator.cancel();
         }
     }
 }

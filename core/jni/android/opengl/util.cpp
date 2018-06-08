@@ -25,7 +25,9 @@
 #include <assert.h>
 #include <dlfcn.h>
 
-#include <GLES/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#include <GLES3/gl3.h>
 #include <ETC1/etc1.h>
 
 #include <SkBitmap.h>
@@ -620,29 +622,43 @@ void util_multiplyMV(JNIEnv *env, jclass clazz,
 
 // ---------------------------------------------------------------------------
 
-static int checkFormat(SkColorType colorType, int format, int type)
+static int checkInternalFormat(SkColorType colorType, int internalformat,
+    int type)
 {
     switch(colorType) {
         case kN32_SkColorType:
+            return (type == GL_UNSIGNED_BYTE &&
+                internalformat == GL_RGBA) ? 0 : -1;
         case kAlpha_8_SkColorType:
-            if (type == GL_UNSIGNED_BYTE)
-                return 0;
+            return (type == GL_UNSIGNED_BYTE &&
+                internalformat == GL_ALPHA) ? 0 : -1;
         case kARGB_4444_SkColorType:
+            return (type == GL_UNSIGNED_SHORT_4_4_4_4 &&
+                internalformat == GL_RGBA) ? 0 : -1;
         case kRGB_565_SkColorType:
-            switch (type) {
-                case GL_UNSIGNED_SHORT_4_4_4_4:
-                case GL_UNSIGNED_SHORT_5_6_5:
-                case GL_UNSIGNED_SHORT_5_5_5_1:
-                    return 0;
-                case GL_UNSIGNED_BYTE:
-                    if (format == GL_LUMINANCE_ALPHA)
-                        return 0;
-            }
-            break;
+            return (type == GL_UNSIGNED_SHORT_5_6_5 &&
+                internalformat == GL_RGB) ? 0 : -1;
+        case kRGBA_F16_SkColorType:
+            return (type == GL_HALF_FLOAT &&
+                internalformat == GL_RGBA16F) ? 0 : -1;
         default:
             break;
     }
     return -1;
+}
+
+// The internal format is no longer the same as pixel format, per Table 2 in
+// https://www.khronos.org/registry/OpenGL-Refpages/es3.1/html/glTexImage2D.xhtml
+static int getPixelFormatFromInternalFormat(uint32_t internalFormat) {
+    switch (internalFormat) {
+        // For sized internal format.
+        case GL_RGBA16F:
+            return GL_RGBA;
+        // Base internal formats and pixel formats are still the same, see Table 1 in
+        // https://www.khronos.org/registry/OpenGL-Refpages/es3.1/html/glTexImage2D.xhtml
+        default:
+            return internalFormat;
+    }
 }
 
 static int getInternalFormat(SkColorType colorType)
@@ -656,6 +672,8 @@ static int getInternalFormat(SkColorType colorType)
             return GL_RGBA;
         case kRGB_565_SkColorType:
             return GL_RGB;
+        case kRGBA_F16_SkColorType:
+            return GL_RGBA16F;
         default:
             return -1;
     }
@@ -672,6 +690,8 @@ static int getType(SkColorType colorType)
             return GL_UNSIGNED_BYTE;
         case kRGB_565_SkColorType:
             return GL_UNSIGNED_SHORT_5_6_5;
+        case kRGBA_F16_SkColorType:
+            return GL_HALF_FLOAT;
         default:
             return -1;
     }
@@ -706,7 +726,7 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
     if (type < 0) {
         type = getType(colorType);
     }
-    int err = checkFormat(colorType, internalformat, type);
+    int err = checkInternalFormat(colorType, internalformat, type);
     if (err)
         return err;
     const int w = bitmap.width();
@@ -715,7 +735,8 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
     if (internalformat == GL_PALETTE8_RGBA8_OES) {
         err = -1;
     } else {
-        glTexImage2D(target, level, internalformat, w, h, border, internalformat, type, p);
+        glTexImage2D(target, level, internalformat, w, h, border,
+                     getPixelFormatFromInternalFormat(internalformat), type, p);
     }
     return err;
 }
@@ -727,12 +748,13 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
     SkBitmap bitmap;
     GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
     SkColorType colorType = bitmap.colorType();
+    int internalFormat = getInternalFormat(colorType);
     if (format < 0) {
-        format = getInternalFormat(colorType);
+        format = getPixelFormatFromInternalFormat(internalFormat);
         if (format == GL_PALETTE8_RGBA8_OES)
             return -1; // glCompressedTexSubImage2D() not supported
     }
-    int err = checkFormat(colorType, format, type);
+    int err = checkInternalFormat(colorType, internalFormat, type);
     if (err)
         return err;
     const int w = bitmap.width();

@@ -41,21 +41,33 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     }
 
     public void dispatchStartedWakingUp() {
+        if (getWakefulness() == WAKEFULNESS_WAKING) {
+            return;
+        }
         setWakefulness(WAKEFULNESS_WAKING);
         dispatch(Observer::onStartedWakingUp);
     }
 
     public void dispatchFinishedWakingUp() {
+        if (getWakefulness() == WAKEFULNESS_AWAKE) {
+            return;
+        }
         setWakefulness(WAKEFULNESS_AWAKE);
         dispatch(Observer::onFinishedWakingUp);
     }
 
     public void dispatchStartedGoingToSleep() {
+        if (getWakefulness() == WAKEFULNESS_GOING_TO_SLEEP) {
+            return;
+        }
         setWakefulness(WAKEFULNESS_GOING_TO_SLEEP);
         dispatch(Observer::onStartedGoingToSleep);
     }
 
     public void dispatchFinishedGoingToSleep() {
+        if (getWakefulness() == WAKEFULNESS_ASLEEP) {
+            return;
+        }
         setWakefulness(WAKEFULNESS_ASLEEP);
         dispatch(Observer::onFinishedGoingToSleep);
     }

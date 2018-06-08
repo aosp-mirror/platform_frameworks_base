@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.graphics.Rect;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -33,7 +34,7 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link StackWindowController}.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.StackWindowControllerTests
+ *  atest FrameworksServicesTests:StackWindowControllerTests
  */
 @SmallTest
 @Presubmit

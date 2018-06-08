@@ -21,6 +21,7 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.service.procstats.ProcessStatsProto;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -29,6 +30,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import static com.android.internal.app.procstats.ProcessStats.*;
 
@@ -45,12 +47,77 @@ import java.util.Objects;
  * Utilities for dumping.
  */
 public final class DumpUtils {
-    public static final String[] STATE_NAMES = new String[] {
-            "Persist", "Top    ", "ImpFg  ", "ImpBg  ",
-            "Backup ", "HeavyWt", "Service", "ServRst",
-            "Receivr", "Home   ",
-            "LastAct", "CchAct ", "CchCAct", "CchEmty"
-    };
+    public static final String[] STATE_NAMES;
+    public static final String[] STATE_NAMES_CSV;
+    static final String[] STATE_TAGS;
+    static final int[] STATE_PROTO_ENUMS;
+
+    // Make the mapping easy to update.
+    static {
+        STATE_NAMES = new String[STATE_COUNT];
+        STATE_NAMES[STATE_PERSISTENT] = "Persist";
+        STATE_NAMES[STATE_TOP] = "Top";
+        STATE_NAMES[STATE_IMPORTANT_FOREGROUND] = "ImpFg";
+        STATE_NAMES[STATE_IMPORTANT_BACKGROUND] = "ImpBg";
+        STATE_NAMES[STATE_BACKUP] = "Backup";
+        STATE_NAMES[STATE_SERVICE] = "Service";
+        STATE_NAMES[STATE_SERVICE_RESTARTING] = "ServRst";
+        STATE_NAMES[STATE_RECEIVER] = "Receivr";
+        STATE_NAMES[STATE_HEAVY_WEIGHT] = "HeavyWt";
+        STATE_NAMES[STATE_HOME] = "Home";
+        STATE_NAMES[STATE_LAST_ACTIVITY] = "LastAct";
+        STATE_NAMES[STATE_CACHED_ACTIVITY] = "CchAct";
+        STATE_NAMES[STATE_CACHED_ACTIVITY_CLIENT] = "CchCAct";
+        STATE_NAMES[STATE_CACHED_EMPTY] = "CchEmty";
+
+        STATE_NAMES_CSV = new String[STATE_COUNT];
+        STATE_NAMES_CSV[STATE_PERSISTENT] = "pers";
+        STATE_NAMES_CSV[STATE_TOP] = "top";
+        STATE_NAMES_CSV[STATE_IMPORTANT_FOREGROUND] = "impfg";
+        STATE_NAMES_CSV[STATE_IMPORTANT_BACKGROUND] = "impbg";
+        STATE_NAMES_CSV[STATE_BACKUP] = "backup";
+        STATE_NAMES_CSV[STATE_SERVICE] = "service";
+        STATE_NAMES_CSV[STATE_SERVICE_RESTARTING] = "service-rs";
+        STATE_NAMES_CSV[STATE_RECEIVER] = "receiver";
+        STATE_NAMES_CSV[STATE_HEAVY_WEIGHT] = "heavy";
+        STATE_NAMES_CSV[STATE_HOME] = "home";
+        STATE_NAMES_CSV[STATE_LAST_ACTIVITY] = "lastact";
+        STATE_NAMES_CSV[STATE_CACHED_ACTIVITY] = "cch-activity";
+        STATE_NAMES_CSV[STATE_CACHED_ACTIVITY_CLIENT] = "cch-aclient";
+        STATE_NAMES_CSV[STATE_CACHED_EMPTY] = "cch-empty";
+
+        STATE_TAGS = new String[STATE_COUNT];
+        STATE_TAGS[STATE_PERSISTENT] = "p";
+        STATE_TAGS[STATE_TOP] = "t";
+        STATE_TAGS[STATE_IMPORTANT_FOREGROUND] = "f";
+        STATE_TAGS[STATE_IMPORTANT_BACKGROUND] = "b";
+        STATE_TAGS[STATE_BACKUP] = "u";
+        STATE_TAGS[STATE_SERVICE] = "s";
+        STATE_TAGS[STATE_SERVICE_RESTARTING] = "x";
+        STATE_TAGS[STATE_RECEIVER] = "r";
+        STATE_TAGS[STATE_HEAVY_WEIGHT] = "w";
+        STATE_TAGS[STATE_HOME] = "h";
+        STATE_TAGS[STATE_LAST_ACTIVITY] = "l";
+        STATE_TAGS[STATE_CACHED_ACTIVITY] = "a";
+        STATE_TAGS[STATE_CACHED_ACTIVITY_CLIENT] = "c";
+        STATE_TAGS[STATE_CACHED_EMPTY] = "e";
+
+        STATE_PROTO_ENUMS = new int[STATE_COUNT];
+        STATE_PROTO_ENUMS[STATE_PERSISTENT] = ProcessStatsProto.State.PERSISTENT;
+        STATE_PROTO_ENUMS[STATE_TOP] = ProcessStatsProto.State.TOP;
+        STATE_PROTO_ENUMS[STATE_IMPORTANT_FOREGROUND] = ProcessStatsProto.State.IMPORTANT_FOREGROUND;
+        STATE_PROTO_ENUMS[STATE_IMPORTANT_BACKGROUND] = ProcessStatsProto.State.IMPORTANT_BACKGROUND;
+        STATE_PROTO_ENUMS[STATE_BACKUP] = ProcessStatsProto.State.BACKUP;
+        STATE_PROTO_ENUMS[STATE_SERVICE] = ProcessStatsProto.State.SERVICE;
+        STATE_PROTO_ENUMS[STATE_SERVICE_RESTARTING] = ProcessStatsProto.State.SERVICE_RESTARTING;
+        STATE_PROTO_ENUMS[STATE_RECEIVER] = ProcessStatsProto.State.RECEIVER;
+        STATE_PROTO_ENUMS[STATE_HEAVY_WEIGHT] = ProcessStatsProto.State.HEAVY_WEIGHT;
+        STATE_PROTO_ENUMS[STATE_HOME] = ProcessStatsProto.State.HOME;
+        STATE_PROTO_ENUMS[STATE_LAST_ACTIVITY] = ProcessStatsProto.State.LAST_ACTIVITY;
+        STATE_PROTO_ENUMS[STATE_CACHED_ACTIVITY] = ProcessStatsProto.State.CACHED_ACTIVITY;
+        STATE_PROTO_ENUMS[STATE_CACHED_ACTIVITY_CLIENT] = ProcessStatsProto.State.CACHED_ACTIVITY_CLIENT;
+        STATE_PROTO_ENUMS[STATE_CACHED_EMPTY] = ProcessStatsProto.State.CACHED_EMPTY;
+    }
 
     public static final String[] ADJ_SCREEN_NAMES_CSV = new String[] {
             "off", "on"
@@ -60,23 +127,26 @@ public final class DumpUtils {
             "norm", "mod",  "low", "crit"
     };
 
-    public static final String[] STATE_NAMES_CSV = new String[] {
-            "pers", "top", "impfg", "impbg", "backup", "heavy",
-            "service", "service-rs", "receiver", "home", "lastact",
-            "cch-activity", "cch-aclient", "cch-empty"
-    };
-
+    // State enum is defined in frameworks/base/core/proto/android/service/procstats.proto
+    // Update states must sync enum definition as well, the ordering must not be changed.
     static final String[] ADJ_SCREEN_TAGS = new String[] {
             "0", "1"
+    };
+
+    static final int[] ADJ_SCREEN_PROTO_ENUMS = new int[] {
+            ProcessStatsProto.State.OFF,
+            ProcessStatsProto.State.ON
     };
 
     static final String[] ADJ_MEM_TAGS = new String[] {
             "n", "m",  "l", "c"
     };
 
-    static final String[] STATE_TAGS = new String[] {
-            "p", "t", "f", "b", "u", "w",
-            "s", "x", "r", "h", "l", "a", "c", "e"
+    static final int[] ADJ_MEM_PROTO_ENUMS = new int[] {
+            ProcessStatsProto.State.NORMAL,
+            ProcessStatsProto.State.MODERATE,
+            ProcessStatsProto.State.LOW,
+            ProcessStatsProto.State.CRITICAL
     };
 
     static final String CSV_SEP = "\t";
@@ -175,6 +245,14 @@ public final class DumpUtils {
         state = printArrayEntry(pw, ADJ_SCREEN_TAGS,  state, ADJ_SCREEN_MOD*STATE_COUNT);
         state = printArrayEntry(pw, ADJ_MEM_TAGS,  state, STATE_COUNT);
         printArrayEntry(pw, STATE_TAGS,  state, 1);
+    }
+
+    public static void printProcStateTagProto(ProtoOutputStream proto, long screenId, long memId,
+            long stateId, int state) {
+        state = printProto(proto, screenId, ADJ_SCREEN_PROTO_ENUMS,
+                state, ADJ_SCREEN_MOD * STATE_COUNT);
+        state = printProto(proto, memId, ADJ_MEM_PROTO_ENUMS, state, STATE_COUNT);
+        printProto(proto, stateId, STATE_PROTO_ENUMS, state, 1);
     }
 
     public static void printAdjTag(PrintWriter pw, int state) {
@@ -284,30 +362,6 @@ public final class DumpUtils {
         }
     }
 
-    /*
-     * Doesn't seem to be used.
-     *
-    public static void dumpProcessList(PrintWriter pw, String prefix, ArrayList<ProcessState> procs,
-            int[] screenStates, int[] memStates, int[] procStates, long now) {
-        String innerPrefix = prefix + "  ";
-        for (int i=procs.size()-1; i>=0; i--) {
-            ProcessState proc = procs.get(i);
-            pw.print(prefix);
-            pw.print(proc.mName);
-            pw.print(" / ");
-            UserHandle.formatUid(pw, proc.mUid);
-            pw.print(" (");
-            pw.print(proc.durations.getKeyCount());
-            pw.print(" entries)");
-            pw.println(":");
-            proc.dumpProcessState(pw, innerPrefix, screenStates, memStates, procStates, now);
-            if (proc.pssTable.getKeyCount() > 0) {
-                proc.dumpPss(pw, innerPrefix, screenStates, memStates, procStates);
-            }
-        }
-    }
-    */
-
     public static void dumpProcessSummaryLocked(PrintWriter pw, String prefix,
             ArrayList<ProcessState> procs, int[] screenStates, int[] memStates, int[] procStates,
             long now, long totalTime) {
@@ -349,6 +403,15 @@ public final class DumpUtils {
         } else {
             pw.print('?');
         }
+        return value - index*mod;
+    }
+
+    public static int printProto(ProtoOutputStream proto, long fieldId,
+            int[] enums, int value, int mod) {
+        int index = value/mod;
+        if (index >= 0 && index < enums.length) {
+            proto.write(fieldId, enums[index]);
+        } // else enum default is always zero in proto3
         return value - index*mod;
     }
 

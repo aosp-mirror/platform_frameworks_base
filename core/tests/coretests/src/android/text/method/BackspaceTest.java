@@ -16,6 +16,7 @@
 
 package android.text.method;
 
+import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -24,6 +25,7 @@ import android.util.KeyUtils;
 import android.view.KeyEvent;
 import android.widget.EditText;
 import android.widget.TextView.BufferType;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +36,8 @@ import org.junit.runner.RunWith;
  * Only contains edge cases. For normal cases, see {@see android.text.method.cts.BackspaceTest}.
  * TODO: introduce test cases for surrogate pairs and replacement span.
  */
+
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class BackspaceTest {

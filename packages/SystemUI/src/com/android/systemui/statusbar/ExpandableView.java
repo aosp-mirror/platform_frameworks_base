@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
  */
 public abstract class ExpandableView extends FrameLayout {
 
+    public static final float NO_ROUNDNESS = -1;
     protected OnHeightChangedListener mOnHeightChangedListener;
     private int mActualHeight;
     protected int mClipTopAmount;
@@ -57,6 +59,7 @@ public abstract class ExpandableView extends FrameLayout {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int givenSize = MeasureSpec.getSize(heightMeasureSpec);
+        final int viewHorizontalPadding = getPaddingStart() + getPaddingEnd();
         int ownMaxHeight = Integer.MAX_VALUE;
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         if (heightMode != MeasureSpec.UNSPECIFIED && givenSize != 0) {
@@ -79,8 +82,8 @@ public abstract class ExpandableView extends FrameLayout {
                         ? MeasureSpec.makeMeasureSpec(ownMaxHeight, MeasureSpec.EXACTLY)
                         : MeasureSpec.makeMeasureSpec(layoutParams.height, MeasureSpec.EXACTLY);
                 }
-                child.measure(
-                        getChildMeasureSpec(widthMeasureSpec, 0 /* padding */, layoutParams.width),
+                child.measure(getChildMeasureSpec(
+                        widthMeasureSpec, viewHorizontalPadding, layoutParams.width),
                         childHeightSpec);
                 int childHeight = child.getMeasuredHeight();
                 maxChildHeight = Math.max(maxChildHeight, childHeight);
@@ -93,7 +96,7 @@ public abstract class ExpandableView extends FrameLayout {
         newHeightSpec = MeasureSpec.makeMeasureSpec(ownHeight, MeasureSpec.EXACTLY);
         for (View child : mMatchParentViews) {
             child.measure(getChildMeasureSpec(
-                    widthMeasureSpec, 0 /* padding */, child.getLayoutParams().width),
+                    widthMeasureSpec, viewHorizontalPadding, child.getLayoutParams().width),
                     newHeightSpec);
         }
         mMatchParentViews.clear();
@@ -130,6 +133,14 @@ public abstract class ExpandableView extends FrameLayout {
         }
     }
 
+    /**
+     * Set the distance to the top roundness, from where we should start clipping a value above
+     * or equal to 0 is the effective distance, and if a value below 0 is received, there should
+     * be no clipping.
+     */
+    public void setDistanceToTopRoundness(float distanceToTopRoundness) {
+    }
+
     public void setActualHeight(int actualHeight) {
         setActualHeight(actualHeight, true /* notifyListeners */);
     }
@@ -141,6 +152,10 @@ public abstract class ExpandableView extends FrameLayout {
      */
     public int getActualHeight() {
         return mActualHeight;
+    }
+
+    public boolean isExpandAnimationRunning() {
+        return false;
     }
 
     /**
@@ -200,6 +215,10 @@ public abstract class ExpandableView extends FrameLayout {
 
     public boolean isDark() {
         return mDark;
+    }
+
+    public boolean isRemoved() {
+        return false;
     }
 
     /**
@@ -280,19 +299,24 @@ public abstract class ExpandableView extends FrameLayout {
 
     /**
      * Perform a remove animation on this view.
-     *
      * @param duration The duration of the remove animation.
+     * @param delay The delay of the animation
      * @param translationDirection The direction value from [-1 ... 1] indicating in which the
-     *                             animation should be performed. A value of -1 means that The
-     *                             remove animation should be performed upwards,
-     *                             such that the  child appears to be going away to the top. 1
-     *                             Should mean the opposite.
+ *                             animation should be performed. A value of -1 means that The
+ *                             remove animation should be performed upwards,
+ *                             such that the  child appears to be going away to the top. 1
+ *                             Should mean the opposite.
+     * @param isHeadsUpAnimation Is this a headsUp animation.
+     * @param endLocation The location where the horizonal heads up disappear animation should end.
      * @param onFinishedRunnable A runnable which should be run when the animation is finished.
+     * @param animationListener An animation listener to add to the animation.
      */
-    public abstract void performRemoveAnimation(long duration, float translationDirection,
-            Runnable onFinishedRunnable);
+    public abstract void performRemoveAnimation(long duration,
+            long delay, float translationDirection, boolean isHeadsUpAnimation, float endLocation,
+            Runnable onFinishedRunnable,
+            AnimatorListenerAdapter animationListener);
 
-    public abstract void performAddAnimation(long delay, long duration);
+    public abstract void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear);
 
     /**
      * Set the notification appearance to be below the speed bump.
@@ -363,8 +387,8 @@ public abstract class ExpandableView extends FrameLayout {
         return false;
     }
 
-    private void updateClipping() {
-        if (mClipToActualHeight) {
+    protected void updateClipping() {
+        if (mClipToActualHeight && shouldClipToActualHeight()) {
             int top = getClipTopAmount();
             mClipRect.set(0, top, getWidth(), Math.max(getActualHeight() + getExtraBottomPadding()
                     - mClipBottomAmount, top));
@@ -372,6 +396,14 @@ public abstract class ExpandableView extends FrameLayout {
         } else {
             setClipBounds(null);
         }
+    }
+
+    public float getHeaderVisibleAmount() {
+        return 1.0f;
+    }
+
+    protected boolean shouldClipToActualHeight() {
+        return true;
     }
 
     public void setClipToActualHeight(boolean clipToActualHeight) {
@@ -474,6 +506,9 @@ public abstract class ExpandableView extends FrameLayout {
         return false;
     }
 
+    public void setHeadsUpIsVisible() {
+    }
+
     public boolean isChildInGroup() {
         return false;
     }
@@ -517,6 +552,10 @@ public abstract class ExpandableView extends FrameLayout {
     }
 
     public boolean isAboveShelf() {
+        return false;
+    }
+
+    public boolean hasExpandingChild() {
         return false;
     }
 

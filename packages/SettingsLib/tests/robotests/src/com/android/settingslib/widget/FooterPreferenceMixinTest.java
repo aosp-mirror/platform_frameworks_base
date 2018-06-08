@@ -16,22 +16,6 @@
 
 package com.android.settingslib.widget;
 
-import android.support.v14.preference.PreferenceFragment;
-import android.support.v7.preference.PreferenceManager;
-import android.support.v7.preference.PreferenceScreen;
-
-import com.android.settingslib.SettingLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
-import com.android.settingslib.core.lifecycle.Lifecycle;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowApplication;
-
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -39,8 +23,22 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(SettingLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
+import android.arch.lifecycle.LifecycleOwner;
+import android.support.v14.preference.PreferenceFragment;
+import android.support.v7.preference.PreferenceManager;
+import android.support.v7.preference.PreferenceScreen;
+
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
+import com.android.settingslib.core.lifecycle.Lifecycle;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.robolectric.shadows.ShadowApplication;
+
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class FooterPreferenceMixinTest {
 
     @Mock
@@ -48,13 +46,15 @@ public class FooterPreferenceMixinTest {
     @Mock
     private PreferenceScreen mScreen;
 
+    private LifecycleOwner mLifecycleOwner;
     private Lifecycle mLifecycle;
     private FooterPreferenceMixin mMixin;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mLifecycle = new Lifecycle();
+        mLifecycleOwner = () -> mLifecycle;
+        mLifecycle = new Lifecycle(mLifecycleOwner);
         when(mFragment.getPreferenceManager()).thenReturn(mock(PreferenceManager.class));
         when(mFragment.getPreferenceManager().getContext())
                 .thenReturn(ShadowApplication.getInstance().getApplicationContext());

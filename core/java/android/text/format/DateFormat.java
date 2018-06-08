@@ -16,6 +16,7 @@
 
 package android.text.format;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -165,7 +166,7 @@ public class DateFormat {
      * @return true if 24 hour time format is selected, false otherwise.
      */
     public static boolean is24HourFormat(Context context) {
-        return is24HourFormat(context, UserHandle.myUserId());
+        return is24HourFormat(context, context.getUserId());
     }
 
     /**
@@ -178,43 +179,47 @@ public class DateFormat {
      * @hide
      */
     public static boolean is24HourFormat(Context context, int userHandle) {
-        String value = Settings.System.getStringForUser(context.getContentResolver(),
+        final String value = Settings.System.getStringForUser(context.getContentResolver(),
                 Settings.System.TIME_12_24, userHandle);
-
-        if (value == null) {
-            Locale locale = context.getResources().getConfiguration().locale;
-
-            synchronized (sLocaleLock) {
-                if (sIs24HourLocale != null && sIs24HourLocale.equals(locale)) {
-                    return sIs24Hour;
-                }
-            }
-
-            java.text.DateFormat natural =
-                    java.text.DateFormat.getTimeInstance(java.text.DateFormat.LONG, locale);
-
-            if (natural instanceof SimpleDateFormat) {
-                SimpleDateFormat sdf = (SimpleDateFormat) natural;
-                String pattern = sdf.toPattern();
-
-                if (pattern.indexOf('H') >= 0) {
-                    value = "24";
-                } else {
-                    value = "12";
-                }
-            } else {
-                value = "12";
-            }
-
-            synchronized (sLocaleLock) {
-                sIs24HourLocale = locale;
-                sIs24Hour = value.equals("24");
-            }
-
-            return sIs24Hour;
+        if (value != null) {
+            return value.equals("24");
         }
 
-        return value.equals("24");
+        return is24HourLocale(context.getResources().getConfiguration().locale);
+    }
+
+    /**
+     * Returns true if the specified locale uses a 24-hour time format by default, ignoring user
+     * settings.
+     * @param locale the locale to check
+     * @return true if the locale uses a 24 hour time format by default, false otherwise
+     * @hide
+     */
+    public static boolean is24HourLocale(@NonNull Locale locale) {
+        synchronized (sLocaleLock) {
+            if (sIs24HourLocale != null && sIs24HourLocale.equals(locale)) {
+                return sIs24Hour;
+            }
+        }
+
+        final java.text.DateFormat natural =
+                java.text.DateFormat.getTimeInstance(java.text.DateFormat.LONG, locale);
+
+        final boolean is24Hour;
+        if (natural instanceof SimpleDateFormat) {
+            final SimpleDateFormat sdf = (SimpleDateFormat) natural;
+            final String pattern = sdf.toPattern();
+            is24Hour = hasDesignator(pattern, 'H');
+        } else {
+            is24Hour = false;
+        }
+
+        synchronized (sLocaleLock) {
+            sIs24HourLocale = locale;
+            sIs24Hour = is24Hour;
+        }
+
+        return is24Hour;
     }
 
     /**
@@ -250,65 +255,69 @@ public class DateFormat {
 
     /**
      * Returns a {@link java.text.DateFormat} object that can format the time according
-     * to the current locale and the user's 12-/24-hour clock preference.
+     * to the context's locale and the user's 12-/24-hour clock preference.
      * @param context the application context
      * @return the {@link java.text.DateFormat} object that properly formats the time.
      */
     public static java.text.DateFormat getTimeFormat(Context context) {
-        return new java.text.SimpleDateFormat(getTimeFormatString(context));
+        final Locale locale = context.getResources().getConfiguration().locale;
+        return new java.text.SimpleDateFormat(getTimeFormatString(context), locale);
     }
 
     /**
      * Returns a String pattern that can be used to format the time according
-     * to the current locale and the user's 12-/24-hour clock preference.
+     * to the context's locale and the user's 12-/24-hour clock preference.
      * @param context the application context
      * @hide
      */
     public static String getTimeFormatString(Context context) {
-        return getTimeFormatString(context, UserHandle.myUserId());
+        return getTimeFormatString(context, context.getUserId());
     }
 
     /**
      * Returns a String pattern that can be used to format the time according
-     * to the current locale and the user's 12-/24-hour clock preference.
+     * to the context's locale and the user's 12-/24-hour clock preference.
      * @param context the application context
      * @param userHandle the user handle of the user to query the format for
      * @hide
      */
     public static String getTimeFormatString(Context context, int userHandle) {
-        LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
+        final LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
         return is24HourFormat(context, userHandle) ? d.timeFormat_Hm : d.timeFormat_hm;
     }
 
     /**
      * Returns a {@link java.text.DateFormat} object that can format the date
-     * in short form according to the current locale.
+     * in short form according to the context's locale.
      *
      * @param context the application context
      * @return the {@link java.text.DateFormat} object that properly formats the date.
      */
     public static java.text.DateFormat getDateFormat(Context context) {
-        return java.text.DateFormat.getDateInstance(java.text.DateFormat.SHORT);
+        final Locale locale = context.getResources().getConfiguration().locale;
+        return java.text.DateFormat.getDateInstance(java.text.DateFormat.SHORT, locale);
     }
 
     /**
      * Returns a {@link java.text.DateFormat} object that can format the date
-     * in long form (such as {@code Monday, January 3, 2000}) for the current locale.
+     * in long form (such as {@code Monday, January 3, 2000}) for the context's locale.
      * @param context the application context
      * @return the {@link java.text.DateFormat} object that formats the date in long form.
      */
     public static java.text.DateFormat getLongDateFormat(Context context) {
-        return java.text.DateFormat.getDateInstance(java.text.DateFormat.LONG);
+        final Locale locale = context.getResources().getConfiguration().locale;
+        return java.text.DateFormat.getDateInstance(java.text.DateFormat.LONG, locale);
     }
 
     /**
      * Returns a {@link java.text.DateFormat} object that can format the date
-     * in medium form (such as {@code Jan 3, 2000}) for the current locale.
+     * in medium form (such as {@code Jan 3, 2000}) for the context's locale.
      * @param context the application context
      * @return the {@link java.text.DateFormat} object that formats the date in long form.
      */
     public static java.text.DateFormat getMediumDateFormat(Context context) {
-        return java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM);
+        final Locale locale = context.getResources().getConfiguration().locale;
+        return java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM, locale);
     }
 
     /**
@@ -321,11 +330,13 @@ public class DateFormat {
      * order returned here.
      */
     public static char[] getDateFormatOrder(Context context) {
-        return ICU.getDateFormatOrder(getDateFormatString());
+        return ICU.getDateFormatOrder(getDateFormatString(context));
     }
 
-    private static String getDateFormatString() {
-        java.text.DateFormat df = java.text.DateFormat.getDateInstance(java.text.DateFormat.SHORT);
+    private static String getDateFormatString(Context context) {
+        final Locale locale = context.getResources().getConfiguration().locale;
+        java.text.DateFormat df = java.text.DateFormat.getDateInstance(
+                java.text.DateFormat.SHORT, locale);
         if (df instanceof SimpleDateFormat) {
             return ((SimpleDateFormat) df).toPattern();
         }
@@ -376,6 +387,9 @@ public class DateFormat {
      * Test if a format string contains the given designator. Always returns
      * {@code false} if the input format is {@code null}.
      *
+     * Note that this is intended for searching for designators, not arbitrary
+     * characters. So searching for a literal single quote would not work correctly.
+     *
      * @hide
      */
     public static boolean hasDesignator(CharSequence inFormat, char designator) {
@@ -383,50 +397,19 @@ public class DateFormat {
 
         final int length = inFormat.length();
 
-        int c;
-        int count;
-
-        for (int i = 0; i < length; i += count) {
-            count = 1;
-            c = inFormat.charAt(i);
-
+        boolean insideQuote = false;
+        for (int i = 0; i < length; i++) {
+            final char c = inFormat.charAt(i);
             if (c == QUOTE) {
-                count = skipQuotedText(inFormat, i, length);
-            } else if (c == designator) {
-                return true;
+                insideQuote = !insideQuote;
+            } else if (!insideQuote) {
+                if (c == designator) {
+                    return true;
+                }
             }
         }
 
         return false;
-    }
-
-    private static int skipQuotedText(CharSequence s, int i, int len) {
-        if (i + 1 < len && s.charAt(i + 1) == QUOTE) {
-            return 2;
-        }
-
-        int count = 1;
-        // skip leading quote
-        i++;
-
-        while (i < len) {
-            char c = s.charAt(i);
-
-            if (c == QUOTE) {
-                count++;
-                //  QUOTEQUOTE -> QUOTE
-                if (i + 1 < len && s.charAt(i + 1) == QUOTE) {
-                    i++;
-                } else {
-                    break;
-                }
-            } else {
-                i++;
-                count++;
-            }
-        }
-
-        return count;
     }
 
     /**
@@ -449,7 +432,7 @@ public class DateFormat {
             int c = s.charAt(i);
 
             if (c == QUOTE) {
-                count = appendQuotedText(s, i, len);
+                count = appendQuotedText(s, i);
                 len = s.length();
                 continue;
             }
@@ -592,36 +575,48 @@ public class DateFormat {
                             : String.format(Locale.getDefault(), "%d", year);
     }
 
-    private static int appendQuotedText(SpannableStringBuilder s, int i, int len) {
-        if (i + 1 < len && s.charAt(i + 1) == QUOTE) {
-            s.delete(i, i + 1);
+
+    /**
+     * Strips quotation marks from the {@code formatString} and appends the result back to the
+     * {@code formatString}.
+     *
+     * @param formatString the format string, as described in
+     *                     {@link android.text.format.DateFormat}, to be modified
+     * @param index        index of the first quote
+     * @return the length of the quoted text that was appended.
+     * @hide
+     */
+    public static int appendQuotedText(SpannableStringBuilder formatString, int index) {
+        int length = formatString.length();
+        if (index + 1 < length && formatString.charAt(index + 1) == QUOTE) {
+            formatString.delete(index, index + 1);
             return 1;
         }
 
         int count = 0;
 
         // delete leading quote
-        s.delete(i, i + 1);
-        len--;
+        formatString.delete(index, index + 1);
+        length--;
 
-        while (i < len) {
-            char c = s.charAt(i);
+        while (index < length) {
+            char c = formatString.charAt(index);
 
             if (c == QUOTE) {
                 //  QUOTEQUOTE -> QUOTE
-                if (i + 1 < len && s.charAt(i + 1) == QUOTE) {
+                if (index + 1 < length && formatString.charAt(index + 1) == QUOTE) {
 
-                    s.delete(i, i + 1);
-                    len--;
+                    formatString.delete(index, index + 1);
+                    length--;
                     count++;
-                    i++;
+                    index++;
                 } else {
                     //  Closing QUOTE ends quoted text copying
-                    s.delete(i, i + 1);
+                    formatString.delete(index, index + 1);
                     break;
                 }
             } else {
-                i++;
+                index++;
                 count++;
             }
         }

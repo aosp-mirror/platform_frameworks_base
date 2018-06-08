@@ -16,15 +16,26 @@
 
 package com.android.systemui.statusbar.notification;
 
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.service.notification.StatusBarNotification;
+import android.util.ArraySet;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.widget.NotificationActionListLayout;
+import com.android.systemui.Dependency;
+import com.android.systemui.R;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.TransformableView;
@@ -35,18 +46,20 @@ import com.android.systemui.statusbar.ViewTransformationHelper;
  */
 public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapper {
 
-    private static final int mDarkProgressTint = 0xffffffff;
-
     protected ImageView mPicture;
     private ProgressBar mProgressBar;
     private TextView mTitle;
     private TextView mText;
-    private View mActionsContainer;
-    private View mReplyAction;
+    protected View mActionsContainer;
+    private ImageView mReplyAction;
     private Rect mTmpRect = new Rect();
 
     private int mContentHeight;
     private int mMinHeightHint;
+    private NotificationActionListLayout mActions;
+    private ArraySet<PendingIntent> mCancelledPendingIntents = new ArraySet<>();
+    private UiOffloadThread mUiOffloadThread;
+    private View mRemoteInputHistory;
 
     protected NotificationTemplateViewWrapper(Context ctx, View view,
             ExpandableNotificationRow row) {
@@ -133,7 +146,107 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
             mProgressBar = null;
         }
         mActionsContainer = mView.findViewById(com.android.internal.R.id.actions_container);
+        mActions = mView.findViewById(com.android.internal.R.id.actions);
         mReplyAction = mView.findViewById(com.android.internal.R.id.reply_icon_action);
+        mRemoteInputHistory = mView.findViewById(
+                com.android.internal.R.id.notification_material_reply_container);
+        updatePendingIntentCancellations();
+    }
+
+    private void updatePendingIntentCancellations() {
+        if (mActions != null) {
+            int numActions = mActions.getChildCount();
+            for (int i = 0; i < numActions; i++) {
+                Button action = (Button) mActions.getChildAt(i);
+                performOnPendingIntentCancellation(action, () -> {
+                    if (action.isEnabled()) {
+                        action.setEnabled(false);
+                        // The visual appearance doesn't look disabled enough yet, let's add the
+                        // alpha as well. Since Alpha doesn't play nicely right now with the
+                        // transformation, we rather blend it manually with the background color.
+                        ColorStateList textColors = action.getTextColors();
+                        int[] colors = textColors.getColors();
+                        int[] newColors = new int[colors.length];
+                        float disabledAlpha = mView.getResources().getFloat(
+                                com.android.internal.R.dimen.notification_action_disabled_alpha);
+                        for (int j = 0; j < colors.length; j++) {
+                            int color = colors[j];
+                            color = blendColorWithBackground(color, disabledAlpha);
+                            newColors[j] = color;
+                        }
+                        ColorStateList newColorStateList = new ColorStateList(
+                                textColors.getStates(), newColors);
+                        action.setTextColor(newColorStateList);
+                    }
+                });
+            }
+        }
+        if (mReplyAction != null) {
+            // Let's reset the view on update, assuming the new pending intent isn't cancelled
+            // anymore. The color filter automatically resets when it's updated.
+            mReplyAction.setEnabled(true);
+            performOnPendingIntentCancellation(mReplyAction, () -> {
+                if (mReplyAction != null && mReplyAction.isEnabled()) {
+                    mReplyAction.setEnabled(false);
+                    // The visual appearance doesn't look disabled enough yet, let's add the
+                    // alpha as well. Since Alpha doesn't play nicely right now with the
+                    // transformation, we rather blend it manually with the background color.
+                    Drawable drawable = mReplyAction.getDrawable().mutate();
+                    PorterDuffColorFilter colorFilter =
+                            (PorterDuffColorFilter) drawable.getColorFilter();
+                    float disabledAlpha = mView.getResources().getFloat(
+                            com.android.internal.R.dimen.notification_action_disabled_alpha);
+                    if (colorFilter != null) {
+                        int color = colorFilter.getColor();
+                        color = blendColorWithBackground(color, disabledAlpha);
+                        drawable.mutate().setColorFilter(color, colorFilter.getMode());
+                    } else {
+                        mReplyAction.setAlpha(disabledAlpha);
+                    }
+                }
+            });
+        }
+    }
+
+    private int blendColorWithBackground(int color, float alpha) {
+        // alpha doesn't go well for color filters, so let's blend it manually
+        return NotificationColorUtil.compositeColors(Color.argb((int) (alpha * 255),
+                Color.red(color), Color.green(color), Color.blue(color)), resolveBackgroundColor());
+    }
+
+    private void performOnPendingIntentCancellation(View view, Runnable cancellationRunnable) {
+        PendingIntent pendingIntent = (PendingIntent) view.getTag(
+                com.android.internal.R.id.pending_intent_tag);
+        if (pendingIntent == null) {
+            return;
+        }
+        if (mCancelledPendingIntents.contains(pendingIntent)) {
+            cancellationRunnable.run();
+        } else {
+            PendingIntent.CancelListener listener = (PendingIntent intent) -> {
+                mView.post(() -> {
+                    mCancelledPendingIntents.add(pendingIntent);
+                    cancellationRunnable.run();
+                });
+            };
+            if (mUiOffloadThread == null) {
+                mUiOffloadThread = Dependency.get(UiOffloadThread.class);
+            }
+            if (view.isAttachedToWindow()) {
+                mUiOffloadThread.submit(() -> pendingIntent.registerCancelListener(listener));
+            }
+            view.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+                @Override
+                public void onViewAttachedToWindow(View v) {
+                    mUiOffloadThread.submit(() -> pendingIntent.registerCancelListener(listener));
+                }
+
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                    mUiOffloadThread.submit(() -> pendingIntent.unregisterCancelListener(listener));
+                }
+            });
+        }
     }
 
     @Override
@@ -167,15 +280,6 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     }
 
     @Override
-    protected void updateInvertHelper() {
-        super.updateInvertHelper();
-        View mainColumn = mView.findViewById(com.android.internal.R.id.notification_main_column);
-        if (mainColumn != null) {
-            mInvertHelper.addTarget(mainColumn);
-        }
-    }
-
-    @Override
     protected void updateTransformedTypes() {
         // This also clears the existing types
         super.updateTransformedTypes();
@@ -198,65 +302,6 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     }
 
     @Override
-    public void setDark(boolean dark, boolean fade, long delay) {
-        if (dark == mDark && mDarkInitialized) {
-            return;
-        }
-        super.setDark(dark, fade, delay);
-        setPictureDark(dark, fade, delay);
-        setProgressBarDark(dark, fade, delay);
-    }
-
-    private void setProgressBarDark(boolean dark, boolean fade, long delay) {
-        if (mProgressBar != null) {
-            if (fade) {
-                fadeProgressDark(mProgressBar, dark, delay);
-            } else {
-                updateProgressDark(mProgressBar, dark);
-            }
-        }
-    }
-
-    private void fadeProgressDark(final ProgressBar target, final boolean dark, long delay) {
-        getDozer().startIntensityAnimation(animation -> {
-            float t = (float) animation.getAnimatedValue();
-            updateProgressDark(target, t);
-        }, dark, delay, null /* listener */);
-    }
-
-    private void updateProgressDark(ProgressBar target, float intensity) {
-        int color = interpolateColor(mColor, mDarkProgressTint, intensity);
-        target.getIndeterminateDrawable().mutate().setTint(color);
-        target.getProgressDrawable().mutate().setTint(color);
-    }
-
-    private void updateProgressDark(ProgressBar target, boolean dark) {
-        updateProgressDark(target, dark ? 1f : 0f);
-    }
-
-    private void setPictureDark(boolean dark, boolean fade, long delay) {
-        if (mPicture != null) {
-            getDozer().setImageDark(mPicture, dark, fade, delay, true /* useGrayscale */);
-        }
-    }
-
-    private static int interpolateColor(int source, int target, float t) {
-        int aSource = Color.alpha(source);
-        int rSource = Color.red(source);
-        int gSource = Color.green(source);
-        int bSource = Color.blue(source);
-        int aTarget = Color.alpha(target);
-        int rTarget = Color.red(target);
-        int gTarget = Color.green(target);
-        int bTarget = Color.blue(target);
-        return Color.argb(
-                (int) (aSource * (1f - t) + aTarget * t),
-                (int) (rSource * (1f - t) + rTarget * t),
-                (int) (gSource * (1f - t) + gTarget * t),
-                (int) (bSource * (1f - t) + bTarget * t));
-    }
-
-    @Override
     public void setContentHeight(int contentHeight, int minHeightHint) {
         super.setContentHeight(contentHeight, minHeightHint);
 
@@ -265,11 +310,36 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         updateActionOffset();
     }
 
+    @Override
+    public boolean shouldClipToRounding(boolean topRounded, boolean bottomRounded) {
+        if (super.shouldClipToRounding(topRounded, bottomRounded)) {
+            return true;
+        }
+        return bottomRounded && mActionsContainer != null
+                && mActionsContainer.getVisibility() != View.GONE;
+    }
+
     private void updateActionOffset() {
         if (mActionsContainer != null) {
             // We should never push the actions higher than they are in the headsup view.
             int constrainedContentHeight = Math.max(mContentHeight, mMinHeightHint);
-            mActionsContainer.setTranslationY(constrainedContentHeight - mView.getHeight());
+
+            // We also need to compensate for any header translation, since we're always at the end.
+            mActionsContainer.setTranslationY(constrainedContentHeight - mView.getHeight()
+                    - getHeaderTranslation());
         }
+    }
+
+    @Override
+    public int getExtraMeasureHeight() {
+        int extra = 0;
+        if (mActions != null) {
+            extra = mActions.getExtraMeasureHeight();
+        }
+        if (mRemoteInputHistory != null && mRemoteInputHistory.getVisibility() != View.GONE) {
+            extra += mRow.getContext().getResources().getDimensionPixelSize(
+                    R.dimen.remote_input_history_extra_height);
+        }
+        return extra + super.getExtraMeasureHeight();
     }
 }

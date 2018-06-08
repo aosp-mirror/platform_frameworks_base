@@ -21,12 +21,10 @@ import android.content.pm.PackageInfoLite;
 import android.content.res.ObbInfo;
 
 interface IMediaContainerService {
-    String copyPackageToContainer(String packagePath, String containerId, String key,
-            boolean isExternal, boolean isForwardLocked, String abiOverride);
     int copyPackage(String packagePath, in IParcelFileDescriptorFactory target);
 
     PackageInfoLite getMinimalPackageInfo(String packagePath, int flags, String abiOverride);
     ObbInfo getObbInfo(String filename);
     void clearDirectory(String directory);
-    long calculateInstalledSize(String packagePath, boolean isForwardLocked, String abiOverride);
+    long calculateInstalledSize(String packagePath, String abiOverride);
 }

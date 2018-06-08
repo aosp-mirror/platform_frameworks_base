@@ -111,7 +111,8 @@ public class DexManagerTests {
                 DELEGATE_LAST_CLASS_LOADER_NAME);
 
         mDexManager = new DexManager(
-            mPM, /*PackageDexOptimizer*/ null, mInstaller, mInstallLock, mListener);
+            /*Context*/ null, mPM, /*PackageDexOptimizer*/ null, mInstaller, mInstallLock,
+            mListener);
 
         // Foo and Bar are available to user0.
         // Only Bar is available to user1;

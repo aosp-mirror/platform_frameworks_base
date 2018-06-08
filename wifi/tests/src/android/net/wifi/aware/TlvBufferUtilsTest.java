@@ -18,7 +18,7 @@ package android.net.wifi.aware;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.SmallTest;
 
 import org.junit.Rule;
 import org.junit.Test;

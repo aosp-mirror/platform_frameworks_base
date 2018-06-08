@@ -18,6 +18,7 @@ package android.test.mock;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -26,12 +27,11 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ChangedPackages;
-import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageStatsObserver;
+import android.content.pm.InstantAppInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
@@ -54,6 +54,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
 
@@ -106,6 +107,12 @@ public class MockPackageManager extends PackageManager {
 
     @Override
     public Intent getLeanbackLaunchIntentForPackage(String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public Intent getCarLaunchIntentForPackage(String packageName) {
         throw new UnsupportedOperationException();
     }
 
@@ -459,6 +466,11 @@ public class MockPackageManager extends PackageManager {
     }
 
     @Override
+    public ResolveInfo resolveServiceAsUser(Intent intent, int flags, int userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public List<ResolveInfo> queryIntentServices(Intent intent, int flags) {
         throw new UnsupportedOperationException();
     }
@@ -651,15 +663,6 @@ public class MockPackageManager extends PackageManager {
 
     @Override
     public PackageInfo getPackageArchiveInfo(String archiveFilePath, int flags) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @hide - to match hiding in superclass
-     */
-    @Override
-    public void installPackage(Uri packageURI, IPackageInstallObserver observer,
-            int flags, String installerPackageName) {
         throw new UnsupportedOperationException();
     }
 
@@ -949,7 +952,8 @@ public class MockPackageManager extends PackageManager {
 
     /** @hide */
     @Override
-    public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean hidden, int userId) {
+    public String[] setPackagesSuspended(String[] packageNames, boolean hidden,
+            PersistableBundle appExtras, PersistableBundle launcherExtras, String dialogMessage) {
         throw new UnsupportedOperationException();
     }
 
@@ -1100,15 +1104,6 @@ public class MockPackageManager extends PackageManager {
      * @hide
      */
     @Override
-    public void installPackage(Uri packageURI, PackageInstallObserver observer,
-            int flags, String installerPackageName) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @hide
-     */
-    @Override
     public void addCrossProfileIntentFilter(IntentFilter filter, int sourceUserId, int targetUserId,
             int flags) {
         throw new UnsupportedOperationException();
@@ -1191,6 +1186,42 @@ public class MockPackageManager extends PackageManager {
      */
     @Override
     public ArtManager getArtManager() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void setHarmfulAppWarning(String packageName, CharSequence warning) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public CharSequence getHarmfulAppWarning(String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasSigningCertificate(
+            String packageName, byte[] certificate, @PackageManager.CertificateInputType int type) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasSigningCertificate(
+            int uid, byte[] certificate, @PackageManager.CertificateInputType int type) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public String getSystemTextClassifierPackageName() {
         throw new UnsupportedOperationException();
     }
 }

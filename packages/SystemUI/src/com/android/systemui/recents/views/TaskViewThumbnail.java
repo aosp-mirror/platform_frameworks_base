@@ -37,9 +37,9 @@ import android.view.ViewDebug;
 import com.android.systemui.R;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.ui.TaskSnapshotChangedEvent;
-import com.android.systemui.recents.misc.Utilities;
-import com.android.systemui.recents.model.Task;
-import com.android.systemui.recents.model.ThumbnailData;
+import com.android.systemui.shared.recents.utilities.Utilities;
+import com.android.systemui.shared.recents.model.Task;
+import com.android.systemui.shared.recents.model.ThumbnailData;
 import java.io.PrintWriter;
 
 
@@ -245,10 +245,6 @@ public class TaskViewThumbnail extends View {
     public void updateThumbnailMatrix() {
         mThumbnailScale = 1f;
         if (mBitmapShader != null && mThumbnailData != null) {
-            // We consider this a stack task if it is not freeform (ie. has no bounds) or has been
-            // dragged into the stack from the freeform workspace
-            boolean isStackTask = !mTask.isFreeformTask() || mTask.bounds == null;
-            int xOffset, yOffset = 0;
             if (mTaskViewRect.isEmpty()) {
                 // If we haven't measured , skip the thumbnail drawing and only draw the background
                 // color
@@ -266,7 +262,7 @@ public class TaskViewThumbnail extends View {
                     mThumbnailScale = (float) (mTaskViewRect.height() - mTitleBarHeight)
                             / (float) mThumbnailRect.height();
                 }
-            } else if (isStackTask) {
+            } else {
                 float invThumbnailScale = 1f / mFullscreenThumbnailScale;
                 if (mDisplayOrientation == Configuration.ORIENTATION_PORTRAIT) {
                     if (mThumbnailData.orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -283,12 +279,6 @@ public class TaskViewThumbnail extends View {
                     // Otherwise, scale the screenshot to fit 1:1 in the current orientation
                     mThumbnailScale = invThumbnailScale;
                 }
-            } else {
-                // Otherwise, if this is a freeform task with task bounds, then scale the thumbnail
-                // to fit the entire bitmap into the task bounds
-                mThumbnailScale = Math.min(
-                        (float) mTaskViewRect.width() / mThumbnailRect.width(),
-                        (float) mTaskViewRect.height() / mThumbnailRect.height());
             }
             mMatrix.setTranslate(-mThumbnailData.insets.left * mFullscreenThumbnailScale,
                     -mThumbnailData.insets.top * mFullscreenThumbnailScale);

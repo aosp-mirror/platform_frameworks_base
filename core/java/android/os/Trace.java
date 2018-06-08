@@ -90,6 +90,8 @@ public final class Trace {
     /** @hide */
     public static final long TRACE_TAG_ADB = 1L << 22;
     /** @hide */
+    public static final long TRACE_TAG_VIBRATOR = 1L << 23;
+    /** @hide */
     public static final long TRACE_TAG_AIDL = 1L << 24;
     /** @hide */
     public static final long TRACE_TAG_NNAPI = 1L << 25;

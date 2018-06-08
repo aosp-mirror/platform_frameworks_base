@@ -22,11 +22,12 @@
 
 using ::aapt::test::ValueEq;
 using ::testing::Contains;
-using ::testing::NotNull;
-using ::testing::UnorderedElementsAreArray;
-using ::testing::Pointee;
-using ::testing::Field;
 using ::testing::Eq;
+using ::testing::Field;
+using ::testing::NotNull;
+using ::testing::Pointee;
+using ::testing::StrEq;
+using ::testing::UnorderedElementsAreArray;
 
 namespace aapt {
 
@@ -67,10 +68,9 @@ TEST_F(TableMergerTest, SimpleMerge) {
 
   ResourceTable final_table;
   TableMerger merger(context_.get(), &final_table, TableMergerOptions{});
-  io::FileCollection collection;
 
-  ASSERT_TRUE(merger.Merge({}, table_a.get()));
-  ASSERT_TRUE(merger.MergeAndMangle({}, "com.app.b", table_b.get(), &collection));
+  ASSERT_TRUE(merger.Merge({}, table_a.get(), false /*overlay*/));
+  ASSERT_TRUE(merger.MergeAndMangle({}, "com.app.b", table_b.get()));
 
   EXPECT_TRUE(merger.merged_packages().count("com.app.b") != 0);
 
@@ -98,7 +98,7 @@ TEST_F(TableMergerTest, MergeFile) {
   file_desc.source = Source("res/layout-hdpi/main.xml");
   test::TestFile test_file("path/to/res/layout-hdpi/main.xml.flat");
 
-  ASSERT_TRUE(merger.MergeFile(file_desc, &test_file));
+  ASSERT_TRUE(merger.MergeFile(file_desc, false /*overlay*/, &test_file));
 
   FileReference* file = test::GetValueForConfig<FileReference>(
       &final_table, "com.app.a:layout/main", test::ParseConfigOrDie("hdpi-v4"));
@@ -117,37 +117,40 @@ TEST_F(TableMergerTest, MergeFileOverlay) {
   test::TestFile file_a("path/to/fileA.xml.flat");
   test::TestFile file_b("path/to/fileB.xml.flat");
 
-  ASSERT_TRUE(merger.MergeFile(file_desc, &file_a));
-  ASSERT_TRUE(merger.MergeFileOverlay(file_desc, &file_b));
+  ASSERT_TRUE(merger.MergeFile(file_desc, false /*overlay*/, &file_a));
+  ASSERT_TRUE(merger.MergeFile(file_desc, true /*overlay*/, &file_b));
 }
 
 TEST_F(TableMergerTest, MergeFileReferences) {
+  test::TestFile file_a("res/xml/file.xml");
+  test::TestFile file_b("res/xml/file.xml");
+
   std::unique_ptr<ResourceTable> table_a =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.a", 0x7f)
-          .AddFileReference("com.app.a:xml/file", "res/xml/file.xml")
+          .AddFileReference("com.app.a:xml/file", "res/xml/file.xml", &file_a)
           .Build();
   std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.b", 0x7f)
-          .AddFileReference("com.app.b:xml/file", "res/xml/file.xml")
+          .AddFileReference("com.app.b:xml/file", "res/xml/file.xml", &file_b)
           .Build();
 
   ResourceTable final_table;
   TableMerger merger(context_.get(), &final_table, TableMergerOptions{});
-  io::FileCollection collection;
-  collection.InsertFile("res/xml/file.xml");
 
-  ASSERT_TRUE(merger.Merge({}, table_a.get()));
-  ASSERT_TRUE(merger.MergeAndMangle({}, "com.app.b", table_b.get(), &collection));
+  ASSERT_TRUE(merger.Merge({}, table_a.get(), false /*overlay*/));
+  ASSERT_TRUE(merger.MergeAndMangle({}, "com.app.b", table_b.get()));
 
   FileReference* f = test::GetValue<FileReference>(&final_table, "com.app.a:xml/file");
   ASSERT_THAT(f, NotNull());
-  EXPECT_EQ(std::string("res/xml/file.xml"), *f->path);
+  EXPECT_THAT(*f->path, StrEq("res/xml/file.xml"));
+  EXPECT_THAT(f->file, Eq(&file_a));
 
   f = test::GetValue<FileReference>(&final_table, "com.app.a:xml/com.app.b$file");
   ASSERT_THAT(f, NotNull());
-  EXPECT_EQ(std::string("res/xml/com.app.b$file.xml"), *f->path);
+  EXPECT_THAT(*f->path, StrEq("res/xml/com.app.b$file.xml"));
+  EXPECT_THAT(f->file, Eq(&file_b));
 }
 
 TEST_F(TableMergerTest, OverrideResourceWithOverlay) {
@@ -167,8 +170,8 @@ TEST_F(TableMergerTest, OverrideResourceWithOverlay) {
   options.auto_add_overlay = false;
   TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.Merge({}, base.get()));
-  ASSERT_TRUE(merger.MergeOverlay({}, overlay.get()));
+  ASSERT_TRUE(merger.Merge({}, base.get(), false /*overlay*/));
+  ASSERT_TRUE(merger.Merge({}, overlay.get(), true /*overlay*/));
 
   BinaryPrimitive* foo = test::GetValue<BinaryPrimitive>(&final_table, "com.app.a:bool/foo");
   ASSERT_THAT(foo,
@@ -179,14 +182,12 @@ TEST_F(TableMergerTest, OverrideSameResourceIdsWithOverlay) {
   std::unique_ptr<ResourceTable> base =
       test::ResourceTableBuilder()
           .SetPackageId("", 0x7f)
-          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001),
-                          SymbolState::kPublic)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001), Visibility::Level::kPublic)
           .Build();
   std::unique_ptr<ResourceTable> overlay =
       test::ResourceTableBuilder()
           .SetPackageId("", 0x7f)
-          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001),
-                          SymbolState::kPublic)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001), Visibility::Level::kPublic)
           .Build();
 
   ResourceTable final_table;
@@ -194,22 +195,20 @@ TEST_F(TableMergerTest, OverrideSameResourceIdsWithOverlay) {
   options.auto_add_overlay = false;
   TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.Merge({}, base.get()));
-  ASSERT_TRUE(merger.MergeOverlay({}, overlay.get()));
+  ASSERT_TRUE(merger.Merge({}, base.get(), false /*overlay*/));
+  ASSERT_TRUE(merger.Merge({}, overlay.get(), true /*overlay*/));
 }
 
 TEST_F(TableMergerTest, FailToOverrideConflictingTypeIdsWithOverlay) {
   std::unique_ptr<ResourceTable> base =
       test::ResourceTableBuilder()
           .SetPackageId("", 0x7f)
-          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001),
-                          SymbolState::kPublic)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001), Visibility::Level::kPublic)
           .Build();
   std::unique_ptr<ResourceTable> overlay =
       test::ResourceTableBuilder()
           .SetPackageId("", 0x7f)
-          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x02, 0x0001),
-                          SymbolState::kPublic)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x02, 0x0001), Visibility::Level::kPublic)
           .Build();
 
   ResourceTable final_table;
@@ -217,22 +216,20 @@ TEST_F(TableMergerTest, FailToOverrideConflictingTypeIdsWithOverlay) {
   options.auto_add_overlay = false;
   TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.Merge({}, base.get()));
-  ASSERT_FALSE(merger.MergeOverlay({}, overlay.get()));
+  ASSERT_TRUE(merger.Merge({}, base.get(), false /*overlay*/));
+  ASSERT_FALSE(merger.Merge({}, overlay.get(), true /*overlay*/));
 }
 
 TEST_F(TableMergerTest, FailToOverrideConflictingEntryIdsWithOverlay) {
   std::unique_ptr<ResourceTable> base =
       test::ResourceTableBuilder()
           .SetPackageId("", 0x7f)
-          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001),
-                          SymbolState::kPublic)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001), Visibility::Level::kPublic)
           .Build();
   std::unique_ptr<ResourceTable> overlay =
       test::ResourceTableBuilder()
           .SetPackageId("", 0x7f)
-          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0002),
-                          SymbolState::kPublic)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0002), Visibility::Level::kPublic)
           .Build();
 
   ResourceTable final_table;
@@ -240,8 +237,8 @@ TEST_F(TableMergerTest, FailToOverrideConflictingEntryIdsWithOverlay) {
   options.auto_add_overlay = false;
   TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.Merge({}, base.get()));
-  ASSERT_FALSE(merger.MergeOverlay({}, overlay.get()));
+  ASSERT_TRUE(merger.Merge({}, base.get(), false /*overlay*/));
+  ASSERT_FALSE(merger.Merge({}, overlay.get(), true /*overlay*/));
 }
 
 TEST_F(TableMergerTest, MergeAddResourceFromOverlay) {
@@ -250,7 +247,7 @@ TEST_F(TableMergerTest, MergeAddResourceFromOverlay) {
   std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
           .SetPackageId("", 0x7f)
-          .SetSymbolState("bool/foo", {}, SymbolState::kUndefined, true /*allow new overlay*/)
+          .SetSymbolState("bool/foo", {}, Visibility::Level::kUndefined, true /*allow new overlay*/)
           .AddValue("bool/foo", ResourceUtils::TryParseBool("true"))
           .Build();
 
@@ -259,8 +256,8 @@ TEST_F(TableMergerTest, MergeAddResourceFromOverlay) {
   options.auto_add_overlay = false;
   TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.Merge({}, table_a.get()));
-  ASSERT_TRUE(merger.MergeOverlay({}, table_b.get()));
+  ASSERT_TRUE(merger.Merge({}, table_a.get(), false /*overlay*/));
+  ASSERT_TRUE(merger.Merge({}, table_b.get(), false /*overlay*/));
 }
 
 TEST_F(TableMergerTest, MergeAddResourceFromOverlayWithAutoAddOverlay) {
@@ -277,8 +274,8 @@ TEST_F(TableMergerTest, MergeAddResourceFromOverlayWithAutoAddOverlay) {
   options.auto_add_overlay = true;
   TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.Merge({}, table_a.get()));
-  ASSERT_TRUE(merger.MergeOverlay({}, table_b.get()));
+  ASSERT_TRUE(merger.Merge({}, table_a.get(), false /*overlay*/));
+  ASSERT_TRUE(merger.Merge({}, table_b.get(), false /*overlay*/));
 }
 
 TEST_F(TableMergerTest, FailToMergeNewResourceWithoutAutoAddOverlay) {
@@ -295,8 +292,8 @@ TEST_F(TableMergerTest, FailToMergeNewResourceWithoutAutoAddOverlay) {
   options.auto_add_overlay = false;
   TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.Merge({}, table_a.get()));
-  ASSERT_FALSE(merger.MergeOverlay({}, table_b.get()));
+  ASSERT_TRUE(merger.Merge({}, table_a.get(), false /*overlay*/));
+  ASSERT_FALSE(merger.Merge({}, table_b.get(), true /*overlay*/));
 }
 
 TEST_F(TableMergerTest, OverlaidStyleablesAndStylesShouldBeMerged) {
@@ -337,8 +334,8 @@ TEST_F(TableMergerTest, OverlaidStyleablesAndStylesShouldBeMerged) {
   options.auto_add_overlay = true;
   TableMerger merger(context_.get(), &final_table, options);
 
-  ASSERT_TRUE(merger.Merge({}, table_a.get()));
-  ASSERT_TRUE(merger.MergeOverlay({}, table_b.get()));
+  ASSERT_TRUE(merger.Merge({}, table_a.get(), false /*overlay*/));
+  ASSERT_TRUE(merger.Merge({}, table_b.get(), true /*overlay*/));
 
   Styleable* styleable = test::GetValue<Styleable>(&final_table, "com.app.a:styleable/Foo");
   ASSERT_THAT(styleable, NotNull());

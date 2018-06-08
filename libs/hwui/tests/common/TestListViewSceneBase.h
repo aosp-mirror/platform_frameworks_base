@@ -15,9 +15,9 @@
  */
 #pragma once
 
-#include "TestScene.h"
 #include <RenderNode.h>
 #include <RenderProperties.h>
+#include "TestScene.h"
 
 namespace android {
 namespace uirenderer {
@@ -25,20 +25,21 @@ namespace test {
 
 class TestListViewSceneBase : public TestScene {
 public:
-    virtual void createListItem(RenderProperties& props, Canvas& canvas, int id,
-            int itemWidth, int itemHeight) = 0;
+    virtual void createListItem(RenderProperties& props, Canvas& canvas, int id, int itemWidth,
+                                int itemHeight) = 0;
+
 private:
     int mItemHeight;
     int mItemSpacing;
     int mItemWidth;
     int mItemLeft;
     sp<RenderNode> mListView;
-    std::vector< sp<RenderNode> > mListItems;
+    std::vector<sp<RenderNode> > mListItems;
 
     void createContent(int width, int height, Canvas& canvas) override;
     void doFrame(int frameNr) override;
 };
 
-} // namespace test
-} // namespace uirenderer
-} // namespace android
+}  // namespace test
+}  // namespace uirenderer
+}  // namespace android

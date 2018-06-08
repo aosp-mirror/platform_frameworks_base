@@ -17,6 +17,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="android.ext.services.tests.unit">
 
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+
     <application>
         <uses-library android:name="android.test.runner" />
     </application>

@@ -17,6 +17,7 @@
 package android.security.net.config;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 import android.util.ArraySet;
@@ -44,7 +45,8 @@ public class XmlConfigTests extends AndroidTestCase {
     private final static String DEBUG_CA_SUBJ = "O=AOSP, CN=Test debug CA";
 
     public void testEmptyConfigFile() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.empty_config);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.empty_config,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         assertFalse(appConfig.hasPerDomainConfigs());
         NetworkSecurityConfig config = appConfig.getConfigForHostname("");
@@ -63,7 +65,8 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testEmptyAnchors() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.empty_trust);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.empty_trust,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         assertFalse(appConfig.hasPerDomainConfigs());
         NetworkSecurityConfig config = appConfig.getConfigForHostname("");
@@ -81,7 +84,8 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testBasicDomainConfig() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.domain1);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.domain1,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         assertTrue(appConfig.hasPerDomainConfigs());
         NetworkSecurityConfig config = appConfig.getConfigForHostname("");
@@ -117,7 +121,8 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testBasicPinning() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.pins1);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.pins1,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         assertTrue(appConfig.hasPerDomainConfigs());
         // Check android.com.
@@ -132,7 +137,8 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testExpiredPin() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.expired_pin);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.expired_pin,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         assertTrue(appConfig.hasPerDomainConfigs());
         // Check android.com.
@@ -146,7 +152,8 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testOverridesPins() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.override_pins);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.override_pins,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         assertTrue(appConfig.hasPerDomainConfigs());
         // Check android.com.
@@ -160,7 +167,8 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testBadPin() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.bad_pin);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.bad_pin,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         assertTrue(appConfig.hasPerDomainConfigs());
         // Check android.com.
@@ -175,7 +183,8 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testMultipleDomains() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.multiple_domains);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.multiple_domains,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         assertTrue(appConfig.hasPerDomainConfigs());
         NetworkSecurityConfig config = appConfig.getConfigForHostname("android.com");
@@ -196,7 +205,8 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testMultipleDomainConfigs() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.multiple_configs);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.multiple_configs,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         assertTrue(appConfig.hasPerDomainConfigs());
         // Should be two different config objects
@@ -211,7 +221,8 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testIncludeSubdomains() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.subdomains);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.subdomains,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         assertTrue(appConfig.hasPerDomainConfigs());
         // Try connections.
@@ -224,7 +235,8 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testAttributes() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.attributes);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.attributes,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         assertFalse(appConfig.hasPerDomainConfigs());
         NetworkSecurityConfig config = appConfig.getConfigForHostname("");
@@ -233,7 +245,8 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testResourcePemCertificateSource() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.resource_anchors_pem);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.resource_anchors_pem,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         // Check android.com.
         NetworkSecurityConfig config = appConfig.getConfigForHostname("android.com");
@@ -249,7 +262,8 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testResourceDerCertificateSource() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.resource_anchors_der);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.resource_anchors_der,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         // Check android.com.
         NetworkSecurityConfig config = appConfig.getConfigForHostname("android.com");
@@ -265,7 +279,8 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testNestedDomainConfigs() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.nested_domains);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.nested_domains,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         assertTrue(appConfig.hasPerDomainConfigs());
         NetworkSecurityConfig parent = appConfig.getConfigForHostname("android.com");
@@ -283,7 +298,8 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testNestedDomainConfigsOverride() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.nested_domains_override);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.nested_domains_override,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         assertTrue(appConfig.hasPerDomainConfigs());
         NetworkSecurityConfig parent = appConfig.getConfigForHostname("android.com");
@@ -294,7 +310,8 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testDebugOverridesDisabled() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.debug_basic, false);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.debug_basic,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         NetworkSecurityConfig config = appConfig.getConfigForHostname("");
         Set<TrustAnchor> anchors = config.getTrustAnchors();
@@ -305,7 +322,9 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testBasicDebugOverrides() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.debug_basic, true);
+        ApplicationInfo info = TestUtils.makeApplicationInfo();
+        info.flags |= ApplicationInfo.FLAG_DEBUGGABLE;
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.debug_basic, info);
         ApplicationConfig appConfig = new ApplicationConfig(source);
         NetworkSecurityConfig config = appConfig.getConfigForHostname("");
         Set<TrustAnchor> anchors = config.getTrustAnchors();
@@ -319,7 +338,9 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testDebugOverridesWithDomain() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.debug_domain, true);
+        ApplicationInfo info = TestUtils.makeApplicationInfo();
+        info.flags |= ApplicationInfo.FLAG_DEBUGGABLE;
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.debug_domain, info);
         ApplicationConfig appConfig = new ApplicationConfig(source);
         NetworkSecurityConfig config = appConfig.getConfigForHostname("android.com");
         Set<TrustAnchor> anchors = config.getTrustAnchors();
@@ -337,7 +358,9 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testDebugInherit() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.debug_domain, true);
+        ApplicationInfo info = TestUtils.makeApplicationInfo();
+        info.flags |= ApplicationInfo.FLAG_DEBUGGABLE;
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.debug_domain, info);
         ApplicationConfig appConfig = new ApplicationConfig(source);
         NetworkSecurityConfig config = appConfig.getConfigForHostname("android.com");
         Set<TrustAnchor> anchors = config.getTrustAnchors();
@@ -357,7 +380,8 @@ public class XmlConfigTests extends AndroidTestCase {
 
     private void testBadConfig(int configId) throws Exception {
         try {
-            XmlConfigSource source = new XmlConfigSource(getContext(), configId);
+            XmlConfigSource source = new XmlConfigSource(getContext(), configId,
+                    TestUtils.makeApplicationInfo());
             ApplicationConfig appConfig = new ApplicationConfig(source);
             appConfig.getConfigForHostname("android.com");
             fail("Bad config " + getContext().getResources().getResourceName(configId)
@@ -393,7 +417,8 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testTrustManagerKeystore() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.bad_pin, true);
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.bad_pin,
+                TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         Provider provider = new NetworkSecurityConfigProvider();
         TrustManagerFactory tmf =
@@ -415,7 +440,9 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testDebugDedup() throws Exception {
-        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.override_dedup, true);
+        ApplicationInfo info = TestUtils.makeApplicationInfo();
+        info.flags |= ApplicationInfo.FLAG_DEBUGGABLE;
+        XmlConfigSource source = new XmlConfigSource(getContext(), R.xml.override_dedup, info);
         ApplicationConfig appConfig = new ApplicationConfig(source);
         assertTrue(appConfig.hasPerDomainConfigs());
         // Check android.com.
@@ -433,15 +460,18 @@ public class XmlConfigTests extends AndroidTestCase {
     }
 
     public void testExtraDebugResource() throws Exception {
+        ApplicationInfo info = TestUtils.makeApplicationInfo();
+        info.flags |= ApplicationInfo.FLAG_DEBUGGABLE;
         XmlConfigSource source =
-                new XmlConfigSource(getContext(), R.xml.extra_debug_resource, true);
+                new XmlConfigSource(getContext(), R.xml.extra_debug_resource, info);
         ApplicationConfig appConfig = new ApplicationConfig(source);
         assertFalse(appConfig.hasPerDomainConfigs());
         NetworkSecurityConfig config = appConfig.getConfigForHostname("");
         MoreAsserts.assertNotEmpty(config.getTrustAnchors());
 
         // Check that the _debug file is ignored if debug is false.
-        source = new XmlConfigSource(getContext(), R.xml.extra_debug_resource, false);
+        source = new XmlConfigSource(getContext(), R.xml.extra_debug_resource,
+                TestUtils.makeApplicationInfo());
         appConfig = new ApplicationConfig(source);
         assertFalse(appConfig.hasPerDomainConfigs());
         config = appConfig.getConfigForHostname("");
@@ -451,12 +481,15 @@ public class XmlConfigTests extends AndroidTestCase {
     public void testExtraDebugResourceIgnored() throws Exception {
         // Verify that parsing the extra debug config resource fails only when debugging is true.
         XmlConfigSource source =
-                new XmlConfigSource(getContext(), R.xml.bad_extra_debug_resource, false);
+                new XmlConfigSource(getContext(), R.xml.bad_extra_debug_resource,
+                        TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         // Force parsing the config file.
         appConfig.getConfigForHostname("");
 
-        source = new XmlConfigSource(getContext(), R.xml.bad_extra_debug_resource, true);
+        ApplicationInfo info = TestUtils.makeApplicationInfo();
+        info.flags |= ApplicationInfo.FLAG_DEBUGGABLE;
+        source = new XmlConfigSource(getContext(), R.xml.bad_extra_debug_resource, info);
         appConfig = new ApplicationConfig(source);
         try {
             appConfig.getConfigForHostname("");
@@ -467,7 +500,8 @@ public class XmlConfigTests extends AndroidTestCase {
 
     public void testDomainWhitespaceTrimming() throws Exception {
         XmlConfigSource source =
-                new XmlConfigSource(getContext(), R.xml.domain_whitespace, false);
+                new XmlConfigSource(getContext(), R.xml.domain_whitespace,
+                        TestUtils.makeApplicationInfo());
         ApplicationConfig appConfig = new ApplicationConfig(source);
         NetworkSecurityConfig defaultConfig = appConfig.getConfigForHostname("");
         MoreAsserts.assertNotEqual(defaultConfig, appConfig.getConfigForHostname("developer.android.com"));

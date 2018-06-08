@@ -308,7 +308,6 @@ public class CarrierConfigManager {
      *
      * @see SubscriptionManager#getSubscriptionPlans(int)
      * @see SubscriptionManager#setSubscriptionPlans(int, java.util.List)
-     * @hide
      */
     @SystemApi
     public static final String KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING =
@@ -333,10 +332,10 @@ public class CarrierConfigManager {
      * If true all networks are considered as home network a.k.a non-roaming.  When false,
      * the 2 pairs of CMDA and GSM roaming/non-roaming arrays are consulted.
      *
-     * @see KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
-     * @see KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
-     * @see KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY
-     * @see KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY
+     * @see #KEY_GSM_ROAMING_NETWORKS_STRING_ARRAY
+     * @see #KEY_GSM_NONROAMING_NETWORKS_STRING_ARRAY
+     * @see #KEY_CDMA_ROAMING_NETWORKS_STRING_ARRAY
+     * @see #KEY_CDMA_NONROAMING_NETWORKS_STRING_ARRAY
      */
     public static final String
             KEY_FORCE_HOME_NETWORK_BOOL = "force_home_network_bool";
@@ -370,6 +369,19 @@ public class CarrierConfigManager {
             "notify_handover_video_from_wifi_to_lte_bool";
 
     /**
+     * Flag specifying whether the carrier wants to notify the user when a VT call has been handed
+     * over from LTE to WIFI.
+     * <p>
+     * The handover notification is sent as a
+     * {@link TelephonyManager#EVENT_HANDOVER_VIDEO_FROM_LTE_TO_WIFI}
+     * {@link android.telecom.Connection} event, which an {@link android.telecom.InCallService}
+     * should use to trigger the display of a user-facing message.
+     * @hide
+     */
+    public static final String KEY_NOTIFY_HANDOVER_VIDEO_FROM_LTE_TO_WIFI_BOOL =
+            "notify_handover_video_from_lte_to_wifi_bool";
+
+    /**
      * Flag specifying whether the carrier supports downgrading a video call (tx, rx or tx/rx)
      * directly to an audio call.
      * @hide
@@ -383,6 +395,15 @@ public class CarrierConfigManager {
      * When empty string, no default voicemail number is specified.
      */
     public static final String KEY_DEFAULT_VM_NUMBER_STRING = "default_vm_number_string";
+
+    /**
+     * Where there is no preloaded voicemail number on a SIM card, specifies the carrier's default
+     * voicemail number for roaming network.
+     * When empty string, no default voicemail number is specified for roaming network.
+     * @hide
+     */
+    public static final String KEY_DEFAULT_VM_NUMBER_ROAMING_STRING =
+            "default_vm_number_roaming_string";
 
     /**
      * Flag that specifies to use the user's own phone number as the voicemail number when there is
@@ -782,12 +803,11 @@ public class CarrierConfigManager {
     public static final String KEY_SHOW_ICCID_IN_SIM_STATUS_BOOL = "show_iccid_in_sim_status_bool";
 
     /**
-     * Flag specifying whether signal strength is hidden in SIM Status screen,
-     * default to false.
-     * @hide
+     * Flag specifying whether the {@link android.telephony.SignalStrength} is shown in the SIM
+     * Status screen. The default value is true.
      */
-    public static final String KEY_HIDE_SIGNAL_STRENGTH_IN_SIM_STATUS_BOOL =
-        "hide_signal_strength_in_sim_status_bool";
+    public static final String KEY_SHOW_SIGNAL_STRENGTH_IN_SIM_STATUS_BOOL =
+        "show_signal_strength_in_sim_status_bool";
 
     /**
      * Flag specifying whether an additional (client initiated) intent needs to be sent on System
@@ -1316,24 +1336,21 @@ public class CarrierConfigManager {
      */
     public static final String KEY_CDMA_3WAYCALL_FLASH_DELAY_INT = "cdma_3waycall_flash_delay_int";
 
-
     /**
-     * @hide
-     * The default value for preferred CDMA roaming mode (aka CDMA system select.)
-     *          CDMA_ROAMING_MODE_RADIO_DEFAULT = the default roaming mode from the radio
-     *          CDMA_ROAMING_MODE_HOME = Home Networks
-     *          CDMA_ROAMING_MODE_AFFILIATED = Roaming on Affiliated networks
-     *          CDMA_ROAMING_MODE_ANY = Roaming on any networks
+     * The CDMA roaming mode (aka CDMA system select).
+     *
+     * <p>The value should be one of the CDMA_ROAMING_MODE_ constants in {@link TelephonyManager}.
+     * Values other than {@link TelephonyManager#CDMA_ROAMING_MODE_RADIO_DEFAULT} (which is the
+     * default) will take precedence over user selection.
+     *
+     * @see TelephonyManager#CDMA_ROAMING_MODE_RADIO_DEFAULT
+     * @see TelephonyManager#CDMA_ROAMING_MODE_HOME
+     * @see TelephonyManager#CDMA_ROAMING_MODE_AFFILIATED
+     * @see TelephonyManager#CDMA_ROAMING_MODE_ANY
      */
     public static final String KEY_CDMA_ROAMING_MODE_INT = "cdma_roaming_mode_int";
-    /** @hide */
-    public static final int CDMA_ROAMING_MODE_RADIO_DEFAULT = -1;
-    /** @hide */
-    public static final int CDMA_ROAMING_MODE_HOME = 0;
-    /** @hide */
-    public static final int CDMA_ROAMING_MODE_AFFILIATED = 1;
-    /** @hide */
-    public static final int CDMA_ROAMING_MODE_ANY = 2;
+
+
     /**
      * Boolean indicating if support is provided for directly dialing FDN number from FDN list.
      * If false, this feature is not supported.
@@ -1669,6 +1686,15 @@ public class CarrierConfigManager {
             "data_warning_threshold_bytes_long";
 
     /**
+     * Controls if the device should automatically notify the user as they reach
+     * their cellular data warning. When set to {@code false} the carrier is
+     * expected to have implemented their own notification mechanism.
+     * @hide
+     */
+    public static final String KEY_DATA_WARNING_NOTIFICATION_BOOL =
+            "data_warning_notification_bool";
+
+    /**
      * Controls the cellular data limit.
      * <p>
      * If the user uses more than this amount of data in their billing cycle, as defined by
@@ -1681,6 +1707,24 @@ public class CarrierConfigManager {
      */
     public static final String KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG =
             "data_limit_threshold_bytes_long";
+
+    /**
+     * Controls if the device should automatically notify the user as they reach
+     * their cellular data limit. When set to {@code false} the carrier is
+     * expected to have implemented their own notification mechanism.
+     * @hide
+     */
+    public static final String KEY_DATA_LIMIT_NOTIFICATION_BOOL =
+            "data_limit_notification_bool";
+
+    /**
+     * Controls if the device should automatically notify the user when rapid
+     * cellular data usage is observed. When set to {@code false} the carrier is
+     * expected to have implemented their own notification mechanism.
+     * @hide
+     */
+    public static final String KEY_DATA_RAPID_NOTIFICATION_BOOL =
+            "data_rapid_notification_bool";
 
     /**
      * Offset to be reduced from rsrp threshold while calculating signal strength level.
@@ -1839,11 +1883,20 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_CONFIG_APPLIED_BOOL = "carrier_config_applied_bool";
 
     /**
+     * Determines whether we should show a warning asking the user to check with their carrier
+     * on pricing when the user enabled data roaming.
+     * default to false.
+     * @hide
+     */
+    public static final String KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL =
+            "check_pricing_with_carrier_data_roaming_bool";
+
+    /**
      * A list of 4 LTE RSRP thresholds above which a signal level is considered POOR,
      * MODERATE, GOOD, or EXCELLENT, to be used in SignalStrength reporting.
      *
      * Note that the min and max thresholds are fixed at -140 and -44, as explained in
-     * TS 36.133 9.1.4 - RSRP Measurement Report Mapping.
+     * TS 136.133 9.1.4 - RSRP Measurement Report Mapping.
      * <p>
      * See SignalStrength#MAX_LTE_RSRP and SignalStrength#MIN_LTE_RSRP. Any signal level outside
      * these boundaries is considered invalid.
@@ -1922,8 +1975,10 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VT_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_NOTIFY_HANDOVER_VIDEO_FROM_WIFI_TO_LTE_BOOL, false);
+        sDefaults.putBoolean(KEY_NOTIFY_HANDOVER_VIDEO_FROM_LTE_TO_WIFI_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_DOWNGRADE_VT_TO_AUDIO_BOOL, true);
         sDefaults.putString(KEY_DEFAULT_VM_NUMBER_STRING, "");
+        sDefaults.putString(KEY_DEFAULT_VM_NUMBER_ROAMING_STRING, "");
         sDefaults.putBoolean(KEY_CONFIG_TELEPHONY_USE_OWN_NUMBER_FOR_VOICEMAIL_BOOL, false);
         sDefaults.putBoolean(KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS, true);
         sDefaults.putBoolean(KEY_VILTE_DATA_IS_METERED_BOOL, true);
@@ -1942,10 +1997,10 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_IMS_GBA_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_USE_IMS_FIRST_FOR_EMERGENCY_BOOL, true);
-        sDefaults.putString(KEY_CARRIER_DATA_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING, "");
-        sDefaults.putString(KEY_CARRIER_DATA_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_NETWORK_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_NETWORK_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_DATA_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_DATA_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_INVALID_CHARS_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_ESCAPED_CHARS_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_ENCODING_STRING, "");
@@ -1994,7 +2049,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CARRIER_VVM_PACKAGE_NAME_STRING, "");
         sDefaults.putStringArray(KEY_CARRIER_VVM_PACKAGE_NAME_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_SHOW_ICCID_IN_SIM_STATUS_BOOL, false);
-        sDefaults.putBoolean(KEY_HIDE_SIGNAL_STRENGTH_IN_SIM_STATUS_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_SIGNAL_STRENGTH_IN_SIM_STATUS_BOOL, true);
         sDefaults.putBoolean(KEY_CI_ACTION_ON_SYS_UPDATE_BOOL, false);
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_INTENT_STRING, "");
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_STRING, "");
@@ -2022,9 +2077,14 @@ public class CarrierConfigManager {
                 new String[]{"default", "mms", "dun", "supl"});
         sDefaults.putStringArray(KEY_CARRIER_METERED_ROAMING_APN_TYPES_STRINGS,
                 new String[]{"default", "mms", "dun", "supl"});
-        // By default all APNs are unmetered if the device is on IWLAN.
+        // By default all APNs should be unmetered if the device is on IWLAN. However, we add
+        // default APN as metered here as a workaround for P because in some cases, a data
+        // connection was brought up on cellular, but later on the device camped on IWLAN. That
+        // data connection was incorrectly treated as unmetered due to the current RAT IWLAN.
+        // Marking it as metered for now can workaround the issue.
+        // Todo: This will be fixed in Q when IWLAN full refactoring is completed.
         sDefaults.putStringArray(KEY_CARRIER_METERED_IWLAN_APN_TYPES_STRINGS,
-                new String[]{});
+                new String[]{"default"});
 
         sDefaults.putIntArray(KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY,
                 new int[]{
@@ -2110,7 +2170,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ALLOW_NON_EMERGENCY_CALLS_IN_ECM_BOOL, true);
         sDefaults.putBoolean(KEY_USE_RCS_PRESENCE_BOOL, false);
         sDefaults.putBoolean(KEY_FORCE_IMEI_BOOL, false);
-        sDefaults.putInt(KEY_CDMA_ROAMING_MODE_INT, CDMA_ROAMING_MODE_RADIO_DEFAULT);
+        sDefaults.putInt(
+                KEY_CDMA_ROAMING_MODE_INT, TelephonyManager.CDMA_ROAMING_MODE_RADIO_DEFAULT);
         sDefaults.putString(KEY_RCS_CONFIG_SERVER_URL_STRING, "");
 
         // Carrier Signalling Receivers
@@ -2147,7 +2208,10 @@ public class CarrierConfigManager {
 
         sDefaults.putInt(KEY_MONTHLY_DATA_CYCLE_DAY_INT, DATA_CYCLE_USE_PLATFORM_DEFAULT);
         sDefaults.putLong(KEY_DATA_WARNING_THRESHOLD_BYTES_LONG, DATA_CYCLE_USE_PLATFORM_DEFAULT);
+        sDefaults.putBoolean(KEY_DATA_WARNING_NOTIFICATION_BOOL, true);
         sDefaults.putLong(KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG, DATA_CYCLE_USE_PLATFORM_DEFAULT);
+        sDefaults.putBoolean(KEY_DATA_LIMIT_NOTIFICATION_BOOL, true);
+        sDefaults.putBoolean(KEY_DATA_RAPID_NOTIFICATION_BOOL, true);
 
         // Rat families: {GPRS, EDGE}, {EVDO, EVDO_A, EVDO_B}, {UMTS, HSPA, HSDPA, HSUPA, HSPAP},
         // {LTE, LTE_CA}
@@ -2169,7 +2233,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_FILTERED_CNAP_NAMES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, false);
         sDefaults.putBoolean(KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL, false);
-        sDefaults.putBoolean(KEY_PERSIST_LPP_MODE_BOOL, false);
+        sDefaults.putBoolean(KEY_PERSIST_LPP_MODE_BOOL, true);
         sDefaults.putStringArray(KEY_CARRIER_WIFI_STRING_ARRAY, null);
         sDefaults.putInt(KEY_PREF_NETWORK_NOTIFICATION_DELAY_INT, -1);
         sDefaults.putInt(KEY_EMERGENCY_NOTIFICATION_DELAY_INT, -1);
@@ -2200,6 +2264,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_CONFIG_APPLIED_BOOL, false);
+        sDefaults.putBoolean(KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL, false);
         sDefaults.putIntArray(KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY,
                 new int[] {
                         -128, /* SIGNAL_STRENGTH_POOR */
@@ -2306,7 +2371,7 @@ public class CarrierConfigManager {
      * {@link android.service.carrier.CarrierService#onLoadConfig} will be called from an
      * arbitrary thread.
      * </p>
-     * @see #hasCarrierPrivileges
+     * @see TelephonyManager#hasCarrierPrivileges
      */
     public void notifyConfigChangedForSubId(int subId) {
         try {

@@ -18,4 +18,7 @@
     package="com.android.aapt.autoversiontest">
 
     <uses-sdk android:minSdkVersion="7" />
+    <application>
+        <uses-library android:name="clockwork-system" />
+    </application>
 </manifest>

@@ -84,6 +84,27 @@ public class SysuiColorExtractorTests extends SysuiTestCase {
         }
     }
 
+    @Test
+    public void getColors_fallbackWhenMediaIsVisible() {
+        ColorExtractor.GradientColors colors = new ColorExtractor.GradientColors();
+        colors.setMainColor(Color.RED);
+        colors.setSecondaryColor(Color.RED);
+
+        SysuiColorExtractor extractor = getTestableExtractor(colors);
+        simulateEvent(extractor);
+        extractor.setWallpaperVisible(true);
+        extractor.setMediaBackdropVisible(true);
+
+        ColorExtractor.GradientColors fallbackColors = extractor.getFallbackColors();
+
+        for (int type : sTypes) {
+            assertEquals("Not using fallback!",
+                    extractor.getColors(WallpaperManager.FLAG_LOCK, type), fallbackColors);
+            assertNotEquals("Media visibility should not affect system wallpaper.",
+                    extractor.getColors(WallpaperManager.FLAG_SYSTEM, type), fallbackColors);
+        }
+    }
+
     private SysuiColorExtractor getTestableExtractor(ColorExtractor.GradientColors colors) {
         return new SysuiColorExtractor(getContext(),
                 (inWallpaperColors, outGradientColorsNormal, outGradientColorsDark,

@@ -56,6 +56,28 @@ public class TouchAnimatorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testSetValueFloat_threeValues() {
+        TouchAnimator animator = new TouchAnimator.Builder()
+                .addFloat(mTestView, "x", 0, 20, 50)
+                .build();
+
+        animator.setPosition(0);
+        assertEquals(0f, mTestView.getX());
+
+        animator.setPosition(.25f);
+        assertEquals(10f, mTestView.getX());
+
+        animator.setPosition(.5f);
+        assertEquals(20f, mTestView.getX());
+
+        animator.setPosition(.75f);
+        assertEquals(35f, mTestView.getX());
+
+        animator.setPosition(1);
+        assertEquals(50f, mTestView.getX());
+    }
+
+    @Test
     public void testSetValueInt() {
         TouchAnimator animator = new TouchAnimator.Builder()
                 .addInt(mTestView, "top", 0, 50)

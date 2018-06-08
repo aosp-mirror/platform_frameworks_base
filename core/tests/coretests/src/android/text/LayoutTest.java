@@ -29,6 +29,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.Layout.Alignment;
@@ -40,7 +41,9 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class LayoutTest {
@@ -215,6 +218,17 @@ public class LayoutTest {
     }
 
     @Test
+    public void testGetLineExtra_returnsZeroByDefault() {
+        final String text = "a\nb\nc\n";
+        final Layout layout = new MockLayout(LAYOUT_TEXT, mTextPaint, mWidth,
+                mAlign, 100 /* spacingMult*/, 100 /*spacingAdd*/);
+        final int lineCount = text.split("\n").length;
+        for (int i = 0; i < lineCount; i++) {
+            assertEquals(0, layout.getLineExtra(i));
+        }
+    }
+
+    @Test
     public void testGetLineVisibleEnd() {
         Layout layout = new MockLayout(LAYOUT_TEXT, mTextPaint, mWidth,
                 mAlign, mSpacingMult, mSpacingAdd);
@@ -274,6 +288,215 @@ public class LayoutTest {
         Layout layout = new MockLayout(LAYOUT_TEXT, mTextPaint, mWidth,
                 mAlign, mSpacingMult, mSpacingAdd);
         assertEquals(mWidth, layout.getParagraphRight(0));
+    }
+
+    @Test
+    public void testGetSelectionWithEmptySelection() {
+        final Layout layout = new MockLayout(LAYOUT_TEXT, mTextPaint, mWidth,
+                mAlign, mSpacingMult, mSpacingAdd);
+
+        /*
+         * When the selection is empty (i.e. the start and the end index are the same), we do not
+         * expect any rectangles to be generated.
+         */
+
+        layout.getSelection(5 /* startIndex */, 5 /* endIndex */,
+                (left, top, right, bottom, textSelectionLayout) -> fail(
+                        String.format(Locale.getDefault(),
+                        "Did not expect any rectangles, got a rectangle with (left: %f,"
+                                + " top: %f), (right: %f, bottom: %f)",
+                        left, top, right, bottom)));
+    }
+
+    @Test
+    public void testGetSelectionWithASingleLineSelection() {
+        final Layout layout = new StaticLayout("abc", mTextPaint, Integer.MAX_VALUE,
+                Alignment.ALIGN_LEFT, mSpacingMult, mSpacingAdd, false);
+
+        final List<RectF> rectangles = new ArrayList<>();
+
+        layout.getSelection(0 /* startIndex */, 1 /* endIndex */,
+                (left, top, right, bottom, textSelectionLayout) -> rectangles.add(
+                        new RectF(left, top, right, bottom)));
+
+        /*
+         * The selection we expect will only cover the letter "a". Hence, we expect one rectangle
+         * to be generated and this rectangle should start at the top left of the canvas and should
+         * end somewhere to the right and down.
+         *
+         * | a | b c
+         *
+         */
+
+        assertEquals(1, rectangles.size());
+
+        final RectF rectangle = rectangles.get(0);
+
+        assertEquals(0, rectangle.left, 0.0f);
+        assertEquals(0, rectangle.top, 0.0f);
+        assertTrue(rectangle.right > 0);
+        assertTrue(rectangle.bottom > 0);
+    }
+
+    @Test
+    public void
+            testGetSelectionWithMultilineSelection_secondLineSelectionEndsBeforeFirstCharacter() {
+        final Layout layout = new StaticLayout("a\nb\nc", mTextPaint, Integer.MAX_VALUE,
+                Alignment.ALIGN_LEFT, mSpacingMult, mSpacingAdd, false);
+
+        final List<RectF> rectangles = new ArrayList<>();
+
+        layout.getSelection(0 /* startIndex */, 2 /* endIndex */,
+                (left, top, right, bottom, textSelectionLayout) -> rectangles.add(
+                        new RectF(left, top, right, bottom)));
+
+        /*
+         * The selection that will be selected is "a\n" - the selection starts at the beginning
+         * of the first line and ends at the start of the second line. This means the selection
+         * highlight will span from the beginning of the first line to the end of the first line
+         * and will appear as a zero width line at the beginning of the second line.
+         *
+         * Hence, we expect three rectangles - one that will select the "a" on the first line,
+         * one that will extend the selection from the "a" to the end of the first line and one
+         * that will prepare the selection for the second line.
+         *
+         * | a | *topToEndOfLineRectangle* |
+         * | b
+         *   c
+         */
+
+        assertEquals(3, rectangles.size());
+
+        final RectF topRectangle = rectangles.get(0);
+        final RectF topToEndOfLineRectangle = rectangles.get(1);
+        final RectF bottomLineStartRectangle = rectangles.get(2);
+
+        assertFalse(topRectangle.intersect(bottomLineStartRectangle));
+        assertTrue(topRectangle.top < bottomLineStartRectangle.top);
+        assertTrue(topRectangle.left == bottomLineStartRectangle.left);
+
+        assertFalse(topRectangle.intersect(topToEndOfLineRectangle));
+        assertEquals(Integer.MAX_VALUE, topToEndOfLineRectangle.right, 1);
+        assertTrue(topRectangle.top == topToEndOfLineRectangle.top);
+        assertTrue(topRectangle.right == topToEndOfLineRectangle.left);
+        assertTrue(topRectangle.bottom == topToEndOfLineRectangle.bottom);
+
+        assertEquals(0, bottomLineStartRectangle.left, 0.0f);
+        assertEquals(0, bottomLineStartRectangle.right, 0.0f);
+    }
+
+    @Test
+    public void testGetSelectionWithMultilineSelection_secondLineSelectionEndsAfterACharacter() {
+        final Layout layout = new StaticLayout("a\nb\nc", mTextPaint, Integer.MAX_VALUE,
+                Alignment.ALIGN_LEFT, mSpacingMult, mSpacingAdd, false);
+
+        final List<RectF> rectangles = new ArrayList<>();
+
+        layout.getSelection(0 /* startIndex */, 3 /* endIndex */,
+                (left, top, right, bottom, textSelectionLayout) -> rectangles.add(
+                        new RectF(left, top, right, bottom)));
+
+        /*
+         * The selection that will be selected is "a\nb" - the selection starts at the beginning
+         * of the first line and ends at the end of the letter "b". This means the selection
+         * highlight will span from the beginning of the first line to the end of the first line
+         * and will also cover the letter "b" on the second line.
+         *
+         * We expect four rectangles - one that will select the "a" on the first line,
+         * one that will extend the selection from the "a" to the end of the first line the one
+         * from the previous case that will prepare the selection for the second line and finally
+         * one that will select the letter b.
+         *
+         *  | a | *topToEndOfLineRectangle* |
+         * || b |
+         *    c
+         */
+
+        assertEquals(4, rectangles.size());
+
+        final RectF topRectangle = rectangles.get(0);
+        final RectF topToEndOfLineRectangle = rectangles.get(1);
+        final RectF bottomRectangle = rectangles.get(2);
+        final RectF bottomLineStartRectangle = rectangles.get(3);
+
+        assertTrue(topRectangle.top == topToEndOfLineRectangle.top);
+        assertTrue(bottomLineStartRectangle.top == bottomRectangle.top);
+        assertTrue(bottomLineStartRectangle.bottom == bottomRectangle.bottom);
+        assertEquals(0, bottomLineStartRectangle.left, 0.0f);
+        assertEquals(0, bottomLineStartRectangle.right, 0.0f);
+        assertEquals(0, bottomRectangle.left, 0.0f);
+        assertTrue(bottomRectangle.right > 0);
+    }
+
+    @Test
+    public void testGetSelectionPathWithASingleLineSelection() {
+        final Layout layout = new StaticLayout("abc", mTextPaint, Integer.MAX_VALUE,
+                Alignment.ALIGN_LEFT, mSpacingMult, mSpacingAdd, false);
+
+        final List<RectF> rectangles = new ArrayList<>();
+
+        layout.getSelection(0 /* startIndex */, 1 /* endIndex */,
+                (left, top, right, bottom, textSelectionLayout) -> rectangles.add(
+                        new RectF(left, top, right, bottom)));
+
+        /*
+         * In the single line selection case, we expect that only one rectangle covering the letter
+         * "a" will be generated. Hence, we expect that the generated path will only consist of
+         * that rectangle as well.
+         *
+         * | a | b c
+         *
+         */
+
+        assertEquals(1, rectangles.size());
+
+        final RectF rectangle = rectangles.get(0);
+
+        final Path generatedPath = new Path();
+        layout.getSelectionPath(0 /* startIndex */, 1 /* endIndex */, generatedPath);
+
+        final RectF pathRectangle = new RectF();
+
+        assertTrue(generatedPath.isRect(pathRectangle));
+        assertEquals(rectangle, pathRectangle);
+    }
+
+    @Test
+    public void testGetSelection_latinTextDirection() {
+        final Layout layout = new StaticLayout("abc", mTextPaint, Integer.MAX_VALUE,
+                Alignment.ALIGN_LEFT, mSpacingMult, mSpacingAdd, false);
+
+        layout.getSelection(0 /* startIndex */, 2 /* endIndex */,
+                (left, top, right, bottom, textSelectionLayout) ->
+                        assertEquals(Layout.TEXT_SELECTION_LAYOUT_LEFT_TO_RIGHT,
+                                textSelectionLayout));
+    }
+
+    @Test
+    public void testGetSelection_arabicTextDirection() {
+        final Layout layout = new StaticLayout("غينيا", mTextPaint, Integer.MAX_VALUE,
+                Alignment.ALIGN_LEFT, mSpacingMult, mSpacingAdd, false);
+
+        layout.getSelection(0 /* startIndex */, 2 /* endIndex */,
+                (left, top, right, bottom, textSelectionLayout) ->
+                        assertEquals(Layout.TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT,
+                                textSelectionLayout));
+    }
+
+    @Test
+    public void testGetSelection_mixedLatinAndArabicTextDirection() {
+        final Layout layout = new StaticLayout("abcغينيا", mTextPaint, Integer.MAX_VALUE,
+                Alignment.ALIGN_LEFT, mSpacingMult, mSpacingAdd, false);
+
+        final List<Integer> layouts = new ArrayList<>(2);
+
+        layout.getSelection(0 /* startIndex */, 6 /* endIndex */,
+                (left, top, right, bottom, textSelectionLayout) -> layouts.add(
+                        textSelectionLayout));
+
+        assertEquals(2, layouts.size());
+        assertEquals(Layout.TEXT_SELECTION_LAYOUT_LEFT_TO_RIGHT, (long) layouts.get(0));
+        assertEquals(Layout.TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT, (long) layouts.get(1));
     }
 
     @Test

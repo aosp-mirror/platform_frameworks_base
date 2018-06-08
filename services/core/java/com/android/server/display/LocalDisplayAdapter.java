@@ -16,12 +16,14 @@
 
 package com.android.server.display;
 
+import android.app.ActivityThread;
 import android.content.res.Resources;
 import com.android.server.LocalServices;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 
 import android.content.Context;
+import android.hardware.sidekick.SidekickInternal;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -29,13 +31,15 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.text.TextUtils;
+import android.util.PathParser;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.DisplayEventReceiver;
 import android.view.Surface;
 import android.view.SurfaceControl;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -148,6 +152,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 return SurfaceControl.POWER_MODE_DOZE;
             case Display.STATE_DOZE_SUSPEND:
                 return SurfaceControl.POWER_MODE_DOZE_SUSPEND;
+            case Display.STATE_ON_SUSPEND:
+                return SurfaceControl.POWER_MODE_ON_SUSPEND;
             default:
                 return SurfaceControl.POWER_MODE_NORMAL;
         }
@@ -170,6 +176,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int mActiveColorMode;
         private boolean mActiveColorModeInvalid;
         private Display.HdrCapabilities mHdrCapabilities;
+        private boolean mSidekickActive;
+        private SidekickInternal mSidekickInternal;
 
         private  SurfaceControl.PhysicalDisplayInfo mDisplayInfos[];
 
@@ -181,6 +189,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             updatePhysicalDisplayInfoLocked(physicalDisplayInfos, activeDisplayInfo,
                     colorModes, activeColorMode);
             updateColorModesLocked(colorModes, activeColorMode);
+            mSidekickInternal = LocalServices.getService(SidekickInternal.class);
             if (mBuiltInDisplayId == SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN) {
                 LightsManager lights = LocalServices.getService(LightsManager.class);
                 mBacklight = lights.getLight(LightsManager.LIGHT_ID_BACKLIGHT);
@@ -384,7 +393,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             | DisplayDeviceInfo.FLAG_SUPPORTS_PROTECTED_BUFFERS;
                 }
 
-                final Resources res = getContext().getResources();
+                final Resources res = getOverlayContext().getResources();
                 if (mBuiltInDisplayId == SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN) {
                     mInfo.name = res.getString(
                             com.android.internal.R.string.display_manager_built_in_display_name);
@@ -395,12 +404,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_ROUND;
                     }
+                    mInfo.displayCutout = DisplayCutout.fromResources(res, mInfo.width,
+                            mInfo.height);
                     mInfo.type = Display.TYPE_BUILT_IN;
                     mInfo.densityDpi = (int)(phys.density * 160 + 0.5f);
                     mInfo.xDpi = phys.xDpi;
                     mInfo.yDpi = phys.yDpi;
                     mInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
                 } else {
+                    mInfo.displayCutout = null;
                     mInfo.type = Display.TYPE_HDMI;
                     mInfo.flags |= DisplayDeviceInfo.FLAG_PRESENTATION;
                     mInfo.name = getContext().getResources().getString(
@@ -423,6 +435,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     if (!res.getBoolean(
                                 com.android.internal.R.bool.config_localDisplaysMirrorContent)) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
+                    }
+
+                    if (res.getBoolean(com.android.internal.R.bool.config_localDisplaysPrivate)) {
+                        mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE;
                     }
                 }
             }
@@ -467,6 +483,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                     || oldState == Display.STATE_DOZE_SUSPEND) {
                                 setDisplayState(Display.STATE_DOZE);
                                 currentState = Display.STATE_DOZE;
+                            } else if (state == Display.STATE_ON_SUSPEND
+                                    || oldState == Display.STATE_ON_SUSPEND) {
+                                setDisplayState(Display.STATE_ON);
+                                currentState = Display.STATE_ON;
                             } else {
                                 return; // old state and new state is off
                             }
@@ -510,15 +530,39 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                     + ", state=" + Display.stateToString(state) + ")");
                         }
 
+                        // We must tell sidekick to stop controlling the display before we
+                        // can change its power mode, so do that first.
+                        if (mSidekickActive) {
+                            Trace.traceBegin(Trace.TRACE_TAG_POWER,
+                                    "SidekickInternal#endDisplayControl");
+                            try {
+                                mSidekickInternal.endDisplayControl();
+                            } finally {
+                                Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                            }
+                            mSidekickActive = false;
+                        }
+                        final int mode = getPowerModeForState(state);
                         Trace.traceBegin(Trace.TRACE_TAG_POWER, "setDisplayState("
                                 + "id=" + displayId
                                 + ", state=" + Display.stateToString(state) + ")");
                         try {
-                            final int mode = getPowerModeForState(state);
                             SurfaceControl.setDisplayPowerMode(token, mode);
                             Trace.traceCounter(Trace.TRACE_TAG_POWER, "DisplayPowerMode", mode);
                         } finally {
                             Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                        }
+                        // If we're entering a suspended (but not OFF) power state and we
+                        // have a sidekick available, tell it now that it can take control.
+                        if (Display.isSuspendedState(state) && state != Display.STATE_OFF
+                                && mSidekickInternal != null && !mSidekickActive) {
+                            Trace.traceBegin(Trace.TRACE_TAG_POWER,
+                                    "SidekickInternal#startDisplayControl");
+                            try {
+                                mSidekickActive = mSidekickInternal.startDisplayControl(state);
+                            } finally {
+                                Trace.traceEnd(Trace.TRACE_TAG_POWER);
+                            }
                         }
                     }
 
@@ -544,15 +588,19 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void requestDisplayModesInTransactionLocked(
-                int colorMode, int modeId) {
-            if (requestModeInTransactionLocked(modeId) ||
-                    requestColorModeInTransactionLocked(colorMode)) {
+        public void requestDisplayModesLocked(int colorMode, int modeId) {
+            if (requestModeLocked(modeId) ||
+                    requestColorModeLocked(colorMode)) {
                 updateDeviceInfoLocked();
             }
         }
 
-        public boolean requestModeInTransactionLocked(int modeId) {
+        @Override
+        public void onOverlayChangedLocked() {
+            updateDeviceInfoLocked();
+        }
+
+        public boolean requestModeLocked(int modeId) {
             if (modeId == 0) {
                 modeId = mDefaultModeId;
             } else if (mSupportedModes.indexOfKey(modeId) < 0) {
@@ -578,7 +626,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return true;
         }
 
-        public boolean requestColorModeInTransactionLocked(int colorMode) {
+        public boolean requestColorModeLocked(int colorMode) {
             if (mActiveColorMode == colorMode) {
                 return false;
             }
@@ -638,6 +686,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mInfo = null;
             sendDisplayDeviceEventLocked(this, DISPLAY_DEVICE_EVENT_CHANGED);
         }
+    }
+
+    /** Supplies a context whose Resources apply runtime-overlays */
+    Context getOverlayContext() {
+        return ActivityThread.currentActivityThread().getSystemUiContext();
     }
 
     /**

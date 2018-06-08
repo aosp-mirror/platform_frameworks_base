@@ -19,7 +19,8 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_MODULE := frameworks-core-util-lib
-LOCAL_STATIC_JAVA_LIBRARIES := junit legacy-android-test
+LOCAL_STATIC_JAVA_LIBRARIES := junit
+LOCAL_JAVA_LIBRARIES := android.test.base
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 

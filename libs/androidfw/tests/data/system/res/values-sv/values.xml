@@ -15,6 +15,5 @@
 -->
 
 <resources>
-    <public type="integer" name="number" id="0x01030000" />
     <integer name="number">1</integer>
 </resources>

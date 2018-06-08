@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
 /*
 ** Copyright 2009, The Android Open Source Project
 **
@@ -18,20 +17,45 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-        android:shareInterpolator="false" android:zAdjustment="top">
+    android:shareInterpolator="false"
+    android:showWallpaper="true">
 
-    <alpha android:fromAlpha="1.0" android:toAlpha="0"
-            android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:interpolator="@interpolator/accelerate_quad"
-            android:startOffset="250"
-            android:duration="167"/>
+    <alpha
+        android:fromAlpha="1.0"
+        android:toAlpha="1"
+        android:fillEnabled="true"
+        android:fillBefore="true"
+        android:fillAfter="true"
+        android:interpolator="@interpolator/linear"
+        android:startOffset="67"
+        android:duration="283"/>
 
-    <translate android:fromYDelta="0" android:toYDelta="110%"
-            android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-            android:interpolator="@interpolator/accelerate_quint"
-            android:duration="417"/>
+    <translate
+        android:fromXDelta="0"
+        android:toXDelta="105%"
+        android:fillEnabled="true"
+        android:fillBefore="true"
+        android:fillAfter="true"
+        android:interpolator="@interpolator/aggressive_ease"
+        android:startOffset="50"
+        android:duration="383"/>
+
+    <scale
+        android:fromXScale="1.0"
+        android:toXScale="0.95"
+        android:fromYScale="1.0"
+        android:toYScale="0.95"
+        android:fillEnabled="true"
+        android:fillBefore="true"
+        android:fillAfter="true"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:interpolator="@interpolator/fast_out_slow_in"
+        android:duration="283"/>
 
     <!-- This is needed to keep the animation running while task_open_enter completes -->
-    <alpha android:fromAlpha="1.0" android:toAlpha="1.0"
-            android:duration="700" />
+    <alpha
+        android:fromAlpha="1.0"
+        android:toAlpha="1.0"
+        android:duration="600"/>
 </set>

@@ -16,13 +16,14 @@
 #pragma once
 
 #include <SkBitmap.h>
+#include <SkColorFilter.h>
 #include <SkColorSpace.h>
+#include <SkImage.h>
 #include <SkImage.h>
 #include <SkImageInfo.h>
 #include <SkPixelRef.h>
 #include <cutils/compiler.h>
 #include <ui/GraphicBuffer.h>
-#include <SkImage.h>
 
 namespace android {
 
@@ -35,7 +36,7 @@ enum class PixelStorageType {
 
 namespace uirenderer {
 namespace renderthread {
-    class RenderThread;
+class RenderThread;
 }
 }
 
@@ -52,21 +53,20 @@ public:
 
     static sk_sp<Bitmap> allocateAshmemBitmap(SkBitmap* bitmap);
     static sk_sp<Bitmap> allocateAshmemBitmap(size_t allocSize, const SkImageInfo& info,
-        size_t rowBytes);
+                                              size_t rowBytes);
 
     static sk_sp<Bitmap> createFrom(sp<GraphicBuffer> graphicBuffer);
 
     static sk_sp<Bitmap> createFrom(const SkImageInfo&, SkPixelRef&);
 
     Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes);
-    Bitmap(void* address, void* context, FreeFunc freeFunc,
-            const SkImageInfo& info, size_t rowBytes);
-    Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
-            size_t rowBytes);
+    Bitmap(void* address, void* context, FreeFunc freeFunc, const SkImageInfo& info,
+           size_t rowBytes);
+    Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes);
     Bitmap(GraphicBuffer* buffer, const SkImageInfo& info);
 
     int rowBytesAsPixels() const {
-        return rowBytes() >> SkColorTypeShiftPerPixel(mInfo.colorType());
+        return rowBytes() >> mInfo.shiftPerPixel();
     }
 
     void reconfigure(const SkImageInfo& info, size_t rowBytes);
@@ -84,21 +84,27 @@ public:
 
     bool isOpaque() const { return mInfo.isOpaque(); }
     SkColorType colorType() const { return mInfo.colorType(); }
-    const SkImageInfo& info() const {
-        return mInfo;
-    }
+    const SkImageInfo& info() const { return mInfo; }
 
     void getBounds(SkRect* bounds) const;
 
-    bool isHardware() const {
-        return mPixelStorageType == PixelStorageType::Hardware;
-    }
+    bool isHardware() const { return mPixelStorageType == PixelStorageType::Hardware; }
 
     GraphicBuffer* graphicBuffer();
 
-    // makeImage creates or returns a cached SkImage. Can be invoked from UI or render thread.
-    // Caching is supported only for HW Bitmaps with skia pipeline.
-    sk_sp<SkImage> makeImage();
+    /**
+     * Creates or returns a cached SkImage and is safe to be invoked from either
+     * the UI or RenderThread.
+     *
+     * @param outputColorFilter is a required param that will be populated by
+     *     this function if the bitmap's colorspace is not sRGB. If populated the
+     *     filter will convert colors from the bitmaps colorspace into sRGB. It
+     *     is the callers responsibility to use this colorFilter when drawing
+     *     this image into any destination that is presumed to be sRGB (i.e. a
+     *     buffer that has no colorspace defined).
+     */
+    sk_sp<SkImage> makeImage(sk_sp<SkColorFilter>* outputColorFilter);
+
 private:
     virtual ~Bitmap();
     void* getStorage() const;
@@ -129,7 +135,7 @@ private:
         } hardware;
     } mPixelStorage;
 
-    sk_sp<SkImage> mImage; // Cache is used only for HW Bitmaps with Skia pipeline.
+    sk_sp<SkImage> mImage;  // Cache is used only for HW Bitmaps with Skia pipeline.
 };
 
-} //namespace android
+}  // namespace android

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (C) 2018 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- The name of this application [CHAR LIMIT=NONE] -->
+    <string name="app_name">Sim App Dialog</string>
+    <!-- Install Carrier App Activity -->
+    <!-- Title of screen asking user to download the carrier app to match the inserted SIM card [CHAR LIMIT=30] -->
+    <string name="install_carrier_app_title">Activate mobile service</string>
+    <!-- Description of screen asking user to download the carrier app to match the inserted SIM card if we know the name of the carrier [CHAR LIMIT=90] -->
+    <string name="install_carrier_app_description">To get your new SIM working properly, you\'ll
+        need to install the <xliff:g name="carrier_name" example="Project Fi">%1$s</xliff:g> app
+    </string>
+    <!-- Description of screen asking user to download the carrier app to match the inserted SIM card if we don't know the name of the carrier  [CHAR LIMIT=100] -->
+    <string name="install_carrier_app_description_default">To get your new SIM working properly,
+        you\'ll need to install the carrier app
+    </string>
+    <!-- Name of the button used to defer downloading the carrier app  [CHAR LIMIT=25]-->
+    <string name="install_carrier_app_defer_action">Not now</string>
+    <!-- Name of the button for downloading the carrier app [CHAR LIMIT=25] -->
+    <string name="install_carrier_app_download_action">Download app</string>
+</resources>

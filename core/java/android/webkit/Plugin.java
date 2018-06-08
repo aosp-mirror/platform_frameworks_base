@@ -16,11 +16,11 @@
 
 package android.webkit;
 
-import com.android.internal.R;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+
+import com.android.internal.R;
 
 /**
  * Represents a plugin (Java equivalent of the PluginPackageAndroid
@@ -32,13 +32,13 @@ import android.content.DialogInterface;
  */
 @Deprecated
 public class Plugin {
-    /*
+    /**
      * @hide
      * @deprecated This interface was intended to be used by Gears. Since Gears was
      * deprecated, so is this class.
      */
     public interface PreferencesClickHandler {
-        /*
+        /**
          * @hide
          * @deprecated This interface was intended to be used by Gears. Since Gears was
          * deprecated, so is this class.

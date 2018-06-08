@@ -21,10 +21,12 @@
     <application>
         <uses-library android:name="android.test.runner" />
 
-        <activity android:name=".PrintTestActivity"/>
+        <activity
+            android:name="android.print.test.PrintDocumentActivity"
+            android:theme="@style/NoAnimation" />
 
         <service
-                android:name=".mockservice.MockPrintService"
+                android:name="android.print.test.services.FirstPrintService"
                 android:permission="android.permission.BIND_PRINT_SERVICE">
 
             <intent-filter>
@@ -37,13 +39,15 @@
         </service>
 
         <activity
-                android:name=".mockservice.SettingsActivity"
+                android:name="android.print.test.services.SettingsActivity"
                 android:permission="android.permission.START_PRINT_SERVICE_CONFIG_ACTIVITY"
+                android:theme="@style/NoAnimation"
                 android:exported="true">
         </activity>
 
         <activity
-                android:name=".mockservice.AddPrintersActivity"
+                android:name="android.print.test.services.AddPrintersActivity"
+                android:theme="@style/NoAnimation"
                 android:exported="true">
         </activity>
 

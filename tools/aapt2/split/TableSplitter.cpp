@@ -32,8 +32,7 @@
 namespace aapt {
 
 using ConfigClaimedMap = std::unordered_map<ResourceConfigValue*, bool>;
-using ConfigDensityGroups =
-    std::map<ConfigDescription, std::vector<ResourceConfigValue*>>;
+using ConfigDensityGroups = std::map<ConfigDescription, std::vector<ResourceConfigValue*>>;
 
 static ConfigDescription CopyWithoutDensity(const ConfigDescription& config) {
   ConfigDescription without_density = config;
@@ -51,8 +50,7 @@ class SplitValueSelector {
       if (config.density == 0) {
         density_independent_configs_.insert(config);
       } else {
-        density_dependent_config_to_density_map_[CopyWithoutDensity(config)] =
-            config.density;
+        density_dependent_config_to_density_map_[CopyWithoutDensity(config)] = config.density;
       }
     }
   }
@@ -94,9 +92,7 @@ class SplitValueSelector {
 
         ResourceConfigValue* best_value = nullptr;
         for (ResourceConfigValue* this_value : related_values) {
-          if (!best_value ||
-              this_value->config.isBetterThan(best_value->config,
-                                              &target_density)) {
+          if (!best_value || this_value->config.isBetterThan(best_value->config, &target_density)) {
             best_value = this_value;
           }
         }
@@ -120,9 +116,8 @@ class SplitValueSelector {
 };
 
 /**
- * Marking non-preferred densities as claimed will make sure the base doesn't
- * include them,
- * leaving only the preferred density behind.
+ * Marking non-preferred densities as claimed will make sure the base doesn't include them, leaving
+ * only the preferred density behind.
  */
 static void MarkNonPreferredDensitiesAsClaimed(
     const std::vector<uint16_t>& preferred_densities, const ConfigDensityGroups& density_groups,
@@ -161,8 +156,7 @@ bool TableSplitter::VerifySplitConstraints(IAaptContext* context) {
   for (size_t i = 0; i < split_constraints_.size(); i++) {
     for (size_t j = i + 1; j < split_constraints_.size(); j++) {
       for (const ConfigDescription& config : split_constraints_[i].configs) {
-        if (split_constraints_[j].configs.find(config) !=
-            split_constraints_[j].configs.end()) {
+        if (split_constraints_[j].configs.find(config) != split_constraints_[j].configs.end()) {
           context->GetDiagnostics()->Error(DiagMessage()
                                            << "config '" << config
                                            << "' appears in multiple splits, "
@@ -193,28 +187,22 @@ void TableSplitter::SplitTable(ResourceTable* original_table) {
       for (auto& entry : type->entries) {
         if (options_.config_filter) {
           // First eliminate any resource that we definitely don't want.
-          for (std::unique_ptr<ResourceConfigValue>& config_value :
-               entry->values) {
+          for (std::unique_ptr<ResourceConfigValue>& config_value : entry->values) {
             if (!options_.config_filter->Match(config_value->config)) {
-              // null out the entry. We will clean up and remove nulls at the
-              // end for performance reasons.
+              // null out the entry. We will clean up and remove nulls at the end for performance
+              // reasons.
               config_value.reset();
             }
           }
         }
 
-        // Organize the values into two separate buckets. Those that are
-        // density-dependent
-        // and those that are density-independent.
-        // One density technically matches all density, it's just that some
-        // densities
-        // match better. So we need to be aware of the full set of densities to
-        // make this
-        // decision.
+        // Organize the values into two separate buckets. Those that are density-dependent and those
+        // that are density-independent. One density technically matches all density, it's just that
+        // some densities match better. So we need to be aware of the full set of densities to make
+        // this decision.
         ConfigDensityGroups density_groups;
         ConfigClaimedMap config_claimed_map;
-        for (const std::unique_ptr<ResourceConfigValue>& config_value :
-             entry->values) {
+        for (const std::unique_ptr<ResourceConfigValue>& config_value : entry->values) {
           if (config_value) {
             config_claimed_map[config_value.get()] = false;
 
@@ -226,9 +214,8 @@ void TableSplitter::SplitTable(ResourceTable* original_table) {
           }
         }
 
-        // First we check all the splits. If it doesn't match one of the splits,
-        // we
-        // leave it in the base.
+        // First we check all the splits. If it doesn't match one of the splits, we leave it in the
+        // base.
         for (size_t idx = 0; idx < split_count; idx++) {
           const SplitConstraints& split_constraint = split_constraints_[idx];
           ResourceTable* split_table = splits_[idx].get();
@@ -240,30 +227,25 @@ void TableSplitter::SplitTable(ResourceTable* original_table) {
 
           // No need to do any work if we selected nothing.
           if (!selected_values.empty()) {
-            // Create the same resource structure in the split. We do this
-            // lazily because we might not have actual values for each
-            // type/entry.
-            ResourceTablePackage* split_pkg =
-                split_table->FindPackage(pkg->name);
-            ResourceTableType* split_type =
-                split_pkg->FindOrCreateType(type->type);
+            // Create the same resource structure in the split. We do this lazily because we might
+            // not have actual values for each type/entry.
+            ResourceTablePackage* split_pkg = split_table->FindPackage(pkg->name);
+            ResourceTableType* split_type = split_pkg->FindOrCreateType(type->type);
             if (!split_type->id) {
               split_type->id = type->id;
-              split_type->symbol_status = type->symbol_status;
+              split_type->visibility_level = type->visibility_level;
             }
 
-            ResourceEntry* split_entry =
-                split_type->FindOrCreateEntry(entry->name);
+            ResourceEntry* split_entry = split_type->FindOrCreateEntry(entry->name);
             if (!split_entry->id) {
               split_entry->id = entry->id;
-              split_entry->symbol_status = entry->symbol_status;
+              split_entry->visibility = entry->visibility;
             }
 
             // Copy the selected values into the new Split Entry.
             for (ResourceConfigValue* config_value : selected_values) {
               ResourceConfigValue* new_config_value =
-                  split_entry->FindOrCreateValue(config_value->config,
-                                                 config_value->product);
+                  split_entry->FindOrCreateValue(config_value->config, config_value->product);
               new_config_value->value = std::unique_ptr<Value>(
                   config_value->value->Clone(&split_table->string_pool));
             }
@@ -276,11 +258,9 @@ void TableSplitter::SplitTable(ResourceTable* original_table) {
                                              &config_claimed_map);
         }
 
-        // All splits are handled, now check to see what wasn't claimed and
-        // remove
-        // whatever exists in other splits.
-        for (std::unique_ptr<ResourceConfigValue>& config_value :
-             entry->values) {
+        // All splits are handled, now check to see what wasn't claimed and remove whatever exists
+        // in other splits.
+        for (std::unique_ptr<ResourceConfigValue>& config_value : entry->values) {
           if (config_value && config_claimed_map[config_value.get()]) {
             // Claimed, remove from base.
             config_value.reset();

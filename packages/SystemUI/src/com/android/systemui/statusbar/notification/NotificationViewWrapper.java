@@ -17,10 +17,8 @@
 package com.android.systemui.statusbar.notification;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.v4.graphics.ColorUtils;
 import android.view.NotificationHeaderView;
 import android.view.View;
 
@@ -36,12 +34,8 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     protected final View mView;
     protected final ExpandableNotificationRow mRow;
-    private final NotificationDozeHelper mDozer;
 
-    protected boolean mDark;
     private int mBackgroundColor = 0;
-    protected boolean mShouldInvertDark;
-    protected boolean mDarkInitialized = false;
 
     public static NotificationViewWrapper wrap(Context ctx, View v, ExpandableNotificationRow row) {
         if (v.getId() == com.android.internal.R.id.status_bar_latest_event_content) {
@@ -65,28 +59,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
     protected NotificationViewWrapper(Context ctx, View view, ExpandableNotificationRow row) {
         mView = view;
         mRow = row;
-        mDozer = createDozer(ctx);
         onReinflated();
-    }
-
-    protected NotificationDozeHelper createDozer(Context ctx) {
-        return new NotificationDozeHelper();
-    }
-
-    protected NotificationDozeHelper getDozer() {
-        return mDozer;
-    }
-
-    /**
-     * In dark mode, we draw as little as possible, assuming a black background.
-     *
-     * @param dark whether we should display ourselves in dark mode
-     * @param fade whether to animate the transition if the mode changes
-     * @param delay if fading, the delay of the animation
-     */
-    public void setDark(boolean dark, boolean fade, long delay) {
-        mDark = dark;
-        mDarkInitialized = true;
     }
 
     /**
@@ -94,7 +67,6 @@ public abstract class NotificationViewWrapper implements TransformableView {
      * @param row the row this wrapper is attached to
      */
     public void onContentUpdated(ExpandableNotificationRow row) {
-        mDarkInitialized = false;
     }
 
     public void onReinflated() {
@@ -106,16 +78,10 @@ public abstract class NotificationViewWrapper implements TransformableView {
             mBackgroundColor = ((ColorDrawable) background).getColor();
             mView.setBackground(null);
         }
-        mShouldInvertDark = mBackgroundColor == 0 || isColorLight(mBackgroundColor);
     }
 
     protected boolean shouldClearBackgroundOnReapply() {
         return true;
-    }
-
-    private boolean isColorLight(int backgroundColor) {
-        return Color.alpha(backgroundColor) == 0
-                || ColorUtils.calculateLuminance(backgroundColor) > 0.5;
     }
 
     /**
@@ -131,6 +97,10 @@ public abstract class NotificationViewWrapper implements TransformableView {
      */
     public NotificationHeaderView getNotificationHeader() {
         return null;
+    }
+
+    public int getHeaderTranslation() {
+        return 0;
     }
 
     @Override
@@ -171,6 +141,15 @@ public abstract class NotificationViewWrapper implements TransformableView {
         return mRow.isSummaryWithChildren() ? 0 : mBackgroundColor;
     }
 
+    protected int resolveBackgroundColor() {
+        int customBackgroundColor = getCustomBackgroundColor();
+        if (customBackgroundColor != 0) {
+            return customBackgroundColor;
+        }
+        return mView.getContext().getColor(
+                com.android.internal.R.color.notification_material_background_color);
+    }
+
     public void setLegacy(boolean legacy) {
     }
 
@@ -189,5 +168,24 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     public boolean disallowSingleClick(float x, float y) {
         return false;
+    }
+
+    public int getMinLayoutHeight() {
+        return 0;
+    }
+
+    public boolean shouldClipToRounding(boolean topRounded, boolean bottomRounded) {
+        return false;
+    }
+
+    public void setHeaderVisibleAmount(float headerVisibleAmount) {
+    }
+
+    /**
+     * Get the extra height that needs to be added to this view, such that it can be measured
+     * normally.
+     */
+    public int getExtraMeasureHeight() {
+        return 0;
     }
 }

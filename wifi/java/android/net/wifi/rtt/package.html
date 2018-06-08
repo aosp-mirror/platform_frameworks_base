@@ -1,0 +1,41 @@
+<HTML>
+<BODY>
+<p>Provides classes which allow applications to use Wi-Fi RTT (IEEE 802.11mc) to measure distance
+    to supporting Access Points and peer devices.</p>
+<p>The primary entry point to Wi-Fi RTT capabilities is the
+    {@link android.net.wifi.rtt.WifiRttManager} class, which is acquired by calling
+    {@link android.content.Context#getSystemService(String)
+    Context.getSystemService(Context.WIFI_RTT_RANGING_SERVICE)}</p>
+
+<p>Some APIs may require the following user permissions:</p>
+<ul>
+    <li>{@link android.Manifest.permission#ACCESS_WIFI_STATE}</li>
+    <li>{@link android.Manifest.permission#CHANGE_WIFI_STATE}</li>
+    <li>{@link android.Manifest.permission#ACCESS_FINE_LOCATION}</li>
+</ul>
+<p>Usage of the API is also gated by the device's Location Mode: whether it permits Wi-Fi based
+location to be queried.</p>
+
+<p class="note"><strong>Note:</strong> Not all Android-powered devices support Wi-Fi RTT
+    functionality.
+    If your application only works with Wi-Fi RTT (i.e. it should only be installed on devices which
+    support Wi-Fi RTT), declare so with a <a
+            href="{@docRoot}guide/topics/manifest/uses-feature-element.html">
+        {@code <uses-feature>}</a>
+    element in the manifest file:</p>
+<pre>
+&lt;manifest ...>
+    &lt;uses-feature android:name="android.hardware.wifi.rtt" />
+    ...
+&lt;/manifest>
+</pre>
+<p>Alternatively, if your application does not require Wi-Fi RTT but can take advantage of it if
+    available, you can perform
+    the check at run-time in your code using {@link
+    android.content.pm.PackageManager#hasSystemFeature(String)} with {@link
+    android.content.pm.PackageManager#FEATURE_WIFI_RTT}:</p>
+<pre>
+    getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_RTT)
+</pre>
+</BODY>
+</HTML>

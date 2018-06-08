@@ -17,6 +17,7 @@
 package android.hardware.display;
 
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager.DisplayListener;
@@ -30,6 +31,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayAdjustments;
@@ -37,6 +39,8 @@ import android.view.DisplayInfo;
 import android.view.Surface;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Manager communication with the display manager service on behalf of
@@ -381,6 +385,17 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    /**
+     * Set the level of color saturation to apply to the display.
+     */
+    public void setSaturationLevel(float level) {
+        try {
+            mDm.setSaturationLevel(level);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     public VirtualDisplay createVirtualDisplay(Context context, MediaProjection projection,
             String name, int width, int height, int densityDpi, Surface surface, int flags,
             VirtualDisplay.Callback callback, Handler handler, String uniqueId) {
@@ -451,6 +466,131 @@ public final class DisplayManagerGlobal {
     public Point getStableDisplaySize() {
         try {
             return mDm.getStableDisplaySize();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieves brightness change events.
+     */
+    public List<BrightnessChangeEvent> getBrightnessEvents(String callingPackage) {
+        try {
+            ParceledListSlice<BrightnessChangeEvent> events =
+                    mDm.getBrightnessEvents(callingPackage);
+            if (events == null) {
+                return Collections.emptyList();
+            }
+            return events.getList();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the global brightness configuration for a given user.
+     *
+     * @hide
+     */
+    public void setBrightnessConfigurationForUser(BrightnessConfiguration c, int userId,
+            String packageName) {
+        try {
+            mDm.setBrightnessConfigurationForUser(c, userId, packageName);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the global brightness configuration for a given user or null if one hasn't been set.
+     *
+     * @hide
+     */
+    public BrightnessConfiguration getBrightnessConfigurationForUser(int userId) {
+        try {
+            return mDm.getBrightnessConfigurationForUser(userId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the default brightness configuration or null if one hasn't been configured.
+     *
+     * @hide
+     */
+    public BrightnessConfiguration getDefaultBrightnessConfiguration() {
+        try {
+            return mDm.getDefaultBrightnessConfiguration();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Temporarily sets the brightness of the display.
+     * <p>
+     * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS} permission.
+     * </p>
+     *
+     * @param brightness The brightness value from 0 to 255.
+     *
+     * @hide Requires signature permission.
+     */
+    public void setTemporaryBrightness(int brightness) {
+        try {
+            mDm.setTemporaryBrightness(brightness);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Temporarily sets the auto brightness adjustment factor.
+     * <p>
+     * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS} permission.
+     * </p>
+     *
+     * @param adjustment The adjustment factor from -1.0 to 1.0.
+     *
+     * @hide Requires signature permission.
+     */
+    public void setTemporaryAutoBrightnessAdjustment(float adjustment) {
+        try {
+            mDm.setTemporaryAutoBrightnessAdjustment(adjustment);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the minimum brightness curve, which guarantess that any brightness curve that dips
+     * below it is rejected by the system.
+     * This prevent auto-brightness from setting the screen so dark as to prevent the user from
+     * resetting or disabling it, and maps lux to the absolute minimum nits that are still readable
+     * in that ambient brightness.
+     *
+     * @return The minimum brightness curve (as lux values and their corresponding nits values).
+     */
+    public Pair<float[], float[]> getMinimumBrightnessCurve() {
+        try {
+            Curve curve = mDm.getMinimumBrightnessCurve();
+            return Pair.create(curve.getX(), curve.getY());
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieves ambient brightness stats.
+     */
+    public List<AmbientBrightnessDayStats> getAmbientBrightnessStats() {
+        try {
+            ParceledListSlice<AmbientBrightnessDayStats> stats = mDm.getAmbientBrightnessStats();
+            if (stats == null) {
+                return Collections.emptyList();
+            }
+            return stats.getList();
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

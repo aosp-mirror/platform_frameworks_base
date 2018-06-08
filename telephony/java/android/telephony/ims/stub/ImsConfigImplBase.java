@@ -18,6 +18,7 @@ package android.telephony.ims.stub;
 
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.content.Intent;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.telephony.ims.aidl.IImsConfig;
@@ -197,7 +198,7 @@ public class ImsConfigImplBase {
         }
 
         protected synchronized void updateCachedValue(int item, int value, boolean notifyChange)
-                throws RemoteException {
+        throws RemoteException {
             mProvisionedIntValue.put(item, value);
             if (notifyChange) {
                 notifyImsConfigChanged(item, value);
@@ -358,7 +359,7 @@ public class ImsConfigImplBase {
      */
     public final void notifyProvisionedValueChanged(int item, String value) {
         try {
-            mImsConfigStub.updateCachedValue(item, value, true);
+        mImsConfigStub.updateCachedValue(item, value, true);
         } catch (RemoteException e) {
             Log.w(TAG, "notifyProvisionedValueChanged(string): Framework connection is dead.");
         }

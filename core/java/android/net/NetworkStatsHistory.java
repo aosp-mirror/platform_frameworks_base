@@ -39,6 +39,8 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.IndentingPrintWriter;
 
+import libcore.util.EmptyArray;
+
 import java.io.CharArrayWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -456,6 +458,21 @@ public class NetworkStatsHistory implements Parcelable {
         setLong(txPackets, index, 0L);
         setLong(operations, index, 0L);
         bucketCount++;
+    }
+
+    /**
+     * Clear all data stored in this object.
+     */
+    public void clear() {
+        bucketStart = EmptyArray.LONG;
+        if (activeTime != null) activeTime = EmptyArray.LONG;
+        if (rxBytes != null) rxBytes = EmptyArray.LONG;
+        if (rxPackets != null) rxPackets = EmptyArray.LONG;
+        if (txBytes != null) txBytes = EmptyArray.LONG;
+        if (txPackets != null) txPackets = EmptyArray.LONG;
+        if (operations != null) operations = EmptyArray.LONG;
+        bucketCount = 0;
+        totalBytes = 0;
     }
 
     /**

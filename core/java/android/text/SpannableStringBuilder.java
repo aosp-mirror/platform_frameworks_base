@@ -312,7 +312,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
                     // The following condition indicates that the span would become empty
                     (textIsRemoved || mSpanStarts[i] > start || mSpanEnds[i] < mGapStart)) {
                 mIndexOfSpan.remove(mSpans[i]);
-                removeSpan(i);
+                removeSpan(i, 0 /* flags */);
                 return true;
             }
             return resolveGap(mSpanStarts[i]) <= end && (i & 1) != 0 &&
@@ -472,7 +472,7 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     }
 
     // Note: caller is responsible for removing the mIndexOfSpan entry.
-    private void removeSpan(int i) {
+    private void removeSpan(int i, int flags) {
         Object object = mSpans[i];
 
         int start = mSpanStarts[i];
@@ -496,7 +496,9 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         // Invariants must be restored before sending span removed notifications.
         restoreInvariants();
 
-        sendSpanRemoved(object, start, end);
+        if ((flags & Spanned.SPAN_INTERMEDIATE) == 0) {
+            sendSpanRemoved(object, start, end);
+        }
     }
 
     // Documentation from interface
@@ -782,10 +784,19 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
      * Remove the specified markup object from the buffer.
      */
     public void removeSpan(Object what) {
+        removeSpan(what, 0 /* flags */);
+    }
+
+    /**
+     * Remove the specified markup object from the buffer.
+     *
+     * @hide
+     */
+    public void removeSpan(Object what, int flags) {
         if (mIndexOfSpan == null) return;
         Integer i = mIndexOfSpan.remove(what);
         if (i != null) {
-            removeSpan(i.intValue());
+            removeSpan(i.intValue(), flags);
         }
     }
 

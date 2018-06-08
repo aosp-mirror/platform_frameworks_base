@@ -24,9 +24,8 @@ import android.service.vr.IPersistentVrStateCallbacks;
 import android.service.vr.IVrManager;
 import android.util.Log;
 import android.view.Surface;
-import android.view.WindowManagerInternal;
 
-import com.android.server.vr.VrManagerService;
+import com.android.server.wm.WindowManagerInternal;
 
 /**
  * Creates a 2D Virtual Display while VR Mode is enabled. This display will be used to run and

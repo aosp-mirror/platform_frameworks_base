@@ -16,6 +16,9 @@
 
 package android.app;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Intent;
@@ -24,6 +27,9 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -72,6 +78,20 @@ public final class RemoteInput implements Parcelable {
     /** Extra added to a clip data intent object to hold the data results bundle. */
     private static final String EXTRA_DATA_TYPE_RESULTS_DATA =
             "android.remoteinput.dataTypeResultsData";
+
+    /** Extra added to a clip data intent object identifying the {@link Source} of the results. */
+    private static final String EXTRA_RESULTS_SOURCE = "android.remoteinput.resultsSource";
+
+    /** @hide */
+    @IntDef(prefix = {"SOURCE_"}, value = {SOURCE_FREE_FORM_INPUT, SOURCE_CHOICE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Source {}
+
+    /** The user manually entered the data. */
+    public static final int SOURCE_FREE_FORM_INPUT = 0;
+
+    /** The user selected one of the choices from {@link #getChoices}. */
+    public static final int SOURCE_CHOICE = 1;
 
     // Flags bitwise-ored to mFlags
     private static final int FLAG_ALLOW_FREE_FORM_INPUT = 0x1;
@@ -160,17 +180,18 @@ public final class RemoteInput implements Parcelable {
      */
     public static final class Builder {
         private final String mResultKey;
+        private final ArraySet<String> mAllowedDataTypes = new ArraySet<>();
+        private final Bundle mExtras = new Bundle();
         private CharSequence mLabel;
         private CharSequence[] mChoices;
         private int mFlags = DEFAULT_FLAGS;
-        private Bundle mExtras = new Bundle();
-        private final ArraySet<String> mAllowedDataTypes = new ArraySet<>();
 
         /**
          * Create a builder object for {@link RemoteInput} objects.
+         *
          * @param resultKey the Bundle key that refers to this input when collected from the user
          */
-        public Builder(String resultKey) {
+        public Builder(@NonNull String resultKey) {
             if (resultKey == null) {
                 throw new IllegalArgumentException("Result key can't be null");
             }
@@ -179,22 +200,30 @@ public final class RemoteInput implements Parcelable {
 
         /**
          * Set a label to be displayed to the user when collecting this input.
-         * @param label The label to show to users when they input a response.
+         *
+         * @param label The label to show to users when they input a response
          * @return this object for method chaining
          */
-        public Builder setLabel(CharSequence label) {
+        @NonNull
+        public Builder setLabel(@Nullable CharSequence label) {
             mLabel = Notification.safeCharSequence(label);
             return this;
         }
 
         /**
          * Specifies choices available to the user to satisfy this input.
+         *
+         * <p>Note: Starting in Android P, these choices will always be shown on phones if the app's
+         * target SDK is >= P. However, these choices may also be rendered on other types of devices
+         * regardless of target SDK.
+         *
          * @param choices an array of pre-defined choices for users input.
          *        You must provide a non-null and non-empty array if
-         *        you disabled free form input using {@link #setAllowFreeFormInput}.
+         *        you disabled free form input using {@link #setAllowFreeFormInput}
          * @return this object for method chaining
          */
-        public Builder setChoices(CharSequence[] choices) {
+        @NonNull
+        public Builder setChoices(@Nullable CharSequence[] choices) {
             if (choices == null) {
                 mChoices = null;
             } else {
@@ -214,11 +243,12 @@ public final class RemoteInput implements Parcelable {
          * @param mimeType A mime type that results are allowed to come in.
          *         Be aware that text results (see {@link #setAllowFreeFormInput}
          *         are allowed by default. If you do not want text results you will have to
-         *         pass false to {@code setAllowFreeFormInput}.
-         * @param doAllow Whether the mime type should be allowed or not.
+         *         pass false to {@code setAllowFreeFormInput}
+         * @param doAllow Whether the mime type should be allowed or not
          * @return this object for method chaining
          */
-        public Builder setAllowDataType(String mimeType, boolean doAllow) {
+        @NonNull
+        public Builder setAllowDataType(@NonNull String mimeType, boolean doAllow) {
             if (doAllow) {
                 mAllowedDataTypes.add(mimeType);
             } else {
@@ -234,9 +264,10 @@ public final class RemoteInput implements Parcelable {
          *         If you specify {@code false}, you must either provide a non-null
          *         and non-empty array to {@link #setChoices}, or enable a data result
          *         in {@code setAllowDataType}. Otherwise an
-         *         {@link IllegalArgumentException} is thrown.
+         *         {@link IllegalArgumentException} is thrown
          * @return this object for method chaining
          */
+        @NonNull
         public Builder setAllowFreeFormInput(boolean allowFreeFormTextInput) {
             setFlag(mFlags, allowFreeFormTextInput);
             return this;
@@ -249,7 +280,8 @@ public final class RemoteInput implements Parcelable {
          *
          * @see RemoteInput#getExtras
          */
-        public Builder addExtras(Bundle extras) {
+        @NonNull
+        public Builder addExtras(@NonNull Bundle extras) {
             if (extras != null) {
                 mExtras.putAll(extras);
             }
@@ -261,6 +293,7 @@ public final class RemoteInput implements Parcelable {
          *
          * <p>The returned Bundle is shared with this Builder.
          */
+        @NonNull
         public Bundle getExtras() {
             return mExtras;
         }
@@ -277,6 +310,7 @@ public final class RemoteInput implements Parcelable {
          * Combine all of the options that have been set and return a new {@link RemoteInput}
          * object.
          */
+        @NonNull
         public RemoteInput build() {
             return new RemoteInput(
                     mResultKey, mLabel, mChoices, mFlags, mExtras, mAllowedDataTypes);
@@ -414,6 +448,48 @@ public final class RemoteInput implements Parcelable {
             clipDataIntent.putExtra(getExtraResultsKeyForData(mimeType), resultsBundle);
         }
         intent.setClipData(ClipData.newIntent(RESULTS_CLIP_LABEL, clipDataIntent));
+    }
+
+    /**
+     * Set the source of the RemoteInput results. This method should only be called by remote
+     * input collection services (e.g.
+     * {@link android.service.notification.NotificationListenerService})
+     * when sending results to a pending intent.
+     *
+     * @see #SOURCE_FREE_FORM_INPUT
+     * @see #SOURCE_CHOICE
+     *
+     * @param intent The intent to add remote input source to. The {@link ClipData}
+     *               field of the intent will be modified to contain the source.
+     * @param source The source of the results.
+     */
+    public static void setResultsSource(Intent intent, @Source int source) {
+        Intent clipDataIntent = getClipDataIntentFromIntent(intent);
+        if (clipDataIntent == null) {
+            clipDataIntent = new Intent();  // First time we've added a result.
+        }
+        clipDataIntent.putExtra(EXTRA_RESULTS_SOURCE, source);
+        intent.setClipData(ClipData.newIntent(RESULTS_CLIP_LABEL, clipDataIntent));
+    }
+
+    /**
+     * Get the source of the RemoteInput results.
+     *
+     * @see #SOURCE_FREE_FORM_INPUT
+     * @see #SOURCE_CHOICE
+     *
+     * @param intent The intent object that fired in response to an action or content intent
+     *               which also had one or more remote input requested.
+     * @return The source of the results. If no source was set, {@link #SOURCE_FREE_FORM_INPUT} will
+     * be returned.
+     */
+    @Source
+    public static int getResultsSource(Intent intent) {
+        Intent clipDataIntent = getClipDataIntentFromIntent(intent);
+        if (clipDataIntent == null) {
+            return SOURCE_FREE_FORM_INPUT;
+        }
+        return clipDataIntent.getExtras().getInt(EXTRA_RESULTS_SOURCE, SOURCE_FREE_FORM_INPUT);
     }
 
     private static String getExtraResultsKeyForData(String mimeType) {

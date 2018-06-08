@@ -16,28 +16,37 @@
 
 package com.android.server.job.controllers;
 
+import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.job.JobInfo;
 import android.app.job.JobWorkItem;
 import android.content.ClipData;
 import android.content.ComponentName;
+import android.content.pm.PackageManagerInternal;
+import android.net.Network;
 import android.net.Uri;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.Time;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
+import com.android.server.LocalServices;
 import com.android.server.job.GrantedUriPermissions;
+import com.android.server.job.JobSchedulerInternal;
 import com.android.server.job.JobSchedulerService;
+import com.android.server.job.JobStatusDumpProto;
+import com.android.server.job.JobStatusShortInfoProto;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.Predicate;
 
 /**
  * Uniquely identifies a job internally.
@@ -63,17 +72,10 @@ public final class JobStatus {
     static final int CONSTRAINT_STORAGE_NOT_LOW = JobInfo.CONSTRAINT_FLAG_STORAGE_NOT_LOW;
     static final int CONSTRAINT_TIMING_DELAY = 1<<31;
     static final int CONSTRAINT_DEADLINE = 1<<30;
-    static final int CONSTRAINT_UNMETERED = 1<<29;
     static final int CONSTRAINT_CONNECTIVITY = 1<<28;
-    static final int CONSTRAINT_APP_NOT_IDLE = 1<<27;
     static final int CONSTRAINT_CONTENT_TRIGGER = 1<<26;
     static final int CONSTRAINT_DEVICE_NOT_DOZING = 1<<25;
-    static final int CONSTRAINT_NOT_ROAMING = 1<<24;
-    static final int CONSTRAINT_METERED = 1<<23;
-
-    static final int CONNECTIVITY_MASK =
-            CONSTRAINT_UNMETERED | CONSTRAINT_CONNECTIVITY |
-            CONSTRAINT_NOT_ROAMING | CONSTRAINT_METERED;
+    static final int CONSTRAINT_BACKGROUND_NOT_RESTRICTED = 1<<22;
 
     // Soft override: ignore constraints like time that don't affect API availability
     public static final int OVERRIDE_SOFT = 1;
@@ -93,10 +95,18 @@ public final class JobStatus {
     public static final long MIN_TRIGGER_MAX_DELAY = 1000;
 
     final JobInfo job;
-    /** Uid of the package requesting this job. */
+    /**
+     * Uid of the package requesting this job.  This can differ from the "source"
+     * uid when the job was scheduled on the app's behalf, such as with the jobs
+     * that underly Sync Manager operation.
+     */
     final int callingUid;
+    final int targetSdkVersion;
     final String batteryName;
 
+    /**
+     * Identity of the app in which the job is hosted.
+     */
     final String sourcePackageName;
     final int sourceUserId;
     final int sourceUid;
@@ -124,12 +134,33 @@ public final class JobStatus {
     /** How many times this job has failed, used to compute back-off. */
     private final int numFailures;
 
+    /**
+     * Current standby heartbeat when this job was scheduled or last ran.  Used to
+     * pin the runnability check regardless of the job's app moving between buckets.
+     */
+    private final long baseHeartbeat;
+
+    /**
+     * Which app standby bucket this job's app is in.  Updated when the app is moved to a
+     * different bucket.
+     */
+    private int standbyBucket;
+
+    /**
+     * Debugging: timestamp if we ever defer this job based on standby bucketing, this
+     * is when we did so.
+     */
+    private long whenStandbyDeferred;
+
     // Constraints.
     final int requiredConstraints;
     int satisfiedConstraints = 0;
 
     // Set to true if doze constraint was satisfied due to app being whitelisted.
     public boolean dozeWhitelisted;
+
+    // Set to true when the app is "active" per AppStateTracker
+    public boolean uidActive;
 
     /**
      * Flag for {@link #trackingControllers}: the battery controller is currently tracking this job.
@@ -163,9 +194,25 @@ public final class JobStatus {
      */
     private int trackingControllers;
 
+    /**
+     * Flag for {@link #mInternalFlags}: this job was scheduled when the app that owns the job
+     * service (not necessarily the caller) was in the foreground and the job has no time
+     * constraints, which makes it exempted from the battery saver job restriction.
+     *
+     * @hide
+     */
+    public static final int INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION = 1 << 0;
+
+    /**
+     * Versatile, persistable flags for a job that's updated within the system server,
+     * as opposed to {@link JobInfo#flags} that's set by callers.
+     */
+    private int mInternalFlags;
+
     // These are filled in by controllers when preparing for execution.
     public ArraySet<Uri> changedUris;
     public ArraySet<String> changedAuthorities;
+    public Network network;
 
     public int lastEvaluatedPriority;
 
@@ -216,16 +263,47 @@ public final class JobStatus {
      */
     ContentObserverController.JobInstance contentObserverJobInstance;
 
+    private long totalNetworkBytes = JobInfo.NETWORK_BYTES_UNKNOWN;
+
     /** Provide a handle to the service that this job will be run on. */
     public int getServiceToken() {
         return callingUid;
     }
 
-    private JobStatus(JobInfo job, int callingUid, String sourcePackageName,
-            int sourceUserId, String tag, int numFailures, long earliestRunTimeElapsedMillis,
-            long latestRunTimeElapsedMillis, long lastSuccessfulRunTime, long lastFailedRunTime) {
+    /**
+     * Core constructor for JobStatus instances.  All other ctors funnel down to this one.
+     *
+     * @param job The actual requested parameters for the job
+     * @param callingUid Identity of the app that is scheduling the job.  This may not be the
+     *     app in which the job is implemented; such as with sync jobs.
+     * @param targetSdkVersion The targetSdkVersion of the app in which the job will run.
+     * @param sourcePackageName The package name of the app in which the job will run.
+     * @param sourceUserId The user in which the job will run
+     * @param standbyBucket The standby bucket that the source package is currently assigned to,
+     *     cached here for speed of handling during runnability evaluations (and updated when bucket
+     *     assignments are changed)
+     * @param heartbeat Timestamp of when the job was created, in the standby-related
+     *     timebase.
+     * @param tag A string associated with the job for debugging/logging purposes.
+     * @param numFailures Count of how many times this job has requested a reschedule because
+     *     its work was not yet finished.
+     * @param earliestRunTimeElapsedMillis Milestone: earliest point in time at which the job
+     *     is to be considered runnable
+     * @param latestRunTimeElapsedMillis Milestone: point in time at which the job will be
+     *     considered overdue
+     * @param lastSuccessfulRunTime When did we last run this job to completion?
+     * @param lastFailedRunTime When did we last run this job only to have it stop incomplete?
+     * @param internalFlags Non-API property flags about this job
+     */
+    private JobStatus(JobInfo job, int callingUid, int targetSdkVersion, String sourcePackageName,
+            int sourceUserId, int standbyBucket, long heartbeat, String tag, int numFailures,
+            long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
+            long lastSuccessfulRunTime, long lastFailedRunTime, int internalFlags) {
         this.job = job;
         this.callingUid = callingUid;
+        this.targetSdkVersion = targetSdkVersion;
+        this.standbyBucket = standbyBucket;
+        this.baseHeartbeat = heartbeat;
 
         int tempSourceUid = -1;
         if (sourceUserId != -1 && sourcePackageName != null) {
@@ -258,28 +336,9 @@ public final class JobStatus {
         this.numFailures = numFailures;
 
         int requiredConstraints = job.getConstraintFlags();
-
-        switch (job.getNetworkType()) {
-            case JobInfo.NETWORK_TYPE_NONE:
-                // No constraint.
-                break;
-            case JobInfo.NETWORK_TYPE_ANY:
-                requiredConstraints |= CONSTRAINT_CONNECTIVITY;
-                break;
-            case JobInfo.NETWORK_TYPE_UNMETERED:
-                requiredConstraints |= CONSTRAINT_UNMETERED;
-                break;
-            case JobInfo.NETWORK_TYPE_NOT_ROAMING:
-                requiredConstraints |= CONSTRAINT_NOT_ROAMING;
-                break;
-            case JobInfo.NETWORK_TYPE_METERED:
-                requiredConstraints |= CONSTRAINT_METERED;
-                break;
-            default:
-                Slog.w(TAG, "Unrecognized networking constraint " + job.getNetworkType());
-                break;
+        if (job.getRequiredNetwork() != null) {
+            requiredConstraints |= CONSTRAINT_CONNECTIVITY;
         }
-
         if (earliestRunTimeElapsedMillis != NO_EARLIEST_RUNTIME) {
             requiredConstraints |= CONSTRAINT_TIMING_DELAY;
         }
@@ -293,16 +352,29 @@ public final class JobStatus {
 
         mLastSuccessfulRunTime = lastSuccessfulRunTime;
         mLastFailedRunTime = lastFailedRunTime;
+
+        mInternalFlags = internalFlags;
+
+        updateEstimatedNetworkBytesLocked();
+
+        if (job.getRequiredNetwork() != null) {
+            // Later, when we check if a given network satisfies the required
+            // network, we need to know the UID that is requesting it, so push
+            // our source UID into place.
+            job.getRequiredNetwork().networkCapabilities.setSingleUid(this.sourceUid);
+        }
     }
 
     /** Copy constructor: used specifically when cloning JobStatus objects for persistence,
      *   so we preserve RTC window bounds if the source object has them. */
     public JobStatus(JobStatus jobStatus) {
-        this(jobStatus.getJob(), jobStatus.getUid(),
+        this(jobStatus.getJob(), jobStatus.getUid(), jobStatus.targetSdkVersion,
                 jobStatus.getSourcePackageName(), jobStatus.getSourceUserId(),
+                jobStatus.getStandbyBucket(), jobStatus.getBaseHeartbeat(),
                 jobStatus.getSourceTag(), jobStatus.getNumFailures(),
                 jobStatus.getEarliestRunTime(), jobStatus.getLatestRunTimeElapsed(),
-                jobStatus.getLastSuccessfulRunTime(), jobStatus.getLastFailedRunTime());
+                jobStatus.getLastSuccessfulRunTime(), jobStatus.getLastFailedRunTime(),
+                jobStatus.getInternalFlags());
         mPersistedUtcTimes = jobStatus.mPersistedUtcTimes;
         if (jobStatus.mPersistedUtcTimes != null) {
             if (DEBUG) {
@@ -316,15 +388,20 @@ public final class JobStatus {
      * {@link android.app.job.JobInfo} time criteria because we can load a persisted periodic job
      * from the {@link com.android.server.job.JobStore} and still want to respect its
      * wallclock runtime rather than resetting it on every boot.
-     * We consider a freshly loaded job to no longer be in back-off.
+     * We consider a freshly loaded job to no longer be in back-off, and the associated
+     * standby bucket is whatever the OS thinks it should be at this moment.
      */
-    public JobStatus(JobInfo job, int callingUid, String sourcePackageName, int sourceUserId,
-            String sourceTag, long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
+    public JobStatus(JobInfo job, int callingUid, String sourcePkgName, int sourceUserId,
+            int standbyBucket, long baseHeartbeat, String sourceTag,
+            long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
             long lastSuccessfulRunTime, long lastFailedRunTime,
-            Pair<Long, Long> persistedExecutionTimesUTC) {
-        this(job, callingUid, sourcePackageName, sourceUserId, sourceTag, 0,
+            Pair<Long, Long> persistedExecutionTimesUTC,
+            int innerFlags) {
+        this(job, callingUid, resolveTargetSdkVersion(job), sourcePkgName, sourceUserId,
+                standbyBucket, baseHeartbeat,
+                sourceTag, 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
-                lastSuccessfulRunTime, lastFailedRunTime);
+                lastSuccessfulRunTime, lastFailedRunTime, innerFlags);
 
         // Only during initial inflation do we record the UTC-timebase execution bounds
         // read from the persistent store.  If we ever have to recreate the JobStatus on
@@ -339,26 +416,29 @@ public final class JobStatus {
     }
 
     /** Create a new job to be rescheduled with the provided parameters. */
-    public JobStatus(JobStatus rescheduling, long newEarliestRuntimeElapsedMillis,
+    public JobStatus(JobStatus rescheduling, long newBaseHeartbeat,
+            long newEarliestRuntimeElapsedMillis,
             long newLatestRuntimeElapsedMillis, int backoffAttempt,
             long lastSuccessfulRunTime, long lastFailedRunTime) {
-        this(rescheduling.job, rescheduling.getUid(),
+        this(rescheduling.job, rescheduling.getUid(), resolveTargetSdkVersion(rescheduling.job),
                 rescheduling.getSourcePackageName(), rescheduling.getSourceUserId(),
+                rescheduling.getStandbyBucket(), newBaseHeartbeat,
                 rescheduling.getSourceTag(), backoffAttempt, newEarliestRuntimeElapsedMillis,
                 newLatestRuntimeElapsedMillis,
-                lastSuccessfulRunTime, lastFailedRunTime);
+                lastSuccessfulRunTime, lastFailedRunTime, rescheduling.getInternalFlags());
     }
 
     /**
      * Create a newly scheduled job.
      * @param callingUid Uid of the package that scheduled this job.
-     * @param sourcePackageName Package name on whose behalf this job is scheduled. Null indicates
-     *                          the calling package is the source.
+     * @param sourcePkg Package name of the app that will actually run the job.  Null indicates
+     *     that the calling package is the source.
      * @param sourceUserId User id for whom this job is scheduled. -1 indicates this is same as the
+     *     caller.
      */
-    public static JobStatus createFromJobInfo(JobInfo job, int callingUid, String sourcePackageName,
+    public static JobStatus createFromJobInfo(JobInfo job, int callingUid, String sourcePkg,
             int sourceUserId, String tag) {
-        final long elapsedNow = SystemClock.elapsedRealtime();
+        final long elapsedNow = sElapsedRealtimeClock.millis();
         final long earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis;
         if (job.isPeriodic()) {
             latestRunTimeElapsedMillis = elapsedNow + job.getIntervalMillis();
@@ -369,9 +449,19 @@ public final class JobStatus {
             latestRunTimeElapsedMillis = job.hasLateConstraint() ?
                     elapsedNow + job.getMaxExecutionDelayMillis() : NO_LATEST_RUNTIME;
         }
-        return new JobStatus(job, callingUid, sourcePackageName, sourceUserId, tag, 0,
+        String jobPackage = (sourcePkg != null) ? sourcePkg : job.getService().getPackageName();
+
+        int standbyBucket = JobSchedulerService.standbyBucketForPackage(jobPackage,
+                sourceUserId, elapsedNow);
+        JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
+        long currentHeartbeat = js != null
+                ? js.baseHeartbeatForApp(jobPackage, sourceUserId, standbyBucket)
+                : 0;
+        return new JobStatus(job, callingUid, resolveTargetSdkVersion(job), sourcePkg, sourceUserId,
+                standbyBucket, currentHeartbeat, tag, 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
-                0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */);
+                0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
+                /*innerFlags=*/ 0);
     }
 
     public void enqueueWorkLocked(IActivityManager am, JobWorkItem work) {
@@ -386,6 +476,7 @@ public final class JobStatus {
                     sourcePackageName, sourceUserId, toShortString()));
         }
         pendingWork.add(work);
+        updateEstimatedNetworkBytesLocked();
     }
 
     public JobWorkItem dequeueWorkLocked() {
@@ -398,6 +489,7 @@ public final class JobStatus {
                 executingWork.add(work);
                 work.bumpDeliveryCount();
             }
+            updateEstimatedNetworkBytesLocked();
             return work;
         }
         return null;
@@ -456,6 +548,7 @@ public final class JobStatus {
             pendingWork = null;
             executingWork = null;
             incomingJob.nextPendingWorkId = nextPendingWorkId;
+            incomingJob.updateEstimatedNetworkBytesLocked();
         } else {
             // We are completely stopping the job...  need to clean up work.
             ungrantWorkList(am, pendingWork);
@@ -463,6 +556,7 @@ public final class JobStatus {
             ungrantWorkList(am, executingWork);
             executingWork = null;
         }
+        updateEstimatedNetworkBytesLocked();
     }
 
     public void prepareLocked(IActivityManager am) {
@@ -511,6 +605,10 @@ public final class JobStatus {
         return job.getId();
     }
 
+    public int getTargetSdkVersion() {
+        return targetSdkVersion;
+    }
+
     public void printUniqueId(PrintWriter pw) {
         UserHandle.formatUid(pw, callingUid);
         pw.print("/");
@@ -541,6 +639,29 @@ public final class JobStatus {
         return UserHandle.getUserId(callingUid);
     }
 
+    public int getStandbyBucket() {
+        return standbyBucket;
+    }
+
+    public long getBaseHeartbeat() {
+        return baseHeartbeat;
+    }
+
+    // Called only by the standby monitoring code
+    public void setStandbyBucket(int newBucket) {
+        standbyBucket = newBucket;
+    }
+
+    // Called only by the standby monitoring code
+    public long getWhenStandbyDeferred() {
+        return whenStandbyDeferred;
+    }
+
+    // Called only by the standby monitoring code
+    public void setWhenStandbyDeferred(long now) {
+        whenStandbyDeferred = now;
+    }
+
     public String getSourceTag() {
         return sourceTag;
     }
@@ -565,25 +686,63 @@ public final class JobStatus {
         return job.getFlags();
     }
 
+    public int getInternalFlags() {
+        return mInternalFlags;
+    }
+
+    public void addInternalFlags(int flags) {
+        mInternalFlags |= flags;
+    }
+
+    public void maybeAddForegroundExemption(Predicate<Integer> uidForegroundChecker) {
+        // Jobs with time constraints shouldn't be exempted.
+        if (job.hasEarlyConstraint() || job.hasLateConstraint()) {
+            return;
+        }
+        // Already exempted, skip the foreground check.
+        if ((mInternalFlags & INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION) != 0) {
+            return;
+        }
+        if (uidForegroundChecker.test(getSourceUid())) {
+            addInternalFlags(INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION);
+        }
+    }
+
+    private void updateEstimatedNetworkBytesLocked() {
+        totalNetworkBytes = computeEstimatedNetworkBytesLocked();
+    }
+
+    private long computeEstimatedNetworkBytesLocked() {
+        // If any component of the job has unknown usage, we don't have a
+        // complete picture of what data will be used, and we have to treat the
+        // entire job as unknown.
+        long totalNetworkBytes = 0;
+        long networkBytes = job.getEstimatedNetworkBytes();
+        if (networkBytes == JobInfo.NETWORK_BYTES_UNKNOWN) {
+            return JobInfo.NETWORK_BYTES_UNKNOWN;
+        } else {
+            totalNetworkBytes += networkBytes;
+        }
+        if (pendingWork != null) {
+            for (int i = 0; i < pendingWork.size(); i++) {
+                networkBytes = pendingWork.get(i).getEstimatedNetworkBytes();
+                if (networkBytes == JobInfo.NETWORK_BYTES_UNKNOWN) {
+                    return JobInfo.NETWORK_BYTES_UNKNOWN;
+                } else {
+                    totalNetworkBytes += networkBytes;
+                }
+            }
+        }
+        return totalNetworkBytes;
+    }
+
+    public long getEstimatedNetworkBytes() {
+        return totalNetworkBytes;
+    }
+
     /** Does this job have any sort of networking constraint? */
     public boolean hasConnectivityConstraint() {
-        return (requiredConstraints&CONNECTIVITY_MASK) != 0;
-    }
-
-    public boolean needsAnyConnectivity() {
         return (requiredConstraints&CONSTRAINT_CONNECTIVITY) != 0;
-    }
-
-    public boolean needsUnmeteredConnectivity() {
-        return (requiredConstraints&CONSTRAINT_UNMETERED) != 0;
-    }
-
-    public boolean needsMeteredConnectivity() {
-        return (requiredConstraints&CONSTRAINT_METERED) != 0;
-    }
-
-    public boolean needsNonRoamingConnectivity() {
-        return (requiredConstraints&CONSTRAINT_NOT_ROAMING) != 0;
     }
 
     public boolean hasChargingConstraint() {
@@ -646,6 +805,37 @@ public final class JobStatus {
         return latestRunTimeElapsedMillis;
     }
 
+    /**
+     * Return the fractional position of "now" within the "run time" window of
+     * this job.
+     * <p>
+     * For example, if the earliest run time was 10 minutes ago, and the latest
+     * run time is 30 minutes from now, this would return 0.25.
+     * <p>
+     * If the job has no window defined, returns 1. When only an earliest or
+     * latest time is defined, it's treated as an infinitely small window at
+     * that time.
+     */
+    public float getFractionRunTime() {
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        if (earliestRunTimeElapsedMillis == 0 && latestRunTimeElapsedMillis == Long.MAX_VALUE) {
+            return 1;
+        } else if (earliestRunTimeElapsedMillis == 0) {
+            return now >= latestRunTimeElapsedMillis ? 1 : 0;
+        } else if (latestRunTimeElapsedMillis == Long.MAX_VALUE) {
+            return now >= earliestRunTimeElapsedMillis ? 1 : 0;
+        } else {
+            if (now <= earliestRunTimeElapsedMillis) {
+                return 0;
+            } else if (now >= latestRunTimeElapsedMillis) {
+                return 1;
+            } else {
+                return (float) (now - earliestRunTimeElapsedMillis)
+                        / (float) (latestRunTimeElapsedMillis - earliestRunTimeElapsedMillis);
+            }
+        }
+    }
+
     public Pair<Long, Long> getPersistedUtcTimes() {
         return mPersistedUtcTimes;
     }
@@ -682,22 +872,6 @@ public final class JobStatus {
         return setConstraintSatisfied(CONSTRAINT_CONNECTIVITY, state);
     }
 
-    boolean setUnmeteredConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_UNMETERED, state);
-    }
-
-    boolean setMeteredConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_METERED, state);
-    }
-
-    boolean setNotRoamingConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_NOT_ROAMING, state);
-    }
-
-    boolean setAppNotIdleConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_APP_NOT_IDLE, state);
-    }
-
     boolean setContentTriggerConstraintSatisfied(boolean state) {
         return setConstraintSatisfied(CONSTRAINT_CONTENT_TRIGGER, state);
     }
@@ -705,6 +879,18 @@ public final class JobStatus {
     boolean setDeviceNotDozingConstraintSatisfied(boolean state, boolean whitelisted) {
         dozeWhitelisted = whitelisted;
         return setConstraintSatisfied(CONSTRAINT_DEVICE_NOT_DOZING, state);
+    }
+
+    boolean setBackgroundNotRestrictedConstraintSatisfied(boolean state) {
+        return setConstraintSatisfied(CONSTRAINT_BACKGROUND_NOT_RESTRICTED, state);
+    }
+
+    boolean setUidActive(final boolean newActiveState) {
+        if (newActiveState != uidActive) {
+            uidActive = newActiveState;
+            return true;
+        }
+        return false; /* unchanged */
     }
 
     boolean setConstraintSatisfied(int constraint, boolean state) {
@@ -740,11 +926,6 @@ public final class JobStatus {
         return mLastFailedRunTime;
     }
 
-    public boolean shouldDump(int filterUid) {
-        return filterUid == -1 || UserHandle.getAppId(getUid()) == filterUid
-                || UserHandle.getAppId(getSourceUid()) == filterUid;
-    }
-
     /**
      * @return Whether or not this job is ready to run, based on its requirements. This is true if
      * the constraints are satisfied <strong>or</strong> the deadline on the job has expired.
@@ -758,20 +939,19 @@ public final class JobStatus {
         // satisfied).
         // AppNotIdle implicit constraint must be satisfied
         // DeviceNotDozing implicit constraint must be satisfied
+        // NotRestrictedInBackground implicit constraint must be satisfied
         final boolean deadlineSatisfied = (!job.isPeriodic() && hasDeadlineConstraint()
                 && (satisfiedConstraints & CONSTRAINT_DEADLINE) != 0);
-        final boolean notIdle = (satisfiedConstraints & CONSTRAINT_APP_NOT_IDLE) != 0;
         final boolean notDozing = (satisfiedConstraints & CONSTRAINT_DEVICE_NOT_DOZING) != 0
                 || (job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
-        return (isConstraintsSatisfied() || deadlineSatisfied) && notIdle && notDozing;
+        final boolean notRestrictedInBg =
+                (satisfiedConstraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) != 0;
+        return (isConstraintsSatisfied() || deadlineSatisfied) && notDozing && notRestrictedInBg;
     }
 
-    static final int CONSTRAINTS_OF_INTEREST =
-            CONSTRAINT_CHARGING | CONSTRAINT_BATTERY_NOT_LOW | CONSTRAINT_STORAGE_NOT_LOW |
-            CONSTRAINT_TIMING_DELAY |
-            CONSTRAINT_CONNECTIVITY | CONSTRAINT_UNMETERED |
-            CONSTRAINT_NOT_ROAMING | CONSTRAINT_METERED |
-            CONSTRAINT_IDLE | CONSTRAINT_CONTENT_TRIGGER;
+    static final int CONSTRAINTS_OF_INTEREST = CONSTRAINT_CHARGING | CONSTRAINT_BATTERY_NOT_LOW
+            | CONSTRAINT_STORAGE_NOT_LOW | CONSTRAINT_TIMING_DELAY | CONSTRAINT_CONNECTIVITY
+            | CONSTRAINT_IDLE | CONSTRAINT_CONTENT_TRIGGER;
 
     // Soft override covers all non-"functional" constraints
     static final int SOFT_OVERRIDE_CONSTRAINTS =
@@ -819,15 +999,14 @@ public final class JobStatus {
         sb.append(getSourceUid());
         if (earliestRunTimeElapsedMillis != NO_EARLIEST_RUNTIME
                 || latestRunTimeElapsedMillis != NO_LATEST_RUNTIME) {
-            long now = SystemClock.elapsedRealtime();
+            long now = sElapsedRealtimeClock.millis();
             sb.append(" TIME=");
             formatRunTime(sb, earliestRunTimeElapsedMillis, NO_EARLIEST_RUNTIME, now);
             sb.append(":");
             formatRunTime(sb, latestRunTimeElapsedMillis, NO_LATEST_RUNTIME, now);
         }
-        if (job.getNetworkType() != JobInfo.NETWORK_TYPE_NONE) {
-            sb.append(" NET=");
-            sb.append(job.getNetworkType());
+        if (job.getRequiredNetwork() != null) {
+            sb.append(" NET");
         }
         if (job.isRequireCharging()) {
             sb.append(" CHARGING");
@@ -846,9 +1025,6 @@ public final class JobStatus {
         }
         if (job.isPersisted()) {
             sb.append(" PERSISTED");
-        }
-        if ((satisfiedConstraints&CONSTRAINT_APP_NOT_IDLE) == 0) {
-            sb.append(" WAIT:APP_NOT_IDLE");
         }
         if ((satisfiedConstraints&CONSTRAINT_DEVICE_NOT_DOZING) == 0) {
             sb.append(" WAIT:DEV_NOT_DOZING");
@@ -912,6 +1088,20 @@ public final class JobStatus {
         return sb.toString();
     }
 
+    /**
+     * Convenience function to dump data that identifies a job uniquely to proto. This is intended
+     * to mimic {@link #toShortString}.
+     */
+    public void writeToShortProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
+        proto.write(JobStatusShortInfoProto.CALLING_UID, callingUid);
+        proto.write(JobStatusShortInfoProto.JOB_ID, job.getId());
+        proto.write(JobStatusShortInfoProto.BATTERY_NAME, batteryName);
+
+        proto.end(token);
+    }
+
     void dumpConstraints(PrintWriter pw, int constraints) {
         if ((constraints&CONSTRAINT_CHARGING) != 0) {
             pw.print(" CHARGING");
@@ -934,23 +1124,50 @@ public final class JobStatus {
         if ((constraints&CONSTRAINT_CONNECTIVITY) != 0) {
             pw.print(" CONNECTIVITY");
         }
-        if ((constraints&CONSTRAINT_UNMETERED) != 0) {
-            pw.print(" UNMETERED");
-        }
-        if ((constraints&CONSTRAINT_NOT_ROAMING) != 0) {
-            pw.print(" NOT_ROAMING");
-        }
-        if ((constraints&CONSTRAINT_METERED) != 0) {
-            pw.print(" METERED");
-        }
-        if ((constraints&CONSTRAINT_APP_NOT_IDLE) != 0) {
-            pw.print(" APP_NOT_IDLE");
-        }
         if ((constraints&CONSTRAINT_CONTENT_TRIGGER) != 0) {
             pw.print(" CONTENT_TRIGGER");
         }
         if ((constraints&CONSTRAINT_DEVICE_NOT_DOZING) != 0) {
             pw.print(" DEVICE_NOT_DOZING");
+        }
+        if ((constraints&CONSTRAINT_BACKGROUND_NOT_RESTRICTED) != 0) {
+            pw.print(" BACKGROUND_NOT_RESTRICTED");
+        }
+        if (constraints != 0) {
+            pw.print(" [0x");
+            pw.print(Integer.toHexString(constraints));
+            pw.print("]");
+        }
+    }
+
+    /** Writes constraints to the given repeating proto field. */
+    void dumpConstraints(ProtoOutputStream proto, long fieldId, int constraints) {
+        if ((constraints & CONSTRAINT_CHARGING) != 0) {
+            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_CHARGING);
+        }
+        if ((constraints & CONSTRAINT_BATTERY_NOT_LOW) != 0) {
+            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_BATTERY_NOT_LOW);
+        }
+        if ((constraints & CONSTRAINT_STORAGE_NOT_LOW) != 0) {
+            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_STORAGE_NOT_LOW);
+        }
+        if ((constraints & CONSTRAINT_TIMING_DELAY) != 0) {
+            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_TIMING_DELAY);
+        }
+        if ((constraints & CONSTRAINT_DEADLINE) != 0) {
+            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_DEADLINE);
+        }
+        if ((constraints & CONSTRAINT_IDLE) != 0) {
+            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_IDLE);
+        }
+        if ((constraints & CONSTRAINT_CONNECTIVITY) != 0) {
+            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_CONNECTIVITY);
+        }
+        if ((constraints & CONSTRAINT_CONTENT_TRIGGER) != 0) {
+            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_CONTENT_TRIGGER);
+        }
+        if ((constraints & CONSTRAINT_DEVICE_NOT_DOZING) != 0) {
+            proto.write(fieldId, JobStatusDumpProto.CONSTRAINT_DEVICE_NOT_DOZING);
         }
     }
 
@@ -962,6 +1179,40 @@ public final class JobStatus {
             pw.print(prefix); pw.println("  URI grants:");
             ((GrantedUriPermissions)work.getGrants()).dump(pw, prefix + "    ");
         }
+    }
+
+    private void dumpJobWorkItem(ProtoOutputStream proto, long fieldId, JobWorkItem work) {
+        final long token = proto.start(fieldId);
+
+        proto.write(JobStatusDumpProto.JobWorkItem.WORK_ID, work.getWorkId());
+        proto.write(JobStatusDumpProto.JobWorkItem.DELIVERY_COUNT, work.getDeliveryCount());
+        if (work.getIntent() != null) {
+            work.getIntent().writeToProto(proto, JobStatusDumpProto.JobWorkItem.INTENT);
+        }
+        Object grants = work.getGrants();
+        if (grants != null) {
+            ((GrantedUriPermissions) grants).dump(proto, JobStatusDumpProto.JobWorkItem.URI_GRANTS);
+        }
+
+        proto.end(token);
+    }
+
+    // normalized bucket indices, not the AppStandby constants
+    private String bucketName(int bucket) {
+        switch (bucket) {
+            case 0: return "ACTIVE";
+            case 1: return "WORKING_SET";
+            case 2: return "FREQUENT";
+            case 3: return "RARE";
+            case 4: return "NEVER";
+            default:
+                return "Unknown: " + bucket;
+        }
+    }
+
+    private static int resolveTargetSdkVersion(JobInfo job) {
+        return LocalServices.getService(PackageManagerInternal.class)
+                .getPackageTargetSdkVersion(job.getService().getPackageName());
     }
 
     // Dumpsys infrastructure
@@ -991,6 +1242,15 @@ public final class JobStatus {
             if (job.getFlags() != 0) {
                 pw.print(prefix); pw.print("  Flags: ");
                 pw.println(Integer.toHexString(job.getFlags()));
+            }
+            if (getInternalFlags() != 0) {
+                pw.print(prefix); pw.print("  Internal flags: ");
+                pw.print(Integer.toHexString(getInternalFlags()));
+
+                if ((getInternalFlags()&INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION) != 0) {
+                    pw.print(" HAS_FOREGROUND_EXEMPTION");
+                }
+                pw.println();
             }
             pw.print(prefix); pw.print("  Requires: charging=");
             pw.print(job.isRequireCharging()); pw.print(" batteryNotLow=");
@@ -1033,8 +1293,13 @@ public final class JobStatus {
                 pw.print(prefix); pw.println("  Granted URI permissions:");
                 uriPerms.dump(pw, prefix + "  ");
             }
-            if (job.getNetworkType() != JobInfo.NETWORK_TYPE_NONE) {
-                pw.print(prefix); pw.print("  Network type: "); pw.println(job.getNetworkType());
+            if (job.getRequiredNetwork() != null) {
+                pw.print(prefix); pw.print("  Network type: ");
+                pw.println(job.getRequiredNetwork());
+            }
+            if (totalNetworkBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                pw.print(prefix); pw.print("  Network bytes: ");
+                pw.println(totalNetworkBytes);
             }
             if (job.getMinLatencyMillis() != 0) {
                 pw.print(prefix); pw.print("  Minimum latency: ");
@@ -1069,6 +1334,9 @@ public final class JobStatus {
             if (dozeWhitelisted) {
                 pw.print(prefix); pw.println("Doze whitelisted: true");
             }
+            if (uidActive) {
+                pw.print(prefix); pw.println("Uid: active");
+            }
         }
         if (trackingControllers != 0) {
             pw.print(prefix); pw.print("Tracking:");
@@ -1092,6 +1360,9 @@ public final class JobStatus {
                 }
             }
         }
+        if (network != null) {
+            pw.print(prefix); pw.print("Network: "); pw.println(network);
+        }
         if (pendingWork != null && pendingWork.size() > 0) {
             pw.print(prefix); pw.println("Pending work:");
             for (int i = 0; i < pendingWork.size(); i++) {
@@ -1103,6 +1374,17 @@ public final class JobStatus {
             for (int i = 0; i < executingWork.size(); i++) {
                 dumpJobWorkItem(pw, prefix, executingWork.get(i), i);
             }
+        }
+        pw.print(prefix); pw.print("Standby bucket: ");
+        pw.println(bucketName(standbyBucket));
+        if (standbyBucket > 0) {
+            pw.print(prefix); pw.print("Base heartbeat: ");
+            pw.println(baseHeartbeat);
+        }
+        if (whenStandbyDeferred != 0) {
+            pw.print(prefix); pw.print("  Deferred since: ");
+            TimeUtils.formatDuration(whenStandbyDeferred, elapsedRealtimeMillis, pw);
+            pw.println();
         }
         pw.print(prefix); pw.print("Enqueue time: ");
         TimeUtils.formatDuration(enqueueTime, elapsedRealtimeMillis, pw);
@@ -1127,5 +1409,170 @@ public final class JobStatus {
             t.set(mLastFailedRunTime);
             pw.println(t.format(format));
         }
+    }
+
+    public void dump(ProtoOutputStream proto, long fieldId, boolean full, long elapsedRealtimeMillis) {
+        final long token = proto.start(fieldId);
+
+        proto.write(JobStatusDumpProto.CALLING_UID, callingUid);
+        proto.write(JobStatusDumpProto.TAG, tag);
+        proto.write(JobStatusDumpProto.SOURCE_UID, getSourceUid());
+        proto.write(JobStatusDumpProto.SOURCE_USER_ID, getSourceUserId());
+        proto.write(JobStatusDumpProto.SOURCE_PACKAGE_NAME, getSourcePackageName());
+        proto.write(JobStatusDumpProto.INTERNAL_FLAGS, getInternalFlags());
+
+        if (full) {
+            final long jiToken = proto.start(JobStatusDumpProto.JOB_INFO);
+
+            job.getService().writeToProto(proto, JobStatusDumpProto.JobInfo.SERVICE);
+
+            proto.write(JobStatusDumpProto.JobInfo.IS_PERIODIC, job.isPeriodic());
+            proto.write(JobStatusDumpProto.JobInfo.PERIOD_INTERVAL_MS, job.getIntervalMillis());
+            proto.write(JobStatusDumpProto.JobInfo.PERIOD_FLEX_MS, job.getFlexMillis());
+
+            proto.write(JobStatusDumpProto.JobInfo.IS_PERSISTED, job.isPersisted());
+            proto.write(JobStatusDumpProto.JobInfo.PRIORITY, job.getPriority());
+            proto.write(JobStatusDumpProto.JobInfo.FLAGS, job.getFlags());
+
+            proto.write(JobStatusDumpProto.JobInfo.REQUIRES_CHARGING, job.isRequireCharging());
+            proto.write(JobStatusDumpProto.JobInfo.REQUIRES_BATTERY_NOT_LOW, job.isRequireBatteryNotLow());
+            proto.write(JobStatusDumpProto.JobInfo.REQUIRES_DEVICE_IDLE, job.isRequireDeviceIdle());
+
+            if (job.getTriggerContentUris() != null) {
+                for (int i = 0; i < job.getTriggerContentUris().length; i++) {
+                    final long tcuToken = proto.start(JobStatusDumpProto.JobInfo.TRIGGER_CONTENT_URIS);
+                    JobInfo.TriggerContentUri trig = job.getTriggerContentUris()[i];
+
+                    proto.write(JobStatusDumpProto.JobInfo.TriggerContentUri.FLAGS, trig.getFlags());
+                    Uri u = trig.getUri();
+                    if (u != null) {
+                        proto.write(JobStatusDumpProto.JobInfo.TriggerContentUri.URI, u.toString());
+                    }
+
+                    proto.end(tcuToken);
+                }
+                if (job.getTriggerContentUpdateDelay() >= 0) {
+                    proto.write(JobStatusDumpProto.JobInfo.TRIGGER_CONTENT_UPDATE_DELAY_MS,
+                            job.getTriggerContentUpdateDelay());
+                }
+                if (job.getTriggerContentMaxDelay() >= 0) {
+                    proto.write(JobStatusDumpProto.JobInfo.TRIGGER_CONTENT_MAX_DELAY_MS,
+                            job.getTriggerContentMaxDelay());
+                }
+            }
+            if (job.getExtras() != null && !job.getExtras().maybeIsEmpty()) {
+                job.getExtras().writeToProto(proto, JobStatusDumpProto.JobInfo.EXTRAS);
+            }
+            if (job.getTransientExtras() != null && !job.getTransientExtras().maybeIsEmpty()) {
+                job.getTransientExtras().writeToProto(proto, JobStatusDumpProto.JobInfo.TRANSIENT_EXTRAS);
+            }
+            if (job.getClipData() != null) {
+                job.getClipData().writeToProto(proto, JobStatusDumpProto.JobInfo.CLIP_DATA);
+            }
+            if (uriPerms != null) {
+                uriPerms.dump(proto, JobStatusDumpProto.JobInfo.GRANTED_URI_PERMISSIONS);
+            }
+            if (job.getRequiredNetwork() != null) {
+                job.getRequiredNetwork().writeToProto(proto, JobStatusDumpProto.JobInfo.REQUIRED_NETWORK);
+            }
+            if (totalNetworkBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                proto.write(JobStatusDumpProto.JobInfo.TOTAL_NETWORK_BYTES, totalNetworkBytes);
+            }
+            proto.write(JobStatusDumpProto.JobInfo.MIN_LATENCY_MS, job.getMinLatencyMillis());
+            proto.write(JobStatusDumpProto.JobInfo.MAX_EXECUTION_DELAY_MS, job.getMaxExecutionDelayMillis());
+
+            final long bpToken = proto.start(JobStatusDumpProto.JobInfo.BACKOFF_POLICY);
+            proto.write(JobStatusDumpProto.JobInfo.Backoff.POLICY, job.getBackoffPolicy());
+            proto.write(JobStatusDumpProto.JobInfo.Backoff.INITIAL_BACKOFF_MS,
+                    job.getInitialBackoffMillis());
+            proto.end(bpToken);
+
+            proto.write(JobStatusDumpProto.JobInfo.HAS_EARLY_CONSTRAINT, job.hasEarlyConstraint());
+            proto.write(JobStatusDumpProto.JobInfo.HAS_LATE_CONSTRAINT, job.hasLateConstraint());
+
+            proto.end(jiToken);
+        }
+
+        dumpConstraints(proto, JobStatusDumpProto.REQUIRED_CONSTRAINTS, requiredConstraints);
+        if (full) {
+            dumpConstraints(proto, JobStatusDumpProto.SATISFIED_CONSTRAINTS, satisfiedConstraints);
+            dumpConstraints(proto, JobStatusDumpProto.UNSATISFIED_CONSTRAINTS,
+                    (requiredConstraints & ~satisfiedConstraints));
+            proto.write(JobStatusDumpProto.IS_DOZE_WHITELISTED, dozeWhitelisted);
+        }
+
+        // Tracking controllers
+        if ((trackingControllers&TRACKING_BATTERY) != 0) {
+            proto.write(JobStatusDumpProto.TRACKING_CONTROLLERS,
+                    JobStatusDumpProto.TRACKING_BATTERY);
+        }
+        if ((trackingControllers&TRACKING_CONNECTIVITY) != 0) {
+            proto.write(JobStatusDumpProto.TRACKING_CONTROLLERS,
+                    JobStatusDumpProto.TRACKING_CONNECTIVITY);
+        }
+        if ((trackingControllers&TRACKING_CONTENT) != 0) {
+            proto.write(JobStatusDumpProto.TRACKING_CONTROLLERS,
+                    JobStatusDumpProto.TRACKING_CONTENT);
+        }
+        if ((trackingControllers&TRACKING_IDLE) != 0) {
+            proto.write(JobStatusDumpProto.TRACKING_CONTROLLERS,
+                    JobStatusDumpProto.TRACKING_IDLE);
+        }
+        if ((trackingControllers&TRACKING_STORAGE) != 0) {
+            proto.write(JobStatusDumpProto.TRACKING_CONTROLLERS,
+                    JobStatusDumpProto.TRACKING_STORAGE);
+        }
+        if ((trackingControllers&TRACKING_TIME) != 0) {
+            proto.write(JobStatusDumpProto.TRACKING_CONTROLLERS,
+                    JobStatusDumpProto.TRACKING_TIME);
+        }
+
+        if (changedAuthorities != null) {
+            for (int k = 0; k < changedAuthorities.size(); k++) {
+                proto.write(JobStatusDumpProto.CHANGED_AUTHORITIES, changedAuthorities.valueAt(k));
+            }
+        }
+        if (changedUris != null) {
+            for (int i = 0; i < changedUris.size(); i++) {
+                Uri u = changedUris.valueAt(i);
+                proto.write(JobStatusDumpProto.CHANGED_URIS, u.toString());
+            }
+        }
+
+        if (network != null) {
+            network.writeToProto(proto, JobStatusDumpProto.NETWORK);
+        }
+
+        if (pendingWork != null && pendingWork.size() > 0) {
+            for (int i = 0; i < pendingWork.size(); i++) {
+                dumpJobWorkItem(proto, JobStatusDumpProto.PENDING_WORK, pendingWork.get(i));
+            }
+        }
+        if (executingWork != null && executingWork.size() > 0) {
+            for (int i = 0; i < executingWork.size(); i++) {
+                dumpJobWorkItem(proto, JobStatusDumpProto.EXECUTING_WORK, executingWork.get(i));
+            }
+        }
+
+        proto.write(JobStatusDumpProto.STANDBY_BUCKET, standbyBucket);
+        proto.write(JobStatusDumpProto.ENQUEUE_DURATION_MS, elapsedRealtimeMillis - enqueueTime);
+        if (earliestRunTimeElapsedMillis == NO_EARLIEST_RUNTIME) {
+            proto.write(JobStatusDumpProto.TIME_UNTIL_EARLIEST_RUNTIME_MS, 0);
+        } else {
+            proto.write(JobStatusDumpProto.TIME_UNTIL_EARLIEST_RUNTIME_MS,
+                    earliestRunTimeElapsedMillis - elapsedRealtimeMillis);
+        }
+        if (latestRunTimeElapsedMillis == NO_LATEST_RUNTIME) {
+            proto.write(JobStatusDumpProto.TIME_UNTIL_LATEST_RUNTIME_MS, 0);
+        } else {
+            proto.write(JobStatusDumpProto.TIME_UNTIL_LATEST_RUNTIME_MS,
+                    latestRunTimeElapsedMillis - elapsedRealtimeMillis);
+        }
+
+        proto.write(JobStatusDumpProto.NUM_FAILURES, numFailures);
+        proto.write(JobStatusDumpProto.LAST_SUCCESSFUL_RUN_TIME, mLastSuccessfulRunTime);
+        proto.write(JobStatusDumpProto.LAST_FAILED_RUN_TIME, mLastFailedRunTime);
+
+        proto.end(token);
     }
 }

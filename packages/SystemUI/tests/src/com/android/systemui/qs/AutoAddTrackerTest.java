@@ -30,6 +30,7 @@ import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
 import com.android.systemui.SysuiTestCase;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -39,6 +40,11 @@ import org.junit.runner.RunWith;
 public class AutoAddTrackerTest extends SysuiTestCase {
 
     private AutoAddTracker mAutoTracker;
+
+    @Before
+    public void setUp() {
+        Secure.putString(mContext.getContentResolver(), Secure.QS_AUTO_ADDED_TILES, "");
+    }
 
     @Test
     public void testMigration() {
@@ -50,7 +56,10 @@ public class AutoAddTrackerTest extends SysuiTestCase {
         assertTrue(mAutoTracker.isAdded(WORK));
         assertFalse(mAutoTracker.isAdded(INVERSION));
 
+        // These keys have been removed; retrieving their values should always return the default.
+        assertTrue(Prefs.getBoolean(mContext, Key.QS_DATA_SAVER_ADDED, true ));
         assertFalse(Prefs.getBoolean(mContext, Key.QS_DATA_SAVER_ADDED, false));
+        assertTrue(Prefs.getBoolean(mContext, Key.QS_WORK_ADDED, true));
         assertFalse(Prefs.getBoolean(mContext, Key.QS_WORK_ADDED, false));
 
         mAutoTracker.destroy();
@@ -96,5 +105,4 @@ public class AutoAddTrackerTest extends SysuiTestCase {
 
         mAutoTracker.destroy();
     }
-
 }

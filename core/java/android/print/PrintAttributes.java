@@ -26,6 +26,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources.NotFoundException;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.service.print.PrintAttributesProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -48,32 +49,35 @@ import java.util.Map;
 public final class PrintAttributes implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {
-            COLOR_MODE_MONOCHROME, COLOR_MODE_COLOR
+    @IntDef(flag = true, prefix = { "COLOR_MODE_" }, value = {
+            COLOR_MODE_MONOCHROME,
+            COLOR_MODE_COLOR
     })
     @interface ColorMode {
     }
     /** Color mode: Monochrome color scheme, for example one color is used. */
-    public static final int COLOR_MODE_MONOCHROME = 1 << 0;
+    public static final int COLOR_MODE_MONOCHROME = PrintAttributesProto.COLOR_MODE_MONOCHROME;
     /** Color mode: Color color scheme, for example many colors are used. */
-    public static final int COLOR_MODE_COLOR = 1 << 1;
+    public static final int COLOR_MODE_COLOR = PrintAttributesProto.COLOR_MODE_COLOR;
 
     private static final int VALID_COLOR_MODES =
             COLOR_MODE_MONOCHROME | COLOR_MODE_COLOR;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {
-            DUPLEX_MODE_NONE, DUPLEX_MODE_LONG_EDGE, DUPLEX_MODE_SHORT_EDGE
+    @IntDef(flag = true, prefix = { "DUPLEX_MODE_" }, value = {
+            DUPLEX_MODE_NONE,
+            DUPLEX_MODE_LONG_EDGE,
+            DUPLEX_MODE_SHORT_EDGE
     })
     @interface DuplexMode {
     }
     /** Duplex mode: No duplexing. */
-    public static final int DUPLEX_MODE_NONE = 1 << 0;
+    public static final int DUPLEX_MODE_NONE = PrintAttributesProto.DUPLEX_MODE_NONE;
     /** Duplex mode: Pages are turned sideways along the long edge - like a book. */
-    public static final int DUPLEX_MODE_LONG_EDGE = 1 << 1;
+    public static final int DUPLEX_MODE_LONG_EDGE = PrintAttributesProto.DUPLEX_MODE_LONG_EDGE;
     /** Duplex mode: Pages are turned upwards along the short edge - like a notpad. */
-    public static final int DUPLEX_MODE_SHORT_EDGE = 1 << 2;
+    public static final int DUPLEX_MODE_SHORT_EDGE = PrintAttributesProto.DUPLEX_MODE_SHORT_EDGE;
 
     private static final int VALID_DUPLEX_MODES =
             DUPLEX_MODE_NONE | DUPLEX_MODE_LONG_EDGE | DUPLEX_MODE_SHORT_EDGE;

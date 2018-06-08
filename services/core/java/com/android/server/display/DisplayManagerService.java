@@ -29,11 +29,20 @@ import com.android.internal.util.IndentingPrintWriter;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.UserIdInt;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Point;
 import android.hardware.SensorManager;
+import android.hardware.display.AmbientBrightnessDayStats;
+import android.hardware.display.BrightnessChangeEvent;
+import android.hardware.display.BrightnessConfiguration;
+import android.hardware.display.Curve;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayViewport;
@@ -54,24 +63,34 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.os.UserHandle;
+import android.os.UserManager;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.IntArray;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.Spline;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
-import android.view.WindowManagerInternal;
+import android.view.SurfaceControl;
 
+import com.android.internal.util.Preconditions;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
+import com.android.server.wm.WindowManagerInternal;
+import com.android.server.wm.SurfaceAnimationThread;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -139,6 +158,8 @@ public final class DisplayManagerService extends SystemService {
     private static final int MSG_DELIVER_DISPLAY_EVENT = 3;
     private static final int MSG_REQUEST_TRAVERSAL = 4;
     private static final int MSG_UPDATE_VIEWPORT = 5;
+    private static final int MSG_REGISTER_BRIGHTNESS_TRACKER = 6;
+    private static final int MSG_LOAD_BRIGHTNESS_CONFIGURATION = 7;
 
     private final Context mContext;
     private final DisplayManagerHandler mHandler;
@@ -213,6 +234,9 @@ public final class DisplayManagerService extends SystemService {
     // The virtual display adapter, or null if not registered.
     private VirtualDisplayAdapter mVirtualDisplayAdapter;
 
+    // The User ID of the current user
+    private @UserIdInt int mCurrentUserId;
+
     // The stable device screen height and width. These are not tied to a specific display, even
     // the default display, because they need to be stable over the course of the device's entire
     // life, even if the default display changes (e.g. a new monitor is plugged into a PC-like
@@ -256,6 +280,11 @@ public final class DisplayManagerService extends SystemService {
 
     private final Injector mInjector;
 
+    // The minimum brightness curve, which guarantess that any brightness curve that dips below it
+    // is rejected by the system.
+    private final Curve mMinimumBrightnessCurve;
+    private final Spline mMinimumBrightnessSpline;
+
     public DisplayManagerService(Context context) {
         this(context, new Injector());
     }
@@ -269,20 +298,30 @@ public final class DisplayManagerService extends SystemService {
         mUiHandler = UiThread.getHandler();
         mDisplayAdapterListener = new DisplayAdapterListener();
         mSingleDisplayDemoMode = SystemProperties.getBoolean("persist.demo.singledisplay", false);
+        Resources resources = mContext.getResources();
         mDefaultDisplayDefaultColorMode = mContext.getResources().getInteger(
-            com.android.internal.R.integer.config_defaultDisplayDefaultColorMode);
+                com.android.internal.R.integer.config_defaultDisplayDefaultColorMode);
+        float[] lux = getFloatArray(resources.obtainTypedArray(
+                com.android.internal.R.array.config_minimumBrightnessCurveLux));
+        float[] nits = getFloatArray(resources.obtainTypedArray(
+                com.android.internal.R.array.config_minimumBrightnessCurveNits));
+        mMinimumBrightnessCurve = new Curve(lux, nits);
+        mMinimumBrightnessSpline = Spline.createSpline(lux, nits);
 
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mGlobalDisplayBrightness = pm.getDefaultScreenBrightnessSetting();
+        mCurrentUserId = UserHandle.USER_SYSTEM;
     }
 
     public void setupSchedulerPolicies() {
         // android.display and android.anim is critical to user experience and we should make sure
-        // it is not in the default foregroup groups, add it to top-app to make sure it uses all the
-        // cores and scheduling settings for top-app when it runs.
+        // it is not in the default foregroup groups, add it to top-app to make sure it uses all
+        // the cores and scheduling settings for top-app when it runs.
         Process.setThreadGroupAndCpuset(DisplayThread.get().getThreadId(),
                 Process.THREAD_GROUP_TOP_APP);
         Process.setThreadGroupAndCpuset(AnimationThread.get().getThreadId(),
+                Process.THREAD_GROUP_TOP_APP);
+        Process.setThreadGroupAndCpuset(SurfaceAnimationThread.get().getThreadId(),
                 Process.THREAD_GROUP_TOP_APP);
     }
 
@@ -331,6 +370,20 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    @Override
+    public void onSwitchUser(@UserIdInt int newUserId) {
+        final int userSerial = getUserManager().getUserSerialNumber(newUserId);
+        synchronized (mSyncRoot) {
+            if (mCurrentUserId != newUserId) {
+                mCurrentUserId = newUserId;
+                BrightnessConfiguration config =
+                        mPersistentDataStore.getBrightnessConfiguration(userSerial);
+                mDisplayPowerController.setBrightnessConfiguration(config);
+            }
+            mDisplayPowerController.onSwitchUser(newUserId);
+        }
+    }
+
     // TODO: Use dependencies or a boot phase
     public void windowManagerAndInputReady() {
         synchronized (mSyncRoot) {
@@ -350,6 +403,7 @@ public final class DisplayManagerService extends SystemService {
         }
 
         mHandler.sendEmptyMessage(MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS);
+        mHandler.sendEmptyMessage(MSG_REGISTER_BRIGHTNESS_TRACKER);
     }
 
     @VisibleForTesting
@@ -423,14 +477,14 @@ public final class DisplayManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    void performTraversalInTransactionFromWindowManagerInternal() {
+    void performTraversalInternal(SurfaceControl.Transaction t) {
         synchronized (mSyncRoot) {
             if (!mPendingTraversal) {
                 return;
             }
             mPendingTraversal = false;
 
-            performTraversalInTransactionLocked();
+            performTraversalLocked(t);
         }
 
         // List is self-synchronized copy-on-write.
@@ -658,6 +712,27 @@ public final class DisplayManagerService extends SystemService {
                 scheduleTraversalLocked(false);
             }
         }
+    }
+
+    private void setSaturationLevelInternal(float level) {
+        if (level < 0 || level > 1) {
+            throw new IllegalArgumentException("Saturation level must be between 0 and 1");
+        }
+        float[] matrix = (level == 1.0f ? null : computeSaturationMatrix(level));
+        DisplayTransformManager dtm = LocalServices.getService(DisplayTransformManager.class);
+        dtm.setColorMatrix(DisplayTransformManager.LEVEL_COLOR_MATRIX_SATURATION, matrix);
+    }
+
+    private static float[] computeSaturationMatrix(float saturation) {
+        float desaturation = 1.0f - saturation;
+        float[] luminance = {0.231f * desaturation, 0.715f * desaturation, 0.072f * desaturation};
+        float[] matrix = {
+            luminance[0] + saturation, luminance[0], luminance[0], 0,
+            luminance[1], luminance[1] + saturation, luminance[1], 0,
+            luminance[2], luminance[2], luminance[2] + saturation, 0,
+            0, 0, 0, 1
+        };
+        return matrix;
     }
 
     private int createVirtualDisplayInternal(IVirtualDisplayCallback callback,
@@ -973,6 +1048,60 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    @VisibleForTesting
+    Curve getMinimumBrightnessCurveInternal() {
+        return mMinimumBrightnessCurve;
+    }
+
+    private void setBrightnessConfigurationForUserInternal(
+            @Nullable BrightnessConfiguration c, @UserIdInt int userId,
+            @Nullable String packageName) {
+        validateBrightnessConfiguration(c);
+        final int userSerial = getUserManager().getUserSerialNumber(userId);
+        synchronized (mSyncRoot) {
+            try {
+                mPersistentDataStore.setBrightnessConfigurationForUser(c, userSerial,
+                        packageName);
+            } finally {
+                mPersistentDataStore.saveIfNeeded();
+            }
+            if (userId == mCurrentUserId) {
+                mDisplayPowerController.setBrightnessConfiguration(c);
+            }
+        }
+    }
+
+    @VisibleForTesting
+    void validateBrightnessConfiguration(BrightnessConfiguration config) {
+        if (config == null) {
+            return;
+        }
+        if (isBrightnessConfigurationTooDark(config)) {
+            throw new IllegalArgumentException("brightness curve is too dark");
+        }
+    }
+
+    private boolean isBrightnessConfigurationTooDark(BrightnessConfiguration config) {
+        Pair<float[], float[]> curve = config.getCurve();
+        float[] lux = curve.first;
+        float[] nits = curve.second;
+        for (int i = 0; i < lux.length; i++) {
+            if (nits[i] < mMinimumBrightnessSpline.interpolate(lux[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void loadBrightnessConfiguration() {
+        synchronized (mSyncRoot) {
+            final int userSerial = getUserManager().getUserSerialNumber(mCurrentUserId);
+            BrightnessConfiguration config =
+                    mPersistentDataStore.getBrightnessConfiguration(userSerial);
+            mDisplayPowerController.setBrightnessConfiguration(config);
+        }
+    }
+
     // Updates all existing logical displays given the current set of display devices.
     // Removes invalid logical displays.
     // Sends notifications if needed.
@@ -996,7 +1125,7 @@ public final class DisplayManagerService extends SystemService {
         return changed;
     }
 
-    private void performTraversalInTransactionLocked() {
+    private void performTraversalLocked(SurfaceControl.Transaction t) {
         // Clear all viewports before configuring displays so that we can keep
         // track of which ones we have configured.
         clearViewportsLocked();
@@ -1005,8 +1134,8 @@ public final class DisplayManagerService extends SystemService {
         final int count = mDisplayDevices.size();
         for (int i = 0; i < count; i++) {
             DisplayDevice device = mDisplayDevices.get(i);
-            configureDisplayInTransactionLocked(device);
-            device.performTraversalInTransactionLocked();
+            configureDisplayLocked(t, device);
+            device.performTraversalLocked(t);
         }
 
         // Tell the input system about these new viewports.
@@ -1090,7 +1219,7 @@ public final class DisplayManagerService extends SystemService {
         mVirtualTouchViewports.clear();
     }
 
-    private void configureDisplayInTransactionLocked(DisplayDevice device) {
+    private void configureDisplayLocked(SurfaceControl.Transaction t, DisplayDevice device) {
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         final boolean ownContent = (info.flags & DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY) != 0;
 
@@ -1115,7 +1244,7 @@ public final class DisplayManagerService extends SystemService {
                     + device.getDisplayDeviceInfoLocked());
             return;
         }
-        display.configureDisplayInTransactionLocked(device, info.state == Display.STATE_OFF);
+        display.configureDisplayLocked(t, device, info.state == Display.STATE_OFF);
 
         // Update the viewports if needed.
         if (!mDefaultViewport.valid
@@ -1173,7 +1302,7 @@ public final class DisplayManagerService extends SystemService {
         mHandler.sendMessage(msg);
     }
 
-    // Requests that performTraversalsInTransactionFromWindowManager be called at a
+    // Requests that performTraversals be called at a
     // later time to apply changes to surfaces and displays.
     private void scheduleTraversalLocked(boolean inTraversal) {
         if (!mPendingTraversal && mWindowManagerInternal != null) {
@@ -1215,6 +1344,10 @@ public final class DisplayManagerService extends SystemService {
             mProjectionService = IMediaProjectionManager.Stub.asInterface(b);
         }
         return mProjectionService;
+    }
+
+    private UserManager getUserManager() {
+        return mContext.getSystemService(UserManager.class);
     }
 
     private void dumpInternal(PrintWriter pw) {
@@ -1278,6 +1411,16 @@ public final class DisplayManagerService extends SystemService {
             pw.println();
             mPersistentDataStore.dump(pw);
         }
+    }
+
+    private static float[] getFloatArray(TypedArray array) {
+        int length = array.length();
+        float[] floatArray = new float[length];
+        for (int i = 0; i < length; i++) {
+            floatArray[i] = array.getFloat(i, Float.NaN);
+        }
+        array.recycle();
+        return floatArray;
     }
 
     /**
@@ -1352,6 +1495,10 @@ public final class DisplayManagerService extends SystemService {
                             mTempExternalTouchViewport, mTempVirtualTouchViewports);
                     break;
                 }
+
+                case MSG_LOAD_BRIGHTNESS_CONFIGURATION:
+                    loadBrightnessConfiguration();
+                    break;
             }
         }
     }
@@ -1618,6 +1765,19 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
+        public void setSaturationLevel(float level) {
+            mContext.enforceCallingOrSelfPermission(
+                   Manifest.permission.CONTROL_DISPLAY_SATURATION,
+                   "Permission required to set display saturation level");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                setSaturationLevelInternal(level);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
         public int createVirtualDisplay(IVirtualDisplayCallback callback,
                 IMediaProjection projection, String packageName, String name,
                 int width, int height, int densityDpi, Surface surface, int flags,
@@ -1736,6 +1896,183 @@ public final class DisplayManagerService extends SystemService {
             }
         }
 
+        @Override // Binder call
+        public ParceledListSlice<BrightnessChangeEvent> getBrightnessEvents(String callingPackage) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.BRIGHTNESS_SLIDER_USAGE,
+                    "Permission to read brightness events.");
+
+            final int callingUid = Binder.getCallingUid();
+            AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
+            final int mode = appOpsManager.noteOp(AppOpsManager.OP_GET_USAGE_STATS,
+                    callingUid, callingPackage);
+            final boolean hasUsageStats;
+            if (mode == AppOpsManager.MODE_DEFAULT) {
+                // The default behavior here is to check if PackageManager has given the app
+                // permission.
+                hasUsageStats = mContext.checkCallingPermission(
+                        Manifest.permission.PACKAGE_USAGE_STATS)
+                        == PackageManager.PERMISSION_GRANTED;
+            } else {
+                hasUsageStats = mode == AppOpsManager.MODE_ALLOWED;
+            }
+
+            final int userId = UserHandle.getUserId(callingUid);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mSyncRoot) {
+                    return mDisplayPowerController.getBrightnessEvents(userId, hasUsageStats);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public ParceledListSlice<AmbientBrightnessDayStats> getAmbientBrightnessStats() {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.ACCESS_AMBIENT_LIGHT_STATS,
+                    "Permission required to to access ambient light stats.");
+            final int callingUid = Binder.getCallingUid();
+            final int userId = UserHandle.getUserId(callingUid);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mSyncRoot) {
+                    return mDisplayPowerController.getAmbientBrightnessStats(userId);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void setBrightnessConfigurationForUser(
+                BrightnessConfiguration c, @UserIdInt int userId, String packageName) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS,
+                    "Permission required to change the display's brightness configuration");
+            if (userId != UserHandle.getCallingUserId()) {
+                mContext.enforceCallingOrSelfPermission(
+                        Manifest.permission.INTERACT_ACROSS_USERS,
+                        "Permission required to change the display brightness"
+                        + " configuration of another user");
+            }
+            if (packageName != null && !validatePackageName(getCallingUid(), packageName)) {
+                packageName = null;
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                setBrightnessConfigurationForUserInternal(c, userId, packageName);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public BrightnessConfiguration getBrightnessConfigurationForUser(int userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS,
+                    "Permission required to read the display's brightness configuration");
+            if (userId != UserHandle.getCallingUserId()) {
+                mContext.enforceCallingOrSelfPermission(
+                        Manifest.permission.INTERACT_ACROSS_USERS,
+                        "Permission required to read the display brightness"
+                                + " configuration of another user");
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final int userSerial = getUserManager().getUserSerialNumber(userId);
+                synchronized (mSyncRoot) {
+                    BrightnessConfiguration config =
+                            mPersistentDataStore.getBrightnessConfiguration(userSerial);
+                    if (config == null) {
+                        config = mDisplayPowerController.getDefaultBrightnessConfiguration();
+                    }
+                    return config;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public BrightnessConfiguration getDefaultBrightnessConfiguration() {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS,
+                    "Permission required to read the display's default brightness configuration");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mSyncRoot) {
+                    return mDisplayPowerController.getDefaultBrightnessConfiguration();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void setTemporaryBrightness(int brightness) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,
+                    "Permission required to set the display's brightness");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mSyncRoot) {
+                    mDisplayPowerController.setTemporaryBrightness(brightness);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void setTemporaryAutoBrightnessAdjustment(float adjustment) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,
+                    "Permission required to set the display's auto brightness adjustment");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mSyncRoot) {
+                    mDisplayPowerController.setTemporaryAutoBrightnessAdjustment(adjustment);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void onShellCommand(FileDescriptor in, FileDescriptor out,
+                FileDescriptor err, String[] args, ShellCallback callback,
+                ResultReceiver resultReceiver) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                DisplayManagerShellCommand command = new DisplayManagerShellCommand(this);
+                command.exec(this, in, out, err, args, callback, resultReceiver);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public Curve getMinimumBrightnessCurve() {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return getMinimumBrightnessCurveInternal();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        void setBrightness(int brightness) {
+            Settings.System.putIntForUser(mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS, brightness, UserHandle.USER_CURRENT);
+        }
+
+        void resetBrightnessConfiguration() {
+            setBrightnessConfigurationForUserInternal(null, mContext.getUserId(),
+                    mContext.getPackageName());
+        }
+
         private boolean validatePackageName(int uid, String packageName) {
             if (packageName != null) {
                 String[] packageNames = mContext.getPackageManager().getPackagesForUid(uid);
@@ -1807,18 +2144,24 @@ public final class DisplayManagerService extends SystemService {
                 mDisplayPowerController = new DisplayPowerController(
                         mContext, callbacks, handler, sensorManager, blanker);
             }
+
+            mHandler.sendEmptyMessage(MSG_LOAD_BRIGHTNESS_CONFIGURATION);
         }
 
         @Override
         public boolean requestPowerState(DisplayPowerRequest request,
                 boolean waitForNegativeProximity) {
-            return mDisplayPowerController.requestPowerState(request,
-                    waitForNegativeProximity);
+            synchronized (mSyncRoot) {
+                return mDisplayPowerController.requestPowerState(request,
+                        waitForNegativeProximity);
+            }
         }
 
         @Override
         public boolean isProximitySensorAvailable() {
-            return mDisplayPowerController.isProximitySensorAvailable();
+            synchronized (mSyncRoot) {
+                return mDisplayPowerController.isProximitySensorAvailable();
+            }
         }
 
         @Override
@@ -1855,8 +2198,8 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
-        public void performTraversalInTransactionFromWindowManager() {
-            performTraversalInTransactionFromWindowManagerInternal();
+        public void performTraversal(SurfaceControl.Transaction t) {
+            performTraversalInternal(t);
         }
 
         @Override
@@ -1879,6 +2222,22 @@ public final class DisplayManagerService extends SystemService {
         @Override
         public boolean isUidPresentOnDisplay(int uid, int displayId) {
             return isUidPresentOnDisplayInternal(uid, displayId);
+        }
+
+        @Override
+        public void persistBrightnessTrackerState() {
+            synchronized (mSyncRoot) {
+                mDisplayPowerController.persistBrightnessTrackerState();
+            }
+        }
+
+        @Override
+        public void onOverlayChanged() {
+            synchronized (mSyncRoot) {
+                for (int i = 0; i < mDisplayDevices.size(); i++) {
+                    mDisplayDevices.get(i).onOverlayChangedLocked();
+                }
+            }
         }
     }
 }

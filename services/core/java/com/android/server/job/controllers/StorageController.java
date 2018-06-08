@@ -16,58 +16,44 @@
 
 package com.android.server.job.controllers;
 
+import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.job.JobSchedulerService;
-import com.android.server.job.StateChangedListener;
+import com.android.server.job.StateControllerProto;
 import com.android.server.storage.DeviceStorageMonitorService;
 
-import java.io.PrintWriter;
+import java.util.function.Predicate;
 
 /**
  * Simple controller that tracks the status of the device's storage.
  */
 public final class StorageController extends StateController {
-    private static final String TAG = "JobScheduler.Stor";
-
-    private static final Object sCreationLock = new Object();
-    private static volatile StorageController sController;
+    private static final String TAG = "JobScheduler.Storage";
+    private static final boolean DEBUG = JobSchedulerService.DEBUG
+            || Log.isLoggable(TAG, Log.DEBUG);
 
     private final ArraySet<JobStatus> mTrackedTasks = new ArraySet<JobStatus>();
-    private StorageTracker mStorageTracker;
-
-    public static StorageController get(JobSchedulerService taskManagerService) {
-        synchronized (sCreationLock) {
-            if (sController == null) {
-                sController = new StorageController(taskManagerService,
-                        taskManagerService.getContext(), taskManagerService.getLock());
-            }
-        }
-        return sController;
-    }
+    private final StorageTracker mStorageTracker;
 
     @VisibleForTesting
     public StorageTracker getTracker() {
         return mStorageTracker;
     }
 
-    @VisibleForTesting
-    public static StorageController getForTesting(StateChangedListener stateChangedListener,
-            Context context) {
-        return new StorageController(stateChangedListener, context, new Object());
-    }
-
-    private StorageController(StateChangedListener stateChangedListener, Context context,
-            Object lock) {
-        super(stateChangedListener, context, lock);
+    public StorageController(JobSchedulerService service) {
+        super(service);
         mStorageTracker = new StorageTracker();
         mStorageTracker.startTracking();
     }
@@ -118,7 +104,7 @@ public final class StorageController extends StateController {
          */
         private boolean mStorageLow;
         /** Sequence number of last broadcast. */
-        private int mLastBatterySeq = -1;
+        private int mLastStorageSeq = -1;
 
         public StorageTracker() {
         }
@@ -138,7 +124,7 @@ public final class StorageController extends StateController {
         }
 
         public int getSeq() {
-            return mLastBatterySeq;
+            return mLastStorageSeq;
         }
 
         @Override
@@ -149,18 +135,18 @@ public final class StorageController extends StateController {
         @VisibleForTesting
         public void onReceiveInternal(Intent intent) {
             final String action = intent.getAction();
-            mLastBatterySeq = intent.getIntExtra(DeviceStorageMonitorService.EXTRA_SEQUENCE,
-                    mLastBatterySeq);
+            mLastStorageSeq = intent.getIntExtra(DeviceStorageMonitorService.EXTRA_SEQUENCE,
+                    mLastStorageSeq);
             if (Intent.ACTION_DEVICE_STORAGE_LOW.equals(action)) {
                 if (DEBUG) {
                     Slog.d(TAG, "Available storage too low to do work. @ "
-                            + SystemClock.elapsedRealtime());
+                            + sElapsedRealtimeClock.millis());
                 }
                 mStorageLow = true;
             } else if (Intent.ACTION_DEVICE_STORAGE_OK.equals(action)) {
                 if (DEBUG) {
                     Slog.d(TAG, "Available stoage high enough to do work. @ "
-                            + SystemClock.elapsedRealtime());
+                            + sElapsedRealtimeClock.millis());
                 }
                 mStorageLow = false;
                 maybeReportNewStorageState();
@@ -169,24 +155,49 @@ public final class StorageController extends StateController {
     }
 
     @Override
-    public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
-        pw.print("Storage: not low = ");
-        pw.print(mStorageTracker.isStorageNotLow());
-        pw.print(", seq=");
-        pw.println(mStorageTracker.getSeq());
-        pw.print("Tracking ");
-        pw.print(mTrackedTasks.size());
-        pw.println(":");
+    public void dumpControllerStateLocked(IndentingPrintWriter pw,
+            Predicate<JobStatus> predicate) {
+        pw.println("Not low: " + mStorageTracker.isStorageNotLow());
+        pw.println("Sequence: " + mStorageTracker.getSeq());
+        pw.println();
+
         for (int i = 0; i < mTrackedTasks.size(); i++) {
             final JobStatus js = mTrackedTasks.valueAt(i);
-            if (!js.shouldDump(filterUid)) {
+            if (!predicate.test(js)) {
                 continue;
             }
-            pw.print("  #");
+            pw.print("#");
             js.printUniqueId(pw);
             pw.print(" from ");
             UserHandle.formatUid(pw, js.getSourceUid());
             pw.println();
         }
+    }
+
+    @Override
+    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId,
+            Predicate<JobStatus> predicate) {
+        final long token = proto.start(fieldId);
+        final long mToken = proto.start(StateControllerProto.STORAGE);
+
+        proto.write(StateControllerProto.StorageController.IS_STORAGE_NOT_LOW,
+                mStorageTracker.isStorageNotLow());
+        proto.write(StateControllerProto.StorageController.LAST_BROADCAST_SEQUENCE_NUMBER,
+                mStorageTracker.getSeq());
+
+        for (int i = 0; i < mTrackedTasks.size(); i++) {
+            final JobStatus js = mTrackedTasks.valueAt(i);
+            if (!predicate.test(js)) {
+                continue;
+            }
+            final long jsToken = proto.start(StateControllerProto.StorageController.TRACKED_JOBS);
+            js.writeToShortProto(proto, StateControllerProto.StorageController.TrackedJob.INFO);
+            proto.write(StateControllerProto.StorageController.TrackedJob.SOURCE_UID,
+                    js.getSourceUid());
+            proto.end(jsToken);
+        }
+
+        proto.end(mToken);
+        proto.end(token);
     }
 }

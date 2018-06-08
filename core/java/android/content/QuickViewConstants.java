@@ -33,13 +33,22 @@ public class QuickViewConstants {
     public static final String FEATURE_VIEW = "android:view";
 
     /**
-     * Feature to view a document using system standard editing mechanism, like
+     * Feature to edit a document using system standard editing mechanism, like
      * {@link Intent#ACTION_EDIT}.
      *
      * @see Intent#EXTRA_QUICK_VIEW_FEATURES
      * @see Intent#ACTION_QUICK_VIEW
      */
     public static final String FEATURE_EDIT = "android:edit";
+
+    /**
+     * Feature to delete an individual document. Quick viewer implementations must use
+     * Storage Access Framework to both verify delete permission and to delete content.
+     *
+     * @see DocumentsContract.Document#FLAG_SUPPORTS_DELETE
+     * @see DocumentsContract#deleteDocument(ContentResolver, Uri)
+     */
+    public static final String FEATURE_DELETE = "android:delete";
 
     /**
      * Feature to view a document using system standard sending mechanism, like

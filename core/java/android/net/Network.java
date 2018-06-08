@@ -21,6 +21,7 @@ import android.os.Parcelable;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.okhttp.internalandroidapi.Dns;
 import com.android.okhttp.internalandroidapi.HttpURLConnectionFactory;
@@ -78,6 +79,11 @@ public class Network implements Parcelable {
             httpKeepAlive ? Integer.parseInt(System.getProperty("http.maxConnections", "5")) : 0;
     private static final long httpKeepAliveDurationMs =
             Long.parseLong(System.getProperty("http.keepAliveDuration", "300000"));  // 5 minutes.
+    // Value used to obfuscate network handle longs.
+    // The HANDLE_MAGIC value MUST be kept in sync with the corresponding
+    // value in the native/android/net.c NDK implementation.
+    private static final long HANDLE_MAGIC = 0xcafed00dL;
+    private static final int HANDLE_MAGIC_SIZE = 32;
 
     // A boolean to control how getAllByName()/getByName() behaves in the face
     // of Private DNS.
@@ -400,6 +406,25 @@ public class Network implements Parcelable {
     }
 
     /**
+     * Returns a {@link Network} object given a handle returned from {@link #getNetworkHandle}.
+     *
+     * @param networkHandle a handle returned from {@link #getNetworkHandle}.
+     * @return A {@link Network} object derived from {@code networkHandle}.
+     */
+    public static Network fromNetworkHandle(long networkHandle) {
+        if (networkHandle == 0) {
+            throw new IllegalArgumentException(
+                    "Network.fromNetworkHandle refusing to instantiate NETID_UNSET Network.");
+        }
+        if ((networkHandle & ((1L << HANDLE_MAGIC_SIZE) - 1)) != HANDLE_MAGIC
+                || networkHandle < 0) {
+            throw new IllegalArgumentException(
+                    "Value passed to fromNetworkHandle() is not a network handle.");
+        }
+        return new Network((int) (networkHandle >> HANDLE_MAGIC_SIZE));
+    }
+
+    /**
      * Returns a handle representing this {@code Network}, for use with the NDK API.
      */
     public long getNetworkHandle() {
@@ -421,14 +446,10 @@ public class Network implements Parcelable {
         // At some future date it may be desirable to realign the handle with
         // Multiple Provisioning Domains API recommendations, as made by the
         // IETF mif working group.
-        //
-        // The handleMagic value MUST be kept in sync with the corresponding
-        // value in the native/android/net.c NDK implementation.
         if (netId == 0) {
             return 0L;  // make this zero condition obvious for debugging
         }
-        final long handleMagic = 0xcafed00dL;
-        return (((long) netId) << 32) | handleMagic;
+        return (((long) netId) << HANDLE_MAGIC_SIZE) | HANDLE_MAGIC;
     }
 
     // implement the Parcelable interface
@@ -467,5 +488,12 @@ public class Network implements Parcelable {
     @Override
     public String toString() {
         return Integer.toString(netId);
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(NetworkProto.NET_ID, netId);
+        proto.end(token);
     }
 }

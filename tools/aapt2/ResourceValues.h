@@ -29,11 +29,13 @@
 #include "Resource.h"
 #include "StringPool.h"
 #include "io/File.h"
+#include "text/Printer.h"
 #include "util/Maybe.h"
 
 namespace aapt {
 
-struct RawValueVisitor;
+class ValueVisitor;
+class ConstValueVisitor;
 
 // A resource value. This is an all-encompassing representation
 // of Item and Map and their subclasses. The way to do
@@ -45,36 +47,58 @@ class Value {
   virtual ~Value() = default;
 
   // Whether this value is weak and can be overridden without warning or error. Default is false.
-  bool IsWeak() const { return weak_; }
+  bool IsWeak() const {
+    return weak_;
+  }
 
-  void SetWeak(bool val) { weak_ = val; }
+  void SetWeak(bool val) {
+    weak_ = val;
+  }
 
-  // Whether the value is marked as translatable.
-  // This does not persist when flattened.
+  // Whether the value is marked as translatable. This does not persist when flattened to binary.
   // It is only used during compilation phase.
-  void SetTranslatable(bool val) { translatable_ = val; }
+  void SetTranslatable(bool val) {
+    translatable_ = val;
+  }
 
   // Default true.
-  bool IsTranslatable() const { return translatable_; }
+  bool IsTranslatable() const {
+    return translatable_;
+  }
 
   // Returns the source where this value was defined.
-  const Source& GetSource() const { return source_; }
+  const Source& GetSource() const {
+    return source_;
+  }
 
-  void SetSource(const Source& source) { source_ = source; }
+  void SetSource(const Source& source) {
+    source_ = source;
+  }
 
-  void SetSource(Source&& source) { source_ = std::move(source); }
+  void SetSource(Source&& source) {
+    source_ = std::move(source);
+  }
 
   // Returns the comment that was associated with this resource.
-  const std::string& GetComment() const { return comment_; }
+  const std::string& GetComment() const {
+    return comment_;
+  }
 
-  void SetComment(const android::StringPiece& str) { comment_ = str.to_string(); }
+  void SetComment(const android::StringPiece& str) {
+    comment_ = str.to_string();
+  }
 
-  void SetComment(std::string&& str) { comment_ = std::move(str); }
+  void SetComment(std::string&& str) {
+    comment_ = std::move(str);
+  }
 
   virtual bool Equals(const Value* value) const = 0;
 
   // Calls the appropriate overload of ValueVisitor.
-  virtual void Accept(RawValueVisitor* visitor) = 0;
+  virtual void Accept(ValueVisitor* visitor) = 0;
+
+  // Calls the appropriate overload of ConstValueVisitor.
+  virtual void Accept(ConstValueVisitor* visitor) const = 0;
 
   // Clone the value. `new_pool` is the new StringPool that
   // any resources with strings should use when copying their string.
@@ -82,6 +106,10 @@ class Value {
 
   // Human readable printout of this value.
   virtual void Print(std::ostream* out) const = 0;
+
+  // Human readable printout of this value that may omit some information for the sake
+  // of brevity and readability. Default implementation just calls Print().
+  virtual void PrettyPrint(text::Printer* printer) const;
 
   friend std::ostream& operator<<(std::ostream& out, const Value& value);
 
@@ -95,7 +123,8 @@ class Value {
 // Inherit from this to get visitor accepting implementations for free.
 template <typename Derived>
 struct BaseValue : public Value {
-  void Accept(RawValueVisitor* visitor) override;
+  void Accept(ValueVisitor* visitor) override;
+  void Accept(ConstValueVisitor* visitor) const override;
 };
 
 // A resource item with a single value. This maps to android::ResTable_entry.
@@ -111,7 +140,8 @@ struct Item : public Value {
 // Inherit from this to get visitor accepting implementations for free.
 template <typename Derived>
 struct BaseItem : public Item {
-  void Accept(RawValueVisitor* visitor) override;
+  void Accept(ValueVisitor* visitor) override;
+  void Accept(ConstValueVisitor* visitor) const override;
 };
 
 // A reference to another resource. This maps to android::Res_value::TYPE_REFERENCE.
@@ -127,6 +157,7 @@ struct Reference : public BaseItem<Reference> {
   Maybe<ResourceId> id;
   Reference::Type reference_type;
   bool private_reference = false;
+  bool is_dynamic = false;
 
   Reference();
   explicit Reference(const ResourceNameRef& n, Type type = Type::kResource);
@@ -137,6 +168,10 @@ struct Reference : public BaseItem<Reference> {
   bool Flatten(android::Res_value* out_value) const override;
   Reference* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
+  void PrettyPrint(text::Printer* printer) const override;
+
+  // Prints the reference without a package name if the package name matches the one given.
+  void PrettyPrint(const android::StringPiece& package, text::Printer* printer) const;
 };
 
 bool operator<(const Reference&, const Reference&);
@@ -144,7 +179,10 @@ bool operator==(const Reference&, const Reference&);
 
 // An ID resource. Has no real value, just a place holder.
 struct Id : public BaseItem<Id> {
-  Id() { weak_ = true; }
+  Id() {
+    weak_ = true;
+  }
+
   bool Equals(const Value* value) const override;
   bool Flatten(android::Res_value* out) const override;
   Id* Clone(StringPool* new_pool) const override;
@@ -196,6 +234,7 @@ struct String : public BaseItem<String> {
   bool Flatten(android::Res_value* out_value) const override;
   String* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
+  void PrettyPrint(text::Printer* printer) const override;
 };
 
 struct StyledString : public BaseItem<StyledString> {
@@ -221,6 +260,10 @@ struct FileReference : public BaseItem<FileReference> {
   // This field is NOT persisted in any format. It is transient.
   io::IFile* file = nullptr;
 
+  // FileType of the file pointed to by `file`. This is used to know how to inflate the file,
+  // or if to inflate at all (just copy).
+  ResourceFile::Type type = ResourceFile::Type::kUnknown;
+
   FileReference() = default;
   explicit FileReference(const StringPool::Ref& path);
 
@@ -242,6 +285,7 @@ struct BinaryPrimitive : public BaseItem<BinaryPrimitive> {
   bool Flatten(android::Res_value* out_value) const override;
   BinaryPrimitive* Clone(StringPool* new_pool) const override;
   void Print(std::ostream* out) const override;
+  void PrettyPrint(text::Printer* printer) const override;
 };
 
 struct Attribute : public BaseValue<Attribute> {
@@ -257,12 +301,17 @@ struct Attribute : public BaseValue<Attribute> {
   int32_t max_int;
   std::vector<Symbol> symbols;
 
-  Attribute();
-  explicit Attribute(bool w, uint32_t t = 0u);
+  explicit Attribute(uint32_t t = 0u);
 
   bool Equals(const Value* value) const override;
+
+  // Returns true if this Attribute's format is compatible with the given Attribute. The basic
+  // rule is that TYPE_REFERENCE can be ignored for both of the Attributes, and TYPE_FLAGS and
+  // TYPE_ENUMS are never compatible.
+  bool IsCompatibleWith(const Attribute& attr) const;
+
   Attribute* Clone(StringPool* new_pool) const override;
-  void PrintMask(std::ostream* out) const;
+  std::string MaskString() const;
   void Print(std::ostream* out) const override;
   bool Matches(const Item& item, DiagMessage* out_msg = nullptr) const;
 };

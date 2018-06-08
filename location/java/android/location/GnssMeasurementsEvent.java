@@ -49,7 +49,7 @@ public final class GnssMeasurementsEvent implements Parcelable {
          * @hide
          */
         @Retention(RetentionPolicy.SOURCE)
-        @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_LOCATION_DISABLED})
+        @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_LOCATION_DISABLED, STATUS_NOT_ALLOWED})
         public @interface GnssMeasurementsStatus {}
 
         /**
@@ -70,6 +70,19 @@ public final class GnssMeasurementsEvent implements Parcelable {
          * enabled.
          */
         public static final int STATUS_LOCATION_DISABLED = 2;
+
+        /**
+         * The client is not allowed to register for GNSS Measurements in general or in the
+         * requested mode.
+         *
+         * <p>Such a status is returned when a client tries to request a functionality from the GNSS
+         * chipset while another client has an ongoing request that does not allow such
+         * functionality to be performed.
+         *
+         * <p>If such a status is received, one would try again at a later time point where no
+         * other client is having a conflicting request.
+         */
+        public static final int STATUS_NOT_ALLOWED = 3;
 
         /**
          * Reports the latest collected GNSS Measurements.

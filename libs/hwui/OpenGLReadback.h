@@ -30,19 +30,21 @@ class GlLayer;
 class OpenGLReadback : public Readback {
 public:
     virtual CopyResult copySurfaceInto(Surface& surface, const Rect& srcRect,
-            SkBitmap* bitmap) override;
+                                       SkBitmap* bitmap) override;
     virtual CopyResult copyGraphicBufferInto(GraphicBuffer* graphicBuffer,
-            SkBitmap* bitmap) override;
+                                             SkBitmap* bitmap) override;
 
 protected:
     explicit OpenGLReadback(renderthread::RenderThread& thread) : Readback(thread) {}
     virtual ~OpenGLReadback() {}
 
     virtual CopyResult copyImageInto(EGLImageKHR eglImage, const Matrix4& imgTransform,
-            int imgWidth, int imgHeight, const Rect& srcRect, SkBitmap* bitmap) = 0;
+                                     int imgWidth, int imgHeight, const Rect& srcRect,
+                                     SkBitmap* bitmap) = 0;
+
 private:
     CopyResult copyGraphicBufferInto(GraphicBuffer* graphicBuffer, Matrix4& texTransform,
-            const Rect& srcRect, SkBitmap* bitmap);
+                                     const Rect& srcRect, SkBitmap* bitmap);
 };
 
 class OpenGLReadbackImpl : public OpenGLReadback {
@@ -53,12 +55,13 @@ public:
      * Copies the layer's contents into the provided bitmap.
      */
     static bool copyLayerInto(renderthread::RenderThread& renderThread, GlLayer& layer,
-            SkBitmap* bitmap);
+                              SkBitmap* bitmap);
 
 protected:
     virtual CopyResult copyImageInto(EGLImageKHR eglImage, const Matrix4& imgTransform,
-            int imgWidth, int imgHeight, const Rect& srcRect, SkBitmap* bitmap) override;
+                                     int imgWidth, int imgHeight, const Rect& srcRect,
+                                     SkBitmap* bitmap) override;
 };
 
-} // namespace uirenderer
-} // namespace android
+}  // namespace uirenderer
+}  // namespace android

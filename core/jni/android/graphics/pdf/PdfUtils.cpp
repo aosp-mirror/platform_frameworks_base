@@ -17,7 +17,7 @@
 #include "PdfUtils.h"
 
 #include "jni.h"
-#include "JNIHelp.h"
+#include <nativehelper/JNIHelp.h>
 
 #include "fpdfview.h"
 
@@ -78,34 +78,24 @@ bool forwardPdfiumError(JNIEnv* env) {
     return true;
 }
 
-static bool initializeLibraryIfNeeded(JNIEnv* env) {
+static void initializeLibraryIfNeeded(JNIEnv* env) {
     if (sUnmatchedPdfiumInitRequestCount == 0) {
         FPDF_InitLibrary();
-
-        HANDLE_PDFIUM_ERROR_STATE_WITH_RET_CODE(env, false);
     }
 
     sUnmatchedPdfiumInitRequestCount++;
-    return true;
 }
 
 static void destroyLibraryIfNeeded(JNIEnv* env, bool handleError) {
     if (sUnmatchedPdfiumInitRequestCount == 1) {
-       FPDF_DestroyLibrary();
-
-       if (handleError) {
-           HANDLE_PDFIUM_ERROR_STATE(env);
-       }
+        FPDF_DestroyLibrary();
     }
 
     sUnmatchedPdfiumInitRequestCount--;
 }
 
 jlong nativeOpen(JNIEnv* env, jclass thiz, jint fd, jlong size) {
-    bool isInitialized = initializeLibraryIfNeeded(env);
-    if (!isInitialized) {
-        return -1;
-    }
+    initializeLibraryIfNeeded(env);
 
     FPDF_FILEACCESS loader;
     loader.m_FileLen = size;
@@ -125,7 +115,6 @@ jlong nativeOpen(JNIEnv* env, jclass thiz, jint fd, jlong size) {
 void nativeClose(JNIEnv* env, jclass thiz, jlong documentPtr) {
     FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
     FPDF_CloseDocument(document);
-    HANDLE_PDFIUM_ERROR_STATE(env)
 
     destroyLibraryIfNeeded(env, true);
 }
@@ -133,17 +122,12 @@ void nativeClose(JNIEnv* env, jclass thiz, jlong documentPtr) {
 jint nativeGetPageCount(JNIEnv* env, jclass thiz, jlong documentPtr) {
     FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
 
-    int pageCount = FPDF_GetPageCount(document);
-    HANDLE_PDFIUM_ERROR_STATE_WITH_RET_CODE(env, -1);
-
-    return pageCount;
+    return FPDF_GetPageCount(document);
 }
 
 jboolean nativeScaleForPrinting(JNIEnv* env, jclass thiz, jlong documentPtr) {
     FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
-
     FPDF_BOOL printScaling = FPDF_VIEWERREF_GetPrintScaling(document);
-    HANDLE_PDFIUM_ERROR_STATE_WITH_RET_CODE(env, false);
 
     return printScaling ? JNI_TRUE : JNI_FALSE;
 }

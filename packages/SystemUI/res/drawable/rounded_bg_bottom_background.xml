@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    <solid android:color="?android:attr/panelColorBackground" />
+    <corners
+        android:bottomLeftRadius="@dimen/corner_size"
+        android:topLeftRadius="0dp"
+        android:bottomRightRadius="@dimen/corner_size"
+        android:topRightRadius="0dp"
+        />
+</shape>

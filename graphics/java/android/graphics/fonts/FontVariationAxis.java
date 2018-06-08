@@ -178,7 +178,7 @@ public final class FontVariationAxis {
      * @return String a valid font variation settings string.
      */
     public static @NonNull String toFontVariationSettings(@Nullable FontVariationAxis[] axes) {
-        if (axes == null || axes.length == 0) {
+        if (axes == null) {
             return "";
         }
         return TextUtils.join(",", axes);

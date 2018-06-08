@@ -67,6 +67,11 @@ final class OppProfile implements LocalBluetoothProfile {
         return true;
     }
 
+    @Override
+    public int getProfileId() {
+        return BluetoothProfile.OPP;
+    }
+
     public String toString() {
         return NAME;
     }

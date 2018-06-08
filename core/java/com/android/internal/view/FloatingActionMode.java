@@ -17,6 +17,7 @@
 package com.android.internal.view;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -30,6 +31,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.WindowManager;
 
+import android.widget.PopupWindow;
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 import com.android.internal.view.menu.MenuBuilder;
@@ -239,6 +241,23 @@ public final class FloatingActionMode extends ActionMode {
             mFloatingToolbarVisibilityHelper.updateToolbarVisibility();
             mOriginatingView.postDelayed(mHideOff, duration);
         }
+    }
+
+    /**
+     * If this is set to true, the action mode view will dismiss itself on touch events outside of
+     * its window. This only makes sense if the action mode view is a PopupWindow that is touchable
+     * but not focusable, which means touches outside of the window will be delivered to the window
+     * behind. The default is false.
+     *
+     * This is for internal use only and the approach to this may change.
+     * @hide
+     *
+     * @param outsideTouchable whether or not this action mode is "outside touchable"
+     * @param onDismiss optional. Sets a callback for when this action mode popup dismisses itself
+     */
+    public void setOutsideTouchable(
+            boolean outsideTouchable, @Nullable PopupWindow.OnDismissListener onDismiss) {
+        mFloatingToolbar.setOutsideTouchable(outsideTouchable, onDismiss);
     }
 
     @Override

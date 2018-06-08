@@ -107,6 +107,7 @@ enum {
 struct stat_fields {
     jfieldID pss_field;
     jfieldID pssSwappable_field;
+    jfieldID rss_field;
     jfieldID privateDirty_field;
     jfieldID sharedDirty_field;
     jfieldID privateClean_field;
@@ -118,6 +119,7 @@ struct stat_fields {
 struct stat_field_names {
     const char* pss_name;
     const char* pssSwappable_name;
+    const char* rss_name;
     const char* privateDirty_name;
     const char* sharedDirty_name;
     const char* privateClean_name;
@@ -129,11 +131,11 @@ struct stat_field_names {
 static stat_fields stat_fields[_NUM_CORE_HEAP];
 
 static stat_field_names stat_field_names[_NUM_CORE_HEAP] = {
-    { "otherPss", "otherSwappablePss", "otherPrivateDirty", "otherSharedDirty",
+    { "otherPss", "otherSwappablePss", "otherRss", "otherPrivateDirty", "otherSharedDirty",
         "otherPrivateClean", "otherSharedClean", "otherSwappedOut", "otherSwappedOutPss" },
-    { "dalvikPss", "dalvikSwappablePss", "dalvikPrivateDirty", "dalvikSharedDirty",
+    { "dalvikPss", "dalvikSwappablePss", "dalvikRss", "dalvikPrivateDirty", "dalvikSharedDirty",
         "dalvikPrivateClean", "dalvikSharedClean", "dalvikSwappedOut", "dalvikSwappedOutPss" },
-    { "nativePss", "nativeSwappablePss", "nativePrivateDirty", "nativeSharedDirty",
+    { "nativePss", "nativeSwappablePss", "nativeRss", "nativePrivateDirty", "nativeSharedDirty",
         "nativePrivateClean", "nativeSharedClean", "nativeSwappedOut", "nativeSwappedOutPss" }
 };
 
@@ -143,6 +145,7 @@ jfieldID hasSwappedOutPss_field;
 struct stats_t {
     int pss;
     int swappablePss;
+    int rss;
     int privateDirty;
     int sharedDirty;
     int privateClean;
@@ -246,7 +249,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
     int len, nameLen;
     bool skip, done = false;
 
-    unsigned pss = 0, swappable_pss = 0;
+    unsigned pss = 0, swappable_pss = 0, rss = 0;
     float sharing_proportion = 0.0;
     unsigned shared_clean = 0, shared_dirty = 0;
     unsigned private_clean = 0, private_dirty = 0;
@@ -412,7 +415,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
             if (line[0] == 'S' && sscanf(line, "Size: %d kB", &temp) == 1) {
                 /* size = temp; */
             } else if (line[0] == 'R' && sscanf(line, "Rss: %d kB", &temp) == 1) {
-                /* resident = temp; */
+                rss = temp;
             } else if (line[0] == 'P' && sscanf(line, "Pss: %d kB", &temp) == 1) {
                 pss = temp;
             } else if (line[0] == 'S' && sscanf(line, "Shared_Clean: %d kB", &temp) == 1) {
@@ -450,6 +453,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
 
             stats[whichHeap].pss += pss;
             stats[whichHeap].swappablePss += swappable_pss;
+            stats[whichHeap].rss += rss;
             stats[whichHeap].privateDirty += private_dirty;
             stats[whichHeap].sharedDirty += shared_dirty;
             stats[whichHeap].privateClean += private_clean;
@@ -460,6 +464,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats, bool* foundSwapPss)
                     whichHeap == HEAP_DEX || whichHeap == HEAP_ART) {
                 stats[subHeap].pss += pss;
                 stats[subHeap].swappablePss += swappable_pss;
+                stats[subHeap].rss += rss;
                 stats[subHeap].privateDirty += private_dirty;
                 stats[subHeap].sharedDirty += shared_dirty;
                 stats[subHeap].privateClean += private_clean;
@@ -495,15 +500,19 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
     if (read_memtrack_memory(pid, &graphics_mem) == 0) {
         stats[HEAP_GRAPHICS].pss = graphics_mem.graphics;
         stats[HEAP_GRAPHICS].privateDirty = graphics_mem.graphics;
+        stats[HEAP_GRAPHICS].rss = graphics_mem.graphics;
         stats[HEAP_GL].pss = graphics_mem.gl;
         stats[HEAP_GL].privateDirty = graphics_mem.gl;
+        stats[HEAP_GL].rss = graphics_mem.gl;
         stats[HEAP_OTHER_MEMTRACK].pss = graphics_mem.other;
         stats[HEAP_OTHER_MEMTRACK].privateDirty = graphics_mem.other;
+        stats[HEAP_OTHER_MEMTRACK].rss = graphics_mem.other;
     }
 
     for (int i=_NUM_CORE_HEAP; i<_NUM_EXCLUSIVE_HEAP; i++) {
         stats[HEAP_UNKNOWN].pss += stats[i].pss;
         stats[HEAP_UNKNOWN].swappablePss += stats[i].swappablePss;
+        stats[HEAP_UNKNOWN].rss += stats[i].rss;
         stats[HEAP_UNKNOWN].privateDirty += stats[i].privateDirty;
         stats[HEAP_UNKNOWN].sharedDirty += stats[i].sharedDirty;
         stats[HEAP_UNKNOWN].privateClean += stats[i].privateClean;
@@ -515,6 +524,7 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
     for (int i=0; i<_NUM_CORE_HEAP; i++) {
         env->SetIntField(object, stat_fields[i].pss_field, stats[i].pss);
         env->SetIntField(object, stat_fields[i].pssSwappable_field, stats[i].swappablePss);
+        env->SetIntField(object, stat_fields[i].rss_field, stats[i].rss);
         env->SetIntField(object, stat_fields[i].privateDirty_field, stats[i].privateDirty);
         env->SetIntField(object, stat_fields[i].sharedDirty_field, stats[i].sharedDirty);
         env->SetIntField(object, stat_fields[i].privateClean_field, stats[i].privateClean);
@@ -536,6 +546,7 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
     for (int i=_NUM_CORE_HEAP; i<_NUM_HEAP; i++) {
         otherArray[j++] = stats[i].pss;
         otherArray[j++] = stats[i].swappablePss;
+        otherArray[j++] = stats[i].rss;
         otherArray[j++] = stats[i].privateDirty;
         otherArray[j++] = stats[i].sharedDirty;
         otherArray[j++] = stats[i].privateClean;
@@ -580,10 +591,11 @@ UniqueFile OpenSmapsOrRollup(int pid)
 }
 
 static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
-        jlongArray outUssSwapPss, jlongArray outMemtrack)
+        jlongArray outUssSwapPssRss, jlongArray outMemtrack)
 {
-    char line[1024];
+    char lineBuffer[1024];
     jlong pss = 0;
+    jlong rss = 0;
     jlong swapPss = 0;
     jlong uss = 0;
     jlong memtrack = 0;
@@ -597,50 +609,70 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
         UniqueFile fp = OpenSmapsOrRollup(pid);
 
         if (fp != nullptr) {
+            char* line;
+
             while (true) {
-                if (fgets(line, sizeof (line), fp.get()) == NULL) {
+                if (fgets(lineBuffer, sizeof (lineBuffer), fp.get()) == NULL) {
                     break;
                 }
+                line = lineBuffer;
 
-                if (line[0] == 'P') {
-                    if (strncmp(line, "Pss:", 4) == 0) {
-                        char* c = line + 4;
-                        while (*c != 0 && (*c < '0' || *c > '9')) {
-                            c++;
+                switch (line[0]) {
+                    case 'P':
+                        if (strncmp(line, "Pss:", 4) == 0) {
+                            char* c = line + 4;
+                            while (*c != 0 && (*c < '0' || *c > '9')) {
+                                c++;
+                            }
+                            pss += atoi(c);
+                        } else if (strncmp(line, "Private_Clean:", 14) == 0
+                                    || strncmp(line, "Private_Dirty:", 14) == 0) {
+                            char* c = line + 14;
+                            while (*c != 0 && (*c < '0' || *c > '9')) {
+                                c++;
+                            }
+                            uss += atoi(c);
                         }
-                        pss += atoi(c);
-                    } else if (strncmp(line, "Private_Clean:", 14) == 0
-                                || strncmp(line, "Private_Dirty:", 14) == 0) {
-                        char* c = line + 14;
-                        while (*c != 0 && (*c < '0' || *c > '9')) {
-                            c++;
+                        break;
+                    case 'R':
+                        if (strncmp(line, "Rss:", 4) == 0) {
+                            char* c = line + 4;
+                            while (*c != 0 && (*c < '0' || *c > '9')) {
+                                c++;
+                            }
+                            rss += atoi(c);
                         }
-                        uss += atoi(c);
-                    }
-                } else if (line[0] == 'S' && strncmp(line, "SwapPss:", 8) == 0) {
-                    char* c = line + 8;
-                    jlong lSwapPss;
-                    while (*c != 0 && (*c < '0' || *c > '9')) {
-                        c++;
-                    }
-                    lSwapPss = atoi(c);
-                    swapPss += lSwapPss;
-                    pss += lSwapPss; // Also in swap, those pages would be accounted as Pss without SWAP
+                        break;
+                    case 'S':
+                        if (strncmp(line, "SwapPss:", 8) == 0) {
+                            char* c = line + 8;
+                            jlong lSwapPss;
+                            while (*c != 0 && (*c < '0' || *c > '9')) {
+                                c++;
+                            }
+                            lSwapPss = atoi(c);
+                            swapPss += lSwapPss;
+                            pss += lSwapPss; // Also in swap, those pages would be accounted as Pss without SWAP
+                        }
+                        break;
                 }
             }
         }
     }
 
-    if (outUssSwapPss != NULL) {
-        if (env->GetArrayLength(outUssSwapPss) >= 1) {
-            jlong* outUssSwapPssArray = env->GetLongArrayElements(outUssSwapPss, 0);
-            if (outUssSwapPssArray != NULL) {
-                outUssSwapPssArray[0] = uss;
-                if (env->GetArrayLength(outUssSwapPss) >= 2) {
-                    outUssSwapPssArray[1] = swapPss;
+    if (outUssSwapPssRss != NULL) {
+        if (env->GetArrayLength(outUssSwapPssRss) >= 1) {
+            jlong* outUssSwapPssRssArray = env->GetLongArrayElements(outUssSwapPssRss, 0);
+            if (outUssSwapPssRssArray != NULL) {
+                outUssSwapPssRssArray[0] = uss;
+                if (env->GetArrayLength(outUssSwapPssRss) >= 2) {
+                    outUssSwapPssRssArray[1] = swapPss;
+                }
+                if (env->GetArrayLength(outUssSwapPssRss) >= 3) {
+                    outUssSwapPssRssArray[2] = rss;
                 }
             }
-            env->ReleaseLongArrayElements(outUssSwapPss, outUssSwapPssArray, 0);
+            env->ReleaseLongArrayElements(outUssSwapPssRss, outUssSwapPssRssArray, 0);
         }
     }
 
@@ -747,7 +779,7 @@ static long long get_zram_mem_used()
 
 static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray out)
 {
-    char buffer[1024];
+    char buffer[4096];
     size_t numFound = 0;
 
     if (out == NULL) {
@@ -1209,6 +1241,8 @@ int register_android_os_Debug(JNIEnv *env)
                 env->GetFieldID(clazz, stat_field_names[i].pss_name, "I");
         stat_fields[i].pssSwappable_field =
                 env->GetFieldID(clazz, stat_field_names[i].pssSwappable_name, "I");
+        stat_fields[i].rss_field =
+                env->GetFieldID(clazz, stat_field_names[i].rss_name, "I");
         stat_fields[i].privateDirty_field =
                 env->GetFieldID(clazz, stat_field_names[i].privateDirty_name, "I");
         stat_fields[i].sharedDirty_field =

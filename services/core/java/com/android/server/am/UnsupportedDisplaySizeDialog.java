@@ -30,7 +30,7 @@ public class UnsupportedDisplaySizeDialog {
     private final AlertDialog mDialog;
     private final String mPackageName;
 
-    public UnsupportedDisplaySizeDialog(final ActivityManagerService service, Context context,
+    public UnsupportedDisplaySizeDialog(final AppWarnings manager, Context context,
             ApplicationInfo appInfo) {
         mPackageName = appInfo.packageName;
 
@@ -54,14 +54,10 @@ public class UnsupportedDisplaySizeDialog {
         // DO NOT MODIFY. Used by CTS to verify the dialog is displayed.
         window.getAttributes().setTitle("UnsupportedDisplaySizeDialog");
 
-        final CheckBox alwaysShow = (CheckBox) mDialog.findViewById(R.id.ask_checkbox);
+        final CheckBox alwaysShow = mDialog.findViewById(R.id.ask_checkbox);
         alwaysShow.setChecked(true);
-        alwaysShow.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            synchronized (service) {
-                service.mCompatModePackages.setPackageNotifyUnsupportedZoomLocked(
-                        mPackageName, isChecked);
-            }
-        });
+        alwaysShow.setOnCheckedChangeListener((buttonView, isChecked) -> manager.setPackageFlag(
+                mPackageName, AppWarnings.FLAG_HIDE_DISPLAY_SIZE, !isChecked));
     }
 
     public String getPackageName() {

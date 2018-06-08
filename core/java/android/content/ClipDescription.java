@@ -21,6 +21,7 @@ import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.text.TextUtils;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -335,6 +336,28 @@ public class ClipDescription implements Parcelable {
             b.append(mMimeTypes.get(i));
         }
         return !first;
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
+        final int size = mMimeTypes.size();
+        for (int i = 0; i < size; i++) {
+            proto.write(ClipDescriptionProto.MIME_TYPES, mMimeTypes.get(i));
+        }
+
+        if (mLabel != null) {
+            proto.write(ClipDescriptionProto.LABEL, mLabel.toString());
+        }
+        if (mExtras != null) {
+            mExtras.writeToProto(proto, ClipDescriptionProto.EXTRAS);
+        }
+        if (mTimeStamp > 0) {
+            proto.write(ClipDescriptionProto.TIMESTAMP_MS, mTimeStamp);
+        }
+
+        proto.end(token);
     }
 
     @Override

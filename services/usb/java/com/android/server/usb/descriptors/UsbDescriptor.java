@@ -85,36 +85,36 @@ public abstract class UsbDescriptor implements Reporting {
     public static final byte DESCRIPTORTYPE_ENDPOINT_COMPANION = 0x30; // 48
 
     // Class IDs
-    public static final byte CLASSID_DEVICE  =      0x00;
-    public static final byte CLASSID_AUDIO =        0x01;
-    public static final byte CLASSID_COM =          0x02;
-    public static final byte CLASSID_HID =          0x03;
-    // public static final byte CLASSID_??? =       0x04;
-    public static final byte CLASSID_PHYSICAL =     0x05;
-    public static final byte CLASSID_IMAGE =        0x06;
-    public static final byte CLASSID_PRINTER =      0x07;
-    public static final byte CLASSID_STORAGE =      0x08;
-    public static final byte CLASSID_HUB =          0x09;
-    public static final byte CLASSID_CDC_CONTROL =  0x0A;
-    public static final byte CLASSID_SMART_CARD =   0x0B;
-    //public static final byte CLASSID_??? =        0x0C;
-    public static final byte CLASSID_SECURITY =     0x0D;
-    public static final byte CLASSID_VIDEO =        0x0E;
-    public static final byte CLASSID_HEALTHCARE =   0x0F;
-    public static final byte CLASSID_AUDIOVIDEO =   0x10;
-    public static final byte CLASSID_BILLBOARD =    0x11;
-    public static final byte CLASSID_TYPECBRIDGE =  0x12;
-    public static final byte CLASSID_DIAGNOSTIC =   (byte) 0xDC;
-    public static final byte CLASSID_WIRELESS =     (byte) 0xE0;
-    public static final byte CLASSID_MISC =         (byte) 0xEF;
-    public static final byte CLASSID_APPSPECIFIC =  (byte) 0xFE;
-    public static final byte CLASSID_VENDSPECIFIC = (byte) 0xFF;
+    public static final int CLASSID_DEVICE  =      0x00;
+    public static final int CLASSID_AUDIO =        0x01;
+    public static final int CLASSID_COM =          0x02;
+    public static final int CLASSID_HID =          0x03;
+    // public static final int CLASSID_??? =       0x04;
+    public static final int CLASSID_PHYSICAL =     0x05;
+    public static final int CLASSID_IMAGE =        0x06;
+    public static final int CLASSID_PRINTER =      0x07;
+    public static final int CLASSID_STORAGE =      0x08;
+    public static final int CLASSID_HUB =          0x09;
+    public static final int CLASSID_CDC_CONTROL =  0x0A;
+    public static final int CLASSID_SMART_CARD =   0x0B;
+    //public static final int CLASSID_??? =        0x0C;
+    public static final int CLASSID_SECURITY =     0x0D;
+    public static final int CLASSID_VIDEO =        0x0E;
+    public static final int CLASSID_HEALTHCARE =   0x0F;
+    public static final int CLASSID_AUDIOVIDEO =   0x10;
+    public static final int CLASSID_BILLBOARD =    0x11;
+    public static final int CLASSID_TYPECBRIDGE =  0x12;
+    public static final int CLASSID_DIAGNOSTIC =   0xDC;
+    public static final int CLASSID_WIRELESS =     0xE0;
+    public static final int CLASSID_MISC =         0xEF;
+    public static final int CLASSID_APPSPECIFIC =  0xFE;
+    public static final int CLASSID_VENDSPECIFIC = 0xFF;
 
     // Audio Subclass codes
-    public static final byte AUDIO_SUBCLASS_UNDEFINED   = 0x00;
-    public static final byte AUDIO_AUDIOCONTROL         = 0x01;
-    public static final byte AUDIO_AUDIOSTREAMING       = 0x02;
-    public static final byte AUDIO_MIDISTREAMING        = 0x03;
+    public static final int AUDIO_SUBCLASS_UNDEFINED   = 0x00;
+    public static final int AUDIO_AUDIOCONTROL         = 0x01;
+    public static final int AUDIO_AUDIOSTREAMING       = 0x02;
+    public static final int AUDIO_MIDISTREAMING        = 0x03;
 
     // Request IDs
     public static final int REQUEST_GET_STATUS         = 0x00;

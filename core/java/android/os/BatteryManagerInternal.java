@@ -24,26 +24,63 @@ package android.os;
 public abstract class BatteryManagerInternal {
     /**
      * Returns true if the device is plugged into any of the specified plug types.
+     *
+     * This is a simple accessor that's safe to be called from any locks, but internally it may
+     * wait on the battery service lock.
      */
     public abstract boolean isPowered(int plugTypeSet);
 
     /**
      * Returns the current plug type.
+     *
+     * This is a simple accessor that's safe to be called from any locks, but internally it may
+     * wait on the battery service lock.
      */
     public abstract int getPlugType();
 
     /**
      * Returns battery level as a percentage.
+     *
+     * This is a simple accessor that's safe to be called from any locks, but internally it may
+     * wait on the battery service lock.
      */
     public abstract int getBatteryLevel();
 
     /**
+     * Instantaneous battery capacity in uA-h, as defined in the HealthInfo HAL struct.
+     * Please note apparently it could be bigger than {@link #getBatteryFullCharge}.
+     *
+     * This is a simple accessor that's safe to be called from any locks, but internally it may
+     * wait on the battery service lock.
+     *
+     * @see android.hardware.health.V1_0.HealthInfo#batteryChargeCounter
+     */
+    public abstract int getBatteryChargeCounter();
+
+    /**
+     * Battery charge value when it is considered to be "full" in uA-h , as defined in the
+     * HealthInfo HAL struct.
+     *
+     * This is a simple accessor that's safe to be called from any locks, but internally it may
+     * wait on the battery service lock.
+     *
+     * @see android.hardware.health.V1_0.HealthInfo#batteryFullCharge
+     */
+    public abstract int getBatteryFullCharge();
+
+    /**
      * Returns whether we currently consider the battery level to be low.
+     *
+     * This is a simple accessor that's safe to be called from any locks, but internally it may
+     * wait on the battery service lock.
      */
     public abstract boolean getBatteryLevelLow();
 
     /**
      * Returns a non-zero value if an unsupported charger is attached.
+     *
+     * This is a simple accessor that's safe to be called from any locks, but internally it may
+     * wait on the battery service lock.
      */
     public abstract int getInvalidCharger();
 }

@@ -99,6 +99,21 @@ public class TonalTest {
     }
 
     @Test
+    public void tonal_rangeTest() {
+        Tonal.ConfigParser config = new Tonal.ConfigParser(InstrumentationRegistry.getContext());
+        for (Tonal.TonalPalette palette : config.getTonalPalettes()) {
+            assertTrue("minHue should be >= to 0.", palette.minHue >= 0);
+            assertTrue("maxHue should be <= to 360.", palette.maxHue <= 360);
+
+            assertTrue("S should be >= to 0.", palette.s[0] >= 0);
+            assertTrue("S should be <= to 1.", palette.s[1] <= 1);
+
+            assertTrue("L should be >= to 0.", palette.l[0] >= 0);
+            assertTrue("L should be <= to 1.", palette.l[1] <= 1);
+        }
+    }
+
+    @Test
     public void tonal_blacklistTest() {
         // Make sure that palette generation will fail.
         final Tonal tonal = new Tonal(InstrumentationRegistry.getContext());

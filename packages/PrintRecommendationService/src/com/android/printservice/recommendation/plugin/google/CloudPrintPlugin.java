@@ -18,11 +18,12 @@ package com.android.printservice.recommendation.plugin.google;
 
 import static com.android.printservice.recommendation.util.MDNSUtils.ATTRIBUTE_TY;
 
-import android.annotation.NonNull;
-import android.annotation.StringRes;
 import android.content.Context;
 import android.util.ArrayMap;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 
 import com.android.printservice.recommendation.PrintServicePlugin;
 import com.android.printservice.recommendation.R;

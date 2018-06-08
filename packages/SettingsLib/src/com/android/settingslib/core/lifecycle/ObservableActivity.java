@@ -15,8 +15,16 @@
  */
 package com.android.settingslib.core.lifecycle;
 
+import static android.arch.lifecycle.Lifecycle.Event.ON_CREATE;
+import static android.arch.lifecycle.Lifecycle.Event.ON_DESTROY;
+import static android.arch.lifecycle.Lifecycle.Event.ON_PAUSE;
+import static android.arch.lifecycle.Lifecycle.Event.ON_RESUME;
+import static android.arch.lifecycle.Lifecycle.Event.ON_START;
+import static android.arch.lifecycle.Lifecycle.Event.ON_STOP;
+
 import android.annotation.Nullable;
 import android.app.Activity;
+import android.arch.lifecycle.LifecycleOwner;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.view.Menu;
@@ -25,17 +33,19 @@ import android.view.MenuItem;
 /**
  * {@link Activity} that has hooks to observe activity lifecycle events.
  */
-public class ObservableActivity extends Activity {
+public class ObservableActivity extends Activity implements LifecycleOwner {
 
-    private final Lifecycle mLifecycle = new Lifecycle();
+    private final Lifecycle mLifecycle = new Lifecycle(this);
 
-    protected Lifecycle getLifecycle() {
+    public Lifecycle getLifecycle() {
         return mLifecycle;
     }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         mLifecycle.onAttach(this);
+        mLifecycle.onCreate(savedInstanceState);
+        mLifecycle.handleLifecycleEvent(ON_CREATE);
         super.onCreate(savedInstanceState);
     }
 
@@ -43,36 +53,38 @@ public class ObservableActivity extends Activity {
     public void onCreate(@Nullable Bundle savedInstanceState,
             @Nullable PersistableBundle persistentState) {
         mLifecycle.onAttach(this);
+        mLifecycle.onCreate(savedInstanceState);
+        mLifecycle.handleLifecycleEvent(ON_CREATE);
         super.onCreate(savedInstanceState, persistentState);
     }
 
     @Override
     protected void onStart() {
-        mLifecycle.onStart();
+        mLifecycle.handleLifecycleEvent(ON_START);
         super.onStart();
     }
 
     @Override
     protected void onResume() {
-        mLifecycle.onResume();
+        mLifecycle.handleLifecycleEvent(ON_RESUME);
         super.onResume();
     }
 
     @Override
     protected void onPause() {
-        mLifecycle.onPause();
+        mLifecycle.handleLifecycleEvent(ON_PAUSE);
         super.onPause();
     }
 
     @Override
     protected void onStop() {
-        mLifecycle.onStop();
+        mLifecycle.handleLifecycleEvent(ON_STOP);
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
-        mLifecycle.onDestroy();
+        mLifecycle.handleLifecycleEvent(ON_DESTROY);
         super.onDestroy();
     }
 

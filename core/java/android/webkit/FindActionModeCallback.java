@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.res.Resources;
@@ -69,7 +70,7 @@ public class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         mActionMode.finish();
     }
 
-    /*
+    /**
      * Place text in the text field so it can be searched for.  Need to press
      * the find next or find previous button to find all of the matches.
      */
@@ -87,10 +88,12 @@ public class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         mMatchesFound = false;
     }
 
-    /*
-     * Set the WebView to search.  Must be non null.
+    /**
+     * Set the WebView to search.
+     *
+     * @param webView an implementation of WebView
      */
-    public void setWebView(WebView webView) {
+    public void setWebView(@NonNull WebView webView) {
         if (null == webView) {
             throw new AssertionError("WebView supplied to "
                     + "FindActionModeCallback cannot be null");
@@ -107,10 +110,10 @@ public class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         }
     }
 
-    /*
+    /**
      * Move the highlight to the next match.
-     * @param next If true, find the next match further down in the document.
-     *             If false, find the previous match, up in the document.
+     * @param next If {@code true}, find the next match further down in the document.
+     *             If {@code false}, find the previous match, up in the document.
      */
     private void findNext(boolean next) {
         if (mWebView == null) {
@@ -130,7 +133,7 @@ public class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         updateMatchesString();
     }
 
-    /*
+    /**
      * Highlight all the instances of the string from mEditText in mWebView.
      */
     public void findAll() {
@@ -169,7 +172,7 @@ public class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         }
     }
 
-    /*
+    /**
      * Update the string which tells the user how many matches were found, and
      * which match is currently highlighted.
      */

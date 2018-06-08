@@ -57,26 +57,46 @@ public class IndentingPrintWriter extends PrintWriter {
         mWrapLength = wrapLength;
     }
 
-    public void increaseIndent() {
+    public IndentingPrintWriter setIndent(String indent) {
+        mIndentBuilder.setLength(0);
+        mIndentBuilder.append(indent);
+        mCurrentIndent = null;
+        return this;
+    }
+
+    public IndentingPrintWriter setIndent(int indent) {
+        mIndentBuilder.setLength(0);
+        for (int i = 0; i < indent; i++) {
+            increaseIndent();
+        }
+        return this;
+    }
+
+    public IndentingPrintWriter increaseIndent() {
         mIndentBuilder.append(mSingleIndent);
         mCurrentIndent = null;
+        return this;
     }
 
-    public void decreaseIndent() {
+    public IndentingPrintWriter decreaseIndent() {
         mIndentBuilder.delete(0, mSingleIndent.length());
         mCurrentIndent = null;
+        return this;
     }
 
-    public void printPair(String key, Object value) {
+    public IndentingPrintWriter printPair(String key, Object value) {
         print(key + "=" + String.valueOf(value) + " ");
+        return this;
     }
 
-    public void printPair(String key, Object[] value) {
+    public IndentingPrintWriter printPair(String key, Object[] value) {
         print(key + "=" + Arrays.toString(value) + " ");
+        return this;
     }
 
-    public void printHexPair(String key, int value) {
+    public IndentingPrintWriter printHexPair(String key, int value) {
         print(key + "=0x" + Integer.toHexString(value) + " ");
+        return this;
     }
 
     @Override

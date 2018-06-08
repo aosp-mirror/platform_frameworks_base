@@ -23,12 +23,17 @@ import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
+import android.content.pm.SigningInfo;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
+
+import com.android.server.LocalServices;
+import com.android.server.backup.utils.AppBackupUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -68,11 +73,27 @@ public class PackageManagerBackupAgent extends BackupAgent {
     private static final String DEFAULT_HOME_KEY = "@home@";
 
     // Sentinel: start of state file, followed by a version number
+    // Note that STATE_FILE_VERSION=2 is tied to UNDEFINED_ANCESTRAL_RECORD_VERSION=-1 *as well as*
+    // ANCESTRAL_RECORD_VERSION=1 (introduced Android P).
+    // Should the ANCESTRAL_RECORD_VERSION be bumped up in the future, STATE_FILE_VERSION will also
+    // need bumping up, assuming more data needs saving to the state file.
     private static final String STATE_FILE_HEADER = "=state=";
     private static final int STATE_FILE_VERSION = 2;
 
-    // Current version of the saved ancestral-dataset file format
+    // key under which we store the saved ancestral-dataset format (starting from Android P)
+    // IMPORTANT: this key needs to come first in the restore data stream (to find out
+    // whether this version of Android knows how to restore the incoming data set), so it needs
+    // to be always the first one in alphabetical order of all the keys
+    private static final String ANCESTRAL_RECORD_KEY = "@ancestral_record@";
+
+    // Current version of the saved ancestral-dataset format
+    // Note that this constant was not used until Android P, and started being used
+    // to version @pm@ data for forwards-compatibility.
     private static final int ANCESTRAL_RECORD_VERSION = 1;
+
+    // Undefined version of the saved ancestral-dataset file format means that the restore data
+    // is coming from pre-Android P device.
+    private static final int UNDEFINED_ANCESTRAL_RECORD_VERSION = -1;
 
     private List<PackageInfo> mAllPackages;
     private PackageManager mPackageManager;
@@ -97,10 +118,10 @@ public class PackageManagerBackupAgent extends BackupAgent {
     // For compactness we store the SHA-256 hash of each app's Signatures
     // rather than the Signature blocks themselves.
     public class Metadata {
-        public int versionCode;
+        public long versionCode;
         public ArrayList<byte[]> sigHashes;
 
-        Metadata(int version, ArrayList<byte[]> hashes) {
+        Metadata(long version, ArrayList<byte[]> hashes) {
             versionCode = version;
             sigHashes = hashes;
         }
@@ -136,11 +157,11 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
     public static List<PackageInfo> getStorableApplications(PackageManager pm) {
         List<PackageInfo> pkgs;
-        pkgs = pm.getInstalledPackages(PackageManager.GET_SIGNATURES);
+        pkgs = pm.getInstalledPackages(PackageManager.GET_SIGNING_CERTIFICATES);
         int N = pkgs.size();
         for (int a = N-1; a >= 0; a--) {
             PackageInfo pkg = pkgs.get(a);
-            if (!BackupManagerService.appIsEligibleForBackup(pkg.applicationInfo, pm)) {
+            if (!AppBackupUtils.appIsEligibleForBackup(pkg.applicationInfo, pm)) {
                 pkgs.remove(a);
             }
         }
@@ -173,9 +194,8 @@ public class PackageManagerBackupAgent extends BackupAgent {
         // additional involvement by the transport to obtain.
         return mRestoredSignatures.keySet();
     }
-    
-    // The backed up data is the signature block for each app, keyed by
-    // the package name.
+
+    // The backed up data is the signature block for each app, keyed by the package name.
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) {
         if (DEBUG) Slog.v(TAG, "onBackup()");
@@ -194,6 +214,22 @@ public class PackageManagerBackupAgent extends BackupAgent {
             mExisting.clear();
         }
 
+        /*
+         * Ancestral record version:
+         *
+         * int ancestralRecordVersion -- the version of the format in which this backup set is
+         *                               produced
+         */
+        try {
+            if (DEBUG) Slog.v(TAG, "Storing ancestral record version key");
+            outputBufferStream.writeInt(ANCESTRAL_RECORD_VERSION);
+            writeEntity(data, ANCESTRAL_RECORD_KEY, outputBuffer.toByteArray());
+        } catch (IOException e) {
+            // Real error writing data
+            Slog.e(TAG, "Unable to write package backup data file!");
+            return;
+        }
+
         long homeVersion = 0;
         ArrayList<byte[]> homeSigHashes = null;
         PackageInfo homeInfo = null;
@@ -202,10 +238,18 @@ public class PackageManagerBackupAgent extends BackupAgent {
         if (home != null) {
             try {
                 homeInfo = mPackageManager.getPackageInfo(home.getPackageName(),
-                        PackageManager.GET_SIGNATURES);
+                        PackageManager.GET_SIGNING_CERTIFICATES);
                 homeInstaller = mPackageManager.getInstallerPackageName(home.getPackageName());
-                homeVersion = homeInfo.versionCode;
-                homeSigHashes = BackupUtils.hashSignatureArray(homeInfo.signatures);
+                homeVersion = homeInfo.getLongVersionCode();
+                SigningInfo signingInfo = homeInfo.signingInfo;
+                if (signingInfo == null) {
+                    Slog.e(TAG, "Home app has no signing information");
+                } else {
+                    // retrieve the newest sigs to back up
+                    // TODO (b/73988180) use entire signing history in case of rollbacks
+                    Signature[] homeInfoSignatures = signingInfo.getApkContentsSigners();
+                    homeSigHashes = BackupUtils.hashSignatureArray(homeInfoSignatures);
+                }
             } catch (NameNotFoundException e) {
                 Slog.w(TAG, "Can't access preferred home info");
                 // proceed as though there were no preferred home set
@@ -219,15 +263,17 @@ public class PackageManagerBackupAgent extends BackupAgent {
             //    2. the home app [or absence] we now use differs from the prior state,
             // OR 3. it looks like we use the same home app + version as before, but
             //       the signatures don't match so we treat them as different apps.
+            PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
             final boolean needHomeBackup = (homeVersion != mStoredHomeVersion)
                     || !Objects.equals(home, mStoredHomeComponent)
                     || (home != null
-                        && !BackupUtils.signaturesMatch(mStoredHomeSigHashes, homeInfo));
+                        && !BackupUtils.signaturesMatch(mStoredHomeSigHashes, homeInfo, pmi));
             if (needHomeBackup) {
                 if (DEBUG) {
                     Slog.i(TAG, "Home preference changed; backing up new state " + home);
                 }
                 if (home != null) {
+                    outputBuffer.reset();
                     outputBufferStream.writeUTF(home.flattenToString());
                     outputBufferStream.writeLong(homeVersion);
                     outputBufferStream.writeUTF(homeInstaller != null ? homeInstaller : "" );
@@ -242,8 +288,8 @@ public class PackageManagerBackupAgent extends BackupAgent {
              * Global metadata:
              *
              * int SDKversion -- the SDK version of the OS itself on the device
-             *                   that produced this backup set.  Used to reject
-             *                   backups from later OSes onto earlier ones.
+             *                   that produced this backup set. Before Android P it was used to
+             *                   reject backups from later OSes onto earlier ones.
              * String incremental -- the incremental release name of the OS stored in
              *                       the backup set.
              */
@@ -270,7 +316,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                     PackageInfo info = null;
                     try {
                         info = mPackageManager.getPackageInfo(packName,
-                                PackageManager.GET_SIGNATURES);
+                                PackageManager.GET_SIGNING_CERTIFICATES);
                     } catch (NameNotFoundException e) {
                         // Weird; we just found it, and now are told it doesn't exist.
                         // Treat it as having been removed from the device.
@@ -285,13 +331,13 @@ public class PackageManagerBackupAgent extends BackupAgent {
                         // metadata again.  In either case, take it out of mExisting so that
                         // we don't consider it deleted later.
                         mExisting.remove(packName);
-                        if (info.versionCode == mStateVersions.get(packName).versionCode) {
+                        if (info.getLongVersionCode() == mStateVersions.get(packName).versionCode) {
                             continue;
                         }
                     }
-                    
-                    if (info.signatures == null || info.signatures.length == 0)
-                    {
+
+                    SigningInfo signingInfo = info.signingInfo;
+                    if (signingInfo == null) {
                         Slog.w(TAG, "Not backing up package " + packName
                                 + " since it appears to have no signatures.");
                         continue;
@@ -307,13 +353,20 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
                     // marshal the version code in a canonical form
                     outputBuffer.reset();
-                    outputBufferStream.writeInt(info.versionCode);
+                    if (info.versionCodeMajor != 0) {
+                        outputBufferStream.writeInt(Integer.MIN_VALUE);
+                        outputBufferStream.writeLong(info.getLongVersionCode());
+                    } else {
+                        outputBufferStream.writeInt(info.versionCode);
+                    }
+                    // retrieve the newest sigs to back up
+                    Signature[] infoSignatures = signingInfo.getApkContentsSigners();
                     writeSignatureHashArray(outputBufferStream,
-                            BackupUtils.hashSignatureArray(info.signatures));
+                            BackupUtils.hashSignatureArray(infoSignatures));
 
                     if (DEBUG) {
                         Slog.v(TAG, "+ writing metadata for " + packName
-                                + " version=" + info.versionCode
+                                + " version=" + info.getLongVersionCode()
                                 + " entityLen=" + outputBuffer.size());
                     }
                     
@@ -347,7 +400,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
         // Finally, write the new state blob -- just the list of all apps we handled
         writeStateFile(mAllPackages, home, homeVersion, homeSigHashes, newState);
     }
-    
+
     private static void writeEntity(BackupDataOutput data, String key, byte[] bytes)
             throws IOException {
         data.writeEntityHeader(key, bytes.length);
@@ -359,77 +412,57 @@ public class PackageManagerBackupAgent extends BackupAgent {
     // image.  We'll use those later to determine what we can legitimately restore.
     public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState)
             throws IOException {
-        List<ApplicationInfo> restoredApps = new ArrayList<ApplicationInfo>();
-        HashMap<String, Metadata> sigMap = new HashMap<String, Metadata>();
         if (DEBUG) Slog.v(TAG, "onRestore()");
-        int storedSystemVersion = -1;
 
-        while (data.readNextHeader()) {
+        // we expect the ANCESTRAL_RECORD_KEY ("@ancestral_record@") to always come first in the
+        // restore set - based on that value we use different mechanisms to consume the data;
+        // if the ANCESTRAL_RECORD_KEY is missing in the restore set, it means that the data is
+        // is coming from a pre-Android P device, and we consume the header data in the legacy way
+        // TODO: add a CTS test to verify that backups of PMBA generated on Android P+ always
+        //       contain the ANCESTRAL_RECORD_KEY, and it's always the first key
+        int ancestralRecordVersion = getAncestralRecordVersionValue(data);
+
+        RestoreDataConsumer consumer = getRestoreDataConsumer(ancestralRecordVersion);
+        if (consumer == null) {
+            Slog.w(TAG, "Ancestral restore set version is unknown"
+                    + " to this Android version; not restoring");
+            return;
+        } else {
+            consumer.consumeRestoreData(data);
+        }
+    }
+
+    private int getAncestralRecordVersionValue(BackupDataInput data) throws IOException {
+        int ancestralRecordVersionValue = UNDEFINED_ANCESTRAL_RECORD_VERSION;
+        if (data.readNextHeader()) {
             String key = data.getKey();
             int dataSize = data.getDataSize();
 
             if (DEBUG) Slog.v(TAG, "   got key=" + key + " dataSize=" + dataSize);
 
-            // generic setup to parse any entity data
-            byte[] inputBytes = new byte[dataSize];
-            data.readEntityData(inputBytes, 0, dataSize);
-            ByteArrayInputStream inputBuffer = new ByteArrayInputStream(inputBytes);
-            DataInputStream inputBufferStream = new DataInputStream(inputBuffer);
+            if (ANCESTRAL_RECORD_KEY.equals(key)) {
+                // generic setup to parse any entity data
+                byte[] inputBytes = new byte[dataSize];
+                data.readEntityData(inputBytes, 0, dataSize);
+                ByteArrayInputStream inputBuffer = new ByteArrayInputStream(inputBytes);
+                DataInputStream inputBufferStream = new DataInputStream(inputBuffer);
 
-            if (key.equals(GLOBAL_METADATA_KEY)) {
-                int storedSdkVersion = inputBufferStream.readInt();
-                if (DEBUG) Slog.v(TAG, "   storedSystemVersion = " + storedSystemVersion);
-                if (storedSystemVersion > Build.VERSION.SDK_INT) {
-                    // returning before setting the sig map means we rejected the restore set
-                    Slog.w(TAG, "Restore set was from a later version of Android; not restoring");
-                    return;
-                }
-                mStoredSdkVersion = storedSdkVersion;
-                mStoredIncrementalVersion = inputBufferStream.readUTF();
-                mHasMetadata = true;
-                if (DEBUG) {
-                    Slog.i(TAG, "Restore set version " + storedSystemVersion
-                            + " is compatible with OS version " + Build.VERSION.SDK_INT
-                            + " (" + mStoredIncrementalVersion + " vs "
-                            + Build.VERSION.INCREMENTAL + ")");
-                }
-            } else if (key.equals(DEFAULT_HOME_KEY)) {
-                String cn = inputBufferStream.readUTF();
-                mRestoredHome = ComponentName.unflattenFromString(cn);
-                mRestoredHomeVersion = inputBufferStream.readLong();
-                mRestoredHomeInstaller = inputBufferStream.readUTF();
-                mRestoredHomeSigHashes = readSignatureHashArray(inputBufferStream);
-                if (DEBUG) {
-                    Slog.i(TAG, "   read preferred home app " + mRestoredHome
-                            + " version=" + mRestoredHomeVersion
-                            + " installer=" + mRestoredHomeInstaller
-                            + " sig=" + mRestoredHomeSigHashes);
-                }
-            } else {
-                // it's a file metadata record
-                int versionCode = inputBufferStream.readInt();
-                ArrayList<byte[]> sigs = readSignatureHashArray(inputBufferStream);
-                if (DEBUG) {
-                    Slog.i(TAG, "   read metadata for " + key
-                            + " dataSize=" + dataSize
-                            + " versionCode=" + versionCode + " sigs=" + sigs);
-                }
-                
-                if (sigs == null || sigs.size() == 0) {
-                    Slog.w(TAG, "Not restoring package " + key
-                            + " since it appears to have no signatures.");
-                    continue;
-                }
-
-                ApplicationInfo app = new ApplicationInfo();
-                app.packageName = key;
-                restoredApps.add(app);
-                sigMap.put(key, new Metadata(versionCode, sigs));
+                ancestralRecordVersionValue = inputBufferStream.readInt();
             }
         }
+        return ancestralRecordVersionValue;
+    }
 
-        // On successful completion, cache the signature map for the Backup Manager to use
-        mRestoredSignatures = sigMap;
+    private RestoreDataConsumer getRestoreDataConsumer(int ancestralRecordVersion) {
+        switch (ancestralRecordVersion) {
+            case UNDEFINED_ANCESTRAL_RECORD_VERSION:
+                return new LegacyRestoreDataConsumer();
+            case 1:
+                return new AncestralVersion1RestoreDataConsumer();
+            default:
+                Slog.e(TAG, "Unrecognized ANCESTRAL_RECORD_VERSION: " + ancestralRecordVersion);
+                return null;
+        }
     }
 
     private static void writeSignatureHashArray(DataOutputStream out, ArrayList<byte[]> hashes)
@@ -559,7 +592,13 @@ public class PackageManagerBackupAgent extends BackupAgent {
             // The global metadata was last; now read all the apps
             while (true) {
                 pkg = in.readUTF();
-                int versionCode = in.readInt();
+                int versionCodeInt = in.readInt();
+                long versionCode;
+                if (versionCodeInt == Integer.MIN_VALUE) {
+                    versionCode = in.readLong();
+                } else {
+                    versionCode = versionCodeInt;
+                }
 
                 if (!ignoreExisting) {
                     mExisting.add(pkg);
@@ -607,12 +646,186 @@ public class PackageManagerBackupAgent extends BackupAgent {
             // now write all the app names + versions
             for (PackageInfo pkg : pkgs) {
                 out.writeUTF(pkg.packageName);
-                out.writeInt(pkg.versionCode);
+                if (pkg.versionCodeMajor != 0) {
+                    out.writeInt(Integer.MIN_VALUE);
+                    out.writeLong(pkg.getLongVersionCode());
+                } else {
+                    out.writeInt(pkg.versionCode);
+                }
             }
 
             out.flush();
         } catch (IOException e) {
             Slog.e(TAG, "Unable to write package manager state file!");
+        }
+    }
+
+    interface RestoreDataConsumer {
+        void consumeRestoreData(BackupDataInput data) throws IOException;
+    }
+
+    private class LegacyRestoreDataConsumer implements RestoreDataConsumer {
+
+        public void consumeRestoreData(BackupDataInput data) throws IOException {
+            List<ApplicationInfo> restoredApps = new ArrayList<ApplicationInfo>();
+            HashMap<String, Metadata> sigMap = new HashMap<String, Metadata>();
+            int storedSystemVersion = -1;
+
+            if (DEBUG) Slog.i(TAG, "Using LegacyRestoreDataConsumer");
+            // we already have the first header read and "cached", since ANCESTRAL_RECORD_KEY
+            // was missing
+            while (true) {
+                String key = data.getKey();
+                int dataSize = data.getDataSize();
+
+                if (DEBUG) Slog.v(TAG, "   got key=" + key + " dataSize=" + dataSize);
+
+                // generic setup to parse any entity data
+                byte[] inputBytes = new byte[dataSize];
+                data.readEntityData(inputBytes, 0, dataSize);
+                ByteArrayInputStream inputBuffer = new ByteArrayInputStream(inputBytes);
+                DataInputStream inputBufferStream = new DataInputStream(inputBuffer);
+
+                if (key.equals(GLOBAL_METADATA_KEY)) {
+                    int storedSdkVersion = inputBufferStream.readInt();
+                    if (DEBUG) Slog.v(TAG, "   storedSystemVersion = " + storedSystemVersion);
+                    mStoredSdkVersion = storedSdkVersion;
+                    mStoredIncrementalVersion = inputBufferStream.readUTF();
+                    mHasMetadata = true;
+                    if (DEBUG) {
+                        Slog.i(TAG, "Restore set version " + storedSystemVersion
+                                + " is compatible with OS version " + Build.VERSION.SDK_INT
+                                + " (" + mStoredIncrementalVersion + " vs "
+                                + Build.VERSION.INCREMENTAL + ")");
+                    }
+                } else if (key.equals(DEFAULT_HOME_KEY)) {
+                    String cn = inputBufferStream.readUTF();
+                    mRestoredHome = ComponentName.unflattenFromString(cn);
+                    mRestoredHomeVersion = inputBufferStream.readLong();
+                    mRestoredHomeInstaller = inputBufferStream.readUTF();
+                    mRestoredHomeSigHashes = readSignatureHashArray(inputBufferStream);
+                    if (DEBUG) {
+                        Slog.i(TAG, "   read preferred home app " + mRestoredHome
+                                + " version=" + mRestoredHomeVersion
+                                + " installer=" + mRestoredHomeInstaller
+                                + " sig=" + mRestoredHomeSigHashes);
+                    }
+                } else {
+                    // it's a file metadata record
+                    int versionCodeInt = inputBufferStream.readInt();
+                    long versionCode;
+                    if (versionCodeInt == Integer.MIN_VALUE) {
+                        versionCode = inputBufferStream.readLong();
+                    } else {
+                        versionCode = versionCodeInt;
+                    }
+                    ArrayList<byte[]> sigs = readSignatureHashArray(inputBufferStream);
+                    if (DEBUG) {
+                        Slog.i(TAG, "   read metadata for " + key
+                                + " dataSize=" + dataSize
+                                + " versionCode=" + versionCode + " sigs=" + sigs);
+                    }
+
+                    if (sigs == null || sigs.size() == 0) {
+                        Slog.w(TAG, "Not restoring package " + key
+                                + " since it appears to have no signatures.");
+                        continue;
+                    }
+
+                    ApplicationInfo app = new ApplicationInfo();
+                    app.packageName = key;
+                    restoredApps.add(app);
+                    sigMap.put(key, new Metadata(versionCode, sigs));
+                }
+
+                boolean readNextHeader = data.readNextHeader();
+                if (!readNextHeader) {
+                    if (DEBUG) Slog.v(TAG, "LegacyRestoreDataConsumer:"
+                            + " we're done reading all the headers");
+                    break;
+                }
+            }
+
+            // On successful completion, cache the signature map for the Backup Manager to use
+            mRestoredSignatures = sigMap;
+        }
+    }
+
+    private class AncestralVersion1RestoreDataConsumer implements RestoreDataConsumer {
+
+        public void consumeRestoreData(BackupDataInput data) throws IOException {
+            List<ApplicationInfo> restoredApps = new ArrayList<ApplicationInfo>();
+            HashMap<String, Metadata> sigMap = new HashMap<String, Metadata>();
+            int storedSystemVersion = -1;
+
+            if (DEBUG) Slog.i(TAG, "Using AncestralVersion1RestoreDataConsumer");
+            while (data.readNextHeader()) {
+                String key = data.getKey();
+                int dataSize = data.getDataSize();
+
+                if (DEBUG) Slog.v(TAG, "   got key=" + key + " dataSize=" + dataSize);
+
+                // generic setup to parse any entity data
+                byte[] inputBytes = new byte[dataSize];
+                data.readEntityData(inputBytes, 0, dataSize);
+                ByteArrayInputStream inputBuffer = new ByteArrayInputStream(inputBytes);
+                DataInputStream inputBufferStream = new DataInputStream(inputBuffer);
+
+                if (key.equals(GLOBAL_METADATA_KEY)) {
+                    int storedSdkVersion = inputBufferStream.readInt();
+                    if (DEBUG) Slog.v(TAG, "   storedSystemVersion = " + storedSystemVersion);
+                    mStoredSdkVersion = storedSdkVersion;
+                    mStoredIncrementalVersion = inputBufferStream.readUTF();
+                    mHasMetadata = true;
+                    if (DEBUG) {
+                        Slog.i(TAG, "Restore set version " + storedSystemVersion
+                                + " is compatible with OS version " + Build.VERSION.SDK_INT
+                                + " (" + mStoredIncrementalVersion + " vs "
+                                + Build.VERSION.INCREMENTAL + ")");
+                    }
+                } else if (key.equals(DEFAULT_HOME_KEY)) {
+                    String cn = inputBufferStream.readUTF();
+                    mRestoredHome = ComponentName.unflattenFromString(cn);
+                    mRestoredHomeVersion = inputBufferStream.readLong();
+                    mRestoredHomeInstaller = inputBufferStream.readUTF();
+                    mRestoredHomeSigHashes = readSignatureHashArray(inputBufferStream);
+                    if (DEBUG) {
+                        Slog.i(TAG, "   read preferred home app " + mRestoredHome
+                                + " version=" + mRestoredHomeVersion
+                                + " installer=" + mRestoredHomeInstaller
+                                + " sig=" + mRestoredHomeSigHashes);
+                    }
+                } else {
+                    // it's a file metadata record
+                    int versionCodeInt = inputBufferStream.readInt();
+                    long versionCode;
+                    if (versionCodeInt == Integer.MIN_VALUE) {
+                        versionCode = inputBufferStream.readLong();
+                    } else {
+                        versionCode = versionCodeInt;
+                    }
+                    ArrayList<byte[]> sigs = readSignatureHashArray(inputBufferStream);
+                    if (DEBUG) {
+                        Slog.i(TAG, "   read metadata for " + key
+                                + " dataSize=" + dataSize
+                                + " versionCode=" + versionCode + " sigs=" + sigs);
+                    }
+
+                    if (sigs == null || sigs.size() == 0) {
+                        Slog.w(TAG, "Not restoring package " + key
+                                + " since it appears to have no signatures.");
+                        continue;
+                    }
+
+                    ApplicationInfo app = new ApplicationInfo();
+                    app.packageName = key;
+                    restoredApps.add(app);
+                    sigMap.put(key, new Metadata(versionCode, sigs));
+                }
+            }
+
+            // On successful completion, cache the signature map for the Backup Manager to use
+            mRestoredSignatures = sigMap;
         }
     }
 }

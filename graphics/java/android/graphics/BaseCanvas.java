@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.Size;
 import android.graphics.Canvas.VertexMode;
 import android.text.GraphicsOperations;
+import android.text.PrecomputedText;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
@@ -40,13 +41,19 @@ public abstract class BaseCanvas {
     /**
      * Should only be assigned in constructors (or setBitmap if software canvas),
      * freed by NativeAllocation.
+     * @hide
      */
     protected long mNativeCanvasWrapper;
 
     /**
      * Used to determine when compatibility scaling is in effect.
+     * @hide
      */
     protected int mScreenDensity = Bitmap.DENSITY_NONE;
+
+    /**
+     * @hide
+     */
     protected int mDensity = Bitmap.DENSITY_NONE;
     private boolean mAllowHwBitmapsInSwMode = false;
 
@@ -375,7 +382,7 @@ public abstract class BaseCanvas {
         }
         throwIfHasHwBitmapInSwMode(paint);
         nDrawText(mNativeCanvasWrapper, text, index, count, x, y, paint.mBidiFlags,
-                paint.getNativeInstance(), paint.mNativeTypeface);
+                paint.getNativeInstance());
     }
 
     public void drawText(@NonNull CharSequence text, int start, int end, float x, float y,
@@ -387,7 +394,7 @@ public abstract class BaseCanvas {
         if (text instanceof String || text instanceof SpannedString ||
                 text instanceof SpannableString) {
             nDrawText(mNativeCanvasWrapper, text.toString(), start, end, x, y,
-                    paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
+                    paint.mBidiFlags, paint.getNativeInstance());
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawText(this, start, end, x, y,
                     paint);
@@ -395,7 +402,7 @@ public abstract class BaseCanvas {
             char[] buf = TemporaryBuffer.obtain(end - start);
             TextUtils.getChars(text, start, end, buf, 0);
             nDrawText(mNativeCanvasWrapper, buf, 0, end - start, x, y,
-                    paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
+                    paint.mBidiFlags, paint.getNativeInstance());
             TemporaryBuffer.recycle(buf);
         }
     }
@@ -403,7 +410,7 @@ public abstract class BaseCanvas {
     public void drawText(@NonNull String text, float x, float y, @NonNull Paint paint) {
         throwIfHasHwBitmapInSwMode(paint);
         nDrawText(mNativeCanvasWrapper, text, 0, text.length(), x, y, paint.mBidiFlags,
-                paint.getNativeInstance(), paint.mNativeTypeface);
+                paint.getNativeInstance());
     }
 
     public void drawText(@NonNull String text, int start, int end, float x, float y,
@@ -413,7 +420,7 @@ public abstract class BaseCanvas {
         }
         throwIfHasHwBitmapInSwMode(paint);
         nDrawText(mNativeCanvasWrapper, text, start, end, x, y, paint.mBidiFlags,
-                paint.getNativeInstance(), paint.mNativeTypeface);
+                paint.getNativeInstance());
     }
 
     public void drawTextOnPath(@NonNull char[] text, int index, int count, @NonNull Path path,
@@ -424,7 +431,7 @@ public abstract class BaseCanvas {
         throwIfHasHwBitmapInSwMode(paint);
         nDrawTextOnPath(mNativeCanvasWrapper, text, index, count,
                 path.readOnlyNI(), hOffset, vOffset,
-                paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
+                paint.mBidiFlags, paint.getNativeInstance());
     }
 
     public void drawTextOnPath(@NonNull String text, @NonNull Path path, float hOffset,
@@ -432,7 +439,7 @@ public abstract class BaseCanvas {
         if (text.length() > 0) {
             throwIfHasHwBitmapInSwMode(paint);
             nDrawTextOnPath(mNativeCanvasWrapper, text, path.readOnlyNI(), hOffset, vOffset,
-                    paint.mBidiFlags, paint.getNativeInstance(), paint.mNativeTypeface);
+                    paint.mBidiFlags, paint.getNativeInstance());
         }
     }
 
@@ -453,7 +460,7 @@ public abstract class BaseCanvas {
 
         throwIfHasHwBitmapInSwMode(paint);
         nDrawTextRun(mNativeCanvasWrapper, text, index, count, contextIndex, contextCount,
-                x, y, isRtl, paint.getNativeInstance(), paint.mNativeTypeface);
+                x, y, isRtl, paint.getNativeInstance(), 0 /* measured text */);
     }
 
     public void drawTextRun(@NonNull CharSequence text, int start, int end, int contextStart,
@@ -474,7 +481,7 @@ public abstract class BaseCanvas {
         if (text instanceof String || text instanceof SpannedString ||
                 text instanceof SpannableString) {
             nDrawTextRun(mNativeCanvasWrapper, text.toString(), start, end, contextStart,
-                    contextEnd, x, y, isRtl, paint.getNativeInstance(), paint.mNativeTypeface);
+                    contextEnd, x, y, isRtl, paint.getNativeInstance());
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawTextRun(this, start, end,
                     contextStart, contextEnd, x, y, isRtl, paint);
@@ -483,8 +490,17 @@ public abstract class BaseCanvas {
             int len = end - start;
             char[] buf = TemporaryBuffer.obtain(contextLen);
             TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
+            long measuredTextPtr = 0;
+            if (text instanceof PrecomputedText) {
+                PrecomputedText mt = (PrecomputedText) text;
+                int paraIndex = mt.findParaIndex(start);
+                if (end <= mt.getParagraphEnd(paraIndex)) {
+                    // Only suppor the text in the same paragraph.
+                    measuredTextPtr = mt.getMeasuredParagraph(paraIndex).getNativePtr();
+                }
+            }
             nDrawTextRun(mNativeCanvasWrapper, buf, start - contextStart, len,
-                    0, contextLen, x, y, isRtl, paint.getNativeInstance(), paint.mNativeTypeface);
+                    0, contextLen, x, y, isRtl, paint.getNativeInstance(), measuredTextPtr);
             TemporaryBuffer.recycle(buf);
         }
     }
@@ -526,10 +542,19 @@ public abstract class BaseCanvas {
         return mAllowHwBitmapsInSwMode;
     }
 
+    /**
+     * @hide
+     */
+    protected void onHwBitmapInSwMode() {
+        if (!mAllowHwBitmapsInSwMode) {
+            throw new IllegalArgumentException(
+                    "Software rendering doesn't support hardware bitmaps");
+        }
+    }
+
     private void throwIfHwBitmapInSwMode(Bitmap bitmap) {
-        if (!mAllowHwBitmapsInSwMode && !isHardwareAccelerated()
-                && bitmap.getConfig() == Bitmap.Config.HARDWARE) {
-            throw new IllegalStateException("Software rendering doesn't support hardware bitmaps");
+        if (!isHardwareAccelerated() && bitmap.getConfig() == Bitmap.Config.HARDWARE) {
+            onHwBitmapInSwMode();
         }
     }
 
@@ -614,23 +639,21 @@ public abstract class BaseCanvas {
             short[] indices, int indexOffset, int indexCount, long nativePaint);
 
     private static native void nDrawText(long nativeCanvas, char[] text, int index, int count,
-            float x, float y, int flags, long nativePaint, long nativeTypeface);
+            float x, float y, int flags, long nativePaint);
 
     private static native void nDrawText(long nativeCanvas, String text, int start, int end,
-            float x, float y, int flags, long nativePaint, long nativeTypeface);
+            float x, float y, int flags, long nativePaint);
 
     private static native void nDrawTextRun(long nativeCanvas, String text, int start, int end,
-            int contextStart, int contextEnd, float x, float y, boolean isRtl, long nativePaint,
-            long nativeTypeface);
+            int contextStart, int contextEnd, float x, float y, boolean isRtl, long nativePaint);
 
     private static native void nDrawTextRun(long nativeCanvas, char[] text, int start, int count,
             int contextStart, int contextCount, float x, float y, boolean isRtl, long nativePaint,
-            long nativeTypeface);
+            long nativePrecomputedText);
 
     private static native void nDrawTextOnPath(long nativeCanvas, char[] text, int index, int count,
-            long nativePath, float hOffset, float vOffset, int bidiFlags, long nativePaint,
-            long nativeTypeface);
+            long nativePath, float hOffset, float vOffset, int bidiFlags, long nativePaint);
 
     private static native void nDrawTextOnPath(long nativeCanvas, String text, long nativePath,
-            float hOffset, float vOffset, int flags, long nativePaint, long nativeTypeface);
+            float hOffset, float vOffset, int flags, long nativePaint);
 }

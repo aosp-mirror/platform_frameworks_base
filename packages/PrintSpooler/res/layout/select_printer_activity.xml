@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dip"
                 android:src="@*android:drawable/ic_grayedout_printer"
-                android:contentDescription="@string/print_searching_for_printers">
+                android:importantForAccessibility="no">
             </ImageView>
 
             <TextView

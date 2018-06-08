@@ -24,7 +24,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.util.FloatProperty;
 import android.util.Log;
-import android.util.MutableFloat;
 import android.util.Property;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
@@ -33,7 +32,8 @@ import android.widget.OverScroller;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.misc.Utilities;
+import com.android.systemui.shared.recents.utilities.AnimationProps;
+import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.recents.views.lowram.TaskStackLowRamLayoutAlgorithm;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 

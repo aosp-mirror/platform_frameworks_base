@@ -418,10 +418,23 @@ public class NotificationColorUtil {
      *
      * @param isBgDarker {@code true} if {@code bg} is darker than {@code color}.
      */
-    private static int ensureTextContrast(int color, int bg, boolean isBgDarker) {
+    public static int ensureTextContrast(int color, int bg, boolean isBgDarker) {
+        return ensureContrast(color, bg, isBgDarker, 4.5);
+    }
+
+    /**
+     * Finds a color with sufficient contrast over bg that has the same or darker hue as the
+     * original color, depending on the value of {@code isBgDarker}.
+     *
+     * @param color the color to start searching from
+     * @param bg the color to ensure contrast against
+     * @param isBgDarker {@code true} if {@code bg} is darker than {@code color}
+     * @param minRatio the minimum contrast ratio required
+     */
+    public static int ensureContrast(int color, int bg, boolean isBgDarker, double minRatio) {
         return isBgDarker
-                ? findContrastColorAgainstDark(color, bg, true, 4.5)
-                : findContrastColor(color, bg, true, 4.5);
+                ? findContrastColorAgainstDark(color, bg, true, minRatio)
+                : findContrastColor(color, bg, true, minRatio);
     }
 
     /** Finds a background color for a text view with given text color and hint text color, that
@@ -443,7 +456,7 @@ public class NotificationColorUtil {
      */
     public static int resolveColor(Context context, int color) {
         if (color == Notification.COLOR_DEFAULT) {
-            return context.getColor(com.android.internal.R.color.notification_icon_default_color);
+            return context.getColor(com.android.internal.R.color.notification_default_color_light);
         }
         return color;
     }
@@ -475,20 +488,15 @@ public class NotificationColorUtil {
             int backgroundColor, boolean isDark) {
         final int resolvedColor = resolveColor(context, notificationColor);
 
-        final int actionBg = context.getColor(
-                com.android.internal.R.color.notification_action_list);
-
         int color = resolvedColor;
-        color = NotificationColorUtil.ensureLargeTextContrast(color, actionBg, isDark);
         color = NotificationColorUtil.ensureTextContrast(color, backgroundColor, isDark);
 
         if (color != resolvedColor) {
             if (DEBUG){
                 Log.w(TAG, String.format(
-                        "Enhanced contrast of notification for %s %s (over action)"
+                        "Enhanced contrast of notification for %s"
                                 + " and %s (over background) by changing #%s to %s",
                         context.getPackageName(),
-                        NotificationColorUtil.contrastChange(resolvedColor, color, actionBg),
                         NotificationColorUtil.contrastChange(resolvedColor, color, backgroundColor),
                         Integer.toHexString(resolvedColor), Integer.toHexString(color)));
             }
@@ -552,11 +560,15 @@ public class NotificationColorUtil {
         }
     }
 
-    public static int resolveActionBarColor(Context context, int backgroundColor) {
-        if (backgroundColor == Notification.COLOR_DEFAULT) {
-            return context.getColor(com.android.internal.R.color.notification_action_list);
+    public static int resolveDefaultColor(Context context, int backgroundColor) {
+        boolean useDark = shouldUseDark(backgroundColor);
+        if (useDark) {
+            return context.getColor(
+                    com.android.internal.R.color.notification_default_color_light);
+        } else {
+            return context.getColor(
+                    com.android.internal.R.color.notification_default_color_dark);
         }
-        return getShiftedColor(backgroundColor, 7);
     }
 
     /**

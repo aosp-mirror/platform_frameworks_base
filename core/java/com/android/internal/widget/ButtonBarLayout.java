@@ -30,9 +30,6 @@ import com.android.internal.R;
  * orientation when it can't fit its child views horizontally.
  */
 public class ButtonBarLayout extends LinearLayout {
-    /** Minimum screen height required for button stacking. */
-    private static final int ALLOW_STACKING_MIN_HEIGHT_DP = 320;
-
     /** Amount of the second button to "peek" above the fold when stacked. */
     private static final int PEEK_BUTTON_DP = 16;
 
@@ -46,12 +43,8 @@ public class ButtonBarLayout extends LinearLayout {
     public ButtonBarLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        final boolean allowStackingDefault =
-                context.getResources().getConfiguration().screenHeightDp
-                        >= ALLOW_STACKING_MIN_HEIGHT_DP;
         final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ButtonBarLayout);
-        mAllowStacking = ta.getBoolean(R.styleable.ButtonBarLayout_allowStacking,
-                allowStackingDefault);
+        mAllowStacking = ta.getBoolean(R.styleable.ButtonBarLayout_allowStacking, true);
         ta.recycle();
     }
 

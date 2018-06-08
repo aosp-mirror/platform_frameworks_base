@@ -19,7 +19,6 @@ package android.net;
 import static android.net.NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CBS;
-import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_EIMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_MMS;
@@ -154,14 +153,6 @@ public class NetworkCapabilitiesTest {
         // NOT_METERED changing (http://b/63326103)
         nc1 = new NetworkCapabilities()
                 .addCapability(NET_CAPABILITY_NOT_METERED)
-                .addCapability(NET_CAPABILITY_INTERNET);
-        nc2 = new NetworkCapabilities().addCapability(NET_CAPABILITY_INTERNET);
-        assertEquals("", nc1.describeImmutableDifferences(nc2));
-        assertEquals("", nc1.describeImmutableDifferences(nc1));
-
-        // DUN changing (http://b/65257223)
-        nc1 = new NetworkCapabilities()
-                .addCapability(NET_CAPABILITY_DUN)
                 .addCapability(NET_CAPABILITY_INTERNET);
         nc2 = new NetworkCapabilities().addCapability(NET_CAPABILITY_INTERNET);
         assertEquals("", nc1.describeImmutableDifferences(nc2));

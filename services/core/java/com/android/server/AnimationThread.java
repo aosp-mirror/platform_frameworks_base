@@ -22,8 +22,8 @@ import android.os.Handler;
 import android.os.Trace;
 
 /**
- * Thread for handling all window animations, or anything that's directly impacting animations like
- * starting windows or traversals.
+ * Thread for handling all legacy window animations, or anything that's directly impacting
+ * animations like starting windows or traversals.
  */
 public final class AnimationThread extends ServiceThread {
     private static AnimationThread sInstance;

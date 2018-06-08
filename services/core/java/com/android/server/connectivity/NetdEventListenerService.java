@@ -36,6 +36,7 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.ArrayMap;
 import android.util.SparseArray;
+import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -235,11 +236,7 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
 
         for (INetdEventCallback callback : mNetdEventCallbackList) {
             if (callback != null) {
-                // TODO(rickywai): Remove this checking to collect ip in watchlist.
-                if (callback ==
-                        mNetdEventCallbackList[INetdEventCallback.CALLBACK_CALLER_DEVICE_POLICY]) {
-                    callback.onConnectEvent(ipAddr, port, timestamp, uid);
-                }
+                callback.onConnectEvent(ipAddr, port, timestamp, uid);
             }
         }
     }
@@ -267,6 +264,10 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         event.srcPort = srcPort;
         event.dstPort = dstPort;
         addWakeupEvent(event);
+
+        String dstMac = event.dstHwAddr.toString();
+        StatsLog.write(StatsLog.PACKET_WAKEUP_OCCURRED,
+                uid, iface, ethertype, dstMac, srcIp, dstIp, ipNextHeader, srcPort, dstPort);
     }
 
     @Override

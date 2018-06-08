@@ -15,16 +15,21 @@
  */
 package com.android.internal.os;
 
+import static android.os.BatteryStats.STATS_CURRENT;
 import static android.os.BatteryStats.STATS_SINCE_CHARGED;
 import static android.os.BatteryStats.WAKE_TYPE_PARTIAL;
 
 import android.app.ActivityManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
+import android.os.BatteryStats.HistoryItem;
+import android.os.BatteryStats.Uid.Sensor;
 import android.os.WorkSource;
 import android.support.test.filters.SmallTest;
 import android.view.Display;
 
+import com.android.internal.os.BatteryStatsImpl.DualTimer;
+import com.android.internal.os.BatteryStatsImpl.Uid;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
@@ -44,11 +49,14 @@ import java.util.Map;
  * Run: adb shell am instrument -e class com.android.internal.os.BatteryStatsNoteTest -w \
  *      com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner
  */
-public class BatteryStatsNoteTest extends TestCase{
+public class BatteryStatsNoteTest extends TestCase {
+
     private static final int UID = 10500;
     private static final WorkSource WS = new WorkSource(UID);
 
-    /** Test BatteryStatsImpl.Uid.noteBluetoothScanResultLocked. */
+    /**
+     * Test BatteryStatsImpl.Uid.noteBluetoothScanResultLocked.
+     */
     @SmallTest
     public void testNoteBluetoothScanResultLocked() throws Exception {
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(new MockClocks());
@@ -75,7 +83,9 @@ public class BatteryStatsNoteTest extends TestCase{
                         .getCountLocked(STATS_SINCE_CHARGED));
     }
 
-    /** Test BatteryStatsImpl.Uid.noteStartWakeLocked. */
+    /**
+     * Test BatteryStatsImpl.Uid.noteStartWakeLocked.
+     */
     @SmallTest
     public void testNoteStartWakeLocked() throws Exception {
         final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
@@ -86,7 +96,8 @@ public class BatteryStatsNoteTest extends TestCase{
 
         bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
-        bi.getUidStatsLocked(UID).noteStartWakeLocked(pid, name, WAKE_TYPE_PARTIAL, clocks.realtime);
+        bi.getUidStatsLocked(UID)
+                .noteStartWakeLocked(pid, name, WAKE_TYPE_PARTIAL, clocks.realtime);
 
         clocks.realtime = clocks.uptime = 100;
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
@@ -94,7 +105,8 @@ public class BatteryStatsNoteTest extends TestCase{
         clocks.realtime = clocks.uptime = 220;
         bi.getUidStatsLocked(UID).noteStopWakeLocked(pid, name, WAKE_TYPE_PARTIAL, clocks.realtime);
 
-        BatteryStats.Timer aggregTimer = bi.getUidStats().get(UID).getAggregatedPartialWakelockTimer();
+        BatteryStats.Timer aggregTimer = bi.getUidStats().get(UID)
+                .getAggregatedPartialWakelockTimer();
         long actualTime = aggregTimer.getTotalTimeLocked(300_000, STATS_SINCE_CHARGED);
         long bgTime = aggregTimer.getSubTimer().getTotalTimeLocked(300_000, STATS_SINCE_CHARGED);
         assertEquals(220_000, actualTime);
@@ -102,7 +114,9 @@ public class BatteryStatsNoteTest extends TestCase{
     }
 
 
-    /** Test BatteryStatsImpl.noteUidProcessStateLocked. */
+    /**
+     * Test BatteryStatsImpl.noteUidProcessStateLocked.
+     */
     @SmallTest
     public void testNoteUidProcessStateLocked() throws Exception {
         final MockClocks clocks = new MockClocks();
@@ -145,36 +159,29 @@ public class BatteryStatsNoteTest extends TestCase{
         expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_TOP);
         assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
 
-
         actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE,
                 elapsedTimeUs, STATS_SINCE_CHARGED);
-        expectedRunTimeMs = stateRuntimeMap.get(
-                ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE)
-                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
         assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
-
 
         actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_TOP_SLEEPING,
                 elapsedTimeUs, STATS_SINCE_CHARGED);
         expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_TOP_SLEEPING);
         assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
 
-
         actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_FOREGROUND,
                 elapsedTimeUs, STATS_SINCE_CHARGED);
-        expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
+        expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND)
+                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
         assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
-
 
         actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_BACKGROUND,
                 elapsedTimeUs, STATS_SINCE_CHARGED);
         expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND)
                 + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_BACKUP)
-                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_HEAVY_WEIGHT)
                 + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_SERVICE)
                 + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_RECEIVER);
         assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
-
 
         actualRunTimeUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_CACHED,
                 elapsedTimeUs, STATS_SINCE_CHARGED);
@@ -192,7 +199,9 @@ public class BatteryStatsNoteTest extends TestCase{
         assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);
     }
 
-    /** Test BatteryStatsImpl.updateTimeBasesLocked. */
+    /**
+     * Test BatteryStatsImpl.updateTimeBasesLocked.
+     */
     @SmallTest
     public void testUpdateTimeBasesLocked() throws Exception {
         final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
@@ -214,7 +223,9 @@ public class BatteryStatsNoteTest extends TestCase{
         assertTrue(bi.getOnBatteryScreenOffTimeBase().isRunning());
     }
 
-    /** Test BatteryStatsImpl.noteScreenStateLocked. */
+    /**
+     * Test BatteryStatsImpl.noteScreenStateLocked sets timebases and screen states correctly.
+     */
     @SmallTest
     public void testNoteScreenStateLocked() throws Exception {
         final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
@@ -233,4 +244,258 @@ public class BatteryStatsNoteTest extends TestCase{
         assertEquals(bi.getScreenState(), Display.STATE_OFF);
     }
 
+    /*
+     * Test BatteryStatsImpl.noteScreenStateLocked updates timers correctly.
+     *
+     * Unknown and doze should both be subset of off state
+     *
+     * Timeline 0----100----200----310----400------------1000
+     * Unknown         -------
+     * On                     -------
+     * Off             -------       ----------------------
+     * Doze                                ----------------
+     */
+    @SmallTest
+    public void testNoteScreenStateTimersLocked() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+
+        clocks.realtime = clocks.uptime = 100;
+        // Device startup, setOnBatteryLocked calls updateTimebases
+        bi.updateTimeBasesLocked(true, Display.STATE_UNKNOWN, 100_000, 100_000);
+        // Turn on display at 200us
+        clocks.realtime = clocks.uptime = 200;
+        bi.noteScreenStateLocked(Display.STATE_ON);
+        assertEquals(150_000, bi.computeBatteryRealtime(250_000, STATS_SINCE_CHARGED));
+        assertEquals(100_000, bi.computeBatteryScreenOffRealtime(250_000, STATS_SINCE_CHARGED));
+        assertEquals(50_000, bi.getScreenOnTime(250_000, STATS_SINCE_CHARGED));
+        assertEquals(0, bi.getScreenDozeTime(250_000, STATS_SINCE_CHARGED));
+
+        clocks.realtime = clocks.uptime = 310;
+        bi.noteScreenStateLocked(Display.STATE_OFF);
+        assertEquals(250_000, bi.computeBatteryRealtime(350_000, STATS_SINCE_CHARGED));
+        assertEquals(140_000, bi.computeBatteryScreenOffRealtime(350_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getScreenOnTime(350_000, STATS_SINCE_CHARGED));
+        assertEquals(0, bi.getScreenDozeTime(350_000, STATS_SINCE_CHARGED));
+
+        clocks.realtime = clocks.uptime = 400;
+        bi.noteScreenStateLocked(Display.STATE_DOZE);
+        assertEquals(400_000, bi.computeBatteryRealtime(500_000, STATS_SINCE_CHARGED));
+        assertEquals(290_000, bi.computeBatteryScreenOffRealtime(500_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getScreenOnTime(500_000, STATS_SINCE_CHARGED));
+        assertEquals(100_000, bi.getScreenDozeTime(500_000, STATS_SINCE_CHARGED));
+
+        clocks.realtime = clocks.uptime = 1000;
+        bi.noteScreenStateLocked(Display.STATE_OFF);
+        assertEquals(1400_000, bi.computeBatteryRealtime(1500_000, STATS_SINCE_CHARGED));
+        assertEquals(1290_000, bi.computeBatteryScreenOffRealtime(1500_000, STATS_SINCE_CHARGED));
+        assertEquals(110_000, bi.getScreenOnTime(1500_000, STATS_SINCE_CHARGED));
+        assertEquals(600_000, bi.getScreenDozeTime(1500_000, STATS_SINCE_CHARGED));
+    }
+
+    @SmallTest
+    public void testAlarmStartAndFinishLocked() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.setRecordAllHistoryLocked(true);
+        bi.forceRecordAllHistory();
+
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
+
+        clocks.realtime = clocks.uptime = 100;
+        bi.noteAlarmStartLocked("foo", null, UID);
+        clocks.realtime = clocks.uptime = 5000;
+        bi.noteAlarmFinishLocked("foo", null, UID);
+
+        HistoryItem item = new HistoryItem();
+        assertTrue(bi.startIteratingHistoryLocked());
+
+        assertTrue(bi.getNextHistoryLocked(item));
+        assertEquals(HistoryItem.EVENT_ALARM_START, item.eventCode);
+        assertEquals("foo", item.eventTag.string);
+        assertEquals(UID, item.eventTag.uid);
+
+        // TODO(narayan): Figure out why this event is written to the history buffer. See
+        // test below where it is being interspersed between multiple START events too.
+        assertTrue(bi.getNextHistoryLocked(item));
+        assertEquals(HistoryItem.EVENT_NONE, item.eventCode);
+
+        assertTrue(bi.getNextHistoryLocked(item));
+        assertEquals(HistoryItem.EVENT_ALARM_FINISH, item.eventCode);
+        assertTrue(item.isDeltaData());
+        assertEquals("foo", item.eventTag.string);
+        assertEquals(UID, item.eventTag.uid);
+
+        assertFalse(bi.getNextHistoryLocked(item));
+    }
+
+    @SmallTest
+    public void testAlarmStartAndFinishLocked_workSource() throws Exception {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.setRecordAllHistoryLocked(true);
+        bi.forceRecordAllHistory();
+
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
+
+        WorkSource ws = new WorkSource();
+        ws.add(100);
+        ws.createWorkChain().addNode(500, "tag");
+        bi.noteAlarmStartLocked("foo", ws, UID);
+        clocks.realtime = clocks.uptime = 5000;
+        bi.noteAlarmFinishLocked("foo", ws, UID);
+
+        HistoryItem item = new HistoryItem();
+        assertTrue(bi.startIteratingHistoryLocked());
+
+        assertTrue(bi.getNextHistoryLocked(item));
+        assertEquals(HistoryItem.EVENT_ALARM_START, item.eventCode);
+        assertEquals("foo", item.eventTag.string);
+        assertEquals(100, item.eventTag.uid);
+
+        assertTrue(bi.getNextHistoryLocked(item));
+        assertEquals(HistoryItem.EVENT_NONE, item.eventCode);
+
+        assertTrue(bi.getNextHistoryLocked(item));
+        assertEquals(HistoryItem.EVENT_ALARM_START, item.eventCode);
+        assertEquals("foo", item.eventTag.string);
+        assertEquals(500, item.eventTag.uid);
+
+        assertTrue(bi.getNextHistoryLocked(item));
+        assertEquals(HistoryItem.EVENT_ALARM_FINISH, item.eventCode);
+        assertEquals("foo", item.eventTag.string);
+        assertEquals(100, item.eventTag.uid);
+
+        assertTrue(bi.getNextHistoryLocked(item));
+        assertEquals(HistoryItem.EVENT_ALARM_FINISH, item.eventCode);
+        assertEquals("foo", item.eventTag.string);
+        assertEquals(500, item.eventTag.uid);
+    }
+
+    @SmallTest
+    public void testNoteWakupAlarmLocked() {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.setRecordAllHistoryLocked(true);
+        bi.forceRecordAllHistory();
+        bi.mForceOnBattery = true;
+
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
+
+        bi.noteWakupAlarmLocked("com.foo.bar", UID, null, "tag");
+
+        Uid.Pkg pkg = bi.getPackageStatsLocked(UID, "com.foo.bar");
+        assertEquals(1, pkg.getWakeupAlarmStats().get("tag").getCountLocked(STATS_CURRENT));
+        assertEquals(1, pkg.getWakeupAlarmStats().size());
+    }
+
+    @SmallTest
+    public void testNoteWakupAlarmLocked_workSource_uid() {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.setRecordAllHistoryLocked(true);
+        bi.forceRecordAllHistory();
+        bi.mForceOnBattery = true;
+
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
+
+        WorkSource ws = new WorkSource();
+        ws.add(100);
+
+        // When a WorkSource is present, "UID" should not be used - only the uids present in the
+        // WorkSource should be reported.
+        bi.noteWakupAlarmLocked("com.foo.bar", UID, ws, "tag");
+        Uid.Pkg pkg = bi.getPackageStatsLocked(UID, "com.foo.bar");
+        assertEquals(0, pkg.getWakeupAlarmStats().size());
+        pkg = bi.getPackageStatsLocked(100, "com.foo.bar");
+        assertEquals(1, pkg.getWakeupAlarmStats().size());
+
+        // If the WorkSource contains a "name", it should be interpreted as a package name and
+        // the packageName supplied as an argument must be ignored.
+        ws = new WorkSource();
+        ws.add(100, "com.foo.baz_alternate");
+        bi.noteWakupAlarmLocked("com.foo.baz", UID, ws, "tag");
+        pkg = bi.getPackageStatsLocked(100, "com.foo.baz");
+        assertEquals(0, pkg.getWakeupAlarmStats().size());
+        pkg = bi.getPackageStatsLocked(100, "com.foo.baz_alternate");
+        assertEquals(1, pkg.getWakeupAlarmStats().size());
+    }
+
+    @SmallTest
+    public void testNoteWakupAlarmLocked_workSource_workChain() {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.setRecordAllHistoryLocked(true);
+        bi.forceRecordAllHistory();
+        bi.mForceOnBattery = true;
+
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
+
+        WorkSource ws = new WorkSource();
+        ws.createWorkChain().addNode(100, "com.foo.baz_alternate");
+        bi.noteWakupAlarmLocked("com.foo.bar", UID, ws, "tag");
+
+        // For WorkChains, again we must only attribute to the uids present in the WorkSource
+        // (and not to "UID"). However, unlike the older "tags" we do not change the packagename
+        // supplied as an argument, given that we're logging the entire attribution chain.
+        Uid.Pkg pkg = bi.getPackageStatsLocked(UID, "com.foo.bar");
+        assertEquals(0, pkg.getWakeupAlarmStats().size());
+        pkg = bi.getPackageStatsLocked(100, "com.foo.bar");
+        assertEquals(1, pkg.getWakeupAlarmStats().size());
+        pkg = bi.getPackageStatsLocked(100, "com.foo.baz_alternate");
+        assertEquals(0, pkg.getWakeupAlarmStats().size());
+    }
+
+    @SmallTest
+    public void testNoteGpsChanged() {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.setRecordAllHistoryLocked(true);
+        bi.forceRecordAllHistory();
+        bi.mForceOnBattery = true;
+
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
+
+        WorkSource ws = new WorkSource();
+        ws.add(UID);
+
+        bi.noteGpsChangedLocked(new WorkSource(), ws);
+        DualTimer t = bi.getUidStatsLocked(UID).getSensorTimerLocked(Sensor.GPS, false);
+        assertNotNull(t);
+        assertTrue(t.isRunningLocked());
+
+        bi.noteGpsChangedLocked(ws, new WorkSource());
+        t = bi.getUidStatsLocked(UID).getSensorTimerLocked(Sensor.GPS, false);
+        assertFalse(t.isRunningLocked());
+    }
+
+    @SmallTest
+    public void testNoteGpsChanged_workSource() {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.setRecordAllHistoryLocked(true);
+        bi.forceRecordAllHistory();
+        bi.mForceOnBattery = true;
+
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
+
+        WorkSource ws = new WorkSource();
+        ws.createWorkChain().addNode(UID, "com.foo");
+
+        bi.noteGpsChangedLocked(new WorkSource(), ws);
+        DualTimer t = bi.getUidStatsLocked(UID).getSensorTimerLocked(Sensor.GPS, false);
+        assertNotNull(t);
+        assertTrue(t.isRunningLocked());
+
+        bi.noteGpsChangedLocked(ws, new WorkSource());
+        t = bi.getUidStatsLocked(UID).getSensorTimerLocked(Sensor.GPS, false);
+        assertFalse(t.isRunningLocked());
+    }
 }

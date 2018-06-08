@@ -74,9 +74,9 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     }
 
     @Override // Binder interface
-    public void dismiss(IKeyguardDismissCallback callback) {
+    public void dismiss(IKeyguardDismissCallback callback, CharSequence message) {
         try {
-            mService.dismiss(callback);
+            mService.dismiss(callback, message);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }

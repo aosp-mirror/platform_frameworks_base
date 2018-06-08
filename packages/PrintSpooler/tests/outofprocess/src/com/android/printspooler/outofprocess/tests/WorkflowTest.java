@@ -16,6 +16,8 @@
 
 package com.android.printspooler.outofprocess.tests;
 
+import static org.junit.Assert.assertNotNull;
+
 import android.graphics.pdf.PdfDocument;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -27,11 +29,12 @@ import android.print.PrintDocumentInfo;
 import android.print.PrinterCapabilitiesInfo;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
-import com.android.printspooler.outofprocess.tests.mockservice.AddPrintersActivity;
-import com.android.printspooler.outofprocess.tests.mockservice.MockPrintService;
-import com.android.printspooler.outofprocess.tests.mockservice.PrinterDiscoverySessionCallbacks;
-import com.android.printspooler.outofprocess.tests.mockservice.StubbablePrinterDiscoverySession;
 import android.print.pdf.PrintedPdfDocument;
+import android.print.test.BasePrintTest;
+import android.print.test.services.AddPrintersActivity;
+import android.print.test.services.FirstPrintService;
+import android.print.test.services.PrinterDiscoverySessionCallbacks;
+import android.print.test.services.StubbablePrinterDiscoverySession;
 import android.support.test.filters.LargeTest;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiObject;
@@ -39,13 +42,11 @@ import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.support.test.uiautomator.UiSelector;
 import android.support.test.uiautomator.Until;
 import android.util.Log;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,18 +55,12 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertNotNull;
-
 /**
  * Tests for the basic printing workflows
  */
 @RunWith(Parameterized.class)
 public class WorkflowTest extends BasePrintTest {
     private static final String LOG_TAG = WorkflowTest.class.getSimpleName();
-
-    private static float sWindowAnimationScaleBefore;
-    private static float sTransitionAnimationScaleBefore;
-    private static float sAnimatiorDurationScaleBefore;
 
     private PrintAttributes.MediaSize mFirst;
     private boolean mSelectPrinter;
@@ -92,80 +87,12 @@ public class WorkflowTest extends BasePrintTest {
             throws TimeoutException, InterruptedException {
         long startTime = System.currentTimeMillis();
         while (condition.get()) {
-            long timeLeft = OPERATION_TIMEOUT - (System.currentTimeMillis() - startTime);
+            long timeLeft = OPERATION_TIMEOUT_MILLIS - (System.currentTimeMillis() - startTime);
             if (timeLeft < 0) {
                 throw new TimeoutException();
             }
 
             waiter.accept(timeLeft);
-        }
-    }
-
-    /**
-     * Executes a shell command using shell user identity, and return the standard output in
-     * string.
-     *
-     * @param cmd the command to run
-     *
-     * @return the standard output of the command
-     */
-    private static String runShellCommand(String cmd) throws IOException {
-        try (FileInputStream is = new ParcelFileDescriptor.AutoCloseInputStream(
-                getInstrumentation().getUiAutomation().executeShellCommand(cmd))) {
-            byte[] buf = new byte[64];
-            int bytesRead;
-
-            StringBuilder stdout = new StringBuilder();
-            while ((bytesRead = is.read(buf)) != -1) {
-                stdout.append(new String(buf, 0, bytesRead));
-            }
-
-            return stdout.toString();
-        }
-    }
-
-    @BeforeClass
-    public static void disableAnimations() throws Exception {
-        try {
-            sWindowAnimationScaleBefore = Float.parseFloat(runShellCommand(
-                    "settings get global window_animation_scale"));
-
-            runShellCommand("settings put global window_animation_scale 0");
-        } catch (NumberFormatException e) {
-            sWindowAnimationScaleBefore = Float.NaN;
-        }
-        try {
-            sTransitionAnimationScaleBefore = Float.parseFloat(runShellCommand(
-                    "settings get global transition_animation_scale"));
-
-            runShellCommand("settings put global transition_animation_scale 0");
-        } catch (NumberFormatException e) {
-            sTransitionAnimationScaleBefore = Float.NaN;
-        }
-        try {
-            sAnimatiorDurationScaleBefore = Float.parseFloat(runShellCommand(
-                    "settings get global animator_duration_scale"));
-
-            runShellCommand("settings put global animator_duration_scale 0");
-        } catch (NumberFormatException e) {
-            sAnimatiorDurationScaleBefore = Float.NaN;
-        }
-    }
-
-    @AfterClass
-    public static void enableAnimations() throws Exception {
-        if (!Float.isNaN(sWindowAnimationScaleBefore)) {
-            runShellCommand(
-                    "settings put global window_animation_scale " + sWindowAnimationScaleBefore);
-        }
-        if (!Float.isNaN(sTransitionAnimationScaleBefore)) {
-            runShellCommand(
-                    "settings put global transition_animation_scale " +
-                            sTransitionAnimationScaleBefore);
-        }
-        if (!Float.isNaN(sAnimatiorDurationScaleBefore)) {
-            runShellCommand(
-                    "settings put global animator_duration_scale " + sAnimatiorDurationScaleBefore);
         }
     }
 
@@ -225,7 +152,7 @@ public class WorkflowTest extends BasePrintTest {
      */
     private void setMockPrintServiceCallbacks(StubbablePrinterDiscoverySession[] sessionRef,
             ArrayList<String> trackedPrinters, PrintAttributes.MediaSize mediaSize) {
-        MockPrintService.setCallbacks(createMockPrintServiceCallbacks(
+        FirstPrintService.setCallbacks(createMockPrintServiceCallbacks(
                 inv -> createMockPrinterDiscoverySessionCallbacks(inv2 -> {
                             synchronized (sessionRef) {
                                 sessionRef[0] = ((PrinterDiscoverySessionCallbacks) inv2.getMock())
@@ -312,7 +239,7 @@ public class WorkflowTest extends BasePrintTest {
                     callback.onWriteFailed(e.getMessage());
                 }
             }
-        }, null);
+        }, (PrintAttributes) null);
     }
 
     @Parameterized.Parameters
@@ -372,7 +299,7 @@ public class WorkflowTest extends BasePrintTest {
         } else {
             Log.i(LOG_TAG, "Waiting for error message");
             assertNotNull(getUiDevice().wait(Until.findObject(
-                    By.text("This printer isn't available right now.")), OPERATION_TIMEOUT));
+                    By.text("This printer isn't available right now.")), OPERATION_TIMEOUT_MILLIS));
         }
 
         setPrinter("All printers\u2026");
@@ -385,7 +312,7 @@ public class WorkflowTest extends BasePrintTest {
                 () -> addPrinter(session[0], "2nd printer", mSecond));
 
         // This executes the observer registered above
-        clickOn(new UiSelector().text(MockPrintService.class.getCanonicalName())
+        clickOn(new UiSelector().text(FirstPrintService.class.getCanonicalName())
                 .resourceId("com.android.printspooler:id/title"));
 
         getUiDevice().pressBack();
@@ -411,7 +338,8 @@ public class WorkflowTest extends BasePrintTest {
             } else {
                 Log.i(LOG_TAG, "Waiting for error message");
                 assertNotNull(getUiDevice().wait(Until.findObject(
-                        By.text("This printer isn't available right now.")), OPERATION_TIMEOUT));
+                        By.text("This printer isn't available right now.")),
+                        OPERATION_TIMEOUT_MILLIS));
             }
 
             Log.i(LOG_TAG, "Waiting for 1st printer to be not tracked");
@@ -439,7 +367,8 @@ public class WorkflowTest extends BasePrintTest {
             } else {
                 Log.i(LOG_TAG, "Waiting for error message");
                 assertNotNull(getUiDevice().wait(Until.findObject(
-                        By.text("This printer isn't available right now.")), OPERATION_TIMEOUT));
+                        By.text("This printer isn't available right now.")),
+                        OPERATION_TIMEOUT_MILLIS));
             }
 
             Log.i(LOG_TAG, "Waiting for 1st printer to be tracked");

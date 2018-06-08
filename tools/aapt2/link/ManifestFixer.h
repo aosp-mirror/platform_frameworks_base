@@ -29,9 +29,19 @@
 namespace aapt {
 
 struct ManifestFixerOptions {
+  // The minimum SDK version to set if no 'android:minSdkVersion' is defined in a <uses-sdk> tag.
   Maybe<std::string> min_sdk_version_default;
+
+  // The target SDK version to set if no 'android:targetSdkVersion' is defined in a <uses-sdk> tag.
   Maybe<std::string> target_sdk_version_default;
+
+  // The Android package to use instead of the one defined in 'package' in <manifest>.
+  // This also renames all relative package/class names in the manifest to fully qualified
+  // Java names.
   Maybe<std::string> rename_manifest_package;
+
+  // The Android package to use instead of the one defined in 'android:targetPackage' in
+  // <instrumentation>.
   Maybe<std::string> rename_instrumentation_target_package;
 
   // The version name to set if 'android:versionName' is not defined in <manifest> or if
@@ -42,23 +52,32 @@ struct ManifestFixerOptions {
   // replace_version is set.
   Maybe<std::string> version_code_default;
 
-  // Wether validation errors should be treated only as warnings. If this is 'true', then an
+  // The version of the framework being compiled against to set for 'android:compileSdkVersion' in
+  // the <manifest> tag.
+  Maybe<std::string> compile_sdk_version;
+
+  // The version codename of the framework being compiled against to set for
+  // 'android:compileSdkVersionCodename' in the <manifest> tag.
+  Maybe<std::string> compile_sdk_version_codename;
+
+  // Whether validation errors should be treated only as warnings. If this is 'true', then an
   // incorrect node will not result in an error, but only as a warning, and the parsing will
   // continue.
   bool warn_validation = false;
+
+  // Whether to inject the android:debuggable="true" flag into the manifest
+  bool debug_mode = false;
 
   // Whether to replace the manifest version with the the command line version
   bool replace_version = false;
 };
 
-/**
- * Verifies that the manifest is correctly formed and inserts defaults
- * where specified with ManifestFixerOptions.
- */
+// Verifies that the manifest is correctly formed and inserts defaults where specified with
+// ManifestFixerOptions.
 class ManifestFixer : public IXmlResourceConsumer {
  public:
-  explicit ManifestFixer(const ManifestFixerOptions& options)
-      : options_(options) {}
+  explicit ManifestFixer(const ManifestFixerOptions& options) : options_(options) {
+  }
 
   bool Consume(IAaptContext* context, xml::XmlResource* doc) override;
 

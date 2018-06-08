@@ -101,7 +101,8 @@ public class SyntheticPasswordManager {
     private static final byte WEAVER_VERSION = 1;
     private static final int INVALID_WEAVER_SLOT = -1;
 
-    private static final byte SYNTHETIC_PASSWORD_VERSION = 1;
+    private static final byte SYNTHETIC_PASSWORD_VERSION_V1 = 1;
+    private static final byte SYNTHETIC_PASSWORD_VERSION = 2;
     private static final byte SYNTHETIC_PASSWORD_PASSWORD_BASED = 0;
     private static final byte SYNTHETIC_PASSWORD_TOKEN_BASED = 1;
 
@@ -120,7 +121,9 @@ public class SyntheticPasswordManager {
     private static final byte[] PERSONALIZATION_USER_GK_AUTH = "user-gk-authentication".getBytes();
     private static final byte[] PERSONALIZATION_SP_GK_AUTH = "sp-gk-authentication".getBytes();
     private static final byte[] PERSONALIZATION_FBE_KEY = "fbe-key".getBytes();
+    private static final byte[] PERSONALIZATION_AUTHSECRET_KEY = "authsecret-hal".getBytes();
     private static final byte[] PERSONALIZATION_SP_SPLIT = "sp-split".getBytes();
+    private static final byte[] PERSONALIZATION_PASSWORD_HASH = "pw-hash".getBytes();
     private static final byte[] PERSONALIZATION_E0 = "e0-encryption".getBytes();
     private static final byte[] PERSONALISATION_WEAVER_PASSWORD = "weaver-pwd".getBytes();
     private static final byte[] PERSONALISATION_WEAVER_KEY = "weaver-key".getBytes();
@@ -155,6 +158,16 @@ public class SyntheticPasswordManager {
 
         public byte[] deriveDiskEncryptionKey() {
             return SyntheticPasswordCrypto.personalisedHash(PERSONALIZATION_FBE_KEY,
+                    syntheticPassword.getBytes());
+        }
+
+        public byte[] deriveVendorAuthSecret() {
+            return SyntheticPasswordCrypto.personalisedHash(PERSONALIZATION_AUTHSECRET_KEY,
+                    syntheticPassword.getBytes());
+        }
+
+        public byte[] derivePasswordHashFactor() {
+            return SyntheticPasswordCrypto.personalisedHash(PERSONALIZATION_PASSWORD_HASH,
                     syntheticPassword.getBytes());
         }
 
@@ -389,11 +402,9 @@ public class SyntheticPasswordManager {
     }
 
     public void removeUser(int userId) {
-        if (isWeaverAvailable()) {
-            for (long handle : mStorage.listSyntheticPasswordHandlesForUser(WEAVER_SLOT_NAME,
-                    userId)) {
-                destroyWeaverSlot(handle, userId);
-            }
+        for (long handle : mStorage.listSyntheticPasswordHandlesForUser(SP_BLOB_NAME, userId)) {
+            destroyWeaverSlot(handle, userId);
+            destroySPBlobKey(getHandleName(handle));
         }
     }
 
@@ -529,17 +540,33 @@ public class SyntheticPasswordManager {
 
     private void destroyWeaverSlot(long handle, int userId) {
         int slot = loadWeaverSlot(handle, userId);
+        destroyState(WEAVER_SLOT_NAME, handle, userId);
         if (slot != INVALID_WEAVER_SLOT) {
-            try {
-                weaverEnroll(slot, null, null);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to destroy slot", e);
+            Set<Integer> usedSlots = getUsedWeaverSlots();
+            if (!usedSlots.contains(slot)) {
+                Log.i(TAG, "Destroy weaver slot " + slot + " for user " + userId);
+                try {
+                    weaverEnroll(slot, null, null);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failed to destroy slot", e);
+                }
+            } else {
+                Log.w(TAG, "Skip destroying reused weaver slot " + slot + " for user " + userId);
             }
         }
-        destroyState(WEAVER_SLOT_NAME, handle, userId);
     }
 
-    private int getNextAvailableWeaverSlot() {
+    /**
+     * Return the set of weaver slots that are currently in use by all users on the device.
+     * <p>
+     * <em>Note:</em> Users who are in the process of being deleted are not tracked here
+     * (due to them being marked as partial in UserManager so not visible from
+     * {@link UserManager#getUsers}). As a result their weaver slots will not be considered
+     * taken and can be reused by new users. Care should be taken when cleaning up the
+     * deleted user in {@link #removeUser}, to prevent a reused slot from being erased
+     * unintentionally.
+     */
+    private Set<Integer> getUsedWeaverSlots() {
         Map<Integer, List<Long>> slotHandles = mStorage.listSyntheticPasswordHandlesForAllUsers(
                 WEAVER_SLOT_NAME);
         HashSet<Integer> slots = new HashSet<>();
@@ -549,8 +576,13 @@ public class SyntheticPasswordManager {
                 slots.add(slot);
             }
         }
+        return slots;
+    }
+
+    private int getNextAvailableWeaverSlot() {
+        Set<Integer> usedSlots = getUsedWeaverSlots();
         for (int i = 0; i < mWeaverConfig.slots; i++) {
-            if (!slots.contains(i)) {
+            if (!usedSlots.contains(i)) {
                 return i;
             }
         }
@@ -587,6 +619,7 @@ public class SyntheticPasswordManager {
         if (isWeaverAvailable()) {
             // Weaver based user password
             int weaverSlot = getNextAvailableWeaverSlot();
+            Log.i(TAG, "Weaver enroll password to slot " + weaverSlot + " for user " + userId);
             byte[] weaverSecret = weaverEnroll(weaverSlot, passwordTokenToWeaverKey(pwdToken), null);
             if (weaverSecret == null) {
                 Log.e(TAG, "Fail to enroll user password under weaver " + userId);
@@ -744,6 +777,7 @@ public class SyntheticPasswordManager {
         if (isWeaverAvailable()) {
             int slot = getNextAvailableWeaverSlot();
             try {
+                Log.i(TAG, "Weaver enroll token to slot " + slot + " for user " + userId);
                 weaverEnroll(slot, null, tokenData.weaverSecret);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to enroll weaver secret when activating token", e);
@@ -782,7 +816,8 @@ public class SyntheticPasswordManager {
      * unknown. Caller might choose to validate it by examining AuthenticationResult.credentialType
      */
     public AuthenticationResult unwrapPasswordBasedSyntheticPassword(IGateKeeperService gatekeeper,
-            long handle, String credential, int userId) throws RemoteException {
+            long handle, String credential, int userId,
+            ICheckCredentialProgressCallback progressCallback) throws RemoteException {
         if (credential == null) {
             credential = DEFAULT_PASSWORD;
         }
@@ -792,6 +827,7 @@ public class SyntheticPasswordManager {
         byte[] pwdToken = computePasswordToken(credential, pwd);
 
         final byte[] applicationId;
+        final long sid;
         int weaverSlot = loadWeaverSlot(handle, userId);
         if (weaverSlot != INVALID_WEAVER_SLOT) {
             // Weaver based user password
@@ -804,6 +840,7 @@ public class SyntheticPasswordManager {
             if (result.gkResponse.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
                 return result;
             }
+            sid = GateKeeper.INVALID_SECURE_USER_ID;
             applicationId = transformUnderWeaverSecret(pwdToken, result.gkResponse.getPayload());
         } else {
             byte[] gkPwdToken = passwordTokenToGkInput(pwdToken);
@@ -836,12 +873,17 @@ public class SyntheticPasswordManager {
                 result.gkResponse = VerifyCredentialResponse.ERROR;
                 return result;
             }
+            sid = sidFromPasswordHandle(pwd.passwordHandle);
             applicationId = transformUnderSecdiscardable(pwdToken,
                     loadSecdiscardable(handle, userId));
         }
-
+        // Supplied credential passes first stage weaver/gatekeeper check so it should be correct.
+        // Notify the callback so the keyguard UI can proceed immediately.
+        if (progressCallback != null) {
+            progressCallback.onCredentialVerified();
+        }
         result.authToken = unwrapSyntheticPasswordBlob(handle, SYNTHETIC_PASSWORD_PASSWORD_BASED,
-                applicationId, userId);
+                applicationId, sid, userId);
 
         // Perform verifyChallenge to refresh auth tokens for GK if user password exists.
         result.gkResponse = verifyChallenge(gatekeeper, result.authToken, 0L, userId);
@@ -877,7 +919,7 @@ public class SyntheticPasswordManager {
         }
         byte[] applicationId = transformUnderSecdiscardable(token, secdiscardable);
         result.authToken = unwrapSyntheticPasswordBlob(handle, SYNTHETIC_PASSWORD_TOKEN_BASED,
-                applicationId, userId);
+                applicationId, 0L, userId);
         if (result.authToken != null) {
             result.gkResponse = verifyChallenge(gatekeeper, result.authToken, 0L, userId);
             if (result.gkResponse == null) {
@@ -892,19 +934,26 @@ public class SyntheticPasswordManager {
     }
 
     private AuthenticationToken unwrapSyntheticPasswordBlob(long handle, byte type,
-            byte[] applicationId, int userId) {
+            byte[] applicationId, long sid, int userId) {
         byte[] blob = loadState(SP_BLOB_NAME, handle, userId);
         if (blob == null) {
             return null;
         }
-        if (blob[0] != SYNTHETIC_PASSWORD_VERSION) {
+        final byte version = blob[0];
+        if (version != SYNTHETIC_PASSWORD_VERSION && version != SYNTHETIC_PASSWORD_VERSION_V1) {
             throw new RuntimeException("Unknown blob version");
         }
         if (blob[1] != type) {
             throw new RuntimeException("Invalid blob type");
         }
-        byte[] secret = decryptSPBlob(getHandleName(handle),
+        final byte[] secret;
+        if (version == SYNTHETIC_PASSWORD_VERSION_V1) {
+            secret = SyntheticPasswordCrypto.decryptBlobV1(getHandleName(handle),
+                    Arrays.copyOfRange(blob, 2, blob.length), applicationId);
+        } else {
+            secret = decryptSPBlob(getHandleName(handle),
                 Arrays.copyOfRange(blob, 2, blob.length), applicationId);
+        }
         if (secret == null) {
             Log.e(TAG, "Fail to decrypt SP for user " + userId);
             return null;
@@ -918,6 +967,10 @@ public class SyntheticPasswordManager {
             result.recreate(secret);
         } else {
             result.syntheticPassword = new String(secret);
+        }
+        if (version == SYNTHETIC_PASSWORD_VERSION_V1) {
+            Log.i(TAG, "Upgrade v1 SP blob for user " + userId + ", type = " + type);
+            createSyntheticPasswordBlob(handle, type, result, applicationId, sid, userId);
         }
         return result;
     }

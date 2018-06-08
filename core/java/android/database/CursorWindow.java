@@ -16,8 +16,7 @@
 
 package android.database;
 
-import dalvik.system.CloseGuard;
-
+import android.annotation.BytesLong;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteClosable;
 import android.database.sqlite.SQLiteException;
@@ -26,8 +25,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
 import android.util.Log;
-import android.util.SparseIntArray;
 import android.util.LongSparseArray;
+import android.util.SparseIntArray;
+
+import dalvik.annotation.optimization.FastNative;
+import dalvik.system.CloseGuard;
 
 /**
  * A buffer containing multiple cursor rows.
@@ -61,28 +63,43 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     private static native void nativeDispose(long windowPtr);
     private static native void nativeWriteToParcel(long windowPtr, Parcel parcel);
 
-    private static native void nativeClear(long windowPtr);
-
-    private static native int nativeGetNumRows(long windowPtr);
-    private static native boolean nativeSetNumColumns(long windowPtr, int columnNum);
-    private static native boolean nativeAllocRow(long windowPtr);
-    private static native void nativeFreeLastRow(long windowPtr);
-
-    private static native int nativeGetType(long windowPtr, int row, int column);
+    private static native String nativeGetName(long windowPtr);
     private static native byte[] nativeGetBlob(long windowPtr, int row, int column);
     private static native String nativeGetString(long windowPtr, int row, int column);
-    private static native long nativeGetLong(long windowPtr, int row, int column);
-    private static native double nativeGetDouble(long windowPtr, int row, int column);
     private static native void nativeCopyStringToBuffer(long windowPtr, int row, int column,
             CharArrayBuffer buffer);
-
     private static native boolean nativePutBlob(long windowPtr, byte[] value, int row, int column);
-    private static native boolean nativePutString(long windowPtr, String value, int row, int column);
+    private static native boolean nativePutString(long windowPtr, String value,
+            int row, int column);
+
+    // Below native methods don't do unconstrained work, so are FastNative for performance
+
+    @FastNative
+    private static native void nativeClear(long windowPtr);
+
+    @FastNative
+    private static native int nativeGetNumRows(long windowPtr);
+    @FastNative
+    private static native boolean nativeSetNumColumns(long windowPtr, int columnNum);
+    @FastNative
+    private static native boolean nativeAllocRow(long windowPtr);
+    @FastNative
+    private static native void nativeFreeLastRow(long windowPtr);
+
+    @FastNative
+    private static native int nativeGetType(long windowPtr, int row, int column);
+    @FastNative
+    private static native long nativeGetLong(long windowPtr, int row, int column);
+    @FastNative
+    private static native double nativeGetDouble(long windowPtr, int row, int column);
+
+    @FastNative
     private static native boolean nativePutLong(long windowPtr, long value, int row, int column);
+    @FastNative
     private static native boolean nativePutDouble(long windowPtr, double value, int row, int column);
+    @FastNative
     private static native boolean nativePutNull(long windowPtr, int row, int column);
 
-    private static native String nativeGetName(long windowPtr);
 
     /**
      * Creates a new empty cursor window and gives it a name.
@@ -94,19 +111,29 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      * @param name The name of the cursor window, or null if none.
      */
     public CursorWindow(String name) {
+        this(name, getCursorWindowSize());
+    }
+
+    /**
+     * Creates a new empty cursor window and gives it a name.
+     * <p>
+     * The cursor initially has no rows or columns.  Call {@link #setNumColumns(int)} to
+     * set the number of columns before adding any rows to the cursor.
+     * </p>
+     *
+     * @param name The name of the cursor window, or null if none.
+     * @param windowSizeBytes Size of cursor window in bytes.
+     * <p><strong>Note:</strong> Memory is dynamically allocated as data rows are added to the
+     * window. Depending on the amount of data stored, the actual amount of memory allocated can be
+     * lower than specified size, but cannot exceed it.
+     */
+    public CursorWindow(String name, @BytesLong long windowSizeBytes) {
         mStartPos = 0;
         mName = name != null && name.length() != 0 ? name : "<unnamed>";
-        if (sCursorWindowSize < 0) {
-            /** The cursor window size. resource xml file specifies the value in kB.
-             * convert it to bytes here by multiplying with 1024.
-             */
-            sCursorWindowSize = Resources.getSystem().getInteger(
-                com.android.internal.R.integer.config_cursorWindowSize) * 1024;
-        }
-        mWindowPtr = nativeCreate(mName, sCursorWindowSize);
+        mWindowPtr = nativeCreate(mName, (int) windowSizeBytes);
         if (mWindowPtr == 0) {
             throw new CursorWindowAllocationException("Cursor window allocation of " +
-                    (sCursorWindowSize / 1024) + " kb failed. " + printStats());
+                    windowSizeBytes + " bytes failed. " + printStats());
         }
         mCloseGuard.open("close");
         recordNewWindow(Binder.getCallingPid(), mWindowPtr);
@@ -771,6 +798,16 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
         // limit the returned string size to 1000
         String s = (buff.length() > 980) ? buff.substring(0, 980) : buff.toString();
         return "# Open Cursors=" + total + s;
+    }
+
+    private static int getCursorWindowSize() {
+        if (sCursorWindowSize < 0) {
+            // The cursor window size. resource xml file specifies the value in kB.
+            // convert it to bytes here by multiplying with 1024.
+            sCursorWindowSize = Resources.getSystem().getInteger(
+                    com.android.internal.R.integer.config_cursorWindowSize) * 1024;
+        }
+        return sCursorWindowSize;
     }
 
     @Override

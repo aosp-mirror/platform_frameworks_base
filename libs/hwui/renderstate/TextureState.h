@@ -16,8 +16,8 @@
 #ifndef RENDERSTATE_TEXTURESTATE_H
 #define RENDERSTATE_TEXTURESTATE_H
 
-#include "Vertex.h"
 #include "Texture.h"
+#include "Vertex.h"
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -29,9 +29,8 @@ namespace uirenderer {
 class Texture;
 
 class TextureState {
-    friend class Caches; // TODO: move to RenderState
+    friend class Caches;  // TODO: move to RenderState
 public:
-
     void constructTexture(Caches& caches);
 
     /**
@@ -96,4 +95,4 @@ private:
 } /* namespace uirenderer */
 } /* namespace android */
 
-#endif // RENDERSTATE_BLEND_H
+#endif  // RENDERSTATE_BLEND_H

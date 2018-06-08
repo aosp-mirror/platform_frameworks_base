@@ -14,9 +14,13 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
+
+import java.util.List;
 
 /**
  * For mocking because AccessibilityManager is final for some reason...
@@ -38,5 +42,28 @@ public class AccessibilityManagerWrapper implements
     @Override
     public void removeCallback(AccessibilityServicesStateChangeListener listener) {
         mAccessibilityManager.removeAccessibilityServicesStateChangeListener(listener);
+    }
+
+    public void addAccessibilityStateChangeListener(
+            AccessibilityManager.AccessibilityStateChangeListener listener) {
+        mAccessibilityManager.addAccessibilityStateChangeListener(listener);
+    }
+
+    public void removeAccessibilityStateChangeListener(
+            AccessibilityManager.AccessibilityStateChangeListener listener) {
+        mAccessibilityManager.removeAccessibilityStateChangeListener(listener);
+    }
+
+    public boolean isEnabled() {
+        return mAccessibilityManager.isEnabled();
+    }
+
+    public void sendAccessibilityEvent(AccessibilityEvent event) {
+        mAccessibilityManager.sendAccessibilityEvent(event);
+    }
+
+    public List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(
+            int feedbackTypeFlags) {
+        return mAccessibilityManager.getEnabledAccessibilityServiceList(feedbackTypeFlags);
     }
 }

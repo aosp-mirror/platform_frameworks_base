@@ -14,46 +14,126 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 package android.service.notification;
 
 option java_multiple_files = true;
 option java_outer_classname = "NotificationServiceProto";
 
+import "frameworks/base/core/proto/android/app/notification_channel.proto";
+import "frameworks/base/core/proto/android/app/notification_channel_group.proto";
+import "frameworks/base/core/proto/android/app/notificationmanager.proto";
+import "frameworks/base/core/proto/android/content/component_name.proto";
+import "frameworks/base/core/proto/android/media/audioattributes.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 message NotificationServiceDumpProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     repeated NotificationRecordProto records = 1;
 
-    ZenModeProto zen = 2;
+    optional ZenModeProto zen = 2;
+
+    optional ManagedServicesProto notification_listeners = 3;
+
+    optional int32 listener_hints = 4;
+
+    repeated ListenersDisablingEffectsProto listeners_disabling_effects = 5;
+
+    optional ManagedServicesProto notification_assistants = 6;
+
+    optional ManagedServicesProto condition_providers = 7;
+
+    optional RankingHelperProto ranking_config = 8;
 }
 
 message NotificationRecordProto {
-    string key = 1;
-    State state = 2;
-    int32 flags = 3;
-    string channelId = 4;
-    string sound = 5;
-    int32 sound_usage = 6;
-    bool can_vibrate = 7;
-    bool can_show_light = 8;
-    string group_key = 9;
-    int32 importance = 10;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional string key = 1;
+
+    enum State {
+        ENQUEUED = 0;
+        POSTED = 1;
+        SNOOZED = 2;
+    }
+    optional State state = 2;
+    optional int32 flags = 3;
+    optional string channelId = 4 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional string sound = 5 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional .android.media.AudioAttributesProto audio_attributes = 6;
+    optional bool can_vibrate = 7;
+    optional bool can_show_light = 8;
+    optional string group_key = 9 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional sint32 importance = 10;
 }
 
-enum State {
-    ENQUEUED = 0;
+message ListenersDisablingEffectsProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    POSTED = 1;
-
-    SNOOZED = 2;
+    optional int32 hint = 1;
+    repeated ManagedServiceInfoProto listeners = 2;
 }
 
-message ZenModeProto {
-    ZenMode zen_mode = 1;
-    repeated string enabled_active_conditions = 2;
-    int32 suppressed_effects = 3;
-    repeated string suppressors = 4;
-    string policy = 5;
+message ManagedServiceInfoProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional android.content.ComponentNameProto component = 1;
+    optional int32 user_id = 2;
+    optional string service = 3;
+    optional bool is_system = 4;
+    optional bool is_guest = 5;
+}
+
+message ManagedServicesProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional string caption = 1;
+
+    message ServiceProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // Package or component name.
+        repeated string name = 1;
+        optional int32 user_id = 2;
+        optional bool is_primary = 3;
+    }
+    repeated ServiceProto approved = 2;
+
+    // All of this type/caption enabled for current profiles.
+    repeated android.content.ComponentNameProto enabled = 3;
+
+
+    repeated ManagedServiceInfoProto live_services = 4;
+
+    // Snoozed for current profiles.
+    repeated android.content.ComponentNameProto snoozed = 5;
+}
+
+message RankingHelperProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    repeated string notification_signal_extractors = 1;
+
+    message RecordProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string package = 1;
+        // Default value is UNKNOWN_UID = USER_NULL = -10000.
+        optional int32 uid = 2;
+        // Default is IMPORTANCE_UNSPECIFIED (-1000).
+        optional sint32 importance = 3;
+        // Default is PRIORITY_DEFAULT (0).
+        optional int32 priority = 4;
+        // Default is VISIBILITY_NO_OVERRIDE (-1000).
+        optional sint32 visibility = 5;
+        // Default is true.
+        optional bool show_badge = 6;
+        repeated android.app.NotificationChannelProto channels = 7;
+        repeated android.app.NotificationChannelGroupProto channel_groups = 8;
+    }
+    repeated RecordProto records = 2;
+    repeated RecordProto records_restored_without_uid = 3;
 }
 
 enum ZenMode {
@@ -61,4 +141,67 @@ enum ZenMode {
     ZEN_MODE_IMPORTANT_INTERRUPTIONS = 1;
     ZEN_MODE_NO_INTERRUPTIONS = 2;
     ZEN_MODE_ALARMS = 3;
+}
+
+// An android.service.notification.Condition object.
+message ConditionProto {
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+    optional string id = 1;
+    optional string summary = 2;
+    optional string line_1 = 3;
+    optional string line_2 = 4;
+    optional int32 icon = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    enum State {
+        // Indicates that Do Not Disturb should be turned off.
+        STATE_FALSE = 0;
+        // Indicates that Do Not Disturb should be turned on.
+        STATE_TRUE = 1;
+        STATE_UNKNOWN = 2;
+        STATE_ERROR = 3;
+    }
+    optional State state = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    optional int32 flags = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
+}
+
+// An android.service.notification.ZenModeConfig.ZenRule object.
+message ZenRuleProto {
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+    // Required for automatic ZenRules (unique).
+    optional string id = 1;
+    // Required for automatic ZenRules.
+    optional string name = 2;
+    // Required for automatic ZenRules.
+    optional int64 creation_time_ms = 3 [
+        (android.privacy).dest = DEST_AUTOMATIC
+    ];
+    optional bool enabled = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // Package name, only used for manual ZenRules.
+    optional string enabler = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    // User manually disabled this instance.
+    optional bool is_snoozing = 6 [
+        (android.privacy).dest = DEST_AUTOMATIC
+    ];
+    optional ZenMode zen_mode = 7 [
+        (android.privacy).dest = DEST_AUTOMATIC
+    ];
+
+    // Required for automatic ZenRules.
+    optional string condition_id = 8;
+    optional ConditionProto condition = 9;
+    optional android.content.ComponentNameProto component = 10;
+}
+
+// A dump from com.android.server.notification.ZenModeHelper.
+message ZenModeProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional ZenMode zen_mode = 1;
+    repeated ZenRuleProto enabled_active_conditions = 2;
+    optional int32 suppressed_effects = 3;
+    repeated android.content.ComponentNameProto suppressors = 4;
+    optional android.app.PolicyProto policy = 5;
 }

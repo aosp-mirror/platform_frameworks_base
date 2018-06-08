@@ -16,12 +16,14 @@
 
 package android.service.autofill;
 
+import android.content.IntentSender;
+
 /**
  * Interface to receive the result of a save request.
  *
  * @hide
  */
 interface ISaveCallback {
-    void onSuccess();
+    void onSuccess(in IntentSender intentSender);
     void onFailure(CharSequence message);
 }

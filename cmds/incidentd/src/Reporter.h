@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
 #ifndef REPORTER_H
 #define REPORTER_H
@@ -20,82 +21,97 @@
 #include <android/os/IIncidentReportStatusListener.h>
 #include <android/os/IncidentReportArgs.h>
 
+#include <map>
 #include <string>
 #include <vector>
 
 #include <time.h>
 
-using namespace android;
-using namespace android::os;
-using namespace std;
+#include "Throttler.h"
+#include "frameworks/base/libs/incident/proto/android/os/metadata.pb.h"
+
+namespace android {
+namespace os {
+namespace incidentd {
 
 // ================================================================================
-struct ReportRequest : public virtual RefBase
-{
+struct ReportRequest : public virtual RefBase {
     IncidentReportArgs args;
     sp<IIncidentReportStatusListener> listener;
     int fd;
     status_t err;
 
-    ReportRequest(const IncidentReportArgs& args,
-            const sp<IIncidentReportStatusListener> &listener, int fd);
+    ReportRequest(const IncidentReportArgs& args, const sp<IIncidentReportStatusListener>& listener,
+                  int fd);
     virtual ~ReportRequest();
+
+    bool ok();  // returns true if the request is ok for write.
 };
 
 // ================================================================================
-class ReportRequestSet
-{
+class ReportRequestSet {
 public:
     ReportRequestSet();
     ~ReportRequestSet();
 
     void add(const sp<ReportRequest>& request);
     void setMainFd(int fd);
-
-    // Write to all of the fds for the requests. If a write fails, it stops
-    // writing to that fd and returns NO_ERROR. When we are out of fds to write
-    // to it returns an error.
-    status_t write(uint8_t const* buf, size_t size);
+    void setMainDest(int dest);
 
     typedef vector<sp<ReportRequest>>::iterator iterator;
 
     iterator begin() { return mRequests.begin(); }
     iterator end() { return mRequests.end(); }
 
+    int mainFd() { return mMainFd; }
+    int mainDest() { return mMainDest; }
+    IncidentMetadata& metadata() { return mMetadata; }
+    map<int, IncidentMetadata::SectionStats>& allSectionStats() { return mSectionStats; }
+
+    bool containsSection(int id);
+    IncidentMetadata::SectionStats* sectionStats(int id);
+
 private:
     vector<sp<ReportRequest>> mRequests;
-    int mWritableCount;
+    IncidentReportArgs mSections;
     int mMainFd;
+    int mMainDest;
+
+    IncidentMetadata mMetadata;
+    map<int, IncidentMetadata::SectionStats> mSectionStats;
 };
 
 // ================================================================================
-class Reporter : public virtual RefBase
-{
+class Reporter : public virtual RefBase {
 public:
-    enum run_report_status_t {
-        REPORT_FINISHED = 0,
-        REPORT_NEEDS_DROPBOX = 1
-    };
+    enum run_report_status_t { REPORT_FINISHED = 0, REPORT_NEEDS_DROPBOX = 1 };
 
-    IncidentReportArgs args;
     ReportRequestSet batch;
 
-    Reporter();
+    Reporter();                       // PROD must use this constructor.
+    Reporter(const char* directory);  // For testing purpose only.
     virtual ~Reporter();
 
     // Run the report as described in the batch and args parameters.
-    run_report_status_t runReport();
+    run_report_status_t runReport(size_t* reportByteSize);
 
     static run_report_status_t upload_backlog();
 
 private:
+    String8 mIncidentDirectory;
+
     string mFilename;
     off_t mMaxSize;
     size_t mMaxCount;
     time_t mStartTime;
 
     status_t create_file(int* fd);
+
+    bool isTest = true;  // default to true for testing
 };
 
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android
 
-#endif // REPORTER_H
+#endif  // REPORTER_H

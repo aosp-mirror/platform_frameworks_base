@@ -205,13 +205,15 @@ public class MobileSignalController extends SignalController<
         }
 
         MobileIconGroup hGroup = TelephonyIcons.THREE_G;
+        MobileIconGroup hPlusGroup = TelephonyIcons.THREE_G;
         if (mConfig.hspaDataDistinguishable) {
             hGroup = TelephonyIcons.H;
+            hPlusGroup = TelephonyIcons.H_PLUS;
         }
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_HSDPA, hGroup);
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_HSUPA, hGroup);
         mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_HSPA, hGroup);
-        mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_HSPAP, hGroup);
+        mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_HSPAP, hPlusGroup);
 
         if (mConfig.show4gForLte) {
             mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_LTE, TelephonyIcons.FOUR_G);
@@ -251,8 +253,11 @@ public class MobileSignalController extends SignalController<
             if (mConfig.inflateSignalStrengths) {
                 level++;
             }
-            return SignalDrawable.getState(level, getNumLevels(),
-                    mCurrentState.inetCondition == 0);
+            boolean dataDisabled = mCurrentState.userSetup
+                    && mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED;
+            boolean noInternet = mCurrentState.inetCondition == 0;
+            boolean cutOut = dataDisabled || noInternet;
+            return SignalDrawable.getState(level, getNumLevels(), cutOut);
         } else if (mCurrentState.enabled) {
             return SignalDrawable.getEmptyState(getNumLevels());
         } else {
@@ -275,6 +280,9 @@ public class MobileSignalController extends SignalController<
 
         String contentDescription = getStringIfExists(getContentDescription());
         String dataContentDescription = getStringIfExists(icons.mDataContentDescription);
+        if (mCurrentState.inetCondition == 0) {
+            dataContentDescription = mContext.getString(R.string.data_connection_no_internet);
+        }
         final boolean dataDisabled = mCurrentState.iconGroup == TelephonyIcons.DATA_DISABLED
                 && mCurrentState.userSetup;
 
@@ -573,14 +581,13 @@ public class MobileSignalController extends SignalController<
 
         public MobileIconGroup(String name, int[][] sbIcons, int[][] qsIcons, int[] contentDesc,
                 int sbNullState, int qsNullState, int sbDiscState, int qsDiscState,
-                int discContentDesc, int dataContentDesc, int dataType, boolean isWide,
-                int qsDataType) {
+                int discContentDesc, int dataContentDesc, int dataType, boolean isWide) {
             super(name, sbIcons, qsIcons, contentDesc, sbNullState, qsNullState, sbDiscState,
                     qsDiscState, discContentDesc);
             mDataContentDescription = dataContentDesc;
             mDataType = dataType;
             mIsWide = isWide;
-            mQsDataType = qsDataType;
+            mQsDataType = dataType; // TODO: remove this field
         }
     }
 

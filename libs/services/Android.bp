@@ -19,6 +19,8 @@ cc_library_shared {
     srcs: [
         ":IDropBoxManagerService.aidl",
         "src/os/DropBoxManager.cpp",
+        "src/os/StatsDimensionsValue.cpp",
+        "src/os/StatsLogEventWrapper.cpp",
     ],
 
     shared_libs: [
@@ -28,7 +30,7 @@ cc_library_shared {
         "libutils",
     ],
     header_libs: [
-        "libbase_headers",
+	"libbase_headers",
     ],
     aidl: {
         include_dirs: ["frameworks/base/core/java/"],

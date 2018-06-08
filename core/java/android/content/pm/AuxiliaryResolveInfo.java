@@ -21,6 +21,10 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Auxiliary application resolution response.
@@ -31,56 +35,95 @@ import android.content.IntentFilter;
  * hasn't been installed.
  * @hide
  */
-public final class AuxiliaryResolveInfo extends IntentFilter {
-    /** Resolved information returned from the external instant resolver */
-    public final InstantAppResolveInfo resolveInfo;
-    /** The resolved package. Copied from {@link #resolveInfo}. */
-    public final String packageName;
+public final class AuxiliaryResolveInfo {
     /** The activity to launch if there's an installation failure. */
     public final ComponentName installFailureActivity;
-    /** The resolve split. Copied from the matched filter in {@link #resolveInfo}. */
-    public final String splitName;
     /** Whether or not instant resolution needs the second phase */
     public final boolean needsPhaseTwo;
     /** Opaque token to track the instant application resolution */
     public final String token;
-    /** The version code of the package */
-    public final int versionCode;
     /** An intent to start upon failure to install */
     public final Intent failureIntent;
+    /** The matching filters for this resolve info. */
+    public final List<AuxiliaryFilter> filters;
 
     /** Create a response for installing an instant application. */
-    public AuxiliaryResolveInfo(@NonNull InstantAppResolveInfo resolveInfo,
-            @NonNull IntentFilter orig,
-            @Nullable String splitName,
-            @NonNull String token,
+    public AuxiliaryResolveInfo(@NonNull String token,
             boolean needsPhase2,
-            @Nullable Intent failureIntent) {
-        super(orig);
-        this.resolveInfo = resolveInfo;
-        this.packageName = resolveInfo.getPackageName();
-        this.splitName = splitName;
+            @Nullable Intent failureIntent,
+            @Nullable List<AuxiliaryFilter> filters) {
         this.token = token;
         this.needsPhaseTwo = needsPhase2;
-        this.versionCode = resolveInfo.getVersionCode();
         this.failureIntent = failureIntent;
+        this.filters = filters;
         this.installFailureActivity = null;
     }
 
     /** Create a response for installing a split on demand. */
-    public AuxiliaryResolveInfo(@NonNull String packageName,
-            @Nullable String splitName,
-            @Nullable ComponentName failureActivity,
-            int versionCode,
-            @Nullable Intent failureIntent) {
+    public AuxiliaryResolveInfo(@Nullable ComponentName failureActivity,
+            @Nullable Intent failureIntent,
+            @Nullable List<AuxiliaryFilter> filters) {
         super();
-        this.packageName = packageName;
         this.installFailureActivity = failureActivity;
-        this.splitName = splitName;
-        this.versionCode = versionCode;
-        this.resolveInfo = null;
+        this.filters = filters;
         this.token = null;
         this.needsPhaseTwo = false;
         this.failureIntent = failureIntent;
+    }
+
+    /** Create a response for installing a split on demand. */
+    public AuxiliaryResolveInfo(@Nullable ComponentName failureActivity,
+            String packageName, long versionCode, String splitName) {
+        this(failureActivity, null, Collections.singletonList(
+                new AuxiliaryResolveInfo.AuxiliaryFilter(packageName, versionCode, splitName)));
+    }
+
+    /** @hide */
+    public static final class AuxiliaryFilter extends IntentFilter {
+        /** Resolved information returned from the external instant resolver */
+        public final InstantAppResolveInfo resolveInfo;
+        /** The resolved package. Copied from {@link #resolveInfo}. */
+        public final String packageName;
+        /** The version code of the package */
+        public final long versionCode;
+        /** The resolve split. Copied from the matched filter in {@link #resolveInfo}. */
+        public final String splitName;
+        /** The extras to pass on to the installer for this filter. */
+        public final Bundle extras;
+
+        public AuxiliaryFilter(IntentFilter orig, InstantAppResolveInfo resolveInfo,
+                String splitName, Bundle extras) {
+            super(orig);
+            this.resolveInfo = resolveInfo;
+            this.packageName = resolveInfo.getPackageName();
+            this.versionCode = resolveInfo.getLongVersionCode();
+            this.splitName = splitName;
+            this.extras = extras;
+        }
+
+        public AuxiliaryFilter(InstantAppResolveInfo resolveInfo,
+                String splitName, Bundle extras) {
+            this.resolveInfo = resolveInfo;
+            this.packageName = resolveInfo.getPackageName();
+            this.versionCode = resolveInfo.getLongVersionCode();
+            this.splitName = splitName;
+            this.extras = extras;
+        }
+
+        public AuxiliaryFilter(String packageName, long versionCode, String splitName) {
+            this.resolveInfo = null;
+            this.packageName = packageName;
+            this.versionCode = versionCode;
+            this.splitName = splitName;
+            this.extras = null;
+        }
+
+        @Override
+        public String toString() {
+            return "AuxiliaryFilter{"
+                    + "packageName='" + packageName + '\''
+                    + ", versionCode=" + versionCode
+                    + ", splitName='" + splitName + '\'' + '}';
+        }
     }
 }

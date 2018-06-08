@@ -17,6 +17,7 @@ package android.media.session;
 
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
+import android.annotation.LongDef;
 import android.annotation.Nullable;
 import android.media.RemoteControlClient;
 import android.os.Bundle;
@@ -41,7 +42,7 @@ public final class PlaybackState implements Parcelable {
     /**
      * @hide
      */
-    @IntDef(flag=true, value={ACTION_STOP, ACTION_PAUSE, ACTION_PLAY, ACTION_REWIND,
+    @LongDef(flag=true, value={ACTION_STOP, ACTION_PAUSE, ACTION_PLAY, ACTION_REWIND,
             ACTION_SKIP_TO_PREVIOUS, ACTION_SKIP_TO_NEXT, ACTION_FAST_FORWARD, ACTION_SET_RATING,
             ACTION_SEEK_TO, ACTION_PLAY_PAUSE, ACTION_PLAY_FROM_MEDIA_ID, ACTION_PLAY_FROM_SEARCH,
             ACTION_SKIP_TO_QUEUE_ITEM, ACTION_PLAY_FROM_URI, ACTION_PREPARE,

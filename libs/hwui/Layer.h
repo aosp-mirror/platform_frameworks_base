@@ -16,11 +16,13 @@
 
 #pragma once
 
-#include <utils/RefBase.h>
 #include <GpuMemoryTracker.h>
+#include <utils/RefBase.h>
 
-#include <SkPaint.h>
+#include <SkColorFilter.h>
+#include <SkColorSpace.h>
 #include <SkBlendMode.h>
+#include <SkPaint.h>
 
 #include "Matrix.h"
 
@@ -43,9 +45,7 @@ public:
         Vulkan = 1,
     };
 
-    Api getApi() const {
-        return mApi;
-    }
+    Api getApi() const { return mApi; }
 
     ~Layer();
 
@@ -59,44 +59,34 @@ public:
 
     virtual bool isBlend() const = 0;
 
-    inline void setForceFilter(bool forceFilter) {
-        this->forceFilter = forceFilter;
-    }
+    inline void setForceFilter(bool forceFilter) { this->forceFilter = forceFilter; }
 
-    inline bool getForceFilter() const {
-        return forceFilter;
-    }
+    inline bool getForceFilter() const { return forceFilter; }
 
-    inline void setAlpha(int alpha) {
-        this->alpha = alpha;
-    }
+    inline void setAlpha(int alpha) { this->alpha = alpha; }
 
     inline void setAlpha(int alpha, SkBlendMode mode) {
         this->alpha = alpha;
         this->mode = mode;
     }
 
-    inline int getAlpha() const {
-        return alpha;
-    }
+    inline int getAlpha() const { return alpha; }
 
-    inline SkBlendMode getMode() const {
-        return mode;
-    }
+    inline SkBlendMode getMode() const { return mode; }
 
-    inline SkColorFilter* getColorFilter() const {
-        return colorFilter;
-    }
+    inline SkColorFilter* getColorFilter() const { return mColorFilter.get(); }
 
-    void setColorFilter(SkColorFilter* filter);
+    void setColorFilter(sk_sp<SkColorFilter> filter);
 
-    inline mat4& getTexTransform() {
-        return texTransform;
-    }
+    void setDataSpace(android_dataspace dataspace);
 
-    inline mat4& getTransform() {
-        return transform;
-    }
+    void setColorSpace(sk_sp<SkColorSpace> colorSpace);
+
+    inline sk_sp<SkColorFilter> getColorSpaceWithFilter() const { return mColorSpaceWithFilter; }
+
+    inline mat4& getTexTransform() { return texTransform; }
+
+    inline mat4& getTransform() { return transform; }
 
     /**
      * Posts a decStrong call to the appropriate thread.
@@ -105,18 +95,30 @@ public:
     void postDecStrong();
 
 protected:
-    Layer(RenderState& renderState, Api api, SkColorFilter* colorFilter, int alpha,
-            SkBlendMode mode);
+    Layer(RenderState& renderState, Api api, sk_sp<SkColorFilter>, int alpha,
+          SkBlendMode mode);
 
     RenderState& mRenderState;
 
 private:
+    void buildColorSpaceWithFilter();
+
     Api mApi;
 
     /**
      * Color filter used to draw this layer. Optional.
      */
-    SkColorFilter* colorFilter;
+    sk_sp<SkColorFilter> mColorFilter;
+
+    /**
+     * Colorspace of the contents of the layer. Optional.
+     */
+    android_dataspace mCurrentDataspace = HAL_DATASPACE_UNKNOWN;
+
+    /**
+     * A color filter that is the combination of the mColorFilter and mColorSpace. Optional.
+     */
+    sk_sp<SkColorFilter> mColorSpaceWithFilter;
 
     /**
      * Indicates raster data backing the layer is scaled, requiring filtration.
@@ -143,7 +145,7 @@ private:
      */
     mat4 transform;
 
-}; // struct Layer
+};  // struct Layer
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

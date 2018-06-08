@@ -48,6 +48,7 @@ cc_library_shared {
         "sensor.cpp",
         "sharedmem.cpp",
         "storage_manager.cpp",
+        "surface_texture.cpp",
         "trace.cpp",
     ],
 

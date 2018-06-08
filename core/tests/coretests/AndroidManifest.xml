@@ -51,6 +51,7 @@
     <uses-permission android:name="android.permission.CLEAR_APP_USER_DATA" />
     <uses-permission android:name="android.permission.DELETE_CACHE_FILES" />
     <uses-permission android:name="android.permission.DOWNLOAD_CACHE_NON_PURGEABLE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.INJECT_EVENTS" />
@@ -68,6 +69,7 @@
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SMS"/>
     <uses-permission android:name="android.permission.TEST_GRANTED" />
+    <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
     <uses-permission android:name="com.google.android.googleapps.permission.ACCESS_GOOGLE_PASSWORD" />
     <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH" />
     <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH.ALL_SERVICES" />
@@ -86,6 +88,7 @@
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
 
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+    <uses-permission android:name="android.permission.KILL_UID" />
 
     <!-- location test permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
@@ -101,6 +104,7 @@
 
     <!-- os storage test permissions -->
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+    <uses-permission android:name="android.permission.ASEC_ACCESS" />
     <uses-permission android:name="android.permission.ASEC_ACCESS" />
     <uses-permission android:name="android.permission.ASEC_CREATE" />
     <uses-permission android:name="android.permission.ASEC_DESTROY" />
@@ -1041,6 +1045,13 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="android.view.menu.ContextMenuActivity" android:label="ContextMenu" android:theme="@android:style/Theme.Material">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
         <activity android:name="android.view.menu.MenuWith1Item" android:label="MenuWith1Item">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1048,7 +1059,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".menus.MenuLayoutPortrait" android:label="MenuLayoutPortrait"
+        <activity android:name="android.view.menu.MenuLayoutPortrait" android:label="MenuLayoutPortrait"
                 android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -1264,6 +1275,11 @@
             </intent-filter>
         </service>
 
+        <service
+            android:name="android.service.settings.suggestions.MockSuggestionService"
+            android:permission="android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE"
+            android:exported="true"/>
+
         <provider android:name="android.app.activity.LocalProvider"
                 android:authorities="com.android.frameworks.coretests.LocalProvider">
             <meta-data android:name="com.android.frameworks.coretests.string" android:value="foo" />
@@ -1340,10 +1356,12 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="android.print.PrintTestActivity"/>
+        <activity
+            android:name="android.print.test.PrintDocumentActivity"
+            android:theme="@style/Theme" />
 
         <service
-            android:name="android.print.mockservice.MockPrintService"
+            android:name="android.print.test.services.FirstPrintService"
             android:permission="android.permission.BIND_PRINT_SERVICE">
             <intent-filter>
                 <action android:name="android.printservice.PrintService" />
@@ -1355,8 +1373,13 @@
         </service>
 
         <activity
-            android:name="android.print.mockservice.SettingsActivity"
+            android:name="android.print.test.services.SettingsActivity"
             android:permission="android.permission.START_PRINT_SERVICE_CONFIG_ACTIVITY"
+            android:exported="true"
+            android:theme="@style/Theme">
+        </activity>
+
+        <activity android:name="android.app.activity.ActivityThreadTest$TestActivity"
             android:exported="true">
         </activity>
 

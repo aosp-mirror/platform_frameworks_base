@@ -18,17 +18,17 @@
 
 #include <string>
 
-#include "utils/StringUtils.h"
 #include <cutils/properties.h>
 #include <log/log.h>
+#include "utils/StringUtils.h"
 
 #include "Caches.h"
 #include "DeviceInfo.h"
 #include "Frame.h"
 #include "Properties.h"
 #include "RenderThread.h"
-#include "renderstate/RenderState.h"
 #include "Texture.h"
+#include "renderstate/RenderState.h"
 
 #include <EGL/eglext.h>
 #include <GrContextOptions.h>
@@ -47,7 +47,9 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-#define ERROR_CASE(x) case x: return #x;
+#define ERROR_CASE(x) \
+    case x:           \
+        return #x;
 static const char* egl_error_str(EGLint error) {
     switch (error) {
         ERROR_CASE(EGL_SUCCESS)
@@ -65,8 +67,8 @@ static const char* egl_error_str(EGLint error) {
         ERROR_CASE(EGL_BAD_PARAMETER)
         ERROR_CASE(EGL_BAD_SURFACE)
         ERROR_CASE(EGL_CONTEXT_LOST)
-    default:
-        return "Unknown error";
+        default:
+            return "Unknown error";
     }
 }
 const char* EglManager::eglErrorString() {
@@ -80,6 +82,7 @@ static struct {
     bool pixelFormatFloat = false;
     bool glColorSpace = false;
     bool scRGB = false;
+    bool contextPriority = false;
 } EglExtensions;
 
 EglManager::EglManager(RenderThread& thread)
@@ -89,8 +92,7 @@ EglManager::EglManager(RenderThread& thread)
         , mEglConfigWideGamut(nullptr)
         , mEglContext(EGL_NO_CONTEXT)
         , mPBufferSurface(EGL_NO_SURFACE)
-        , mCurrentSurface(EGL_NO_SURFACE) {
-}
+        , mCurrentSurface(EGL_NO_SURFACE) {}
 
 void EglManager::initialize() {
     if (hasEglContext()) return;
@@ -98,12 +100,12 @@ void EglManager::initialize() {
     ATRACE_NAME("Creating EGLContext");
 
     mEglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY,
-            "Failed to get EGL_DEFAULT_DISPLAY! err=%s", eglErrorString());
+    LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY, "Failed to get EGL_DEFAULT_DISPLAY! err=%s",
+                        eglErrorString());
 
     EGLint major, minor;
     LOG_ALWAYS_FATAL_IF(eglInitialize(mEglDisplay, &major, &minor) == EGL_FALSE,
-            "Failed to initialize display %p! err=%s", mEglDisplay, eglErrorString());
+                        "Failed to initialize display %p! err=%s", mEglDisplay, eglErrorString());
 
     ALOGI("Initialized EGL, version %d.%d", (int)major, (int)minor);
 
@@ -138,26 +140,26 @@ void EglManager::initialize() {
         LOG_ALWAYS_FATAL_IF(!glInterface.get());
 
         GrContextOptions options;
-        options.fGpuPathRenderers &= ~GrContextOptions::GpuPathRenderers::kDistanceField;
+        options.fDisableDistanceFieldPaths = true;
         mRenderThread.cacheManager().configureContext(&options);
-        mRenderThread.setGrContext(GrContext::Create(GrBackend::kOpenGL_GrBackend,
-                (GrBackendContext)glInterface.get(), options));
+        sk_sp<GrContext> grContext(GrContext::MakeGL(std::move(glInterface), options));
+        LOG_ALWAYS_FATAL_IF(!grContext.get());
+        mRenderThread.setGrContext(grContext);
     }
 }
 
 void EglManager::initExtensions() {
-    auto extensions = StringUtils::split(
-            eglQueryString(mEglDisplay, EGL_EXTENSIONS));
+    auto extensions = StringUtils::split(eglQueryString(mEglDisplay, EGL_EXTENSIONS));
 
     // For our purposes we don't care if EGL_BUFFER_AGE is a result of
     // EGL_EXT_buffer_age or EGL_KHR_partial_update as our usage is covered
     // under EGL_KHR_partial_update and we don't need the expanded scope
     // that EGL_EXT_buffer_age provides.
-    EglExtensions.bufferAge = extensions.has("EGL_EXT_buffer_age")
-            || extensions.has("EGL_KHR_partial_update");
+    EglExtensions.bufferAge =
+            extensions.has("EGL_EXT_buffer_age") || extensions.has("EGL_KHR_partial_update");
     EglExtensions.setDamage = extensions.has("EGL_KHR_partial_update");
     LOG_ALWAYS_FATAL_IF(!extensions.has("EGL_KHR_swap_buffers_with_damage"),
-            "Missing required extension EGL_KHR_swap_buffers_with_damage");
+                        "Missing required extension EGL_KHR_swap_buffers_with_damage");
 
     EglExtensions.glColorSpace = extensions.has("EGL_KHR_gl_colorspace");
     EglExtensions.noConfigContext = extensions.has("EGL_KHR_no_config_context");
@@ -167,6 +169,7 @@ void EglManager::initExtensions() {
 #else
     EglExtensions.scRGB = extensions.has("EGL_EXT_gl_colorspace_scrgb");
 #endif
+    EglExtensions.contextPriority = extensions.has("EGL_IMG_context_priority");
 }
 
 bool EglManager::hasEglContext() {
@@ -175,30 +178,37 @@ bool EglManager::hasEglContext() {
 
 void EglManager::loadConfigs() {
     ALOGD("Swap behavior %d", static_cast<int>(mSwapBehavior));
-    EGLint swapBehavior = (mSwapBehavior == SwapBehavior::Preserved)
-            ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0;
-    EGLint attribs[] = {
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-            EGL_RED_SIZE, 8,
-            EGL_GREEN_SIZE, 8,
-            EGL_BLUE_SIZE, 8,
-            EGL_ALPHA_SIZE, 8,
-            EGL_DEPTH_SIZE, 0,
-            EGL_CONFIG_CAVEAT, EGL_NONE,
-            EGL_STENCIL_SIZE, Stencil::getStencilSize(),
-            EGL_SURFACE_TYPE, EGL_WINDOW_BIT | swapBehavior,
-            EGL_NONE
-    };
+    EGLint swapBehavior =
+            (mSwapBehavior == SwapBehavior::Preserved) ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0;
+    EGLint attribs[] = {EGL_RENDERABLE_TYPE,
+                        EGL_OPENGL_ES2_BIT,
+                        EGL_RED_SIZE,
+                        8,
+                        EGL_GREEN_SIZE,
+                        8,
+                        EGL_BLUE_SIZE,
+                        8,
+                        EGL_ALPHA_SIZE,
+                        8,
+                        EGL_DEPTH_SIZE,
+                        0,
+                        EGL_CONFIG_CAVEAT,
+                        EGL_NONE,
+                        EGL_STENCIL_SIZE,
+                        Stencil::getStencilSize(),
+                        EGL_SURFACE_TYPE,
+                        EGL_WINDOW_BIT | swapBehavior,
+                        EGL_NONE};
 
     EGLint numConfigs = 1;
-    if (!eglChooseConfig(mEglDisplay, attribs, &mEglConfig, numConfigs, &numConfigs)
-            || numConfigs != 1) {
+    if (!eglChooseConfig(mEglDisplay, attribs, &mEglConfig, numConfigs, &numConfigs) ||
+        numConfigs != 1) {
         if (mSwapBehavior == SwapBehavior::Preserved) {
             // Try again without dirty regions enabled
             ALOGW("Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...");
             mSwapBehavior = SwapBehavior::Discard;
             loadConfigs();
-            return; // the call to loadConfigs() we just made picks the wide gamut config
+            return;  // the call to loadConfigs() we just made picks the wide gamut config
         } else {
             // Failed to get a valid config
             LOG_ALWAYS_FATAL("Failed to choose config, error = %s", eglErrorString());
@@ -207,22 +217,30 @@ void EglManager::loadConfigs() {
 
     if (EglExtensions.pixelFormatFloat) {
         // If we reached this point, we have a valid swap behavior
-        EGLint attribs16F[] = {
-                EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-                EGL_COLOR_COMPONENT_TYPE_EXT, EGL_COLOR_COMPONENT_TYPE_FLOAT_EXT,
-                EGL_RED_SIZE, 16,
-                EGL_GREEN_SIZE, 16,
-                EGL_BLUE_SIZE, 16,
-                EGL_ALPHA_SIZE, 16,
-                EGL_DEPTH_SIZE, 0,
-                EGL_STENCIL_SIZE, Stencil::getStencilSize(),
-                EGL_SURFACE_TYPE, EGL_WINDOW_BIT | swapBehavior,
-                EGL_NONE
-        };
+        EGLint attribs16F[] = {EGL_RENDERABLE_TYPE,
+                               EGL_OPENGL_ES2_BIT,
+                               EGL_COLOR_COMPONENT_TYPE_EXT,
+                               EGL_COLOR_COMPONENT_TYPE_FLOAT_EXT,
+                               EGL_RED_SIZE,
+                               16,
+                               EGL_GREEN_SIZE,
+                               16,
+                               EGL_BLUE_SIZE,
+                               16,
+                               EGL_ALPHA_SIZE,
+                               16,
+                               EGL_DEPTH_SIZE,
+                               0,
+                               EGL_STENCIL_SIZE,
+                               Stencil::getStencilSize(),
+                               EGL_SURFACE_TYPE,
+                               EGL_WINDOW_BIT | swapBehavior,
+                               EGL_NONE};
 
         numConfigs = 1;
-        if (!eglChooseConfig(mEglDisplay, attribs16F, &mEglConfigWideGamut, numConfigs, &numConfigs)
-                || numConfigs != 1) {
+        if (!eglChooseConfig(mEglDisplay, attribs16F, &mEglConfigWideGamut, numConfigs,
+                             &numConfigs) ||
+            numConfigs != 1) {
             ALOGE("Device claims wide gamut support, cannot find matching config, error = %s",
                     eglErrorString());
             EglExtensions.pixelFormatFloat = false;
@@ -231,23 +249,28 @@ void EglManager::loadConfigs() {
 }
 
 void EglManager::createContext() {
-    EGLint attribs[] = {
-            EGL_CONTEXT_CLIENT_VERSION, GLES_VERSION,
-            EGL_NONE
-    };
-    mEglContext = eglCreateContext(mEglDisplay,
-            EglExtensions.noConfigContext ? ((EGLConfig) nullptr) : mEglConfig,
-            EGL_NO_CONTEXT, attribs);
-    LOG_ALWAYS_FATAL_IF(mEglContext == EGL_NO_CONTEXT,
-        "Failed to create context, error = %s", eglErrorString());
+    std::vector<EGLint> contextAttributes;
+    contextAttributes.reserve(5);
+    contextAttributes.push_back(EGL_CONTEXT_CLIENT_VERSION);
+    contextAttributes.push_back(GLES_VERSION);
+    if (Properties::contextPriority != 0 && EglExtensions.contextPriority) {
+        contextAttributes.push_back(EGL_CONTEXT_PRIORITY_LEVEL_IMG);
+        contextAttributes.push_back(Properties::contextPriority);
+    }
+    contextAttributes.push_back(EGL_NONE);
+    mEglContext = eglCreateContext(
+            mEglDisplay, EglExtensions.noConfigContext ? ((EGLConfig) nullptr) : mEglConfig,
+            EGL_NO_CONTEXT, contextAttributes.data());
+    LOG_ALWAYS_FATAL_IF(mEglContext == EGL_NO_CONTEXT, "Failed to create context, error = %s",
+                        eglErrorString());
 }
 
 void EglManager::createPBufferSurface() {
     LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY,
-            "usePBufferSurface() called on uninitialized GlobalContext!");
+                        "usePBufferSurface() called on uninitialized GlobalContext!");
 
     if (mPBufferSurface == EGL_NO_SURFACE) {
-        EGLint attribs[] = { EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
+        EGLint attribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
         mPBufferSurface = eglCreatePbufferSurface(mEglDisplay, mEglConfig, attribs);
     }
 }
@@ -255,8 +278,8 @@ void EglManager::createPBufferSurface() {
 EGLSurface EglManager::createSurface(EGLNativeWindowType window, bool wideColorGamut) {
     initialize();
 
-    wideColorGamut = wideColorGamut && EglExtensions.glColorSpace && EglExtensions.scRGB
-            && EglExtensions.pixelFormatFloat && EglExtensions.noConfigContext;
+    wideColorGamut = wideColorGamut && EglExtensions.glColorSpace && EglExtensions.scRGB &&
+                     EglExtensions.pixelFormatFloat && EglExtensions.noConfigContext;
 
     // The color space we want to use depends on whether linear blending is turned
     // on and whether the app has requested wide color gamut rendering. When wide
@@ -280,10 +303,7 @@ EGLSurface EglManager::createSurface(EGLNativeWindowType window, bool wideColorG
     // We insert to placeholders to set EGL_GL_COLORSPACE_KHR and its value.
     // According to section 3.4.1 of the EGL specification, the attributes
     // list is considered empty if the first entry is EGL_NONE
-    EGLint attribs[] = {
-            EGL_NONE, EGL_NONE,
-            EGL_NONE
-    };
+    EGLint attribs[] = {EGL_NONE, EGL_NONE, EGL_NONE};
 
     if (EglExtensions.glColorSpace) {
         attribs[0] = EGL_GL_COLORSPACE_KHR;
@@ -302,16 +322,17 @@ EGLSurface EglManager::createSurface(EGLNativeWindowType window, bool wideColorG
 #endif
     }
 
-    EGLSurface surface = eglCreateWindowSurface(mEglDisplay,
-            wideColorGamut ? mEglConfigWideGamut : mEglConfig, window, attribs);
+    EGLSurface surface = eglCreateWindowSurface(
+            mEglDisplay, wideColorGamut ? mEglConfigWideGamut : mEglConfig, window, attribs);
     LOG_ALWAYS_FATAL_IF(surface == EGL_NO_SURFACE,
-            "Failed to create EGLSurface for window %p, eglErr = %s",
-            (void*) window, eglErrorString());
+                        "Failed to create EGLSurface for window %p, eglErr = %s", (void*)window,
+                        eglErrorString());
 
     if (mSwapBehavior != SwapBehavior::Preserved) {
-        LOG_ALWAYS_FATAL_IF(eglSurfaceAttrib(mEglDisplay, surface, EGL_SWAP_BEHAVIOR, EGL_BUFFER_DESTROYED) == EGL_FALSE,
+        LOG_ALWAYS_FATAL_IF(eglSurfaceAttrib(mEglDisplay, surface, EGL_SWAP_BEHAVIOR,
+                                             EGL_BUFFER_DESTROYED) == EGL_FALSE,
                             "Failed to set swap behavior to destroyed for window %p, eglErr = %s",
-                            (void*) window, eglErrorString());
+                            (void*)window, eglErrorString());
     }
 
     return surface;
@@ -353,11 +374,11 @@ bool EglManager::makeCurrent(EGLSurface surface, EGLint* errOut) {
     if (!eglMakeCurrent(mEglDisplay, surface, surface, mEglContext)) {
         if (errOut) {
             *errOut = eglGetError();
-            ALOGW("Failed to make current on surface %p, error=%s",
-                    (void*)surface, egl_error_str(*errOut));
+            ALOGW("Failed to make current on surface %p, error=%s", (void*)surface,
+                  egl_error_str(*errOut));
         } else {
-            LOG_ALWAYS_FATAL("Failed to make current on surface %p, error=%s",
-                    (void*)surface, eglErrorString());
+            LOG_ALWAYS_FATAL("Failed to make current on surface %p, error=%s", (void*)surface,
+                             eglErrorString());
         }
     }
     mCurrentSurface = surface;
@@ -369,21 +390,20 @@ bool EglManager::makeCurrent(EGLSurface surface, EGLint* errOut) {
 
 EGLint EglManager::queryBufferAge(EGLSurface surface) {
     switch (mSwapBehavior) {
-    case SwapBehavior::Discard:
-        return 0;
-    case SwapBehavior::Preserved:
-        return 1;
-    case SwapBehavior::BufferAge:
-        EGLint bufferAge;
-        eglQuerySurface(mEglDisplay, surface, EGL_BUFFER_AGE_EXT, &bufferAge);
-        return bufferAge;
+        case SwapBehavior::Discard:
+            return 0;
+        case SwapBehavior::Preserved:
+            return 1;
+        case SwapBehavior::BufferAge:
+            EGLint bufferAge;
+            eglQuerySurface(mEglDisplay, surface, EGL_BUFFER_AGE_EXT, &bufferAge);
+            return bufferAge;
     }
     return 0;
 }
 
 Frame EglManager::beginFrame(EGLSurface surface) {
-    LOG_ALWAYS_FATAL_IF(surface == EGL_NO_SURFACE,
-            "Tried to beginFrame on EGL_NO_SURFACE!");
+    LOG_ALWAYS_FATAL_IF(surface == EGL_NO_SURFACE, "Tried to beginFrame on EGL_NO_SURFACE!");
     makeCurrent(surface);
     Frame frame;
     frame.mSurface = surface;
@@ -401,7 +421,7 @@ void EglManager::damageFrame(const Frame& frame, const SkRect& dirty) {
         frame.map(dirty, rects);
         if (!eglSetDamageRegionKHR(mEglDisplay, frame.mSurface, rects, 1)) {
             LOG_ALWAYS_FATAL("Failed to set damage region on surface %p, error=%s",
-                    (void*)frame.mSurface, eglErrorString());
+                             (void*)frame.mSurface, eglErrorString());
         }
     }
 #endif
@@ -412,7 +432,6 @@ bool EglManager::damageRequiresSwap() {
 }
 
 bool EglManager::swapBuffers(const Frame& frame, const SkRect& screenDirty) {
-
     if (CC_UNLIKELY(Properties::waitForGpuCompletion)) {
         ATRACE_NAME("Finishing GPU work");
         fence();
@@ -420,8 +439,7 @@ bool EglManager::swapBuffers(const Frame& frame, const SkRect& screenDirty) {
 
     EGLint rects[4];
     frame.map(screenDirty, rects);
-    eglSwapBuffersWithDamageKHR(mEglDisplay, frame.mSurface, rects,
-            screenDirty.isEmpty() ? 0 : 1);
+    eglSwapBuffersWithDamageKHR(mEglDisplay, frame.mSurface, rects, screenDirty.isEmpty() ? 0 : 1);
 
     EGLint err = eglGetError();
     if (CC_LIKELY(err == EGL_SUCCESS)) {
@@ -431,20 +449,18 @@ bool EglManager::swapBuffers(const Frame& frame, const SkRect& screenDirty) {
         // For some reason our surface was destroyed out from under us
         // This really shouldn't happen, but if it does we can recover easily
         // by just not trying to use the surface anymore
-        ALOGW("swapBuffers encountered EGL error %d on %p, halting rendering...",
-                err, frame.mSurface);
+        ALOGW("swapBuffers encountered EGL error %d on %p, halting rendering...", err,
+              frame.mSurface);
         return false;
     }
-    LOG_ALWAYS_FATAL("Encountered EGL error %d %s during rendering",
-            err, egl_error_str(err));
+    LOG_ALWAYS_FATAL("Encountered EGL error %d %s during rendering", err, egl_error_str(err));
     // Impossible to hit this, but the compiler doesn't know that
     return false;
 }
 
 void EglManager::fence() {
     EGLSyncKHR fence = eglCreateSyncKHR(mEglDisplay, EGL_SYNC_FENCE_KHR, NULL);
-    eglClientWaitSyncKHR(mEglDisplay, fence,
-            EGL_SYNC_FLUSH_COMMANDS_BIT_KHR, EGL_FOREVER_KHR);
+    eglClientWaitSyncKHR(mEglDisplay, fence, EGL_SYNC_FLUSH_COMMANDS_BIT_KHR, EGL_FOREVER_KHR);
     eglDestroySyncKHR(mEglDisplay, fence);
 }
 
@@ -452,17 +468,17 @@ bool EglManager::setPreserveBuffer(EGLSurface surface, bool preserve) {
     if (mSwapBehavior != SwapBehavior::Preserved) return false;
 
     bool preserved = eglSurfaceAttrib(mEglDisplay, surface, EGL_SWAP_BEHAVIOR,
-            preserve ? EGL_BUFFER_PRESERVED : EGL_BUFFER_DESTROYED);
+                                      preserve ? EGL_BUFFER_PRESERVED : EGL_BUFFER_DESTROYED);
     if (!preserved) {
-        ALOGW("Failed to set EGL_SWAP_BEHAVIOR on surface %p, error=%s",
-                (void*) surface, eglErrorString());
+        ALOGW("Failed to set EGL_SWAP_BEHAVIOR on surface %p, error=%s", (void*)surface,
+              eglErrorString());
         // Maybe it's already set?
         EGLint swapBehavior;
         if (eglQuerySurface(mEglDisplay, surface, EGL_SWAP_BEHAVIOR, &swapBehavior)) {
             preserved = (swapBehavior == EGL_BUFFER_PRESERVED);
         } else {
-            ALOGW("Failed to query EGL_SWAP_BEHAVIOR on surface %p, error=%p",
-                                (void*) surface, eglErrorString());
+            ALOGW("Failed to query EGL_SWAP_BEHAVIOR on surface %p, error=%p", (void*)surface,
+                  eglErrorString());
         }
     }
 

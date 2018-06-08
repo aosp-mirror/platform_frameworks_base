@@ -18,10 +18,12 @@ package android.app;
 
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
+import android.app.ContextImpl.ServiceInitializationState;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.job.IJobScheduler;
 import android.app.job.JobScheduler;
+import android.app.slice.SliceManager;
 import android.app.timezone.RulesManager;
 import android.app.trust.TrustManager;
 import android.app.usage.IStorageStatsManager;
@@ -37,6 +39,8 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.IRestrictionsManager;
 import android.content.RestrictionsManager;
+import android.content.pm.CrossProfileApps;
+import android.content.pm.ICrossProfileApps;
 import android.content.pm.IShortcutService;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
@@ -81,11 +85,11 @@ import android.net.INetworkPolicyManager;
 import android.net.IpSecManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
+import android.net.NetworkWatchlistManager;
 import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
 import android.net.nsd.INsdManager;
 import android.net.nsd.NsdManager;
-import android.net.wifi.IRttManager;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.IWifiScanner;
 import android.net.wifi.RttManager;
@@ -95,24 +99,29 @@ import android.net.wifi.aware.IWifiAwareManager;
 import android.net.wifi.aware.WifiAwareManager;
 import android.net.wifi.p2p.IWifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.rtt.IWifiRttManager;
+import android.net.wifi.rtt.WifiRttManager;
 import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Build;
+import android.os.DeviceIdleManager;
 import android.os.DropBoxManager;
 import android.os.HardwarePropertiesManager;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
+import android.os.IDeviceIdleController;
 import android.os.IHardwarePropertiesManager;
 import android.os.IPowerManager;
 import android.os.IRecoverySystem;
+import android.os.ISystemUpdateManager;
 import android.os.IUserManager;
 import android.os.IncidentManager;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.RecoverySystem;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
+import android.os.SystemUpdateManager;
 import android.os.SystemVibrator;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -149,6 +158,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.ISoundTriggerService;
 import com.android.internal.appwidget.IAppWidgetService;
+import com.android.internal.net.INetworkWatchlistManager;
 import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.policy.PhoneLayoutInflater;
 
@@ -303,14 +313,14 @@ final class SystemServiceRegistry {
             }});
 
         registerService(Context.BATTERY_SERVICE, BatteryManager.class,
-                new StaticServiceFetcher<BatteryManager>() {
+                new CachedServiceFetcher<BatteryManager>() {
             @Override
-            public BatteryManager createService() throws ServiceNotFoundException {
+            public BatteryManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBatteryStats stats = IBatteryStats.Stub.asInterface(
                         ServiceManager.getServiceOrThrow(BatteryStats.SERVICE_NAME));
                 IBatteryPropertiesRegistrar registrar = IBatteryPropertiesRegistrar.Stub
                         .asInterface(ServiceManager.getServiceOrThrow("batteryproperties"));
-                return new BatteryManager(stats, registrar);
+                return new BatteryManager(ctx, stats, registrar);
             }});
 
         registerService(Context.NFC_SERVICE, NfcManager.class,
@@ -447,6 +457,13 @@ final class SystemServiceRegistry {
                   ctx.mMainThread.getHandler().getLooper());
             }});
 
+        registerService(Context.STATS_MANAGER, StatsManager.class,
+                new CachedServiceFetcher<StatsManager>() {
+            @Override
+            public StatsManager createService(ContextImpl ctx) {
+                return new StatsManager(ctx.getOuterContext());
+            }});
+
         registerService(Context.STATUS_BAR_SERVICE, StatusBarManager.class,
                 new CachedServiceFetcher<StatusBarManager>() {
             @Override
@@ -470,6 +487,17 @@ final class SystemServiceRegistry {
                 return new StorageStatsManager(ctx, service);
             }});
 
+        registerService(Context.SYSTEM_UPDATE_SERVICE, SystemUpdateManager.class,
+                new CachedServiceFetcher<SystemUpdateManager>() {
+                    @Override
+                    public SystemUpdateManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.SYSTEM_UPDATE_SERVICE);
+                        ISystemUpdateManager service = ISystemUpdateManager.Stub.asInterface(b);
+                        return new SystemUpdateManager(service);
+                    }});
+
         registerService(Context.TELEPHONY_SERVICE, TelephonyManager.class,
                 new CachedServiceFetcher<TelephonyManager>() {
             @Override
@@ -480,7 +508,7 @@ final class SystemServiceRegistry {
         registerService(Context.TELEPHONY_SUBSCRIPTION_SERVICE, SubscriptionManager.class,
                 new CachedServiceFetcher<SubscriptionManager>() {
             @Override
-            public SubscriptionManager createService(ContextImpl ctx) {
+            public SubscriptionManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 return new SubscriptionManager(ctx.getOuterContext());
             }});
 
@@ -545,8 +573,16 @@ final class SystemServiceRegistry {
         registerService(Context.WALLPAPER_SERVICE, WallpaperManager.class,
                 new CachedServiceFetcher<WallpaperManager>() {
             @Override
-            public WallpaperManager createService(ContextImpl ctx) {
-                return new WallpaperManager(ctx.getOuterContext(),
+            public WallpaperManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                final IBinder b;
+                if (ctx.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.P) {
+                    b = ServiceManager.getServiceOrThrow(Context.WALLPAPER_SERVICE);
+                } else {
+                    b = ServiceManager.getService(Context.WALLPAPER_SERVICE);
+                }
+                IWallpaperManager service = IWallpaperManager.Stub.asInterface(b);
+                return new WallpaperManager(service, ctx.getOuterContext(),
                         ctx.mMainThread.getHandler());
             }});
 
@@ -603,13 +639,24 @@ final class SystemServiceRegistry {
 
         registerService(Context.WIFI_RTT_SERVICE, RttManager.class,
                 new CachedServiceFetcher<RttManager>() {
-            @Override
-            public RttManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getServiceOrThrow(Context.WIFI_RTT_SERVICE);
-                IRttManager service = IRttManager.Stub.asInterface(b);
-                return new RttManager(ctx.getOuterContext(), service,
-                        ConnectivityThread.getInstanceLooper());
-            }});
+                @Override
+                public RttManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                    IBinder b = ServiceManager.getServiceOrThrow(Context.WIFI_RTT_RANGING_SERVICE);
+                    IWifiRttManager service = IWifiRttManager.Stub.asInterface(b);
+                    return new RttManager(ctx.getOuterContext(),
+                            new WifiRttManager(ctx.getOuterContext(), service));
+                }});
+
+        registerService(Context.WIFI_RTT_RANGING_SERVICE, WifiRttManager.class,
+                new CachedServiceFetcher<WifiRttManager>() {
+                    @Override
+                    public WifiRttManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.WIFI_RTT_RANGING_SERVICE);
+                        IWifiRttManager service = IWifiRttManager.Stub.asInterface(b);
+                        return new WifiRttManager(ctx.getOuterContext(), service);
+                    }});
 
         registerService(Context.ETHERNET_SERVICE, EthernetManager.class,
                 new CachedServiceFetcher<EthernetManager>() {
@@ -678,8 +725,9 @@ final class SystemServiceRegistry {
                     service = IPrintManager.Stub.asInterface(ServiceManager
                             .getServiceOrThrow(Context.PRINT_SERVICE));
                 }
-                return new PrintManager(ctx.getOuterContext(), service, UserHandle.myUserId(),
-                        UserHandle.getAppId(Process.myUid()));
+                final int userId = ctx.getUserId();
+                final int appId = UserHandle.getAppId(ctx.getApplicationInfo().uid);
+                return new PrintManager(ctx.getOuterContext(), service, userId, appId);
             }});
 
         registerService(Context.COMPANION_DEVICE_SERVICE, CompanionDeviceManager.class,
@@ -734,12 +782,12 @@ final class SystemServiceRegistry {
             }});
 
         registerService(Context.TV_INPUT_SERVICE, TvInputManager.class,
-                new StaticServiceFetcher<TvInputManager>() {
+                new CachedServiceFetcher<TvInputManager>() {
             @Override
-            public TvInputManager createService() throws ServiceNotFoundException {
+            public TvInputManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBinder iBinder = ServiceManager.getServiceOrThrow(Context.TV_INPUT_SERVICE);
                 ITvInputManager service = ITvInputManager.Stub.asInterface(iBinder);
-                return new TvInputManager(service, UserHandle.myUserId());
+                return new TvInputManager(service, ctx.getUserId());
             }});
 
         registerService(Context.NETWORK_SCORE_SERVICE, NetworkScoreManager.class,
@@ -858,6 +906,17 @@ final class SystemServiceRegistry {
                 return new ShortcutManager(ctx, IShortcutService.Stub.asInterface(b));
             }});
 
+        registerService(Context.NETWORK_WATCHLIST_SERVICE, NetworkWatchlistManager.class,
+                new CachedServiceFetcher<NetworkWatchlistManager>() {
+                    @Override
+                    public NetworkWatchlistManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b =
+                                ServiceManager.getServiceOrThrow(Context.NETWORK_WATCHLIST_SERVICE);
+                        return new NetworkWatchlistManager(ctx,
+                                INetworkWatchlistManager.Stub.asInterface(b));
+                    }});
+
         registerService(Context.SYSTEM_HEALTH_SERVICE, SystemHealthManager.class,
                 new CachedServiceFetcher<SystemHealthManager>() {
             @Override
@@ -905,6 +964,39 @@ final class SystemServiceRegistry {
             public RulesManager createService(ContextImpl ctx) {
                 return new RulesManager(ctx.getOuterContext());
             }});
+
+        registerService(Context.CROSS_PROFILE_APPS_SERVICE, CrossProfileApps.class,
+                new CachedServiceFetcher<CrossProfileApps>() {
+                    @Override
+                    public CrossProfileApps createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.CROSS_PROFILE_APPS_SERVICE);
+                        return new CrossProfileApps(ctx.getOuterContext(),
+                                ICrossProfileApps.Stub.asInterface(b));
+                    }
+                });
+
+        registerService(Context.SLICE_SERVICE, SliceManager.class,
+                new CachedServiceFetcher<SliceManager>() {
+                    @Override
+                    public SliceManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new SliceManager(ctx.getOuterContext(),
+                                ctx.mMainThread.getHandler());
+                    }
+            });
+
+        registerService(Context.DEVICE_IDLE_CONTROLLER, DeviceIdleManager.class,
+                new CachedServiceFetcher<DeviceIdleManager>() {
+                    @Override
+                    public DeviceIdleManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IDeviceIdleController service = IDeviceIdleController.Stub.asInterface(
+                                ServiceManager.getServiceOrThrow(
+                                        Context.DEVICE_IDLE_CONTROLLER));
+                        return new DeviceIdleManager(ctx.getOuterContext(), service);
+                    }});
     }
 
     /**
@@ -954,7 +1046,10 @@ final class SystemServiceRegistry {
     static abstract class CachedServiceFetcher<T> implements ServiceFetcher<T> {
         private final int mCacheIndex;
 
-        public CachedServiceFetcher() {
+        CachedServiceFetcher() {
+            // Note this class must be instantiated only by the static initializer of the
+            // outer class (SystemServiceRegistry), which already does the synchronization,
+            // so bare access to sServiceCacheSize is okay here.
             mCacheIndex = sServiceCacheSize++;
         }
 
@@ -962,18 +1057,72 @@ final class SystemServiceRegistry {
         @SuppressWarnings("unchecked")
         public final T getService(ContextImpl ctx) {
             final Object[] cache = ctx.mServiceCache;
-            synchronized (cache) {
-                // Fetch or create the service.
-                Object service = cache[mCacheIndex];
-                if (service == null) {
-                    try {
-                        service = createService(ctx);
-                        cache[mCacheIndex] = service;
-                    } catch (ServiceNotFoundException e) {
-                        onServiceNotFound(e);
+            final int[] gates = ctx.mServiceInitializationStateArray;
+
+            for (;;) {
+                boolean doInitialize = false;
+                synchronized (cache) {
+                    // Return it if we already have a cached instance.
+                    T service = (T) cache[mCacheIndex];
+                    if (service != null || gates[mCacheIndex] == ContextImpl.STATE_NOT_FOUND) {
+                        return service;
+                    }
+
+                    // If we get here, there's no cached instance.
+
+                    // Grr... if gate is STATE_READY, then this means we initialized the service
+                    // once but someone cleared it.
+                    // We start over from STATE_UNINITIALIZED.
+                    if (gates[mCacheIndex] == ContextImpl.STATE_READY) {
+                        gates[mCacheIndex] = ContextImpl.STATE_UNINITIALIZED;
+                    }
+
+                    // It's possible for multiple threads to get here at the same time, so
+                    // use the "gate" to make sure only the first thread will call createService().
+
+                    // At this point, the gate must be either UNINITIALIZED or INITIALIZING.
+                    if (gates[mCacheIndex] == ContextImpl.STATE_UNINITIALIZED) {
+                        doInitialize = true;
+                        gates[mCacheIndex] = ContextImpl.STATE_INITIALIZING;
                     }
                 }
-                return (T)service;
+
+                if (doInitialize) {
+                    // Only the first thread gets here.
+
+                    T service = null;
+                    @ServiceInitializationState int newState = ContextImpl.STATE_NOT_FOUND;
+                    try {
+                        // This thread is the first one to get here. Instantiate the service
+                        // *without* the cache lock held.
+                        service = createService(ctx);
+                        newState = ContextImpl.STATE_READY;
+
+                    } catch (ServiceNotFoundException e) {
+                        onServiceNotFound(e);
+
+                    } finally {
+                        synchronized (cache) {
+                            cache[mCacheIndex] = service;
+                            gates[mCacheIndex] = newState;
+                            cache.notifyAll();
+                        }
+                    }
+                    return service;
+                }
+                // The other threads will wait for the first thread to call notifyAll(),
+                // and go back to the top and retry.
+                synchronized (cache) {
+                    while (gates[mCacheIndex] < ContextImpl.STATE_READY) {
+                        try {
+                            cache.wait();
+                        } catch (InterruptedException e) {
+                            Log.w(TAG, "getService() interrupted");
+                            Thread.currentThread().interrupt();
+                            return null;
+                        }
+                    }
+                }
             }
         }
 

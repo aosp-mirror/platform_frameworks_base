@@ -33,7 +33,7 @@ import java.util.ArrayList;
  * <p>This information is persisted to the filesystem so that it is not lost in the event of a
  * reboot.
  */
-public final class DataChangedJournal {
+public class DataChangedJournal {
     private static final String FILE_NAME_PREFIX = "journal";
 
     /**

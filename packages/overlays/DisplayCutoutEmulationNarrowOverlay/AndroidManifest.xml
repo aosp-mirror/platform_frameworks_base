@@ -1,0 +1,10 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.internal.display.cutout.emulation.narrow"
+        android:versionCode="1"
+        android:versionName="1.0">
+    <overlay android:targetPackage="android"
+        android:category="com.android.internal.display_cutout_emulation"
+        android:priority="1"/>
+
+    <application android:label="@string/display_cutout_emulation_overlay" android:hasCode="false"/>
+</manifest>

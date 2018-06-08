@@ -35,12 +35,14 @@ public class NotificationRankingUpdate implements Parcelable {
     private final Bundle mOverridePeople;
     private final Bundle mSnoozeCriteria;
     private final Bundle mShowBadge;
+    private final Bundle mUserSentiment;
+    private final Bundle mHidden;
 
     public NotificationRankingUpdate(String[] keys, String[] interceptedKeys,
             Bundle visibilityOverrides, Bundle suppressedVisualEffects,
             int[] importance, Bundle explanation, Bundle overrideGroupKeys,
             Bundle channels, Bundle overridePeople, Bundle snoozeCriteria,
-            Bundle showBadge) {
+            Bundle showBadge, Bundle userSentiment, Bundle hidden) {
         mKeys = keys;
         mInterceptedKeys = interceptedKeys;
         mVisibilityOverrides = visibilityOverrides;
@@ -52,6 +54,8 @@ public class NotificationRankingUpdate implements Parcelable {
         mOverridePeople = overridePeople;
         mSnoozeCriteria = snoozeCriteria;
         mShowBadge = showBadge;
+        mUserSentiment = userSentiment;
+        mHidden = hidden;
     }
 
     public NotificationRankingUpdate(Parcel in) {
@@ -67,6 +71,8 @@ public class NotificationRankingUpdate implements Parcelable {
         mOverridePeople = in.readBundle();
         mSnoozeCriteria = in.readBundle();
         mShowBadge = in.readBundle();
+        mUserSentiment = in.readBundle();
+        mHidden = in.readBundle();
     }
 
     @Override
@@ -87,6 +93,8 @@ public class NotificationRankingUpdate implements Parcelable {
         out.writeBundle(mOverridePeople);
         out.writeBundle(mSnoozeCriteria);
         out.writeBundle(mShowBadge);
+        out.writeBundle(mUserSentiment);
+        out.writeBundle(mHidden);
     }
 
     public static final Parcelable.Creator<NotificationRankingUpdate> CREATOR
@@ -142,5 +150,13 @@ public class NotificationRankingUpdate implements Parcelable {
 
     public Bundle getShowBadge() {
         return mShowBadge;
+    }
+
+    public Bundle getUserSentiment() {
+        return mUserSentiment;
+    }
+
+    public Bundle getHidden() {
+        return mHidden;
     }
 }

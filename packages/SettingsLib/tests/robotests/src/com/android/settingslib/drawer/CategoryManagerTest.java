@@ -16,27 +16,24 @@
 
 package com.android.settingslib.drawer;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Pair;
 
-import com.android.settingslib.SettingLibRobolectricTestRunner;
-import com.android.settingslib.TestConfig;
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowApplication;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.google.common.truth.Truth.assertThat;
-
-@RunWith(SettingLibRobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class CategoryManagerTest {
 
     private Context mContext;
@@ -95,8 +92,9 @@ public class CategoryManagerTest {
         mCategoryManager.backwardCompatCleanupForCategory(mTileByComponentCache, mCategoryByKeyMap);
 
         assertThat(mCategoryByKeyMap.size()).isEqualTo(2);
-        assertThat(mCategoryByKeyMap.get(CategoryKey.CATEGORY_ACCOUNT).tiles.size()).isEqualTo(1);
-        assertThat(mCategoryByKeyMap.get(oldCategory).tiles.size()).isEqualTo(1);
+        assertThat(
+                mCategoryByKeyMap.get(CategoryKey.CATEGORY_ACCOUNT).getTilesCount()).isEqualTo(1);
+        assertThat(mCategoryByKeyMap.get(oldCategory).getTilesCount()).isEqualTo(1);
     }
 
     @Test
@@ -114,9 +112,10 @@ public class CategoryManagerTest {
         // Added 1 more category to category map.
         assertThat(mCategoryByKeyMap.size()).isEqualTo(2);
         // The new category map has CATEGORY_NETWORK type now, which contains 1 tile.
-        assertThat(mCategoryByKeyMap.get(CategoryKey.CATEGORY_NETWORK).tiles.size()).isEqualTo(1);
+        assertThat(
+                mCategoryByKeyMap.get(CategoryKey.CATEGORY_NETWORK).getTilesCount()).isEqualTo(1);
         // Old category still exists.
-        assertThat(mCategoryByKeyMap.get(oldCategory).tiles.size()).isEqualTo(1);
+        assertThat(mCategoryByKeyMap.get(oldCategory).getTilesCount()).isEqualTo(1);
     }
 
     @Test
@@ -136,9 +135,9 @@ public class CategoryManagerTest {
         tile3.intent =
                 new Intent().setComponent(new ComponentName(testPackage, "class3"));
         tile3.priority = 200;
-        category.tiles.add(tile1);
-        category.tiles.add(tile2);
-        category.tiles.add(tile3);
+        category.addTile(tile1);
+        category.addTile(tile2);
+        category.addTile(tile3);
         mCategoryByKeyMap.put(CategoryKey.CATEGORY_HOMEPAGE, category);
 
         // Sort their priorities
@@ -146,9 +145,9 @@ public class CategoryManagerTest {
                 mCategoryByKeyMap);
 
         // Verify they are now sorted.
-        assertThat(category.tiles.get(0)).isSameAs(tile3);
-        assertThat(category.tiles.get(1)).isSameAs(tile1);
-        assertThat(category.tiles.get(2)).isSameAs(tile2);
+        assertThat(category.getTile(0)).isSameAs(tile3);
+        assertThat(category.getTile(1)).isSameAs(tile1);
+        assertThat(category.getTile(2)).isSameAs(tile2);
     }
 
     @Test
@@ -169,9 +168,9 @@ public class CategoryManagerTest {
         tile3.intent =
                 new Intent().setComponent(new ComponentName(testPackage1, "class3"));
         tile3.priority = 50;
-        category.tiles.add(tile1);
-        category.tiles.add(tile2);
-        category.tiles.add(tile3);
+        category.addTile(tile1);
+        category.addTile(tile2);
+        category.addTile(tile3);
         mCategoryByKeyMap.put(CategoryKey.CATEGORY_HOMEPAGE, category);
 
         // Sort their priorities
@@ -179,9 +178,9 @@ public class CategoryManagerTest {
                 mCategoryByKeyMap);
 
         // Verify they are now sorted.
-        assertThat(category.tiles.get(0)).isSameAs(tile2);
-        assertThat(category.tiles.get(1)).isSameAs(tile1);
-        assertThat(category.tiles.get(2)).isSameAs(tile3);
+        assertThat(category.getTile(0)).isSameAs(tile2);
+        assertThat(category.getTile(1)).isSameAs(tile1);
+        assertThat(category.getTile(2)).isSameAs(tile3);
     }
 
     @Test
@@ -202,9 +201,9 @@ public class CategoryManagerTest {
         tile3.intent =
                 new Intent().setComponent(new ComponentName(testPackage, "class3"));
         tile3.priority = 50;
-        category.tiles.add(tile1);
-        category.tiles.add(tile2);
-        category.tiles.add(tile3);
+        category.addTile(tile1);
+        category.addTile(tile2);
+        category.addTile(tile3);
         mCategoryByKeyMap.put(CategoryKey.CATEGORY_HOMEPAGE, category);
 
         // Sort their priorities
@@ -212,9 +211,9 @@ public class CategoryManagerTest {
                 mCategoryByKeyMap);
 
         // Verify the sorting order is not changed
-        assertThat(category.tiles.get(0)).isSameAs(tile1);
-        assertThat(category.tiles.get(1)).isSameAs(tile2);
-        assertThat(category.tiles.get(2)).isSameAs(tile3);
+        assertThat(category.getTile(0)).isSameAs(tile1);
+        assertThat(category.getTile(1)).isSameAs(tile2);
+        assertThat(category.getTile(2)).isSameAs(tile3);
     }
 
     @Test
@@ -236,10 +235,10 @@ public class CategoryManagerTest {
         final Tile tile4 = new Tile();
         tile4.intent = new Intent().setComponent(new ComponentName(testPackage, "class3"));
         tile4.priority = -1;
-        category.tiles.add(tile1);
-        category.tiles.add(tile2);
-        category.tiles.add(tile3);
-        category.tiles.add(tile4);
+        category.addTile(tile1);
+        category.addTile(tile2);
+        category.addTile(tile3);
+        category.addTile(tile4);
         mCategoryByKeyMap.put(CategoryKey.CATEGORY_HOMEPAGE, category);
 
         // Sort their priorities
@@ -247,10 +246,10 @@ public class CategoryManagerTest {
             mCategoryByKeyMap);
 
         // Verify the sorting order is not changed
-        assertThat(category.tiles.get(0)).isSameAs(tile1);
-        assertThat(category.tiles.get(1)).isSameAs(tile2);
-        assertThat(category.tiles.get(2)).isSameAs(tile3);
-        assertThat(category.tiles.get(3)).isSameAs(tile4);
+        assertThat(category.getTile(0)).isSameAs(tile1);
+        assertThat(category.getTile(1)).isSameAs(tile2);
+        assertThat(category.getTile(2)).isSameAs(tile3);
+        assertThat(category.getTile(3)).isSameAs(tile4);
     }
 
     @Test
@@ -270,9 +269,9 @@ public class CategoryManagerTest {
         final Tile tile3 = new Tile();
         tile3.intent = new Intent().setComponent(new ComponentName(testPackage3, "class3"));
         tile3.priority = 1;
-        category.tiles.add(tile1);
-        category.tiles.add(tile2);
-        category.tiles.add(tile3);
+        category.addTile(tile1);
+        category.addTile(tile2);
+        category.addTile(tile3);
         mCategoryByKeyMap.put(CategoryKey.CATEGORY_HOMEPAGE, category);
 
         // Sort their priorities
@@ -280,9 +279,9 @@ public class CategoryManagerTest {
             mCategoryByKeyMap);
 
         // Verify the sorting order is internal first, follow by package name ordering
-        assertThat(category.tiles.get(0)).isSameAs(tile2);
-        assertThat(category.tiles.get(1)).isSameAs(tile3);
-        assertThat(category.tiles.get(2)).isSameAs(tile1);
+        assertThat(category.getTile(0)).isSameAs(tile2);
+        assertThat(category.getTile(1)).isSameAs(tile3);
+        assertThat(category.getTile(2)).isSameAs(tile1);
     }
 
     @Test
@@ -303,14 +302,14 @@ public class CategoryManagerTest {
         tile3.intent =
                 new Intent().setComponent(new ComponentName(testPackage, "class3"));
         tile3.priority = 50;
-        category.tiles.add(tile1);
-        category.tiles.add(tile2);
-        category.tiles.add(tile3);
+        category.addTile(tile1);
+        category.addTile(tile2);
+        category.addTile(tile3);
         mCategoryByKeyMap.put(CategoryKey.CATEGORY_HOMEPAGE, category);
 
         mCategoryManager.filterDuplicateTiles(mCategoryByKeyMap);
 
-        assertThat(category.tiles.size()).isEqualTo(3);
+        assertThat(category.getTilesCount()).isEqualTo(3);
     }
 
     @Test
@@ -331,13 +330,13 @@ public class CategoryManagerTest {
         tile3.intent =
                 new Intent().setComponent(new ComponentName(testPackage, "class1"));
         tile3.priority = 50;
-        category.tiles.add(tile1);
-        category.tiles.add(tile2);
-        category.tiles.add(tile3);
+        category.addTile(tile1);
+        category.addTile(tile2);
+        category.addTile(tile3);
         mCategoryByKeyMap.put(CategoryKey.CATEGORY_HOMEPAGE, category);
 
         mCategoryManager.filterDuplicateTiles(mCategoryByKeyMap);
 
-        assertThat(category.tiles.size()).isEqualTo(1);
+        assertThat(category.getTilesCount()).isEqualTo(1);
     }
 }

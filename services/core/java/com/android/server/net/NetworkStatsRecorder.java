@@ -241,6 +241,20 @@ public class NetworkStatsRecorder {
         NetworkStats.Entry entry = null;
         for (int i = 0; i < delta.size(); i++) {
             entry = delta.getValues(i, entry);
+
+            // As a last-ditch sanity check, report any negative values and
+            // clamp them so recording below doesn't croak.
+            if (entry.isNegative()) {
+                if (mObserver != null) {
+                    mObserver.foundNonMonotonic(delta, i, mCookie);
+                }
+                entry.rxBytes = Math.max(entry.rxBytes, 0);
+                entry.rxPackets = Math.max(entry.rxPackets, 0);
+                entry.txBytes = Math.max(entry.txBytes, 0);
+                entry.txPackets = Math.max(entry.txPackets, 0);
+                entry.operations = Math.max(entry.operations, 0);
+            }
+
             final NetworkIdentitySet ident = ifaceIdent.get(entry.iface);
             if (ident == null) {
                 unknownIfaces.add(entry.iface);

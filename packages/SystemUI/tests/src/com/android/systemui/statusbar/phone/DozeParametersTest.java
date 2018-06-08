@@ -16,17 +16,30 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.content.Context;
+import android.os.PowerManager;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.doze.DozeScreenState;
 import com.android.systemui.statusbar.phone.DozeParameters.IntInOutMatcher;
+
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.fail;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -183,6 +196,49 @@ public class DozeParametersTest extends SysuiTestCase {
             fail("Expected IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             // expected
+        }
+    }
+
+    @Test
+    public void test_setControlScreenOffAnimation_setsDozeAfterScreenOff_false() {
+        TestableDozeParameters dozeParameters = new TestableDozeParameters(getContext());
+        PowerManager mockedPowerManager = dozeParameters.getPowerManager();
+        dozeParameters.setControlScreenOffAnimation(true);
+        reset(mockedPowerManager);
+        dozeParameters.setControlScreenOffAnimation(false);
+        verify(mockedPowerManager).setDozeAfterScreenOff(eq(true));
+    }
+
+    @Test
+    public void test_setControlScreenOffAnimation_setsDozeAfterScreenOff_true() {
+        TestableDozeParameters dozeParameters = new TestableDozeParameters(getContext());
+        PowerManager mockedPowerManager = dozeParameters.getPowerManager();
+        dozeParameters.setControlScreenOffAnimation(false);
+        reset(mockedPowerManager);
+        dozeParameters.setControlScreenOffAnimation(true);
+        verify(dozeParameters.getPowerManager()).setDozeAfterScreenOff(eq(false));
+    }
+
+    @Test
+    public void test_getWallpaperAodDuration_when_shouldControlScreenOff() {
+        TestableDozeParameters dozeParameters = new TestableDozeParameters(getContext());
+        dozeParameters.setControlScreenOffAnimation(true);
+        Assert.assertEquals("wallpaper hides faster when controlling screen off",
+                dozeParameters.getWallpaperAodDuration(),
+                DozeScreenState.ENTER_DOZE_HIDE_WALLPAPER_DELAY);
+    }
+
+    private class TestableDozeParameters extends DozeParameters {
+        private PowerManager mPowerManager;
+
+        TestableDozeParameters(Context context) {
+            super(context);
+            mPowerManager = mock(PowerManager.class);
+        }
+
+        @Override
+        protected PowerManager getPowerManager() {
+            return mPowerManager;
         }
     }
 

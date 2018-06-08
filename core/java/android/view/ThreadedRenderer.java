@@ -34,6 +34,7 @@ import android.os.Trace;
 import android.util.Log;
 import android.view.Surface.OutOfResourcesException;
 import android.view.View.AttachInfo;
+import android.view.animation.AnimationUtils;
 
 import com.android.internal.R;
 import com.android.internal.util.VirtualRefBasePtr;
@@ -70,6 +71,7 @@ public final class ThreadedRenderer {
      * Name of the file that holds the shaders cache.
      */
     private static final String CACHE_PATH_SHADERS = "com.android.opengl.shaders_cache";
+    private static final String CACHE_PATH_SKIASHADERS = "com.android.skia.shaders_cache";
 
     /**
      * System property used to enable or disable threaded rendering profiling.
@@ -165,18 +167,6 @@ public final class ThreadedRenderer {
     public static final String OVERDRAW_PROPERTY_SHOW = "show";
 
     /**
-     * Defines the rendering pipeline to be used by the ThreadedRenderer.
-     *
-     * Possible values:
-     * "opengl", will use the existing OpenGL renderer
-     * "skiagl", will use Skia's OpenGL renderer
-     * "skiavk", will use Skia's Vulkan renderer
-     *
-     * @hide
-     */
-    public static final String DEBUG_RENDERER_PROPERTY = "debug.hwui.renderer";
-
-    /**
      * Turn on to debug non-rectangular clip operations.
      *
      * Possible values:
@@ -188,6 +178,21 @@ public final class ThreadedRenderer {
      */
     public static final String DEBUG_SHOW_NON_RECTANGULAR_CLIP_PROPERTY =
             "debug.hwui.show_non_rect_clip";
+
+    /**
+     * Sets the FPS devisor to lower the FPS.
+     *
+     * Sets a positive integer as a divisor. 1 (the default value) menas the full FPS, and 2
+     * means half the full FPS.
+     *
+     *
+     * @hide
+     */
+    public static final String DEBUG_FPS_DIVISOR = "debug.hwui.fps_divisor";
+
+    public static int EGL_CONTEXT_PRIORITY_HIGH_IMG = 0x3101;
+    public static int EGL_CONTEXT_PRIORITY_MEDIUM_IMG = 0x3102;
+    public static int EGL_CONTEXT_PRIORITY_LOW_IMG = 0x3103;
 
     static {
         // Try to check OpenGL support early if possible.
@@ -272,7 +277,9 @@ public final class ThreadedRenderer {
      * @hide
      */
     public static void setupDiskCache(File cacheDir) {
-        ThreadedRenderer.setupShadersDiskCache(new File(cacheDir, CACHE_PATH_SHADERS).getAbsolutePath());
+        ThreadedRenderer.setupShadersDiskCache(
+                new File(cacheDir, CACHE_PATH_SHADERS).getAbsolutePath(),
+                new File(cacheDir, CACHE_PATH_SKIASHADERS).getAbsolutePath());
     }
 
     /**
@@ -322,6 +329,7 @@ public final class ThreadedRenderer {
     // in response, so it really just exists to differentiate from LOST_SURFACE
     // but possibly both can just be deleted.
     private static final int SYNC_CONTEXT_IS_STOPPED = 1 << 2;
+    private static final int SYNC_FRAME_DROPPED = 1 << 3;
 
     private static final String[] VISUALIZERS = {
         PROFILE_PROPERTY_VISUALIZE_BARS,
@@ -329,9 +337,12 @@ public final class ThreadedRenderer {
 
     private static final int FLAG_DUMP_FRAMESTATS   = 1 << 0;
     private static final int FLAG_DUMP_RESET        = 1 << 1;
+    private static final int FLAG_DUMP_ALL          = FLAG_DUMP_FRAMESTATS;
 
-    @IntDef(flag = true, value = {
-            FLAG_DUMP_FRAMESTATS, FLAG_DUMP_RESET })
+    @IntDef(flag = true, prefix = { "FLAG_DUMP_" }, value = {
+            FLAG_DUMP_FRAMESTATS,
+            FLAG_DUMP_RESET
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DumpFlags {}
 
@@ -632,7 +643,10 @@ public final class ThreadedRenderer {
      */
     void dumpGfxInfo(PrintWriter pw, FileDescriptor fd, String[] args) {
         pw.flush();
-        int flags = 0;
+        // If there's no arguments, eg 'dumpsys gfxinfo', then dump everything.
+        // If there's a targetted package, eg 'dumpsys gfxinfo com.android.systemui', then only
+        // dump the summary information
+        int flags = (args == null || args.length == 0) ? FLAG_DUMP_ALL : 0;
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
                 case "framestats":
@@ -640,6 +654,9 @@ public final class ThreadedRenderer {
                     break;
                 case "reset":
                     flags |= FLAG_DUMP_RESET;
+                    break;
+                case "-a": // magic option passed when dumping a bugreport.
+                    flags = FLAG_DUMP_ALL;
                     break;
             }
         }
@@ -774,7 +791,8 @@ public final class ThreadedRenderer {
      * @param attachInfo AttachInfo tied to the specified view.
      * @param callbacks Callbacks invoked when drawing happens.
      */
-    void draw(View view, AttachInfo attachInfo, DrawCallbacks callbacks) {
+    void draw(View view, AttachInfo attachInfo, DrawCallbacks callbacks,
+            FrameDrawingCallback frameDrawingCallback) {
         attachInfo.mIgnoreDirtyState = true;
 
         final Choreographer choreographer = attachInfo.mViewRootImpl.mChoreographer;
@@ -799,6 +817,9 @@ public final class ThreadedRenderer {
         }
 
         final long[] frameInfo = choreographer.mFrameInfo.mFrameInfo;
+        if (frameDrawingCallback != null) {
+            nSetFrameCallback(mNativeProxy, frameDrawingCallback);
+        }
         int syncResult = nSyncAndDrawFrame(mNativeProxy, frameInfo, frameInfo.length);
         if ((syncResult & SYNC_LOST_SURFACE_REWARD_IF_FOUND) != 0) {
             setEnabled(false);
@@ -812,6 +833,10 @@ public final class ThreadedRenderer {
         }
     }
 
+    void setFrameCompleteCallback(FrameCompleteCallback callback) {
+        nSetFrameCompleteCallback(mNativeProxy, callback);
+    }
+
     static void invokeFunctor(long functor, boolean waitForCompletion) {
         nInvokeFunctor(functor, waitForCompletion);
     }
@@ -822,9 +847,9 @@ public final class ThreadedRenderer {
      *
      * @return A hardware layer
      */
-    HardwareLayer createTextureLayer() {
+    TextureLayer createTextureLayer() {
         long layer = nCreateTextureLayer(mNativeProxy);
-        return HardwareLayer.adoptTextureLayer(this, layer);
+        return TextureLayer.adoptTextureLayer(this, layer);
     }
 
 
@@ -833,7 +858,7 @@ public final class ThreadedRenderer {
     }
 
 
-    boolean copyLayerInto(final HardwareLayer layer, final Bitmap bitmap) {
+    boolean copyLayerInto(final TextureLayer layer, final Bitmap bitmap) {
         return nCopyLayerInto(mNativeProxy,
                 layer.getDeferredLayerUpdater(), bitmap);
     }
@@ -844,7 +869,7 @@ public final class ThreadedRenderer {
      *
      * @param layer The hardware layer that needs an update
      */
-    void pushLayerUpdate(HardwareLayer layer) {
+    void pushLayerUpdate(TextureLayer layer) {
         nPushLayerUpdate(mNativeProxy, layer.getDeferredLayerUpdater());
     }
 
@@ -852,7 +877,7 @@ public final class ThreadedRenderer {
      * Tells the HardwareRenderer that the layer is destroyed. The renderer
      * should remove the layer from any update queues.
      */
-    void onLayerDestroyed(HardwareLayer layer) {
+    void onLayerDestroyed(TextureLayer layer) {
         nCancelLayerUpdate(mNativeProxy, layer.getDeferredLayerUpdater());
     }
 
@@ -914,6 +939,28 @@ public final class ThreadedRenderer {
         return nCreateHardwareBitmap(node.getNativeDisplayList(), width, height);
     }
 
+    /**
+     * Sets whether or not high contrast text rendering is enabled. The setting is global
+     * but only affects content rendered after the change is made.
+     */
+    public static void setHighContrastText(boolean highContrastText) {
+        nSetHighContrastText(highContrastText);
+    }
+
+    /**
+     * If set RenderThread will avoid doing any IPC using instead a fake vsync & DisplayInfo source
+     */
+    public static void setIsolatedProcess(boolean isIsolated) {
+        nSetIsolatedProcess(isIsolated);
+    }
+
+    /**
+     * If set extra graphics debugging abilities will be enabled such as dumping skp
+     */
+    public static void setDebuggingEnabled(boolean enable) {
+        nSetDebuggingEnabled(enable);
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -922,6 +969,119 @@ public final class ThreadedRenderer {
         } finally {
             super.finalize();
         }
+    }
+
+    /**
+     * Basic synchronous renderer. Currently only used to render the Magnifier, so use with care.
+     * TODO: deduplicate against ThreadedRenderer.
+     *
+     * @hide
+     */
+    public static class SimpleRenderer {
+        private final RenderNode mRootNode;
+        private long mNativeProxy;
+        private final float mLightY, mLightZ;
+        private Surface mSurface;
+        private final FrameInfo mFrameInfo = new FrameInfo();
+
+        public SimpleRenderer(final Context context, final String name, final Surface surface) {
+            final TypedArray a = context.obtainStyledAttributes(null, R.styleable.Lighting, 0, 0);
+            mLightY = a.getDimension(R.styleable.Lighting_lightY, 0);
+            mLightZ = a.getDimension(R.styleable.Lighting_lightZ, 0);
+            final float lightRadius = a.getDimension(R.styleable.Lighting_lightRadius, 0);
+            final int ambientShadowAlpha =
+                    (int) (255 * a.getFloat(R.styleable.Lighting_ambientShadowAlpha, 0) + 0.5f);
+            final int spotShadowAlpha =
+                    (int) (255 * a.getFloat(R.styleable.Lighting_spotShadowAlpha, 0) + 0.5f);
+            a.recycle();
+
+            final long rootNodePtr = nCreateRootRenderNode();
+            mRootNode = RenderNode.adopt(rootNodePtr);
+            mRootNode.setClipToBounds(false);
+            mNativeProxy = nCreateProxy(true /* translucent */, rootNodePtr);
+            nSetName(mNativeProxy, name);
+
+            ProcessInitializer.sInstance.init(context, mNativeProxy);
+            nLoadSystemProperties(mNativeProxy);
+
+            nSetup(mNativeProxy, lightRadius, ambientShadowAlpha, spotShadowAlpha);
+
+            mSurface = surface;
+            nUpdateSurface(mNativeProxy, surface);
+        }
+
+        /**
+         * Set the light center.
+         */
+        public void setLightCenter(final Display display,
+                final int windowLeft, final int windowTop) {
+            // Adjust light position for window offsets.
+            final Point displaySize = new Point();
+            display.getRealSize(displaySize);
+            final float lightX = displaySize.x / 2f - windowLeft;
+            final float lightY = mLightY - windowTop;
+
+            nSetLightCenter(mNativeProxy, lightX, lightY, mLightZ);
+        }
+
+        public RenderNode getRootNode() {
+            return mRootNode;
+        }
+
+        /**
+         * Draw the surface.
+         */
+        public void draw(final FrameDrawingCallback callback) {
+            final long vsync = AnimationUtils.currentAnimationTimeMillis() * 1000000L;
+            mFrameInfo.setVsync(vsync, vsync);
+            mFrameInfo.addFlags(1 << 2 /* VSYNC */);
+            if (callback != null) {
+                nSetFrameCallback(mNativeProxy, callback);
+            }
+            nSyncAndDrawFrame(mNativeProxy, mFrameInfo.mFrameInfo, mFrameInfo.mFrameInfo.length);
+        }
+
+        /**
+         * Destroy the renderer.
+         */
+        public void destroy() {
+            mSurface = null;
+            nDestroy(mNativeProxy, mRootNode.mNativeRenderNode);
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                nDeleteProxy(mNativeProxy);
+                mNativeProxy = 0;
+            } finally {
+                super.finalize();
+            }
+        }
+    }
+
+    /**
+     * Interface used to receive callbacks when a frame is being drawn.
+     */
+    public interface FrameDrawingCallback {
+        /**
+         * Invoked during a frame drawing.
+         *
+         * @param frame The id of the frame being drawn.
+         */
+        void onFrameDraw(long frame);
+    }
+
+    /**
+     * Interface used to be notified when a frame has finished rendering
+     */
+    public interface FrameCompleteCallback {
+        /**
+         * Invoked after a frame draw
+         *
+         * @param frameNr The id of the frame that was drawn.
+         */
+        void onFrameComplete(long frameNr);
     }
 
     private static class ProcessInitializer {
@@ -944,8 +1104,12 @@ public final class ThreadedRenderer {
             if (mInitialized) return;
             mInitialized = true;
             mAppContext = context.getApplicationContext();
+
             initSched(renderProxy);
-            initGraphicsStats();
+
+            if (mAppContext != null) {
+                initGraphicsStats();
+            }
         }
 
         private void initSched(long renderProxy) {
@@ -996,10 +1160,25 @@ public final class ThreadedRenderer {
         observer.mNative = null;
     }
 
+    /** b/68769804: For low FPS experiments. */
+    public static void setFPSDivisor(int divisor) {
+        nHackySetRTAnimationsEnabled(divisor <= 1);
+    }
+
+    /**
+     * Changes the OpenGL context priority if IMG_context_priority extension is available. Must be
+     * called before any OpenGL context is created.
+     *
+     * @param priority The priority to use. Must be one of EGL_CONTEXT_PRIORITY_* values.
+     */
+    public static void setContextPriority(int priority) {
+        nSetContextPriority(priority);
+    }
+
     /** Not actually public - internal use only. This doc to make lint happy */
     public static native void disableVsync();
 
-    static native void setupShadersDiskCache(String cacheFile);
+    static native void setupShadersDiskCache(String cacheFile, String skiaCacheFile);
 
     private static native void nRotateProcessStatsBuffer();
     private static native void nSetProcessStatsBuffer(int fd);
@@ -1055,6 +1234,9 @@ public final class ThreadedRenderer {
     private static native void nDrawRenderNode(long nativeProxy, long rootRenderNode);
     private static native void nSetContentDrawBounds(long nativeProxy, int left,
              int top, int right, int bottom);
+    private static native void nSetFrameCallback(long nativeProxy, FrameDrawingCallback callback);
+    private static native void nSetFrameCompleteCallback(long nativeProxy,
+            FrameCompleteCallback callback);
 
     private static native long nAddFrameMetricsObserver(long nativeProxy, FrameMetricsObserver observer);
     private static native void nRemoveFrameMetricsObserver(long nativeProxy, long nativeObserver);
@@ -1063,4 +1245,10 @@ public final class ThreadedRenderer {
             int srcLeft, int srcTop, int srcRight, int srcBottom, Bitmap bitmap);
 
     private static native Bitmap nCreateHardwareBitmap(long renderNode, int width, int height);
+    private static native void nSetHighContrastText(boolean enabled);
+    // For temporary experimentation b/66945974
+    private static native void nHackySetRTAnimationsEnabled(boolean enabled);
+    private static native void nSetDebuggingEnabled(boolean enabled);
+    private static native void nSetIsolatedProcess(boolean enabled);
+    private static native void nSetContextPriority(int priority);
 }

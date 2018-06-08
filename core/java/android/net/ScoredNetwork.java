@@ -16,18 +16,14 @@
 
 package android.net;
 
-import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.lang.Math;
-import java.lang.UnsupportedOperationException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A network identifier along with a score for the quality of that network.
@@ -195,7 +191,28 @@ public class ScoredNetwork implements Parcelable {
         return Objects.equals(networkKey, that.networkKey)
                 && Objects.equals(rssiCurve, that.rssiCurve)
                 && Objects.equals(meteredHint, that.meteredHint)
-                && Objects.equals(attributes, that.attributes);
+                && bundleEquals(attributes, that.attributes);
+    }
+
+    private boolean bundleEquals(Bundle bundle1, Bundle bundle2) {
+        if (bundle1 == bundle2) {
+            return true;
+        }
+        if (bundle1 == null || bundle2 == null) {
+            return false;
+        }
+        if (bundle1.size() != bundle2.size()) {
+            return false;
+        }
+        Set<String> keys = bundle1.keySet();
+        for (String key : keys) {
+            Object value1 = bundle1.get(key);
+            Object value2 = bundle2.get(key);
+            if (!Objects.equals(value1, value2)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

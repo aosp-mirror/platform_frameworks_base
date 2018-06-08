@@ -42,21 +42,21 @@ public class OwnersTest extends DpmTestBase {
         {
             final OwnersTestable owners = new OwnersTestable(getServices());
 
-            DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
+            DpmTestUtils.writeToFile(owners.getLegacyConfigFile(),
                     DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test01/input.xml"));
 
             owners.load();
 
             // The legacy file should be removed.
-            assertFalse(owners.getLegacyConfigFileWithTestOverride().exists());
+            assertFalse(owners.getLegacyConfigFile().exists());
 
             // File was empty, so no new files should be created.
-            assertFalse(owners.getDeviceOwnerFileWithTestOverride().exists());
+            assertFalse(owners.getDeviceOwnerFile().exists());
 
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(10).exists());
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(11).exists());
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(20).exists());
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(21).exists());
+            assertFalse(owners.getProfileOwnerFile(10).exists());
+            assertFalse(owners.getProfileOwnerFile(11).exists());
+            assertFalse(owners.getProfileOwnerFile(20).exists());
+            assertFalse(owners.getProfileOwnerFile(21).exists());
 
             assertFalse(owners.hasDeviceOwner());
             assertEquals(UserHandle.USER_NULL, owners.getDeviceOwnerUserId());
@@ -95,20 +95,20 @@ public class OwnersTest extends DpmTestBase {
         {
             final OwnersTestable owners = new OwnersTestable(getServices());
 
-            DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
+            DpmTestUtils.writeToFile(owners.getLegacyConfigFile(),
                     DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test02/input.xml"));
 
             owners.load();
 
             // The legacy file should be removed.
-            assertFalse(owners.getLegacyConfigFileWithTestOverride().exists());
+            assertFalse(owners.getLegacyConfigFile().exists());
 
-            assertTrue(owners.getDeviceOwnerFileWithTestOverride().exists()); // TODO Check content
+            assertTrue(owners.getDeviceOwnerFile().exists()); // TODO Check content
 
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(10).exists());
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(11).exists());
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(20).exists());
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(21).exists());
+            assertFalse(owners.getProfileOwnerFile(10).exists());
+            assertFalse(owners.getProfileOwnerFile(11).exists());
+            assertFalse(owners.getProfileOwnerFile(20).exists());
+            assertFalse(owners.getProfileOwnerFile(21).exists());
 
             assertTrue(owners.hasDeviceOwner());
             assertEquals(null, owners.getDeviceOwnerName());
@@ -153,20 +153,20 @@ public class OwnersTest extends DpmTestBase {
         {
             final OwnersTestable owners = new OwnersTestable(getServices());
 
-            DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
+            DpmTestUtils.writeToFile(owners.getLegacyConfigFile(),
                     DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test03/input.xml"));
 
             owners.load();
 
             // The legacy file should be removed.
-            assertFalse(owners.getLegacyConfigFileWithTestOverride().exists());
+            assertFalse(owners.getLegacyConfigFile().exists());
 
-            assertFalse(owners.getDeviceOwnerFileWithTestOverride().exists());
+            assertFalse(owners.getDeviceOwnerFile().exists());
 
-            assertTrue(owners.getProfileOwnerFileWithTestOverride(10).exists());
-            assertTrue(owners.getProfileOwnerFileWithTestOverride(11).exists());
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(20).exists());
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(21).exists());
+            assertTrue(owners.getProfileOwnerFile(10).exists());
+            assertTrue(owners.getProfileOwnerFile(11).exists());
+            assertFalse(owners.getProfileOwnerFile(20).exists());
+            assertFalse(owners.getProfileOwnerFile(21).exists());
 
             assertFalse(owners.hasDeviceOwner());
             assertEquals(UserHandle.USER_NULL, owners.getDeviceOwnerUserId());
@@ -231,20 +231,20 @@ public class OwnersTest extends DpmTestBase {
         {
             final OwnersTestable owners = new OwnersTestable(getServices());
 
-            DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
+            DpmTestUtils.writeToFile(owners.getLegacyConfigFile(),
                     DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test04/input.xml"));
 
             owners.load();
 
             // The legacy file should be removed.
-            assertFalse(owners.getLegacyConfigFileWithTestOverride().exists());
+            assertFalse(owners.getLegacyConfigFile().exists());
 
-            assertTrue(owners.getDeviceOwnerFileWithTestOverride().exists());
+            assertTrue(owners.getDeviceOwnerFile().exists());
 
-            assertTrue(owners.getProfileOwnerFileWithTestOverride(10).exists());
-            assertTrue(owners.getProfileOwnerFileWithTestOverride(11).exists());
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(20).exists());
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(21).exists());
+            assertTrue(owners.getProfileOwnerFile(10).exists());
+            assertTrue(owners.getProfileOwnerFile(11).exists());
+            assertFalse(owners.getProfileOwnerFile(20).exists());
+            assertFalse(owners.getProfileOwnerFile(21).exists());
 
             assertTrue(owners.hasDeviceOwner());
             assertEquals(null, owners.getDeviceOwnerName());
@@ -341,20 +341,20 @@ public class OwnersTest extends DpmTestBase {
         {
             final OwnersTestable owners = new OwnersTestable(getServices());
 
-            DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
+            DpmTestUtils.writeToFile(owners.getLegacyConfigFile(),
                     DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test05/input.xml"));
 
             owners.load();
 
             // The legacy file should be removed.
-            assertFalse(owners.getLegacyConfigFileWithTestOverride().exists());
+            assertFalse(owners.getLegacyConfigFile().exists());
 
             // Note device initializer is no longer supported.  No need to write the DO file.
-            assertFalse(owners.getDeviceOwnerFileWithTestOverride().exists());
+            assertFalse(owners.getDeviceOwnerFile().exists());
 
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(10).exists());
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(11).exists());
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(20).exists());
+            assertFalse(owners.getProfileOwnerFile(10).exists());
+            assertFalse(owners.getProfileOwnerFile(11).exists());
+            assertFalse(owners.getProfileOwnerFile(20).exists());
 
             assertFalse(owners.hasDeviceOwner());
             assertEquals(UserHandle.USER_NULL, owners.getDeviceOwnerUserId());
@@ -397,19 +397,19 @@ public class OwnersTest extends DpmTestBase {
         {
             final OwnersTestable owners = new OwnersTestable(getServices());
 
-            DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
+            DpmTestUtils.writeToFile(owners.getLegacyConfigFile(),
                     DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test06/input.xml"));
 
             owners.load();
 
             // The legacy file should be removed.
-            assertFalse(owners.getLegacyConfigFileWithTestOverride().exists());
+            assertFalse(owners.getLegacyConfigFile().exists());
 
-            assertTrue(owners.getDeviceOwnerFileWithTestOverride().exists());
+            assertTrue(owners.getDeviceOwnerFile().exists());
 
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(10).exists());
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(11).exists());
-            assertFalse(owners.getProfileOwnerFileWithTestOverride(20).exists());
+            assertFalse(owners.getProfileOwnerFile(10).exists());
+            assertFalse(owners.getProfileOwnerFile(11).exists());
+            assertFalse(owners.getProfileOwnerFile(20).exists());
 
             assertFalse(owners.hasDeviceOwner());
             assertEquals(UserHandle.USER_NULL, owners.getDeviceOwnerUserId());
@@ -451,16 +451,16 @@ public class OwnersTest extends DpmTestBase {
         final OwnersTestable owners = new OwnersTestable(getServices());
 
         // First, migrate to create new-style config files.
-        DpmTestUtils.writeToFile(owners.getLegacyConfigFileWithTestOverride(),
+        DpmTestUtils.writeToFile(owners.getLegacyConfigFile(),
                 DpmTestUtils.readAsset(mRealTestContext, "OwnersTest/test04/input.xml"));
 
         owners.load();
 
-        assertFalse(owners.getLegacyConfigFileWithTestOverride().exists());
+        assertFalse(owners.getLegacyConfigFile().exists());
 
-        assertTrue(owners.getDeviceOwnerFileWithTestOverride().exists());
-        assertTrue(owners.getProfileOwnerFileWithTestOverride(10).exists());
-        assertTrue(owners.getProfileOwnerFileWithTestOverride(11).exists());
+        assertTrue(owners.getDeviceOwnerFile().exists());
+        assertTrue(owners.getProfileOwnerFile(10).exists());
+        assertTrue(owners.getProfileOwnerFile(11).exists());
 
         // Then clear all information and save.
         owners.clearDeviceOwner();
@@ -475,8 +475,8 @@ public class OwnersTest extends DpmTestBase {
         owners.writeProfileOwner(21);
 
         // Now all files should be removed.
-        assertFalse(owners.getDeviceOwnerFileWithTestOverride().exists());
-        assertFalse(owners.getProfileOwnerFileWithTestOverride(10).exists());
-        assertFalse(owners.getProfileOwnerFileWithTestOverride(11).exists());
+        assertFalse(owners.getDeviceOwnerFile().exists());
+        assertFalse(owners.getProfileOwnerFile(10).exists());
+        assertFalse(owners.getProfileOwnerFile(11).exists());
     }
 }

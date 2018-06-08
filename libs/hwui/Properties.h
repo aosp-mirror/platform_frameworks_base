@@ -17,6 +17,7 @@
 #ifndef ANDROID_HWUI_PROPERTIES_H
 #define ANDROID_HWUI_PROPERTIES_H
 
+#include <cutils/compiler.h>
 #include <cutils/properties.h>
 
 /**
@@ -164,38 +165,42 @@ enum DebugLevel {
  */
 #define PROPERTY_RENDERER "debug.hwui.renderer"
 
+/**
+ * Allows to collect a recording of Skia drawing commands.
+ */
+#define PROPERTY_CAPTURE_SKP_ENABLED "debug.hwui.capture_skp_enabled"
+
+/**
+ * Defines how many frames in a sequence to capture.
+ */
+#define PROPERTY_CAPTURE_SKP_FRAMES "debug.hwui.capture_skp_frames"
+
+/**
+ * File name and location, where a SKP recording will be saved.
+ */
+#define PROPERTY_CAPTURE_SKP_FILENAME "debug.hwui.skp_filename"
+
+/**
+ * Property for whether this is running in the emulator.
+ */
+#define PROPERTY_QEMU_KERNEL "ro.kernel.qemu"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
 
 // Converts a number of mega-bytes into bytes
-#define MB(s) ((s) * 1024 * 1024)
+#define MB(s) ((s)*1024 * 1024)
 // Converts a number of kilo-bytes into bytes
-#define KB(s) ((s) * 1024)
+#define KB(s) ((s)*1024)
 
-enum class ProfileType {
-    None,
-    Console,
-    Bars
-};
+enum class ProfileType { None, Console, Bars };
 
-enum class OverdrawColorSet {
-    Default = 0,
-    Deuteranomaly
-};
+enum class OverdrawColorSet { Default = 0, Deuteranomaly };
 
-enum class StencilClipDebug {
-    Hide,
-    ShowHighlight,
-    ShowRegion
-};
+enum class StencilClipDebug { Hide, ShowHighlight, ShowRegion };
 
-enum class RenderPipelineType {
-    OpenGL = 0,
-    SkiaGL,
-    SkiaVulkan,
-    NotInitialized = 128
-};
+enum class RenderPipelineType { OpenGL = 0, SkiaGL, SkiaVulkan, NotInitialized = 128 };
 
 /**
  * Renderthread-only singleton which manages several static rendering properties. Most of these
@@ -234,8 +239,10 @@ public:
     static int overrideSpotShadowStrength;
 
     static ProfileType getProfileType();
-    static RenderPipelineType getRenderPipelineType();
+    ANDROID_API static RenderPipelineType getRenderPipelineType();
     static bool isSkiaEnabled();
+
+    ANDROID_API static bool enableHighContrastText;
 
     // Should be used only by test apps
     static bool waitForGpuCompletion;
@@ -251,18 +258,28 @@ public:
     // created after changing this.
     static bool disableVsync;
 
+    static bool skpCaptureEnabled;
+
+    // For experimentation b/68769804
+    ANDROID_API static bool enableRTAnimations;
+
     // Used for testing only to change the render pipeline.
-#ifdef HWUI_GLES_WRAP_ENABLED
     static void overrideRenderPipelineType(RenderPipelineType);
-#endif
+
+    static bool runningInEmulator;
+
+    ANDROID_API static bool debuggingEnabled;
+    ANDROID_API static bool isolatedProcess;
+
+    ANDROID_API static int contextPriority;
 
 private:
     static ProfileType sProfileType;
     static bool sDisableProfileBars;
     static RenderPipelineType sRenderPipelineType;
-}; // class Caches
+};  // class Caches
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_PROPERTIES_H
+#endif  // ANDROID_HWUI_PROPERTIES_H

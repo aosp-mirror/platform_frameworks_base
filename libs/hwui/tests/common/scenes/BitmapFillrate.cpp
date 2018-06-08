@@ -32,8 +32,7 @@ static bool _BitmapFillrate(
 class BitmapFillrate : public TestScene {
 public:
     BitmapFillrate(BitmapAllocationTestUtils::BitmapAllocator allocator)
-        : TestScene()
-        , mAllocator(allocator) { }
+            : TestScene(), mAllocator(allocator) {}
 
     void createContent(int width, int height, Canvas& canvas) override {
         canvas.drawColor(Color::White, SkBlendMode::kSrcOver);
@@ -41,7 +40,7 @@ public:
         createNode(canvas, 0xA0CDDC39, width / 3, height / 3, width, height);
         createNode(canvas, 0x90009688, width / 3, 0, width, height);
         createNode(canvas, 0xA0FF5722, 0, height / 3, width, height);
-        createNode(canvas, 0x9000796B, width / 6, height/6, width, height);
+        createNode(canvas, 0x9000796B, width / 6, height / 6, width, height);
         createNode(canvas, 0xA0FFC107, width / 6, 0, width, height);
     }
 
@@ -52,23 +51,23 @@ public:
             mNodes[ci]->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
         }
     }
+
 private:
-    void createNode(Canvas& canvas, SkColor color, int left, int top,
-            int width, int height) {
+    void createNode(Canvas& canvas, SkColor color, int left, int top, int width, int height) {
         int itemWidth = 2 * width / 3;
         int itemHeight = 2 * height / 3;
-        auto card = TestUtils::createNode(left, top, left + itemWidth , top + itemHeight,
+        auto card = TestUtils::createNode(
+                left, top, left + itemWidth, top + itemHeight,
                 [this, itemWidth, itemHeight, color](RenderProperties& props, Canvas& canvas) {
-            sk_sp<Bitmap> bitmap = mAllocator(itemWidth, itemHeight, kRGBA_8888_SkColorType,
-                    [color](SkBitmap& skBitmap) {
-                 skBitmap.eraseColor(color);
-            });
-            canvas.drawBitmap(*bitmap, 0, 0, nullptr);
-        });
+                    sk_sp<Bitmap> bitmap =
+                            mAllocator(itemWidth, itemHeight, kRGBA_8888_SkColorType,
+                                       [color](SkBitmap& skBitmap) { skBitmap.eraseColor(color); });
+                    canvas.drawBitmap(*bitmap, 0, 0, nullptr);
+                });
         canvas.drawRenderNode(card.get());
         mNodes.push_back(card);
     }
 
     BitmapAllocationTestUtils::BitmapAllocator mAllocator;
-    std::vector< sp<RenderNode> > mNodes;
+    std::vector<sp<RenderNode> > mNodes;
 };

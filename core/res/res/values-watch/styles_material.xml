@@ -39,8 +39,8 @@ please see styles_device_defaults.xml.
         <item name="taskOpenExitAnimation">@anim/slide_in_exit_micro</item>
         <item name="taskCloseEnterAnimation">@null</item>
         <item name="taskCloseExitAnimation">@anim/slide_out_micro</item>
-        <item name="taskToFrontEnterAnimation">@anim/slide_in_enter_micro</item>
-        <item name="taskToFrontExitAnimation">@anim/slide_in_exit_micro</item>
+        <item name="taskToFrontEnterAnimation">@null</item>
+        <item name="taskToFrontExitAnimation">@anim/slide_out_micro</item>
         <item name="taskToBackEnterAnimation">@null</item>
         <item name="taskToBackExitAnimation">@anim/slide_out_micro</item>
         <item name="wallpaperOpenEnterAnimation">@null</item>

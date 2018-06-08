@@ -23,14 +23,19 @@ import com.android.internal.util.Preconditions;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
+import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.util.Log;
@@ -66,6 +71,7 @@ public class UserRestrictionsUtils {
 
     public static final Set<String> USER_RESTRICTIONS = newSetWithUniqueCheck(new String[] {
             UserManager.DISALLOW_CONFIG_WIFI,
+            UserManager.DISALLOW_CONFIG_LOCALE,
             UserManager.DISALLOW_MODIFY_ACCOUNTS,
             UserManager.DISALLOW_INSTALL_APPS,
             UserManager.DISALLOW_UNINSTALL_APPS,
@@ -80,6 +86,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
             UserManager.DISALLOW_DEBUGGING_FEATURES,
             UserManager.DISALLOW_CONFIG_VPN,
+            UserManager.DISALLOW_CONFIG_DATE_TIME,
             UserManager.DISALLOW_CONFIG_TETHERING,
             UserManager.DISALLOW_NETWORK_RESET,
             UserManager.DISALLOW_FACTORY_RESET,
@@ -96,6 +103,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_SMS,
             UserManager.DISALLOW_FUN,
             UserManager.DISALLOW_CREATE_WINDOWS,
+            UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
             UserManager.DISALLOW_CROSS_PROFILE_COPY_PASTE,
             UserManager.DISALLOW_OUTGOING_BEAM,
             UserManager.DISALLOW_WALLPAPER,
@@ -110,6 +118,15 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_OEM_UNLOCK,
             UserManager.DISALLOW_UNMUTE_DEVICE,
             UserManager.DISALLOW_AUTOFILL,
+            UserManager.DISALLOW_USER_SWITCH,
+            UserManager.DISALLOW_UNIFIED_PASSWORD,
+            UserManager.DISALLOW_CONFIG_LOCATION,
+            UserManager.DISALLOW_AIRPLANE_MODE,
+            UserManager.DISALLOW_CONFIG_BRIGHTNESS,
+            UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE,
+            UserManager.DISALLOW_AMBIENT_DISPLAY,
+            UserManager.DISALLOW_CONFIG_SCREEN_TIMEOUT,
+            UserManager.DISALLOW_PRINTING
     });
 
     /**
@@ -137,7 +154,15 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_FUN,
             UserManager.DISALLOW_SAFE_BOOT,
             UserManager.DISALLOW_CREATE_WINDOWS,
-            UserManager.DISALLOW_DATA_ROAMING
+            UserManager.DISALLOW_DATA_ROAMING,
+            UserManager.DISALLOW_AIRPLANE_MODE
+    );
+
+    /**
+     * User restrictions that cannot be set by profile owners. Applied to all users.
+     */
+    private static final Set<String> DEVICE_OWNER_ONLY_RESTRICTIONS = Sets.newArraySet(
+            UserManager.DISALLOW_USER_SWITCH
     );
 
     /**
@@ -156,6 +181,8 @@ public class UserRestrictionsUtils {
     private static final Set<String> GLOBAL_RESTRICTIONS = Sets.newArraySet(
             UserManager.DISALLOW_ADJUST_VOLUME,
             UserManager.DISALLOW_BLUETOOTH_SHARING,
+            UserManager.DISALLOW_CONFIG_DATE_TIME,
+            UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
             UserManager.DISALLOW_RUN_IN_BACKGROUND,
             UserManager.DISALLOW_UNMUTE_MICROPHONE,
             UserManager.DISALLOW_UNMUTE_DEVICE
@@ -179,11 +206,12 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_BLUETOOTH_SHARING
     );
 
-    /*
+    /**
      * Special user restrictions that are always applied to all users no matter who sets them.
      */
     private static final Set<String> PROFILE_GLOBAL_RESTRICTIONS = Sets.newArraySet(
-            UserManager.ENSURE_VERIFY_APPS
+            UserManager.ENSURE_VERIFY_APPS,
+            UserManager.DISALLOW_AIRPLANE_MODE
     );
 
     /**
@@ -307,6 +335,7 @@ public class UserRestrictionsUtils {
      */
     public static boolean canProfileOwnerChange(String restriction, int userId) {
         return !IMMUTABLE_BY_OWNERS.contains(restriction)
+                && !DEVICE_OWNER_ONLY_RESTRICTIONS.contains(restriction)
                 && !(userId != UserHandle.USER_SYSTEM
                     && PRIMARY_USER_ONLY_RESTRICTIONS.contains(restriction));
     }
@@ -359,8 +388,9 @@ public class UserRestrictionsUtils {
      */
     private static boolean isGlobal(boolean isDeviceOwner, String key) {
         return (isDeviceOwner &&
-                (PRIMARY_USER_ONLY_RESTRICTIONS.contains(key)|| GLOBAL_RESTRICTIONS.contains(key)))
-                || PROFILE_GLOBAL_RESTRICTIONS.contains(key);
+                (PRIMARY_USER_ONLY_RESTRICTIONS.contains(key) || GLOBAL_RESTRICTIONS.contains(key)))
+                || PROFILE_GLOBAL_RESTRICTIONS.contains(key)
+                || DEVICE_OWNER_ONLY_RESTRICTIONS.contains(key);
     }
 
     /**
@@ -411,8 +441,7 @@ public class UserRestrictionsUtils {
     /**
      * Apply each user restriction.
      *
-     * <p>See also {@link
-     * com.android.providers.settings.SettingsProvider#isGlobalOrSecureSettingRestrictedForUser},
+     * <p>See also {@link #isSettingRestrictedForUser()},
      * which should be in sync with this method.
      */
     private static void applyUserRestriction(Context context, int userId, String key,
@@ -440,7 +469,8 @@ public class UserRestrictionsUtils {
                         // DISALLOW_DATA_ROAMING user restriction is set.
 
                         // Multi sim device.
-                        SubscriptionManager subscriptionManager = new SubscriptionManager(context);
+                        SubscriptionManager subscriptionManager = context
+                                .getSystemService(SubscriptionManager.class);
                         final List<SubscriptionInfo> subscriptionInfoList =
                             subscriptionManager.getActiveSubscriptionInfoList();
                         if (subscriptionInfoList != null) {
@@ -518,9 +548,207 @@ public class UserRestrictionsUtils {
                             android.provider.Settings.Global.SAFE_BOOT_DISALLOWED,
                             newValue ? 1 : 0);
                     break;
+                case UserManager.DISALLOW_AIRPLANE_MODE:
+                    if (newValue) {
+                        final boolean airplaneMode = Settings.Global.getInt(
+                                context.getContentResolver(),
+                                Settings.Global.AIRPLANE_MODE_ON, 0) == 1;
+                        if (airplaneMode) {
+                            android.provider.Settings.Global.putInt(
+                                    context.getContentResolver(),
+                                    android.provider.Settings.Global.AIRPLANE_MODE_ON, 0);
+                            // Post the intent.
+                            Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+                            intent.putExtra("state", false);
+                            context.sendBroadcastAsUser(intent, UserHandle.ALL);
+                        }
+                    }
+                    break;
+                case UserManager.DISALLOW_AMBIENT_DISPLAY:
+                    if (newValue) {
+                        android.provider.Settings.Secure.putIntForUser(
+                                context.getContentResolver(),
+                                Settings.Secure.DOZE_ENABLED, 0, userId);
+                        android.provider.Settings.Secure.putIntForUser(
+                                context.getContentResolver(),
+                                Settings.Secure.DOZE_ALWAYS_ON, 0, userId);
+                        android.provider.Settings.Secure.putIntForUser(
+                                context.getContentResolver(),
+                                Settings.Secure.DOZE_PULSE_ON_PICK_UP, 0, userId);
+                        android.provider.Settings.Secure.putIntForUser(
+                                context.getContentResolver(),
+                                Settings.Secure.DOZE_PULSE_ON_LONG_PRESS, 0, userId);
+                        android.provider.Settings.Secure.putIntForUser(
+                                context.getContentResolver(),
+                                Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP, 0, userId);
+                    }
+                    break;
+                case UserManager.DISALLOW_CONFIG_LOCATION:
+                    // When DISALLOW_CONFIG_LOCATION is set on any user, we undo the global
+                    // kill switch.
+                    if (newValue) {
+                        android.provider.Settings.Global.putString(
+                                context.getContentResolver(),
+                                Global.LOCATION_GLOBAL_KILL_SWITCH, "0");
+                    }
+                    break;
             }
         } finally {
             Binder.restoreCallingIdentity(id);
+        }
+    }
+
+    public static boolean isSettingRestrictedForUser(Context context, @NonNull String setting,
+            int userId, String value, int callingUid) {
+        Preconditions.checkNotNull(setting);
+        final UserManager mUserManager = context.getSystemService(UserManager.class);
+        String restriction;
+        boolean checkAllUser = false;
+        switch (setting) {
+            case android.provider.Settings.Secure.LOCATION_MODE:
+                if (mUserManager.hasUserRestriction(
+                        UserManager.DISALLOW_CONFIG_LOCATION, UserHandle.of(userId))
+                        && callingUid != Process.SYSTEM_UID) {
+                    return true;
+                } else if (String.valueOf(Settings.Secure.LOCATION_MODE_OFF).equals(value)) {
+                    // Note LOCATION_MODE will be converted into LOCATION_PROVIDERS_ALLOWED
+                    // in android.provider.Settings.Secure.putStringForUser(), so we shouldn't come
+                    // here normally, but we still protect it here from a direct provider write.
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_SHARE_LOCATION;
+                break;
+
+            case android.provider.Settings.Secure.LOCATION_PROVIDERS_ALLOWED:
+                if (mUserManager.hasUserRestriction(
+                        UserManager.DISALLOW_CONFIG_LOCATION, UserHandle.of(userId))
+                        && callingUid != Process.SYSTEM_UID) {
+                    return true;
+                } else if (value != null && value.startsWith("-")) {
+                    // See SettingsProvider.updateLocationProvidersAllowedLocked.  "-" is to disable
+                    // a provider, which should be allowed even if the user restriction is set.
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_SHARE_LOCATION;
+                break;
+
+            case android.provider.Settings.Secure.INSTALL_NON_MARKET_APPS:
+                if ("0".equals(value)) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES;
+                break;
+
+            case android.provider.Settings.Global.ADB_ENABLED:
+                if ("0".equals(value)) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_DEBUGGING_FEATURES;
+                break;
+
+            case android.provider.Settings.Global.PACKAGE_VERIFIER_ENABLE:
+            case android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB:
+                if ("1".equals(value)) {
+                    return false;
+                }
+                restriction = UserManager.ENSURE_VERIFY_APPS;
+                break;
+
+            case android.provider.Settings.Global.PREFERRED_NETWORK_MODE:
+                restriction = UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS;
+                break;
+
+            case android.provider.Settings.Secure.ALWAYS_ON_VPN_APP:
+            case android.provider.Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN:
+                // Whitelist system uid (ConnectivityService) and root uid to change always-on vpn
+                final int appId = UserHandle.getAppId(callingUid);
+                if (appId == Process.SYSTEM_UID || appId == Process.ROOT_UID) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_CONFIG_VPN;
+                break;
+
+            case android.provider.Settings.Global.SAFE_BOOT_DISALLOWED:
+                if ("1".equals(value)) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_SAFE_BOOT;
+                break;
+
+            case android.provider.Settings.Global.AIRPLANE_MODE_ON:
+                if ("0".equals(value)) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_AIRPLANE_MODE;
+                break;
+
+            case android.provider.Settings.Secure.DOZE_ENABLED:
+            case android.provider.Settings.Secure.DOZE_ALWAYS_ON:
+            case android.provider.Settings.Secure.DOZE_PULSE_ON_PICK_UP:
+            case android.provider.Settings.Secure.DOZE_PULSE_ON_LONG_PRESS:
+            case android.provider.Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP:
+                if ("0".equals(value)) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_AMBIENT_DISPLAY;
+                break;
+
+            case android.provider.Settings.Global.LOCATION_GLOBAL_KILL_SWITCH:
+                if ("0".equals(value)) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_CONFIG_LOCATION;
+                checkAllUser = true;
+                break;
+
+            case android.provider.Settings.System.SCREEN_BRIGHTNESS:
+            case android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE:
+                if (callingUid == Process.SYSTEM_UID) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_CONFIG_BRIGHTNESS;
+                break;
+
+            case android.provider.Settings.Global.AUTO_TIME:
+                DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+                if (dpm != null && dpm.getAutoTimeRequired()
+                        && "0".equals(value)) {
+                    return true;
+                } else if (callingUid == Process.SYSTEM_UID) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_CONFIG_DATE_TIME;
+                break;
+
+            case android.provider.Settings.Global.AUTO_TIME_ZONE:
+                if (callingUid == Process.SYSTEM_UID) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_CONFIG_DATE_TIME;
+                break;
+
+            case android.provider.Settings.System.SCREEN_OFF_TIMEOUT:
+                if (callingUid == Process.SYSTEM_UID) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_CONFIG_SCREEN_TIMEOUT;
+                break;
+
+            default:
+                if (setting.startsWith(Settings.Global.DATA_ROAMING)) {
+                    if ("0".equals(value)) {
+                        return false;
+                    }
+                    restriction = UserManager.DISALLOW_DATA_ROAMING;
+                    break;
+                }
+                return false;
+        }
+
+        if (checkAllUser) {
+            return mUserManager.hasUserRestrictionOnAnyUser(restriction);
+        } else {
+            return mUserManager.hasUserRestriction(restriction, UserHandle.of(userId));
         }
     }
 

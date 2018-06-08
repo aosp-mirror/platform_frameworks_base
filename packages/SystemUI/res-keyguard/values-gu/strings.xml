@@ -53,16 +53,21 @@
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"<xliff:g id="ALARM">%1$s</xliff:g> માટે આગલું એલાર્મ સેટ કર્યું"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"કાઢી નાખો"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"eSIMને અક્ષમ કરો"</string>
+    <string name="error_disable_esim_title" msgid="4852978431156228006">"ઇ-સિમ બંધ કરી શકાતું નથી"</string>
+    <string name="error_disable_esim_msg" msgid="676694908770135639">"એક ભૂલને લીધે ઇ-સિમ બંધ કરી શકાતું નથી."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"દાખલ કરો"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"પૅટર્ન ભૂલી ગયાં"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"ખોટી પૅટર્ન"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"ખોટો પાસવર્ડ"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"ખોટો પિન"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"<xliff:g id="NUMBER">%d</xliff:g> સેકંડમાં ફરીથી પ્રયાસ કરો."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="one"><xliff:g id="NUMBER">%d</xliff:g> સેકન્ડમાં ફરી પ્રયાસ કરો.</item>
+      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> સેકન્ડમાં ફરી પ્રયાસ કરો.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"તમારી પૅટર્ન દોરો"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"સિમ પિન દાખલ કરો"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" માટે સિમ પિન દાખલ કરો."</string>
-    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"મોબાઇલ સેવા વગર ઉપકરણનો ઉપયોગ કરવા eSIMને અક્ષમ કરો."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> મોબાઇલ સેવા વગર ઉપકરણનો ઉપયોગ કરવા માટે ઇ-સિમને બંધ કરો."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"પિન દાખલ કરો"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"પાસવર્ડ દાખલ કરો"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"સિમ હમણાં અક્ષમ કરેલ છે. ચાલુ રાખવા માટે PUK કોડ દાખલ કરો. વિગતો માટે કૅરિઅરનો સંપર્ક કરો."</string>
@@ -132,4 +137,12 @@
       <item quantity="other">ઉપકરણને <xliff:g id="NUMBER_1">%d</xliff:g> કલાક માટે અનલૉક કરવામાં આવ્યું નથી. પાસવર્ડની પુષ્ટિ કરો.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"ઓળખાયેલ નથી"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
+      <item quantity="one">સિમ પિન દાખલ કરો, તમારી પાસે <xliff:g id="NUMBER_1">%d</xliff:g> પ્રયાસ બાકી છે.</item>
+      <item quantity="other">સિમ પિન દાખલ કરો, તમારી પાસે <xliff:g id="NUMBER_1">%d</xliff:g> પ્રયાસો બાકી છે.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
+      <item quantity="one">સિમ હવે બંધ કરેલ છે. ચાલુ રાખવા માટે PUK કોડ દાખલ કરો. સિમ કાયમીરૂપે બિનઉપયોગી બની જાય એ પહેલાં તમારી પાસે <xliff:g id="_NUMBER_1">%d</xliff:g> પ્રયાસ બાકી છે. વિગતો માટે કૅરિઅરનો સંપર્ક કરો.</item>
+      <item quantity="other">સિમ હવે બંધ કરેલ છે. ચાલુ રાખવા માટે PUK કોડ દાખલ કરો. સિમ કાયમીરૂપે બિનઉપયોગી બની જાય એ પહેલાં તમારી પાસે <xliff:g id="_NUMBER_1">%d</xliff:g> પ્રયાસો બાકી છે. વિગતો માટે કૅરિઅરનો સંપર્ક કરો.</item>
+    </plurals>
 </resources>

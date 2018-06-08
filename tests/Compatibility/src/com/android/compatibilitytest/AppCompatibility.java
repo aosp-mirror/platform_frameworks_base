@@ -17,13 +17,13 @@
 package com.android.compatibilitytest;
 
 import android.app.ActivityManager;
+import android.app.ActivityManager.ProcessErrorStateInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.Instrumentation;
 import android.app.UiAutomation;
 import android.app.UiModeManager;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -72,6 +72,8 @@ public class AppCompatibility {
         DROPBOX_TAGS.add("data_app_native_crash");
         DROPBOX_TAGS.add("data_app_crash");
     }
+    private static final int MAX_CRASH_SNIPPET_LINES = 20;
+    private static final int MAX_NUM_CRASH_SNIPPET = 3;
 
     // time waiting for app to launch
     private int mAppLaunchTimeout = 7000;
@@ -149,11 +151,18 @@ public class AppCompatibility {
             try {
                 checkDropbox(startTime, packageName);
                 if (mAppErrors.containsKey(packageName)) {
-                    StringBuilder message = new StringBuilder("Error detected for package: ")
+                    StringBuilder message = new StringBuilder("Error(s) detected for package: ")
                             .append(packageName);
-                    for (String err : mAppErrors.get(packageName)) {
+                    List<String> errors = mAppErrors.get(packageName);
+                    for (int i = 0; i < MAX_NUM_CRASH_SNIPPET && i < errors.size(); i++) {
+                        String err = errors.get(i);
                         message.append("\n\n");
-                        message.append(err);
+                        // limit the size of each crash snippet
+                        message.append(truncate(err, MAX_CRASH_SNIPPET_LINES));
+                    }
+                    if (errors.size() > MAX_NUM_CRASH_SNIPPET) {
+                        message.append(String.format("\n... %d more errors omitted ...",
+                                errors.size() - MAX_NUM_CRASH_SNIPPET));
                     }
                     Assert.fail(message.toString());
                 }
@@ -168,6 +177,28 @@ public class AppCompatibility {
             Log.d(TAG, "Missing argument, use " + PACKAGE_TO_LAUNCH +
                     " to specify the package to launch");
         }
+    }
+
+    /**
+     * Truncate the text to at most the specified number of lines, and append a marker at the end
+     * when truncated
+     * @param text
+     * @param maxLines
+     * @return
+     */
+    private static String truncate(String text, int maxLines) {
+        String[] lines = text.split("\\r?\\n");
+        StringBuilder ret = new StringBuilder();
+        for (int i = 0; i < maxLines && i < lines.length; i++) {
+            ret.append(lines[i]);
+            ret.append('\n');
+        }
+        if (lines.length > maxLines) {
+            ret.append("... ");
+            ret.append(lines.length - maxLines);
+            ret.append(" more lines truncated ...\n");
+        }
+        return ret.toString();
     }
 
     /**
@@ -255,7 +286,7 @@ public class AppCompatibility {
         }  else {
             errors = new ArrayList<>();
         }
-        errors.add(String.format("type: %s details:\n%s", errorType, errorInfo));
+        errors.add(String.format("### Type: %s, Details:\n%s", errorType, errorInfo));
         mAppErrors.put(pkgName, errors);
     }
 

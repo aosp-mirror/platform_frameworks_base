@@ -16,6 +16,8 @@
 
 package com.android.settingslib.drawer;
 
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
+
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -23,6 +25,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class DashboardCategory implements Parcelable {
@@ -48,39 +52,63 @@ public class DashboardCategory implements Parcelable {
     /**
      * List of the category's children
      */
-    public List<Tile> tiles = new ArrayList<>();
+    private List<Tile> mTiles = new ArrayList<>();
 
+    DashboardCategory(DashboardCategory in) {
+        if (in != null) {
+            title = in.title;
+            key = in.key;
+            priority = in.priority;
+            for (Tile tile : in.mTiles) {
+                mTiles.add(tile);
+            }
+        }
+    }
 
     public DashboardCategory() {
         // Empty
     }
 
-    public void addTile(Tile tile) {
-        tiles.add(tile);
+    /**
+     * Get a copy of the list of the category's children.
+     *
+     * Note: the returned list serves as a read-only list. If tiles needs to be added or removed
+     * from the actual tiles list, it should be done through {@link #addTile}, {@link #removeTile}.
+     */
+    public synchronized List<Tile> getTiles() {
+        final List<Tile> result = new ArrayList<>(mTiles.size());
+        for (Tile tile : mTiles) {
+            result.add(tile);
+        }
+        return result;
     }
 
-    public void addTile(int n, Tile tile) {
-        tiles.add(n, tile);
+    public synchronized void addTile(Tile tile) {
+        mTiles.add(tile);
     }
 
-    public void removeTile(Tile tile) {
-        tiles.remove(tile);
+    public synchronized void addTile(int n, Tile tile) {
+        mTiles.add(n, tile);
     }
 
-    public void removeTile(int n) {
-        tiles.remove(n);
+    public synchronized void removeTile(Tile tile) {
+        mTiles.remove(tile);
+    }
+
+    public synchronized void removeTile(int n) {
+        mTiles.remove(n);
     }
 
     public int getTilesCount() {
-        return tiles.size();
+        return mTiles.size();
     }
 
     public Tile getTile(int n) {
-        return tiles.get(n);
+        return mTiles.get(n);
     }
 
-    public boolean containsComponent(ComponentName component) {
-        for (Tile tile : tiles) {
+    public synchronized boolean containsComponent(ComponentName component) {
+        for (Tile tile : mTiles) {
             if (TextUtils.equals(tile.intent.getComponent().getClassName(),
                     component.getClassName())) {
                 if (DEBUG) {
@@ -95,6 +123,40 @@ public class DashboardCategory implements Parcelable {
         return false;
     }
 
+    /**
+     * Sort priority value for tiles in this category.
+     */
+    public void sortTiles() {
+        Collections.sort(mTiles, TILE_COMPARATOR);
+    }
+
+    /**
+     * Sort priority value and package name for tiles in this category.
+     */
+    public synchronized void sortTiles(String skipPackageName) {
+        // Sort mTiles based on [priority, package within priority]
+        Collections.sort(mTiles, (tile1, tile2) -> {
+            final String package1 = tile1.intent.getComponent().getPackageName();
+            final String package2 = tile2.intent.getComponent().getPackageName();
+            final int packageCompare = CASE_INSENSITIVE_ORDER.compare(package1, package2);
+            // First sort by priority
+            final int priorityCompare = tile2.priority - tile1.priority;
+            if (priorityCompare != 0) {
+                return priorityCompare;
+            }
+            // Then sort by package name, skip package take precedence
+            if (packageCompare != 0) {
+                if (TextUtils.equals(package1, skipPackageName)) {
+                    return -1;
+                }
+                if (TextUtils.equals(package2, skipPackageName)) {
+                    return 1;
+                }
+            }
+            return packageCompare;
+        });
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -106,11 +168,11 @@ public class DashboardCategory implements Parcelable {
         dest.writeString(key);
         dest.writeInt(priority);
 
-        final int count = tiles.size();
+        final int count = mTiles.size();
         dest.writeInt(count);
 
         for (int n = 0; n < count; n++) {
-            Tile tile = tiles.get(n);
+            Tile tile = mTiles.get(n);
             tile.writeToParcel(dest, flags);
         }
     }
@@ -124,7 +186,7 @@ public class DashboardCategory implements Parcelable {
 
         for (int n = 0; n < count; n++) {
             Tile tile = Tile.CREATOR.createFromParcel(in);
-            tiles.add(tile);
+            mTiles.add(tile);
         }
     }
 
@@ -141,4 +203,13 @@ public class DashboardCategory implements Parcelable {
             return new DashboardCategory[size];
         }
     };
+
+    public static final Comparator<Tile> TILE_COMPARATOR =
+            new Comparator<Tile>() {
+                @Override
+                public int compare(Tile lhs, Tile rhs) {
+                    return rhs.priority - lhs.priority;
+                }
+            };
+
 }

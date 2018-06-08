@@ -88,6 +88,25 @@ public class NearestTouchFrameTest extends SysuiTestCase {
         ev.recycle();
     }
 
+
+    @Test
+    public void testNearestView_DetachedViewsExcluded() {
+        View left = mockViewAt(0, 0, 10, 10);
+        when(left.isAttachedToWindow()).thenReturn(false);
+        View right = mockViewAt(20, 0, 10, 10);
+
+        mNearestTouchFrame.addView(left);
+        mNearestTouchFrame.addView(right);
+        mNearestTouchFrame.onMeasure(0, 0);
+
+        // Would go to left view if attached, but goes to right instead as left should be detached.
+        MotionEvent ev = MotionEvent.obtain(0, 0, 0,
+                12 /* x */, 5 /* y */, 0);
+        mNearestTouchFrame.onTouchEvent(ev);
+        verify(right).onTouchEvent(eq(ev));
+        ev.recycle();
+    }
+
     @Test
     public void testHorizontalSelection_Left() {
         View left = mockViewAt(0, 0, 10, 10);
@@ -161,6 +180,7 @@ public class NearestTouchFrameTest extends SysuiTestCase {
             return null;
         }).when(v).getLocationInWindow(any());
         when(v.isClickable()).thenReturn(true);
+        when(v.isAttachedToWindow()).thenReturn(true);
 
         // Stupid final methods.
         v.setLeft(0);

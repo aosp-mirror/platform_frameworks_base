@@ -34,10 +34,10 @@
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
 
     <!-- Height of the battery icon in the status bar. -->
-    <dimen name="status_bar_battery_icon_height">14.5dp</dimen>
+    <dimen name="status_bar_battery_icon_height">13.0dp</dimen>
 
     <!-- Width of the battery icon in the status bar. -->
-    <dimen name="status_bar_battery_icon_width">9.5dp</dimen>
+    <dimen name="status_bar_battery_icon_width">8.5dp</dimen>
 
     <!-- The font size for the clock in the status bar. -->
     <dimen name="status_bar_clock_size">14sp</dimen>
@@ -47,6 +47,12 @@
 
     <!-- The end padding for the clock in the status bar. -->
     <dimen name="status_bar_clock_end_padding">0dp</dimen>
+
+    <!-- Starting padding for a left-aligned status bar clock -->
+    <dimen name="status_bar_left_clock_starting_padding">0dp</dimen>
+
+    <!-- End padding for left-aligned status bar clock -->
+    <dimen name="status_bar_left_clock_end_padding">7dp</dimen>
 
     <!-- Spacing after the wifi signals that is present if there are any icons following it. -->
     <dimen name="status_bar_wifi_signal_spacer_width">4dp</dimen>
@@ -72,16 +78,19 @@
     <dimen name="status_bar_connected_device_bt_indicator_size">17dp</dimen>
 
     <!-- Height of a small notification in the status bar-->
-    <dimen name="notification_min_height">92dp</dimen>
+    <dimen name="notification_min_height">106dp</dimen>
 
     <!-- Increased height of a small notification in the status bar -->
-    <dimen name="notification_min_height_increased">132dp</dimen>
+    <dimen name="notification_min_height_increased">146dp</dimen>
 
     <!-- Height of a small notification in the status bar which was used before android N -->
     <dimen name="notification_min_height_legacy">64dp</dimen>
 
+    <!-- Height of a small notification in the status bar which was used before android P -->
+    <dimen name="notification_min_height_before_p">92dp</dimen>
+
     <!-- Height of a large notification in the status bar -->
-    <dimen name="notification_max_height">284dp</dimen>
+    <dimen name="notification_max_height">294dp</dimen>
 
     <!-- Height of an ambient notification on ambient display -->
     <dimen name="notification_ambient_height">400dp</dimen>
@@ -89,11 +98,27 @@
     <!-- Height of a heads up notification in the status bar for legacy custom views -->
     <dimen name="notification_max_heads_up_height_legacy">128dp</dimen>
 
+    <!-- Height of a heads up notification in the status bar for custom views before andoid P -->
+    <dimen name="notification_max_heads_up_height_before_p">148dp</dimen>
+
     <!-- Height of a heads up notification in the status bar -->
-    <dimen name="notification_max_heads_up_height">148dp</dimen>
+    <dimen name="notification_max_heads_up_height">162dp</dimen>
 
     <!-- Height of a heads up notification in the status bar -->
     <dimen name="notification_max_heads_up_height_increased">188dp</dimen>
+
+    <!-- Side padding on the lockscreen on the side of notifications -->
+    <dimen name="notification_side_paddings">4dp</dimen>
+
+    <!-- padding between the heads up and the statusbar -->
+    <dimen name="heads_up_status_bar_padding">8dp</dimen>
+
+    <!-- heads up elevation that is added if the view is pinned -->
+    <dimen name="heads_up_pinned_elevation">16dp</dimen>
+
+    <!-- Height of a messaging notifications with actions at least. Not that this is an upper bound
+         and the notification won't use this much, but is measured with wrap_content -->
+    <dimen name="notification_messaging_actions_min_height">196dp</dimen>
 
     <!-- a threshold in dp per second that is considered fast scrolling -->
     <dimen name="scroll_fast_threshold">1500dp</dimen>
@@ -111,6 +136,13 @@
          views where the distance can't be measured -->
     <dimen name="notification_icon_appear_padding">15dp</dimen>
 
+    <!-- Vertical translation of the shelf during animation that happens after the
+    notification panel collapses -->
+    <dimen name="shelf_appear_translation">42dp</dimen>
+
+    <!-- Vertical translation of pulsing notification animations -->
+    <dimen name="pulsing_notification_appear_translation">10dp</dimen>
+
     <!-- The amount the content shifts upwards when transforming into the icon -->
     <dimen name="notification_icon_transform_content_shift">32dp</dimen>
 
@@ -126,6 +158,24 @@
     <!-- The space around a notification menu item  -->
     <dimen name="notification_menu_icon_padding">20dp</dimen>
 
+    <!-- The vertical space around the buttons in the inline settings -->
+    <dimen name="notification_guts_button_spacing">6dp</dimen>
+
+    <!-- Extra horizontal space for properly aligning guts buttons with the notification content -->
+    <dimen name="notification_guts_button_side_margin">8dp</dimen>
+
+    <!-- The vertical padding a notification guts button has to fulfill the 48dp touch target -->
+    <dimen name="notification_guts_button_vertical_padding">14dp</dimen>
+
+    <!-- The horizontal padding for notification guts buttons-->
+    <dimen name="notification_guts_button_horizontal_padding">8dp</dimen>
+
+    <!-- The horizontal space around the buttons in the inline settings -->
+    <dimen name="notification_guts_button_horizontal_spacing">8dp</dimen>
+
+    <!-- The height of the header in inline settings -->
+    <dimen name="notification_guts_header_height">24dp</dimen>
+
     <!-- The minimum height for the snackbar shown after the snooze option has been chosen. -->
     <dimen name="snooze_snackbar_min_height">56dp</dimen>
 
@@ -136,7 +186,7 @@
     <dimen name="snooze_option_padding">8dp</dimen>
 
     <!-- size at which Notification icons will be drawn in the status bar -->
-    <dimen name="status_bar_icon_drawing_size">17dp</dimen>
+    <dimen name="status_bar_icon_drawing_size">15dp</dimen>
 
     <!-- size at which Notification icons will be drawn on Ambient Display -->
     <dimen name="status_bar_icon_drawing_size_dark">@*android:dimen/notification_header_icon_size_ambient</dimen>
@@ -150,8 +200,11 @@
     <!-- the padding on the start of the statusbar -->
     <dimen name="status_bar_padding_start">6dp</dimen>
 
+    <!-- the padding on the end of the statusbar -->
+    <dimen name="status_bar_padding_end">6dp</dimen>
+
     <!-- the radius of the overflow dot in the status bar -->
-    <dimen name="overflow_dot_radius">1dp</dimen>
+    <dimen name="overflow_dot_radius">2dp</dimen>
 
     <!-- the padding between dots in the icon overflow -->
     <dimen name="overflow_icon_dot_padding">3dp</dimen>
@@ -189,17 +242,15 @@
     <!-- Amount of close_handle that will NOT overlap the notification list -->
     <dimen name="close_handle_underlap">32dp</dimen>
 
-    <!-- Height of the status bar header bar -->
-    <dimen name="status_bar_header_height">124dp</dimen>
-
     <!-- Height of the status bar header bar in the car setting. -->
     <dimen name="car_status_bar_header_height">128dp</dimen>
 
     <!-- The bottom padding of the status bar header. -->
     <dimen name="status_bar_header_padding_bottom">48dp</dimen>
 
-    <!-- The height of the container that holds the system icons in the quick settings header. -->
-    <dimen name="qs_header_system_icons_area_height">40dp</dimen>
+    <!-- The height of the container that holds the battery and time in the quick settings header.
+         -->
+    <dimen name="qs_header_system_icons_area_height">48dp</dimen>
 
     <!-- The height of the container that holds the system icons in the quick settings header in the
          car setting. -->
@@ -207,7 +258,10 @@
 
     <!-- The height of the quick settings footer that holds the user switcher, settings icon,
          etc. -->
-    <dimen name="qs_footer_height">48dp</dimen>
+    <dimen name="qs_footer_height">56dp</dimen>
+
+    <!-- The padding between the notifications and the quick settings container -->
+    <dimen name="qs_notification_padding">@dimen/notification_side_paddings</dimen>
 
     <!-- Height of the status bar header bar when expanded -->
     <dimen name="status_bar_header_height_expanded">124dp</dimen>
@@ -233,10 +287,42 @@
 
     <dimen name="notification_panel_width">@dimen/match_parent</dimen>
 
+    <dimen name="brightness_mirror_height">48dp</dimen>
+
     <!-- The width of the panel that holds the quick settings. -->
     <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
-    <dimen name="volume_dialog_panel_width">@dimen/standard_notification_panel_width</dimen>
+    <dimen name="volume_dialog_panel_transparent_padding_right">8dp</dimen>
+
+    <dimen name="volume_dialog_panel_transparent_padding">20dp</dimen>
+
+    <dimen name="volume_dialog_stream_padding">8dp</dimen>
+
+    <!-- the amount the volume panel should be offset at the end from the view next to it (or
+    the screen edge, in portrait-->
+    <dimen name="volume_dialog_base_margin">8dp</dimen>
+
+    <dimen name="volume_dialog_panel_width">64dp</dimen>
+
+    <dimen name="volume_dialog_slider_height">116dp</dimen>
+
+    <dimen name="volume_dialog_row_height">252dp</dimen>
+
+    <dimen name="volume_dialog_ringer_size">64dp</dimen>
+
+    <dimen name="volume_dialog_tap_target_size">48dp</dimen>
+
+    <dimen name="volume_dialog_spacer">4dp</dimen>
+
+    <dimen name="volume_dialog_slider_margin_top">14dp</dimen>
+
+    <dimen name="volume_dialog_slider_margin_bottom">-2dp</dimen>
+
+    <dimen name="volume_dialog_row_margin_bottom">8dp</dimen>
+
+    <dimen name="volume_dialog_settings_icon_size">16dp</dimen>
+
+    <dimen name="volume_dialog_elevation">9dp</dimen>
 
     <!-- Gravity for the notification panel -->
     <integer name="notification_panel_layout_gravity">0x31</integer><!-- center_horizontal|top -->
@@ -257,11 +343,17 @@
     <dimen name="pull_span_min">25dp</dimen>
 
     <dimen name="qs_tile_height">106dp</dimen>
-    <dimen name="qs_tile_margin">19dp</dimen>
-    <dimen name="qs_tile_margin_top">16dp</dimen>
+    <dimen name="qs_tile_layout_margin_side">6dp</dimen>
+    <dimen name="qs_tile_margin_horizontal">18dp</dimen>
+    <dimen name="qs_tile_margin_vertical">24dp</dimen>
+    <dimen name="qs_tile_margin_top_bottom">12dp</dimen>
+    <dimen name="qs_tile_margin_top">18dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
+    <!-- Width for the spacer, used between QS tiles. -->
+    <dimen name="qs_quick_tile_space_width">0dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>
     <dimen name="qs_header_gear_translation">16dp</dimen>
+    <dimen name="qs_header_tile_margin_horizontal">0dp</dimen>
     <dimen name="qs_page_indicator_width">16dp</dimen>
     <dimen name="qs_page_indicator_height">8dp</dimen>
     <dimen name="qs_tile_icon_size">24dp</dimen>
@@ -277,13 +369,13 @@
     <dimen name="qs_tile_padding_bottom">16dp</dimen>
     <dimen name="qs_tile_spacing">4dp</dimen>
     <dimen name="qs_panel_padding_bottom">0dp</dimen>
+    <dimen name="qs_panel_padding_top">30dp</dimen>
     <dimen name="qs_detail_header_height">56dp</dimen>
     <dimen name="qs_detail_header_padding">0dp</dimen>
     <dimen name="qs_detail_image_width">56dp</dimen>
     <dimen name="qs_detail_image_height">56dp</dimen>
     <dimen name="qs_detail_image_padding">16dp</dimen>
     <dimen name="qs_detail_item_height">48dp</dimen>
-    <dimen name="qs_brightness_padding_top">6dp</dimen>
     <dimen name="qs_detail_header_text_size">20sp</dimen>
     <dimen name="qs_detail_button_text_size">14sp</dimen>
     <dimen name="qs_detail_item_primary_text_size">16sp</dimen>
@@ -301,9 +393,15 @@
     <dimen name="qs_detail_item_icon_width">32dp</dimen>
     <dimen name="qs_detail_item_icon_marginStart">0dp</dimen>
     <dimen name="qs_detail_item_icon_marginEnd">20dp</dimen>
+    <dimen name="qs_header_tooltip_height">18dp</dimen>
+    <dimen name="qs_header_alarm_icon_size">18dp</dimen>
+    <dimen name="qs_header_alarm_text_margin_start">6dp</dimen>
     <dimen name="qs_footer_padding_start">16dp</dimen>
-    <dimen name="qs_footer_padding_end">24dp</dimen>
+    <dimen name="qs_footer_padding_end">16dp</dimen>
     <dimen name="qs_footer_icon_size">16dp</dimen>
+    <dimen name="qs_paged_tile_layout_padding_bottom">24dp</dimen>
+
+    <dimen name="qs_notif_collapsed_space">64dp</dimen>
 
     <!-- Desired qs icon overlay size. -->
     <dimen name="qs_detail_icon_overlay_size">24dp</dimen>
@@ -322,6 +420,9 @@
     <dimen name="qs_footer_dialog_icon_margin">8sp</dimen>
     <!-- Padding between subtitles and the following text in the QSFooter dialog -->
     <dimen name="qs_footer_dialog_subtitle_padding">20dp</dimen>
+
+    <dimen name="seek_bar_height">3dp</dimen>
+    <dimen name="seek_bar_corner_radius">3dp</dimen>
 
     <!-- Zen mode panel: condition item button padding -->
     <dimen name="zen_mode_condition_detail_button_padding">8dp</dimen>
@@ -344,10 +445,6 @@
     <!-- Default distance from each snap target that GlowPadView considers a "hit" -->
     <dimen name="glowpadview_inner_radius">15dip</dimen>
 
-    <!-- bottom_stack_peek_amount + notification_min_height
-         + notification_collapse_second_card_padding -->
-    <dimen name="min_stack_height">104dp</dimen>
-
     <!-- Z distance between notifications if they are in the stack -->
     <dimen name="z_distance_between_notifications">0.5dp</dimen>
 
@@ -363,9 +460,6 @@
     <!-- The height of the divider between the individual notifications in a notification
          group. -->
     <dimen name="notification_children_container_divider_height">@dimen/notification_divider_height</dimen>
-
-    <!-- The height of the header for a container containing child notifications. -->
-    <dimen name="notification_children_container_header_height">53dp</dimen>
 
     <!-- The top margin for the notification children container in its non-expanded form. -->
     <dimen name="notification_children_container_margin_top">@*android:dimen/notification_content_margin_top</dimen>
@@ -394,17 +488,10 @@
     <!-- Minimum distance the user has to drag down to go to the full shade. -->
     <dimen name="keyguard_drag_down_min_distance">100dp</dimen>
 
-    <!-- The fraction of the screen height where the clock on the Keyguard has its center. The
-         max value is used when no notifications are displaying, and the min value is when the
-         highest possible number of notifications are showing. -->
-    <fraction name="keyguard_clock_y_fraction_max">32.5%</fraction>
-    <fraction name="keyguard_clock_y_fraction_min">19.8%</fraction>
-
-    <!-- The margin between the clock and the notifications on Keyguard. See
-         keyguard_clock_height_fraction_* for the difference between min and max.-->
-    <dimen name="keyguard_clock_notifications_margin_min">30dp</dimen>
-    <dimen name="keyguard_clock_notifications_margin_max">42dp</dimen>
-    <dimen name="heads_up_scrim_height">250dp</dimen>
+    <!-- The margin between the clock and the notifications on Keyguard.-->
+    <dimen name="keyguard_clock_notifications_margin">30dp</dimen>
+    <!-- Minimum margin between clock and status bar -->
+    <dimen name="keyguard_clock_top_margin">36dp</dimen>
 
     <item name="scrim_behind_alpha" format="float" type="dimen">0.62</item>
 
@@ -426,9 +513,6 @@
     <!-- Distance the user needs to drag vertically such that a swipe is accepted to unlock the
          device. -->
     <dimen name="unlock_move_distance">75dp</dimen>
-
-    <!-- Distance after which the scrim starts fading in when dragging down the quick settings -->
-    <dimen name="notification_scrim_wait_distance">100dp</dimen>
 
     <!-- Move distance for the unlock hint animation on the lockscreen -->
     <dimen name="hint_move_distance">75dp</dimen>
@@ -485,7 +569,7 @@
     <dimen name="multi_user_avatar_keyguard_size">22dp</dimen>
 
     <!-- The width of user avatar when expanded -->
-    <dimen name="multi_user_avatar_expanded_size">16dp</dimen>
+    <dimen name="multi_user_avatar_expanded_size">18dp</dimen>
 
     <!-- The font size of the time when collapsed in QS -->
     <dimen name="qs_time_collapsed_size">14sp</dimen>
@@ -558,6 +642,7 @@
     <dimen name="keyguard_affordance_icon_width">24dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">65dp</dimen>
+    <dimen name="keyguard_indication_margin_bottom_ambient">16dp</dimen>
 
     <!-- The text size for battery level -->
     <dimen name="battery_level_text_size">12sp</dimen>
@@ -589,12 +674,18 @@
          type icon is wide. -->
     <dimen name="wide_type_icon_start_padding">2dp</dimen>
 
+    <!-- Padding between the mobile signal indicator and the start icon when the roaming icon
+         is displayed in the upper left corner. -->
+    <dimen name="roaming_icon_start_padding">2dp</dimen>
+
     <!-- Extra padding between multiple phone signal icons. -->
     <dimen name="secondary_telephony_padding">2dp</dimen>
 
     <!-- Extra padding between the mobile data type icon and the strength indicator when the data
          type icon is wide for the tile in quick settings. -->
     <dimen name="wide_type_icon_start_padding_qs">3dp</dimen>
+
+    <dimen name="signal_indicator_to_icon_frame_spacing">3dp</dimen>
 
     <!-- The maximum width of the navigation bar ripples. -->
     <dimen name="key_button_ripple_max_width">95dp</dimen>
@@ -609,7 +700,7 @@
     <dimen name="signal_cluster_margin_start">2.5dp</dimen>
 
     <!-- Padding between signal cluster and battery icon -->
-    <dimen name="signal_cluster_battery_padding">7dp</dimen>
+    <dimen name="signal_cluster_battery_padding">6dp</dimen>
 
     <!-- Padding for signal cluster and battery icon when there are not icons in signal cluster -->
     <dimen name="no_signal_cluster_battery_padding">3dp</dimen>
@@ -774,6 +865,11 @@
     <!-- The size of the drag hint text. -->
     <dimen name="recents_drag_hint_text_size">14sp</dimen>
 
+    <!-- The size of corner radius of the arrow in the onboarding toast. -->
+    <dimen name="recents_onboarding_toast_arrow_corner_radius">2dp</dimen>
+    <!-- The start margin of quick scrub onboarding toast. -->
+    <dimen name="recents_quick_scrub_onboarding_margin_start">8dp</dimen>
+
     <!-- The min alpha to apply to a task affiliation group color. -->
     <item name="recents_task_affiliation_color_min_alpha_percentage" format="float" type="dimen">0.6</item>
 
@@ -822,8 +918,6 @@
     <dimen name="default_gear_space">18dp</dimen>
     <dimen name="cell_overlay_padding">18dp</dimen>
 
-    <dimen name="hwui_edge_margin">16dp</dimen>
-
     <dimen name="global_actions_panel_width">120dp</dimen>
 
     <dimen name="global_actions_top_padding">120dp</dimen>
@@ -836,19 +930,86 @@
             burn-in on AOD -->
     <dimen name="burn_in_prevention_offset_y">50dp</dimen>
 
-    <!-- padding between the notification stack and the keyguard status view when dozing -->
-    <dimen name="dozing_stack_padding">10dp</dimen>
-
-    <dimen name="corner_size">16dp</dimen>
+    <dimen name="corner_size">8dp</dimen>
     <dimen name="top_padding">0dp</dimen>
     <dimen name="bottom_padding">48dp</dimen>
-    <dimen name="edge_margin">16dp</dimen>
+    <dimen name="edge_margin">8dp</dimen>
 
     <dimen name="rounded_corner_radius">0dp</dimen>
+    <dimen name="rounded_corner_radius_top">0dp</dimen>
+    <dimen name="rounded_corner_radius_bottom">0dp</dimen>
     <dimen name="rounded_corner_content_padding">0dp</dimen>
     <dimen name="nav_content_padding">0dp</dimen>
+    <dimen name="nav_quick_scrub_track_edge_padding">24dp</dimen>
+    <dimen name="nav_quick_scrub_track_thickness">10dp</dimen>
 
-    <!-- Home button padding for sizing -->
-    <dimen name="home_padding">15dp</dimen>
+    <!-- Navigation bar shadow params. -->
+    <dimen name="nav_key_button_shadow_offset_x">0dp</dimen>
+    <dimen name="nav_key_button_shadow_offset_y">1dp</dimen>
+    <dimen name="nav_key_button_shadow_radius">0.5dp</dimen>
+
+    <!-- Smart reply button. Total height 48dp, visible height 32dp. -->
+    <dimen name="smart_reply_button_spacing">8dp</dimen>
+    <dimen name="smart_reply_button_padding_vertical">14dp</dimen>
+    <!-- Note: The following two paddings need to be different until b/78876518 is fixed. -->
+    <dimen name="smart_reply_button_padding_horizontal_single_line">20dp</dimen>
+    <dimen name="smart_reply_button_padding_horizontal_double_line">19dp</dimen>
+    <dimen name="smart_reply_button_min_height">48dp</dimen>
+    <dimen name="smart_reply_button_stroke_width">1dp</dimen>
+    <dimen name="smart_reply_button_font_size">14sp</dimen>
+    <dimen name="smart_reply_button_line_spacing_extra">6sp</dimen> <!-- Total line height 20sp. -->
+
+    <!-- A reasonable upper bound for the height of the smart reply button. The measuring code
+            needs to start with a guess for the maximum size. Currently two-line smart reply buttons
+            add about 88dp of height to the notifications. -->
+    <dimen name="smart_reply_button_max_height">100dp</dimen>
+
+    <!-- The extra height that we allow a notification with a remote input history to be taller than
+         the regular notification, when we have remote input history texts present. -->
+    <dimen name="remote_input_history_extra_height">60dp</dimen>
+
+    <!-- Fingerprint Dialog values -->
+    <dimen name="fingerprint_dialog_fp_icon_size">64dp</dimen>
+    <dimen name="fingerprint_dialog_animation_translation_offset">350dp</dimen>
+    <dimen name="fingerprint_dialog_corner_size">4dp</dimen>
+
+    <!-- Wireless Charging Animation values -->
+    <dimen name="wireless_charging_dots_radius_start">0dp</dimen>
+    <dimen name="wireless_charging_dots_radius_end">4dp</dimen>
+    <dimen name="wireless_charging_circle_radius_start">28dp</dimen>
+    <dimen name="wireless_charging_circle_radius_end">84dp</dimen>
+    <integer name="wireless_charging_angle_offset">20</integer>
+    <integer name="wireless_charging_scale_dots_duration">83</integer>
+    <integer name="wireless_charging_num_dots">16</integer>
+    <!-- Starting text size in sp of batteryLevel for wireless charging animation -->
+    <item name="wireless_charging_anim_battery_level_text_size_start" format="float" type="dimen">0</item>
+    <!-- Ending text size in sp of batteryLevel for wireless charging animation -->
+    <item name="wireless_charging_anim_battery_level_text_size_end" format="float" type="dimen">24</item>
+    <!-- time until battery info is at full opacity-->
+    <integer name="wireless_charging_anim_opacity_offset">80</integer>
+    <!-- duration batteryLevel opacity goes from 0 to 1 duration -->
+    <integer name="wireless_charging_battery_level_text_opacity_duration">117</integer>
+    <!-- battery text scale animation duration -->
+    <integer name="wireless_charging_battery_level_text_scale_animation_duration">367</integer>
+    <!--time until wireless charging animation starts to fade-->
+    <integer name="wireless_charging_fade_offset">920</integer>
+    <!-- duration wireless charging animation takes to full fade to 0 opacity -->
+    <integer name="wireless_charging_fade_duration">200</integer>
+
+    <!-- Wired charging on AOD, text animation duration -->
+    <integer name="wired_charging_keyguard_text_animation_duration_down">500</integer>
+    <!-- Wired charging on AOD, text animation duration -->
+    <integer name="wired_charging_keyguard_text_animation_duration_up">300</integer>
+    <!-- Wired charging on AOD, text animation distance -->
+    <integer name="wired_charging_keyguard_text_animation_distance">-30</integer>
+
+    <!-- Logout button -->
+    <dimen name="logout_button_layout_height">32dp</dimen>
+    <dimen name="logout_button_padding_horizontal">16dp</dimen>
+    <dimen name="logout_button_margin_bottom">12dp</dimen>
+    <dimen name="logout_button_corner_radius">2dp</dimen>
+
+    <!-- How much into a DisplayCutout's bounds we can go, on each side -->
+    <dimen name="display_cutout_margin_consumption">0px</dimen>
 
 </resources>

@@ -20,11 +20,12 @@
 #include "utils/FileMap.h"
 
 #include "Source.h"
+#include "io/FileStream.h"
 #include "util/Files.h"
 #include "util/Maybe.h"
 #include "util/Util.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
 
 namespace aapt {
 namespace io {
@@ -42,12 +43,20 @@ std::unique_ptr<IData> RegularFile::OpenAsData() {
   return {};
 }
 
-const Source& RegularFile::GetSource() const { return source_; }
+std::unique_ptr<io::InputStream> RegularFile::OpenInputStream() {
+  return util::make_unique<FileInputStream>(source_.path);
+}
+
+const Source& RegularFile::GetSource() const {
+  return source_;
+}
 
 FileCollectionIterator::FileCollectionIterator(FileCollection* collection)
     : current_(collection->files_.begin()), end_(collection->files_.end()) {}
 
-bool FileCollectionIterator::HasNext() { return current_ != end_; }
+bool FileCollectionIterator::HasNext() {
+  return current_ != end_;
+}
 
 IFile* FileCollectionIterator::Next() {
   IFile* result = current_->second.get();

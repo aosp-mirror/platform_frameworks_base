@@ -1,0 +1,89 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.content;
+
+option java_package = "android.content";
+option java_multiple_files = true;
+
+import "frameworks/base/core/proto/android/content/component_name.proto";
+import "frameworks/base/core/proto/android/os/patternmatcher.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+// Next Tag: 13
+message IntentProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum DockState {
+        // Used as an int value for Intent#EXTRA_DOCK_STATE to represent that
+        // the phone is not in any dock.
+        DOCK_STATE_UNDOCKED = 0;
+
+        // Used as an int value for Intent#EXTRA_DOCK_STATE to represent that
+        // the phone is in a desk dock.
+        DOCK_STATE_DESK = 1;
+
+        // Used as an int value for Intent#EXTRA_DOCK_STATE to represent that
+        // the phone is in a car dock.
+        DOCK_STATE_CAR = 2;
+
+        // Used as an int value for Intent#EXTRA_DOCK_STATE to represent that
+        // the phone is in a analog (low end) dock.
+        DOCK_STATE_LE_DESK = 3;
+
+        // Used as an int value for Intent#EXTRA_DOCK_STATE to represent that
+        // the phone is in a digital (high end) dock.
+        DOCK_STATE_HE_DESK = 4;
+    }
+
+    optional string action = 1;
+    repeated string categories = 2;
+    optional string data = 3 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional string type = 4;
+    optional string flag = 5;
+    optional string package = 6;
+    optional ComponentNameProto component = 7;
+    optional string source_bounds = 8;
+    optional string clip_data = 9 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional string extras = 10 [ (.android.privacy).dest = DEST_LOCAL ];
+    optional int32 content_user_hint = 11;
+    optional string selector = 12;
+}
+
+// Next Tag: 11
+message IntentFilterProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    repeated string actions = 1;
+    repeated string categories = 2;
+    repeated string data_schemes = 3  [ (.android.privacy).dest = DEST_EXPLICIT ];
+    repeated android.os.PatternMatcherProto data_scheme_specs = 4;
+    repeated AuthorityEntryProto data_authorities = 5;
+    repeated android.os.PatternMatcherProto data_paths = 6;
+    repeated string data_types = 7;
+    optional int32 priority = 8;
+    optional bool has_partial_types = 9;
+    optional bool get_auto_verify = 10;
+}
+
+message AuthorityEntryProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional string host = 1;
+    optional bool wild = 2;
+    optional int32 port = 3;
+}

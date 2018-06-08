@@ -16,6 +16,7 @@ package android.testing;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -157,5 +158,23 @@ public class TestableLooperTest {
     @RunWithLooper(setAsMainLooper = true)
     public void testMainLooperAnnotation() {
         assertEquals(Looper.myLooper(), Looper.getMainLooper());
+    }
+
+    @Test
+    public void testCorrectLooperExecution() throws Exception {
+        boolean[] hasRun = new boolean[] { false };
+        Runnable r = () -> {
+            assertEquals("Should run on main looper", Looper.getMainLooper(), Looper.myLooper());
+            hasRun[0] = true;
+        };
+        TestableLooper testableLooper = new TestableLooper(Looper.getMainLooper());
+        try {
+            new Handler(Looper.getMainLooper()).post(r);
+            testableLooper.processAllMessages();
+
+            assertTrue(hasRun[0]);
+        } finally {
+            testableLooper.destroy();
+        }
     }
 }

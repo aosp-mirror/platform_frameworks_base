@@ -1,0 +1,243 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.providers.settings;
+
+option java_multiple_files = true;
+
+import "frameworks/base/core/proto/android/providers/settings/common.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+// Note: it's a conscious decision to add each setting as a separate field. This
+// allows annotating each setting with its own privacy tag.
+message SystemSettingsProto {
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+    repeated SettingsOperationProto historical_operations = 1;
+
+    optional SettingProto advanced_settings = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message Alarm {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        // "alarm_alert" in code.
+        optional SettingProto default_uri = 1;
+        optional SettingProto alert_cache = 2;
+    }
+    optional Alarm alarm = 3;
+
+    message Bluetooth {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        // Whether remote devices may discover and/or connect to this device:
+        // 2 -- discoverable and connectable
+        // 1 -- connectable but not discoverable
+        // 0 -- neither connectable nor discoverable
+        optional SettingProto discoverability = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto discoverability_timeout_secs = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Bluetooth bluetooth = 4;
+
+    optional SettingProto date_format = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto display_color_mode = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message DevOptions {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        // Show pointer location on screen? 0 = no, 1 = yes. "pointer_location
+        // in code.
+        optional SettingProto pointer_location = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto show_touches = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Log raw orientation data from {@link
+        // com.android.server.policy.WindowOrientationListener} for use with the
+        // orientationplot.py tool.
+        // 0 = no, 1 = yes
+        optional SettingProto window_orientation_listener_log = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional DevOptions developer_options = 7;
+
+    message DtmfTone {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        // "dtmf_tone_when_dialing" in code.
+        optional SettingProto play_when_dialing = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // "dtmf_tone_type_when_dialing" in code.
+        optional SettingProto type_played_when_dialing = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional DtmfTone dtmf_tone = 8;
+
+    optional SettingProto egg_mode = 9 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto end_button_behavior = 10 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto font_scale = 11 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message HapticFeedback {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto intensity = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional HapticFeedback haptic_feedback = 12;
+
+    // Whether the hearing aid is enabled. The value is boolean (1 or 0).
+    optional SettingProto hearing_aid = 13 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto lock_to_app_enabled = 14 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message Lockscreen {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto sounds_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto disabled = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Lockscreen lockscreen = 15;
+
+    // The system default media button event receiver.
+    optional SettingProto media_button_receiver = 16;
+
+    message Notification {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto sound = 1;
+        optional SettingProto sound_cache = 2;
+        optional SettingProto light_pulse = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto vibration_intensity = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Notification notification = 17;
+
+    optional SettingProto pointer_speed = 18 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message Ringtone {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        // "ringtone" in code. The system-wide default ringtone URI.
+        optional SettingProto default_uri = 1;
+        optional SettingProto cache = 2;
+    }
+    optional Ringtone ringtone = 19;
+
+    message Rotation {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        // Control whether the accelerometer will be used to change screen
+        // orientation.  If 0, it will not be used unless explicitly requested
+        // by the application; if 1, it will be used by default unless
+        // explicitly disabled by the application.
+        optional SettingProto accelerometer_rotation = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Default screen rotation when no other policy applies.
+        // When accelerometer_rotation is zero and no on-screen Activity expresses a
+        // preference, this rotation value will be used. Must be one of the
+        // {@link android.view.Surface#ROTATION_0 Surface rotation constants}.
+        optional SettingProto user_rotation = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Control whether the rotation lock toggle in the System UI should be hidden.
+        // Typically this is done for accessibility purposes to make it harder for
+        // the user to accidentally toggle the rotation lock while the display rotation
+        // has been locked for accessibility.
+        // If 0, then rotation lock toggle is not hidden for accessibility (although it may be
+        // unavailable for other reasons).  If 1, then the rotation lock toggle is hidden.
+        optional SettingProto hide_rotation_lock_toggle_for_accessibility = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Rotation rotation = 20;
+
+    reserved 21; // rtt_calling_mode moved to Settings.Secure
+
+    message Screen {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto off_timeout = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto brightness = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto brightness_for_vr = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto brightness_mode = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto auto_brightness_adj = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Screen screen = 22;
+
+    optional SettingProto setup_wizard_has_run = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto show_battery_percent = 24 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto show_gtalk_service_status = 25 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message Sip {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto receive_calls = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto call_options = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto always = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto address_only = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Sip sip = 26;
+
+    optional SettingProto sound_effects_enabled = 27 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto system_locales = 28 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message Text {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto auto_replace = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto auto_caps = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto auto_punctuate = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto show_password = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Text text = 29;
+
+    optional SettingProto time_12_24 = 30 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto tty_mode = 31 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message Vibrate {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto on = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto input_devices = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Whether silent mode should allow vibration feedback. This is used
+        // internally in AudioService and the Sound settings activity to coordinate
+        // decoupling of vibrate and silent modes. This setting will likely be
+        // removed in a future release with support for audio/vibe feedback
+        // profiles.
+        // Not used anymore. On devices with vibrator, the user explicitly selects
+        // silent or vibrate mode. Kept for use by legacy database upgrade code in
+        // DatabaseHelper.
+        optional SettingProto in_silent = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto when_ringing = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Vibrate vibrate = 32;
+
+    message Volume {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto ring = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto system = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto voice = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto music = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto alarm = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto notification = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto bluetooth_sco = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto accessibility = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto master = 9 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto master_mono = 10 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Determines which streams are affected by ringer mode changes. The stream
+        // type's bit will be set to 1 if it should be muted when going into an
+        // inaudible ringer mode.
+        optional SettingProto mode_ringer_streams_affected = 11 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Which streams are affected by mute. The stream type's bit should be set
+        // to 1 if it should be muted when a mute request is received.
+        optional SettingProto mute_streams_affected = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Volume volume = 33;
+
+    optional SettingProto when_to_make_wifi_calls = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    // Please insert fields in alphabetical order and group them into messages
+    // if possible (to avoid reaching the method limit).
+    // Next tag = 35;
+}

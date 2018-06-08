@@ -22,6 +22,5 @@
 
     <path
         android:fillColor="#000000"
-        android:pathData="M20 2H4c-1.1 0-1.99 .9 -1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9
-11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z" />
+        android:pathData="M20,2H4C2.9,2 2,2.9 2,4v18l4.75,-4h14C21.1,18 22,17.1 22,16V4C22,2.9 21.1,2 20,2zM20,16H4V4h16V16zM9,11H7V9h2V11zM17,11h-2V9h2V11zM13,11h-2V9h2V11z"/>
 </vector>

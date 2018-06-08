@@ -69,7 +69,12 @@ public:
 
         virtual status_t writeToParcel(Parcel* out) const;
         virtual status_t readFromParcel(const Parcel* in);
-        
+
+        const vector<uint8_t>& getData() const;
+        const unique_fd& getFd() const;
+        int32_t getFlags() const;
+        int64_t getTimestamp() const;
+
     private:
         Entry(const String16& tag, int32_t flags);
         Entry(const String16& tag, int32_t flags, int fd);
@@ -83,6 +88,9 @@ public:
 
         friend class DropBoxManager;
     };
+
+    // Get the next entry from the drop box after the specified time.
+    Status getNextEntry(const String16& tag, long msec, Entry* entry);
 
 private:
     enum {

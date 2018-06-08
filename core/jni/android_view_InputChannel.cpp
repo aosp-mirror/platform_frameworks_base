@@ -124,7 +124,7 @@ static jobject android_view_InputChannel_createInputChannel(JNIEnv* env,
 static jobjectArray android_view_InputChannel_nativeOpenInputChannelPair(JNIEnv* env,
         jclass clazz, jstring nameObj) {
     const char* nameChars = env->GetStringUTFChars(nameObj, NULL);
-    String8 name(nameChars);
+    std::string name = nameChars;
     env->ReleaseStringUTFChars(nameObj, nameChars);
 
     sp<InputChannel> serverChannel;
@@ -166,7 +166,7 @@ static void android_view_InputChannel_nativeDispose(JNIEnv* env, jobject obj, jb
     if (nativeInputChannel) {
         if (finalized) {
             ALOGW("Input channel object '%s' was finalized without being disposed!",
-                    nativeInputChannel->getInputChannel()->getName().string());
+                    nativeInputChannel->getInputChannel()->getName().c_str());
         }
 
         nativeInputChannel->invokeAndRemoveDisposeCallback(env, obj);
@@ -212,7 +212,7 @@ static void android_view_InputChannel_nativeReadFromParcel(JNIEnv* env, jobject 
                 return;
             }
 
-            InputChannel* inputChannel = new InputChannel(name, dupFd);
+            InputChannel* inputChannel = new InputChannel(name.string(), dupFd);
             NativeInputChannel* nativeInputChannel = new NativeInputChannel(inputChannel);
 
             android_view_InputChannel_setNativeInputChannel(env, obj, nativeInputChannel);
@@ -230,7 +230,7 @@ static void android_view_InputChannel_nativeWriteToParcel(JNIEnv* env, jobject o
             sp<InputChannel> inputChannel = nativeInputChannel->getInputChannel();
 
             parcel->writeInt32(1);
-            parcel->writeString8(inputChannel->getName());
+            parcel->writeString8(String8(inputChannel->getName().c_str()));
             parcel->writeDupFileDescriptor(inputChannel->getFd());
         } else {
             parcel->writeInt32(0);
@@ -245,7 +245,7 @@ static jstring android_view_InputChannel_nativeGetName(JNIEnv* env, jobject obj)
         return NULL;
     }
 
-    jstring name = env->NewStringUTF(nativeInputChannel->getInputChannel()->getName().string());
+    jstring name = env->NewStringUTF(nativeInputChannel->getInputChannel()->getName().c_str());
     return name;
 }
 

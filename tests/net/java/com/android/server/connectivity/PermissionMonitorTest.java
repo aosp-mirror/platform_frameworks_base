@@ -26,6 +26,8 @@ import static android.content.pm.PackageManager.GET_PERMISSIONS;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -62,8 +64,8 @@ public class PermissionMonitorTest {
 
     private void expectPermission(String[] permissions, boolean preinstalled) throws Exception {
         final PackageInfo packageInfo = packageInfoWithPermissions(permissions, preinstalled);
-        when(mPackageManager.getPackageInfo(MOCK_PACKAGE_NAMES[0], GET_PERMISSIONS))
-                .thenReturn(packageInfo);
+        when(mPackageManager.getPackageInfoAsUser(
+                eq(MOCK_PACKAGE_NAMES[0]), eq(GET_PERMISSIONS), anyInt())).thenReturn(packageInfo);
     }
 
     private PackageInfo packageInfoWithPermissions(String[] permissions, boolean preinstalled) {

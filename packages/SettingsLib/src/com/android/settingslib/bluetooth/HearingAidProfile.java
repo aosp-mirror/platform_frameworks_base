@@ -67,12 +67,19 @@ public class HearingAidProfile implements LocalBluetoothProfile {
                 CachedBluetoothDevice device = mDeviceManager.findDevice(nextDevice);
                 // we may add a new device here, but generally this should not happen
                 if (device == null) {
-                    Log.w(TAG, "HearingAidProfile found new device: " + nextDevice);
+                    if (V) {
+                        Log.d(TAG, "HearingAidProfile found new device: " + nextDevice);
+                    }
                     device = mDeviceManager.addDevice(mLocalAdapter, mProfileManager, nextDevice);
                 }
-                device.onProfileStateChanged(HearingAidProfile.this, BluetoothProfile.STATE_CONNECTED);
+                device.onProfileStateChanged(HearingAidProfile.this,
+                        BluetoothProfile.STATE_CONNECTED);
                 device.refresh();
             }
+
+            // Check current list of CachedDevices to see if any are Hearing Aid devices.
+            mDeviceManager.updateHearingAidsDevices(mProfileManager);
+
             mIsProfileReady=true;
         }
 
@@ -84,6 +91,11 @@ public class HearingAidProfile implements LocalBluetoothProfile {
 
     public boolean isProfileReady() {
         return mIsProfileReady;
+    }
+
+    @Override
+    public int getProfileId() {
+        return BluetoothProfile.HEARING_AID;
     }
 
     HearingAidProfile(Context context, LocalBluetoothAdapter adapter,
@@ -98,7 +110,7 @@ public class HearingAidProfile implements LocalBluetoothProfile {
     }
 
     public boolean isConnectable() {
-        return true;
+        return false;
     }
 
     public boolean isAutoConnectable() {

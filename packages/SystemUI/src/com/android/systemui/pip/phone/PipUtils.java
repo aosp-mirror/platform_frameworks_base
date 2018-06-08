@@ -16,7 +16,8 @@
 
 package com.android.systemui.pip.phone;
 
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import android.app.ActivityManager.StackInfo;
 import android.app.IActivityManager;
@@ -38,7 +39,8 @@ public class PipUtils {
             IActivityManager activityManager) {
         try {
             final String sysUiPackageName = context.getPackageName();
-            final StackInfo pinnedStackInfo = activityManager.getStackInfo(PINNED_STACK_ID);
+            final StackInfo pinnedStackInfo =
+                    activityManager.getStackInfo(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
             if (pinnedStackInfo != null && pinnedStackInfo.taskIds != null &&
                     pinnedStackInfo.taskIds.length > 0) {
                 for (int i = pinnedStackInfo.taskNames.length - 1; i >= 0; i--) {

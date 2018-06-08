@@ -28,7 +28,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class VersionedPackage implements Parcelable {
     private final String mPackageName;
-    private final int mVersionCode;
+    private final long mVersionCode;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -47,9 +47,21 @@ public final class VersionedPackage implements Parcelable {
         mVersionCode = versionCode;
     }
 
+    /**
+     * Creates a new instance. Use {@link PackageManager#VERSION_CODE_HIGHEST}
+     * to refer to the highest version code of this package.
+     * @param packageName The package name.
+     * @param versionCode The version code.
+     */
+    public VersionedPackage(@NonNull String packageName,
+            @VersionCode long versionCode) {
+        mPackageName = packageName;
+        mVersionCode = versionCode;
+    }
+
     private VersionedPackage(Parcel parcel) {
         mPackageName = parcel.readString();
-        mVersionCode = parcel.readInt();
+        mVersionCode = parcel.readLong();
     }
 
     /**
@@ -62,11 +74,19 @@ public final class VersionedPackage implements Parcelable {
     }
 
     /**
+     * @deprecated use {@link #getLongVersionCode()} instead.
+     */
+    @Deprecated
+    public @VersionCode int getVersionCode() {
+        return (int) (mVersionCode & 0x7fffffff);
+    }
+
+    /**
      * Gets the version code.
      *
      * @return The version code.
      */
-    public @VersionCode int getVersionCode() {
+    public @VersionCode long getLongVersionCode() {
         return mVersionCode;
     }
 
@@ -83,7 +103,7 @@ public final class VersionedPackage implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(mPackageName);
-        parcel.writeInt(mVersionCode);
+        parcel.writeLong(mVersionCode);
     }
 
     public static final Creator<VersionedPackage> CREATOR = new Creator<VersionedPackage>() {

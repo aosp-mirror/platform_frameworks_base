@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -151,6 +152,7 @@ public final class PlaybackParams implements Parcelable {
      * @param audioStretchMode
      * @return this <code>PlaybackParams</code> instance.
      */
+    @TestApi
     public PlaybackParams setAudioStretchMode(@AudioStretchMode int audioStretchMode) {
         mAudioStretchMode = audioStretchMode;
         mSet |= SET_AUDIO_STRETCH_MODE;
@@ -163,6 +165,7 @@ public final class PlaybackParams implements Parcelable {
      * @return audio stretch mode
      * @throws IllegalStateException if the audio stretch mode is not set.
      */
+    @TestApi
     public @AudioStretchMode int getAudioStretchMode() {
         if ((mSet & SET_AUDIO_STRETCH_MODE) == 0) {
             throw new IllegalStateException("audio stretch mode not set");

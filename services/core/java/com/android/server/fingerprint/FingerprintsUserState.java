@@ -202,6 +202,7 @@ class FingerprintsUserState {
         }
     }
 
+    @GuardedBy("this")
     private void readStateSyncLocked() {
         FileInputStream in;
         if (!mFile.exists()) {
@@ -226,6 +227,7 @@ class FingerprintsUserState {
         }
     }
 
+    @GuardedBy("this")
     private void parseStateLocked(XmlPullParser parser)
             throws IOException, XmlPullParserException {
         final int outerDepth = parser.getDepth();
@@ -243,6 +245,7 @@ class FingerprintsUserState {
         }
     }
 
+    @GuardedBy("this")
     private void parseFingerprintsLocked(XmlPullParser parser)
             throws IOException, XmlPullParserException {
 

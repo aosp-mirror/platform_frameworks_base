@@ -14,17 +14,25 @@
  * limitations under the License.
  */
 
-#ifndef android_util_AssetManager_H
-#define android_util_AssetManager_H
+#ifndef ANDROID_RUNTIME_ASSETMANAGER_H
+#define ANDROID_RUNTIME_ASSETMANAGER_H
 
-#include <androidfw/AssetManager.h>
+#include "androidfw/AssetManager2.h"
+#include "androidfw/MutexGuard.h"
 
 #include "jni.h"
 
 namespace android {
 
-extern AssetManager* assetManagerForJavaObject(JNIEnv* env, jobject assetMgr);
+extern AAssetManager* NdkAssetManagerForJavaObject(JNIEnv* env, jobject jassetmanager);
+extern Guarded<AssetManager2>* AssetManagerForJavaObject(JNIEnv* env, jobject jassetmanager);
+extern Guarded<AssetManager2>* AssetManagerForNdkAssetManager(AAssetManager* assetmanager);
+struct assetmanager_offsets_t
+{
+    jfieldID mObject;
+};
+extern assetmanager_offsets_t gAssetManagerOffsets;
 
-}
+}  // namespace android
 
-#endif
+#endif  // ANDROID_RUNTIME_ASSETMANAGER_H

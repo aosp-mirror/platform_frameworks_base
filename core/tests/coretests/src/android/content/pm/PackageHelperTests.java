@@ -16,11 +16,9 @@
 
 package android.content.pm;
 
+import static android.os.storage.VolumeInfo.STATE_MOUNTED;
+
 import android.content.Context;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.test.AndroidTestCase;
@@ -36,16 +34,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static android.net.TrafficStats.MB_IN_BYTES;
-import static android.os.storage.VolumeInfo.STATE_MOUNTED;
-
 public class PackageHelperTests extends AndroidTestCase {
     private static final boolean localLOGV = true;
     public static final String TAG = "PackageHelperTests";
     protected final String PREFIX = "android.content.pm";
-    private IStorageManager mSm;
-    private String fullId;
-    private String fullId2;
 
     private static final String sInternalVolPath = "/data";
     private static final String sAdoptedVolPath = "/mnt/expand/123";
@@ -147,34 +139,11 @@ public class PackageHelperTests extends AndroidTestCase {
         }
     }
 
-    private IStorageManager getSm() {
-        IBinder service = ServiceManager.getService("mount");
-        if (service != null) {
-            return IStorageManager.Stub.asInterface(service);
-        } else {
-            Log.e(TAG, "Can't get mount service");
-        }
-        return null;
-    }
-
-    private void cleanupContainers() throws RemoteException {
-        Log.d(TAG,"cleanUp");
-        IStorageManager sm = getSm();
-        String[] containers = sm.getSecureContainerList();
-        for (int i = 0; i < containers.length; i++) {
-            if (containers[i].startsWith(PREFIX)) {
-                Log.d(TAG,"cleaing up "+containers[i]);
-                sm.destroySecureContainer(containers[i], true);
-            }
-        }
-    }
-
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         sStorageManager = createStorageManagerMock();
         if (localLOGV) Log.i(TAG, "Cleaning out old test containers");
-        cleanupContainers();
     }
 
     @Override
@@ -182,55 +151,6 @@ public class PackageHelperTests extends AndroidTestCase {
         super.tearDown();
         sStorageManager = null;
         if (localLOGV) Log.i(TAG, "Cleaning out old test containers");
-        cleanupContainers();
-    }
-
-    public void testMountAndPullSdCard() throws Exception {
-        fullId = PREFIX;
-        fullId2 = PackageHelper.createSdDir(1024 * MB_IN_BYTES, fullId, "none",
-                android.os.Process.myUid(), true);
-
-        Log.d(TAG, "getSdDir=" + PackageHelper.getSdDir(fullId));
-        PackageHelper.unMountSdDir(fullId);
-
-        Runnable r1 = getMountRunnable();
-        Runnable r2 = getDestroyRunnable();
-        Thread thread = new Thread(r1);
-        Thread thread2 = new Thread(r2);
-        thread2.start();
-        thread.start();
-    }
-
-    public Runnable getMountRunnable() {
-        Runnable r = new Runnable () {
-            public void run () {
-                try {
-                    Thread.sleep(5);
-                    String path = PackageHelper.mountSdDir(fullId, "none",
-                            android.os.Process.myUid());
-                    Log.e(TAG, "mount done " + path);
-                } catch (IllegalArgumentException iae) {
-                    throw iae;
-                } catch (Throwable t) {
-                    Log.e(TAG, "mount failed", t);
-                }
-            }
-        };
-        return r;
-    }
-
-    public Runnable getDestroyRunnable() {
-        Runnable r = new Runnable () {
-            public void run () {
-                try {
-                    PackageHelper.destroySdDir(fullId);
-                    Log.e(TAG, "destroy done: " + fullId);
-                } catch (Throwable t) {
-                    Log.e(TAG, "destroy failed", t);
-                }
-            }
-        };
-        return r;
     }
 
     public void testResolveInstallVolumeInternal_SystemApp() throws IOException {

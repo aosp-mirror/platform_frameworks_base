@@ -64,7 +64,7 @@ public class IntentTile extends QSTileImpl<State> {
         mContext.unregisterReceiver(mReceiver);
     }
 
-    public static QSTile create(QSHost host, String spec) {
+    public static IntentTile create(QSHost host, String spec) {
         if (spec == null || !spec.startsWith(PREFIX) || !spec.endsWith(")")) {
             throw new IllegalArgumentException("Bad intent tile spec: " + spec);
         }

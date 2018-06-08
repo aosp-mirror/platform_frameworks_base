@@ -17,6 +17,7 @@
 package android.hardware.radio;
 
 import android.graphics.Bitmap;
+import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 
@@ -63,8 +64,6 @@ interface ITuner {
 
     void cancelAnnouncement();
 
-    RadioManager.ProgramInfo getProgramInformation();
-
     Bitmap getImage(int id);
 
     /**
@@ -73,26 +72,22 @@ interface ITuner {
      */
     boolean startBackgroundScan();
 
-    /**
-     * @param vendorFilter Vendor-specific filter, must be Map<String, String>
-     * @return the list, or null if scan is in progress
-     * @throws IllegalArgumentException if invalid arguments are passed
-     * @throws IllegalStateException if the scan has not been started, client may
-     *         call startBackgroundScan to fix this.
-     */
-    List<RadioManager.ProgramInfo> getProgramList(in Map vendorFilter);
+    void startProgramListUpdates(in ProgramList.Filter filter);
+    void stopProgramListUpdates();
+
+    boolean isConfigFlagSupported(int flag);
+    boolean isConfigFlagSet(int flag);
+    void setConfigFlag(int flag, boolean value);
 
     /**
-     * @throws IllegalStateException if the switch is not supported at current
-     *         configuration.
+     * @param parameters Vendor-specific key-value pairs, must be Map<String, String>
+     * @return Vendor-specific key-value pairs, must be Map<String, String>
      */
-    boolean isAnalogForced();
+    Map setParameters(in Map parameters);
 
     /**
-     * @throws IllegalStateException if the switch is not supported at current
-     *         configuration.
+     * @param keys Parameter keys to fetch
+     * @return Vendor-specific key-value pairs, must be Map<String, String>
      */
-    void setAnalogForced(boolean isForced);
-
-    boolean isAntennaConnected();
+    Map getParameters(in List<String> keys);
 }

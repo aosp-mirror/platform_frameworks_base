@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<certificates>
+  <metadata>
+    <serial>
+      1000
+    </serial>
+    <creation-time>
+      1515697631
+    </creation-time>
+    <refresh-interval>
+      2592000
+    </refresh-interval>
+    <previous>
+      <serial>
+        0
+      </serial>
+      <hash>
+        47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=
+      </hash>
+    </previous>
+  </metadata>
+  <endpoints>
+  </endpoints>
+</certificates>

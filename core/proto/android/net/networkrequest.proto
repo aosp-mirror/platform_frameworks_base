@@ -1,0 +1,75 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.net;
+
+option java_multiple_files = true;
+
+import "frameworks/base/core/proto/android/net/networkcapabilities.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+/**
+ * An android.net.NetworkRequest object.
+ */
+message NetworkRequestProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum Type {
+        TYPE_UNKNOWN = 0;
+        // Only used by applications. When an application creates a
+        // NetworkRequest, it does not have a type; the type is set by the
+        // system depending on the method used to file the request
+        // (requestNetwork, registerNetworkCallback, etc.).
+        TYPE_NONE = 1;
+        // The framework will issue callbacks about any and all networks that
+        // match the specified NetworkCapabilities.
+        TYPE_LISTEN = 2;
+        // A hybrid of the two designed such that the framework will issue
+        // callbacks for the single, highest scoring current network (if any)
+        // that matches the capabilities of the default Internet request
+        // (mDefaultRequest), but which cannot cause the framework to either
+        // create or retain the existence of any specific network. Note that
+        // from the point of view of the request matching code, TRACK_DEFAULT is
+        // identical to REQUEST: its special behaviour is not due to different
+        // semantics, but to the fact that the system will only ever create a
+        // TRACK_DEFAULT with capabilities that are identical to the default
+        // request's capabilities, thus causing it to share fate in every way
+        // with the default request.
+        TYPE_TRACK_DEFAULT = 3;
+        // Capable of causing a specific network to be created first (e.g. a
+        // telephony DUN request), the framework will issue callbacks about the
+        // single, highest scoring current network (if any) that matches the
+        // specified NetworkCapabilities.
+        TYPE_REQUEST = 4;
+        // Like REQUEST but does not cause any networks to retain the
+        // NET_CAPABILITY_FOREGROUND capability. A network with no foreground
+        // requests is in the background. A network that has one or more
+        // background requests and loses its last foreground request to a
+        // higher-scoring network will not go into the background immediately,
+        // but will linger and go into the background after the linger timeout.
+        TYPE_BACKGROUND_REQUEST = 5;
+    }
+    // The type of the request. This is only used by the system and is always
+    // NONE elsewhere.
+    optional Type type = 1;
+    // Identifies the request.
+    optional int32 request_id = 2;
+    // Set for legacy requests and the default.
+    optional int32 legacy_type = 3;
+    optional NetworkCapabilitiesProto network_capabilities = 4;
+}

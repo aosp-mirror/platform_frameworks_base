@@ -41,6 +41,13 @@ public class WeakIdentityHashMapTest extends SysuiTestCase {
         mMap = new WeakIdentityHashMap<>();
     }
 
+    private CollectionWaiter addObjectToMap(WeakIdentityHashMap<Object, Object> map) {
+      Object object = new Object();
+      CollectionWaiter collectionWaiter = ReferenceTestUtils.createCollectionWaiter(object);
+      map.put(object, "value");
+      return collectionWaiter;
+    }
+
     @Test
     public void testUsesIdentity() {
         String a1 = new String("a");
@@ -56,11 +63,12 @@ public class WeakIdentityHashMapTest extends SysuiTestCase {
 
     @Test
     public void testWeaklyReferences() {
-        Object object = new Object();
-        CollectionWaiter collectionWaiter = ReferenceTestUtils.createCollectionWaiter(object);
-
-        mMap.put(object, "value");
-        object = null;
+        // Allocate and add an object to the weak map in a separate method to avoid a live
+        // reference to the allocated object in a dex register. As R8 is used to compile this
+        // test the --dontoptimize flag is also required to ensure that the method is not
+        // inlined, as that would defeat the purpose of having the allocation in a separate
+        // method.
+        CollectionWaiter collectionWaiter = addObjectToMap(mMap);
 
         // Wait until object has been collected. We'll also need to wait for mMap to become empty,
         // because our collection waiter may be told about the collection earlier than mMap.

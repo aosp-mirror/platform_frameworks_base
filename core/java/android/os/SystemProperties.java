@@ -18,6 +18,8 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.util.Log;
 import android.util.MutableInt;
 
@@ -33,6 +35,8 @@ import java.util.HashMap;
  *
  * {@hide}
  */
+@SystemApi
+@TestApi
 public class SystemProperties {
     private static final String TAG = "SystemProperties";
     private static final boolean TRACK_KEY_ACCESS = false;
@@ -40,9 +44,11 @@ public class SystemProperties {
     /**
      * Android O removed the property name length limit, but com.amazon.kindle 7.8.1.5
      * uses reflection to read this whenever text is selected (http://b/36095274).
+     * @hide
      */
     public static final int PROP_NAME_MAX = Integer.MAX_VALUE;
 
+    /** @hide */
     public static final int PROP_VALUE_MAX = 91;
 
     @GuardedBy("sChangeCallbacks")
@@ -86,8 +92,10 @@ public class SystemProperties {
      *
      * @param key the key to lookup
      * @return an empty string if the {@code key} isn't found
+     * @hide
      */
     @NonNull
+    @SystemApi
     public static String get(@NonNull String key) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get(key);
@@ -100,8 +108,11 @@ public class SystemProperties {
      * @param def the default value in case the property is not set or empty
      * @return if the {@code key} isn't found, return {@code def} if it isn't null, or an empty
      * string otherwise
+     * @hide
      */
     @NonNull
+    @SystemApi
+    @TestApi
     public static String get(@NonNull String key, @Nullable String def) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get(key, def);
@@ -114,7 +125,9 @@ public class SystemProperties {
      * @param def a default value to return
      * @return the key parsed as an integer, or def if the key isn't found or
      *         cannot be parsed
+     * @hide
      */
+    @SystemApi
     public static int getInt(@NonNull String key, int def) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_int(key, def);
@@ -127,7 +140,9 @@ public class SystemProperties {
      * @param def a default value to return
      * @return the key parsed as a long, or def if the key isn't found or
      *         cannot be parsed
+     * @hide
      */
+    @SystemApi
     public static long getLong(@NonNull String key, long def) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_long(key, def);
@@ -145,7 +160,9 @@ public class SystemProperties {
      * @param def a default value to return
      * @return the key parsed as a boolean, or def if the key isn't found or is
      *         not able to be parsed as a boolean.
+     * @hide
      */
+    @SystemApi
     public static boolean getBoolean(@NonNull String key, boolean def) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get_boolean(key, def);
@@ -155,6 +172,7 @@ public class SystemProperties {
      * Set the value for the given {@code key} to {@code val}.
      *
      * @throws IllegalArgumentException if the {@code val} exceeds 91 characters
+     * @hide
      */
     public static void set(@NonNull String key, @Nullable String val) {
         if (val != null && !val.startsWith("ro.") && val.length() > PROP_VALUE_MAX) {
@@ -170,6 +188,7 @@ public class SystemProperties {
      *
      * @param callback The {@link Runnable} that should be executed when a system property
      * changes.
+     * @hide
      */
     public static void addChangeCallback(@NonNull Runnable callback) {
         synchronized (sChangeCallbacks) {
@@ -199,10 +218,14 @@ public class SystemProperties {
         }
     }
 
-    /*
+    /**
      * Notifies listeners that a system property has changed
+     * @hide
      */
     public static void reportSyspropChanged() {
         native_report_sysprop_change();
+    }
+
+    private SystemProperties() {
     }
 }

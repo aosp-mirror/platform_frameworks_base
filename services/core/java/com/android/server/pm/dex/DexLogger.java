@@ -27,6 +27,7 @@ import android.util.PackageUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 
@@ -57,10 +58,11 @@ public class DexLogger implements DexManager.Listener {
         return new DexLogger(pms, installer, installLock);
     }
 
-    private DexLogger(IPackageManager pms, Installer installer, Object installLock) {
-      mPackageManager = pms;
-      mInstaller = installer;
-      mInstallLock = installLock;
+    @VisibleForTesting
+    /*package*/ DexLogger(IPackageManager pms, Installer installer, Object installLock) {
+        mPackageManager = pms;
+        mInstaller = installer;
+        mInstallLock = installLock;
     }
 
     /**
@@ -92,7 +94,7 @@ public class DexLogger implements DexManager.Listener {
             message = message + ' ' + ByteStringUtils.toHexString(hash);
         }
 
-        EventLog.writeEvent(SNET_TAG, DCL_SUBTAG, ownerUid, message);
+        writeDclEvent(ownerUid, message);
 
         if (dexUseInfo.isUsedByOtherApps()) {
             Set<String> otherPackages = dexUseInfo.getLoadingPackages();
@@ -109,8 +111,13 @@ public class DexLogger implements DexManager.Listener {
                 }
             }
             for (int otherUid : otherUids) {
-                EventLog.writeEvent(SNET_TAG, DCL_SUBTAG, otherUid, message);
+                writeDclEvent(otherUid, message);
             }
         }
+    }
+
+    @VisibleForTesting
+    /*package*/ void writeDclEvent(int uid, String message) {
+        EventLog.writeEvent(SNET_TAG, DCL_SUBTAG, uid, message);
     }
 }

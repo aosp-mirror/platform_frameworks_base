@@ -33,6 +33,7 @@ import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.os.Build.VERSION_CODES;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -111,6 +112,7 @@ public class Switch extends CompoundButton {
     private CharSequence mTextOn;
     private CharSequence mTextOff;
     private boolean mShowText;
+    private boolean mUseFallbackLineSpacing;
 
     private int mTouchMode;
     private int mTouchSlop;
@@ -245,6 +247,8 @@ public class Switch extends CompoundButton {
         mSwitchPadding = a.getDimensionPixelSize(
                 com.android.internal.R.styleable.Switch_switchPadding, 0);
         mSplitTrack = a.getBoolean(com.android.internal.R.styleable.Switch_splitTrack, false);
+
+        mUseFallbackLineSpacing = context.getApplicationInfo().targetSdkVersion >= VERSION_CODES.P;
 
         ColorStateList thumbTintList = a.getColorStateList(
                 com.android.internal.R.styleable.Switch_thumbTint);
@@ -894,8 +898,9 @@ public class Switch extends CompoundButton {
 
         int width = (int) Math.ceil(Layout.getDesiredWidth(transformed, 0,
                 transformed.length(), mTextPaint, getTextDirectionHeuristic()));
-        return new StaticLayout(transformed, mTextPaint, width,
-                Layout.Alignment.ALIGN_NORMAL, 1.f, 0, true);
+        return StaticLayout.Builder.obtain(transformed, 0, transformed.length(), mTextPaint, width)
+                .setUseLineSpacingFromFallbacks(mUseFallbackLineSpacing)
+                .build();
     }
 
     /**

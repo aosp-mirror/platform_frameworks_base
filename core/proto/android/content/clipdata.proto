@@ -1,0 +1,54 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.content;
+
+option java_multiple_files = true;
+
+import "frameworks/base/core/proto/android/content/clipdescription.proto";
+import "frameworks/base/core/proto/android/content/intent.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+// An android.content.ClipData object.
+message ClipDataProto {
+    option (.android.msg_privacy).dest = DEST_LOCAL;
+
+    optional android.content.ClipDescriptionProto description = 1;
+
+    // Custom dump of an android.graphics.Bitmap object.
+    message Icon {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 width = 1;
+        optional int32 height = 2;
+    }
+    optional Icon icon = 2;
+
+    // An android.content.ClipData.Item object.
+    message Item {
+        option (.android.msg_privacy).dest = DEST_LOCAL;
+
+        oneof data {
+            string html_text = 1;
+            string text = 2;
+            string uri = 3;
+            android.content.IntentProto intent = 4;
+            bool nothing = 5;
+        }
+    }
+    repeated Item items = 3;
+}

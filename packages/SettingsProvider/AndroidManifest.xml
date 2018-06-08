@@ -8,6 +8,7 @@
                  android:process="system"
                  android:backupAgent="SettingsBackupAgent"
                  android:killAfterRestore="false"
+                 android:restoreAnyVersion="true"
                  android:icon="@mipmap/ic_launcher_settings"
                  android:defaultToDeviceProtectedStorage="true"
                  android:directBootAware="true">

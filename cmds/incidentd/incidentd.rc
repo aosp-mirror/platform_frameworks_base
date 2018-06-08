@@ -12,5 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#service incidentd /system/bin/incidentd
-#    class main
+service incidentd /system/bin/incidentd
+    class main
+    user incidentd
+    group incidentd log readproc
+    capabilities KILL SYS_PTRACE
+
+on post-fs-data
+    # Create directory for incidentd
+    mkdir /data/misc/incidents 0770 incidentd incidentd

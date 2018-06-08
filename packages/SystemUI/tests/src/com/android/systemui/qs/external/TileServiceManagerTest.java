@@ -46,7 +46,7 @@ public class TileServiceManagerTest extends SysuiTestCase {
     public void setUp() throws Exception {
         mThread = new HandlerThread("TestThread");
         mThread.start();
-        mHandler = new Handler(mThread.getLooper());
+        mHandler = Handler.createAsync(mThread.getLooper());
         mTileServices = Mockito.mock(TileServices.class);
         Mockito.when(mTileServices.getContext()).thenReturn(mContext);
         mTileLifecycle = Mockito.mock(TileLifecycleManager.class);

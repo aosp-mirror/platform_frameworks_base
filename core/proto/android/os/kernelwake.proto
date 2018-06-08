@@ -1,0 +1,55 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+syntax = "proto2";
+
+option java_multiple_files = true;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+package android.os;
+
+message KernelWakeSourcesProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Kernel records of what caused the application processor to wake up
+    message WakeupSource {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // Name of the event which triggers application processor
+        optional string name = 1;
+
+        optional int32 active_count = 2;
+
+        optional int32 event_count = 3;
+
+        optional int32 wakeup_count = 4;
+
+        optional int32 expire_count = 5;
+
+        optional int64 active_since = 6;
+
+        optional int64 total_time = 7;
+
+        optional int64 max_time = 8;
+
+        optional int64 last_change = 9;
+
+        optional int64 prevent_suspend_time = 10;
+
+        // Next Tag: 11
+    }
+    repeated WakeupSource wakeup_sources = 1;
+}

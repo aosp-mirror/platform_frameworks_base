@@ -43,7 +43,7 @@ TEST(LinearAllocator, create) {
 }
 
 TEST(LinearAllocator, dtor) {
-    int destroyed[10] = { 0 };
+    int destroyed[10] = {0};
     {
         LinearAllocator la;
         for (int i = 0; i < 5; i++) {
@@ -111,7 +111,6 @@ TEST(LinearStdAllocator, simpleAllocate) {
 
     EXPECT_LT(lastLocation, &v[0]);
     EXPECT_GT(lastLocation + 20, &v[0]);
-
 }
 
 TEST(LsaVector, dtorCheck) {
@@ -126,7 +125,7 @@ TEST(LsaVector, dtorCheck) {
                 vector.emplace_back(new TestUtils::SignalingDtor(&destroyed));
             }
             EXPECT_EQ(0, destroyed);
-            EXPECT_EQ(size, (int) vector.size());
+            EXPECT_EQ(size, (int)vector.size());
         }
         EXPECT_EQ(size, destroyed);
     }

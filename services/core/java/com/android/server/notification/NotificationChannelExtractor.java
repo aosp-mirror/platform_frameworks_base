@@ -22,7 +22,7 @@ import android.util.Slog;
  * Stores the latest notification channel information for this notification
  */
 public class NotificationChannelExtractor implements NotificationSignalExtractor {
-    private static final String TAG = "BadgeExtractor";
+    private static final String TAG = "ChannelExtractor";
     private static final boolean DBG = false;
 
     private RankingConfig mConfig;
@@ -51,5 +51,10 @@ public class NotificationChannelExtractor implements NotificationSignalExtractor
     @Override
     public void setConfig(RankingConfig config) {
         mConfig = config;
+    }
+
+    @Override
+    public void setZenHelper(ZenModeHelper helper) {
+
     }
 }

@@ -23,6 +23,7 @@
 #include "data/lib_one/R.h"
 #include "data/libclient/R.h"
 #include "data/styles/R.h"
+#include "data/system/R.h"
 
 namespace app = com::android::app;
 namespace lib_one = com::android::lib_one;
@@ -33,6 +34,9 @@ namespace android {
 class ThemeTest : public ::testing::Test {
  public:
   void SetUp() override {
+    system_assets_ = ApkAssets::Load(GetTestDataPath() + "/system/system.apk", true /*system*/);
+    ASSERT_NE(nullptr, system_assets_);
+
     style_assets_ = ApkAssets::Load(GetTestDataPath() + "/styles/styles.apk");
     ASSERT_NE(nullptr, style_assets_);
 
@@ -47,6 +51,7 @@ class ThemeTest : public ::testing::Test {
   }
 
  protected:
+  std::unique_ptr<const ApkAssets> system_assets_;
   std::unique_ptr<const ApkAssets> style_assets_;
   std::unique_ptr<const ApkAssets> libclient_assets_;
   std::unique_ptr<const ApkAssets> lib_one_assets_;
@@ -121,6 +126,18 @@ TEST_F(ThemeTest, SingleThemeWithParent) {
   EXPECT_EQ(Res_value::TYPE_INT_DEC, value.dataType);
   EXPECT_EQ(3u, value.data);
   EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
+}
+
+TEST_F(ThemeTest, TryToUseBadResourceId) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({style_assets_.get()});
+
+  std::unique_ptr<Theme> theme = assetmanager.NewTheme();
+  ASSERT_TRUE(theme->ApplyStyle(app::R::style::StyleTwo));
+
+  Res_value value;
+  uint32_t flags;
+  ASSERT_EQ(kInvalidCookie, theme->GetAttribute(0x7f000001, &value, &flags));
 }
 
 TEST_F(ThemeTest, MultipleThemesOverlaidNotForce) {
@@ -262,20 +279,30 @@ TEST_F(ThemeTest, CopyThemeSameAssetManager) {
   EXPECT_EQ(static_cast<uint32_t>(ResTable_typeSpec::SPEC_PUBLIC), flags);
 }
 
-TEST_F(ThemeTest, FailToCopyThemeWithDifferentAssetManager) {
+TEST_F(ThemeTest, OnlyCopySystemThemeWhenAssetManagersDiffer) {
   AssetManager2 assetmanager_one;
-  assetmanager_one.SetApkAssets({style_assets_.get()});
+  assetmanager_one.SetApkAssets({system_assets_.get(), style_assets_.get()});
 
   AssetManager2 assetmanager_two;
-  assetmanager_two.SetApkAssets({style_assets_.get()});
+  assetmanager_two.SetApkAssets({system_assets_.get(), style_assets_.get()});
 
   auto theme_one = assetmanager_one.NewTheme();
   ASSERT_TRUE(theme_one->ApplyStyle(app::R::style::StyleOne));
 
   auto theme_two = assetmanager_two.NewTheme();
+  ASSERT_TRUE(theme_two->ApplyStyle(R::style::Theme_One));
   ASSERT_TRUE(theme_two->ApplyStyle(app::R::style::StyleTwo));
 
-  EXPECT_FALSE(theme_one->SetTo(*theme_two));
+  EXPECT_TRUE(theme_one->SetTo(*theme_two));
+
+  Res_value value;
+  uint32_t flags;
+
+  // No app resources.
+  EXPECT_EQ(kInvalidCookie, theme_one->GetAttribute(app::R::attr::attr_one, &value, &flags));
+
+  // Only system.
+  EXPECT_NE(kInvalidCookie, theme_one->GetAttribute(R::attr::foreground, &value, &flags));
 }
 
 }  // namespace android

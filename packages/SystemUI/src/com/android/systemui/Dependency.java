@@ -21,13 +21,15 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
+import android.os.ServiceManager;
 import android.util.ArrayMap;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.app.NightDisplayController;
+import com.android.internal.app.ColorDisplayController;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.Preconditions;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.assist.AssistManager;
@@ -40,8 +42,12 @@ import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.PluginManagerImpl;
 import com.android.systemui.plugins.VolumeDialogController;
+import com.android.systemui.power.EnhancedEstimates;
+import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.power.PowerNotificationWarnings;
 import com.android.systemui.power.PowerUI;
+import com.android.systemui.statusbar.AppOpsListener;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.DarkIconDispatcherImpl;
 import com.android.systemui.statusbar.phone.LightBarController;
@@ -145,7 +151,6 @@ public class Dependency extends SystemUI {
 
     @Override
     public void start() {
-        sDependency = this;
         // TODO: Think about ways to push these creation rules out of Dependency to cut down
         // on imports.
         mProviders.put(TIME_TICK_HANDLER, () -> {
@@ -205,8 +210,8 @@ public class Dependency extends SystemUI {
         mProviders.put(BatteryController.class, () ->
                 new BatteryControllerImpl(mContext));
 
-        mProviders.put(NightDisplayController.class, () ->
-                new NightDisplayController(mContext));
+        mProviders.put(ColorDisplayController.class, () ->
+                new ColorDisplayController(mContext));
 
         mProviders.put(ManagedProfileController.class, () ->
                 new ManagedProfileControllerImpl(mContext));
@@ -241,10 +246,14 @@ public class Dependency extends SystemUI {
                 getDependency(LeakDetector.class),
                 getDependency(LEAK_REPORT_EMAIL)));
 
-        mProviders.put(GarbageMonitor.class, () -> new GarbageMonitor(
-                getDependency(BG_LOOPER),
-                getDependency(LeakDetector.class),
-                getDependency(LeakReporter.class)));
+        mProviders.put(
+                GarbageMonitor.class,
+                () ->
+                        new GarbageMonitor(
+                                mContext,
+                                getDependency(BG_LOOPER),
+                                getDependency(LeakDetector.class),
+                                getDependency(LeakReporter.class)));
 
         mProviders.put(TunerService.class, () ->
                 new TunerServiceImpl(mContext));
@@ -308,8 +317,21 @@ public class Dependency extends SystemUI {
 
         mProviders.put(IWindowManager.class, () -> WindowManagerGlobal.getWindowManagerService());
 
+        mProviders.put(OverviewProxyService.class, () -> new OverviewProxyService(mContext));
+
+        mProviders.put(EnhancedEstimates.class, () -> new EnhancedEstimatesImpl());
+
+        mProviders.put(AppOpsListener.class, () -> new AppOpsListener(mContext));
+
+        mProviders.put(VibratorHelper.class, () -> new VibratorHelper(mContext));
+
+        mProviders.put(IStatusBarService.class, () -> IStatusBarService.Stub.asInterface(
+                ServiceManager.getService(Context.STATUS_BAR_SERVICE)));
+
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);
+
+        sDependency = this;
     }
 
     @Override
@@ -352,7 +374,8 @@ public class Dependency extends SystemUI {
         @SuppressWarnings("unchecked")
         DependencyProvider<T> provider = mProviders.get(cls);
         if (provider == null) {
-            throw new IllegalArgumentException("Unsupported dependency " + cls);
+            throw new IllegalArgumentException("Unsupported dependency " + cls
+                    + ". " + mProviders.size() + " providers known.");
         }
         return provider.createDependency();
     }

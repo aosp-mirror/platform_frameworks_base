@@ -58,6 +58,12 @@ class InputStream {
   virtual bool HadError() const = 0;
 };
 
+// A sub-InputStream interface that knows the total size of its stream.
+class KnownSizeInputStream : public InputStream {
+ public:
+  virtual size_t TotalSize() const = 0;
+};
+
 // OutputStream interface that mimics protobuf's ZeroCopyOutputStream,
 // with added error handling methods to better report issues.
 class OutputStream {

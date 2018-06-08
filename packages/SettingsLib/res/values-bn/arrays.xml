@@ -234,10 +234,6 @@
     <item msgid="7688197031296835369">"অতিবর্ণনা এলাকা দেখান"</item>
     <item msgid="2290859360633824369">"বর্ণান্ধতার জন্য এলাকা দেখান"</item>
   </string-array>
-  <string-array name="debug_hw_renderer_entries">
-    <item msgid="2578620445459945681">"OpenGL (ডিফল্ট)"</item>
-    <item msgid="2839130076198120436">"OpenGL (Skia)"</item>
-  </string-array>
   <string-array name="app_process_limit_entries">
     <item msgid="3401625457385943795">"মানক সীমা"</item>
     <item msgid="4071574792028999443">"কোন ব্যাকগ্রাউন্ড প্রক্রিয়া নেই"</item>

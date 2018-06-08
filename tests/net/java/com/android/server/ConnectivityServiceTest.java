@@ -1041,6 +1041,8 @@ public class ConnectivityServiceTest {
                 mock(INetworkPolicyManager.class),
                 mock(IpConnectivityLog.class));
 
+        // Create local CM before sending system ready so that we can answer
+        // getSystemService() correctly.
         mCm = new WrappedConnectivityManager(InstrumentationRegistry.getContext(), mService);
         mService.systemReady();
         mService.mockVpn(Process.myUid());
@@ -3600,8 +3602,10 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testNetworkCallbackMaximum() {
-        final int MAX_REQUESTS = 100;
-        final int CALLBACKS = 90;
+        // We can only have 99 callbacks, because MultipathPolicyTracker is
+        // already one of them.
+        final int MAX_REQUESTS = 99;
+        final int CALLBACKS = 89;
         final int INTENTS = 10;
         assertEquals(MAX_REQUESTS, CALLBACKS + INTENTS);
 

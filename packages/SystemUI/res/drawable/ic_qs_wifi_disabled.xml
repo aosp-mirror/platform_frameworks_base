@@ -20,7 +20,7 @@ Copyright (C) 2017 The Android Open Source Project
     android:viewportHeight="23.6">
     <group
         android:translateX="0.8"
-        android:translateY="1.1">
+        android:translateY="-1.1">
         <path
             android:pathData="M23.66,8.11c0.39,-0.48 0.29,-1.19 -0.22,-1.54C21.67,5.36 17.55,3 12,3 6.44,3 2.33,5.36 0.56,6.57c-0.51,0.35 -0.61,1.06 -0.23,1.54L11.16,21.6c0.42,0.53 1.23,0.53 1.66,0L23.66,8.11z"
             android:fillColor="#FFFFFFFF"/>

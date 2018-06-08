@@ -17,9 +17,10 @@
 #define LOG_TAG "Configuration"
 #include <utils/Log.h>
 
-#include <androidfw/AssetManager.h>
+#include <androidfw/AssetManager2.h>
 
 #include <android_runtime/android_content_res_Configuration.h>
+#include <android_runtime/android_util_AssetManager.h>
 
 using namespace android;
 
@@ -34,7 +35,11 @@ void AConfiguration_delete(AConfiguration* config) {
 }
 
 void AConfiguration_fromAssetManager(AConfiguration* out, AAssetManager* am) {
-    ((AssetManager*)am)->getConfiguration(out);
+    ScopedLock<AssetManager2> locked_mgr(*AssetManagerForNdkAssetManager(am));
+    ResTable_config config = locked_mgr->GetConfiguration();
+
+    // AConfiguration is not a virtual subclass, so we can memcpy.
+    memcpy(out, &config, sizeof(config));
 }
 
 void AConfiguration_copy(AConfiguration* dest, AConfiguration* src) {

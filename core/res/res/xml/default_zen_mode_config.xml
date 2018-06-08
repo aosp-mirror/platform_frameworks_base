@@ -18,6 +18,13 @@
 -->
 
 <!-- Default configuration for zen mode.  See android.service.notification.ZenModeConfig. -->
-<zen version="2">
-    <allow calls="true" messages="false" reminders="true" events="true" />
+<zen version="7">
+    <allow alarms="true" media="true" system="false" calls="true" callsFrom="2" messages="false"
+           reminders="false" events="false" repeatCallers="true" />
+
+    <!-- all visual effects that exist as of P -->
+    <disallow visualEffects="511" />
+
+    <!-- whether there are notification channels that can bypass dnd -->
+    <state areChannelsBypassingDnd="false" />
 </zen>

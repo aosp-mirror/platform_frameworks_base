@@ -1,0 +1,133 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.net;
+
+option java_multiple_files = true;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+/**
+ * An android.net.NetworkCapabilities object.
+ */
+message NetworkCapabilitiesProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    enum Transport {
+        // Indicates this network uses a Cellular transport.
+        TRANSPORT_CELLULAR = 0;
+        // Indicates this network uses a Wi-Fi transport.
+        TRANSPORT_WIFI = 1;
+        // Indicates this network uses a Bluetooth transport.
+        TRANSPORT_BLUETOOTH = 2;
+        // Indicates this network uses an Ethernet transport.
+        TRANSPORT_ETHERNET = 3;
+        // Indicates this network uses a VPN transport.
+        TRANSPORT_VPN = 4;
+        // Indicates this network uses a Wi-Fi Aware transport.
+        TRANSPORT_WIFI_AWARE = 5;
+        // Indicates this network uses a LoWPAN transport.
+        TRANSPORT_LOWPAN = 6;
+    }
+    repeated Transport transports = 1;
+
+    enum NetCapability {
+        // Indicates this is a network that has the ability to reach the
+        // carrier's MMSC for sending and receiving MMS messages.
+        NET_CAPABILITY_MMS = 0;
+        // Indicates this is a network that has the ability to reach the
+        // carrier's SUPL server, used to retrieve GPS information.
+        NET_CAPABILITY_SUPL = 1;
+        // Indicates this is a network that has the ability to reach the
+        // carrier's DUN or tethering gateway.
+        NET_CAPABILITY_DUN = 2;
+        // Indicates this is a network that has the ability to reach the
+        // carrier's FOTA portal, used for over the air updates.
+        NET_CAPABILITY_FOTA = 3;
+        // Indicates this is a network that has the ability to reach the
+        // carrier's IMS servers, used for network registration and signaling.
+        NET_CAPABILITY_IMS = 4;
+        // Indicates this is a network that has the ability to reach the
+        // carrier's CBS servers, used for carrier specific services.
+        NET_CAPABILITY_CBS = 5;
+        // Indicates this is a network that has the ability to reach a Wi-Fi
+        // direct peer.
+        NET_CAPABILITY_WIFI_P2P = 6;
+        // Indicates this is a network that has the ability to reach a carrier's
+        // Initial Attach servers.
+        NET_CAPABILITY_IA = 7;
+        // Indicates this is a network that has the ability to reach a carrier's
+        // RCS servers, used for Rich Communication Services.
+        NET_CAPABILITY_RCS = 8;
+        // Indicates this is a network that has the ability to reach a carrier's
+        // XCAP servers, used for configuration and control.
+        NET_CAPABILITY_XCAP = 9;
+        // Indicates this is a network that has the ability to reach a carrier's
+        // Emergency IMS servers or other services, used for network signaling
+        // during emergency calls.
+        NET_CAPABILITY_EIMS = 10;
+        // Indicates that this network is unmetered.
+        NET_CAPABILITY_NOT_METERED = 11;
+        // Indicates that this network should be able to reach the internet.
+        NET_CAPABILITY_INTERNET = 12;
+        // Indicates that this network is available for general use. If this is
+        // not set applications should not attempt to communicate on this
+        // network. Note that this is simply informative and not enforcement -
+        // enforcement is handled via other means. Set by default.
+        NET_CAPABILITY_NOT_RESTRICTED = 13;
+        // Indicates that the user has indicated implicit trust of this network.
+        // This generally means it's a sim-selected carrier, a plugged in
+        // ethernet, a paired BT device or a wifi the user asked to connect to.
+        // Untrusted networks are probably limited to unknown wifi AP. Set by
+        // default.
+        NET_CAPABILITY_TRUSTED = 14;
+        // Indicates that this network is not a VPN.  This capability is set by
+        // default and should be explicitly cleared for VPN networks.
+        NET_CAPABILITY_NOT_VPN = 15;
+        // Indicates that connectivity on this network was successfully
+        // validated. For example, for a network with NET_CAPABILITY_INTERNET,
+        // it means that Internet connectivity was successfully detected.
+        NET_CAPABILITY_VALIDATED = 16;
+        // Indicates that this network was found to have a captive portal in
+        // place last time it was probed.
+        NET_CAPABILITY_CAPTIVE_PORTAL = 17;
+        // Indicates that this network is not roaming.
+        NET_CAPABILITY_NOT_ROAMING = 18;
+        // Indicates that this network is available for use by apps, and not a
+        // network that is being kept up in the background to facilitate fast
+        // network switching.
+        NET_CAPABILITY_FOREGROUND = 19;
+    }
+    repeated NetCapability capabilities = 2;
+
+    // Passive link bandwidth. This is a rough guide of the expected peak
+    // bandwidth for the first hop on the given transport.  It is not measured,
+    // but may take into account link parameters (Radio technology, allocated
+    // channels, etc).
+    optional int32 link_up_bandwidth_kbps = 3;
+    optional int32 link_down_bandwidth_kbps = 4;
+
+    optional string network_specifier = 5 [ (.android.privacy).dest = DEST_EXPLICIT ];
+
+    // True if this object specifies a signal strength.
+    optional bool can_report_signal_strength = 6;
+    // This is a signed integer, and higher values indicate better signal. The
+    // exact units are bearer-dependent. For example, Wi-Fi uses RSSI.
+    // Only valid if can_report_signal_strength is true.
+    optional sint32 signal_strength = 7;
+}

@@ -16,11 +16,10 @@
 
 package com.android.systemui.pip.phone;
 
-import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.StackInfo;
 import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -39,9 +38,10 @@ import android.view.WindowManagerGlobal;
 import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.component.ExpandPipEvent;
+import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.recents.misc.SystemServicesProxy;
-import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
-import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.InputConsumerController;
 
 import java.io.PrintWriter;
 
@@ -63,20 +63,19 @@ public class PipManager implements BasePipManager {
     private InputConsumerController mInputConsumerController;
     private PipMenuActivityController mMenuController;
     private PipMediaController mMediaController;
-    private PipNotificationController mNotificationController;
     private PipTouchHandler mTouchHandler;
+    private PipAppOpsListener mAppOpsListener;
 
     /**
      * Handler for system task stack changes.
      */
-    TaskStackListener mTaskStackListener = new TaskStackListener() {
+    SysUiTaskStackChangeListener mTaskStackListener = new SysUiTaskStackChangeListener() {
         @Override
-        public void onActivityPinned(String packageName, int userId, int taskId) {
+        public void onActivityPinned(String packageName, int userId, int taskId, int stackId) {
             mTouchHandler.onActivityPinned();
             mMediaController.onActivityPinned();
             mMenuController.onActivityPinned();
-            mNotificationController.onActivityPinned(packageName, userId,
-                    true /* deferUntilAnimationEnds */);
+            mAppOpsListener.onActivityPinned(packageName);
 
             SystemServicesProxy.getInstance(mContext).setPipVisibility(true);
         }
@@ -89,7 +88,7 @@ public class PipManager implements BasePipManager {
             final int userId = topActivity != null ? topPipActivityInfo.second : 0;
             mMenuController.onActivityUnpinned();
             mTouchHandler.onActivityUnpinned(topActivity);
-            mNotificationController.onActivityUnpinned(topActivity, userId);
+            mAppOpsListener.onActivityUnpinned();
 
             SystemServicesProxy.getInstance(mContext).setPipVisibility(topActivity != null);
         }
@@ -106,7 +105,6 @@ public class PipManager implements BasePipManager {
             mTouchHandler.setTouchEnabled(true);
             mTouchHandler.onPinnedStackAnimationEnded();
             mMenuController.onPinnedStackAnimationEnded();
-            mNotificationController.onPinnedStackAnimationEnded();
         }
 
         @Override
@@ -135,6 +133,13 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
+        public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
+            mHandler.post(() -> {
+               mTouchHandler.onShelfVisibilityChanged(shelfVisible, shelfHeight);
+            });
+        }
+
+        @Override
         public void onMinimizedStateChanged(boolean isMinimized) {
             mHandler.post(() -> {
                 mTouchHandler.setMinimizedState(isMinimized, true /* fromController */);
@@ -143,10 +148,11 @@ public class PipManager implements BasePipManager {
 
         @Override
         public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
-                Rect animatingBounds, boolean fromImeAdjustement, int displayRotation) {
+                Rect animatingBounds, boolean fromImeAdjustment, boolean fromShelfAdjustment,
+                int displayRotation) {
             mHandler.post(() -> {
                 mTouchHandler.onMovementBoundsChanged(insetBounds, normalBounds, animatingBounds,
-                        fromImeAdjustement, displayRotation);
+                        fromImeAdjustment, fromShelfAdjustment, displayRotation);
             });
         }
 
@@ -173,15 +179,16 @@ public class PipManager implements BasePipManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
-        SystemServicesProxy.getInstance(mContext).registerTaskStackListener(mTaskStackListener);
+        ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
 
-        mInputConsumerController = new InputConsumerController(mWindowManager);
+        mInputConsumerController = InputConsumerController.getPipInputConsumer();
+        mInputConsumerController.registerInputConsumer();
         mMediaController = new PipMediaController(context, mActivityManager);
         mMenuController = new PipMenuActivityController(context, mActivityManager, mMediaController,
                 mInputConsumerController);
         mTouchHandler = new PipTouchHandler(context, mActivityManager, mMenuController,
                 mInputConsumerController);
-        mNotificationController = new PipNotificationController(context, mActivityManager,
+        mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
         EventBus.getDefault().register(this);
     }
@@ -197,19 +204,6 @@ public class PipManager implements BasePipManager {
      * Expands the PIP.
      */
     public final void onBusEvent(ExpandPipEvent event) {
-        if (event.clearThumbnailWindows) {
-            try {
-                StackInfo stackInfo = mActivityManager.getStackInfo(PINNED_STACK_ID);
-                if (stackInfo != null && stackInfo.taskIds != null) {
-                    SystemServicesProxy ssp = SystemServicesProxy.getInstance(mContext);
-                    for (int taskId : stackInfo.taskIds) {
-                        ssp.cancelThumbnailTransition(taskId);
-                    }
-                }
-            } catch (RemoteException e) {
-                // Do nothing
-            }
-        }
         mTouchHandler.getMotionHelper().expandPip(false /* skipAnimation */);
     }
 

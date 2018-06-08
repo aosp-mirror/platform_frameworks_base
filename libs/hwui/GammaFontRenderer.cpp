@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "Debug.h"
 #include "GammaFontRenderer.h"
+#include "Debug.h"
 #include "Properties.h"
 
 namespace android {
@@ -39,5 +39,5 @@ void GammaFontRenderer::endPrecaching() {
     }
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

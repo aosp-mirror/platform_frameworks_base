@@ -160,6 +160,24 @@ public class WifiScanner {
      */
     public static final int REPORT_EVENT_NO_BATCH = (1 << 2);
 
+    /**
+     * This is used to indicate the purpose of the scan to the wifi chip in
+     * {@link ScanSettings#type}.
+     * On devices with multiple hardware radio chains (and hence different modes of scan),
+     * this type serves as an indication to the hardware on what mode of scan to perform.
+     * Only apps holding android.Manifest.permission.NETWORK_STACK permission can set this value.
+     *
+     * Note: This serves as an intent and not as a stipulation, the wifi chip
+     * might honor or ignore the indication based on the current radio conditions. Always
+     * use the {@link ScanResult#radioChainInfos} to figure out the radio chain configuration used
+     * to receive the corresponding scan result.
+     */
+    /** {@hide} */
+    public static final int TYPE_LOW_LATENCY = 0;
+    /** {@hide} */
+    public static final int TYPE_LOW_POWER = 1;
+    /** {@hide} */
+    public static final int TYPE_HIGH_ACCURACY = 2;
 
     /** {@hide} */
     public static final String SCAN_PARAMS_SCAN_SETTINGS_KEY = "ScanSettings";
@@ -193,7 +211,8 @@ public class WifiScanner {
          * list of hidden networks to scan for. Explicit probe requests are sent out for such
          * networks during scan. Only valid for single scan requests.
          * {@hide}
-         * */
+         */
+        @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
         public HiddenNetwork[] hiddenNetworks;
         /** period of background scan; in millisecond, 0 => single shot scan */
         public int periodInMs;
@@ -223,6 +242,13 @@ public class WifiScanner {
          * {@hide}
          */
         public boolean isPnoScan;
+        /**
+         * Indicate the type of scan to be performed by the wifi chip.
+         * Default value: {@link #TYPE_LOW_LATENCY}.
+         * {@hide}
+         */
+        @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
+        public int type = TYPE_LOW_LATENCY;
 
         /** Implement the Parcelable interface {@hide} */
         public int describeContents() {
@@ -239,6 +265,7 @@ public class WifiScanner {
             dest.writeInt(maxPeriodInMs);
             dest.writeInt(stepCount);
             dest.writeInt(isPnoScan ? 1 : 0);
+            dest.writeInt(type);
             if (channels != null) {
                 dest.writeInt(channels.length);
                 for (int i = 0; i < channels.length; i++) {
@@ -272,6 +299,7 @@ public class WifiScanner {
                         settings.maxPeriodInMs = in.readInt();
                         settings.stepCount = in.readInt();
                         settings.isPnoScan = in.readInt() == 1;
+                        settings.type = in.readInt();
                         int num_channels = in.readInt();
                         settings.channels = new ChannelSpec[num_channels];
                         for (int i = 0; i < num_channels; i++) {
@@ -1105,8 +1133,6 @@ public class WifiScanner {
     private static final int BASE = Protocol.BASE_WIFI_SCANNER;
 
     /** @hide */
-    public static final int CMD_SCAN                        = BASE + 0;
-    /** @hide */
     public static final int CMD_START_BACKGROUND_SCAN       = BASE + 2;
     /** @hide */
     public static final int CMD_STOP_BACKGROUND_SCAN        = BASE + 3;
@@ -1115,19 +1141,9 @@ public class WifiScanner {
     /** @hide */
     public static final int CMD_SCAN_RESULT                 = BASE + 5;
     /** @hide */
-    public static final int CMD_AP_FOUND                    = BASE + 9;
-    /** @hide */
-    public static final int CMD_AP_LOST                     = BASE + 10;
-    /** @hide */
-    public static final int CMD_WIFI_CHANGE_DETECTED        = BASE + 15;
-    /** @hide */
-    public static final int CMD_WIFI_CHANGES_STABILIZED     = BASE + 16;
-    /** @hide */
     public static final int CMD_OP_SUCCEEDED                = BASE + 17;
     /** @hide */
     public static final int CMD_OP_FAILED                   = BASE + 18;
-    /** @hide */
-    public static final int CMD_PERIOD_CHANGED              = BASE + 19;
     /** @hide */
     public static final int CMD_FULL_SCAN_RESULT            = BASE + 20;
     /** @hide */
@@ -1358,25 +1374,6 @@ public class WifiScanner {
                 case CMD_FULL_SCAN_RESULT :
                     ScanResult result = (ScanResult) msg.obj;
                     ((ScanListener) listener).onFullResult(result);
-                    return;
-                case CMD_PERIOD_CHANGED:
-                    ((ScanListener) listener).onPeriodChanged(msg.arg1);
-                    return;
-                case CMD_AP_FOUND:
-                    ((BssidListener) listener).onFound(
-                            ((ParcelableScanResults) msg.obj).getResults());
-                    return;
-                case CMD_AP_LOST:
-                    ((BssidListener) listener).onLost(
-                            ((ParcelableScanResults) msg.obj).getResults());
-                    return;
-                case CMD_WIFI_CHANGE_DETECTED:
-                    ((WifiChangeListener) listener).onChanging(
-                            ((ParcelableScanResults) msg.obj).getResults());
-                   return;
-                case CMD_WIFI_CHANGES_STABILIZED:
-                    ((WifiChangeListener) listener).onQuiescence(
-                            ((ParcelableScanResults) msg.obj).getResults());
                     return;
                 case CMD_SINGLE_SCAN_COMPLETED:
                     if (DBG) Log.d(TAG, "removing listener for single scan");

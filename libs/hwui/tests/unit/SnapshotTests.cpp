@@ -32,16 +32,16 @@ TEST(Snapshot, serializeIntersectedClip) {
     LinearAllocator allocator;
     ClipRect rect(Rect(0, 0, 75, 75));
     {
-        auto intersectWithChild = child->serializeIntersectedClip(allocator,
-                &rect, Matrix4::identity());
+        auto intersectWithChild =
+                child->serializeIntersectedClip(allocator, &rect, Matrix4::identity());
         ASSERT_NE(nullptr, intersectWithChild);
         EXPECT_EQ(Rect(50, 50, 75, 75), intersectWithChild->rect) << "Expect intersect with child";
     }
 
     rect.intersectWithRoot = true;
     {
-        auto intersectWithRoot = child->serializeIntersectedClip(allocator,
-                &rect, Matrix4::identity());
+        auto intersectWithRoot =
+                child->serializeIntersectedClip(allocator, &rect, Matrix4::identity());
         ASSERT_NE(nullptr, intersectWithRoot);
         EXPECT_EQ(Rect(10, 10, 75, 75), intersectWithRoot->rect) << "Expect intersect with root";
     }

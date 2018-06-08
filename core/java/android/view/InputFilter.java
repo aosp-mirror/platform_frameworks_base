@@ -72,21 +72,21 @@ import android.os.RemoteException;
  * </p><p>
  * The early policy interception decides whether an input event should be delivered
  * to applications or dropped.  The policy indicates its decision by setting the
- * {@link WindowManagerPolicy#FLAG_PASS_TO_USER} policy flag.  The input filter may
+ * {@link WindowManagerPolicyConstants#FLAG_PASS_TO_USER} policy flag.  The input filter may
  * sometimes receive events that do not have this flag set.  It should take note of
  * the fact that the policy intends to drop the event, clean up its state, and
  * then send appropriate cancellation events to the dispatcher if needed.
  * </p><p>
  * For example, suppose the input filter is processing a gesture and one of the touch events
- * it receives does not have the {@link WindowManagerPolicy#FLAG_PASS_TO_USER} flag set.
+ * it receives does not have the {@link WindowManagerPolicyConstants#FLAG_PASS_TO_USER} flag set.
  * The input filter should clear its internal state about the gesture and then send key or
  * motion events to the dispatcher to cancel any keys or pointers that are down.
  * </p><p>
  * Corollary: Events that get sent to the dispatcher should usually include the
- * {@link WindowManagerPolicy#FLAG_PASS_TO_USER} flag.  Otherwise, they will be dropped!
+ * {@link WindowManagerPolicyConstants#FLAG_PASS_TO_USER} flag.  Otherwise, they will be dropped!
  * </p><p>
  * It may be prudent to disable automatic key repeating for synthetic key events
- * by setting the {@link WindowManagerPolicy#FLAG_DISABLE_KEY_REPEAT} policy flag.
+ * by setting the {@link WindowManagerPolicyConstants#FLAG_DISABLE_KEY_REPEAT} policy flag.
  * </p>
  *
  * @hide

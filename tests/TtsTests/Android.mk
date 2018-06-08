@@ -20,8 +20,8 @@ LOCAL_MODULE_TAGS := tests
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
-LOCAL_STATIC_JAVA_LIBRARIES := mockito-target legacy-android-test
-LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_STATIC_JAVA_LIBRARIES := mockito-target
+LOCAL_JAVA_LIBRARIES := android.test.runner android.test.base
 
 LOCAL_PACKAGE_NAME := TtsTests
 LOCAL_PRIVATE_PLATFORM_APIS := true

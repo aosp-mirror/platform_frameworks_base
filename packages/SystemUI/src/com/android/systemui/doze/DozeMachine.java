@@ -24,6 +24,7 @@ import android.view.Display;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.util.Preconditions;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.wakelock.WakeLock;
 
@@ -87,13 +88,15 @@ public class DozeMachine {
             }
         }
 
-        int screenState() {
+        int screenState(DozeParameters parameters) {
             switch (this) {
                 case UNINITIALIZED:
                 case INITIALIZED:
-                case DOZE:
                 case DOZE_REQUEST_PULSE:
+                    return parameters.shouldControlScreenOff() ? Display.STATE_ON
+                            : Display.STATE_OFF;
                 case DOZE_AOD_PAUSED:
+                case DOZE:
                     return Display.STATE_OFF;
                 case DOZE_PULSING:
                     return Display.STATE_ON;

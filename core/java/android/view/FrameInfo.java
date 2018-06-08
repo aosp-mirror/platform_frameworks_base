@@ -16,7 +16,7 @@
 
 package android.view;
 
-import android.annotation.IntDef;
+import android.annotation.LongDef;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -48,7 +48,7 @@ final class FrameInfo {
     // Is this the first-draw following a window layout?
     public static final long FLAG_WINDOW_LAYOUT_CHANGED = 1;
 
-    @IntDef(flag = true, value = {
+    @LongDef(flag = true, value = {
             FLAG_WINDOW_LAYOUT_CHANGED })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrameInfoFlags {}

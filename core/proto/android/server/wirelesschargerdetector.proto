@@ -1,0 +1,55 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package com.android.server.power;
+
+option java_multiple_files = true;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+message WirelessChargerDetectorProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    message VectorProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional float x = 1;
+        optional float y = 2;
+        optional float z = 3;
+    }
+
+    // Previously observed wireless power state.
+    optional bool is_powered_wirelessly = 1;
+    // True if the device is thought to be at rest on a wireless charger.
+    optional bool is_at_rest = 2;
+    // The gravity vector most recently observed while at rest.
+    optional VectorProto rest = 3;
+    // True if detection is in progress.
+    optional bool is_detection_in_progress = 4;
+    // The time when detection was last performed.
+    optional int64 detection_start_time_ms = 5;
+    // True if the rest position should be updated if at rest.
+    optional bool is_must_update_rest_position = 6;
+    // The total number of samples collected.
+    optional int32 total_samples = 7;
+    // The number of samples collected that showed evidence of not being at rest.
+    optional int32 moving_samples = 8;
+    // The value of the first sample that was collected.
+    optional VectorProto first_sample = 9;
+    // The value of the last sample that was collected.
+    optional VectorProto last_sample = 10;
+}

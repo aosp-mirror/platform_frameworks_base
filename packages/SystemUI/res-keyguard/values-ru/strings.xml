@@ -53,16 +53,23 @@
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Время следующего сигнала будильника: <xliff:g id="ALARM">%1$s</xliff:g>."</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Удалить"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"Отключить eSIM"</string>
+    <string name="error_disable_esim_title" msgid="4852978431156228006">"Произошла ошибка"</string>
+    <string name="error_disable_esim_msg" msgid="676694908770135639">"Не удалось отключить eSIM."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Клавиша ввода"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Забыли графический ключ?"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Неверный графический ключ"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"Неверный пароль"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Неверный PIN-код"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> сек."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="one">Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> секунду.</item>
+      <item quantity="few">Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> секунды.</item>
+      <item quantity="many">Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> секунд.</item>
+      <item quantity="other">Повторите попытку через <xliff:g id="NUMBER">%d</xliff:g> секунды.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Введите графический ключ"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Введите PIN-код SIM-карты."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Введите PIN-код SIM-карты \"<xliff:g id="CARRIER">%1$s</xliff:g>\"."</string>
-    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"Чтобы пользоваться устройством без мобильной связи, отключите eSIM."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Чтобы пользоваться устройством без мобильной связи, отключите eSIM."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"Введите PIN-код"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Введите пароль"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM-карта отключена. Чтобы продолжить, введите PUK-код. За подробной информацией обратитесь к оператору связи."</string>
@@ -142,4 +149,16 @@
       <item quantity="other">Устройство не разблокировалось в течение <xliff:g id="NUMBER_1">%d</xliff:g> часа. Введите пароль ещё раз.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Не распознано"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
+      <item quantity="one">Неверный PIN-код. Осталась <xliff:g id="NUMBER_1">%d</xliff:g> попытка.</item>
+      <item quantity="few">Неверный PIN-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попытки.</item>
+      <item quantity="many">Неверный PIN-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попыток.</item>
+      <item quantity="other">Неверный PIN-код. Осталось <xliff:g id="NUMBER_1">%d</xliff:g> попытки.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
+      <item quantity="one">SIM-карта отключена. Чтобы продолжить, введите PUK-код. Осталась <xliff:g id="_NUMBER_1">%d</xliff:g> попытка. После этого SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.</item>
+      <item quantity="few">SIM-карта отключена. Чтобы продолжить, введите PUK-код. Осталось <xliff:g id="_NUMBER_1">%d</xliff:g> попытки. После этого SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.</item>
+      <item quantity="many">SIM-карта отключена. Чтобы продолжить, введите PUK-код. Осталось <xliff:g id="_NUMBER_1">%d</xliff:g> попыток. После этого SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.</item>
+      <item quantity="other">SIM-карта отключена. Чтобы продолжить, введите PUK-код. Осталось <xliff:g id="_NUMBER_1">%d</xliff:g> попытки. После этого SIM-карта будет заблокирована навсегда. За подробной информацией обратитесь к оператору связи.</item>
+    </plurals>
 </resources>

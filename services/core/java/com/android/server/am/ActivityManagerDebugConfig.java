@@ -59,7 +59,6 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_FOCUS = false;
     static final boolean DEBUG_IDLE = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_IMMERSIVE = DEBUG_ALL || false;
-    static final boolean DEBUG_LOCKSCREEN = DEBUG_ALL || false;
     static final boolean DEBUG_LOCKTASK = DEBUG_ALL || false;
     static final boolean DEBUG_LRU = DEBUG_ALL || false;
     static final boolean DEBUG_MU = DEBUG_ALL || false;
@@ -74,10 +73,10 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_PROVIDER = DEBUG_ALL || false;
     static final boolean DEBUG_PSS = DEBUG_ALL || false;
     static final boolean DEBUG_RECENTS = DEBUG_ALL || false;
+    static final boolean DEBUG_RECENTS_TRIM_TASKS = DEBUG_RECENTS || false;
     static final boolean DEBUG_RELEASE = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_RESULTS = DEBUG_ALL || false;
     static final boolean DEBUG_SAVED_STATE = DEBUG_ALL_ACTIVITIES || false;
-    static final boolean DEBUG_SCREENSHOTS = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_SERVICE = DEBUG_ALL || false;
     static final boolean DEBUG_FOREGROUND_SERVICE = DEBUG_ALL || false;
     static final boolean DEBUG_SERVICE_EXECUTING = DEBUG_ALL || false;
@@ -85,7 +84,6 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_STATES = DEBUG_ALL_ACTIVITIES || false;
     static final boolean DEBUG_SWITCH = DEBUG_ALL || false;
     static final boolean DEBUG_TASKS = DEBUG_ALL || false;
-    static final boolean DEBUG_THUMBNAILS = DEBUG_ALL || false;
     static final boolean DEBUG_TRANSITION = DEBUG_ALL || false;
     static final boolean DEBUG_UID_OBSERVERS = DEBUG_ALL || false;
     static final boolean DEBUG_URI_PERMISSION = DEBUG_ALL || false;
@@ -94,6 +92,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_USAGE_STATS = DEBUG_ALL || false;
     static final boolean DEBUG_PERMISSIONS_REVIEW = DEBUG_ALL || false;
     static final boolean DEBUG_WHITELISTS = DEBUG_ALL || false;
+    static final boolean DEBUG_METRICS = DEBUG_ALL || false;
 
     static final String POSTFIX_ADD_REMOVE = (APPEND_CATEGORY_NAME) ? "_AddRemove" : "";
     static final String POSTFIX_APP = (APPEND_CATEGORY_NAME) ? "_App" : "";
@@ -105,7 +104,6 @@ class ActivityManagerDebugConfig {
     static final String POSTFIX_FOCUS = (APPEND_CATEGORY_NAME) ? "_Focus" : "";
     static final String POSTFIX_IDLE = (APPEND_CATEGORY_NAME) ? "_Idle" : "";
     static final String POSTFIX_IMMERSIVE = (APPEND_CATEGORY_NAME) ? "_Immersive" : "";
-    static final String POSTFIX_LOCKSCREEN = (APPEND_CATEGORY_NAME) ? "_LockScreen" : "";
     static final String POSTFIX_LOCKTASK = (APPEND_CATEGORY_NAME) ? "_LockTask" : "";
     static final String POSTFIX_LRU = (APPEND_CATEGORY_NAME) ? "_LRU" : "";
     static final String POSTFIX_MU = "_MU";
@@ -122,7 +120,6 @@ class ActivityManagerDebugConfig {
     static final String POSTFIX_RELEASE = (APPEND_CATEGORY_NAME) ? "_Release" : "";
     static final String POSTFIX_RESULTS = (APPEND_CATEGORY_NAME) ? "_Results" : "";
     static final String POSTFIX_SAVED_STATE = (APPEND_CATEGORY_NAME) ? "_SavedState" : "";
-    static final String POSTFIX_SCREENSHOTS = (APPEND_CATEGORY_NAME) ? "_Screenshots" : "";
     static final String POSTFIX_SERVICE = (APPEND_CATEGORY_NAME) ? "_Service" : "";
     static final String POSTFIX_SERVICE_EXECUTING =
             (APPEND_CATEGORY_NAME) ? "_ServiceExecuting" : "";
@@ -130,13 +127,11 @@ class ActivityManagerDebugConfig {
     static final String POSTFIX_STATES = (APPEND_CATEGORY_NAME) ? "_States" : "";
     static final String POSTFIX_SWITCH = (APPEND_CATEGORY_NAME) ? "_Switch" : "";
     static final String POSTFIX_TASKS = (APPEND_CATEGORY_NAME) ? "_Tasks" : "";
-    static final String POSTFIX_THUMBNAILS = (APPEND_CATEGORY_NAME) ? "_Thumbnails" : "";
     static final String POSTFIX_TRANSITION = (APPEND_CATEGORY_NAME) ? "_Transition" : "";
     static final String POSTFIX_UID_OBSERVERS = (APPEND_CATEGORY_NAME)
             ? "_UidObservers" : "";
     static final String POSTFIX_URI_PERMISSION = (APPEND_CATEGORY_NAME) ? "_UriPermission" : "";
     static final String POSTFIX_USER_LEAVING = (APPEND_CATEGORY_NAME) ? "_UserLeaving" : "";
     static final String POSTFIX_VISIBILITY = (APPEND_CATEGORY_NAME) ? "_Visibility" : "";
-    static final String POSTFIX_VISIBLE_BEHIND = (APPEND_CATEGORY_NAME) ? "_VisibleBehind" : "";
 
 }

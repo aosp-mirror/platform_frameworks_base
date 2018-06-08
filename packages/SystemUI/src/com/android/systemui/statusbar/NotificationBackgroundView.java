@@ -19,37 +19,83 @@ package com.android.systemui.statusbar;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
-import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
+
+import com.android.internal.util.ArrayUtils;
+import com.android.systemui.Interpolators;
+import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 
 /**
  * A view that can be used for both the dimmed and normal background of an notification.
  */
 public class NotificationBackgroundView extends View {
 
+    private final boolean mDontModifyCorners;
     private Drawable mBackground;
     private int mClipTopAmount;
     private int mActualHeight;
     private int mClipBottomAmount;
     private int mTintColor;
+    private float[] mCornerRadii = new float[8];
+    private boolean mBottomIsRounded;
+    private int mBackgroundTop;
+    private boolean mBottomAmountClips = true;
+    private boolean mExpandAnimationRunning;
+    private float mActualWidth;
+    private int mDrawableAlpha = 255;
+    private boolean mIsPressedAllowed;
+
+    private boolean mTopAmountRounded;
+    private float mDistanceToTopRoundness;
 
     public NotificationBackgroundView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mDontModifyCorners = getResources().getBoolean(
+                R.bool.config_clipNotificationsToOutline);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        draw(canvas, mBackground);
+        if (mClipTopAmount + mClipBottomAmount < mActualHeight - mBackgroundTop
+                || mExpandAnimationRunning) {
+            canvas.save();
+            if (!mExpandAnimationRunning) {
+                canvas.clipRect(0, mClipTopAmount, getWidth(), mActualHeight - mClipBottomAmount);
+            }
+            draw(canvas, mBackground);
+            canvas.restore();
+        }
     }
 
     private void draw(Canvas canvas, Drawable drawable) {
-        int bottom = mActualHeight - mClipBottomAmount;
-        if (drawable != null && bottom > mClipTopAmount) {
-            drawable.setBounds(0, mClipTopAmount, getWidth(), bottom);
+        if (drawable != null) {
+            int top = mBackgroundTop;
+            int bottom = mActualHeight;
+            if (mBottomIsRounded && mBottomAmountClips && !mExpandAnimationRunning) {
+                bottom -= mClipBottomAmount;
+            }
+            int left = 0;
+            int right = getWidth();
+            if (mExpandAnimationRunning) {
+                left = (int) ((getWidth() - mActualWidth) / 2.0f);
+                right = (int) (left + mActualWidth);
+            }
+            if (mTopAmountRounded) {
+                int clipTop = (int) (mClipTopAmount - mDistanceToTopRoundness);
+                top += clipTop;
+                if (clipTop >= 0) {
+                    bottom += clipTop;
+                }
+            }
+            drawable.setBounds(left, top, right, bottom);
             drawable.draw(canvas);
         }
     }
@@ -61,13 +107,7 @@ public class NotificationBackgroundView extends View {
 
     @Override
     protected void drawableStateChanged() {
-        drawableStateChanged(mBackground);
-    }
-
-    private void drawableStateChanged(Drawable d) {
-        if (d != null && d.isStateful()) {
-            d.setState(getDrawableState());
-        }
+        setState(getDrawableState());
     }
 
     @Override
@@ -87,6 +127,7 @@ public class NotificationBackgroundView extends View {
             unscheduleDrawable(mBackground);
         }
         mBackground = background;
+        mBackground.mutate();
         if (mBackground != null) {
             mBackground.setCallback(this);
             setTint(mTintColor);
@@ -94,6 +135,7 @@ public class NotificationBackgroundView extends View {
         if (mBackground instanceof RippleDrawable) {
             ((RippleDrawable) mBackground).setForceSoftware(true);
         }
+        updateBackgroundRadii();
         invalidate();
     }
 
@@ -113,6 +155,9 @@ public class NotificationBackgroundView extends View {
     }
 
     public void setActualHeight(int actualHeight) {
+        if (mExpandAnimationRunning) {
+            return;
+        }
         mActualHeight = actualHeight;
         invalidate();
     }
@@ -131,6 +176,14 @@ public class NotificationBackgroundView extends View {
         invalidate();
     }
 
+    public void setDistanceToTopRoundness(float distanceToTopRoundness) {
+        if (distanceToTopRoundness != mDistanceToTopRoundness) {
+            mTopAmountRounded = distanceToTopRoundness >= 0;
+            mDistanceToTopRoundness = distanceToTopRoundness;
+            invalidate();
+        }
+    }
+
     @Override
     public boolean hasOverlappingRendering() {
 
@@ -139,7 +192,13 @@ public class NotificationBackgroundView extends View {
     }
 
     public void setState(int[] drawableState) {
-        mBackground.setState(drawableState);
+        if (mBackground != null && mBackground.isStateful()) {
+            if (!mIsPressedAllowed) {
+                drawableState = ArrayUtils.removeInt(drawableState,
+                        com.android.internal.R.attr.state_pressed);
+            }
+            mBackground.setState(drawableState);
+        }
     }
 
     public void setRippleColor(int color) {
@@ -150,6 +209,81 @@ public class NotificationBackgroundView extends View {
     }
 
     public void setDrawableAlpha(int drawableAlpha) {
+        mDrawableAlpha = drawableAlpha;
+        if (mExpandAnimationRunning) {
+            return;
+        }
         mBackground.setAlpha(drawableAlpha);
+    }
+
+    public void setRoundness(float topRoundness, float bottomRoundNess) {
+        if (topRoundness == mCornerRadii[0] && bottomRoundNess == mCornerRadii[4]) {
+            return;
+        }
+        mBottomIsRounded = bottomRoundNess != 0.0f;
+        mCornerRadii[0] = topRoundness;
+        mCornerRadii[1] = topRoundness;
+        mCornerRadii[2] = topRoundness;
+        mCornerRadii[3] = topRoundness;
+        mCornerRadii[4] = bottomRoundNess;
+        mCornerRadii[5] = bottomRoundNess;
+        mCornerRadii[6] = bottomRoundNess;
+        mCornerRadii[7] = bottomRoundNess;
+        updateBackgroundRadii();
+    }
+
+    public void setBottomAmountClips(boolean clips) {
+        if (clips != mBottomAmountClips) {
+            mBottomAmountClips = clips;
+            invalidate();
+        }
+    }
+
+    private void updateBackgroundRadii() {
+        if (mDontModifyCorners) {
+            return;
+        }
+        if (mBackground instanceof LayerDrawable) {
+            GradientDrawable gradientDrawable =
+                    (GradientDrawable) ((LayerDrawable) mBackground).getDrawable(0);
+            gradientDrawable.setCornerRadii(mCornerRadii);
+        }
+    }
+
+    public void setBackgroundTop(int backgroundTop) {
+        mBackgroundTop = backgroundTop;
+        invalidate();
+    }
+
+    public void setExpandAnimationParams(ActivityLaunchAnimator.ExpandAnimationParameters params) {
+        mActualHeight = params.getHeight();
+        mActualWidth = params.getWidth();
+        float alphaProgress = Interpolators.ALPHA_IN.getInterpolation(
+                params.getProgress(
+                        ActivityLaunchAnimator.ANIMATION_DURATION_FADE_CONTENT /* delay */,
+                        ActivityLaunchAnimator.ANIMATION_DURATION_FADE_APP /* duration */));
+        mBackground.setAlpha((int) (mDrawableAlpha * (1.0f - alphaProgress)));
+        invalidate();
+    }
+
+    public void setExpandAnimationRunning(boolean running) {
+        mExpandAnimationRunning = running;
+        if (mBackground instanceof LayerDrawable) {
+            GradientDrawable gradientDrawable =
+                    (GradientDrawable) ((LayerDrawable) mBackground).getDrawable(0);
+            gradientDrawable.setXfermode(
+                    running ? new PorterDuffXfermode(PorterDuff.Mode.SRC) : null);
+            // Speed optimization: disable AA if transfer mode is not SRC_OVER. AA is not easy to
+            // spot during animation anyways.
+            gradientDrawable.setAntiAlias(!running);
+        }
+        if (!mExpandAnimationRunning) {
+            setDrawableAlpha(mDrawableAlpha);
+        }
+        invalidate();
+    }
+
+    public void setPressedAllowed(boolean allowed) {
+        mIsPressedAllowed = allowed;
     }
 }

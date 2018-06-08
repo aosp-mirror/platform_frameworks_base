@@ -30,4 +30,3 @@ void BM_RenderNode_create(benchmark::State& state) {
     }
 }
 BENCHMARK(BM_RenderNode_create);
-

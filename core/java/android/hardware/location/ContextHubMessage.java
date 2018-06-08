@@ -19,21 +19,25 @@ package android.hardware.location;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import java.util.Arrays;
 
 /**
+ * @deprecated Use {@link android.hardware.location.NanoAppMessage} instead to send messages with
+ *             {@link android.hardware.location.ContextHubClient#sendMessageToNanoApp(
+ *             NanoAppMessage)} and receive messages with
+ *             {@link android.hardware.location.ContextHubClientCallback#onMessageFromNanoApp(
+ *             ContextHubClient, NanoAppMessage)}.
+ *
  * @hide
  */
 @SystemApi
-public class ContextHubMessage {
+@Deprecated
+public class ContextHubMessage implements Parcelable {
+    private static final int DEBUG_LOG_NUM_BYTES = 16;
     private int mType;
     private int mVersion;
     private byte[]mData;
-
-    private static final String TAG = "ContextHubMessage";
-
 
     /**
      * Get the message type
@@ -131,4 +135,28 @@ public class ContextHubMessage {
             return new ContextHubMessage[size];
         }
     };
+
+    @Override
+    public String toString() {
+        int length = mData.length;
+
+        String ret =
+                "ContextHubMessage[type = " + mType + ", length = " + mData.length + " bytes](";
+        if (length > 0) {
+            ret += "data = 0x";
+        }
+        for (int i = 0; i < Math.min(length, DEBUG_LOG_NUM_BYTES); i++) {
+            ret += Byte.toHexString(mData[i], true /* upperCase */);
+
+            if ((i + 1) % 4 == 0) {
+                ret += " ";
+            }
+        }
+        if (length > DEBUG_LOG_NUM_BYTES) {
+            ret += "...";
+        }
+        ret += ")";
+
+        return ret;
+    }
 }

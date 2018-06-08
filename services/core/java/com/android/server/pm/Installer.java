@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import android.annotation.AppIdInt;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
@@ -34,6 +35,8 @@ import com.android.internal.os.BackgroundThread;
 import com.android.server.SystemService;
 
 import dalvik.system.VMRuntime;
+
+import java.io.FileDescriptor;
 
 public class Installer extends SystemService {
     private static final String TAG = "Installer";
@@ -478,6 +481,26 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.deleteOdex(apkPath, instructionSet, outputPath);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public void installApkVerity(String filePath, FileDescriptor verityInput, int contentSize)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.installApkVerity(filePath, verityInput, contentSize);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public void assertFsverityRootHashMatches(String filePath, @NonNull byte[] expectedHash)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.assertFsverityRootHashMatches(filePath, expectedHash);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

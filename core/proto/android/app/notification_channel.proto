@@ -1,0 +1,57 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+option java_package = "android.app";
+option java_multiple_files = true;
+
+package android.app;
+
+import "frameworks/base/core/proto/android/media/audioattributes.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+/**
+ * An android.app.NotificationChannel object.
+ */
+message NotificationChannelProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional string id = 1 [ (android.privacy).dest = DEST_EXPLICIT ];
+    optional string name = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
+    optional string description = 3 [ (android.privacy).dest = DEST_EXPLICIT ];
+    optional int32 importance = 4;
+    optional bool can_bypass_dnd = 5;
+    // Default is VISIBILITY_NO_OVERRIDE (-1000).
+    optional int32 lockscreen_visibility = 6;
+    optional string sound = 7 [ (android.privacy).dest = DEST_EXPLICIT ];
+    optional bool use_lights = 8;
+    // Default is 0.
+    optional int32 light_color = 9;
+    repeated int64 vibration = 10;
+    // Bitwise representation of fields that have been changed by the user,
+    // preventing the app from making changes to these fields.
+    optional int32 user_locked_fields = 11;
+    optional bool is_vibration_enabled = 12;
+    // Default is true.
+    optional bool show_badge = 13;
+    // Default is false.
+    optional bool is_deleted = 14;
+    optional string group = 15 [ (android.privacy).dest = DEST_EXPLICIT ];
+    optional android.media.AudioAttributesProto audio_attributes = 16;
+    // If this is a blockable system notification channel.
+    optional bool is_blockable_system = 17;
+    optional bool fg_service_shown = 18;
+}

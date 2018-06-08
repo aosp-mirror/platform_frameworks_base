@@ -18,8 +18,8 @@ package com.android.server.backup.utils;
 
 import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME;
 
-import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.IBackupManagerMonitor;
@@ -56,6 +56,8 @@ public class BackupManagerMonitorUtils {
                             pkg.packageName);
                     bundle.putInt(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_VERSION,
                             pkg.versionCode);
+                    bundle.putLong(BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION,
+                            pkg.getLongVersionCode());
                 }
                 if (extras != null) {
                     bundle.putAll(extras);

@@ -45,7 +45,7 @@ abstract class DisplayDevice {
     private Rect mCurrentDisplayRect;
 
     // The display device owns its surface, but it should only set it
-    // within a transaction from performTraversalInTransactionLocked.
+    // within a transaction from performTraversalLocked.
     private Surface mCurrentSurface;
 
     // DEBUG STATE: Last device info which was written to the log, or null if none.
@@ -122,7 +122,7 @@ abstract class DisplayDevice {
     /**
      * Gives the display device a chance to update its properties while in a transaction.
      */
-    public void performTraversalInTransactionLocked() {
+    public void performTraversalLocked(SurfaceControl.Transaction t) {
     }
 
     /**
@@ -140,16 +140,19 @@ abstract class DisplayDevice {
     /**
      * Sets the mode, if supported.
      */
-    public void requestDisplayModesInTransactionLocked(int colorMode, int modeId) {
+    public void requestDisplayModesLocked(int colorMode, int modeId) {
+    }
+
+    public void onOverlayChangedLocked() {
     }
 
     /**
      * Sets the display layer stack while in a transaction.
      */
-    public final void setLayerStackInTransactionLocked(int layerStack) {
+    public final void setLayerStackLocked(SurfaceControl.Transaction t, int layerStack) {
         if (mCurrentLayerStack != layerStack) {
             mCurrentLayerStack = layerStack;
-            SurfaceControl.setDisplayLayerStack(mDisplayToken, layerStack);
+            t.setDisplayLayerStack(mDisplayToken, layerStack);
         }
     }
 
@@ -163,7 +166,7 @@ abstract class DisplayDevice {
      *            mapped to. displayRect is specified post-orientation, that is
      *            it uses the orientation seen by the end-user
      */
-    public final void setProjectionInTransactionLocked(int orientation,
+    public final void setProjectionLocked(SurfaceControl.Transaction t, int orientation,
             Rect layerStackRect, Rect displayRect) {
         if (mCurrentOrientation != orientation
                 || mCurrentLayerStackRect == null
@@ -182,7 +185,7 @@ abstract class DisplayDevice {
             }
             mCurrentDisplayRect.set(displayRect);
 
-            SurfaceControl.setDisplayProjection(mDisplayToken,
+            t.setDisplayProjection(mDisplayToken,
                     orientation, layerStackRect, displayRect);
         }
     }
@@ -190,10 +193,10 @@ abstract class DisplayDevice {
     /**
      * Sets the display surface while in a transaction.
      */
-    public final void setSurfaceInTransactionLocked(Surface surface) {
+    public final void setSurfaceLocked(SurfaceControl.Transaction t, Surface surface) {
         if (mCurrentSurface != surface) {
             mCurrentSurface = surface;
-            SurfaceControl.setDisplaySurface(mDisplayToken, surface);
+            t.setDisplaySurface(mDisplayToken, surface);
         }
     }
 

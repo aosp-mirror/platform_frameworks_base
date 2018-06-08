@@ -25,19 +25,19 @@
 namespace android {
 namespace uirenderer {
 
-class TaskProcessorBase: public RefBase {
+class TaskProcessorBase : public RefBase {
 public:
-    TaskProcessorBase() { }
-    virtual ~TaskProcessorBase() { };
+    TaskProcessorBase() {}
+    virtual ~TaskProcessorBase(){};
 
     virtual void process(const sp<TaskBase>& task) = 0;
 };
 
-template<typename T>
-class TaskProcessor: public TaskProcessorBase {
+template <typename T>
+class TaskProcessor : public TaskProcessorBase {
 public:
-    explicit TaskProcessor(TaskManager* manager): mManager(manager) { }
-    virtual ~TaskProcessor() { }
+    explicit TaskProcessor(TaskManager* manager) : mManager(manager) {}
+    virtual ~TaskProcessor() {}
 
     void add(const sp<Task<T> >& task) {
         if (!addImpl(task)) {
@@ -52,7 +52,7 @@ private:
     bool addImpl(const sp<Task<T> >& task);
 
     virtual void process(const sp<TaskBase>& task) override {
-        sp<Task<T> > realTask = static_cast<Task<T>* >(task.get());
+        sp<Task<T> > realTask = static_cast<Task<T>*>(task.get());
         // This is the right way to do it but sp<> doesn't play nice
         // sp<Task<T> > realTask = static_cast<sp<Task<T> > >(task);
         onProcess(realTask);
@@ -61,7 +61,7 @@ private:
     TaskManager* mManager;
 };
 
-template<typename T>
+template <typename T>
 bool TaskProcessor<T>::addImpl(const sp<Task<T> >& task) {
     if (mManager) {
         sp<TaskProcessor<T> > self(this);
@@ -70,7 +70,7 @@ bool TaskProcessor<T>::addImpl(const sp<Task<T> >& task) {
     return false;
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_TASK_PROCESSOR_H
+#endif  // ANDROID_HWUI_TASK_PROCESSOR_H

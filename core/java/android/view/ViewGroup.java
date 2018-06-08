@@ -57,6 +57,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
+import android.view.autofill.Helper;
 
 import com.android.internal.R;
 
@@ -421,22 +422,78 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /**
      * Used to indicate that no drawing cache should be kept in memory.
+     *
+     * @deprecated The view drawing cache was largely made obsolete with the introduction of
+     * hardware-accelerated rendering in API 11. With hardware-acceleration, intermediate cache
+     * layers are largely unnecessary and can easily result in a net loss in performance due to the
+     * cost of creating and updating the layer. In the rare cases where caching layers are useful,
+     * such as for alpha animations, {@link #setLayerType(int, Paint)} handles this with hardware
+     * rendering. For software-rendered snapshots of a small part of the View hierarchy or
+     * individual Views it is recommended to create a {@link Canvas} from either a {@link Bitmap} or
+     * {@link android.graphics.Picture} and call {@link #draw(Canvas)} on the View. However these
+     * software-rendered usages are discouraged and have compatibility issues with hardware-only
+     * rendering features such as {@link android.graphics.Bitmap.Config#HARDWARE Config.HARDWARE}
+     * bitmaps, real-time shadows, and outline clipping. For screenshots of the UI for feedback
+     * reports or unit testing the {@link PixelCopy} API is recommended.
      */
+    @Deprecated
     public static final int PERSISTENT_NO_CACHE = 0x0;
 
     /**
      * Used to indicate that the animation drawing cache should be kept in memory.
+     *
+     * @deprecated The view drawing cache was largely made obsolete with the introduction of
+     * hardware-accelerated rendering in API 11. With hardware-acceleration, intermediate cache
+     * layers are largely unnecessary and can easily result in a net loss in performance due to the
+     * cost of creating and updating the layer. In the rare cases where caching layers are useful,
+     * such as for alpha animations, {@link #setLayerType(int, Paint)} handles this with hardware
+     * rendering. For software-rendered snapshots of a small part of the View hierarchy or
+     * individual Views it is recommended to create a {@link Canvas} from either a {@link Bitmap} or
+     * {@link android.graphics.Picture} and call {@link #draw(Canvas)} on the View. However these
+     * software-rendered usages are discouraged and have compatibility issues with hardware-only
+     * rendering features such as {@link android.graphics.Bitmap.Config#HARDWARE Config.HARDWARE}
+     * bitmaps, real-time shadows, and outline clipping. For screenshots of the UI for feedback
+     * reports or unit testing the {@link PixelCopy} API is recommended.
      */
+    @Deprecated
     public static final int PERSISTENT_ANIMATION_CACHE = 0x1;
 
     /**
      * Used to indicate that the scrolling drawing cache should be kept in memory.
+     *
+     * @deprecated The view drawing cache was largely made obsolete with the introduction of
+     * hardware-accelerated rendering in API 11. With hardware-acceleration, intermediate cache
+     * layers are largely unnecessary and can easily result in a net loss in performance due to the
+     * cost of creating and updating the layer. In the rare cases where caching layers are useful,
+     * such as for alpha animations, {@link #setLayerType(int, Paint)} handles this with hardware
+     * rendering. For software-rendered snapshots of a small part of the View hierarchy or
+     * individual Views it is recommended to create a {@link Canvas} from either a {@link Bitmap} or
+     * {@link android.graphics.Picture} and call {@link #draw(Canvas)} on the View. However these
+     * software-rendered usages are discouraged and have compatibility issues with hardware-only
+     * rendering features such as {@link android.graphics.Bitmap.Config#HARDWARE Config.HARDWARE}
+     * bitmaps, real-time shadows, and outline clipping. For screenshots of the UI for feedback
+     * reports or unit testing the {@link PixelCopy} API is recommended.
      */
+    @Deprecated
     public static final int PERSISTENT_SCROLLING_CACHE = 0x2;
 
     /**
      * Used to indicate that all drawing caches should be kept in memory.
+     *
+     * @deprecated The view drawing cache was largely made obsolete with the introduction of
+     * hardware-accelerated rendering in API 11. With hardware-acceleration, intermediate cache
+     * layers are largely unnecessary and can easily result in a net loss in performance due to the
+     * cost of creating and updating the layer. In the rare cases where caching layers are useful,
+     * such as for alpha animations, {@link #setLayerType(int, Paint)} handles this with hardware
+     * rendering. For software-rendered snapshots of a small part of the View hierarchy or
+     * individual Views it is recommended to create a {@link Canvas} from either a {@link Bitmap} or
+     * {@link android.graphics.Picture} and call {@link #draw(Canvas)} on the View. However these
+     * software-rendered usages are discouraged and have compatibility issues with hardware-only
+     * rendering features such as {@link android.graphics.Bitmap.Config#HARDWARE Config.HARDWARE}
+     * bitmaps, real-time shadows, and outline clipping. For screenshots of the UI for feedback
+     * reports or unit testing the {@link PixelCopy} API is recommended.
      */
+    @Deprecated
     public static final int PERSISTENT_ALL_CACHES = 0x3;
 
     // Layout Modes
@@ -526,6 +583,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private List<Integer> mTransientIndices = null;
     private List<View> mTransientViews = null;
 
+    /**
+     * Keeps track of how many child views have UnhandledKeyEventListeners. This should only be
+     * updated on the UI thread so shouldn't require explicit synchronization.
+     */
+    int mChildUnhandledKeyListeners = 0;
 
     /**
      * Empty ActionMode used as a sentinel in recursive entries to startActionModeForChild.
@@ -2535,7 +2597,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             boolean alreadyDispatchedToNewTouchTarget = false;
             if (!canceled && !intercepted) {
 
-                // If the event is targeting accessiiblity focus we give it to the
+                // If the event is targeting accessibility focus we give it to the
                 // view that has accessibility focus and if it does not handle it
                 // we clear the flag and dispatch the event to all children as usual.
                 // We are looking up the accessibility focused host to avoid keeping
@@ -3159,22 +3221,31 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
         int descendantFocusability = getDescendantFocusability();
 
+        boolean result;
         switch (descendantFocusability) {
             case FOCUS_BLOCK_DESCENDANTS:
-                return super.requestFocus(direction, previouslyFocusedRect);
+                result = super.requestFocus(direction, previouslyFocusedRect);
+                break;
             case FOCUS_BEFORE_DESCENDANTS: {
                 final boolean took = super.requestFocus(direction, previouslyFocusedRect);
-                return took ? took : onRequestFocusInDescendants(direction, previouslyFocusedRect);
+                result = took ? took : onRequestFocusInDescendants(direction,
+                        previouslyFocusedRect);
+                break;
             }
             case FOCUS_AFTER_DESCENDANTS: {
                 final boolean took = onRequestFocusInDescendants(direction, previouslyFocusedRect);
-                return took ? took : super.requestFocus(direction, previouslyFocusedRect);
+                result = took ? took : super.requestFocus(direction, previouslyFocusedRect);
+                break;
             }
             default:
                 throw new IllegalStateException("descendant focusability must be "
                         + "one of FOCUS_BEFORE_DESCENDANTS, FOCUS_AFTER_DESCENDANTS, FOCUS_BLOCK_DESCENDANTS "
                         + "but is " + descendantFocusability);
         }
+        if (result && !isLayoutValid() && ((mPrivateFlags & PFLAG_WANTS_FOCUS) == 0)) {
+            mPrivateFlags |= PFLAG_WANTS_FOCUS;
+        }
+        return result;
     }
 
     /**
@@ -3409,8 +3480,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         if (!isLaidOut()) {
-            Log.v(VIEW_LOG_TAG, "dispatchProvideStructure(): not laid out, ignoring "
-                    + childrenCount + " children of " + getAccessibilityViewId());
+            if (Helper.sVerbose) {
+                Log.v(VIEW_LOG_TAG, "dispatchProvideStructure(): not laid out, ignoring "
+                        + childrenCount + " children of " + getAccessibilityViewId());
+            }
             return;
         }
 
@@ -3487,13 +3560,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     public void dispatchProvideAutofillStructure(ViewStructure structure,
             @AutofillFlags int flags) {
         super.dispatchProvideAutofillStructure(structure, flags);
+
         if (structure.getChildCount() != 0) {
             return;
         }
 
         if (!isLaidOut()) {
-            Log.v(VIEW_LOG_TAG, "dispatchProvideAutofillStructure(): not laid out, ignoring "
-                    + mChildrenCount + " children of " + getAutofillId());
+            if (Helper.sVerbose) {
+                Log.v(VIEW_LOG_TAG, "dispatchProvideAutofillStructure(): not laid out, ignoring "
+                        + mChildrenCount + " children of " + getAutofillId());
+            }
             return;
         }
 
@@ -3769,7 +3845,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Enables or disables the drawing cache for each child of this view group.
      *
      * @param enabled true to enable the cache, false to dispose of it
+     *
+     * @deprecated The view drawing cache was largely made obsolete with the introduction of
+     * hardware-accelerated rendering in API 11. With hardware-acceleration, intermediate cache
+     * layers are largely unnecessary and can easily result in a net loss in performance due to the
+     * cost of creating and updating the layer. In the rare cases where caching layers are useful,
+     * such as for alpha animations, {@link #setLayerType(int, Paint)} handles this with hardware
+     * rendering. For software-rendered snapshots of a small part of the View hierarchy or
+     * individual Views it is recommended to create a {@link Canvas} from either a {@link Bitmap} or
+     * {@link android.graphics.Picture} and call {@link #draw(Canvas)} on the View. However these
+     * software-rendered usages are discouraged and have compatibility issues with hardware-only
+     * rendering features such as {@link android.graphics.Bitmap.Config#HARDWARE Config.HARDWARE}
+     * bitmaps, real-time shadows, and outline clipping. For screenshots of the UI for feedback
+     * reports or unit testing the {@link PixelCopy} API is recommended.
      */
+    @Deprecated
     protected void setChildrenDrawingCacheEnabled(boolean enabled) {
         if (enabled || (mPersistentDrawingCache & PERSISTENT_ALL_CACHES) != PERSISTENT_ALL_CACHES) {
             final View[] children = mChildren;
@@ -3784,7 +3874,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
-    public Bitmap createSnapshot(Bitmap.Config quality, int backgroundColor, boolean skipChildren) {
+    public Bitmap createSnapshot(ViewDebug.CanvasProvider canvasProvider, boolean skipChildren) {
         int count = mChildrenCount;
         int[] visibilities = null;
 
@@ -3800,17 +3890,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
-        Bitmap b = super.createSnapshot(quality, backgroundColor, skipChildren);
-
-        if (skipChildren) {
-            for (int i = 0; i < count; i++) {
-                View child = getChildAt(i);
-                child.mViewFlags = (child.mViewFlags & ~View.VISIBILITY_MASK)
-                        | (visibilities[i] & View.VISIBILITY_MASK);
+        try {
+            return super.createSnapshot(canvasProvider, skipChildren);
+        } finally {
+            if (skipChildren) {
+                for (int i = 0; i < count; i++) {
+                    View child = getChildAt(i);
+                    child.mViewFlags = (child.mViewFlags & ~View.VISIBILITY_MASK)
+                            | (visibilities[i] & View.VISIBILITY_MASK);
+                }
             }
         }
-
-        return b;
     }
 
     /** Return true if this ViewGroup is laying out using optical bounds. */
@@ -4196,6 +4286,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         for (int i = 0; i < count; i++) {
             final View child = children[i];
+            if (((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null)) {
+                recreateChildDisplayList(child);
+            }
+        }
+        final int transientCount = mTransientViews == null ? 0 : mTransientIndices.size();
+        for (int i = 0; i < transientCount; ++i) {
+            View child = mTransientViews.get(i);
             if (((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null)) {
                 recreateChildDisplayList(child);
             }
@@ -4964,6 +5061,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         } else {
             child.mParent = this;
         }
+        if (child.hasUnhandledKeyListener()) {
+            incrementChildUnhandledKeyListeners();
+        }
 
         final boolean childHasFocus = child.hasFocus();
         if (childHasFocus) {
@@ -5017,6 +5117,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // When adding a child that contains default focus, either during inflation or while
             // manually assembling the hierarchy, update the ancestor default-focus chain.
             setDefaultFocus(child);
+        }
+
+        touchAccessibilityNodeProviderIfNeeded(child);
+    }
+
+    /**
+     * We may need to touch the provider to bring up the a11y layer. In a11y mode
+     * clients inspect the screen or the user touches it which triggers bringing up
+     * of the a11y infrastructure while in autofill mode we want the infra up and
+     * running from the beginning since we watch for a11y events to drive autofill.
+     */
+    private void touchAccessibilityNodeProviderIfNeeded(View child) {
+        if (mContext.isAutofillCompatibilityEnabled()) {
+            child.getAccessibilityNodeProvider();
         }
     }
 
@@ -5252,6 +5366,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         needGlobalAttributesUpdate(false);
 
         removeFromArray(index);
+
+        if (view.hasUnhandledKeyListener()) {
+            decrementChildUnhandledKeyListeners();
+        }
 
         if (view == mDefaultFocus) {
             clearDefaultFocus(view);
@@ -5574,6 +5692,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
         dispatchVisibilityAggregated(isAttachedToWindow() && getWindowVisibility() == VISIBLE
                 && isShown());
+        notifySubtreeAccessibilityStateChangedIfNeeded();
     }
 
     /**
@@ -6311,7 +6430,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @return one or a combination of {@link #PERSISTENT_NO_CACHE},
      *         {@link #PERSISTENT_ANIMATION_CACHE}, {@link #PERSISTENT_SCROLLING_CACHE}
      *         and {@link #PERSISTENT_ALL_CACHES}
+     *
+     * @deprecated The view drawing cache was largely made obsolete with the introduction of
+     * hardware-accelerated rendering in API 11. With hardware-acceleration, intermediate cache
+     * layers are largely unnecessary and can easily result in a net loss in performance due to the
+     * cost of creating and updating the layer. In the rare cases where caching layers are useful,
+     * such as for alpha animations, {@link #setLayerType(int, Paint)} handles this with hardware
+     * rendering. For software-rendered snapshots of a small part of the View hierarchy or
+     * individual Views it is recommended to create a {@link Canvas} from either a {@link Bitmap} or
+     * {@link android.graphics.Picture} and call {@link #draw(Canvas)} on the View. However these
+     * software-rendered usages are discouraged and have compatibility issues with hardware-only
+     * rendering features such as {@link android.graphics.Bitmap.Config#HARDWARE Config.HARDWARE}
+     * bitmaps, real-time shadows, and outline clipping. For screenshots of the UI for feedback
+     * reports or unit testing the {@link PixelCopy} API is recommended.
      */
+    @Deprecated
     @ViewDebug.ExportedProperty(category = "drawing", mapping = {
         @ViewDebug.IntToString(from = PERSISTENT_NO_CACHE,        to = "NONE"),
         @ViewDebug.IntToString(from = PERSISTENT_ANIMATION_CACHE, to = "ANIMATION"),
@@ -6332,7 +6465,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @param drawingCacheToKeep one or a combination of {@link #PERSISTENT_NO_CACHE},
      *        {@link #PERSISTENT_ANIMATION_CACHE}, {@link #PERSISTENT_SCROLLING_CACHE}
      *        and {@link #PERSISTENT_ALL_CACHES}
+     *
+     * @deprecated The view drawing cache was largely made obsolete with the introduction of
+     * hardware-accelerated rendering in API 11. With hardware-acceleration, intermediate cache
+     * layers are largely unnecessary and can easily result in a net loss in performance due to the
+     * cost of creating and updating the layer. In the rare cases where caching layers are useful,
+     * such as for alpha animations, {@link #setLayerType(int, Paint)} handles this with hardware
+     * rendering. For software-rendered snapshots of a small part of the View hierarchy or
+     * individual Views it is recommended to create a {@link Canvas} from either a {@link Bitmap} or
+     * {@link android.graphics.Picture} and call {@link #draw(Canvas)} on the View. However these
+     * software-rendered usages are discouraged and have compatibility issues with hardware-only
+     * rendering features such as {@link android.graphics.Bitmap.Config#HARDWARE Config.HARDWARE}
+     * bitmaps, real-time shadows, and outline clipping. For screenshots of the UI for feedback
+     * reports or unit testing the {@link PixelCopy} API is recommended.
      */
+    @Deprecated
     public void setPersistentDrawingCache(int drawingCacheToKeep) {
         mPersistentDrawingCache = drawingCacheToKeep & PERSISTENT_ALL_CACHES;
     }
@@ -7403,6 +7550,62 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    @Override
+    boolean hasUnhandledKeyListener() {
+        return (mChildUnhandledKeyListeners > 0) || super.hasUnhandledKeyListener();
+    }
+
+    void incrementChildUnhandledKeyListeners() {
+        mChildUnhandledKeyListeners += 1;
+        if (mChildUnhandledKeyListeners == 1) {
+            if (mParent instanceof ViewGroup) {
+                ((ViewGroup) mParent).incrementChildUnhandledKeyListeners();
+            }
+        }
+    }
+
+    void decrementChildUnhandledKeyListeners() {
+        mChildUnhandledKeyListeners -= 1;
+        if (mChildUnhandledKeyListeners == 0) {
+            if (mParent instanceof ViewGroup) {
+                ((ViewGroup) mParent).decrementChildUnhandledKeyListeners();
+            }
+        }
+    }
+
+    @Override
+    View dispatchUnhandledKeyEvent(KeyEvent evt) {
+        if (!hasUnhandledKeyListener()) {
+            return null;
+        }
+        ArrayList<View> orderedViews = buildOrderedChildList();
+        if (orderedViews != null) {
+            try {
+                for (int i = orderedViews.size() - 1; i >= 0; --i) {
+                    View v = orderedViews.get(i);
+                    View consumer = v.dispatchUnhandledKeyEvent(evt);
+                    if (consumer != null) {
+                        return consumer;
+                    }
+                }
+            } finally {
+                orderedViews.clear();
+            }
+        } else {
+            for (int i = getChildCount() - 1; i >= 0; --i) {
+                View v = getChildAt(i);
+                View consumer = v.dispatchUnhandledKeyEvent(evt);
+                if (consumer != null) {
+                    return consumer;
+                }
+            }
+        }
+        if (onUnhandledKeyEvent(evt)) {
+            return this;
+        }
+        return null;
+    }
+
     /**
      * LayoutParams are used by views to tell their parents how they want to be
      * laid out. See
@@ -8371,6 +8574,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         private final Rect mLocation = new Rect();
 
+        private ViewGroup mRoot;
+
         public View mView;
 
         private int mLayoutDirection;
@@ -8400,47 +8605,100 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 return 1;
             }
 
+            int boundsResult = compareBoundsOfTree(this, another);
+            if (boundsResult != 0) {
+                return boundsResult;
+            }
+
+            // Just break the tie somehow. The accessibility ids are unique
+            // and stable, hence this is deterministic tie breaking.
+            return mView.getAccessibilityViewId() - another.mView.getAccessibilityViewId();
+        }
+
+        /**
+         * Compare two views based on their bounds. Use the bounds of their children to break ties.
+         *
+         * @param holder1 Holder of first view to compare
+         * @param holder2 Holder of second view to compare. Must have the same root at holder1.
+         * @return The compare result, with equality if no good comparison was found.
+         */
+        private static int compareBoundsOfTree(
+                ViewLocationHolder holder1, ViewLocationHolder holder2) {
             if (sComparisonStrategy == COMPARISON_STRATEGY_STRIPE) {
                 // First is above second.
-                if (mLocation.bottom - another.mLocation.top <= 0) {
+                if (holder1.mLocation.bottom - holder2.mLocation.top <= 0) {
                     return -1;
                 }
                 // First is below second.
-                if (mLocation.top - another.mLocation.bottom >= 0) {
+                if (holder1.mLocation.top - holder2.mLocation.bottom >= 0) {
                     return 1;
                 }
             }
 
             // We are ordering left-to-right, top-to-bottom.
-            if (mLayoutDirection == LAYOUT_DIRECTION_LTR) {
-                final int leftDifference = mLocation.left - another.mLocation.left;
+            if (holder1.mLayoutDirection == LAYOUT_DIRECTION_LTR) {
+                final int leftDifference = holder1.mLocation.left - holder2.mLocation.left;
                 if (leftDifference != 0) {
                     return leftDifference;
                 }
             } else { // RTL
-                final int rightDifference = mLocation.right - another.mLocation.right;
+                final int rightDifference = holder1.mLocation.right - holder2.mLocation.right;
                 if (rightDifference != 0) {
                     return -rightDifference;
                 }
             }
             // We are ordering left-to-right, top-to-bottom.
-            final int topDifference = mLocation.top - another.mLocation.top;
+            final int topDifference = holder1.mLocation.top - holder2.mLocation.top;
             if (topDifference != 0) {
                 return topDifference;
             }
             // Break tie by height.
-            final int heightDiference = mLocation.height() - another.mLocation.height();
+            final int heightDiference = holder1.mLocation.height() - holder2.mLocation.height();
             if (heightDiference != 0) {
                 return -heightDiference;
             }
             // Break tie by width.
-            final int widthDiference = mLocation.width() - another.mLocation.width();
-            if (widthDiference != 0) {
-                return -widthDiference;
+            final int widthDifference = holder1.mLocation.width() - holder2.mLocation.width();
+            if (widthDifference != 0) {
+                return -widthDifference;
             }
-            // Just break the tie somehow. The accessibliity ids are unique
-            // and stable, hence this is deterministic tie breaking.
-            return mView.getAccessibilityViewId() - another.mView.getAccessibilityViewId();
+
+            // Find a child of each view with different screen bounds.
+            final Rect view1Bounds = new Rect();
+            final Rect view2Bounds = new Rect();
+            final Rect tempRect = new Rect();
+            holder1.mView.getBoundsOnScreen(view1Bounds, true);
+            holder2.mView.getBoundsOnScreen(view2Bounds, true);
+            final View child1 = holder1.mView.findViewByPredicateTraversal((view) -> {
+                view.getBoundsOnScreen(tempRect, true);
+                return !tempRect.equals(view1Bounds);
+            }, null);
+            final View child2 = holder2.mView.findViewByPredicateTraversal((view) -> {
+                view.getBoundsOnScreen(tempRect, true);
+                return !tempRect.equals(view2Bounds);
+            }, null);
+
+
+            // Compare the children recursively
+            if ((child1 != null) && (child2 != null)) {
+                final ViewLocationHolder childHolder1 =
+                        ViewLocationHolder.obtain(holder1.mRoot, child1);
+                final ViewLocationHolder childHolder2 =
+                        ViewLocationHolder.obtain(holder1.mRoot, child2);
+                return compareBoundsOfTree(childHolder1, childHolder2);
+            }
+
+            // If only one has a child, use that one
+            if (child1 != null) {
+                return 1;
+            }
+
+            if (child2 != null) {
+                return -1;
+            }
+
+            // Give up
+            return 0;
         }
 
         private void init(ViewGroup root, View view) {
@@ -8448,6 +8706,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             view.getDrawingRect(viewLocation);
             root.offsetDescendantRectToMyCoords(view, viewLocation);
             mView = view;
+            mRoot = root;
             mLayoutDirection = root.getLayoutDirection();
         }
 

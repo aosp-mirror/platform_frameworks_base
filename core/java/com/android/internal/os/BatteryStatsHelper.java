@@ -136,6 +136,7 @@ public class BatteryStatsHelper {
     PowerCalculator mCameraPowerCalculator;
     PowerCalculator mFlashlightPowerCalculator;
     PowerCalculator mMemoryPowerCalculator;
+    PowerCalculator mMediaPowerCalculator;
 
     boolean mHasWifiPowerReporting = false;
     boolean mHasBluetoothPowerReporting = false;
@@ -143,6 +144,9 @@ public class BatteryStatsHelper {
     public static boolean checkWifiOnly(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(
                 Context.CONNECTIVITY_SERVICE);
+        if (cm == null) {
+            return false;
+        }
         return !cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
     }
 
@@ -405,10 +409,9 @@ public class BatteryStatsHelper {
         }
         mBluetoothPowerCalculator.reset();
 
-        if (mSensorPowerCalculator == null) {
-            mSensorPowerCalculator = new SensorPowerCalculator(mPowerProfile,
-                    (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE));
-        }
+        mSensorPowerCalculator = new SensorPowerCalculator(mPowerProfile,
+                (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE),
+                mStats, rawRealtimeUs, statsType);
         mSensorPowerCalculator.reset();
 
         if (mCameraPowerCalculator == null) {
@@ -420,6 +423,11 @@ public class BatteryStatsHelper {
             mFlashlightPowerCalculator = new FlashlightPowerCalculator(mPowerProfile);
         }
         mFlashlightPowerCalculator.reset();
+
+        if (mMediaPowerCalculator == null) {
+            mMediaPowerCalculator = new MediaPowerCalculator(mPowerProfile);
+        }
+        mMediaPowerCalculator.reset();
 
         mStatsType = statsType;
         mRawUptimeUs = rawUptimeUs;
@@ -557,6 +565,7 @@ public class BatteryStatsHelper {
             mCameraPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
             mFlashlightPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs,
                     mStatsType);
+            mMediaPowerCalculator.calculateApp(app, u, mRawRealtimeUs, mRawUptimeUs, mStatsType);
 
             final double totalPower = app.sumPower();
             if (DEBUG && totalPower != 0) {
@@ -640,6 +649,21 @@ public class BatteryStatsHelper {
         }
     }
 
+    /**
+     * Ambient display power is the additional power the screen takes while in ambient display/
+     * screen doze/ always-on display (interchangeable terms) mode. Ambient display power should
+     * be hidden {@link #shouldHideSipper(BatterySipper)}, but should not be included in smearing
+     * {@link #removeHiddenBatterySippers(List)}.
+     */
+    private void addAmbientDisplayUsage() {
+        long ambientDisplayMs = mStats.getScreenDozeTime(mRawRealtimeUs, mStatsType) / 1000;
+        double power = mPowerProfile.getAveragePower(PowerProfile.POWER_AMBIENT_DISPLAY)
+                * ambientDisplayMs / (60 * 60 * 1000);
+        if (power > 0) {
+            addEntry(DrainType.AMBIENT_DISPLAY, ambientDisplayMs, power);
+        }
+    }
+
     private void addRadioUsage() {
         BatterySipper radio = new BatterySipper(BatterySipper.DrainType.CELL, null, 0);
         mMobileRadioPowerCalculator.calculateRemaining(radio, mStats, mRawRealtimeUs, mRawUptimeUs,
@@ -662,14 +686,14 @@ public class BatteryStatsHelper {
 
     /**
      * Calculate the baseline power usage for the device when it is in suspend and idle.
-     * The device is drawing POWER_CPU_IDLE power at its lowest power state.
-     * The device is drawing POWER_CPU_IDLE + POWER_CPU_AWAKE power when a wakelock is held.
+     * The device is drawing POWER_CPU_SUSPEND power at its lowest power state.
+     * The device is drawing POWER_CPU_SUSPEND + POWER_CPU_IDLE power when a wakelock is held.
      */
     private void addIdleUsage() {
         final double suspendPowerMaMs = (mTypeBatteryRealtimeUs / 1000) *
-                mPowerProfile.getAveragePower(PowerProfile.POWER_CPU_IDLE);
+                mPowerProfile.getAveragePower(PowerProfile.POWER_CPU_SUSPEND);
         final double idlePowerMaMs = (mTypeBatteryUptimeUs / 1000) *
-                mPowerProfile.getAveragePower(PowerProfile.POWER_CPU_AWAKE);
+                mPowerProfile.getAveragePower(PowerProfile.POWER_CPU_IDLE);
         final double totalPowerMah = (suspendPowerMaMs + idlePowerMaMs) / (60 * 60 * 1000);
         if (DEBUG && totalPowerMah != 0) {
             Log.d(TAG, "Suspend: time=" + (mTypeBatteryRealtimeUs / 1000)
@@ -738,6 +762,7 @@ public class BatteryStatsHelper {
         addUserUsage();
         addPhoneUsage();
         addScreenUsage();
+        addAmbientDisplayUsage();
         addWiFiUsage();
         addBluetoothUsage();
         addMemoryUsage();
@@ -838,12 +863,13 @@ public class BatteryStatsHelper {
             final BatterySipper sipper = sippers.get(i);
             sipper.shouldHide = shouldHideSipper(sipper);
             if (sipper.shouldHide) {
-                if (sipper.drainType != BatterySipper.DrainType.OVERCOUNTED
-                        && sipper.drainType != BatterySipper.DrainType.SCREEN
-                        && sipper.drainType != BatterySipper.DrainType.UNACCOUNTED
-                        && sipper.drainType != BatterySipper.DrainType.BLUETOOTH
-                        && sipper.drainType != BatterySipper.DrainType.WIFI
-                        && sipper.drainType != BatterySipper.DrainType.IDLE) {
+                if (sipper.drainType != DrainType.OVERCOUNTED
+                        && sipper.drainType != DrainType.SCREEN
+                        && sipper.drainType != DrainType.AMBIENT_DISPLAY
+                        && sipper.drainType != DrainType.UNACCOUNTED
+                        && sipper.drainType != DrainType.BLUETOOTH
+                        && sipper.drainType != DrainType.WIFI
+                        && sipper.drainType != DrainType.IDLE) {
                     // Don't add it if it is overcounted, unaccounted or screen
                     proportionalSmearPowerMah += sipper.totalPowerMah;
                 }
@@ -890,13 +916,14 @@ public class BatteryStatsHelper {
      * Check whether we should hide the battery sipper.
      */
     public boolean shouldHideSipper(BatterySipper sipper) {
-        final BatterySipper.DrainType drainType = sipper.drainType;
+        final DrainType drainType = sipper.drainType;
 
-        return drainType == BatterySipper.DrainType.IDLE
-                || drainType == BatterySipper.DrainType.CELL
-                || drainType == BatterySipper.DrainType.SCREEN
-                || drainType == BatterySipper.DrainType.UNACCOUNTED
-                || drainType == BatterySipper.DrainType.OVERCOUNTED
+        return drainType == DrainType.IDLE
+                || drainType == DrainType.CELL
+                || drainType == DrainType.SCREEN
+                || drainType == DrainType.AMBIENT_DISPLAY
+                || drainType == DrainType.UNACCOUNTED
+                || drainType == DrainType.OVERCOUNTED
                 || isTypeService(sipper)
                 || isTypeSystem(sipper);
     }

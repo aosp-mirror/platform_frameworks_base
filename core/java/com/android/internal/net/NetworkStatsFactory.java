@@ -47,6 +47,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Creates {@link NetworkStats} instances by parsing various {@code /proc/}
  * files as needed.
+ *
+ * @hide
  */
 public class NetworkStatsFactory {
     private static final String TAG = "NetworkStatsFactory";

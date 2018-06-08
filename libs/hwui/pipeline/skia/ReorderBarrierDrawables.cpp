@@ -30,26 +30,24 @@ namespace uirenderer {
 namespace skiapipeline {
 
 StartReorderBarrierDrawable::StartReorderBarrierDrawable(SkiaDisplayList* data)
-        : mEndChildIndex(0)
-        , mBeginChildIndex(data->mChildNodes.size())
-        , mDisplayList(data) {
-}
+        : mEndChildIndex(0), mBeginChildIndex(data->mChildNodes.size()), mDisplayList(data) {}
 
 void StartReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
     if (mChildren.empty()) {
-        //mChildren is allocated and initialized only the first time onDraw is called and cached for
-        //subsequent calls
+        // mChildren is allocated and initialized only the first time onDraw is called and cached
+        // for
+        // subsequent calls
         mChildren.reserve(mEndChildIndex - mBeginChildIndex + 1);
         for (int i = mBeginChildIndex; i <= mEndChildIndex; i++) {
             mChildren.push_back(const_cast<RenderNodeDrawable*>(&mDisplayList->mChildNodes[i]));
         }
     }
     std::stable_sort(mChildren.begin(), mChildren.end(),
-        [](RenderNodeDrawable* a, RenderNodeDrawable* b) {
-            const float aZValue = a->getNodeProperties().getZ();
-            const float bZValue = b->getNodeProperties().getZ();
-            return aZValue < bZValue;
-        });
+                     [](RenderNodeDrawable* a, RenderNodeDrawable* b) {
+                         const float aZValue = a->getNodeProperties().getZ();
+                         const float bZValue = b->getNodeProperties().getZ();
+                         return aZValue < bZValue;
+                     });
 
     size_t drawIndex = 0;
     const size_t endIndex = mChildren.size();
@@ -57,7 +55,7 @@ void StartReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
         RenderNodeDrawable* childNode = mChildren[drawIndex];
         SkASSERT(childNode);
         const float casterZ = childNode->getNodeProperties().getZ();
-        if (casterZ >= -NON_ZERO_EPSILON) { //draw only children with negative Z
+        if (casterZ >= -NON_ZERO_EPSILON) {  // draw only children with negative Z
             return;
         }
         childNode->forceDraw(canvas);
@@ -85,8 +83,9 @@ void EndReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
     size_t drawIndex = 0;
 
     const size_t endIndex = zChildren.size();
-    while (drawIndex < endIndex     //draw only children with positive Z
-            && zChildren[drawIndex]->getNodeProperties().getZ() <= NON_ZERO_EPSILON) drawIndex++;
+    while (drawIndex < endIndex  // draw only children with positive Z
+           && zChildren[drawIndex]->getNodeProperties().getZ() <= NON_ZERO_EPSILON)
+        drawIndex++;
     size_t shadowIndex = drawIndex;
 
     float lastCasterZ = 0.0f;
@@ -98,7 +97,7 @@ void EndReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
             // OR if its caster's Z value is similar to the previous potential caster
             if (shadowIndex == drawIndex || casterZ - lastCasterZ < SHADOW_DELTA) {
                 this->drawShadow(canvas, zChildren[shadowIndex]);
-                lastCasterZ = casterZ; // must do this even if current caster not casting a shadow
+                lastCasterZ = casterZ;  // must do this even if current caster not casting a shadow
                 shadowIndex++;
                 continue;
             }
@@ -112,27 +111,29 @@ void EndReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
     }
 }
 
+static SkColor multiplyAlpha(SkColor color, float alpha) {
+    return SkColorSetA(color, alpha * SkColorGetA(color));
+}
+
 // copied from FrameBuilder::deferShadow
 void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable* caster) {
     const RenderProperties& casterProperties = caster->getNodeProperties();
 
-    if (casterProperties.getAlpha() <= 0.0f
-            || casterProperties.getOutline().getAlpha() <= 0.0f
-            || !casterProperties.getOutline().getPath()
-            || casterProperties.getScaleX() == 0
-            || casterProperties.getScaleY() == 0) {
+    if (casterProperties.getAlpha() <= 0.0f || casterProperties.getOutline().getAlpha() <= 0.0f ||
+        !casterProperties.getOutline().getPath() || casterProperties.getScaleX() == 0 ||
+        casterProperties.getScaleY() == 0) {
         // no shadow to draw
         return;
     }
 
-    const SkScalar casterAlpha = casterProperties.getAlpha()
-            * casterProperties.getOutline().getAlpha();
+    const SkScalar casterAlpha =
+            casterProperties.getAlpha() * casterProperties.getOutline().getAlpha();
     if (casterAlpha <= 0.0f) {
         return;
     }
 
-    float ambientAlpha = (SkiaPipeline::getAmbientShadowAlpha()/255.f)*casterAlpha;
-    float spotAlpha = (SkiaPipeline::getSpotShadowAlpha()/255.f)*casterAlpha;
+    float ambientAlpha = (SkiaPipeline::getAmbientShadowAlpha() / 255.f) * casterAlpha;
+    float spotAlpha = (SkiaPipeline::getSpotShadowAlpha() / 255.f) * casterAlpha;
 
     const RevealClip& revealClip = casterProperties.getRevealClip();
     const SkPath* revealClipPath = revealClip.getPath();
@@ -163,28 +164,22 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
     hwuiMatrix.copyTo(shadowMatrix);
     canvas->concat(shadowMatrix);
 
-    const SkPath* casterOutlinePath = casterProperties.getOutline().getPath();
-    // holds temporary SkPath to store the result of intersections
-    SkPath tmpPath;
-    const SkPath* casterPath = casterOutlinePath;
+    // default the shadow-casting path to the outline of the caster
+    const SkPath* casterPath = casterProperties.getOutline().getPath();
 
-    // TODO: In to following course of code that calculates the final shape, is there an optimal
-    //       of doing the Op calculations?
+    // intersect the shadow-casting path with the clipBounds, if present
+    if (clippedToBounds && !casterClipRect.contains(casterPath->getBounds())) {
+        casterPath = caster->getRenderNode()->getClippedOutline(casterClipRect);
+    }
+
     // intersect the shadow-casting path with the reveal, if present
+    SkPath tmpPath;  // holds temporary SkPath to store the result of intersections
     if (revealClipPath) {
         Op(*casterPath, *revealClipPath, kIntersect_SkPathOp, &tmpPath);
         tmpPath.setIsVolatile(true);
         casterPath = &tmpPath;
     }
 
-    // intersect the shadow-casting path with the clipBounds, if present
-    if (clippedToBounds) {
-        SkPath clipBoundsPath;
-        clipBoundsPath.addRect(casterClipRect);
-        Op(*casterPath, clipBoundsPath, kIntersect_SkPathOp, &tmpPath);
-        tmpPath.setIsVolatile(true);
-        casterPath = &tmpPath;
-    }
     const Vector3 lightPos = SkiaPipeline::getLightCenter();
     SkPoint3 skiaLightPos = SkPoint3::Make(lightPos.x, lightPos.y, lightPos.z);
     SkPoint3 zParams;
@@ -196,11 +191,14 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
     } else {
         zParams = SkPoint3::Make(0, 0, casterProperties.getZ());
     }
-    SkShadowUtils::DrawShadow(canvas, *casterPath, zParams, skiaLightPos,
-        SkiaPipeline::getLightRadius(), ambientAlpha, spotAlpha, SK_ColorBLACK,
-        casterAlpha < 1.0f ? SkShadowFlags::kTransparentOccluder_ShadowFlag : 0);
+    SkColor ambientColor = multiplyAlpha(casterProperties.getAmbientShadowColor(), ambientAlpha);
+    SkColor spotColor = multiplyAlpha(casterProperties.getSpotShadowColor(), spotAlpha);
+    SkShadowUtils::DrawShadow(
+            canvas, *casterPath, zParams, skiaLightPos, SkiaPipeline::getLightRadius(),
+            ambientColor, spotColor,
+            casterAlpha < 1.0f ? SkShadowFlags::kTransparentOccluder_ShadowFlag : 0);
 }
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace skiapipeline
+};  // namespace uirenderer
+};  // namespace android

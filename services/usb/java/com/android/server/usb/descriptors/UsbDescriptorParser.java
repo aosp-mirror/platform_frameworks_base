@@ -15,6 +15,7 @@
  */
 package com.android.server.usb.descriptors;
 
+import android.hardware.usb.UsbDevice;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -25,11 +26,16 @@ import java.util.ArrayList;
  */
 public final class UsbDescriptorParser {
     private static final String TAG = "UsbDescriptorParser";
+    private static final boolean DEBUG = false;
+
+    private final String mDeviceAddr;
 
     // Descriptor Objects
-    private ArrayList<UsbDescriptor> mDescriptors = new ArrayList<UsbDescriptor>();
+    private static final int DESCRIPTORS_ALLOC_SIZE = 128;
+    private final ArrayList<UsbDescriptor> mDescriptors;
 
     private UsbDeviceDescriptor mDeviceDescriptor;
+    private UsbConfigDescriptor mCurConfigDescriptor;
     private UsbInterfaceDescriptor mCurInterfaceDescriptor;
 
     // The AudioClass spec implemented by the AudioClass Interfaces
@@ -37,7 +43,30 @@ public final class UsbDescriptorParser {
     // Obtained from the first AudioClass Header descriptor.
     private int mACInterfacesSpec = UsbDeviceDescriptor.USBSPEC_1_0;
 
-    public UsbDescriptorParser() {}
+    /**
+     * Connect this parser to an existing set of already parsed descriptors.
+     * This is useful for reporting.
+     */
+    public UsbDescriptorParser(String deviceAddr, ArrayList<UsbDescriptor> descriptors) {
+        mDeviceAddr = deviceAddr;
+        mDescriptors = descriptors;
+        //TODO some error checking here....
+        mDeviceDescriptor = (UsbDeviceDescriptor) descriptors.get(0);
+    }
+
+    /**
+     * Connect this parser to an byte array containing unparsed (raw) device descriptors
+     * to be parsed (and parse them). Useful for parsing a stored descriptor buffer.
+     */
+    public UsbDescriptorParser(String deviceAddr, byte[] rawDescriptors) {
+        mDeviceAddr = deviceAddr;
+        mDescriptors = new ArrayList<UsbDescriptor>(DESCRIPTORS_ALLOC_SIZE);
+        parseDescriptors(rawDescriptors);
+    }
+
+    public String getDeviceAddr() {
+        return mDeviceAddr;
+    }
 
     /**
      * @return the USB Spec value associated with the Device descriptor for the
@@ -60,6 +89,18 @@ public final class UsbDescriptorParser {
     public int getACInterfaceSpec() {
         return mACInterfacesSpec;
     }
+
+    private class UsbDescriptorsStreamFormatException extends Exception {
+        String mMessage;
+        UsbDescriptorsStreamFormatException(String message) {
+            mMessage = message;
+        }
+
+        public String toString() {
+            return "Descriptor Stream Format Exception: " + mMessage;
+        }
+    }
+
     /**
      * The probability (as returned by getHeadsetProbability() at which we conclude
      * the peripheral is a headset.
@@ -67,7 +108,8 @@ public final class UsbDescriptorParser {
     private static final float IN_HEADSET_TRIGGER = 0.75f;
     private static final float OUT_HEADSET_TRIGGER = 0.75f;
 
-    private UsbDescriptor allocDescriptor(ByteStream stream) {
+    private UsbDescriptor allocDescriptor(ByteStream stream)
+            throws UsbDescriptorsStreamFormatException {
         stream.resetReadCount();
 
         int length = stream.getUnsignedByte();
@@ -83,15 +125,38 @@ public final class UsbDescriptorParser {
                 break;
 
             case UsbDescriptor.DESCRIPTORTYPE_CONFIG:
-                descriptor = new UsbConfigDescriptor(length, type);
+                descriptor = mCurConfigDescriptor = new UsbConfigDescriptor(length, type);
+                if (mDeviceDescriptor != null) {
+                    mDeviceDescriptor.addConfigDescriptor(mCurConfigDescriptor);
+                } else {
+                    Log.e(TAG, "Config Descriptor found with no associated Device Descriptor!");
+                    throw new UsbDescriptorsStreamFormatException(
+                            "Config Descriptor found with no associated Device Descriptor!");
+                }
                 break;
 
             case UsbDescriptor.DESCRIPTORTYPE_INTERFACE:
                 descriptor = mCurInterfaceDescriptor = new UsbInterfaceDescriptor(length, type);
+                if (mCurConfigDescriptor != null) {
+                    mCurConfigDescriptor.addInterfaceDescriptor(mCurInterfaceDescriptor);
+                } else {
+                    Log.e(TAG, "Interface Descriptor found with no associated Config Descriptor!");
+                    throw new UsbDescriptorsStreamFormatException(
+                            "Interface Descriptor found with no associated Config Descriptor!");
+                }
                 break;
 
             case UsbDescriptor.DESCRIPTORTYPE_ENDPOINT:
                 descriptor = new UsbEndpointDescriptor(length, type);
+                if (mCurInterfaceDescriptor != null) {
+                    mCurInterfaceDescriptor.addEndpointDescriptor(
+                            (UsbEndpointDescriptor) descriptor);
+                } else {
+                    Log.e(TAG,
+                            "Endpoint Descriptor found with no associated Interface Descriptor!");
+                    throw new UsbDescriptorsStreamFormatException(
+                            "Endpoint Descriptor found with no associated Interface Descriptor!");
+                }
                 break;
 
             /*
@@ -145,7 +210,9 @@ public final class UsbDescriptorParser {
      * @hide
      */
     public void parseDescriptors(byte[] descriptors) {
-        mDescriptors.clear();
+        if (DEBUG) {
+            Log.d(TAG, "parseDescriptors() - start");
+        }
 
         ByteStream stream = new ByteStream(descriptors);
         while (stream.available() > 0) {
@@ -173,21 +240,25 @@ public final class UsbDescriptorParser {
                 }
             }
         }
+        if (DEBUG) {
+            Log.d(TAG, "parseDescriptors() - end " + mDescriptors.size() + " descriptors.");
+        }
     }
+
+    public byte[] getRawDescriptors() {
+        return getRawDescriptors_native(mDeviceAddr);
+    }
+
+    private native byte[] getRawDescriptors_native(String deviceAddr);
 
     /**
      * @hide
      */
-    public boolean parseDevice(String deviceAddr) {
-        byte[] rawDescriptors = getRawDescriptors(deviceAddr);
-        if (rawDescriptors != null) {
-            parseDescriptors(rawDescriptors);
-            return true;
-        }
-        return false;
+    public String getDescriptorString(int stringId) {
+        return getDescriptorString_native(mDeviceAddr, stringId);
     }
 
-    private native byte[] getRawDescriptors(String deviceAddr);
+    private native String getDescriptorString_native(String deviceAddr, int stringId);
 
     public int getParsingSpec() {
         return mDeviceDescriptor != null ? mDeviceDescriptor.getSpec() : 0;
@@ -195,6 +266,22 @@ public final class UsbDescriptorParser {
 
     public ArrayList<UsbDescriptor> getDescriptors() {
         return mDescriptors;
+    }
+
+    /**
+     * @hide
+     */
+    public UsbDevice toAndroidUsbDevice() {
+        if (mDeviceDescriptor == null) {
+            Log.e(TAG, "toAndroidUsbDevice() ERROR - No Device Descriptor");
+            return null;
+        }
+
+        UsbDevice device = mDeviceDescriptor.toAndroid(this);
+        if (device == null) {
+            Log.e(TAG, "toAndroidUsbDevice() ERROR Creating Device");
+        }
+        return device;
     }
 
     /**
@@ -213,7 +300,7 @@ public final class UsbDescriptorParser {
     /**
      * @hide
      */
-    public ArrayList<UsbDescriptor> getInterfaceDescriptorsForClass(byte usbClass) {
+    public ArrayList<UsbDescriptor> getInterfaceDescriptorsForClass(int usbClass) {
         ArrayList<UsbDescriptor> list = new ArrayList<UsbDescriptor>();
         for (UsbDescriptor descriptor : mDescriptors) {
             // ensure that this isn't an unrecognized DESCRIPTORTYPE_INTERFACE
@@ -235,7 +322,7 @@ public final class UsbDescriptorParser {
     /**
      * @hide
      */
-    public ArrayList<UsbDescriptor> getACInterfaceDescriptors(byte subtype, byte subclass) {
+    public ArrayList<UsbDescriptor> getACInterfaceDescriptors(byte subtype, int subclass) {
         ArrayList<UsbDescriptor> list = new ArrayList<UsbDescriptor>();
         for (UsbDescriptor descriptor : mDescriptors) {
             if (descriptor.getType() == UsbDescriptor.DESCRIPTORTYPE_AUDIO_INTERFACE) {
@@ -255,12 +342,162 @@ public final class UsbDescriptorParser {
         return list;
     }
 
+    /*
+     * Attribute predicates
+     */
     /**
      * @hide
      */
-    public boolean hasHIDDescriptor() {
+    public boolean hasInput() {
+        if (DEBUG) {
+            Log.d(TAG, "---- hasInput()");
+        }
+        ArrayList<UsbDescriptor> acDescriptors =
+                getACInterfaceDescriptors(UsbACInterface.ACI_INPUT_TERMINAL,
+                UsbACInterface.AUDIO_AUDIOCONTROL);
+        boolean hasInput = false;
+        for (UsbDescriptor descriptor : acDescriptors) {
+            if (descriptor instanceof UsbACTerminal) {
+                UsbACTerminal inDescr = (UsbACTerminal) descriptor;
+                // Check for input and bi-directional terminal types
+                int type = inDescr.getTerminalType();
+                if (DEBUG) {
+                    Log.d(TAG, "  type:0x" + Integer.toHexString(type));
+                }
+                int terminalCategory = type & ~0xFF;
+                if (terminalCategory != UsbTerminalTypes.TERMINAL_USB_UNDEFINED
+                        && terminalCategory != UsbTerminalTypes.TERMINAL_OUT_UNDEFINED) {
+                    // If not explicitly a USB connection or output, it could be an input.
+                    hasInput = true;
+                    break;
+                }
+            } else {
+                Log.w(TAG, "Undefined Audio Input terminal l: " + descriptor.getLength()
+                        + " t:0x" + Integer.toHexString(descriptor.getType()));
+            }
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "hasInput() = " + hasInput);
+        }
+        return hasInput;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean hasOutput() {
+        if (DEBUG) {
+            Log.d(TAG, "---- hasOutput()");
+        }
+        ArrayList<UsbDescriptor> acDescriptors =
+                getACInterfaceDescriptors(UsbACInterface.ACI_OUTPUT_TERMINAL,
+                UsbACInterface.AUDIO_AUDIOCONTROL);
+        boolean hasOutput = false;
+        for (UsbDescriptor descriptor : acDescriptors) {
+            if (descriptor instanceof UsbACTerminal) {
+                UsbACTerminal outDescr = (UsbACTerminal) descriptor;
+                // Check for output and bi-directional terminal types
+                int type = outDescr.getTerminalType();
+                if (DEBUG) {
+                    Log.d(TAG, "  type:0x" + Integer.toHexString(type));
+                }
+                int terminalCategory = type & ~0xFF;
+                if (terminalCategory != UsbTerminalTypes.TERMINAL_USB_UNDEFINED
+                        && terminalCategory != UsbTerminalTypes.TERMINAL_IN_UNDEFINED) {
+                    // If not explicitly a USB connection or input, it could be an output.
+                    hasOutput = true;
+                    break;
+                }
+            } else {
+                Log.w(TAG, "Undefined Audio Input terminal l: " + descriptor.getLength()
+                        + " t:0x" + Integer.toHexString(descriptor.getType()));
+            }
+        }
+        if (DEBUG) {
+            Log.d(TAG, "hasOutput() = " + hasOutput);
+        }
+        return hasOutput;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean hasMic() {
+        boolean hasMic = false;
+
+        ArrayList<UsbDescriptor> acDescriptors =
+                getACInterfaceDescriptors(UsbACInterface.ACI_INPUT_TERMINAL,
+                UsbACInterface.AUDIO_AUDIOCONTROL);
+        for (UsbDescriptor descriptor : acDescriptors) {
+            if (descriptor instanceof UsbACTerminal) {
+                UsbACTerminal inDescr = (UsbACTerminal) descriptor;
+                if (inDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_IN_MIC
+                        || inDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_BIDIR_HEADSET
+                        || inDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_BIDIR_UNDEFINED
+                        || inDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_EXTERN_LINE) {
+                    hasMic = true;
+                    break;
+                }
+            } else {
+                Log.w(TAG, "Undefined Audio Input terminal l: " + descriptor.getLength()
+                        + " t:0x" + Integer.toHexString(descriptor.getType()));
+            }
+        }
+        return hasMic;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean hasSpeaker() {
+        boolean hasSpeaker = false;
+
+        ArrayList<UsbDescriptor> acDescriptors =
+                getACInterfaceDescriptors(UsbACInterface.ACI_OUTPUT_TERMINAL,
+                        UsbACInterface.AUDIO_AUDIOCONTROL);
+        for (UsbDescriptor descriptor : acDescriptors) {
+            if (descriptor instanceof UsbACTerminal) {
+                UsbACTerminal outDescr = (UsbACTerminal) descriptor;
+                if (outDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_OUT_SPEAKER
+                        || outDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_OUT_HEADPHONES
+                        || outDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_BIDIR_HEADSET) {
+                    hasSpeaker = true;
+                    break;
+                }
+            } else {
+                Log.w(TAG, "Undefined Audio Output terminal l: " + descriptor.getLength()
+                        + " t:0x" + Integer.toHexString(descriptor.getType()));
+            }
+        }
+
+        return hasSpeaker;
+    }
+
+    /**
+     *@ hide
+     */
+    public boolean hasAudioInterface() {
+        ArrayList<UsbDescriptor> descriptors =
+                getInterfaceDescriptorsForClass(UsbDescriptor.CLASSID_AUDIO);
+        return !descriptors.isEmpty();
+    }
+
+    /**
+     * @hide
+     */
+    public boolean hasHIDInterface() {
         ArrayList<UsbDescriptor> descriptors =
                 getInterfaceDescriptorsForClass(UsbDescriptor.CLASSID_HID);
+        return !descriptors.isEmpty();
+    }
+
+    /**
+     * @hide
+     */
+    public boolean hasStorageInterface() {
+        ArrayList<UsbDescriptor> descriptors =
+                getInterfaceDescriptorsForClass(UsbDescriptor.CLASSID_STORAGE);
         return !descriptors.isEmpty();
     }
 
@@ -294,54 +531,18 @@ public final class UsbDescriptorParser {
         }
 
         float probability = 0.0f;
-        ArrayList<UsbDescriptor> acDescriptors;
 
         // Look for a microphone
-        boolean hasMic = false;
-        acDescriptors = getACInterfaceDescriptors(UsbACInterface.ACI_INPUT_TERMINAL,
-                UsbACInterface.AUDIO_AUDIOCONTROL);
-        for (UsbDescriptor descriptor : acDescriptors) {
-            if (descriptor instanceof UsbACTerminal) {
-                UsbACTerminal inDescr = (UsbACTerminal) descriptor;
-                if (inDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_IN_MIC
-                        || inDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_BIDIR_HEADSET
-                        || inDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_BIDIR_UNDEFINED
-                        || inDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_EXTERN_LINE) {
-                    hasMic = true;
-                    break;
-                }
-            } else {
-                Log.w(TAG, "Undefined Audio Input terminal l: " + descriptor.getLength()
-                        + " t:0x" + Integer.toHexString(descriptor.getType()));
-            }
-        }
+        boolean hasMic = hasMic();
 
         // Look for a "speaker"
-        boolean hasSpeaker = false;
-        acDescriptors =
-                getACInterfaceDescriptors(UsbACInterface.ACI_OUTPUT_TERMINAL,
-                        UsbACInterface.AUDIO_AUDIOCONTROL);
-        for (UsbDescriptor descriptor : acDescriptors) {
-            if (descriptor instanceof UsbACTerminal) {
-                UsbACTerminal outDescr = (UsbACTerminal) descriptor;
-                if (outDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_OUT_SPEAKER
-                        || outDescr.getTerminalType()
-                            == UsbTerminalTypes.TERMINAL_OUT_HEADPHONES
-                        || outDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_BIDIR_HEADSET) {
-                    hasSpeaker = true;
-                    break;
-                }
-            } else {
-                Log.w(TAG, "Undefined Audio Output terminal l: " + descriptor.getLength()
-                        + " t:0x" + Integer.toHexString(descriptor.getType()));
-            }
-        }
+        boolean hasSpeaker = hasSpeaker();
 
         if (hasMic && hasSpeaker) {
             probability += 0.75f;
         }
 
-        if (hasMic && hasHIDDescriptor()) {
+        if (hasMic && hasHIDInterface()) {
             probability += 0.25f;
         }
 
@@ -355,8 +556,6 @@ public final class UsbDescriptorParser {
      * to count on the peripheral being a headset.
      */
     public boolean isInputHeadset() {
-        // TEMP
-        Log.i(TAG, "---- isInputHeadset() prob:" + (getInputHeadsetProbability() * 100f) + "%");
         return getInputHeadsetProbability() >= IN_HEADSET_TRIGGER;
     }
 
@@ -396,7 +595,7 @@ public final class UsbDescriptorParser {
             probability += 0.75f;
         }
 
-        if (hasSpeaker && hasHIDDescriptor()) {
+        if (hasSpeaker && hasHIDInterface()) {
             probability += 0.25f;
         }
 
@@ -410,8 +609,6 @@ public final class UsbDescriptorParser {
      * to count on the peripheral being a headset.
      */
     public boolean isOutputHeadset() {
-        // TEMP
-        Log.i(TAG, "---- isOutputHeadset() prob:" + (getOutputHeadsetProbability() * 100f) + "%");
         return getOutputHeadsetProbability() >= OUT_HEADSET_TRIGGER;
     }
 

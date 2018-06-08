@@ -34,7 +34,7 @@ public final class Usb10ASGeneral extends UsbACInterface {
     private int mFormatTag;     // 5:2 The Audio Data Format that has to be used to communicate
                                 // with this interface.
 
-    public Usb10ASGeneral(int length, byte type, byte subtype, byte subclass) {
+    public Usb10ASGeneral(int length, byte type, byte subtype, int subclass) {
         super(length, type, subtype, subclass);
     }
 

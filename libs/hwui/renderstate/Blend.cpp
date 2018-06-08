@@ -52,49 +52,42 @@ static_assert(17 == static_cast<int>(SkBlendMode::kLighten), "SkBlendMode enums 
 
 // In this array, the index of each Blender equals the value of the first
 // entry. For instance, gBlends[1] == gBlends[SkBlendMode::kSrc]
-const Blender kBlends[] = {
-    { SkBlendMode::kClear,    GL_ZERO,                GL_ONE_MINUS_SRC_ALPHA },
-    { SkBlendMode::kSrc,      GL_ONE,                 GL_ZERO },
-    { SkBlendMode::kDst,      GL_ZERO,                GL_ONE },
-    { SkBlendMode::kSrcOver,  GL_ONE,                 GL_ONE_MINUS_SRC_ALPHA },
-    { SkBlendMode::kDstOver,  GL_ONE_MINUS_DST_ALPHA, GL_ONE },
-    { SkBlendMode::kSrcIn,    GL_DST_ALPHA,           GL_ZERO },
-    { SkBlendMode::kDstIn,    GL_ZERO,                GL_SRC_ALPHA },
-    { SkBlendMode::kSrcOut,   GL_ONE_MINUS_DST_ALPHA, GL_ZERO },
-    { SkBlendMode::kDstOut,   GL_ZERO,                GL_ONE_MINUS_SRC_ALPHA },
-    { SkBlendMode::kSrcATop,  GL_DST_ALPHA,           GL_ONE_MINUS_SRC_ALPHA },
-    { SkBlendMode::kDstATop,  GL_ONE_MINUS_DST_ALPHA, GL_SRC_ALPHA },
-    { SkBlendMode::kXor,      GL_ONE_MINUS_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA },
-    { SkBlendMode::kPlus,     GL_ONE,                 GL_ONE },
-    { SkBlendMode::kModulate, GL_ZERO,                GL_SRC_COLOR },
-    { SkBlendMode::kScreen,   GL_ONE,                 GL_ONE_MINUS_SRC_COLOR }
-};
+const Blender kBlends[] = {{SkBlendMode::kClear, GL_ZERO, GL_ONE_MINUS_SRC_ALPHA},
+                           {SkBlendMode::kSrc, GL_ONE, GL_ZERO},
+                           {SkBlendMode::kDst, GL_ZERO, GL_ONE},
+                           {SkBlendMode::kSrcOver, GL_ONE, GL_ONE_MINUS_SRC_ALPHA},
+                           {SkBlendMode::kDstOver, GL_ONE_MINUS_DST_ALPHA, GL_ONE},
+                           {SkBlendMode::kSrcIn, GL_DST_ALPHA, GL_ZERO},
+                           {SkBlendMode::kDstIn, GL_ZERO, GL_SRC_ALPHA},
+                           {SkBlendMode::kSrcOut, GL_ONE_MINUS_DST_ALPHA, GL_ZERO},
+                           {SkBlendMode::kDstOut, GL_ZERO, GL_ONE_MINUS_SRC_ALPHA},
+                           {SkBlendMode::kSrcATop, GL_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA},
+                           {SkBlendMode::kDstATop, GL_ONE_MINUS_DST_ALPHA, GL_SRC_ALPHA},
+                           {SkBlendMode::kXor, GL_ONE_MINUS_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA},
+                           {SkBlendMode::kPlus, GL_ONE, GL_ONE},
+                           {SkBlendMode::kModulate, GL_ZERO, GL_SRC_COLOR},
+                           {SkBlendMode::kScreen, GL_ONE, GL_ONE_MINUS_SRC_COLOR}};
 
 // This array contains the swapped version of each SkBlendMode. For instance
 // this array's SrcOver blending mode is actually DstOver. You can refer to
 // createLayer() for more information on the purpose of this array.
-const Blender kBlendsSwap[] = {
-    { SkBlendMode::kClear,    GL_ONE_MINUS_DST_ALPHA, GL_ZERO },
-    { SkBlendMode::kSrc,      GL_ZERO,                GL_ONE },
-    { SkBlendMode::kDst,      GL_ONE,                 GL_ZERO },
-    { SkBlendMode::kSrcOver,  GL_ONE_MINUS_DST_ALPHA, GL_ONE },
-    { SkBlendMode::kDstOver,  GL_ONE,                 GL_ONE_MINUS_SRC_ALPHA },
-    { SkBlendMode::kSrcIn,    GL_ZERO,                GL_SRC_ALPHA },
-    { SkBlendMode::kDstIn,    GL_DST_ALPHA,           GL_ZERO },
-    { SkBlendMode::kSrcOut,   GL_ZERO,                GL_ONE_MINUS_SRC_ALPHA },
-    { SkBlendMode::kDstOut,   GL_ONE_MINUS_DST_ALPHA, GL_ZERO },
-    { SkBlendMode::kSrcATop,  GL_ONE_MINUS_DST_ALPHA, GL_SRC_ALPHA },
-    { SkBlendMode::kDstATop,  GL_DST_ALPHA,           GL_ONE_MINUS_SRC_ALPHA },
-    { SkBlendMode::kXor,      GL_ONE_MINUS_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA },
-    { SkBlendMode::kPlus,     GL_ONE,                 GL_ONE },
-    { SkBlendMode::kModulate, GL_DST_COLOR,           GL_ZERO },
-    { SkBlendMode::kScreen,   GL_ONE_MINUS_DST_COLOR, GL_ONE }
-};
+const Blender kBlendsSwap[] = {{SkBlendMode::kClear, GL_ONE_MINUS_DST_ALPHA, GL_ZERO},
+                               {SkBlendMode::kSrc, GL_ZERO, GL_ONE},
+                               {SkBlendMode::kDst, GL_ONE, GL_ZERO},
+                               {SkBlendMode::kSrcOver, GL_ONE_MINUS_DST_ALPHA, GL_ONE},
+                               {SkBlendMode::kDstOver, GL_ONE, GL_ONE_MINUS_SRC_ALPHA},
+                               {SkBlendMode::kSrcIn, GL_ZERO, GL_SRC_ALPHA},
+                               {SkBlendMode::kDstIn, GL_DST_ALPHA, GL_ZERO},
+                               {SkBlendMode::kSrcOut, GL_ZERO, GL_ONE_MINUS_SRC_ALPHA},
+                               {SkBlendMode::kDstOut, GL_ONE_MINUS_DST_ALPHA, GL_ZERO},
+                               {SkBlendMode::kSrcATop, GL_ONE_MINUS_DST_ALPHA, GL_SRC_ALPHA},
+                               {SkBlendMode::kDstATop, GL_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA},
+                               {SkBlendMode::kXor, GL_ONE_MINUS_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA},
+                               {SkBlendMode::kPlus, GL_ONE, GL_ONE},
+                               {SkBlendMode::kModulate, GL_DST_COLOR, GL_ZERO},
+                               {SkBlendMode::kScreen, GL_ONE_MINUS_DST_COLOR, GL_ONE}};
 
-Blend::Blend()
-    : mEnabled(false)
-    , mSrcMode(GL_ZERO)
-    , mDstMode(GL_ZERO) {
+Blend::Blend() : mEnabled(false), mSrcMode(GL_ZERO), mDstMode(GL_ZERO) {
     // gl blending off by default
 }
 
@@ -145,4 +138,3 @@ void Blend::dump() {
 
 } /* namespace uirenderer */
 } /* namespace android */
-

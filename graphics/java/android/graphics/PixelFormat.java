@@ -185,4 +185,52 @@ public class PixelFormat {
 
         return false;
     }
+
+    /**
+     * @hide
+     */
+    public static String formatToString(@Format int format) {
+        switch (format) {
+            case UNKNOWN:
+                return "UNKNOWN";
+            case TRANSLUCENT:
+                return "TRANSLUCENT";
+            case TRANSPARENT:
+                return "TRANSPARENT";
+            case RGBA_8888:
+                return "RGBA_8888";
+            case RGBX_8888:
+                return "RGBX_8888";
+            case RGB_888:
+                return "RGB_888";
+            case RGB_565:
+                return "RGB_565";
+            case RGBA_5551:
+                return "RGBA_5551";
+            case RGBA_4444:
+                return "RGBA_4444";
+            case A_8:
+                return "A_8";
+            case L_8:
+                return "L_8";
+            case LA_88:
+                return "LA_88";
+            case RGB_332:
+                return "RGB_332";
+            case YCbCr_422_SP:
+                return "YCbCr_422_SP";
+            case YCbCr_420_SP:
+                return "YCbCr_420_SP";
+            case YCbCr_422_I:
+                return "YCbCr_422_I";
+            case RGBA_F16:
+                return "RGBA_F16";
+            case RGBA_1010102:
+                return "RGBA_1010102";
+            case JPEG:
+                return "JPEG";
+            default:
+                return Integer.toString(format);
+        }
+    }
 }

@@ -31,7 +31,7 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    public void onActivityPinned(String packageName, int userId, int taskId)
+    public void onActivityPinned(String packageName, int userId, int taskId, int stackId)
             throws RemoteException {
     }
 
@@ -77,7 +77,7 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    public void onTaskRemovalStarted(int taskId) {
+    public void onTaskRemovalStarted(int taskId) throws RemoteException {
     }
 
     @Override
@@ -91,11 +91,10 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    public void onTaskProfileLocked(int taskId, int userId) {
+    public void onTaskProfileLocked(int taskId, int userId) throws RemoteException {
     }
 
     @Override
-    public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot)
-            throws RemoteException {
+    public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) throws RemoteException {
     }
 }

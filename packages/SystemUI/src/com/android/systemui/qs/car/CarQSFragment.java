@@ -13,21 +13,30 @@
  */
 package com.android.systemui.qs.car;
 
+import android.animation.Animator;
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.support.v7.widget.GridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFooter;
-import com.android.systemui.statusbar.car.UserGridView;
-import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.statusbar.car.UserGridRecyclerView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A quick settings fragment for the car. For auto, there is no row for quick settings or ability
@@ -36,8 +45,13 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
  */
 public class CarQSFragment extends Fragment implements QS {
     private View mHeader;
+    private View mUserSwitcherContainer;
     private CarQSFooter mFooter;
-    private UserGridView mUserGridView;
+    private View mFooterUserName;
+    private View mFooterExpandIcon;
+    private UserGridRecyclerView mUserGridView;
+    private AnimatorSet mAnimatorSet;
+    private UserSwitchCallback mUserSwitchCallback;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -50,12 +64,22 @@ public class CarQSFragment extends Fragment implements QS {
         super.onViewCreated(view, savedInstanceState);
         mHeader = view.findViewById(R.id.header);
         mFooter = view.findViewById(R.id.qs_footer);
+        mFooterUserName = mFooter.findViewById(R.id.user_name);
+        mFooterExpandIcon = mFooter.findViewById(R.id.user_switch_expand_icon);
 
-        mUserGridView = view.findViewById(R.id.user_grid);
-        mUserGridView.init(null, Dependency.get(UserSwitcherController.class),
-                false /* showInitially */);
+        mUserSwitcherContainer = view.findViewById(R.id.user_switcher_container);
 
-        mFooter.setUserGridView(mUserGridView);
+        updateUserSwitcherHeight(0);
+
+        Context context = getContext();
+        mUserGridView = mUserSwitcherContainer.findViewById(R.id.user_grid);
+        GridLayoutManager layoutManager = new GridLayoutManager(context,
+                context.getResources().getInteger(R.integer.user_fullscreen_switcher_num_col));
+        mUserGridView.getRecyclerView().setLayoutManager(layoutManager);
+        mUserGridView.buildAdapter();
+
+        mUserSwitchCallback = new UserSwitchCallback();
+        mFooter.setUserSwitchCallback(mUserSwitchCallback);
     }
 
     @Override
@@ -170,5 +194,82 @@ public class CarQSFragment extends Fragment implements QS {
     @Override
     public void setExpandClickListener(OnClickListener onClickListener) {
         // No ability to expand the quick settings.
+    }
+
+    public class UserSwitchCallback {
+        private boolean mShowing;
+
+        public boolean isShowing() {
+            return mShowing;
+        }
+
+        public void show() {
+            mShowing = true;
+            animateHeightChange(true /* opening */);
+        }
+
+        public void hide() {
+            mShowing = false;
+            animateHeightChange(false /* opening */);
+        }
+    }
+
+    private void updateUserSwitcherHeight(int height) {
+        ViewGroup.LayoutParams layoutParams = mUserSwitcherContainer.getLayoutParams();
+        layoutParams.height = height;
+        mUserSwitcherContainer.requestLayout();
+    }
+
+    private void animateHeightChange(boolean opening) {
+        // Animation in progress; cancel it to avoid contention.
+        if (mAnimatorSet != null){
+            mAnimatorSet.cancel();
+        }
+
+        List<Animator> allAnimators = new ArrayList<>();
+        ValueAnimator heightAnimator = (ValueAnimator) AnimatorInflater.loadAnimator(getContext(),
+                opening ? R.anim.car_user_switcher_open_animation
+                        : R.anim.car_user_switcher_close_animation);
+        heightAnimator.addUpdateListener(valueAnimator -> {
+            updateUserSwitcherHeight((Integer) valueAnimator.getAnimatedValue());
+        });
+        allAnimators.add(heightAnimator);
+
+        Animator nameAnimator = AnimatorInflater.loadAnimator(getContext(),
+                opening ? R.anim.car_user_switcher_open_name_animation
+                        : R.anim.car_user_switcher_close_name_animation);
+        nameAnimator.setTarget(mFooterUserName);
+        allAnimators.add(nameAnimator);
+
+        Animator iconAnimator = AnimatorInflater.loadAnimator(getContext(),
+                opening ? R.anim.car_user_switcher_open_icon_animation
+                        : R.anim.car_user_switcher_close_icon_animation);
+        iconAnimator.setTarget(mFooterExpandIcon);
+        allAnimators.add(iconAnimator);
+
+        mAnimatorSet = new AnimatorSet();
+        mAnimatorSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mAnimatorSet = null;
+            }
+        });
+        mAnimatorSet.playTogether(allAnimators.toArray(new Animator[0]));
+
+        // Setup all values to the start values in the animations, since there are delays, but need
+        // to have all values start at the beginning.
+        setupInitialValues(mAnimatorSet);
+
+        mAnimatorSet.start();
+    }
+
+    private void setupInitialValues(Animator anim) {
+        if (anim instanceof AnimatorSet) {
+            for (Animator a : ((AnimatorSet) anim).getChildAnimations()) {
+                setupInitialValues(a);
+            }
+        } else if (anim instanceof ObjectAnimator) {
+            ((ObjectAnimator) anim).setCurrentFraction(0.0f);
+        }
     }
 }

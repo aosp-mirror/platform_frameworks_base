@@ -22,66 +22,57 @@
 
 #include "androidfw/StringPiece.h"
 
+#include "text/Printer.h"
+
 namespace aapt {
 
-/**
- * Builds a JavaDoc comment from a set of XML comments.
- * This will also look for instances of @SystemApi and convert them to
- * actual Java annotations.
- *
- * Example:
- *
- * Input XML:
- *
- * <!-- This is meant to be hidden because
- *      It is system api. Also it is @deprecated
- *      @SystemApi
- *      -->
- *
- * Output JavaDoc:
- *
- *  /\*
- *   * This is meant to be hidden because
- *   * It is system api. Also it is @deprecated
- *   *\/
- *
- * Output Annotations:
- *
- * @Deprecated
- * @android.annotation.SystemApi
- *
- */
+// Builds a JavaDoc comment from a set of XML comments.
+// This will also look for instances of @SystemApi and convert them to
+// actual Java annotations.
+//
+// Example:
+//
+// Input XML:
+//
+// <!-- This is meant to be hidden because
+//      It is system api. Also it is @deprecated
+//      @SystemApi
+//      -->
+//
+// Output JavaDoc:
+//
+//  /**
+//   * This is meant to be hidden because
+//   * It is system api. Also it is @deprecated
+//   */
+//
+// Output Annotations:
+//
+// @Deprecated
+// @android.annotation.SystemApi
 class AnnotationProcessor {
  public:
+  // Extracts the first sentence of a comment. The algorithm selects the substring starting from
+  // the beginning of the string, and ending at the first '.' character that is followed by a
+  // whitespace character. If these requirements are not met, the whole string is returned.
   static android::StringPiece ExtractFirstSentence(const android::StringPiece& comment);
 
-  /**
-   * Adds more comments. Since resources can have various values with different
-   * configurations,
-   * we need to collect all the comments.
-   */
+  // Adds more comments. Resources can have value definitions for various configurations, and
+  // each of the definitions may have comments that need to be processed.
   void AppendComment(const android::StringPiece& comment);
 
   void AppendNewLine();
 
-  /**
-   * Writes the comments and annotations to the stream, with the given prefix
-   * before each line.
-   */
-  void WriteToStream(std::ostream* out, const android::StringPiece& prefix) const;
+  // Writes the comments and annotations to the Printer.
+  void Print(text::Printer* printer) const;
 
  private:
-  enum : uint32_t {
-    kDeprecated = 0x01,
-    kSystemApi = 0x02,
-  };
-
   std::stringstream comment_;
   std::stringstream mAnnotations;
   bool has_comments_ = false;
   uint32_t annotation_bit_mask_ = 0;
 
-  void AppendCommentLine(std::string& line);
+  void AppendCommentLine(std::string line);
 };
 
 }  // namespace aapt

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include <Rect.h>
+#include <gtest/gtest.h>
 #include <renderstate/OffscreenBufferPool.h>
 
 #include <tests/common/TestUtils.h>
@@ -56,12 +56,10 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBuffer, constructWideColorGamut) {
 
 RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBuffer, getTextureCoordinates) {
     OffscreenBuffer layerAligned(renderThread.renderState(), Caches::getInstance(), 256u, 256u);
-    EXPECT_EQ(Rect(0, 1, 1, 0),
-            layerAligned.getTextureCoordinates());
+    EXPECT_EQ(Rect(0, 1, 1, 0), layerAligned.getTextureCoordinates());
 
     OffscreenBuffer layerUnaligned(renderThread.renderState(), Caches::getInstance(), 200u, 225u);
-    EXPECT_EQ(Rect(0, 225.0f / 256.0f, 200.0f / 256.0f, 0),
-            layerUnaligned.getTextureCoordinates());
+    EXPECT_EQ(Rect(0, 225.0f / 256.0f, 200.0f / 256.0f, 0), layerUnaligned.getTextureCoordinates());
 }
 
 RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBuffer, dirty) {
@@ -221,7 +219,7 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBufferPool, putAndDestroy) {
     auto hugeLayer = pool.get(renderThread.renderState(), pool.getMaxSize() / 64, 64);
     EXPECT_GT(hugeLayer->getSizeInBytes(), pool.getMaxSize());
     pool.putOrDelete(hugeLayer);
-    EXPECT_EQ(0u, pool.getCount()); // failed to put (so was destroyed instead)
+    EXPECT_EQ(0u, pool.getCount());  // failed to put (so was destroyed instead)
 }
 
 RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBufferPool, clear) {
@@ -244,4 +242,3 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(OffscreenBufferPool, clear) {
 
     EXPECT_EQ(0, GpuMemoryTracker::getInstanceCount(GpuObjectType::OffscreenBuffer));
 }
-

@@ -44,13 +44,14 @@ import java.util.Hashtable;
  */
 public class MiniThumbFile {
     private static final String TAG = "MiniThumbFile";
-    private static final int MINI_THUMB_DATA_FILE_VERSION = 3;
+    private static final int MINI_THUMB_DATA_FILE_VERSION = 4;
     public static final int BYTES_PER_MINTHUMB = 10000;
     private static final int HEADER_SIZE = 1 + 8 + 4;
     private Uri mUri;
     private RandomAccessFile mMiniThumbFile;
     private FileChannel mChannel;
     private ByteBuffer mBuffer;
+    private ByteBuffer mEmptyBuffer;
     private static final Hashtable<String, MiniThumbFile> sThumbFiles =
         new Hashtable<String, MiniThumbFile>();
 
@@ -127,9 +128,10 @@ public class MiniThumbFile {
         return mMiniThumbFile;
     }
 
-    public MiniThumbFile(Uri uri) {
+    private MiniThumbFile(Uri uri) {
         mUri = uri;
         mBuffer = ByteBuffer.allocateDirect(BYTES_PER_MINTHUMB);
+        mEmptyBuffer = ByteBuffer.allocateDirect(BYTES_PER_MINTHUMB);
     }
 
     public synchronized void deactivate() {
@@ -182,6 +184,54 @@ public class MiniThumbFile {
             }
         }
         return 0;
+    }
+
+    public synchronized void eraseMiniThumb(long id) {
+        RandomAccessFile r = miniThumbDataFile();
+        if (r != null) {
+            long pos = id * BYTES_PER_MINTHUMB;
+            FileLock lock = null;
+            try {
+                mBuffer.clear();
+                mBuffer.limit(1 + 8);
+
+                lock = mChannel.lock(pos, BYTES_PER_MINTHUMB, false);
+                // check that we can read the following 9 bytes
+                // (1 for the "status" and 8 for the long)
+                if (mChannel.read(mBuffer, pos) == 9) {
+                    mBuffer.position(0);
+                    if (mBuffer.get() == 1) {
+                        long currentMagic = mBuffer.getLong();
+                        if (currentMagic == 0) {
+                            // there is no thumbnail stored here
+                            Log.i(TAG, "no thumbnail for id " + id);
+                            return;
+                        }
+                        // zero out the thumbnail slot
+                        // Log.v(TAG, "clearing slot " + id + ", magic " + currentMagic
+                        //         + " at offset " + pos);
+                        mChannel.write(mEmptyBuffer, pos);
+                    }
+                } else {
+                    // Log.v(TAG, "No slot");
+                }
+            } catch (IOException ex) {
+                Log.v(TAG, "Got exception checking file magic: ", ex);
+            } catch (RuntimeException ex) {
+                // Other NIO related exception like disk full, read only channel..etc
+                Log.e(TAG, "Got exception when reading magic, id = " + id +
+                        ", disk full or mount read-only? " + ex.getClass());
+            } finally {
+                try {
+                    if (lock != null) lock.release();
+                }
+                catch (IOException ex) {
+                    // ignore it.
+                }
+            }
+        } else {
+            // Log.v(TAG, "No data file");
+        }
     }
 
     public synchronized void saveMiniThumbToFile(byte[] data, long id, long magic)

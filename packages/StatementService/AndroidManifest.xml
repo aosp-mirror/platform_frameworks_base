@@ -26,6 +26,7 @@
     <application
             android:label="@string/service_name"
             android:allowBackup="false">
+        <uses-library android:name="org.apache.http.legacy" />
         <service
                 android:name=".DirectStatementService"
                 android:exported="false">

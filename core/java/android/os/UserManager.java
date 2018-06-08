@@ -36,6 +36,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.UserInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -103,8 +104,12 @@ public class UserManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag=true, value={RESTRICTION_NOT_SET, RESTRICTION_SOURCE_SYSTEM,
-            RESTRICTION_SOURCE_DEVICE_OWNER, RESTRICTION_SOURCE_PROFILE_OWNER})
+    @IntDef(flag = true, prefix = { "RESTRICTION_" }, value = {
+            RESTRICTION_NOT_SET,
+            RESTRICTION_SOURCE_SYSTEM,
+            RESTRICTION_SOURCE_DEVICE_OWNER,
+            RESTRICTION_SOURCE_PROFILE_OWNER
+    })
     @SystemApi
     public @interface UserRestrictionSource {}
 
@@ -140,8 +145,21 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_WIFI = "no_config_wifi";
 
     /**
-     * Specifies if a user is disallowed from installing applications.
-     * The default value is <code>false</code>.
+     * Specifies if a user is disallowed from changing the device
+     * language. The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_LOCALE = "no_config_locale";
+
+    /**
+     * Specifies if a user is disallowed from installing applications. This user restriction also
+     * prevents device owners and profile owners installing apps. The default value is
+     * {@code false}.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -176,6 +194,64 @@ public class UserManager {
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_SHARE_LOCATION = "no_share_location";
+
+    /**
+     * Specifies if airplane mode is disallowed on the device.
+     *
+     * <p> This restriction can only be set by the device owner and the profile owner on the
+     * primary user and it applies globally - i.e. it disables airplane mode on the entire device.
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_AIRPLANE_MODE = "no_airplane_mode";
+
+    /**
+     * Specifies if a user is disallowed from configuring brightness. When device owner sets it,
+     * it'll only be applied on the target(system) user.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>This user restriction has no effect on managed profiles.
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_BRIGHTNESS = "no_config_brightness";
+
+    /**
+     * Specifies if ambient display is disallowed for the user.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>This user restriction has no effect on managed profiles.
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_AMBIENT_DISPLAY = "no_ambient_display";
+
+    /**
+     * Specifies if a user is disallowed from changing screen off timeout.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>This user restriction has no effect on managed profiles.
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_SCREEN_TIMEOUT = "no_config_screen_timeout";
 
     /**
      * Specifies if a user is disallowed from enabling the
@@ -319,9 +395,52 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_VPN = "no_config_vpn";
 
     /**
+     * Specifies if a user is disallowed from enabling or disabling location providers. As a
+     * result, user is disallowed from turning on or off location. Device owner and profile owners
+     * can set this restriction and it only applies on the managed user.
+     *
+     * <p>In a managed profile, location sharing is forced off when it's off on primary user, so
+     * user can still turn off location sharing on managed profile when the restriction is set by
+     * profile owner on managed profile.
+     *
+     * <p>This user restriction is different from {@link #DISALLOW_SHARE_LOCATION},
+     * as the device owner or profile owner can still enable or disable location mode via
+     * {@link DevicePolicyManager#setSecureSetting} when this restriction is on.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see android.location.LocationManager#isProviderEnabled(String)
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_LOCATION = "no_config_location";
+
+    /**
+     * Specifies if date, time and timezone configuring is disallowed.
+     *
+     * <p>When restriction is set by device owners, it applies globally - i.e., it disables date,
+     * time and timezone setting on the entire device and all users will be affected. When it's set
+     * by profile owners, it's only applied to the managed user.
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>This user restriction has no effect on managed profiles.
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_DATE_TIME = "no_config_date_time";
+
+    /**
      * Specifies if a user is disallowed from configuring Tethering
      * & portable hotspots. This can only be set by device owners and profile owners on the
      * primary user. The default value is <code>false</code>.
+     * <p>In Android 9.0 or higher, if tethering is enabled when this restriction is set,
+     * tethering will be automatically turned off.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -495,8 +614,11 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from adjusting the master volume. If set, the master volume
-     * will be muted. This can be set by device owners and profile owners. The default value is
-     * <code>false</code>.
+     * will be muted. This can be set by device owners from API 21 and profile owners from API 24.
+     * The default value is <code>false</code>.
+     *
+     * <p>When the restriction is set by profile owners, then it only applies to relevant
+     * profiles.
      *
      * <p>This restriction has no effect on managed profiles.
      * <p>Key for user restrictions.
@@ -567,6 +689,24 @@ public class UserManager {
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CREATE_WINDOWS = "no_create_windows";
+
+    /**
+     * Specifies that system error dialogs for crashed or unresponsive apps should not be shown.
+     * In this case, the system will force-stop the app as if the user chooses the "close app"
+     * option on the UI. A feedback report isn't collected as there is no way for the user to
+     * provide explicit consent. The default value is <code>false</code>.
+     *
+     * <p>When this user restriction is set by device owners, it's applied to all users. When set by
+     * the profile owner of the primary user or a secondary user, the restriction affects only the
+     * calling user. This user restriction has no effect on managed profiles.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_SYSTEM_ERROR_DIALOGS = "no_system_error_dialogs";
 
     /**
      * Specifies if what is copied in the clipboard of this profile can
@@ -654,6 +794,7 @@ public class UserManager {
      * @see #getUserRestrictions()
      * @hide
      */
+    @SystemApi
     public static final String DISALLOW_RUN_IN_BACKGROUND = "no_run_in_background";
 
     /**
@@ -717,6 +858,25 @@ public class UserManager {
     public static final String DISALLOW_OEM_UNLOCK = "no_oem_unlock";
 
     /**
+     * Specifies that the managed profile is not allowed to have unified lock screen challenge with
+     * the primary user.
+     *
+     * <p><strong>Note:</strong> Setting this restriction alone doesn't automatically set a
+     * separate challenge. Profile owner can ask the user to set a new password using
+     * {@link DevicePolicyManager#ACTION_SET_NEW_PASSWORD} and verify it using
+     * {@link DevicePolicyManager#isUsingUnifiedPassword(ComponentName)}.
+     *
+     * <p>Can be set by profile owners. It only has effect on managed profiles when set by managed
+     * profile owner. Has no effect on non-managed profiles or users.
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_UNIFIED_PASSWORD = "no_unified_password";
+
+    /**
      * Allows apps in the parent profile to handle web links from the managed profile.
      *
      * This user restriction has an effect only in a managed profile.
@@ -749,6 +909,57 @@ public class UserManager {
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_AUTOFILL = "no_autofill";
+
+    /**
+     * Specifies if user switching is blocked on the current user.
+     *
+     * <p> This restriction can only be set by the device owner, it will be applied to all users.
+     * Device owner can still switch user via
+     * {@link DevicePolicyManager#switchUser(ComponentName, UserHandle)} when this restriction is
+     * set.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_USER_SWITCH = "no_user_switch";
+
+    /**
+     * Specifies whether the user can share file / picture / data from the primary user into the
+     * managed profile, either by sending them from the primary side, or by picking up data within
+     * an app in the managed profile.
+     * <p>
+     * When a managed profile is created, the system allows the user to send data from the primary
+     * side to the profile by setting up certain default cross profile intent filters. If
+     * this is undesired, this restriction can be set to disallow it. Note that this restriction
+     * will not block any sharing allowed by explicit
+     * {@link DevicePolicyManager#addCrossProfileIntentFilter} calls by the profile owner.
+     * <p>
+     * This restriction is only meaningful when set by profile owner. When it is set by device
+     * owner, it does not have any effect.
+     * <p>
+     * The default value is <code>false</code>.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_SHARE_INTO_MANAGED_PROFILE = "no_sharing_into_profile";
+
+    /**
+     * Specifies whether the user is allowed to print.
+     *
+     * This restriction can be set by device or profile owner.
+     *
+     * The default value is {@code false}.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_PRINTING = "no_printing";
 
     /**
      * Application restriction key that is used to indicate the pending arrival
@@ -832,6 +1043,85 @@ public class UserManager {
      */
     public static final int USER_CREATION_FAILED_NO_MORE_USERS = Activity.RESULT_FIRST_USER + 1;
 
+    /**
+     * Indicates user operation is successful.
+     */
+    public static final int USER_OPERATION_SUCCESS = 0;
+
+    /**
+     * Indicates user operation failed for unknown reason.
+     */
+    public static final int USER_OPERATION_ERROR_UNKNOWN = 1;
+
+    /**
+     * Indicates user operation failed because target user is a managed profile.
+     */
+    public static final int USER_OPERATION_ERROR_MANAGED_PROFILE = 2;
+
+    /**
+     * Indicates user operation failed because maximum running user limit has been reached.
+     */
+    public static final int USER_OPERATION_ERROR_MAX_RUNNING_USERS = 3;
+
+    /**
+     * Indicates user operation failed because the target user is in the foreground.
+     */
+    public static final int USER_OPERATION_ERROR_CURRENT_USER = 4;
+
+    /**
+     * Indicates user operation failed because device has low data storage.
+     */
+    public static final int USER_OPERATION_ERROR_LOW_STORAGE = 5;
+
+    /**
+     * Indicates user operation failed because maximum user limit has been reached.
+     */
+    public static final int USER_OPERATION_ERROR_MAX_USERS = 6;
+
+    /**
+     * Result returned from various user operations.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "USER_OPERATION_" }, value = {
+            USER_OPERATION_SUCCESS,
+            USER_OPERATION_ERROR_UNKNOWN,
+            USER_OPERATION_ERROR_MANAGED_PROFILE,
+            USER_OPERATION_ERROR_MAX_RUNNING_USERS,
+            USER_OPERATION_ERROR_CURRENT_USER,
+            USER_OPERATION_ERROR_LOW_STORAGE,
+            USER_OPERATION_ERROR_MAX_USERS
+    })
+    public @interface UserOperationResult {}
+
+    /**
+     * Thrown to indicate user operation failed.
+     */
+    public static class UserOperationException extends RuntimeException {
+        private final @UserOperationResult int mUserOperationResult;
+
+        /**
+         * Constructs a UserOperationException with specific result code.
+         *
+         * @param message the detail message
+         * @param userOperationResult the result code
+         * @hide
+         */
+        public UserOperationException(String message,
+                @UserOperationResult int userOperationResult) {
+            super(message);
+            mUserOperationResult = userOperationResult;
+        }
+
+        /**
+         * Returns the operation result code.
+         */
+        public @UserOperationResult int getUserOperationResult() {
+            return mUserOperationResult;
+        }
+    }
+
     /** @hide */
     public static UserManager get(Context context) {
         return (UserManager) context.getSystemService(Context.USER_SERVICE);
@@ -860,6 +1150,7 @@ public class UserManager {
      * primary user are two separate users. Previously system user and primary user are combined as
      * a single owner user.  see @link {android.os.UserHandle#USER_OWNER}
      */
+    @TestApi
     public static boolean isSplitSystemUser() {
         return RoSystemProperties.FW_SYSTEM_USER_SPLIT;
     }
@@ -876,7 +1167,7 @@ public class UserManager {
     /**
      * Returns whether switching users is currently allowed.
      * <p>For instance switching users is not allowed if the current user is in a phone call,
-     * or system user hasn't been unlocked yet
+     * system user hasn't been unlocked yet, or {@link #DISALLOW_USER_SWITCH} is set.
      * @hide
      */
     public boolean canSwitchUsers() {
@@ -886,7 +1177,9 @@ public class UserManager {
         boolean isSystemUserUnlocked = isUserUnlocked(UserHandle.SYSTEM);
         boolean inCall = TelephonyManager.getDefault().getCallState()
                 != TelephonyManager.CALL_STATE_IDLE;
-        return (allowUserSwitchingWhenSystemUserLocked || isSystemUserUnlocked) && !inCall;
+        boolean isUserSwitchDisallowed = hasUserRestriction(DISALLOW_USER_SWITCH);
+        return (allowUserSwitchingWhenSystemUserLocked || isSystemUserUnlocked) && !inCall
+                && !isUserSwitchDisallowed;
     }
 
     /**
@@ -981,12 +1274,22 @@ public class UserManager {
     }
 
     /**
-     * Used to check if the user making this call is linked to another user. Linked users may have
+     * @hide
+     * @deprecated Use {@link #isRestrictedProfile()}
+     */
+    @Deprecated
+    public boolean isLinkedUser() {
+        return isRestrictedProfile();
+    }
+
+    /**
+     * Returns whether the caller is running as restricted profile. Restricted profile may have
      * a reduced number of available apps, app restrictions and account restrictions.
      * @return whether the user making this call is a linked user
      * @hide
      */
-    public boolean isLinkedUser() {
+    @SystemApi
+    public boolean isRestrictedProfile() {
         try {
             return mService.isRestricted();
         } catch (RemoteException re) {
@@ -1001,6 +1304,20 @@ public class UserManager {
     public boolean canHaveRestrictedProfile(@UserIdInt int userId) {
         try {
             return mService.canHaveRestrictedProfile(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether the calling user has at least one restricted profile associated with it.
+     * @return
+     * @hide
+     */
+    @SystemApi
+    public boolean hasRestrictedProfiles() {
+        try {
+            return mService.hasRestrictedProfiles();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -1025,6 +1342,7 @@ public class UserManager {
         UserInfo user = getUserInfo(UserHandle.myUserId());
         return user != null && user.isGuest();
     }
+
 
     /**
      * Checks if the calling app is running in a demo user. When running in a demo user,
@@ -1239,6 +1557,34 @@ public class UserManager {
     }
 
     /**
+     * Return the time when the calling user started in elapsed milliseconds since boot,
+     * or 0 if not started.
+     *
+     * @hide
+     */
+    public long getUserStartRealtime() {
+        try {
+            return mService.getUserStartRealtime();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return the time when the calling user was unlocked elapsed milliseconds since boot,
+     * or 0 if not unlocked.
+     *
+     * @hide
+     */
+    public long getUserUnlockRealtime() {
+        try {
+            return mService.getUserUnlockRealtime();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the UserInfo object describing a specific user.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @param userHandle the user handle of the user whose information is being requested.
@@ -1410,6 +1756,18 @@ public class UserManager {
         try {
             return mService.hasUserRestriction(restrictionKey,
                     userHandle.getIdentifier());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Returns whether any user on the device has the given user restriction set.
+     */
+    public boolean hasUserRestrictionOnAnyUser(String restrictionKey) {
+        try {
+            return mService.hasUserRestrictionOnAnyUser(restrictionKey);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -1729,12 +2087,33 @@ public class UserManager {
      * Also ephemeral users can be disabled to indicate that their removal is in progress and they
      * shouldn't be re-entered. Therefore ephemeral users should not be re-enabled once disabled.
      *
-     * @param userHandle the id of the profile to enable
+     * @param userId the id of the profile to enable
      * @hide
      */
-    public void setUserEnabled(@UserIdInt int userHandle) {
+    public void setUserEnabled(@UserIdInt int userId) {
         try {
-            mService.setUserEnabled(userHandle);
+            mService.setUserEnabled(userId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Assigns admin privileges to the user, if such a user exists.
+     *
+     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} and
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permissions.
+     *
+     * @param userHandle the id of the user to become admin
+     * @hide
+     */
+    @RequiresPermission(allOf = {
+            Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            Manifest.permission.MANAGE_USERS
+    })
+    public void setUserAdmin(@UserIdInt int userHandle) {
+        try {
+            mService.setUserAdmin(userHandle);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2014,15 +2393,47 @@ public class UserManager {
     }
 
     /**
-     * Set quiet mode of a managed profile.
+     * Enables or disables quiet mode for a managed profile. If quiet mode is enabled, apps in a
+     * managed profile don't run, generate notifications, or consume data or battery.
+     * <p>
+     * If a user's credential is needed to turn off quiet mode, a confirm credential screen will be
+     * shown to the user.
+     * <p>
+     * The change may not happen instantly, however apps can listen for
+     * {@link Intent#ACTION_MANAGED_PROFILE_AVAILABLE} and
+     * {@link Intent#ACTION_MANAGED_PROFILE_UNAVAILABLE} broadcasts in order to be notified of
+     * the change of the quiet mode. Apps can also check the current state of quiet mode by
+     * calling {@link #isQuietModeEnabled(UserHandle)}.
+     * <p>
+     * The caller must either be the foreground default launcher or have one of these permissions:
+     * {@code MANAGE_USERS} or {@code MODIFY_QUIET_MODE}.
      *
-     * @param userHandle The user handle of the profile.
-     * @param enableQuietMode Whether quiet mode should be enabled or disabled.
+     * @param enableQuietMode whether quiet mode should be enabled or disabled
+     * @param userHandle user handle of the profile
+     * @return {@code false} if user's credential is needed in order to turn off quiet mode,
+     *         {@code true} otherwise
+     * @throws SecurityException if the caller is invalid
+     * @throws IllegalArgumentException if {@code userHandle} is not a managed profile
+     *
+     * @see #isQuietModeEnabled(UserHandle)
+     */
+    public boolean requestQuietModeEnabled(boolean enableQuietMode, @NonNull UserHandle userHandle) {
+        return requestQuietModeEnabled(enableQuietMode, userHandle, null);
+    }
+
+    /**
+     * Similar to {@link #requestQuietModeEnabled(boolean, UserHandle)}, except you can specify
+     * a target to start when user is unlocked. If {@code target} is specified, caller must have
+     * the {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
+     * @see {@link #requestQuietModeEnabled(boolean, UserHandle)}
      * @hide
      */
-    public void setQuietModeEnabled(@UserIdInt int userHandle, boolean enableQuietMode) {
+    public boolean requestQuietModeEnabled(
+            boolean enableQuietMode, @NonNull UserHandle userHandle, IntentSender target) {
         try {
-            mService.setQuietModeEnabled(userHandle, enableQuietMode);
+            return mService.requestQuietModeEnabled(
+                    mContext.getPackageName(), enableQuietMode, userHandle.getIdentifier(), target);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2038,23 +2449,6 @@ public class UserManager {
     public boolean isQuietModeEnabled(UserHandle userHandle) {
         try {
             return mService.isQuietModeEnabled(userHandle.getIdentifier());
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Tries disabling quiet mode for a given user. If the user is still locked, we unlock the user
-     * first by showing the confirm credentials screen and disable quiet mode upon successful
-     * unlocking. If the user is already unlocked, we call through to {@link #setQuietModeEnabled}
-     * directly.
-     *
-     * @return true if the quiet mode was disabled immediately
-     * @hide
-     */
-    public boolean trySetQuietModeDisabled(@UserIdInt int userHandle, IntentSender target) {
-        try {
-            return mService.trySetQuietModeDisabled(userHandle, target);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2241,8 +2635,13 @@ public class UserManager {
     public static int getMaxSupportedUsers() {
         // Don't allow multiple users on certain builds
         if (android.os.Build.ID.startsWith("JVP")) return 1;
-        // Svelte devices don't get multi-user.
-        if (ActivityManager.isLowRamDeviceStatic()) return 1;
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            // Low-ram devices are Svelte. Most of the time they don't get multi-user.
+            if ((Resources.getSystem().getConfiguration().uiMode & Configuration.UI_MODE_TYPE_MASK)
+                    != Configuration.UI_MODE_TYPE_TELEVISION) {
+                return 1;
+            }
+        }
         return SystemProperties.getInt("fw.max_users",
                 Resources.getSystem().getInteger(R.integer.config_multiuserMaximumUsers));
     }
@@ -2255,6 +2654,9 @@ public class UserManager {
      */
     public boolean isUserSwitcherEnabled() {
         if (!supportsMultipleUsers()) {
+            return false;
+        }
+        if (hasUserRestriction(DISALLOW_USER_SWITCH)) {
             return false;
         }
         // If Demo Mode is on, don't show user switcher

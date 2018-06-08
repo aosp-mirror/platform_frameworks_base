@@ -17,7 +17,8 @@
 package com.android.server.usage;
 
 import android.app.usage.ConfigurationStats;
-import android.app.usage.TimeSparseArray;
+import android.app.usage.EventList;
+import android.app.usage.EventStats;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
@@ -60,6 +61,7 @@ class UserUsageStatsService {
     private final UnixCalendar mDailyExpiryDate;
     private final StatsUpdatedListener mListener;
     private final String mLogPrefix;
+    private String mLastBackgroundedPackage;
     private final int mUserId;
 
     private static final long[] INTERVAL_LENGTH = new long[] {
@@ -171,25 +173,55 @@ class UserUsageStatsService {
 
         // Add the event to the daily list.
         if (currentDailyStats.events == null) {
-            currentDailyStats.events = new TimeSparseArray<>();
+            currentDailyStats.events = new EventList();
         }
         if (event.mEventType != UsageEvents.Event.SYSTEM_INTERACTION) {
-            currentDailyStats.events.put(event.mTimeStamp, event);
+            currentDailyStats.events.insert(event);
+        }
+
+        boolean incrementAppLaunch = false;
+        if (event.mEventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+            if (event.mPackage != null && !event.mPackage.equals(mLastBackgroundedPackage)) {
+                incrementAppLaunch = true;
+            }
+        } else if (event.mEventType == UsageEvents.Event.MOVE_TO_BACKGROUND) {
+            if (event.mPackage != null) {
+                mLastBackgroundedPackage = event.mPackage;
+            }
         }
 
         for (IntervalStats stats : mCurrentStats) {
-            if (event.mEventType == UsageEvents.Event.CONFIGURATION_CHANGE) {
-                stats.updateConfigurationStats(newFullConfig, event.mTimeStamp);
-            } else if (event.mEventType == UsageEvents.Event.CHOOSER_ACTION) {
-                stats.updateChooserCounts(event.mPackage, event.mContentType, event.mAction);
-                String[] annotations = event.mContentAnnotations;
-                if (annotations != null) {
-                    for (String annotation : annotations) {
-                        stats.updateChooserCounts(event.mPackage, annotation, event.mAction);
+            switch (event.mEventType) {
+                case UsageEvents.Event.CONFIGURATION_CHANGE: {
+                    stats.updateConfigurationStats(newFullConfig, event.mTimeStamp);
+                } break;
+                case UsageEvents.Event.CHOOSER_ACTION: {
+                    stats.updateChooserCounts(event.mPackage, event.mContentType, event.mAction);
+                    String[] annotations = event.mContentAnnotations;
+                    if (annotations != null) {
+                        for (String annotation : annotations) {
+                            stats.updateChooserCounts(event.mPackage, annotation, event.mAction);
+                        }
                     }
-                }
-            } else {
-                stats.update(event.mPackage, event.mTimeStamp, event.mEventType);
+                } break;
+                case UsageEvents.Event.SCREEN_INTERACTIVE: {
+                    stats.updateScreenInteractive(event.mTimeStamp);
+                } break;
+                case UsageEvents.Event.SCREEN_NON_INTERACTIVE: {
+                    stats.updateScreenNonInteractive(event.mTimeStamp);
+                } break;
+                case UsageEvents.Event.KEYGUARD_SHOWN: {
+                    stats.updateKeyguardShown(event.mTimeStamp);
+                } break;
+                case UsageEvents.Event.KEYGUARD_HIDDEN: {
+                    stats.updateKeyguardHidden(event.mTimeStamp);
+                } break;
+                default: {
+                    stats.update(event.mPackage, event.mTimeStamp, event.mEventType);
+                    if (incrementAppLaunch) {
+                        stats.incrementAppLaunchCount(event.mPackage);
+                    }
+                } break;
             }
         }
 
@@ -227,6 +259,15 @@ class UserUsageStatsService {
                     for (int i = 0; i < configCount; i++) {
                         accResult.add(new ConfigurationStats(stats.configurations.valueAt(i)));
                     }
+                }
+            };
+
+    private static final StatCombiner<EventStats> sEventStatsCombiner =
+            new StatCombiner<EventStats>() {
+                @Override
+                public void combine(IntervalStats stats, boolean mutable,
+                        List<EventStats> accResult) {
+                    stats.addEventStatsTo(accResult);
                 }
             };
 
@@ -309,6 +350,10 @@ class UserUsageStatsService {
         return queryStats(bucketType, beginTime, endTime, sConfigStatsCombiner);
     }
 
+    List<EventStats> queryEventStats(int bucketType, long beginTime, long endTime) {
+        return queryStats(bucketType, beginTime, endTime, sEventStatsCombiner);
+    }
+
     UsageEvents queryEvents(final long beginTime, final long endTime,
             boolean obfuscateInstantApps) {
         final ArraySet<String> names = new ArraySet<>();
@@ -321,18 +366,14 @@ class UserUsageStatsService {
                             return;
                         }
 
-                        final int startIndex = stats.events.closestIndexOnOrAfter(beginTime);
-                        if (startIndex < 0) {
-                            return;
-                        }
-
+                        final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
                         final int size = stats.events.size();
                         for (int i = startIndex; i < size; i++) {
-                            if (stats.events.keyAt(i) >= endTime) {
+                            if (stats.events.get(i).mTimeStamp >= endTime) {
                                 return;
                             }
 
-                            UsageEvents.Event event = stats.events.valueAt(i);
+                            UsageEvents.Event event = stats.events.get(i);
                             if (obfuscateInstantApps) {
                                 event = event.getObfuscatedIfInstantApp();
                             }
@@ -350,6 +391,43 @@ class UserUsageStatsService {
         }
 
         String[] table = names.toArray(new String[names.size()]);
+        Arrays.sort(table);
+        return new UsageEvents(results, table);
+    }
+
+    UsageEvents queryEventsForPackage(final long beginTime, final long endTime,
+            final String packageName) {
+        final ArraySet<String> names = new ArraySet<>();
+        names.add(packageName);
+        final List<UsageEvents.Event> results = queryStats(UsageStatsManager.INTERVAL_DAILY,
+                beginTime, endTime, (stats, mutable, accumulatedResult) -> {
+                    if (stats.events == null) {
+                        return;
+                    }
+
+                    final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
+                    final int size = stats.events.size();
+                    for (int i = startIndex; i < size; i++) {
+                        if (stats.events.get(i).mTimeStamp >= endTime) {
+                            return;
+                        }
+
+                        final UsageEvents.Event event = stats.events.get(i);
+                        if (!packageName.equals(event.mPackage)) {
+                            continue;
+                        }
+                        if (event.mClass != null) {
+                            names.add(event.mClass);
+                        }
+                        accumulatedResult.add(event);
+                    }
+                });
+
+        if (results == null || results.isEmpty()) {
+            return null;
+        }
+
+        final String[] table = names.toArray(new String[names.size()]);
         Arrays.sort(table);
         return new UsageEvents(results, table);
     }
@@ -391,6 +469,7 @@ class UserUsageStatsService {
             }
 
             stat.updateConfigurationStats(null, mDailyExpiryDate.getTimeInMillis() - 1);
+            stat.commitTime(mDailyExpiryDate.getTimeInMillis() - 1);
         }
 
         persistActiveStats();
@@ -474,25 +553,28 @@ class UserUsageStatsService {
         mDatabase.checkinDailyFiles(new UsageStatsDatabase.CheckinAction() {
             @Override
             public boolean checkin(IntervalStats stats) {
-                printIntervalStats(pw, stats, false);
+                printIntervalStats(pw, stats, false, false, null);
                 return true;
             }
         });
     }
 
-    void dump(IndentingPrintWriter pw) {
-        // This is not a check-in, only dump in-memory stats.
+    void dump(IndentingPrintWriter pw, String pkg) {
+        dump(pw, pkg, false);
+    }
+    void dump(IndentingPrintWriter pw, String pkg, boolean compact) {
+        printLast24HrEvents(pw, !compact, pkg);
         for (int interval = 0; interval < mCurrentStats.length; interval++) {
             pw.print("In-memory ");
             pw.print(intervalToString(interval));
             pw.println(" stats");
-            printIntervalStats(pw, mCurrentStats[interval], true);
+            printIntervalStats(pw, mCurrentStats[interval], !compact, true, pkg);
         }
     }
 
     private String formatDateTime(long dateTime, boolean pretty) {
         if (pretty) {
-            return "\"" + DateUtils.formatDateTime(mContext, dateTime, sDateFormatFlags) + "\"";
+            return "\"" + sDateFormat.format(dateTime)+ "\"";
         }
         return Long.toString(dateTime);
     }
@@ -504,8 +586,97 @@ class UserUsageStatsService {
         return Long.toString(elapsedTime);
     }
 
+
+    void printEvent(IndentingPrintWriter pw, UsageEvents.Event event, boolean prettyDates) {
+        pw.printPair("time", formatDateTime(event.mTimeStamp, prettyDates));
+        pw.printPair("type", eventToString(event.mEventType));
+        pw.printPair("package", event.mPackage);
+        if (event.mClass != null) {
+            pw.printPair("class", event.mClass);
+        }
+        if (event.mConfiguration != null) {
+            pw.printPair("config", Configuration.resourceQualifierString(event.mConfiguration));
+        }
+        if (event.mShortcutId != null) {
+            pw.printPair("shortcutId", event.mShortcutId);
+        }
+        if (event.mEventType == UsageEvents.Event.STANDBY_BUCKET_CHANGED) {
+            pw.printPair("standbyBucket", event.getStandbyBucket());
+            pw.printPair("reason", UsageStatsManager.reasonToString(event.getStandbyReason()));
+        }
+        pw.printHexPair("flags", event.mFlags);
+        pw.println();
+    }
+
+    void printLast24HrEvents(IndentingPrintWriter pw, boolean prettyDates, final String pkg) {
+        final long endTime = System.currentTimeMillis();
+        UnixCalendar yesterday = new UnixCalendar(endTime);
+        yesterday.addDays(-1);
+
+        final long beginTime = yesterday.getTimeInMillis();
+
+        List<UsageEvents.Event> events = queryStats(UsageStatsManager.INTERVAL_DAILY,
+                beginTime, endTime, new StatCombiner<UsageEvents.Event>() {
+                    @Override
+                    public void combine(IntervalStats stats, boolean mutable,
+                            List<UsageEvents.Event> accumulatedResult) {
+                        if (stats.events == null) {
+                            return;
+                        }
+
+                        final int startIndex = stats.events.firstIndexOnOrAfter(beginTime);
+                        final int size = stats.events.size();
+                        for (int i = startIndex; i < size; i++) {
+                            if (stats.events.get(i).mTimeStamp >= endTime) {
+                                return;
+                            }
+
+                            UsageEvents.Event event = stats.events.get(i);
+                            if (pkg != null && !pkg.equals(event.mPackage)) {
+                                continue;
+                            }
+                            accumulatedResult.add(event);
+                        }
+                    }
+                });
+
+        pw.print("Last 24 hour events (");
+        if (prettyDates) {
+            pw.printPair("timeRange", "\"" + DateUtils.formatDateRange(mContext,
+                    beginTime, endTime, sDateFormatFlags) + "\"");
+        } else {
+            pw.printPair("beginTime", beginTime);
+            pw.printPair("endTime", endTime);
+        }
+        pw.println(")");
+        if (events != null) {
+            pw.increaseIndent();
+            for (UsageEvents.Event event : events) {
+                printEvent(pw, event, prettyDates);
+            }
+            pw.decreaseIndent();
+        }
+    }
+
+    void printEventAggregation(IndentingPrintWriter pw, String label,
+            IntervalStats.EventTracker tracker, boolean prettyDates) {
+        if (tracker.count != 0 || tracker.duration != 0) {
+            pw.print(label);
+            pw.print(": ");
+            pw.print(tracker.count);
+            pw.print("x for ");
+            pw.print(formatElapsedTime(tracker.duration, prettyDates));
+            if (tracker.curStartTime != 0) {
+                pw.print(" (now running, started at ");
+                formatDateTime(tracker.curStartTime, prettyDates);
+                pw.print(")");
+            }
+            pw.println();
+        }
+    }
+
     void printIntervalStats(IndentingPrintWriter pw, IntervalStats stats,
-            boolean prettyDates) {
+            boolean prettyDates, boolean skipEvents, String pkg) {
         if (prettyDates) {
             pw.printPair("timeRange", "\"" + DateUtils.formatDateRange(mContext,
                     stats.beginTime, stats.endTime, sDateFormatFlags) + "\"");
@@ -521,10 +692,14 @@ class UserUsageStatsService {
         final int pkgCount = pkgStats.size();
         for (int i = 0; i < pkgCount; i++) {
             final UsageStats usageStats = pkgStats.valueAt(i);
+            if (pkg != null && !pkg.equals(usageStats.mPackageName)) {
+                continue;
+            }
             pw.printPair("package", usageStats.mPackageName);
             pw.printPair("totalTime",
                     formatElapsedTime(usageStats.mTotalTimeInForeground, prettyDates));
             pw.printPair("lastTime", formatDateTime(usageStats.mLastTimeUsed, prettyDates));
+            pw.printPair("appLaunchCount", usageStats.mAppLaunchCount);
             pw.println();
         }
         pw.decreaseIndent();
@@ -533,6 +708,9 @@ class UserUsageStatsService {
         pw.println("ChooserCounts");
         pw.increaseIndent();
         for (UsageStats usageStats : pkgStats.values()) {
+            if (pkg != null && !pkg.equals(usageStats.mPackageName)) {
+                continue;
+            }
             pw.printPair("package", usageStats.mPackageName);
             if (usageStats.mChooserCounts != null) {
                 final int chooserCountSize = usageStats.mChooserCounts.size();
@@ -555,42 +733,50 @@ class UserUsageStatsService {
         }
         pw.decreaseIndent();
 
-        pw.println("configurations");
-        pw.increaseIndent();
-        final ArrayMap<Configuration, ConfigurationStats> configStats = stats.configurations;
-        final int configCount = configStats.size();
-        for (int i = 0; i < configCount; i++) {
-            final ConfigurationStats config = configStats.valueAt(i);
-            pw.printPair("config", Configuration.resourceQualifierString(config.mConfiguration));
-            pw.printPair("totalTime", formatElapsedTime(config.mTotalTimeActive, prettyDates));
-            pw.printPair("lastTime", formatDateTime(config.mLastTimeActive, prettyDates));
-            pw.printPair("count", config.mActivationCount);
-            pw.println();
+        if (pkg == null) {
+            pw.println("configurations");
+            pw.increaseIndent();
+            final ArrayMap<Configuration, ConfigurationStats> configStats = stats.configurations;
+            final int configCount = configStats.size();
+            for (int i = 0; i < configCount; i++) {
+                final ConfigurationStats config = configStats.valueAt(i);
+                pw.printPair("config", Configuration.resourceQualifierString(
+                        config.mConfiguration));
+                pw.printPair("totalTime", formatElapsedTime(config.mTotalTimeActive, prettyDates));
+                pw.printPair("lastTime", formatDateTime(config.mLastTimeActive, prettyDates));
+                pw.printPair("count", config.mActivationCount);
+                pw.println();
+            }
+            pw.decreaseIndent();
+            pw.println("event aggregations");
+            pw.increaseIndent();
+            printEventAggregation(pw, "screen-interactive", stats.interactiveTracker,
+                    prettyDates);
+            printEventAggregation(pw, "screen-non-interactive", stats.nonInteractiveTracker,
+                    prettyDates);
+            printEventAggregation(pw, "keyguard-shown", stats.keyguardShownTracker,
+                    prettyDates);
+            printEventAggregation(pw, "keyguard-hidden", stats.keyguardHiddenTracker,
+                    prettyDates);
+            pw.decreaseIndent();
         }
-        pw.decreaseIndent();
 
-        pw.println("events");
-        pw.increaseIndent();
-        final TimeSparseArray<UsageEvents.Event> events = stats.events;
-        final int eventCount = events != null ? events.size() : 0;
-        for (int i = 0; i < eventCount; i++) {
-            final UsageEvents.Event event = events.valueAt(i);
-            pw.printPair("time", formatDateTime(event.mTimeStamp, prettyDates));
-            pw.printPair("type", eventToString(event.mEventType));
-            pw.printPair("package", event.mPackage);
-            if (event.mClass != null) {
-                pw.printPair("class", event.mClass);
+        // The last 24 hours of events is already printed in the non checkin dump
+        // No need to repeat here.
+        if (!skipEvents) {
+            pw.println("events");
+            pw.increaseIndent();
+            final EventList events = stats.events;
+            final int eventCount = events != null ? events.size() : 0;
+            for (int i = 0; i < eventCount; i++) {
+                final UsageEvents.Event event = events.get(i);
+                if (pkg != null && !pkg.equals(event.mPackage)) {
+                    continue;
+                }
+                printEvent(pw, event, prettyDates);
             }
-            if (event.mConfiguration != null) {
-                pw.printPair("config", Configuration.resourceQualifierString(event.mConfiguration));
-            }
-            if (event.mShortcutId != null) {
-                pw.printPair("shortcutId", event.mShortcutId);
-            }
-            pw.printHexPair("flags", event.mFlags);
-            pw.println();
+            pw.decreaseIndent();
         }
-        pw.decreaseIndent();
         pw.decreaseIndent();
     }
 
@@ -631,6 +817,20 @@ class UserUsageStatsService {
                 return "SHORTCUT_INVOCATION";
             case UsageEvents.Event.CHOOSER_ACTION:
                 return "CHOOSER_ACTION";
+            case UsageEvents.Event.NOTIFICATION_SEEN:
+                return "NOTIFICATION_SEEN";
+            case UsageEvents.Event.STANDBY_BUCKET_CHANGED:
+                return "STANDBY_BUCKET_CHANGED";
+            case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
+                return "NOTIFICATION_INTERRUPTION";
+            case UsageEvents.Event.SLICE_PINNED:
+                return "SLICE_PINNED";
+            case UsageEvents.Event.SLICE_PINNED_PRIV:
+                return "SLICE_PINNED_PRIV";
+            case UsageEvents.Event.SCREEN_INTERACTIVE:
+                return "SCREEN_INTERACTIVE";
+            case UsageEvents.Event.SCREEN_NON_INTERACTIVE:
+                return "SCREEN_NON_INTERACTIVE";
             default:
                 return "UNKNOWN";
         }

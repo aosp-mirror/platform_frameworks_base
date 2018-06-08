@@ -43,13 +43,14 @@
 
 using android::hardware::Return;
 using android::hardware::Void;
-using android::hardware::power::V1_0::IPower;
 using android::hardware::power::V1_0::PowerStatePlatformSleepState;
 using android::hardware::power::V1_0::PowerStateVoter;
 using android::hardware::power::V1_0::Status;
 using android::hardware::power::V1_1::PowerStateSubsystem;
 using android::hardware::power::V1_1::PowerStateSubsystemSleepState;
 using android::hardware::hidl_vec;
+using IPowerV1_1 = android::hardware::power::V1_1::IPower;
+using IPowerV1_0 = android::hardware::power::V1_0::IPower;
 
 namespace android
 {
@@ -59,9 +60,9 @@ namespace android
 
 static bool wakeup_init = false;
 static sem_t wakeup_sem;
-extern sp<android::hardware::power::V1_0::IPower> gPowerHalV1_0;
-extern std::mutex gPowerHalMutex;
-extern bool getPowerHal();
+extern sp<IPowerV1_0> getPowerHalV1_0();
+extern sp<IPowerV1_1> getPowerHalV1_1();
+extern bool processPowerHalReturn(const Return<void> &ret, const char* functionName);
 
 // Java methods used in getLowPowerStats
 static jmethodID jgetAndUpdatePlatformState = NULL;
@@ -203,13 +204,13 @@ static void getLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject jrpmStats
         return;
     }
 
-    std::lock_guard<std::mutex> lock(gPowerHalMutex);
-    if (!getPowerHal()) {
+    sp<IPowerV1_0> powerHalV1_0 = getPowerHalV1_0();
+    if (powerHalV1_0 == nullptr) {
         ALOGE("Power Hal not loaded");
         return;
     }
 
-    Return<void> ret = gPowerHalV1_0->getPlatformLowPowerStats(
+    Return<void> ret = powerHalV1_0->getPlatformLowPowerStats(
             [&env, &jrpmStats](hidl_vec<PowerStatePlatformSleepState> states, Status status) {
 
             if (status != Status::SUCCESS) return;
@@ -236,20 +237,17 @@ static void getLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject jrpmStats
                 }
             }
     });
-    if (!ret.isOk()) {
-        ALOGE("getLowPowerStats() failed: power HAL service not available");
-        gPowerHalV1_0 = nullptr;
+    if (!processPowerHalReturn(ret, "getPlatformLowPowerStats")) {
         return;
     }
 
-    //Trying to cast to IPower 1.1, this will succeed only for devices supporting 1.1
-    sp<android::hardware::power::V1_1::IPower> gPowerHal_1_1
-            = android::hardware::power::V1_1::IPower::castFrom(gPowerHalV1_0);
-    if (gPowerHal_1_1 == nullptr) {
-        //This device does not support IPower@1.1, exiting gracefully
+    // Trying to get IPower 1.1, this will succeed only for devices supporting 1.1
+    sp<IPowerV1_1> powerHal_1_1 = getPowerHalV1_1();
+    if (powerHal_1_1 == nullptr) {
+        // This device does not support IPower@1.1, exiting gracefully
         return;
     }
-    ret = gPowerHal_1_1->getSubsystemLowPowerStats(
+    ret = powerHal_1_1->getSubsystemLowPowerStats(
             [&env, &jrpmStats](hidl_vec<PowerStateSubsystem> subsystems, Status status) {
 
         if (status != Status::SUCCESS) return;
@@ -275,11 +273,7 @@ static void getLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject jrpmStats
             }
         }
     });
-    if (!ret.isOk()) {
-        ALOGE("getSubsystemLowPowerStats() failed: power HAL service not available");
-        gPowerHalV1_0 = nullptr;
-    }
-    // gPowerHalMutex released here
+    processPowerHalReturn(ret, "getSubsystemLowPowerStats");
 }
 
 static jint getPlatformLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject outBuf) {
@@ -294,13 +288,13 @@ static jint getPlatformLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject o
     }
 
     {
-        std::lock_guard<std::mutex> lock(gPowerHalMutex);
-        if (!getPowerHal()) {
+        sp<IPowerV1_0> powerHalV1_0 = getPowerHalV1_0();
+        if (powerHalV1_0 == nullptr) {
             ALOGE("Power Hal not loaded");
             return -1;
         }
 
-        Return<void> ret = gPowerHalV1_0->getPlatformLowPowerStats(
+        Return<void> ret = powerHalV1_0->getPlatformLowPowerStats(
             [&offset, &remaining, &total_added](hidl_vec<PowerStatePlatformSleepState> states,
                     Status status) {
                 if (status != Status::SUCCESS)
@@ -352,9 +346,7 @@ static jint getPlatformLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject o
             }
         );
 
-        if (!ret.isOk()) {
-            ALOGE("getPlatformLowPowerStats() failed: power HAL service not available");
-            gPowerHalV1_0 = nullptr;
+        if (!processPowerHalReturn(ret, "getPlatformLowPowerStats")) {
             return -1;
         }
     }
@@ -369,8 +361,8 @@ static jint getSubsystemLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject 
     int remaining = (int)env->GetDirectBufferCapacity(outBuf);
     int total_added = -1;
 
-	//This is a IPower 1.1 API
-    sp<android::hardware::power::V1_1::IPower> gPowerHal_1_1 = nullptr;
+    // This is a IPower 1.1 API
+    sp<IPowerV1_1> powerHal_1_1 = nullptr;
 
     if (outBuf == NULL) {
         jniThrowException(env, "java/lang/NullPointerException", "null argument");
@@ -378,20 +370,14 @@ static jint getSubsystemLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject 
     }
 
     {
-        std::lock_guard<std::mutex> lock(gPowerHalMutex);
-        if (!getPowerHal()) {
-            ALOGE("Power Hal not loaded");
-            return -1;
-        }
-
-        //Trying to cast to 1.1, this will succeed only for devices supporting 1.1
-        gPowerHal_1_1 = android::hardware::power::V1_1::IPower::castFrom(gPowerHalV1_0);
-    	if (gPowerHal_1_1 == nullptr) {
+        // Trying to get 1.1, this will succeed only for devices supporting 1.1
+        powerHal_1_1 = getPowerHalV1_1();
+        if (powerHal_1_1 == nullptr) {
             //This device does not support IPower@1.1, exiting gracefully
             return 0;
-    	}
+        }
 
-        Return<void> ret = gPowerHal_1_1->getSubsystemLowPowerStats(
+        Return<void> ret = powerHal_1_1->getSubsystemLowPowerStats(
            [&offset, &remaining, &total_added](hidl_vec<PowerStateSubsystem> subsystems,
                 Status status) {
 
@@ -452,9 +438,7 @@ static jint getSubsystemLowPowerStats(JNIEnv* env, jobject /* clazz */, jobject 
         }
         );
 
-        if (!ret.isOk()) {
-            ALOGE("getSubsystemLowPowerStats() failed: power HAL service not available");
-            gPowerHalV1_0 = nullptr;
+        if (!processPowerHalReturn(ret, "getSubsystemLowPowerStats")) {
             return -1;
         }
     }

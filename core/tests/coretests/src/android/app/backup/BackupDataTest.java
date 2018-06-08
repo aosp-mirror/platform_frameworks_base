@@ -23,6 +23,7 @@ import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.support.test.filters.LargeTest;
 import android.test.AndroidTestCase;
 import android.test.InstrumentationTestCase;
 import android.util.Base64;
@@ -41,6 +42,7 @@ import java.io.InputStreamReader;
 import java.lang.Exception;
 import java.nio.ByteBuffer;
 
+@LargeTest
 public class BackupDataTest extends AndroidTestCase {
     private static final String KEY1 = "key1";
     private static final String KEY2 = "key2a";

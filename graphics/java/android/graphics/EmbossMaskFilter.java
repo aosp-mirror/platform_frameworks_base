@@ -20,12 +20,15 @@ public class EmbossMaskFilter extends MaskFilter {
     /**
      * Create an emboss maskfilter
      *
+     * @deprecated This subclass is not supported and should not be instantiated.
+     *
      * @param direction  array of 3 scalars [x, y, z] specifying the direction of the light source
      * @param ambient    0...1 amount of ambient light
      * @param specular   coefficient for specular highlights (e.g. 8)
      * @param blurRadius amount to blur before applying lighting (e.g. 3)
      * @return           the emboss maskfilter
      */
+    @Deprecated
     public EmbossMaskFilter(float[] direction, float ambient, float specular, float blurRadius) {
         if (direction.length < 3) {
             throw new ArrayIndexOutOfBoundsException();

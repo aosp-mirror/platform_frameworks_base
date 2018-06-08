@@ -27,6 +27,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.settingslib.R;
@@ -118,6 +119,12 @@ public class BluetoothEventManager {
                    new ActiveDeviceChangedHandler());
         addHandler(BluetoothHearingAid.ACTION_ACTIVE_DEVICE_CHANGED,
                    new ActiveDeviceChangedHandler());
+
+        // Headset state changed broadcasts
+        addHandler(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED,
+                new AudioModeChangedHandler());
+        addHandler(TelephonyManager.ACTION_PHONE_STATE_CHANGED,
+                new AudioModeChangedHandler());
 
         mContext.registerReceiver(mBroadcastReceiver, mAdapterIntentFilter, null, mReceiverHandler);
         mContext.registerReceiver(mProfileBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
@@ -265,6 +272,14 @@ public class BluetoothEventManager {
         }
     }
 
+    void dispatchDeviceRemoved(CachedBluetoothDevice cachedDevice) {
+        synchronized (mCallbacks) {
+            for (BluetoothCallback callback : mCallbacks) {
+                callback.onDeviceDeleted(cachedDevice);
+            }
+        }
+    }
+
     private class DeviceDisappearedHandler implements Handler {
         public void onReceive(Context context, Intent intent,
                 BluetoothDevice device) {
@@ -324,6 +339,10 @@ public class BluetoothEventManager {
             cachedDevice.onBondingStateChanged(bondState);
 
             if (bondState == BluetoothDevice.BOND_NONE) {
+                /* Check if we need to remove other Hearing Aid devices */
+                if (cachedDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID) {
+                    mDeviceManager.onDeviceUnpaired(cachedDevice);
+                }
                 int reason = intent.getIntExtra(BluetoothDevice.EXTRA_REASON,
                         BluetoothDevice.ERROR);
 
@@ -455,5 +474,37 @@ public class BluetoothEventManager {
                 callback.onActiveDeviceChanged(activeDevice, bluetoothProfile);
             }
         }
+    }
+
+    private class AudioModeChangedHandler implements Handler {
+
+        @Override
+        public void onReceive(Context context, Intent intent, BluetoothDevice device) {
+            final String action = intent.getAction();
+            if (action == null) {
+                Log.w(TAG, "AudioModeChangedHandler() action is null");
+                return;
+            }
+            dispatchAudioModeChanged();
+        }
+    }
+
+    private void dispatchAudioModeChanged() {
+        mDeviceManager.dispatchAudioModeChanged();
+        synchronized (mCallbacks) {
+            for (BluetoothCallback callback : mCallbacks) {
+                callback.onAudioModeChanged();
+            }
+        }
+    }
+
+    void dispatchProfileConnectionStateChanged(CachedBluetoothDevice device, int state,
+            int bluetoothProfile) {
+        synchronized (mCallbacks) {
+            for (BluetoothCallback callback : mCallbacks) {
+                callback.onProfileConnectionStateChanged(device, state, bluetoothProfile);
+            }
+        }
+        mDeviceManager.onProfileConnectionStateChanged(device, state, bluetoothProfile);
     }
 }

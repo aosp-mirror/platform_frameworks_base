@@ -18,6 +18,7 @@ package com.android.framework.permission.tests;
 
 import com.android.internal.os.BinderInternal;
 
+import android.app.AppOpsManager;
 import android.os.Binder;
 import android.os.IPermissionController;
 import android.os.RemoteException;
@@ -49,8 +50,14 @@ public class ServiceManagerPermissionTests extends TestCase {
     public void testSetPermissionController() {
         try {
             IPermissionController pc = new IPermissionController.Stub() {
+                @Override
                 public boolean checkPermission(java.lang.String permission, int pid, int uid) {
                     return true;
+                }
+
+                @Override
+                public int noteOp(String op, int uid, String packageName) {
+                    return AppOpsManager.MODE_ALLOWED;
                 }
 
                 @Override
@@ -61,6 +68,11 @@ public class ServiceManagerPermissionTests extends TestCase {
                 @Override
                 public boolean isRuntimePermission(String permission) {
                     return false;
+                }
+
+                @Override
+                public int getPackageUid(String packageName, int flags) {
+                    return -1;
                 }
             };
             ServiceManagerNative.asInterface(BinderInternal.getContextObject())

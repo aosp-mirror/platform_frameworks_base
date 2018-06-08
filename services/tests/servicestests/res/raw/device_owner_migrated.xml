@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<root>
+<device-owner
+    package="com.another.package.name"
+    name=""
+    component="com.another.package.name/whatever.random.class"
+    userRestrictionsMigrated="true" />
+<device-owner-context userId="0" />
+</root>

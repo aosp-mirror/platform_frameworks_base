@@ -44,7 +44,6 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.ims.ImsConfig;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.RILConstants;
@@ -88,7 +87,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final HashSet<String> mValidTables = new HashSet<String>();
 
-    private static final String DATABASE_JOURNAL_SUFFIX = "-journal";
     private static final String DATABASE_BACKUP_SUFFIX = "-backup";
 
     private static final String TABLE_SYSTEM = "system";
@@ -149,12 +147,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
         File databaseFile = mContext.getDatabasePath(getDatabaseName());
         if (databaseFile.exists()) {
-            databaseFile.delete();
-        }
-        File databaseJournalFile = mContext.getDatabasePath(getDatabaseName()
-                + DATABASE_JOURNAL_SUFFIX);
-        if (databaseJournalFile.exists()) {
-            databaseJournalFile.delete();
+            SQLiteDatabase.deleteDatabase(databaseFile);
         }
     }
 
@@ -1511,7 +1504,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
                 try {
                     stmt = db.compileStatement("INSERT OR REPLACE INTO global(name,value)"
                             + " VALUES(?,?);");
-                    loadStringSetting(stmt, Settings.Global.WIRELESS_CHARGING_STARTED_SOUND,
+                    loadStringSetting(stmt, Settings.Global.CHARGING_STARTED_SOUND,
                             R.string.def_wireless_charging_started_sound);
                     db.setTransactionSuccessful();
                 } finally {
@@ -2307,10 +2300,11 @@ class DatabaseHelper extends SQLiteOpenHelper {
             loadIntegerSetting(stmt, Settings.System.SCREEN_BRIGHTNESS,
                     R.integer.def_screen_brightness);
 
+            loadIntegerSetting(stmt, Settings.System.SCREEN_BRIGHTNESS_FOR_VR,
+                    com.android.internal.R.integer.config_screenBrightnessForVrSettingDefault);
+
             loadBooleanSetting(stmt, Settings.System.SCREEN_BRIGHTNESS_MODE,
                     R.bool.def_screen_brightness_automatic_mode);
-
-            loadDefaultAnimationSettings(stmt);
 
             loadBooleanSetting(stmt, Settings.System.ACCELEROMETER_ROTATION,
                     R.bool.def_accelerometer_rotation);
@@ -2505,6 +2499,8 @@ class DatabaseHelper extends SQLiteOpenHelper {
             loadSetting(stmt, Settings.Global.MODE_RINGER,
                     AudioManager.RINGER_MODE_NORMAL);
 
+            loadDefaultAnimationSettings(stmt);
+
             // --- Previously in 'secure'
             loadBooleanSetting(stmt, Settings.Global.PACKAGE_VERIFIER_ENABLE,
                     R.bool.def_package_verifier_enable);
@@ -2585,7 +2581,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
                     R.string.def_car_dock_sound);
             loadStringSetting(stmt, Settings.Global.CAR_UNDOCK_SOUND,
                     R.string.def_car_undock_sound);
-            loadStringSetting(stmt, Settings.Global.WIRELESS_CHARGING_STARTED_SOUND,
+            loadStringSetting(stmt, Settings.Global.CHARGING_STARTED_SOUND,
                     R.string.def_wireless_charging_started_sound);
 
             loadIntegerSetting(stmt, Settings.Global.DOCK_AUDIO_MEDIA_ENABLED,

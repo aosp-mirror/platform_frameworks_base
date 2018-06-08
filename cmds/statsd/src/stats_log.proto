@@ -1,0 +1,388 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.os.statsd;
+
+option java_package = "com.android.os";
+option java_outer_classname = "StatsLog";
+
+import "frameworks/base/cmds/statsd/src/atoms.proto";
+
+message DimensionsValue {
+  optional int32 field = 1;
+
+  oneof value {
+    string value_str = 2;
+    int32 value_int = 3;
+    int64 value_long = 4;
+    bool value_bool = 5;
+    float value_float = 6;
+    DimensionsValueTuple value_tuple = 7;
+    uint64 value_str_hash = 8;
+  }
+}
+
+message DimensionsValueTuple {
+  repeated DimensionsValue dimensions_value = 1;
+}
+
+message EventMetricData {
+  optional int64 elapsed_timestamp_nanos = 1;
+
+  optional Atom atom = 2;
+
+  optional int64 wall_clock_timestamp_nanos = 3;
+}
+
+message CountBucketInfo {
+  optional int64 start_bucket_elapsed_nanos = 1;
+
+  optional int64 end_bucket_elapsed_nanos = 2;
+
+  optional int64 count = 3;
+
+  optional int64 bucket_num = 4;
+
+  optional int64 start_bucket_elapsed_millis = 5;
+
+  optional int64 end_bucket_elapsed_millis = 6;
+}
+
+message CountMetricData {
+  optional DimensionsValue dimensions_in_what = 1;
+
+  optional DimensionsValue dimensions_in_condition = 2;
+
+  repeated CountBucketInfo bucket_info = 3;
+
+  repeated DimensionsValue dimension_leaf_values_in_what = 4;
+
+  repeated DimensionsValue dimension_leaf_values_in_condition = 5;
+}
+
+message DurationBucketInfo {
+  optional int64 start_bucket_elapsed_nanos = 1;
+
+  optional int64 end_bucket_elapsed_nanos = 2;
+
+  optional int64 duration_nanos = 3;
+
+  optional int64 bucket_num = 4;
+
+  optional int64 start_bucket_elapsed_millis = 5;
+
+  optional int64 end_bucket_elapsed_millis = 6;
+}
+
+message DurationMetricData {
+  optional DimensionsValue dimensions_in_what = 1;
+
+  optional DimensionsValue dimensions_in_condition = 2;
+
+  repeated DurationBucketInfo bucket_info = 3;
+
+  repeated DimensionsValue dimension_leaf_values_in_what = 4;
+
+  repeated DimensionsValue dimension_leaf_values_in_condition = 5;
+}
+
+message ValueBucketInfo {
+  optional int64 start_bucket_elapsed_nanos = 1;
+
+  optional int64 end_bucket_elapsed_nanos = 2;
+
+  optional int64 value = 3;
+
+  optional int64 bucket_num = 4;
+
+  optional int64 start_bucket_elapsed_millis = 5;
+
+  optional int64 end_bucket_elapsed_millis = 6;
+}
+
+message ValueMetricData {
+  optional DimensionsValue dimensions_in_what = 1;
+
+  optional DimensionsValue dimensions_in_condition = 2;
+
+  repeated ValueBucketInfo bucket_info = 3;
+
+  repeated DimensionsValue dimension_leaf_values_in_what = 4;
+
+  repeated DimensionsValue dimension_leaf_values_in_condition = 5;
+}
+
+message GaugeBucketInfo {
+  optional int64 start_bucket_elapsed_nanos = 1;
+
+  optional int64 end_bucket_elapsed_nanos = 2;
+
+  repeated Atom atom = 3;
+
+  repeated int64 elapsed_timestamp_nanos = 4;
+
+  repeated int64 wall_clock_timestamp_nanos = 5;
+
+  optional int64 bucket_num = 6;
+
+  optional int64 start_bucket_elapsed_millis = 7;
+
+  optional int64 end_bucket_elapsed_millis = 8;
+}
+
+message GaugeMetricData {
+  optional DimensionsValue dimensions_in_what = 1;
+
+  optional DimensionsValue dimensions_in_condition = 2;
+
+  repeated GaugeBucketInfo bucket_info = 3;
+
+  repeated DimensionsValue dimension_leaf_values_in_what = 4;
+
+  repeated DimensionsValue dimension_leaf_values_in_condition = 5;
+}
+
+message StatsLogReport {
+  optional int64 metric_id = 1;
+
+  // Fields 2 and 3 are reserved.
+
+  message SkippedBuckets {
+      optional int64 start_bucket_elapsed_nanos = 1;
+      optional int64 end_bucket_elapsed_nanos = 2;
+      optional int64 start_bucket_elapsed_millis = 3;
+      optional int64 end_bucket_elapsed_millis = 4;
+  }
+
+  message EventMetricDataWrapper {
+    repeated EventMetricData data = 1;
+  }
+  message CountMetricDataWrapper {
+    repeated CountMetricData data = 1;
+  }
+  message DurationMetricDataWrapper {
+    repeated DurationMetricData data = 1;
+  }
+  message ValueMetricDataWrapper {
+    repeated ValueMetricData data = 1;
+    repeated SkippedBuckets skipped = 2;
+  }
+
+  message GaugeMetricDataWrapper {
+    repeated GaugeMetricData data = 1;
+    repeated SkippedBuckets skipped = 2;
+  }
+
+  oneof data {
+    EventMetricDataWrapper event_metrics = 4;
+    CountMetricDataWrapper count_metrics = 5;
+    DurationMetricDataWrapper duration_metrics = 6;
+    ValueMetricDataWrapper value_metrics = 7;
+    GaugeMetricDataWrapper gauge_metrics = 8;
+  }
+
+  optional int64 time_base_elapsed_nano_seconds = 9;
+
+  optional int64 bucket_size_nano_seconds = 10;
+
+  optional DimensionsValue dimensions_path_in_what = 11;
+
+  optional DimensionsValue dimensions_path_in_condition = 12;
+}
+
+message UidMapping {
+    message PackageInfoSnapshot {
+        message PackageInfo {
+            optional string name = 1;
+
+            optional int64 version = 2;
+
+            optional int32 uid = 3;
+
+            optional bool deleted = 4;
+
+            optional uint64 name_hash = 5;
+        }
+        optional int64 elapsed_timestamp_nanos = 1;
+
+        repeated PackageInfo package_info = 2;
+    }
+    repeated PackageInfoSnapshot snapshots = 1;
+
+    message Change {
+        optional bool deletion = 1;
+
+        optional int64 elapsed_timestamp_nanos = 2;
+        optional string app = 3;
+        optional int32 uid = 4;
+
+        optional int64 new_version = 5;
+        optional int64 prev_version = 6;
+        optional uint64 app_hash = 7;
+    }
+    repeated Change changes = 2;
+}
+
+message ConfigMetricsReport {
+  repeated StatsLogReport metrics = 1;
+
+  optional UidMapping uid_map = 2;
+
+  optional int64 last_report_elapsed_nanos = 3;
+
+  optional int64 current_report_elapsed_nanos = 4;
+
+  optional int64 last_report_wall_clock_nanos = 5;
+
+  optional int64 current_report_wall_clock_nanos = 6;
+
+  message Annotation {
+      optional int64 field_int64 = 1;
+      optional int32 field_int32 = 2;
+  }
+  repeated Annotation annotation = 7;
+
+  enum DumpReportReason {
+      DEVICE_SHUTDOWN = 1;
+      CONFIG_UPDATED = 2;
+      CONFIG_REMOVED = 3;
+      GET_DATA_CALLED = 4;
+      ADB_DUMP = 5;
+      CONFIG_RESET = 6;
+      STATSCOMPANION_DIED = 7;
+  }
+  optional DumpReportReason dump_report_reason = 8;
+
+  repeated string strings = 9;
+}
+
+message ConfigMetricsReportList {
+  message ConfigKey {
+    optional int32 uid = 1;
+    optional int64 id = 2;
+  }
+  optional ConfigKey config_key = 1;
+
+  repeated ConfigMetricsReport reports = 2;
+
+  reserved 10;
+}
+
+message StatsdStatsReport {
+    optional int32 stats_begin_time_sec = 1;
+
+    optional int32 stats_end_time_sec = 2;
+
+    message MatcherStats {
+        optional int64 id = 1;
+        optional int32 matched_times = 2;
+    }
+
+    message ConditionStats {
+        optional int64 id = 1;
+        optional int32 max_tuple_counts = 2;
+    }
+
+    message MetricStats {
+        optional int64 id = 1;
+        optional int32 max_tuple_counts = 2;
+    }
+
+    message AlertStats {
+        optional int64 id = 1;
+        optional int32 alerted_times = 2;
+    }
+
+    message ConfigStats {
+        optional int32 uid = 1;
+        optional int64 id = 2;
+        optional int32 creation_time_sec = 3;
+        optional int32 deletion_time_sec = 4;
+        optional int32 reset_time_sec = 19;
+        optional int32 metric_count = 5;
+        optional int32 condition_count = 6;
+        optional int32 matcher_count = 7;
+        optional int32 alert_count = 8;
+        optional bool is_valid = 9;
+        repeated int32 broadcast_sent_time_sec = 10;
+        repeated int32 data_drop_time_sec = 11;
+        repeated int32 dump_report_time_sec = 12;
+        repeated int32 dump_report_data_size = 20;
+        repeated MatcherStats matcher_stats = 13;
+        repeated ConditionStats condition_stats = 14;
+        repeated MetricStats metric_stats = 15;
+        repeated AlertStats alert_stats = 16;
+        repeated MetricStats metric_dimension_in_condition_stats = 17;
+        message Annotation {
+            optional int64 field_int64 = 1;
+            optional int32 field_int32 = 2;
+        }
+        repeated Annotation annotation = 18;
+    }
+
+    repeated ConfigStats config_stats = 3;
+
+    message AtomStats {
+        optional int32 tag = 1;
+        optional int32 count = 2;
+    }
+
+    repeated AtomStats atom_stats = 7;
+
+    message UidMapStats {
+        optional int32 changes = 1;
+        optional int32 bytes_used = 2;
+        optional int32 dropped_changes = 3;
+        optional int32 deleted_apps = 4;
+    }
+    optional UidMapStats uidmap_stats = 8;
+
+    message AnomalyAlarmStats {
+        optional int32 alarms_registered = 1;
+    }
+    optional AnomalyAlarmStats anomaly_alarm_stats = 9;
+
+    message PulledAtomStats {
+        optional int32 atom_id = 1;
+        optional int64 total_pull = 2;
+        optional int64 total_pull_from_cache = 3;
+        optional int64 min_pull_interval_sec = 4;
+    }
+    repeated PulledAtomStats pulled_atom_stats = 10;
+
+    message LoggerErrorStats {
+        optional int32 logger_disconnection_sec = 1;
+        optional int32 error_code = 2;
+    }
+    repeated LoggerErrorStats logger_error_stats = 11;
+
+    message PeriodicAlarmStats {
+        optional int32 alarms_registered = 1;
+    }
+    optional PeriodicAlarmStats periodic_alarm_stats = 12;
+
+    message  SkippedLogEventStats {
+        optional int32 tag = 1;
+        optional int64 elapsed_timestamp_nanos = 2;
+    }
+    repeated SkippedLogEventStats skipped_log_event_stats = 13;
+
+    repeated int64 log_loss_stats = 14;
+
+    repeated int32 system_restart_sec = 15;
+}

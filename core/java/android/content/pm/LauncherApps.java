@@ -20,8 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
-import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -37,10 +37,10 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
-import android.graphics.drawable.AdaptiveIconDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -211,11 +211,36 @@ public class LauncherApps {
          * example, this can happen when a Device Administrator suspends
          * an applicaton.
          *
+         * <p>Note: On devices running {@link android.os.Build.VERSION_CODES#P Android P} or higher,
+         * any apps that override {@link #onPackagesSuspended(String[], UserHandle, Bundle)} will
+         * not receive this callback.
+         *
          * @param packageNames The names of the packages that have just been
          *            suspended.
          * @param user The UserHandle of the profile that generated the change.
          */
         public void onPackagesSuspended(String[] packageNames, UserHandle user) {
+        }
+
+        /**
+         * Indicates that one or more packages have been suspended. A device administrator or an app
+         * with {@code android.permission.SUSPEND_APPS} can do this.
+         *
+         * <p>A suspending app with the permission {@code android.permission.SUSPEND_APPS} can
+         * optionally provide a {@link Bundle} of extra information that it deems helpful for the
+         * launcher to handle the suspended state of these packages. The contents of this
+         * {@link Bundle} are supposed to be a contract between the suspending app and the launcher.
+         *
+         * @param packageNames The names of the packages that have just been suspended.
+         * @param user the user for which the given packages were suspended.
+         * @param launcherExtras A {@link Bundle} of extras for the launcher, if provided to the
+         *                      system, {@code null} otherwise.
+         * @see PackageManager#isPackageSuspended()
+         * @see #getSuspendedPackageLauncherExtras(String, UserHandle)
+         */
+        public void onPackagesSuspended(String[] packageNames, UserHandle user,
+                @Nullable Bundle launcherExtras) {
+            onPackagesSuspended(packageNames, user);
         }
 
         /**
@@ -265,6 +290,14 @@ public class LauncherApps {
 
         /**
          * Include pinned shortcuts in the result.
+         *
+         * <p>If you are the selected assistant app, and wishes to fetch all shortcuts that the
+         * user owns on the launcher (or by other launchers, in case the user has multiple), use
+         * {@link #FLAG_MATCH_PINNED_BY_ANY_LAUNCHER} instead.
+         *
+         * <p>If you're a regular launcher app, there's no way to get shortcuts pinned by other
+         * launchers, and {@link #FLAG_MATCH_PINNED_BY_ANY_LAUNCHER} will be ignored. So use this
+         * flag to get own pinned shortcuts.
          */
         public static final int FLAG_MATCH_PINNED = 1 << 1;
 
@@ -282,12 +315,34 @@ public class LauncherApps {
         public static final int FLAG_GET_MANIFEST = FLAG_MATCH_MANIFEST;
 
         /**
-         * Does not retrieve CHOOSER only shortcuts.
-         * TODO: Add another flag for MATCH_ALL_PINNED
+         * Include all pinned shortcuts by any launchers, not just by the caller,
+         * in the result.
+         *
+         * <p>The caller must be the selected assistant app to use this flag, or have the system
+         * {@code ACCESS_SHORTCUTS} permission.
+         *
+         * <p>If you are the selected assistant app, and wishes to fetch all shortcuts that the
+         * user owns on the launcher (or by other launchers, in case the user has multiple), use
+         * {@link #FLAG_MATCH_PINNED_BY_ANY_LAUNCHER} instead.
+         *
+         * <p>If you're a regular launcher app (or any app that's not the selected assistant app)
+         * then this flag will be ignored.
+         */
+        public static final int FLAG_MATCH_PINNED_BY_ANY_LAUNCHER = 1 << 10;
+
+        /**
+         * FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_MANIFEST
          * @hide
          */
         public static final int FLAG_MATCH_ALL_KINDS =
-                FLAG_GET_DYNAMIC | FLAG_GET_PINNED | FLAG_GET_MANIFEST;
+                FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_MANIFEST;
+
+        /**
+         * FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_MANIFEST | FLAG_MATCH_ALL_PINNED
+         * @hide
+         */
+        public static final int FLAG_MATCH_ALL_KINDS_WITH_ALL_PINNED =
+                FLAG_MATCH_ALL_KINDS | FLAG_MATCH_PINNED_BY_ANY_LAUNCHER;
 
         /** @hide kept for unit tests */
         @Deprecated
@@ -313,13 +368,13 @@ public class LauncherApps {
         public static final int FLAG_GET_KEY_FIELDS_ONLY = 1 << 2;
 
         /** @hide */
-        @IntDef(flag = true,
-                value = {
-                        FLAG_MATCH_DYNAMIC,
-                        FLAG_MATCH_PINNED,
-                        FLAG_MATCH_MANIFEST,
-                        FLAG_GET_KEY_FIELDS_ONLY,
-                })
+        @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+                FLAG_MATCH_DYNAMIC,
+                FLAG_MATCH_PINNED,
+                FLAG_MATCH_MANIFEST,
+                FLAG_GET_KEY_FIELDS_ONLY,
+                FLAG_MATCH_MANIFEST,
+        })
         @Retention(RetentionPolicy.SOURCE)
         public @interface QueryFlags {}
 
@@ -493,7 +548,8 @@ public class LauncherApps {
             Log.i(TAG, "StartMainActivity " + component + " " + user.getIdentifier());
         }
         try {
-            mService.startActivityAsUser(mContext.getPackageName(),
+            mService.startActivityAsUser(mContext.getIApplicationThread(),
+                    mContext.getPackageName(),
                     component, sourceBounds, opts, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -513,7 +569,8 @@ public class LauncherApps {
             Rect sourceBounds, Bundle opts) {
         logErrorForInvalidProfileAccess(user);
         try {
-            mService.showAppDetailsAsUser(mContext.getPackageName(),
+            mService.showAppDetailsAsUser(mContext.getIApplicationThread(),
+                    mContext.getPackageName(),
                     component, sourceBounds, opts, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -608,6 +665,34 @@ public class LauncherApps {
     }
 
     /**
+     * Gets the launcher extras supplied to the system when the given package was suspended via
+     * {@code PackageManager#setPackagesSuspended(String[], boolean, PersistableBundle,
+     * PersistableBundle, String)}.
+     *
+     * <p>The contents of this {@link Bundle} are supposed to be a contract between the suspending
+     * app and the launcher.
+     *
+     * <p>Note: This just returns whatever extras were provided to the system, <em>which might
+     * even be {@code null}.</em>
+     *
+     * @param packageName The package for which to fetch the launcher extras.
+     * @param user The {@link UserHandle} of the profile.
+     * @return A {@link Bundle} of launcher extras. Or {@code null} if the package is not currently
+     *         suspended.
+     *
+     * @see Callback#onPackagesSuspended(String[], UserHandle, Bundle)
+     * @see PackageManager#isPackageSuspended()
+     */
+    public @Nullable Bundle getSuspendedPackageLauncherExtras(String packageName, UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
+        try {
+            return mService.getSuspendedPackageLauncherExtras(packageName, user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns {@link ApplicationInfo} about an application installed for a specific user profile.
      *
      * @param packageName The package name of the application
@@ -622,7 +707,7 @@ public class LauncherApps {
             @ApplicationInfoFlags int flags, @NonNull UserHandle user)
             throws PackageManager.NameNotFoundException {
         Preconditions.checkNotNull(packageName, "packageName");
-        Preconditions.checkNotNull(packageName, "user");
+        Preconditions.checkNotNull(user, "user");
         logErrorForInvalidProfileAccess(user);
         try {
             final ApplicationInfo ai = mService
@@ -655,9 +740,13 @@ public class LauncherApps {
     }
 
     /**
-     * Returns whether the caller can access the shortcut information.
+     * Returns whether the caller can access the shortcut information.  Access is currently
+     * available to:
      *
-     * <p>Only the default launcher can access the shortcut information.
+     * <ul>
+     *     <li>The current launcher (or default launcher if there is no set current launcher).</li>
+     *     <li>The currently active voice interaction service.</li>
+     * </ul>
      *
      * <p>Note when this method returns {@code false}, it may be a temporary situation because
      * the user is trying a new launcher application.  The user may decide to change the default
@@ -676,6 +765,21 @@ public class LauncherApps {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    private List<ShortcutInfo> maybeUpdateDisabledMessage(List<ShortcutInfo> shortcuts) {
+        if (shortcuts == null) {
+            return null;
+        }
+        for (int i = shortcuts.size() - 1; i >= 0; i--) {
+            final ShortcutInfo si = shortcuts.get(i);
+            final String message = ShortcutInfo.getDisabledReasonForRestoreIssue(mContext,
+                    si.getDisabledReason());
+            if (message != null) {
+                si.setDisabledMessage(message);
+            }
+        }
+        return shortcuts;
     }
 
     /**
@@ -698,10 +802,16 @@ public class LauncherApps {
             @NonNull UserHandle user) {
         logErrorForInvalidProfileAccess(user);
         try {
-            return mService.getShortcuts(mContext.getPackageName(),
+            // Note this is the only case we need to update the disabled message for shortcuts
+            // that weren't restored.
+            // The restore problem messages are only shown by the user, and publishers will never
+            // see them. The only other API that the launcher gets shortcuts is the shortcut
+            // changed callback, but that only returns shortcuts with the "key" information, so
+            // that won't return disabled message.
+            return maybeUpdateDisabledMessage(mService.getShortcuts(mContext.getPackageName(),
                     query.mChangedSince, query.mPackage, query.mShortcutIds, query.mActivity,
                     query.mQueryFlags, user)
-                    .getList();
+                    .getList());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1108,14 +1218,15 @@ public class LauncherApps {
         }
 
         @Override
-        public void onPackagesSuspended(UserHandle user, String[] packageNames)
+        public void onPackagesSuspended(UserHandle user, String[] packageNames,
+                Bundle launcherExtras)
                 throws RemoteException {
             if (DEBUG) {
                 Log.d(TAG, "onPackagesSuspended " + user.getIdentifier() + "," + packageNames);
             }
             synchronized (LauncherApps.this) {
                 for (CallbackMessageHandler callback : mCallbacks) {
-                    callback.postOnPackagesSuspended(packageNames, user);
+                    callback.postOnPackagesSuspended(packageNames, launcherExtras, user);
                 }
             }
         }
@@ -1163,6 +1274,7 @@ public class LauncherApps {
         private static class CallbackInfo {
             String[] packageNames;
             String packageName;
+            Bundle launcherExtras;
             boolean replacing;
             UserHandle user;
             List<ShortcutInfo> shortcuts;
@@ -1196,7 +1308,8 @@ public class LauncherApps {
                     mCallback.onPackagesUnavailable(info.packageNames, info.user, info.replacing);
                     break;
                 case MSG_SUSPENDED:
-                    mCallback.onPackagesSuspended(info.packageNames, info.user);
+                    mCallback.onPackagesSuspended(info.packageNames, info.user, info.launcherExtras
+                    );
                     break;
                 case MSG_UNSUSPENDED:
                     mCallback.onPackagesUnsuspended(info.packageNames, info.user);
@@ -1246,10 +1359,12 @@ public class LauncherApps {
             obtainMessage(MSG_UNAVAILABLE, info).sendToTarget();
         }
 
-        public void postOnPackagesSuspended(String[] packageNames, UserHandle user) {
+        public void postOnPackagesSuspended(String[] packageNames, Bundle launcherExtras,
+                UserHandle user) {
             CallbackInfo info = new CallbackInfo();
             info.packageNames = packageNames;
             info.user = user;
+            info.launcherExtras = launcherExtras;
             obtainMessage(MSG_SUSPENDED, info).sendToTarget();
         }
 
@@ -1324,7 +1439,10 @@ public class LauncherApps {
         public static final int REQUEST_TYPE_APPWIDGET = 2;
 
         /** @hide */
-        @IntDef(value = {REQUEST_TYPE_SHORTCUT})
+        @IntDef(prefix = { "REQUEST_TYPE_" }, value = {
+                REQUEST_TYPE_SHORTCUT,
+                REQUEST_TYPE_APPWIDGET
+        })
         @Retention(RetentionPolicy.SOURCE)
         public @interface RequestType {}
 
@@ -1370,6 +1488,10 @@ public class LauncherApps {
          * {@link AppWidgetProviderInfo} sent by the requesting app.
          * Always non-null for a {@link #REQUEST_TYPE_APPWIDGET} request, and always null for a
          * different request type.
+         *
+         * <p>Launcher should not show any configuration activity associated with the provider, and
+         * assume that the widget is already fully configured. Upon accepting the widget, it should
+         * pass the widgetId in {@link #accept(Bundle)}.
          *
          * @return requested {@link AppWidgetProviderInfo} when a request is of the
          * {@link #REQUEST_TYPE_APPWIDGET} type.  Null otherwise.

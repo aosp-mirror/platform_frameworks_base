@@ -44,6 +44,7 @@ import android.util.DisplayMetrics;
 import android.util.PathParser;
 
 import com.android.internal.R;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -668,13 +669,7 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
 
     @Override
     public void setAlpha(int alpha) {
-        final ChildDrawable[] array = mLayerState.mChildren;
-        for (int i = 0; i < mLayerState.N_CHILDREN; i++) {
-            final Drawable dr = array[i].mDrawable;
-            if (dr != null) {
-                dr.setAlpha(alpha);
-            }
-        }
+        mPaint.setAlpha(alpha);
     }
 
     @Override

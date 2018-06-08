@@ -14,63 +14,44 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
-
+syntax = "proto2";
 package android.service.battery;
 
 option java_multiple_files = true;
 option java_outer_classname = "BatteryServiceProto";
 
+import "frameworks/base/core/proto/android/os/enums.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 message BatteryServiceDumpProto {
-    enum BatteryPlugged {
-        BATTERY_PLUGGED_NONE = 0;
-        BATTERY_PLUGGED_AC = 1;
-        BATTERY_PLUGGED_USB = 2;
-        BATTERY_PLUGGED_WIRELESS = 4;
-    }
-    enum BatteryStatus {
-        BATTERY_STATUS_INVALID = 0;
-        BATTERY_STATUS_UNKNOWN = 1;
-        BATTERY_STATUS_CHARGING = 2;
-        BATTERY_STATUS_DISCHARGING = 3;
-        BATTERY_STATUS_NOT_CHARGING = 4;
-        BATTERY_STATUS_FULL = 5;
-    }
-    enum BatteryHealth {
-        BATTERY_HEALTH_INVALID = 0;
-        BATTERY_HEALTH_UNKNOWN = 1;
-        BATTERY_HEALTH_GOOD = 2;
-        BATTERY_HEALTH_OVERHEAT = 3;
-        BATTERY_HEALTH_DEAD = 4;
-        BATTERY_HEALTH_OVER_VOLTAGE = 5;
-        BATTERY_HEALTH_UNSPECIFIED_FAILURE = 6;
-        BATTERY_HEALTH_COLD = 7;
-    }
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // If true: UPDATES STOPPED -- use 'reset' to restart
-    bool are_updates_stopped = 1;
+    optional bool are_updates_stopped = 1;
     // Plugged status of power sources
-    BatteryPlugged plugged = 2;
-    // Max current in microamperes
-    int32 max_charging_current = 3;
-    // Max voltage
-    int32 max_charging_voltage = 4;
+    optional android.os.BatteryPluggedStateEnum plugged = 2;
+    // Max current in microamperes. This may be 0 if the device's kernel drivers
+    // don't support it.
+    optional int32 max_charging_current = 3;
+    // Max voltage. This may be 0 if the device's kernel drivers don't support
+    // it.
+    optional int32 max_charging_voltage = 4;
     // Battery capacity in microampere-hours
-    int32 charge_counter = 5;
+    optional int32 charge_counter = 5;
     // Charging status
-    BatteryStatus status = 6;
+    optional android.os.BatteryStatusEnum status = 6;
     // Battery health
-    BatteryHealth health = 7;
+    optional android.os.BatteryHealthEnum health = 7;
     // True if the battery is present
-    bool is_present = 8;
+    optional bool is_present = 8;
     // Charge level, from 0 through "scale" inclusive
-    int32 level = 9;
+    optional int32 level = 9;
     // The maximum value for the charge level
-    int32 scale = 10;
+    optional int32 scale = 10;
     // Battery voltage in millivolts
-    int32 voltage = 11;
+    optional int32 voltage = 11;
     // Battery temperature in tenths of a degree Centigrade
-    int32 temperature = 12;
+    optional int32 temperature = 12;
     // The type of battery installed, e.g. "Li-ion"
-    string technology = 13;
+    optional string technology = 13;
 }

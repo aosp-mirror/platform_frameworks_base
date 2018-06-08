@@ -20,6 +20,9 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 
 public class VintfObjectTest extends TestCase {
+    /**
+     * Sanity check for {@link VintfObject#report VintfObject.report()}.
+     */
     public void testReport() {
         String[] xmls = VintfObject.report();
         assertTrue(xmls.length > 0);
@@ -28,6 +31,6 @@ public class VintfObjectTest extends TestCase {
                 "<manifest version=\"1.0\" type=\"framework\">"));
         // From /system/compatibility-matrix.xml
         assertTrue(String.join("", xmls).contains(
-                "<compatibility-matrix version=\"1.0\" type=\"framework\">"));
+                "<compatibility-matrix version=\"1.0\" type=\"framework\""));
     }
 }

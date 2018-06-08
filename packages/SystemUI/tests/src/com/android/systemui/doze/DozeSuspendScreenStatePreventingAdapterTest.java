@@ -74,6 +74,12 @@ public class DozeSuspendScreenStatePreventingAdapterTest extends SysuiTestCase {
     }
 
     @Test
+    public void forwards_setDozeScreenState_on_suspend() throws Exception {
+        mWrapper.setDozeScreenState(Display.STATE_ON_SUSPEND);
+        verify(mInner).setDozeScreenState(Display.STATE_ON_SUSPEND);
+    }
+
+    @Test
     public void forwards_requestWakeUp() throws Exception {
         mWrapper.requestWakeUp();
         verify(mInner).requestWakeUp();

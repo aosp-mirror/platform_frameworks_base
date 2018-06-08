@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 namespace android {
-namespace javastream_proto {
+namespace stream_proto {
 
 Errors ERRORS;
 
@@ -82,6 +82,6 @@ Errors::HasErrors() const
     return m_errors.size() > 0;
 }
 
-} // namespace javastream_proto
+} // namespace stream_proto
 } // namespace android
 

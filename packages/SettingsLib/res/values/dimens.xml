@@ -32,6 +32,9 @@
     <dimen name="user_spinner_padding_sides">20dp</dimen>
     <dimen name="user_spinner_item_height">56dp</dimen>
 
+    <dimen name="two_target_pref_small_icon_size">24dp</dimen>
+    <dimen name="two_target_pref_medium_icon_size">32dp</dimen>
+
     <!-- Lock icon for preferences locked by admin -->
     <dimen name="restricted_icon_size">16dp</dimen>
     <dimen name="restricted_icon_padding">4dp</dimen>
@@ -54,6 +57,7 @@
 
     <dimen name="battery_height">14.5dp</dimen>
     <dimen name="battery_width">9.5dp</dimen>
+    <dimen name="battery_powersave_outline_thickness">1dp</dimen>
 
     <dimen name="bt_battery_padding">2dp</dimen>
 
@@ -74,8 +78,20 @@
     <fraction name="battery_subpixel_smoothing_left">0%</fraction>
     <fraction name="battery_subpixel_smoothing_right">0%</fraction>
 
+    <!-- Zen mode panel: condition item button padding -->
+    <dimen name="zen_mode_condition_detail_button_padding">8dp</dimen>
+    <!-- Zen mode panel: spacing between condition items -->
+    <dimen name="zen_mode_condition_detail_item_spacing">12dp</dimen>
+    <!-- Zen mode panel: spacing between two-line condition upper and lower lines -->
+    <dimen name="zen_mode_condition_detail_item_interline_spacing">4dp</dimen>
+    <!-- Zen mode panel: bottom padding, a bit less than qs_panel_padding -->
+    <dimen name="zen_mode_condition_detail_bottom_padding">4dp</dimen>
+
     <!-- SignalDrawable -->
-    <dimen name="signal_icon_size">17dp</dimen>
+    <dimen name="signal_icon_size">15dp</dimen>
     <!-- How far to inset the rounded edges -->
     <dimen name="stat_sys_mobile_signal_circle_inset">0.9dp</dimen>
+
+
+
 </resources>

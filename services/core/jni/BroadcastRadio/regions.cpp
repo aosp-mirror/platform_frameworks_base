@@ -19,7 +19,7 @@
 
 #include "regions.h"
 
-#include <broadcastradio-utils/Utils.h>
+#include <broadcastradio-utils-1x/Utils.h>
 #include <utils/Log.h>
 
 namespace android {
@@ -27,7 +27,7 @@ namespace server {
 namespace BroadcastRadio {
 namespace regions {
 
-namespace utils = hardware::broadcastradio::V1_1::utils;
+namespace utils = hardware::broadcastradio::utils;
 
 using hardware::hidl_vec;
 

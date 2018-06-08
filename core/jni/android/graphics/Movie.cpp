@@ -104,7 +104,8 @@ static jobject movie_decodeStream(JNIEnv* env, jobject clazz, jobject istream) {
     // will only read 6.
     // FIXME: Get this number from SkImageDecoder
     // bufferedStream takes ownership of strm
-    std::unique_ptr<SkStreamRewindable> bufferedStream(SkFrontBufferedStream::Create(strm, 6));
+    std::unique_ptr<SkStreamRewindable> bufferedStream(SkFrontBufferedStream::Make(
+        std::unique_ptr<SkStream>(strm), 6));
     SkASSERT(bufferedStream.get() != NULL);
 
     Movie* moov = Movie::DecodeStream(bufferedStream.get());

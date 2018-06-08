@@ -193,6 +193,7 @@ public class DeviceAdminServiceController {
         }
     }
 
+    @GuardedBy("mLock")
     private void disconnectServiceOnUserLocked(int userId, @NonNull String actionForLog) {
         final DevicePolicyServiceConnection conn = mConnections.get(userId);
         if (conn != null) {

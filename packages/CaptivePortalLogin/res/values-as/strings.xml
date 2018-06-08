@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
+    <string name="action_use_network" msgid="6076184727448466030">"এই নেটৱৰ্কটো এইদৰে ব্যৱহাৰ কৰক"</string>
+    <string name="action_do_not_use_network" msgid="4577366536956516683">"এই নেটৱৰ্কটো ব্যৱহাৰ নকৰিব"</string>
+    <!-- no translation found for action_bar_label (917235635415966620) -->
+    <skip />
+    <!-- no translation found for action_bar_title (5645564790486983117) -->
+    <skip />
+    <!-- no translation found for ssl_error_warning (6653188881418638872) -->
+    <skip />
+    <!-- no translation found for ssl_error_example (647898534624078900) -->
+    <skip />
+    <!-- no translation found for ssl_error_continue (6492718244923937110) -->
+    <skip />
+</resources>

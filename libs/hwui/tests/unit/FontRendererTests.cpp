@@ -40,16 +40,16 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(FontRenderer, renderDropShadow) {
     std::vector<float> positions;
     float totalAdvance;
     Rect bounds;
-    TestUtils::layoutTextUnscaled(paint, "This is a test",
-            &glyphs, &positions, &totalAdvance, &bounds);
+    TestUtils::layoutTextUnscaled(paint, "This is a test", &glyphs, &positions, &totalAdvance,
+                                  &bounds);
 
     for (int radius : {28, 20, 2}) {
-        auto result = fontRenderer.renderDropShadow(&paint, glyphs.data(), glyphs.size(),
-                radius, positions.data());
+        auto result = fontRenderer.renderDropShadow(&paint, glyphs.data(), glyphs.size(), radius,
+                                                    positions.data());
         ASSERT_NE(nullptr, result.image);
         EXPECT_FALSE(isZero(result.image, result.width * result.height));
-        EXPECT_LE(bounds.getWidth() + radius * 2, (int) result.width);
-        EXPECT_LE(bounds.getHeight() + radius * 2, (int) result.height);
+        EXPECT_LE(bounds.getWidth() + radius * 2, (int)result.width);
+        EXPECT_LE(bounds.getHeight() + radius * 2, (int)result.height);
         delete result.image;
     }
 }

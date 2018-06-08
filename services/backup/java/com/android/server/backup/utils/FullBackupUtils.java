@@ -16,12 +16,13 @@
 
 package com.android.server.backup.utils;
 
-import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_MANIFEST_VERSION;
-import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.BACKUP_MANIFEST_VERSION;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.content.pm.SigningInfo;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
@@ -97,18 +98,24 @@ public class FullBackupUtils {
 
         printer.println(Integer.toString(BACKUP_MANIFEST_VERSION));
         printer.println(pkg.packageName);
-        printer.println(Integer.toString(pkg.versionCode));
+        printer.println(Long.toString(pkg.getLongVersionCode()));
         printer.println(Integer.toString(Build.VERSION.SDK_INT));
 
         String installerName = packageManager.getInstallerPackageName(pkg.packageName);
         printer.println((installerName != null) ? installerName : "");
 
         printer.println(withApk ? "1" : "0");
-        if (pkg.signatures == null) {
+
+        // write the signature block
+        SigningInfo signingInfo = pkg.signingInfo;
+        if (signingInfo == null) {
             printer.println("0");
         } else {
-            printer.println(Integer.toString(pkg.signatures.length));
-            for (Signature sig : pkg.signatures) {
+            // retrieve the newest sigs to write
+            // TODO (b/73988180) use entire signing history in case of rollbacks
+            Signature[] signatures = signingInfo.getApkContentsSigners();
+            printer.println(Integer.toString(signatures.length));
+            for (Signature sig : signatures) {
                 printer.println(sig.toCharsString());
             }
         }

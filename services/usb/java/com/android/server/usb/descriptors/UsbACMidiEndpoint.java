@@ -28,7 +28,7 @@ public final class UsbACMidiEndpoint extends UsbACEndpoint {
     private byte mNumJacks;
     private byte[] mJackIds;
 
-    public UsbACMidiEndpoint(int length, byte type, byte subclass) {
+    public UsbACMidiEndpoint(int length, byte type, int subclass) {
         super(length, type, subclass);
     }
 

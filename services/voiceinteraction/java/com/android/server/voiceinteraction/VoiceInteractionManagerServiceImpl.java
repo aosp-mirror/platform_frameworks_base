@@ -20,6 +20,7 @@ import static android.app.ActivityManager.START_ASSISTANT_HIDDEN_SESSION;
 import static android.app.ActivityManager.START_ASSISTANT_NOT_ACTIVE_SESSION;
 import static android.app.ActivityManager.START_VOICE_HIDDEN_SESSION;
 import static android.app.ActivityManager.START_VOICE_NOT_ACTIVE_SESSION;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackId;
@@ -54,6 +55,7 @@ import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConnection.Callback {
@@ -161,13 +163,16 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                     mInfo.getServiceInfo().applicationInfo.uid, mHandler);
         }
         List<IBinder> activityTokens = null;
-        if (activityToken == null) {
+        if (activityToken != null) {
+            activityTokens = new ArrayList<>();
+            activityTokens.add(activityToken);
+        } else {
             // Let's get top activities from all visible stacks
             activityTokens = LocalServices.getService(ActivityManagerInternal.class)
                     .getTopVisibleActivities();
         }
         return mActiveSession.showLocked(args, flags, mDisabledShowContext, showCallback,
-                activityToken, activityTokens);
+                activityTokens);
     }
 
     public boolean hideSessionLocked() {
@@ -222,8 +227,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             }
             intent = new Intent(intent);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            ActivityOptions options = ActivityOptions.makeBasic();
-            options.setLaunchStackId(StackId.ASSISTANT_STACK_ID);
+            final ActivityOptions options = ActivityOptions.makeBasic();
+            options.setLaunchActivityType(ACTIVITY_TYPE_ASSISTANT);
             return mAm.startAssistantActivity(mComponent.getPackageName(), callingPid, callingUid,
                     intent, resolvedType, options.toBundle(), mUser);
         } catch (RemoteException e) {

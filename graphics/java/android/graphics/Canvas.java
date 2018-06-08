@@ -47,6 +47,7 @@ import javax.microedition.khronos.opengles.GL;
  * Canvas and Drawables</a> developer guide.</p></div>
  */
 public class Canvas extends BaseCanvas {
+    private static int sCompatiblityVersion = 0;
     /** @hide */
     public static boolean sCompatibilityRestore = false;
     /** @hide */
@@ -200,11 +201,6 @@ public class Canvas extends BaseCanvas {
     }
 
     /** @hide */
-    public void setHighContrastText(boolean highContrastText) {
-        nSetHighContrastText(mNativeCanvasWrapper, highContrastText);
-    }
-
-    /** @hide */
     public void insertReorderBarrier() {}
 
     /** @hide */
@@ -311,7 +307,7 @@ public class Canvas extends BaseCanvas {
 
     /**
      * Restore the current matrix when restore() is called.
-     *
+     * @removed
      * @deprecated Use the flagless version of {@link #save()}, {@link #saveLayer(RectF, Paint)} or
      *             {@link #saveLayerAlpha(RectF, int)}. For saveLayer() calls the matrix
      *             was always restored for {@link #isHardwareAccelerated() Hardware accelerated}
@@ -323,6 +319,7 @@ public class Canvas extends BaseCanvas {
     /**
      * Restore the current clip when restore() is called.
      *
+     * @removed
      * @deprecated Use the flagless version of {@link #save()}, {@link #saveLayer(RectF, Paint)} or
      *             {@link #saveLayerAlpha(RectF, int)}. For saveLayer() calls the clip
      *             was always restored for {@link #isHardwareAccelerated() Hardware accelerated}
@@ -334,6 +331,7 @@ public class Canvas extends BaseCanvas {
     /**
      * The layer requires a per-pixel alpha channel.
      *
+     * @removed
      * @deprecated This flag is ignored. Use the flagless version of {@link #saveLayer(RectF, Paint)}
      *             {@link #saveLayerAlpha(RectF, int)}.
      */
@@ -342,6 +340,7 @@ public class Canvas extends BaseCanvas {
     /**
      * The layer requires full 8-bit precision for each color channel.
      *
+     * @removed
      * @deprecated This flag is ignored. Use the flagless version of {@link #saveLayer(RectF, Paint)}
      *             {@link #saveLayerAlpha(RectF, int)}.
      */
@@ -354,6 +353,7 @@ public class Canvas extends BaseCanvas {
      * <code>saveLayerAlpha()</code> variants. Not passing this flag generally
      * triggers extremely poor performance with hardware accelerated rendering.
      *
+     * @removed
      * @deprecated This flag results in poor performance and the same effect can be achieved with
      *             a single layer or multiple draw commands with different clips.
      *
@@ -371,6 +371,14 @@ public class Canvas extends BaseCanvas {
      * have flagless versions that are equivalent to passing this flag.
      */
     public static final int ALL_SAVE_FLAG = 0x1F;
+
+    private static void checkValidSaveFlags(int saveFlags) {
+        if (sCompatiblityVersion >= Build.VERSION_CODES.P
+                && saveFlags != ALL_SAVE_FLAG) {
+            throw new IllegalArgumentException(
+                    "Invalid Layer Save Flag - only ALL_SAVE_FLAGS is allowed");
+        }
+    }
 
     /**
      * Saves the current matrix and clip onto a private stack.
@@ -398,6 +406,7 @@ public class Canvas extends BaseCanvas {
      * restore() is made, those calls will be forgotten, and the settings that
      * existed before the save() will be reinstated.
      *
+     * @removed
      * @deprecated Use {@link #save()} instead.
      * @param saveFlags flag bits that specify which parts of the Canvas state
      *                  to save/restore
@@ -412,10 +421,8 @@ public class Canvas extends BaseCanvas {
      * redirects drawing to an offscreen bitmap.
      * <p class="note"><strong>Note:</strong> this method is very expensive,
      * incurring more than double rendering cost for contained content. Avoid
-     * using this method, especially if the bounds provided are large, or if
-     * the {@link #CLIP_TO_LAYER_SAVE_FLAG} is omitted from the
-     * {@code saveFlags} parameter. It is recommended to use a
-     * {@link android.view.View#LAYER_TYPE_HARDWARE hardware layer} on a View
+     * using this method, especially if the bounds provided are large. It is
+     * recommended to use a {@link android.view.View#LAYER_TYPE_HARDWARE hardware layer} on a View
      * to apply an xfermode, color filter, or alpha, as it will perform much
      * better than this method.
      * <p>
@@ -428,6 +435,9 @@ public class Canvas extends BaseCanvas {
      * {@link Paint#getXfermode() Xfermode}, and
      * {@link Paint#getColorFilter() ColorFilter} are applied when the
      * offscreen bitmap is drawn back when restore() is called.
+     *
+     * As of API Level API level {@value Build.VERSION_CODES#P} the only valid
+     * {@code saveFlags} is {@link #ALL_SAVE_FLAG}.  All other flags are ignored.
      *
      * @deprecated Use {@link #saveLayer(RectF, Paint)} instead.
      * @param bounds May be null. The maximum size the offscreen bitmap
@@ -442,7 +452,9 @@ public class Canvas extends BaseCanvas {
         if (bounds == null) {
             bounds = new RectF(getClipBounds());
         }
-        return saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, paint, saveFlags);
+        checkValidSaveFlags(saveFlags);
+        return saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, paint,
+                ALL_SAVE_FLAG);
     }
 
     /**
@@ -476,15 +488,26 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
+     * @hide
+     */
+    public int saveUnclippedLayer(int left, int top, int right, int bottom) {
+        return nSaveLayer(mNativeCanvasWrapper, left, top, right, bottom, 0, 0);
+    }
+
+    /**
      * Helper version of saveLayer() that takes 4 values rather than a RectF.
+     *
+     * As of API Level API level {@value Build.VERSION_CODES#P} the only valid
+     * {@code saveFlags} is {@link #ALL_SAVE_FLAG}.  All other flags are ignored.
      *
      * @deprecated Use {@link #saveLayer(float, float, float, float, Paint)} instead.
      */
     public int saveLayer(float left, float top, float right, float bottom, @Nullable Paint paint,
             @Saveflags int saveFlags) {
+        checkValidSaveFlags(saveFlags);
         return nSaveLayer(mNativeCanvasWrapper, left, top, right, bottom,
                 paint != null ? paint.getNativeInstance() : 0,
-                saveFlags);
+                ALL_SAVE_FLAG);
     }
 
     /**
@@ -500,10 +523,8 @@ public class Canvas extends BaseCanvas {
      * redirects drawing to an offscreen bitmap.
      * <p class="note"><strong>Note:</strong> this method is very expensive,
      * incurring more than double rendering cost for contained content. Avoid
-     * using this method, especially if the bounds provided are large, or if
-     * the {@link #CLIP_TO_LAYER_SAVE_FLAG} is omitted from the
-     * {@code saveFlags} parameter. It is recommended to use a
-     * {@link android.view.View#LAYER_TYPE_HARDWARE hardware layer} on a View
+     * using this method, especially if the bounds provided are large. It is
+     * recommended to use a {@link android.view.View#LAYER_TYPE_HARDWARE hardware layer} on a View
      * to apply an xfermode, color filter, or alpha, as it will perform much
      * better than this method.
      * <p>
@@ -514,6 +535,9 @@ public class Canvas extends BaseCanvas {
      * <p>
      * The {@code alpha} parameter is applied when the offscreen bitmap is
      * drawn back when restore() is called.
+     *
+     * As of API Level API level {@value Build.VERSION_CODES#P} the only valid
+     * {@code saveFlags} is {@link #ALL_SAVE_FLAG}.  All other flags are ignored.
      *
      * @deprecated Use {@link #saveLayerAlpha(RectF, int)} instead.
      * @param bounds    The maximum size the offscreen bitmap needs to be
@@ -528,7 +552,9 @@ public class Canvas extends BaseCanvas {
         if (bounds == null) {
             bounds = new RectF(getClipBounds());
         }
-        return saveLayerAlpha(bounds.left, bounds.top, bounds.right, bounds.bottom, alpha, saveFlags);
+        checkValidSaveFlags(saveFlags);
+        return saveLayerAlpha(bounds.left, bounds.top, bounds.right, bounds.bottom, alpha,
+                ALL_SAVE_FLAG);
     }
 
     /**
@@ -547,13 +573,17 @@ public class Canvas extends BaseCanvas {
     /**
      * Helper for saveLayerAlpha() that takes 4 values instead of a RectF.
      *
+     * As of API Level API level {@value Build.VERSION_CODES#P} the only valid
+     * {@code saveFlags} is {@link #ALL_SAVE_FLAG}.  All other flags are ignored.
+     *
      * @deprecated Use {@link #saveLayerAlpha(float, float, float, float, int)} instead.
      */
     public int saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
             @Saveflags int saveFlags) {
+        checkValidSaveFlags(saveFlags);
         alpha = Math.min(255, Math.max(0, alpha));
         return nSaveLayerAlpha(mNativeCanvasWrapper, left, top, right, bottom,
-                                     alpha, saveFlags);
+                                     alpha, ALL_SAVE_FLAG);
     }
 
     /**
@@ -743,6 +773,14 @@ public class Canvas extends BaseCanvas {
         return m;
     }
 
+    private static void checkValidClipOp(@NonNull Region.Op op) {
+        if (sCompatiblityVersion >= Build.VERSION_CODES.P
+                && op != Region.Op.INTERSECT && op != Region.Op.DIFFERENCE) {
+            throw new IllegalArgumentException(
+                    "Invalid Region.Op - only INTERSECT and DIFFERENCE are allowed");
+        }
+    }
+
     /**
      * Modify the current clip with the specified rectangle.
      *
@@ -755,9 +793,13 @@ public class Canvas extends BaseCanvas {
      * are intended to only expand the clip as a result of a restore operation. This enables a view
      * parent to clip a canvas to clearly define the maximal drawing area of its children. The
      * recommended alternative calls are {@link #clipRect(RectF)} and {@link #clipOutRect(RectF)};
+     *
+     * As of API Level API level {@value Build.VERSION_CODES#P} only {@link Region.Op#INTERSECT} and
+     * {@link Region.Op#DIFFERENCE} are valid Region.Op parameters.
      */
     @Deprecated
     public boolean clipRect(@NonNull RectF rect, @NonNull Region.Op op) {
+        checkValidClipOp(op);
         return nClipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
                 op.nativeInt);
     }
@@ -775,11 +817,26 @@ public class Canvas extends BaseCanvas {
      * are intended to only expand the clip as a result of a restore operation. This enables a view
      * parent to clip a canvas to clearly define the maximal drawing area of its children. The
      * recommended alternative calls are {@link #clipRect(Rect)} and {@link #clipOutRect(Rect)};
+     *
+     * As of API Level API level {@value Build.VERSION_CODES#P} only {@link Region.Op#INTERSECT} and
+     * {@link Region.Op#DIFFERENCE} are valid Region.Op parameters.
      */
     @Deprecated
     public boolean clipRect(@NonNull Rect rect, @NonNull Region.Op op) {
+        checkValidClipOp(op);
         return nClipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
                 op.nativeInt);
+    }
+
+    /**
+     * DON'T USE THIS METHOD.  It exists only to support a particular legacy behavior in
+     * the view system and will be removed as soon as that code is refactored to no longer
+     * depend on this behavior.
+     * @hide
+     */
+    public boolean clipRectUnion(@NonNull Rect rect) {
+        return nClipRect(mNativeCanvasWrapper, rect.left, rect.top, rect.right, rect.bottom,
+                Region.Op.UNION.nativeInt);
     }
 
     /**
@@ -851,10 +908,14 @@ public class Canvas extends BaseCanvas {
      * parent to clip a canvas to clearly define the maximal drawing area of its children. The
      * recommended alternative calls are {@link #clipRect(float,float,float,float)} and
      * {@link #clipOutRect(float,float,float,float)};
+     *
+     * As of API Level API level {@value Build.VERSION_CODES#P} only {@link Region.Op#INTERSECT} and
+     * {@link Region.Op#DIFFERENCE} are valid Region.Op parameters.
      */
     @Deprecated
     public boolean clipRect(float left, float top, float right, float bottom,
             @NonNull Region.Op op) {
+        checkValidClipOp(op);
         return nClipRect(mNativeCanvasWrapper, left, top, right, bottom, op.nativeInt);
     }
 
@@ -937,9 +998,13 @@ public class Canvas extends BaseCanvas {
      * parent to clip a canvas to clearly define the maximal drawing area of its children. The
      * recommended alternative calls are {@link #clipPath(Path)} and
      * {@link #clipOutPath(Path)};
+     *
+     * As of API Level API level {@value Build.VERSION_CODES#P} only {@link Region.Op#INTERSECT} and
+     * {@link Region.Op#DIFFERENCE} are valid Region.Op parameters.
      */
     @Deprecated
     public boolean clipPath(@NonNull Path path, @NonNull Region.Op op) {
+        checkValidClipOp(op);
         return nClipPath(mNativeCanvasWrapper, path.readOnlyNI(), op.nativeInt);
     }
 
@@ -1224,10 +1289,17 @@ public class Canvas extends BaseCanvas {
         nFreeTextLayoutCaches();
     }
 
+    /** @hide */
+    public static void setCompatibilityVersion(int apiLevel) {
+        sCompatiblityVersion = apiLevel;
+        nSetCompatibilityVersion(apiLevel);
+    }
+
     private static native void nFreeCaches();
     private static native void nFreeTextLayoutCaches();
     private static native long nInitRaster(Bitmap bitmap);
     private static native long nGetNativeFinalizer();
+    private static native void nSetCompatibilityVersion(int apiLevel);
 
     // ---------------- @FastNative -------------------
 
@@ -1241,8 +1313,6 @@ public class Canvas extends BaseCanvas {
 
     @CriticalNative
     private static native boolean nIsOpaque(long canvasHandle);
-    @CriticalNative
-    private static native void nSetHighContrastText(long renderer, boolean highContrastText);
     @CriticalNative
     private static native int nGetWidth(long canvasHandle);
     @CriticalNative
@@ -1492,6 +1562,10 @@ public class Canvas extends BaseCanvas {
      * array is accessed in row-major order, so that the first meshWidth+1 vertices are distributed
      * across the top of the bitmap from left to right. A more general version of this method is
      * drawVertices().
+     *
+     * Prior to API level {@value Build.VERSION_CODES#P} vertOffset and colorOffset were ignored,
+     * effectively treating them as zeros. In API level {@value Build.VERSION_CODES#P} and above
+     * these parameters will be respected.
      *
      * @param bitmap The bitmap to draw using the mesh
      * @param meshWidth The number of columns in the mesh. Nothing is drawn if this is 0

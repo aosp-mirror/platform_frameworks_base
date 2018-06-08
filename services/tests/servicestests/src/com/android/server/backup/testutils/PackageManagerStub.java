@@ -1,6 +1,5 @@
 package com.android.server.backup.testutils;
 
-import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -11,7 +10,6 @@ import android.content.pm.ChangedPackages;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
-import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.InstrumentationInfo;
@@ -33,8 +31,8 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
 
@@ -45,6 +43,7 @@ import java.util.List;
  */
 public class PackageManagerStub extends PackageManager {
     public static PackageInfo sPackageInfo;
+    public static int sApplicationEnabledSetting = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 
     @Override
     public PackageInfo getPackageInfo(String packageName, int flags)
@@ -85,6 +84,11 @@ public class PackageManagerStub extends PackageManager {
 
     @Override
     public Intent getLeanbackLaunchIntentForPackage(String packageName) {
+        return null;
+    }
+
+    @Override
+    public Intent getCarLaunchIntentForPackage(String packageName) {
         return null;
     }
 
@@ -434,6 +438,11 @@ public class PackageManagerStub extends PackageManager {
     }
 
     @Override
+    public ResolveInfo resolveServiceAsUser(Intent intent, int flags, int userId) {
+        return null;
+    }
+
+    @Override
     public List<ResolveInfo> queryIntentServices(Intent intent, int flags) {
         return null;
     }
@@ -619,18 +628,6 @@ public class PackageManagerStub extends PackageManager {
     public Resources getResourcesForApplicationAsUser(String appPackageName, int userId)
             throws NameNotFoundException {
         return null;
-    }
-
-    @Override
-    public void installPackage(Uri packageURI, IPackageInstallObserver observer, int flags,
-            String installerPackageName) {
-
-    }
-
-    @Override
-    public void installPackage(Uri packageURI, PackageInstallObserver observer, int flags,
-            String installerPackageName) {
-
     }
 
     @Override
@@ -820,7 +817,7 @@ public class PackageManagerStub extends PackageManager {
 
     @Override
     public int getApplicationEnabledSetting(String packageName) {
-        return 0;
+        return sApplicationEnabledSetting;
     }
 
     @Override
@@ -878,8 +875,8 @@ public class PackageManagerStub extends PackageManager {
     }
 
     @Override
-    public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean suspended,
-            int userId) {
+    public String[] setPackagesSuspended(String[] packageNames, boolean suspended,
+            PersistableBundle appExtras, PersistableBundle launcherExtras, String dialogMessage) {
         return new String[0];
     }
 

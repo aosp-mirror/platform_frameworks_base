@@ -38,9 +38,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
     private final ActivityManagerService mService;
     private final AppErrorResult mResult;
     private final ProcessRecord mProc;
-    private final boolean mRepeating;
     private final boolean mIsRestartable;
-    private CharSequence mName;
 
     static int CANT_SHOW = -1;
     static int BACKGROUND_USER = -2;
@@ -53,6 +51,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
     static final int MUTE = 5;
     static final int TIMEOUT = 6;
     static final int CANCEL = 7;
+    static final int APP_INFO = 8;
 
     // 5-minute timeout, then we automatically dismiss the crash dialog
     static final long DISMISS_TIMEOUT = 1000 * 60 * 5;
@@ -64,23 +63,25 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         mService = service;
         mProc = data.proc;
         mResult = data.result;
-        mRepeating = data.repeating;
-        mIsRestartable = data.task != null || data.isRestartableForService;
+        mIsRestartable = (data.task != null || data.isRestartableForService)
+                && Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG, 0) != 0;
         BidiFormatter bidi = BidiFormatter.getInstance();
 
+        CharSequence name;
         if ((mProc.pkgList.size() == 1) &&
-                (mName = context.getPackageManager().getApplicationLabel(mProc.info)) != null) {
+                (name = context.getPackageManager().getApplicationLabel(mProc.info)) != null) {
             setTitle(res.getString(
-                    mRepeating ? com.android.internal.R.string.aerr_application_repeated
+                    data.repeating ? com.android.internal.R.string.aerr_application_repeated
                             : com.android.internal.R.string.aerr_application,
-                    bidi.unicodeWrap(mName.toString()),
+                    bidi.unicodeWrap(name.toString()),
                     bidi.unicodeWrap(mProc.info.processName)));
         } else {
-            mName = mProc.processName;
+            name = mProc.processName;
             setTitle(res.getString(
-                    mRepeating ? com.android.internal.R.string.aerr_process_repeated
+                    data.repeating ? com.android.internal.R.string.aerr_process_repeated
                             : com.android.internal.R.string.aerr_process,
-                    bidi.unicodeWrap(mName.toString())));
+                    bidi.unicodeWrap(name.toString())));
         }
 
         setCancelable(true);
@@ -118,11 +119,14 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         report.setOnClickListener(this);
         report.setVisibility(hasReceiver ? View.VISIBLE : View.GONE);
         final TextView close = findViewById(com.android.internal.R.id.aerr_close);
-        close.setVisibility(mRepeating ? View.VISIBLE : View.GONE);
         close.setOnClickListener(this);
+        final TextView appInfo = findViewById(com.android.internal.R.id.aerr_app_info);
+        appInfo.setOnClickListener(this);
 
         boolean showMute = !Build.IS_USER && Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0;
+                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0
+                && Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.SHOW_MUTE_IN_CRASH_DIALOG, 0) != 0;
         final TextView mute = findViewById(com.android.internal.R.id.aerr_mute);
         mute.setOnClickListener(this);
         mute.setVisibility(showMute ? View.VISIBLE : View.GONE);
@@ -182,6 +186,9 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
                 break;
             case com.android.internal.R.id.aerr_close:
                 mHandler.obtainMessage(FORCE_QUIT).sendToTarget();
+                break;
+            case com.android.internal.R.id.aerr_app_info:
+                mHandler.obtainMessage(APP_INFO).sendToTarget();
                 break;
             case com.android.internal.R.id.aerr_mute:
                 mHandler.obtainMessage(MUTE).sendToTarget();

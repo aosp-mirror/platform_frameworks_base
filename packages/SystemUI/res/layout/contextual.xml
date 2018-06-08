@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2018 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:systemui="http://schemas.android.com/apk/res-auto"
+             android:id="@+id/menu_container"
+             android:layout_width="@dimen/navigation_key_width"
+             android:layout_height="match_parent"
+             android:importantForAccessibility="no"
+             android:clipChildren="false"
+             android:clipToPadding="false"
+             >
+    <com.android.systemui.statusbar.policy.KeyButtonView
+        android:id="@+id/menu"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_weight="0"
+        android:scaleType="center"
+        systemui:keyCode="82"
+        systemui:playSound="false"
+        android:visibility="invisible"
+        android:contentDescription="@string/accessibility_menu"
+        android:paddingStart="@dimen/navigation_key_padding"
+        android:paddingEnd="@dimen/navigation_key_padding"
+    />
+    <com.android.systemui.statusbar.policy.KeyButtonView
+        android:id="@+id/ime_switcher"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0"
+        android:scaleType="center"
+        android:visibility="invisible"
+        android:contentDescription="@string/accessibility_ime_switch_button"
+        android:paddingStart="@dimen/navigation_key_padding"
+        android:paddingEnd="@dimen/navigation_key_padding"
+    />
+    <com.android.systemui.statusbar.policy.KeyButtonView
+        android:id="@+id/rotate_suggestion"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0"
+        android:scaleType="center"
+        android:visibility="invisible"
+        android:contentDescription="@string/accessibility_rotate_button"
+        android:paddingStart="@dimen/navigation_key_padding"
+        android:paddingEnd="@dimen/navigation_key_padding"
+    />
+    <com.android.systemui.statusbar.policy.KeyButtonView
+        android:id="@+id/accessibility_button"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="0"
+        android:scaleType="center"
+        android:visibility="invisible"
+        android:contentDescription="@string/accessibility_accessibility_button"
+        android:paddingStart="@dimen/navigation_key_padding"
+        android:paddingEnd="@dimen/navigation_key_padding"
+    />
+</FrameLayout>

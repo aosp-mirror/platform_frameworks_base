@@ -32,8 +32,8 @@ namespace uirenderer {
  */
 class CanvasStateClient {
 public:
-    CanvasStateClient() { }
-    virtual ~CanvasStateClient() { }
+    CanvasStateClient() {}
+    virtual ~CanvasStateClient() {}
 
     /**
      * Callback allowing embedder to take actions in the middle of a
@@ -53,7 +53,7 @@ public:
      */
     virtual GLuint getTargetFbo() const = 0;
 
-}; // class CanvasStateClient
+};  // class CanvasStateClient
 
 /**
  * Implements Canvas state methods on behalf of Renderers.
@@ -86,13 +86,10 @@ public:
      * Initializes the first snapshot, computing the projection matrix,
      * and stores the dimensions of the render target.
      */
-    void initializeSaveStack(int viewportWidth, int viewportHeight,
-            float clipLeft, float clipTop, float clipRight, float clipBottom,
-            const Vector3& lightCenter);
+    void initializeSaveStack(int viewportWidth, int viewportHeight, float clipLeft, float clipTop,
+                             float clipRight, float clipBottom, const Vector3& lightCenter);
 
-    bool hasRectToRectTransform() const {
-        return CC_LIKELY(currentTransform()->rectToRect());
-    }
+    bool hasRectToRectTransform() const { return CC_LIKELY(currentTransform()->rectToRect()); }
 
     // Save (layer)
     int getSaveCount() const { return mSaveCount; }
@@ -112,9 +109,9 @@ public:
     void skew(float sx, float sy);
 
     void setMatrix(const SkMatrix& matrix);
-    void setMatrix(const Matrix4& matrix); // internal only convenience method
+    void setMatrix(const Matrix4& matrix);  // internal only convenience method
     void concatMatrix(const SkMatrix& matrix);
-    void concatMatrix(const Matrix4& matrix); // internal only convenience method
+    void concatMatrix(const Matrix4& matrix);  // internal only convenience method
 
     // Clip
     const Rect& getLocalClipBounds() const { return mSnapshot->getLocalClip(); }
@@ -132,13 +129,11 @@ public:
      * outline.
      */
     void setClippingOutline(LinearAllocator& allocator, const Outline* outline);
-    void setClippingRoundRect(LinearAllocator& allocator,
-            const Rect& rect, float radius, bool highPriority = true) {
+    void setClippingRoundRect(LinearAllocator& allocator, const Rect& rect, float radius,
+                              bool highPriority = true) {
         mSnapshot->setClippingRoundRect(allocator, rect, radius, highPriority);
     }
-    void setProjectionPathMask(const SkPath* path) {
-        mSnapshot->setProjectionPathMask(path);
-    }
+    void setProjectionPathMask(const SkPath* path) { mSnapshot->setProjectionPathMask(path); }
 
     /**
      * Returns true if drawing in the rectangle (left, top, right, bottom)
@@ -146,14 +141,19 @@ public:
      * perfect tests would return true.
      */
     bool calculateQuickRejectForScissor(float left, float top, float right, float bottom,
-            bool* clipRequired, bool* roundRectClipRequired, bool snapOut) const;
+                                        bool* clipRequired, bool* roundRectClipRequired,
+                                        bool snapOut) const;
 
     void scaleAlpha(float alpha) { mSnapshot->alpha *= alpha; }
 
     inline const mat4* currentTransform() const { return currentSnapshot()->transform; }
-    inline const Rect& currentRenderTargetClip() const { return currentSnapshot()->getRenderTargetClip(); }
+    inline const Rect& currentRenderTargetClip() const {
+        return currentSnapshot()->getRenderTargetClip();
+    }
     inline int currentFlags() const { return currentSnapshot()->flags; }
-    const Vector3& currentLightCenter() const { return currentSnapshot()->getRelativeLightCenter(); }
+    const Vector3& currentLightCenter() const {
+        return currentSnapshot()->getRelativeLightCenter();
+    }
     int getViewportWidth() const { return currentSnapshot()->getViewportWidth(); }
     int getViewportHeight() const { return currentSnapshot()->getViewportHeight(); }
     int getWidth() const { return mWidth; }
@@ -189,7 +189,7 @@ private:
     Snapshot* mSnapshotPool = nullptr;
     int mSnapshotPoolCount = 0;
 
-}; // class CanvasState
+};  // class CanvasState
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

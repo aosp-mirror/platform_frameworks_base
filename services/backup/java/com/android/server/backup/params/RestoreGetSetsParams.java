@@ -20,20 +20,24 @@ import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IRestoreObserver;
 
 import com.android.internal.backup.IBackupTransport;
+import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.restore.ActiveRestoreSession;
+import com.android.server.backup.transport.TransportClient;
 
 public class RestoreGetSetsParams {
+    public final TransportClient transportClient;
+    public final ActiveRestoreSession session;
+    public final IRestoreObserver observer;
+    public final IBackupManagerMonitor monitor;
+    public final OnTaskFinishedListener listener;
 
-    public IBackupTransport transport;
-    public ActiveRestoreSession session;
-    public IRestoreObserver observer;
-    public IBackupManagerMonitor monitor;
-
-    public RestoreGetSetsParams(IBackupTransport _transport, ActiveRestoreSession _session,
-            IRestoreObserver _observer, IBackupManagerMonitor _monitor) {
-        transport = _transport;
+    public RestoreGetSetsParams(TransportClient _transportClient, ActiveRestoreSession _session,
+            IRestoreObserver _observer, IBackupManagerMonitor _monitor,
+            OnTaskFinishedListener _listener) {
+        transportClient = _transportClient;
         session = _session;
         observer = _observer;
         monitor = _monitor;
+        listener = _listener;
     }
 }

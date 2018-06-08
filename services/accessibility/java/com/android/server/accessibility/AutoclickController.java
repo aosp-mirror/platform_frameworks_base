@@ -23,15 +23,12 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.Slog;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
-import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
 /**
@@ -55,11 +52,10 @@ import android.view.accessibility.AccessibilityManager;
  *
  * Each instance is associated to a single user (and it does not handle user switch itself).
  */
-public class AutoclickController implements EventStreamTransformation {
+public class AutoclickController extends BaseEventStreamTransformation {
 
     private static final String LOG_TAG = AutoclickController.class.getSimpleName();
 
-    private EventStreamTransformation mNext;
     private final Context mContext;
     private final int mUserId;
 
@@ -88,9 +84,7 @@ public class AutoclickController implements EventStreamTransformation {
             mClickScheduler.cancel();
         }
 
-        if (mNext != null) {
-            mNext.onMotionEvent(event, rawEvent, policyFlags);
-        }
+        super.onMotionEvent(event, rawEvent, policyFlags);
     }
 
     @Override
@@ -103,21 +97,7 @@ public class AutoclickController implements EventStreamTransformation {
             }
         }
 
-        if (mNext != null) {
-          mNext.onKeyEvent(event, policyFlags);
-        }
-    }
-
-    @Override
-    public void onAccessibilityEvent(AccessibilityEvent event) {
-        if (mNext != null) {
-            mNext.onAccessibilityEvent(event);
-        }
-    }
-
-    @Override
-    public void setNext(EventStreamTransformation next) {
-        mNext = next;
+        super.onKeyEvent(event, policyFlags);
     }
 
     @Override
@@ -126,9 +106,7 @@ public class AutoclickController implements EventStreamTransformation {
             mClickScheduler.cancel();
         }
 
-        if (mNext != null) {
-            mNext.clearEvents(inputSource);
-        }
+        super.clearEvents(inputSource);
     }
 
     @Override
@@ -418,7 +396,7 @@ public class AutoclickController implements EventStreamTransformation {
          * Creates and forwards click event sequence.
          */
         private void sendClick() {
-            if (mLastMotionEvent == null || mNext == null) {
+            if (mLastMotionEvent == null || getNext() == null) {
                 return;
             }
 
@@ -448,10 +426,10 @@ public class AutoclickController implements EventStreamTransformation {
             MotionEvent upEvent = MotionEvent.obtain(downEvent);
             upEvent.setAction(MotionEvent.ACTION_UP);
 
-            mNext.onMotionEvent(downEvent, downEvent, mEventPolicyFlags);
+            AutoclickController.super.onMotionEvent(downEvent, downEvent, mEventPolicyFlags);
             downEvent.recycle();
 
-            mNext.onMotionEvent(upEvent, upEvent, mEventPolicyFlags);
+            AutoclickController.super.onMotionEvent(upEvent, upEvent, mEventPolicyFlags);
             upEvent.recycle();
         }
 

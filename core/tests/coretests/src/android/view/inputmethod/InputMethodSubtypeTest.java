@@ -16,15 +16,26 @@
 
 package android.view.inputmethod;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import android.os.Parcel;
-import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Locale;
 import java.util.Objects;
 
-public class InputMethodSubtypeTest extends InstrumentationTestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class InputMethodSubtypeTest {
 
     public void verifyLocale(final String localeString) {
         // InputMethodSubtype#getLocale() returns exactly the same string that is passed to the
@@ -48,7 +59,7 @@ public class InputMethodSubtypeTest extends InstrumentationTestCase {
                 cloneViaParcel(cloneViaParcel(createDummySubtype(localeString))).hashCode());
     }
 
-    @SmallTest
+    @Test
     public void testLocaleObj_locale() {
         final InputMethodSubtype usSubtype = createDummySubtype("en_US");
         Locale localeObject = usSubtype.getLocaleObject();
@@ -59,7 +70,7 @@ public class InputMethodSubtypeTest extends InstrumentationTestCase {
         assertTrue(localeObject == usSubtype.getLocaleObject());
     }
 
-    @SmallTest
+    @Test
     public void testLocaleObj_languageTag() {
         final InputMethodSubtype usSubtype = createDummySubtypeUsingLanguageTag("en-US");
         Locale localeObject = usSubtype.getLocaleObject();
@@ -71,7 +82,7 @@ public class InputMethodSubtypeTest extends InstrumentationTestCase {
         assertTrue(localeObject == usSubtype.getLocaleObject());
     }
 
-    @SmallTest
+    @Test
     public void testLocaleObj_emptyLocale() {
         final InputMethodSubtype emptyLocaleSubtype = createDummySubtype("");
         assertNull(emptyLocaleSubtype.getLocaleObject());
@@ -80,7 +91,7 @@ public class InputMethodSubtypeTest extends InstrumentationTestCase {
         assertNull(emptyLocaleSubtype.getLocaleObject());
     }
 
-    @SmallTest
+    @Test
     public void testLocaleString() throws Exception {
         // The locale string in InputMethodSubtype has accepted an arbitrary text actually,
         // regardless of the validity of the text as a locale string.
@@ -95,7 +106,7 @@ public class InputMethodSubtypeTest extends InstrumentationTestCase {
         verifyLocale("fil_PH");
     }
 
-    @SmallTest
+    @Test
     public void testDeprecatedLocaleString() throws Exception {
         // Make sure "iw" is not automatically replaced with "he".
         final InputMethodSubtype subtypeIw = createDummySubtype("iw");

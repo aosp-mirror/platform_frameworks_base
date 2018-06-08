@@ -24,7 +24,10 @@
 #include "Resource.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
+#include "configuration/ConfigurationParser.h"
+#include "configuration/ConfigurationParser.internal.h"
 #include "process/IResourceTableConsumer.h"
+#include "test/Common.h"
 #include "util/Maybe.h"
 #include "xml/XmlDom.h"
 
@@ -50,19 +53,22 @@ class ResourceTableBuilder {
   ResourceTableBuilder& AddString(const android::StringPiece& name, const ResourceId& id,
                                   const ConfigDescription& config, const android::StringPiece& str);
   ResourceTableBuilder& AddFileReference(const android::StringPiece& name,
-                                         const android::StringPiece& path);
+                                         const android::StringPiece& path,
+                                         io::IFile* file = nullptr);
   ResourceTableBuilder& AddFileReference(const android::StringPiece& name, const ResourceId& id,
-                                         const android::StringPiece& path);
+                                         const android::StringPiece& path,
+                                         io::IFile* file = nullptr);
   ResourceTableBuilder& AddFileReference(const android::StringPiece& name,
                                          const android::StringPiece& path,
-                                         const ConfigDescription& config);
+                                         const ConfigDescription& config,
+                                         io::IFile* file = nullptr);
   ResourceTableBuilder& AddValue(const android::StringPiece& name, std::unique_ptr<Value> value);
   ResourceTableBuilder& AddValue(const android::StringPiece& name, const ResourceId& id,
                                  std::unique_ptr<Value> value);
   ResourceTableBuilder& AddValue(const android::StringPiece& name, const ConfigDescription& config,
                                  const ResourceId& id, std::unique_ptr<Value> value);
   ResourceTableBuilder& SetSymbolState(const android::StringPiece& name, const ResourceId& id,
-                                       SymbolState state, bool allow_new = false);
+                                       Visibility::Level level, bool allow_new = false);
 
   StringPool* string_pool();
   std::unique_ptr<ResourceTable> Build();
@@ -107,8 +113,9 @@ class ValueBuilder {
 
 class AttributeBuilder {
  public:
-  explicit AttributeBuilder(bool weak = false);
+  AttributeBuilder();
   AttributeBuilder& SetTypeMask(uint32_t typeMask);
+  AttributeBuilder& SetWeak(bool weak);
   AttributeBuilder& AddItem(const android::StringPiece& name, uint32_t value);
   std::unique_ptr<Attribute> Build();
 
@@ -148,6 +155,54 @@ class StyleableBuilder {
 std::unique_ptr<xml::XmlResource> BuildXmlDom(const android::StringPiece& str);
 std::unique_ptr<xml::XmlResource> BuildXmlDomForPackageName(IAaptContext* context,
                                                             const android::StringPiece& str);
+
+class ArtifactBuilder {
+ public:
+  ArtifactBuilder() = default;
+
+  ArtifactBuilder& SetName(const std::string& name);
+  ArtifactBuilder& SetVersion(int version);
+  ArtifactBuilder& AddAbi(configuration::Abi abi);
+  ArtifactBuilder& AddDensity(const ConfigDescription& density);
+  ArtifactBuilder& AddLocale(const ConfigDescription& locale);
+  ArtifactBuilder& SetAndroidSdk(int min_sdk);
+  configuration::OutputArtifact Build();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ArtifactBuilder);
+
+  configuration::OutputArtifact artifact_;
+};
+
+class PostProcessingConfigurationBuilder {
+ public:
+  PostProcessingConfigurationBuilder() = default;
+
+  PostProcessingConfigurationBuilder& AddAbiGroup(const std::string& label,
+                                                  std::vector<configuration::Abi> abis = {});
+  PostProcessingConfigurationBuilder& AddDensityGroup(const std::string& label,
+                                                      std::vector<std::string> densities = {});
+  PostProcessingConfigurationBuilder& AddLocaleGroup(const std::string& label,
+                                                     std::vector<std::string> locales = {});
+  PostProcessingConfigurationBuilder& AddDeviceFeatureGroup(const std::string& label);
+  PostProcessingConfigurationBuilder& AddGlTextureGroup(const std::string& label);
+  PostProcessingConfigurationBuilder& AddAndroidSdk(std::string label, int min_sdk);
+  PostProcessingConfigurationBuilder& AddArtifact(configuration::ConfiguredArtifact artrifact);
+
+  configuration::PostProcessingConfiguration Build();
+
+ private:
+  template <typename T>
+  inline PostProcessingConfigurationBuilder& AddGroup(const std::string& label,
+                                                      configuration::Group<T>* group,
+                                                      std::vector<T> to_add = {}) {
+    auto& values = GetOrCreateGroup(label, group);
+    values.insert(std::begin(values), std::begin(to_add), std::end(to_add));
+    return *this;
+  }
+
+  configuration::PostProcessingConfiguration config_;
+};
 
 }  // namespace test
 }  // namespace aapt

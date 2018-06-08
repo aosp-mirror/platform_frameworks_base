@@ -59,10 +59,10 @@ public class WifiP2pManagerTest {
      */
     @Test
     public void testChannelFinalize() throws Exception {
-        WifiP2pManager.Channel channel = new WifiP2pManager.Channel(mContextMock,
-                mTestLooper.getLooper(), null, null, mDut);
-
-        leakageDetectorRule.assertUnreleasedResourceCount(channel, 1);
+        try (WifiP2pManager.Channel channel = new WifiP2pManager.Channel(mContextMock,
+                mTestLooper.getLooper(), null, null, mDut)) {
+            leakageDetectorRule.assertUnreleasedResourceCount(channel, 1);
+        }
     }
 
     /**

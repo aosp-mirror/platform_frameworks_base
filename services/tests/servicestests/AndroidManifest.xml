@@ -50,12 +50,27 @@
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
     <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
     <uses-permission android:name="android.permission.DELETE_PACKAGES" />
+    <uses-permission android:name="android.permission.GET_APP_OPS_STATS" />
+    <uses-permission android:name="android.permission.UPDATE_APP_OPS_STATS" />
+    <uses-permission android:name="android.permission.MANAGE_APP_OPS_MODES"/>
+    <uses-permission android:name="android.permission.DEVICE_POWER" />
+    <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES" />
+    <uses-permission android:name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
+    <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
+    <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WATCH_APPOPS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.SUSPEND_APPS"/>
+    <uses-permission android:name="android.permission.CONTROL_KEYGUARD"/>
 
     <!-- Uses API introduced in O (26) -->
     <uses-sdk android:minSdkVersion="1"
           android:targetSdkVersion="26"/>
 
-    <application>
+    <application android:testOnly="true">
         <uses-library android:name="android.test.runner" />
 
         <service android:name="com.android.server.accounts.TestAccountType1AuthenticatorService"
@@ -127,8 +142,19 @@
         <activity android:name="com.android.server.pm.BaseShortcutManagerTest$ShortcutActivity2" />
         <activity android:name="com.android.server.pm.BaseShortcutManagerTest$ShortcutActivity3" />
 
+        <activity android:name="com.android.server.wm.ScreenDecorWindowTests$TestActivity" />
+
         <activity android:name="com.android.server.pm.ShortcutTestActivity"
                  android:enabled="true" android:exported="true" />
+
+        <activity android:name="com.android.server.pm.SuspendedDetailsActivity"
+                  android:enabled="true"
+                  android:permission="android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS">
+            <intent-filter>
+                <action android:name="android.intent.action.SHOW_SUSPENDED_APP_DETAILS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <activity android:name="com.android.server.accounts.AccountAuthenticatorDummyActivity" />
 

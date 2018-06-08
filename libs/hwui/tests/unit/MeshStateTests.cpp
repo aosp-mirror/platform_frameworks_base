@@ -16,8 +16,8 @@
 
 #include <debug/MockGlesDriver.h>
 #include <debug/ScopedReplaceDriver.h>
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <renderstate/MeshState.h>
 #include <tests/common/TestUtils.h>
 
@@ -32,5 +32,6 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(MeshState, genOrUpdate) {
     EXPECT_CALL(mockGlDriver, glBufferData_(_, _, _, _));
 
     GLuint buffer = 0;
-    renderThread.renderState().meshState().genOrUpdateMeshBuffer(&buffer, 10, nullptr, GL_DYNAMIC_DRAW);
+    renderThread.renderState().meshState().genOrUpdateMeshBuffer(&buffer, 10, nullptr,
+                                                                 GL_DYNAMIC_DRAW);
 }

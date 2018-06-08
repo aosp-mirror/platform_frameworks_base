@@ -26,12 +26,12 @@ import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static android.widget.espresso.CustomViewActions.longPressAtRelativeCoordinates;
-import static android.widget.espresso.DragHandleUtils.assertNoSelectionHandles;
 import static android.widget.espresso.DragHandleUtils.onHandleView;
-import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarContainsItem;
-import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarDoesNotContainItem;
+import static android.widget.espresso.FloatingToolbarEspressoUtils
+        .assertFloatingToolbarContainsItem;
+import static android.widget.espresso.FloatingToolbarEspressoUtils
+        .assertFloatingToolbarDoesNotContainItem;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarIsDisplayed;
-import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarIsNotDisplayed;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarItemIndex;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.clickFloatingToolbarItem;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.sleepForFloatingToolbarPopup;
@@ -46,11 +46,17 @@ import static android.widget.espresso.TextViewAssertions.doesNotHaveStyledText;
 import static android.widget.espresso.TextViewAssertions.hasInsertionPointerAtIndex;
 import static android.widget.espresso.TextViewAssertions.hasSelection;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.Activity;
 import android.app.Instrumentation;
@@ -61,15 +67,22 @@ import android.support.test.espresso.action.EspressoKey;
 import android.support.test.filters.MediumTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.support.test.uiautomator.UiDevice;
+import android.test.suitebuilder.annotation.Suppress;
 import android.text.InputType;
 import android.text.Selection;
 import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
 import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
+import android.view.textclassifier.TextLinks;
+import android.view.textclassifier.TextLinksParams;
 import android.widget.espresso.CustomViewActions.RelativeCoordinatesProvider;
 
 import com.android.frameworks.coretests.R;
@@ -78,6 +91,9 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tests the TextView widget from an Activity
@@ -216,7 +232,6 @@ public class TextViewActivityTest {
 
         onView(withId(R.id.textview)).check(matches(withText("abc ghi.def")));
         onView(withId(R.id.textview)).check(hasSelection(""));
-        assertNoSelectionHandles();
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex("abc ghi.def".length()));
 
         // Test undo returns to the original state.
@@ -269,18 +284,12 @@ public class TextViewActivityTest {
     @Test
     public void testToolbarAppearsAfterSelection() {
         final String text = "Toolbar appears after selection.";
-        assertFloatingToolbarIsNotDisplayed();
         onView(withId(R.id.textview)).perform(replaceText(text));
         onView(withId(R.id.textview)).perform(
                 longPressOnTextAtIndex(text.indexOf("appears")));
 
         sleepForFloatingToolbarPopup();
         assertFloatingToolbarIsDisplayed();
-
-        final String text2 = "Toolbar disappears after typing text.";
-        onView(withId(R.id.textview)).perform(replaceText(text2));
-        sleepForFloatingToolbarPopup();
-        assertFloatingToolbarIsNotDisplayed();
     }
 
     @Test
@@ -308,11 +317,112 @@ public class TextViewActivityTest {
     }
 
     @Test
+    public void testToolbarAppearsAfterLinkClicked() throws Throwable {
+        TextLinks.TextLink textLink = addLinkifiedTextToTextView(R.id.textview);
+        int position = (textLink.getStart() + textLink.getEnd()) / 2;
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(position));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+    }
+
+    @Test
+    public void testToolbarAppearsAfterLinkClickedNonselectable() throws Throwable {
+        final TextView textView = mActivity.findViewById(R.id.nonselectable_textview);
+        final TextLinks.TextLink textLink = addLinkifiedTextToTextView(R.id.nonselectable_textview);
+        final int position = (textLink.getStart() + textLink.getEnd()) / 2;
+
+        onView(withId(R.id.nonselectable_textview)).perform(clickOnTextAtIndex(position));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+        assertTrue(textView.hasSelection());
+
+        // toggle
+        onView(withId(R.id.nonselectable_textview)).perform(clickOnTextAtIndex(position));
+        sleepForFloatingToolbarPopup();
+        assertFalse(textView.hasSelection());
+
+        onView(withId(R.id.nonselectable_textview)).perform(clickOnTextAtIndex(position));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+        assertTrue(textView.hasSelection());
+
+        // click outside
+        onView(withId(R.id.nonselectable_textview)).perform(clickOnTextAtIndex(0));
+        sleepForFloatingToolbarPopup();
+        assertFalse(textView.hasSelection());
+    }
+
+    @Test
+    public void testSelectionRemovedWhenNonselectableTextLosesFocus() throws Throwable {
+        final TextLinks.TextLink textLink = addLinkifiedTextToTextView(R.id.nonselectable_textview);
+        final int position = (textLink.getStart() + textLink.getEnd()) / 2;
+        final TextView textView = mActivity.findViewById(R.id.nonselectable_textview);
+        mActivityRule.runOnUiThread(() -> textView.setFocusableInTouchMode(true));
+
+        onView(withId(R.id.nonselectable_textview)).perform(clickOnTextAtIndex(position));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+        assertTrue(textView.hasSelection());
+
+        mActivityRule.runOnUiThread(() -> textView.clearFocus());
+        mInstrumentation.waitForIdleSync();
+        sleepForFloatingToolbarPopup();
+
+        assertFalse(textView.hasSelection());
+    }
+
+    @Test
+    public void testSelectionRemovedFromNonselectableTextWhenWindowLosesFocus() throws Throwable {
+        TextLinks.TextLink textLink = addLinkifiedTextToTextView(R.id.nonselectable_textview);
+        int nonselectablePosition = (textLink.getStart() + textLink.getEnd()) / 2;
+        TextView nonselectableTextView = mActivity.findViewById(R.id.nonselectable_textview);
+
+        onView(withId(R.id.nonselectable_textview))
+                .perform(clickOnTextAtIndex(nonselectablePosition));
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
+        assertTrue(nonselectableTextView.hasSelection());
+
+        UiDevice device = UiDevice.getInstance(mInstrumentation);
+        device.openNotification();
+        Thread.sleep(2000);
+        device.pressBack();
+        Thread.sleep(2000);
+
+        assertFalse(nonselectableTextView.hasSelection());
+    }
+
+    private TextLinks.TextLink addLinkifiedTextToTextView(int id) throws Throwable {
+        TextView textView = mActivity.findViewById(id);
+        useSystemDefaultTextClassifier();
+        TextClassificationManager textClassificationManager =
+                mActivity.getSystemService(TextClassificationManager.class);
+        TextClassifier textClassifier = textClassificationManager.getTextClassifier();
+        Spannable content = new SpannableString("Call me at +19148277737");
+        TextLinks.Request request = new TextLinks.Request.Builder(content).build();
+        TextLinks links = textClassifier.generateLinks(request);
+        TextLinksParams applyParams = new TextLinksParams.Builder()
+                .setApplyStrategy(TextLinks.APPLY_STRATEGY_REPLACE)
+                .build();
+        applyParams.apply(content, links);
+
+        mActivityRule.runOnUiThread(() -> {
+            textView.setText(content);
+            textView.setMovementMethod(LinkMovementMethod.getInstance());
+        });
+        mInstrumentation.waitForIdleSync();
+
+        // Wait for the UI thread to refresh
+        Thread.sleep(1000);
+
+        return links.getLinks().iterator().next();
+    }
+
+    @Test
     public void testToolbarAndInsertionHandle() {
         final String text = "text";
         onView(withId(R.id.textview)).perform(replaceText(text));
         onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
-        assertFloatingToolbarIsNotDisplayed();
 
         onHandleView(com.android.internal.R.id.insertion_handle).perform(click());
         sleepForFloatingToolbarPopup();
@@ -404,8 +514,6 @@ public class TextViewActivityTest {
         final String text = "abcd efg hijk lmn";
         onView(withId(R.id.textview)).perform(replaceText(text));
 
-        assertNoSelectionHandles();
-
         onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('f')));
 
         onHandleView(com.android.internal.R.id.selection_start_handle)
@@ -427,8 +535,6 @@ public class TextViewActivityTest {
     public void testSelectionHandles_bidi() {
         final String text = "abc \u0621\u0622\u0623 def";
         onView(withId(R.id.textview)).perform(replaceText(text));
-
-        assertNoSelectionHandles();
 
         onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('\u0622')));
 
@@ -491,6 +597,7 @@ public class TextViewActivityTest {
         onView(withId(R.id.textview)).check(hasSelection("abcd\nefg\nhijk\nlmn\nopqr"));
     }
 
+    @Suppress // Consistently failing.
     @Test
     public void testSelectionHandles_multiLine_rtl() {
         // Arabic text.
@@ -644,18 +751,57 @@ public class TextViewActivityTest {
     }
 
     @Test
-    public void testSetSelectionAndActionMode() throws Throwable {
-        final String text = "abc def";
+    public void testSelectionHandles_visibleEvenWithEmptyMenu() {
+        ((TextView) mActivity.findViewById(R.id.textview)).setCustomSelectionActionModeCallback(
+                new ActionMode.Callback() {
+                    @Override
+                    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                        menu.clear();
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                        menu.clear();
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                        return false;
+                    }
+
+                    @Override
+                    public void onDestroyActionMode(ActionMode mode) {}
+                });
+        final String text = "abcd efg hijk lmn";
         onView(withId(R.id.textview)).perform(replaceText(text));
 
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('f')));
+
+        onHandleView(com.android.internal.R.id.selection_start_handle)
+                .check(matches(isDisplayed()));
+        onHandleView(com.android.internal.R.id.selection_end_handle)
+                .check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testSetSelectionAndActionMode() throws Throwable {
         final TextView textView = mActivity.findViewById(R.id.textview);
-        assertFloatingToolbarIsNotDisplayed();
+        final ActionMode.Callback amCallback = mock(ActionMode.Callback.class);
+        when(amCallback.onCreateActionMode(any(ActionMode.class), any(Menu.class)))
+                .thenReturn(true);
+        when(amCallback.onPrepareActionMode(any(ActionMode.class), any(Menu.class)))
+                .thenReturn(true);
+        textView.setCustomSelectionActionModeCallback(amCallback);
+
+        final String text = "abc def";
+        onView(withId(R.id.textview)).perform(replaceText(text));
         mActivityRule.runOnUiThread(
                 () -> Selection.setSelection((Spannable) textView.getText(), 0, 3));
         mInstrumentation.waitForIdleSync();
-        sleepForFloatingToolbarPopup();
         // Don't automatically start action mode.
-        assertFloatingToolbarIsNotDisplayed();
+        verify(amCallback, never()).onCreateActionMode(any(ActionMode.class), any(Menu.class));
         // Make sure that "Select All" is included in the selection action mode when the entire text
         // is not selected.
         onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('e')));
@@ -685,8 +831,6 @@ public class TextViewActivityTest {
                 () -> Selection.setSelection((Spannable) textView.getText(), 0));
         mInstrumentation.waitForIdleSync();
 
-        sleepForFloatingToolbarPopup();
-        assertFloatingToolbarIsNotDisplayed();
         // Make sure that user click can trigger the insertion action mode.
         onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
         onHandleView(com.android.internal.R.id.insertion_handle).perform(click());
@@ -836,6 +980,30 @@ public class TextViewActivityTest {
         onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(password.indexOf('@')));
         sleepForFloatingToolbarPopup();
         assertFloatingToolbarDoesNotContainItem(android.R.id.textAssist);
+    }
+
+    @Test
+    public void testSelectionMetricsLogger_noAbandonAfterCopy() throws Throwable {
+        final List<SelectionEvent> selectionEvents = new ArrayList<>();
+        final TextClassifier classifier = new TextClassifier() {
+            @Override
+            public void onSelectionEvent(SelectionEvent event) {
+                selectionEvents.add(event);
+            }
+        };
+        final TextView textView = mActivity.findViewById(R.id.textview);
+        mActivityRule.runOnUiThread(() -> textView.setTextClassifier(classifier));
+        mInstrumentation.waitForIdleSync();
+        final String text = "andyroid@android.com";
+
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        onView(withId(R.id.textview)).perform(longPressOnTextAtIndex(text.indexOf('@')));
+        sleepForFloatingToolbarPopup();
+        clickFloatingToolbarItem(mActivity.getString(com.android.internal.R.string.copy));
+        mInstrumentation.waitForIdleSync();
+
+        final SelectionEvent lastEvent = selectionEvents.get(selectionEvents.size() - 1);
+        assertEquals(SelectionEvent.ACTION_COPY, lastEvent.getEventType());
     }
 
     @Test

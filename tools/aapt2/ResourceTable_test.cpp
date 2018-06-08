@@ -24,7 +24,10 @@
 #include <ostream>
 #include <string>
 
+using ::android::StringPiece;
+using ::testing::Eq;
 using ::testing::NotNull;
+using ::testing::StrEq;
 
 namespace aapt {
 
@@ -45,7 +48,7 @@ TEST(ResourceTableTest, FailToAddResourceWithBadName) {
 TEST(ResourceTableTest, AddResourceWithWeirdNameWhenAddingMangledResources) {
   ResourceTable table;
 
-  EXPECT_TRUE(table.AddResourceAllowMangled(
+  EXPECT_TRUE(table.AddResourceMangled(
       test::ParseNameOrDie("android:id/heythere       "), ConfigDescription{}, "",
       test::ValueBuilder<Id>().SetSource("test.xml", 21u).Build(), test::GetDiagnostics()));
 }
@@ -99,21 +102,35 @@ TEST(ResourceTableTest, AddMultipleResources) {
 TEST(ResourceTableTest, OverrideWeakResourceValue) {
   ResourceTable table;
 
-  ASSERT_TRUE(table.AddResource(
-      test::ParseNameOrDie("android:attr/foo"), ConfigDescription{}, "",
-      util::make_unique<Attribute>(true), test::GetDiagnostics()));
+  ASSERT_TRUE(table.AddResource(test::ParseNameOrDie("android:attr/foo"), ConfigDescription{}, "",
+                                test::AttributeBuilder().SetWeak(true).Build(),
+                                test::GetDiagnostics()));
 
   Attribute* attr = test::GetValue<Attribute>(&table, "android:attr/foo");
   ASSERT_THAT(attr, NotNull());
   EXPECT_TRUE(attr->IsWeak());
 
-  ASSERT_TRUE(table.AddResource(
-      test::ParseNameOrDie("android:attr/foo"), ConfigDescription{}, "",
-      util::make_unique<Attribute>(false), test::GetDiagnostics()));
+  ASSERT_TRUE(table.AddResource(test::ParseNameOrDie("android:attr/foo"), ConfigDescription{}, "",
+                                util::make_unique<Attribute>(), test::GetDiagnostics()));
 
   attr = test::GetValue<Attribute>(&table, "android:attr/foo");
   ASSERT_THAT(attr, NotNull());
   EXPECT_FALSE(attr->IsWeak());
+}
+
+TEST(ResourceTableTest, AllowCompatibleDuplicateAttributes) {
+  ResourceTable table;
+
+  const ResourceName name = test::ParseNameOrDie("android:attr/foo");
+  Attribute attr_one(android::ResTable_map::TYPE_STRING);
+  attr_one.SetWeak(true);
+  Attribute attr_two(android::ResTable_map::TYPE_STRING | android::ResTable_map::TYPE_REFERENCE);
+  attr_two.SetWeak(true);
+
+  ASSERT_TRUE(table.AddResource(name, ConfigDescription{}, "",
+                                util::make_unique<Attribute>(attr_one), test::GetDiagnostics()));
+  ASSERT_TRUE(table.AddResource(name, ConfigDescription{}, "",
+                                util::make_unique<Attribute>(attr_two), test::GetDiagnostics()));
 }
 
 TEST(ResourceTableTest, ProductVaryingValues) {
@@ -139,6 +156,106 @@ TEST(ResourceTableTest, ProductVaryingValues) {
   ASSERT_EQ(2u, values.size());
   EXPECT_EQ(std::string("phone"), values[0]->product);
   EXPECT_EQ(std::string("tablet"), values[1]->product);
+}
+
+static StringPiece LevelToString(Visibility::Level level) {
+  switch (level) {
+    case Visibility::Level::kPrivate:
+      return "private";
+    case Visibility::Level::kPublic:
+      return "private";
+    default:
+      return "undefined";
+  }
+}
+
+static ::testing::AssertionResult VisibilityOfResource(const ResourceTable& table,
+                                                       const ResourceNameRef& name,
+                                                       Visibility::Level level,
+                                                       const StringPiece& comment) {
+  Maybe<ResourceTable::SearchResult> result = table.FindResource(name);
+  if (!result) {
+    return ::testing::AssertionFailure() << "no resource '" << name << "' found in table";
+  }
+
+  const Visibility& visibility = result.value().entry->visibility;
+  if (visibility.level != level) {
+    return ::testing::AssertionFailure() << "expected visibility " << LevelToString(level)
+                                         << " but got " << LevelToString(visibility.level);
+  }
+
+  if (visibility.comment != comment) {
+    return ::testing::AssertionFailure() << "expected visibility comment '" << comment
+                                         << "' but got '" << visibility.comment << "'";
+  }
+  return ::testing::AssertionSuccess();
+}
+
+TEST(ResourceTableTest, SetVisibility) {
+  using Level = Visibility::Level;
+
+  ResourceTable table;
+  const ResourceName name = test::ParseNameOrDie("android:string/foo");
+
+  Visibility visibility;
+  visibility.level = Visibility::Level::kPrivate;
+  visibility.comment = "private";
+  ASSERT_TRUE(table.SetVisibility(name, visibility, test::GetDiagnostics()));
+  ASSERT_TRUE(VisibilityOfResource(table, name, Level::kPrivate, "private"));
+
+  visibility.level = Visibility::Level::kUndefined;
+  visibility.comment = "undefined";
+  ASSERT_TRUE(table.SetVisibility(name, visibility, test::GetDiagnostics()));
+  ASSERT_TRUE(VisibilityOfResource(table, name, Level::kPrivate, "private"));
+
+  visibility.level = Visibility::Level::kPublic;
+  visibility.comment = "public";
+  ASSERT_TRUE(table.SetVisibility(name, visibility, test::GetDiagnostics()));
+  ASSERT_TRUE(VisibilityOfResource(table, name, Level::kPublic, "public"));
+
+  visibility.level = Visibility::Level::kPrivate;
+  visibility.comment = "private";
+  ASSERT_TRUE(table.SetVisibility(name, visibility, test::GetDiagnostics()));
+  ASSERT_TRUE(VisibilityOfResource(table, name, Level::kPublic, "public"));
+}
+
+TEST(ResourceTableTest, SetAllowNew) {
+  ResourceTable table;
+  const ResourceName name = test::ParseNameOrDie("android:string/foo");
+
+  AllowNew allow_new;
+  Maybe<ResourceTable::SearchResult> result;
+
+  allow_new.comment = "first";
+  ASSERT_TRUE(table.SetAllowNew(name, allow_new, test::GetDiagnostics()));
+  result = table.FindResource(name);
+  ASSERT_TRUE(result);
+  ASSERT_TRUE(result.value().entry->allow_new);
+  ASSERT_THAT(result.value().entry->allow_new.value().comment, StrEq("first"));
+
+  allow_new.comment = "second";
+  ASSERT_TRUE(table.SetAllowNew(name, allow_new, test::GetDiagnostics()));
+  result = table.FindResource(name);
+  ASSERT_TRUE(result);
+  ASSERT_TRUE(result.value().entry->allow_new);
+  ASSERT_THAT(result.value().entry->allow_new.value().comment, StrEq("second"));
+}
+
+TEST(ResourceTableTest, SetOverlayable) {
+  ResourceTable table;
+  const ResourceName name = test::ParseNameOrDie("android:string/foo");
+
+  Overlayable overlayable;
+
+  overlayable.comment = "first";
+  ASSERT_TRUE(table.SetOverlayable(name, overlayable, test::GetDiagnostics()));
+  Maybe<ResourceTable::SearchResult> result = table.FindResource(name);
+  ASSERT_TRUE(result);
+  ASSERT_TRUE(result.value().entry->overlayable);
+  ASSERT_THAT(result.value().entry->overlayable.value().comment, StrEq("first"));
+
+  overlayable.comment = "second";
+  ASSERT_FALSE(table.SetOverlayable(name, overlayable, test::GetDiagnostics()));
 }
 
 }  // namespace aapt

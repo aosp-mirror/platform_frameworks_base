@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<!-- Extends RelativeLayout -->
+<!-- Extends LinearLayout -->
 <com.android.systemui.qs.car.CarStatusBarHeader
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
@@ -23,22 +23,21 @@
     android:paddingStart="8dp"
     android:paddingEnd="8dp" >
 
-    <include
-        layout="@layout/system_icons"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true" />
+    <include layout="@layout/system_icons"
+             android:layout_width="wrap_content"
+             android:layout_height="match_parent"
+             android:gravity="center_vertical|end"
+             android:layout_weight="1"
+    />
 
     <com.android.systemui.statusbar.policy.Clock
         android:id="@+id/clock"
         android:textAppearance="@style/TextAppearance.StatusBar.Clock"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
         android:singleLine="true"
         android:paddingStart="@dimen/status_bar_clock_starting_padding"
         android:paddingEnd="@dimen/status_bar_clock_end_padding"
-        systemui:showDark="false" />
+        android:gravity="center_vertical|end"
+    />
 </com.android.systemui.qs.car.CarStatusBarHeader>

@@ -547,7 +547,7 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>>
 
         private PersistenceManager(final Activity activity, final int internalLoaderId) {
             mStatePersistFile = new AtomicFile(new File(activity.getFilesDir(),
-                    PERSIST_FILE_NAME));
+                    PERSIST_FILE_NAME), "printer-history");
 
             // Initialize enabled services to make sure they are set are the read task might be done
             // before the loader updated the services the first time.

@@ -2,10 +2,14 @@ cc_defaults {
     name: "hwui_defaults",
     defaults: [
         "hwui_static_deps",
-
+        "skia_deps",
         //"hwui_bugreport_font_cache_usage",
         //"hwui_compile_for_perf",
+        "hwui_pgo",
+        "hwui_lto",
     ],
+
+    cpp_std: "c++17",
 
     cflags: [
         "-DEGL_EGLEXT_PROTOTYPES",
@@ -37,6 +41,7 @@ cc_defaults {
         "external/skia/src/image",
         "external/skia/src/utils",
         "external/skia/src/gpu",
+        "external/skia/src/shaders",
     ],
 
     product_variables: {
@@ -55,7 +60,6 @@ cc_defaults {
         "libEGL",
         "libGLESv2",
         "libvulkan",
-        "libskia",
         "libui",
         "libgui",
         "libprotobuf-cpp-lite",
@@ -66,7 +70,7 @@ cc_defaults {
         "libRScpp",
     ],
     static_libs: [
-        "libplatformprotos",
+        "libEGL_blobCache",
     ],
 }
 
@@ -107,6 +111,34 @@ cc_defaults {
     include_dirs: ["frameworks/native/opengl/libs/GLES2"],
 }
 
+// Build libhwui with PGO by default.
+// Location of PGO profile data is defined in build/soong/cc/pgo.go
+// and is separate from hwui.
+// To turn it off, set ANDROID_PGO_NO_PROFILE_USE environment variable
+// or set enable_profile_use property to false.
+cc_defaults {
+    name: "hwui_pgo",
+
+    pgo: {
+        instrumentation: true,
+        profile_file: "hwui/hwui.profdata",
+        benchmarks: ["hwui"],
+        enable_profile_use: true,
+    },
+}
+
+// Build hwui library with ThinLTO by default.
+cc_defaults {
+    name: "hwui_lto",
+    target: {
+        android: {
+            lto: {
+                thin: true,
+            },
+        },
+    },
+}
+
 // ------------------------
 // library
 // ------------------------
@@ -114,7 +146,12 @@ cc_defaults {
 cc_defaults {
     name: "libhwui_defaults",
     defaults: ["hwui_defaults"],
+
+    whole_static_libs: ["libskia"],
+
     srcs: [
+        "hwui/AnimatedImageDrawable.cpp",
+        "hwui/AnimatedImageThread.cpp",
         "hwui/Bitmap.cpp",
         "font/CacheTexture.cpp",
         "font/Font.cpp",
@@ -127,7 +164,9 @@ cc_defaults {
         "pipeline/skia/LayerDrawable.cpp",
         "pipeline/skia/RenderNodeDrawable.cpp",
         "pipeline/skia/ReorderBarrierDrawables.cpp",
+        "pipeline/skia/ShaderCache.cpp",
         "pipeline/skia/SkiaDisplayList.cpp",
+        "pipeline/skia/SkiaMemoryTracer.cpp",
         "pipeline/skia/SkiaOpenGLPipeline.cpp",
         "pipeline/skia/SkiaOpenGLReadback.cpp",
         "pipeline/skia/SkiaPipeline.cpp",
@@ -228,6 +267,7 @@ cc_defaults {
         "TextureCache.cpp",
         "VectorDrawable.cpp",
         "VkLayer.cpp",
+        "protos/graphicsstats.proto",
         "protos/hwui.proto",
     ],
 
@@ -248,7 +288,7 @@ cc_library {
         // If enabled, every GLES call is wrapped & error checked
         // Has moderate overhead
         "hwui_enable_opengl_validation",
-],
+    ],
 }
 
 // ------------------------
@@ -293,7 +333,9 @@ cc_test {
         "libgmock",
         "libhwui_static_debug",
     ],
-    shared_libs: ["libmemunreachable"],
+    shared_libs: [
+        "libmemunreachable",
+    ],
     cflags: [
         "-include debug/wrap_gles.h",
         "-DHWUI_NULL_GPU",
@@ -330,6 +372,7 @@ cc_test {
         "tests/unit/RecordingCanvasTests.cpp",
         "tests/unit/RenderNodeTests.cpp",
         "tests/unit/RenderPropertiesTests.cpp",
+        "tests/unit/ShaderCacheTests.cpp",
         "tests/unit/SkiaBehaviorTests.cpp",
         "tests/unit/SkiaDisplayListTests.cpp",
         "tests/unit/SkiaPipelineTests.cpp",
@@ -340,7 +383,8 @@ cc_test {
         "tests/unit/TestUtilsTests.cpp",
         "tests/unit/TextDropShadowCacheTests.cpp",
         "tests/unit/TextureCacheTests.cpp",
-	"tests/unit/TypefaceTests.cpp",
+        "tests/unit/ThreadBaseTests.cpp",
+        "tests/unit/TypefaceTests.cpp",
         "tests/unit/VectorDrawableTests.cpp",
         "tests/unit/VectorDrawableAtlasTests.cpp",
     ],
@@ -356,7 +400,9 @@ cc_benchmark {
 
     // set to libhwui_static_debug to skip actual GL commands
     whole_static_libs: ["libhwui"],
-    shared_libs: ["libmemunreachable"],
+    shared_libs: [
+        "libmemunreachable",
+    ],
 
     srcs: [
         "tests/macrobench/TestSceneRunner.cpp",
@@ -378,7 +424,9 @@ cc_benchmark {
     ],
 
     whole_static_libs: ["libhwui_static_debug"],
-    shared_libs: ["libmemunreachable"],
+    shared_libs: [
+        "libmemunreachable",
+    ],
 
     srcs: [
         "tests/microbench/main.cpp",
@@ -391,4 +439,16 @@ cc_benchmark {
         "tests/microbench/ShadowBench.cpp",
         "tests/microbench/TaskManagerBench.cpp",
     ],
+}
+
+// ----------------------------------------
+// Phony target to build benchmarks for PGO
+// ----------------------------------------
+
+phony {
+    name: "pgo-targets-hwui",
+    required: [
+        "hwuimicro",
+        "hwuimacro",
+    ]
 }

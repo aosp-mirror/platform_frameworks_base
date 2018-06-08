@@ -14,7 +14,9 @@
 
 package com.android.systemui.plugins.statusbar.phone;
 
+import android.graphics.Canvas;
 import android.view.MotionEvent;
+import android.view.View;
 
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
@@ -34,6 +36,14 @@ public interface NavGesture extends Plugin {
         public boolean onInterceptTouchEvent(MotionEvent event);
 
         public void setBarState(boolean vertical, boolean isRtl);
+
+        public void onDraw(Canvas canvas);
+
+        public void onDarkIntensityChange(float intensity);
+
+        public void onLayout(boolean changed, int left, int top, int right, int bottom);
+
+        public void onNavigationButtonLongPress(View v);
 
         public default void destroy() { }
     }

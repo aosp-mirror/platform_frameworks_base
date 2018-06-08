@@ -23,6 +23,8 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * A Pin based Keyguard input view
  */
@@ -49,12 +51,6 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
 
     public KeyguardPinBasedInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    @Override
-    public void reset() {
-        mPasswordEntry.requestFocus();
-        super.reset();
     }
 
     @Override
@@ -103,7 +99,7 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
     }
 
     @Override
-    protected int getPromtReasonStringRes(int reason) {
+    protected int getPromptReasonStringRes(int reason) {
         switch (reason) {
             case PROMPT_REASON_RESTART:
                 return R.string.kg_prompt_reason_restart_pin;
@@ -238,6 +234,12 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
     }
 
     @Override
+    public void onResume(int reason) {
+        super.onResume(reason);
+        mPasswordEntry.requestFocus();
+    }
+
+    @Override
     public boolean onTouch(View v, MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
             doHapticKeyClick();
@@ -251,5 +253,11 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
             return onKeyDown(keyCode, event);
         }
         return false;
+    }
+
+    @Override
+    public CharSequence getTitle() {
+        return getContext().getString(
+                com.android.internal.R.string.keyguard_accessibility_pin_unlock);
     }
 }

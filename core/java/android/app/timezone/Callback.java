@@ -30,9 +30,14 @@ import java.lang.annotation.RetentionPolicy;
 public abstract class Callback {
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({SUCCESS, ERROR_UNKNOWN_FAILURE, ERROR_INSTALL_BAD_DISTRO_STRUCTURE,
-        ERROR_INSTALL_BAD_DISTRO_FORMAT_VERSION, ERROR_INSTALL_RULES_TOO_OLD,
-        ERROR_INSTALL_VALIDATION_ERROR})
+    @IntDef(prefix = { "SUCCESS", "ERROR_" }, value = {
+            SUCCESS,
+            ERROR_UNKNOWN_FAILURE,
+            ERROR_INSTALL_BAD_DISTRO_STRUCTURE,
+            ERROR_INSTALL_BAD_DISTRO_FORMAT_VERSION,
+            ERROR_INSTALL_RULES_TOO_OLD,
+            ERROR_INSTALL_VALIDATION_ERROR
+    })
     public @interface AsyncResultCode {}
 
     /**

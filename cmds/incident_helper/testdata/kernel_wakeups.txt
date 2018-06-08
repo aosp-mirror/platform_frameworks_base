@@ -1,0 +1,3 @@
+name		active_count	event_count	wakeup_count	expire_count	active_since	total_time	max_time	last_change	prevent_suspend_time
+ipc000000ab_ATFWD-daemon	8		8		0		0		0		0		0		131348		0
+ipc000000aa_ATFWD-daemon	143		143		0		0		0		123		3		2067286206		0

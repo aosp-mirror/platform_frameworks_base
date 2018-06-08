@@ -17,6 +17,7 @@
 package com.android.internal.app;
 
 import android.content.Context;
+import android.os.LocaleList;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 
@@ -68,7 +69,9 @@ public class LocaleStore {
                 return null;
             }
             return new Locale.Builder()
-                    .setLocale(locale).setRegion("")
+                    .setLocale(locale)
+                    .setRegion("")
+                    .setExtension(Locale.UNICODE_LOCALE_EXTENSION, "")
                     .build();
         }
 
@@ -143,7 +146,11 @@ public class LocaleStore {
 
         private String getLangScriptKey() {
             if (mLangScriptKey == null) {
-                Locale parentWithScript = getParent(LocaleHelper.addLikelySubtags(mLocale));
+                Locale baseLocale = new Locale.Builder()
+                    .setLocale(mLocale)
+                    .setExtension(Locale.UNICODE_LOCALE_EXTENSION, "")
+                    .build();
+                Locale parentWithScript = getParent(LocaleHelper.addLikelySubtags(baseLocale));
                 mLangScriptKey =
                         (parentWithScript == null)
                         ? mLocale.toLanguageTag()
@@ -253,11 +260,25 @@ public class LocaleStore {
 
         Set<String> simCountries = getSimCountries(context);
 
+        final boolean isInDeveloperMode = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0;
         for (String localeId : LocalePicker.getSupportedLocales(context)) {
             if (localeId.isEmpty()) {
                 throw new IllformedLocaleException("Bad locale entry in locale_config.xml");
             }
             LocaleInfo li = new LocaleInfo(localeId);
+
+            if (LocaleList.isPseudoLocale(li.getLocale())) {
+                if (isInDeveloperMode) {
+                    li.setTranslated(true);
+                    li.mIsPseudo = true;
+                    li.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_SIM;
+                } else {
+                    // Do not display pseudolocales unless in development mode.
+                    continue;
+                }
+            }
+
             if (simCountries.contains(li.getLocale().getCountry())) {
                 li.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_SIM;
             }
@@ -268,19 +289,6 @@ public class LocaleStore {
                 if (!sLocaleCache.containsKey(parentId)) {
                     sLocaleCache.put(parentId, new LocaleInfo(parent));
                 }
-            }
-        }
-
-        boolean isInDeveloperMode = Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0;
-        for (String localeId : LocalePicker.getPseudoLocales()) {
-            LocaleInfo li = getLocaleInfo(Locale.forLanguageTag(localeId));
-            if (isInDeveloperMode) {
-                li.setTranslated(true);
-                li.mIsPseudo = true;
-                li.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_SIM;
-            } else {
-                sLocaleCache.remove(li.getId());
             }
         }
 

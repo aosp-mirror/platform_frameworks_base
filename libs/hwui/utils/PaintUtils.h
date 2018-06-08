@@ -31,7 +31,6 @@ namespace uirenderer {
  */
 class PaintUtils {
 public:
-
     static inline GLenum getFilter(const SkPaint* paint) {
         if (!paint || paint->getFilterQuality() != kNone_SkFilterQuality) {
             return GL_LINEAR;
@@ -40,18 +39,16 @@ public:
     }
 
     static bool isOpaquePaint(const SkPaint* paint) {
-        if (!paint) return true; // default (paintless) behavior is SrcOver, black
+        if (!paint) return true;  // default (paintless) behavior is SrcOver, black
 
-        if (paint->getAlpha() != 0xFF
-                || PaintUtils::isBlendedShader(paint->getShader())
-                || PaintUtils::isBlendedColorFilter(paint->getColorFilter())) {
+        if (paint->getAlpha() != 0xFF || PaintUtils::isBlendedShader(paint->getShader()) ||
+            PaintUtils::isBlendedColorFilter(paint->getColorFilter())) {
             return false;
         }
 
         // Only let simple srcOver / src blending modes declare opaque, since behavior is clear.
         SkBlendMode mode = paint->getBlendMode();
-        return mode == SkBlendMode::kSrcOver
-                || mode == SkBlendMode::kSrc;
+        return mode == SkBlendMode::kSrcOver || mode == SkBlendMode::kSrc;
     }
 
     static bool isBlendedShader(const SkShader* shader) {
@@ -89,9 +86,7 @@ public:
         return false;
     }
 
-    static inline bool hasTextShadow(const SkPaint* paint) {
-        return getTextShadow(paint, nullptr);
-    }
+    static inline bool hasTextShadow(const SkPaint* paint) { return getTextShadow(paint, nullptr); }
 
     static inline SkBlendMode getBlendModeDirect(const SkPaint* paint) {
         return paint ? paint->getBlendMode() : SkBlendMode::kSrcOver;
@@ -101,7 +96,7 @@ public:
         return paint ? paint->getAlpha() : 255;
     }
 
-}; // class PaintUtils
+};  // class PaintUtils
 
 } /* namespace uirenderer */
 } /* namespace android */

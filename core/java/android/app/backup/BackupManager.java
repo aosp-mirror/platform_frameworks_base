@@ -16,15 +16,19 @@
 
 package android.app.backup;
 
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
 
@@ -249,23 +253,33 @@ public class BackupManager {
     }
 
     /**
-     * Restore the calling application from backup.  The data will be restored from the
+     * @deprecated Applications shouldn't request a restore operation using this method. In Android
+     * P and later, this method is a no-op.
+     *
+     * <p>Restore the calling application from backup. The data will be restored from the
      * current backup dataset if the application has stored data there, or from
      * the dataset used during the last full device setup operation if the current
      * backup dataset has no matching data.  If no backup data exists for this application
-     * in either source, a nonzero value will be returned.
+     * in either source, a non-zero value is returned.
      *
-     * <p>If this method returns zero (meaning success), the OS will attempt to retrieve
-     * a backed-up dataset from the remote transport, instantiate the application's
-     * backup agent, and pass the dataset to the agent's
+     * <p>If this method returns zero (meaning success), the OS attempts to retrieve a backed-up
+     * dataset from the remote transport, instantiate the application's backup agent, and pass the
+     * dataset to the agent's
      * {@link android.app.backup.BackupAgent#onRestore(BackupDataInput, int, android.os.ParcelFileDescriptor) onRestore()}
      * method.
+     *
+     * <p class="caution">Unlike other restore operations, this method doesn't terminate the
+     * application after the restore. The application continues running to receive the
+     * {@link RestoreObserver} callbacks on the {@code observer} argument. Full backups use an
+     * {@link android.app.Application Application} base class while key-value backups use the
+     * application subclass declared in the AndroidManifest.xml {@code <application>} tag.
      *
      * @param observer The {@link RestoreObserver} to receive callbacks during the restore
      * operation. This must not be null.
      *
      * @return Zero on success; nonzero on error.
      */
+    @Deprecated
     public int requestRestore(RestoreObserver observer) {
         return requestRestore(observer, null);
     }
@@ -273,7 +287,9 @@ public class BackupManager {
     // system APIs start here
 
     /**
-     * Restore the calling application from backup.  The data will be restored from the
+     * @deprecated Since Android P app can no longer request restoring of its backup.
+     *
+     * <p>Restore the calling application from backup.  The data will be restored from the
      * current backup dataset if the application has stored data there, or from
      * the dataset used during the last full device setup operation if the current
      * backup dataset has no matching data.  If no backup data exists for this application
@@ -295,28 +311,12 @@ public class BackupManager {
      *
      * @hide
      */
+    @Deprecated
     @SystemApi
     public int requestRestore(RestoreObserver observer, BackupManagerMonitor monitor) {
-        int result = -1;
-        checkServiceBinder();
-        if (sService != null) {
-            RestoreSession session = null;
-            try {
-                IRestoreSession binder = sService.beginRestoreSession(mContext.getPackageName(),
-                    null);
-                if (binder != null) {
-                    session = new RestoreSession(mContext, binder);
-                    result = session.restorePackage(mContext.getPackageName(), observer, monitor);
-                }
-            } catch (RemoteException e) {
-                Log.e(TAG, "restoreSelf() unable to contact service");
-            } finally {
-                if (session != null) {
-                    session.endRestoreSession();
-                }
-            }
-        }
-        return result;
+        Log.w(TAG, "requestRestore(): Since Android P app can no longer request restoring"
+                + " of its backup.");
+        return -1;
     }
 
     /**
@@ -385,6 +385,29 @@ public class BackupManager {
     }
 
     /**
+     * Report whether the backup mechanism is currently active.
+     * When it is inactive, the device will not perform any backup operations, nor will it
+     * deliver data for restore, although clients can still safely call BackupManager methods.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public boolean isBackupServiceActive(UserHandle user) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+                "isBackupServiceActive");
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                return sService.isBackupServiceActive(user.getIdentifier());
+            } catch (RemoteException e) {
+                Log.e(TAG, "isBackupEnabled() couldn't connect");
+            }
+        }
+        return false;
+    }
+
+    /**
      * Enable/disable data restore at application install time.  When enabled, app
      * installation will include an attempt to fetch the app's historical data from
      * the archival restore dataset (if any).  When disabled, no such attempt will
@@ -443,6 +466,57 @@ public class BackupManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Update the attributes of the transport identified by {@code transportComponent}. If the
+     * specified transport has not been bound at least once (for registration), this call will be
+     * ignored. Only the host process of the transport can change its description, otherwise a
+     * {@link SecurityException} will be thrown.
+     *
+     * @param transportComponent The identity of the transport being described.
+     * @param name A {@link String} with the new name for the transport. This is NOT for
+     *     identification. MUST NOT be {@code null}.
+     * @param configurationIntent An {@link Intent} that can be passed to
+     *     {@link Context#startActivity} in order to launch the transport's configuration UI. It may
+     *     be {@code null} if the transport does not offer any user-facing configuration UI.
+     * @param currentDestinationString A {@link String} describing the destination to which the
+     *     transport is currently sending data. MUST NOT be {@code null}.
+     * @param dataManagementIntent An {@link Intent} that can be passed to
+     *     {@link Context#startActivity} in order to launch the transport's data-management UI. It
+     *     may be {@code null} if the transport does not offer any user-facing data
+     *     management UI.
+     * @param dataManagementLabel A {@link String} to be used as the label for the transport's data
+     *     management affordance. This MUST be {@code null} when dataManagementIntent is
+     *     {@code null} and MUST NOT be {@code null} when dataManagementIntent is not {@code null}.
+     * @throws SecurityException If the UID of the calling process differs from the package UID of
+     *     {@code transportComponent} or if the caller does NOT have BACKUP permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public void updateTransportAttributes(
+            ComponentName transportComponent,
+            String name,
+            @Nullable Intent configurationIntent,
+            String currentDestinationString,
+            @Nullable Intent dataManagementIntent,
+            @Nullable String dataManagementLabel) {
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                sService.updateTransportAttributes(
+                        transportComponent,
+                        name,
+                        configurationIntent,
+                        currentDestinationString,
+                        dataManagementIntent,
+                        dataManagementLabel);
+            } catch (RemoteException e) {
+                Log.e(TAG, "describeTransport() couldn't connect");
+            }
+        }
     }
 
     /**
@@ -568,7 +642,7 @@ public class BackupManager {
         }
         return false;
     }
-    
+
     /**
      * Request an immediate backup, providing an observer to which results of the backup operation
      * will be published. The Android backup system will decide for each package whether it will
@@ -649,12 +723,97 @@ public class BackupManager {
         }
     }
 
+    /**
+     * Returns an {@link Intent} for the specified transport's configuration UI.
+     * This value is set by {@link #updateTransportAttributes(ComponentName, String, Intent, String,
+     * Intent, String)}.
+     * @param transportName The name of the registered transport.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public Intent getConfigurationIntent(String transportName) {
+        if (sService != null) {
+            try {
+                return sService.getConfigurationIntent(transportName);
+            } catch (RemoteException e) {
+                Log.e(TAG, "getConfigurationIntent() couldn't connect");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns a {@link String} describing where the specified transport is sending data.
+     * This value is set by {@link #updateTransportAttributes(ComponentName, String, Intent, String,
+     * Intent, String)}.
+     * @param transportName The name of the registered transport.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public String getDestinationString(String transportName) {
+        if (sService != null) {
+            try {
+                return sService.getDestinationString(transportName);
+            } catch (RemoteException e) {
+                Log.e(TAG, "getDestinationString() couldn't connect");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns an {@link Intent} for the specified transport's data management UI.
+     * This value is set by {@link #updateTransportAttributes(ComponentName, String, Intent, String,
+     * Intent, String)}.
+     * @param transportName The name of the registered transport.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public Intent getDataManagementIntent(String transportName) {
+        if (sService != null) {
+            try {
+                return sService.getDataManagementIntent(transportName);
+            } catch (RemoteException e) {
+                Log.e(TAG, "getDataManagementIntent() couldn't connect");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns a {@link String} describing what the specified transport's data management intent is
+     * used for.
+     * This value is set by {@link #updateTransportAttributes(ComponentName, String, Intent, String,
+     * Intent, String)}.
+     *
+     * @param transportName The name of the registered transport.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public String getDataManagementLabel(String transportName) {
+        if (sService != null) {
+            try {
+                return sService.getDataManagementLabel(transportName);
+            } catch (RemoteException e) {
+                Log.e(TAG, "getDataManagementLabel() couldn't connect");
+            }
+        }
+        return null;
+    }
+
     /*
      * We wrap incoming binder calls with a private class implementation that
      * redirects them into main-thread actions.  This serializes the backup
      * progress callbacks nicely within the usual main-thread lifecycle pattern.
      */
-    @SystemApi
     private class BackupObserverWrapper extends IBackupObserver.Stub {
         final Handler mHandler;
         final BackupObserver mObserver;

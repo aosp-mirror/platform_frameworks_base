@@ -334,6 +334,23 @@ public class RemoteCallbackList<E extends IInterface> {
     }
 
     /**
+     * Performs {@code action} for each cookie associated with a callback, calling
+     * {@link #beginBroadcast()}/{@link #finishBroadcast()} before/after looping
+     *
+     * @hide
+     */
+    public <C> void broadcastForEachCookie(Consumer<C> action) {
+        int itemCount = beginBroadcast();
+        try {
+            for (int i = 0; i < itemCount; i++) {
+                action.accept((C) getBroadcastCookie(i));
+            }
+        } finally {
+            finishBroadcast();
+        }
+    }
+
+    /**
      * Returns the number of registered callbacks. Note that the number of registered
      * callbacks may differ from the value returned by {@link #beginBroadcast()} since
      * the former returns the number of callbacks registered at the time of the call

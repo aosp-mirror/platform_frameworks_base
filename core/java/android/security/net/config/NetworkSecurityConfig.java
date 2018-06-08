@@ -16,9 +16,11 @@
 
 package android.security.net.config;
 
+import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,8 +29,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.net.ssl.X509TrustManager;
 
 /**
  * @hide
@@ -164,28 +164,32 @@ public final class NetworkSecurityConfig {
      * <p>
      * The default configuration has the following properties:
      * <ol>
-     * <li>Cleartext traffic is permitted for non-ephemeral apps.</li>
+     * <li>If the application targets API level 27 (Android O MR1) or lower then cleartext traffic
+     * is allowed by default.</li>
      * <li>Cleartext traffic is not permitted for ephemeral apps.</li>
      * <li>HSTS is not enforced.</li>
      * <li>No certificate pinning is used.</li>
      * <li>The system certificate store is trusted for connections.</li>
      * <li>If the application targets API level 23 (Android M) or lower then the user certificate
-     * store is trusted by default as well.</li>
+     * store is trusted by default as well for non-privileged applications.</li>
+     * <li>Privileged applications do not trust the user certificate store on Android P and higher.
+     * </li>
      * </ol>
      *
      * @hide
      */
-    public static final Builder getDefaultBuilder(int targetSdkVersion, int targetSandboxVesrsion) {
+    public static Builder getDefaultBuilder(ApplicationInfo info) {
         Builder builder = new Builder()
                 .setHstsEnforced(DEFAULT_HSTS_ENFORCED)
                 // System certificate store, does not bypass static pins.
                 .addCertificatesEntryRef(
                         new CertificatesEntryRef(SystemCertificateSource.getInstance(), false));
-        final boolean cleartextTrafficPermitted = targetSandboxVesrsion < 2;
+        final boolean cleartextTrafficPermitted = info.targetSdkVersion < Build.VERSION_CODES.P
+                && info.targetSandboxVersion < 2;
         builder.setCleartextTrafficPermitted(cleartextTrafficPermitted);
         // Applications targeting N and above must opt in into trusting the user added certificate
         // store.
-        if (targetSdkVersion <= Build.VERSION_CODES.M) {
+        if (info.targetSdkVersion <= Build.VERSION_CODES.M && !info.isPrivilegedApp()) {
             // User certificate store, does not bypass static pins.
             builder.addCertificatesEntryRef(
                     new CertificatesEntryRef(UserCertificateSource.getInstance(), false));

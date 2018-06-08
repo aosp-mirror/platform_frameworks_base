@@ -174,7 +174,7 @@ public final class NetworkStatsAccess {
             AppOpsManager appOps = (AppOpsManager) context.getSystemService(
                     Context.APP_OPS_SERVICE);
 
-            final int mode = appOps.checkOp(AppOpsManager.OP_GET_USAGE_STATS,
+            final int mode = appOps.noteOp(AppOpsManager.OP_GET_USAGE_STATS,
                     callingUid, callingPackage);
             if (mode == AppOpsManager.MODE_DEFAULT) {
                 // The default behavior here is to check if PackageManager has given the app

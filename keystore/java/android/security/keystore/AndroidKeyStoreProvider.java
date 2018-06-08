@@ -64,8 +64,13 @@ public class AndroidKeyStoreProvider extends Provider {
 
     private static final String PACKAGE_NAME = "android.security.keystore";
 
+    private static final String DESEDE_SYSTEM_PROPERTY =
+            "ro.hardware.keystore_desede";
+
     public AndroidKeyStoreProvider() {
         super(PROVIDER_NAME, 1.0, "Android KeyStore security provider");
+
+        boolean supports3DES = "true".equals(android.os.SystemProperties.get(DESEDE_SYSTEM_PROPERTY));
 
         // java.security.KeyStore
         put("KeyStore.AndroidKeyStore", PACKAGE_NAME + ".AndroidKeyStoreSpi");
@@ -86,8 +91,15 @@ public class AndroidKeyStoreProvider extends Provider {
         put("KeyGenerator.HmacSHA384", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$HmacSHA384");
         put("KeyGenerator.HmacSHA512", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$HmacSHA512");
 
+        if (supports3DES) {
+            put("KeyGenerator.DESede", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$DESede");
+        }
+
         // java.security.SecretKeyFactory
         putSecretKeyFactoryImpl("AES");
+        if (supports3DES) {
+            putSecretKeyFactoryImpl("DESede");
+        }
         putSecretKeyFactoryImpl("HmacSHA1");
         putSecretKeyFactoryImpl("HmacSHA224");
         putSecretKeyFactoryImpl("HmacSHA256");
@@ -196,7 +208,7 @@ public class AndroidKeyStoreProvider extends Provider {
     }
 
     @NonNull
-    public static AndroidKeyStorePrivateKey getAndroidKeyStorePrivateKey(
+    private static AndroidKeyStorePrivateKey getAndroidKeyStorePrivateKey(
             @NonNull AndroidKeyStorePublicKey publicKey) {
         String keyAlgorithm = publicKey.getAlgorithm();
         if (KeyProperties.KEY_ALGORITHM_EC.equalsIgnoreCase(keyAlgorithm)) {
@@ -212,17 +224,25 @@ public class AndroidKeyStoreProvider extends Provider {
     }
 
     @NonNull
-    public static AndroidKeyStorePublicKey loadAndroidKeyStorePublicKeyFromKeystore(
-            @NonNull KeyStore keyStore, @NonNull String privateKeyAlias, int uid)
+    private static KeyCharacteristics getKeyCharacteristics(@NonNull KeyStore keyStore,
+            @NonNull String alias, int uid)
             throws UnrecoverableKeyException {
         KeyCharacteristics keyCharacteristics = new KeyCharacteristics();
         int errorCode = keyStore.getKeyCharacteristics(
-                privateKeyAlias, null, null, uid, keyCharacteristics);
+                alias, null, null, uid, keyCharacteristics);
         if (errorCode != KeyStore.NO_ERROR) {
             throw (UnrecoverableKeyException)
-                    new UnrecoverableKeyException("Failed to obtain information about private key")
-                    .initCause(KeyStore.getKeyStoreException(errorCode));
+                    new UnrecoverableKeyException("Failed to obtain information about key")
+                            .initCause(KeyStore.getKeyStoreException(errorCode));
         }
+        return keyCharacteristics;
+    }
+
+    @NonNull
+    private static AndroidKeyStorePublicKey loadAndroidKeyStorePublicKeyFromKeystore(
+            @NonNull KeyStore keyStore, @NonNull String privateKeyAlias, int uid,
+            KeyCharacteristics keyCharacteristics)
+            throws UnrecoverableKeyException {
         ExportResult exportResult = keyStore.exportKey(
                 privateKeyAlias, KeymasterDefs.KM_KEY_FORMAT_X509, null, null, uid);
         if (exportResult.resultCode != KeyStore.NO_ERROR) {
@@ -252,37 +272,56 @@ public class AndroidKeyStoreProvider extends Provider {
     }
 
     @NonNull
-    public static KeyPair loadAndroidKeyStoreKeyPairFromKeystore(
+    public static AndroidKeyStorePublicKey loadAndroidKeyStorePublicKeyFromKeystore(
             @NonNull KeyStore keyStore, @NonNull String privateKeyAlias, int uid)
             throws UnrecoverableKeyException {
+        return loadAndroidKeyStorePublicKeyFromKeystore(keyStore, privateKeyAlias, uid,
+                getKeyCharacteristics(keyStore, privateKeyAlias, uid));
+    }
+
+    @NonNull
+    private static KeyPair loadAndroidKeyStoreKeyPairFromKeystore(
+            @NonNull KeyStore keyStore, @NonNull String privateKeyAlias, int uid,
+            @NonNull KeyCharacteristics keyCharacteristics)
+            throws UnrecoverableKeyException {
         AndroidKeyStorePublicKey publicKey =
-                loadAndroidKeyStorePublicKeyFromKeystore(keyStore, privateKeyAlias, uid);
+                loadAndroidKeyStorePublicKeyFromKeystore(keyStore, privateKeyAlias, uid,
+                        keyCharacteristics);
         AndroidKeyStorePrivateKey privateKey =
                 AndroidKeyStoreProvider.getAndroidKeyStorePrivateKey(publicKey);
         return new KeyPair(publicKey, privateKey);
     }
 
     @NonNull
-    public static AndroidKeyStorePrivateKey loadAndroidKeyStorePrivateKeyFromKeystore(
+    public static KeyPair loadAndroidKeyStoreKeyPairFromKeystore(
             @NonNull KeyStore keyStore, @NonNull String privateKeyAlias, int uid)
             throws UnrecoverableKeyException {
-        KeyPair keyPair = loadAndroidKeyStoreKeyPairFromKeystore(keyStore, privateKeyAlias, uid);
+        return loadAndroidKeyStoreKeyPairFromKeystore(keyStore, privateKeyAlias, uid,
+                getKeyCharacteristics(keyStore, privateKeyAlias, uid));
+    }
+
+    @NonNull
+    private static AndroidKeyStorePrivateKey loadAndroidKeyStorePrivateKeyFromKeystore(
+            @NonNull KeyStore keyStore, @NonNull String privateKeyAlias, int uid,
+            @NonNull KeyCharacteristics keyCharacteristics)
+            throws UnrecoverableKeyException {
+        KeyPair keyPair = loadAndroidKeyStoreKeyPairFromKeystore(keyStore, privateKeyAlias, uid,
+                keyCharacteristics);
         return (AndroidKeyStorePrivateKey) keyPair.getPrivate();
     }
 
     @NonNull
-    public static AndroidKeyStoreSecretKey loadAndroidKeyStoreSecretKeyFromKeystore(
-            @NonNull KeyStore keyStore, @NonNull String secretKeyAlias, int uid)
+    public static AndroidKeyStorePrivateKey loadAndroidKeyStorePrivateKeyFromKeystore(
+            @NonNull KeyStore keyStore, @NonNull String privateKeyAlias, int uid)
             throws UnrecoverableKeyException {
-        KeyCharacteristics keyCharacteristics = new KeyCharacteristics();
-        int errorCode = keyStore.getKeyCharacteristics(
-                secretKeyAlias, null, null, uid, keyCharacteristics);
-        if (errorCode != KeyStore.NO_ERROR) {
-            throw (UnrecoverableKeyException)
-                    new UnrecoverableKeyException("Failed to obtain information about key")
-                            .initCause(KeyStore.getKeyStoreException(errorCode));
-        }
+        return loadAndroidKeyStorePrivateKeyFromKeystore(keyStore, privateKeyAlias, uid,
+                getKeyCharacteristics(keyStore, privateKeyAlias, uid));
+    }
 
+    @NonNull
+    private static AndroidKeyStoreSecretKey loadAndroidKeyStoreSecretKeyFromKeystore(
+            @NonNull String secretKeyAlias, int uid, @NonNull KeyCharacteristics keyCharacteristics)
+            throws UnrecoverableKeyException {
         Integer keymasterAlgorithm = keyCharacteristics.getEnum(KeymasterDefs.KM_TAG_ALGORITHM);
         if (keymasterAlgorithm == null) {
             throw new UnrecoverableKeyException("Key algorithm unknown");
@@ -308,6 +347,31 @@ public class AndroidKeyStoreProvider extends Provider {
         }
 
         return new AndroidKeyStoreSecretKey(secretKeyAlias, uid, keyAlgorithmString);
+    }
+
+    @NonNull
+    public static AndroidKeyStoreKey loadAndroidKeyStoreKeyFromKeystore(
+            @NonNull KeyStore keyStore, @NonNull String userKeyAlias, int uid)
+            throws UnrecoverableKeyException  {
+        KeyCharacteristics keyCharacteristics = getKeyCharacteristics(keyStore, userKeyAlias, uid);
+
+        Integer keymasterAlgorithm = keyCharacteristics.getEnum(KeymasterDefs.KM_TAG_ALGORITHM);
+        if (keymasterAlgorithm == null) {
+            throw new UnrecoverableKeyException("Key algorithm unknown");
+        }
+
+        if (keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_HMAC ||
+                keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_AES ||
+                keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_3DES) {
+            return loadAndroidKeyStoreSecretKeyFromKeystore(userKeyAlias, uid,
+                    keyCharacteristics);
+        } else if (keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_RSA ||
+                keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_EC) {
+            return loadAndroidKeyStorePrivateKeyFromKeystore(keyStore, userKeyAlias, uid,
+                    keyCharacteristics);
+        } else {
+            throw new UnrecoverableKeyException("Key algorithm unknown");
+        }
     }
 
     /**

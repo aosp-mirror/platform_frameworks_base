@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import android.app.ActivityManager;
 import android.app.IUserSwitchObserver;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -31,6 +30,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserManagerInternal;
+import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
@@ -49,26 +49,31 @@ import java.util.List;
 import java.util.Set;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static com.android.server.am.ActivityManagerService.CONTINUE_USER_SWITCH_MSG;
-import static com.android.server.am.ActivityManagerService.REPORT_LOCKED_BOOT_COMPLETE_MSG;
-import static com.android.server.am.ActivityManagerService.REPORT_USER_SWITCH_COMPLETE_MSG;
-import static com.android.server.am.ActivityManagerService.REPORT_USER_SWITCH_MSG;
-import static com.android.server.am.ActivityManagerService.SYSTEM_USER_CURRENT_MSG;
-import static com.android.server.am.ActivityManagerService.SYSTEM_USER_START_MSG;
-import static com.android.server.am.ActivityManagerService.USER_SWITCH_TIMEOUT_MSG;
+import static android.testing.DexmakerShareClassLoaderRule.runWithDexmakerShareClassLoader;
+import static com.android.server.am.UserController.CONTINUE_USER_SWITCH_MSG;
+import static com.android.server.am.UserController.REPORT_LOCKED_BOOT_COMPLETE_MSG;
+import static com.android.server.am.UserController.REPORT_USER_SWITCH_COMPLETE_MSG;
+import static com.android.server.am.UserController.REPORT_USER_SWITCH_MSG;
+import static com.android.server.am.UserController.SYSTEM_USER_CURRENT_MSG;
+import static com.android.server.am.UserController.SYSTEM_USER_START_MSG;
+import static com.android.server.am.UserController.USER_SWITCH_TIMEOUT_MSG;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
+/**
+ * Usage: bit FrameworksServicesTests:com.android.server.am.UserControllerTest
+ */
+@Presubmit
 public class UserControllerTest extends AndroidTestCase {
     private static final int TEST_USER_ID = 10;
     private static final int NONEXIST_USER_ID = 2;
@@ -98,16 +103,22 @@ public class UserControllerTest extends AndroidTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        System.setProperty("dexmaker.share_classloader", "true");
-        mInjector = new TestInjector(getContext());
-        mUserController = new UserController(mInjector);
-        setUpUser(TEST_USER_ID, 0);
+        runWithDexmakerShareClassLoader(() -> {
+            mInjector = Mockito.spy(new TestInjector(getContext()));
+            doNothing().when(mInjector).clearAllLockedTasks(anyString());
+            doNothing().when(mInjector).startHomeActivity(anyInt(), anyString());
+            doReturn(false).when(mInjector).stackSupervisorSwitchUser(anyInt(), any());
+            doNothing().when(mInjector).stackSupervisorResumeFocusedStackTopActivity();
+            mUserController = new UserController(mInjector);
+            setUpUser(TEST_USER_ID, 0);
+        });
     }
 
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
         mInjector.handlerThread.quit();
+        Mockito.validateMockitoUsage();
     }
 
     @SmallTest
@@ -117,11 +128,7 @@ public class UserControllerTest extends AndroidTestCase {
         Mockito.verify(mInjector.getWindowManager(), never()).stopFreezingScreen();
         Mockito.verify(mInjector.getWindowManager(), times(1)).setSwitchingUser(anyBoolean());
         Mockito.verify(mInjector.getWindowManager()).setSwitchingUser(true);
-        Mockito.verify(mInjector.getActivityStackSupervisor()).setLockTaskModeLocked(
-                nullable(TaskRecord.class),
-                eq(ActivityManager.LOCK_TASK_MODE_NONE),
-                anyString(),
-                anyBoolean());
+        Mockito.verify(mInjector).clearAllLockedTasks(anyString());
         startForegroundUserAssertions();
     }
 
@@ -131,11 +138,7 @@ public class UserControllerTest extends AndroidTestCase {
         Mockito.verify(
                 mInjector.getWindowManager(), never()).startFreezingScreen(anyInt(), anyInt());
         Mockito.verify(mInjector.getWindowManager(), never()).setSwitchingUser(anyBoolean());
-        Mockito.verify(mInjector.getActivityStackSupervisor(), never()).setLockTaskModeLocked(
-                nullable(TaskRecord.class),
-                eq(ActivityManager.LOCK_TASK_MODE_NONE),
-                anyString(),
-                anyBoolean());
+        Mockito.verify(mInjector, never()).clearAllLockedTasks(anyString());
         startBackgroundUserAssertions();
     }
 
@@ -316,14 +319,14 @@ public class UserControllerTest extends AndroidTestCase {
         return result;
     }
 
-    private static class TestInjector extends UserController.Injector {
-        final Object lock = new Object();
+    // Should be public to allow mocking
+    public static class TestInjector extends UserController.Injector {
         TestHandler handler;
+        TestHandler uiHandler;
         HandlerThread handlerThread;
         UserManagerService userManagerMock;
         UserManagerInternal userManagerInternalMock;
         WindowManagerService windowManagerMock;
-        ActivityStackSupervisor activityStackSupervisor;
         private Context mCtx;
         List<Intent> sentIntents = new ArrayList<>();
 
@@ -333,20 +336,20 @@ public class UserControllerTest extends AndroidTestCase {
             handlerThread = new HandlerThread(TAG);
             handlerThread.start();
             handler = new TestHandler(handlerThread.getLooper());
+            uiHandler = new TestHandler(handlerThread.getLooper());
             userManagerMock = mock(UserManagerService.class);
             userManagerInternalMock = mock(UserManagerInternal.class);
             windowManagerMock = mock(WindowManagerService.class);
-            activityStackSupervisor = mock(ActivityStackSupervisor.class);
         }
 
         @Override
-        protected Object getLock() {
-            return lock;
-        }
-
-        @Override
-        protected Handler getHandler() {
+        protected Handler getHandler(Handler.Callback callback) {
             return handler;
+        }
+
+        @Override
+        protected Handler getUiHandler(Handler.Callback callback) {
+            return uiHandler;
         }
 
         @Override
@@ -376,12 +379,12 @@ public class UserControllerTest extends AndroidTestCase {
         }
 
         @Override
-        void updateUserConfigurationLocked() {
-            Log.i(TAG, "updateUserConfigurationLocked");
+        void updateUserConfiguration() {
+            Log.i(TAG, "updateUserConfiguration");
         }
 
         @Override
-        protected int broadcastIntentLocked(Intent intent, String resolvedType,
+        protected int broadcastIntent(Intent intent, String resolvedType,
                 IIntentReceiver resultTo, int resultCode, String resultData, Bundle resultExtras,
                 String[] requiredPermissions, int appOp, Bundle bOptions, boolean ordered,
                 boolean sticky, int callingPid, int callingUid, int userId) {
@@ -391,13 +394,11 @@ public class UserControllerTest extends AndroidTestCase {
         }
 
         @Override
-        void startHomeActivityLocked(int userId, String reason) {
-            Log.i(TAG, "startHomeActivityLocked " + userId);
+        void reportGlobalUsageEventLocked(int event) {
         }
 
         @Override
-        ActivityStackSupervisor getActivityStackSupervisor() {
-            return activityStackSupervisor;
+        void reportCurWakefulnessUsageEvent() {
         }
     }
 

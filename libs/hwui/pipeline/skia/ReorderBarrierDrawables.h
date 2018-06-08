@@ -41,9 +41,7 @@ public:
     explicit StartReorderBarrierDrawable(SkiaDisplayList* data);
 
 protected:
-    virtual SkRect onGetBounds() override {
-        return SkRect::MakeLargest();
-    }
+    virtual SkRect onGetBounds() override { return SkRect::MakeLargest(); }
     virtual void onDraw(SkCanvas* canvas) override;
 
 private:
@@ -65,16 +63,16 @@ private:
 class EndReorderBarrierDrawable : public SkDrawable {
 public:
     explicit EndReorderBarrierDrawable(StartReorderBarrierDrawable* startBarrier);
+
 protected:
-    virtual SkRect onGetBounds() override {
-        return SkRect::MakeLargest();
-    }
+    virtual SkRect onGetBounds() override { return SkRect::MakeLargest(); }
     virtual void onDraw(SkCanvas* canvas) override;
+
 private:
     void drawShadow(SkCanvas* canvas, RenderNodeDrawable* caster);
     StartReorderBarrierDrawable* mStartBarrier;
 };
 
-}; // namespace skiapipeline
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace skiapipeline
+};  // namespace uirenderer
+};  // namespace android

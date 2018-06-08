@@ -27,24 +27,37 @@
 
 #include <cutils/ashmem.h>
 #include <log/log.h>
+#include <sstream>
 
 #include "Properties.h"
 #include "utils/TimeUtils.h"
+#include "utils/Trace.h"
 
 namespace android {
 namespace uirenderer {
 
 struct Comparison {
+    JankType type;
+    std::function<int64_t(nsecs_t)> computeThreadshold;
     FrameInfoIndex start;
     FrameInfoIndex end;
 };
 
-static const Comparison COMPARISONS[] = {
-        {FrameInfoIndex::IntendedVsync, FrameInfoIndex::Vsync},
-        {FrameInfoIndex::OldestInputEvent, FrameInfoIndex::Vsync},
-        {FrameInfoIndex::Vsync, FrameInfoIndex::SyncStart},
-        {FrameInfoIndex::SyncStart, FrameInfoIndex::IssueDrawCommandsStart},
-        {FrameInfoIndex::IssueDrawCommandsStart, FrameInfoIndex::FrameCompleted},
+static const std::array<Comparison, 4> COMPARISONS{
+        Comparison{JankType::kMissedVsync, [](nsecs_t) { return 1; }, FrameInfoIndex::IntendedVsync,
+                   FrameInfoIndex::Vsync},
+
+        Comparison{JankType::kSlowUI,
+                   [](nsecs_t frameInterval) { return static_cast<int64_t>(.5 * frameInterval); },
+                   FrameInfoIndex::Vsync, FrameInfoIndex::SyncStart},
+
+        Comparison{JankType::kSlowSync,
+                   [](nsecs_t frameInterval) { return static_cast<int64_t>(.2 * frameInterval); },
+                   FrameInfoIndex::SyncStart, FrameInfoIndex::IssueDrawCommandsStart},
+
+        Comparison{JankType::kSlowRT,
+                   [](nsecs_t frameInterval) { return static_cast<int64_t>(.75 * frameInterval); },
+                   FrameInfoIndex::IssueDrawCommandsStart, FrameInfoIndex::FrameCompleted},
 };
 
 // If the event exceeds 10 seconds throw it away, this isn't a jank event
@@ -88,73 +101,91 @@ JankTracker::JankTracker(ProfileDataContainer* globalData, const DisplayInfo& di
 
 void JankTracker::setFrameInterval(nsecs_t frameInterval) {
     mFrameInterval = frameInterval;
-    mThresholds[kMissedVsync] = 1;
-    /*
-     * Due to interpolation and sample rate differences between the touch
-     * panel and the display (example, 85hz touch panel driving a 60hz display)
-     * we call high latency 1.5 * frameinterval
-     *
-     * NOTE: Be careful when tuning this! A theoretical 1,000hz touch panel
-     * on a 60hz display will show kOldestInputEvent - kIntendedVsync of being 15ms
-     * Thus this must always be larger than frameInterval, or it will fail
-     */
-    mThresholds[kHighInputLatency] = static_cast<int64_t>(1.5 * frameInterval);
 
-    // Note that these do not add up to 1. This is intentional. It's to deal
-    // with variance in values, and should be sort of an upper-bound on what
-    // is reasonable to expect.
-    mThresholds[kSlowUI] = static_cast<int64_t>(.5 * frameInterval);
-    mThresholds[kSlowSync] = static_cast<int64_t>(.2 * frameInterval);
-    mThresholds[kSlowRT] = static_cast<int64_t>(.75 * frameInterval);
-
+    for (auto& comparison : COMPARISONS) {
+        mThresholds[comparison.type] = comparison.computeThreadshold(frameInterval);
+    }
 }
 
 void JankTracker::finishFrame(const FrameInfo& frame) {
     // Fast-path for jank-free frames
     int64_t totalDuration = frame.duration(sFrameStart, FrameInfoIndex::FrameCompleted);
-    if (mDequeueTimeForgiveness
-            && frame[FrameInfoIndex::DequeueBufferDuration] > 500_us) {
-        nsecs_t expectedDequeueDuration =
-                mDequeueTimeForgiveness + frame[FrameInfoIndex::Vsync]
-                - frame[FrameInfoIndex::IssueDrawCommandsStart];
+    if (mDequeueTimeForgiveness && frame[FrameInfoIndex::DequeueBufferDuration] > 500_us) {
+        nsecs_t expectedDequeueDuration = mDequeueTimeForgiveness + frame[FrameInfoIndex::Vsync] -
+                                          frame[FrameInfoIndex::IssueDrawCommandsStart];
         if (expectedDequeueDuration > 0) {
             // Forgive only up to the expected amount, but not more than
             // the actual time spent blocked.
-            nsecs_t forgiveAmount = std::min(expectedDequeueDuration,
-                    frame[FrameInfoIndex::DequeueBufferDuration]);
+            nsecs_t forgiveAmount =
+                    std::min(expectedDequeueDuration, frame[FrameInfoIndex::DequeueBufferDuration]);
             LOG_ALWAYS_FATAL_IF(forgiveAmount >= totalDuration,
-                    "Impossible dequeue duration! dequeue duration reported %" PRId64
-                    ", total duration %" PRId64, forgiveAmount, totalDuration);
+                                "Impossible dequeue duration! dequeue duration reported %" PRId64
+                                ", total duration %" PRId64,
+                                forgiveAmount, totalDuration);
             totalDuration -= forgiveAmount;
         }
     }
+
     LOG_ALWAYS_FATAL_IF(totalDuration <= 0, "Impossible totalDuration %" PRId64, totalDuration);
     mData->reportFrame(totalDuration);
     (*mGlobalData)->reportFrame(totalDuration);
 
-    // Keep the fast path as fast as possible.
-    if (CC_LIKELY(totalDuration < mFrameInterval)) {
-        return;
-    }
-
     // Only things like Surface.lockHardwareCanvas() are exempt from tracking
-    if (frame[FrameInfoIndex::Flags] & EXEMPT_FRAMES_FLAGS) {
+    if (CC_UNLIKELY(frame[FrameInfoIndex::Flags] & EXEMPT_FRAMES_FLAGS)) {
         return;
     }
 
-    mData->reportJank();
-    (*mGlobalData)->reportJank();
+    if (totalDuration > mFrameInterval) {
+        mData->reportJank();
+        (*mGlobalData)->reportJank();
+    }
 
-    for (int i = 0; i < NUM_BUCKETS; i++) {
-        int64_t delta = frame.duration(COMPARISONS[i].start, COMPARISONS[i].end);
-        if (delta >= mThresholds[i] && delta < IGNORE_EXCEEDING) {
-            mData->reportJankType((JankType) i);
-            (*mGlobalData)->reportJankType((JankType) i);
+    bool isTripleBuffered = mSwapDeadline > frame[FrameInfoIndex::IntendedVsync];
+
+    mSwapDeadline = std::max(mSwapDeadline + mFrameInterval,
+                             frame[FrameInfoIndex::IntendedVsync] + mFrameInterval);
+
+    // If we hit the deadline, cool!
+    if (frame[FrameInfoIndex::FrameCompleted] < mSwapDeadline) {
+        if (isTripleBuffered) {
+            mData->reportJankType(JankType::kHighInputLatency);
+            (*mGlobalData)->reportJankType(JankType::kHighInputLatency);
         }
+        return;
+    }
+
+    mData->reportJankType(JankType::kMissedDeadline);
+    (*mGlobalData)->reportJankType(JankType::kMissedDeadline);
+
+    // Janked, reset the swap deadline
+    nsecs_t jitterNanos = frame[FrameInfoIndex::FrameCompleted] - frame[FrameInfoIndex::Vsync];
+    nsecs_t lastFrameOffset = jitterNanos % mFrameInterval;
+    mSwapDeadline = frame[FrameInfoIndex::FrameCompleted] - lastFrameOffset + mFrameInterval;
+
+    for (auto& comparison : COMPARISONS) {
+        int64_t delta = frame.duration(comparison.start, comparison.end);
+        if (delta >= mThresholds[comparison.type] && delta < IGNORE_EXCEEDING) {
+            mData->reportJankType(comparison.type);
+            (*mGlobalData)->reportJankType(comparison.type);
+        }
+    }
+
+    // Log daveys since they are weird and we don't know what they are (b/70339576)
+    if (totalDuration >= 700_ms) {
+        static int sDaveyCount = 0;
+        std::stringstream ss;
+        ss << "Davey! duration=" << ns2ms(totalDuration) << "ms; ";
+        for (size_t i = 0; i < static_cast<size_t>(FrameInfoIndex::NumIndexes); i++) {
+            ss << FrameInfoNames[i] << "=" << frame[i] << ", ";
+        }
+        ALOGI("%s", ss.str().c_str());
+        // Just so we have something that counts up, the value is largely irrelevant
+        ATRACE_INT(ss.str().c_str(), ++sDaveyCount);
     }
 }
 
-void JankTracker::dumpData(int fd, const ProfileDataDescription* description, const ProfileData* data) {
+void JankTracker::dumpData(int fd, const ProfileDataDescription* description,
+                           const ProfileData* data) {
     if (description) {
         switch (description->type) {
             case JankTrackerType::Generic:
@@ -175,33 +206,30 @@ void JankTracker::dumpData(int fd, const ProfileDataDescription* description, co
 }
 
 void JankTracker::dumpFrames(int fd) {
-    FILE* file = fdopen(fd, "a");
-    fprintf(file, "\n\n---PROFILEDATA---\n");
+    dprintf(fd, "\n\n---PROFILEDATA---\n");
     for (size_t i = 0; i < static_cast<size_t>(FrameInfoIndex::NumIndexes); i++) {
-        fprintf(file, "%s", FrameInfoNames[i].c_str());
-        fprintf(file, ",");
+        dprintf(fd, "%s", FrameInfoNames[i].c_str());
+        dprintf(fd, ",");
     }
     for (size_t i = 0; i < mFrames.size(); i++) {
         FrameInfo& frame = mFrames[i];
         if (frame[FrameInfoIndex::SyncStart] == 0) {
             continue;
         }
-        fprintf(file, "\n");
+        dprintf(fd, "\n");
         for (int i = 0; i < static_cast<int>(FrameInfoIndex::NumIndexes); i++) {
-            fprintf(file, "%" PRId64 ",", frame[i]);
+            dprintf(fd, "%" PRId64 ",", frame[i]);
         }
     }
-    fprintf(file, "\n---PROFILEDATA---\n\n");
-    fflush(file);
+    dprintf(fd, "\n---PROFILEDATA---\n\n");
 }
 
 void JankTracker::reset() {
     mFrames.clear();
     mData->reset();
     (*mGlobalData)->reset();
-    sFrameStart = Properties::filterOutTestOverhead
-            ? FrameInfoIndex::HandleInputStart
-            : FrameInfoIndex::IntendedVsync;
+    sFrameStart = Properties::filterOutTestOverhead ? FrameInfoIndex::HandleInputStart
+                                                    : FrameInfoIndex::IntendedVsync;
 }
 
 } /* namespace uirenderer */

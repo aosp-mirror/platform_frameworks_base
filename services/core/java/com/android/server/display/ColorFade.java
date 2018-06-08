@@ -99,7 +99,7 @@ final class ColorFade {
     private final float mProjMatrix[] = new float[16];
     private final int[] mGLBuffers = new int[2];
     private int mTexCoordLoc, mVertexLoc, mTexUnitLoc, mProjMatrixLoc, mTexMatrixLoc;
-    private int mOpacityLoc, mScaleLoc, mGammaLoc, mSaturationLoc;
+    private int mOpacityLoc, mGammaLoc;
     private int mProgram;
 
     // Vertex and corresponding texture coordinates.
@@ -245,8 +245,6 @@ final class ColorFade {
 
         mOpacityLoc = GLES20.glGetUniformLocation(mProgram, "opacity");
         mGammaLoc = GLES20.glGetUniformLocation(mProgram, "gamma");
-        mSaturationLoc = GLES20.glGetUniformLocation(mProgram, "saturation");
-        mScaleLoc = GLES20.glGetUniformLocation(mProgram, "scale");
         mTexUnitLoc = GLES20.glGetUniformLocation(mProgram, "texUnit");
 
         GLES20.glUseProgram(mProgram);
@@ -394,10 +392,8 @@ final class ColorFade {
             double cos = Math.cos(Math.PI * one_minus_level);
             double sign = cos < 0 ? -1 : 1;
             float opacity = (float) -Math.pow(one_minus_level, 2) + 1;
-            float saturation = (float) Math.pow(level, 4);
-            float scale = (float) ((-Math.pow(one_minus_level, 2) + 1) * 0.1d + 0.9d);
             float gamma = (float) ((0.5d * sign * Math.pow(cos, 2) + 0.5d) * 0.9d + 0.1d);
-            drawFaded(opacity, 1.f / gamma, saturation, scale);
+            drawFaded(opacity, 1.f / gamma);
             if (checkGlErrors("drawFrame")) {
                 return false;
             }
@@ -409,10 +405,9 @@ final class ColorFade {
         return showSurface(1.0f);
     }
 
-    private void drawFaded(float opacity, float gamma, float saturation, float scale) {
+    private void drawFaded(float opacity, float gamma) {
         if (DEBUG) {
-            Slog.d(TAG, "drawFaded: opacity=" + opacity + ", gamma=" + gamma +
-                        ", saturation=" + saturation + ", scale=" + scale);
+            Slog.d(TAG, "drawFaded: opacity=" + opacity + ", gamma=" + gamma);
         }
         // Use shaders
         GLES20.glUseProgram(mProgram);
@@ -422,8 +417,6 @@ final class ColorFade {
         GLES20.glUniformMatrix4fv(mTexMatrixLoc, 1, false, mTexMatrix, 0);
         GLES20.glUniform1f(mOpacityLoc, opacity);
         GLES20.glUniform1f(mGammaLoc, gamma);
-        GLES20.glUniform1f(mSaturationLoc, saturation);
-        GLES20.glUniform1f(mScaleLoc, scale);
 
         // Use textures
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
@@ -585,9 +578,11 @@ final class ColorFade {
                     } else {
                         flags = SurfaceControl.OPAQUE | SurfaceControl.HIDDEN;
                     }
-                    mSurfaceControl = new SurfaceControl(mSurfaceSession,
-                            "ColorFade", mDisplayWidth, mDisplayHeight,
-                            PixelFormat.OPAQUE, flags);
+                    mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession)
+                            .setName("ColorFade")
+                            .setSize(mDisplayWidth, mDisplayHeight)
+                            .setFlags(flags)
+                            .build();
                 } catch (OutOfResourcesException ex) {
                     Slog.e(TAG, "Unable to create surface.", ex);
                     return false;

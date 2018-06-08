@@ -118,12 +118,14 @@ public class LockPatternView extends View {
     private float mInProgressY = -1;
 
     private long mAnimatingPeriodStart;
+    private long[] mLineFadeStart = new long[9];
 
     private DisplayMode mPatternDisplayMode = DisplayMode.Correct;
     private boolean mInputEnabled = true;
     private boolean mInStealthMode = false;
     private boolean mEnableHapticFeedback = true;
     private boolean mPatternInProgress = false;
+    private boolean mFadePattern = true;
 
     private float mHitFactor = 0.6f;
 
@@ -375,6 +377,14 @@ public class LockPatternView extends View {
     }
 
     /**
+     * Set whether the pattern should fade as it's being drawn. If
+     * true, each segment of the pattern fades over time.
+     */
+    public void setFadePattern(boolean fadePattern) {
+        mFadePattern = fadePattern;
+    }
+
+    /**
      * Set whether the view will use tactile feedback.  If true, there will be
      * tactile feedback as the user enters the pattern.
      *
@@ -596,12 +606,14 @@ public class LockPatternView extends View {
     }
 
     /**
-     * Clear the pattern lookup table.
+     * Clear the pattern lookup table. Also reset the line fade start times for
+     * the next attempt.
      */
     private void clearPatternDrawLookup() {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 mPatternDrawLookup[i][j] = false;
+                mLineFadeStart[i+j] = 0;
             }
         }
     }
@@ -988,6 +1000,11 @@ public class LockPatternView extends View {
             setPatternInProgress(false);
             cancelLineAnimations();
             notifyPatternDetected();
+            // Also clear pattern if fading is enabled
+            if (mFadePattern) {
+                clearPatternDrawLookup();
+                mPatternDisplayMode = DisplayMode.Correct;
+            }
             invalidate();
         }
         if (PROFILE_DRAWING) {
@@ -1136,7 +1153,8 @@ public class LockPatternView extends View {
             boolean anyCircles = false;
             float lastX = 0f;
             float lastY = 0f;
-            for (int i = 0; i < count; i++) {
+            long elapsedRealtime = SystemClock.elapsedRealtime();
+           for (int i = 0; i < count; i++) {
                 Cell cell = pattern.get(i);
 
                 // only draw the part of the pattern stored in
@@ -1147,16 +1165,34 @@ public class LockPatternView extends View {
                 }
                 anyCircles = true;
 
+                if (mLineFadeStart[i] == 0) {
+                  mLineFadeStart[i] = SystemClock.elapsedRealtime();
+                }
+
                 float centerX = getCenterXForColumn(cell.column);
                 float centerY = getCenterYForRow(cell.row);
                 if (i != 0) {
+                   // Set this line segment to slowly fade over the next second.
+                   int lineFadeVal = (int) Math.min((elapsedRealtime -
+                           mLineFadeStart[i])/2f, 255f);
+
                     CellState state = mCellStates[cell.row][cell.column];
                     currentPath.rewind();
                     currentPath.moveTo(lastX, lastY);
                     if (state.lineEndX != Float.MIN_VALUE && state.lineEndY != Float.MIN_VALUE) {
                         currentPath.lineTo(state.lineEndX, state.lineEndY);
+                        if (mFadePattern) {
+                            mPathPaint.setAlpha((int) 255 - lineFadeVal );
+                        } else {
+                            mPathPaint.setAlpha(255);
+                        }
                     } else {
                         currentPath.lineTo(centerX, centerY);
+                        if (mFadePattern) {
+                            mPathPaint.setAlpha((int) 255 - lineFadeVal );
+                        } else {
+                            mPathPaint.setAlpha(255);
+                        }
                     }
                     canvas.drawPath(currentPath, mPathPaint);
                 }

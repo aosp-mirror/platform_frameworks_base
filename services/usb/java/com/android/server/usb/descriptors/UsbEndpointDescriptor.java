@@ -15,6 +15,9 @@
  */
 package com.android.server.usb.descriptors;
 
+import android.hardware.usb.UsbEndpoint;
+import android.util.Log;
+
 import com.android.server.usb.descriptors.report.ReportCanvas;
 
 /**
@@ -24,17 +27,18 @@ import com.android.server.usb.descriptors.report.ReportCanvas;
  */
 public class UsbEndpointDescriptor extends UsbDescriptor {
     private static final String TAG = "UsbEndpointDescriptor";
+    private static final boolean DEBUG = false;
 
-    public static final byte MASK_ENDPOINT_ADDRESS = 0b0001111;
-    public static final byte MASK_ENDPOINT_DIRECTION = (byte) 0b10000000;
-    public static final byte DIRECTION_OUTPUT = 0x00;
-    public static final byte DIRECTION_INPUT = (byte) 0x80;
+    public static final int MASK_ENDPOINT_ADDRESS = 0b000000000001111;
+    public static final int MASK_ENDPOINT_DIRECTION = (byte) 0b0000000010000000;
+    public static final int DIRECTION_OUTPUT = 0x0000;
+    public static final int DIRECTION_INPUT = (byte) 0x0080;
 
-    public static final byte MASK_ATTRIBS_TRANSTYPE = 0b00000011;
-    public static final byte TRANSTYPE_CONTROL = 0x00;
-    public static final byte TRANSTYPE_ISO = 0x01;
-    public static final byte TRANSTYPE_BULK = 0x02;
-    public static final byte TRANSTYPE_INTERRUPT = 0x03;
+    public static final int MASK_ATTRIBS_TRANSTYPE = 0b00000011;
+    public static final int TRANSTYPE_CONTROL = 0x00;
+    public static final int TRANSTYPE_ISO = 0x01;
+    public static final int TRANSTYPE_BULK = 0x02;
+    public static final int TRANSTYPE_INTERRUPT = 0x03;
 
     public static final byte MASK_ATTRIBS_SYNCTYPE = 0b00001100;
     public static final byte SYNCTYPE_NONE = 0b00000000;
@@ -42,18 +46,18 @@ public class UsbEndpointDescriptor extends UsbDescriptor {
     public static final byte SYNCTYPE_ADAPTSYNC = 0b00001000;
     public static final byte SYNCTYPE_RESERVED = 0b00001100;
 
-    public static final byte MASK_ATTRIBS_USEAGE = 0b00110000;
-    public static final byte USEAGE_DATA = 0b00000000;
-    public static final byte USEAGE_FEEDBACK = 0b00010000;
-    public static final byte USEAGE_EXPLICIT = 0b00100000;
-    public static final byte USEAGE_RESERVED = 0b00110000;
+    public static final int MASK_ATTRIBS_USEAGE = 0b00110000;
+    public static final int USEAGE_DATA = 0b00000000;
+    public static final int USEAGE_FEEDBACK = 0b00010000;
+    public static final int USEAGE_EXPLICIT = 0b00100000;
+    public static final int USEAGE_RESERVED = 0b00110000;
 
-    private byte mEndpointAddress;  // 2:1 Endpoint Address
+    private int mEndpointAddress;   // 2:1 Endpoint Address
                                     // Bits 0..3b Endpoint Number.
                                     // Bits 4..6b Reserved. Set to Zero
                                     // Bits 7 Direction 0 = Out, 1 = In
                                     // (Ignored for Control Endpoints)
-    private byte mAttributes;   // 3:1 Various flags
+    private int mAttributes;    // 3:1 Various flags
                                 // Bits 0..1 Transfer Type:
                                 //     00 = Control, 01 = Isochronous, 10 = Bulk, 11 = Interrupt
                                 // Bits 2..7 are reserved. If Isochronous endpoint,
@@ -69,7 +73,7 @@ public class UsbEndpointDescriptor extends UsbDescriptor {
                                 //  11: Reserved
     private int mPacketSize;    // 4:2 Maximum Packet Size this endpoint is capable of
                                 // sending or receiving
-    private byte mInterval;     // 6:1 Interval for polling endpoint data transfers. Value in
+    private int mInterval;      // 6:1 Interval for polling endpoint data transfers. Value in
                                 // frame counts.
                                 // Ignored for Bulk & Control Endpoints. Isochronous must equal
                                 // 1 and field may range from 1 to 255 for interrupt endpoints.
@@ -81,11 +85,11 @@ public class UsbEndpointDescriptor extends UsbDescriptor {
         mHierarchyLevel = 4;
     }
 
-    public byte getEndpointAddress() {
+    public int getEndpointAddress() {
         return mEndpointAddress;
     }
 
-    public byte getAttributes() {
+    public int getAttributes() {
         return mAttributes;
     }
 
@@ -93,7 +97,7 @@ public class UsbEndpointDescriptor extends UsbDescriptor {
         return mPacketSize;
     }
 
-    public byte getInterval() {
+    public int getInterval() {
         return mInterval;
     }
 
@@ -105,12 +109,22 @@ public class UsbEndpointDescriptor extends UsbDescriptor {
         return mSyncAddress;
     }
 
+    /* package */ UsbEndpoint toAndroid(UsbDescriptorParser parser) {
+        if (DEBUG) {
+            Log.d(TAG, "toAndroid() type:"
+                    + Integer.toHexString(mAttributes & MASK_ATTRIBS_TRANSTYPE)
+                    + " sync:" + Integer.toHexString(mAttributes & MASK_ATTRIBS_SYNCTYPE)
+                    + " usage:" + Integer.toHexString(mAttributes & MASK_ATTRIBS_USEAGE));
+        }
+        return new UsbEndpoint(mEndpointAddress, mAttributes, mPacketSize, mInterval);
+    }
+
     @Override
     public int parseRawDescriptors(ByteStream stream) {
-        mEndpointAddress = stream.getByte();
-        mAttributes = stream.getByte();
+        mEndpointAddress = stream.getUnsignedByte();
+        mAttributes = stream.getUnsignedByte();
         mPacketSize = stream.unpackUsbShort();
-        mInterval = stream.getByte();
+        mInterval = stream.getUnsignedByte();
         if (mLength == 9) {
             mRefresh = stream.getByte();
             mSyncAddress = stream.getByte();
@@ -124,13 +138,13 @@ public class UsbEndpointDescriptor extends UsbDescriptor {
 
         canvas.openList();
 
-        byte address = getEndpointAddress();
+        int address = getEndpointAddress();
         canvas.writeListItem("Address: "
                 + ReportCanvas.getHexString(address & UsbEndpointDescriptor.MASK_ENDPOINT_ADDRESS)
                 + ((address & UsbEndpointDescriptor.MASK_ENDPOINT_DIRECTION)
                 == UsbEndpointDescriptor.DIRECTION_OUTPUT ? " [out]" : " [in]"));
 
-        byte attributes = getAttributes();
+        int attributes = getAttributes();
         canvas.openListItem();
         canvas.write("Attributes: " + ReportCanvas.getHexString(attributes) + " ");
         switch (attributes & UsbEndpointDescriptor.MASK_ATTRIBS_TRANSTYPE) {

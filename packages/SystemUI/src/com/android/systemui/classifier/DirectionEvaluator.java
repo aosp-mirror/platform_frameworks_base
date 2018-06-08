@@ -33,6 +33,7 @@ public class DirectionEvaluator {
                 }
                 break;
             case Classifier.UNLOCK:
+            case Classifier.BOUNCER_UNLOCK:
                 if (!vertical || yDiff >= 0.0) {
                     return falsingEvaluation;
                 }

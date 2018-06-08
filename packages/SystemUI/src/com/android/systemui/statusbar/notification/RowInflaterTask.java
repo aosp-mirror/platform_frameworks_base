@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification;
 
 import android.content.Context;
 import android.support.v4.view.AsyncLayoutInflater;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -30,15 +31,23 @@ import com.android.systemui.statusbar.NotificationData;
  * An inflater task that asynchronously inflates a ExpandableNotificationRow
  */
 public class RowInflaterTask implements InflationTask, AsyncLayoutInflater.OnInflateFinishedListener {
+
+    private static final String TAG = "RowInflaterTask";
+    private static final boolean TRACE_ORIGIN = true;
+
     private RowInflationFinishedListener mListener;
     private NotificationData.Entry mEntry;
     private boolean mCancelled;
+    private Throwable mInflateOrigin;
 
     /**
      * Inflates a new notificationView. This should not be called twice on this object
      */
     public void inflate(Context context, ViewGroup parent, NotificationData.Entry entry,
             RowInflationFinishedListener listener) {
+        if (TRACE_ORIGIN) {
+            mInflateOrigin = new Throwable("inflate requested here");
+        }
         mListener = listener;
         AsyncLayoutInflater inflater = new AsyncLayoutInflater(context);
         mEntry = entry;
@@ -54,8 +63,16 @@ public class RowInflaterTask implements InflationTask, AsyncLayoutInflater.OnInf
     @Override
     public void onInflateFinished(View view, int resid, ViewGroup parent) {
         if (!mCancelled) {
-            mEntry.onInflationTaskFinished();
-            mListener.onInflationFinished((ExpandableNotificationRow) view);
+            try {
+                mEntry.onInflationTaskFinished();
+                mListener.onInflationFinished((ExpandableNotificationRow) view);
+            } catch (Throwable t) {
+                if (mInflateOrigin != null) {
+                    Log.e(TAG, "Error in inflation finished listener: " + t, mInflateOrigin);
+                    t.addSuppressed(mInflateOrigin);
+                }
+                throw t;
+            }
         }
     }
 

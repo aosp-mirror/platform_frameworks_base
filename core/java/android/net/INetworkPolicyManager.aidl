@@ -37,8 +37,6 @@ interface INetworkPolicyManager {
     int getUidPolicy(int uid);
     int[] getUidsWithPolicy(int policy);
 
-    boolean isUidForeground(int uid);
-
     void registerListener(INetworkPolicyListener listener);
     void unregisterListener(INetworkPolicyListener listener);
 
@@ -70,6 +68,8 @@ interface INetworkPolicyManager {
 
     SubscriptionPlan[] getSubscriptionPlans(int subId, String callingPackage);
     void setSubscriptionPlans(int subId, in SubscriptionPlan[] plans, String callingPackage);
+    String getSubscriptionPlansOwner(int subId);
+    void setSubscriptionOverride(int subId, int overrideMask, int overrideValue, long timeoutMillis, String callingPackage);
 
     void factoryReset(String subscriber);
 

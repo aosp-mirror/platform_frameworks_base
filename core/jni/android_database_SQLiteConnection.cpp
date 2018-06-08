@@ -765,6 +765,14 @@ static jlong nativeExecuteForCursorWindow(JNIEnv* env, jclass clazz,
     if (startPos > totalRows) {
         ALOGE("startPos %d > actual rows %d", startPos, totalRows);
     }
+    if (totalRows > 0 && addedRows == 0) {
+        String8 msg;
+        msg.appendFormat("Row too big to fit into CursorWindow requiredPos=%d, totalRows=%d",
+                requiredPos, totalRows);
+        throw_sqlite3_exception(env, SQLITE_TOOBIG, NULL, msg.string());
+        return 0;
+    }
+
     jlong result = jlong(startPos) << 32 | jlong(totalRows);
     return result;
 }

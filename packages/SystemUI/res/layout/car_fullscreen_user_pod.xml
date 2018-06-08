@@ -15,27 +15,30 @@
      limitations under the License.
 -->
 
+
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="wrap_content"
+    android:clipChildren="false"
+    android:alpha="0"
     android:layout_height="wrap_content"
-    android:gravity="center" >
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:gravity="center">
 
     <ImageView android:id="@+id/user_avatar"
-        android:layout_gravity="center"
-        android:layout_width="@dimen/car_fullscreen_user_pod_image_avatar_width"
-        android:layout_height="@dimen/car_fullscreen_user_pod_image_avatar_height" />
+        android:layout_width="@dimen/car_user_switcher_image_avatar_size"
+        android:layout_height="@dimen/car_user_switcher_image_avatar_size"
+        android:background="@drawable/car_button_ripple_background_inverse"
+        android:gravity="center"/>
 
     <TextView android:id="@+id/user_name"
-        android:layout_width="@dimen/car_fullscreen_user_pod_width"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/car_fullscreen_user_pod_margin_name_top"
-        android:layout_marginBottom="@dimen/car_fullscreen_user_pod_margin_name_bottom"
-        android:textSize="@dimen/car_fullscreen_user_pod_text_size"
-        android:textColor="@color/qs_user_detail_name"
+        android:layout_marginTop="@dimen/car_user_switcher_vertical_spacing_between_name_and_avatar"
+        android:textSize="@dimen/car_user_switcher_name_text_size"
+        android:textColor="@color/car_user_switcher_name_text_color"
         android:ellipsize="end"
         android:singleLine="true"
-        android:gravity="center_horizontal"
-        android:layout_gravity="center_horizontal" />
+        android:gravity="center"/>
+
 </LinearLayout>

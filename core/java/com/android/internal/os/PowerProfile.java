@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -37,29 +38,26 @@ import java.util.HashMap;
  */
 public class PowerProfile {
 
-    /**
-     * No power consumption, or accounted for elsewhere.
+    /*
+     * POWER_CPU_SUSPEND: Power consumption when CPU is in power collapse mode.
+     * POWER_CPU_IDLE: Power consumption when CPU is awake (when a wake lock is held). This should
+     *                 be zero on devices that can go into full CPU power collapse even when a wake
+     *                 lock is held. Otherwise, this is the power consumption in addition to
+     * POWER_CPU_SUSPEND due to a wake lock being held but with no CPU activity.
+     * POWER_CPU_ACTIVE: Power consumption when CPU is running, excluding power consumed by clusters
+     *                   and cores.
+     *
+     * CPU Power Equation (assume two clusters):
+     * Total power = POWER_CPU_SUSPEND  (always added)
+     *               + POWER_CPU_IDLE   (skip this and below if in power collapse mode)
+     *               + POWER_CPU_ACTIVE (skip this and below if CPU is not running, but a wakelock
+     *                                   is held)
+     *               + cluster_power.cluster0 + cluster_power.cluster1 (skip cluster not running)
+     *               + core_power.cluster0 * num running cores in cluster 0
+     *               + core_power.cluster1 * num running cores in cluster 1
      */
-    public static final String POWER_NONE = "none";
-
-    /**
-     * Power consumption when CPU is in power collapse mode.
-     */
+    public static final String POWER_CPU_SUSPEND = "cpu.suspend";
     public static final String POWER_CPU_IDLE = "cpu.idle";
-
-    /**
-     * Power consumption when CPU is awake (when a wake lock is held).  This
-     * should be 0 on devices that can go into full CPU power collapse even
-     * when a wake lock is held.  Otherwise, this is the power consumption in
-     * addition to POWER_CPU_IDLE due to a wake lock being held but with no
-     * CPU activity.
-     */
-    public static final String POWER_CPU_AWAKE = "cpu.awake";
-
-    /**
-     * Power consumption when CPU is in power collapse mode.
-     */
-    @Deprecated
     public static final String POWER_CPU_ACTIVE = "cpu.active";
 
     /**
@@ -81,7 +79,6 @@ public class PowerProfile {
     // Updated power constants. These are not estimated, they are real world
     // currents and voltages for the underlying bluetooth and wifi controllers.
     //
-
     public static final String POWER_WIFI_CONTROLLER_IDLE = "wifi.controller.idle";
     public static final String POWER_WIFI_CONTROLLER_RX = "wifi.controller.rx";
     public static final String POWER_WIFI_CONTROLLER_TX = "wifi.controller.tx";
@@ -94,6 +91,7 @@ public class PowerProfile {
     public static final String POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE =
             "bluetooth.controller.voltage";
 
+    public static final String POWER_MODEM_CONTROLLER_SLEEP = "modem.controller.sleep";
     public static final String POWER_MODEM_CONTROLLER_IDLE = "modem.controller.idle";
     public static final String POWER_MODEM_CONTROLLER_RX = "modem.controller.rx";
     public static final String POWER_MODEM_CONTROLLER_TX = "modem.controller.tx";
@@ -106,7 +104,14 @@ public class PowerProfile {
     public static final String POWER_GPS_ON = "gps.on";
 
     /**
+     * GPS power parameters based on signal quality
+     */
+    public static final String POWER_GPS_SIGNAL_QUALITY_BASED = "gps.signalqualitybased";
+    public static final String POWER_GPS_OPERATING_VOLTAGE = "gps.voltage";
+
+    /**
      * Power consumption when Bluetooth driver is on.
+     *
      * @deprecated
      */
     @Deprecated
@@ -114,6 +119,7 @@ public class PowerProfile {
 
     /**
      * Power consumption when Bluetooth driver is transmitting/receiving.
+     *
      * @deprecated
      */
     @Deprecated
@@ -121,11 +127,16 @@ public class PowerProfile {
 
     /**
      * Power consumption when Bluetooth driver gets an AT command.
+     *
      * @deprecated
      */
     @Deprecated
     public static final String POWER_BLUETOOTH_AT_CMD = "bluetooth.at";
 
+    /**
+     * Power consumption when screen is in doze/ambient/always-on mode, including backlight power.
+     */
+    public static final String POWER_AMBIENT_DISPLAY = "ambient.on";
 
     /**
      * Power consumption when screen is on, not including the backlight power.
@@ -157,13 +168,13 @@ public class PowerProfile {
      * Power consumed by the audio hardware when playing back audio content. This is in addition
      * to the CPU power, probably due to a DSP and / or amplifier.
      */
-    public static final String POWER_AUDIO = "dsp.audio";
+    public static final String POWER_AUDIO = "audio";
 
     /**
      * Power consumed by any media hardware when playing back video content. This is in addition
      * to the CPU power, probably due to a DSP.
      */
-    public static final String POWER_VIDEO = "dsp.video";
+    public static final String POWER_VIDEO = "video";
 
     /**
      * Average power consumption when camera flashlight is on.
@@ -182,9 +193,6 @@ public class PowerProfile {
      */
     public static final String POWER_CAMERA = "camera.avg";
 
-    @Deprecated
-    public static final String POWER_CPU_SPEEDS = "cpu.speeds";
-
     /**
      * Power consumed by wif batched scaning.  Broken down into bins by
      * Channels Scanned per Hour.  May do 1-720 scans per hour of 1-100 channels
@@ -197,7 +205,15 @@ public class PowerProfile {
      */
     public static final String POWER_BATTERY_CAPACITY = "battery.capacity";
 
-    static final HashMap<String, Object> sPowerMap = new HashMap<>();
+    /**
+     * A map from Power Use Item to its power consumption.
+     */
+    static final HashMap<String, Double> sPowerItemMap = new HashMap<>();
+    /**
+     * A map from Power Use Item to an array of its power consumption
+     * (for items with variable power e.g. CPU).
+     */
+    static final HashMap<String, Double[]> sPowerArrayMap = new HashMap<>();
 
     private static final String TAG_DEVICE = "device";
     private static final String TAG_ITEM = "item";
@@ -207,23 +223,32 @@ public class PowerProfile {
 
     private static final Object sLock = new Object();
 
+    @VisibleForTesting
     public PowerProfile(Context context) {
-        // Read the XML file for the given profile (normally only one per
-        // device)
+        this(context, false);
+    }
+
+    /**
+     * For PowerProfileTest
+     */
+    @VisibleForTesting
+    public PowerProfile(Context context, boolean forTest) {
+        // Read the XML file for the given profile (normally only one per device)
         synchronized (sLock) {
-            if (sPowerMap.size() == 0) {
-                readPowerValuesFromXml(context);
+            if (sPowerItemMap.size() == 0 && sPowerArrayMap.size() == 0) {
+                readPowerValuesFromXml(context, forTest);
             }
             initCpuClusters();
         }
     }
 
-    private void readPowerValuesFromXml(Context context) {
-        int id = com.android.internal.R.xml.power_profile;
+    private void readPowerValuesFromXml(Context context, boolean forTest) {
+        final int id = forTest ? com.android.internal.R.xml.power_profile_test :
+                com.android.internal.R.xml.power_profile;
         final Resources resources = context.getResources();
         XmlResourceParser parser = resources.getXml(id);
         boolean parsingArray = false;
-        ArrayList<Double> array = new ArrayList<Double>();
+        ArrayList<Double> array = new ArrayList<>();
         String arrayName = null;
 
         try {
@@ -237,7 +262,7 @@ public class PowerProfile {
 
                 if (parsingArray && !element.equals(TAG_ARRAYITEM)) {
                     // Finish array
-                    sPowerMap.put(arrayName, array.toArray(new Double[array.size()]));
+                    sPowerArrayMap.put(arrayName, array.toArray(new Double[array.size()]));
                     parsingArray = false;
                 }
                 if (element.equals(TAG_ARRAY)) {
@@ -255,7 +280,7 @@ public class PowerProfile {
                         } catch (NumberFormatException nfe) {
                         }
                         if (element.equals(TAG_ITEM)) {
-                            sPowerMap.put(name, value);
+                            sPowerItemMap.put(name, value);
                         } else if (parsingArray) {
                             array.add(value);
                         }
@@ -263,7 +288,7 @@ public class PowerProfile {
                 }
             }
             if (parsingArray) {
-                sPowerMap.put(arrayName, array.toArray(new Double[array.size()]));
+                sPowerArrayMap.put(arrayName, array.toArray(new Double[array.size()]));
             }
         } catch (XmlPullParserException e) {
             throw new RuntimeException(e);
@@ -279,10 +304,6 @@ public class PowerProfile {
                 com.android.internal.R.integer.config_bluetooth_rx_cur_ma,
                 com.android.internal.R.integer.config_bluetooth_tx_cur_ma,
                 com.android.internal.R.integer.config_bluetooth_operating_voltage_mv,
-                com.android.internal.R.integer.config_wifi_idle_receive_cur_ma,
-                com.android.internal.R.integer.config_wifi_active_rx_cur_ma,
-                com.android.internal.R.integer.config_wifi_tx_cur_ma,
-                com.android.internal.R.integer.config_wifi_operating_voltage_mv,
         };
 
         String[] configResIdKeys = new String[]{
@@ -290,62 +311,62 @@ public class PowerProfile {
                 POWER_BLUETOOTH_CONTROLLER_RX,
                 POWER_BLUETOOTH_CONTROLLER_TX,
                 POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE,
-                POWER_WIFI_CONTROLLER_IDLE,
-                POWER_WIFI_CONTROLLER_RX,
-                POWER_WIFI_CONTROLLER_TX,
-                POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE,
         };
 
         for (int i = 0; i < configResIds.length; i++) {
             String key = configResIdKeys[i];
             // if we already have some of these parameters in power_profile.xml, ignore the
             // value in config.xml
-            if ((sPowerMap.containsKey(key) && (Double) sPowerMap.get(key) > 0)) {
+            if ((sPowerItemMap.containsKey(key) && sPowerItemMap.get(key) > 0)) {
                 continue;
             }
             int value = resources.getInteger(configResIds[i]);
             if (value > 0) {
-                sPowerMap.put(key, (double) value);
+                sPowerItemMap.put(key, (double) value);
             }
         }
     }
 
     private CpuClusterKey[] mCpuClusters;
 
-    private static final String POWER_CPU_CLUSTER_CORE_COUNT = "cpu.clusters.cores";
-    private static final String POWER_CPU_CLUSTER_SPEED_PREFIX = "cpu.speeds.cluster";
-    private static final String POWER_CPU_CLUSTER_ACTIVE_PREFIX = "cpu.active.cluster";
+    private static final String CPU_PER_CLUSTER_CORE_COUNT = "cpu.clusters.cores";
+    private static final String CPU_CLUSTER_POWER_COUNT = "cpu.cluster_power.cluster";
+    private static final String CPU_CORE_SPEED_PREFIX = "cpu.core_speeds.cluster";
+    private static final String CPU_CORE_POWER_PREFIX = "cpu.core_power.cluster";
 
-    @SuppressWarnings("deprecation")
     private void initCpuClusters() {
-        // Figure out how many CPU clusters we're dealing with
-        final Object obj = sPowerMap.get(POWER_CPU_CLUSTER_CORE_COUNT);
-        if (obj == null || !(obj instanceof Double[])) {
+        if (sPowerArrayMap.containsKey(CPU_PER_CLUSTER_CORE_COUNT)) {
+            final Double[] data = sPowerArrayMap.get(CPU_PER_CLUSTER_CORE_COUNT);
+            mCpuClusters = new CpuClusterKey[data.length];
+            for (int cluster = 0; cluster < data.length; cluster++) {
+                int numCpusInCluster = (int) Math.round(data[cluster]);
+                mCpuClusters[cluster] = new CpuClusterKey(
+                        CPU_CORE_SPEED_PREFIX + cluster, CPU_CLUSTER_POWER_COUNT + cluster,
+                        CPU_CORE_POWER_PREFIX + cluster, numCpusInCluster);
+            }
+        } else {
             // Default to single.
             mCpuClusters = new CpuClusterKey[1];
-            mCpuClusters[0] = new CpuClusterKey(POWER_CPU_SPEEDS, POWER_CPU_ACTIVE, 1);
-
-        } else {
-            final Double[] array = (Double[]) obj;
-            mCpuClusters = new CpuClusterKey[array.length];
-            for (int cluster = 0; cluster < array.length; cluster++) {
-                int numCpusInCluster = (int) Math.round(array[cluster]);
-                mCpuClusters[cluster] = new CpuClusterKey(
-                        POWER_CPU_CLUSTER_SPEED_PREFIX + cluster,
-                        POWER_CPU_CLUSTER_ACTIVE_PREFIX + cluster,
-                        numCpusInCluster);
+            int numCpus = 1;
+            if (sPowerItemMap.containsKey(CPU_PER_CLUSTER_CORE_COUNT)) {
+                numCpus = (int) Math.round(sPowerItemMap.get(CPU_PER_CLUSTER_CORE_COUNT));
             }
+            mCpuClusters[0] = new CpuClusterKey(CPU_CORE_SPEED_PREFIX + 0,
+                    CPU_CLUSTER_POWER_COUNT + 0, CPU_CORE_POWER_PREFIX + 0, numCpus);
         }
     }
 
     public static class CpuClusterKey {
-        private final String timeKey;
-        private final String powerKey;
+        private final String freqKey;
+        private final String clusterPowerKey;
+        private final String corePowerKey;
         private final int numCpus;
 
-        private CpuClusterKey(String timeKey, String powerKey, int numCpus) {
-            this.timeKey = timeKey;
-            this.powerKey = powerKey;
+        private CpuClusterKey(String freqKey, String clusterPowerKey,
+                String corePowerKey, int numCpus) {
+            this.freqKey = freqKey;
+            this.clusterPowerKey = clusterPowerKey;
+            this.corePowerKey = corePowerKey;
             this.numCpus = numCpus;
         }
     }
@@ -354,21 +375,30 @@ public class PowerProfile {
         return mCpuClusters.length;
     }
 
-    public int getNumCoresInCpuCluster(int index) {
-        return mCpuClusters[index].numCpus;
+    public int getNumCoresInCpuCluster(int cluster) {
+        return mCpuClusters[cluster].numCpus;
     }
 
-    public int getNumSpeedStepsInCpuCluster(int index) {
-        Object value = sPowerMap.get(mCpuClusters[index].timeKey);
-        if (value != null && value instanceof Double[]) {
-            return ((Double[])value).length;
+    public int getNumSpeedStepsInCpuCluster(int cluster) {
+        if (cluster < 0 || cluster >= mCpuClusters.length) {
+            return 0; // index out of bound
+        }
+        if (sPowerArrayMap.containsKey(mCpuClusters[cluster].freqKey)) {
+            return sPowerArrayMap.get(mCpuClusters[cluster].freqKey).length;
         }
         return 1; // Only one speed
     }
 
-    public double getAveragePowerForCpu(int cluster, int step) {
+    public double getAveragePowerForCpuCluster(int cluster) {
         if (cluster >= 0 && cluster < mCpuClusters.length) {
-            return getAveragePower(mCpuClusters[cluster].powerKey, step);
+            return getAveragePower(mCpuClusters[cluster].clusterPowerKey);
+        }
+        return 0;
+    }
+
+    public double getAveragePowerForCpuCore(int cluster, int step) {
+        if (cluster >= 0 && cluster < mCpuClusters.length) {
+            return getAveragePower(mCpuClusters[cluster].corePowerKey, step);
         }
         return 0;
     }
@@ -376,17 +406,14 @@ public class PowerProfile {
     /**
      * Returns the number of memory bandwidth buckets defined in power_profile.xml, or a
      * default value if the subsystem has no recorded value.
+     *
      * @return the number of memory bandwidth buckets.
      */
     public int getNumElements(String key) {
-        if (sPowerMap.containsKey(key)) {
-            Object data = sPowerMap.get(key);
-            if (data instanceof Double[]) {
-                final Double[] values = (Double[]) data;
-                return values.length;
-            } else {
-                return 1;
-            }
+        if (sPowerItemMap.containsKey(key)) {
+            return 1;
+        } else if (sPowerArrayMap.containsKey(key)) {
+            return sPowerArrayMap.get(key).length;
         }
         return 0;
     }
@@ -394,18 +421,16 @@ public class PowerProfile {
     /**
      * Returns the average current in mA consumed by the subsystem, or the given
      * default value if the subsystem has no recorded value.
-     * @param type the subsystem type
+     *
+     * @param type         the subsystem type
      * @param defaultValue the value to return if the subsystem has no recorded value.
      * @return the average current in milliAmps.
      */
     public double getAveragePowerOrDefault(String type, double defaultValue) {
-        if (sPowerMap.containsKey(type)) {
-            Object data = sPowerMap.get(type);
-            if (data instanceof Double[]) {
-                return ((Double[])data)[0];
-            } else {
-                return (Double) sPowerMap.get(type);
-            }
+        if (sPowerItemMap.containsKey(type)) {
+            return sPowerItemMap.get(type);
+        } else if (sPowerArrayMap.containsKey(type)) {
+            return sPowerArrayMap.get(type)[0];
         } else {
             return defaultValue;
         }
@@ -413,35 +438,34 @@ public class PowerProfile {
 
     /**
      * Returns the average current in mA consumed by the subsystem
+     *
      * @param type the subsystem type
      * @return the average current in milliAmps.
      */
     public double getAveragePower(String type) {
         return getAveragePowerOrDefault(type, 0);
     }
-    
+
     /**
      * Returns the average current in mA consumed by the subsystem for the given level.
-     * @param type the subsystem type
+     *
+     * @param type  the subsystem type
      * @param level the level of power at which the subsystem is running. For instance, the
-     *  signal strength of the cell network between 0 and 4 (if there are 4 bars max.)
-     *  If there is no data for multiple levels, the level is ignored.
+     *              signal strength of the cell network between 0 and 4 (if there are 4 bars max.)
+     *              If there is no data for multiple levels, the level is ignored.
      * @return the average current in milliAmps.
      */
     public double getAveragePower(String type, int level) {
-        if (sPowerMap.containsKey(type)) {
-            Object data = sPowerMap.get(type);
-            if (data instanceof Double[]) {
-                final Double[] values = (Double[]) data;
-                if (values.length > level && level >= 0) {
-                    return values[level];
-                } else if (level < 0 || values.length == 0) {
-                    return 0;
-                } else {
-                    return values[values.length - 1];
-                }
+        if (sPowerItemMap.containsKey(type)) {
+            return sPowerItemMap.get(type);
+        } else if (sPowerArrayMap.containsKey(type)) {
+            final Double[] values = sPowerArrayMap.get(type);
+            if (values.length > level && level >= 0) {
+                return values[level];
+            } else if (level < 0 || values.length == 0) {
+                return 0;
             } else {
-                return (Double) data;
+                return values[values.length - 1];
             }
         } else {
             return 0;
@@ -451,6 +475,7 @@ public class PowerProfile {
     /**
      * Returns the battery capacity, if available, in milli Amp Hours. If not available,
      * it returns zero.
+     *
      * @return the battery capacity in mAh
      */
     public double getBatteryCapacity() {

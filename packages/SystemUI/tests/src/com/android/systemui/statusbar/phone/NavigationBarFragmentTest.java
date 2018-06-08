@@ -27,6 +27,7 @@ import android.view.WindowManager;
 
 import com.android.systemui.Dependency;
 
+import com.android.systemui.OverviewProxyService;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.Divider;
@@ -61,6 +62,7 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
         mSysuiContext.putComponent(Recents.class, mock(Recents.class));
         mSysuiContext.putComponent(Divider.class, mock(Divider.class));
         injectLeakCheckedDependencies(ALL_SUPPORTED_CLASSES);
+        mDependency.injectMockDependency(OverviewProxyService.class);
         WindowManager windowManager = mock(WindowManager.class);
         Display defaultDisplay = mContext.getSystemService(WindowManager.class).getDefaultDisplay();
         when(windowManager.getDefaultDisplay()).thenReturn(

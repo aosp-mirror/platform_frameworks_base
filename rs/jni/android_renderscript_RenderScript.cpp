@@ -24,8 +24,9 @@
 #include <utils/misc.h>
 #include <inttypes.h>
 
+#include <android-base/macros.h>
 #include <androidfw/Asset.h>
-#include <androidfw/AssetManager.h>
+#include <androidfw/AssetManager2.h>
 #include <androidfw/ResourceTypes.h>
 #include <android-base/macros.h>
 
@@ -1328,7 +1329,7 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong type, 
     const void* ptr = bitmap.getPixels();
     jlong id = (jlong)(uintptr_t)rsAllocationCreateFromBitmap((RsContext)con,
                                                   (RsType)type, (RsAllocationMipmapControl)mip,
-                                                  ptr, bitmap.getSize(), usage);
+                                                  ptr, bitmap.computeByteSize(), usage);
     return id;
 }
 
@@ -1356,7 +1357,7 @@ nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong ty
     const void* ptr = bitmap.getPixels();
     jlong id = (jlong)(uintptr_t)rsAllocationCubeCreateFromBitmap((RsContext)con,
                                                       (RsType)type, (RsAllocationMipmapControl)mip,
-                                                      ptr, bitmap.getSize(), usage);
+                                                      ptr, bitmap.computeByteSize(), usage);
     return id;
 }
 
@@ -1371,7 +1372,7 @@ nAllocationCopyFromBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, j
     const void* ptr = bitmap.getPixels();
     rsAllocation2DData((RsContext)con, (RsAllocation)alloc, 0, 0,
                        0, RS_ALLOCATION_CUBEMAP_FACE_POSITIVE_X,
-                       w, h, ptr, bitmap.getSize(), 0);
+                       w, h, ptr, bitmap.computeByteSize(), 0);
 }
 
 static void
@@ -1381,7 +1382,7 @@ nAllocationCopyToBitmap(JNIEnv *_env, jobject _this, jlong con, jlong alloc, job
     GraphicsJNI::getSkBitmap(_env, jbitmap, &bitmap);
 
     void* ptr = bitmap.getPixels();
-    rsAllocationCopyToBitmap((RsContext)con, (RsAllocation)alloc, ptr, bitmap.getSize());
+    rsAllocationCopyToBitmap((RsContext)con, (RsAllocation)alloc, ptr, bitmap.computeByteSize());
     bitmap.notifyPixelsChanged();
 }
 
@@ -1664,18 +1665,22 @@ nFileA3DCreateFromAssetStream(JNIEnv *_env, jobject _this, jlong con, jlong nati
 static jlong
 nFileA3DCreateFromAsset(JNIEnv *_env, jobject _this, jlong con, jobject _assetMgr, jstring _path)
 {
-    AssetManager* mgr = assetManagerForJavaObject(_env, _assetMgr);
+    Guarded<AssetManager2>* mgr = AssetManagerForJavaObject(_env, _assetMgr);
     if (mgr == nullptr) {
         return 0;
     }
 
     AutoJavaStringToUTF8 str(_env, _path);
-    Asset* asset = mgr->open(str.c_str(), Asset::ACCESS_BUFFER);
-    if (asset == nullptr) {
-        return 0;
+    std::unique_ptr<Asset> asset;
+    {
+        ScopedLock<AssetManager2> locked_mgr(*mgr);
+        asset = locked_mgr->Open(str.c_str(), Asset::ACCESS_BUFFER);
+        if (asset == nullptr) {
+            return 0;
+        }
     }
 
-    jlong id = (jlong)(uintptr_t)rsaFileA3DCreateFromAsset((RsContext)con, asset);
+    jlong id = (jlong)(uintptr_t)rsaFileA3DCreateFromAsset((RsContext)con, asset.release());
     return id;
 }
 
@@ -1752,22 +1757,25 @@ static jlong
 nFontCreateFromAsset(JNIEnv *_env, jobject _this, jlong con, jobject _assetMgr, jstring _path,
                      jfloat fontSize, jint dpi)
 {
-    AssetManager* mgr = assetManagerForJavaObject(_env, _assetMgr);
+    Guarded<AssetManager2>* mgr = AssetManagerForJavaObject(_env, _assetMgr);
     if (mgr == nullptr) {
         return 0;
     }
 
     AutoJavaStringToUTF8 str(_env, _path);
-    Asset* asset = mgr->open(str.c_str(), Asset::ACCESS_BUFFER);
-    if (asset == nullptr) {
-        return 0;
+    std::unique_ptr<Asset> asset;
+    {
+        ScopedLock<AssetManager2> locked_mgr(*mgr);
+        asset = locked_mgr->Open(str.c_str(), Asset::ACCESS_BUFFER);
+        if (asset == nullptr) {
+            return 0;
+        }
     }
 
     jlong id = (jlong)(uintptr_t)rsFontCreateFromMemory((RsContext)con,
                                            str.c_str(), str.length(),
                                            fontSize, dpi,
                                            asset->getBuffer(false), asset->getLength());
-    delete asset;
     return id;
 }
 

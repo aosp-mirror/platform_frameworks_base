@@ -31,7 +31,25 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/widget_vertical_padding"
         android:orientation="vertical">
+        <TextView
+            android:id="@+id/logout"
+            android:layout_height="@dimen/logout_button_layout_height"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/logout_button_margin_bottom"
+            android:gravity="center"
+            android:paddingLeft="@dimen/logout_button_padding_horizontal"
+            android:paddingRight="@dimen/logout_button_padding_horizontal"
+            android:background="@drawable/logout_button_background"
+            android:fontFamily="roboto-medium"
+            android:textAllCaps="true"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="13sp"
+            android:text="@*android:string/global_action_logout" />
+
         <RelativeLayout
             android:id="@+id/keyguard_clock_container"
             android:layout_width="match_parent"
@@ -44,29 +62,25 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_centerHorizontal="true"
                 android:layout_alignParentTop="true"
+                android:letterSpacing="0.03"
                 android:textColor="?attr/wallpaperTextColor"
                 android:singleLine="true"
                 style="@style/widget_big_thin"
                 android:format12Hour="@string/keyguard_widget_12_hours_format"
-                android:format24Hour="@string/keyguard_widget_24_hours_format"
-                android:layout_marginBottom="@dimen/bottom_text_spacing_digital" />
-            <com.android.systemui.ChargingView
-                android:id="@+id/battery_doze"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@id/clock_view"
-                android:layout_alignBottom="@id/clock_view"
-                android:layout_toEndOf="@id/clock_view"
-                android:visibility="invisible"
-                android:src="@drawable/ic_aod_charging_24dp"
-                android:contentDescription="@string/accessibility_ambient_display_charging"
-            />
+                android:format24Hour="@string/keyguard_widget_24_hours_format" />
+            <View
+                android:id="@+id/clock_separator"
+                android:layout_width="@dimen/widget_separator_width"
+                android:layout_height="@dimen/widget_separator_thickness"
+                android:layout_below="@id/clock_view"
+                android:background="#f00"
+                android:layout_centerHorizontal="true" />
 
             <include layout="@layout/keyguard_status_area"
                 android:id="@+id/keyguard_status_area"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/clock_view" />
+                android:layout_below="@id/clock_separator" />
         </RelativeLayout>
 
         <TextView
@@ -83,6 +97,5 @@
             android:letterSpacing="0.05"
             android:ellipsize="marquee"
             android:singleLine="true" />
-
     </LinearLayout>
 </com.android.keyguard.KeyguardStatusView>

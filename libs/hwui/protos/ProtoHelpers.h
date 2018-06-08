@@ -35,7 +35,7 @@ void set(std::string* dest, const SkPath& src) {
     src.writeToMemory(&*dest->begin());
 }
 
-} // namespace uirenderer
-} // namespace android
+}  // namespace uirenderer
+}  // namespace android
 
-#endif // PROTOHELPERS_H
+#endif  // PROTOHELPERS_H

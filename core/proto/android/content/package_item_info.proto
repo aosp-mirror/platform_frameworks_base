@@ -1,0 +1,92 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+option java_package = "android.content.pm";
+option java_multiple_files = true;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+package android.content.pm;
+
+message PackageItemInfoProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional string name = 1;
+    optional string package_name = 2;
+    optional int32 label_res = 3;
+    optional string non_localized_label = 4;
+    optional int32 icon = 5;
+    optional int32 banner = 6;
+}
+
+// Proto of android.content.pm.ApplicationInfo which extends PackageItemInfo
+message ApplicationInfoProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional PackageItemInfoProto package = 1;
+    optional string permission = 2;
+    optional string process_name = 3;
+    optional int32 uid = 4;
+    optional int32 flags = 5;
+    optional int32 private_flags = 6;
+    optional int32 theme = 7;
+    optional string source_dir = 8;
+    optional string public_source_dir = 9;
+    repeated string split_source_dirs = 10;
+    repeated string split_public_source_dirs = 11;
+    repeated string resource_dirs = 12;
+    optional string data_dir = 13;
+    optional string class_loader_name = 14;
+    repeated string split_class_loader_names = 15;
+
+    message Version {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional bool enabled = 1;
+        optional int32 min_sdk_version = 2;
+        optional int32 target_sdk_version = 3;
+        optional int32 version_code = 4;
+        optional int32 target_sandbox_version = 5;
+    }
+    optional Version version = 16;
+
+    message Detail {
+        option (.android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional string class_name = 1;
+        optional string task_affinity = 2;
+        optional int32 requires_smallest_width_dp = 3;
+        optional int32 compatible_width_limit_dp = 4;
+        optional int32 largest_width_limit_dp = 5;
+        optional string seinfo = 6;
+        optional string seinfo_user = 7;
+        optional string device_protected_data_dir = 8;
+        optional string credential_protected_data_dir = 9;
+        repeated string shared_library_files = 10;
+        optional string manage_space_activity_name = 11;
+        optional int32 description_res = 12;
+        optional int32 ui_options = 13;
+        optional bool supports_rtl = 14;
+        oneof full_backup_content {
+            string content = 15;
+            bool is_full_backup = 16;
+        }
+        optional int32 networkSecurity_config_res = 17;
+        optional int32 category = 18;
+    }
+    optional Detail detail = 17;
+}

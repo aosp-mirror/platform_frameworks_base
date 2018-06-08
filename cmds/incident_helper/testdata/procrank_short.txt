@@ -1,0 +1,7 @@
+  PID       Vss      Rss      Pss      Uss    cmdline
+ 1119  2607640K  339564K  180278K  114216K    system_server
+  649    11016K    1448K      98K      48K    /vendor/bin/qseecomd
+                           ------   ------    ------
+                          1201993K  935300K   TOTAL
+
+RAM: 3843972K total, 281424K free, 116764K buffers, 1777452K cached, 1136K shmem, 217916K slab

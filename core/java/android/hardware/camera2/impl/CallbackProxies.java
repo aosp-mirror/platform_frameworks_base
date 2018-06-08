@@ -15,15 +15,16 @@
  */
 package android.hardware.camera2.impl;
 
+import android.os.Binder;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
-import android.hardware.camera2.dispatch.Dispatchable;
-import android.hardware.camera2.dispatch.MethodNameInvoker;
 import android.view.Surface;
+
+import java.util.concurrent.Executor;
 
 import static com.android.internal.util.Preconditions.*;
 
@@ -34,164 +35,86 @@ import static com.android.internal.util.Preconditions.*;
  * to use our own proxy mechanism.</p>
  */
 public class CallbackProxies {
-
-    // TODO: replace with codegen
-
-    public static class DeviceStateCallbackProxy extends CameraDeviceImpl.StateCallbackKK {
-        private final MethodNameInvoker<CameraDeviceImpl.StateCallbackKK> mProxy;
-
-        public DeviceStateCallbackProxy(
-                Dispatchable<CameraDeviceImpl.StateCallbackKK> dispatchTarget) {
-            dispatchTarget = checkNotNull(dispatchTarget, "dispatchTarget must not be null");
-            mProxy = new MethodNameInvoker<>(dispatchTarget, CameraDeviceImpl.StateCallbackKK.class);
-        }
-
-        @Override
-        public void onOpened(CameraDevice camera) {
-            mProxy.invoke("onOpened", camera);
-        }
-
-        @Override
-        public void onDisconnected(CameraDevice camera) {
-            mProxy.invoke("onDisconnected", camera);
-        }
-
-        @Override
-        public void onError(CameraDevice camera, int error) {
-            mProxy.invoke("onError", camera, error);
-        }
-
-        @Override
-        public void onUnconfigured(CameraDevice camera) {
-            mProxy.invoke("onUnconfigured", camera);
-        }
-
-        @Override
-        public void onActive(CameraDevice camera) {
-            mProxy.invoke("onActive", camera);
-        }
-
-        @Override
-        public void onBusy(CameraDevice camera) {
-            mProxy.invoke("onBusy", camera);
-        }
-
-        @Override
-        public void onClosed(CameraDevice camera) {
-            mProxy.invoke("onClosed", camera);
-        }
-
-        @Override
-        public void onIdle(CameraDevice camera) {
-            mProxy.invoke("onIdle", camera);
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    public static class DeviceCaptureCallbackProxy implements CameraDeviceImpl.CaptureCallback {
-        private final MethodNameInvoker<CameraDeviceImpl.CaptureCallback> mProxy;
-
-        public DeviceCaptureCallbackProxy(
-                Dispatchable<CameraDeviceImpl.CaptureCallback> dispatchTarget) {
-            dispatchTarget = checkNotNull(dispatchTarget, "dispatchTarget must not be null");
-            mProxy = new MethodNameInvoker<>(dispatchTarget, CameraDeviceImpl.CaptureCallback.class);
-        }
-
-        @Override
-        public void onCaptureStarted(CameraDevice camera,
-                CaptureRequest request, long timestamp, long frameNumber) {
-            mProxy.invoke("onCaptureStarted", camera, request, timestamp, frameNumber);
-        }
-
-        @Override
-        public void onCapturePartial(CameraDevice camera,
-                CaptureRequest request, CaptureResult result) {
-            mProxy.invoke("onCapturePartial", camera, request, result);
-        }
-
-        @Override
-        public void onCaptureProgressed(CameraDevice camera,
-                CaptureRequest request, CaptureResult partialResult) {
-            mProxy.invoke("onCaptureProgressed", camera, request, partialResult);
-        }
-
-        @Override
-        public void onCaptureCompleted(CameraDevice camera,
-                CaptureRequest request, TotalCaptureResult result) {
-            mProxy.invoke("onCaptureCompleted", camera, request, result);
-        }
-
-        @Override
-        public void onCaptureFailed(CameraDevice camera,
-                CaptureRequest request, CaptureFailure failure) {
-            mProxy.invoke("onCaptureFailed", camera, request, failure);
-        }
-
-        @Override
-        public void onCaptureSequenceCompleted(CameraDevice camera,
-                int sequenceId, long frameNumber) {
-            mProxy.invoke("onCaptureSequenceCompleted", camera, sequenceId, frameNumber);
-        }
-
-        @Override
-        public void onCaptureSequenceAborted(CameraDevice camera,
-                int sequenceId) {
-            mProxy.invoke("onCaptureSequenceAborted", camera, sequenceId);
-        }
-
-        @Override
-        public void onCaptureBufferLost(CameraDevice camera,
-                CaptureRequest request, Surface target, long frameNumber) {
-            mProxy.invoke("onCaptureBufferLost", camera, request, target, frameNumber);
-        }
-
-    }
-
     public static class SessionStateCallbackProxy
             extends CameraCaptureSession.StateCallback {
-        private final MethodNameInvoker<CameraCaptureSession.StateCallback> mProxy;
+        private final Executor mExecutor;
+        private final CameraCaptureSession.StateCallback mCallback;
 
-        public SessionStateCallbackProxy(
-                Dispatchable<CameraCaptureSession.StateCallback> dispatchTarget) {
-            dispatchTarget = checkNotNull(dispatchTarget, "dispatchTarget must not be null");
-            mProxy = new MethodNameInvoker<>(dispatchTarget,
-                    CameraCaptureSession.StateCallback.class);
+        public SessionStateCallbackProxy(Executor executor,
+                CameraCaptureSession.StateCallback callback) {
+            mExecutor = checkNotNull(executor, "executor must not be null");
+            mCallback = checkNotNull(callback, "callback must not be null");
         }
 
         @Override
         public void onConfigured(CameraCaptureSession session) {
-            mProxy.invoke("onConfigured", session);
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onConfigured(session));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
 
 
         @Override
         public void onConfigureFailed(CameraCaptureSession session) {
-            mProxy.invoke("onConfigureFailed", session);
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onConfigureFailed(session));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
 
         @Override
         public void onReady(CameraCaptureSession session) {
-            mProxy.invoke("onReady", session);
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onReady(session));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
 
         @Override
         public void onActive(CameraCaptureSession session) {
-            mProxy.invoke("onActive", session);
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onActive(session));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
 
         @Override
         public void onCaptureQueueEmpty(CameraCaptureSession session) {
-            mProxy.invoke("onCaptureQueueEmpty", session);
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onCaptureQueueEmpty(session));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
 
         @Override
         public void onClosed(CameraCaptureSession session) {
-            mProxy.invoke("onClosed", session);
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onClosed(session));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
 
         @Override
         public void onSurfacePrepared(CameraCaptureSession session, Surface surface) {
-            mProxy.invoke("onSurfacePrepared", session, surface);
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(() -> mCallback.onSurfacePrepared(session, surface));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
 
     }

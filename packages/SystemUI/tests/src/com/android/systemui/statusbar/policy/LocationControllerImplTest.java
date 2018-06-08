@@ -29,12 +29,14 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
+@Ignore
 public class LocationControllerImplTest extends SysuiTestCase {
 
     private LocationControllerImpl mLocationController;

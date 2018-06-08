@@ -29,8 +29,8 @@ import java.io.UnsupportedEncodingException;
  * Class to write to a protobuf stream.
  *
  * Each write method takes an ID code from the protoc generated classes
- * and the value to write.  To make a nested object, call startObject
- * and then endObject when you are done.
+ * and the value to write.  To make a nested object, call #start
+ * and then #end when you are done.
  *
  * The ID codes have type information embedded into them, so if you call
  * the incorrect function you will get an IllegalArgumentException.
@@ -60,16 +60,16 @@ import java.io.UnsupportedEncodingException;
  * Message objects. We need to find another way.
  *
  * So what we do here is to let the calling code write the data into a
- * byte[] (actually a collection of them wrapped in the EncodedBuffer) class,
+ * byte[] (actually a collection of them wrapped in the EncodedBuffer class),
  * but not do the varint encoding of the sub-message sizes.  Then, we do a
  * recursive traversal of the buffer itself, calculating the sizes (which are
  * then knowable, although still not the actual sizes in the buffer because of
  * possible further nesting).  Then we do a third pass, compacting the
  * buffer and varint encoding the sizes.
  *
- * This gets us a relatively small number number of fixed-size allocations,
+ * This gets us a relatively small number of fixed-size allocations,
  * which is less likely to cause memory fragmentation or churn the GC, and
- * the same number of data copies as would have gotten with setting it
+ * the same number of data copies as we would have gotten with setting it
  * field-by-field in generated code, and no code bloat from generated code.
  * The final data copy is also done with System.arraycopy, which will be
  * more efficient, in general, than doing the individual fields twice (as in
@@ -77,26 +77,26 @@ import java.io.UnsupportedEncodingException;
  *
  * To accomplish the multiple passes, whenever we write a
  * WIRE_TYPE_LENGTH_DELIMITED field, we write the size occupied in our
- * buffer as a fixed 32 bit int (called childRawSize), not variable length
+ * buffer as a fixed 32 bit int (called childRawSize), not a variable length
  * one. We reserve another 32 bit slot for the computed size (called
  * childEncodedSize).  If we know the size up front, as we do for strings
  * and byte[], then we also put that into childEncodedSize, if we don't, we
- * write the negative of childRawSize, as a sentiel that we need to
+ * write the negative of childRawSize, as a sentinel that we need to
  * compute it during the second pass and recursively compact it during the
  * third pass.
  *
- * Unsgigned size varints can be up to five bytes long, but we reserve eight
+ * Unsigned size varints can be up to five bytes long, but we reserve eight
  * bytes for overhead, so we know that when we compact the buffer, there
  * will always be space for the encoded varint.
  *
  * When we can figure out the size ahead of time, we do, in order
  * to save overhead with recalculating it, and with the later arraycopy.
  *
- * During the period between when the caller has called startObject, but
- * not yet called endObject, we maintain a linked list of the tokens
- * returned by startObject, stored in those 8 bytes of size storage space.
+ * During the period between when the caller has called #start, but
+ * not yet called #end, we maintain a linked list of the tokens
+ * returned by #start, stored in those 8 bytes of size storage space.
  * We use that linked list of tokens to ensure that the caller has
- * correctly matched pairs of startObject and endObject calls, and issue
+ * correctly matched pairs of #start and #end calls, and issue
  * errors if they are not matched.
  */
 @TestApi
@@ -127,42 +127,48 @@ public final class ProtoOutputStream {
 
     public static final long FIELD_TYPE_UNKNOWN = 0;
 
+    /**
+     * The types are copied from external/protobuf/src/google/protobuf/descriptor.h directly,
+     * so no extra mapping needs to be maintained in this case.
+     */
     public static final long FIELD_TYPE_DOUBLE = 1L << FIELD_TYPE_SHIFT;
     public static final long FIELD_TYPE_FLOAT = 2L << FIELD_TYPE_SHIFT;
-    public static final long FIELD_TYPE_INT32 = 3L << FIELD_TYPE_SHIFT;
-    public static final long FIELD_TYPE_INT64 = 4L << FIELD_TYPE_SHIFT;
-    public static final long FIELD_TYPE_UINT32 = 5L << FIELD_TYPE_SHIFT;
-    public static final long FIELD_TYPE_UINT64 = 6L << FIELD_TYPE_SHIFT;
-    public static final long FIELD_TYPE_SINT32 = 7L << FIELD_TYPE_SHIFT;
-    public static final long FIELD_TYPE_SINT64 = 8L << FIELD_TYPE_SHIFT;
-    public static final long FIELD_TYPE_FIXED32 = 9L << FIELD_TYPE_SHIFT;
-    public static final long FIELD_TYPE_FIXED64 = 10L << FIELD_TYPE_SHIFT;
-    public static final long FIELD_TYPE_SFIXED32 = 11L << FIELD_TYPE_SHIFT;
-    public static final long FIELD_TYPE_SFIXED64 = 12L << FIELD_TYPE_SHIFT;
-    public static final long FIELD_TYPE_BOOL = 13L << FIELD_TYPE_SHIFT;
-    public static final long FIELD_TYPE_STRING = 14L << FIELD_TYPE_SHIFT;
-    public static final long FIELD_TYPE_BYTES = 15L << FIELD_TYPE_SHIFT;
-    public static final long FIELD_TYPE_ENUM = 16L << FIELD_TYPE_SHIFT;
-    public static final long FIELD_TYPE_OBJECT = 17L << FIELD_TYPE_SHIFT;
+    public static final long FIELD_TYPE_INT64 = 3L << FIELD_TYPE_SHIFT;
+    public static final long FIELD_TYPE_UINT64 = 4L << FIELD_TYPE_SHIFT;
+    public static final long FIELD_TYPE_INT32 = 5L << FIELD_TYPE_SHIFT;
+    public static final long FIELD_TYPE_FIXED64 = 6L << FIELD_TYPE_SHIFT;
+    public static final long FIELD_TYPE_FIXED32 = 7L << FIELD_TYPE_SHIFT;
+    public static final long FIELD_TYPE_BOOL = 8L << FIELD_TYPE_SHIFT;
+    public static final long FIELD_TYPE_STRING = 9L << FIELD_TYPE_SHIFT;
+//  public static final long FIELD_TYPE_GROUP = 10L << FIELD_TYPE_SHIFT; // Deprecated.
+    public static final long FIELD_TYPE_MESSAGE = 11L << FIELD_TYPE_SHIFT;
+    public static final long FIELD_TYPE_BYTES = 12L << FIELD_TYPE_SHIFT;
+    public static final long FIELD_TYPE_UINT32 = 13L << FIELD_TYPE_SHIFT;
+    public static final long FIELD_TYPE_ENUM = 14L << FIELD_TYPE_SHIFT;
+    public static final long FIELD_TYPE_SFIXED32 = 15L << FIELD_TYPE_SHIFT;
+    public static final long FIELD_TYPE_SFIXED64 = 16L << FIELD_TYPE_SHIFT;
+    public static final long FIELD_TYPE_SINT32 = 17L << FIELD_TYPE_SHIFT;
+    public static final long FIELD_TYPE_SINT64 = 18L << FIELD_TYPE_SHIFT;
 
     private static final String[] FIELD_TYPE_NAMES = new String[] {
         "Double",
         "Float",
-        "Int32",
         "Int64",
-        "UInt32",
         "UInt64",
-        "SInt32",
-        "SInt64",
-        "Fixed32",
+        "Int32",
         "Fixed64",
-        "SFixed32",
-        "SFixed64",
+        "Fixed32",
         "Bool",
         "String",
+        "Group",  // This field is deprecated but reserved here for indexing.
+        "Message",
         "Bytes",
+        "UInt32",
         "Enum",
-        "Object",
+        "SFixed32",
+        "SFixed64",
+        "SInt32",
+        "SInt64",
     };
 
     //
@@ -867,21 +873,21 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = (int)fieldId;
 
-        switch ((int)((fieldId & (FIELD_TYPE_MASK | FIELD_COUNT_MASK)) >> FIELD_TYPE_SHIFT)) {
+        switch ((int) ((fieldId & (FIELD_TYPE_MASK | FIELD_COUNT_MASK)) >> FIELD_TYPE_SHIFT)) {
             // bytes
-            case (int)((FIELD_TYPE_BYTES | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+            case (int) ((FIELD_TYPE_BYTES | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
                 writeBytesImpl(id, val);
                 break;
-            case (int)((FIELD_TYPE_BYTES | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
-            case (int)((FIELD_TYPE_BYTES | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+            case (int) ((FIELD_TYPE_BYTES | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int) ((FIELD_TYPE_BYTES | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
                 writeRepeatedBytesImpl(id, val);
                 break;
             // Object
-            case (int)((FIELD_TYPE_OBJECT | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
+            case (int) ((FIELD_TYPE_MESSAGE | FIELD_COUNT_SINGLE) >> FIELD_TYPE_SHIFT):
                 writeObjectImpl(id, val);
                 break;
-            case (int)((FIELD_TYPE_OBJECT | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
-            case (int)((FIELD_TYPE_OBJECT | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
+            case (int) ((FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED) >> FIELD_TYPE_SHIFT):
+            case (int) ((FIELD_TYPE_MESSAGE | FIELD_COUNT_PACKED) >> FIELD_TYPE_SHIFT):
                 writeRepeatedObjectImpl(id, val);
                 break;
             // nothing else allowed
@@ -899,7 +905,7 @@ public final class ProtoOutputStream {
         assertNotCompacted();
         final int id = (int)fieldId;
 
-        if ((fieldId & FIELD_TYPE_MASK) == FIELD_TYPE_OBJECT) {
+        if ((fieldId & FIELD_TYPE_MASK) == FIELD_TYPE_MESSAGE) {
             final long count = fieldId & FIELD_COUNT_MASK;
             if (count == FIELD_COUNT_SINGLE) {
                 return startObjectImpl(id, false);
@@ -2091,7 +2097,7 @@ public final class ProtoOutputStream {
     @Deprecated
     public long startObject(long fieldId) {
         assertNotCompacted();
-        final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_OBJECT);
+        final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_MESSAGE);
 
         return startObjectImpl(id, false);
     }
@@ -2119,7 +2125,7 @@ public final class ProtoOutputStream {
     @Deprecated
     public long startRepeatedObject(long fieldId) {
         assertNotCompacted();
-        final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_OBJECT);
+        final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_MESSAGE);
 
         return startObjectImpl(id, true);
     }
@@ -2217,7 +2223,7 @@ public final class ProtoOutputStream {
     @Deprecated
     public void writeObject(long fieldId, byte[] value) {
         assertNotCompacted();
-        final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_OBJECT);
+        final int id = checkFieldId(fieldId, FIELD_COUNT_SINGLE | FIELD_TYPE_MESSAGE);
 
         writeObjectImpl(id, value);
     }
@@ -2237,7 +2243,7 @@ public final class ProtoOutputStream {
     @Deprecated
     public void writeRepeatedObject(long fieldId, byte[] value) {
         assertNotCompacted();
-        final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_OBJECT);
+        final int id = checkFieldId(fieldId, FIELD_COUNT_REPEATED | FIELD_TYPE_MESSAGE);
 
         writeRepeatedObjectImpl(id, value);
     }
@@ -2296,7 +2302,7 @@ public final class ProtoOutputStream {
             final String typeString = getFieldTypeString(fieldType);
             if (typeString != null && countString != null) {
                 final StringBuilder sb = new StringBuilder();
-                if (expectedType == FIELD_TYPE_OBJECT) {
+                if (expectedType == FIELD_TYPE_MESSAGE) {
                     sb.append("start");
                 } else {
                     sb.append("write");
@@ -2306,7 +2312,7 @@ public final class ProtoOutputStream {
                 sb.append(" called for field ");
                 sb.append((int)fieldId);
                 sb.append(" which should be used with ");
-                if (fieldType == FIELD_TYPE_OBJECT) {
+                if (fieldType == FIELD_TYPE_MESSAGE) {
                     sb.append("start");
                 } else {
                     sb.append("write");
@@ -2321,7 +2327,7 @@ public final class ProtoOutputStream {
                 throw new IllegalArgumentException(sb.toString());
             } else {
                 final StringBuilder sb = new StringBuilder();
-                if (expectedType == FIELD_TYPE_OBJECT) {
+                if (expectedType == FIELD_TYPE_MESSAGE) {
                     sb.append("start");
                 } else {
                     sb.append("write");
@@ -2375,6 +2381,9 @@ public final class ProtoOutputStream {
         if (countString == null) {
             countString = "fieldCount=" + fieldCount;
         }
+        if (countString.length() > 0) {
+            countString += " ";
+        }
 
         final long fieldType = fieldId & FIELD_TYPE_MASK;
         String typeString = getFieldTypeString(fieldType);
@@ -2382,7 +2391,7 @@ public final class ProtoOutputStream {
             typeString = "fieldType=" + fieldType;
         }
 
-        return fieldCount + " " + typeString + " tag=" + ((int)fieldId)
+        return countString + typeString + " tag=" + ((int) fieldId)
                 + " fieldId=0x" + Long.toHexString(fieldId);
     }
 

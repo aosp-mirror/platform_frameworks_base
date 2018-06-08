@@ -1,9 +1,13 @@
 #include <string>
+#include <vector>
 
 namespace android {
-namespace javastream_proto {
+namespace stream_proto {
 
 using namespace std;
+
+// Indent
+const string INDENT = "    ";
 
 /**
  * Capitalizes the string, removes underscores and makes the next letter
@@ -22,11 +26,20 @@ string make_constant_name(const string& str);
 string file_base_name(const string& str);
 
 /**
- * Replace all occurances of 'replace' with 'with'.
+ * Replaces all occurances of 'replace' with 'with'.
  */
 string replace_string(const string& str, const char replace, const char with);
 
+/**
+ * Splits a string to parts by delimiter.
+ */
+vector<string> split(const string& str, const char delimiter);
 
-} // namespace javastream_proto
+/**
+ * Returns the rest of str if it has prefix, otherwise return all.
+ */
+string stripPrefix(const string& str, const string& prefix);
+
+} // namespace stream_proto
 } // namespace android
 

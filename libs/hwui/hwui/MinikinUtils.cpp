@@ -20,60 +20,69 @@
 
 #include <log/log.h>
 
+#include <minikin/MeasuredText.h>
 #include "Paint.h"
 #include "SkPathMeasure.h"
 #include "Typeface.h"
 
 namespace android {
 
-minikin::FontStyle MinikinUtils::prepareMinikinPaint(minikin::MinikinPaint* minikinPaint,
-        const Paint* paint, Typeface* typeface) {
+minikin::MinikinPaint MinikinUtils::prepareMinikinPaint(const Paint* paint,
+                                                        const Typeface* typeface) {
     const Typeface* resolvedFace = Typeface::resolveDefault(typeface);
-    minikin::FontStyle resolved = resolvedFace->fStyle;
 
-    /* Prepare minikin FontStyle */
-    minikin::FontVariant minikinVariant = (paint->getFontVariant() == minikin::VARIANT_ELEGANT) ?
-            minikin::VARIANT_ELEGANT : minikin::VARIANT_COMPACT;
-    const uint32_t langListId = paint->getMinikinLangListId();
-    minikin::FontStyle minikinStyle(langListId, minikinVariant, resolved.getWeight(),
-            resolved.getItalic());
-
+    minikin::MinikinPaint minikinPaint(resolvedFace->fFontCollection);
     /* Prepare minikin Paint */
-    // Note: it would be nice to handle fractional size values (it would improve smooth zoom
-    // behavior), but historically size has been treated as an int.
-    // TODO: explore whether to enable fractional sizes, possibly when linear text flag is set.
-    minikinPaint->size = (int)paint->getTextSize();
-    minikinPaint->scaleX = paint->getTextScaleX();
-    minikinPaint->skewX = paint->getTextSkewX();
-    minikinPaint->letterSpacing = paint->getLetterSpacing();
-    minikinPaint->wordSpacing = paint->getWordSpacing();
-    minikinPaint->paintFlags = MinikinFontSkia::packPaintFlags(paint);
-    minikinPaint->fontFeatureSettings = paint->getFontFeatureSettings();
-    minikinPaint->hyphenEdit = minikin::HyphenEdit(paint->getHyphenEdit());
-    return minikinStyle;
+    minikinPaint.size =
+            paint->isLinearText() ? paint->getTextSize() : static_cast<int>(paint->getTextSize());
+    minikinPaint.scaleX = paint->getTextScaleX();
+    minikinPaint.skewX = paint->getTextSkewX();
+    minikinPaint.letterSpacing = paint->getLetterSpacing();
+    minikinPaint.wordSpacing = paint->getWordSpacing();
+    minikinPaint.paintFlags = MinikinFontSkia::packPaintFlags(paint);
+    minikinPaint.localeListId = paint->getMinikinLocaleListId();
+    minikinPaint.familyVariant = paint->getFamilyVariant();
+    minikinPaint.fontStyle = resolvedFace->fStyle;
+    minikinPaint.fontFeatureSettings = paint->getFontFeatureSettings();
+    return minikinPaint;
 }
 
-minikin::Layout MinikinUtils::doLayout(const Paint* paint, int bidiFlags,
-        Typeface* typeface, const uint16_t* buf, size_t start, size_t count,
-        size_t bufSize) {
-    minikin::MinikinPaint minikinPaint;
-    minikin::FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, paint, typeface);
+minikin::Layout MinikinUtils::doLayout(const Paint* paint, minikin::Bidi bidiFlags,
+                                       const Typeface* typeface, const uint16_t* buf, size_t start,
+                                       size_t count, size_t bufSize, minikin::MeasuredText* mt) {
+    minikin::MinikinPaint minikinPaint = prepareMinikinPaint(paint, typeface);
     minikin::Layout layout;
-    layout.doLayout(buf, start, count, bufSize, bidiFlags, minikinStyle, minikinPaint,
-            Typeface::resolveDefault(typeface)->fFontCollection);
+
+    const minikin::U16StringPiece textBuf(buf, bufSize);
+    const minikin::Range range(start, start + count);
+    const minikin::HyphenEdit hyphenEdit = static_cast<minikin::HyphenEdit>(paint->getHyphenEdit());
+    const minikin::StartHyphenEdit startHyphen = minikin::startHyphenEdit(hyphenEdit);
+    const minikin::EndHyphenEdit endHyphen = minikin::endHyphenEdit(hyphenEdit);
+
+    if (mt == nullptr) {
+        layout.doLayout(textBuf,range, bidiFlags, minikinPaint, startHyphen, endHyphen);
+    } else {
+        mt->buildLayout(textBuf, range, minikinPaint, bidiFlags, startHyphen, endHyphen, &layout);
+    }
     return layout;
 }
 
-float MinikinUtils::measureText(const Paint* paint, int bidiFlags, Typeface* typeface,
-        const uint16_t* buf, size_t start, size_t count, size_t bufSize, float *advances) {
-    minikin::MinikinPaint minikinPaint;
-    minikin::FontStyle minikinStyle = prepareMinikinPaint(&minikinPaint, paint, typeface);
-    Typeface* resolvedTypeface = Typeface::resolveDefault(typeface);
-    return minikin::Layout::measureText(buf, start, count, bufSize, bidiFlags, minikinStyle,
-            minikinPaint, resolvedTypeface->fFontCollection, advances);
+float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
+                                const Typeface* typeface, const uint16_t* buf, size_t start,
+                                size_t count, size_t bufSize, float* advances) {
+    minikin::MinikinPaint minikinPaint = prepareMinikinPaint(paint, typeface);
+    const minikin::U16StringPiece textBuf(buf, bufSize);
+    const minikin::Range range(start, start + count);
+    const minikin::HyphenEdit hyphenEdit = static_cast<minikin::HyphenEdit>(paint->getHyphenEdit());
+    const minikin::StartHyphenEdit startHyphen = minikin::startHyphenEdit(hyphenEdit);
+    const minikin::EndHyphenEdit endHyphen = minikin::endHyphenEdit(hyphenEdit);
+
+    return minikin::Layout::measureText(textBuf, range, bidiFlags, minikinPaint, startHyphen,
+                                        endHyphen, advances, nullptr /* extent */,
+                                        nullptr /* layout pieces */);
 }
 
-bool MinikinUtils::hasVariationSelector(Typeface* typeface, uint32_t codepoint, uint32_t vs) {
+bool MinikinUtils::hasVariationSelector(const Typeface* typeface, uint32_t codepoint, uint32_t vs) {
     const Typeface* resolvedFace = Typeface::resolveDefault(typeface);
     return resolvedFace->fFontCollection->hasVariationSelector(codepoint, vs);
 }
@@ -93,7 +102,7 @@ float MinikinUtils::xOffsetForTextAlign(Paint* paint, const minikin::Layout& lay
 }
 
 float MinikinUtils::hOffsetForTextAlign(Paint* paint, const minikin::Layout& layout,
-        const SkPath& path) {
+                                        const SkPath& path) {
     float align = 0;
     switch (paint->getTextAlign()) {
         case Paint::kCenter_Align:
@@ -108,5 +117,4 @@ float MinikinUtils::hOffsetForTextAlign(Paint* paint, const minikin::Layout& lay
     SkPathMeasure measure(path, false);
     return align * (layout.getAdvance() - measure.getLength());
 }
-
-}
+}  // namespace android

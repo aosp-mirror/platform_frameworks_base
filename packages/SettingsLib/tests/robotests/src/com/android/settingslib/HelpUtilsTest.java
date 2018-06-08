@@ -16,6 +16,13 @@
 
 package com.android.settingslib;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +34,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.provider.Settings;
 import android.view.MenuItem;
+
 import com.android.internal.R;
 
 import org.junit.Before;
@@ -37,20 +45,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link HelpUtils}.
  */
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class HelpUtilsTest {
     private static final String TEST_HELP_URL = "intent:#Intent;action=com.android.test;end";
     private static final String PACKAGE_NAME_KEY = "package-name-key";

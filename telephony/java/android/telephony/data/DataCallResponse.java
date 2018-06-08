@@ -19,7 +19,6 @@ package android.telephony.data;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.net.LinkAddress;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -34,7 +33,6 @@ import java.util.Objects;
  *
  * @hide
  */
-@SystemApi
 public final class DataCallResponse implements Parcelable {
     private final int mStatus;
     private final int mSuggestedRetryTime;

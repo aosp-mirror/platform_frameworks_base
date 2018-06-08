@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.app.Notification;
+import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -29,9 +31,11 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A class to handle notifications and their corresponding groups.
@@ -39,12 +43,14 @@ import java.util.Map;
 public class NotificationGroupManager implements OnHeadsUpChangedListener {
 
     private static final String TAG = "NotificationGroupManager";
+    private static final long HEADS_UP_TRANSFER_TIMEOUT = 300;
     private final HashMap<String, NotificationGroup> mGroupMap = new HashMap<>();
     private OnGroupChangeListener mListener;
     private int mBarState = -1;
     private HashMap<String, StatusBarNotification> mIsolatedEntries = new HashMap<>();
     private HeadsUpManager mHeadsUpManager;
     private boolean mIsUpdatingUnchangedGroup;
+    private HashMap<String, NotificationData.Entry> mPendingNotifications;
 
     public void setOnGroupChangeListener(OnGroupChangeListener listener) {
         mListener = listener;
@@ -147,6 +153,103 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
                 mListener.onGroupCreatedFromChildren(group);
             }
         }
+        cleanUpHeadsUpStatesOnAdd(group, false /* addIsPending */);
+    }
+
+    public void onPendingEntryAdded(NotificationData.Entry shadeEntry) {
+        String groupKey = getGroupKey(shadeEntry.notification);
+        NotificationGroup group = mGroupMap.get(groupKey);
+        if (group != null) {
+            cleanUpHeadsUpStatesOnAdd(group, true /* addIsPending */);
+        }
+    }
+
+    /**
+     * Clean up the heads up states when a new child was added.
+     * @param group The group where a view was added or will be added.
+     * @param addIsPending True if is the addition still pending or false has it already been added.
+     */
+    private void cleanUpHeadsUpStatesOnAdd(NotificationGroup group, boolean addIsPending) {
+        if (!addIsPending && group.hunSummaryOnNextAddition) {
+            if (!mHeadsUpManager.isHeadsUp(group.summary.key)) {
+                mHeadsUpManager.showNotification(group.summary);
+            }
+            group.hunSummaryOnNextAddition = false;
+        }
+        // Because notification groups are not delivered as a whole unit, it may happen that a
+        // group child gets added quite a bit after the summary got posted. Our guidance is, that
+        // apps should always post the group summary as well and we'll hide it for them if the child
+        // is the only child in a group. Because of this, we also have to transfer heads up to the
+        // child, otherwise the invisible summary would be heads-upped.
+        // This transfer to the child is not always correct in case the app has just posted another
+        // child in addition to the existing one, but it hasn't arrived in systemUI yet. In such
+        // a scenario we would transfer the heads up to the old child and the wrong notification
+        // would be heads-upped. In oder to avoid this, we'll recover from this issue and hun the
+        // summary again instead of the old child if it's within a certain timeout.
+        if (SystemClock.elapsedRealtime() - group.lastHeadsUpTransfer < HEADS_UP_TRANSFER_TIMEOUT) {
+            if (!onlySummaryAlerts(group.summary)) {
+                return;
+            }
+            int numChildren = group.children.size();
+            NotificationData.Entry isolatedChild = getIsolatedChild(getGroupKey(
+                    group.summary.notification));
+            int numPendingChildren = getPendingChildrenNotAlerting(group);
+            numChildren += numPendingChildren;
+            if (isolatedChild != null) {
+                numChildren++;
+            }
+            if (numChildren <= 1) {
+                return;
+            }
+            boolean releasedChild = false;
+            ArrayList<NotificationData.Entry> children = new ArrayList<>(group.children.values());
+            int size = children.size();
+            for (int i = 0; i < size; i++) {
+                NotificationData.Entry entry = children.get(i);
+                if (onlySummaryAlerts(entry) && entry.row.isHeadsUp()) {
+                    releasedChild = true;
+                    mHeadsUpManager.releaseImmediately(entry.key);
+                }
+            }
+            if (isolatedChild != null && onlySummaryAlerts(isolatedChild)
+                    && isolatedChild.row.isHeadsUp()) {
+                releasedChild = true;
+                mHeadsUpManager.releaseImmediately(isolatedChild.key);
+            }
+            if (releasedChild && !mHeadsUpManager.isHeadsUp(group.summary.key)) {
+                boolean notifyImmediately = (numChildren - numPendingChildren) > 1;
+                if (notifyImmediately) {
+                    mHeadsUpManager.showNotification(group.summary);
+                } else {
+                    group.hunSummaryOnNextAddition = true;
+                }
+                group.lastHeadsUpTransfer = 0;
+            }
+        }
+    }
+
+    private int getPendingChildrenNotAlerting(NotificationGroup group) {
+        if (mPendingNotifications == null) {
+            return 0;
+        }
+        int number = 0;
+        String groupKey = getGroupKey(group.summary.notification);
+        Collection<NotificationData.Entry> values = mPendingNotifications.values();
+        for (NotificationData.Entry entry : values) {
+            if (!isGroupChild(entry.notification)) {
+                continue;
+            }
+            if (!Objects.equals(getGroupKey(entry.notification), groupKey)) {
+                continue;
+            }
+            if (group.children.containsKey(entry.key)) {
+                continue;
+            }
+            if (onlySummaryAlerts(entry)) {
+                number++;
+            }
+        }
+        return number;
     }
 
     private void onEntryBecomingChild(NotificationData.Entry entry) {
@@ -169,7 +272,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
             if (group.suppressed) {
                 handleSuppressedSummaryHeadsUpped(group.summary);
             }
-            if (!mIsUpdatingUnchangedGroup) {
+            if (!mIsUpdatingUnchangedGroup && mListener != null) {
                 mListener.onGroupsChanged();
             }
         }
@@ -421,8 +524,16 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
                 || !entry.row.isHeadsUp()) {
             return;
         }
+
         // The parent of a suppressed group got huned, lets hun the child!
         NotificationGroup notificationGroup = mGroupMap.get(sbn.getGroupKey());
+
+        if (pendingInflationsWillAddChildren(notificationGroup)) {
+            // New children will actually be added to this group, let's not transfer the heads
+            // up
+            return;
+        }
+
         if (notificationGroup != null) {
             Iterator<NotificationData.Entry> iterator
                     = notificationGroup.children.values().iterator();
@@ -438,11 +549,43 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
                 if (mHeadsUpManager.isHeadsUp(child.key)) {
                     mHeadsUpManager.updateNotification(child, true);
                 } else {
+                    if (onlySummaryAlerts(entry)) {
+                        notificationGroup.lastHeadsUpTransfer = SystemClock.elapsedRealtime();
+                    }
                     mHeadsUpManager.showNotification(child);
                 }
             }
         }
         mHeadsUpManager.releaseImmediately(entry.key);
+    }
+
+    private boolean onlySummaryAlerts(NotificationData.Entry entry) {
+        return entry.notification.getNotification().getGroupAlertBehavior()
+                == Notification.GROUP_ALERT_SUMMARY;
+    }
+
+    /**
+     * Check if the pending inflations will add children to this group.
+     * @param group The group to check.
+     */
+    private boolean pendingInflationsWillAddChildren(NotificationGroup group) {
+        if (mPendingNotifications == null) {
+            return false;
+        }
+        Collection<NotificationData.Entry> values = mPendingNotifications.values();
+        String groupKey = getGroupKey(group.summary.notification);
+        for (NotificationData.Entry entry : values) {
+            if (!isGroupChild(entry.notification)) {
+                continue;
+            }
+            if (!Objects.equals(getGroupKey(entry.notification), groupKey)) {
+                continue;
+            }
+            if (!group.children.containsKey(entry.key)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean shouldIsolate(StatusBarNotification sbn) {
@@ -477,6 +620,10 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
         }
     }
 
+    public void setPendingEntries(HashMap<String, NotificationData.Entry> pendingNotifications) {
+        mPendingNotifications = pendingNotifications;
+    }
+
     public static class NotificationGroup {
         public final HashMap<String, NotificationData.Entry> children = new HashMap<>();
         public NotificationData.Entry summary;
@@ -485,6 +632,12 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
          * Is this notification group suppressed, i.e its summary is hidden
          */
         public boolean suppressed;
+        /**
+         * The time when the last heads transfer from group to child happened, while the summary
+         * has the flags to heads up on its own.
+         */
+        public long lastHeadsUpTransfer;
+        public boolean hunSummaryOnNextAddition;
 
         @Override
         public String toString() {

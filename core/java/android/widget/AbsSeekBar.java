@@ -863,7 +863,7 @@ public abstract class AbsSeekBar extends ProgressBar {
         }
 
         final int range = getMax() - getMin();
-        progress += scale * range;
+        progress += scale * range + getMin();
 
         setHotspot(x, y);
         setProgressInternal(Math.round(progress), true, false);

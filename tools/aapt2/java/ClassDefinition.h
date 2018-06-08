@@ -17,7 +17,6 @@
 #ifndef AAPT_JAVA_CLASSDEFINITION_H
 #define AAPT_JAVA_CLASSDEFINITION_H
 
-#include <ostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -27,6 +26,7 @@
 
 #include "Resource.h"
 #include "java/AnnotationProcessor.h"
+#include "text/Printer.h"
 #include "util/Util.h"
 
 namespace aapt {
@@ -47,11 +47,10 @@ class ClassMember {
 
   virtual const std::string& GetName() const = 0;
 
-  // Writes the class member to the out stream. Subclasses should derive this method
+  // Writes the class member to the Printer. Subclasses should derive this method
   // to write their own data. Call this base method from the subclass to write out
   // this member's comments/annotations.
-  virtual void WriteToStream(const android::StringPiece& prefix, bool final,
-                             std::ostream* out) const;
+  virtual void Print(bool final, text::Printer* printer) const;
 
  private:
   AnnotationProcessor processor_;
@@ -71,11 +70,16 @@ class PrimitiveMember : public ClassMember {
     return name_;
   }
 
-  void WriteToStream(const android::StringPiece& prefix, bool final,
-                     std::ostream* out) const override {
-    ClassMember::WriteToStream(prefix, final, out);
-    *out << prefix << "public static " << (final ? "final " : "") << "int " << name_ << "=" << val_
-         << ";";
+  void Print(bool final, text::Printer* printer) const override {
+    using std::to_string;
+
+    ClassMember::Print(final, printer);
+
+    printer->Print("public static ");
+    if (final) {
+      printer->Print("final ");
+    }
+    printer->Print("int ").Print(name_).Print("=").Print(to_string(val_)).Print(";");
   }
 
  private:
@@ -100,12 +104,14 @@ class PrimitiveMember<std::string> : public ClassMember {
     return name_;
   }
 
-  void WriteToStream(const android::StringPiece& prefix, bool final,
-                     std::ostream* out) const override {
-    ClassMember::WriteToStream(prefix, final, out);
+  void Print(bool final, text::Printer* printer) const override {
+    ClassMember::Print(final, printer);
 
-    *out << prefix << "public static " << (final ? "final " : "") << "String "
-         << name_ << "=\"" << val_ << "\";";
+    printer->Print("public static ");
+    if (final) {
+      printer->Print("final ");
+    }
+    printer->Print("String ").Print(name_).Print("=\"").Print(val_).Print("\";");
   }
 
  private:
@@ -136,25 +142,27 @@ class PrimitiveArrayMember : public ClassMember {
     return name_;
   }
 
-  void WriteToStream(const android::StringPiece& prefix, bool final,
-                     std::ostream* out) const override {
-    ClassMember::WriteToStream(prefix, final, out);
+  void Print(bool final, text::Printer* printer) const override {
+    ClassMember::Print(final, printer);
 
-    *out << prefix << "public static final int[] " << name_ << "={";
+    printer->Print("public static final int[] ").Print(name_).Print("={");
+    printer->Indent();
 
     const auto begin = elements_.begin();
     const auto end = elements_.end();
     for (auto current = begin; current != end; ++current) {
       if (std::distance(begin, current) % kAttribsPerLine == 0) {
-        *out << "\n" << prefix << kIndent << kIndent;
+        printer->Println();
       }
 
-      *out << *current;
+      printer->Print(to_string(*current));
       if (std::distance(current, end) > 1) {
-        *out << ", ";
+        printer->Print(", ");
       }
     }
-    *out << "\n" << prefix << kIndent << "};";
+    printer->Println();
+    printer->Undent();
+    printer->Print("};");
   }
 
  private:
@@ -187,8 +195,7 @@ class MethodDefinition : public ClassMember {
     return false;
   }
 
-  void WriteToStream(const android::StringPiece& prefix, bool final,
-                     std::ostream* out) const override;
+  void Print(bool final, text::Printer* printer) const override;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(MethodDefinition);
@@ -201,8 +208,8 @@ enum class ClassQualifier { kNone, kStatic };
 
 class ClassDefinition : public ClassMember {
  public:
-  static bool WriteJavaFile(const ClassDefinition* def, const android::StringPiece& package,
-                            bool final, std::ostream* out);
+  static void WriteJavaFile(const ClassDefinition* def, const android::StringPiece& package,
+                            bool final, io::OutputStream* out);
 
   ClassDefinition(const android::StringPiece& name, ClassQualifier qualifier, bool createIfEmpty)
       : name_(name.to_string()), qualifier_(qualifier), create_if_empty_(createIfEmpty) {}
@@ -220,8 +227,7 @@ class ClassDefinition : public ClassMember {
     return name_;
   }
 
-  void WriteToStream(const android::StringPiece& prefix, bool final,
-                     std::ostream* out) const override;
+  void Print(bool final, text::Printer* printer) const override;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ClassDefinition);

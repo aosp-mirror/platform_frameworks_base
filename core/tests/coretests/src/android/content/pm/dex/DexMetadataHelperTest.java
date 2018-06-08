@@ -221,10 +221,12 @@ public class DexMetadataHelperTest {
     public void testPackageSizeWithPartialPackageLite() throws IOException, PackageParserException {
         File base = copyApkToToTmpDir("install_split_base", R.raw.install_split_base);
         File dm = createDexMetadataFile("install_split_base.apk");
-        ApkLite baseApk = PackageParser.parseApkLite(base, 0);
-        PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null, null,
-                null, null);
-        Assert.assertEquals(dm.length(), DexMetadataHelper.getPackageDexMetadataSize(pkgLite));
+        try (FileInputStream is = new FileInputStream(base)) {
+            ApkLite baseApk = PackageParser.parseApkLite(is.getFD(), base.getAbsolutePath(), 0);
+            PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null, null,
+                    null, null);
+            Assert.assertEquals(dm.length(), DexMetadataHelper.getPackageDexMetadataSize(pkgLite));
+        }
 
     }
 

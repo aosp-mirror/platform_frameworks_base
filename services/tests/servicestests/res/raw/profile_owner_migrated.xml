@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<root>
+    <profile-owner package="com.another.package.name"
+       name="com.another.package.name"
+       component="com.another.package.name/whatever.random.class"
+       userRestrictionsMigrated="true"/>
+</root>

@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.ShortcutServiceInternal;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
@@ -44,6 +45,7 @@ import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
@@ -53,6 +55,7 @@ import android.service.voice.VoiceInteractionServiceInfo;
 import android.service.voice.VoiceInteractionSession;
 import android.speech.RecognitionService;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
@@ -63,6 +66,8 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.Preconditions;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
@@ -71,7 +76,6 @@ import com.android.server.soundtrigger.SoundTriggerInternal;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.TreeSet;
 
 /**
  * SystemService that publishes an IVoiceInteractionManagerService.
@@ -84,7 +88,9 @@ public class VoiceInteractionManagerService extends SystemService {
     final ContentResolver mResolver;
     final DatabaseHelper mDbHelper;
     final ActivityManagerInternal mAmInternal;
-    final TreeSet<Integer> mLoadedKeyphraseIds;
+    final UserManager mUserManager;
+    final ArraySet<Integer> mLoadedKeyphraseIds = new ArraySet<>();
+    ShortcutServiceInternal mShortcutServiceInternal;
     SoundTriggerInternal mSoundTriggerInternal;
 
     private final RemoteCallbackList<IVoiceInteractionSessionListener>
@@ -96,8 +102,10 @@ public class VoiceInteractionManagerService extends SystemService {
         mResolver = context.getContentResolver();
         mDbHelper = new DatabaseHelper(context);
         mServiceStub = new VoiceInteractionManagerServiceStub();
-        mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
-        mLoadedKeyphraseIds = new TreeSet<Integer>();
+        mAmInternal = Preconditions.checkNotNull(
+                LocalServices.getService(ActivityManagerInternal.class));
+        mUserManager = Preconditions.checkNotNull(
+                context.getSystemService(UserManager.class));
 
         PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
@@ -124,6 +132,8 @@ public class VoiceInteractionManagerService extends SystemService {
     @Override
     public void onBootPhase(int phase) {
         if (PHASE_SYSTEM_SERVICES_READY == phase) {
+            mShortcutServiceInternal = Preconditions.checkNotNull(
+                    LocalServices.getService(ShortcutServiceInternal.class));
             mSoundTriggerInternal = LocalServices.getService(SoundTriggerInternal.class);
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
             mServiceStub.systemRunning(isSafeMode());
@@ -180,6 +190,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
         private boolean mSafeMode;
         private int mCurUser;
+        private boolean mCurUserUnlocked;
         private final boolean mEnableService;
 
         VoiceInteractionManagerServiceStub() {
@@ -379,10 +390,13 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         public void switchUser(int userHandle) {
-            synchronized (this) {
-                mCurUser = userHandle;
-                switchImplementationIfNeededLocked(false);
-            }
+            FgThread.getHandler().post(() -> {
+                synchronized (this) {
+                    mCurUser = userHandle;
+                    mCurUserUnlocked = false;
+                    switchImplementationIfNeededLocked(false);
+                }
+            });
         }
 
         void switchImplementationIfNeeded(boolean force) {
@@ -409,18 +423,32 @@ public class VoiceInteractionManagerService extends SystemService {
                     }
                 }
 
+                final boolean hasComponent = serviceComponent != null && serviceInfo != null;
+
+                if (mUserManager.isUserUnlockingOrUnlocked(mCurUser)) {
+                    if (hasComponent) {
+                        mShortcutServiceInternal.setShortcutHostPackage(TAG,
+                                serviceComponent.getPackageName(), mCurUser);
+                        mAmInternal.setAllowAppSwitches(TAG,
+                                serviceInfo.applicationInfo.uid, mCurUser);
+                    } else {
+                        mShortcutServiceInternal.setShortcutHostPackage(TAG, null, mCurUser);
+                        mAmInternal.setAllowAppSwitches(TAG, -1, mCurUser);
+                    }
+                }
+
                 if (force || mImpl == null || mImpl.mUser != mCurUser
                         || !mImpl.mComponent.equals(serviceComponent)) {
                     unloadAllKeyphraseModels();
                     if (mImpl != null) {
                         mImpl.shutdownLocked();
                     }
-                    if (serviceComponent != null && serviceInfo != null) {
-                        mImpl = new VoiceInteractionManagerServiceImpl(mContext,
-                                UiThread.getHandler(), this, mCurUser, serviceComponent);
+                    if (hasComponent) {
+                        setImplLocked(new VoiceInteractionManagerServiceImpl(mContext,
+                                UiThread.getHandler(), this, mCurUser, serviceComponent));
                         mImpl.startLocked();
                     } else {
-                        mImpl = null;
+                        setImplLocked(null);
                     }
                 }
             }
@@ -953,12 +981,14 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         private synchronized void unloadAllKeyphraseModels() {
-            for (int keyphraseId : mLoadedKeyphraseIds) {
+            for (int i = 0; i < mLoadedKeyphraseIds.size(); i++) {
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    int status = mSoundTriggerInternal.unloadKeyphraseModel(keyphraseId);
+                    int status = mSoundTriggerInternal.unloadKeyphraseModel(
+                            mLoadedKeyphraseIds.valueAt(i));
                     if (status != SoundTriggerInternal.STATUS_OK) {
-                        Slog.w(TAG, "Failed to unload keyphrase " + keyphraseId + ":" + status);
+                        Slog.w(TAG, "Failed to unload keyphrase " + mLoadedKeyphraseIds.valueAt(i)
+                                + ":" + status);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(caller);
@@ -1149,6 +1179,12 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        private void setImplLocked(VoiceInteractionManagerServiceImpl impl) {
+            mImpl = impl;
+            mAmInternal.notifyActiveVoiceInteractionServiceChanged(
+                    getActiveServiceComponentName());
+        }
+
         class SettingsObserver extends ContentObserver {
             SettingsObserver(Handler handler) {
                 super(handler);
@@ -1191,7 +1227,7 @@ public class VoiceInteractionManagerService extends SystemService {
                         unloadAllKeyphraseModels();
                         if (mImpl != null) {
                             mImpl.shutdownLocked();
-                            mImpl = null;
+                            setImplLocked(null);
                         }
                         setCurInteractor(null, userHandle);
                         setCurRecognizer(null, userHandle);

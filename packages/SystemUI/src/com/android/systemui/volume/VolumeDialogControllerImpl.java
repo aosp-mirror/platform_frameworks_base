@@ -16,6 +16,8 @@
 
 package com.android.systemui.volume;
 
+import static android.media.AudioManager.RINGER_MODE_NORMAL;
+
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -26,8 +28,10 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
+import android.media.IAudioService;
 import android.media.IVolumeController;
 import android.media.VolumePolicy;
 import android.media.session.MediaController.PlaybackInfo;
@@ -38,9 +42,12 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.Condition;
+import android.service.notification.ZenModeConfig;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
@@ -49,7 +56,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
-import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.qs.tiles.DndTile;
@@ -71,10 +77,17 @@ import java.util.Objects;
 public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpable {
     private static final String TAG = Util.logTag(VolumeDialogControllerImpl.class);
 
+
+    private static final int TOUCH_FEEDBACK_TIMEOUT_MS = 1000;
     private static final int DYNAMIC_STREAM_START_INDEX = 100;
     private static final int VIBRATE_HINT_DURATION = 50;
+    private static final AudioAttributes SONIFICIATION_VIBRATION_ATTRIBUTES =
+            new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                    .build();
 
-    private static final ArrayMap<Integer, Integer> STREAMS = new ArrayMap<>();
+    static final ArrayMap<Integer, Integer> STREAMS = new ArrayMap<>();
     static {
         STREAMS.put(AudioSystem.STREAM_ALARM, R.string.stream_alarm);
         STREAMS.put(AudioSystem.STREAM_BLUETOOTH_SCO, R.string.stream_bluetooth_sco);
@@ -93,6 +106,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final W mWorker;
     private final Context mContext;
     private AudioManager mAudio;
+    private IAudioService mAudioService;
     protected StatusBar mStatusBar;
     private final NotificationManager mNoMan;
     private final SettingObserver mObserver;
@@ -104,6 +118,10 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final Vibrator mVibrator;
     private final boolean mHasVibrator;
     private boolean mShowA11yStream;
+    private boolean mShowVolumeDialog;
+    private boolean mShowSafetyWarning;
+    private long mLastToggledRingerOn;
+    private final NotificationManager mNotificationManager;
 
     private boolean mDestroyed;
     private VolumePolicy mVolumePolicy;
@@ -115,6 +133,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     public VolumeDialogControllerImpl(Context context) {
         mContext = context.getApplicationContext();
+        mNotificationManager = (NotificationManager) mContext.getSystemService(
+                Context.NOTIFICATION_SERVICE);
         Events.writeEvent(mContext, Events.EVENT_COLLECTION_STARTED);
         mWorkerThread = new HandlerThread(VolumeDialogControllerImpl.class.getSimpleName());
         mWorkerThread.start();
@@ -128,6 +148,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mReceiver.init();
         mVibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = mVibrator != null && mVibrator.hasVibrator();
+        mAudioService = IAudioService.Stub.asInterface(
+                ServiceManager.getService(Context.AUDIO_SERVICE));
         updateStatusBar();
 
         boolean accessibilityVolumeStreamActive = context.getSystemService(
@@ -167,7 +189,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     protected int getAudioManagerStreamMinVolume(int stream) {
-        return mAudio.getStreamMinVolume(stream);
+        return mAudio.getStreamMinVolumeInt(stream);
     }
 
     public void register() {
@@ -283,9 +305,29 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mWorker.obtainMessage(W.SET_ACTIVE_STREAM, stream, 0).sendToTarget();
     }
 
-    public void vibrate() {
+    public void setEnableDialogs(boolean volumeUi, boolean safetyWarning) {
+      mShowVolumeDialog = volumeUi;
+      mShowSafetyWarning = safetyWarning;
+    }
+
+    @Override
+    public void scheduleTouchFeedback() {
+        mLastToggledRingerOn = System.currentTimeMillis();
+    }
+
+    private void playTouchFeedback() {
+        if (System.currentTimeMillis() - mLastToggledRingerOn < TOUCH_FEEDBACK_TIMEOUT_MS) {
+            try {
+                mAudioService.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD);
+            } catch (RemoteException e) {
+                // ignore
+            }
+        }
+    }
+
+    public void vibrate(VibrationEffect effect) {
         if (mHasVibrator) {
-            mVibrator.vibrate(VIBRATE_HINT_DURATION);
+            mVibrator.vibrate(effect, SONIFICIATION_VIBRATION_ATTRIBUTES);
         }
     }
 
@@ -294,7 +336,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     private void onNotifyVisibleW(boolean visible) {
-        if (mDestroyed) return;
+        if (mDestroyed) return; 
         mAudio.notifyVolumeControllerVisible(mVolumeController, visible);
         if (!visible) {
             if (updateActiveStreamW(-1)) {
@@ -312,7 +354,9 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     private void onShowSafetyWarningW(int flags) {
-        mCallbacks.onShowSafetyWarning(flags);
+        if (mShowSafetyWarning) {
+            mCallbacks.onShowSafetyWarning(flags);
+        }
     }
 
     private void onAccessibilityModeChanged(Boolean showA11yStream) {
@@ -340,11 +384,15 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     private boolean shouldShowUI(int flags) {
         updateStatusBar();
-        return mStatusBar != null
-                && mStatusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_ASLEEP
-                && mStatusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP
+        // if status bar isn't null, check if phone is in AOD, else check flags
+        // since we could be using a different status bar
+        return mStatusBar != null ?
+                mStatusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_ASLEEP
+                && mStatusBar.getWakefulnessState() !=
+                        WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP
                 && mStatusBar.isDeviceInteractive()
-                && (flags & AudioManager.FLAG_SHOW_UI) != 0;
+                && (flags & AudioManager.FLAG_SHOW_UI) != 0 && mShowVolumeDialog
+                : mShowVolumeDialog && (flags & AudioManager.FLAG_SHOW_UI) != 0;
     }
 
     boolean onVolumeChangedW(int stream, int flags) {
@@ -401,7 +449,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         for (int stream : STREAMS.keySet()) {
             updateStreamLevelW(stream, getAudioManagerStreamVolume(stream));
             streamStateW(stream).levelMin = getAudioManagerStreamMinVolume(stream);
-            streamStateW(stream).levelMax = getAudioManagerStreamMaxVolume(stream);
+            streamStateW(stream).levelMax = Math.max(1, getAudioManagerStreamMaxVolume(stream));
             updateStreamMuteW(stream, mAudio.isStreamMute(stream));
             final StreamState ss = streamStateW(stream);
             ss.muteSupported = mAudio.isStreamAffectedByMute(stream);
@@ -410,6 +458,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         }
         updateRingerModeExternalW(mAudio.getRingerMode());
         updateZenModeW();
+        updateZenConfig();
         updateEffectsSuppressorW(mNoMan.getEffectsSuppressor());
         mCallbacks.onStateChanged(mState);
     }
@@ -495,6 +544,31 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         return true;
     }
 
+    private boolean updateZenConfig() {
+        final NotificationManager.Policy policy = mNotificationManager.getNotificationPolicy();
+        boolean disallowAlarms = (policy.priorityCategories & NotificationManager.Policy
+                .PRIORITY_CATEGORY_ALARMS) == 0;
+        boolean disallowMedia = (policy.priorityCategories & NotificationManager.Policy
+                .PRIORITY_CATEGORY_MEDIA) == 0;
+        boolean disallowSystem = (policy.priorityCategories & NotificationManager.Policy
+                .PRIORITY_CATEGORY_SYSTEM) == 0;
+        boolean disallowRinger = ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(policy);
+        if (mState.disallowAlarms == disallowAlarms
+                && mState.disallowMedia == disallowMedia
+                && mState.disallowRinger == disallowRinger
+                && mState.disallowSystem == disallowSystem) {
+            return false;
+        }
+        mState.disallowAlarms = disallowAlarms;
+        mState.disallowMedia = disallowMedia;
+        mState.disallowSystem = disallowSystem;
+        mState.disallowRinger = disallowRinger;
+        Events.writeEvent(mContext, Events.EVENT_ZEN_CONFIG_CHANGED, "disallowAlarms=" +
+                disallowAlarms + " disallowMedia=" + disallowMedia + " disallowSystem=" +
+                disallowSystem + " disallowRinger=" + disallowRinger);
+        return true;
+    }
+
     private boolean updateRingerModeExternalW(int rm) {
         if (rm == mState.ringerModeExternal) return false;
         mState.ringerModeExternal = rm;
@@ -506,6 +580,11 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         if (rm == mState.ringerModeInternal) return false;
         mState.ringerModeInternal = rm;
         Events.writeEvent(mContext, Events.EVENT_INTERNAL_RINGER_MODE_CHANGED, rm);
+
+        if (mState.ringerModeInternal == RINGER_MODE_NORMAL) {
+            playTouchFeedback();
+        }
+
         return true;
     }
 
@@ -655,6 +734,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 case USER_ACTIVITY: onUserActivityW(); break;
                 case SHOW_SAFETY_WARNING: onShowSafetyWarningW(msg.arg1); break;
                 case ACCESSIBILITY_MODE_CHANGED: onAccessibilityModeChanged((Boolean) msg.obj);
+
             }
         }
     }
@@ -822,6 +902,10 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             if (ZEN_MODE_URI.equals(uri)) {
                 changed = updateZenModeW();
             }
+            if (ZEN_MODE_CONFIG_URI.equals(uri)) {
+                changed |= updateZenConfig();
+            }
+
             if (changed) {
                 mCallbacks.onStateChanged(mState);
             }

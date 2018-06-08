@@ -17,6 +17,7 @@
 package com.android.systemui.qs;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -25,7 +26,7 @@ import android.widget.Space;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.plugins.qs.*;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.plugins.qs.QSTileView;
@@ -43,13 +44,14 @@ public class QuickQSPanel extends QSPanel {
 
     public static final String NUM_QUICK_TILES = "sysui_qqs_count";
 
+    private boolean mDisabledByPolicy;
     private int mMaxTiles;
     protected QSPanel mFullPanel;
 
     public QuickQSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
         if (mFooter != null) {
-            removeView((View) mFooter.getView());
+            removeView(mFooter.getView());
         }
         if (mTileLayout != null) {
             for (int i = 0; i < mRecords.size(); i++) {
@@ -121,9 +123,8 @@ public class QuickQSPanel extends QSPanel {
 
     @Override
     public void onTuningChanged(String key, String newValue) {
-        // No tunings for you.
-        if (key.equals(QS_SHOW_BRIGHTNESS)) {
-            // No Brightness for you.
+        if (QS_SHOW_BRIGHTNESS.equals(key)) {
+            // No Brightness or Tooltip for you!
             super.onTuningChanged(key, "0");
         }
     }
@@ -151,17 +152,81 @@ public class QuickQSPanel extends QSPanel {
         return Dependency.get(TunerService.class).getValue(NUM_QUICK_TILES, 6);
     }
 
+    void setDisabledByPolicy(boolean disabled) {
+        if (disabled != mDisabledByPolicy) {
+            mDisabledByPolicy = disabled;
+            setVisibility(disabled ? View.GONE : View.VISIBLE);
+        }
+    }
+
+    /**
+     * Sets the visibility of this {@link QuickQSPanel}. This method has no effect when this panel
+     * is disabled by policy through {@link #setDisabledByPolicy(boolean)}, and in this case the
+     * visibility will always be {@link View#GONE}. This method is called externally by
+     * {@link QSAnimator} only.
+     */
+    @Override
+    public void setVisibility(int visibility) {
+        if (mDisabledByPolicy) {
+            if (getVisibility() == View.GONE) {
+                return;
+            }
+            visibility = View.GONE;
+        }
+        super.setVisibility(visibility);
+    }
+
     private static class HeaderTileLayout extends LinearLayout implements QSTileLayout {
 
         protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
         private boolean mListening;
+        /** Size of the QS tile (width & height). */
+        private int mTileDimensionSize;
 
         public HeaderTileLayout(Context context) {
             super(context);
             setClipChildren(false);
             setClipToPadding(false);
-            setGravity(Gravity.CENTER_VERTICAL);
+
+            mTileDimensionSize = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.qs_quick_tile_size);
+
+            setGravity(Gravity.CENTER);
             setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        }
+
+        @Override
+        protected void onConfigurationChanged(Configuration newConfig) {
+            super.onConfigurationChanged(newConfig);
+
+            setGravity(Gravity.CENTER);
+            LayoutParams staticSpaceLayoutParams = generateSpaceLayoutParams(
+                    mContext.getResources().getDimensionPixelSize(
+                            R.dimen.qs_quick_tile_space_width));
+
+            // Update space params since they fill any open space in portrait orientation and have
+            // a static width in landscape orientation.
+            final int childViewCount = getChildCount();
+            for (int i = 0; i < childViewCount; i++) {
+                View childView = getChildAt(i);
+                if (childView instanceof Space) {
+                    childView.setLayoutParams(staticSpaceLayoutParams);
+                }
+            }
+        }
+
+        /**
+         * Returns {@link LayoutParams} based on the given {@code spaceWidth}. If the width is 0,
+         * then we're going to have the space expand to take up as much space as possible. If the
+         * width is non-zero, we want the inter-tile spacers to be fixed.
+         */
+        private LayoutParams generateSpaceLayoutParams(int spaceWidth) {
+            LayoutParams lp = new LayoutParams(spaceWidth, mTileDimensionSize);
+            if (spaceWidth == 0) {
+                lp.weight = 1;
+            }
+            lp.gravity = Gravity.CENTER;
+            return lp;
         }
 
         @Override
@@ -176,25 +241,22 @@ public class QuickQSPanel extends QSPanel {
         @Override
         public void addTile(TileRecord tile) {
             if (getChildCount() != 0) {
-                // Add a spacer.
-                addView(new Space(mContext), getChildCount(), generateSpaceParams());
+                // Add a spacer between tiles. We want static-width spaces if we're in landscape to
+                // keep the tiles close. For portrait, we stick with spaces that fill up any
+                // available space.
+                LayoutParams spaceLayoutParams = generateSpaceLayoutParams(
+                        mContext.getResources().getDimensionPixelSize(
+                                R.dimen.qs_quick_tile_space_width));
+                addView(new Space(mContext), getChildCount(), spaceLayoutParams);
             }
-            addView(tile.tileView, getChildCount(), generateLayoutParams());
+
+            addView(tile.tileView, getChildCount(), generateTileLayoutParams());
             mRecords.add(tile);
             tile.tile.setListening(this, mListening);
         }
 
-        private LayoutParams generateSpaceParams() {
-            int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
-            LayoutParams lp = new LayoutParams(0, size);
-            lp.weight = 1;
-            lp.gravity = Gravity.CENTER;
-            return lp;
-        }
-
-        private LayoutParams generateLayoutParams() {
-            int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
-            LayoutParams lp = new LayoutParams(size, size);
+        private LayoutParams generateTileLayoutParams() {
+            LayoutParams lp = new LayoutParams(mTileDimensionSize, mTileDimensionSize);
             lp.gravity = Gravity.CENTER;
             return lp;
         }
@@ -213,8 +275,8 @@ public class QuickQSPanel extends QSPanel {
         }
 
         private int getChildIndex(QSTileView tileView) {
-            final int N = getChildCount();
-            for (int i = 0; i < N; i++) {
+            final int childViewCount = getChildCount();
+            for (int i = 0; i < childViewCount; i++) {
                 if (getChildAt(i) == tileView) {
                     return i;
                 }

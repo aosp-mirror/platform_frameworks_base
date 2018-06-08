@@ -88,7 +88,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="16dp"
-        android:text="@string/accessibility_data_connection_roaming"
+        android:text="@string/data_connection_roaming"
         android:textAppearance="@style/TextAppearance.QS.DataUsage.Secondary"
         android:visibility="gone" />
 

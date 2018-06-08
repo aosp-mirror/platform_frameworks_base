@@ -16,9 +16,15 @@
 
 package android.location;
 
-import com.android.internal.location.ProviderProperties;
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.LOCATION_HARDWARE;
+import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
 import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -27,20 +33,25 @@ import android.annotation.TestApi;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
-
+import com.android.internal.location.ProviderProperties;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
-import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import java.util.Set;
 
 /**
  * This class provides access to the system location services.  These
@@ -58,6 +69,7 @@ import static android.Manifest.permission.ACCESS_FINE_LOCATION;
  * location will be obfuscated to a coarse level of accuracy.
  */
 @SystemService(Context.LOCATION_SERVICE)
+@RequiresFeature(PackageManager.FEATURE_LOCATION)
 public class LocationManager {
     private static final String TAG = "LocationManager";
 
@@ -184,6 +196,17 @@ public class LocationManager {
     public static final String MODE_CHANGED_ACTION = "android.location.MODE_CHANGED";
 
     /**
+     * Broadcast intent action when {@link android.provider.Settings.Secure#LOCATION_MODE} is
+     * about to be changed through Settings app or Quick Settings.
+     * For use with the {@link android.provider.Settings.Secure#LOCATION_MODE} API.
+     * If you're interacting with {@link #isProviderEnabled(String)}, use
+     * {@link #PROVIDERS_CHANGED_ACTION} instead.
+     *
+     * @hide
+     */
+    public static final String MODE_CHANGING_ACTION = "com.android.settings.location.MODE_CHANGING";
+
+    /**
      * Broadcast intent action indicating that the GPS has either started or
      * stopped receiving GPS fixes. An intent extra provides this state as a
      * boolean, where {@code true} means that the GPS is actively receiving fixes.
@@ -213,6 +236,62 @@ public class LocationManager {
      */
     public static final String HIGH_POWER_REQUEST_CHANGE_ACTION =
         "android.location.HIGH_POWER_REQUEST_CHANGE";
+
+    /**
+     * Broadcast intent action for Settings app to inject a footer at the bottom of location
+     * settings.
+     *
+     * <p>This broadcast is used for two things:
+     * <ol>
+     *     <li>For receivers to inject a footer with provided text. This is for use only by apps
+     *         that are included in the system image. </li>
+     *     <li>For receivers to know their footer is injected under location settings.</li>
+     * </ol>
+     *
+     * <p>To inject a footer to location settings, you must declare a broadcast receiver of
+     * {@link LocationManager#SETTINGS_FOOTER_DISPLAYED_ACTION} in the manifest as so:
+     * <pre>
+     *     &lt;receiver android:name="com.example.android.footer.MyFooterInjector"&gt;
+     *         &lt;intent-filter&gt;
+     *             &lt;action android:name="com.android.settings.location.INJECT_FOOTER" /&gt;
+     *         &lt;/intent-filter&gt;
+     *         &lt;meta-data
+     *             android:name="com.android.settings.location.FOOTER_STRING"
+     *             android:resource="@string/my_injected_footer_string" /&gt;
+     *     &lt;/receiver&gt;
+     * </pre>
+     *
+     * <p>On entering location settings, Settings app will send a
+     * {@link #SETTINGS_FOOTER_DISPLAYED_ACTION} broadcast to receivers whose footer is successfully
+     * injected. On leaving location settings, the footer becomes not visible to users. Settings app
+     * will send a {@link #SETTINGS_FOOTER_REMOVED_ACTION} broadcast to those receivers.
+     *
+     * @hide
+     */
+    public static final String SETTINGS_FOOTER_DISPLAYED_ACTION =
+            "com.android.settings.location.DISPLAYED_FOOTER";
+
+    /**
+     * Broadcast intent action when location settings footer is not visible to users.
+     *
+     * <p>See {@link #SETTINGS_FOOTER_DISPLAYED_ACTION} for more detail on how to use.
+     *
+     * @hide
+     */
+    public static final String SETTINGS_FOOTER_REMOVED_ACTION =
+            "com.android.settings.location.REMOVED_FOOTER";
+
+    /**
+     * Metadata name for {@link LocationManager#SETTINGS_FOOTER_DISPLAYED_ACTION} broadcast
+     * receivers to specify a string resource id as location settings footer text. This is for use
+     * only by apps that are included in the system image.
+     *
+     * <p>See {@link #SETTINGS_FOOTER_DISPLAYED_ACTION} for more detail on how to use.
+     *
+     * @hide
+     */
+    public static final String METADATA_SETTINGS_FOOTER_STRING =
+            "com.android.settings.location.FOOTER_STRING";
 
     // Map from LocationListeners to their associated ListenerTransport objects
     private HashMap<LocationListener,ListenerTransport> mListeners =
@@ -310,6 +389,18 @@ public class LocationManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public String[] getBackgroundThrottlingWhitelist() {
+        try {
+            return mService.getBackgroundThrottlingWhitelist();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -864,6 +955,34 @@ public class LocationManager {
         requestLocationUpdates(request, null, null, intent);
     }
 
+    /**
+     * Set the last known location with a new location.
+     *
+     * <p>A privileged client can inject a {@link Location} if it has a better estimate of what
+     * the recent location is.  This is especially useful when the device boots up and the GPS
+     * chipset is in the process of getting the first fix.  If the client has cached the location,
+     * it can inject the {@link Location}, so if an app requests for a {@link Location} from {@link
+     * #getLastKnownLocation(String)}, the location information is still useful before getting
+     * the first fix.</p>
+     *
+     * <p> Useful in products like Auto.
+     *
+     * @param newLocation newly available {@link Location} object
+     * @return true if update was successful, false if not
+     *
+     * @throws SecurityException if no suitable permission is present
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = {LOCATION_HARDWARE, ACCESS_FINE_LOCATION})
+    public boolean injectLocation(Location newLocation) {
+        try {
+            return mService.injectLocation(newLocation);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private ListenerTransport wrapListener(LocationListener listener, Looper looper) {
         if (listener == null) return null;
         synchronized (mListeners) {
@@ -1124,13 +1243,56 @@ public class LocationManager {
     }
 
     /**
+     * Returns the current enabled/disabled status of location
+     *
+     * @return true if location is enabled. false if location is disabled.
+     */
+    public boolean isLocationEnabled() {
+        return isLocationEnabledForUser(Process.myUserHandle());
+    }
+
+    /**
+     * Method for enabling or disabling location.
+     *
+     * @param enabled true to enable location. false to disable location
+     * @param userHandle the user to set
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(WRITE_SECURE_SETTINGS)
+    public void setLocationEnabledForUser(boolean enabled, UserHandle userHandle) {
+        try {
+            mService.setLocationEnabledForUser(enabled, userHandle.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the current enabled/disabled status of location
+     *
+     * @param userHandle the user to query
+     * @return true location is enabled. false if location is disabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isLocationEnabledForUser(UserHandle userHandle) {
+        try {
+            return mService.isLocationEnabledForUser(userHandle.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the current enabled/disabled status of the given provider.
      *
      * <p>If the user has enabled this provider in the Settings menu, true
      * is returned otherwise false is returned
      *
-     * <p>Callers should instead use
-     * {@link android.provider.Settings.Secure#LOCATION_MODE}
+     * <p>Callers should instead use {@link #isLocationEnabled()}
      * unless they depend on provider-specific APIs such as
      * {@link #requestLocationUpdates(String, long, float, LocationListener)}.
      *
@@ -1145,10 +1307,62 @@ public class LocationManager {
      * @throws IllegalArgumentException if provider is null
      */
     public boolean isProviderEnabled(String provider) {
+        return isProviderEnabledForUser(provider, Process.myUserHandle());
+    }
+
+    /**
+     * Returns the current enabled/disabled status of the given provider and user.
+     *
+     * <p>If the user has enabled this provider in the Settings menu, true
+     * is returned otherwise false is returned
+     *
+     * <p>Callers should instead use {@link #isLocationEnabled()}
+     * unless they depend on provider-specific APIs such as
+     * {@link #requestLocationUpdates(String, long, float, LocationListener)}.
+     *
+     * <p>
+     * Before API version {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this
+     * method would throw {@link SecurityException} if the location permissions
+     * were not sufficient to use the specified provider.
+     *
+     * @param provider the name of the provider
+     * @param userHandle the user to query
+     * @return true if the provider exists and is enabled
+     *
+     * @throws IllegalArgumentException if provider is null
+     * @hide
+     */
+    @SystemApi
+    public boolean isProviderEnabledForUser(String provider, UserHandle userHandle) {
         checkProvider(provider);
 
         try {
-            return mService.isProviderEnabled(provider);
+            return mService.isProviderEnabledForUser(provider, userHandle.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Method for enabling or disabling a single location provider.
+     *
+     * @param provider the name of the provider
+     * @param enabled true to enable the provider. false to disable the provider
+     * @param userHandle the user to set
+     * @return true if the value was set, false on database errors
+     *
+     * @throws IllegalArgumentException if provider is null
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(WRITE_SECURE_SETTINGS)
+    public boolean setProviderEnabledForUser(
+            String provider, boolean enabled, UserHandle userHandle) {
+        checkProvider(provider);
+
+        try {
+            return mService.setProviderEnabledForUser(
+                    provider, enabled, userHandle.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1958,14 +2172,33 @@ public class LocationManager {
     }
 
     /**
-     * Returns the system information of the GPS hardware.
-     * May return 0 if GPS hardware is earlier than 2016.
-     * @hide
+     * Returns the model year of the GNSS hardware and software build.
+     *
+     * <p> More details, such as build date, may be available in {@link #getGnssHardwareModelName()}.
+     *
+     * <p> May return 0 if the model year is less than 2016.
      */
-    @TestApi
     public int getGnssYearOfHardware() {
         try {
             return mService.getGnssYearOfHardware();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the Model Name (including Vendor and Hardware/Software Version) of the GNSS hardware
+     * driver.
+     *
+     * <p> No device-specific serial number or ID is returned from this API.
+     *
+     * <p> Will return null when the GNSS hardware abstraction layer does not support providing
+     * this value.
+     */
+    @Nullable
+    public String getGnssHardwareModelName() {
+        try {
+            return mService.getGnssHardwareModelName();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

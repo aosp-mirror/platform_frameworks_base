@@ -29,8 +29,7 @@ namespace uirenderer {
 class BatchBase {
 public:
     BatchBase(batchid_t batchId, BakedOpState* op, bool merging)
-            : mBatchId(batchId)
-            , mMerging(merging) {
+            : mBatchId(batchId), mMerging(merging) {
         mBounds = op->computedState.clippedBounds;
         mOps.push_back(op);
     }
@@ -52,9 +51,10 @@ public:
     const std::vector<BakedOpState*>& getOps() const { return mOps; }
 
     void dump() const {
-        ALOGD("    Batch %p, id %d, merging %d, count %d, bounds " RECT_STRING,
-                this, mBatchId, mMerging, (int) mOps.size(), RECT_ARGS(mBounds));
+        ALOGD("    Batch %p, id %d, merging %d, count %d, bounds " RECT_STRING, this, mBatchId,
+              mMerging, (int)mOps.size(), RECT_ARGS(mBounds));
     }
+
 protected:
     batchid_t mBatchId;
     Rect mBounds;
@@ -64,9 +64,7 @@ protected:
 
 class OpBatch : public BatchBase {
 public:
-    OpBatch(batchid_t batchId, BakedOpState* op)
-            : BatchBase(batchId, op, false) {
-    }
+    OpBatch(batchid_t batchId, BakedOpState* op) : BatchBase(batchId, op, false) {}
 
     void batchOp(BakedOpState* op) {
         mBounds.unionWith(op->computedState.clippedBounds);
@@ -77,16 +75,14 @@ public:
 class MergingOpBatch : public BatchBase {
 public:
     MergingOpBatch(batchid_t batchId, BakedOpState* op)
-            : BatchBase(batchId, op, true)
-            , mClipSideFlags(op->computedState.clipSideFlags) {
-    }
+            : BatchBase(batchId, op, true), mClipSideFlags(op->computedState.clipSideFlags) {}
 
     /*
      * Helper for determining if a new op can merge with a MergingDrawBatch based on their bounds
      * and clip side flags. Positive bounds delta means new bounds fit in old.
      */
     static inline bool checkSide(const int currentFlags, const int newFlags, const int side,
-            float boundsDelta) {
+                                 float boundsDelta) {
         bool currentClipExists = currentFlags & side;
         bool newClipExists = newFlags & side;
 
@@ -100,16 +96,14 @@ public:
     }
 
     static bool paintIsDefault(const SkPaint& paint) {
-        return paint.getAlpha() == 255
-                && paint.getColorFilter() == nullptr
-                && paint.getShader() == nullptr;
+        return paint.getAlpha() == 255 && paint.getColorFilter() == nullptr &&
+               paint.getShader() == nullptr;
     }
 
     static bool paintsAreEquivalent(const SkPaint& a, const SkPaint& b) {
         // Note: don't check color, since all currently mergeable ops can merge across colors
-        return a.getAlpha() == b.getAlpha()
-                && a.getColorFilter() == b.getColorFilter()
-                && a.getShader() == b.getShader();
+        return a.getAlpha() == b.getAlpha() && a.getColorFilter() == b.getColorFilter() &&
+               a.getShader() == b.getShader();
     }
 
     /*
@@ -123,8 +117,8 @@ public:
      * dropped, so we make simplifying qualifications on the ops that can merge, per op type.
      */
     bool canMergeWith(BakedOpState* op) const {
-        bool isTextBatch = getBatchId() == OpBatchType::Text
-                || getBatchId() == OpBatchType::ColorText;
+        bool isTextBatch =
+                getBatchId() == OpBatchType::Text || getBatchId() == OpBatchType::ColorText;
 
         // Overlapping other operations is only allowed for text without shadow. For other ops,
         // multiDraw isn't guaranteed to overdraw correctly
@@ -142,8 +136,9 @@ public:
         if (lhs->roundRectClipState != rhs->roundRectClipState) return false;
 
         // Local masks prevent merge, since they're potentially in different coordinate spaces
-        if (lhs->computedState.localProjectionPathMask
-                || rhs->computedState.localProjectionPathMask) return false;
+        if (lhs->computedState.localProjectionPathMask ||
+            rhs->computedState.localProjectionPathMask)
+            return false;
 
         /* Clipping compatibility check
          *
@@ -155,15 +150,18 @@ public:
         if (currentFlags != OpClipSideFlags::None || newFlags != OpClipSideFlags::None) {
             const Rect& opBounds = op->computedState.clippedBounds;
             float boundsDelta = mBounds.left - opBounds.left;
-            if (!checkSide(currentFlags, newFlags, OpClipSideFlags::Left, boundsDelta)) return false;
+            if (!checkSide(currentFlags, newFlags, OpClipSideFlags::Left, boundsDelta))
+                return false;
             boundsDelta = mBounds.top - opBounds.top;
             if (!checkSide(currentFlags, newFlags, OpClipSideFlags::Top, boundsDelta)) return false;
 
             // right and bottom delta calculation reversed to account for direction
             boundsDelta = opBounds.right - mBounds.right;
-            if (!checkSide(currentFlags, newFlags, OpClipSideFlags::Right, boundsDelta)) return false;
+            if (!checkSide(currentFlags, newFlags, OpClipSideFlags::Right, boundsDelta))
+                return false;
             boundsDelta = opBounds.bottom - mBounds.bottom;
-            if (!checkSide(currentFlags, newFlags, OpClipSideFlags::Bottom, boundsDelta)) return false;
+            if (!checkSide(currentFlags, newFlags, OpClipSideFlags::Bottom, boundsDelta))
+                return false;
         }
 
         const SkPaint* newPaint = op->op->paint;
@@ -197,8 +195,8 @@ private:
     int mClipSideFlags;
 };
 
-LayerBuilder::LayerBuilder(uint32_t width, uint32_t height,
-        const Rect& repaintRect, const BeginLayerOp* beginLayerOp, RenderNode* renderNode)
+LayerBuilder::LayerBuilder(uint32_t width, uint32_t height, const Rect& repaintRect,
+                           const BeginLayerOp* beginLayerOp, RenderNode* renderNode)
         : width(width)
         , height(height)
         , repaintRect(repaintRect)
@@ -210,7 +208,7 @@ LayerBuilder::LayerBuilder(uint32_t width, uint32_t height,
 // iterate back toward target to see if anything drawn since should overlap the new op
 // if no target, merging ops still iterate to find similar batch to insert after
 void LayerBuilder::locateInsertIndex(int batchId, const Rect& clippedBounds,
-        BatchBase** targetBatch, size_t* insertBatchIndex) const {
+                                     BatchBase** targetBatch, size_t* insertBatchIndex) const {
     for (int i = mBatches.size() - 1; i >= 0; i--) {
         BatchBase* overBatch = mBatches[i];
 
@@ -219,7 +217,7 @@ void LayerBuilder::locateInsertIndex(int batchId, const Rect& clippedBounds,
         // TODO: also consider shader shared between batch types
         if (batchId == overBatch->getBatchId()) {
             *insertBatchIndex = i + 1;
-            if (!*targetBatch) break; // found insert position, quit
+            if (!*targetBatch) break;  // found insert position, quit
         }
 
         if (overBatch->intersects(clippedBounds)) {
@@ -242,10 +240,10 @@ void LayerBuilder::onDeferOp(LinearAllocator& allocator, const BakedOpState* bak
         // and issue them together in one draw.
         flushLayerClears(allocator);
 
-        if (CC_UNLIKELY(activeUnclippedSaveLayers.empty()
-                && bakedState->computedState.opaqueOverClippedBounds
-                && bakedState->computedState.clippedBounds.contains(repaintRect)
-                && !Properties::debugOverdraw)) {
+        if (CC_UNLIKELY(activeUnclippedSaveLayers.empty() &&
+                        bakedState->computedState.opaqueOverClippedBounds &&
+                        bakedState->computedState.clippedBounds.contains(repaintRect) &&
+                        !Properties::debugOverdraw)) {
             // discard all deferred drawing ops, since new one will occlude them
             clear();
         }
@@ -258,7 +256,7 @@ void LayerBuilder::flushLayerClears(LinearAllocator& allocator) {
         // put the verts in the frame allocator, since
         //     1) SimpleRectsOps needs verts, not rects
         //     2) even if mClearRects stored verts, std::vectors will move their contents
-        Vertex* const verts = (Vertex*) allocator.create_trivial_array<Vertex>(vertCount);
+        Vertex* const verts = (Vertex*)allocator.create_trivial_array<Vertex>(vertCount);
 
         Vertex* currentVert = verts;
         Rect bounds = mClearRects[0];
@@ -269,35 +267,34 @@ void LayerBuilder::flushLayerClears(LinearAllocator& allocator) {
             Vertex::set(currentVert++, rect.left, rect.bottom);
             Vertex::set(currentVert++, rect.right, rect.bottom);
         }
-        mClearRects.clear(); // discard rects before drawing so this method isn't reentrant
+        mClearRects.clear();  // discard rects before drawing so this method isn't reentrant
 
         // One or more unclipped saveLayers have been enqueued, with deferred clears.
         // Flush all of these clears with a single draw
         SkPaint* paint = allocator.create<SkPaint>();
         paint->setBlendMode(SkBlendMode::kClear);
-        SimpleRectsOp* op = allocator.create_trivial<SimpleRectsOp>(bounds,
-                Matrix4::identity(), nullptr, paint,
-                verts, vertCount);
-        BakedOpState* bakedState = BakedOpState::directConstruct(allocator,
-                &repaintClip, bounds, *op);
+        SimpleRectsOp* op = allocator.create_trivial<SimpleRectsOp>(
+                bounds, Matrix4::identity(), nullptr, paint, verts, vertCount);
+        BakedOpState* bakedState =
+                BakedOpState::directConstruct(allocator, &repaintClip, bounds, *op);
         deferUnmergeableOp(allocator, bakedState, OpBatchType::Vertices);
     }
 }
 
-void LayerBuilder::deferUnmergeableOp(LinearAllocator& allocator,
-        BakedOpState* op, batchid_t batchId) {
+void LayerBuilder::deferUnmergeableOp(LinearAllocator& allocator, BakedOpState* op,
+                                      batchid_t batchId) {
     onDeferOp(allocator, op);
     OpBatch* targetBatch = mBatchLookup[batchId];
 
     size_t insertBatchIndex = mBatches.size();
     if (targetBatch) {
-        locateInsertIndex(batchId, op->computedState.clippedBounds,
-                (BatchBase**)(&targetBatch), &insertBatchIndex);
+        locateInsertIndex(batchId, op->computedState.clippedBounds, (BatchBase**)(&targetBatch),
+                          &insertBatchIndex);
     }
 
     if (targetBatch) {
         targetBatch->batchOp(op);
-    } else  {
+    } else {
         // new non-merging batch
         targetBatch = allocator.create<OpBatch>(batchId, op);
         mBatchLookup[batchId] = targetBatch;
@@ -305,8 +302,8 @@ void LayerBuilder::deferUnmergeableOp(LinearAllocator& allocator,
     }
 }
 
-void LayerBuilder::deferMergeableOp(LinearAllocator& allocator,
-        BakedOpState* op, batchid_t batchId, mergeid_t mergeId) {
+void LayerBuilder::deferMergeableOp(LinearAllocator& allocator, BakedOpState* op, batchid_t batchId,
+                                    mergeid_t mergeId) {
     onDeferOp(allocator, op);
     MergingOpBatch* targetBatch = nullptr;
 
@@ -320,12 +317,12 @@ void LayerBuilder::deferMergeableOp(LinearAllocator& allocator,
     }
 
     size_t insertBatchIndex = mBatches.size();
-    locateInsertIndex(batchId, op->computedState.clippedBounds,
-            (BatchBase**)(&targetBatch), &insertBatchIndex);
+    locateInsertIndex(batchId, op->computedState.clippedBounds, (BatchBase**)(&targetBatch),
+                      &insertBatchIndex);
 
     if (targetBatch) {
         targetBatch->mergeOp(op);
-    } else  {
+    } else {
         // new merging batch
         targetBatch = allocator.create<MergingOpBatch>(batchId, op);
         mMergingBatchLookup[batchId].insert(std::make_pair(mergeId, targetBatch));
@@ -334,11 +331,11 @@ void LayerBuilder::deferMergeableOp(LinearAllocator& allocator,
     }
 }
 
-void LayerBuilder::replayBakedOpsImpl(void* arg,
-        BakedOpReceiver* unmergedReceivers, MergedOpReceiver* mergedReceivers) const {
+void LayerBuilder::replayBakedOpsImpl(void* arg, BakedOpReceiver* unmergedReceivers,
+                                      MergedOpReceiver* mergedReceivers) const {
     if (renderNode) {
-        ATRACE_FORMAT_BEGIN("Issue HW Layer DisplayList %s %ux%u",
-                renderNode->getName(), width, height);
+        ATRACE_FORMAT_BEGIN("Issue HW Layer DisplayList %s %ux%u", renderNode->getName(), width,
+                            height);
     } else {
         ATRACE_BEGIN("flush drawing commands");
     }
@@ -348,12 +345,9 @@ void LayerBuilder::replayBakedOpsImpl(void* arg,
         if (size > 1 && batch->isMerging()) {
             int opId = batch->getOps()[0]->op->opId;
             const MergingOpBatch* mergingBatch = static_cast<const MergingOpBatch*>(batch);
-            MergedBakedOpList data = {
-                    batch->getOps().data(),
-                    size,
-                    mergingBatch->getClipSideFlags(),
-                    mergingBatch->getClipRect()
-            };
+            MergedBakedOpList data = {batch->getOps().data(), size,
+                                      mergingBatch->getClipSideFlags(),
+                                      mergingBatch->getClipRect()};
             mergedReceivers[opId](arg, data);
         } else {
             for (const BakedOpState* op : batch->getOps()) {
@@ -373,13 +367,12 @@ void LayerBuilder::clear() {
 }
 
 void LayerBuilder::dump() const {
-    ALOGD("LayerBuilder %p, %ux%u buffer %p, blo %p, rn %p (%s)",
-            this, width, height, offscreenBuffer, beginLayerOp,
-            renderNode, renderNode ? renderNode->getName() : "-");
+    ALOGD("LayerBuilder %p, %ux%u buffer %p, blo %p, rn %p (%s)", this, width, height,
+          offscreenBuffer, beginLayerOp, renderNode, renderNode ? renderNode->getName() : "-");
     for (const BatchBase* batch : mBatches) {
         batch->dump();
     }
 }
 
-} // namespace uirenderer
-} // namespace android
+}  // namespace uirenderer
+}  // namespace android

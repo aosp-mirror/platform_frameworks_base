@@ -76,14 +76,15 @@ public abstract class ServiceWorkerWebSettings {
      * Sets whether Service Workers should not load resources from the network,
      * see {@link WebSettings#setBlockNetworkLoads}.
      *
-     * @param flag true means block network loads by the Service Workers
+     * @param flag {@code true} means block network loads by the Service Workers
      */
     public abstract void setBlockNetworkLoads(boolean flag);
 
     /**
      * Gets whether Service Workers are prohibited from loading any resources from the network.
      *
-     * @return true if the Service Workers are not allowed to load any resources from the network
+     * @return {@code true} if the Service Workers are not allowed to load any resources from the
+     *         network
      * @see #setBlockNetworkLoads
      */
     public abstract boolean getBlockNetworkLoads();

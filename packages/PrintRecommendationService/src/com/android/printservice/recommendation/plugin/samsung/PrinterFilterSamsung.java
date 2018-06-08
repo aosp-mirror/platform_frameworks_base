@@ -17,9 +17,10 @@
 package com.android.printservice.recommendation.plugin.samsung;
 
 import android.net.nsd.NsdServiceInfo;
-import android.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.android.printservice.recommendation.util.MDNSFilteredDiscovery;
 import com.android.printservice.recommendation.util.MDNSUtils;

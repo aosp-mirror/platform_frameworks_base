@@ -24,7 +24,7 @@
 #include "ValueVisitor.h"
 #include "util/Util.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
 
 namespace aapt {
 
@@ -32,27 +32,19 @@ TableMerger::TableMerger(IAaptContext* context, ResourceTable* out_table,
                          const TableMergerOptions& options)
     : context_(context), master_table_(out_table), options_(options) {
   // Create the desired package that all tables will be merged into.
-  master_package_ = master_table_->CreatePackage(
-      context_->GetCompilationPackage(), context_->GetPackageId());
+  master_package_ =
+      master_table_->CreatePackage(context_->GetCompilationPackage(), context_->GetPackageId());
   CHECK(master_package_ != nullptr) << "package name or ID already taken";
 }
 
-bool TableMerger::Merge(const Source& src, ResourceTable* table,
-                        io::IFileCollection* collection) {
-  return MergeImpl(src, table, collection, false /* overlay */, true /* allow new */);
+bool TableMerger::Merge(const Source& src, ResourceTable* table, bool overlay) {
+  // We allow adding new resources if this is not an overlay, or if the options allow overlays
+  // to add new resources.
+  return MergeImpl(src, table, overlay, options_.auto_add_overlay || !overlay /*allow_new*/);
 }
 
-bool TableMerger::MergeOverlay(const Source& src, ResourceTable* table,
-                               io::IFileCollection* collection) {
-  return MergeImpl(src, table, collection, true /* overlay */, options_.auto_add_overlay);
-}
-
-/**
- * This will merge packages with the same package name (or no package name).
- */
-bool TableMerger::MergeImpl(const Source& src, ResourceTable* table,
-                            io::IFileCollection* collection, bool overlay,
-                            bool allow_new) {
+// This will merge packages with the same package name (or no package name).
+bool TableMerger::MergeImpl(const Source& src, ResourceTable* table, bool overlay, bool allow_new) {
   bool error = false;
   for (auto& package : table->packages) {
     // Only merge an empty package or the package we're building.
@@ -60,133 +52,98 @@ bool TableMerger::MergeImpl(const Source& src, ResourceTable* table,
     // This is because at compile time it is unknown if the attributes are
     // simply uses of the attribute or definitions.
     if (package->name.empty() || context_->GetCompilationPackage() == package->name) {
-      FileMergeCallback callback;
-      if (collection) {
-        callback = [&](const ResourceNameRef& name,
-                       const ConfigDescription& config, FileReference* new_file,
-                       FileReference* old_file) -> bool {
-          // The old file's path points inside the APK, so we can use it as is.
-          io::IFile* f = collection->FindFile(*old_file->path);
-          if (!f) {
-            context_->GetDiagnostics()->Error(DiagMessage(src)
-                                              << "file '" << *old_file->path << "' not found");
-            return false;
-          }
-
-          new_file->file = f;
-          return true;
-        };
-      }
-
-      // Merge here. Once the entries are merged and mangled, any references to
-      // them are still valid. This is because un-mangled references are
-      // mangled, then looked up at resolution time.
-      // Also, when linking, we convert references with no package name to use
-      // the compilation package name.
-      error |= !DoMerge(src, table, package.get(), false /* mangle */, overlay,
-                        allow_new, callback);
+      // Merge here. Once the entries are merged and mangled, any references to them are still
+      // valid. This is because un-mangled references are mangled, then looked up at resolution
+      // time. Also, when linking, we convert references with no package name to use the compilation
+      // package name.
+      error |= !DoMerge(src, table, package.get(), false /*mangle*/, overlay, allow_new);
     }
   }
   return !error;
 }
 
-/**
- * This will merge and mangle resources from a static library.
- */
-bool TableMerger::MergeAndMangle(const Source& src,
-                                 const StringPiece& package_name,
-                                 ResourceTable* table,
-                                 io::IFileCollection* collection) {
+// This will merge and mangle resources from a static library. It is assumed that all FileReferences
+// have correctly set their io::IFile*.
+bool TableMerger::MergeAndMangle(const Source& src, const StringPiece& package_name,
+                                 ResourceTable* table) {
   bool error = false;
   for (auto& package : table->packages) {
     // Warn of packages with an unrelated ID.
     if (package_name != package->name) {
-      context_->GetDiagnostics()->Warn(DiagMessage(src) << "ignoring package "
-                                                        << package->name);
+      context_->GetDiagnostics()->Warn(DiagMessage(src) << "ignoring package " << package->name);
       continue;
     }
 
     bool mangle = package_name != context_->GetCompilationPackage();
     merged_packages_.insert(package->name);
-
-    auto callback = [&](
-        const ResourceNameRef& name, const ConfigDescription& config,
-        FileReference* new_file, FileReference* old_file) -> bool {
-      // The old file's path points inside the APK, so we can use it as is.
-      io::IFile* f = collection->FindFile(*old_file->path);
-      if (!f) {
-        context_->GetDiagnostics()->Error(
-            DiagMessage(src) << "file '" << *old_file->path << "' not found");
-        return false;
-      }
-
-      new_file->file = f;
-      return true;
-    };
-
-    error |= !DoMerge(src, table, package.get(), mangle, false /* overlay */,
-                      true /* allow new */, callback);
+    error |= !DoMerge(src, table, package.get(), mangle, false /*overlay*/, true /*allow_new*/);
   }
   return !error;
 }
 
-static bool MergeType(IAaptContext* context, const Source& src,
-                      ResourceTableType* dst_type,
+static bool MergeType(IAaptContext* context, const Source& src, ResourceTableType* dst_type,
                       ResourceTableType* src_type) {
-  if (dst_type->symbol_status.state < src_type->symbol_status.state) {
-    // The incoming type's visibility is stronger, so we should override
-    // the visibility.
-    if (src_type->symbol_status.state == SymbolState::kPublic) {
-      // Only copy the ID if the source is public, or else the ID is
-      // meaningless.
+  if (src_type->visibility_level > dst_type->visibility_level) {
+    // The incoming type's visibility is stronger, so we should override the visibility.
+    if (src_type->visibility_level == Visibility::Level::kPublic) {
+      // Only copy the ID if the source is public, or else the ID is meaningless.
       dst_type->id = src_type->id;
     }
-    dst_type->symbol_status = std::move(src_type->symbol_status);
-  } else if (dst_type->symbol_status.state == SymbolState::kPublic &&
-             src_type->symbol_status.state == SymbolState::kPublic &&
-             dst_type->id && src_type->id &&
-             dst_type->id.value() != src_type->id.value()) {
+    dst_type->visibility_level = src_type->visibility_level;
+  } else if (dst_type->visibility_level == Visibility::Level::kPublic &&
+             src_type->visibility_level == Visibility::Level::kPublic && dst_type->id &&
+             src_type->id && dst_type->id.value() != src_type->id.value()) {
     // Both types are public and have different IDs.
-    context->GetDiagnostics()->Error(DiagMessage(src)
-                                     << "cannot merge type '" << src_type->type
-                                     << "': conflicting public IDs");
+    context->GetDiagnostics()->Error(DiagMessage(src) << "cannot merge type '" << src_type->type
+                                                      << "': conflicting public IDs");
     return false;
   }
   return true;
 }
 
-static bool MergeEntry(IAaptContext* context, const Source& src,
+static bool MergeEntry(IAaptContext* context, const Source& src, bool overlay,
                        ResourceEntry* dst_entry, ResourceEntry* src_entry) {
-  if (dst_entry->symbol_status.state < src_entry->symbol_status.state) {
-    // The incoming type's visibility is stronger, so we should override
-    // the visibility.
-    if (src_entry->symbol_status.state == SymbolState::kPublic) {
-      // Only copy the ID if the source is public, or else the ID is
-      // meaningless.
+  // Copy over the strongest visibility.
+  if (src_entry->visibility.level > dst_entry->visibility.level) {
+    // Only copy the ID if the source is public, or else the ID is meaningless.
+    if (src_entry->visibility.level == Visibility::Level::kPublic) {
       dst_entry->id = src_entry->id;
     }
-    dst_entry->symbol_status = std::move(src_entry->symbol_status);
-  } else if (src_entry->symbol_status.state == SymbolState::kPublic &&
-             dst_entry->symbol_status.state == SymbolState::kPublic &&
-             dst_entry->id && src_entry->id &&
-             dst_entry->id.value() != src_entry->id.value()) {
+    dst_entry->visibility = std::move(src_entry->visibility);
+  } else if (src_entry->visibility.level == Visibility::Level::kPublic &&
+             dst_entry->visibility.level == Visibility::Level::kPublic && dst_entry->id &&
+             src_entry->id && src_entry->id != dst_entry->id) {
     // Both entries are public and have different IDs.
-    context->GetDiagnostics()->Error(
-        DiagMessage(src) << "cannot merge entry '" << src_entry->name
-                         << "': conflicting public IDs");
+    context->GetDiagnostics()->Error(DiagMessage(src) << "cannot merge entry '" << src_entry->name
+                                                      << "': conflicting public IDs");
     return false;
+  }
+
+  // Copy over the rest of the properties, if needed.
+  if (src_entry->allow_new) {
+    dst_entry->allow_new = std::move(src_entry->allow_new);
+  }
+
+  if (src_entry->overlayable) {
+    if (dst_entry->overlayable && !overlay) {
+      context->GetDiagnostics()->Error(DiagMessage(src_entry->overlayable.value().source)
+                                       << "duplicate overlayable declaration for resource '"
+                                       << src_entry->name << "'");
+      context->GetDiagnostics()->Error(DiagMessage(dst_entry->overlayable.value().source)
+                                       << "previous declaration here");
+      return false;
+    }
+    dst_entry->overlayable = std::move(src_entry->overlayable);
   }
   return true;
 }
 
 // Modified CollisionResolver which will merge Styleables and Styles. Used with overlays.
 //
-// Styleables are not actual resources, but they are treated as such during the
-// compilation phase.
+// Styleables are not actual resources, but they are treated as such during the compilation phase.
 //
-// Styleables and Styles don't simply overlay each other, their definitions merge
-// and accumulate. If both values are Styleables/Styles, we just merge them into the
-// existing value.
+// Styleables and Styles don't simply overlay each other, their definitions merge and accumulate.
+// If both values are Styleables/Styles, we just merge them into the existing value.
 static ResourceTable::CollisionResult ResolveMergeCollision(Value* existing, Value* incoming,
                                                             StringPool* pool) {
   if (Styleable* existing_styleable = ValueCast<Styleable>(existing)) {
@@ -208,7 +165,7 @@ static ResourceTable::CollisionResult ResolveMergeCollision(Value* existing, Val
 
 static ResourceTable::CollisionResult MergeConfigValue(IAaptContext* context,
                                                        const ResourceNameRef& res_name,
-                                                       const bool overlay,
+                                                       bool overlay,
                                                        ResourceConfigValue* dst_config_value,
                                                        ResourceConfigValue* src_config_value,
                                                        StringPool* pool) {
@@ -241,10 +198,8 @@ static ResourceTable::CollisionResult MergeConfigValue(IAaptContext* context,
 }
 
 bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
-                          ResourceTablePackage* src_package,
-                          const bool mangle_package, const bool overlay,
-                          const bool allow_new_resources,
-                          const FileMergeCallback& callback) {
+                          ResourceTablePackage* src_package, bool mangle_package, bool overlay,
+                          bool allow_new_resources) {
   bool error = false;
 
   for (auto& src_type : src_package->types) {
@@ -261,7 +216,7 @@ bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
       }
 
       ResourceEntry* dst_entry;
-      if (allow_new_resources || src_entry->symbol_status.allow_new) {
+      if (allow_new_resources || src_entry->allow_new) {
         dst_entry = dst_type->FindOrCreateEntry(entry_name);
       } else {
         dst_entry = dst_type->FindEntry(entry_name);
@@ -279,7 +234,7 @@ bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
         continue;
       }
 
-      if (!MergeEntry(context_, src, dst_entry, src_entry.get())) {
+      if (!MergeEntry(context_, src, overlay, dst_entry, src_entry.get())) {
         error = true;
         continue;
       }
@@ -313,13 +268,6 @@ bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
           } else {
             new_file_ref = std::unique_ptr<FileReference>(f->Clone(&master_table_->string_pool));
           }
-
-          if (callback) {
-            if (!callback(res_name, src_config_value->config, new_file_ref.get(), f)) {
-              error = true;
-              continue;
-            }
-          }
           dst_config_value->value = std::move(new_file_ref);
 
         } else {
@@ -342,17 +290,20 @@ std::unique_ptr<FileReference> TableMerger::CloneAndMangleFile(
         util::make_unique<FileReference>(master_table_->string_pool.MakeRef(newPath));
     new_file_ref->SetComment(file_ref.GetComment());
     new_file_ref->SetSource(file_ref.GetSource());
+    new_file_ref->type = file_ref.type;
+    new_file_ref->file = file_ref.file;
     return new_file_ref;
   }
   return std::unique_ptr<FileReference>(file_ref.Clone(&master_table_->string_pool));
 }
 
-bool TableMerger::MergeFileImpl(const ResourceFile& file_desc, io::IFile* file, bool overlay) {
+bool TableMerger::MergeFile(const ResourceFile& file_desc, bool overlay, io::IFile* file) {
   ResourceTable table;
   std::string path = ResourceUtils::BuildResourceFileName(file_desc);
   std::unique_ptr<FileReference> file_ref =
       util::make_unique<FileReference>(table.string_pool.MakeRef(path));
   file_ref->SetSource(file_desc.source);
+  file_ref->type = file_desc.type;
   file_ref->file = file;
 
   ResourceTablePackage* pkg = table.CreatePackage(file_desc.name.package, 0x0);
@@ -361,17 +312,8 @@ bool TableMerger::MergeFileImpl(const ResourceFile& file_desc, io::IFile* file, 
       ->FindOrCreateValue(file_desc.config, {})
       ->value = std::move(file_ref);
 
-  return DoMerge(file->GetSource(), &table, pkg, false /* mangle */,
-                 overlay /* overlay */, true /* allow_new */, {});
-}
-
-bool TableMerger::MergeFile(const ResourceFile& file_desc, io::IFile* file) {
-  return MergeFileImpl(file_desc, file, false /* overlay */);
-}
-
-bool TableMerger::MergeFileOverlay(const ResourceFile& file_desc,
-                                   io::IFile* file) {
-  return MergeFileImpl(file_desc, file, true /* overlay */);
+  return DoMerge(file->GetSource(), &table, pkg, false /*mangle*/, overlay /*overlay*/,
+                 true /*allow_new*/);
 }
 
 }  // namespace aapt

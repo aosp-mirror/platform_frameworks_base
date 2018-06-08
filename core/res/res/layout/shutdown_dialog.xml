@@ -29,7 +29,7 @@
     <TextView
         android:id="@id/text1"
         android:layout_width="wrap_content"
-        android:layout_height="32dp"
+        android:layout_height="32sp"
         android:text="@string/shutdown_progress"
         android:textDirection="locale"
         android:textSize="24sp"

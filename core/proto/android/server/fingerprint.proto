@@ -1,0 +1,68 @@
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package com.android.server.fingerprint;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "FingerprintServiceProto";
+
+message FingerprintServiceDumpProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Each log may include multiple tuples of (user_id, num_fingerprints).
+    repeated FingerprintUserStatsProto users = 1;
+}
+
+message FingerprintUserStatsProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Should be 0, 10, 11, 12, etc. where 0 is the owner.
+    optional int32 user_id = 1;
+
+    // The number of fingerprints registered to this user.
+    optional int32 num_fingerprints = 2;
+
+    // Normal fingerprint authentications (e.g. lockscreen).
+    optional PerformanceStatsProto normal = 3;
+
+    // Crypto authentications (e.g. to unlock password storage, make secure
+    // purchases, etc).
+    optional PerformanceStatsProto crypto = 4;
+}
+
+// A com.android.server.fingerprint.FingerpintService.PerformanceStats object.
+message PerformanceStatsProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Number of accepted fingerprints.
+    optional int32 accept = 1;
+
+    // Number of rejected fingerprints.
+    optional int32 reject = 2;
+
+    // Total number of acquisitions. Should be >= accept+reject due to poor
+    // image acquisition in some cases (too fast, too slow, dirty sensor, etc.)
+    optional int32 acquire = 3;
+
+    // Total number of lockouts.
+    optional int32 lockout = 4;
+
+    // Total number of permanent lockouts.
+    optional int32 permanent_lockout = 5;
+}

@@ -22,12 +22,15 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.UserInfo;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.AndroidTestingRunner;
+import android.testing.LayoutInflaterBuilder;
+import android.testing.TestableImageView;
+import android.testing.TestableLooper;
+import android.testing.TestableLooper.RunWithLooper;
 import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,8 +41,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.SecurityController;
-import android.testing.LayoutInflaterBuilder;
-import android.testing.TestableImageView;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +57,8 @@ import org.mockito.Mockito;
 */
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@RunWithLooper(setAsMainLooper = true)
 public class QSSecurityFooterTest extends SysuiTestCase {
 
     private final String MANAGING_ORGANIZATION = "organization";
@@ -81,12 +83,10 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                         .build());
         mUserManager = Mockito.mock(UserManager.class);
         mContext.addMockSystemService(Context.USER_SERVICE, mUserManager);
-        Handler h = new Handler(Looper.getMainLooper());
-        h.post(() -> mFooter = new QSSecurityFooter(null, mContext));
-        waitForIdleSync(h);
+        mFooter = new QSSecurityFooter(null, mContext);
         mRootView = (ViewGroup) mFooter.getView();
-        mFooterText = (TextView) mRootView.findViewById(R.id.footer_text);
-        mFooterIcon = (TestableImageView) mRootView.findViewById(R.id.footer_icon);
+        mFooterText = mRootView.findViewById(R.id.footer_text);
+        mFooterIcon = mRootView.findViewById(R.id.footer_icon);
         mFooter.setHostEnvironment(null);
     }
 
@@ -95,7 +95,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.isDeviceManaged()).thenReturn(false);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(View.GONE, mRootView.getVisibility());
     }
 
@@ -105,7 +105,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.getDeviceOwnerOrganizationName()).thenReturn(null);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_management),
                      mFooterText.getText());
         assertEquals(View.VISIBLE, mRootView.getVisibility());
@@ -121,7 +121,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                 .thenReturn(MANAGING_ORGANIZATION);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_named_management,
                                         MANAGING_ORGANIZATION),
                 mFooterText.getText());
@@ -142,7 +142,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
 
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(View.GONE, mRootView.getVisibility());
     }
 
@@ -152,7 +152,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.isNetworkLoggingEnabled()).thenReturn(true);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_management_monitoring),
                 mFooterText.getText());
         assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
@@ -164,7 +164,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                 .thenReturn(MANAGING_ORGANIZATION);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(mContext.getString(
                              R.string.quick_settings_disclosure_named_management_monitoring,
                              MANAGING_ORGANIZATION),
@@ -177,7 +177,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.hasCACertInCurrentUser()).thenReturn(true);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_management_monitoring),
                 mFooterText.getText());
     }
@@ -189,7 +189,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.getPrimaryVpnName()).thenReturn(VPN_PACKAGE);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_management_named_vpn,
                                         VPN_PACKAGE),
                      mFooterText.getText());
@@ -201,7 +201,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                 .thenReturn(MANAGING_ORGANIZATION);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(mContext.getString(
                               R.string.quick_settings_disclosure_named_management_named_vpn,
                               MANAGING_ORGANIZATION, VPN_PACKAGE),
@@ -216,7 +216,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.getWorkProfileVpnName()).thenReturn(VPN_PACKAGE_2);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_management_vpns),
                      mFooterText.getText());
         assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
@@ -227,7 +227,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                 .thenReturn(MANAGING_ORGANIZATION);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_named_management_vpns,
                                         MANAGING_ORGANIZATION),
                      mFooterText.getText());
@@ -241,7 +241,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.getPrimaryVpnName()).thenReturn("VPN Test App");
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(View.VISIBLE, mFooterIcon.getVisibility());
         assertEquals(R.drawable.ic_qs_vpn, mFooterIcon.getLastImageResource());
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_management_monitoring),
@@ -254,7 +254,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.hasCACertInWorkProfile()).thenReturn(true);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         // -1 == never set.
         assertEquals(-1, mFooterIcon.getLastImageResource());
         assertEquals(mContext.getString(
@@ -266,7 +266,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                 .thenReturn(MANAGING_ORGANIZATION);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(mContext.getString(
                              R.string.quick_settings_disclosure_named_managed_profile_monitoring,
                              MANAGING_ORGANIZATION),
@@ -279,7 +279,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.hasCACertInCurrentUser()).thenReturn(true);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         // -1 == never set.
         assertEquals(-1, mFooterIcon.getLastImageResource());
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_monitoring),
@@ -293,7 +293,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.getWorkProfileVpnName()).thenReturn(VPN_PACKAGE_2);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(R.drawable.ic_qs_vpn, mFooterIcon.getLastImageResource());
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_vpns),
                      mFooterText.getText());
@@ -305,7 +305,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.getWorkProfileVpnName()).thenReturn(VPN_PACKAGE_2);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(R.drawable.ic_qs_vpn, mFooterIcon.getLastImageResource());
         assertEquals(mContext.getString(
                              R.string.quick_settings_disclosure_managed_profile_named_vpn,
@@ -319,7 +319,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.getPrimaryVpnName()).thenReturn(VPN_PACKAGE);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(R.drawable.ic_qs_vpn, mFooterIcon.getLastImageResource());
         assertEquals(mContext.getString(R.string.quick_settings_disclosure_named_vpn,
                                         VPN_PACKAGE),
@@ -328,7 +328,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
         when(mSecurityController.hasWorkProfile()).thenReturn(true);
         mFooter.refreshState();
 
-        waitForIdleSync(mFooter.mHandler);
+        TestableLooper.get(this).processAllMessages();
         assertEquals(mContext.getString(
                              R.string.quick_settings_disclosure_personal_profile_named_vpn,
                              VPN_PACKAGE),

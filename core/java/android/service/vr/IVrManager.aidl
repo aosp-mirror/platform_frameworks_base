@@ -17,6 +17,7 @@
 package android.service.vr;
 
 import android.app.Vr2dDisplayProperties;
+import android.content.ComponentName;
 import android.service.vr.IVrStateCallbacks;
 import android.service.vr.IPersistentVrStateCallbacks;
 
@@ -101,5 +102,21 @@ interface IVrManager {
      * application's compositor process to bind to, or null to clear the current binding.
      */
     void setAndBindCompositor(in String componentName);
+
+    /**
+     * Sets the current standby status of the VR device. Standby mode is only used on standalone vr
+     * devices. Standby mode is a deep sleep state where it's appropriate to turn off vr mode.
+     *
+     * @param standy True if the device is entering standby, false if it's exiting standby.
+     */
+    void setStandbyEnabled(boolean standby);
+
+    /**
+     * Start VR Input method for the given packageName in {@param componentName}.
+     * This method notifies InputMethodManagerService to use VR IME instead of
+     * regular phone IME.
+     */
+    void setVrInputMethod(in ComponentName componentName);
+
 }
 

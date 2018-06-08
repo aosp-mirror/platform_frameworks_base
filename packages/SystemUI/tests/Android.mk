@@ -39,6 +39,8 @@ LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res \
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
     SystemUIPluginLib \
+    SystemUISharedLib \
+    android-support-car \
     android-support-v4 \
     android-support-v7-recyclerview \
     android-support-v7-preference \
@@ -46,19 +48,34 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
     android-support-v7-mediarouter \
     android-support-v7-palette \
     android-support-v14-preference \
-    android-support-v17-leanback
+    android-support-v17-leanback \
+    android-slices-core \
+    android-slices-view \
+    android-slices-builders \
+    android-arch-core-runtime \
+    android-arch-lifecycle-extensions \
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     metrics-helper-lib \
     android-support-test \
-    mockito-target-minus-junit4 \
+    mockito-target-inline-minus-junit4 \
     SystemUI-proto \
     SystemUI-tags \
-    legacy-android-test \
     testables \
     truth-prebuilt \
 
-LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common android.car
+LOCAL_MULTILIB := both
+
+LOCAL_JNI_SHARED_LIBRARIES := \
+    libdexmakerjvmtiagent \
+    libmultiplejvmtiagentsinterferenceagent
+
+
+LOCAL_JAVA_LIBRARIES := \
+    android.test.runner \
+    telephony-common \
+    android.test.base \
+    android.car
 
 LOCAL_AAPT_FLAGS := --extra-packages com.android.systemui:com.android.keyguard
 

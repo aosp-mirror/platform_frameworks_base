@@ -29,6 +29,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Defines the configuration of a Aware subscribe session. Built using
@@ -79,15 +80,32 @@ public final class SubscribeConfig implements Parcelable {
     public final boolean mEnableTerminateNotification;
 
     /** @hide */
+    public final boolean mMinDistanceMmSet;
+
+    /** @hide */
+    public final int mMinDistanceMm;
+
+    /** @hide */
+    public final boolean mMaxDistanceMmSet;
+
+    /** @hide */
+    public final int mMaxDistanceMm;
+
+    /** @hide */
     public SubscribeConfig(byte[] serviceName, byte[] serviceSpecificInfo, byte[] matchFilter,
-            int subscribeType, int ttlSec,
-            boolean enableTerminateNotification) {
+            int subscribeType, int ttlSec, boolean enableTerminateNotification,
+            boolean minDistanceMmSet, int minDistanceMm, boolean maxDistanceMmSet,
+            int maxDistanceMm) {
         mServiceName = serviceName;
         mServiceSpecificInfo = serviceSpecificInfo;
         mMatchFilter = matchFilter;
         mSubscribeType = subscribeType;
         mTtlSec = ttlSec;
         mEnableTerminateNotification = enableTerminateNotification;
+        mMinDistanceMm = minDistanceMm;
+        mMinDistanceMmSet = minDistanceMmSet;
+        mMaxDistanceMm = maxDistanceMm;
+        mMaxDistanceMmSet = maxDistanceMmSet;
     }
 
     @Override
@@ -102,7 +120,11 @@ public final class SubscribeConfig implements Parcelable {
                 + (new TlvBufferUtils.TlvIterable(0, 1, mMatchFilter)).toString()
                 + ", mMatchFilter.length=" + (mMatchFilter == null ? 0 : mMatchFilter.length)
                 + ", mSubscribeType=" + mSubscribeType + ", mTtlSec=" + mTtlSec
-                + ", mEnableTerminateNotification=" + mEnableTerminateNotification + "]";
+                + ", mEnableTerminateNotification=" + mEnableTerminateNotification
+                + ", mMinDistanceMm=" + mMinDistanceMm
+                + ", mMinDistanceMmSet=" + mMinDistanceMmSet
+                + ", mMaxDistanceMm=" + mMaxDistanceMm
+                + ", mMaxDistanceMmSet=" + mMaxDistanceMmSet + "]";
     }
 
     @Override
@@ -118,6 +140,10 @@ public final class SubscribeConfig implements Parcelable {
         dest.writeInt(mSubscribeType);
         dest.writeInt(mTtlSec);
         dest.writeInt(mEnableTerminateNotification ? 1 : 0);
+        dest.writeInt(mMinDistanceMm);
+        dest.writeInt(mMinDistanceMmSet ? 1 : 0);
+        dest.writeInt(mMaxDistanceMm);
+        dest.writeInt(mMaxDistanceMmSet ? 1 : 0);
     }
 
     public static final Creator<SubscribeConfig> CREATOR = new Creator<SubscribeConfig>() {
@@ -134,9 +160,14 @@ public final class SubscribeConfig implements Parcelable {
             int subscribeType = in.readInt();
             int ttlSec = in.readInt();
             boolean enableTerminateNotification = in.readInt() != 0;
+            int minDistanceMm = in.readInt();
+            boolean minDistanceMmSet = in.readInt() != 0;
+            int maxDistanceMm = in.readInt();
+            boolean maxDistanceMmSet = in.readInt() != 0;
 
-            return new SubscribeConfig(serviceName, ssi, matchFilter, subscribeType,
-                    ttlSec, enableTerminateNotification);
+            return new SubscribeConfig(serviceName, ssi, matchFilter, subscribeType, ttlSec,
+                    enableTerminateNotification, minDistanceMmSet, minDistanceMm, maxDistanceMmSet,
+                    maxDistanceMm);
         }
     };
 
@@ -152,23 +183,37 @@ public final class SubscribeConfig implements Parcelable {
 
         SubscribeConfig lhs = (SubscribeConfig) o;
 
-        return Arrays.equals(mServiceName, lhs.mServiceName) && Arrays.equals(mServiceSpecificInfo,
-                lhs.mServiceSpecificInfo) && Arrays.equals(mMatchFilter, lhs.mMatchFilter)
-                && mSubscribeType == lhs.mSubscribeType
-                && mTtlSec == lhs.mTtlSec
-                && mEnableTerminateNotification == lhs.mEnableTerminateNotification;
+        if (!(Arrays.equals(mServiceName, lhs.mServiceName) && Arrays.equals(
+                mServiceSpecificInfo, lhs.mServiceSpecificInfo) && Arrays.equals(mMatchFilter,
+                lhs.mMatchFilter) && mSubscribeType == lhs.mSubscribeType && mTtlSec == lhs.mTtlSec
+                && mEnableTerminateNotification == lhs.mEnableTerminateNotification
+                && mMinDistanceMmSet == lhs.mMinDistanceMmSet
+                && mMaxDistanceMmSet == lhs.mMaxDistanceMmSet)) {
+            return false;
+        }
+
+        if (mMinDistanceMmSet && mMinDistanceMm != lhs.mMinDistanceMm) {
+            return false;
+        }
+
+        if (mMaxDistanceMmSet && mMaxDistanceMm != lhs.mMaxDistanceMm) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override
     public int hashCode() {
-        int result = 17;
+        int result = Objects.hash(mServiceName, mServiceSpecificInfo, mMatchFilter, mSubscribeType,
+                mTtlSec, mEnableTerminateNotification, mMinDistanceMmSet, mMaxDistanceMmSet);
 
-        result = 31 * result + Arrays.hashCode(mServiceName);
-        result = 31 * result + Arrays.hashCode(mServiceSpecificInfo);
-        result = 31 * result + Arrays.hashCode(mMatchFilter);
-        result = 31 * result + mSubscribeType;
-        result = 31 * result + mTtlSec;
-        result = 31 * result + (mEnableTerminateNotification ? 1 : 0);
+        if (mMinDistanceMmSet) {
+            result = Objects.hash(result, mMinDistanceMm);
+        }
+        if (mMaxDistanceMmSet) {
+            result = Objects.hash(result, mMaxDistanceMm);
+        }
 
         return result;
     }
@@ -179,7 +224,7 @@ public final class SubscribeConfig implements Parcelable {
      *
      * @hide
      */
-    public void assertValid(Characteristics characteristics)
+    public void assertValid(Characteristics characteristics, boolean rttSupported)
             throws IllegalArgumentException {
         WifiAwareUtils.validateServiceName(mServiceName);
 
@@ -213,6 +258,21 @@ public final class SubscribeConfig implements Parcelable {
                         "Match filter longer than supported by device characteristics");
             }
         }
+
+        if (mMinDistanceMmSet && mMinDistanceMm < 0) {
+            throw new IllegalArgumentException("Minimum distance must be non-negative");
+        }
+        if (mMaxDistanceMmSet && mMaxDistanceMm < 0) {
+            throw new IllegalArgumentException("Maximum distance must be non-negative");
+        }
+        if (mMinDistanceMmSet && mMaxDistanceMmSet && mMaxDistanceMm <= mMinDistanceMm) {
+            throw new IllegalArgumentException(
+                    "Maximum distance must be greater than minimum distance");
+        }
+
+        if (!rttSupported && (mMinDistanceMmSet || mMaxDistanceMmSet)) {
+            throw new IllegalArgumentException("Ranging is not supported");
+        }
     }
 
     /**
@@ -225,6 +285,10 @@ public final class SubscribeConfig implements Parcelable {
         private int mSubscribeType = SUBSCRIBE_TYPE_PASSIVE;
         private int mTtlSec = 0;
         private boolean mEnableTerminateNotification = true;
+        private boolean mMinDistanceMmSet = false;
+        private int mMinDistanceMm;
+        private boolean mMaxDistanceMmSet = false;
+        private int mMaxDistanceMm;
 
         /**
          * Specify the service name of the subscribe session. The actual on-air
@@ -350,13 +414,83 @@ public final class SubscribeConfig implements Parcelable {
         }
 
         /**
+         * Configure the minimum distance to a discovered publisher at which to trigger a discovery
+         * notification. I.e. discovery will be triggered if we've found a matching publisher
+         * (based on the other criteria in this configuration) <b>and</b> the distance to the
+         * publisher is larger than the value specified in this API. Can be used in conjunction with
+         * {@link #setMaxDistanceMm(int)} to specify a geofence, i.e. discovery with min <=
+         * distance <= max.
+         * <p>
+         * For ranging to be used in discovery it must also be enabled on the publisher using
+         * {@link PublishConfig.Builder#setRangingEnabled(boolean)}. However, ranging may
+         * not be available or enabled on the publisher or may be temporarily disabled on either
+         * subscriber or publisher - in such cases discovery will proceed without ranging.
+         * <p>
+         * When ranging is enabled and available on both publisher and subscriber and a service
+         * is discovered based on geofence constraints the
+         * {@link DiscoverySessionCallback#onServiceDiscoveredWithinRange(PeerHandle, byte[], List, int)}
+         * is called, otherwise the
+         * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle, byte[], List)}
+         * is called.
+         * <p>
+         * The device must support Wi-Fi RTT for this feature to be used. Feature support is checked
+         * as described in {@link android.net.wifi.rtt}.
+         *
+         * @param minDistanceMm Minimum distance, in mm, to the publisher above which to trigger
+         *                      discovery.
+         *
+         * @return The builder to facilitate chaining
+         *         {@code builder.setXXX(..).setXXX(..)}.
+         */
+        public Builder setMinDistanceMm(int minDistanceMm) {
+            mMinDistanceMm = minDistanceMm;
+            mMinDistanceMmSet = true;
+            return this;
+        }
+
+        /**
+         * Configure the maximum distance to a discovered publisher at which to trigger a discovery
+         * notification. I.e. discovery will be triggered if we've found a matching publisher
+         * (based on the other criteria in this configuration) <b>and</b> the distance to the
+         * publisher is smaller than the value specified in this API. Can be used in conjunction
+         * with {@link #setMinDistanceMm(int)} to specify a geofence, i.e. discovery with min <=
+         * distance <= max.
+         * <p>
+         * For ranging to be used in discovery it must also be enabled on the publisher using
+         * {@link PublishConfig.Builder#setRangingEnabled(boolean)}. However, ranging may
+         * not be available or enabled on the publisher or may be temporarily disabled on either
+         * subscriber or publisher - in such cases discovery will proceed without ranging.
+         * <p>
+         * When ranging is enabled and available on both publisher and subscriber and a service
+         * is discovered based on geofence constraints the
+         * {@link DiscoverySessionCallback#onServiceDiscoveredWithinRange(PeerHandle, byte[], List, int)}
+         * is called, otherwise the
+         * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle, byte[], List)}
+         * is called.
+         * <p>
+         * The device must support Wi-Fi RTT for this feature to be used. Feature support is checked
+         * as described in {@link android.net.wifi.rtt}.
+         *
+         * @param maxDistanceMm Maximum distance, in mm, to the publisher below which to trigger
+         *                      discovery.
+         *
+         * @return The builder to facilitate chaining
+         *         {@code builder.setXXX(..).setXXX(..)}.
+         */
+        public Builder setMaxDistanceMm(int maxDistanceMm) {
+            mMaxDistanceMm = maxDistanceMm;
+            mMaxDistanceMmSet = true;
+            return this;
+        }
+
+        /**
          * Build {@link SubscribeConfig} given the current requests made on the
          * builder.
          */
         public SubscribeConfig build() {
             return new SubscribeConfig(mServiceName, mServiceSpecificInfo, mMatchFilter,
-                    mSubscribeType, mTtlSec,
-                    mEnableTerminateNotification);
+                    mSubscribeType, mTtlSec, mEnableTerminateNotification,
+                    mMinDistanceMmSet, mMinDistanceMm, mMaxDistanceMmSet, mMaxDistanceMm);
         }
     }
 }

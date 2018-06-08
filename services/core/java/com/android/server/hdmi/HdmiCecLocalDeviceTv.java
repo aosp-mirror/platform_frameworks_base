@@ -1299,6 +1299,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     /**
      * Return external input devices.
      */
+    @GuardedBy("mLock")
     List<HdmiDeviceInfo> getSafeExternalInputsLocked() {
         return mSafeExternalInputs;
     }
@@ -1421,6 +1422,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
+    @GuardedBy("mLock")
     List<HdmiDeviceInfo> getSafeCecDevicesLocked() {
         ArrayList<HdmiDeviceInfo> infoList = new ArrayList<>();
         for (HdmiDeviceInfo info : mSafeAllDeviceInfos) {

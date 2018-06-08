@@ -29,10 +29,10 @@ import android.util.LongSparseArray;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * A Handler class for managing network logging on a background thread.
@@ -64,6 +64,8 @@ final class NetworkLoggingHandler extends Handler {
     private final DevicePolicyManagerService mDpm;
     private final AlarmManager mAlarmManager;
 
+    private long mId;
+
     private final OnAlarmListener mBatchTimeoutAlarmListener = new OnAlarmListener() {
         @Override
         public void onAlarm() {
@@ -79,6 +81,7 @@ final class NetworkLoggingHandler extends Handler {
         }
     };
 
+    @VisibleForTesting
     static final int LOG_NETWORK_EVENT_MSG = 1;
 
     /** Network events accumulated so far to be finalized into a batch at some point. */
@@ -104,9 +107,15 @@ final class NetworkLoggingHandler extends Handler {
     private long mLastRetrievedBatchToken;
 
     NetworkLoggingHandler(Looper looper, DevicePolicyManagerService dpm) {
+        this(looper, dpm, 0 /* event id */);
+    }
+
+    @VisibleForTesting
+    NetworkLoggingHandler(Looper looper, DevicePolicyManagerService dpm, long id) {
         super(looper);
-        mDpm = dpm;
-        mAlarmManager = mDpm.mInjector.getAlarmManager();
+        this.mDpm = dpm;
+        this.mAlarmManager = mDpm.mInjector.getAlarmManager();
+        this.mId = id;
     }
 
     @Override
@@ -185,6 +194,16 @@ final class NetworkLoggingHandler extends Handler {
     private Bundle finalizeBatchAndBuildDeviceOwnerMessageLocked() {
         Bundle notificationExtras = null;
         if (mNetworkEvents.size() > 0) {
+            // Assign ids to the events.
+            for (NetworkEvent event : mNetworkEvents) {
+                event.setId(mId);
+                if (mId == Long.MAX_VALUE) {
+                    Slog.i(TAG, "Reached maximum id value; wrapping around ." + mCurrentBatchToken);
+                    mId = 0;
+                } else {
+                    mId++;
+                }
+            }
             // Finalize the batch and start a new one from scratch.
             if (mBatches.size() >= MAX_BATCHES) {
                 // Remove the oldest batch if we hit the limit.

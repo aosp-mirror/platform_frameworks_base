@@ -29,7 +29,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.SysuiTestCase;
@@ -46,7 +47,8 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @Ignore("failing")
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@RunWithLooper(setAsMainLooper = true)
 public class DozeTriggersTest extends SysuiTestCase {
     private DozeTriggers mTriggers;
     private DozeMachine mMachine;
@@ -54,7 +56,6 @@ public class DozeTriggersTest extends SysuiTestCase {
     private AmbientDisplayConfiguration mConfig;
     private DozeParameters mParameters;
     private FakeSensorManager mSensors;
-    private Handler mHandler;
     private WakeLock mWakeLock;
     private Instrumentation mInstrumentation;
     private AlarmManager mAlarmManager;
@@ -74,40 +75,29 @@ public class DozeTriggersTest extends SysuiTestCase {
         mConfig = DozeConfigurationUtil.createMockConfig();
         mParameters = DozeConfigurationUtil.createMockParameters();
         mSensors = new FakeSensorManager(mContext);
-        mHandler = new Handler(Looper.getMainLooper());
         mWakeLock = new WakeLockFake();
 
-        mInstrumentation.runOnMainSync(() -> {
-            mTriggers = new DozeTriggers(mContext, mMachine, mHost, mAlarmManager,
-                    mConfig, mParameters, mSensors, mHandler, mWakeLock, true);
-        });
+        mTriggers = new DozeTriggers(mContext, mMachine, mHost, mAlarmManager, mConfig, mParameters,
+                mSensors, Handler.createAsync(Looper.myLooper()), mWakeLock, true);
     }
 
     @Test
     public void testOnNotification_stillWorksAfterOneFailedProxCheck() throws Exception {
         when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
 
-        mInstrumentation.runOnMainSync(()->{
-            mTriggers.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
-            mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
+        mTriggers.transitionTo(DozeMachine.State.UNINITIALIZED, DozeMachine.State.INITIALIZED);
+        mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
 
-            mHost.callback.onNotificationHeadsUp();
-        });
+        mHost.callback.onNotificationHeadsUp();
 
-        mInstrumentation.runOnMainSync(() -> {
-            mSensors.getMockProximitySensor().sendProximityResult(false); /* Near */
-        });
+        mSensors.getMockProximitySensor().sendProximityResult(false); /* Near */
 
         verify(mMachine, never()).requestState(any());
         verify(mMachine, never()).requestPulse(anyInt());
 
-        mInstrumentation.runOnMainSync(()->{
-            mHost.callback.onNotificationHeadsUp();
-        });
+        mHost.callback.onNotificationHeadsUp();
 
-        mInstrumentation.runOnMainSync(() -> {
-            mSensors.getMockProximitySensor().sendProximityResult(true); /* Far */
-        });
+        mSensors.getMockProximitySensor().sendProximityResult(true); /* Far */
 
         verify(mMachine).requestPulse(anyInt());
     }

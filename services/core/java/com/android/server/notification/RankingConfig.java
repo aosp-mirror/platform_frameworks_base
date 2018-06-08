@@ -29,15 +29,16 @@ public interface RankingConfig {
     void setShowBadge(String packageName, int uid, boolean showBadge);
     boolean canShowBadge(String packageName, int uid);
     boolean badgingEnabled(UserHandle userHandle);
+    boolean isGroupBlocked(String packageName, int uid, String groupId);
 
     Collection<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid);
     void createNotificationChannelGroup(String pkg, int uid, NotificationChannelGroup group,
             boolean fromTargetApp);
     ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
-            int uid, boolean includeDeleted);
+            int uid, boolean includeDeleted, boolean includeNonGrouped);
     void createNotificationChannel(String pkg, int uid, NotificationChannel channel,
-            boolean fromTargetApp);
+            boolean fromTargetApp, boolean hasDndAccess);
     void updateNotificationChannel(String pkg, int uid, NotificationChannel channel, boolean fromUser);
     NotificationChannel getNotificationChannel(String pkg, int uid, String channelId, boolean includeDeleted);
     void deleteNotificationChannel(String pkg, int uid, String channelId);

@@ -22,7 +22,10 @@
 #include <ui/DisplayInfo.h>
 #include <utils/String8.h>
 #include <vector>
+
 #include "pipeline/skia/VectorDrawableAtlas.h"
+#include "thread/TaskManager.h"
+#include "thread/TaskProcessor.h"
 
 namespace android {
 
@@ -39,10 +42,7 @@ class RenderThread;
 
 class CacheManager {
 public:
-    enum class TrimMemoryMode {
-        Complete,
-        UiHidden
-    };
+    enum class TrimMemoryMode { Complete, UiHidden };
 
     void configureContext(GrContextOptions* context);
     void trimMemory(TrimMemoryMode mode);
@@ -54,13 +54,14 @@ public:
     size_t getCacheSize() const { return mMaxResourceBytes; }
     size_t getBackgroundCacheSize() const { return mBackgroundResourceBytes; }
 
+    TaskManager* getTaskManager() { return &mTaskManager; }
+
 private:
     friend class RenderThread;
 
     CacheManager(const DisplayInfo& display);
 
-
-    void reset(GrContext* grContext);
+    void reset(sk_sp<GrContext> grContext);
     void destroy();
     void updateContextCacheSizes();
 
@@ -77,6 +78,10 @@ private:
     };
 
     sp<skiapipeline::VectorDrawableAtlas> mVectorDrawableAtlas;
+
+    class SkiaTaskProcessor;
+    sp<SkiaTaskProcessor> mTaskProcessor;
+    TaskManager mTaskManager;
 };
 
 } /* namespace renderthread */
@@ -84,4 +89,3 @@ private:
 } /* namespace android */
 
 #endif /* CACHEMANAGER_H */
-

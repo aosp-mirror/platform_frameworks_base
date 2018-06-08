@@ -31,10 +31,13 @@ import android.net.NetworkPolicyManager;
 import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.SettingsValidators.Validator;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.BackupUtils;
 import android.util.Log;
 
@@ -46,11 +49,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
+import java.time.DateTimeException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.zip.CRC32;
@@ -147,6 +150,16 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     // stored in the full-backup tarfile as well, so should not be changed.
     private static final String STAGE_FILE = "flattened-data";
 
+    // List of keys that support restore to lower version of the SDK, introduced in Android P
+    private static final ArraySet<String> RESTORE_FROM_HIGHER_SDK_INT_SUPPORTED_KEYS =
+            new ArraySet<String>(Arrays.asList(new String[] {
+                KEY_NETWORK_POLICIES,
+                KEY_WIFI_NEW_CONFIG,
+                KEY_SYSTEM,
+                KEY_SECURE,
+                KEY_GLOBAL,
+            }));
+
     private SettingsHelper mSettingsHelper;
 
     private WifiManager mWifiManager;
@@ -209,6 +222,19 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     public void onRestore(BackupDataInput data, int appVersionCode,
             ParcelFileDescriptor newState) throws IOException {
 
+        if (DEBUG) {
+            Log.d(TAG, "onRestore(): appVersionCode: " + appVersionCode
+                    + "; Build.VERSION.SDK_INT: " + Build.VERSION.SDK_INT);
+        }
+
+        boolean overrideRestoreAnyVersion = Settings.Global.getInt(getContentResolver(),
+                Settings.Global.OVERRIDE_SETTINGS_PROVIDER_RESTORE_ANY_VERSION, 0) == 1;
+        if ((appVersionCode > Build.VERSION.SDK_INT) && overrideRestoreAnyVersion) {
+            Log.w(TAG, "Ignoring restore from API" + appVersionCode + " to API"
+                    + Build.VERSION.SDK_INT + " due to settings flag override.");
+            return;
+        }
+
         // versionCode of com.android.providers.settings corresponds to SDK_INT
         mRestoredFromSdkInt = appVersionCode;
 
@@ -221,6 +247,16 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         while (data.readNextHeader()) {
             final String key = data.getKey();
             final int size = data.getDataSize();
+
+            // bail out of restoring from higher SDK_INT version for unsupported keys
+            if (appVersionCode > Build.VERSION.SDK_INT
+                    && !RESTORE_FROM_HIGHER_SDK_INT_SUPPORTED_KEYS.contains(key)) {
+                Log.w(TAG, "Not restoring unrecognized key '"
+                        + key + "' from future version " + appVersionCode);
+                data.skipEntityData();
+                continue;
+            }
+
             switch (key) {
                 case KEY_SYSTEM :
                     restoreSettings(data, Settings.System.CONTENT_URI, movedToGlobal);
@@ -288,65 +324,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     @Override
     public void onFullBackup(FullBackupDataOutput data)  throws IOException {
-        byte[] systemSettingsData = getSystemSettings();
-        byte[] secureSettingsData = getSecureSettings();
-        byte[] globalSettingsData = getGlobalSettings();
-        byte[] lockSettingsData   = getLockSettings(UserHandle.myUserId());
-        byte[] locale = mSettingsHelper.getLocaleData();
-        byte[] softApConfigData = getSoftAPConfiguration();
-        byte[] netPoliciesData = getNetworkPolicies();
-        byte[] wifiFullConfigData = getNewWifiConfigData();
-
-        // Write the data to the staging file, then emit that as our tarfile
-        // representation of the backed-up settings.
-        String root = getFilesDir().getAbsolutePath();
-        File stage = new File(root, STAGE_FILE);
-        try {
-            FileOutputStream filestream = new FileOutputStream(stage);
-            BufferedOutputStream bufstream = new BufferedOutputStream(filestream);
-            DataOutputStream out = new DataOutputStream(bufstream);
-
-            if (DEBUG_BACKUP) Log.d(TAG, "Writing flattened data version " + FULL_BACKUP_VERSION);
-            out.writeInt(FULL_BACKUP_VERSION);
-
-            if (DEBUG_BACKUP) Log.d(TAG, systemSettingsData.length + " bytes of settings data");
-            out.writeInt(systemSettingsData.length);
-            out.write(systemSettingsData);
-            if (DEBUG_BACKUP) {
-                Log.d(TAG, secureSettingsData.length + " bytes of secure settings data");
-            }
-            out.writeInt(secureSettingsData.length);
-            out.write(secureSettingsData);
-            if (DEBUG_BACKUP) {
-                Log.d(TAG, globalSettingsData.length + " bytes of global settings data");
-            }
-            out.writeInt(globalSettingsData.length);
-            out.write(globalSettingsData);
-            if (DEBUG_BACKUP) Log.d(TAG, locale.length + " bytes of locale data");
-            out.writeInt(locale.length);
-            out.write(locale);
-            if (DEBUG_BACKUP) Log.d(TAG, lockSettingsData.length + " bytes of lock settings data");
-            out.writeInt(lockSettingsData.length);
-            out.write(lockSettingsData);
-            if (DEBUG_BACKUP) Log.d(TAG, softApConfigData.length + " bytes of softap config data");
-            out.writeInt(softApConfigData.length);
-            out.write(softApConfigData);
-            if (DEBUG_BACKUP) Log.d(TAG, netPoliciesData.length + " bytes of net policies data");
-            out.writeInt(netPoliciesData.length);
-            out.write(netPoliciesData);
-            if (DEBUG_BACKUP) {
-                Log.d(TAG, wifiFullConfigData.length + " bytes of wifi config data");
-            }
-            out.writeInt(wifiFullConfigData.length);
-            out.write(wifiFullConfigData);
-
-            out.flush();    // also flushes downstream
-
-            // now we're set to emit the tar stream
-            fullBackupFile(stage, data);
-        } finally {
-            stage.delete();
-        }
+        // Full backup of SettingsBackupAgent support was removed in Android P. If you want to adb
+        // backup com.android.providers.settings package use \"-keyvalue\" flag.
+        // Full restore of SettingsBackupAgent is still available for backwards compatibility.
     }
 
     @Override
@@ -604,15 +584,19 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         // Figure out the white list and redirects to the global table.  We restore anything
         // in either the backup whitelist or the legacy-restore whitelist for this table.
         final String[] whitelist;
+        Map<String, Validator> validators = null;
         if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
             whitelist = concat(Settings.Secure.SETTINGS_TO_BACKUP,
                     Settings.Secure.LEGACY_RESTORE_SETTINGS);
+            validators = Settings.Secure.VALIDATORS;
         } else if (contentUri.equals(Settings.System.CONTENT_URI)) {
             whitelist = concat(Settings.System.SETTINGS_TO_BACKUP,
                     Settings.System.LEGACY_RESTORE_SETTINGS);
+            validators = Settings.System.VALIDATORS;
         } else if (contentUri.equals(Settings.Global.CONTENT_URI)) {
             whitelist = concat(Settings.Global.SETTINGS_TO_BACKUP,
                     Settings.Global.LEGACY_RESTORE_SETTINGS);
+            validators = Settings.Global.VALIDATORS;
         } else {
             throw new IllegalArgumentException("Unknown URI: " + contentUri);
         }
@@ -660,6 +644,13 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 continue;
             }
 
+            // only restore the settings that have valid values
+            if (!isValidSettingValue(key, value, validators)) {
+                Log.w(TAG, "Attempted restore of " + key + " setting, but its value didn't pass"
+                        + " validation, value: " + value);
+                continue;
+            }
+
             final Uri destination = (movedToGlobal != null && movedToGlobal.contains(key))
                     ? Settings.Global.CONTENT_URI
                     : contentUri;
@@ -670,6 +661,15 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 Log.d(TAG, "Restored setting: " + destination + " : " + key + "=" + value);
             }
         }
+    }
+
+    private boolean isValidSettingValue(String key, String value,
+            Map<String, Validator> validators) {
+        if (key == null || validators == null) {
+            return false;
+        }
+        Validator validator = validators.get(key);
+        return (validator != null) && validator.validate(value);
     }
 
     private final String[] concat(String[] first, @Nullable String[] second) {
@@ -858,7 +858,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 out.writeInt(NETWORK_POLICIES_BACKUP_VERSION);
                 out.writeInt(policies.length);
                 for (NetworkPolicy policy : policies) {
-                    if (policy != null) {
+                    // We purposefully only backup policies that the user has
+                    // defined; any inferred policies might include
+                    // carrier-protected data that we can't export.
+                    if (policy != null && !policy.inferred) {
                         byte[] marshaledPolicy = policy.getBytesForBackup();
                         out.writeByte(BackupUtils.NOT_NULL);
                         out.writeInt(marshaledPolicy.length);
@@ -910,7 +913,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 }
                 // Only set the policies if there was no error in the restore operation
                 networkPolicyManager.setNetworkPolicies(policies);
-            } catch (NullPointerException | IOException | BackupUtils.BadVersionException e) {
+            } catch (NullPointerException | IOException | BackupUtils.BadVersionException
+                    | DateTimeException e) {
                 // NPE can be thrown when trying to instantiate a NetworkPolicy
                 Log.e(TAG, "Failed to convert byte array to NetworkPolicies " + e.getMessage());
             }

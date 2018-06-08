@@ -16,13 +16,13 @@
 
 #include "Canvas.h"
 
-#include "RecordingCanvas.h"
-#include "RenderNode.h"
 #include "MinikinUtils.h"
 #include "Paint.h"
 #include "Properties.h"
-#include "pipeline/skia/SkiaRecordingCanvas.h"
+#include "RecordingCanvas.h"
+#include "RenderNode.h"
 #include "Typeface.h"
+#include "pipeline/skia/SkiaRecordingCanvas.h"
 
 #include <SkDrawFilter.h>
 
@@ -36,7 +36,7 @@ Canvas* Canvas::create_recording_canvas(int width, int height, uirenderer::Rende
 }
 
 static inline void drawStroke(SkScalar left, SkScalar right, SkScalar top, SkScalar thickness,
-        const SkPaint& paint, Canvas* canvas) {
+                              const SkPaint& paint, Canvas* canvas) {
     const SkScalar strokeWidth = fmax(thickness, 1.0f);
     const SkScalar bottom = top + strokeWidth;
     canvas->drawRect(left, top, right, bottom, paint);
@@ -91,20 +91,18 @@ static void simplifyPaint(int color, SkPaint* paint) {
 
 class DrawTextFunctor {
 public:
-    DrawTextFunctor(const minikin::Layout& layout, Canvas* canvas,
-            const SkPaint& paint, float x, float y, minikin::MinikinRect& bounds,
-            float totalAdvance)
-        : layout(layout)
-        , canvas(canvas)
-        , paint(paint)
-        , x(x)
-        , y(y)
-        , bounds(bounds)
-        , totalAdvance(totalAdvance) {
-    }
+    DrawTextFunctor(const minikin::Layout& layout, Canvas* canvas, const SkPaint& paint, float x,
+                    float y, minikin::MinikinRect& bounds, float totalAdvance)
+            : layout(layout)
+            , canvas(canvas)
+            , paint(paint)
+            , x(x)
+            , y(y)
+            , bounds(bounds)
+            , totalAdvance(totalAdvance) {}
 
     void operator()(size_t start, size_t end) {
-        auto glyphFunc = [&] (uint16_t* text, float* positions) {
+        auto glyphFunc = [&](uint16_t* text, float* positions) {
             if (canvas->drawTextAbsolutePos()) {
                 for (size_t i = start, textIndex = 0, posIndex = 0; i < end; i++) {
                     text[textIndex++] = layout.getGlyphId(i);
@@ -133,20 +131,21 @@ public:
             simplifyPaint(darken ? SK_ColorWHITE : SK_ColorBLACK, &outlinePaint);
             outlinePaint.setStyle(SkPaint::kStrokeAndFill_Style);
             canvas->drawGlyphs(glyphFunc, glyphCount, outlinePaint, x, y, bounds.mLeft, bounds.mTop,
-                    bounds.mRight, bounds.mBottom, totalAdvance);
+                               bounds.mRight, bounds.mBottom, totalAdvance);
 
             // inner
             SkPaint innerPaint(paint);
             simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, &innerPaint);
             innerPaint.setStyle(SkPaint::kFill_Style);
             canvas->drawGlyphs(glyphFunc, glyphCount, innerPaint, x, y, bounds.mLeft, bounds.mTop,
-                    bounds.mRight, bounds.mBottom, totalAdvance);
+                               bounds.mRight, bounds.mBottom, totalAdvance);
         } else {
             // standard draw path
             canvas->drawGlyphs(glyphFunc, glyphCount, paint, x, y, bounds.mLeft, bounds.mTop,
-                    bounds.mRight, bounds.mBottom, totalAdvance);
+                               bounds.mRight, bounds.mBottom, totalAdvance);
         }
     }
+
 private:
     const minikin::Layout& layout;
     Canvas* canvas;
@@ -157,13 +156,15 @@ private:
     float totalAdvance;
 };
 
-void Canvas::drawText(const uint16_t* text, int start, int count, int contextCount,
-        float x, float y, int bidiFlags, const Paint& origPaint, Typeface* typeface) {
+void Canvas::drawText(const uint16_t* text, int start, int count, int contextCount, float x,
+                      float y, minikin::Bidi bidiFlags, const Paint& origPaint,
+                      const Typeface* typeface, minikin::MeasuredText* mt) {
     // minikin may modify the original paint
     Paint paint(origPaint);
 
-    minikin::Layout layout = MinikinUtils::doLayout(
-            &paint, bidiFlags, typeface, text, start, count, contextCount);
+    minikin::Layout layout =
+            MinikinUtils::doLayout(&paint, bidiFlags, typeface, text, start, count, contextCount,
+                                   mt);
 
     x += MinikinUtils::xOffsetForTextAlign(&paint, layout);
 
@@ -185,18 +186,18 @@ void Canvas::drawText(const uint16_t* text, int start, int count, int contextCou
 class DrawTextOnPathFunctor {
 public:
     DrawTextOnPathFunctor(const minikin::Layout& layout, Canvas* canvas, float hOffset,
-            float vOffset, const Paint& paint, const SkPath& path)
-        : layout(layout)
-        , canvas(canvas)
-        , hOffset(hOffset)
-        , vOffset(vOffset)
-        , paint(paint)
-        , path(path) {
-    }
+                          float vOffset, const Paint& paint, const SkPath& path)
+            : layout(layout)
+            , canvas(canvas)
+            , hOffset(hOffset)
+            , vOffset(vOffset)
+            , paint(paint)
+            , path(path) {}
 
     void operator()(size_t start, size_t end) {
         canvas->drawLayoutOnPath(layout, hOffset, vOffset, paint, path, start, end);
     }
+
 private:
     const minikin::Layout& layout;
     Canvas* canvas;
@@ -206,11 +207,12 @@ private:
     const SkPath& path;
 };
 
-void Canvas::drawTextOnPath(const uint16_t* text, int count, int bidiFlags, const SkPath& path,
-        float hOffset, float vOffset, const Paint& paint, Typeface* typeface) {
+void Canvas::drawTextOnPath(const uint16_t* text, int count, minikin::Bidi bidiFlags,
+                            const SkPath& path, float hOffset, float vOffset, const Paint& paint,
+                            const Typeface* typeface) {
     Paint paintCopy(paint);
-    minikin::Layout layout = MinikinUtils::doLayout(
-            &paintCopy, bidiFlags, typeface, text, 0, count, count);
+    minikin::Layout layout =
+            MinikinUtils::doLayout(&paintCopy, bidiFlags, typeface, text, 0, count, count, nullptr);
     hOffset += MinikinUtils::hOffsetForTextAlign(&paintCopy, layout, path);
 
     // Set align to left for drawing, as we don't want individual
@@ -222,4 +224,10 @@ void Canvas::drawTextOnPath(const uint16_t* text, int count, int bidiFlags, cons
     MinikinUtils::forFontRun(layout, &paintCopy, f);
 }
 
-} // namespace android
+int Canvas::sApiLevel = 1;
+
+void Canvas::setCompatibilityVersion(int apiLevel) {
+    sApiLevel = apiLevel;
+}
+
+}  // namespace android

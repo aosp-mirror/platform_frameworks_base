@@ -79,9 +79,6 @@
     <!-- The color of the material notification background when dark -->
     <color name="notification_material_background_dark_color">#ff333333</color>
 
-    <!-- The color of the material notification background when low priority -->
-    <color name="notification_material_background_low_priority_color">#fff5f5f5</color>
-
     <!-- The color of the dividing line between grouped notifications. -->
     <color name="notification_divider_color">#FF616161</color>
 
@@ -91,9 +88,6 @@
     <!-- The color of the ripples on the untinted notifications -->
     <color name="notification_ripple_untinted_color">#28000000</color>
 
-    <!-- The color of the ripples on the low priority notifications -->
-    <color name="notification_ripple_color_low_priority">#30000000</color>
-
     <!-- The color of the ripples on the tinted notifications -->
     <color name="notification_ripple_tinted_color">#30ffffff</color>
 
@@ -101,7 +95,7 @@
     <color name="notification_gear_color">#ff757575</color>
 
     <!-- The "inside" of a notification, reached via longpress -->
-    <color name="notification_guts_bg_color">#eeeeee</color>
+    <color name="notification_guts_bg_color">#f8f9fa</color>
 
     <color name="assist_orb_color">#ffffff</color>
 
@@ -109,6 +103,9 @@
 
     <!-- The color of the navigation bar icons. Need to be in sync with ic_sysbar_* -->
     <color name="navigation_bar_icon_color">#E5FFFFFF</color>
+
+    <!-- The shadow color for light navigation bar icons. -->
+    <color name="nav_key_button_shadow_color">#30000000</color>
 
     <!-- Shadow color for the first pixels around the fake shadow for recents. -->
     <color name="fake_shadow_start_color">#44000000</color>
@@ -128,9 +125,6 @@
     <color name="light_mode_icon_color_dual_tone_background">#4dffffff</color>
     <color name="light_mode_icon_color_dual_tone_fill">#ffffff</color>
 
-    <color name="volume_settings_icon_color">#7fffffff</color>
-    <color name="volume_slider_inactive">@*android:color/quaternary_device_default_settings</color>
-
     <color name="docked_divider_background">#ff000000</color>
     <color name="docked_divider_handle">#ffffff</color>
     <drawable name="forced_resizable_background">#59000000</drawable>
@@ -143,6 +137,9 @@
 
     <color name="remote_input_accent">#eeeeee</color>
 
+    <color name="quick_step_track_background_dark">#61000000</color>
+    <color name="quick_step_track_background_light">#33FFFFFF</color>
+
     <!-- Keyboard shortcuts colors -->
     <color name="ksh_application_group_color">#fff44336</color>
     <color name="ksh_keyword_color">#d9000000</color>
@@ -153,4 +150,19 @@
 
     <color name="zen_introduction">#ffffffff</color>
 
+    <color name="smart_reply_button_text">#5F6368</color>
+    <color name="smart_reply_button_text_dark_bg">@*android:color/notification_primary_text_color_dark</color>
+    <color name="smart_reply_button_background">#ffffffff</color>
+    <color name="smart_reply_button_stroke">#ffdadce0</color>
+
+    <!-- Fingerprint dialog colors -->
+    <color name="fingerprint_dialog_bg_color">#ffffffff</color> <!-- 100% white -->
+    <color name="fingerprint_dialog_text_dark_color">#dd000000</color> <!-- 87% black -->
+    <color name="fingerprint_dialog_text_light_color">#89000000</color> <!-- 54% black -->
+    <color name="fingerprint_dialog_dim_color">#80000000</color> <!-- 50% black -->
+    <color name="fingerprint_dialog_error_color">#fff44336</color> <!-- red -->
+    <color name="fingerprint_dialog_fingerprint_color">#ff008577</color> <!-- teal -->
+
+    <!-- Logout button -->
+    <color name="logout_button_bg_color">#ccffffff</color>
 </resources>

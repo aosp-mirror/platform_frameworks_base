@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.TestApi;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.storage.StorageManager;
@@ -24,6 +25,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
+import java.util.LinkedList;
 
 /**
  * Provides access to environment variables.
@@ -40,6 +42,7 @@ public class Environment {
     private static final String ENV_OEM_ROOT = "OEM_ROOT";
     private static final String ENV_ODM_ROOT = "ODM_ROOT";
     private static final String ENV_VENDOR_ROOT = "VENDOR_ROOT";
+    private static final String ENV_PRODUCT_ROOT = "PRODUCT_ROOT";
 
     /** {@hide} */
     public static final String DIR_ANDROID = "Android";
@@ -61,6 +64,7 @@ public class Environment {
     private static final File DIR_OEM_ROOT = getDirectory(ENV_OEM_ROOT, "/oem");
     private static final File DIR_ODM_ROOT = getDirectory(ENV_ODM_ROOT, "/odm");
     private static final File DIR_VENDOR_ROOT = getDirectory(ENV_VENDOR_ROOT, "/vendor");
+    private static final File DIR_PRODUCT_ROOT = getDirectory(ENV_PRODUCT_ROOT, "/product");
 
     private static UserEnvironment sCurrentUser;
     private static boolean sUserRequired;
@@ -179,6 +183,16 @@ public class Environment {
     }
 
     /**
+     * Return root directory of the "product" partition holding product-specific
+     * customizations if any. If present, the partition is mounted read-only.
+     *
+     * @hide
+     */
+    public static File getProductDirectory() {
+        return DIR_PRODUCT_ROOT;
+    }
+
+    /**
      * Return the system directory for a user. This is for use by system
      * services to store files relating to the user. This directory will be
      * automatically deleted when the user is removed.
@@ -288,6 +302,16 @@ public class Environment {
 
     private static File getDataProfilesDeDirectory(int userId) {
         return buildPath(getDataDirectory(), "misc", "profiles", "cur", String.valueOf(userId));
+    }
+
+    /** {@hide} */
+    public static File getDataVendorCeDirectory(int userId) {
+        return buildPath(getDataDirectory(), "vendor_ce", String.valueOf(userId));
+    }
+
+    /** {@hide} */
+    public static File getDataVendorDeDirectory(int userId) {
+        return buildPath(getDataDirectory(), "vendor_de", String.valueOf(userId));
     }
 
     /** {@hide} */
@@ -608,6 +632,79 @@ public class Environment {
         return false;
     }
 
+    /** {@hide} */ public static final int HAS_MUSIC = 1 << 0;
+    /** {@hide} */ public static final int HAS_PODCASTS = 1 << 1;
+    /** {@hide} */ public static final int HAS_RINGTONES = 1 << 2;
+    /** {@hide} */ public static final int HAS_ALARMS = 1 << 3;
+    /** {@hide} */ public static final int HAS_NOTIFICATIONS = 1 << 4;
+    /** {@hide} */ public static final int HAS_PICTURES = 1 << 5;
+    /** {@hide} */ public static final int HAS_MOVIES = 1 << 6;
+    /** {@hide} */ public static final int HAS_DOWNLOADS = 1 << 7;
+    /** {@hide} */ public static final int HAS_DCIM = 1 << 8;
+    /** {@hide} */ public static final int HAS_DOCUMENTS = 1 << 9;
+
+    /** {@hide} */ public static final int HAS_ANDROID = 1 << 16;
+    /** {@hide} */ public static final int HAS_OTHER = 1 << 17;
+
+    /**
+     * Classify the content types present on the given external storage device.
+     * <p>
+     * This is typically useful for deciding if an inserted SD card is empty, or
+     * if it contains content like photos that should be preserved.
+     *
+     * @hide
+     */
+    public static int classifyExternalStorageDirectory(File dir) {
+        int res = 0;
+        for (File f : FileUtils.listFilesOrEmpty(dir)) {
+            if (f.isFile() && isInterestingFile(f)) {
+                res |= HAS_OTHER;
+            } else if (f.isDirectory() && hasInterestingFiles(f)) {
+                final String name = f.getName();
+                if (DIRECTORY_MUSIC.equals(name)) res |= HAS_MUSIC;
+                else if (DIRECTORY_PODCASTS.equals(name)) res |= HAS_PODCASTS;
+                else if (DIRECTORY_RINGTONES.equals(name)) res |= HAS_RINGTONES;
+                else if (DIRECTORY_ALARMS.equals(name)) res |= HAS_ALARMS;
+                else if (DIRECTORY_NOTIFICATIONS.equals(name)) res |= HAS_NOTIFICATIONS;
+                else if (DIRECTORY_PICTURES.equals(name)) res |= HAS_PICTURES;
+                else if (DIRECTORY_MOVIES.equals(name)) res |= HAS_MOVIES;
+                else if (DIRECTORY_DOWNLOADS.equals(name)) res |= HAS_DOWNLOADS;
+                else if (DIRECTORY_DCIM.equals(name)) res |= HAS_DCIM;
+                else if (DIRECTORY_DOCUMENTS.equals(name)) res |= HAS_DOCUMENTS;
+                else if (DIRECTORY_ANDROID.equals(name)) res |= HAS_ANDROID;
+                else res |= HAS_OTHER;
+            }
+        }
+        return res;
+    }
+
+    private static boolean hasInterestingFiles(File dir) {
+        final LinkedList<File> explore = new LinkedList<>();
+        explore.add(dir);
+        while (!explore.isEmpty()) {
+            dir = explore.pop();
+            for (File f : FileUtils.listFilesOrEmpty(dir)) {
+                if (isInterestingFile(f)) return true;
+                if (f.isDirectory()) explore.add(f);
+            }
+        }
+        return false;
+    }
+
+    private static boolean isInterestingFile(File file) {
+        if (file.isFile()) {
+            final String name = file.getName().toLowerCase();
+            if (name.endsWith(".exe") || name.equals("autorun.inf")
+                    || name.equals("launchpad.zip") || name.equals(".nomedia")) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
     /**
      * Get a top-level shared/external storage directory for placing files of a
      * particular type. This is where the user will typically place and manage
@@ -836,7 +933,6 @@ public class Environment {
      *         physically removed.
      */
     public static boolean isExternalStorageRemovable() {
-        if (isStorageDisabled()) return false;
         final File externalDir = sCurrentUser.getExternalDirs()[0];
         return isExternalStorageRemovable(externalDir);
     }
@@ -875,7 +971,6 @@ public class Environment {
      *      boolean)
      */
     public static boolean isExternalStorageEmulated() {
-        if (isStorageDisabled()) return false;
         final File externalDir = sCurrentUser.getExternalDirs()[0];
         return isExternalStorageEmulated(externalDir);
     }
@@ -939,6 +1034,7 @@ public class Environment {
      *
      * @hide
      */
+    @TestApi
     public static File buildPath(File base, String... segments) {
         File cur = base;
         for (String segment : segments) {
@@ -951,9 +1047,6 @@ public class Environment {
         return cur;
     }
 
-    private static boolean isStorageDisabled() {
-        return SystemProperties.getBoolean("config.disable_storage", false);
-    }
 
     /**
      * If the given path exists on emulated external storage, return the

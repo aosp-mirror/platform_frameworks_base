@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -32,12 +33,17 @@ import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.service.autofill.BatchUpdates;
 import android.service.autofill.CustomDescription;
+import android.service.autofill.InternalTransformation;
+import android.service.autofill.InternalValidator;
 import android.service.autofill.SaveInfo;
 import android.service.autofill.ValueFinder;
 import android.text.Html;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.Slog;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,15 +54,16 @@ import android.view.WindowManager;
 import android.view.autofill.AutofillManager;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.UiThread;
+import com.android.server.autofill.Helper;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 /**
  * Autofill Save Prompt
@@ -64,6 +71,9 @@ import java.io.PrintWriter;
 final class SaveUi {
 
     private static final String TAG = "AutofillSaveUi";
+
+    private static final int THEME_ID =
+            com.android.internal.R.style.Theme_DeviceDefault_Autofill_Save;
 
     public interface OnSaveListener {
         void onSave();
@@ -124,21 +134,25 @@ final class SaveUi {
     private final CharSequence mSubTitle;
     private final PendingUi mPendingUi;
     private final String mServicePackageName;
-    private final String mPackageName;
+    private final ComponentName mComponentName;
+    private final boolean mCompatMode;
 
     private boolean mDestroyed;
 
     SaveUi(@NonNull Context context, @NonNull PendingUi pendingUi,
            @NonNull CharSequence serviceLabel, @NonNull Drawable serviceIcon,
-           @Nullable String servicePackageName, @NonNull String packageName,
+           @Nullable String servicePackageName, @NonNull ComponentName componentName,
            @NonNull SaveInfo info, @NonNull ValueFinder valueFinder,
-           @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener) {
+           @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener,
+           boolean compatMode) {
         mPendingUi= pendingUi;
         mListener = new OneTimeListener(listener);
         mOverlayControl = overlayControl;
         mServicePackageName = servicePackageName;
-        mPackageName = packageName;
+        mComponentName = componentName;
+        mCompatMode = compatMode;
 
+        context = new ContextThemeWrapper(context, THEME_ID);
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View view = inflater.inflate(R.layout.autofill_save, null);
 
@@ -185,68 +199,17 @@ final class SaveUi {
 
         setServiceIcon(context, view, serviceIcon);
 
-        ScrollView subtitleContainer = null;
-        final CustomDescription customDescription = info.getCustomDescription();
-        if (customDescription != null) {
-            writeLog(MetricsEvent.AUTOFILL_SAVE_CUSTOM_DESCRIPTION, type);
-
+        final boolean hasCustomDescription =
+                applyCustomDescription(context, view, valueFinder, info);
+        if (hasCustomDescription) {
             mSubTitle = null;
-            if (sDebug) Slog.d(TAG, "Using custom description");
-
-            final RemoteViews presentation = customDescription.getPresentation(valueFinder);
-            if (presentation != null) {
-                final RemoteViews.OnClickHandler handler = new RemoteViews.OnClickHandler() {
-                    @Override
-                    public boolean onClickHandler(View view, PendingIntent pendingIntent,
-                            Intent intent) {
-                        final LogMaker log =
-                                newLogMaker(MetricsEvent.AUTOFILL_SAVE_LINK_TAPPED, type);
-                        // We need to hide the Save UI before launching the pending intent, and
-                        // restore back it once the activity is finished, and that's achieved by
-                        // adding a custom extra in the activity intent.
-                        final boolean isValid = isValidLink(pendingIntent, intent);
-                        if (!isValid) {
-                            log.setType(MetricsEvent.TYPE_UNKNOWN);
-                            mMetricsLogger.write(log);
-                            return false;
-                        }
-                        if (sVerbose) Slog.v(TAG, "Intercepting custom description intent");
-                        final IBinder token = mPendingUi.getToken();
-                        intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
-                        try {
-                            pendingUi.client.startIntentSender(pendingIntent.getIntentSender(),
-                                    intent);
-                            mPendingUi.setState(PendingUi.STATE_PENDING);
-                            if (sDebug) Slog.d(TAG, "hiding UI until restored with token " + token);
-                            hide();
-                            log.setType(MetricsEvent.TYPE_OPEN);
-                            mMetricsLogger.write(log);
-                            return true;
-                        } catch (RemoteException e) {
-                            Slog.w(TAG, "error triggering pending intent: " + intent);
-                            log.setType(MetricsEvent.TYPE_FAILURE);
-                            mMetricsLogger.write(log);
-                            return false;
-                        }
-                    }
-                };
-
-                try {
-                    final View customSubtitleView = presentation.apply(context, null, handler);
-                    subtitleContainer = view.findViewById(R.id.autofill_save_custom_subtitle);
-                    subtitleContainer.addView(customSubtitleView);
-                    subtitleContainer.setVisibility(View.VISIBLE);
-                } catch (Exception e) {
-                    Slog.e(TAG, "Could not inflate custom description. ", e);
-                }
-            } else {
-                Slog.w(TAG, "could not create remote presentation for custom title");
-            }
+            if (sDebug) Slog.d(TAG, "on constructor: applied custom description");
         } else {
             mSubTitle = info.getDescription();
             if (mSubTitle != null) {
                 writeLog(MetricsEvent.AUTOFILL_SAVE_CUSTOM_SUBTITLE, type);
-                subtitleContainer = view.findViewById(R.id.autofill_save_custom_subtitle);
+                final ViewGroup subtitleContainer =
+                        view.findViewById(R.id.autofill_save_custom_subtitle);
                 final TextView subtitleView = new TextView(context);
                 subtitleView.setText(mSubTitle);
                 subtitleContainer.addView(subtitleView,
@@ -268,7 +231,7 @@ final class SaveUi {
         final View yesButton = view.findViewById(R.id.autofill_save_yes);
         yesButton.setOnClickListener((v) -> mListener.onSave());
 
-        mDialog = new Dialog(context, R.style.Theme_DeviceDefault_Light_Panel);
+        mDialog = new Dialog(context, THEME_ID);
         mDialog.setContentView(view);
 
         // Dialog can be dismissed when touched outside, but the negative listener should not be
@@ -277,8 +240,7 @@ final class SaveUi {
 
         final Window window = mDialog.getWindow();
         window.setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
-        window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+        window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                 | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH);
         window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS);
@@ -291,6 +253,123 @@ final class SaveUi {
         params.windowAnimations = R.style.AutofillSaveAnimation;
 
         show();
+    }
+
+    private boolean applyCustomDescription(@NonNull Context context, @NonNull View saveUiView,
+            @NonNull ValueFinder valueFinder, @NonNull SaveInfo info) {
+        final CustomDescription customDescription = info.getCustomDescription();
+        if (customDescription == null) {
+            return false;
+        }
+        final int type = info.getType();
+        writeLog(MetricsEvent.AUTOFILL_SAVE_CUSTOM_DESCRIPTION, type);
+
+        final RemoteViews template = customDescription.getPresentation();
+        if (template == null) {
+            Slog.w(TAG, "No remote view on custom description");
+            return false;
+        }
+
+        // First apply the unconditional transformations (if any) to the templates.
+        final ArrayList<Pair<Integer, InternalTransformation>> transformations =
+                customDescription.getTransformations();
+        if (transformations != null) {
+            if (!InternalTransformation.batchApply(valueFinder, template, transformations)) {
+                Slog.w(TAG, "could not apply main transformations on custom description");
+                return false;
+            }
+        }
+
+        final RemoteViews.OnClickHandler handler = new RemoteViews.OnClickHandler() {
+            @Override
+            public boolean onClickHandler(View view, PendingIntent pendingIntent,
+                    Intent intent) {
+                final LogMaker log =
+                        newLogMaker(MetricsEvent.AUTOFILL_SAVE_LINK_TAPPED, type);
+                // We need to hide the Save UI before launching the pending intent, and
+                // restore back it once the activity is finished, and that's achieved by
+                // adding a custom extra in the activity intent.
+                final boolean isValid = isValidLink(pendingIntent, intent);
+                if (!isValid) {
+                    log.setType(MetricsEvent.TYPE_UNKNOWN);
+                    mMetricsLogger.write(log);
+                    return false;
+                }
+                if (sVerbose) Slog.v(TAG, "Intercepting custom description intent");
+                final IBinder token = mPendingUi.getToken();
+                intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
+                try {
+                    mPendingUi.client.startIntentSender(pendingIntent.getIntentSender(),
+                            intent);
+                    mPendingUi.setState(PendingUi.STATE_PENDING);
+                    if (sDebug) Slog.d(TAG, "hiding UI until restored with token " + token);
+                    hide();
+                    log.setType(MetricsEvent.TYPE_OPEN);
+                    mMetricsLogger.write(log);
+                    return true;
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "error triggering pending intent: " + intent);
+                    log.setType(MetricsEvent.TYPE_FAILURE);
+                    mMetricsLogger.write(log);
+                    return false;
+                }
+            }
+        };
+
+        try {
+            // Create the remote view peer.
+            template.setApplyTheme(THEME_ID);
+            final View customSubtitleView = template.apply(context, null, handler);
+
+            // And apply batch updates (if any).
+            final ArrayList<Pair<InternalValidator, BatchUpdates>> updates =
+                    customDescription.getUpdates();
+            if (updates != null) {
+                final int size = updates.size();
+                if (sDebug) Slog.d(TAG, "custom description has " + size + " batch updates");
+                for (int i = 0; i < size; i++) {
+                    final Pair<InternalValidator, BatchUpdates> pair = updates.get(i);
+                    final InternalValidator condition = pair.first;
+                    if (condition == null || !condition.isValid(valueFinder)) {
+                        if (sDebug) Slog.d(TAG, "Skipping batch update #" + i );
+                        continue;
+                    }
+                    final BatchUpdates batchUpdates = pair.second;
+                    // First apply the updates...
+                    final RemoteViews templateUpdates = batchUpdates.getUpdates();
+                    if (templateUpdates != null) {
+                        if (sDebug) Slog.d(TAG, "Applying template updates for batch update #" + i);
+                        templateUpdates.reapply(context, customSubtitleView);
+                    }
+                    // Then the transformations...
+                    final ArrayList<Pair<Integer, InternalTransformation>> batchTransformations =
+                            batchUpdates.getTransformations();
+                    if (batchTransformations != null) {
+                        if (sDebug) {
+                            Slog.d(TAG, "Applying child transformation for batch update #" + i
+                                    + ": " + batchTransformations);
+                        }
+                        if (!InternalTransformation.batchApply(valueFinder, template,
+                                batchTransformations)) {
+                            Slog.w(TAG, "Could not apply child transformation for batch update "
+                                    + "#" + i + ": " + batchTransformations);
+                            return false;
+                        }
+                        template.reapply(context, customSubtitleView);
+                    }
+                }
+            }
+
+            // Finally, add the custom description to the save UI.
+            final ViewGroup subtitleContainer =
+                    saveUiView.findViewById(R.id.autofill_save_custom_subtitle);
+            subtitleContainer.addView(customSubtitleView);
+            subtitleContainer.setVisibility(View.VISIBLE);
+            return true;
+        } catch (Exception e) {
+            Slog.e(TAG, "Error applying custom description. ", e);
+        }
+        return false;
     }
 
     private void setServiceIcon(Context context, View view, Drawable serviceIcon) {
@@ -334,14 +413,12 @@ final class SaveUi {
     }
 
     private LogMaker newLogMaker(int category, int saveType) {
-        return newLogMaker(category)
-                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SAVE_TYPE, saveType);
+        return newLogMaker(category).addTaggedData(MetricsEvent.FIELD_AUTOFILL_SAVE_TYPE, saveType);
     }
 
     private LogMaker newLogMaker(int category) {
-        return new LogMaker(category)
-                .setPackageName(mPackageName)
-                .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, mServicePackageName);
+        return Helper.newLogMaker(category, mComponentName, mServicePackageName,
+                mPendingUi.sessionId, mCompatMode);
     }
 
     private void writeLog(int category, int saveType) {
@@ -429,7 +506,8 @@ final class SaveUi {
         pw.print(prefix); pw.print("subtitle: "); pw.println(mSubTitle);
         pw.print(prefix); pw.print("pendingUi: "); pw.println(mPendingUi);
         pw.print(prefix); pw.print("service: "); pw.println(mServicePackageName);
-        pw.print(prefix); pw.print("app: "); pw.println(mPackageName);
+        pw.print(prefix); pw.print("app: "); pw.println(mComponentName.toShortString());
+        pw.print(prefix); pw.print("compat mode: "); pw.println(mCompatMode);
 
         final View view = mDialog.getWindow().getDecorView();
         final int[] loc = view.getLocationOnScreen();

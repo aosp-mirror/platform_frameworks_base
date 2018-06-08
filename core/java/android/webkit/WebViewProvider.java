@@ -19,16 +19,16 @@ package android.webkit;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.content.res.Configuration;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.net.http.SslCertificate;
 import android.net.Uri;
+import android.net.http.SslCertificate;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -73,7 +73,8 @@ public interface WebViewProvider {
      * Initialize this WebViewProvider instance. Called after the WebView has fully constructed.
      * @param javaScriptInterfaces is a Map of interface names, as keys, and
      * object implementing those interfaces, as values.
-     * @param privateBrowsing If true the web view will be initialized in private / incognito mode.
+     * @param privateBrowsing If {@code true} the web view will be initialized in private /
+     * incognito mode.
      */
     public void init(Map<String, Object> javaScriptInterfaces,
             boolean privateBrowsing);
@@ -315,7 +316,7 @@ public interface WebViewProvider {
     /**
      * Provides mechanism for the name-sake methods declared in View and ViewGroup to be delegated
      * into the WebViewProvider instance.
-     * NOTE For many of these methods, the WebView will provide a super.Foo() call before or after
+     * NOTE: For many of these methods, the WebView will provide a super.Foo() call before or after
      * making the call into the provider instance. This is done for convenience in the common case
      * of maintaining backward compatibility. For remaining super class calls (e.g. where the
      * provider may need to only conditionally make the call based on some internal state) see the
@@ -328,13 +329,16 @@ public interface WebViewProvider {
 
         public void onProvideVirtualStructure(android.view.ViewStructure structure);
 
-        @SuppressWarnings("unused")
-        public default void onProvideAutofillVirtualStructure(android.view.ViewStructure structure,
-                int flags) {
+        default void onProvideAutofillVirtualStructure(
+                @SuppressWarnings("unused") android.view.ViewStructure structure,
+                @SuppressWarnings("unused") int flags) {
         }
 
-        @SuppressWarnings("unused")
-        public default void autofill(SparseArray<AutofillValue>values) {
+        default void autofill(@SuppressWarnings("unused") SparseArray<AutofillValue> values) {
+        }
+
+        default boolean isVisibleToUserForAutofill(@SuppressWarnings("unused") int virtualId) {
+            return true; // true is the default value returned by View.isVisibleToUserForAutofill()
         }
 
         public AccessibilityNodeProvider getAccessibilityNodeProvider();
@@ -423,6 +427,11 @@ public interface WebViewProvider {
         public Handler getHandler(Handler originalHandler);
 
         public View findFocus(View originalFocusedView);
+
+        @SuppressWarnings("unused")
+        default boolean onCheckIsTextEditor() {
+            return false;
+        }
     }
 
     interface ScrollDelegate {

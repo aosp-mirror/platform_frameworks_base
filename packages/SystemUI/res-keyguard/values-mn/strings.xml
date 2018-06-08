@@ -53,16 +53,21 @@
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Дараагийн сэрүүлгийг <xliff:g id="ALARM">%1$s</xliff:g>-д тавьсан"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Устгах"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"eSIM-г идэвхгүй болгох"</string>
+    <string name="error_disable_esim_title" msgid="4852978431156228006">"eSIM-г идэвхгүй болгох боломжгүй"</string>
+    <string name="error_disable_esim_msg" msgid="676694908770135639">"Алдаа гарсан тул eSIM-г идэвхгүй болгох боломжгүй байна."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Оруулах"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Загварыг мартсан"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Загвар буруу байна"</string>
     <string name="kg_wrong_password" msgid="4580683060277329277">"Нууц үг буруу байна"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"ПИН код буруу байна"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"<xliff:g id="NUMBER">%d</xliff:g> секундын дараа дахин оролдоно уу."</string>
+    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
+      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> секундын дараа дахин оролдоно уу.</item>
+      <item quantity="one">1 секундын дараа дахин оролдоно уу.</item>
+    </plurals>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Загварыг оруулна уу"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"SIM-н ПИН-г оруулна уу."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\"-н SIM-н ПИН-г оруулна уу."</string>
-    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"Төхөөрөмжийг мобайл үйлчилгээгүй ашиглахын тулд eSIM-г идэвхгүй болгоно уу."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Төхөөрөмжийг мобайл үйлчилгээгүйгээр ашиглахын тулд eSIM-г идэвхгүй болгоно уу."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"ПИН оруулна уу"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Нууц үг оруулна уу"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM идэвхгүй байна. Үргэлжлүүлэх бол PUK кодыг оруулна уу. Дэлгэрэнгүй мэдээлэл авах бол оператор компанитайгаа холбогдоно уу."</string>
@@ -132,4 +137,12 @@
       <item quantity="one">Төхөөрөмжийн түгжээг <xliff:g id="NUMBER_0">%d</xliff:g> цагийн турш тайлаагүй байна. Нууц үгээ баталгаажуулна уу.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"Танигдахгүй байна"</string>
+    <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
+      <item quantity="other">SIM-н ПИН кодыг оруулна уу. Танд <xliff:g id="NUMBER_1">%d</xliff:g> оролдлого үлдлээ.</item>
+      <item quantity="one">SIM-н ПИН кодыг оруулна уу. Танд оператор компанитайгаа холбогдохгүйгээр төхөөрөмжийн түгжээг тайлах <xliff:g id="NUMBER_0">%d</xliff:g> оролдлого үлдлээ.</item>
+    </plurals>
+    <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
+      <item quantity="other">SIM-г идэвхгүй болголоо. Үргэлжлүүлэхийн тулд PUK кодыг оруулна уу. Таны SIM бүрмөсөн хүчингүй болох хүртэл <xliff:g id="_NUMBER_1">%d</xliff:g> оролдлого үлдлээ. Дэлгэрэнгүй мэдээлэл авахын тулд оператор компанитайгаа холбогдоно уу.</item>
+      <item quantity="one">SIM-г идэвхгүй болголоо. Үргэлжлүүлэхийн тулд PUK кодыг оруулна уу. Таны SIM бүрмөсөн хүчингүй болох хүртэл <xliff:g id="_NUMBER_0">%d</xliff:g> оролдлого үлдлээ. Дэлгэрэнгүй мэдээлэл авахын тулд оператор компанитайгаа холбогдоно уу.</item>
+    </plurals>
 </resources>

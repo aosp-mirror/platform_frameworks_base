@@ -234,10 +234,6 @@
     <item msgid="7688197031296835369">"වැඩිකොට දක්වනවා ඇති ප්‍රදේශ පෙන්වන්න"</item>
     <item msgid="2290859360633824369">"අපවිෂවීම සඳහා ප්‍රදේශ පෙන්වන්න"</item>
   </string-array>
-  <string-array name="debug_hw_renderer_entries">
-    <item msgid="2578620445459945681">"OpenGL (පෙරනිමි)"</item>
-    <item msgid="2839130076198120436">"OpenGL (Skia)"</item>
-  </string-array>
   <string-array name="app_process_limit_entries">
     <item msgid="3401625457385943795">"සම්මත සීමාව"</item>
     <item msgid="4071574792028999443">"පසුබිම් ක්‍රියාවලි නොමැත"</item>

@@ -21,11 +21,11 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.util.IntProperty;
 import android.util.Property;
 import android.view.View;
 
-import com.android.systemui.recents.misc.Utilities;
+import com.android.systemui.shared.recents.utilities.AnimationProps;
+import com.android.systemui.shared.recents.utilities.Utilities;
 
 import java.util.ArrayList;
 
@@ -59,7 +59,7 @@ public class TaskViewTransform {
 
     public boolean visible = false;
 
-    // This is a window-space rect used for positioning the task in the stack and freeform workspace
+    // This is a window-space rect used for positioning the task in the stack
     public RectF rect = new RectF();
 
     /**

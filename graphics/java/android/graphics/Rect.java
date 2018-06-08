@@ -17,10 +17,12 @@
 package android.graphics;
 
 import android.annotation.CheckResult;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import android.text.TextUtils;
+import android.util.proto.ProtoOutputStream;
 import java.io.PrintWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -96,6 +98,16 @@ public final class Rect implements Parcelable {
             right = r.right;
             bottom = r.bottom;
         }
+    }
+
+    /**
+     * Returns a copy of {@code r} if {@code r} is not {@code null}, or {@code null} otherwise.
+     *
+     * @hide
+     */
+    @Nullable
+    public static Rect copyOrNull(@Nullable Rect r) {
+        return r == null ? null : new Rect(r);
     }
 
     @Override
@@ -194,7 +206,24 @@ public final class Rect implements Parcelable {
         pw.print(top); pw.print("]["); pw.print(right);
         pw.print(','); pw.print(bottom); pw.print(']');
     }
-    
+
+    /**
+     * Write to a protocol buffer output stream.
+     * Protocol buffer message definition at {@link android.graphics.RectProto}
+     *
+     * @param protoOutputStream Stream to write the Rect object to.
+     * @param fieldId           Field Id of the Rect as defined in the parent message
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
+        final long token = protoOutputStream.start(fieldId);
+        protoOutputStream.write(RectProto.LEFT, left);
+        protoOutputStream.write(RectProto.TOP, top);
+        protoOutputStream.write(RectProto.RIGHT, right);
+        protoOutputStream.write(RectProto.BOTTOM, bottom);
+        protoOutputStream.end(token);
+    }
+
     /**
      * Returns true if the rectangle is empty (left >= right or top >= bottom)
      */
@@ -454,6 +483,19 @@ public final class Rect implements Parcelable {
     @CheckResult
     public boolean intersect(Rect r) {
         return intersect(r.left, r.top, r.right, r.bottom);
+    }
+
+    /**
+     * If the specified rectangle intersects this rectangle, set this rectangle to that
+     * intersection, otherwise set this rectangle to the empty rectangle.
+     * @see #inset(int, int, int, int) but without checking if the rects overlap.
+     * @hide
+     */
+    public void intersectUnchecked(Rect other) {
+        left = Math.max(left, other.left);
+        top = Math.max(top, other.top);
+        right = Math.min(right, other.right);
+        bottom = Math.min(bottom, other.bottom);
     }
 
     /**

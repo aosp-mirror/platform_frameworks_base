@@ -17,6 +17,7 @@
 package android.hardware;
 
 import android.annotation.IntDef;
+import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -24,10 +25,10 @@ import android.os.Parcelable;
 import dalvik.annotation.optimization.FastNative;
 import dalvik.system.CloseGuard;
 
+import libcore.util.NativeAllocationRegistry;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
-import libcore.util.NativeAllocationRegistry;
 
 /**
  * HardwareBuffer wraps a native <code>AHardwareBuffer</code> object, which is a low-level object
@@ -41,10 +42,25 @@ import libcore.util.NativeAllocationRegistry;
 public final class HardwareBuffer implements Parcelable, AutoCloseable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({RGBA_8888, RGBA_FP16, RGBA_1010102, RGBX_8888, RGB_888, RGB_565, BLOB})
+    @IntDef(prefix = { "RGB", "BLOB", "D_", "DS_", "S_" }, value = {
+            RGBA_8888,
+            RGBA_FP16,
+            RGBA_1010102,
+            RGBX_8888,
+            RGB_888,
+            RGB_565,
+            BLOB,
+            D_16,
+            D_24,
+            DS_24UI8,
+            D_FP32,
+            DS_FP32UI8,
+            S_UI8,
+    })
     public @interface Format {
     }
 
+    @Format
     /** Format: 8 bits each red, green, blue, alpha */
     public static final int RGBA_8888    = 1;
     /** Format: 8 bits each red, green, blue, alpha, alpha is always 0xFF */
@@ -59,6 +75,18 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     public static final int RGBA_1010102 = 0x2b;
     /** Format: opaque format used for raw data transfer; must have a height of 1 */
     public static final int BLOB         = 0x21;
+    /** Format: 16 bits depth */
+    public static final int D_16         = 0x30;
+    /** Format: 24 bits depth */
+    public static final int D_24         = 0x31;
+    /** Format: 24 bits depth, 8 bits stencil */
+    public static final int DS_24UI8     = 0x32;
+    /** Format: 32 bits depth */
+    public static final int D_FP32       = 0x33;
+    /** Format: 32 bits depth, 8 bits stencil */
+    public static final int DS_FP32UI8   = 0x34;
+    /** Format: 8 bits stencil */
+    public static final int S_UI8        = 0x35;
 
     // Note: do not rename, this field is used by native code
     private long mNativeObject;
@@ -70,12 +98,14 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {USAGE_CPU_READ_RARELY, USAGE_CPU_READ_OFTEN,
+    @LongDef(flag = true, value = {USAGE_CPU_READ_RARELY, USAGE_CPU_READ_OFTEN,
             USAGE_CPU_WRITE_RARELY, USAGE_CPU_WRITE_OFTEN, USAGE_GPU_SAMPLED_IMAGE,
             USAGE_GPU_COLOR_OUTPUT, USAGE_PROTECTED_CONTENT, USAGE_VIDEO_ENCODE,
-            USAGE_GPU_DATA_BUFFER, USAGE_SENSOR_DIRECT_DATA})
+            USAGE_GPU_DATA_BUFFER, USAGE_SENSOR_DIRECT_DATA, USAGE_GPU_CUBE_MAP,
+            USAGE_GPU_MIPMAP_COMPLETE})
     public @interface Usage {};
 
+    @Usage
     /** Usage: The buffer will sometimes be read by the CPU */
     public static final long USAGE_CPU_READ_RARELY       = 2;
     /** Usage: The buffer will often be read by the CPU */
@@ -98,6 +128,10 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     public static final long USAGE_SENSOR_DIRECT_DATA     = 1 << 23;
     /** Usage: The buffer will be used as a shader storage or uniform buffer object */
     public static final long USAGE_GPU_DATA_BUFFER        = 1 << 24;
+    /** Usage: The buffer will be used as a cube map texture */
+    public static final long USAGE_GPU_CUBE_MAP           = 1 << 25;
+    /** Usage: The buffer contains a complete mipmap hierarchy */
+    public static final long USAGE_GPU_MIPMAP_COMPLETE    = 1 << 26;
 
     // The approximate size of a native AHardwareBuffer object.
     private static final long NATIVE_HARDWARE_BUFFER_SIZE = 232;
@@ -109,15 +143,9 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      *
      * @param width The width in pixels of the buffer
      * @param height The height in pixels of the buffer
-     * @param format The format of each pixel, one of {@link #RGBA_8888}, {@link #RGBA_FP16},
-     * {@link #RGBX_8888}, {@link #RGB_565}, {@link #RGB_888}, {@link #RGBA_1010102}, {@link #BLOB}
+     * @param format The @Format of each pixel
      * @param layers The number of layers in the buffer
-     * @param usage Flags describing how the buffer will be used, one of
-     *     {@link #USAGE_CPU_READ_RARELY}, {@link #USAGE_CPU_READ_OFTEN},
-     *     {@link #USAGE_CPU_WRITE_RARELY}, {@link #USAGE_CPU_WRITE_OFTEN},
-     *     {@link #USAGE_GPU_SAMPLED_IMAGE}, {@link #USAGE_GPU_COLOR_OUTPUT},
-     *     {@link #USAGE_GPU_DATA_BUFFER}, {@link #USAGE_PROTECTED_CONTENT},
-     *     {@link #USAGE_SENSOR_DIRECT_DATA}, {@link #USAGE_VIDEO_ENCODE}
+     * @param usage The @Usage flags describing how the buffer will be used
      * @return A <code>HardwareBuffer</code> instance if successful, or throws an
      *     IllegalArgumentException if the dimensions passed are invalid (either zero, negative, or
      *     too large to allocate), if the format is not supported, if the requested number of layers
@@ -145,7 +173,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
         if (nativeObject == 0) {
             throw new IllegalArgumentException("Unable to create a HardwareBuffer, either the " +
                     "dimensions passed were too large, too many image layers were requested, " +
-                    "or an invalid set of usage flags was passed");
+                    "or an invalid set of usage flags or invalid format was passed");
         }
         return new HardwareBuffer(nativeObject);
     }
@@ -197,8 +225,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     }
 
     /**
-     * Returns the format of this buffer, one of {@link #RGBA_8888}, {@link #RGBA_FP16},
-     * {@link #RGBX_8888}, {@link #RGB_565}, {@link #RGB_888}, {@link #RGBA_1010102}, {@link #BLOB}.
+     * Returns the @Format of this buffer.
      */
     @Format
     public int getFormat() {
@@ -329,6 +356,12 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
             case RGB_565:
             case RGB_888:
             case BLOB:
+            case D_16:
+            case D_24:
+            case DS_24UI8:
+            case D_FP32:
+            case DS_FP32UI8:
+            case S_UI8:
                 return true;
         }
         return false;

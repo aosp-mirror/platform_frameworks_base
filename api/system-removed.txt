@@ -1,13 +1,5 @@
 package android.app {
 
-  public abstract deprecated class EphemeralResolverService extends android.app.InstantAppResolverService {
-    ctor public EphemeralResolverService();
-    method public android.os.Looper getLooper();
-    method public abstract deprecated java.util.List<android.content.pm.EphemeralResolveInfo> onEphemeralResolveInfoList(int[], int);
-    method public android.content.pm.EphemeralResolveInfo onGetEphemeralIntentFilter(java.lang.String);
-    method public java.util.List<android.content.pm.EphemeralResolveInfo> onGetEphemeralResolveInfo(int[]);
-  }
-
   public class Notification implements android.os.Parcelable {
     method public static java.lang.Class<? extends android.app.Notification.Style> getNotificationStyleClass(java.lang.String);
   }
@@ -31,10 +23,7 @@ package android.content {
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
     field public static final deprecated java.lang.String ACTION_DEVICE_INITIALIZATION_WIZARD = "android.intent.action.DEVICE_INITIALIZATION_WIZARD";
-    field public static final deprecated java.lang.String ACTION_EPHEMERAL_RESOLVER_SETTINGS = "android.intent.action.EPHEMERAL_RESOLVER_SETTINGS";
-    field public static final deprecated java.lang.String ACTION_INSTALL_EPHEMERAL_PACKAGE = "android.intent.action.INSTALL_EPHEMERAL_PACKAGE";
     field public static final deprecated java.lang.String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
-    field public static final deprecated java.lang.String ACTION_RESOLVE_EPHEMERAL_PACKAGE = "android.intent.action.RESOLVE_EPHEMERAL_PACKAGE";
     field public static final deprecated java.lang.String ACTION_SERVICE_STATE = "android.intent.action.SERVICE_STATE";
     field public static final deprecated java.lang.String EXTRA_CDMA_DEFAULT_ROAMING_INDICATOR = "cdmaDefaultRoamingIndicator";
     field public static final deprecated java.lang.String EXTRA_CDMA_ROAMING_INDICATOR = "cdmaRoamingIndicator";
@@ -62,49 +51,14 @@ package android.content {
 
 }
 
-package android.content.pm {
-
-  public final deprecated class EphemeralIntentFilter implements android.os.Parcelable {
-    ctor public EphemeralIntentFilter(java.lang.String, java.util.List<android.content.IntentFilter>);
-    method public int describeContents();
-    method public java.util.List<android.content.IntentFilter> getFilters();
-    method public java.lang.String getSplitName();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.pm.EphemeralIntentFilter> CREATOR;
-  }
-
-  public final deprecated class EphemeralResolveInfo implements android.os.Parcelable {
-    ctor public deprecated EphemeralResolveInfo(android.net.Uri, java.lang.String, java.util.List<android.content.IntentFilter>);
-    ctor public deprecated EphemeralResolveInfo(android.content.pm.EphemeralResolveInfo.EphemeralDigest, java.lang.String, java.util.List<android.content.pm.EphemeralIntentFilter>);
-    ctor public EphemeralResolveInfo(android.content.pm.EphemeralResolveInfo.EphemeralDigest, java.lang.String, java.util.List<android.content.pm.EphemeralIntentFilter>, int);
-    ctor public EphemeralResolveInfo(java.lang.String, java.lang.String, java.util.List<android.content.pm.EphemeralIntentFilter>);
-    method public int describeContents();
-    method public byte[] getDigestBytes();
-    method public int getDigestPrefix();
-    method public deprecated java.util.List<android.content.IntentFilter> getFilters();
-    method public java.util.List<android.content.pm.EphemeralIntentFilter> getIntentFilters();
-    method public java.lang.String getPackageName();
-    method public int getVersionCode();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.pm.EphemeralResolveInfo> CREATOR;
-    field public static final java.lang.String SHA_ALGORITHM = "SHA-256";
-  }
-
-  public static final class EphemeralResolveInfo.EphemeralDigest implements android.os.Parcelable {
-    ctor public EphemeralResolveInfo.EphemeralDigest(java.lang.String);
-    method public int describeContents();
-    method public byte[][] getDigestBytes();
-    method public int[] getDigestPrefix();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.pm.EphemeralResolveInfo.EphemeralDigest> CREATOR;
-  }
-
-}
-
 package android.media.tv {
 
   public final class TvInputManager {
     method public android.media.tv.TvInputManager.Hardware acquireTvInputHardware(int, android.media.tv.TvInputManager.HardwareCallback, android.media.tv.TvInputInfo);
+  }
+
+  public static final class TvInputManager.Hardware {
+    method public boolean dispatchKeyEventToHdmi(android.view.KeyEvent);
   }
 
 }
@@ -122,29 +76,6 @@ package android.net.wifi {
     field public boolean untrusted;
   }
 
-  public class WifiConnectionStatistics implements android.os.Parcelable {
-    ctor public WifiConnectionStatistics();
-    ctor public WifiConnectionStatistics(android.net.wifi.WifiConnectionStatistics);
-    method public int describeContents();
-    method public void incrementOrAddUntrusted(java.lang.String, int, int);
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.net.wifi.WifiConnectionStatistics> CREATOR;
-    field public int num24GhzConnected;
-    field public int num5GhzConnected;
-    field public int numAutoJoinAttempt;
-    field public int numAutoRoamAttempt;
-    field public int numWifiManagerJoinAttempt;
-    field public java.util.HashMap<java.lang.String, android.net.wifi.WifiNetworkConnectionStatistics> untrustedNetworkHistory;
-  }
-
-  public class WifiManager {
-    method public deprecated java.util.List<android.net.wifi.BatchedScanResult> getBatchedScanResults();
-    method public android.net.wifi.WifiConnectionStatistics getConnectionStatistics();
-    method public deprecated boolean isBatchedScanSupported();
-    method public deprecated boolean setWifiApEnabled(android.net.wifi.WifiConfiguration, boolean);
-    method public deprecated boolean startLocationRestrictedScan(android.os.WorkSource);
-  }
-
 }
 
 package android.os {
@@ -156,6 +87,38 @@ package android.os {
   public final class PowerManager {
     method public deprecated boolean isScreenBrightnessBoosted();
     field public static final deprecated java.lang.String ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED = "android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED";
+  }
+
+}
+
+package android.security.keystore.recovery {
+
+  public final class KeyChainSnapshot implements android.os.Parcelable {
+    method public deprecated byte[] getTrustedHardwarePublicKey();
+  }
+
+  public class RecoveryController {
+    method public deprecated byte[] generateAndStoreKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
+    method public deprecated java.security.Key generateKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
+    method public deprecated java.util.List<java.lang.String> getAliases(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public deprecated android.security.keystore.recovery.KeyChainSnapshot getRecoveryData() throws android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public deprecated int getRecoveryStatus(java.lang.String, java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public deprecated void initRecoveryService(java.lang.String, byte[]) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public deprecated void setRecoveryStatus(java.lang.String, java.lang.String, int) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.content.pm.PackageManager.NameNotFoundException;
+  }
+
+  public class RecoverySession implements java.lang.AutoCloseable {
+    method public deprecated java.util.Map<java.lang.String, byte[]> recoverKeys(byte[], java.util.List<android.security.keystore.recovery.WrappedApplicationKey>) throws android.security.keystore.recovery.DecryptionFailedException, android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.SessionExpiredException;
+    method public deprecated byte[] start(byte[], byte[], byte[], java.util.List<android.security.keystore.recovery.KeyChainProtectionParams>) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public deprecated byte[] start(java.security.cert.CertPath, byte[], byte[], java.util.List<android.security.keystore.recovery.KeyChainProtectionParams>) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
+  }
+
+  public final class WrappedApplicationKey implements android.os.Parcelable {
+    method public deprecated byte[] getAccount();
+  }
+
+  public static class WrappedApplicationKey.Builder {
+    method public deprecated android.security.keystore.recovery.WrappedApplicationKey.Builder setAccount(byte[]);
   }
 
 }

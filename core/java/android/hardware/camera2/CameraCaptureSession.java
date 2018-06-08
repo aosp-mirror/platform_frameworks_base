@@ -16,14 +16,15 @@
 
 package android.hardware.camera2;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.os.Handler;
 import android.view.Surface;
 
+import java.util.concurrent.Executor;
 import java.util.List;
-
 
 /**
  * A configured capture session for a {@link CameraDevice}, used for capturing images from the
@@ -249,7 +250,7 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * <p>This function can also be called in case where multiple surfaces share the same
      * OutputConfiguration, and one of the surfaces becomes available after the {@link
      * CameraCaptureSession} is created. In that case, the application must first create the
-     * OutputConfiguration with the available Surface, then enable furture surface sharing via
+     * OutputConfiguration with the available Surface, then enable further surface sharing via
      * {@link OutputConfiguration#enableSurfaceSharing}, before creating the CameraCaptureSession.
      * After the CameraCaptureSession is created, and once the extra Surface becomes available, the
      * application must then call {@link OutputConfiguration#addSurface} before finalizing the
@@ -354,6 +355,50 @@ public abstract class CameraCaptureSession implements AutoCloseable {
             throws CameraAccessException;
 
     /**
+     * <p>Submit a request for an image to be captured by the camera device.</p>
+     *
+     * <p>The behavior of this method matches that of
+     * {@link #capture(CaptureRequest, CaptureCallback, Handler)},
+     * except that it uses {@link java.util.concurrent.Executor} as an argument
+     * instead of {@link android.os.Handler}.</p>
+     *
+     * @param request the settings for this capture
+     * @param executor the executor which will be used for invoking the listener.
+     * @param listener The callback object to notify once this request has been
+     * processed.
+     *
+     * @return int A unique capture sequence ID used by
+     *             {@link CaptureCallback#onCaptureSequenceCompleted}.
+     *
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if this session is no longer active, either because the session
+     *                               was explicitly closed, a new session has been created
+     *                               or the camera device has been closed.
+     * @throws IllegalArgumentException if the request targets no Surfaces or Surfaces that are not
+     *                                  configured as outputs for this session; or the request
+     *                                  targets a set of Surfaces that cannot be submitted
+     *                                  simultaneously in a reprocessable capture session; or a
+     *                                  reprocess capture request is submitted in a
+     *                                  non-reprocessable capture session; or the reprocess capture
+     *                                  request was created with a {@link TotalCaptureResult} from
+     *                                  a different session; or the capture targets a Surface in
+     *                                  the middle of being {@link #prepare prepared}; or the
+     *                                  executor is null, or the listener is not null.
+     *
+     * @see #captureBurst
+     * @see #setRepeatingRequest
+     * @see #setRepeatingBurst
+     * @see #abortCaptures
+     * @see CameraDevice#createReprocessableCaptureSession
+     */
+    public int captureSingleRequest(@NonNull CaptureRequest request,
+            @NonNull @CallbackExecutor Executor executor, @NonNull CaptureCallback listener)
+            throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
+
+    /**
      * Submit a list of requests to be captured in sequence as a burst. The
      * burst will be captured in the minimum amount of time possible, and will
      * not be interleaved with requests submitted by other capture or repeat
@@ -414,6 +459,53 @@ public abstract class CameraCaptureSession implements AutoCloseable {
     public abstract int captureBurst(@NonNull List<CaptureRequest> requests,
             @Nullable CaptureCallback listener, @Nullable Handler handler)
             throws CameraAccessException;
+
+    /**
+     * Submit a list of requests to be captured in sequence as a burst. The
+     * burst will be captured in the minimum amount of time possible, and will
+     * not be interleaved with requests submitted by other capture or repeat
+     * calls.
+     *
+     * <p>The behavior of this method matches that of
+     * {@link #captureBurst(List, CaptureCallback, Handler)},
+     * except that it uses {@link java.util.concurrent.Executor} as an argument
+     * instead of {@link android.os.Handler}.</p>
+     *
+     * @param requests the list of settings for this burst capture
+     * @param executor the executor which will be used for invoking the listener.
+     * @param listener The callback object to notify each time one of the
+     * requests in the burst has been processed.
+     *
+     * @return int A unique capture sequence ID used by
+     *             {@link CaptureCallback#onCaptureSequenceCompleted}.
+     *
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if this session is no longer active, either because the session
+     *                               was explicitly closed, a new session has been created
+     *                               or the camera device has been closed.
+     * @throws IllegalArgumentException If the requests target no Surfaces, or the requests target
+     *                                  Surfaces not currently configured as outputs; or one of the
+     *                                  requests targets a set of Surfaces that cannot be submitted
+     *                                  simultaneously in a reprocessable capture session; or a
+     *                                  reprocess capture request is submitted in a
+     *                                  non-reprocessable capture session; or one of the reprocess
+     *                                  capture requests was created with a
+     *                                  {@link TotalCaptureResult} from a different session; or one
+     *                                  of the captures targets a Surface in the middle of being
+     *                                  {@link #prepare prepared}; or if the executor is null; or if
+     *                                  the listener is null.
+     *
+     * @see #capture
+     * @see #setRepeatingRequest
+     * @see #setRepeatingBurst
+     * @see #abortCaptures
+     */
+    public int captureBurstRequests(@NonNull List<CaptureRequest> requests,
+            @NonNull @CallbackExecutor Executor executor, @NonNull CaptureCallback listener)
+            throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
 
     /**
      * Request endlessly repeating capture of images by this capture session.
@@ -481,6 +573,45 @@ public abstract class CameraCaptureSession implements AutoCloseable {
     public abstract int setRepeatingRequest(@NonNull CaptureRequest request,
             @Nullable CaptureCallback listener, @Nullable Handler handler)
             throws CameraAccessException;
+
+    /**
+     * Request endlessly repeating capture of images by this capture session.
+     *
+     * <p>The behavior of this method matches that of
+     * {@link #setRepeatingRequest(CaptureRequest, CaptureCallback, Handler)},
+     * except that it uses {@link java.util.concurrent.Executor} as an argument
+     * instead of {@link android.os.Handler}.</p>
+     *
+     * @param request the request to repeat indefinitely
+     * @param executor the executor which will be used for invoking the listener.
+     * @param listener The callback object to notify every time the
+     * request finishes processing.
+     *
+     * @return int A unique capture sequence ID used by
+     *             {@link CaptureCallback#onCaptureSequenceCompleted}.
+     *
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if this session is no longer active, either because the session
+     *                               was explicitly closed, a new session has been created
+     *                               or the camera device has been closed.
+     * @throws IllegalArgumentException If the request references no Surfaces or references Surfaces
+     *                                  that are not currently configured as outputs; or the request
+     *                                  is a reprocess capture request; or the capture targets a
+     *                                  Surface in the middle of being {@link #prepare prepared}; or
+     *                                  the executor is null; or the listener is null.
+     *
+     * @see #capture
+     * @see #captureBurst
+     * @see #setRepeatingBurst
+     * @see #stopRepeating
+     * @see #abortCaptures
+     */
+    public int setSingleRepeatingRequest(@NonNull CaptureRequest request,
+            @NonNull @CallbackExecutor Executor executor, @NonNull CaptureCallback listener)
+            throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
 
     /**
      * <p>Request endlessly repeating capture of a sequence of images by this
@@ -553,6 +684,47 @@ public abstract class CameraCaptureSession implements AutoCloseable {
     public abstract int setRepeatingBurst(@NonNull List<CaptureRequest> requests,
             @Nullable CaptureCallback listener, @Nullable Handler handler)
             throws CameraAccessException;
+
+    /**
+     * <p>Request endlessly repeating capture of a sequence of images by this
+     * capture session.</p>
+     *
+     * <p>The behavior of this method matches that of
+     * {@link #setRepeatingBurst(List, CaptureCallback, Handler)},
+     * except that it uses {@link java.util.concurrent.Executor} as an argument
+     * instead of {@link android.os.Handler}.</p>
+     *
+     * @param requests the list of requests to cycle through indefinitely
+     * @param executor the executor which will be used for invoking the listener.
+     * @param listener The callback object to notify each time one of the
+     * requests in the repeating bursts has finished processing.
+     *
+     * @return int A unique capture sequence ID used by
+     *             {@link CaptureCallback#onCaptureSequenceCompleted}.
+     *
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if this session is no longer active, either because the session
+     *                               was explicitly closed, a new session has been created
+     *                               or the camera device has been closed.
+     * @throws IllegalArgumentException If the requests reference no Surfaces or reference Surfaces
+     *                                  not currently configured as outputs; or one of the requests
+     *                                  is a reprocess capture request; or one of the captures
+     *                                  targets a Surface in the middle of being
+     *                                  {@link #prepare prepared}; or the executor is null; or the
+     *                                  listener is null.
+     *
+     * @see #capture
+     * @see #captureBurst
+     * @see #setRepeatingRequest
+     * @see #stopRepeating
+     * @see #abortCaptures
+     */
+    public int setRepeatingBurstRequests(@NonNull List<CaptureRequest> requests,
+            @NonNull @CallbackExecutor Executor executor, @NonNull CaptureCallback listener)
+            throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
 
     /**
      * <p>Cancel any ongoing repeating capture set by either
@@ -643,6 +815,44 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      */
     @Nullable
     public abstract Surface getInputSurface();
+
+    /**
+     * Update {@link OutputConfiguration} after configuration finalization see
+     * {@link #finalizeOutputConfigurations}.
+     *
+     * <p>Any {@link OutputConfiguration} that has been modified via calls to
+     * {@link OutputConfiguration#addSurface} or {@link OutputConfiguration#removeSurface} must be
+     * updated. After the update call returns without throwing exceptions any newly added surfaces
+     * can be referenced in subsequent capture requests.</p>
+     *
+     * <p>Surfaces that get removed must not be part of any active repeating or single/burst
+     * request or have any pending results. Consider updating any repeating requests first via
+     * {@link #setRepeatingRequest} or {@link #setRepeatingBurst} and then wait for the last frame
+     * number when the sequence completes {@link CaptureCallback#onCaptureSequenceCompleted}
+     * before calling updateOutputConfiguration to remove a previously active Surface.</p>
+     *
+     * <p>Surfaces that get added must not be part of any other registered
+     * {@link OutputConfiguration}.</p>
+     *
+     * @param config Modified output configuration.
+     *
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error.
+     * @throws IllegalArgumentException if an attempt was made to add a {@link Surface} already
+     *                               in use by another buffer-producing API, such as MediaCodec or
+     *                               a different camera device or {@link OutputConfiguration}; or
+     *                               new surfaces are not compatible (see
+     *                               {@link OutputConfiguration#enableSurfaceSharing}); or a
+     *                               {@link Surface} that was removed from the modified
+     *                               {@link OutputConfiguration} still has pending requests.
+     * @throws IllegalStateException if this session is no longer active, either because the session
+     *                               was explicitly closed, a new session has been created
+     *                               or the camera device has been closed.
+     */
+    public void updateOutputConfiguration(OutputConfiguration config)
+        throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
 
     /**
      * Close this capture session asynchronously.

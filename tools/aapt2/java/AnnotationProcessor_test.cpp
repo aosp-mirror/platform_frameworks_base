@@ -16,8 +16,12 @@
 
 #include "java/AnnotationProcessor.h"
 
+#include "io/StringStream.h"
 #include "test/Test.h"
+#include "text/Printer.h"
 
+using ::aapt::io::StringOutputStream;
+using ::aapt::text::Printer;
 using ::testing::Eq;
 using ::testing::HasSubstr;
 using ::testing::Not;
@@ -33,9 +37,11 @@ TEST(AnnotationProcessorTest, EmitsDeprecated) {
   AnnotationProcessor processor;
   processor.AppendComment(comment);
 
-  std::stringstream result;
-  processor.WriteToStream(&result, "");
-  std::string annotations = result.str();
+  std::string annotations;
+  StringOutputStream out(&annotations);
+  Printer printer(&out);
+  processor.Print(&printer);
+  out.Flush();
 
   EXPECT_THAT(annotations, HasSubstr("@Deprecated"));
 }
@@ -44,13 +50,30 @@ TEST(AnnotationProcessorTest, EmitsSystemApiAnnotationAndRemovesFromComment) {
   AnnotationProcessor processor;
   processor.AppendComment("@SystemApi This is a system API");
 
-  std::stringstream result;
-  processor.WriteToStream(&result, "");
-  std::string annotations = result.str();
+  std::string annotations;
+  StringOutputStream out(&annotations);
+  Printer printer(&out);
+  processor.Print(&printer);
+  out.Flush();
 
   EXPECT_THAT(annotations, HasSubstr("@android.annotation.SystemApi"));
   EXPECT_THAT(annotations, Not(HasSubstr("@SystemApi")));
   EXPECT_THAT(annotations, HasSubstr("This is a system API"));
+}
+
+TEST(AnnotationProcessorTest, EmitsTestApiAnnotationAndRemovesFromComment) {
+  AnnotationProcessor processor;
+  processor.AppendComment("@TestApi This is a test API");
+
+  std::string annotations;
+  StringOutputStream out(&annotations);
+  Printer printer(&out);
+  processor.Print(&printer);
+  out.Flush();
+
+  EXPECT_THAT(annotations, HasSubstr("@android.annotation.TestApi"));
+  EXPECT_THAT(annotations, Not(HasSubstr("@TestApi")));
+  EXPECT_THAT(annotations, HasSubstr("This is a test API"));
 }
 
 TEST(AnnotationProcessor, ExtractsFirstSentence) {

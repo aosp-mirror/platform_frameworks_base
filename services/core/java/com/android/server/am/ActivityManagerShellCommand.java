@@ -23,24 +23,35 @@ import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.IUidObserver;
+import android.app.KeyguardManager;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
+import android.app.usage.AppStandbyInfo;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageStatsManager;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DeviceConfigurationProto;
+import android.content.GlobalConfigurationProto;
 import android.content.IIntentReceiver;
 import android.content.Intent;
+import android.content.pm.ConfigurationInfo;
+import android.content.pm.FeatureInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.UserInfo;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
+import android.opengl.GLES10;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -48,15 +59,20 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ShellCommand;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
 import android.util.DisplayMetrics;
+import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 
 import com.android.internal.util.HexDump;
+import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
 
 import java.io.BufferedReader;
@@ -67,14 +83,24 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.egl.EGLContext;
+import javax.microedition.khronos.egl.EGLDisplay;
+import javax.microedition.khronos.egl.EGLSurface;
 
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityManager.RESIZE_MODE_USER;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
 import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
@@ -82,15 +108,6 @@ import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 final class ActivityManagerShellCommand extends ShellCommand {
     public static final String NO_CLASS_ERROR_CODE = "Error type 3";
     private static final String SHELL_PACKAGE_NAME = "com.android.shell";
-
-    // Is the object moving in a positive direction?
-    private static final boolean MOVING_FORWARD = true;
-    // Is the object moving in the horizontal plan?
-    private static final boolean MOVING_HORIZONTALLY = true;
-    // Is the object current point great then its target point?
-    private static final boolean GREATER_THAN_TARGET = true;
-    // Amount we reduce the stack size by when testing a task re-size.
-    private static final int STACK_BOUNDS_INSET = 10;
 
     // IPC interface to activity manager -- don't need to do additional security checks.
     final IActivityManager mInterface;
@@ -116,9 +133,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private String mAgent;  // Agent to attach on startup.
     private boolean mAttachAgentDuringBind;  // Whether agent should be attached late.
     private int mDisplayId;
-    private int mStackId;
+    private int mWindowingMode;
+    private int mActivityType;
     private int mTaskId;
     private boolean mIsTaskOverlay;
+    private boolean mIsLockTask;
 
     final boolean mDumping;
 
@@ -134,7 +153,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         if (cmd == null) {
             return handleDefaultCommands(cmd);
         }
-        PrintWriter pw = getOutPrintWriter();
+        final PrintWriter pw = getOutPrintWriter();
         try {
             switch (cmd) {
                 case "start":
@@ -232,6 +251,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runSetInactive(pw);
                 case "get-inactive":
                     return runGetInactive(pw);
+                case "set-standby-bucket":
+                    return runSetStandbyBucket(pw);
+                case "get-standby-bucket":
+                    return runGetStandbyBucket(pw);
                 case "send-trim-memory":
                     return runSendTrimMemory(pw);
                 case "display":
@@ -274,9 +297,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mStreaming = false;
         mUserId = defUser;
         mDisplayId = INVALID_DISPLAY;
-        mStackId = INVALID_STACK_ID;
+        mWindowingMode = WINDOWING_MODE_UNDEFINED;
+        mActivityType = ACTIVITY_TYPE_UNDEFINED;
         mTaskId = INVALID_TASK_ID;
         mIsTaskOverlay = false;
+        mIsLockTask = false;
 
         return Intent.parseCommandArgs(this, new Intent.CommandOptionHandler() {
             @Override
@@ -325,12 +350,16 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mReceiverPermission = getNextArgRequired();
                 } else if (opt.equals("--display")) {
                     mDisplayId = Integer.parseInt(getNextArgRequired());
-                } else if (opt.equals("--stack")) {
-                    mStackId = Integer.parseInt(getNextArgRequired());
+                } else if (opt.equals("--windowingMode")) {
+                    mWindowingMode = Integer.parseInt(getNextArgRequired());
+                } else if (opt.equals("--activityType")) {
+                    mActivityType = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("--task")) {
                     mTaskId = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("--task-overlay")) {
                     mIsTaskOverlay = true;
+                } else if (opt.equals("--lock-task")) {
+                    mIsLockTask = true;
                 } else {
                     return false;
                 }
@@ -392,7 +421,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             if (mProfileFile != null || mAgent != null) {
                 ParcelFileDescriptor fd = null;
                 if (mProfileFile != null) {
-                    fd = openOutputFileForSystem(mProfileFile);
+                    fd = openFileForSystem(mProfileFile, "w");
                     if (fd == null) {
                         return 1;
                     }
@@ -413,17 +442,33 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 options = ActivityOptions.makeBasic();
                 options.setLaunchDisplayId(mDisplayId);
             }
-            if (mStackId != INVALID_STACK_ID) {
-                options = ActivityOptions.makeBasic();
-                options.setLaunchStackId(mStackId);
+            if (mWindowingMode != WINDOWING_MODE_UNDEFINED) {
+                if (options == null) {
+                    options = ActivityOptions.makeBasic();
+                }
+                options.setLaunchWindowingMode(mWindowingMode);
+            }
+            if (mActivityType != ACTIVITY_TYPE_UNDEFINED) {
+                if (options == null) {
+                    options = ActivityOptions.makeBasic();
+                }
+                options.setLaunchActivityType(mActivityType);
             }
             if (mTaskId != INVALID_TASK_ID) {
-                options = ActivityOptions.makeBasic();
+                if (options == null) {
+                    options = ActivityOptions.makeBasic();
+                }
                 options.setLaunchTaskId(mTaskId);
 
                 if (mIsTaskOverlay) {
                     options.setTaskOverlay(true, true /* canResume */);
                 }
+            }
+            if (mIsLockTask) {
+                if (options == null) {
+                    options = ActivityOptions.makeBasic();
+                }
+                options.setLockTaskEnabled(true);
             }
             if (mWaitOption) {
                 result = mInterface.startActivityAndWait(null, null, intent, mimeType,
@@ -679,7 +724,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         File file = new File(filename);
         file.delete();
-        ParcelFileDescriptor fd = openOutputFileForSystem(filename);
+        ParcelFileDescriptor fd = openFileForSystem(filename, "w");
         if (fd == null) {
             return -1;
         }
@@ -767,7 +812,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         if (start) {
             profileFile = getNextArgRequired();
-            fd = openOutputFileForSystem(profileFile);
+            fd = openFileForSystem(profileFile, "w");
             if (fd == null) {
                 return -1;
             }
@@ -831,7 +876,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         File file = new File(heapFile);
         file.delete();
-        ParcelFileDescriptor fd = openOutputFileForSystem(heapFile);
+        ParcelFileDescriptor fd = openFileForSystem(heapFile, "w");
         if (fd == null) {
             return -1;
         }
@@ -1342,65 +1387,95 @@ final class ActivityManagerShellCommand extends ShellCommand {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq) throws RemoteException {
             synchronized (this) {
-                mPw.print(uid);
-                mPw.print(" procstate ");
-                mPw.print(ProcessList.makeProcStateString(procState));
-                mPw.print(" seq ");
-                mPw.println(procStateSeq);
-                mPw.flush();
+                final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+                try {
+                    mPw.print(uid);
+                    mPw.print(" procstate ");
+                    mPw.print(ProcessList.makeProcStateString(procState));
+                    mPw.print(" seq ");
+                    mPw.println(procStateSeq);
+                    mPw.flush();
+                } finally {
+                    StrictMode.setThreadPolicy(oldPolicy);
+                }
             }
         }
 
         @Override
         public void onUidGone(int uid, boolean disabled) throws RemoteException {
             synchronized (this) {
-                mPw.print(uid);
-                mPw.print(" gone");
-                if (disabled) {
-                    mPw.print(" disabled");
+                final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+                try {
+                    mPw.print(uid);
+                    mPw.print(" gone");
+                    if (disabled) {
+                        mPw.print(" disabled");
+                    }
+                    mPw.println();
+                    mPw.flush();
+                } finally {
+                    StrictMode.setThreadPolicy(oldPolicy);
                 }
-                mPw.println();
-                mPw.flush();
             }
         }
 
         @Override
         public void onUidActive(int uid) throws RemoteException {
             synchronized (this) {
-                mPw.print(uid);
-                mPw.println(" active");
-                mPw.flush();
+                final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+                try {
+                    mPw.print(uid);
+                    mPw.println(" active");
+                    mPw.flush();
+                } finally {
+                    StrictMode.setThreadPolicy(oldPolicy);
+                }
             }
         }
 
         @Override
         public void onUidIdle(int uid, boolean disabled) throws RemoteException {
             synchronized (this) {
-                mPw.print(uid);
-                mPw.print(" idle");
-                if (disabled) {
-                    mPw.print(" disabled");
+                final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+                try {
+                    mPw.print(uid);
+                    mPw.print(" idle");
+                    if (disabled) {
+                        mPw.print(" disabled");
+                    }
+                    mPw.println();
+                    mPw.flush();
+                } finally {
+                    StrictMode.setThreadPolicy(oldPolicy);
                 }
-                mPw.println();
-                mPw.flush();
             }
         }
 
         @Override
         public void onUidCachedChanged(int uid, boolean cached) throws RemoteException {
             synchronized (this) {
-                mPw.print(uid);
-                mPw.println(cached ? " cached" : " uncached");
-                mPw.flush();
+                final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+                try {
+                    mPw.print(uid);
+                    mPw.println(cached ? " cached" : " uncached");
+                    mPw.flush();
+                } finally {
+                    StrictMode.setThreadPolicy(oldPolicy);
+                }
             }
         }
 
         @Override
         public void onOomAdjMessage(String msg) {
             synchronized (this) {
-                mPw.print("# ");
-                mPw.println(msg);
-                mPw.flush();
+                final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+                try {
+                    mPw.print("# ");
+                    mPw.println(msg);
+                    mPw.flush();
+                } finally {
+                    StrictMode.setThreadPolicy(oldPolicy);
+                }
             }
         }
 
@@ -1567,6 +1642,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runSwitchUser(PrintWriter pw) throws RemoteException {
+        UserManager userManager = mInternal.mContext.getSystemService(UserManager.class);
+        if (!userManager.canSwitchUsers()) {
+            getErrPrintWriter().println("Error: disallowed switching user");
+            return -1;
+        }
         String user = getNextArgRequired();
         mInterface.switchUser(Integer.parseInt(user));
         return 0;
@@ -1781,17 +1861,251 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
     }
 
-    int runGetConfig(PrintWriter pw) throws RemoteException {
-        int days = 14;
-        String option = getNextOption();
-        if (option != null) {
-            if (!option.equals("--days")) {
-                throw new IllegalArgumentException("unrecognized option " + option);
+    /**
+     * Adds all supported GL extensions for a provided EGLConfig to a set by creating an EGLContext
+     * and EGLSurface and querying extensions.
+     *
+     * @param egl An EGL API object
+     * @param display An EGLDisplay to create a context and surface with
+     * @param config The EGLConfig to get the extensions for
+     * @param surfaceSize eglCreatePbufferSurface generic parameters
+     * @param contextAttribs eglCreateContext generic parameters
+     * @param glExtensions A Set<String> to add GL extensions to
+     */
+    private static void addExtensionsForConfig(
+            EGL10 egl,
+            EGLDisplay display,
+            EGLConfig config,
+            int[] surfaceSize,
+            int[] contextAttribs,
+            Set<String> glExtensions) {
+        // Create a context.
+        EGLContext context =
+                egl.eglCreateContext(display, config, EGL10.EGL_NO_CONTEXT, contextAttribs);
+        // No-op if we can't create a context.
+        if (context == EGL10.EGL_NO_CONTEXT) {
+            return;
+        }
+
+        // Create a surface.
+        EGLSurface surface = egl.eglCreatePbufferSurface(display, config, surfaceSize);
+        if (surface == EGL10.EGL_NO_SURFACE) {
+            egl.eglDestroyContext(display, context);
+            return;
+        }
+
+        // Update the current surface and context.
+        egl.eglMakeCurrent(display, surface, surface, context);
+
+        // Get the list of extensions.
+        String extensionList = GLES10.glGetString(GLES10.GL_EXTENSIONS);
+        if (!TextUtils.isEmpty(extensionList)) {
+            // The list of extensions comes from the driver separated by spaces.
+            // Split them apart and add them into a Set for deduping purposes.
+            for (String extension : extensionList.split(" ")) {
+                glExtensions.add(extension);
+            }
+        }
+
+        // Tear down the context and surface for this config.
+        egl.eglMakeCurrent(display, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
+        egl.eglDestroySurface(display, surface);
+        egl.eglDestroyContext(display, context);
+    }
+
+
+    Set<String> getGlExtensionsFromDriver() {
+        Set<String> glExtensions = new HashSet<>();
+
+        // Get the EGL implementation.
+        EGL10 egl = (EGL10) EGLContext.getEGL();
+        if (egl == null) {
+            getErrPrintWriter().println("Warning: couldn't get EGL");
+            return glExtensions;
+        }
+
+        // Get the default display and initialize it.
+        EGLDisplay display = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
+        int[] version = new int[2];
+        egl.eglInitialize(display, version);
+
+        // Call getConfigs() in order to find out how many there are.
+        int[] numConfigs = new int[1];
+        if (!egl.eglGetConfigs(display, null, 0, numConfigs)) {
+            getErrPrintWriter().println("Warning: couldn't get EGL config count");
+            return glExtensions;
+        }
+
+        // Allocate space for all configs and ask again.
+        EGLConfig[] configs = new EGLConfig[numConfigs[0]];
+        if (!egl.eglGetConfigs(display, configs, numConfigs[0], numConfigs)) {
+            getErrPrintWriter().println("Warning: couldn't get EGL configs");
+            return glExtensions;
+        }
+
+        // Allocate surface size parameters outside of the main loop to cut down
+        // on GC thrashing.  1x1 is enough since we are only using it to get at
+        // the list of extensions.
+        int[] surfaceSize =
+                new int[] {
+                        EGL10.EGL_WIDTH, 1,
+                        EGL10.EGL_HEIGHT, 1,
+                        EGL10.EGL_NONE
+                };
+
+        // For when we need to create a GLES2.0 context.
+        final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
+        int[] gles2 = new int[] {EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE};
+
+        // For getting return values from eglGetConfigAttrib
+        int[] attrib = new int[1];
+
+        for (int i = 0; i < numConfigs[0]; i++) {
+            // Get caveat for this config in order to skip slow (i.e. software) configs.
+            egl.eglGetConfigAttrib(display, configs[i], EGL10.EGL_CONFIG_CAVEAT, attrib);
+            if (attrib[0] == EGL10.EGL_SLOW_CONFIG) {
+                continue;
             }
 
-            days = Integer.parseInt(getNextArgRequired());
-            if (days <= 0) {
-                throw new IllegalArgumentException("--days must be a positive integer");
+            // If the config does not support pbuffers we cannot do an eglMakeCurrent
+            // on it in addExtensionsForConfig(), so skip it here. Attempting to make
+            // it current with a pbuffer will result in an EGL_BAD_MATCH error
+            egl.eglGetConfigAttrib(display, configs[i], EGL10.EGL_SURFACE_TYPE, attrib);
+            if ((attrib[0] & EGL10.EGL_PBUFFER_BIT) == 0) {
+                continue;
+            }
+
+            final int EGL_OPENGL_ES_BIT = 0x0001;
+            final int EGL_OPENGL_ES2_BIT = 0x0004;
+            egl.eglGetConfigAttrib(display, configs[i], EGL10.EGL_RENDERABLE_TYPE, attrib);
+            if ((attrib[0] & EGL_OPENGL_ES_BIT) != 0) {
+                addExtensionsForConfig(egl, display, configs[i], surfaceSize, null, glExtensions);
+            }
+            if ((attrib[0] & EGL_OPENGL_ES2_BIT) != 0) {
+                addExtensionsForConfig(egl, display, configs[i], surfaceSize, gles2, glExtensions);
+            }
+        }
+
+        // Release all EGL resources.
+        egl.eglTerminate(display);
+
+        return glExtensions;
+    }
+
+    private void writeDeviceConfig(ProtoOutputStream protoOutputStream, long fieldId,
+            PrintWriter pw, Configuration config, DisplayManager dm) {
+        Point stableSize = dm.getStableDisplaySize();
+        long token = -1;
+        if (protoOutputStream != null) {
+            token = protoOutputStream.start(fieldId);
+            protoOutputStream.write(DeviceConfigurationProto.STABLE_SCREEN_WIDTH_PX, stableSize.x);
+            protoOutputStream.write(DeviceConfigurationProto.STABLE_SCREEN_HEIGHT_PX, stableSize.y);
+            protoOutputStream.write(DeviceConfigurationProto.STABLE_DENSITY_DPI,
+                    DisplayMetrics.DENSITY_DEVICE_STABLE);
+        }
+        if (pw != null) {
+            pw.print("stable-width-px: "); pw.println(stableSize.x);
+            pw.print("stable-height-px: "); pw.println(stableSize.y);
+            pw.print("stable-density-dpi: "); pw.println(DisplayMetrics.DENSITY_DEVICE_STABLE);
+        }
+
+        MemInfoReader memreader = new MemInfoReader();
+        memreader.readMemInfo();
+        KeyguardManager kgm = mInternal.mContext.getSystemService(KeyguardManager.class);
+        if (protoOutputStream != null) {
+            protoOutputStream.write(DeviceConfigurationProto.TOTAL_RAM, memreader.getTotalSize());
+            protoOutputStream.write(DeviceConfigurationProto.LOW_RAM,
+                    ActivityManager.isLowRamDeviceStatic());
+            protoOutputStream.write(DeviceConfigurationProto.MAX_CORES,
+                    Runtime.getRuntime().availableProcessors());
+            protoOutputStream.write(DeviceConfigurationProto.HAS_SECURE_SCREEN_LOCK,
+                    kgm.isDeviceSecure());
+        }
+        if (pw != null) {
+            pw.print("total-ram: "); pw.println(memreader.getTotalSize());
+            pw.print("low-ram: "); pw.println(ActivityManager.isLowRamDeviceStatic());
+            pw.print("max-cores: "); pw.println(Runtime.getRuntime().availableProcessors());
+            pw.print("has-secure-screen-lock: "); pw.println(kgm.isDeviceSecure());
+        }
+
+        ConfigurationInfo configInfo = mInternal.getDeviceConfigurationInfo();
+        if (configInfo.reqGlEsVersion != ConfigurationInfo.GL_ES_VERSION_UNDEFINED) {
+            if (protoOutputStream != null) {
+                protoOutputStream.write(DeviceConfigurationProto.OPENGL_VERSION,
+                        configInfo.reqGlEsVersion);
+            }
+            if (pw != null) {
+                pw.print("opengl-version: 0x");
+                pw.println(Integer.toHexString(configInfo.reqGlEsVersion));
+            }
+        }
+
+        Set<String> glExtensionsSet = getGlExtensionsFromDriver();
+        String[] glExtensions = new String[glExtensionsSet.size()];
+        glExtensions = glExtensionsSet.toArray(glExtensions);
+        Arrays.sort(glExtensions);
+        for (int i = 0; i < glExtensions.length; i++) {
+            if (protoOutputStream != null) {
+                protoOutputStream.write(DeviceConfigurationProto.OPENGL_EXTENSIONS,
+                        glExtensions[i]);
+            }
+            if (pw != null) {
+                pw.print("opengl-extensions: "); pw.println(glExtensions[i]);
+            }
+
+        }
+
+        PackageManager pm = mInternal.mContext.getPackageManager();
+        List<SharedLibraryInfo> slibs = pm.getSharedLibraries(0);
+        Collections.sort(slibs, Comparator.comparing(SharedLibraryInfo::getName));
+        for (int i = 0; i < slibs.size(); i++) {
+            if (protoOutputStream != null) {
+                protoOutputStream.write(DeviceConfigurationProto.SHARED_LIBRARIES,
+                        slibs.get(i).getName());
+            }
+            if (pw != null) {
+                pw.print("shared-libraries: "); pw.println(slibs.get(i).getName());
+            }
+        }
+
+        FeatureInfo[] features = pm.getSystemAvailableFeatures();
+        Arrays.sort(features, (o1, o2) ->
+                (o1.name == o2.name ? 0 : (o1.name == null ? -1 : o1.name.compareTo(o2.name))));
+        for (int i = 0; i < features.length; i++) {
+            if (features[i].name != null) {
+                if (protoOutputStream != null) {
+                    protoOutputStream.write(DeviceConfigurationProto.FEATURES, features[i].name);
+                }
+                if (pw != null) {
+                    pw.print("features: "); pw.println(features[i].name);
+                }
+            }
+        }
+
+        if (protoOutputStream != null) {
+            protoOutputStream.end(token);
+        }
+    }
+
+    int runGetConfig(PrintWriter pw) throws RemoteException {
+        int days = -1;
+        boolean asProto = false;
+        boolean inclDevice = false;
+
+        String opt;
+        while ((opt=getNextOption()) != null) {
+            if (opt.equals("--days")) {
+                days = Integer.parseInt(getNextArgRequired());
+                if (days <= 0) {
+                    throw new IllegalArgumentException("--days must be a positive integer");
+                }
+            } else if (opt.equals("--proto")) {
+                asProto = true;
+            } else if (opt.equals("--device")) {
+                inclDevice = true;
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
             }
         }
 
@@ -1801,18 +2115,38 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        pw.println("config: " + Configuration.resourceQualifierString(config));
-        pw.println("abi: " + TextUtils.join(",", Build.SUPPORTED_ABIS));
+        DisplayManager dm = mInternal.mContext.getSystemService(DisplayManager.class);
+        Display display = dm.getDisplay(Display.DEFAULT_DISPLAY);
+        DisplayMetrics metrics = new DisplayMetrics();
+        display.getMetrics(metrics);
 
-        final List<Configuration> recentConfigs = getRecentConfigurations(days);
-        final int recentConfigSize = recentConfigs.size();
-        if (recentConfigSize > 0) {
-            pw.println("recentConfigs:");
-        }
+        if (asProto) {
+            final ProtoOutputStream proto = new ProtoOutputStream(getOutFileDescriptor());
+            config.writeResConfigToProto(proto, GlobalConfigurationProto.RESOURCES, metrics);
+            if (inclDevice) {
+                writeDeviceConfig(proto, GlobalConfigurationProto.DEVICE, null, config, dm);
+            }
+            proto.flush();
 
-        for (int i = 0; i < recentConfigSize; i++) {
-            pw.println("  config: " + Configuration.resourceQualifierString(
-                    recentConfigs.get(i)));
+        } else {
+            pw.println("config: " + Configuration.resourceQualifierString(config, metrics));
+            pw.println("abi: " + TextUtils.join(",", Build.SUPPORTED_ABIS));
+            if (inclDevice) {
+                writeDeviceConfig(null, -1, pw, config, dm);
+            }
+
+            if (days >= 0) {
+                final List<Configuration> recentConfigs = getRecentConfigurations(days);
+                final int recentConfigSize = recentConfigs.size();
+                if (recentConfigSize > 0) {
+                    pw.println("recentConfigs:");
+                    for (int i = 0; i < recentConfigSize; i++) {
+                        pw.println("  config: " + Configuration.resourceQualifierString(
+                                recentConfigs.get(i)));
+                    }
+                }
+            }
+
         }
         return 0;
     }
@@ -1841,6 +2175,97 @@ final class ActivityManagerShellCommand extends ShellCommand {
         IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
                 Context.USAGE_STATS_SERVICE));
         usm.setAppInactive(packageName, Boolean.parseBoolean(value), userId);
+        return 0;
+    }
+
+    private int bucketNameToBucketValue(String name) {
+        String lower = name.toLowerCase();
+        if (lower.startsWith("ac")) {
+            return UsageStatsManager.STANDBY_BUCKET_ACTIVE;
+        } else if (lower.startsWith("wo")) {
+            return UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
+        } else if (lower.startsWith("fr")) {
+            return UsageStatsManager.STANDBY_BUCKET_FREQUENT;
+        } else if (lower.startsWith("ra")) {
+            return UsageStatsManager.STANDBY_BUCKET_RARE;
+        } else if (lower.startsWith("ne")) {
+            return UsageStatsManager.STANDBY_BUCKET_NEVER;
+        } else {
+            try {
+                int bucket = Integer.parseInt(lower);
+                return bucket;
+            } catch (NumberFormatException nfe) {
+                getErrPrintWriter().println("Error: Unknown bucket: " + name);
+            }
+        }
+        return -1;
+    }
+
+    int runSetStandbyBucket(PrintWriter pw) throws RemoteException {
+        int userId = UserHandle.USER_CURRENT;
+
+        String opt;
+        while ((opt=getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        String packageName = getNextArgRequired();
+        String value = getNextArgRequired();
+        int bucket = bucketNameToBucketValue(value);
+        if (bucket < 0) return -1;
+        boolean multiple = peekNextArg() != null;
+
+
+        IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
+                Context.USAGE_STATS_SERVICE));
+        if (!multiple) {
+            usm.setAppStandbyBucket(packageName, bucketNameToBucketValue(value), userId);
+        } else {
+            ArrayList<AppStandbyInfo> bucketInfoList = new ArrayList<>();
+            bucketInfoList.add(new AppStandbyInfo(packageName, bucket));
+            while ((packageName = getNextArg()) != null) {
+                value = getNextArgRequired();
+                bucket = bucketNameToBucketValue(value);
+                if (bucket < 0) continue;
+                bucketInfoList.add(new AppStandbyInfo(packageName, bucket));
+            }
+            ParceledListSlice<AppStandbyInfo> slice = new ParceledListSlice<>(bucketInfoList);
+            usm.setAppStandbyBuckets(slice, userId);
+        }
+        return 0;
+    }
+
+    int runGetStandbyBucket(PrintWriter pw) throws RemoteException {
+        int userId = UserHandle.USER_CURRENT;
+
+        String opt;
+        while ((opt=getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+        String packageName = getNextArg();
+
+        IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
+                Context.USAGE_STATS_SERVICE));
+        if (packageName != null) {
+            int bucket = usm.getAppStandbyBucket(packageName, null, userId);
+            pw.println(bucket);
+        } else {
+            ParceledListSlice<AppStandbyInfo> buckets = usm.getAppStandbyBuckets(
+                    SHELL_PACKAGE_NAME, userId);
+            for (AppStandbyInfo bucketInfo : buckets.getList()) {
+                pw.print(bucketInfo.mPackageName); pw.print(": ");
+                pw.println(bucketInfo.mStandbyBucket);
+            }
+        }
         return 0;
     }
 
@@ -1953,8 +2378,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return runStackInfo(pw);
             case "move-top-activity-to-pinned-stack":
                 return runMoveTopActivityToPinnedStack(pw);
-            case "size-docked-stack-test":
-                return runStackSizeDockedStackTest(pw);
             case "remove":
                 return runStackRemove(pw);
             default:
@@ -2123,9 +2546,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     int runStackInfo(PrintWriter pw) throws RemoteException {
-        String stackIdStr = getNextArgRequired();
-        int stackId = Integer.parseInt(stackIdStr);
-        ActivityManager.StackInfo info = mInterface.getStackInfo(stackId);
+        int windowingMode = Integer.parseInt(getNextArgRequired());
+        int activityType = Integer.parseInt(getNextArgRequired());
+        ActivityManager.StackInfo info = mInterface.getStackInfo(windowingMode, activityType);
         pw.println(info);
         return 0;
     }
@@ -2148,88 +2571,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         if (!mInterface.moveTopActivityToPinnedStack(stackId, bounds)) {
             getErrPrintWriter().println("Didn't move top activity to pinned stack.");
             return -1;
-        }
-        return 0;
-    }
-
-    int runStackSizeDockedStackTest(PrintWriter pw) throws RemoteException {
-        final PrintWriter err = getErrPrintWriter();
-        final int stepSize = Integer.parseInt(getNextArgRequired());
-        final String side = getNextArgRequired();
-        final String delayStr = getNextArg();
-        final int delayMs = (delayStr != null) ? Integer.parseInt(delayStr) : 0;
-
-        ActivityManager.StackInfo info = mInterface.getStackInfo(DOCKED_STACK_ID);
-        if (info == null) {
-            err.println("Docked stack doesn't exist");
-            return -1;
-        }
-        if (info.bounds == null) {
-            err.println("Docked stack doesn't have a bounds");
-            return -1;
-        }
-        Rect bounds = info.bounds;
-
-        final boolean horizontalGrowth = "l".equals(side) || "r".equals(side);
-        final int changeSize = (horizontalGrowth ? bounds.width() : bounds.height()) / 2;
-        int currentPoint;
-        switch (side) {
-            case "l":
-                currentPoint = bounds.left;
-                break;
-            case "r":
-                currentPoint = bounds.right;
-                break;
-            case "t":
-                currentPoint = bounds.top;
-                break;
-            case "b":
-                currentPoint = bounds.bottom;
-                break;
-            default:
-                err.println("Unknown growth side: " + side);
-                return -1;
-        }
-
-        final int startPoint = currentPoint;
-        final int minPoint = currentPoint - changeSize;
-        final int maxPoint = currentPoint + changeSize;
-
-        int maxChange;
-        pw.println("Shrinking docked stack side=" + side);
-        pw.flush();
-        while (currentPoint > minPoint) {
-            maxChange = Math.min(stepSize, currentPoint - minPoint);
-            currentPoint -= maxChange;
-            setBoundsSide(bounds, side, currentPoint);
-            int res = resizeStack(DOCKED_STACK_ID, bounds, delayMs);
-            if (res < 0) {
-                return res;
-            }
-        }
-
-        pw.println("Growing docked stack side=" + side);
-        pw.flush();
-        while (currentPoint < maxPoint) {
-            maxChange = Math.min(stepSize, maxPoint - currentPoint);
-            currentPoint += maxChange;
-            setBoundsSide(bounds, side, currentPoint);
-            int res = resizeStack(DOCKED_STACK_ID, bounds, delayMs);
-            if (res < 0) {
-                return res;
-            }
-        }
-
-        pw.println("Back to Original size side=" + side);
-        pw.flush();
-        while (currentPoint > startPoint) {
-            maxChange = Math.min(stepSize, currentPoint - startPoint);
-            currentPoint -= maxChange;
-            setBoundsSide(bounds, side, currentPoint);
-            int res = resizeStack(DOCKED_STACK_ID, bounds, delayMs);
-            if (res < 0) {
-                return res;
-            }
         }
         return 0;
     }
@@ -2262,10 +2603,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return runTaskResizeable(pw);
         } else if (op.equals("resize")) {
             return runTaskResize(pw);
-        } else if (op.equals("drag-task-test")) {
-            return runTaskDragTaskTest(pw);
-        } else if (op.equals("size-task-test")) {
-            return runTaskSizeTaskTest(pw);
         } else if (op.equals("focus")) {
             return runTaskFocus(pw);
         } else {
@@ -2277,7 +2614,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runTaskLock(PrintWriter pw) throws RemoteException {
         String taskIdStr = getNextArgRequired();
         if (taskIdStr.equals("stop")) {
-            mInterface.stopLockTaskMode();
+            mInterface.stopSystemLockTaskMode();
         } else {
             int taskId = Integer.parseInt(taskIdStr);
             mInterface.startSystemLockTaskMode(taskId);
@@ -2316,58 +2653,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             Thread.sleep(delay_ms);
         } catch (InterruptedException e) {
         }
-    }
-
-    int runTaskDragTaskTest(PrintWriter pw) throws RemoteException {
-        final int taskId = Integer.parseInt(getNextArgRequired());
-        final int stepSize = Integer.parseInt(getNextArgRequired());
-        final String delayStr = getNextArg();
-        final int delay_ms = (delayStr != null) ? Integer.parseInt(delayStr) : 0;
-        final ActivityManager.StackInfo stackInfo;
-        Rect taskBounds;
-        stackInfo = mInterface.getStackInfo(mInterface.getFocusedStackId());
-        taskBounds = mInterface.getTaskBounds(taskId);
-        final Rect stackBounds = stackInfo.bounds;
-        int travelRight = stackBounds.width() - taskBounds.width();
-        int travelLeft = -travelRight;
-        int travelDown = stackBounds.height() - taskBounds.height();
-        int travelUp = -travelDown;
-        int passes = 0;
-
-        // We do 2 passes to get back to the original location of the task.
-        while (passes < 2) {
-            // Move right
-            pw.println("Moving right...");
-            pw.flush();
-            travelRight = moveTask(taskId, taskBounds, stackBounds, stepSize,
-                    travelRight, MOVING_FORWARD, MOVING_HORIZONTALLY, delay_ms);
-            pw.println("Still need to travel right by " + travelRight);
-
-            // Move down
-            pw.println("Moving down...");
-            pw.flush();
-            travelDown = moveTask(taskId, taskBounds, stackBounds, stepSize,
-                    travelDown, MOVING_FORWARD, !MOVING_HORIZONTALLY, delay_ms);
-            pw.println("Still need to travel down by " + travelDown);
-
-            // Move left
-            pw.println("Moving left...");
-            pw.flush();
-            travelLeft = moveTask(taskId, taskBounds, stackBounds, stepSize,
-                    travelLeft, !MOVING_FORWARD, MOVING_HORIZONTALLY, delay_ms);
-            pw.println("Still need to travel left by " + travelLeft);
-
-            // Move up
-            pw.println("Moving up...");
-            pw.flush();
-            travelUp = moveTask(taskId, taskBounds, stackBounds, stepSize,
-                    travelUp, !MOVING_FORWARD, !MOVING_HORIZONTALLY, delay_ms);
-            pw.println("Still need to travel up by " + travelUp);
-
-            taskBounds = mInterface.getTaskBounds(taskId);
-            passes++;
-        }
-        return 0;
     }
 
     int moveTask(int taskId, Rect taskRect, Rect stackRect, int stepSize,
@@ -2432,133 +2717,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return stepSize;
     }
 
-    int runTaskSizeTaskTest(PrintWriter pw) throws RemoteException {
-        final int taskId = Integer.parseInt(getNextArgRequired());
-        final int stepSize = Integer.parseInt(getNextArgRequired());
-        final String delayStr = getNextArg();
-        final int delay_ms = (delayStr != null) ? Integer.parseInt(delayStr) : 0;
-        final ActivityManager.StackInfo stackInfo;
-        final Rect initialTaskBounds;
-        stackInfo = mInterface.getStackInfo(mInterface.getFocusedStackId());
-        initialTaskBounds = mInterface.getTaskBounds(taskId);
-        final Rect stackBounds = stackInfo.bounds;
-        stackBounds.inset(STACK_BOUNDS_INSET, STACK_BOUNDS_INSET);
-        final Rect currentTaskBounds = new Rect(initialTaskBounds);
-
-        // Size by top-left
-        pw.println("Growing top-left");
-        pw.flush();
-        do {
-            currentTaskBounds.top -= getStepSize(
-                    currentTaskBounds.top, stackBounds.top, stepSize, GREATER_THAN_TARGET);
-
-            currentTaskBounds.left -= getStepSize(
-                    currentTaskBounds.left, stackBounds.left, stepSize, GREATER_THAN_TARGET);
-
-            taskResize(taskId, currentTaskBounds, delay_ms, true);
-        } while (stackBounds.top < currentTaskBounds.top
-                || stackBounds.left < currentTaskBounds.left);
-
-        // Back to original size
-        pw.println("Shrinking top-left");
-        pw.flush();
-        do {
-            currentTaskBounds.top += getStepSize(
-                    currentTaskBounds.top, initialTaskBounds.top, stepSize, !GREATER_THAN_TARGET);
-
-            currentTaskBounds.left += getStepSize(
-                    currentTaskBounds.left, initialTaskBounds.left, stepSize, !GREATER_THAN_TARGET);
-
-            taskResize(taskId, currentTaskBounds, delay_ms, true);
-        } while (initialTaskBounds.top > currentTaskBounds.top
-                || initialTaskBounds.left > currentTaskBounds.left);
-
-        // Size by top-right
-        pw.println("Growing top-right");
-        pw.flush();
-        do {
-            currentTaskBounds.top -= getStepSize(
-                    currentTaskBounds.top, stackBounds.top, stepSize, GREATER_THAN_TARGET);
-
-            currentTaskBounds.right += getStepSize(
-                    currentTaskBounds.right, stackBounds.right, stepSize, !GREATER_THAN_TARGET);
-
-            taskResize(taskId, currentTaskBounds, delay_ms, true);
-        } while (stackBounds.top < currentTaskBounds.top
-                || stackBounds.right > currentTaskBounds.right);
-
-        // Back to original size
-        pw.println("Shrinking top-right");
-        pw.flush();
-        do {
-            currentTaskBounds.top += getStepSize(
-                    currentTaskBounds.top, initialTaskBounds.top, stepSize, !GREATER_THAN_TARGET);
-
-            currentTaskBounds.right -= getStepSize(currentTaskBounds.right, initialTaskBounds.right,
-                    stepSize, GREATER_THAN_TARGET);
-
-            taskResize(taskId, currentTaskBounds, delay_ms, true);
-        } while (initialTaskBounds.top > currentTaskBounds.top
-                || initialTaskBounds.right < currentTaskBounds.right);
-
-        // Size by bottom-left
-        pw.println("Growing bottom-left");
-        pw.flush();
-        do {
-            currentTaskBounds.bottom += getStepSize(
-                    currentTaskBounds.bottom, stackBounds.bottom, stepSize, !GREATER_THAN_TARGET);
-
-            currentTaskBounds.left -= getStepSize(
-                    currentTaskBounds.left, stackBounds.left, stepSize, GREATER_THAN_TARGET);
-
-            taskResize(taskId, currentTaskBounds, delay_ms, true);
-        } while (stackBounds.bottom > currentTaskBounds.bottom
-                || stackBounds.left < currentTaskBounds.left);
-
-        // Back to original size
-        pw.println("Shrinking bottom-left");
-        pw.flush();
-        do {
-            currentTaskBounds.bottom -= getStepSize(currentTaskBounds.bottom,
-                    initialTaskBounds.bottom, stepSize, GREATER_THAN_TARGET);
-
-            currentTaskBounds.left += getStepSize(
-                    currentTaskBounds.left, initialTaskBounds.left, stepSize, !GREATER_THAN_TARGET);
-
-            taskResize(taskId, currentTaskBounds, delay_ms, true);
-        } while (initialTaskBounds.bottom < currentTaskBounds.bottom
-                || initialTaskBounds.left > currentTaskBounds.left);
-
-        // Size by bottom-right
-        pw.println("Growing bottom-right");
-        pw.flush();
-        do {
-            currentTaskBounds.bottom += getStepSize(
-                    currentTaskBounds.bottom, stackBounds.bottom, stepSize, !GREATER_THAN_TARGET);
-
-            currentTaskBounds.right += getStepSize(
-                    currentTaskBounds.right, stackBounds.right, stepSize, !GREATER_THAN_TARGET);
-
-            taskResize(taskId, currentTaskBounds, delay_ms, true);
-        } while (stackBounds.bottom > currentTaskBounds.bottom
-                || stackBounds.right > currentTaskBounds.right);
-
-        // Back to original size
-        pw.println("Shrinking bottom-right");
-        pw.flush();
-        do {
-            currentTaskBounds.bottom -= getStepSize(currentTaskBounds.bottom,
-                    initialTaskBounds.bottom, stepSize, GREATER_THAN_TARGET);
-
-            currentTaskBounds.right -= getStepSize(currentTaskBounds.right, initialTaskBounds.right,
-                    stepSize, GREATER_THAN_TARGET);
-
-            taskResize(taskId, currentTaskBounds, delay_ms, true);
-        } while (initialTaskBounds.bottom < currentTaskBounds.bottom
-                || initialTaskBounds.right < currentTaskBounds.right);
-        return 0;
-    }
-
     int runTaskFocus(PrintWriter pw) throws RemoteException {
         final int taskId = Integer.parseInt(getNextArgRequired());
         pw.println("Setting focus to task " + taskId);
@@ -2569,7 +2727,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runWrite(PrintWriter pw) {
         mInternal.enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
                 "registerUidObserver()");
-        mInternal.mRecentTasks.flush();
+        mInternal.getRecentTasks().flush();
         pw.println("All tasks persisted.");
         return 0;
     }
@@ -2685,6 +2843,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  -p: limit output to given package.");
             pw.println("  --checkin: output checkin format, resetting data.");
             pw.println("  --C: output checkin format, not resetting data.");
+            pw.println("  --proto: output dump in protocol buffer format.");
         } else {
             pw.println("Activity manager (activity) commands:");
             pw.println("  help");
@@ -2710,7 +2869,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --track-allocation: enable tracking of object allocations");
             pw.println("      --user <USER_ID> | current: Specify which user to run as; if not");
             pw.println("          specified then run as the current user.");
-            pw.println("      --stack <STACK_ID>: Specify into which stack should the activity be put.");
+            pw.println("      --windowingMode <WINDOWING_MODE>: The windowing mode to launch the activity into.");
+            pw.println("      --activityType <ACTIVITY_TYPE>: The activity type to launch the activity as.");
             pw.println("  start-service [--user <USER_ID> | current] <INTENT>");
             pw.println("      Start a Service.  Options are:");
             pw.println("      --user <USER_ID> | current: Specify which user to run as; if not");
@@ -2739,7 +2899,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      -e <NAME> <VALUE>: set argument <NAME> to <VALUE>.  For test runners a");
             pw.println("          common form is [-e <testrunner_flag> <value>[,<value>...]].");
             pw.println("      -p <FILE>: write profiling data to <FILE>");
-            pw.println("      -m: Write output as protobuf (machine readable)");
+            pw.println("      -m: Write output as protobuf to stdout (machine readable)");
+            pw.println("      -f <Optional PATH/TO/FILE>: Write output as protobuf to a file (machine");
+            pw.println("          readable). If path is not specified, default directory and file name will");
+            pw.println("          be used: /sdcard/instrument-logs/log-yyyyMMdd-hhmmss-SSS.instrumentation_data_proto");
             pw.println("      -w: wait for instrumentation to finish before returning.  Required for");
             pw.println("          test runners.");
             pw.println("      --user <USER_ID> | current: Specify user instrumentation runs in;");
@@ -2790,7 +2953,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  crash [--user <USER_ID>] <PACKAGE|PID>");
             pw.println("      Induce a VM crash in the specified package or process");
             pw.println("  kill [--user <USER_ID> | all | current] <PACKAGE>");
-            pw.println("      Kill all processes associated with the given application.");
+            pw.println("      Kill all background processes associated with the given application.");
             pw.println("  kill-all");
             pw.println("      Kill all processes that are safe to kill (cached, etc).");
             pw.println("  make-uid-idle [--user <USER_ID> | all | current] <PACKAGE>");
@@ -2799,7 +2962,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  monitor [--gdb <port>]");
             pw.println("      Start monitoring for crashes or ANRs.");
             pw.println("      --gdb: start gdbserv on the given port at crash/ANR");
-            pw.println("  watch-uids [--oom <uid>");
+            pw.println("  watch-uids [--oom <uid>]");
             pw.println("      Start watching for and reporting uid state changes.");
             pw.println("      --oom: specify a uid for which to report detailed change messages.");
             pw.println("  hang [--allow-restart]");
@@ -2846,8 +3009,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Gets the process state of an app given its <UID>.");
             pw.println("  attach-agent <PROCESS> <FILE>");
             pw.println("    Attach an agent to the specified <PROCESS>, which may be either a process name or a PID.");
-            pw.println("  get-config");
-            pw.println("      Rtrieve the configuration and any recent configurations of the device.");
+            pw.println("  get-config [--days N] [--device] [--proto]");
+            pw.println("      Retrieve the configuration and any recent configurations of the device.");
+            pw.println("      --days: also return last N days of configurations that have been seen.");
+            pw.println("      --device: also output global device configuration info.");
+            pw.println("      --proto: return result as a proto; does not include --days info.");
             pw.println("  supports-multiwindow");
             pw.println("      Returns true if the device supports multiwindow.");
             pw.println("  supports-split-screen-multi-window");
@@ -2858,6 +3024,10 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Sets the inactive state of an app.");
             pw.println("  get-inactive [--user <USER_ID>] <PACKAGE>");
             pw.println("      Returns the inactive state of an app.");
+            pw.println("  set-standby-bucket [--user <USER_ID>] <PACKAGE> active|working_set|frequent|rare");
+            pw.println("      Puts an app in the standby bucket.");
+            pw.println("  get-standby-bucket [--user <USER_ID>] <PACKAGE>");
+            pw.println("      Returns the standby bucket of an app.");
             pw.println("  send-trim-memory [--user <USER_ID>] <PROCESS>");
             pw.println("          [HIDDEN|RUNNING_MODERATE|BACKGROUND|RUNNING_LOW|MODERATE|RUNNING_CRITICAL|COMPLETE]");
             pw.println("      Send a memory trim event to a <PROCESS>.  May also supply a raw trim int level.");
@@ -2878,10 +3048,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("           Change docked stack to <LEFT,TOP,RIGHT,BOTTOM>");
             pw.println("           and supplying temporary different task bounds indicated by");
             pw.println("           <TASK_LEFT,TOP,RIGHT,BOTTOM>");
-            pw.println("       size-docked-stack-test: <STEP_SIZE> <l|t|r|b> [DELAY_MS]");
-            pw.println("           Test command for sizing docked stack by");
-            pw.println("           <STEP_SIZE> increments from the side <l>eft, <t>op, <r>ight, or <b>ottom");
-            pw.println("           applying the optional [DELAY_MS] between each step.");
             pw.println("       move-top-activity-to-pinned-stack: <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>");
             pw.println("           Moves the top activity from");
             pw.println("           <STACK_ID> to the pinned stack using <LEFT,TOP,RIGHT,BOTTOM> for the");
@@ -2890,8 +3056,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("           Place <TASK_ID> in <STACK_ID> at <POSITION>");
             pw.println("       list");
             pw.println("           List all of the activity stacks and their sizes.");
-            pw.println("       info <STACK_ID>");
-            pw.println("           Display the information about activity stack <STACK_ID>.");
+            pw.println("       info <WINDOWING_MODE> <ACTIVITY_TYPE>");
+            pw.println("           Display the information about activity stack in <WINDOWING_MODE> and <ACTIVITY_TYPE>.");
             pw.println("       remove <STACK_ID>");
             pw.println("           Remove stack <STACK_ID>.");
             pw.println("  task [COMMAND] [...]: sub-commands for operating on activity tasks.");
@@ -2909,14 +3075,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("           Makes sure <TASK_ID> is in a stack with the specified bounds.");
             pw.println("           Forces the task to be resizeable and creates a stack if no existing stack");
             pw.println("           has the specified bounds.");
-            pw.println("       drag-task-test <TASK_ID> <STEP_SIZE> [DELAY_MS]");
-            pw.println("           Test command for dragging/moving <TASK_ID> by");
-            pw.println("           <STEP_SIZE> increments around the screen applying the optional [DELAY_MS]");
-            pw.println("           between each step.");
-            pw.println("       size-task-test <TASK_ID> <STEP_SIZE> [DELAY_MS]");
-            pw.println("           Test command for sizing <TASK_ID> by <STEP_SIZE>");
-            pw.println("           increments within the screen applying the optional [DELAY_MS] between");
-            pw.println("           each step.");
             pw.println("  update-appinfo <USER_ID> <PACKAGE_NAME> [<PACKAGE_NAME>...]");
             pw.println("      Update the ApplicationInfo objects of the listed packages for <USER_ID>");
             pw.println("      without restarting any processes.");

@@ -138,9 +138,10 @@ int numOutputs = info.getOutputPortCount();
 </pre>
 
 
-<p>Note that &ldquo;input&rdquo; and &ldquo;output&rdquo; are from the standpoint of the device. So a
-synthesizer will have an &ldquo;input&rdquo; port that receives messages. A keyboard will
-have an &ldquo;output&rdquo; port that sends messages.</p>
+<p>Note that &ldquo;input&rdquo; and &ldquo;output&rdquo; directions reflect the point of view
+of the MIDI device itself, not your app.
+For example, to send MIDI notes to a synthesizer, open the synth's INPUT port.
+To receive notes from a keyboard, open the keyboard's OUTPUT port.</p>
 
 <p>The MidiDeviceInfo has a bundle of properties.</p>
 
@@ -359,8 +360,10 @@ public class MidiSynthDeviceService extends MidiDeviceService {
 <p>MIDI devices can be connected to Android using Bluetooth LE.</p>
 
 <p>Before using the device, the app must scan for available BTLE devices and then allow
-the user to connect. An example program
-will be provided so look for it on the Android developer website.</p>
+the user to connect.
+See the Android developer website for an
+<a href="https://source.android.com/devices/audio/midi_test#apps" target="_blank">example
+program</a>.</p>
 
 <h2 id=btle_location_permissions>Request Location Permission for BTLE</h2>
 

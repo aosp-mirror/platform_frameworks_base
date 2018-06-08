@@ -18,7 +18,6 @@ package android.os;
 
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.IntArray;
@@ -33,14 +32,19 @@ import java.util.ArrayList;
 @TestApi
 public final class IncidentReportArgs implements Parcelable {
 
+    private static final int DEST_EXPLICIT = 100;
+    private static final int DEST_AUTO = 200;
+
     private final IntArray mSections = new IntArray();
     private final ArrayList<byte[]> mHeaders = new ArrayList<byte[]>();
     private boolean mAll;
+    private int mDest;
 
     /**
      * Construct an incident report args with no fields.
      */
     public IncidentReportArgs() {
+        mDest = DEST_AUTO;
     }
 
     /**
@@ -50,10 +54,12 @@ public final class IncidentReportArgs implements Parcelable {
         readFromParcel(in);
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mAll ? 1 : 0);
 
@@ -68,6 +74,8 @@ public final class IncidentReportArgs implements Parcelable {
         for (int i=0; i<N; i++) {
             out.writeByteArray(mHeaders.get(i));
         }
+
+        out.writeInt(mDest);
     }
 
     public void readFromParcel(Parcel in) {
@@ -84,6 +92,8 @@ public final class IncidentReportArgs implements Parcelable {
         for (int i=0; i<N; i++) {
             mHeaders.add(in.createByteArray());
         }
+
+        mDest = in.readInt();
     }
 
     public static final Parcelable.Creator<IncidentReportArgs> CREATOR
@@ -100,6 +110,7 @@ public final class IncidentReportArgs implements Parcelable {
     /**
      * Print this report as a string.
      */
+    @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Incident(");
         if (mAll) {
@@ -116,7 +127,8 @@ public final class IncidentReportArgs implements Parcelable {
         }
         sb.append(", ");
         sb.append(mHeaders.size());
-        sb.append(" headers)");
+        sb.append(" headers), ");
+        sb.append("Dest enum value: ").append(mDest);
         return sb.toString();
     }
 
@@ -131,10 +143,26 @@ public final class IncidentReportArgs implements Parcelable {
     }
 
     /**
-     * Add this section to the incident report.
+     * Set this incident report privacy policy spec.
+     * @hide
+     */
+    public void setPrivacyPolicy(int dest) {
+        switch (dest) {
+            case DEST_EXPLICIT:
+            case DEST_AUTO:
+                mDest = dest;
+                break;
+            default:
+                mDest = DEST_AUTO;
+        }
+    }
+
+    /**
+     * Add this section to the incident report. Skip if the input is smaller than 2 since section
+     * id are only valid for positive integer as Protobuf field id. Here 1 is reserved for Header.
      */
     public void addSection(int section) {
-        if (!mAll) {
+        if (!mAll && section > 1) {
             mSections.add(section);
         }
     }
@@ -159,54 +187,6 @@ public final class IncidentReportArgs implements Parcelable {
 
     public void addHeader(byte[] header) {
         mHeaders.add(header);
-    }
-
-    /**
-     * Parses an incident report config as described in the system setting.
-     *
-     * @see IncidentManager#reportIncident
-     */
-    public static IncidentReportArgs parseSetting(String setting)
-            throws IllegalArgumentException {
-        if (setting == null || setting.length() == 0) {
-            return null;
-        }
-        setting = setting.trim();
-        if (setting.length() == 0 || "disabled".equals(setting)) {
-            return null;
-        }
-
-        final IncidentReportArgs args = new IncidentReportArgs();
-
-        if ("all".equals(setting)) {
-            args.setAll(true);
-            return args;
-        } else if ("none".equals(setting)) {
-            return args;
-        }
-
-        final String[] splits = setting.split(",");
-        final int N = splits.length;
-        for (int i=0; i<N; i++) {
-            final String str = splits[i].trim();
-            if (str.length() == 0) {
-                continue;
-            }
-            int section;
-            try {
-                section = Integer.parseInt(str);
-            } catch (NumberFormatException ex) {
-                throw new IllegalArgumentException("Malformed setting. Bad integer at section"
-                        + " index " + i + ": section='" + str + "' setting='" + setting + "'");
-            }
-            if (section < 1) {
-                throw new IllegalArgumentException("Malformed setting. Illegal section at"
-                        + " index " + i + ": section='" + str + "' setting='" + setting + "'");
-            }
-            args.addSection(section);
-        }
-
-        return args;
     }
 }
 

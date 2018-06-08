@@ -247,6 +247,26 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         assertEquals(7, updates.size());
     }
 
+    public void testUpdatesReceived_queueEmptyAfterStartListening() {
+        int widgetId = setupHostAndWidget();
+        int widgetId2 = bindNewWidget();
+        mService.stopListening(mPkgName, HOST_ID);
+
+        sendDummyUpdates(widgetId, 22, 23);
+        sendDummyUpdates(widgetId2, 100, 101, 102);
+
+        List<PendingHostUpdate> updates = mService.startListening(
+                mMockHost, mPkgName, HOST_ID, new int[]{widgetId, widgetId2}).getList();
+        // 3 updates for first widget and 4 for second
+        assertEquals(7, updates.size());
+
+        // Stop and start listening again
+        mService.stopListening(mPkgName, HOST_ID);
+        updates = mService.startListening(
+                mMockHost, mPkgName, HOST_ID, new int[]{widgetId, widgetId2}).getList();
+        assertTrue(updates.isEmpty());
+    }
+
     public void testGetInstalledProvidersForPackage() {
         List<AppWidgetProviderInfo> allProviders = mManager.getInstalledProviders();
         assertTrue(!allProviders.isEmpty());

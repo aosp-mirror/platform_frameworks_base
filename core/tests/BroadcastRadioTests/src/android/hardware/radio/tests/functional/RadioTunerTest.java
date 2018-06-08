@@ -122,6 +122,8 @@ public class RadioTunerTest {
 
     private void resetCallback() {
         verify(mCallback, atLeast(0)).onMetadataChanged(any());
+        verify(mCallback, atLeast(0)).onProgramInfoChanged(any());
+        verify(mCallback, atLeast(0)).onProgramListChanged();
         verifyNoMoreInteractions(mCallback);
         Mockito.reset(mCallback);
     }
@@ -149,6 +151,10 @@ public class RadioTunerTest {
 
         mRadioTuner = mRadioManager.openTuner(mModule.getId(),
                 mFmBandConfig, withAudio, mCallback, null);
+        if (!withAudio) {
+            // non-audio sessions might not be supported - if so, then skip the test
+            assumeNotNull(mRadioTuner);
+        }
         assertNotNull(mRadioTuner);
         verify(mCallback, timeout(kConfigCallbackTimeoutMs)).onConfigurationChanged(any());
         resetCallback();
@@ -207,20 +213,8 @@ public class RadioTunerTest {
     public void testSetBadConfiguration() throws Throwable {
         openTuner();
 
-        // set bad config
-        Constructor<RadioManager.AmBandConfig> configConstr =
-                RadioManager.AmBandConfig.class.getDeclaredConstructor(
-                        int.class, int.class, int.class, int.class, int.class, boolean.class);
-        configConstr.setAccessible(true);
-        RadioManager.AmBandConfig badConfig = configConstr.newInstance(
-                0 /*region*/, RadioManager.BAND_AM /*type*/,
-                10000 /*lowerLimit*/, 1 /*upperLimit*/, 100 /*spacing*/, false /*stereo*/);
-        int ret = mRadioTuner.setConfiguration(badConfig);
-        assertEquals(RadioManager.STATUS_BAD_VALUE, ret);
-        verify(mCallback, never()).onConfigurationChanged(any());
-
         // set null config
-        ret = mRadioTuner.setConfiguration(null);
+        int ret = mRadioTuner.setConfiguration(null);
         assertEquals(RadioManager.STATUS_BAD_VALUE, ret);
         verify(mCallback, never()).onConfigurationChanged(any());
 

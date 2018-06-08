@@ -53,6 +53,7 @@
     </style>
     <style name="widget_big_thin">
         <item name="android:textSize">@dimen/widget_big_font_size</item>
+        <item name="android:paddingBottom">@dimen/bottom_text_spacing_digital</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyLight</item>
         <item name="android:fontFeatureSettings">@*android:string/config_headlineFontFeatureSettings</item>
     </style>
@@ -76,6 +77,21 @@
     <style name="keyguard_presentation_theme" parent="@android:style/Theme.Material.NoActionBar.Fullscreen">
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
         <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_dark</item>
+    </style>
+
+    <style name="TextAppearance.Keyguard" parent="Theme.SystemUI">
+        <item name="android:textSize">@dimen/widget_title_font_size</item>
+        <item name="android:gravity">center</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamilyLight</item>
+    </style>
+
+    <style name="TextAppearance.Keyguard.Secondary">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:lines">1</item>
+        <item name="android:textSize">@dimen/widget_label_font_size</item>
     </style>
 
 </resources>

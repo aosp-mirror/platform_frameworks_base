@@ -157,6 +157,13 @@ public final class UiccAccessRule implements Parcelable {
     }
 
     /**
+     * Returns the hex string of the certificate hash.
+     */
+    public String getCertificateHexString() {
+        return IccUtils.bytesToHexString(mCertificateHash);
+    }
+
+    /**
      * Returns the carrier privilege status associated with the given package.
      *
      * @param packageInfo package info fetched from

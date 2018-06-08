@@ -16,6 +16,7 @@
 package android.app.usage;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -80,6 +81,7 @@ public final class UsageEvents implements Parcelable {
          * An event type denoting that a package was interacted with in some way by the system.
          * @hide
          */
+        @SystemApi
         public static final int SYSTEM_INTERACTION = 6;
 
         /**
@@ -100,14 +102,75 @@ public final class UsageEvents implements Parcelable {
          */
         public static final int CHOOSER_ACTION = 9;
 
+        /**
+         * An event type denoting that a notification was viewed by the user.
+         * @hide
+         */
+        @SystemApi
+        public static final int NOTIFICATION_SEEN = 10;
+
+        /**
+         * An event type denoting a change in App Standby Bucket. The new bucket can be
+         * retrieved by calling {@link #getAppStandbyBucket()}.
+         *
+         * @see UsageStatsManager#getAppStandbyBucket()
+         */
+        public static final int STANDBY_BUCKET_CHANGED = 11;
+
+        /**
+         * An event type denoting that an app posted an interruptive notification. Visual and
+         * audible interruptions are included.
+         * @hide
+         */
+        @SystemApi
+        public static final int NOTIFICATION_INTERRUPTION = 12;
+
+        /**
+         * A Slice was pinned by the default launcher or the default assistant.
+         * @hide
+         */
+        @SystemApi
+        public static final int SLICE_PINNED_PRIV = 13;
+
+        /**
+         * A Slice was pinned by an app.
+         * @hide
+         */
+        @SystemApi
+        public static final int SLICE_PINNED = 14;
+
+        /**
+         * An event type denoting that the screen has gone in to an interactive state (turned
+         * on for full user interaction, not ambient display or other non-interactive state).
+         */
+        public static final int SCREEN_INTERACTIVE = 15;
+
+        /**
+         * An event type denoting that the screen has gone in to a non-interactive state
+         * (completely turned off or turned on only in a non-interactive state like ambient
+         * display).
+         */
+        public static final int SCREEN_NON_INTERACTIVE = 16;
+
+        /**
+         * An event type denoting that the screen's keyguard has been shown, whether or not
+         * the screen is off.
+         */
+        public static final int KEYGUARD_SHOWN = 17;
+
+        /**
+         * An event type denoting that the screen's keyguard has been hidden.  This typically
+         * happens when the user unlocks their phone after turning it on.
+         */
+        public static final int KEYGUARD_HIDDEN = 18;
+
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;
 
         /** @hide */
-        @IntDef(flag = true,
-                value = {
-                        FLAG_IS_PACKAGE_INSTANT_APP,
-                })
+        @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+                FLAG_IS_PACKAGE_INSTANT_APP,
+        })
         @Retention(RetentionPolicy.SOURCE)
         public @interface EventFlags {}
 
@@ -165,6 +228,22 @@ public final class UsageEvents implements Parcelable {
          */
         public String[] mContentAnnotations;
 
+        /**
+         * The app standby bucket assigned and reason. Bucket is the high order 16 bits, reason
+         * is the low order 16 bits.
+         * Only present for {@link #STANDBY_BUCKET_CHANGED} event types
+         * {@hide}
+         */
+        public int mBucketAndReason;
+
+        /**
+         * The id of the {@link android.app.NotificationChannel} to which an interruptive
+         * notification was posted.
+         * Only present for {@link #NOTIFICATION_INTERRUPTION} event types.
+         * {@hide}
+         */
+        public String mNotificationChannelId;
+
         /** @hide */
         @EventFlags
         public int mFlags;
@@ -184,6 +263,8 @@ public final class UsageEvents implements Parcelable {
             mContentType = orig.mContentType;
             mContentAnnotations = orig.mContentAnnotations;
             mFlags = orig.mFlags;
+            mBucketAndReason = orig.mBucketAndReason;
+            mNotificationChannelId = orig.mNotificationChannelId;
         }
 
         /**
@@ -213,8 +294,11 @@ public final class UsageEvents implements Parcelable {
         /**
          * The event type.
          *
-         * See {@link #MOVE_TO_BACKGROUND}
-         * See {@link #MOVE_TO_FOREGROUND}
+         * @see #MOVE_TO_BACKGROUND
+         * @see #MOVE_TO_FOREGROUND
+         * @see #CONFIGURATION_CHANGE
+         * @see #USER_INTERACTION
+         * @see #STANDBY_BUCKET_CHANGED
          */
         public int getEventType() {
             return mEventType;
@@ -236,6 +320,48 @@ public final class UsageEvents implements Parcelable {
          */
         public String getShortcutId() {
             return mShortcutId;
+        }
+
+        /**
+         * Returns the standby bucket of the app, if the event is of type
+         * {@link #STANDBY_BUCKET_CHANGED}, otherwise returns 0.
+         * @return the standby bucket associated with the event.
+         * @hide
+         */
+        public int getStandbyBucket() {
+            return (mBucketAndReason & 0xFFFF0000) >>> 16;
+        }
+
+        /**
+         * Returns the standby bucket of the app, if the event is of type
+         * {@link #STANDBY_BUCKET_CHANGED}, otherwise returns 0.
+         * @return the standby bucket associated with the event.
+         *
+         */
+        public int getAppStandbyBucket() {
+            return (mBucketAndReason & 0xFFFF0000) >>> 16;
+        }
+
+        /**
+         * Returns the reason for the bucketing, if the event is of type
+         * {@link #STANDBY_BUCKET_CHANGED}, otherwise returns 0. Reason values include
+         * the main reason which is one of REASON_MAIN_*, OR'ed with REASON_SUB_*, if there
+         * are sub-reasons for the main reason, such as REASON_SUB_USAGE_* when the main reason
+         * is REASON_MAIN_USAGE.
+         * @hide
+         */
+        public int getStandbyReason() {
+            return mBucketAndReason & 0x0000FFFF;
+        }
+
+        /**
+         * Returns the ID of the {@link android.app.NotificationChannel} for this event if the
+         * event is of type {@link #NOTIFICATION_INTERRUPTION}, otherwise it returns null;
+         * @hide
+         */
+        @SystemApi
+        public String getNotificationChannelId() {
+            return mNotificationChannelId;
         }
 
         /** @hide */
@@ -273,16 +399,20 @@ public final class UsageEvents implements Parcelable {
      * {@hide}
      */
     public UsageEvents(Parcel in) {
-        mEventCount = in.readInt();
-        mIndex = in.readInt();
+        byte[] bytes = in.readBlob();
+        Parcel data = Parcel.obtain();
+        data.unmarshall(bytes, 0, bytes.length);
+        data.setDataPosition(0);
+        mEventCount = data.readInt();
+        mIndex = data.readInt();
         if (mEventCount > 0) {
-            mStringPool = in.createStringArray();
+            mStringPool = data.createStringArray();
 
-            final int listByteLength = in.readInt();
-            final int positionInParcel = in.readInt();
+            final int listByteLength = data.readInt();
+            final int positionInParcel = data.readInt();
             mParcel = Parcel.obtain();
             mParcel.setDataPosition(0);
-            mParcel.appendFrom(in, in.dataPosition(), listByteLength);
+            mParcel.appendFrom(data, data.dataPosition(), listByteLength);
             mParcel.setDataSize(mParcel.dataPosition());
             mParcel.setDataPosition(positionInParcel);
         }
@@ -394,6 +524,12 @@ public final class UsageEvents implements Parcelable {
                 p.writeString(event.mContentType);
                 p.writeStringArray(event.mContentAnnotations);
                 break;
+            case Event.STANDBY_BUCKET_CHANGED:
+                p.writeInt(event.mBucketAndReason);
+                break;
+            case Event.NOTIFICATION_INTERRUPTION:
+                p.writeString(event.mNotificationChannelId);
+                break;
         }
     }
 
@@ -423,6 +559,7 @@ public final class UsageEvents implements Parcelable {
         eventOut.mAction = null;
         eventOut.mContentType = null;
         eventOut.mContentAnnotations = null;
+        eventOut.mNotificationChannelId = null;
 
         switch (eventOut.mEventType) {
             case Event.CONFIGURATION_CHANGE:
@@ -437,6 +574,12 @@ public final class UsageEvents implements Parcelable {
                 eventOut.mContentType = p.readString();
                 eventOut.mContentAnnotations = p.createStringArray();
                 break;
+            case Event.STANDBY_BUCKET_CHANGED:
+                eventOut.mBucketAndReason = p.readInt();
+                break;
+            case Event.NOTIFICATION_INTERRUPTION:
+                eventOut.mNotificationChannelId = p.readString();
+                break;
         }
     }
 
@@ -447,10 +590,11 @@ public final class UsageEvents implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mEventCount);
-        dest.writeInt(mIndex);
+        Parcel data = Parcel.obtain();
+        data.writeInt(mEventCount);
+        data.writeInt(mIndex);
         if (mEventCount > 0) {
-            dest.writeStringArray(mStringPool);
+            data.writeStringArray(mStringPool);
 
             if (mEventsToWrite != null) {
                 // Write out the events
@@ -465,31 +609,34 @@ public final class UsageEvents implements Parcelable {
                     final int listByteLength = p.dataPosition();
 
                     // Write the total length of the data.
-                    dest.writeInt(listByteLength);
+                    data.writeInt(listByteLength);
 
                     // Write our current position into the data.
-                    dest.writeInt(0);
+                    data.writeInt(0);
 
                     // Write the data.
-                    dest.appendFrom(p, 0, listByteLength);
+                    data.appendFrom(p, 0, listByteLength);
                 } finally {
                     p.recycle();
                 }
 
             } else if (mParcel != null) {
                 // Write the total length of the data.
-                dest.writeInt(mParcel.dataSize());
+                data.writeInt(mParcel.dataSize());
 
                 // Write out current position into the data.
-                dest.writeInt(mParcel.dataPosition());
+                data.writeInt(mParcel.dataPosition());
 
                 // Write the data.
-                dest.appendFrom(mParcel, 0, mParcel.dataSize());
+                data.appendFrom(mParcel, 0, mParcel.dataSize());
             } else {
                 throw new IllegalStateException(
                         "Either mParcel or mEventsToWrite must not be null");
             }
         }
+        // Data can be too large for a transact. Write the data as a Blob, which will be written to
+        // ashmem if too large.
+        dest.writeBlob(data.marshall());
     }
 
     public static final Creator<UsageEvents> CREATOR = new Creator<UsageEvents>() {

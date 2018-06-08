@@ -20,7 +20,7 @@ namespace android {
 namespace NinePatchUtils {
 
 static inline void SetLatticeDivs(SkCanvas::Lattice* lattice, const Res_png_9patch& chunk,
-        int width, int height) {
+                                  int width, int height) {
     lattice->fXCount = chunk.numXDivs;
     lattice->fYCount = chunk.numYDivs;
     lattice->fXDivs = chunk.getXDivs();
@@ -53,10 +53,13 @@ static inline int NumDistinctRects(const SkCanvas::Lattice& lattice) {
     return xRects * yRects;
 }
 
-static inline void SetLatticeFlags(SkCanvas::Lattice* lattice, SkCanvas::Lattice::Flags* flags,
-        int numFlags, const Res_png_9patch& chunk) {
-    lattice->fFlags = flags;
-    sk_bzero(flags, numFlags * sizeof(SkCanvas::Lattice::Flags));
+static inline void SetLatticeFlags(SkCanvas::Lattice* lattice,
+        SkCanvas::Lattice::RectType* flags, int numFlags, const Res_png_9patch& chunk,
+        SkColor* colors) {
+    lattice->fRectTypes = flags;
+    lattice->fColors = colors;
+    sk_bzero(flags, numFlags * sizeof(SkCanvas::Lattice::RectType));
+    sk_bzero(colors, numFlags * sizeof(SkColor));
 
     bool needPadRow = lattice->fYCount > 0 && 0 == lattice->fYDivs[0];
     bool needPadCol = lattice->fXCount > 0 && 0 == lattice->fXDivs[0];
@@ -65,6 +68,7 @@ static inline void SetLatticeFlags(SkCanvas::Lattice* lattice, SkCanvas::Lattice
     if (needPadRow) {
         // Skip flags for the degenerate first row of rects.
         flags += lattice->fXCount + 1;
+        colors += lattice->fXCount + 1;
         yCount--;
     }
 
@@ -75,22 +79,30 @@ static inline void SetLatticeFlags(SkCanvas::Lattice* lattice, SkCanvas::Lattice
             if (0 == x && needPadCol) {
                 // First rect of each column is degenerate, skip the flag.
                 flags++;
+                colors++;
                 continue;
             }
 
-            if (0 == chunk.getColors()[i++]) {
-                *flags = SkCanvas::Lattice::kTransparent_Flags;
+            uint32_t currentColor = chunk.getColors()[i++];
+            if (Res_png_9patch::TRANSPARENT_COLOR == currentColor) {
+                *flags = SkCanvas::Lattice::kTransparent;
+                setFlags = true;
+            } else if (Res_png_9patch::NO_COLOR != currentColor) {
+                *flags = SkCanvas::Lattice::kFixedColor;
+                *colors = currentColor;
                 setFlags = true;
             }
 
             flags++;
+            colors++;
         }
     }
 
     if (!setFlags) {
-        lattice->fFlags = nullptr;
+        lattice->fRectTypes = nullptr;
+        lattice->fColors = nullptr;
     }
 }
 
-}; // namespace NinePatchUtils
-}; // namespace android
+};  // namespace NinePatchUtils
+};  // namespace android

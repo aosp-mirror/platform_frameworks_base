@@ -21,7 +21,8 @@
     <option name="test-suite-tag" value="apct" />
     <option name="test-tag" value="MtpDocumentsProviderTests" />
     <test class="com.android.tradefed.testtype.InstrumentationTest" >
-        <option name="package" value="com.android.mtp" />
-        <option name="runner" value="android.test.InstrumentationTestRunner" />
+        <option name="package" value="com.android.mtp.tests" />
+        <option name="runner" value="com.android.mtp.TestResultInstrumentation" />
+        <option name="hidden-api-checks" value="false"/>
     </test>
 </configuration>

@@ -18,6 +18,7 @@ package android.content.pm;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.TaskStackBuilder;
 import android.content.ComponentName;
@@ -100,9 +101,15 @@ public final class ShortcutInfo implements Parcelable {
     /** @hide When this is set, the bitmap icon is waiting to be saved. */
     public static final int FLAG_ICON_FILE_PENDING_SAVE = 1 << 11;
 
+    /**
+     * "Shadow" shortcuts are the ones that are restored, but the owner package hasn't been
+     * installed yet.
+     * @hide
+     */
+    public static final int FLAG_SHADOW = 1 << 12;
+
     /** @hide */
-    @IntDef(flag = true,
-            value = {
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             FLAG_DYNAMIC,
             FLAG_PINNED,
             FLAG_HAS_ICON_RES,
@@ -145,17 +152,143 @@ public final class ShortcutInfo implements Parcelable {
             | CLONE_REMOVE_RES_NAMES;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                    CLONE_REMOVE_ICON,
-                    CLONE_REMOVE_INTENT,
-                    CLONE_REMOVE_NON_KEY_INFO,
-                    CLONE_REMOVE_RES_NAMES,
-                    CLONE_REMOVE_FOR_CREATOR,
-                    CLONE_REMOVE_FOR_LAUNCHER
-            })
+    @IntDef(flag = true, prefix = { "CLONE_" }, value = {
+            CLONE_REMOVE_ICON,
+            CLONE_REMOVE_INTENT,
+            CLONE_REMOVE_NON_KEY_INFO,
+            CLONE_REMOVE_RES_NAMES,
+            CLONE_REMOVE_FOR_CREATOR,
+            CLONE_REMOVE_FOR_LAUNCHER
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CloneFlags {}
+
+    /**
+     * Shortcut is not disabled.
+     */
+    public static final int DISABLED_REASON_NOT_DISABLED = 0;
+
+    /**
+     * Shortcut has been disabled by the publisher app with the
+     * {@link ShortcutManager#disableShortcuts(List)} API.
+     */
+    public static final int DISABLED_REASON_BY_APP = 1;
+
+    /**
+     * Shortcut has been disabled due to changes to the publisher app. (e.g. a manifest shortcut
+     * no longer exists.)
+     */
+    public static final int DISABLED_REASON_APP_CHANGED = 2;
+
+    /**
+     * Shortcut is disabled for an unknown reason.
+     */
+    public static final int DISABLED_REASON_UNKNOWN = 3;
+
+    /**
+     * A disabled reason that's equal to or bigger than this is due to backup and restore issue.
+     * A shortcut with such a reason wil be visible to the launcher, but not to the publisher.
+     * ({@link #isVisibleToPublisher()} will be false.)
+     */
+    private static final int DISABLED_REASON_RESTORE_ISSUE_START = 100;
+
+    /**
+     * Shortcut has been restored from the previous device, but the publisher app on the current
+     * device is of a lower version. The shortcut will not be usable until the app is upgraded to
+     * the same version or higher.
+     */
+    public static final int DISABLED_REASON_VERSION_LOWER = 100;
+
+    /**
+     * Shortcut has not been restored because the publisher app does not support backup and restore.
+     */
+    public static final int DISABLED_REASON_BACKUP_NOT_SUPPORTED = 101;
+
+    /**
+     * Shortcut has not been restored because the publisher app's signature has changed.
+     */
+    public static final int DISABLED_REASON_SIGNATURE_MISMATCH = 102;
+
+    /**
+     * Shortcut has not been restored for unknown reason.
+     */
+    public static final int DISABLED_REASON_OTHER_RESTORE_ISSUE = 103;
+
+    /** @hide */
+    @IntDef(prefix = { "DISABLED_REASON_" }, value = {
+            DISABLED_REASON_NOT_DISABLED,
+            DISABLED_REASON_BY_APP,
+            DISABLED_REASON_APP_CHANGED,
+            DISABLED_REASON_UNKNOWN,
+            DISABLED_REASON_VERSION_LOWER,
+            DISABLED_REASON_BACKUP_NOT_SUPPORTED,
+            DISABLED_REASON_SIGNATURE_MISMATCH,
+            DISABLED_REASON_OTHER_RESTORE_ISSUE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DisabledReason{}
+
+    /**
+     * Return a label for disabled reasons, which are *not* supposed to be shown to the user.
+     * @hide
+     */
+    public static String getDisabledReasonDebugString(@DisabledReason int disabledReason) {
+        switch (disabledReason) {
+            case DISABLED_REASON_NOT_DISABLED:
+                return "[Not disabled]";
+            case DISABLED_REASON_BY_APP:
+                return "[Disabled: by app]";
+            case DISABLED_REASON_APP_CHANGED:
+                return "[Disabled: app changed]";
+            case DISABLED_REASON_VERSION_LOWER:
+                return "[Disabled: lower version]";
+            case DISABLED_REASON_BACKUP_NOT_SUPPORTED:
+                return "[Disabled: backup not supported]";
+            case DISABLED_REASON_SIGNATURE_MISMATCH:
+                return "[Disabled: signature mismatch]";
+            case DISABLED_REASON_OTHER_RESTORE_ISSUE:
+                return "[Disabled: unknown restore issue]";
+        }
+        return "[Disabled: unknown reason:" + disabledReason + "]";
+    }
+
+    /**
+     * Return a label for a disabled reason for shortcuts that are disabled due to a backup and
+     * restore issue. If the reason is not due to backup & restore, then it'll return null.
+     *
+     * This method returns localized, user-facing strings, which will be returned by
+     * {@link #getDisabledMessage()}.
+     *
+     * @hide
+     */
+    public static String getDisabledReasonForRestoreIssue(Context context,
+            @DisabledReason int disabledReason) {
+        final Resources res = context.getResources();
+
+        switch (disabledReason) {
+            case DISABLED_REASON_VERSION_LOWER:
+                return res.getString(
+                        com.android.internal.R.string.shortcut_restored_on_lower_version);
+            case DISABLED_REASON_BACKUP_NOT_SUPPORTED:
+                return res.getString(
+                        com.android.internal.R.string.shortcut_restore_not_supported);
+            case DISABLED_REASON_SIGNATURE_MISMATCH:
+                return res.getString(
+                        com.android.internal.R.string.shortcut_restore_signature_mismatch);
+            case DISABLED_REASON_OTHER_RESTORE_ISSUE:
+                return res.getString(
+                        com.android.internal.R.string.shortcut_restore_unknown_issue);
+            case DISABLED_REASON_UNKNOWN:
+                return res.getString(
+                        com.android.internal.R.string.shortcut_disabled_reason_unknown);
+        }
+        return null;
+    }
+
+    /** @hide */
+    public static boolean isDisabledForRestoreIssue(@DisabledReason int disabledReason) {
+        return disabledReason >= DISABLED_REASON_RESTORE_ISSUE_START;
+    }
 
     /**
      * Shortcut category for messaging related actions, such as chat.
@@ -239,6 +372,11 @@ public final class ShortcutInfo implements Parcelable {
     private String mBitmapPath;
 
     private final int mUserId;
+
+    /** @hide */
+    public static final int VERSION_CODE_UNKNOWN = -1;
+
+    private int mDisabledReason;
 
     private ShortcutInfo(Builder b) {
         mUserId = b.mContext.getUserId();
@@ -352,6 +490,7 @@ public final class ShortcutInfo implements Parcelable {
         mActivity = source.mActivity;
         mFlags = source.mFlags;
         mLastChangedTimestamp = source.mLastChangedTimestamp;
+        mDisabledReason = source.mDisabledReason;
 
         // Just always keep it since it's cheep.
         mIconResId = source.mIconResId;
@@ -615,13 +754,23 @@ public final class ShortcutInfo implements Parcelable {
 
     /**
      * @hide
+     *
+     * @isUpdating set true if it's "update", as opposed to "replace".
      */
-    public void ensureUpdatableWith(ShortcutInfo source) {
+    public void ensureUpdatableWith(ShortcutInfo source, boolean isUpdating) {
+        if (isUpdating) {
+            Preconditions.checkState(isVisibleToPublisher(),
+                    "[Framework BUG] Invisible shortcuts can't be updated");
+        }
         Preconditions.checkState(mUserId == source.mUserId, "Owner User ID must match");
         Preconditions.checkState(mId.equals(source.mId), "ID must match");
         Preconditions.checkState(mPackageName.equals(source.mPackageName),
                 "Package name must match");
-        Preconditions.checkState(!isImmutable(), "Target ShortcutInfo is immutable");
+
+        if (isVisibleToPublisher()) {
+            // Don't do this check for restore-blocked shortcuts.
+            Preconditions.checkState(!isImmutable(), "Target ShortcutInfo is immutable");
+        }
     }
 
     /**
@@ -638,7 +787,7 @@ public final class ShortcutInfo implements Parcelable {
      * @hide
      */
     public void copyNonNullFieldsFrom(ShortcutInfo source) {
-        ensureUpdatableWith(source);
+        ensureUpdatableWith(source, /*isUpdating=*/ true);
 
         if (source.mActivity != null) {
             mActivity = source.mActivity;
@@ -1169,6 +1318,19 @@ public final class ShortcutInfo implements Parcelable {
         return mDisabledMessageResId;
     }
 
+    /** @hide */
+    public void setDisabledReason(@DisabledReason int reason) {
+        mDisabledReason = reason;
+    }
+
+    /**
+     * Returns why a shortcut has been disabled.
+     */
+    @DisabledReason
+    public int getDisabledReason() {
+        return mDisabledReason;
+    }
+
     /**
      * Return the shortcut's categories.
      *
@@ -1403,6 +1565,21 @@ public final class ShortcutInfo implements Parcelable {
         return hasFlags(FLAG_IMMUTABLE);
     }
 
+    /** @hide */
+    public boolean isDynamicVisible() {
+        return isDynamic() && isVisibleToPublisher();
+    }
+
+    /** @hide */
+    public boolean isPinnedVisible() {
+        return isPinned() && isVisibleToPublisher();
+    }
+
+    /** @hide */
+    public boolean isManifestVisible() {
+        return isDeclaredInManifest() && isVisibleToPublisher();
+    }
+
     /**
      * Return if a shortcut is immutable, in which case it cannot be modified with any of
      * {@link ShortcutManager} APIs.
@@ -1488,6 +1665,18 @@ public final class ShortcutInfo implements Parcelable {
     /** @hide */
     public void clearIconPendingSave() {
         clearFlags(FLAG_ICON_FILE_PENDING_SAVE);
+    }
+
+    /**
+     * When the system wasn't able to restore a shortcut, it'll still be registered to the system
+     * but disabled, and such shortcuts will not be visible to the publisher. They're still visible
+     * to launchers though.
+     *
+     * @hide
+     */
+    @TestApi
+    public boolean isVisibleToPublisher() {
+        return !isDisabledForRestoreIssue(mDisabledReason);
     }
 
     /**
@@ -1668,6 +1857,7 @@ public final class ShortcutInfo implements Parcelable {
         mFlags = source.readInt();
         mIconResId = source.readInt();
         mLastChangedTimestamp = source.readLong();
+        mDisabledReason = source.readInt();
 
         if (source.readInt() == 0) {
             return; // key information only.
@@ -1711,6 +1901,7 @@ public final class ShortcutInfo implements Parcelable {
         dest.writeInt(mFlags);
         dest.writeInt(mIconResId);
         dest.writeLong(mLastChangedTimestamp);
+        dest.writeInt(mDisabledReason);
 
         if (hasKeyFieldsOnly()) {
             dest.writeInt(0);
@@ -1763,21 +1954,43 @@ public final class ShortcutInfo implements Parcelable {
         return 0;
     }
 
+
     /**
      * Return a string representation, intended for logging.  Some fields will be retracted.
      */
     @Override
     public String toString() {
-        return toStringInner(/* secure =*/ true, /* includeInternalData =*/ false);
+        return toStringInner(/* secure =*/ true, /* includeInternalData =*/ false,
+                /*indent=*/ null);
     }
 
     /** @hide */
     public String toInsecureString() {
-        return toStringInner(/* secure =*/ false, /* includeInternalData =*/ true);
+        return toStringInner(/* secure =*/ false, /* includeInternalData =*/ true,
+                /*indent=*/ null);
     }
 
-    private String toStringInner(boolean secure, boolean includeInternalData) {
+    /** @hide */
+    public String toDumpString(String indent) {
+        return toStringInner(/* secure =*/ false, /* includeInternalData =*/ true, indent);
+    }
+
+    private void addIndentOrComma(StringBuilder sb, String indent) {
+        if (indent != null) {
+            sb.append("\n  ");
+            sb.append(indent);
+        } else {
+            sb.append(", ");
+        }
+    }
+
+    private String toStringInner(boolean secure, boolean includeInternalData, String indent) {
         final StringBuilder sb = new StringBuilder();
+
+        if (indent != null) {
+            sb.append(indent);
+        }
+
         sb.append("ShortcutInfo {");
 
         sb.append("id=");
@@ -1786,48 +1999,59 @@ public final class ShortcutInfo implements Parcelable {
         sb.append(", flags=0x");
         sb.append(Integer.toHexString(mFlags));
         sb.append(" [");
+        if ((mFlags & FLAG_SHADOW) != 0) {
+            // Note the shadow flag isn't actually used anywhere and it's just for dumpsys, so
+            // we don't have an isXxx for this.
+            sb.append("Sdw");
+        }
         if (!isEnabled()) {
-            sb.append("X");
+            sb.append("Dis");
         }
         if (isImmutable()) {
             sb.append("Im");
         }
         if (isManifestShortcut()) {
-            sb.append("M");
+            sb.append("Man");
         }
         if (isDynamic()) {
-            sb.append("D");
+            sb.append("Dyn");
         }
         if (isPinned()) {
-            sb.append("P");
+            sb.append("Pin");
         }
         if (hasIconFile()) {
-            sb.append("If");
+            sb.append("Ic-f");
         }
         if (isIconPendingSave()) {
-            sb.append("^");
+            sb.append("Pens");
         }
         if (hasIconResource()) {
-            sb.append("Ir");
+            sb.append("Ic-r");
         }
         if (hasKeyFieldsOnly()) {
-            sb.append("K");
+            sb.append("Key");
         }
         if (hasStringResourcesResolved()) {
-            sb.append("Sr");
+            sb.append("Str");
         }
         if (isReturnedByServer()) {
-            sb.append("V");
+            sb.append("Rets");
         }
         sb.append("]");
 
-        sb.append(", packageName=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("packageName=");
         sb.append(mPackageName);
 
-        sb.append(", activity=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("activity=");
         sb.append(mActivity);
 
-        sb.append(", shortLabel=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("shortLabel=");
         sb.append(secure ? "***" : mTitle);
         sb.append(", resId=");
         sb.append(mTitleResId);
@@ -1835,7 +2059,9 @@ public final class ShortcutInfo implements Parcelable {
         sb.append(mTitleResName);
         sb.append("]");
 
-        sb.append(", longLabel=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("longLabel=");
         sb.append(secure ? "***" : mText);
         sb.append(", resId=");
         sb.append(mTextResId);
@@ -1843,7 +2069,9 @@ public final class ShortcutInfo implements Parcelable {
         sb.append(mTextResName);
         sb.append("]");
 
-        sb.append(", disabledMessage=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("disabledMessage=");
         sb.append(secure ? "***" : mDisabledMessage);
         sb.append(", resId=");
         sb.append(mDisabledMessageResId);
@@ -1851,19 +2079,32 @@ public final class ShortcutInfo implements Parcelable {
         sb.append(mDisabledMessageResName);
         sb.append("]");
 
-        sb.append(", categories=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("disabledReason=");
+        sb.append(getDisabledReasonDebugString(mDisabledReason));
+
+        addIndentOrComma(sb, indent);
+
+        sb.append("categories=");
         sb.append(mCategories);
 
-        sb.append(", icon=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("icon=");
         sb.append(mIcon);
 
-        sb.append(", rank=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("rank=");
         sb.append(mRank);
 
         sb.append(", timestamp=");
         sb.append(mLastChangedTimestamp);
 
-        sb.append(", intents=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("intents=");
         if (mIntents == null) {
             sb.append("null");
         } else {
@@ -1885,12 +2126,15 @@ public final class ShortcutInfo implements Parcelable {
             }
         }
 
-        sb.append(", extras=");
+        addIndentOrComma(sb, indent);
+
+        sb.append("extras=");
         sb.append(mExtras);
 
         if (includeInternalData) {
+            addIndentOrComma(sb, indent);
 
-            sb.append(", iconRes=");
+            sb.append("iconRes=");
             sb.append(mIconResId);
             sb.append("[");
             sb.append(mIconResName);
@@ -1912,7 +2156,7 @@ public final class ShortcutInfo implements Parcelable {
             CharSequence disabledMessage, int disabledMessageResId, String disabledMessageResName,
             Set<String> categories, Intent[] intentsWithExtras, int rank, PersistableBundle extras,
             long lastChangedTimestamp,
-            int flags, int iconResId, String iconResName, String bitmapPath) {
+            int flags, int iconResId, String iconResName, String bitmapPath, int disabledReason) {
         mUserId = userId;
         mId = id;
         mPackageName = packageName;
@@ -1937,5 +2181,6 @@ public final class ShortcutInfo implements Parcelable {
         mIconResId = iconResId;
         mIconResName = iconResName;
         mBitmapPath = bitmapPath;
+        mDisabledReason = disabledReason;
     }
 }

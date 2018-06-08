@@ -16,32 +16,44 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.Notification.CATEGORY_ALARM;
+import static android.app.Notification.CATEGORY_CALL;
+import static android.app.Notification.CATEGORY_EVENT;
+import static android.app.Notification.CATEGORY_MESSAGE;
+import static android.app.Notification.CATEGORY_REMINDER;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
+
+import android.Manifest;
 import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.Person;
+import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.Context;
 import android.graphics.drawable.Icon;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
-import android.Manifest;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
@@ -49,6 +61,7 @@ import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -65,8 +78,12 @@ public class NotificationData {
     private final Environment mEnvironment;
     private HeadsUpManager mHeadsUpManager;
 
+    final ZenModeController mZen = Dependency.get(ZenModeController.class);
+    final ForegroundServiceController mFsc = Dependency.get(ForegroundServiceController.class);
+
     public static final class Entry {
         private static final long LAUNCH_COOLDOWN = 2000;
+        private static final long REMOTE_INPUT_COOLDOWN = 500;
         private static final long NOT_LAUNCHED_YET = -LAUNCH_COOLDOWN;
         private static final int COLOR_INVALID = 1;
         public String key;
@@ -86,10 +103,28 @@ public class NotificationData {
         public RemoteViews cachedAmbientContentView;
         public CharSequence remoteInputText;
         public List<SnoozeCriterion> snoozeCriteria;
+        public int userSentiment = Ranking.USER_SENTIMENT_NEUTRAL;
+
         private int mCachedContrastColor = COLOR_INVALID;
         private int mCachedContrastColorIsFor = COLOR_INVALID;
         private InflationTask mRunningTask = null;
         private Throwable mDebugThrowable;
+        public CharSequence remoteInputTextWhenReset;
+        public long lastRemoteInputSent = NOT_LAUNCHED_YET;
+        public ArraySet<Integer> mActiveAppOps = new ArraySet<>(3);
+        public CharSequence headsUpStatusBarText;
+        public CharSequence headsUpStatusBarTextPublic;
+        /**
+         * Whether or not this row represents a system notification. Note that if this is
+         * {@code null}, that means we were either unable to retrieve the info or have yet to
+         * retrieve the info.
+         */
+        public Boolean mIsSystemNotification;
+
+        /**
+         * Has the user sent a reply through this Notification.
+         */
+        private boolean hasSentReply;
 
         public Entry(StatusBarNotification n) {
             this.key = n.getKey();
@@ -128,6 +163,10 @@ public class NotificationData {
 
         public boolean hasJustLaunchedFullScreenIntent() {
             return SystemClock.elapsedRealtime() < lastFullScreenIntentLaunchTime + LAUNCH_COOLDOWN;
+        }
+
+        public boolean hasJustSentRemoteInput() {
+            return SystemClock.elapsedRealtime() < lastRemoteInputSent + REMOTE_INPUT_COOLDOWN;
         }
 
         /**
@@ -185,7 +224,7 @@ public class NotificationData {
         /**
          * Update the notification icons.
          * @param context the context to create the icons with.
-         * @param n the notification to read the icon from.
+         * @param sbn the notification to read the icon from.
          * @throws InflationException
          */
         public void updateIcons(Context context, StatusBarNotification sbn)
@@ -263,10 +302,50 @@ public class NotificationData {
         public Throwable getDebugThrowable() {
             return mDebugThrowable;
         }
+
+        public void onRemoteInputInserted() {
+            lastRemoteInputSent = NOT_LAUNCHED_YET;
+            remoteInputTextWhenReset = null;
+        }
+
+        public void setHasSentReply() {
+            hasSentReply = true;
+        }
+
+        public boolean isLastMessageFromReply() {
+            if (!hasSentReply) {
+                return false;
+            }
+            Bundle extras = notification.getNotification().extras;
+            CharSequence[] replyTexts = extras.getCharSequenceArray(
+                    Notification.EXTRA_REMOTE_INPUT_HISTORY);
+            if (!ArrayUtils.isEmpty(replyTexts)) {
+                return true;
+            }
+            Parcelable[] messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES);
+            if (messages != null && messages.length > 0) {
+                Parcelable message = messages[messages.length - 1];
+                if (message instanceof Bundle) {
+                    Notification.MessagingStyle.Message lastMessage =
+                            Notification.MessagingStyle.Message.getMessageFromBundle(
+                                    (Bundle) message);
+                    if (lastMessage != null) {
+                        Person senderPerson = lastMessage.getSenderPerson();
+                        if (senderPerson == null) {
+                            return true;
+                        }
+                        Person user = extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON);
+                        return Objects.equals(user, senderPerson);
+                    }
+                }
+            }
+            return false;
+        }
     }
 
     private final ArrayMap<String, Entry> mEntries = new ArrayMap<>();
     private final ArrayList<Entry> mSortedAndFiltered = new ArrayList<>();
+    private final ArrayList<Entry> mFilteredForUser = new ArrayList<>();
 
     private NotificationGroupManager mGroupManager;
 
@@ -351,6 +430,23 @@ public class NotificationData {
         return mSortedAndFiltered;
     }
 
+    public ArrayList<Entry> getNotificationsForCurrentUser() {
+        mFilteredForUser.clear();
+
+        synchronized (mEntries) {
+            final int N = mEntries.size();
+            for (int i = 0; i < N; i++) {
+                Entry entry = mEntries.valueAt(i);
+                final StatusBarNotification sbn = entry.notification;
+                if (!mEnvironment.isNotificationForCurrentProfiles(sbn)) {
+                    continue;
+                }
+                mFilteredForUser.add(entry);
+            }
+        }
+        return mFilteredForUser;
+    }
+
     public Entry get(String key) {
         return mEntries.get(key);
     }
@@ -379,6 +475,24 @@ public class NotificationData {
         updateRankingAndSort(ranking);
     }
 
+    public void updateAppOp(int appOp, int uid, String pkg, String key, boolean showIcon) {
+        synchronized (mEntries) {
+            final int N = mEntries.size();
+            for (int i = 0; i < N; i++) {
+                Entry entry = mEntries.valueAt(i);
+                if (uid == entry.notification.getUid()
+                        && pkg.equals(entry.notification.getPackageName())
+                        && key.equals(entry.key)) {
+                    if (showIcon) {
+                        entry.mActiveAppOps.add(appOp);
+                    } else {
+                        entry.mActiveAppOps.remove(appOp);
+                    }
+                }
+            }
+        }
+    }
+
     public boolean isAmbient(String key) {
         if (mRankingMap != null) {
             getRanking(key, mTmpRanking);
@@ -395,22 +509,74 @@ public class NotificationData {
         return Ranking.VISIBILITY_NO_OVERRIDE;
     }
 
-    public boolean shouldSuppressScreenOff(String key) {
+    public boolean shouldSuppressFullScreenIntent(Entry entry) {
+        return shouldSuppressVisualEffect(entry, SUPPRESSED_EFFECT_FULL_SCREEN_INTENT);
+    }
+
+    public boolean shouldSuppressPeek(Entry entry) {
+        return shouldSuppressVisualEffect(entry, SUPPRESSED_EFFECT_PEEK);
+    }
+
+    public boolean shouldSuppressStatusBar(Entry entry) {
+        return shouldSuppressVisualEffect(entry, SUPPRESSED_EFFECT_STATUS_BAR);
+    }
+
+    public boolean shouldSuppressAmbient(Entry entry) {
+        return shouldSuppressVisualEffect(entry, SUPPRESSED_EFFECT_AMBIENT);
+    }
+
+    public boolean shouldSuppressNotificationList(Entry entry) {
+        return shouldSuppressVisualEffect(entry, SUPPRESSED_EFFECT_NOTIFICATION_LIST);
+    }
+
+    private boolean shouldSuppressVisualEffect(Entry entry, int effect) {
+        if (isExemptFromDndVisualSuppression(entry)) {
+            return false;
+        }
+        String key = entry.key;
         if (mRankingMap != null) {
             getRanking(key, mTmpRanking);
-            return (mTmpRanking.getSuppressedVisualEffects()
-                    & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_OFF) != 0;
+            return (mTmpRanking.getSuppressedVisualEffects() & effect) != 0;
         }
         return false;
     }
 
-    public boolean shouldSuppressScreenOn(String key) {
-        if (mRankingMap != null) {
-            getRanking(key, mTmpRanking);
-            return (mTmpRanking.getSuppressedVisualEffects()
-                    & NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON) != 0;
+    protected boolean isExemptFromDndVisualSuppression(Entry entry) {
+        if (isNotificationBlockedByPolicy(entry.notification.getNotification())) {
+            return false;
+        }
+
+        if ((entry.notification.getNotification().flags
+                & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+            return true;
+        }
+        if (entry.notification.getNotification().isMediaNotification()) {
+            return true;
+        }
+        if (entry.mIsSystemNotification != null && entry.mIsSystemNotification) {
+            return true;
         }
         return false;
+    }
+
+    /**
+     * Categories that are explicitly called out on DND settings screens are always blocked, if
+     * DND has flagged them, even if they are foreground or system notifications that might
+     * otherwise visually bypass DND.
+     */
+    protected boolean isNotificationBlockedByPolicy(Notification n) {
+        if (isCategory(CATEGORY_CALL, n)
+                || isCategory(CATEGORY_MESSAGE, n)
+                || isCategory(CATEGORY_ALARM, n)
+                || isCategory(CATEGORY_EVENT, n)
+                || isCategory(CATEGORY_REMINDER, n)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isCategory(String category, Notification n) {
+        return Objects.equals(n.category, category);
     }
 
     public int getImportance(String key) {
@@ -445,6 +611,22 @@ public class NotificationData {
         return null;
     }
 
+    public int getRank(String key) {
+        if (mRankingMap != null) {
+            getRanking(key, mTmpRanking);
+            return mTmpRanking.getRank();
+        }
+        return 0;
+    }
+
+    public boolean shouldHide(String key) {
+        if (mRankingMap != null) {
+            getRanking(key, mTmpRanking);
+            return mTmpRanking.isSuspended();
+        }
+        return false;
+    }
+
     private void updateRankingAndSort(RankingMap ranking) {
         if (ranking != null) {
             mRankingMap = ranking;
@@ -463,6 +645,7 @@ public class NotificationData {
                     }
                     entry.channel = getChannel(entry.key);
                     entry.snoozeCriteria = getSnoozeCriteria(entry.key);
+                    entry.userSentiment = mTmpRanking.getUserSentiment();
                 }
             }
         }
@@ -491,9 +674,8 @@ public class NotificationData {
             final int N = mEntries.size();
             for (int i = 0; i < N; i++) {
                 Entry entry = mEntries.valueAt(i);
-                StatusBarNotification sbn = entry.notification;
 
-                if (shouldFilterOut(sbn)) {
+                if (shouldFilterOut(entry)) {
                     continue;
                 }
 
@@ -505,10 +687,10 @@ public class NotificationData {
     }
 
     /**
-     * @param sbn
      * @return true if this notification should NOT be shown right now
      */
-    public boolean shouldFilterOut(StatusBarNotification sbn) {
+    public boolean shouldFilterOut(Entry entry) {
+        final StatusBarNotification sbn = entry.notification;
         if (!(mEnvironment.isDeviceProvisioned() ||
                 showNotificationEvenIfUnprovisioned(sbn))) {
             return true;
@@ -525,15 +707,35 @@ public class NotificationData {
             return true;
         }
 
+        if (mEnvironment.isDozing() && shouldSuppressAmbient(entry)) {
+            return true;
+        }
+
+        if (!mEnvironment.isDozing() && shouldSuppressNotificationList(entry)) {
+            return true;
+        }
+
+        if (shouldHide(sbn.getKey())) {
+            return true;
+        }
+
         if (!StatusBar.ENABLE_CHILD_NOTIFICATIONS
                 && mGroupManager.isChildInGroupWithSummary(sbn)) {
             return true;
         }
 
-        final ForegroundServiceController fsc = Dependency.get(ForegroundServiceController.class);
-        if (fsc.isDungeonNotification(sbn) && !fsc.isDungeonNeededForUser(sbn.getUserId())) {
+        if (mFsc.isDungeonNotification(sbn) && !mFsc.isDungeonNeededForUser(sbn.getUserId())) {
             // this is a foreground-service disclosure for a user that does not need to show one
             return true;
+        }
+        if (mFsc.isSystemAlertNotification(sbn)) {
+            final String[] apps = sbn.getNotification().extras.getStringArray(
+                    Notification.EXTRA_FOREGROUND_APPS);
+            if (apps != null && apps.length >= 1) {
+                if (!mFsc.isSystemAlertWarningNeeded(sbn.getUserId(), apps[0])) {
+                    return true;
+                }
+            }
         }
 
         return false;
@@ -616,5 +818,9 @@ public class NotificationData {
         public boolean isNotificationForCurrentProfiles(StatusBarNotification sbn);
         public String getCurrentMediaNotificationKey();
         public NotificationGroupManager getGroupManager();
+        /**
+         * @return true iff the device is dozing
+         */
+        boolean isDozing();
     }
 }

@@ -829,14 +829,24 @@ public final class MediaCodecInfo {
 
         /** @hide */
         public CodecCapabilities dup() {
-            return new CodecCapabilities(
-                // clone writable arrays
-                Arrays.copyOf(profileLevels, profileLevels.length),
-                Arrays.copyOf(colorFormats, colorFormats.length),
-                isEncoder(),
-                mFlagsVerified,
-                mDefaultFormat,
-                mCapabilitiesInfo);
+            CodecCapabilities caps = new CodecCapabilities();
+
+            // profileLevels and colorFormats may be modified by client.
+            caps.profileLevels = Arrays.copyOf(profileLevels, profileLevels.length);
+            caps.colorFormats = Arrays.copyOf(colorFormats, colorFormats.length);
+
+            caps.mMime = mMime;
+            caps.mMaxSupportedInstances = mMaxSupportedInstances;
+            caps.mFlagsRequired = mFlagsRequired;
+            caps.mFlagsSupported = mFlagsSupported;
+            caps.mFlagsVerified = mFlagsVerified;
+            caps.mAudioCaps = mAudioCaps;
+            caps.mVideoCaps = mVideoCaps;
+            caps.mEncoderCaps = mEncoderCaps;
+            caps.mDefaultFormat = mDefaultFormat;
+            caps.mCapabilitiesInfo = mCapabilitiesInfo;
+
+            return caps;
         }
 
         /**
@@ -898,13 +908,14 @@ public final class MediaCodecInfo {
 
             if (mMime.toLowerCase().startsWith("audio/")) {
                 mAudioCaps = AudioCapabilities.create(info, this);
-                mAudioCaps.setDefaultFormat(mDefaultFormat);
-            } else if (mMime.toLowerCase().startsWith("video/")) {
+                mAudioCaps.getDefaultFormat(mDefaultFormat);
+            } else if (mMime.toLowerCase().startsWith("video/")
+                    || mMime.equalsIgnoreCase(MediaFormat.MIMETYPE_IMAGE_ANDROID_HEIC)) {
                 mVideoCaps = VideoCapabilities.create(info, this);
             }
             if (encoder) {
                 mEncoderCaps = EncoderCapabilities.create(info, this);
-                mEncoderCaps.setDefaultFormat(mDefaultFormat);
+                mEncoderCaps.getDefaultFormat(mDefaultFormat);
             }
 
             final Map<String, Object> global = MediaCodecList.getGlobalSettings();
@@ -990,8 +1001,7 @@ public final class MediaCodecInfo {
             return caps;
         }
 
-        /** @hide */
-        public void init(MediaFormat info, CodecCapabilities parent) {
+        private void init(MediaFormat info, CodecCapabilities parent) {
             mParent = parent;
             initWithPlatformLimits();
             applyLevelLimits();
@@ -1171,7 +1181,7 @@ public final class MediaCodecInfo {
         }
 
         /** @hide */
-        public void setDefaultFormat(MediaFormat format) {
+        public void getDefaultFormat(MediaFormat format) {
             // report settings that have only a single choice
             if (mBitrateRange.getLower().equals(mBitrateRange.getUpper())) {
                 format.setInteger(MediaFormat.KEY_BIT_RATE, mBitrateRange.getLower());
@@ -1585,8 +1595,7 @@ public final class MediaCodecInfo {
             return caps;
         }
 
-        /** @hide */
-        public void init(MediaFormat info, CodecCapabilities parent) {
+        private void init(MediaFormat info, CodecCapabilities parent) {
             mParent = parent;
             initWithPlatformLimits();
             applyLevelLimits();
@@ -2639,7 +2648,8 @@ public final class MediaCodecInfo {
         /**
          * Returns the supported range of quality values.
          *
-         * @hide
+         * Quality is implementation-specific. As a general rule, a higher quality
+         * setting results in a better image quality and a lower compression ratio.
          */
         public Range<Integer> getQualityRange() {
             return mQualityRange;
@@ -2706,8 +2716,7 @@ public final class MediaCodecInfo {
             return caps;
         }
 
-        /** @hide */
-        public void init(MediaFormat info, CodecCapabilities parent) {
+        private void init(MediaFormat info, CodecCapabilities parent) {
             // no support for complexity or quality yet
             mParent = parent;
             mComplexityRange = Range.create(0, 0);
@@ -2751,7 +2760,7 @@ public final class MediaCodecInfo {
             }
             if (info.containsKey("feature-bitrate-modes")) {
                 for (String mode: info.getString("feature-bitrate-modes").split(",")) {
-                    mBitControl |= parseBitrateMode(mode);
+                    mBitControl |= (1 << parseBitrateMode(mode));
                 }
             }
 
@@ -2788,7 +2797,7 @@ public final class MediaCodecInfo {
         }
 
         /** @hide */
-        public void setDefaultFormat(MediaFormat format) {
+        public void getDefaultFormat(MediaFormat format) {
             // don't list trivial quality/complexity as default for now
             if (!mQualityRange.getUpper().equals(mQualityRange.getLower())
                     && mDefaultQuality != null) {
@@ -2963,6 +2972,8 @@ public final class MediaCodecInfo {
         public static final int AACObjectLD         = 23;
         public static final int AACObjectHE_PS      = 29;
         public static final int AACObjectELD        = 39;
+        /** xHE-AAC (includes USAC) */
+        public static final int AACObjectXHE        = 42;
 
         // from OMX_VIDEO_VP8LEVELTYPE
         public static final int VP8Level_Version0 = 0x01;
@@ -3001,6 +3012,7 @@ public final class MediaCodecInfo {
         // from OMX_VIDEO_HEVCPROFILETYPE
         public static final int HEVCProfileMain        = 0x01;
         public static final int HEVCProfileMain10      = 0x02;
+        public static final int HEVCProfileMainStill   = 0x04;
         public static final int HEVCProfileMain10HDR10 = 0x1000;
 
         // from OMX_VIDEO_HEVCLEVELTYPE
@@ -3077,6 +3089,23 @@ public final class MediaCodecInfo {
          * {@link VideoCapabilities} to determine the codec capabilities.
          */
         public int level;
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (obj instanceof CodecProfileLevel) {
+                CodecProfileLevel other = (CodecProfileLevel)obj;
+                return other.profile == profile && other.level == level;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Long.hashCode(((long)profile << Integer.SIZE) | level);
+        }
     };
 
     /**

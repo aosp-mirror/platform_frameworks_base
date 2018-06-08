@@ -33,6 +33,7 @@ enum JankType {
     kSlowUI,
     kSlowSync,
     kSlowRT,
+    kMissedDeadline,
 
     // must be last
     NUM_BUCKETS,
@@ -70,8 +71,8 @@ public:
     void histogramForEach(const std::function<void(HistogramEntry)>& callback) const;
 
     constexpr static int HistogramSize() {
-        return std::tuple_size<decltype(ProfileData::mFrameCounts)>::value
-                + std::tuple_size<decltype(ProfileData::mSlowFrameCounts)>::value;
+        return std::tuple_size<decltype(ProfileData::mFrameCounts)>::value +
+               std::tuple_size<decltype(ProfileData::mSlowFrameCounts)>::value;
     }
 
     // Visible for testing
@@ -82,7 +83,7 @@ private:
     // Open our guts up to unit tests
     friend class MockProfileData;
 
-    std::array <uint32_t, NUM_BUCKETS> mJankTypeCounts;
+    std::array<uint32_t, NUM_BUCKETS> mJankTypeCounts;
     // See comments on kBucket* constants for what this holds
     std::array<uint32_t, 57> mFrameCounts;
     // Holds a histogram of frame times in 50ms increments from 150ms to 5s
@@ -106,4 +107,3 @@ public:
 
 } /* namespace uirenderer */
 } /* namespace android */
-

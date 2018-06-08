@@ -1700,6 +1700,8 @@ public abstract class Connection extends Conferenceable {
 
     // The internal telecom call ID associated with this connection.
     private String mTelecomCallId;
+    // The PhoneAccountHandle associated with this connection.
+    private PhoneAccountHandle mPhoneAccountHandle;
     private int mState = STATE_NEW;
     private CallAudioState mCallAudioState;
     private Uri mAddress;
@@ -2848,7 +2850,7 @@ public abstract class Connection extends Conferenceable {
      * Notifies this {@link Connection} that a handover has completed.
      * <p>
      * A handover is initiated with {@link android.telecom.Call#handoverTo(PhoneAccountHandle, int,
-     * Bundle)} on the initiating side of the handover, and on the receiving side with
+     * Bundle)} on the initiating side of the handover, and
      * {@link TelecomManager#acceptHandover(Uri, int, PhoneAccountHandle)}.
      */
     public void onHandoverComplete() {}
@@ -3135,6 +3137,27 @@ public abstract class Connection extends Conferenceable {
         for (Listener l : mListeners) {
             l.onPhoneAccountChanged(this, pHandle);
         }
+    }
+
+    /**
+     * Sets the {@link PhoneAccountHandle} associated with this connection.
+     *
+     * @hide
+     */
+    public void setPhoneAccountHandle(PhoneAccountHandle phoneAccountHandle) {
+        if (mPhoneAccountHandle != phoneAccountHandle) {
+            mPhoneAccountHandle = phoneAccountHandle;
+            notifyPhoneAccountChanged(phoneAccountHandle);
+        }
+    }
+
+    /**
+     * Returns the {@link PhoneAccountHandle} associated with this connection.
+     *
+     * @hide
+     */
+    public PhoneAccountHandle getPhoneAccountHandle() {
+        return mPhoneAccountHandle;
     }
 
     /**

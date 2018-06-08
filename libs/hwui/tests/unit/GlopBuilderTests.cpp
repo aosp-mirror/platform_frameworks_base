@@ -28,8 +28,7 @@ using namespace android::uirenderer;
 
 static void expectFillEq(Glop::Fill& expectedFill, Glop::Fill& builtFill) {
     EXPECT_EQ(expectedFill.colorEnabled, builtFill.colorEnabled);
-    if (expectedFill.colorEnabled)
-        EXPECT_EQ(expectedFill.color, builtFill.color);
+    if (expectedFill.colorEnabled) EXPECT_EQ(expectedFill.color, builtFill.color);
 
     EXPECT_EQ(expectedFill.filterMode, builtFill.filterMode);
     if (expectedFill.filterMode == ProgramDescription::ColorFilterMode::Blend) {
@@ -38,15 +37,15 @@ static void expectFillEq(Glop::Fill& expectedFill, Glop::Fill& builtFill) {
         Glop::Fill::Filter::Matrix& expectedMatrix = expectedFill.filter.matrix;
         Glop::Fill::Filter::Matrix& builtMatrix = expectedFill.filter.matrix;
         EXPECT_TRUE(std::memcmp(expectedMatrix.matrix, builtMatrix.matrix,
-                sizeof(Glop::Fill::Filter::Matrix::matrix)));
+                                sizeof(Glop::Fill::Filter::Matrix::matrix)));
         EXPECT_TRUE(std::memcmp(expectedMatrix.vector, builtMatrix.vector,
-                sizeof(Glop::Fill::Filter::Matrix::vector)));
+                                sizeof(Glop::Fill::Filter::Matrix::vector)));
     }
     EXPECT_EQ(expectedFill.skiaShaderData.skiaShaderType, builtFill.skiaShaderData.skiaShaderType);
     EXPECT_EQ(expectedFill.texture.clamp, builtFill.texture.clamp);
     EXPECT_EQ(expectedFill.texture.filter, builtFill.texture.filter);
-    EXPECT_TRUE((expectedFill.texture.texture && builtFill.texture.texture)
-            || (!expectedFill.texture.texture && !builtFill.texture.texture));
+    EXPECT_TRUE((expectedFill.texture.texture && builtFill.texture.texture) ||
+                (!expectedFill.texture.texture && !builtFill.texture.texture));
     if (expectedFill.texture.texture) {
         EXPECT_EQ(expectedFill.texture.texture->target(), builtFill.texture.texture->target());
     }
@@ -97,22 +96,23 @@ static void expectGlopEq(Glop& expectedGlop, Glop& builtGlop) {
 
 static std::unique_ptr<Glop> blackUnitQuadGlop(RenderState& renderState) {
     std::unique_ptr<Glop> glop(new Glop());
-    glop->blend = { GL_ZERO, GL_ZERO };
+    glop->blend = {GL_ZERO, GL_ZERO};
     glop->mesh.elementCount = 4;
     glop->mesh.primitiveMode = GL_TRIANGLE_STRIP;
     glop->mesh.indices.indices = nullptr;
     glop->mesh.indices.bufferObject = GL_ZERO;
-    glop->mesh.vertices = {
-            renderState.meshState().getUnitQuadVBO(),
-            VertexAttribFlags::None,
-            nullptr, nullptr, nullptr,
-            kTextureVertexStride };
+    glop->mesh.vertices = {renderState.meshState().getUnitQuadVBO(),
+                           VertexAttribFlags::None,
+                           nullptr,
+                           nullptr,
+                           nullptr,
+                           kTextureVertexStride};
     glop->transform.modelView.loadIdentity();
     glop->fill.colorEnabled = true;
     glop->fill.color.set(Color::Black);
     glop->fill.skiaShaderData.skiaShaderType = kNone_SkiaShaderType;
     glop->fill.filterMode = ProgramDescription::ColorFilterMode::None;
-    glop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
+    glop->fill.texture = {nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr};
     return glop;
 }
 

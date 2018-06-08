@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-
-#include <gtest/gtest.h>
 #include <GpuMemoryTracker.h>
+#include <gtest/gtest.h>
 
 #include "renderthread/EglManager.h"
 #include "renderthread/RenderThread.h"
@@ -32,9 +31,7 @@ class TestGPUObject : public GpuMemoryTracker {
 public:
     TestGPUObject() : GpuMemoryTracker(GpuObjectType::Texture) {}
 
-    void changeSize(int newSize) {
-        notifySizeChanged(newSize);
-    }
+    void changeSize(int newSize) { notifySizeChanged(newSize); }
 };
 
 // Other tests may have created a renderthread and EGL context.
@@ -42,9 +39,7 @@ public:
 // current thread can spoof being a GPU thread
 static void destroyEglContext() {
     if (TestUtils::isRenderThreadRunning()) {
-        TestUtils::runOnRenderThread([](RenderThread& thread) {
-            thread.eglManager().destroy();
-        });
+        TestUtils::runOnRenderThread([](RenderThread& thread) { thread.eglManager().destroy(); });
     }
 }
 

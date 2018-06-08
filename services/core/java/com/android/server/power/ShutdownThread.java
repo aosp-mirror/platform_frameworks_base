@@ -20,17 +20,13 @@ package com.android.server.power;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.IActivityManager;
-import android.app.KeyguardManager;
 import android.app.ProgressDialog;
-import android.app.WallpaperColors;
-import android.app.WallpaperManager;
+import android.app.admin.SecurityLog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.media.AudioAttributes;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -45,8 +41,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.Vibrator;
-import android.os.storage.IStorageManager;
-import android.os.storage.IStorageShutdownObserver;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.TimingsTraceLog;
@@ -66,7 +60,8 @@ import java.nio.charset.StandardCharsets;
 public final class ShutdownThread extends Thread {
     // constants
     private static final String TAG = "ShutdownThread";
-    private static final int PHONE_STATE_POLL_SLEEP_MSEC = 500;
+    private static final int ACTION_DONE_POLL_WAIT_MS = 500;
+    private static final int RADIOS_STATE_POLL_SLEEP_MS = 100;
     // maximum time we wait for the shutdown broadcast before going on.
     private static final int MAX_BROADCAST_TIME = 10*1000;
     private static final int MAX_SHUTDOWN_WAIT_TIME = 20*1000;
@@ -119,7 +114,7 @@ public final class ShutdownThread extends Thread {
     private static String METRIC_PM = "shutdown_package_manager";
     private static String METRIC_RADIOS = "shutdown_radios";
     private static String METRIC_RADIO = "shutdown_radio";
-    private static String METRIC_SM = "shutdown_storage_manager";
+    private static String METRIC_SHUTDOWN_TIME_START = "begin_shutdown";
 
     private final Object mActionDoneSync = new Object();
     private boolean mActionDone;
@@ -397,6 +392,10 @@ public final class ShutdownThread extends Thread {
             }
         }
 
+        if (SecurityLog.isLoggingEnabled()) {
+            SecurityLog.writeEvent(SecurityLog.TAG_OS_SHUTDOWN);
+        }
+
         // start the thread that initiates shutdown
         sInstance.mHandler = new Handler() {
         };
@@ -417,6 +416,7 @@ public final class ShutdownThread extends Thread {
     public void run() {
         TimingsTraceLog shutdownTimingLog = newTimingsLog();
         shutdownTimingLog.traceBegin("SystemServerShutdown");
+        metricShutdownStart();
         metricStarted(METRIC_SYSTEM_SERVER);
 
         BroadcastReceiver br = new BroadcastReceiver() {
@@ -451,8 +451,7 @@ public final class ShutdownThread extends Thread {
         // First send the high-level shut down broadcast.
         mActionDone = false;
         Intent intent = new Intent(Intent.ACTION_SHUTDOWN);
-        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND
-                | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND | Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         mContext.sendOrderedBroadcastAsUser(intent,
                 UserHandle.ALL, null, br, mHandler, 0, null, null);
 
@@ -469,7 +468,7 @@ public final class ShutdownThread extends Thread {
                     sInstance.setRebootProgress(status, null);
                 }
                 try {
-                    mActionDoneSync.wait(Math.min(delay, PHONE_STATE_POLL_SLEEP_MSEC));
+                    mActionDoneSync.wait(Math.min(delay, ACTION_DONE_POLL_WAIT_MS));
                 } catch (InterruptedException e) {
                 }
             }
@@ -523,54 +522,6 @@ public final class ShutdownThread extends Thread {
         shutdownTimingLog.traceEnd(); // ShutdownRadios
         metricEnded(METRIC_RADIOS);
 
-        // Shutdown StorageManagerService to ensure media is in a safe state
-        IStorageShutdownObserver observer = new IStorageShutdownObserver.Stub() {
-            public void onShutDownComplete(int statusCode) throws RemoteException {
-                Log.w(TAG, "Result code " + statusCode + " from StorageManagerService.shutdown");
-                actionDone();
-            }
-        };
-
-        Log.i(TAG, "Shutting down StorageManagerService");
-        shutdownTimingLog.traceBegin("ShutdownStorageManager");
-        metricStarted(METRIC_SM);
-
-        // Set initial variables and time out time.
-        mActionDone = false;
-        final long endShutTime = SystemClock.elapsedRealtime() + MAX_SHUTDOWN_WAIT_TIME;
-        synchronized (mActionDoneSync) {
-            try {
-                final IStorageManager storageManager = IStorageManager.Stub.asInterface(
-                        ServiceManager.checkService("mount"));
-                if (storageManager != null) {
-                    storageManager.shutdown(observer);
-                } else {
-                    Log.w(TAG, "StorageManagerService unavailable for shutdown");
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Exception during StorageManagerService shutdown", e);
-            }
-            while (!mActionDone) {
-                long delay = endShutTime - SystemClock.elapsedRealtime();
-                if (delay <= 0) {
-                    Log.w(TAG, "StorageManager shutdown wait timed out");
-                    break;
-                } else if (mRebootHasProgressBar) {
-                    int status = (int)((MAX_SHUTDOWN_WAIT_TIME - delay) * 1.0 *
-                            (MOUNT_SERVICE_STOP_PERCENT - RADIO_STOP_PERCENT) /
-                            MAX_SHUTDOWN_WAIT_TIME);
-                    status += RADIO_STOP_PERCENT;
-                    sInstance.setRebootProgress(status, null);
-                }
-                try {
-                    mActionDoneSync.wait(Math.min(delay, PHONE_STATE_POLL_SLEEP_MSEC));
-                } catch (InterruptedException e) {
-                }
-            }
-        }
-        shutdownTimingLog.traceEnd(); // ShutdownStorageManager
-        metricEnded(METRIC_SM);
-
         if (mRebootHasProgressBar) {
             sInstance.setRebootProgress(MOUNT_SERVICE_STOP_PERCENT, null);
 
@@ -581,7 +532,8 @@ public final class ShutdownThread extends Thread {
 
         shutdownTimingLog.traceEnd(); // SystemServerShutdown
         metricEnded(METRIC_SYSTEM_SERVER);
-        saveMetrics(mReboot);
+        saveMetrics(mReboot, mReason);
+        // Remaining work will be done by init, including vold shutdown
         rebootOrShutdown(mContext, mReboot, mReason);
     }
 
@@ -599,6 +551,12 @@ public final class ShutdownThread extends Thread {
         synchronized (TRON_METRICS) {
             TRON_METRICS
                     .put(metricKey, SystemClock.elapsedRealtime() + TRON_METRICS.get(metricKey));
+        }
+    }
+
+    private static void metricShutdownStart() {
+        synchronized (TRON_METRICS) {
+            TRON_METRICS.put(METRIC_SHUTDOWN_TIME_START, System.currentTimeMillis());
         }
     }
 
@@ -672,8 +630,7 @@ public final class ShutdownThread extends Thread {
                         done[0] = true;
                         break;
                     }
-                    SystemClock.sleep(PHONE_STATE_POLL_SLEEP_MSEC);
-
+                    SystemClock.sleep(RADIOS_STATE_POLL_SLEEP_MS);
                     delay = endTime - SystemClock.elapsedRealtime();
                 }
             }
@@ -724,10 +681,11 @@ public final class ShutdownThread extends Thread {
         PowerManagerService.lowLevelShutdown(reason);
     }
 
-    private static void saveMetrics(boolean reboot) {
+    private static void saveMetrics(boolean reboot, String reason) {
         StringBuilder metricValue = new StringBuilder();
         metricValue.append("reboot:");
         metricValue.append(reboot ? "y" : "n");
+        metricValue.append(",").append("reason:").append(reason);
         final int metricsSize = TRON_METRICS.size();
         for (int i = 0; i < metricsSize; i++) {
             final String name = TRON_METRICS.keyAt(i);

@@ -17,6 +17,8 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
@@ -30,7 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,7 +49,7 @@ public class MediaMetadataRetriever
     // The field below is accessed by native methods
     @SuppressWarnings("unused")
     private long mNativeContext;
- 
+
     private static final int EMBEDDED_PICTURE_TYPE_ANY = 0xFFFF;
 
     public MediaMetadataRetriever() {
@@ -58,7 +60,7 @@ public class MediaMetadataRetriever
      * Sets the data source (file pathname) to use. Call this
      * method before the rest of the methods in this class. This method may be
      * time-consuming.
-     * 
+     *
      * @param path The path of the input media file.
      * @throws IllegalArgumentException If the path is invalid.
      */
@@ -113,7 +115,7 @@ public class MediaMetadataRetriever
      * responsibility to close the file descriptor. It is safe to do so as soon
      * as this call returns. Call this method before the rest of the methods in
      * this class. This method may be time-consuming.
-     * 
+     *
      * @param fd the FileDescriptor for the file you want to play
      * @param offset the offset into the file where the data to be played starts,
      * in bytes. It must be non-negative
@@ -123,13 +125,13 @@ public class MediaMetadataRetriever
      */
     public native void setDataSource(FileDescriptor fd, long offset, long length)
             throws IllegalArgumentException;
-    
+
     /**
      * Sets the data source (FileDescriptor) to use. It is the caller's
      * responsibility to close the file descriptor. It is safe to do so as soon
      * as this call returns. Call this method before the rest of the methods in
      * this class. This method may be time-consuming.
-     * 
+     *
      * @param fd the FileDescriptor for the file you want to play
      * @throws IllegalArgumentException if the FileDescriptor is invalid
      */
@@ -138,11 +140,11 @@ public class MediaMetadataRetriever
         // intentionally less than LONG_MAX
         setDataSource(fd, 0, 0x7ffffffffffffffL);
     }
-    
+
     /**
-     * Sets the data source as a content Uri. Call this method before 
+     * Sets the data source as a content Uri. Call this method before
      * the rest of the methods in this class. This method may be time-consuming.
-     * 
+     *
      * @param context the Context to use when resolving the Uri
      * @param uri the Content URI of the data you want to play
      * @throws IllegalArgumentException if the Uri is invalid
@@ -154,7 +156,7 @@ public class MediaMetadataRetriever
         if (uri == null) {
             throw new IllegalArgumentException();
         }
-        
+
         String scheme = uri.getScheme();
         if(scheme == null || scheme.equals("file")) {
             setDataSource(uri.getPath());
@@ -213,12 +215,12 @@ public class MediaMetadataRetriever
     /**
      * Call this method after setDataSource(). This method retrieves the
      * meta data value associated with the keyCode.
-     * 
+     *
      * The keyCode currently supported is listed below as METADATA_XXX
      * constants. With any other value, it returns a null pointer.
-     * 
+     *
      * @param keyCode One of the constants listed below at the end of the class.
-     * @return The meta data value associate with the given keyCode on success; 
+     * @return The meta data value associate with the given keyCode on success;
      * null on failure.
      */
     public native String extractMetadata(int keyCode);
@@ -226,9 +228,12 @@ public class MediaMetadataRetriever
     /**
      * Call this method after setDataSource(). This method finds a
      * representative frame close to the given time position by considering
-     * the given option if possible, and returns it as a bitmap. This is
-     * useful for generating a thumbnail for an input data source or just
-     * obtain and display a frame at the given time position.
+     * the given option if possible, and returns it as a bitmap.
+     *
+     * <p>If you don't need a full-resolution
+     * frame (for example, because you need a thumbnail image), use
+     * {@link #getScaledFrameAtTime getScaledFrameAtTime()} instead of this
+     * method.</p>
      *
      * @param timeUs The time position where the frame will be retrieved.
      * When retrieving the frame at the given time position, there is no
@@ -315,10 +320,14 @@ public class MediaMetadataRetriever
     /**
      * Call this method after setDataSource(). This method finds a
      * representative frame close to the given time position if possible,
-     * and returns it as a bitmap. This is useful for generating a thumbnail
-     * for an input data source. Call this method if one does not care
+     * and returns it as a bitmap. Call this method if one does not care
      * how the frame is found as long as it is close to the given time;
      * otherwise, please call {@link #getFrameAtTime(long, int)}.
+     *
+     * <p>If you don't need a full-resolution
+     * frame (for example, because you need a thumbnail image), use
+     * {@link #getScaledFrameAtTime getScaledFrameAtTime()} instead of this
+     * method.</p>
      *
      * @param timeUs The time position where the frame will be retrieved.
      * When retrieving the frame at the given time position, there is no
@@ -339,10 +348,14 @@ public class MediaMetadataRetriever
     /**
      * Call this method after setDataSource(). This method finds a
      * representative frame at any time position if possible,
-     * and returns it as a bitmap. This is useful for generating a thumbnail
-     * for an input data source. Call this method if one does not
+     * and returns it as a bitmap. Call this method if one does not
      * care about where the frame is located; otherwise, please call
      * {@link #getFrameAtTime(long)} or {@link #getFrameAtTime(long, int)}
+     *
+     * <p>If you don't need a full-resolution
+     * frame (for example, because you need a thumbnail image), use
+     * {@link #getScaledFrameAtTime getScaledFrameAtTime()} instead of this
+     * method.</p>
      *
      * @return A Bitmap containing a representative video frame, which
      *         can be null, if such a frame cannot be retrieved.
@@ -355,6 +368,294 @@ public class MediaMetadataRetriever
     }
 
     private native Bitmap _getFrameAtTime(long timeUs, int option, int width, int height);
+
+    public static final class BitmapParams {
+        private Bitmap.Config inPreferredConfig = Bitmap.Config.ARGB_8888;
+        private Bitmap.Config outActualConfig = Bitmap.Config.ARGB_8888;
+
+        /**
+         * Create a default BitmapParams object. By default, it uses {@link Bitmap.Config#ARGB_8888}
+         * as the preferred bitmap config.
+         */
+        public BitmapParams() {}
+
+        /**
+         * Set the preferred bitmap config for the decoder to decode into.
+         *
+         * If not set, or the request cannot be met, the decoder will output
+         * in {@link Bitmap.Config#ARGB_8888} config by default.
+         *
+         * After decode, the actual config used can be retrieved by {@link #getActualConfig()}.
+         *
+         * @param config the preferred bitmap config to use.
+         */
+        public void setPreferredConfig(@NonNull Bitmap.Config config) {
+            if (config == null) {
+                throw new IllegalArgumentException("preferred config can't be null");
+            }
+            inPreferredConfig = config;
+        }
+
+        /**
+         * Retrieve the preferred bitmap config in the params.
+         *
+         * @return the preferred bitmap config.
+         */
+        public @NonNull Bitmap.Config getPreferredConfig() {
+            return inPreferredConfig;
+        }
+
+        /**
+         * Get the actual bitmap config used to decode the bitmap after the decoding.
+         *
+         * @return the actual bitmap config used.
+         */
+        public @NonNull Bitmap.Config getActualConfig() {
+            return outActualConfig;
+        }
+    }
+
+    /**
+     * This method retrieves a video frame by its index. It should only be called
+     * after {@link #setDataSource}.
+     *
+     * After the bitmap is returned, you can query the actual parameters that were
+     * used to create the bitmap from the {@code BitmapParams} argument, for instance
+     * to query the bitmap config used for the bitmap with {@link BitmapParams#getActualConfig}.
+     *
+     * @param frameIndex 0-based index of the video frame. The frame index must be that of
+     *        a valid frame. The total number of frames available for retrieval can be queried
+     *        via the {@link #METADATA_KEY_VIDEO_FRAME_COUNT} key.
+     * @param params BitmapParams that controls the returned bitmap config (such as pixel formats).
+     *
+     * @throws IllegalStateException if the container doesn't contain video or image sequences.
+     * @throws IllegalArgumentException if the requested frame index does not exist.
+     *
+     * @return A Bitmap containing the requested video frame, or null if the retrieval fails.
+     *
+     * @see #getFrameAtIndex(int)
+     * @see #getFramesAtIndex(int, int, BitmapParams)
+     * @see #getFramesAtIndex(int, int)
+     */
+    public Bitmap getFrameAtIndex(int frameIndex, @NonNull BitmapParams params) {
+        List<Bitmap> bitmaps = getFramesAtIndex(frameIndex, 1, params);
+        return bitmaps.get(0);
+    }
+
+    /**
+     * This method is similar to {@link #getFrameAtIndex(int, BitmapParams)} except that
+     * the default for {@link BitmapParams} will be used.
+     *
+     * @param frameIndex 0-based index of the video frame. The frame index must be that of
+     *        a valid frame. The total number of frames available for retrieval can be queried
+     *        via the {@link #METADATA_KEY_VIDEO_FRAME_COUNT} key.
+     *
+     * @throws IllegalStateException if the container doesn't contain video or image sequences.
+     * @throws IllegalArgumentException if the requested frame index does not exist.
+     *
+     * @return A Bitmap containing the requested video frame, or null if the retrieval fails.
+     *
+     * @see #getFrameAtIndex(int, BitmapParams)
+     * @see #getFramesAtIndex(int, int, BitmapParams)
+     * @see #getFramesAtIndex(int, int)
+     */
+    public Bitmap getFrameAtIndex(int frameIndex) {
+        List<Bitmap> bitmaps = getFramesAtIndex(frameIndex, 1);
+        return bitmaps.get(0);
+    }
+
+    /**
+     * This method retrieves a consecutive set of video frames starting at the
+     * specified index. It should only be called after {@link #setDataSource}.
+     *
+     * If the caller intends to retrieve more than one consecutive video frames,
+     * this method is preferred over {@link #getFrameAtIndex(int, BitmapParams)} for efficiency.
+     *
+     * After the bitmaps are returned, you can query the actual parameters that were
+     * used to create the bitmaps from the {@code BitmapParams} argument, for instance
+     * to query the bitmap config used for the bitmaps with {@link BitmapParams#getActualConfig}.
+     *
+     * @param frameIndex 0-based index of the first video frame to retrieve. The frame index
+     *        must be that of a valid frame. The total number of frames available for retrieval
+     *        can be queried via the {@link #METADATA_KEY_VIDEO_FRAME_COUNT} key.
+     * @param numFrames number of consecutive video frames to retrieve. Must be a positive
+     *        value. The stream must contain at least numFrames frames starting at frameIndex.
+     * @param params BitmapParams that controls the returned bitmap config (such as pixel formats).
+     *
+     * @throws IllegalStateException if the container doesn't contain video or image sequences.
+     * @throws IllegalArgumentException if the frameIndex or numFrames is invalid, or the
+     *         stream doesn't contain at least numFrames starting at frameIndex.
+
+     * @return An list of Bitmaps containing the requested video frames. The returned
+     *         array could contain less frames than requested if the retrieval fails.
+     *
+     * @see #getFrameAtIndex(int, BitmapParams)
+     * @see #getFrameAtIndex(int)
+     * @see #getFramesAtIndex(int, int)
+     */
+    public @NonNull List<Bitmap> getFramesAtIndex(
+            int frameIndex, int numFrames, @NonNull BitmapParams params) {
+        return getFramesAtIndexInternal(frameIndex, numFrames, params);
+    }
+
+    /**
+     * This method is similar to {@link #getFramesAtIndex(int, int, BitmapParams)} except that
+     * the default for {@link BitmapParams} will be used.
+     *
+     * @param frameIndex 0-based index of the first video frame to retrieve. The frame index
+     *        must be that of a valid frame. The total number of frames available for retrieval
+     *        can be queried via the {@link #METADATA_KEY_VIDEO_FRAME_COUNT} key.
+     * @param numFrames number of consecutive video frames to retrieve. Must be a positive
+     *        value. The stream must contain at least numFrames frames starting at frameIndex.
+     *
+     * @throws IllegalStateException if the container doesn't contain video or image sequences.
+     * @throws IllegalArgumentException if the frameIndex or numFrames is invalid, or the
+     *         stream doesn't contain at least numFrames starting at frameIndex.
+
+     * @return An list of Bitmaps containing the requested video frames. The returned
+     *         array could contain less frames than requested if the retrieval fails.
+     *
+     * @see #getFrameAtIndex(int, BitmapParams)
+     * @see #getFrameAtIndex(int)
+     * @see #getFramesAtIndex(int, int, BitmapParams)
+     */
+    public @NonNull List<Bitmap> getFramesAtIndex(int frameIndex, int numFrames) {
+        return getFramesAtIndexInternal(frameIndex, numFrames, null);
+    }
+
+    private @NonNull List<Bitmap> getFramesAtIndexInternal(
+            int frameIndex, int numFrames, @Nullable BitmapParams params) {
+        if (!"yes".equals(extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO))) {
+            throw new IllegalStateException("Does not contail video or image sequences");
+        }
+        int frameCount = Integer.parseInt(
+                extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_FRAME_COUNT));
+        if (frameIndex < 0 || numFrames < 1
+                || frameIndex >= frameCount
+                || frameIndex > frameCount - numFrames) {
+            throw new IllegalArgumentException("Invalid frameIndex or numFrames: "
+                + frameIndex + ", " + numFrames);
+        }
+        return _getFrameAtIndex(frameIndex, numFrames, params);
+    }
+
+    private native @NonNull List<Bitmap> _getFrameAtIndex(
+            int frameIndex, int numFrames, @Nullable BitmapParams params);
+
+    /**
+     * This method retrieves a still image by its index. It should only be called
+     * after {@link #setDataSource}.
+     *
+     * After the bitmap is returned, you can query the actual parameters that were
+     * used to create the bitmap from the {@code BitmapParams} argument, for instance
+     * to query the bitmap config used for the bitmap with {@link BitmapParams#getActualConfig}.
+     *
+     * @param imageIndex 0-based index of the image.
+     * @param params BitmapParams that controls the returned bitmap config (such as pixel formats).
+     *
+     * @throws IllegalStateException if the container doesn't contain still images.
+     * @throws IllegalArgumentException if the requested image does not exist.
+     *
+     * @return the requested still image, or null if the image cannot be retrieved.
+     *
+     * @see #getImageAtIndex(int)
+     * @see #getPrimaryImage(BitmapParams)
+     * @see #getPrimaryImage()
+     */
+    public Bitmap getImageAtIndex(int imageIndex, @NonNull BitmapParams params) {
+        return getImageAtIndexInternal(imageIndex, params);
+    }
+
+    /**
+     * @hide
+     *
+     * This method retrieves the thumbnail image for a still image if it's available.
+     * It should only be called after {@link #setDataSource}.
+     *
+     * @param imageIndex 0-based index of the image, negative value indicates primary image.
+     * @param params BitmapParams that controls the returned bitmap config (such as pixel formats).
+     * @param targetSize intended size of one edge (wdith or height) of the thumbnail,
+     *                   this is a heuristic for the framework to decide whether the embedded
+     *                   thumbnail should be used.
+     * @param maxPixels maximum pixels of thumbnail, this is a heuristic for the frameowrk to
+     *                  decide whehther the embedded thumnbail (or a downscaled version of it)
+     *                  should be used.
+     * @return the retrieved thumbnail, or null if no suitable thumbnail is available.
+     */
+    public native @Nullable Bitmap getThumbnailImageAtIndex(
+            int imageIndex, @NonNull BitmapParams params, int targetSize, int maxPixels);
+
+    /**
+     * This method is similar to {@link #getImageAtIndex(int, BitmapParams)} except that
+     * the default for {@link BitmapParams} will be used.
+     *
+     * @param imageIndex 0-based index of the image.
+     *
+     * @throws IllegalStateException if the container doesn't contain still images.
+     * @throws IllegalArgumentException if the requested image does not exist.
+     *
+     * @return the requested still image, or null if the image cannot be retrieved.
+     *
+     * @see #getImageAtIndex(int, BitmapParams)
+     * @see #getPrimaryImage(BitmapParams)
+     * @see #getPrimaryImage()
+     */
+    public Bitmap getImageAtIndex(int imageIndex) {
+        return getImageAtIndexInternal(imageIndex, null);
+    }
+
+    /**
+     * This method retrieves the primary image of the media content. It should only
+     * be called after {@link #setDataSource}.
+     *
+     * After the bitmap is returned, you can query the actual parameters that were
+     * used to create the bitmap from the {@code BitmapParams} argument, for instance
+     * to query the bitmap config used for the bitmap with {@link BitmapParams#getActualConfig}.
+     *
+     * @param params BitmapParams that controls the returned bitmap config (such as pixel formats).
+     *
+     * @return the primary image, or null if it cannot be retrieved.
+     *
+     * @throws IllegalStateException if the container doesn't contain still images.
+     *
+     * @see #getImageAtIndex(int, BitmapParams)
+     * @see #getImageAtIndex(int)
+     * @see #getPrimaryImage()
+     */
+    public Bitmap getPrimaryImage(@NonNull BitmapParams params) {
+        return getImageAtIndexInternal(-1, params);
+    }
+
+    /**
+     * This method is similar to {@link #getPrimaryImage(BitmapParams)} except that
+     * the default for {@link BitmapParams} will be used.
+     *
+     * @return the primary image, or null if it cannot be retrieved.
+     *
+     * @throws IllegalStateException if the container doesn't contain still images.
+     *
+     * @see #getImageAtIndex(int, BitmapParams)
+     * @see #getImageAtIndex(int)
+     * @see #getPrimaryImage(BitmapParams)
+     */
+    public Bitmap getPrimaryImage() {
+        return getImageAtIndexInternal(-1, null);
+    }
+
+    private Bitmap getImageAtIndexInternal(int imageIndex, @Nullable BitmapParams params) {
+        if (!"yes".equals(extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_IMAGE))) {
+            throw new IllegalStateException("Does not contail still images");
+        }
+
+        String imageCount = extractMetadata(MediaMetadataRetriever.METADATA_KEY_IMAGE_COUNT);
+        if (imageIndex >= Integer.parseInt(imageCount)) {
+            throw new IllegalArgumentException("Invalid image index: " + imageCount);
+        }
+
+        return _getImageAtIndex(imageIndex, params);
+    }
+
+    private native Bitmap _getImageAtIndex(int imageIndex, @Nullable BitmapParams params);
 
     /**
      * Call this method after setDataSource(). This method finds the optional
@@ -395,7 +696,7 @@ public class MediaMetadataRetriever
      * @see #getFrameAtTime(long, int)
      */
     /* Do not change these option values without updating their counterparts
-     * in include/media/stagefright/MediaSource.h!
+     * in include/media/MediaSource.h!
      */
     /**
      * This option is used with {@link #getFrameAtTime(long, int)} to retrieve
@@ -572,5 +873,50 @@ public class MediaMetadataRetriever
      * number.
      */
     public static final int METADATA_KEY_CAPTURE_FRAMERATE = 25;
+    /**
+     * If this key exists the media contains still image content.
+     */
+    public static final int METADATA_KEY_HAS_IMAGE       = 26;
+    /**
+     * If the media contains still images, this key retrieves the number
+     * of still images.
+     */
+    public static final int METADATA_KEY_IMAGE_COUNT     = 27;
+    /**
+     * If the media contains still images, this key retrieves the image
+     * index of the primary image.
+     */
+    public static final int METADATA_KEY_IMAGE_PRIMARY   = 28;
+    /**
+     * If the media contains still images, this key retrieves the width
+     * of the primary image.
+     */
+    public static final int METADATA_KEY_IMAGE_WIDTH     = 29;
+    /**
+     * If the media contains still images, this key retrieves the height
+     * of the primary image.
+     */
+    public static final int METADATA_KEY_IMAGE_HEIGHT    = 30;
+    /**
+     * If the media contains still images, this key retrieves the rotation
+     * angle (in degrees clockwise) of the primary image. The image rotation
+     * angle must be one of 0, 90, 180, or 270 degrees.
+     */
+    public static final int METADATA_KEY_IMAGE_ROTATION  = 31;
+    /**
+     * If the media contains video and this key exists, it retrieves the
+     * total number of frames in the video sequence.
+     */
+    public static final int METADATA_KEY_VIDEO_FRAME_COUNT = 32;
+
+    /**
+     * @hide
+     */
+    public static final int METADATA_KEY_EXIF_OFFSET = 33;
+
+    /**
+     * @hide
+     */
+    public static final int METADATA_KEY_EXIF_LENGTH = 34;
     // Add more here...
 }

@@ -15,6 +15,7 @@
 -keep class com.android.systemui.statusbar.tv.TvStatusBar
 -keep class com.android.systemui.car.CarSystemUIFactory
 -keep class com.android.systemui.SystemUIFactory
+-keep class * extends com.android.systemui.SystemUI
 
 -keepclassmembers class ** {
     public void onBusEvent(**);
@@ -40,3 +41,4 @@
 -keep class com.android.systemui.plugins.** {
     public protected *;
 }
+-keep class android.support.v4.app.CoreComponentFactory

@@ -22,7 +22,7 @@
 #include "process/IResourceTableConsumer.h"
 #include "process/SymbolTable.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
 
 namespace aapt {
 
@@ -75,14 +75,14 @@ static void EmitDiffLine(const Source& source, const StringPiece& message) {
   std::cerr << source << ": " << message << "\n";
 }
 
-static bool IsSymbolVisibilityDifferent(const Symbol& symbol_a, const Symbol& symbol_b) {
-  return symbol_a.state != symbol_b.state;
+static bool IsSymbolVisibilityDifferent(const Visibility& vis_a, const Visibility& vis_b) {
+  return vis_a.level != vis_b.level;
 }
 
 template <typename Id>
-static bool IsIdDiff(const Symbol& symbol_a, const Maybe<Id>& id_a, const Symbol& symbol_b,
-                     const Maybe<Id>& id_b) {
-  if (symbol_a.state == SymbolState::kPublic || symbol_b.state == SymbolState::kPublic) {
+static bool IsIdDiff(const Visibility::Level& level_a, const Maybe<Id>& id_a,
+                     const Visibility::Level& level_b, const Maybe<Id>& id_b) {
+  if (level_a == Visibility::Level::kPublic || level_b == Visibility::Level::kPublic) {
     return id_a != id_b;
   }
   return false;
@@ -157,17 +157,17 @@ static bool EmitResourceTypeDiff(IAaptContext* context, LoadedApk* apk_a,
       EmitDiffLine(apk_b->GetSource(), str_stream.str());
       diff = true;
     } else {
-      if (IsSymbolVisibilityDifferent(entry_a->symbol_status, entry_b->symbol_status)) {
+      if (IsSymbolVisibilityDifferent(entry_a->visibility, entry_b->visibility)) {
         std::stringstream str_stream;
         str_stream << pkg_a->name << ":" << type_a->type << "/" << entry_a->name
                    << " has different visibility (";
-        if (entry_b->symbol_status.state == SymbolState::kPublic) {
+        if (entry_b->visibility.level == Visibility::Level::kPublic) {
           str_stream << "PUBLIC";
         } else {
           str_stream << "PRIVATE";
         }
         str_stream << " vs ";
-        if (entry_a->symbol_status.state == SymbolState::kPublic) {
+        if (entry_a->visibility.level == Visibility::Level::kPublic) {
           str_stream << "PUBLIC";
         } else {
           str_stream << "PRIVATE";
@@ -175,7 +175,7 @@ static bool EmitResourceTypeDiff(IAaptContext* context, LoadedApk* apk_a,
         str_stream << ")";
         EmitDiffLine(apk_b->GetSource(), str_stream.str());
         diff = true;
-      } else if (IsIdDiff(entry_a->symbol_status, entry_a->id, entry_b->symbol_status,
+      } else if (IsIdDiff(entry_a->visibility.level, entry_a->id, entry_b->visibility.level,
                           entry_b->id)) {
         std::stringstream str_stream;
         str_stream << pkg_a->name << ":" << type_a->type << "/" << entry_a->name
@@ -225,16 +225,16 @@ static bool EmitResourcePackageDiff(IAaptContext* context, LoadedApk* apk_a,
       EmitDiffLine(apk_a->GetSource(), str_stream.str());
       diff = true;
     } else {
-      if (IsSymbolVisibilityDifferent(type_a->symbol_status, type_b->symbol_status)) {
+      if (type_a->visibility_level != type_b->visibility_level) {
         std::stringstream str_stream;
         str_stream << pkg_a->name << ":" << type_a->type << " has different visibility (";
-        if (type_b->symbol_status.state == SymbolState::kPublic) {
+        if (type_b->visibility_level == Visibility::Level::kPublic) {
           str_stream << "PUBLIC";
         } else {
           str_stream << "PRIVATE";
         }
         str_stream << " vs ";
-        if (type_a->symbol_status.state == SymbolState::kPublic) {
+        if (type_a->visibility_level == Visibility::Level::kPublic) {
           str_stream << "PUBLIC";
         } else {
           str_stream << "PRIVATE";
@@ -242,7 +242,8 @@ static bool EmitResourcePackageDiff(IAaptContext* context, LoadedApk* apk_a,
         str_stream << ")";
         EmitDiffLine(apk_b->GetSource(), str_stream.str());
         diff = true;
-      } else if (IsIdDiff(type_a->symbol_status, type_a->id, type_b->symbol_status, type_b->id)) {
+      } else if (IsIdDiff(type_a->visibility_level, type_a->id, type_b->visibility_level,
+                          type_b->id)) {
         std::stringstream str_stream;
         str_stream << pkg_a->name << ":" << type_a->type << " has different public ID (";
         if (type_b->id) {
@@ -325,9 +326,9 @@ static bool EmitResourceTableDiff(IAaptContext* context, LoadedApk* apk_a, Loade
   return diff;
 }
 
-class ZeroingReferenceVisitor : public ValueVisitor {
+class ZeroingReferenceVisitor : public DescendingValueVisitor {
  public:
-  using ValueVisitor::Visit;
+  using DescendingValueVisitor::Visit;
 
   void Visit(Reference* ref) override {
     if (ref->name && ref->id) {
@@ -357,8 +358,9 @@ int Diff(const std::vector<StringPiece>& args) {
     return 1;
   }
 
-  std::unique_ptr<LoadedApk> apk_a = LoadedApk::LoadApkFromPath(&context, flags.GetArgs()[0]);
-  std::unique_ptr<LoadedApk> apk_b = LoadedApk::LoadApkFromPath(&context, flags.GetArgs()[1]);
+  IDiagnostics* diag = context.GetDiagnostics();
+  std::unique_ptr<LoadedApk> apk_a = LoadedApk::LoadApkFromPath(flags.GetArgs()[0], diag);
+  std::unique_ptr<LoadedApk> apk_b = LoadedApk::LoadApkFromPath(flags.GetArgs()[1], diag);
   if (!apk_a || !apk_b) {
     return 1;
   }

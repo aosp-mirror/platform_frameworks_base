@@ -17,7 +17,12 @@
 
 package android.view;
 
+import android.annotation.Nullable;
 import android.graphics.Rect;
+
+import com.android.internal.util.Preconditions;
+
+import java.util.Objects;
 
 /**
  * Describes a set of insets for window content.
@@ -25,6 +30,12 @@ import android.graphics.Rect;
  * <p>WindowInsets are immutable and may be expanded to include more inset types in the future.
  * To adjust insets, use one of the supplied clone methods to obtain a new WindowInsets instance
  * with the adjusted properties.</p>
+ *
+ * <p>Note: Before {@link android.os.Build.VERSION_CODES#P P}, WindowInsets instances were only
+ * immutable during a single layout pass (i.e. would return the same values between
+ * {@link View#onApplyWindowInsets} and {@link View#onLayout}, but could return other values
+ * otherwise). Starting with {@link android.os.Build.VERSION_CODES#P P}, WindowInsets are
+ * always immutable and implement equality.
  *
  * @see View.OnApplyWindowInsetsListener
  * @see View#onApplyWindowInsets(WindowInsets)
@@ -36,6 +47,7 @@ public final class WindowInsets {
     private Rect mStableInsets;
     private Rect mTempRect;
     private boolean mIsRound;
+    private DisplayCutout mDisplayCutout;
 
     /**
      * In multi-window we force show the navigation bar. Because we don't want that the surface size
@@ -47,6 +59,7 @@ public final class WindowInsets {
     private boolean mSystemWindowInsetsConsumed = false;
     private boolean mWindowDecorInsetsConsumed = false;
     private boolean mStableInsetsConsumed = false;
+    private boolean mDisplayCutoutConsumed = false;
 
     private static final Rect EMPTY_RECT = new Rect(0, 0, 0, 0);
 
@@ -59,23 +72,28 @@ public final class WindowInsets {
     public static final WindowInsets CONSUMED;
 
     static {
-        CONSUMED = new WindowInsets(null, null, null, false, false);
+        CONSUMED = new WindowInsets(null, null, null, false, false, null);
     }
 
     /** @hide */
     public WindowInsets(Rect systemWindowInsets, Rect windowDecorInsets, Rect stableInsets,
-            boolean isRound, boolean alwaysConsumeNavBar) {
+            boolean isRound, boolean alwaysConsumeNavBar, DisplayCutout displayCutout) {
         mSystemWindowInsetsConsumed = systemWindowInsets == null;
-        mSystemWindowInsets = mSystemWindowInsetsConsumed ? EMPTY_RECT : systemWindowInsets;
+        mSystemWindowInsets = mSystemWindowInsetsConsumed
+                ? EMPTY_RECT : new Rect(systemWindowInsets);
 
         mWindowDecorInsetsConsumed = windowDecorInsets == null;
-        mWindowDecorInsets = mWindowDecorInsetsConsumed ? EMPTY_RECT : windowDecorInsets;
+        mWindowDecorInsets = mWindowDecorInsetsConsumed ? EMPTY_RECT : new Rect(windowDecorInsets);
 
         mStableInsetsConsumed = stableInsets == null;
-        mStableInsets = mStableInsetsConsumed ? EMPTY_RECT : stableInsets;
+        mStableInsets = mStableInsetsConsumed ? EMPTY_RECT : new Rect(stableInsets);
 
         mIsRound = isRound;
         mAlwaysConsumeNavBar = alwaysConsumeNavBar;
+
+        mDisplayCutoutConsumed = displayCutout == null;
+        mDisplayCutout = (mDisplayCutoutConsumed || displayCutout.isEmpty())
+                ? null : displayCutout;
     }
 
     /**
@@ -92,11 +110,13 @@ public final class WindowInsets {
         mStableInsetsConsumed = src.mStableInsetsConsumed;
         mIsRound = src.mIsRound;
         mAlwaysConsumeNavBar = src.mAlwaysConsumeNavBar;
+        mDisplayCutout = src.mDisplayCutout;
+        mDisplayCutoutConsumed = src.mDisplayCutoutConsumed;
     }
 
     /** @hide */
     public WindowInsets(Rect systemWindowInsets) {
-        this(systemWindowInsets, null, null, false, false);
+        this(systemWindowInsets, null, null, false, false, null);
     }
 
     /**
@@ -260,8 +280,33 @@ public final class WindowInsets {
      * @return true if any inset values are nonzero
      */
     public boolean hasInsets() {
-        return hasSystemWindowInsets() || hasWindowDecorInsets() || hasStableInsets();
+        return hasSystemWindowInsets() || hasWindowDecorInsets() || hasStableInsets()
+                || mDisplayCutout != null;
     }
+
+    /**
+     * Returns the display cutout if there is one.
+     *
+     * @return the display cutout or null if there is none
+     * @see DisplayCutout
+     */
+    @Nullable
+    public DisplayCutout getDisplayCutout() {
+        return mDisplayCutout;
+    }
+
+    /**
+     * Returns a copy of this WindowInsets with the cutout fully consumed.
+     *
+     * @return A modified copy of this WindowInsets
+     */
+    public WindowInsets consumeDisplayCutout() {
+        final WindowInsets result = new WindowInsets(this);
+        result.mDisplayCutout = null;
+        result.mDisplayCutoutConsumed = true;
+        return result;
+    }
+
 
     /**
      * Check if these insets have been fully consumed.
@@ -277,7 +322,8 @@ public final class WindowInsets {
      * @return true if the insets have been fully consumed.
      */
     public boolean isConsumed() {
-        return mSystemWindowInsetsConsumed && mWindowDecorInsetsConsumed && mStableInsetsConsumed;
+        return mSystemWindowInsetsConsumed && mWindowDecorInsetsConsumed && mStableInsetsConsumed
+                && mDisplayCutoutConsumed;
     }
 
     /**
@@ -495,7 +541,109 @@ public final class WindowInsets {
     public String toString() {
         return "WindowInsets{systemWindowInsets=" + mSystemWindowInsets
                 + " windowDecorInsets=" + mWindowDecorInsets
-                + " stableInsets=" + mStableInsets +
-                (isRound() ? " round}" : "}");
+                + " stableInsets=" + mStableInsets
+                + (mDisplayCutout != null ? " cutout=" + mDisplayCutout : "")
+                + (isRound() ? " round" : "")
+                + "}";
+    }
+
+    /**
+     * Returns a copy of this instance inset in the given directions.
+     *
+     * @see #inset(int, int, int, int)
+     * @hide
+     */
+    public WindowInsets inset(Rect r) {
+        return inset(r.left, r.top, r.right, r.bottom);
+    }
+
+    /**
+     * Returns a copy of this instance inset in the given directions.
+     *
+     * This is intended for dispatching insets to areas of the window that are smaller than the
+     * current area.
+     *
+     * <p>Example:
+     * <pre>
+     * childView.dispatchApplyWindowInsets(insets.inset(
+     *         childMarginLeft, childMarginTop, childMarginBottom, childMarginRight));
+     * </pre>
+     *
+     * @param left the amount of insets to remove from the left. Must be non-negative.
+     * @param top the amount of insets to remove from the top. Must be non-negative.
+     * @param right the amount of insets to remove from the right. Must be non-negative.
+     * @param bottom the amount of insets to remove from the bottom. Must be non-negative.
+     *
+     * @return the inset insets
+     *
+     * @hide pending API
+     */
+    public WindowInsets inset(int left, int top, int right, int bottom) {
+        Preconditions.checkArgumentNonnegative(left);
+        Preconditions.checkArgumentNonnegative(top);
+        Preconditions.checkArgumentNonnegative(right);
+        Preconditions.checkArgumentNonnegative(bottom);
+
+        WindowInsets result = new WindowInsets(this);
+        if (!result.mSystemWindowInsetsConsumed) {
+            result.mSystemWindowInsets =
+                    insetInsets(result.mSystemWindowInsets, left, top, right, bottom);
+        }
+        if (!result.mWindowDecorInsetsConsumed) {
+            result.mWindowDecorInsets =
+                    insetInsets(result.mWindowDecorInsets, left, top, right, bottom);
+        }
+        if (!result.mStableInsetsConsumed) {
+            result.mStableInsets = insetInsets(result.mStableInsets, left, top, right, bottom);
+        }
+        if (mDisplayCutout != null) {
+            result.mDisplayCutout = result.mDisplayCutout.inset(left, top, right, bottom);
+            if (result.mDisplayCutout.isEmpty()) {
+                result.mDisplayCutout = null;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof WindowInsets)) return false;
+        WindowInsets that = (WindowInsets) o;
+        return mIsRound == that.mIsRound
+                && mAlwaysConsumeNavBar == that.mAlwaysConsumeNavBar
+                && mSystemWindowInsetsConsumed == that.mSystemWindowInsetsConsumed
+                && mWindowDecorInsetsConsumed == that.mWindowDecorInsetsConsumed
+                && mStableInsetsConsumed == that.mStableInsetsConsumed
+                && mDisplayCutoutConsumed == that.mDisplayCutoutConsumed
+                && Objects.equals(mSystemWindowInsets, that.mSystemWindowInsets)
+                && Objects.equals(mWindowDecorInsets, that.mWindowDecorInsets)
+                && Objects.equals(mStableInsets, that.mStableInsets)
+                && Objects.equals(mDisplayCutout, that.mDisplayCutout);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mSystemWindowInsets, mWindowDecorInsets, mStableInsets, mIsRound,
+                mDisplayCutout, mAlwaysConsumeNavBar, mSystemWindowInsetsConsumed,
+                mWindowDecorInsetsConsumed, mStableInsetsConsumed, mDisplayCutoutConsumed);
+    }
+
+    private static Rect insetInsets(Rect insets, int left, int top, int right, int bottom) {
+        int newLeft = Math.max(0, insets.left - left);
+        int newTop = Math.max(0, insets.top - top);
+        int newRight = Math.max(0, insets.right - right);
+        int newBottom = Math.max(0, insets.bottom - bottom);
+        if (newLeft == left && newTop == top && newRight == right && newBottom == bottom) {
+            return insets;
+        }
+        return new Rect(newLeft, newTop, newRight, newBottom);
+    }
+
+    /**
+     * @return whether system window insets have been consumed.
+     */
+    boolean isSystemWindowInsetsConsumed() {
+        return mSystemWindowInsetsConsumed;
     }
 }

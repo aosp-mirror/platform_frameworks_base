@@ -16,6 +16,7 @@
 
 package android.security.keystore;
 
+import android.app.ActivityManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.security.GateKeeper;
 import android.security.KeyStore;
@@ -93,22 +94,32 @@ public abstract class KeymasterUtils {
      *        overriding the default logic in this method where the key is bound to either the root
      *        SID of the current user, or the fingerprint SID if explicit fingerprint authorization
      *        is requested.
+     * @param userConfirmationRequired whether user confirmation is required to authorize the use
+     *        of the key.
      * @throws IllegalStateException if user authentication is required but the system is in a wrong
      *         state (e.g., secure lock screen not set up) for generating or importing keys that
      *         require user authentication.
      */
-    public static void addUserAuthArgs(KeymasterArguments args,
-            boolean userAuthenticationRequired,
-            int userAuthenticationValidityDurationSeconds,
-            boolean userAuthenticationValidWhileOnBody,
-            boolean invalidatedByBiometricEnrollment,
-            long boundToSpecificSecureUserId) {
-        if (!userAuthenticationRequired) {
+    public static void addUserAuthArgs(KeymasterArguments args, UserAuthArgs spec) {
+
+        if (spec.isUserConfirmationRequired()) {
+            args.addBoolean(KeymasterDefs.KM_TAG_TRUSTED_CONFIRMATION_REQUIRED);
+        }
+
+        if (spec.isUserPresenceRequired()) {
+            args.addBoolean(KeymasterDefs.KM_TAG_TRUSTED_USER_PRESENCE_REQUIRED);
+        }
+
+        if (spec.isUnlockedDeviceRequired()) {
+            args.addBoolean(KeymasterDefs.KM_TAG_UNLOCKED_DEVICE_REQUIRED);
+        }
+
+        if (!spec.isUserAuthenticationRequired()) {
             args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
             return;
         }
 
-        if (userAuthenticationValidityDurationSeconds == -1) {
+        if (spec.getUserAuthenticationValidityDurationSeconds() == -1) {
             // Every use of this key needs to be authorized by the user. This currently means
             // fingerprint-only auth.
             FingerprintManager fingerprintManager =
@@ -124,9 +135,9 @@ public abstract class KeymasterUtils {
             }
 
             long sid;
-            if (boundToSpecificSecureUserId != GateKeeper.INVALID_SECURE_USER_ID) {
-                sid = boundToSpecificSecureUserId;
-            } else if (invalidatedByBiometricEnrollment) {
+            if (spec.getBoundToSpecificSecureUserId() != GateKeeper.INVALID_SECURE_USER_ID) {
+                sid = spec.getBoundToSpecificSecureUserId();
+            } else if (spec.isInvalidatedByBiometricEnrollment()) {
                 // The fingerprint-only SID will change on fingerprint enrollment or removal of all,
                 // enrolled fingerprints, invalidating the key.
                 sid = fingerprintOnlySid;
@@ -139,14 +150,14 @@ public abstract class KeymasterUtils {
             args.addUnsignedLong(
                     KeymasterDefs.KM_TAG_USER_SECURE_ID, KeymasterArguments.toUint64(sid));
             args.addEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, KeymasterDefs.HW_AUTH_FINGERPRINT);
-            if (userAuthenticationValidWhileOnBody) {
+            if (spec.isUserAuthenticationValidWhileOnBody()) {
                 throw new ProviderException("Key validity extension while device is on-body is not "
                         + "supported for keys requiring fingerprint authentication");
             }
         } else {
             long sid;
-            if (boundToSpecificSecureUserId != GateKeeper.INVALID_SECURE_USER_ID) {
-                sid = boundToSpecificSecureUserId;
+            if (spec.getBoundToSpecificSecureUserId() != GateKeeper.INVALID_SECURE_USER_ID) {
+                sid = spec.getBoundToSpecificSecureUserId();
             } else {
                 // The key is authorized for use for the specified amount of time after the user has
                 // authenticated. Whatever unlocks the secure lock screen should authorize this key.
@@ -157,8 +168,8 @@ public abstract class KeymasterUtils {
             args.addEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
                     KeymasterDefs.HW_AUTH_PASSWORD | KeymasterDefs.HW_AUTH_FINGERPRINT);
             args.addUnsignedInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
-                    userAuthenticationValidityDurationSeconds);
-            if (userAuthenticationValidWhileOnBody) {
+                    spec.getUserAuthenticationValidityDurationSeconds());
+            if (spec.isUserAuthenticationValidWhileOnBody()) {
                 args.addBoolean(KeymasterDefs.KM_TAG_ALLOW_WHILE_ON_BODY);
             }
         }

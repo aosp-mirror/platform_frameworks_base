@@ -45,10 +45,7 @@ namespace uirenderer {
  */
 class PixelBuffer {
 public:
-    enum BufferType {
-        kBufferType_Auto,
-        kBufferType_CPU
-    };
+    enum BufferType { kBufferType_Auto, kBufferType_CPU };
 
     enum AccessMode {
         kAccessMode_None = 0,
@@ -66,17 +63,14 @@ public:
      * a CPU or GPU buffer.
      */
     static PixelBuffer* create(GLenum format, uint32_t width, uint32_t height,
-            BufferType type = kBufferType_Auto);
+                               BufferType type = kBufferType_Auto);
 
-    virtual ~PixelBuffer() {
-    }
+    virtual ~PixelBuffer() {}
 
     /**
      * Returns the format of this render buffer.
      */
-    GLenum getFormat() const {
-        return mFormat;
-    }
+    GLenum getFormat() const { return mFormat; }
 
     /**
      * Maps this before with the specified access mode. This method
@@ -95,9 +89,7 @@ public:
      * Returns the current access mode for this buffer. If the buffer
      * is not mapped, this method returns kAccessMode_None.
      */
-    AccessMode getAccessMode() const {
-        return mAccessMode;
-    }
+    AccessMode getAccessMode() const { return mAccessMode; }
 
     /**
      * Upload the specified rectangle of this pixel buffer as a
@@ -121,23 +113,17 @@ public:
     /**
      * Returns the width of the render buffer in pixels.
      */
-    uint32_t getWidth() const {
-        return mWidth;
-    }
+    uint32_t getWidth() const { return mWidth; }
 
     /**
      * Returns the height of the render buffer in pixels.
      */
-    uint32_t getHeight() const {
-        return mHeight;
-    }
+    uint32_t getHeight() const { return mHeight; }
 
     /**
      * Returns the size of this pixel buffer in bytes.
      */
-    uint32_t getSize() const {
-        return mWidth * mHeight * formatSize(mFormat);
-    }
+    uint32_t getSize() const { return mWidth * mHeight * formatSize(mFormat); }
 
     /**
      * Returns the offset of a pixel in this pixel buffer, in bytes.
@@ -178,7 +164,7 @@ public:
                 return 3;
         }
 
-        ALOGE("unsupported format: %d",format);
+        ALOGE("unsupported format: %d", format);
         return 0;
     }
 
@@ -187,9 +173,8 @@ protected:
      * Creates a new render buffer in the specified format and dimensions.
      * The format must be GL_ALPHA or GL_RGBA.
      */
-    PixelBuffer(GLenum format, uint32_t width, uint32_t height):
-            mFormat(format), mWidth(width), mHeight(height), mAccessMode(kAccessMode_None) {
-    }
+    PixelBuffer(GLenum format, uint32_t width, uint32_t height)
+            : mFormat(format), mWidth(width), mHeight(height), mAccessMode(kAccessMode_None) {}
 
     /**
      * Unmaps this buffer, if needed. After the buffer is unmapped,
@@ -205,9 +190,9 @@ protected:
 
     AccessMode mAccessMode;
 
-}; // class PixelBuffer
+};  // class PixelBuffer
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_PIXEL_BUFFER_H
+#endif  // ANDROID_HWUI_PIXEL_BUFFER_H

@@ -21,17 +21,16 @@ import android.content.pm.ParceledListSlice;
 
 import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
-
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.ScanSettings;
-import android.net.wifi.ScanResult;
-import android.net.wifi.PasspointManagementObjectDefinition;
-import android.net.wifi.WifiConnectionStatistics;
-import android.net.wifi.WifiActivityEnergyInfo;
-import android.net.Network;
+import android.net.wifi.hotspot2.IProvisioningCallback;
 
 import android.net.DhcpInfo;
+import android.net.Network;
+import android.net.wifi.ISoftApCallback;
+import android.net.wifi.PasspointManagementObjectDefinition;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiActivityEnergyInfo;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 
 import android.os.Messenger;
 import android.os.ResultReceiver;
@@ -62,13 +61,15 @@ interface IWifiManager
 
     WifiConfiguration getMatchingWifiConfig(in ScanResult scanResult);
 
+    List<WifiConfiguration> getAllMatchingWifiConfigs(in ScanResult scanResult);
+
     List<OsuProvider> getMatchingOsuProviders(in ScanResult scanResult);
 
-    int addOrUpdateNetwork(in WifiConfiguration config);
+    int addOrUpdateNetwork(in WifiConfiguration config, String packageName);
 
-    boolean addOrUpdatePasspointConfiguration(in PasspointConfiguration config);
+    boolean addOrUpdatePasspointConfiguration(in PasspointConfiguration config, String packageName);
 
-    boolean removePasspointConfiguration(in String fqdn);
+    boolean removePasspointConfiguration(in String fqdn, String packageName);
 
     List<PasspointConfiguration> getPasspointConfigurations();
 
@@ -78,21 +79,21 @@ interface IWifiManager
 
     void deauthenticateNetwork(long holdoff, boolean ess);
 
-    boolean removeNetwork(int netId);
+    boolean removeNetwork(int netId, String packageName);
 
-    boolean enableNetwork(int netId, boolean disableOthers);
+    boolean enableNetwork(int netId, boolean disableOthers, String packageName);
 
-    boolean disableNetwork(int netId);
+    boolean disableNetwork(int netId, String packageName);
 
-    void startScan(in ScanSettings requested, in WorkSource ws, in String packageName);
+    boolean startScan(String packageName);
 
     List<ScanResult> getScanResults(String callingPackage);
 
-    void disconnect();
+    void disconnect(String packageName);
 
-    void reconnect();
+    void reconnect(String packageName);
 
-    void reassociate();
+    void reassociate(String packageName);
 
     WifiInfo getConnectionInfo(String callingPackage);
 
@@ -100,13 +101,13 @@ interface IWifiManager
 
     int getWifiEnabledState();
 
-    void setCountryCode(String country, boolean persist);
+    void setCountryCode(String country);
 
     String getCountryCode();
 
     boolean isDualBandSupported();
 
-    boolean saveConfiguration();
+    boolean needs5GHzToAnyApBandConversion();
 
     DhcpInfo getDhcpInfo();
 
@@ -126,15 +127,13 @@ interface IWifiManager
 
     void releaseMulticastLock();
 
-    void setWifiApEnabled(in WifiConfiguration wifiConfig, boolean enable);
-
     void updateInterfaceIpState(String ifaceName, int mode);
 
     boolean startSoftAp(in WifiConfiguration wifiConfig);
 
     boolean stopSoftAp();
 
-    int startLocalOnlyHotspot(in Messenger messenger, in IBinder binder, in String packageName);
+    int startLocalOnlyHotspot(in Messenger messenger, in IBinder binder, String packageName);
 
     void stopLocalOnlyHotspot();
 
@@ -146,9 +145,9 @@ interface IWifiManager
 
     WifiConfiguration getWifiApConfiguration();
 
-    void setWifiApConfiguration(in WifiConfiguration wifiConfig);
+    boolean setWifiApConfiguration(in WifiConfiguration wifiConfig, String packageName);
 
-    Messenger getWifiServiceMessenger();
+    Messenger getWifiServiceMessenger(String packageName);
 
     void enableTdls(String remoteIPAddress, boolean enable);
 
@@ -160,22 +159,11 @@ interface IWifiManager
 
     int getVerboseLoggingLevel();
 
-    void enableAggressiveHandover(int enabled);
-    int getAggressiveHandover();
-
-    void setAllowScansWithTraffic(int enabled);
-    int getAllowScansWithTraffic();
-
-    boolean setEnableAutoJoinWhenAssociated(boolean enabled);
-    boolean getEnableAutoJoinWhenAssociated();
-
     void enableWifiConnectivityManager(boolean enabled);
 
-    WifiConnectionStatistics getConnectionStatistics();
+    void disableEphemeralNetwork(String SSID, String packageName);
 
-    void disableEphemeralNetwork(String SSID);
-
-    void factoryReset();
+    void factoryReset(String packageName);
 
     Network getCurrentNetwork();
 
@@ -184,5 +172,11 @@ interface IWifiManager
     void restoreBackupData(in byte[] data);
 
     void restoreSupplicantBackupData(in byte[] supplicantData, in byte[] ipConfigData);
+
+    void startSubscriptionProvisioning(in OsuProvider provider, in IProvisioningCallback callback);
+
+    void registerSoftApCallback(in IBinder binder, in ISoftApCallback callback, int callbackIdentifier);
+
+    void unregisterSoftApCallback(int callbackIdentifier);
 }
 

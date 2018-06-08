@@ -19,7 +19,9 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.media.AudioManager.OnAudioFocusChangeListener;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -163,12 +165,12 @@ import android.os.Looper;
  * // requesting audio focus
  * int res = mAudioManager.requestAudioFocus(mFocusRequest);
  * synchronized (mFocusLock) {
- *     if (res == AUDIOFOCUS_REQUEST_FAILED) {
+ *     if (res == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
  *         mPlaybackDelayed = false;
- *     } else if (res == AUDIOFOCUS_REQUEST_GRANTED) {
+ *     } else if (res == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
  *         mPlaybackDelayed = false;
  *         playbackNow();
- *     } else if (res == AUDIOFOCUS_REQUEST_DELAYED) {
+ *     } else if (res == AudioManager.AUDIOFOCUS_REQUEST_DELAYED) {
  *        mPlaybackDelayed = true;
  *     }
  * }
@@ -220,6 +222,9 @@ public final class AudioFocusRequest {
     private final static AudioAttributes FOCUS_DEFAULT_ATTR = new AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_MEDIA).build();
 
+    /** @hide */
+    public static final String KEY_ACCESSIBILITY_FORCE_FOCUS_DUCKING = "a11y_force_ducking";
+
     private final OnAudioFocusChangeListener mFocusListener; // may be null
     private final Handler mListenerHandler;                  // may be null
     private final AudioAttributes mAttr;                     // never null
@@ -258,6 +263,7 @@ public final class AudioFocusRequest {
      * Returns the focus change listener set for this {@code AudioFocusRequest}.
      * @return null if no {@link AudioManager.OnAudioFocusChangeListener} was set.
      */
+    @TestApi
     public @Nullable OnAudioFocusChangeListener getOnAudioFocusChangeListener() {
         return mFocusListener;
     }
@@ -349,6 +355,7 @@ public final class AudioFocusRequest {
         private boolean mPausesOnDuck = false;
         private boolean mDelayedFocus = false;
         private boolean mFocusLocked = false;
+        private boolean mA11yForceDucking = false;
 
         /**
          * Constructs a new {@code Builder}, and specifies how audio focus
@@ -407,7 +414,9 @@ public final class AudioFocusRequest {
          *   with {@link AudioManager#abandonAudioFocusRequest(AudioFocusRequest)}.
          *   Note that only focus changes (gains and losses) affecting the focus owner are reported,
          *   not gains and losses of other focus requesters in the system.<br>
-         *   Notifications are delivered on the main {@link Looper}.
+         *   Notifications are delivered on the {@link Looper} associated with the one of
+         *   the creation of the {@link AudioManager} used to request focus
+         *   (see {@link AudioManager#requestAudioFocus(AudioFocusRequest)}).
          * @param listener the listener receiving the focus change notifications.
          * @return this {@code Builder} instance.
          * @throws NullPointerException thrown when a null focus listener is used.
@@ -526,6 +535,21 @@ public final class AudioFocusRequest {
         }
 
         /**
+         * Marks this focus request as forcing ducking, regardless of the conditions in which
+         * the system would or would not enforce ducking.
+         * Forcing ducking will only be honored when requesting AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+         * with an {@link AudioAttributes} usage of
+         * {@link AudioAttributes#USAGE_ASSISTANCE_ACCESSIBILITY}, coming from an accessibility
+         * service, and will be ignored otherwise.
+         * @param forceDucking {@code true} to force ducking
+         * @return this {@code Builder} instance
+         */
+        public @NonNull Builder setForceDucking(boolean forceDucking) {
+            mA11yForceDucking = forceDucking;
+            return this;
+        }
+
+        /**
          * Builds a new {@code AudioFocusRequest} instance combining all the information gathered
          * by this {@code Builder}'s configuration methods.
          * @return the {@code AudioFocusRequest} instance qualified by all the properties set
@@ -537,6 +561,17 @@ public final class AudioFocusRequest {
             if ((mDelayedFocus || mPausesOnDuck) && (mFocusListener == null)) {
                 throw new IllegalStateException(
                         "Can't use delayed focus or pause on duck without a listener");
+            }
+            if (mA11yForceDucking) {
+                final Bundle extraInfo;
+                if (mAttr.getBundle() == null) {
+                    extraInfo = new Bundle();
+                } else {
+                    extraInfo = mAttr.getBundle();
+                }
+                // checking of usage and focus request is done server side
+                extraInfo.putBoolean(KEY_ACCESSIBILITY_FORCE_FOCUS_DUCKING, true);
+                mAttr = new AudioAttributes.Builder(mAttr).addBundle(extraInfo).build();
             }
             final int flags = 0
                     | (mDelayedFocus ? AudioManager.AUDIOFOCUS_FLAG_DELAY_OK : 0)

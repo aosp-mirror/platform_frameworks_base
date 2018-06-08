@@ -18,47 +18,46 @@
 #include "androidfw/ResourceTypes.h"
 
 #include "BenchmarkHelpers.h"
-#include "TestHelpers.h"
 #include "data/sparse/R.h"
 
 namespace sparse = com::android::sparse;
 
 namespace android {
 
-static void BM_SparseEntryGetResourceSparseSmall(benchmark::State& state) {
+static void BM_SparseEntryGetResourceOldSparse(benchmark::State& state, uint32_t resid) {
   ResTable_config config;
   memset(&config, 0, sizeof(config));
   config.sdkVersion = 26;
-  GetResourceBenchmarkOld({GetTestDataPath() + "/sparse/sparse.apk"}, &config,
-                          sparse::R::integer::foo_9, state);
+  GetResourceBenchmarkOld({GetTestDataPath() + "/sparse/sparse.apk"}, &config, resid, state);
 }
-BENCHMARK(BM_SparseEntryGetResourceSparseSmall);
+BENCHMARK_CAPTURE(BM_SparseEntryGetResourceOldSparse, Small, sparse::R::integer::foo_9);
+BENCHMARK_CAPTURE(BM_SparseEntryGetResourceOldSparse, Large, sparse::R::string::foo_999);
 
-static void BM_SparseEntryGetResourceNotSparseSmall(benchmark::State& state) {
+static void BM_SparseEntryGetResourceOldNotSparse(benchmark::State& state, uint32_t resid) {
   ResTable_config config;
   memset(&config, 0, sizeof(config));
   config.sdkVersion = 26;
-  GetResourceBenchmarkOld({GetTestDataPath() + "/sparse/not_sparse.apk"}, &config,
-                          sparse::R::integer::foo_9, state);
+  GetResourceBenchmarkOld({GetTestDataPath() + "/sparse/not_sparse.apk"}, &config, resid, state);
 }
-BENCHMARK(BM_SparseEntryGetResourceNotSparseSmall);
+BENCHMARK_CAPTURE(BM_SparseEntryGetResourceOldNotSparse, Small, sparse::R::integer::foo_9);
+BENCHMARK_CAPTURE(BM_SparseEntryGetResourceOldNotSparse, Large, sparse::R::string::foo_999);
 
-static void BM_SparseEntryGetResourceSparseLarge(benchmark::State& state) {
+static void BM_SparseEntryGetResourceSparse(benchmark::State& state, uint32_t resid) {
   ResTable_config config;
   memset(&config, 0, sizeof(config));
   config.sdkVersion = 26;
-  GetResourceBenchmarkOld({GetTestDataPath() + "/sparse/sparse.apk"}, &config,
-                          sparse::R::string::foo_999, state);
+  GetResourceBenchmark({GetTestDataPath() + "/sparse/sparse.apk"}, &config, resid, state);
 }
-BENCHMARK(BM_SparseEntryGetResourceSparseLarge);
+BENCHMARK_CAPTURE(BM_SparseEntryGetResourceSparse, Small, sparse::R::integer::foo_9);
+BENCHMARK_CAPTURE(BM_SparseEntryGetResourceSparse, Large, sparse::R::string::foo_999);
 
-static void BM_SparseEntryGetResourceNotSparseLarge(benchmark::State& state) {
+static void BM_SparseEntryGetResourceNotSparse(benchmark::State& state, uint32_t resid) {
   ResTable_config config;
   memset(&config, 0, sizeof(config));
   config.sdkVersion = 26;
-  GetResourceBenchmarkOld({GetTestDataPath() + "/sparse/not_sparse.apk"}, &config,
-                          sparse::R::string::foo_999, state);
+  GetResourceBenchmark({GetTestDataPath() + "/sparse/not_sparse.apk"}, &config, resid, state);
 }
-BENCHMARK(BM_SparseEntryGetResourceNotSparseLarge);
+BENCHMARK_CAPTURE(BM_SparseEntryGetResourceNotSparse, Small, sparse::R::integer::foo_9);
+BENCHMARK_CAPTURE(BM_SparseEntryGetResourceNotSparse, Large, sparse::R::string::foo_999);
 
 }  // namespace android

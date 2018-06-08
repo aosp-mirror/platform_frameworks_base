@@ -17,9 +17,9 @@
 #ifndef _ANDROID_GRAPHICS_MINIKIN_SKIA_H_
 #define _ANDROID_GRAPHICS_MINIKIN_SKIA_H_
 
+#include <SkRefCnt.h>
 #include <cutils/compiler.h>
 #include <minikin/MinikinFont.h>
-#include <SkRefCnt.h>
 
 class SkPaint;
 class SkTypeface;
@@ -29,13 +29,17 @@ namespace android {
 class ANDROID_API MinikinFontSkia : public minikin::MinikinFont {
 public:
     explicit MinikinFontSkia(sk_sp<SkTypeface> typeface, const void* fontData, size_t fontSize,
-        int ttcIndex, const std::vector<minikin::FontVariation>& axes);
+                             int ttcIndex, const std::vector<minikin::FontVariation>& axes);
 
-    float GetHorizontalAdvance(uint32_t glyph_id,
-        const minikin::MinikinPaint &paint) const;
+    float GetHorizontalAdvance(uint32_t glyph_id, const minikin::MinikinPaint& paint,
+                               const minikin::FontFakery& fakery) const override;
 
     void GetBounds(minikin::MinikinRect* bounds, uint32_t glyph_id,
-        const minikin::MinikinPaint &paint) const;
+                   const minikin::MinikinPaint& paint,
+                   const minikin::FontFakery& fakery) const override;
+
+    void GetFontExtent(minikin::MinikinExtent* extent, const minikin::MinikinPaint& paint,
+                       const minikin::FontFakery& fakery) const override;
 
     SkTypeface* GetSkTypeface() const;
     sk_sp<SkTypeface> RefSkTypeface() const;
@@ -53,7 +57,8 @@ public:
 
     // set typeface and fake bold/italic parameters
     static void populateSkPaint(SkPaint* paint, const minikin::MinikinFont* font,
-            minikin::FontFakery fakery);
+                                minikin::FontFakery fakery);
+
 private:
     sk_sp<SkTypeface> mTypeface;
 

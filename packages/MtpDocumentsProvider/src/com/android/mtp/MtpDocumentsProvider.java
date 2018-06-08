@@ -16,6 +16,7 @@
 
 package com.android.mtp;
 
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -37,11 +38,12 @@ import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.os.ProxyFileDescriptorCallback;
 import android.os.storage.StorageManager;
+import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Path;
 import android.provider.DocumentsContract.Root;
-import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
+import android.provider.MetadataReader;
 import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.OsConstants;
@@ -50,14 +52,16 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
+import libcore.io.IoUtils;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
-import libcore.io.IoUtils;
 
 /**
  * DocumentsProvider for MTP devices.
@@ -107,7 +111,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mResources = getContext().getResources();
         mMtpManager = new MtpManager(getContext());
         mResolver = getContext().getContentResolver();
-        mDeviceToolkits = new HashMap<Integer, DeviceToolkit>();
+        mDeviceToolkits = new HashMap<>();
         mDatabase = new MtpDatabase(getContext(), MtpDatabaseConstants.FLAG_DATABASE_IN_FILE);
         mRootScanner = new RootScanner(mResolver, mMtpManager, mDatabase);
         mIntentSender = new ServiceIntentSender(getContext());
@@ -151,7 +155,7 @@ public class MtpDocumentsProvider extends DocumentsProvider {
         mResources = resources;
         mMtpManager = mtpManager;
         mResolver = resolver;
-        mDeviceToolkits = new HashMap<Integer, DeviceToolkit>();
+        mDeviceToolkits = new HashMap<>();
         mDatabase = database;
         mRootScanner = new RootScanner(mResolver, mMtpManager, mDatabase);
         mIntentSender = intentSender;
@@ -545,6 +549,29 @@ public class MtpDocumentsProvider extends DocumentsProvider {
             }
         } catch (FileNotFoundException error) {
             return false;
+        }
+    }
+
+    @Override
+    public @Nullable Bundle getDocumentMetadata(String docId) throws FileNotFoundException {
+        String mimeType = getDocumentType(docId);
+
+        if (!MetadataReader.isSupportedMimeType(mimeType)) {
+            return null;
+        }
+
+        InputStream stream = null;
+        try {
+            stream = new ParcelFileDescriptor.AutoCloseInputStream(
+                    openDocument(docId, "r", null));
+            Bundle metadata = new Bundle();
+            MetadataReader.getMetadata(metadata, stream, mimeType, null);
+            return metadata;
+        } catch (IOException e) {
+            Log.e(TAG, "An error occurred retrieving the metadata", e);
+            return null;
+        } finally {
+            IoUtils.closeQuietly(stream);
         }
     }
 

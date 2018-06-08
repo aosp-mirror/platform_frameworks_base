@@ -1,0 +1,353 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package com.android.server.power;
+
+option java_multiple_files = true;
+
+import "frameworks/base/core/proto/android/app/enums.proto";
+import "frameworks/base/core/proto/android/content/intent.proto";
+import "frameworks/base/core/proto/android/os/enums.proto";
+import "frameworks/base/core/proto/android/os/looper.proto";
+import "frameworks/base/core/proto/android/os/powermanager.proto";
+import "frameworks/base/core/proto/android/os/worksource.proto";
+import "frameworks/base/core/proto/android/providers/settings.proto";
+import "frameworks/base/core/proto/android/server/wirelesschargerdetector.proto";
+import "frameworks/base/core/proto/android/view/enums.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+message PowerManagerServiceDumpProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // A com.android.server.power.PowerManagerService.Constants object.
+    message ConstantsProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional bool is_no_cached_wake_locks = 1;
+    }
+    message ActiveWakeLocksProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional bool is_cpu = 1;
+        optional bool is_screen_bright = 2;
+        optional bool is_screen_dim = 3;
+        optional bool is_button_bright = 4;
+        optional bool is_proximity_screen_off = 5;
+        // only set if already awake
+        optional bool is_stay_awake = 6;
+        optional bool is_doze = 7;
+        optional bool is_draw = 8;
+    }
+    message UserActivityProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional bool is_screen_bright = 1;
+        optional bool is_screen_dim = 2;
+        optional bool is_screen_dream = 3;
+    }
+    // A com.android.server.power.PowerManagerService.UidState object.
+    message UidStateProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 uid = 1;
+        optional string uid_string = 2;
+        optional bool is_active = 3;
+        optional int32 num_wake_locks = 4;
+        optional .android.app.ProcessStateEnum process_state = 5;
+    }
+
+    optional ConstantsProto constants = 1;
+    // A bitfield that indicates what parts of the power state have
+    // changed and need to be recalculated.
+    optional int32 dirty = 2;
+    // Indicates whether the device is awake or asleep or somewhere in between.
+    optional .android.os.PowerManagerInternalProto.Wakefulness wakefulness = 3;
+    optional bool is_wakefulness_changing = 4;
+    // True if the device is plugged into a power source.
+    optional bool is_powered = 5;
+    // The current plug type
+    optional .android.os.BatteryPluggedStateEnum plug_type = 6;
+    // The current battery level percentage.
+    optional int32 battery_level = 7;
+    // The battery level percentage at the time the dream started.
+    optional int32 battery_level_when_dream_started = 8;
+    // The current dock state.
+    optional .android.content.IntentProto.DockState dock_state = 9;
+    // True if the device should stay on.
+    optional bool is_stay_on = 10;
+    // True if the proximity sensor reads a positive result.
+    optional bool is_proximity_positive = 11;
+    // True if boot completed occurred.  We keep the screen on until this happens.
+    optional bool is_boot_completed = 12;
+    // True if systemReady() has been called.
+    optional bool is_system_ready = 13;
+    // True if auto-suspend mode is enabled.
+    optional bool is_hal_auto_suspend_mode_enabled = 14;
+    // True if interactive mode is enabled.
+    optional bool is_hal_auto_interactive_mode_enabled = 15;
+    // Summarizes the state of all active wakelocks.
+    optional ActiveWakeLocksProto active_wake_locks = 16;
+    // Have we scheduled a message to check for long wake locks?  This is when
+    // we will check. (In milliseconds timestamp)
+    optional int64 notify_long_scheduled_ms = 17;
+    // Last time we checked for long wake locks. (In milliseconds timestamp)
+    optional int64 notify_long_dispatched_ms = 18;
+    // The time we decided to do next long check. (In milliseconds timestamp)
+    optional int64 notify_long_next_check_ms = 19;
+    // Summarizes the effect of the user activity timer.
+    optional UserActivityProto user_activity = 20;
+    // If true, instructs the display controller to wait for the proximity
+    // sensor to go negative before turning the screen on.
+    optional bool is_request_wait_for_negative_proximity = 21;
+    // True if MSG_SANDMAN has been scheduled.
+    optional bool is_sandman_scheduled = 22;
+    // True if the sandman has just been summoned for the first time since entering
+    // the dreaming or dozing state.  Indicates whether a new dream should begin.
+    optional bool is_sandman_summoned = 23;
+    // True if the battery level is currently considered low.
+    optional bool is_battery_level_low = 24;
+    // True if we are currently in light device idle mode.
+    optional bool is_light_device_idle_mode = 25;
+    // True if we are currently in device idle mode.
+    optional bool is_device_idle_mode = 26;
+    // Set of app ids that we will always respect the wake locks for.
+    repeated int32 device_idle_whitelist = 27;
+    // Set of app ids that are temporarily allowed to acquire wakelocks due to
+    // high-pri message
+    repeated int32 device_idle_temp_whitelist = 28;
+    // Timestamp of the last time the device was awoken.
+    optional int64 last_wake_time_ms = 29;
+    // Timestamp of the last time the device was put to sleep.
+    optional int64 last_sleep_time_ms = 30;
+    // Timestamp of the last call to user activity.
+    optional int64 last_user_activity_time_ms = 31;
+    optional int64 last_user_activity_time_no_change_lights_ms = 32;
+    // Timestamp of last interactive power hint.
+    optional int64 last_interactive_power_hint_time_ms = 33;
+    // Timestamp of the last screen brightness boost.
+    optional int64 last_screen_brightness_boost_time_ms = 34;
+    // True if screen brightness boost is in progress.
+    optional bool is_screen_brightness_boost_in_progress = 35;
+    // True if the display power state has been fully applied, which means the
+    // display is actually on or actually off or whatever was requested.
+    optional bool is_display_ready = 36;
+    // True if the wake lock suspend blocker has been acquired.
+    optional bool is_holding_wake_lock_suspend_blocker = 37;
+    // The suspend blocker used to keep the CPU alive when the display is on, the
+    // display is getting ready or there is user activity (in which case the
+    // display must be on).
+    optional bool is_holding_display_suspend_blocker = 38;
+    // Settings and configuration
+    optional PowerServiceSettingsAndConfigurationDumpProto settings_and_configuration = 39;
+    // Sleep timeout in ms. This can be -1.
+    optional sint32 sleep_timeout_ms = 40;
+    // Screen off timeout in ms
+    optional int32 screen_off_timeout_ms = 41;
+    // Screen dim duration in ms
+    optional int32 screen_dim_duration_ms = 42;
+    // We are currently in the middle of a batch change of uids.
+    optional bool are_uids_changing = 43;
+    // Some uids have actually changed while mUidsChanging was true.
+    optional bool are_uids_changed = 44;
+    // List of UIDs and their states
+    repeated UidStateProto uid_states = 45;
+    optional .android.os.LooperProto looper = 46;
+    // List of all wake locks acquired by applications.
+    repeated WakeLockProto wake_locks = 47;
+    // List of all suspend blockers.
+    repeated SuspendBlockerProto suspend_blockers = 48;
+    optional WirelessChargerDetectorProto wireless_charger_detector = 49;
+    optional BatterySaverStateMachineProto battery_saver_state_machine = 50;
+}
+
+// A com.android.server.power.PowerManagerService.SuspendBlockerImpl object.
+message SuspendBlockerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional string name = 1;
+    optional int32 reference_count = 2;
+}
+
+// A com.android.server.power.PowerManagerService.WakeLock object.
+message WakeLockProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    message WakeLockFlagsProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // Turn the screen on when the wake lock is acquired.
+        optional bool is_acquire_causes_wakeup = 1;
+        // When this wake lock is released, poke the user activity timer
+        // so the screen stays on for a little longer.
+        optional bool is_on_after_release = 2;
+    }
+
+    optional .android.os.WakeLockLevelEnum lock_level = 1;
+    optional string tag = 2;
+    optional WakeLockFlagsProto flags = 3;
+    optional bool is_disabled = 4;
+    // Acquire time in ms
+    optional int64 acq_ms = 5;
+    optional bool is_notified_long = 6;
+    // Owner UID
+    optional int32 uid = 7;
+    // Owner PID
+    optional int32 pid = 8;
+    optional .android.os.WorkSourceProto work_source = 9;
+}
+
+message PowerServiceSettingsAndConfigurationDumpProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    message StayOnWhilePluggedInProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional bool is_stay_on_while_plugged_in_ac = 1;
+        optional bool is_stay_on_while_plugged_in_usb = 2;
+        optional bool is_stay_on_while_plugged_in_wireless = 3;
+    }
+    message ScreenBrightnessSettingLimitsProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 setting_minimum = 1;
+        optional int32 setting_maximum = 2;
+        optional int32 setting_default = 3;
+    }
+
+    // True to decouple auto-suspend mode from the display state.
+    optional bool is_decouple_hal_auto_suspend_mode_from_display_config = 1;
+    // True to decouple interactive mode from the display state.
+    optional bool is_decouple_hal_interactive_mode_from_display_config = 2;
+    // True if the device should wake up when plugged or unplugged.
+    optional bool is_wake_up_when_plugged_or_unplugged_config = 3;
+    // True if the device should wake up when plugged or unplugged in theater mode.
+    optional bool is_wake_up_when_plugged_or_unplugged_in_theater_mode_config = 4;
+    // True if theater mode is enabled
+    optional bool is_theater_mode_enabled = 5;
+    // True if the device should suspend when the screen is off due to proximity.
+    optional bool is_suspend_when_screen_off_due_to_proximity_config = 6;
+    // True if dreams are supported on this device.
+    optional bool are_dreams_supported_config = 7;
+    // Default value for dreams enabled
+    optional bool are_dreams_enabled_by_default_config = 8;
+    // Default value for dreams activate-on-sleep
+    optional bool are_dreams_activated_on_sleep_by_default_config = 9;
+    // Default value for dreams activate-on-dock
+    optional bool are_dreams_activated_on_dock_by_default_config = 10;
+    // True if dreams can run while not plugged in.
+    optional bool are_dreams_enabled_on_battery_config = 11;
+    // Minimum battery level to allow dreaming when powered.
+    // Use -1 to disable this safety feature.
+    optional sint32 dreams_battery_level_minimum_when_powered_config = 12;
+    // Minimum battery level to allow dreaming when not powered.
+    // Use -1 to disable this safety feature.
+    optional sint32 dreams_battery_level_minimum_when_not_powered_config = 13;
+    // If the battery level drops by this percentage and the user activity
+    // timeout has expired, then assume the device is receiving insufficient
+    // current to charge effectively and terminate the dream.  Use -1 to disable
+    // this safety feature.
+    optional sint32 dreams_battery_level_drain_cutoff_config = 14;
+    // True if dreams are enabled by the user.
+    optional bool are_dreams_enabled_setting = 15;
+    // True if dreams should be activated on sleep.
+    optional bool are_dreams_activate_on_sleep_setting = 16;
+    // True if dreams should be activated on dock.
+    optional bool are_dreams_activate_on_dock_setting = 17;
+    // True if doze should not be started until after the screen off transition.
+    optional bool is_doze_after_screen_off_config = 18;
+    // The minimum screen off timeout, in milliseconds.
+    optional int32 minimum_screen_off_timeout_config_ms = 19;
+    // The screen dim duration, in milliseconds.
+    optional int32 maximum_screen_dim_duration_config_ms = 20;
+    // The maximum screen dim time expressed as a ratio relative to the screen off timeout.
+    optional float maximum_screen_dim_ratio_config = 21;
+    // The screen off timeout setting value in milliseconds.
+    optional int32 screen_off_timeout_setting_ms = 22;
+    // The sleep timeout setting value in milliseconds. Default value is -1.
+    optional sint32 sleep_timeout_setting_ms = 23;
+    // The maximum allowable screen off timeout according to the device administration policy.
+    optional int32 maximum_screen_off_timeout_from_device_admin_ms = 24;
+    optional bool is_maximum_screen_off_timeout_from_device_admin_enforced_locked = 25;
+    // The stay on while plugged in setting.
+    // A set of battery conditions under which to make the screen stay on.
+    optional StayOnWhilePluggedInProto stay_on_while_plugged_in = 26;
+    // The screen brightness mode.
+    optional .android.providers.settings.SettingsProto.ScreenBrightnessMode screen_brightness_mode_setting = 27;
+    // The screen brightness setting override from the window manager
+    // to allow the current foreground activity to override the brightness.
+    // Use -1 to disable.
+    optional sint32 screen_brightness_override_from_window_manager = 28;
+    // The user activity timeout override from the window manager
+    // to allow the current foreground activity to override the user activity
+    // timeout. Use -1 to disable.
+    optional sint64 user_activity_timeout_override_from_window_manager_ms = 29;
+    // The window manager has determined the user to be inactive via other means.
+    // Set this to false to disable.
+    optional bool is_user_inactive_override_from_window_manager = 30;
+    // The screen state to use while dozing.
+    optional .android.view.DisplayStateEnum doze_screen_state_override_from_dream_manager = 31;
+    // The screen brightness to use while dozing.
+    optional float dozed_screen_brightness_override_from_dream_manager = 32;
+    // Screen brightness settings limits.
+    optional ScreenBrightnessSettingLimitsProto screen_brightness_setting_limits = 33;
+    // True if double tap to wake is enabled
+    optional bool is_double_tap_wake_enabled = 34;
+    // True if we are currently in VR Mode.
+    optional bool is_vr_mode_enabled = 35;
+    // True if Sidekick is controlling the display and we shouldn't change its power mode.
+    optional bool draw_wake_lock_override_from_sidekick = 36;
+}
+
+message BatterySaverStateMachineProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Whether battery saver is enabled.
+    optional bool enabled = 1;
+
+    // Whether system has booted.
+    optional bool boot_completed = 2;
+
+    // Whether settings have been loaded already.
+    optional bool settings_loaded = 3;
+
+    // Whether battery status has been set at least once.
+    optional bool battery_status_set = 4;
+
+    // Whether automatic battery saver has been canceled by the user.
+    optional bool battery_saver_snoozing = 5;
+
+    // Whether the device is connected to any power source.
+    optional bool is_powered = 6;
+
+    // Current battery level in %, 0-100.
+    optional int32 battery_level = 7;
+
+    // Whether battery level is low or not.
+    optional bool is_battery_level_low = 8;
+
+    // The value of Global.LOW_POWER_MODE. This is a cached value, so it could
+    // be slightly different from what's in GlobalSettingsProto.LowPowerMode.
+    optional bool setting_battery_saver_enabled = 9;
+
+    // The value of Global.LOW_POWER_MODE_STICKY. This is a cached value, so it could
+    // be slightly different from what's in GlobalSettingsProto.LowPowerMode.
+    optional bool setting_battery_saver_enabled_sticky = 10;
+
+    // The value of Global.LOW_POWER_MODE_TRIGGER_LEVEL. This is a cached value, so it could
+    // be slightly different from what's in GlobalSettingsProto.LowPowerMode.
+    optional int32 setting_battery_saver_trigger_threshold = 11;
+}

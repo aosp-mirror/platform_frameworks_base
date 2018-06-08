@@ -23,11 +23,11 @@ import static org.junit.Assert.assertTrue;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
+import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View.MeasureSpec;
 
 import com.android.frameworks.coretests.R;
-import com.google.common.base.Function;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -52,33 +52,28 @@ public class MessagingLinearLayoutTest {
 
     @Test
     public void testSingleChild() {
-        FakeImageFloatingTextView child = fakeChild((i) -> 3);
+        FakeImageFloatingTextView child = fakeChild(3);
 
-        mView.setNumIndentLines(2);
         mView.addView(child);
 
         mView.measure(WIDTH_SPEC, HEIGHT_SPEC);
         mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
 
-        assertEquals(3, child.getNumIndentLines());
         assertFalse(child.isHidden());
         assertEquals(150, mView.getMeasuredHeight());
     }
 
     @Test
     public void testLargeSmall() {
-        FakeImageFloatingTextView child1 = fakeChild((i) -> 3);
-        FakeImageFloatingTextView child2 = fakeChild((i) -> 1);
+        FakeImageFloatingTextView child1 = fakeChild(3);
+        FakeImageFloatingTextView child2 = fakeChild(1);
 
-        mView.setNumIndentLines(2);
         mView.addView(child1);
         mView.addView(child2);
 
         mView.measure(WIDTH_SPEC, HEIGHT_SPEC);
         mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
 
-        assertEquals(3, child1.getNumIndentLines());
-        assertEquals(0, child2.getNumIndentLines());
         assertFalse("child1 should not be hidden", child1.isHidden());
         assertFalse("child2 should not be hidden", child2.isHidden());
         assertEquals(205, mView.getMeasuredHeight());
@@ -86,18 +81,15 @@ public class MessagingLinearLayoutTest {
 
     @Test
     public void testSmallSmall() {
-        FakeImageFloatingTextView child1 = fakeChild((i) -> 1);
-        FakeImageFloatingTextView child2 = fakeChild((i) -> 1);
+        FakeImageFloatingTextView child1 = fakeChild(1);
+        FakeImageFloatingTextView child2 = fakeChild(1);
 
-        mView.setNumIndentLines(2);
         mView.addView(child1);
         mView.addView(child2);
 
         mView.measure(WIDTH_SPEC, HEIGHT_SPEC);
         mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
 
-        assertEquals(2, child1.getNumIndentLines());
-        assertEquals(1, child2.getNumIndentLines());
         assertFalse("child1 should not be hidden", child1.isHidden());
         assertFalse("child2 should not be hidden", child2.isHidden());
         assertEquals(105, mView.getMeasuredHeight());
@@ -105,17 +97,15 @@ public class MessagingLinearLayoutTest {
 
     @Test
     public void testLargeLarge() {
-        FakeImageFloatingTextView child1 = fakeChild((i) -> 7);
-        FakeImageFloatingTextView child2 = fakeChild((i) -> 7);
+        FakeImageFloatingTextView child1 = fakeChild(7);
+        FakeImageFloatingTextView child2 = fakeChild(7);
 
-        mView.setNumIndentLines(2);
         mView.addView(child1);
         mView.addView(child2);
 
         mView.measure(WIDTH_SPEC, HEIGHT_SPEC);
         mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
 
-        assertEquals(3, child2.getNumIndentLines());
         assertTrue("child1 should be hidden", child1.isHidden());
         assertFalse("child2 should not be hidden", child2.isHidden());
         assertEquals(350, mView.getMeasuredHeight());
@@ -123,10 +113,9 @@ public class MessagingLinearLayoutTest {
 
     @Test
     public void testLargeSmall_largeWrapsWith3indentbutNotFullHeight_andHitsMax() {
-        FakeImageFloatingTextView child1 = fakeChild((i) -> i > 2 ? 7 : 6);
-        FakeImageFloatingTextView child2 = fakeChild((i) -> 1);
+        FakeImageFloatingTextView child1 = fakeChild(7);
+        FakeImageFloatingTextView child2 = fakeChild(1);
 
-        mView.setNumIndentLines(2);
         mView.addView(child1);
         mView.addView(child2);
 
@@ -135,51 +124,18 @@ public class MessagingLinearLayoutTest {
 
         assertFalse("child1 should not be hidden", child1.isHidden());
         assertFalse("child2 should not be hidden", child2.isHidden());
-        assertEquals(355, mView.getMeasuredHeight());
-        assertEquals(3, child1.getNumIndentLines());
-        assertEquals(0, child2.getNumIndentLines());
+        assertEquals(355, mView.getMeasuredHeight());;
     }
 
-    @Test
-    public void testLargeSmall_largeWrapsWith3indentbutnot3() {
-        FakeImageFloatingTextView child1 = fakeChild((i) -> i > 2 ? 4 : 3);
-        FakeImageFloatingTextView child2 = fakeChild((i) -> 1);
-
-        mView.setNumIndentLines(2);
-        mView.addView(child1);
-        mView.addView(child2);
-
-        mView.measure(WIDTH_SPEC, HEIGHT_SPEC);
-        mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
-
-        assertFalse("child1 should not be hidden", child1.isHidden());
-        assertFalse("child2 should not be hidden", child2.isHidden());
-        assertEquals(255, mView.getMeasuredHeight());
-        assertEquals(3, child1.getNumIndentLines());
-        assertEquals(0, child2.getNumIndentLines());
-    }
-
-    private class FakeImageFloatingTextView extends ImageFloatingTextView {
+    private class FakeImageFloatingTextView extends MessagingTextMessage {
 
         public static final int LINE_HEIGHT = 50;
-        private final Function<Integer, Integer> mLinesForIndent;
-        private int mNumIndentLines;
+        private final int mNumLines;
 
         public FakeImageFloatingTextView(Context context,
-                Function<Integer, Integer> linesForIndent) {
+                int linesForIndent) {
             super(context, null, 0, 0);
-            mLinesForIndent = linesForIndent;
-        }
-
-        @Override
-        public boolean setNumIndentLines(int lines) {
-            boolean changed = (mNumIndentLines != lines);
-            mNumIndentLines = lines;
-            return changed;
-        }
-
-        public int getNumIndentLines() {
-            return mNumIndentLines;
+            mNumLines = linesForIndent;
         }
 
         @Override
@@ -195,6 +151,20 @@ public class MessagingLinearLayoutTest {
                             heightMeasureSpec)));
         }
 
+        public int getMeasuredType() {
+            boolean measuredTooSmall = getMeasuredHeight()
+                    < getLayoutHeight() + getPaddingTop() + getPaddingBottom();
+            if (measuredTooSmall) {
+                return MEASURED_TOO_SMALL;
+            } else {
+                if (getMeasuredHeight() == getDesiredHeight()) {
+                    return MEASURED_NORMAL;
+                } else {
+                    return MEASURED_SHORTENED;
+                }
+            }
+        }
+
         private int clampToMultiplesOfLineHeight(int size) {
             if (size <= LINE_HEIGHT) {
                 return size;
@@ -204,7 +174,7 @@ public class MessagingLinearLayoutTest {
 
         @Override
         public int getLineCount() {
-            return mLinesForIndent.apply(mNumIndentLines);
+            return mNumLines;
         }
 
         public int getDesiredHeight() {
@@ -229,7 +199,7 @@ public class MessagingLinearLayoutTest {
         }
     }
 
-    private FakeImageFloatingTextView fakeChild(Function<Integer,Integer> linesForIndent) {
-        return new FakeImageFloatingTextView(mContext, linesForIndent);
+    private FakeImageFloatingTextView fakeChild(int numLines) {
+        return new FakeImageFloatingTextView(mContext, numLines);
     }
 }

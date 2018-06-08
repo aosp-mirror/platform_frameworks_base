@@ -1,50 +1,109 @@
 package com.android.server.job;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_IMS;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PAID;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
-import android.content.ComponentName;
-import android.content.Context;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.app.job.JobInfo;
 import android.app.job.JobInfo.Builder;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.pm.PackageManagerInternal;
+import android.net.NetworkRequest;
+import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.SystemClock;
-import android.test.AndroidTestCase;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.RenamingDelegatingContext;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.internal.util.HexDump;
+import com.android.server.IoThread;
+import com.android.server.LocalServices;
 import com.android.server.job.JobStore.JobSet;
 import com.android.server.job.controllers.JobStatus;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.time.Clock;
+import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Test reading and writing correctly from file.
+ *
+ * atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/job/JobStoreTest.java
  */
-public class JobStoreTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class JobStoreTest {
     private static final String TAG = "TaskStoreTest";
     private static final String TEST_PREFIX = "_test_";
 
-    private static final int SOME_UID = 34234;
+    private static final int SOME_UID = android.os.Process.FIRST_APPLICATION_UID;
     private ComponentName mComponent;
-    private static final long IO_WAIT = 1000L;
 
     JobStore mTaskStoreUnderTest;
     Context mTestContext;
 
-    @Override
+    private Context getContext() {
+        return InstrumentationRegistry.getContext();
+    }
+
+    @Before
     public void setUp() throws Exception {
         mTestContext = new RenamingDelegatingContext(getContext(), TEST_PREFIX);
         Log.d(TAG, "Saving tasks to '" + mTestContext.getFilesDir() + "'");
         mTaskStoreUnderTest =
                 JobStore.initAndGetForTesting(mTestContext, mTestContext.getFilesDir());
         mComponent = new ComponentName(getContext().getPackageName(), StubClass.class.getName());
+
+        // Assume all packages are current SDK
+        final PackageManagerInternal pm = mock(PackageManagerInternal.class);
+        when(pm.getPackageTargetSdkVersion(anyString()))
+                .thenReturn(Build.VERSION_CODES.CUR_DEVELOPMENT);
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, pm);
+
+        // Freeze the clocks at this moment in time
+        JobSchedulerService.sSystemClock =
+                Clock.fixed(Clock.systemUTC().instant(), ZoneOffset.UTC);
+        JobSchedulerService.sUptimeMillisClock =
+                Clock.fixed(SystemClock.uptimeMillisClock().instant(), ZoneOffset.UTC);
+        JobSchedulerService.sElapsedRealtimeClock =
+                Clock.fixed(SystemClock.elapsedRealtimeClock().instant(), ZoneOffset.UTC);
     }
 
-    @Override
+    @After
     public void tearDown() throws Exception {
         mTaskStoreUnderTest.clear();
     }
 
+    private void waitForPendingIo() throws Exception {
+        final CountDownLatch latch = new CountDownLatch(1);
+        IoThread.getHandler().post(() -> {
+            latch.countDown();
+        });
+        latch.await(10, TimeUnit.SECONDS);
+    }
+
+    @Test
     public void testMaybeWriteStatusToDisk() throws Exception {
         int taskId = 5;
         long runByMillis = 20000L; // 20s
@@ -60,8 +119,10 @@ public class JobStoreTest extends AndroidTestCase {
                 .setPersisted(true)
                 .build();
         final JobStatus ts = JobStatus.createFromJobInfo(task, SOME_UID, null, -1, null);
+        ts.addInternalFlags(JobStatus.INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION);
         mTaskStoreUnderTest.add(ts);
-        Thread.sleep(IO_WAIT);
+        waitForPendingIo();
+
         // Manually load tasks from xml file.
         final JobSet jobStatusSet = new JobSet();
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
@@ -71,13 +132,15 @@ public class JobStoreTest extends AndroidTestCase {
         assertTasksEqual(task, loadedTaskStatus.getJob());
         assertTrue("JobStore#contains invalid.", mTaskStoreUnderTest.containsJob(ts));
         assertEquals("Different uids.", SOME_UID, loadedTaskStatus.getUid());
+        assertEquals(JobStatus.INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION,
+                loadedTaskStatus.getInternalFlags());
         compareTimestampsSubjectToIoLatency("Early run-times not the same after read.",
                 ts.getEarliestRunTime(), loadedTaskStatus.getEarliestRunTime());
         compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
                 ts.getLatestRunTimeElapsed(), loadedTaskStatus.getLatestRunTimeElapsed());
-
     }
 
+    @Test
     public void testWritingTwoFilesToDisk() throws Exception {
         final JobInfo task1 = new Builder(8, mComponent)
                 .setRequiresDeviceIdle(true)
@@ -96,7 +159,7 @@ public class JobStoreTest extends AndroidTestCase {
         final JobStatus taskStatus2 = JobStatus.createFromJobInfo(task2, SOME_UID, null, -1, null);
         mTaskStoreUnderTest.add(taskStatus1);
         mTaskStoreUnderTest.add(taskStatus2);
-        Thread.sleep(IO_WAIT);
+        waitForPendingIo();
 
         final JobSet jobStatusSet = new JobSet();
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
@@ -125,9 +188,9 @@ public class JobStoreTest extends AndroidTestCase {
                 taskStatus2.getEarliestRunTime(), loaded2.getEarliestRunTime());
         compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
                 taskStatus2.getLatestRunTimeElapsed(), loaded2.getLatestRunTimeElapsed());
-
     }
 
+    @Test
     public void testWritingTaskWithExtras() throws Exception {
         JobInfo.Builder b = new Builder(8, mComponent)
                 .setRequiresDeviceIdle(true)
@@ -144,7 +207,7 @@ public class JobStoreTest extends AndroidTestCase {
         JobStatus taskStatus = JobStatus.createFromJobInfo(task, SOME_UID, null, -1, null);
 
         mTaskStoreUnderTest.add(taskStatus);
-        Thread.sleep(IO_WAIT);
+        waitForPendingIo();
 
         final JobSet jobStatusSet = new JobSet();
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
@@ -152,6 +215,8 @@ public class JobStoreTest extends AndroidTestCase {
         JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
         assertTasksEqual(task, loaded.getJob());
     }
+
+    @Test
     public void testWritingTaskWithSourcePackage() throws Exception {
         JobInfo.Builder b = new Builder(8, mComponent)
                 .setRequiresDeviceIdle(true)
@@ -162,7 +227,7 @@ public class JobStoreTest extends AndroidTestCase {
                 "com.google.android.gms", 0, null);
 
         mTaskStoreUnderTest.add(taskStatus);
-        Thread.sleep(IO_WAIT);
+        waitForPendingIo();
 
         final JobSet jobStatusSet = new JobSet();
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
@@ -174,6 +239,7 @@ public class JobStoreTest extends AndroidTestCase {
                 taskStatus.getSourceUserId());
     }
 
+    @Test
     public void testWritingTaskWithFlex() throws Exception {
         JobInfo.Builder b = new Builder(8, mComponent)
                 .setRequiresDeviceIdle(true)
@@ -183,7 +249,7 @@ public class JobStoreTest extends AndroidTestCase {
         JobStatus taskStatus = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
 
         mTaskStoreUnderTest.add(taskStatus);
-        Thread.sleep(IO_WAIT);
+        waitForPendingIo();
 
         final JobSet jobStatusSet = new JobSet();
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
@@ -195,6 +261,7 @@ public class JobStoreTest extends AndroidTestCase {
                 taskStatus.getJob().getFlexMillis());
     }
 
+    @Test
     public void testMassivePeriodClampedOnRead() throws Exception {
         final long ONE_HOUR = 60*60*1000L; // flex
         final long TWO_HOURS = 2 * ONE_HOUR; // period
@@ -208,13 +275,13 @@ public class JobStoreTest extends AndroidTestCase {
                 invalidLateRuntimeElapsedMillis - TWO_HOURS;  // Early is (late - period).
         final Pair<Long, Long> persistedExecutionTimesUTC = new Pair<>(rtcNow, rtcNow + ONE_HOUR);
         final JobStatus js = new JobStatus(b.build(), SOME_UID, "somePackage",
-                0 /* sourceUserId */, "someTag",
+                0 /* sourceUserId */, 0, 0, "someTag",
                 invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
-                persistedExecutionTimesUTC);
+                persistedExecutionTimesUTC, 0 /* innerFlagg */);
 
         mTaskStoreUnderTest.add(js);
-        Thread.sleep(IO_WAIT);
+        waitForPendingIo();
 
         final JobSet jobStatusSet = new JobSet();
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
@@ -231,6 +298,7 @@ public class JobStoreTest extends AndroidTestCase {
                 loaded.getEarliestRunTime() <= newNowElapsed + TWO_HOURS + ONE_HOUR);
     }
 
+    @Test
     public void testPriorityPersisted() throws Exception {
         JobInfo.Builder b = new Builder(92, mComponent)
                 .setOverrideDeadline(5000)
@@ -238,7 +306,8 @@ public class JobStoreTest extends AndroidTestCase {
                 .setPersisted(true);
         final JobStatus js = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
         mTaskStoreUnderTest.add(js);
-        Thread.sleep(IO_WAIT);
+        waitForPendingIo();
+
         final JobSet jobStatusSet = new JobSet();
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         JobStatus loaded = jobStatusSet.getAllJobs().iterator().next();
@@ -248,6 +317,7 @@ public class JobStoreTest extends AndroidTestCase {
     /**
      * Test that non persisted job is not written to disk.
      */
+    @Test
     public void testNonPersistedTaskIsNotPersisted() throws Exception {
         JobInfo.Builder b = new Builder(42, mComponent)
                 .setOverrideDeadline(10000)
@@ -259,12 +329,71 @@ public class JobStoreTest extends AndroidTestCase {
                 .setPersisted(true);
         JobStatus jsPersisted = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null);
         mTaskStoreUnderTest.add(jsPersisted);
-        Thread.sleep(IO_WAIT);
+        waitForPendingIo();
+
         final JobSet jobStatusSet = new JobSet();
         mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
         assertEquals("Job count is incorrect.", 1, jobStatusSet.size());
         JobStatus jobStatus = jobStatusSet.getAllJobs().iterator().next();
         assertEquals("Wrong job persisted.", 43, jobStatus.getJobId());
+    }
+
+    @Test
+    public void testRequiredNetworkType() throws Exception {
+        assertPersistedEquals(new JobInfo.Builder(0, mComponent)
+                .setPersisted(true)
+                .setRequiresDeviceIdle(true)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE).build());
+        assertPersistedEquals(new JobInfo.Builder(0, mComponent)
+                .setPersisted(true)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY).build());
+        assertPersistedEquals(new JobInfo.Builder(0, mComponent)
+                .setPersisted(true)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED).build());
+        assertPersistedEquals(new JobInfo.Builder(0, mComponent)
+                .setPersisted(true)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_NOT_ROAMING).build());
+        assertPersistedEquals(new JobInfo.Builder(0, mComponent)
+                .setPersisted(true)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_CELLULAR).build());
+    }
+
+    @Test
+    public void testRequiredNetwork() throws Exception {
+        assertPersistedEquals(new JobInfo.Builder(0, mComponent)
+                .setPersisted(true)
+                .setRequiresDeviceIdle(true)
+                .setRequiredNetwork(null).build());
+        assertPersistedEquals(new JobInfo.Builder(0, mComponent)
+                .setPersisted(true)
+                .setRequiredNetwork(new NetworkRequest.Builder().build()).build());
+        assertPersistedEquals(new JobInfo.Builder(0, mComponent)
+                .setPersisted(true)
+                .setRequiredNetwork(new NetworkRequest.Builder()
+                        .addTransportType(TRANSPORT_WIFI).build())
+                .build());
+        assertPersistedEquals(new JobInfo.Builder(0, mComponent)
+                .setPersisted(true)
+                .setRequiredNetwork(new NetworkRequest.Builder()
+                        .addCapability(NET_CAPABILITY_IMS)
+                        .addUnwantedCapability(NET_CAPABILITY_OEM_PAID)
+                        .build())
+                .build());
+    }
+
+    /**
+     * Helper function to kick a {@link JobInfo} through a persistence cycle and
+     * assert that it's unchanged.
+     */
+    private void assertPersistedEquals(JobInfo first) throws Exception {
+        mTaskStoreUnderTest.clear();
+        mTaskStoreUnderTest.add(JobStatus.createFromJobInfo(first, SOME_UID, null, -1, null));
+        waitForPendingIo();
+
+        final JobSet jobStatusSet = new JobSet();
+        mTaskStoreUnderTest.readJobMapFromDisk(jobStatusSet, true);
+        final JobStatus second = jobStatusSet.getAllJobs().iterator().next();
+        assertTasksEqual(first, second.getJob());
     }
 
     /**
@@ -286,12 +415,10 @@ public class JobStoreTest extends AndroidTestCase {
                 second.isRequireBatteryNotLow());
         assertEquals("Invalid idle constraint.", first.isRequireDeviceIdle(),
                 second.isRequireDeviceIdle());
-        assertEquals("Invalid unmetered constraint.",
-                first.getNetworkType() == JobInfo.NETWORK_TYPE_UNMETERED,
-                second.getNetworkType() == JobInfo.NETWORK_TYPE_UNMETERED);
-        assertEquals("Invalid connectivity constraint.",
-                first.getNetworkType() == JobInfo.NETWORK_TYPE_ANY,
-                second.getNetworkType() == JobInfo.NETWORK_TYPE_ANY);
+        assertEquals("Invalid network type.",
+                first.getNetworkType(), second.getNetworkType());
+        assertEquals("Invalid network.",
+                first.getRequiredNetwork(), second.getRequiredNetwork());
         assertEquals("Invalid deadline constraint.",
                 first.hasLateConstraint(),
                 second.hasLateConstraint());
@@ -302,6 +429,26 @@ public class JobStoreTest extends AndroidTestCase {
                 first.getExtras().toString(), second.getExtras().toString());
         assertEquals("Transient xtras don't match",
                 first.getTransientExtras().toString(), second.getTransientExtras().toString());
+
+        // Since people can forget to add tests here for new fields, do one last
+        // sanity check based on bits-on-wire equality.
+        final byte[] firstBytes = marshall(first);
+        final byte[] secondBytes = marshall(second);
+        if (!Arrays.equals(firstBytes, secondBytes)) {
+            Log.w(TAG, "First: " + HexDump.dumpHexString(firstBytes));
+            Log.w(TAG, "Second: " + HexDump.dumpHexString(secondBytes));
+            fail("Raw JobInfo aren't equal; see logs for details");
+        }
+    }
+
+    private static byte[] marshall(Parcelable p) {
+        final Parcel parcel = Parcel.obtain();
+        try {
+            p.writeToParcel(parcel, 0);
+            return parcel.marshall();
+        } finally {
+            parcel.recycle();
+        }
     }
 
     /**
@@ -312,7 +459,7 @@ public class JobStoreTest extends AndroidTestCase {
      */
     private void compareTimestampsSubjectToIoLatency(String error, long ts1, long ts2) {
         final long DELTA_MILLIS = 700L;  // We allow up to 700ms of latency for IO read/writes.
-        assertTrue(error, Math.abs(ts1 - ts2) < DELTA_MILLIS + IO_WAIT);
+        assertTrue(error, Math.abs(ts1 - ts2) < DELTA_MILLIS);
     }
 
     private static class StubClass {}

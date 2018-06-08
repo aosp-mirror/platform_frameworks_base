@@ -28,7 +28,7 @@ public final class Usb10ACOutputTerminal extends UsbACTerminal {
     private byte mSourceID;         // 7:1 From Input Terminal. (0x01)
     private byte mTerminal;         // 8:1 Unused.
 
-    public Usb10ACOutputTerminal(int length, byte type, byte subtype, byte subClass) {
+    public Usb10ACOutputTerminal(int length, byte type, byte subtype, int subClass) {
         super(length, type, subtype, subClass);
     }
 

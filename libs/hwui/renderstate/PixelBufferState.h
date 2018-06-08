@@ -22,10 +22,11 @@ namespace android {
 namespace uirenderer {
 
 class PixelBufferState {
-    friend class Caches; // TODO: move to RenderState
+    friend class Caches;  // TODO: move to RenderState
 public:
     bool bind(GLuint buffer);
     bool unbind();
+
 private:
     PixelBufferState();
     GLuint mCurrentPixelBuffer;
@@ -34,4 +35,4 @@ private:
 } /* namespace uirenderer */
 } /* namespace android */
 
-#endif // RENDERSTATE_PIXELBUFFERSTATE_H
+#endif  // RENDERSTATE_PIXELBUFFERSTATE_H

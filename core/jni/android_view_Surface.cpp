@@ -517,38 +517,22 @@ static jint nativeAttachAndQueueBuffer(JNIEnv *env, jclass clazz, jlong nativeOb
         jobject graphicBuffer) {
     Surface* surface = reinterpret_cast<Surface*>(nativeObject);
     sp<GraphicBuffer> bp = graphicBufferForJavaObject(env, graphicBuffer);
-    if (bp == nullptr) {
-        return BAD_VALUE;
-    }
-    int err = ((ANativeWindow*)surface)->perform(surface, NATIVE_WINDOW_API_CONNECT,
-            NATIVE_WINDOW_API_CPU);
-    if (err != OK) {
-        return err;
-    }
-    err = surface->attachBuffer(bp->getNativeBuffer());
-    if (err != OK) {
-        return err;
-    }
-    err = ((ANativeWindow*)surface)->queueBuffer(surface, bp->getNativeBuffer(), -1);
-    if (err != OK) {
-        return err;
-    }
-    err = surface->disconnect(NATIVE_WINDOW_API_CPU);
+    int err = Surface::attachAndQueueBuffer(surface, bp);
     return err;
 }
 
 static jint nativeSetSharedBufferModeEnabled(JNIEnv* env, jclass clazz, jlong nativeObject,
         jboolean enabled) {
     Surface* surface = reinterpret_cast<Surface*>(nativeObject);
-    return ((ANativeWindow*) nativeObject)->perform(surface,
-            NATIVE_WINDOW_SET_SHARED_BUFFER_MODE, enabled);
+    ANativeWindow* anw = static_cast<ANativeWindow*>(surface);
+    return anw->perform(surface, NATIVE_WINDOW_SET_SHARED_BUFFER_MODE, int(enabled));
 }
 
 static jint nativeSetAutoRefreshEnabled(JNIEnv* env, jclass clazz, jlong nativeObject,
         jboolean enabled) {
     Surface* surface = reinterpret_cast<Surface*>(nativeObject);
-    return ((ANativeWindow*) nativeObject)->perform(surface,
-            NATIVE_WINDOW_SET_AUTO_REFRESH, enabled);
+    ANativeWindow* anw = static_cast<ANativeWindow*>(surface);
+    return anw->perform(surface, NATIVE_WINDOW_SET_AUTO_REFRESH, int(enabled));
 }
 
 namespace uirenderer {
@@ -562,12 +546,16 @@ public:
     }
 };
 
-static jlong create(JNIEnv* env, jclass clazz, jlong rootNodePtr, jlong surfacePtr) {
+static jlong create(JNIEnv* env, jclass clazz, jlong rootNodePtr, jlong surfacePtr,
+        jboolean isWideColorGamut) {
     RenderNode* rootNode = reinterpret_cast<RenderNode*>(rootNodePtr);
     sp<Surface> surface(reinterpret_cast<Surface*>(surfacePtr));
     ContextFactory factory;
     RenderProxy* proxy = new RenderProxy(false, rootNode, &factory);
     proxy->loadSystemProperties();
+    if (isWideColorGamut) {
+        proxy->setWideGamut(true);
+    }
     proxy->setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
     proxy->initialize(surface);
     // Shadows can't be used via this interface, so just set the light source
@@ -636,7 +624,7 @@ static const JNINativeMethod gSurfaceMethods[] = {
     {"nativeSetAutoRefreshEnabled", "(JZ)I", (void*)nativeSetAutoRefreshEnabled},
 
     // HWUI context
-    {"nHwuiCreate", "(JJ)J", (void*) hwui::create },
+    {"nHwuiCreate", "(JJZ)J", (void*) hwui::create },
     {"nHwuiSetSurface", "(JJ)V", (void*) hwui::setSurface },
     {"nHwuiDraw", "(J)V", (void*) hwui::draw },
     {"nHwuiDestroy", "(J)V", (void*) hwui::destroy },

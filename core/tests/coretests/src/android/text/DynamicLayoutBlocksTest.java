@@ -21,6 +21,7 @@ import static android.text.Layout.Alignment.ALIGN_NORMAL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -33,6 +34,7 @@ import org.junit.runner.RunWith;
  * Requires disabling access checks in the vm since this calls package-private APIs.
  *
  */
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DynamicLayoutBlocksTest {

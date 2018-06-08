@@ -168,6 +168,12 @@ public class PluginInstanceManager<T extends Plugin> {
         return false;
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s@%s (action=%s)",
+                getClass().getSimpleName(), hashCode(), mAction);
+    }
+
     private class MainHandler extends Handler {
         private static final int PLUGIN_CONNECTED = 1;
         private static final int PLUGIN_DISCONNECTED = 2;

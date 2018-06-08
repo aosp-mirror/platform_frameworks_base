@@ -1,0 +1,123 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.os;
+
+option java_outer_classname = "OsProtoEnums";
+option java_multiple_files = true;
+
+// These constants are defined in hardware/interfaces/health/1.0/types.hal
+// They are primarily used by android/os/BatteryManager.java.
+enum BatteryHealthEnum {
+    BATTERY_HEALTH_INVALID = 0;
+    BATTERY_HEALTH_UNKNOWN = 1;
+    BATTERY_HEALTH_GOOD = 2;
+    BATTERY_HEALTH_OVERHEAT = 3;
+    BATTERY_HEALTH_DEAD = 4;
+    BATTERY_HEALTH_OVER_VOLTAGE = 5;
+    BATTERY_HEALTH_UNSPECIFIED_FAILURE = 6;
+    BATTERY_HEALTH_COLD = 7;
+}
+
+// Plug states, primarily used by android/os/BatteryManager.java.
+enum BatteryPluggedStateEnum {
+    // Note that NONE is not in BatteryManager.java's constants.
+    BATTERY_PLUGGED_NONE = 0;
+    // Power source is an AC charger.
+    BATTERY_PLUGGED_AC = 1;
+    // Power source is a USB port.
+    BATTERY_PLUGGED_USB = 2;
+    // Power source is wireless.
+    BATTERY_PLUGGED_WIRELESS = 4;
+}
+
+// These constants are defined in hardware/interfaces/health/1.0/types.hal
+// They are primarily used by android/os/BatteryManager.java.
+enum BatteryStatusEnum {
+    BATTERY_STATUS_INVALID = 0;
+    BATTERY_STATUS_UNKNOWN = 1;
+    BATTERY_STATUS_CHARGING = 2;
+    BATTERY_STATUS_DISCHARGING = 3;
+    BATTERY_STATUS_NOT_CHARGING = 4;
+    BATTERY_STATUS_FULL = 5;
+}
+
+// These constants are defined in hardware/interfaces/thermal/1.0/types.hal
+// They are primarily used by android/os/HardwarePropertiesManager.java.
+// Any change to the types in the thermal hal should be made here as well.
+enum TemperatureTypeEnum {
+    TEMPERATURE_TYPE_UNKNOWN = -1;
+    TEMPERATURE_TYPE_CPU = 0;
+    TEMPERATURE_TYPE_GPU = 1;
+    TEMPERATURE_TYPE_BATTERY = 2;
+    TEMPERATURE_TYPE_SKIN = 3;
+}
+
+// Wakelock types, primarily used by android/os/PowerManager.java.
+enum WakeLockLevelEnum {
+    // NOTE: Wake lock levels were previously defined as a bit field, except
+    // that only a few combinations were actually supported so the bit field
+    // was removed. This explains why the numbering scheme is so odd. If
+    // adding a new wake lock level, any unused value can be used.
+
+    // Ensures that the CPU is running; the screen and keyboard backlight
+    // will be allowed to go off.
+    PARTIAL_WAKE_LOCK = 1;
+
+    // Ensures that the screen is on (but may be dimmed); the keyboard
+    // backlight will be allowed to go off. If the user presses the power
+    // button, then the SCREEN_DIM_WAKE_LOCK will be implicitly released by
+    // the system, causing both the screen and the CPU to be turned off.
+    SCREEN_DIM_WAKE_LOCK = 6 [deprecated = true];
+
+    // Ensures that the screen is on at full brightness; the keyboard
+    // backlight will be allowed to go off. If the user presses the power
+    // button, then the SCREEN_BRIGHT_WAKE_LOCK will be implicitly released
+    // by the system, causing both the screen and the CPU to be turned off.
+    SCREEN_BRIGHT_WAKE_LOCK = 10 [deprecated = true];
+
+    // Ensures that the screen and keyboard backlight are on at full
+    // brightness. If the user presses the power button, then the
+    // FULL_WAKE_LOCK will be implicitly released by the system, causing
+    // both the screen and the CPU to be turned off.
+    FULL_WAKE_LOCK = 26 [deprecated = true];
+
+    // Turns the screen off when the proximity sensor activates. If the
+    // proximity sensor detects that an object is nearby, the screen turns
+    // off immediately. Shortly after the object moves away, the screen
+    // turns on again.
+    // A proximity wake lock does not prevent the device from falling asleep
+    // unlike FULL_WAKE_LOCK, SCREEN_BRIGHT_WAKE_LOCK and
+    // SCREEN_DIM_WAKE_LOCK. If there is no user activity and no other wake
+    // locks are held, then the device will fall asleep (and lock) as usual.
+    // However, the device will not fall asleep while the screen has been
+    // turned off by the proximity sensor because it effectively counts as
+    // ongoing user activity.
+    PROXIMITY_SCREEN_OFF_WAKE_LOCK = 32;
+
+    // Put the screen in a low power state and allow the CPU to suspend if
+    // no other wake locks are held. This is used by the dream manager to
+    // implement doze mode. It currently has no effect unless the power
+    // manager is in the dozing state.
+    DOZE_WAKE_LOCK = 64;
+
+    // Keep the device awake enough to allow drawing to occur. This is used
+    // by the window manager to allow applications to draw while the system
+    // is dozing. It currently has no effect unless the power manager is in
+    // the dozing state.
+    DRAW_WAKE_LOCK = 128;
+}

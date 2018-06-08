@@ -50,7 +50,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -593,7 +592,6 @@ public class IpSecServiceParameterizedTest {
         }
     }
 
-    @Ignore
     @Test
     public void testAddTunnelFailsForBadPackageName() throws Exception {
         try {

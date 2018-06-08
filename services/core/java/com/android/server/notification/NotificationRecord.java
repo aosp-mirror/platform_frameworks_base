@@ -15,18 +15,29 @@
  */
 package com.android.server.notification;
 
-import static android.app.NotificationManager.IMPORTANCE_MIN;
-import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
+import static android.app.NotificationManager.IMPORTANCE_MIN;
+import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+import static android.service.notification.NotificationListenerService.Ranking
+        .USER_SENTIMENT_NEUTRAL;
+import static android.service.notification.NotificationListenerService.Ranking
+        .USER_SENTIMENT_POSITIVE;
 
+import android.annotation.Nullable;
+import android.app.ActivityManager;
+import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
@@ -34,18 +45,22 @@ import android.media.AudioAttributes;
 import android.media.AudioSystem;
 import android.metrics.LogMaker;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationRecordProto;
+import android.service.notification.NotificationStats;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
-import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.widget.RemoteViews;
@@ -54,6 +69,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.EventLogTags;
+import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
@@ -79,13 +95,13 @@ public final class NotificationRecord {
     static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
     private static final int MAX_LOGTAG_LENGTH = 35;
     final StatusBarNotification sbn;
+    final int mTargetSdkVersion;
     final int mOriginalFlags;
     private final Context mContext;
 
     NotificationUsageStats.SingleNotificationStats stats;
     boolean isCanceled;
-    /** Whether the notification was seen by the user via one of the notification listeners. */
-    boolean mIsSeen;
+    IBinder permissionOwner;
 
     // These members are used by NotificationSignalExtractors
     // to communicate with the ranking module.
@@ -95,6 +111,9 @@ public final class NotificationRecord {
 
     // is this notification currently being intercepted by Zen Mode?
     private boolean mIntercept;
+
+    // is this notification hidden since the app pkg is suspended?
+    private boolean mHidden;
 
     // The timestamp used for ranking.
     private long mRankingTimeMs;
@@ -136,12 +155,25 @@ public final class NotificationRecord {
     private String mChannelIdLogTag;
 
     private final List<Adjustment> mAdjustments;
+    private final NotificationStats mStats;
+    private int mUserSentiment;
+    private boolean mIsInterruptive;
+    private boolean mTextChanged;
+    private boolean mRecordedInterruption;
+    private int mNumberOfSmartRepliesAdded;
+    private boolean mHasSeenSmartReplies;
+    /**
+     * Whether this notification (and its channels) should be considered user locked. Used in
+     * conjunction with user sentiment calculation.
+     */
+    private boolean mIsAppImportanceLocked;
+    private ArraySet<Uri> mGrantableUris;
 
-    @VisibleForTesting
     public NotificationRecord(Context context, StatusBarNotification sbn,
-            NotificationChannel channel)
-    {
+            NotificationChannel channel) {
         this.sbn = sbn;
+        mTargetSdkVersion = LocalServices.getService(PackageManagerInternal.class)
+                .getPackageTargetSdkVersion(sbn.getPackageName());
         mOriginalFlags = sbn.getNotification().flags;
         mRankingTimeMs = calculateRankingTimeMs(0L);
         mCreationTimeMs = sbn.getPostTime();
@@ -156,20 +188,16 @@ public final class NotificationRecord {
         mImportance = calculateImportance();
         mLight = calculateLights();
         mAdjustments = new ArrayList<>();
+        mStats = new NotificationStats();
+        calculateUserSentiment();
+        calculateGrantableUris();
     }
 
     private boolean isPreChannelsNotification() {
-        try {
-            if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(getChannel().getId())) {
-                  final ApplicationInfo applicationInfo =
-                        mContext.getPackageManager().getApplicationInfoAsUser(sbn.getPackageName(),
-                                0, UserHandle.getUserId(sbn.getUid()));
-                if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.O) {
-                    return true;
-                }
+        if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(getChannel().getId())) {
+            if (mTargetSdkVersion < Build.VERSION_CODES.O) {
+                return true;
             }
-        } catch (NameNotFoundException e) {
-            Slog.e(TAG, "Can't find package", e);
         }
         return false;
     }
@@ -313,7 +341,7 @@ public final class NotificationRecord {
         if (mPreChannelsNotification
                 && (importance == IMPORTANCE_UNSPECIFIED
                 || (getChannel().getUserLockedFields()
-                & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0)) {
+                & USER_LOCKED_IMPORTANCE) == 0)) {
             if (!stats.isNoisy && requestedImportance > IMPORTANCE_LOW) {
                 requestedImportance = IMPORTANCE_LOW;
             }
@@ -341,6 +369,7 @@ public final class NotificationRecord {
         mPackagePriority = previous.mPackagePriority;
         mPackageVisibility = previous.mPackageVisibility;
         mIntercept = previous.mIntercept;
+        mHidden = previous.mHidden;
         mRankingTimeMs = calculateRankingTimeMs(previous.getRankingTimeMs());
         mCreationTimeMs = previous.mCreationTimeMs;
         mVisibleSinceMs = previous.mVisibleSinceMs;
@@ -356,9 +385,13 @@ public final class NotificationRecord {
     public String getKey() { return sbn.getKey(); }
     /** @deprecated Use {@link #getUser()} instead. */
     public int getUserId() { return sbn.getUserId(); }
+    public int getUid() { return sbn.getUid(); }
 
-    void dump(ProtoOutputStream proto, boolean redact) {
+    void dump(ProtoOutputStream proto, long fieldId, boolean redact, int state) {
+        final long token = proto.start(fieldId);
+
         proto.write(NotificationRecordProto.KEY, sbn.getKey());
+        proto.write(NotificationRecordProto.STATE, state);
         if (getChannel() != null) {
             proto.write(NotificationRecordProto.CHANNEL_ID, getChannel().getId());
         }
@@ -371,8 +404,10 @@ public final class NotificationRecord {
             proto.write(NotificationRecordProto.SOUND, getSound().toString());
         }
         if (getAudioAttributes() != null) {
-            proto.write(NotificationRecordProto.SOUND_USAGE, getAudioAttributes().getUsage());
+            getAudioAttributes().writeToProto(proto, NotificationRecordProto.AUDIO_ATTRIBUTES);
         }
+
+        proto.end(token);
     }
 
     String formatRemoteViews(RemoteViews rv) {
@@ -395,7 +430,7 @@ public final class NotificationRecord {
         pw.println(prefix + "flags=0x" + Integer.toHexString(notification.flags));
         pw.println(prefix + "pri=" + notification.priority);
         pw.println(prefix + "key=" + sbn.getKey());
-        pw.println(prefix + "seen=" + mIsSeen);
+        pw.println(prefix + "seen=" + mStats.hasSeen());
         pw.println(prefix + "groupKey=" + getGroupKey());
         pw.println(prefix + "fullscreenIntent=" + notification.fullScreenIntent);
         pw.println(prefix + "contentIntent=" + notification.contentIntent);
@@ -480,7 +515,9 @@ public final class NotificationRecord {
         pw.println(prefix + "mImportance="
                 + NotificationListenerService.Ranking.importanceToString(mImportance));
         pw.println(prefix + "mImportanceExplanation=" + mImportanceExplanation);
+        pw.println(prefix + "mIsAppImportanceLocked=" + mIsAppImportanceLocked);
         pw.println(prefix + "mIntercept=" + mIntercept);
+        pw.println(prefix + "mHidden==" + mHidden);
         pw.println(prefix + "mGlobalSortKey=" + mGlobalSortKey);
         pw.println(prefix + "mRankingTimeMs=" + mRankingTimeMs);
         pw.println(prefix + "mCreationTimeMs=" + mCreationTimeMs);
@@ -503,6 +540,7 @@ public final class NotificationRecord {
         pw.println(prefix + "mLight= " + mLight);
         pw.println(prefix + "mShowBadge=" + mShowBadge);
         pw.println(prefix + "mColorized=" + notification.isColorized());
+        pw.println(prefix + "mIsInterruptive=" + mIsInterruptive);
         pw.println(prefix + "effectiveNotificationChannel=" + getChannel());
         if (getPeopleOverride() != null) {
             pw.println(prefix + "overridePeople= " + TextUtils.join(",", getPeopleOverride()));
@@ -539,11 +577,11 @@ public final class NotificationRecord {
     public final String toString() {
         return String.format(
                 "NotificationRecord(0x%08x: pkg=%s user=%s id=%d tag=%s importance=%d key=%s" +
-                        ": %s)",
+                        "appImportanceLocked=%s: %s)",
                 System.identityHashCode(this),
                 this.sbn.getPackageName(), this.sbn.getUser(), this.sbn.getId(),
                 this.sbn.getTag(), this.mImportance, this.sbn.getKey(),
-                this.sbn.getNotification());
+                mIsAppImportanceLocked, this.sbn.getNotification());
     }
 
     public void addAdjustment(Adjustment adjustment) {
@@ -572,8 +610,22 @@ public final class NotificationRecord {
                             adjustment.getSignals().getString(Adjustment.KEY_GROUP_KEY);
                     setOverrideGroupKey(groupOverrideKey);
                 }
+                if (signals.containsKey(Adjustment.KEY_USER_SENTIMENT)) {
+                    // Only allow user sentiment update from assistant if user hasn't already
+                    // expressed a preference for this channel
+                    if (!mIsAppImportanceLocked
+                            && (getChannel().getUserLockedFields() & USER_LOCKED_IMPORTANCE) == 0) {
+                        setUserSentiment(adjustment.getSignals().getInt(
+                                Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEUTRAL));
+                    }
+                }
             }
         }
+    }
+
+    public void setIsAppImportanceLocked(boolean isAppImportanceLocked) {
+        mIsAppImportanceLocked = isAppImportanceLocked;
+        calculateUserSentiment();
     }
 
     public void setContactAffinity(float contactAffinity) {
@@ -676,6 +728,15 @@ public final class NotificationRecord {
         return mIntercept;
     }
 
+    public void setHidden(boolean hidden) {
+        mHidden = hidden;
+    }
+
+    public boolean isHidden() {
+        return mHidden;
+    }
+
+
     public void setSuppressedVisualEffects(int effects) {
         mSuppressedVisualEffects = effects;
     }
@@ -688,13 +749,8 @@ public final class NotificationRecord {
         return Objects.equals(getNotification().category, category);
     }
 
-    public boolean isAudioStream(int stream) {
-        return getNotification().audioStreamType == stream;
-    }
-
     public boolean isAudioAttributesUsage(int usage) {
-        final AudioAttributes attributes = getNotification().audioAttributes;
-        return attributes != null && attributes.getUsage() == usage;
+        return mAttributes != null && mAttributes.getUsage() == usage;
     }
 
     /**
@@ -731,15 +787,17 @@ public final class NotificationRecord {
     /**
      * Set the visibility of the notification.
      */
-    public void setVisibility(boolean visible, int rank) {
+    public void setVisibility(boolean visible, int rank, int count) {
         final long now = System.currentTimeMillis();
         mVisibleSinceMs = visible ? now : mVisibleSinceMs;
         stats.onVisibilityChanged(visible);
         MetricsLogger.action(getLogMaker(now)
                 .setCategory(MetricsEvent.NOTIFICATION_ITEM)
                 .setType(visible ? MetricsEvent.TYPE_OPEN : MetricsEvent.TYPE_CLOSE)
-                .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, rank));
+                .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, rank)
+                .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_COUNT, count));
         if (visible) {
+            setSeen();
             MetricsLogger.histogram(mContext, "note_freshness", getFreshnessMs(now));
         }
         EventLogTags.writeNotificationVisibility(getKey(), visible ? 1 : 0,
@@ -777,12 +835,15 @@ public final class NotificationRecord {
 
     /** Check if any of the listeners have marked this notification as seen by the user. */
     public boolean isSeen() {
-        return mIsSeen;
+        return mStats.hasSeen();
     }
 
     /** Mark the notification as seen by the user. */
     public void setSeen() {
-        mIsSeen = true;
+        mStats.setSeen();
+        if (mTextChanged) {
+            mIsInterruptive = true;
+        }
     }
 
     public void setAuthoritativeRank(int authoritativeRank) {
@@ -828,18 +889,22 @@ public final class NotificationRecord {
         }
     }
 
-    public boolean isImportanceFromUser() {
-        return mImportance == mUserImportance;
-    }
-
     public NotificationChannel getChannel() {
         return mChannel;
+    }
+
+    /**
+     * @see RankingHelper#getIsAppImportanceLocked(String, int)
+     */
+    public boolean getIsAppImportanceLocked() {
+        return mIsAppImportanceLocked;
     }
 
     protected void updateNotificationChannel(NotificationChannel channel) {
         if (channel != null) {
             mChannel = channel;
             calculateImportance();
+            calculateUserSentiment();
         }
     }
 
@@ -871,6 +936,26 @@ public final class NotificationRecord {
         return mPeopleOverride;
     }
 
+    public void setInterruptive(boolean interruptive) {
+        mIsInterruptive = interruptive;
+    }
+
+    public void setTextChanged(boolean textChanged) {
+        mTextChanged = textChanged;
+    }
+
+    public void setRecordedInterruption(boolean recorded) {
+        mRecordedInterruption = recorded;
+    }
+
+    public boolean hasRecordedInterruption() {
+        return mRecordedInterruption;
+    }
+
+    public boolean isInterruptive() {
+        return mIsInterruptive;
+    }
+
     protected void setPeopleOverride(ArrayList<String> people) {
         mPeopleOverride = people;
     }
@@ -881,6 +966,129 @@ public final class NotificationRecord {
 
     protected void setSnoozeCriteria(ArrayList<SnoozeCriterion> snoozeCriteria) {
         mSnoozeCriteria = snoozeCriteria;
+    }
+
+    private void calculateUserSentiment() {
+        if ((getChannel().getUserLockedFields() & USER_LOCKED_IMPORTANCE) != 0
+                || mIsAppImportanceLocked) {
+            mUserSentiment = USER_SENTIMENT_POSITIVE;
+        }
+    }
+
+    private void setUserSentiment(int userSentiment) {
+        mUserSentiment = userSentiment;
+    }
+
+    public int getUserSentiment() {
+        return mUserSentiment;
+    }
+
+    public NotificationStats getStats() {
+        return mStats;
+    }
+
+    public void recordExpanded() {
+        mStats.setExpanded();
+    }
+
+    public void recordDirectReplied() {
+        mStats.setDirectReplied();
+    }
+
+    public void recordDismissalSurface(@NotificationStats.DismissalSurface int surface) {
+        mStats.setDismissalSurface(surface);
+    }
+
+    public void recordSnoozed() {
+        mStats.setSnoozed();
+    }
+
+    public void recordViewedSettings() {
+        mStats.setViewedSettings();
+    }
+
+    public void setNumSmartRepliesAdded(int noReplies) {
+        mNumberOfSmartRepliesAdded = noReplies;
+    }
+
+    public int getNumSmartRepliesAdded() {
+        return mNumberOfSmartRepliesAdded;
+    }
+
+    public boolean hasSeenSmartReplies() {
+        return mHasSeenSmartReplies;
+    }
+
+    public void setSeenSmartReplies(boolean hasSeenSmartReplies) {
+        mHasSeenSmartReplies = hasSeenSmartReplies;
+    }
+
+    /**
+     * @return all {@link Uri} that should have permission granted to whoever
+     *         will be rendering it. This list has already been vetted to only
+     *         include {@link Uri} that the enqueuing app can grant.
+     */
+    public @Nullable ArraySet<Uri> getGrantableUris() {
+        return mGrantableUris;
+    }
+
+    /**
+     * Collect all {@link Uri} that should have permission granted to whoever
+     * will be rendering it.
+     */
+    private void calculateGrantableUris() {
+        final Notification notification = getNotification();
+        notification.visitUris((uri) -> {
+            visitGrantableUri(uri);
+        });
+
+        if (notification.getChannelId() != null) {
+            NotificationChannel channel = getChannel();
+            if (channel != null) {
+                visitGrantableUri(channel.getSound());
+            }
+        }
+    }
+
+    /**
+     * Note the presence of a {@link Uri} that should have permission granted to
+     * whoever will be rendering it.
+     * <p>
+     * If the enqueuing app has the ability to grant access, it will be added to
+     * {@link #mGrantableUris}. Otherwise, this will either log or throw
+     * {@link SecurityException} depending on target SDK of enqueuing app.
+     */
+    private void visitGrantableUri(Uri uri) {
+        if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
+
+        // We can't grant Uri permissions from system
+        final int sourceUid = sbn.getUid();
+        if (sourceUid == android.os.Process.SYSTEM_UID) return;
+
+        final IActivityManager am = ActivityManager.getService();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            // This will throw SecurityException if caller can't grant
+            am.checkGrantUriPermission(sourceUid, null,
+                    ContentProvider.getUriWithoutUserId(uri),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                    ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)));
+
+            if (mGrantableUris == null) {
+                mGrantableUris = new ArraySet<>();
+            }
+            mGrantableUris.add(uri);
+        } catch (RemoteException ignored) {
+            // Ignored because we're in same process
+        } catch (SecurityException e) {
+            if (mTargetSdkVersion >= Build.VERSION_CODES.P) {
+                throw e;
+            } else {
+                Log.w(TAG, "Ignoring " + uri + " from " + sourceUid + ": " + e.getMessage());
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     public LogMaker getLogMaker(long now) {

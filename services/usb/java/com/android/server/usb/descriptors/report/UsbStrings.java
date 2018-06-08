@@ -32,8 +32,8 @@ public final class UsbStrings {
     private static HashMap<Byte, String> sDescriptorNames;
     private static HashMap<Byte, String> sACControlInterfaceNames;
     private static HashMap<Byte, String> sACStreamingInterfaceNames;
-    private static HashMap<Byte, String> sClassNames;
-    private static HashMap<Byte, String> sAudioSubclassNames;
+    private static HashMap<Integer, String> sClassNames;
+    private static HashMap<Integer, String> sAudioSubclassNames;
     private static HashMap<Integer, String> sAudioEncodingNames;
     private static HashMap<Integer, String> sTerminalNames;
     private static HashMap<Integer, String> sFormatNames;
@@ -92,7 +92,7 @@ public final class UsbStrings {
     }
 
     private static void initClassNames() {
-        sClassNames = new HashMap<Byte, String>();
+        sClassNames = new HashMap<Integer, String>();
         sClassNames.put(UsbDescriptor.CLASSID_DEVICE, "Device");
         sClassNames.put(UsbDescriptor.CLASSID_AUDIO, "Audio");
         sClassNames.put(UsbDescriptor.CLASSID_COM, "Communications");
@@ -118,7 +118,7 @@ public final class UsbStrings {
     }
 
     private static void initAudioSubclassNames() {
-        sAudioSubclassNames = new HashMap<Byte, String>();
+        sAudioSubclassNames = new HashMap<Integer, String>();
         sAudioSubclassNames.put(UsbDescriptor.AUDIO_SUBCLASS_UNDEFINED, "Undefinded");
         sAudioSubclassNames.put(UsbDescriptor.AUDIO_AUDIOCONTROL, "Audio Control");
         sAudioSubclassNames.put(UsbDescriptor.AUDIO_AUDIOSTREAMING, "Audio Streaming");
@@ -300,7 +300,7 @@ public final class UsbStrings {
     /**
      * Retrieves the name for the specified USB class ID.
      */
-    public static String getClassName(byte classID) {
+    public static String getClassName(int classID) {
         String name = sClassNames.get(classID);
         int iClassID = classID & 0xFF;
         return name != null
@@ -312,7 +312,7 @@ public final class UsbStrings {
     /**
      * Retrieves the name for the specified USB audio subclass ID.
      */
-    public static String getAudioSubclassName(byte subClassID) {
+    public static String getAudioSubclassName(int subClassID) {
         String name = sAudioSubclassNames.get(subClassID);
         int iSubclassID = subClassID & 0xFF;
         return name != null
@@ -335,7 +335,7 @@ public final class UsbStrings {
     /**
      * Retrieves the name for the specified USB audio interface subclass ID.
      */
-    public static String getACInterfaceSubclassName(byte subClassID) {
+    public static String getACInterfaceSubclassName(int subClassID) {
         return subClassID == UsbDescriptor.AUDIO_AUDIOCONTROL ? "AC Control" : "AC Streaming";
     }
 }

@@ -16,6 +16,7 @@
 package android.service.autofill;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.os.Parcelable;
 
 /**
@@ -24,6 +25,7 @@ import android.os.Parcelable;
  *
  * @hide
  */
+@TestApi
 public abstract class InternalValidator implements Validator, Parcelable {
 
     /**
@@ -34,5 +36,6 @@ public abstract class InternalValidator implements Validator, Parcelable {
      *
      * @hide
      */
+    @TestApi
     public abstract boolean isValid(@NonNull ValueFinder finder);
 }

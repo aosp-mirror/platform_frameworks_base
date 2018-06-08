@@ -1,0 +1,505 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+option java_multiple_files = true;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+package android.os;
+
+// Android Platform Exported System Properties
+// TODO: This is not the completed list, new properties need to be whitelisted.
+message SystemPropertiesProto {
+
+    // Properties that are not specified below would be appended here.
+    // These values stay on device only.
+    message Property {
+        option (android.msg_privacy).dest = DEST_LOCAL;
+
+        optional string name = 1;
+        optional string value = 2;
+    }
+    repeated Property extra_properties = 1;
+
+    message AacDrc {
+        optional int32  boost = 1;
+        optional int32  cut = 2;
+        optional int32  enc_target_level = 3;
+        optional int32  heavy = 4;
+        optional int32  reference_level = 5;
+    }
+    optional AacDrc aac_drc = 2;
+
+    message Aaudio {
+        optional int32  hw_burst_min_usec = 1;
+        optional int32  minimum_sleep_usec = 2;
+        optional int32  mixer_bursts = 3;
+        optional int32  mmap_exclusive_policy = 4;
+        optional int32  mmap_policy = 5;
+        optional int32  wakeup_delay_usec = 6;
+
+        // Next Tag: 7
+    }
+    optional Aaudio aaudio = 3;
+
+    optional int32  af_fast_track_multiplier = 4;
+
+    message Camera {
+        optional bool   disable_zsl_mode = 1;
+        optional int32  fifo_disable = 2;
+
+        // Next Tag: 3
+    }
+    optional Camera camera = 5;
+
+    message DalvikVm {
+        optional string appimageformat = 1;
+        optional string backgroundgctype = 2;
+        optional bool   checkjni = 3;
+        optional string dex2oat_filter = 4;
+        optional string dex2oat_flags = 5;
+        optional int32  dex2oat_threads = 6;
+        optional string dex2oat_Xms = 7;
+        optional string dex2oat_Xmx = 8;
+        optional bool   dexopt_secondary = 9;
+        optional string execution_mode = 10;
+        optional string extra_opts = 11;
+        optional string gctype = 12;
+        optional string heapgrowthlimit = 13;
+        optional string heapmaxfree = 14;
+        optional string heapminfree = 15;
+        optional string heapsize = 16;
+        optional string heapstartsize = 17;
+        optional double heaptargetutilization = 18;
+        optional int32  hot_startup_method_samples = 19;
+        optional string image_dex2oat_filter = 20;
+        optional string image_dex2oat_flags = 21;
+        optional int32  image_dex2oat_threads = 22;
+        optional string image_dex2oat_Xms = 23;
+        optional string image_dex2oat_Xmx = 24;
+        optional string isa_arm_features = 25;
+        optional string isa_arm_variant = 26;
+        optional string isa_arm64_features = 27;
+        optional string isa_arm64_variant = 28;
+        optional string isa_mips_features = 29;
+        optional string isa_mips_variant = 30;
+        optional string isa_mips64_features = 31;
+        optional string isa_mips64_variant = 32;
+        optional string isa_unknown_features = 33;
+        optional string isa_unknown_variant = 34;
+        optional string isa_x86_64_features = 35;
+        optional string isa_x86_64_variant = 36;
+        optional string isa_x86_features = 37;
+        optional string isa_x86_variant = 38;
+        optional string jitinitialsize = 39;
+        optional string jitmaxsize = 40;
+        optional int32  jitprithreadweight = 41;
+        optional int32  jitthreshold = 42;
+        optional int32  jittransitionweight = 43;
+        optional string jniopts = 44;
+        optional int32  lockprof_threshold = 45;
+        optional bool   method_trace = 46;
+        optional string method_trace_file = 47;
+        optional int32  method_trace_file_siz = 48;
+        optional bool   method_trace_stream = 49;
+        optional bool   profilesystemserver = 50;
+        optional string stack_trace_dir = 51;
+        optional bool   usejit = 52;
+        optional bool   usejitprofiles = 53;
+        optional int32  zygote_max_boot_retry = 54;
+
+        // Next Tag: 55
+    }
+    optional DalvikVm dalvik_vm = 6;
+
+    optional bool   drm_64bit_enabled = 7;
+    optional bool   drm_service_enabled = 8;
+    optional bool   dumpstate_dry_run = 9;
+    optional string gsm_sim_operator_numeric = 10;
+    optional bool   hal_instrumentation_enable = 11;
+
+    message InitSvc {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        enum Status {
+            STATUS_UNKNOWN = 0;
+            STATUS_RUNNING = 1;
+            STATUS_STOPPED = 2;
+        }
+        optional Status adbd = 1;
+        optional Status audioserver = 2;
+        optional Status bootanim = 3;
+        optional Status bufferhubd = 4;
+        optional Status cameraserver = 5;
+        optional Status clear_bcb = 6;
+        optional Status drm = 7;
+        optional Status gatekeeperd = 8;
+        optional Status healthd = 9;
+        optional Status hidl_memory = 10;
+        optional Status hostapd = 11;
+        optional Status hwservicemanager = 12;
+        optional Status installd = 13;
+        optional Status keystore = 14;
+        optional Status lmkd = 15;
+        optional Status logd = 16;
+        optional Status logd_reinit = 17;
+        optional Status media = 18;
+        optional Status mediadrm = 19;
+        optional Status mediaextractor = 20;
+        optional Status mediametrics = 21;
+        optional Status netd = 22;
+        optional Status performanced = 23;
+        optional Status ril_daemon = 24;
+        optional Status servicemanager = 25;
+        optional Status storaged = 26;
+        optional Status surfaceflinger = 27;
+        optional Status thermalservice = 28;
+        optional Status tombstoned = 29;
+        optional Status ueventd = 30;
+        optional Status update_engine = 31;
+        optional Status update_verifier_nonencrypted = 32;
+        optional Status virtual_touchpad = 33;
+        optional Status vndservicemanager = 34;
+        optional Status vold = 35;
+        optional Status vr_hwc = 36;
+        optional Status webview_zygote32 = 37;
+        optional Status wificond = 38;
+        optional Status wpa_supplicant = 39;
+        optional Status zygote = 40;
+        optional Status zygote_secondary = 41;
+
+        // Next Tag: 42
+    }
+    optional InitSvc init_svc = 12;
+
+    optional bool   keyguard_no_require_sim = 13;
+    optional string libc_debug_malloc_options = 14;
+    optional string libc_debug_malloc_program = 15;
+
+    message Log {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string tag_WifiHAL = 1;
+        optional string tag_stats_log = 2;
+
+        // Next Tag: 3
+    }
+    optional Log log = 16;
+
+    optional bool   media_mediadrmservice_enable = 17;
+    optional bool   media_recorder_show_manufacturer_and_model = 18;
+
+    message Persist {
+        optional string config_calibration_fac = 1;
+        optional int32  dbg_volte_avail_ovr = 2;
+        optional int32  dbg_vt_avail_ovr = 3;
+        optional int32  dbg_wfc_avail_ovr = 4;
+        optional int32  radio_airplane_mode_on = 5;
+        optional string radio_multisim_config = 6;
+        optional int32  rcs_supported = 7;
+        optional bool   sys_crash_rcu = 8;
+        optional string sys_dalvik_vm_lib_2 = 9;
+        optional float  sys_sf_color_saturation = 10;
+        optional string sys_timezone = 11;
+
+        // Next Tag: 12
+    }
+    optional Persist persist = 19;
+
+    message PmDexopt {
+        optional string ab_ota = 1;
+        optional string bg_dexopt = 2;
+        optional string boot = 3;
+        optional string first_boot = 4;
+        optional string install = 5;
+
+        // Next Tag: 6
+    }
+    optional PmDexopt pm_dexopt = 20;
+
+    // Read only properites on the device.
+    message Ro {
+        optional bool  adb_secure = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional string arch = 2;
+        optional bool   audio_ignore_effects = 3;
+        optional bool   audio_monitorRotation = 4;
+        optional string baseband = 5;
+        optional string board_platform = 6;
+
+        message Boot {
+            optional string avb_version = 1;
+            optional string baseband = 2;
+            optional string bootdevice = 3;
+            optional string bootloader = 4;
+            repeated string boottime = 5;
+            optional string console = 6;
+            optional int32  fake_battery = 7;
+            optional string hardware = 8;
+            optional string hardware_color = 9;
+            optional string hardware_revision = 10;
+            optional string hardware_sku = 11;
+            optional string keymaster = 12;
+            optional string mode = 13;
+            optional string revision = 14;
+            optional string slot_suffix = 15;
+            optional string vbmeta_avb_version = 16;
+            optional string vendor_overlay_theme = 17;
+            optional string verifiedbootstate = 18;
+            optional string veritymode = 19;
+            optional string wificountrycode = 20;
+
+            // Next Tag: 21
+        }
+        optional Boot boot = 7;
+
+        // boot.img's properties.
+        message BootImage {
+            option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            // When the boot.img is built.
+            optional string build_date = 1;
+            // UTC timestamp of build date.
+            optional int64 build_date_utc = 2;
+            // Android Build fingerprint of the build, e.g.
+            // google/marlin/marlin:P/MASTER/android-build/dev-keys
+            optional string build_fingerprint = 3;
+
+            // Next Tag: 4
+        }
+        optional BootImage bootimage = 8;
+
+        // Version of bootloader on device.
+        optional string bootloader = 9  [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Kernel bootmode, e.g. charger.
+        optional string bootmode = 10  [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        // Android Platform build metadata.
+        message Build {
+            option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional string date = 1;
+            optional int64  date_utc = 2;
+            optional string description = 3;
+            optional string display_id = 4;
+            optional string host = 5;
+            optional string id = 6;
+            optional string product = 7;
+            optional bool   system_root_image = 8;
+            optional string tags = 9;
+            optional string type = 10;
+            optional string user = 11;
+
+            message Version {
+                option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+                optional string base_os = 1;
+                optional string codename = 2;
+                optional string incremental = 3;
+                optional int32  preview_sdk = 4;
+                optional string release = 5;
+                optional int32  sdk = 6;
+                optional string security_patch = 7;
+
+                // Next Tag: 8
+            }
+            optional Version version = 12;
+
+            // Next Tag: 13
+        }
+        optional Build build = 11;
+
+        optional bool   camera_notify_nfc = 12  [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional string carrier = 13;
+        optional bool   com_android_dataroaming = 14  [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional bool   com_android_prov_mobiledata = 15  [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional string com_google_clientidbase = 16;
+
+        message Config {
+            optional string alarm_alert = 1;
+            optional int32  media_vol_steps = 2;
+            optional string notification_sound = 3;
+            optional string ringtone = 4;
+            optional int32  vc_call_vol_steps = 5;
+
+            // Next Tag: 6
+        }
+        optional Config config = 17;
+
+        optional string control_privapp_permissions = 18;
+        optional int32  cp_system_other_odex = 19;
+        optional string crypto_scrypt_params = 20;
+        optional string crypto_state = 21;
+        optional string crypto_type = 22;
+        optional string dalvik_vm_native_bridge = 23;
+        optional bool   debuggable = 24;
+        optional string frp_pst = 25;
+        optional string gfx_driver_0 = 26;
+
+        message Hardware {
+            option (android.msg_privacy).dest = DEST_LOCAL;
+
+            optional string value = 1; // value of ro.hardware itself
+
+            optional string activity_recognition = 2;
+            optional string audio = 3;
+            optional string audio_policy = 4;
+            optional string audio_a2dp = 5;
+            optional string audio_primary = 6;
+            optional string audio_usb = 7;
+            optional string bootctrl = 8;
+            optional string camera = 9;
+            optional string consumerir = 10;
+            optional string context_hub = 11;
+            optional string egl = 12;
+            optional string fingerprint = 13;
+            optional string flp = 14;
+            optional string gatekeeper = 15;
+            optional string gps = 16;
+            optional string gralloc = 17;
+            optional string hdmi_cec = 18;
+            optional string hwcomposer = 19;
+            optional string input = 20;
+            optional string keystore = 21;
+            optional string lights = 22;
+            optional string local_time = 23;
+            optional string memtrack = 24;
+            optional string nfc = 25;
+            optional string nfc_nci = 26;
+            optional string nfc_tag = 27;
+            optional string nvram = 28;
+            optional string power = 29;
+            optional string radio = 30;
+            optional string sensors = 31;
+            optional string sound_trigger = 32;
+            optional string thermal = 33;
+            optional string tv_input = 34;
+            optional string type = 35;
+            optional string vehicle = 36;
+            optional string vibrator = 37;
+            optional string virtual_device = 38;
+            optional string vulkan = 39;
+
+            // Next Tag: 40
+        }
+        optional Hardware hardware = 27;
+
+        optional int32  kernel_qemu = 28;
+        optional int32  kernel_qemu_gles = 29;
+        optional int32  oem_unlock_supported = 30;
+        optional int32  opengles_version = 31;
+
+        message Product {
+            option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional string board = 1;
+            optional string brand = 2;
+            optional string cpu_abi = 3;
+            repeated string cpu_abilist = 4;
+            repeated string cpu_abilist32 = 5;
+            repeated string cpu_abilist64 = 6;
+            optional string device = 7;
+            optional int32  first_api_level = 8;
+            optional string manufacturer = 9;
+            optional string model = 10;
+            optional string name = 11;
+
+            message Vendor {
+                option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+                optional string brand = 1;
+                optional string device = 2;
+                optional string manufacturer = 3;
+                optional string model = 4;
+                optional string name = 5;
+            }
+            optional Vendor vendor = 12;
+
+            // Next Tag: 13
+        }
+        optional Product product = 32;
+
+        optional int32  property_service_version = 33;
+        optional string retaildemo_video_path = 34;
+        optional string revision = 35;
+        optional int32  sf_lcd_density = 36;
+        optional bool   storage_manager_enabled = 37;
+
+        message Telephony {
+            optional bool  call_ring_multiple = 1;
+            optional int32 default_cdma_sub = 2;
+            optional int32 default_network = 3;
+        }
+        optional Telephony telephony = 38;
+
+        optional string url_legal = 39;
+        optional string url_legal_android_privacy = 40;
+
+        message Vendor {
+            optional string build_date = 1;
+            optional int64  build_date_utc = 2;
+            optional string build_fingerprint = 3;
+        }
+        optional Vendor vendor = 41;
+
+        optional string vndk_version = 42;
+        optional int32  vts_coverage = 43;
+        optional string zygote = 44;
+
+        // Next Tag: 45
+    }
+    optional Ro ro = 21;
+
+    optional string sendbug_preferred_domain = 22;
+    optional int32  service_bootanim_exit = 23;
+
+    message Sys {
+        optional int32  boot_completed = 1;
+        optional int32  boot_from_charger_mode = 2;
+        optional int32  retaildemo_enabled = 3;
+        optional string shutdown_requested = 4;
+
+        message Usb {
+            optional string config = 1;
+            optional int32  configfs = 2;
+            optional string controller = 3;
+            optional int32  ffs_max_read = 4;
+            optional int32  ffs_max_write = 5;
+            optional int32  ffs_mtp_ready = 6;
+            optional int32  ffs_ready = 7;
+            optional int32  mtp_device_type = 8;
+            optional string state = 9;
+
+            // Next Tag: 10
+        }
+        optional Usb usb = 5;
+
+        // Next Tag: 6
+    }
+    optional Sys sys = 24;
+
+    optional int32  telephony_lteOnCdmaDevice = 25;
+    optional int32  tombstoned_max_tombstone_count = 26;
+    optional string vold_decrypt = 27;
+    optional int32  vold_post_fs_data_done = 28;
+    optional int32  vts_native_server_on = 29;
+    optional string wifi_direct_interface = 30;
+    optional string wifi_interface = 31;
+
+    // Next Tag: 32
+}
+

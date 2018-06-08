@@ -24,11 +24,12 @@
 namespace android {
 namespace uirenderer {
 
-template<typename T>
-class Future: public LightRefBase<Future<T> > {
+template <typename T>
+class Future : public LightRefBase<Future<T> > {
 public:
-    explicit Future(Condition::WakeUpType type = Condition::WAKE_UP_ONE): mBarrier(type), mResult() { }
-    ~Future() { }
+    explicit Future(Condition::WakeUpType type = Condition::WAKE_UP_ONE)
+            : mBarrier(type), mResult() {}
+    ~Future() {}
 
     /**
      * Returns the result of this future, blocking if
@@ -52,7 +53,7 @@ private:
     T mResult;
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_FUTURE_H
+#endif  // ANDROID_HWUI_FUTURE_H

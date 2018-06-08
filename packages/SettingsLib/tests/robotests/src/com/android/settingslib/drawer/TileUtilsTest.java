@@ -17,7 +17,6 @@
 package com.android.settingslib.drawer;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -29,6 +28,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
+import static org.robolectric.shadow.api.Shadow.extract;
 
 import android.app.ActivityManager;
 import android.content.ContentResolver;
@@ -53,7 +53,6 @@ import android.util.Pair;
 import android.widget.RemoteViews;
 
 import com.android.settingslib.R;
-import com.android.settingslib.TestConfig;
 import com.android.settingslib.suggestions.SuggestionParser;
 
 import org.junit.Before;
@@ -66,7 +65,6 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
-import org.robolectric.internal.ShadowExtractor;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -74,12 +72,9 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = TestConfig.MANIFEST_PATH,
-        sdk = TestConfig.SDK_VERSION,
-        shadows = {TileUtilsTest.TileUtilsShadowRemoteViews.class})
+@Config(shadows = TileUtilsTest.TileUtilsShadowRemoteViews.class)
 public class TileUtilsTest {
 
-    @Mock
     private Context mContext;
     @Mock
     private PackageManager mPackageManager;
@@ -97,6 +92,7 @@ public class TileUtilsTest {
 
     @Before
     public void setUp() throws NameNotFoundException {
+        mContext = spy(application);
         MockitoAnnotations.initMocks(this);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.getResourcesForApplication(anyString())).thenReturn(mResources);
@@ -216,7 +212,7 @@ public class TileUtilsTest {
         List<DashboardCategory> categoryList = TileUtils.getCategories(
                 mContext, cache, false /* categoryDefinedInManifest */, testAction,
                 TileUtils.SETTING_PKG);
-        assertThat(categoryList.get(0).tiles.get(0).category).isEqualTo(testCategory);
+        assertThat(categoryList.get(0).getTile(0).category).isEqualTo(testCategory);
     }
 
     @Test
@@ -456,8 +452,7 @@ public class TileUtilsTest {
         assertThat(tile.remoteViews).isNotNull();
         assertThat(tile.remoteViews.getLayoutId()).isEqualTo(R.layout.user_preference);
         // Make sure the summary TextView got a new text string.
-        TileUtilsShadowRemoteViews shadowRemoteViews =
-                (TileUtilsShadowRemoteViews) ShadowExtractor.extract(tile.remoteViews);
+        TileUtilsShadowRemoteViews shadowRemoteViews = extract(tile.remoteViews);
         assertThat(shadowRemoteViews.overrideViewId).isEqualTo(android.R.id.summary);
         assertThat(shadowRemoteViews.overrideText).isEqualTo("new summary text");
     }
@@ -494,8 +489,7 @@ public class TileUtilsTest {
         assertThat(tile.remoteViews).isNotNull();
         assertThat(tile.remoteViews.getLayoutId()).isEqualTo(R.layout.user_preference);
         // Make sure the summary TextView didn't get any text view updates.
-        TileUtilsShadowRemoteViews shadowRemoteViews =
-                (TileUtilsShadowRemoteViews) ShadowExtractor.extract(tile.remoteViews);
+        TileUtilsShadowRemoteViews shadowRemoteViews = extract(tile.remoteViews);
         assertThat(shadowRemoteViews.overrideViewId).isNull();
         assertThat(shadowRemoteViews.overrideText).isNull();
     }
@@ -535,13 +529,9 @@ public class TileUtilsTest {
             info.activityInfo.metaData.putString("com.android.settings.summary_uri", summaryUri);
         }
         if (titleResId != 0) {
-            info.activityInfo.metaData.putString(TileUtils.META_DATA_PREFERENCE_TITLE, title);
+            info.activityInfo.metaData.putInt(TileUtils.META_DATA_PREFERENCE_TITLE, titleResId);
         } else if (title != null) {
             info.activityInfo.metaData.putString(TileUtils.META_DATA_PREFERENCE_TITLE, title);
-        }
-        if (titleResId != 0) {
-            info.activityInfo.metaData.putInt(
-                    TileUtils.META_DATA_PREFERENCE_TITLE_RES_ID, titleResId);
         }
         info.activityInfo.applicationInfo = new ApplicationInfo();
         if (systemApp) {

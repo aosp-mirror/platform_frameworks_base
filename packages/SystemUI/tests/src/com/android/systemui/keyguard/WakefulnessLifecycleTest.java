@@ -18,6 +18,7 @@ package com.android.systemui.keyguard;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -96,6 +97,23 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
                 mWakefulness.getWakefulness());
 
         verify(mWakefulnessObserver).onFinishedGoingToSleep();
+    }
+
+    @Test
+    public void doesNotDispatchTwice() throws Exception {
+        mWakefulness.dispatchStartedWakingUp();
+        mWakefulness.dispatchStartedWakingUp();
+        mWakefulness.dispatchFinishedWakingUp();
+        mWakefulness.dispatchFinishedWakingUp();
+        mWakefulness.dispatchStartedGoingToSleep();
+        mWakefulness.dispatchStartedGoingToSleep();
+        mWakefulness.dispatchFinishedGoingToSleep();
+        mWakefulness.dispatchFinishedGoingToSleep();
+
+        verify(mWakefulnessObserver, times(1)).onStartedGoingToSleep();
+        verify(mWakefulnessObserver, times(1)).onFinishedGoingToSleep();
+        verify(mWakefulnessObserver, times(1)).onStartedWakingUp();
+        verify(mWakefulnessObserver, times(1)).onFinishedWakingUp();
     }
 
     @Test

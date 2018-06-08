@@ -25,6 +25,7 @@ import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.CaptureResultExtras;
+import android.hardware.camera2.impl.PhysicalCaptureResultInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -230,8 +231,8 @@ public class CameraBinderTest extends AndroidTestCase {
          * android.hardware.camera2.CaptureResultExtras)
          */
         @Override
-        public void onResultReceived(CameraMetadataNative result, CaptureResultExtras resultExtras)
-                throws RemoteException {
+        public void onResultReceived(CameraMetadataNative result, CaptureResultExtras resultExtras,
+                PhysicalCaptureResultInfo physicalResults[]) throws RemoteException {
             // TODO Auto-generated method stub
 
         }

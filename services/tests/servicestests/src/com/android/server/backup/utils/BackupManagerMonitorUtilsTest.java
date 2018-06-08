@@ -20,6 +20,7 @@ import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_CATEGORY;
 import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_ID;
 import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME;
 import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_VERSION;
+import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -102,11 +103,40 @@ public class BackupManagerMonitorUtilsTest {
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mMonitorMock).onEvent(bundleCaptor.capture());
         Bundle eventBundle = bundleCaptor.getValue();
-        assertThat(eventBundle.size()).isEqualTo(6);
+        assertThat(eventBundle.size()).isEqualTo(7);
         assertThat(eventBundle.getInt(EXTRA_LOG_EVENT_ID)).isEqualTo(1);
         assertThat(eventBundle.getInt(EXTRA_LOG_EVENT_CATEGORY)).isEqualTo(2);
         assertThat(eventBundle.getString(EXTRA_LOG_EVENT_PACKAGE_NAME)).isEqualTo("test.package");
         assertThat(eventBundle.getInt(EXTRA_LOG_EVENT_PACKAGE_VERSION)).isEqualTo(3);
+        assertThat(eventBundle.getLong(EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION)).isEqualTo(3);
+        assertThat(eventBundle.getInt("key1")).isEqualTo(4);
+        assertThat(eventBundle.getString("key2")).isEqualTo("value2");
+    }
+
+    @Test
+    public void monitorEvent_packageAndExtrasAreNotNull_fillsBundleCorrectlyLong() throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test.package";
+        packageInfo.versionCode = 3;
+        packageInfo.versionCodeMajor = 10;
+        Bundle extras = new Bundle();
+        extras.putInt("key1", 4);
+        extras.putString("key2", "value2");
+
+        IBackupManagerMonitor result = BackupManagerMonitorUtils.monitorEvent(mMonitorMock, 1,
+                packageInfo, 2, extras);
+
+        assertThat(result).isEqualTo(mMonitorMock);
+        ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
+        verify(mMonitorMock).onEvent(bundleCaptor.capture());
+        Bundle eventBundle = bundleCaptor.getValue();
+        assertThat(eventBundle.size()).isEqualTo(7);
+        assertThat(eventBundle.getInt(EXTRA_LOG_EVENT_ID)).isEqualTo(1);
+        assertThat(eventBundle.getInt(EXTRA_LOG_EVENT_CATEGORY)).isEqualTo(2);
+        assertThat(eventBundle.getString(EXTRA_LOG_EVENT_PACKAGE_NAME)).isEqualTo("test.package");
+        assertThat(eventBundle.getInt(EXTRA_LOG_EVENT_PACKAGE_VERSION)).isEqualTo(3);
+        assertThat(eventBundle.getLong(EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION)).isEqualTo(
+                (10L << 32) | 3);
         assertThat(eventBundle.getInt("key1")).isEqualTo(4);
         assertThat(eventBundle.getString("key2")).isEqualTo("value2");
     }

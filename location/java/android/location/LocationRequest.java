@@ -143,7 +143,7 @@ public final class LocationRequest implements Parcelable {
 
     private int mQuality = POWER_LOW;
     private long mInterval = 60 * 60 * 1000;   // 60 minutes
-    private long mFastestInterval = (long)(mInterval / FASTEST_INTERVAL_FACTOR);  // 10 minutes
+    private long mFastestInterval = (long) (mInterval / FASTEST_INTERVAL_FACTOR);  // 10 minutes
     private boolean mExplicitFastestInterval = false;
     private long mExpireAt = Long.MAX_VALUE;  // no expiry
     private int mNumUpdates = Integer.MAX_VALUE;  // no expiry
@@ -151,7 +151,11 @@ public final class LocationRequest implements Parcelable {
     private WorkSource mWorkSource = null;
     private boolean mHideFromAppOps = false; // True if this request shouldn't be counted by AppOps
 
-    private String mProvider = LocationManager.FUSED_PROVIDER;  // for deprecated APIs that explicitly request a provider
+    private String mProvider = LocationManager.FUSED_PROVIDER;
+            // for deprecated APIs that explicitly request a provider
+
+    /** If true, GNSS chipset will make strong tradeoffs to substantially restrict power use */
+    private boolean mLowPowerMode = false;
 
     /**
      * Create a location request with default parameters.
@@ -184,11 +188,11 @@ public final class LocationRequest implements Parcelable {
         }
 
         LocationRequest request = new LocationRequest()
-            .setProvider(provider)
-            .setQuality(quality)
-            .setInterval(minTime)
-            .setFastestInterval(minTime)
-            .setSmallestDisplacement(minDistance);
+                .setProvider(provider)
+                .setQuality(quality)
+                .setInterval(minTime)
+                .setFastestInterval(minTime)
+                .setSmallestDisplacement(minDistance);
         if (singleShot) request.setNumUpdates(1);
         return request;
     }
@@ -220,16 +224,17 @@ public final class LocationRequest implements Parcelable {
         }
 
         LocationRequest request = new LocationRequest()
-            .setQuality(quality)
-            .setInterval(minTime)
-            .setFastestInterval(minTime)
-            .setSmallestDisplacement(minDistance);
+                .setQuality(quality)
+                .setInterval(minTime)
+                .setFastestInterval(minTime)
+                .setSmallestDisplacement(minDistance);
         if (singleShot) request.setNumUpdates(1);
         return request;
     }
 
     /** @hide */
-    public LocationRequest() { }
+    public LocationRequest() {
+    }
 
     /** @hide */
     public LocationRequest(LocationRequest src) {
@@ -243,6 +248,7 @@ public final class LocationRequest implements Parcelable {
         mProvider = src.mProvider;
         mWorkSource = src.mWorkSource;
         mHideFromAppOps = src.mHideFromAppOps;
+        mLowPowerMode = src.mLowPowerMode;
     }
 
     /**
@@ -263,8 +269,8 @@ public final class LocationRequest implements Parcelable {
      * on a location request.
      *
      * @param quality an accuracy or power constant
-     * @throws InvalidArgumentException if the quality constant is not valid
      * @return the same object, so that setters can be chained
+     * @throws InvalidArgumentException if the quality constant is not valid
      */
     public LocationRequest setQuality(int quality) {
         checkQuality(quality);
@@ -306,14 +312,14 @@ public final class LocationRequest implements Parcelable {
      * on a location request.
      *
      * @param millis desired interval in millisecond, inexact
-     * @throws InvalidArgumentException if the interval is less than zero
      * @return the same object, so that setters can be chained
+     * @throws InvalidArgumentException if the interval is less than zero
      */
     public LocationRequest setInterval(long millis) {
         checkInterval(millis);
         mInterval = millis;
         if (!mExplicitFastestInterval) {
-            mFastestInterval = (long)(mInterval / FASTEST_INTERVAL_FACTOR);
+            mFastestInterval = (long) (mInterval / FASTEST_INTERVAL_FACTOR);
         }
         return this;
     }
@@ -325,6 +331,35 @@ public final class LocationRequest implements Parcelable {
      */
     public long getInterval() {
         return mInterval;
+    }
+
+
+    /**
+     * Requests the GNSS chipset to run in a low power mode and make strong tradeoffs to
+     * substantially restrict power.
+     *
+     * <p>In this mode, the GNSS chipset will not, on average, run power hungry operations like RF &
+     * signal searches for more than one second per interval (specified by
+     * {@link #setInterval(long)}).
+     *
+     * @param enabled Enable or disable low power mode
+     * @return the same object, so that setters can be chained
+     * @hide
+     */
+    @SystemApi
+    public LocationRequest setLowPowerMode(boolean enabled) {
+        mLowPowerMode = enabled;
+        return this;
+    }
+
+    /**
+     * Returns true if low power mode is enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean isLowPowerMode() {
+        return mLowPowerMode;
     }
 
     /**
@@ -353,8 +388,8 @@ public final class LocationRequest implements Parcelable {
      * then your effective fastest interval is {@link #setInterval}.
      *
      * @param millis fastest interval for updates in milliseconds, exact
-     * @throws InvalidArgumentException if the interval is less than zero
      * @return the same object, so that setters can be chained
+     * @throws InvalidArgumentException if the interval is less than zero
      */
     public LocationRequest setFastestInterval(long millis) {
         checkInterval(millis);
@@ -397,9 +432,9 @@ public final class LocationRequest implements Parcelable {
 
         // Check for > Long.MAX_VALUE overflow (elapsedRealtime > 0):
         if (millis > Long.MAX_VALUE - elapsedRealtime) {
-          mExpireAt = Long.MAX_VALUE;
+            mExpireAt = Long.MAX_VALUE;
         } else {
-          mExpireAt = millis + elapsedRealtime;
+            mExpireAt = millis + elapsedRealtime;
         }
 
         if (mExpireAt < 0) mExpireAt = 0;
@@ -448,11 +483,14 @@ public final class LocationRequest implements Parcelable {
      * to the location manager.
      *
      * @param numUpdates the number of location updates requested
-     * @throws InvalidArgumentException if numUpdates is 0 or less
      * @return the same object, so that setters can be chained
+     * @throws InvalidArgumentException if numUpdates is 0 or less
      */
     public LocationRequest setNumUpdates(int numUpdates) {
-        if (numUpdates <= 0) throw new IllegalArgumentException("invalid numUpdates: " + numUpdates);
+        if (numUpdates <= 0) {
+            throw new IllegalArgumentException(
+                    "invalid numUpdates: " + numUpdates);
+        }
         mNumUpdates = numUpdates;
         return this;
     }
@@ -462,6 +500,7 @@ public final class LocationRequest implements Parcelable {
      *
      * <p>By default this is {@link Integer#MAX_VALUE}, which indicates that
      * locations are updated until the request is explicitly removed.
+     *
      * @return number of updates
      */
     public int getNumUpdates() {
@@ -539,8 +578,8 @@ public final class LocationRequest implements Parcelable {
      * doesn't have the {@link android.Manifest.permission#UPDATE_APP_OPS_STATS} permission.
      *
      * @param hideFromAppOps If true AppOps won't keep track of this location request.
-     * @see android.app.AppOpsManager
      * @hide
+     * @see android.app.AppOpsManager
      */
     @SystemApi
     public void setHideFromAppOps(boolean hideFromAppOps) {
@@ -587,27 +626,29 @@ public final class LocationRequest implements Parcelable {
 
     public static final Parcelable.Creator<LocationRequest> CREATOR =
             new Parcelable.Creator<LocationRequest>() {
-        @Override
-        public LocationRequest createFromParcel(Parcel in) {
-            LocationRequest request = new LocationRequest();
-            request.setQuality(in.readInt());
-            request.setFastestInterval(in.readLong());
-            request.setInterval(in.readLong());
-            request.setExpireAt(in.readLong());
-            request.setNumUpdates(in.readInt());
-            request.setSmallestDisplacement(in.readFloat());
-            request.setHideFromAppOps(in.readInt() != 0);
-            String provider = in.readString();
-            if (provider != null) request.setProvider(provider);
-            WorkSource workSource = in.readParcelable(null);
-            if (workSource != null) request.setWorkSource(workSource);
-            return request;
-        }
-        @Override
-        public LocationRequest[] newArray(int size) {
-            return new LocationRequest[size];
-        }
-    };
+                @Override
+                public LocationRequest createFromParcel(Parcel in) {
+                    LocationRequest request = new LocationRequest();
+                    request.setQuality(in.readInt());
+                    request.setFastestInterval(in.readLong());
+                    request.setInterval(in.readLong());
+                    request.setExpireAt(in.readLong());
+                    request.setNumUpdates(in.readInt());
+                    request.setSmallestDisplacement(in.readFloat());
+                    request.setHideFromAppOps(in.readInt() != 0);
+                    request.setLowPowerMode(in.readInt() != 0);
+                    String provider = in.readString();
+                    if (provider != null) request.setProvider(provider);
+                    WorkSource workSource = in.readParcelable(null);
+                    if (workSource != null) request.setWorkSource(workSource);
+                    return request;
+                }
+
+                @Override
+                public LocationRequest[] newArray(int size) {
+                    return new LocationRequest[size];
+                }
+            };
 
     @Override
     public int describeContents() {
@@ -623,6 +664,7 @@ public final class LocationRequest implements Parcelable {
         parcel.writeInt(mNumUpdates);
         parcel.writeFloat(mSmallestDisplacement);
         parcel.writeInt(mHideFromAppOps ? 1 : 0);
+        parcel.writeInt(mLowPowerMode ? 1 : 0);
         parcel.writeString(mProvider);
         parcel.writeParcelable(mWorkSource, 0);
     }
@@ -663,9 +705,10 @@ public final class LocationRequest implements Parcelable {
             s.append(" expireIn=");
             TimeUtils.formatDuration(expireIn, s);
         }
-        if (mNumUpdates != Integer.MAX_VALUE){
+        if (mNumUpdates != Integer.MAX_VALUE) {
             s.append(" num=").append(mNumUpdates);
         }
+        s.append(" lowPowerMode=").append(mLowPowerMode);
         s.append(']');
         return s.toString();
     }

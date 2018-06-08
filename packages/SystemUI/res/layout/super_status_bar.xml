@@ -43,27 +43,18 @@
                    android:visibility="invisible" />
     </com.android.systemui.statusbar.BackDropView>
 
-    <com.android.systemui.statusbar.ScrimView android:id="@+id/scrim_behind"
+    <com.android.systemui.statusbar.ScrimView
+        android:id="@+id/scrim_behind"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
         />
 
-    <com.android.systemui.statusbar.AlphaOptimizedView
-        android:id="@+id/heads_up_scrim"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/heads_up_scrim_height"
-        android:background="@drawable/heads_up_scrim"
-        sysui:ignoreRightInset="true"
-        android:importantForAccessibility="no"/>
-
     <FrameLayout
         android:id="@+id/status_bar_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
-    <include layout="@layout/brightness_mirror" />
 
     <ViewStub android:id="@+id/fullscreen_user_switcher_stub"
               android:layout="@layout/car_fullscreen_user_switcher"
@@ -75,7 +66,10 @@
         android:layout_height="match_parent"
         android:visibility="invisible" />
 
-    <com.android.systemui.statusbar.ScrimView android:id="@+id/scrim_in_front"
+    <include layout="@layout/brightness_mirror" />
+
+    <com.android.systemui.statusbar.ScrimView
+        android:id="@+id/scrim_in_front"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:importantForAccessibility="no"

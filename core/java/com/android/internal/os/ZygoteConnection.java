@@ -162,12 +162,17 @@ class ZygoteConnection {
 
         if (parsedArgs.preloadPackage != null) {
             handlePreloadPackage(parsedArgs.preloadPackage, parsedArgs.preloadPackageLibs,
-                    parsedArgs.preloadPackageCacheKey);
+                    parsedArgs.preloadPackageLibFileName, parsedArgs.preloadPackageCacheKey);
             return null;
         }
 
         if (parsedArgs.apiBlacklistExemptions != null) {
             handleApiBlacklistExemptions(parsedArgs.apiBlacklistExemptions);
+            return null;
+        }
+
+        if (parsedArgs.hiddenApiAccessLogSampleRate != -1) {
+            handleHiddenApiAccessLogSampleRate(parsedArgs.hiddenApiAccessLogSampleRate);
             return null;
         }
 
@@ -310,6 +315,15 @@ class ZygoteConnection {
         }
     }
 
+    private void handleHiddenApiAccessLogSampleRate(int percent) {
+        try {
+            ZygoteInit.setHiddenApiAccessLogSampleRate(percent);
+            mSocketOutStream.writeInt(0);
+        } catch (IOException ioe) {
+            throw new IllegalStateException("Error writing to command socket", ioe);
+        }
+    }
+
     protected void preload() {
         ZygoteInit.lazyPreload();
     }
@@ -322,7 +336,8 @@ class ZygoteConnection {
         return mSocketOutStream;
     }
 
-    protected void handlePreloadPackage(String packagePath, String libsPath, String cacheKey) {
+    protected void handlePreloadPackage(String packagePath, String libsPath, String libFileName,
+            String cacheKey) {
         throw new RuntimeException("Zyogte does not support package preloading");
     }
 
@@ -434,10 +449,24 @@ class ZygoteConnection {
         String appDataDir;
 
         /**
-         * Whether to preload a package, with the package path in the remainingArgs.
+         * The APK path of the package to preload, when using --preload-package.
          */
         String preloadPackage;
+
+        /**
+         * The native library path of the package to preload, when using --preload-package.
+         */
         String preloadPackageLibs;
+
+        /**
+         * The filename of the native library to preload, when using --preload-package.
+         */
+        String preloadPackageLibFileName;
+
+        /**
+         * The cache key under which to enter the preloaded package into the classloader cache,
+         * when using --preload-package.
+         */
         String preloadPackageCacheKey;
 
         /**
@@ -467,6 +496,12 @@ class ZygoteConnection {
         String[] apiBlacklistExemptions;
 
         /**
+         * Sampling rate for logging hidden API accesses to the event log. This is sent to the
+         * pre-forked zygote at boot time, or when it changes, via --hidden-api-log-sampling-rate.
+         */
+        int hiddenApiAccessLogSampleRate = -1;
+
+        /**
          * Constructs instance and parses args
          * @param args zygote command-line args
          * @throws IllegalArgumentException
@@ -489,6 +524,7 @@ class ZygoteConnection {
 
             boolean seenRuntimeArgs = false;
 
+            boolean expectRuntimeArgs = true;
             for ( /* curArg */ ; curArg < args.length; curArg++) {
                 String arg = args[curArg];
 
@@ -616,9 +652,11 @@ class ZygoteConnection {
                 } else if (arg.equals("--preload-package")) {
                     preloadPackage = args[++curArg];
                     preloadPackageLibs = args[++curArg];
+                    preloadPackageLibFileName = args[++curArg];
                     preloadPackageCacheKey = args[++curArg];
                 } else if (arg.equals("--preload-default")) {
                     preloadDefault = true;
+                    expectRuntimeArgs = false;
                 } else if (arg.equals("--start-child-zygote")) {
                     startChildZygote = true;
                 } else if (arg.equals("--set-api-blacklist-exemptions")) {
@@ -626,6 +664,16 @@ class ZygoteConnection {
                     // with the regular fork command.
                     apiBlacklistExemptions = Arrays.copyOfRange(args, curArg + 1, args.length);
                     curArg = args.length;
+                    expectRuntimeArgs = false;
+                } else if (arg.startsWith("--hidden-api-log-sampling-rate=")) {
+                    String rateStr = arg.substring(arg.indexOf('=') + 1);
+                    try {
+                        hiddenApiAccessLogSampleRate = Integer.parseInt(rateStr);
+                    } catch (NumberFormatException nfe) {
+                        throw new IllegalArgumentException(
+                                "Invalid log sampling rate: " + rateStr, nfe);
+                    }
+                    expectRuntimeArgs = false;
                 } else {
                     break;
                 }
@@ -640,7 +688,7 @@ class ZygoteConnection {
                     throw new IllegalArgumentException(
                             "Unexpected arguments after --preload-package.");
                 }
-            } else if (!preloadDefault && apiBlacklistExemptions == null) {
+            } else if (expectRuntimeArgs) {
                 if (!seenRuntimeArgs) {
                     throw new IllegalArgumentException("Unexpected argument : " + args[curArg]);
                 }

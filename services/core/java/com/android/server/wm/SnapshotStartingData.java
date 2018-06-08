@@ -17,8 +17,8 @@
 package com.android.server.wm;
 
 import android.app.ActivityManager.TaskSnapshot;
-import android.graphics.GraphicBuffer;
-import android.view.WindowManagerPolicy.StartingSurface;
+
+import com.android.server.policy.WindowManagerPolicy.StartingSurface;
 
 /**
  * Represents starting data for snapshot starting windows.

@@ -269,12 +269,12 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void performTraversalInTransactionLocked() {
+        public void performTraversalLocked(SurfaceControl.Transaction t) {
             if ((mPendingChanges & PENDING_RESIZE) != 0) {
-                SurfaceControl.setDisplaySize(getDisplayTokenLocked(), mWidth, mHeight);
+                t.setDisplaySize(getDisplayTokenLocked(), mWidth, mHeight);
             }
             if ((mPendingChanges & PENDING_SURFACE_CHANGE) != 0) {
-                setSurfaceInTransactionLocked(mSurface);
+                setSurfaceLocked(t, mSurface);
             }
             mPendingChanges = 0;
         }

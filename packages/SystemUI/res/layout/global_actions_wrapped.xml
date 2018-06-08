@@ -18,6 +18,6 @@
         android:gravity="center"
         android:orientation="vertical"
         android:padding="12dp"
-        android:translationZ="8dp" />
+        android:translationZ="9dp" />
 
 </com.android.systemui.HardwareUiLayout>

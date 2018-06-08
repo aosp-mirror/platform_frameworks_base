@@ -32,14 +32,19 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.XmlResourceParser;
+import android.hardware.usb.AccessoryFilter;
+import android.hardware.usb.DeviceFilter;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.service.usb.UsbProfileGroupSettingsManagerProto;
+import android.service.usb.UsbSettingsAccessoryPreferenceProto;
+import android.service.usb.UsbSettingsDevicePreferenceProto;
+import android.service.usb.UserPackageProto;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
@@ -51,14 +56,13 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.Immutable;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
+import com.android.internal.util.dump.DualDumpOutputStream;
 
 import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -71,7 +75,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 class UsbProfileGroupSettingsManager {
     private static final String TAG = UsbProfileGroupSettingsManager.class.getSimpleName();
@@ -155,403 +158,14 @@ class UsbProfileGroupSettingsManager {
         public String toString() {
             return user.getIdentifier() + "/" + packageName;
         }
-    }
 
-    // This class is used to describe a USB device.
-    // When used in HashMaps all values must be specified,
-    // but wildcards can be used for any of the fields in
-    // the package meta-data.
-    private static class DeviceFilter {
-        // USB Vendor ID (or -1 for unspecified)
-        public final int mVendorId;
-        // USB Product ID (or -1 for unspecified)
-        public final int mProductId;
-        // USB device or interface class (or -1 for unspecified)
-        public final int mClass;
-        // USB device subclass (or -1 for unspecified)
-        public final int mSubclass;
-        // USB device protocol (or -1 for unspecified)
-        public final int mProtocol;
-        // USB device manufacturer name string (or null for unspecified)
-        public final String mManufacturerName;
-        // USB device product name string (or null for unspecified)
-        public final String mProductName;
-        // USB device serial number string (or null for unspecified)
-        public final String mSerialNumber;
+        public void dump(DualDumpOutputStream dump, String idName, long id) {
+            long token = dump.start(idName, id);
 
-        public DeviceFilter(int vid, int pid, int clasz, int subclass, int protocol,
-                            String manufacturer, String product, String serialnum) {
-            mVendorId = vid;
-            mProductId = pid;
-            mClass = clasz;
-            mSubclass = subclass;
-            mProtocol = protocol;
-            mManufacturerName = manufacturer;
-            mProductName = product;
-            mSerialNumber = serialnum;
-        }
+            dump.write("user_id", UserPackageProto.USER_ID, user.getIdentifier());
+            dump.write("package_name", UserPackageProto.PACKAGE_NAME, packageName);
 
-        public DeviceFilter(UsbDevice device) {
-            mVendorId = device.getVendorId();
-            mProductId = device.getProductId();
-            mClass = device.getDeviceClass();
-            mSubclass = device.getDeviceSubclass();
-            mProtocol = device.getDeviceProtocol();
-            mManufacturerName = device.getManufacturerName();
-            mProductName = device.getProductName();
-            mSerialNumber = device.getSerialNumber();
-        }
-
-        public static DeviceFilter read(XmlPullParser parser)
-                throws XmlPullParserException, IOException {
-            int vendorId = -1;
-            int productId = -1;
-            int deviceClass = -1;
-            int deviceSubclass = -1;
-            int deviceProtocol = -1;
-            String manufacturerName = null;
-            String productName = null;
-            String serialNumber = null;
-
-            int count = parser.getAttributeCount();
-            for (int i = 0; i < count; i++) {
-                String name = parser.getAttributeName(i);
-                String value = parser.getAttributeValue(i);
-                // Attribute values are ints or strings
-                if ("manufacturer-name".equals(name)) {
-                    manufacturerName = value;
-                } else if ("product-name".equals(name)) {
-                    productName = value;
-                } else if ("serial-number".equals(name)) {
-                    serialNumber = value;
-                } else {
-                    int intValue;
-                    int radix = 10;
-                    if (value != null && value.length() > 2 && value.charAt(0) == '0' &&
-                        (value.charAt(1) == 'x' || value.charAt(1) == 'X')) {
-                        // allow hex values starting with 0x or 0X
-                        radix = 16;
-                        value = value.substring(2);
-                    }
-                    try {
-                        intValue = Integer.parseInt(value, radix);
-                    } catch (NumberFormatException e) {
-                        Slog.e(TAG, "invalid number for field " + name, e);
-                        continue;
-                    }
-                    if ("vendor-id".equals(name)) {
-                        vendorId = intValue;
-                    } else if ("product-id".equals(name)) {
-                        productId = intValue;
-                    } else if ("class".equals(name)) {
-                        deviceClass = intValue;
-                    } else if ("subclass".equals(name)) {
-                        deviceSubclass = intValue;
-                    } else if ("protocol".equals(name)) {
-                        deviceProtocol = intValue;
-                    }
-                }
-            }
-            return new DeviceFilter(vendorId, productId,
-                    deviceClass, deviceSubclass, deviceProtocol,
-                    manufacturerName, productName, serialNumber);
-        }
-
-        public void write(XmlSerializer serializer) throws IOException {
-            serializer.startTag(null, "usb-device");
-            if (mVendorId != -1) {
-                serializer.attribute(null, "vendor-id", Integer.toString(mVendorId));
-            }
-            if (mProductId != -1) {
-                serializer.attribute(null, "product-id", Integer.toString(mProductId));
-            }
-            if (mClass != -1) {
-                serializer.attribute(null, "class", Integer.toString(mClass));
-            }
-            if (mSubclass != -1) {
-                serializer.attribute(null, "subclass", Integer.toString(mSubclass));
-            }
-            if (mProtocol != -1) {
-                serializer.attribute(null, "protocol", Integer.toString(mProtocol));
-            }
-            if (mManufacturerName != null) {
-                serializer.attribute(null, "manufacturer-name", mManufacturerName);
-            }
-            if (mProductName != null) {
-                serializer.attribute(null, "product-name", mProductName);
-            }
-            if (mSerialNumber != null) {
-                serializer.attribute(null, "serial-number", mSerialNumber);
-            }
-            serializer.endTag(null, "usb-device");
-        }
-
-        private boolean matches(int clasz, int subclass, int protocol) {
-            return ((mClass == -1 || clasz == mClass) &&
-                    (mSubclass == -1 || subclass == mSubclass) &&
-                    (mProtocol == -1 || protocol == mProtocol));
-        }
-
-        public boolean matches(UsbDevice device) {
-            if (mVendorId != -1 && device.getVendorId() != mVendorId) return false;
-            if (mProductId != -1 && device.getProductId() != mProductId) return false;
-            if (mManufacturerName != null && device.getManufacturerName() == null) return false;
-            if (mProductName != null && device.getProductName() == null) return false;
-            if (mSerialNumber != null && device.getSerialNumber() == null) return false;
-            if (mManufacturerName != null && device.getManufacturerName() != null &&
-                !mManufacturerName.equals(device.getManufacturerName())) return false;
-            if (mProductName != null && device.getProductName() != null &&
-                !mProductName.equals(device.getProductName())) return false;
-            if (mSerialNumber != null && device.getSerialNumber() != null &&
-                !mSerialNumber.equals(device.getSerialNumber())) return false;
-
-            // check device class/subclass/protocol
-            if (matches(device.getDeviceClass(), device.getDeviceSubclass(),
-                    device.getDeviceProtocol())) return true;
-
-            // if device doesn't match, check the interfaces
-            int count = device.getInterfaceCount();
-            for (int i = 0; i < count; i++) {
-                UsbInterface intf = device.getInterface(i);
-                 if (matches(intf.getInterfaceClass(), intf.getInterfaceSubclass(),
-                        intf.getInterfaceProtocol())) return true;
-            }
-
-            return false;
-        }
-
-        /**
-         * If the device described by {@code device} covered by this filter?
-         *
-         * @param device The device
-         *
-         * @return {@code true} iff this filter covers the {@code device}
-         */
-        public boolean contains(DeviceFilter device) {
-            // -1 and null means "match anything"
-
-            if (mVendorId != -1 && device.mVendorId != mVendorId) return false;
-            if (mProductId != -1 && device.mProductId != mProductId) return false;
-            if (mManufacturerName != null && !Objects.equals(mManufacturerName,
-                    device.mManufacturerName)) {
-                return false;
-            }
-            if (mProductName != null && !Objects.equals(mProductName, device.mProductName)) {
-                return false;
-            }
-            if (mSerialNumber != null
-                    && !Objects.equals(mSerialNumber, device.mSerialNumber)) {
-                return false;
-            }
-
-            // check device class/subclass/protocol
-            return matches(device.mClass, device.mSubclass, device.mProtocol);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            // can't compare if we have wildcard strings
-            if (mVendorId == -1 || mProductId == -1 ||
-                    mClass == -1 || mSubclass == -1 || mProtocol == -1) {
-                return false;
-            }
-            if (obj instanceof DeviceFilter) {
-                DeviceFilter filter = (DeviceFilter)obj;
-
-                if (filter.mVendorId != mVendorId ||
-                        filter.mProductId != mProductId ||
-                        filter.mClass != mClass ||
-                        filter.mSubclass != mSubclass ||
-                        filter.mProtocol != mProtocol) {
-                    return(false);
-                }
-                if ((filter.mManufacturerName != null &&
-                        mManufacturerName == null) ||
-                    (filter.mManufacturerName == null &&
-                        mManufacturerName != null) ||
-                    (filter.mProductName != null &&
-                        mProductName == null)  ||
-                    (filter.mProductName == null &&
-                        mProductName != null) ||
-                    (filter.mSerialNumber != null &&
-                        mSerialNumber == null)  ||
-                    (filter.mSerialNumber == null &&
-                        mSerialNumber != null)) {
-                    return(false);
-                }
-                if  ((filter.mManufacturerName != null &&
-                        mManufacturerName != null &&
-                        !mManufacturerName.equals(filter.mManufacturerName)) ||
-                     (filter.mProductName != null &&
-                        mProductName != null &&
-                        !mProductName.equals(filter.mProductName)) ||
-                     (filter.mSerialNumber != null &&
-                        mSerialNumber != null &&
-                        !mSerialNumber.equals(filter.mSerialNumber))) {
-                    return false;
-                }
-                return true;
-            }
-            if (obj instanceof UsbDevice) {
-                UsbDevice device = (UsbDevice)obj;
-                if (device.getVendorId() != mVendorId ||
-                        device.getProductId() != mProductId ||
-                        device.getDeviceClass() != mClass ||
-                        device.getDeviceSubclass() != mSubclass ||
-                        device.getDeviceProtocol() != mProtocol) {
-                    return(false);
-                }
-                if ((mManufacturerName != null && device.getManufacturerName() == null) ||
-                        (mManufacturerName == null && device.getManufacturerName() != null) ||
-                        (mProductName != null && device.getProductName() == null) ||
-                        (mProductName == null && device.getProductName() != null) ||
-                        (mSerialNumber != null && device.getSerialNumber() == null) ||
-                        (mSerialNumber == null && device.getSerialNumber() != null)) {
-                    return(false);
-                }
-                if ((device.getManufacturerName() != null &&
-                        !mManufacturerName.equals(device.getManufacturerName())) ||
-                        (device.getProductName() != null &&
-                            !mProductName.equals(device.getProductName())) ||
-                        (device.getSerialNumber() != null &&
-                            !mSerialNumber.equals(device.getSerialNumber()))) {
-                    return false;
-                }
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return (((mVendorId << 16) | mProductId) ^
-                    ((mClass << 16) | (mSubclass << 8) | mProtocol));
-        }
-
-        @Override
-        public String toString() {
-            return "DeviceFilter[mVendorId=" + mVendorId + ",mProductId=" + mProductId +
-                    ",mClass=" + mClass + ",mSubclass=" + mSubclass +
-                    ",mProtocol=" + mProtocol + ",mManufacturerName=" + mManufacturerName +
-                    ",mProductName=" + mProductName + ",mSerialNumber=" + mSerialNumber +
-                    "]";
-        }
-    }
-
-    // This class is used to describe a USB accessory.
-    // When used in HashMaps all values must be specified,
-    // but wildcards can be used for any of the fields in
-    // the package meta-data.
-    private static class AccessoryFilter {
-        // USB accessory manufacturer (or null for unspecified)
-        public final String mManufacturer;
-        // USB accessory model (or null for unspecified)
-        public final String mModel;
-        // USB accessory version (or null for unspecified)
-        public final String mVersion;
-
-        public AccessoryFilter(String manufacturer, String model, String version) {
-            mManufacturer = manufacturer;
-            mModel = model;
-            mVersion = version;
-        }
-
-        public AccessoryFilter(UsbAccessory accessory) {
-            mManufacturer = accessory.getManufacturer();
-            mModel = accessory.getModel();
-            mVersion = accessory.getVersion();
-        }
-
-        public static AccessoryFilter read(XmlPullParser parser)
-                throws XmlPullParserException, IOException {
-            String manufacturer = null;
-            String model = null;
-            String version = null;
-
-            int count = parser.getAttributeCount();
-            for (int i = 0; i < count; i++) {
-                String name = parser.getAttributeName(i);
-                String value = parser.getAttributeValue(i);
-
-                if ("manufacturer".equals(name)) {
-                    manufacturer = value;
-                } else if ("model".equals(name)) {
-                    model = value;
-                } else if ("version".equals(name)) {
-                    version = value;
-                }
-             }
-             return new AccessoryFilter(manufacturer, model, version);
-        }
-
-        public void write(XmlSerializer serializer)throws IOException {
-            serializer.startTag(null, "usb-accessory");
-            if (mManufacturer != null) {
-                serializer.attribute(null, "manufacturer", mManufacturer);
-            }
-            if (mModel != null) {
-                serializer.attribute(null, "model", mModel);
-            }
-            if (mVersion != null) {
-                serializer.attribute(null, "version", mVersion);
-            }
-            serializer.endTag(null, "usb-accessory");
-        }
-
-        public boolean matches(UsbAccessory acc) {
-            if (mManufacturer != null && !acc.getManufacturer().equals(mManufacturer)) return false;
-            if (mModel != null && !acc.getModel().equals(mModel)) return false;
-            return !(mVersion != null && !acc.getVersion().equals(mVersion));
-        }
-
-        /**
-         * Is the accessories described {@code accessory} covered by this filter?
-         *
-         * @param accessory A filter describing the accessory
-         *
-         * @return {@code true} iff this the filter covers the accessory
-         */
-        public boolean contains(AccessoryFilter accessory) {
-            if (mManufacturer != null && !Objects.equals(accessory.mManufacturer, mManufacturer)) {
-                return false;
-            }
-            if (mModel != null && !Objects.equals(accessory.mModel, mModel)) return false;
-            return !(mVersion != null && !Objects.equals(accessory.mVersion, mVersion));
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            // can't compare if we have wildcard strings
-            if (mManufacturer == null || mModel == null || mVersion == null) {
-                return false;
-            }
-            if (obj instanceof AccessoryFilter) {
-                AccessoryFilter filter = (AccessoryFilter)obj;
-                return (mManufacturer.equals(filter.mManufacturer) &&
-                        mModel.equals(filter.mModel) &&
-                        mVersion.equals(filter.mVersion));
-            }
-            if (obj instanceof UsbAccessory) {
-                UsbAccessory accessory = (UsbAccessory)obj;
-                return (mManufacturer.equals(accessory.getManufacturer()) &&
-                        mModel.equals(accessory.getModel()) &&
-                        mVersion.equals(accessory.getVersion()));
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return ((mManufacturer == null ? 0 : mManufacturer.hashCode()) ^
-                    (mModel == null ? 0 : mModel.hashCode()) ^
-                    (mVersion == null ? 0 : mVersion.hashCode()));
-        }
-
-        @Override
-        public String toString() {
-            return "AccessoryFilter[mManufacturer=\"" + mManufacturer +
-                                "\", mModel=\"" + mModel +
-                                "\", mVersion=\"" + mVersion + "\"]";
+            dump.end(token);
         }
     }
 
@@ -607,7 +221,7 @@ class UsbProfileGroupSettingsManager {
         mParentUser = user;
         mSettingsFile = new AtomicFile(new File(
                 Environment.getUserSystemDirectory(user.getIdentifier()),
-                "usb_device_manager.xml"));
+                "usb_device_manager.xml"), "usb-state");
 
         mDisablePermissionDialogs = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_disableUsbPermissionDialogs);
@@ -700,6 +314,7 @@ class UsbProfileGroupSettingsManager {
      * Upgrade any single-user settings from {@link #sSingleUserSettingsFile}.
      * Should only by called by owner.
      */
+    @GuardedBy("mLock")
     private void upgradeSingleUserLocked() {
         if (sSingleUserSettingsFile.exists()) {
             mDevicePreferenceMap.clear();
@@ -733,6 +348,7 @@ class UsbProfileGroupSettingsManager {
         }
     }
 
+    @GuardedBy("mLock")
     private void readSettingsLocked() {
         if (DEBUG) Slog.v(TAG, "readSettingsLocked()");
 
@@ -772,6 +388,7 @@ class UsbProfileGroupSettingsManager {
      * <p>In the uncommon case that the system crashes in between the scheduling and the write the
      * update is lost.</p>
      */
+    @GuardedBy("mLock")
     private void scheduleWriteSettingsLocked() {
         if (mIsWriteSettingsScheduled) {
             return;
@@ -1255,6 +872,7 @@ class UsbProfileGroupSettingsManager {
         return null;
     }
 
+    @GuardedBy("mLock")
     private boolean clearCompatibleMatchesLocked(@NonNull UserPackage userPackage,
             @NonNull DeviceFilter filter) {
         ArrayList<DeviceFilter> keysToRemove = new ArrayList<>();
@@ -1278,6 +896,7 @@ class UsbProfileGroupSettingsManager {
         return !keysToRemove.isEmpty();
     }
 
+    @GuardedBy("mLock")
     private boolean clearCompatibleMatchesLocked(@NonNull UserPackage userPackage,
             @NonNull AccessoryFilter filter) {
         ArrayList<AccessoryFilter> keysToRemove = new ArrayList<>();
@@ -1301,6 +920,7 @@ class UsbProfileGroupSettingsManager {
         return !keysToRemove.isEmpty();
     }
 
+    @GuardedBy("mLock")
     private boolean handlePackageAddedLocked(UserPackage userPackage, ActivityInfo aInfo,
             String metaDataName) {
         XmlResourceParser parser = null;
@@ -1508,17 +1128,38 @@ class UsbProfileGroupSettingsManager {
         }
     }
 
-    public void dump(IndentingPrintWriter pw) {
+    public void dump(@NonNull DualDumpOutputStream dump, @NonNull String idName, long id) {
+        long token = dump.start(idName, id);
+
         synchronized (mLock) {
-            pw.println("Device preferences:");
+            dump.write("parent_user_id", UsbProfileGroupSettingsManagerProto.PARENT_USER_ID,
+                    mParentUser.getIdentifier());
+
             for (DeviceFilter filter : mDevicePreferenceMap.keySet()) {
-                pw.println("  " + filter + ": " + mDevicePreferenceMap.get(filter));
+                long devicePrefToken = dump.start("device_preferences",
+                        UsbProfileGroupSettingsManagerProto.DEVICE_PREFERENCES);
+
+                filter.dump(dump, "filter", UsbSettingsDevicePreferenceProto.FILTER);
+
+                mDevicePreferenceMap.get(filter).dump(dump, "user_package",
+                        UsbSettingsDevicePreferenceProto.USER_PACKAGE);
+
+                dump.end(devicePrefToken);
             }
-            pw.println("Accessory preferences:");
             for (AccessoryFilter filter : mAccessoryPreferenceMap.keySet()) {
-                pw.println("  " + filter + ": " + mAccessoryPreferenceMap.get(filter));
+                long accessoryPrefToken = dump.start("accessory_preferences",
+                        UsbProfileGroupSettingsManagerProto.ACCESSORY_PREFERENCES);
+
+                filter.dump(dump, "filter", UsbSettingsAccessoryPreferenceProto.FILTER);
+
+                mAccessoryPreferenceMap.get(filter).dump(dump, "user_package",
+                        UsbSettingsAccessoryPreferenceProto.USER_PACKAGE);
+
+                dump.end(accessoryPrefToken);
             }
         }
+
+        dump.end(token);
     }
 
     private static Intent createDeviceAttachedIntent(UsbDevice device) {

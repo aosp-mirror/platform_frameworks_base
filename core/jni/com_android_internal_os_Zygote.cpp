@@ -661,7 +661,9 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
       }
     }
 
-    if (!is_system_server) {
+    // If this zygote isn't root, it won't be able to create a process group,
+    // since the directory is owned by root.
+    if (!is_system_server && getuid() == 0) {
         int rc = createProcessGroup(uid, getpid());
         if (rc != 0) {
             if (rc == -EROFS) {
@@ -908,7 +910,10 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
       }
 
       // Assign system_server to the correct memory cgroup.
-      if (!WriteStringToFile(StringPrintf("%d", pid), "/dev/memcg/system/tasks")) {
+      // Not all devices mount /dev/memcg so check for the file first
+      // to avoid unnecessarily printing errors and denials in the logs.
+      if (!access("/dev/memcg/system/tasks", F_OK) &&
+                !WriteStringToFile(StringPrintf("%d", pid), "/dev/memcg/system/tasks")) {
         ALOGE("couldn't write %d to /dev/memcg/system/tasks", pid);
       }
   }

@@ -160,7 +160,7 @@ public class NotificationComparator
     }
 
     private boolean isCall(NotificationRecord record) {
-        return record.getNotification().category == Notification.CATEGORY_CALL
+        return record.isCategory(Notification.CATEGORY_CALL)
                 && isDefaultPhoneApp(record.sbn.getPackageName());
     }
 

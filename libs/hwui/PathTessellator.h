@@ -39,11 +39,10 @@ namespace uirenderer {
  */
 struct PathApproximationInfo {
     PathApproximationInfo(float invScaleX, float invScaleY, float pixelThreshold)
-        : thresholdSquared(pixelThreshold * pixelThreshold)
-        , sqrInvScaleX(invScaleX * invScaleX)
-        , sqrInvScaleY(invScaleY * invScaleY)
-        , thresholdForConicQuads(pixelThreshold * std::min(invScaleX, invScaleY) / 2.0f) {
-    };
+            : thresholdSquared(pixelThreshold * pixelThreshold)
+            , sqrInvScaleX(invScaleX * invScaleX)
+            , sqrInvScaleY(invScaleY * invScaleY)
+            , thresholdForConicQuads(pixelThreshold * std::min(invScaleX, invScaleY) / 2.0f){};
 
     const float thresholdSquared;
     const float sqrInvScaleX;
@@ -64,7 +63,8 @@ public:
     static void extractTessellationScales(const Matrix4& transform, float* scaleX, float* scaleY);
 
     /**
-     * Populates a VertexBuffer with a tessellated approximation of the input convex path, as a single
+     * Populates a VertexBuffer with a tessellated approximation of the input convex path, as a
+     * single
      * triangle strip. Note: joins are not currently supported.
      *
      * @param path The path to be approximated
@@ -74,8 +74,8 @@ public:
      *        vertex approximation, and correct AA ramp offsetting.
      * @param vertexBuffer The output buffer
      */
-    static void tessellatePath(const SkPath& path, const SkPaint* paint,
-            const mat4& transform, VertexBuffer& vertexBuffer);
+    static void tessellatePath(const SkPath& path, const SkPaint* paint, const mat4& transform,
+                               VertexBuffer& vertexBuffer);
 
     /**
      * Populates a VertexBuffer with a tessellated approximation of points as a single triangle
@@ -84,12 +84,13 @@ public:
      * @param points The center vertices of the points to be drawn
      * @param count The number of floats making up the point vertices
      * @param paint The paint the points will be drawn with indicating AA, stroke width & cap
-     * @param transform The transform the points will be drawn with, used to drive stretch-aware path
+     * @param transform The transform the points will be drawn with, used to drive stretch-aware
+     * path
      *        vertex approximation, and correct AA ramp offsetting
      * @param vertexBuffer The output buffer
      */
     static void tessellatePoints(const float* points, int count, const SkPaint* paint,
-            const mat4& transform, VertexBuffer& vertexBuffer);
+                                 const mat4& transform, VertexBuffer& vertexBuffer);
 
     /**
      * Populates a VertexBuffer with a tessellated approximation of lines as a single triangle
@@ -98,12 +99,13 @@ public:
      * @param points Pairs of endpoints defining the lines to be drawn
      * @param count The number of floats making up the line vertices
      * @param paint The paint the lines will be drawn with indicating AA, stroke width & cap
-     * @param transform The transform the points will be drawn with, used to drive stretch-aware path
+     * @param transform The transform the points will be drawn with, used to drive stretch-aware
+     * path
      *        vertex approximation, and correct AA ramp offsetting
      * @param vertexBuffer The output buffer
      */
     static void tessellateLines(const float* points, int count, const SkPaint* paint,
-            const mat4& transform, VertexBuffer& vertexBuffer);
+                                const mat4& transform, VertexBuffer& vertexBuffer);
 
     /**
      * Approximates a convex outline into a clockwise Vector of 2d vertices.
@@ -112,38 +114,35 @@ public:
      * @param threshold The threshold of acceptable error (in pixels) when approximating
      * @param outputVertices An empty Vector which will be populated with the output
      */
-    static bool approximatePathOutlineVertices(const SkPath &path, float threshold,
-            std::vector<Vertex> &outputVertices);
+    static bool approximatePathOutlineVertices(const SkPath& path, float threshold,
+                                               std::vector<Vertex>& outputVertices);
 
 private:
-    static bool approximatePathOutlineVertices(const SkPath &path, bool forceClose,
-            const PathApproximationInfo& approximationInfo, std::vector<Vertex> &outputVertices);
+    static bool approximatePathOutlineVertices(const SkPath& path, bool forceClose,
+                                               const PathApproximationInfo& approximationInfo,
+                                               std::vector<Vertex>& outputVertices);
 
-/*
-  endpoints a & b,
-  control c
- */
-    static void recursiveQuadraticBezierVertices(
-            float ax, float ay,
-            float bx, float by,
-            float cx, float cy,
-            const PathApproximationInfo& approximationInfo,
-            std::vector<Vertex> &outputVertices, int depth = 0);
+    /*
+      endpoints a & b,
+      control c
+     */
+    static void recursiveQuadraticBezierVertices(float ax, float ay, float bx, float by, float cx,
+                                                 float cy,
+                                                 const PathApproximationInfo& approximationInfo,
+                                                 std::vector<Vertex>& outputVertices,
+                                                 int depth = 0);
 
-/*
-  endpoints p1, p2
-  control c1, c2
- */
-    static void recursiveCubicBezierVertices(
-            float p1x, float p1y,
-            float c1x, float c1y,
-            float p2x, float p2y,
-            float c2x, float c2y,
-            const PathApproximationInfo& approximationInfo,
-            std::vector<Vertex> &outputVertices, int depth = 0);
+    /*
+      endpoints p1, p2
+      control c1, c2
+     */
+    static void recursiveCubicBezierVertices(float p1x, float p1y, float c1x, float c1y, float p2x,
+                                             float p2y, float c2x, float c2y,
+                                             const PathApproximationInfo& approximationInfo,
+                                             std::vector<Vertex>& outputVertices, int depth = 0);
 };
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_PATH_TESSELLATOR_H
+#endif  // ANDROID_HWUI_PATH_TESSELLATOR_H

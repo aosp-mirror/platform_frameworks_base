@@ -25,7 +25,7 @@ using namespace std;
 /**
  * Class to represent a protobuf Message, where we don't actually
  * know what any of the fields are, just their type codes. In other
- * words, this loslessly stores a parsed protobuf object without
+ * words, this losslessly stores a parsed protobuf object without
  * having the .proto file that generated it.
  */
 class GenericMessage

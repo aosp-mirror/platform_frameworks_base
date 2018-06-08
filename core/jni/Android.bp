@@ -1,3 +1,13 @@
+
+genrule {
+    name: "android_util_StatsLog.cpp",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --jni $(genDir)/android_util_StatsLog.cpp",
+    out: [
+        "android_util_StatsLog.cpp",
+    ],
+}
+
 cc_library_shared {
     name: "libandroid_runtime",
 
@@ -24,6 +34,7 @@ cc_library_shared {
     ],
 
     cppflags: ["-Wno-conversion-null"],
+    cpp_std: "c++17",
 
     srcs: [
         "AndroidRuntime.cpp",
@@ -31,7 +42,6 @@ cc_library_shared {
         "com_google_android_gles_jni_EGLImpl.cpp",
         "com_google_android_gles_jni_GLImpl.cpp", // TODO: .arm
         "android_app_Activity.cpp",
-        "android_app_ApplicationLoaders.cpp",
         "android_app_NativeActivity.cpp",
         "android_app_admin_SecurityLog.cpp",
         "android_opengl_EGL14.cpp",
@@ -54,7 +64,7 @@ cc_library_shared {
         "android_graphics_drawable_VectorDrawable.cpp",
         "android_view_DisplayEventReceiver.cpp",
         "android_view_DisplayListCanvas.cpp",
-        "android_view_HardwareLayer.cpp",
+        "android_view_TextureLayer.cpp",
         "android_view_InputChannel.cpp",
         "android_view_InputDevice.cpp",
         "android_view_InputEventReceiver.cpp",
@@ -73,7 +83,8 @@ cc_library_shared {
         "android_view_ThreadedRenderer.cpp",
         "android_view_VelocityTracker.cpp",
         "android_text_AndroidCharacter.cpp",
-        "android_text_AndroidBidi.cpp",
+        "android_text_Hyphenator.cpp",
+        "android_text_MeasuredParagraph.cpp",
         "android_text_StaticLayout.cpp",
         "android_os_Debug.cpp",
         "android_os_GraphicsEnvironment.cpp",
@@ -99,8 +110,8 @@ cc_library_shared {
         "android_util_AssetManager.cpp",
         "android_util_Binder.cpp",
         "android_util_EventLog.cpp",
-        "android_util_MemoryIntArray.cpp",
         "android_util_Log.cpp",
+        "android_util_MemoryIntArray.cpp",
         "android_util_PathParser.cpp",
         "android_util_Process.cpp",
         "android_util_StringBlock.cpp",
@@ -108,8 +119,10 @@ cc_library_shared {
         "android_util_jar_StrictJarFile.cpp",
         "android_graphics_Canvas.cpp",
         "android_graphics_Picture.cpp",
+        "android/graphics/AnimatedImageDrawable.cpp",
         "android/graphics/Bitmap.cpp",
         "android/graphics/BitmapFactory.cpp",
+        "android/graphics/ByteBufferStreamAdaptor.cpp",
         "android/graphics/Camera.cpp",
         "android/graphics/CanvasProperty.cpp",
         "android/graphics/ColorFilter.cpp",
@@ -121,6 +134,7 @@ cc_library_shared {
         "android/graphics/GraphicBuffer.cpp",
         "android/graphics/Graphics.cpp",
         "android/graphics/HarfBuzzNGFaceSkia.cpp",
+        "android/graphics/ImageDecoder.cpp",
         "android/graphics/Interpolator.cpp",
         "android/graphics/MaskFilter.cpp",
         "android/graphics/Matrix.cpp",
@@ -149,6 +163,8 @@ cc_library_shared {
         "android_media_AudioTrack.cpp",
         "android_media_DeviceCallback.cpp",
         "android_media_JetPlayer.cpp",
+        "android_media_MediaMetricsJNI.cpp",
+        "android_media_MicrophoneInfo.cpp",
         "android_media_RemoteDisplay.cpp",
         "android_media_ToneGenerator.cpp",
         "android_hardware_Camera.cpp",
@@ -169,16 +185,17 @@ cc_library_shared {
         "android/opengl/poly_clip.cpp", // TODO: .arm
         "android/opengl/util.cpp",
         "android_server_NetworkManagementSocketTagger.cpp",
-        "android_server_Watchdog.cpp",
         "android_ddm_DdmHandleNativeHeap.cpp",
         "android_backup_BackupDataInput.cpp",
         "android_backup_BackupDataOutput.cpp",
         "android_backup_FileBackupHelperBase.cpp",
         "android_backup_BackupHelperDispatcher.cpp",
         "android_app_backup_FullBackup.cpp",
+        "android_content_res_ApkAssets.cpp",
         "android_content_res_ObbScanner.cpp",
         "android_content_res_Configuration.cpp",
         "android_animation_PropertyValuesHolder.cpp",
+        "android_security_Scrypt.cpp",
         "com_android_internal_net_NetworkStatsFactory.cpp",
         "com_android_internal_os_ClassLoaderFactory.cpp",
         "com_android_internal_os_FuseAppLoop.cpp",
@@ -212,6 +229,7 @@ cc_library_shared {
         "libseccomp_policy",
         "libselinux",
         "libgrallocusage",
+        "libscrypt_static",
     ],
 
     shared_libs: [
@@ -235,7 +253,6 @@ cc_library_shared {
         "libinput",
         "libcamera_client",
         "libcamera_metadata",
-        "libskia",
         "libsqlite",
         "libEGL",
         "libGLESv1_CM",
@@ -248,6 +265,7 @@ cc_library_shared {
         "libselinux",
         "libicuuc",
         "libmedia",
+        "libmediametrics",
         "libaudioclient",
         "libjpeg",
         "libusbhost",
@@ -267,10 +285,12 @@ cc_library_shared {
         "libhwbinder",
         "libvintf",
         "libnativewindow",
-
         "libhwui",
         "libdl",
+        "libstatslog",
     ],
+
+    generated_sources: ["android_util_StatsLog.cpp"],
 
     local_include_dirs: ["android/graphics"],
     export_include_dirs: [

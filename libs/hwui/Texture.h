@@ -27,10 +27,10 @@
 
 #include <ui/ColorSpace.h>
 
-#include <GLES2/gl2.h>
-#include <GLES3/gl3.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+#include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 #include <SkBitmap.h>
 
 namespace android {
@@ -48,32 +48,30 @@ class Layer;
  */
 class Texture : public GpuMemoryTracker {
 public:
-    static SkBitmap uploadToN32(const SkBitmap& bitmap,
-            bool hasLinearBlending, sk_sp<SkColorSpace> sRGB);
+    static SkBitmap uploadToN32(const SkBitmap& bitmap, bool hasLinearBlending,
+                                sk_sp<SkColorSpace> sRGB);
     static bool hasUnsupportedColorType(const SkImageInfo& info, bool hasLinearBlending);
     static void colorTypeToGlFormatAndType(const Caches& caches, SkColorType colorType,
-            bool needSRGB, GLint* outInternalFormat, GLint* outFormat, GLint* outType);
+                                           bool needSRGB, GLint* outInternalFormat,
+                                           GLint* outFormat, GLint* outType);
 
-    explicit Texture(Caches& caches)
-        : GpuMemoryTracker(GpuObjectType::Texture)
-        , mCaches(caches)
-    { }
+    explicit Texture(Caches& caches) : GpuMemoryTracker(GpuObjectType::Texture), mCaches(caches) {}
 
-    virtual ~Texture() { }
+    virtual ~Texture() {}
 
     inline void setWrap(GLenum wrap, bool bindTexture = false, bool force = false) {
         setWrapST(wrap, wrap, bindTexture, force);
     }
 
     virtual void setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture = false,
-            bool force = false);
+                           bool force = false);
 
     inline void setFilter(GLenum filter, bool bindTexture = false, bool force = false) {
         setFilterMinMag(filter, filter, bindTexture, force);
     }
 
     virtual void setFilterMinMag(GLenum min, GLenum mag, bool bindTexture = false,
-            bool force = false);
+                                 bool force = false);
 
     /**
      * Convenience method to call glDeleteTextures() on this texture's id.
@@ -89,7 +87,7 @@ public:
      */
     void resize(uint32_t width, uint32_t height, GLint internalFormat, GLint format) {
         upload(internalFormat, width, height, format,
-                internalFormat == GL_RGBA16F ? GL_HALF_FLOAT : GL_UNSIGNED_BYTE, nullptr);
+               internalFormat == GL_RGBA16F ? GL_HALF_FLOAT : GL_UNSIGNED_BYTE, nullptr);
     }
 
     /**
@@ -104,60 +102,42 @@ public:
     /**
      * Basically glTexImage2D/glTexSubImage2D.
      */
-    void upload(GLint internalFormat, uint32_t width, uint32_t height,
-            GLenum format, GLenum type, const void* pixels);
+    void upload(GLint internalFormat, uint32_t width, uint32_t height, GLenum format, GLenum type,
+                const void* pixels);
 
     /**
      * Wraps an existing texture.
      */
-    void wrap(GLuint id, uint32_t width, uint32_t height, GLint internalFormat,
-            GLint format, GLenum target);
+    void wrap(GLuint id, uint32_t width, uint32_t height, GLint internalFormat, GLint format,
+              GLenum target);
 
-    GLuint id() const {
-        return mId;
-    }
+    GLuint id() const { return mId; }
 
-    uint32_t width() const {
-        return mWidth;
-    }
+    uint32_t width() const { return mWidth; }
 
-    uint32_t height() const {
-        return mHeight;
-    }
+    uint32_t height() const { return mHeight; }
 
-    GLint format() const {
-        return mFormat;
-    }
+    GLint format() const { return mFormat; }
 
-    GLint internalFormat() const {
-        return mInternalFormat;
-    }
+    GLint internalFormat() const { return mInternalFormat; }
 
-    GLenum target() const {
-        return mTarget;
-    }
+    GLenum target() const { return mTarget; }
 
     /**
      * Returns nullptr if this texture does not require color space conversion
      * to sRGB, or a valid pointer to a ColorSpaceConnector if a conversion
      * is required.
      */
-    constexpr const ColorSpaceConnector* getColorSpaceConnector() const {
-        return mConnector.get();
-    }
+    constexpr const ColorSpaceConnector* getColorSpaceConnector() const { return mConnector.get(); }
 
-    constexpr bool hasColorSpaceConversion() const {
-        return mConnector.get() != nullptr;
-    }
+    constexpr bool hasColorSpaceConversion() const { return mConnector.get() != nullptr; }
 
     TransferFunctionType getTransferFunctionType() const;
 
     /**
      * Returns true if this texture uses a linear encoding format.
      */
-    constexpr bool isLinear() const {
-        return mIsLinear;
-    }
+    constexpr bool isLinear() const { return mIsLinear; }
 
     /**
      * Generation of the backing bitmap,
@@ -190,6 +170,7 @@ public:
      * the current frame. This is reset at the start of a new frame.
      */
     void* isInUse = nullptr;
+
 private:
     // TODO: Temporarily grant private access to GlLayer, remove once
     // GlLayer can be de-tangled from being a dual-purpose render target
@@ -197,8 +178,8 @@ private:
     friend class GlLayer;
 
     // Returns true if the texture layout (size, format, etc.) changed, false if it was the same
-    bool updateLayout(uint32_t width, uint32_t height, GLint internalFormat,
-            GLint format, GLenum target);
+    bool updateLayout(uint32_t width, uint32_t height, GLint internalFormat, GLint format,
+                      GLenum target);
     void uploadHardwareBitmapToTexture(GraphicBuffer* buffer);
     void resetCachedParams();
 
@@ -226,12 +207,11 @@ private:
     Caches& mCaches;
 
     std::unique_ptr<ColorSpaceConnector> mConnector;
-}; // struct Texture
+};  // struct Texture
 
 class AutoTexture {
 public:
-    explicit AutoTexture(Texture* texture)
-            : texture(texture) {}
+    explicit AutoTexture(Texture* texture) : texture(texture) {}
     ~AutoTexture() {
         if (texture && texture->cleanup) {
             texture->deleteTexture();
@@ -240,9 +220,9 @@ public:
     }
 
     Texture* const texture;
-}; // class AutoTexture
+};  // class AutoTexture
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android
 
-#endif // ANDROID_HWUI_TEXTURE_H
+#endif  // ANDROID_HWUI_TEXTURE_H

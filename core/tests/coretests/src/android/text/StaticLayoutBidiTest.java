@@ -18,6 +18,7 @@ package android.text;
 
 import static org.junit.Assert.assertEquals;
 
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
@@ -28,6 +29,7 @@ import org.junit.runner.RunWith;
 /**
  * Quick check of native bidi implementation.
  */
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class StaticLayoutBidiTest {
@@ -96,7 +98,7 @@ public class StaticLayoutBidiTest {
         int n = chs.length;
         byte[] chInfo = new byte[n];
 
-        int resultDir = AndroidBidi.bidi(dir, chs, chInfo, n, false);
+        int resultDir = AndroidBidi.bidi(dir, chs, chInfo);
 
         {
             StringBuilder sb = new StringBuilder("info:");

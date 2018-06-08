@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="prompt" msgid="3183836924226407828">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‎‎‎‏‎‏‏‏‏‎‏‎‎‎‎‏‎‏‏‎‏‎‎‎‎‎‏‎‏‏‎‏‏‎‏‎‎‏‎‎‏‏‎‎‎‏‏‎‏‏‎‎‏‎‏‎‎‎Connection request‎‏‎‎‏‎"</string>
+    <string name="warning" msgid="809658604548412033">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‎‏‏‏‏‎‎‎‏‏‏‏‏‎‎‎‎‏‏‎‏‏‎‎‎‎‎‏‎‎‏‎‏‏‏‎‎‏‎‎‏‎‏‎‎‏‎‏‎‎‎‎‎‎‏‎‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>‎‏‎‎‏‏‏‎ wants to set up a VPN connection that allows it to monitor network traffic. Only accept if you trust the source. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; appears at the top of your screen when VPN is active.‎‏‎‎‏‎"</string>
+    <string name="legacy_title" msgid="192936250066580964">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‏‎‏‎‏‏‎‏‎‏‏‏‎‎‏‎‎‏‏‏‏‏‏‏‎‏‎‎‏‎‎‏‏‎‎‎‎‎‏‏‏‎‏‏‎‏‎‏‏‏‏‎‎‏‎‎‎VPN is connected‎‏‎‎‏‎"</string>
+    <string name="session" msgid="6470628549473641030">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‏‎‎‏‏‎‎‎‏‎‎‏‎‏‎‎‏‏‎‎‎‏‎‎‎‎‎‎‏‎‎‏‏‏‎‎‎‎‎‏‎‏‎‎‎‏‎‎‏‎‎‎‏‏‎‎Session:‎‏‎‎‏‎"</string>
+    <string name="duration" msgid="3584782459928719435">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‏‏‏‏‏‏‏‎‏‏‎‏‎‎‏‎‏‎‎‏‏‏‏‎‎‎‎‎‎‏‎‎‎‏‏‎‏‎‎‎‏‏‎‎‎‎‎‏‎‎‏‎‏‏‎Duration:‎‏‎‎‏‎"</string>
+    <string name="data_transmitted" msgid="7988167672982199061">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‎‏‏‎‏‏‎‏‏‏‎‏‎‏‏‎‎‎‎‏‎‏‏‎‎‏‏‏‎‏‎‏‎‎‏‎‏‏‏‎‎‏‏‎‏‏‎‏‏‎‎‎‏‎‏‎‏‎Sent:‎‏‎‎‏‎"</string>
+    <string name="data_received" msgid="4062776929376067820">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‎‎‏‏‎‎‎‎‏‏‏‏‎‎‎‏‎‎‎‎‏‎‏‏‏‎‏‏‏‏‏‎‏‎‎‎‏‏‏‎‎‏‏‏‎‎‎‎‎‏‏‏‎‏‏‎‎‎Received:‎‏‎‎‏‎"</string>
+    <string name="data_value_format" msgid="2192466557826897580">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‎‏‏‎‏‏‎‏‎‎‏‏‎‏‎‎‏‎‏‏‎‏‏‏‏‏‎‏‏‎‎‏‎‎‏‏‎‎‏‎‎‎‎‏‎‏‏‎‏‎‏‎‏‏‎‎‎‎‏‎‎‏‏‎<xliff:g id="NUMBER_0">%1$s</xliff:g>‎‏‎‎‏‏‏‎ bytes / ‎‏‎‎‏‏‎<xliff:g id="NUMBER_1">%2$s</xliff:g>‎‏‎‎‏‏‏‎ packets‎‏‎‎‏‎"</string>
+    <string name="always_on_disconnected_title" msgid="1906740176262776166">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‎‏‏‏‎‏‏‎‎‎‎‏‏‎‏‎‎‎‎‏‎‏‏‎‏‎‎‎‎‏‎‏‎‎‎‏‏‎‏‏‏‏‎‎‎‏‎‏‎‏‏‎‎‏‏‎‎Can\'t connect to always-on VPN‎‏‎‎‏‎"</string>
+    <string name="always_on_disconnected_message" msgid="555634519845992917">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‎‎‎‎‏‎‏‎‏‎‎‏‏‎‏‏‏‎‎‏‎‎‎‏‎‏‏‏‎‏‎‏‏‏‏‎‎‏‏‏‎‏‎‏‎‏‎‎‏‎‎‏‏‎<xliff:g id="VPN_APP_0">%1$s</xliff:g>‎‏‎‎‏‏‏‎ is set up to stay connected all the time, but it can\'t connect right now. Your phone will use a public network until it can reconnect to ‎‏‎‎‏‏‎<xliff:g id="VPN_APP_1">%1$s</xliff:g>‎‏‎‎‏‏‏‎.‎‏‎‎‏‎"</string>
+    <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‏‎‏‏‏‎‏‏‏‏‏‎‎‎‏‎‏‎‏‏‎‏‎‎‏‎‎‎‏‎‎‏‎‏‎‎‎‎‎‏‎‎‏‎‎‏‏‏‎‏‎‏‏‎‎‎‎‎‏‎‎‏‏‎<xliff:g id="VPN_APP">%1$s</xliff:g>‎‏‎‎‏‏‏‎ is set up to stay connected all the time, but it can\'t connect right now. You won\'t have a connection until the VPN can reconnect.‎‏‎‎‏‎"</string>
+    <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" ‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‏‏‏‏‏‎‎‎‏‏‎‏‎‏‎‏‎‎‏‎‎‎‎‏‏‏‏‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‎‏‏‎‏‎‏‏‏‏‎‏‏‎ ‎‏‎‎‏‎"</string>
+    <string name="always_on_disconnected_message_settings_link" msgid="6172280302829992412">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‏‏‎‏‎‏‎‎‎‎‏‎‏‏‎‎‎‎‎‏‏‏‎‏‏‏‎‏‏‏‎‎‎‎‏‎‏‎‎‏‎‎‏‏‏‏‎‎‏‏‏‎‏‏‏‎‎‎Change VPN settings‎‏‎‎‏‎"</string>
+    <string name="configure" msgid="4905518375574791375">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‎‎‎‎‏‎‎‏‏‏‏‏‎‎‏‏‎‏‏‏‏‏‎‎‎‏‏‎‏‎‏‏‏‎‏‎‎‏‎‎‏‎‏‏‎‎‏‎‎‏‏‎‎‏‏‏‏‎Configure‎‏‎‎‏‎"</string>
+    <string name="disconnect" msgid="971412338304200056">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‏‎‏‏‏‏‎‏‏‎‎‏‎‎‏‏‎‎‏‎‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‏‏‎‏‎‏‏‎‏‎‏‏‏‏‎‎‎‎Disconnect‎‏‎‎‏‎"</string>
+    <string name="open_app" msgid="3717639178595958667">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‏‎‎‏‎‏‏‏‏‎‏‏‎‏‎‏‎‎‏‎‎‎‏‎‏‏‎‏‎‎‏‏‎‏‎‎‏‎‎‏‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‎Open app‎‏‎‎‏‎"</string>
+    <string name="dismiss" msgid="6192859333764711227">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‏‏‏‏‏‎‎‎‏‎‏‏‏‎‏‎‎‏‏‎‎‎‎‎‎‏‎‏‏‏‏‎‏‎‎‎‎‎‎‏‎‎‎‎‎‎‎‏‏‎‎‏‏‏‎‏‏‎Dismiss‎‏‎‎‏‎"</string>
+</resources>

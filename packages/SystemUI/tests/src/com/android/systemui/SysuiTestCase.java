@@ -19,21 +19,23 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
+import android.os.ParcelFileDescriptor;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
+import android.testing.DexmakerShareClassLoaderRule;
 import android.testing.LeakCheck;
 import android.util.Log;
+
+import com.android.keyguard.KeyguardUpdateMonitor;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -48,12 +50,14 @@ public abstract class SysuiTestCase {
     @Rule
     public SysuiTestableContext mContext = new SysuiTestableContext(
             InstrumentationRegistry.getContext(), getLeakCheck());
+    @Rule
+    public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
+            new DexmakerShareClassLoaderRule();
     public TestableDependency mDependency = new TestableDependency(mContext);
     private Instrumentation mRealInstrumentation;
 
     @Before
     public void SysuiSetup() throws Exception {
-        System.setProperty("dexmaker.share_classloader", "true");
         mContext.setTheme(R.style.Theme_SystemUI);
         SystemUIFactory.createFromConfig(mContext);
 
@@ -68,6 +72,7 @@ public abstract class SysuiTestCase {
                     "SysUI Tests should use SysuiTestCase#getContext or SysuiTestCase#mContext");
         });
         InstrumentationRegistry.registerInstance(inst, InstrumentationRegistry.getArguments());
+        KeyguardUpdateMonitor.disableHandlerCheckForTesting(inst);
     }
 
     @After
@@ -80,8 +85,18 @@ public abstract class SysuiTestCase {
         return null;
     }
 
-    public Context getContext() {
+    public SysuiTestableContext getContext() {
         return mContext;
+    }
+
+    protected void runShellCommand(String command) throws IOException {
+        ParcelFileDescriptor pfd = mRealInstrumentation.getUiAutomation()
+                .executeShellCommand(command);
+
+        // Read the input stream fully.
+        FileInputStream fis = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+        while (fis.read() != -1);
+        fis.close();
     }
 
     protected void waitForIdleSync() {

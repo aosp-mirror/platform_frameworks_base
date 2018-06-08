@@ -258,7 +258,7 @@ android_mtp_MtpDevice_get_device_info(JNIEnv *env, jobject thiz)
                 return NULL;
             }
             for (size_t i = 0; i < size; ++i) {
-                elements[i] = deviceInfo->mOperations->itemAt(i);
+                elements[i] = static_cast<int>(deviceInfo->mOperations->at(i));
             }
             env->SetObjectField(info, field_deviceInfo_operationsSupported, operations.get());
         }
@@ -274,7 +274,7 @@ android_mtp_MtpDevice_get_device_info(JNIEnv *env, jobject thiz)
                 return NULL;
             }
             for (size_t i = 0; i < size; ++i) {
-                elements[i] = deviceInfo->mEvents->itemAt(i);
+                elements[i] = static_cast<int>(deviceInfo->mEvents->at(i));
             }
             env->SetObjectField(info, field_deviceInfo_eventsSupported, events.get());
         }
@@ -296,7 +296,7 @@ android_mtp_MtpDevice_get_storage_ids(JNIEnv *env, jobject thiz)
     int length = storageIDs->size();
     jintArray array = env->NewIntArray(length);
     // FIXME is this cast safe?
-    env->SetIntArrayRegion(array, 0, length, (const jint *)storageIDs->array());
+    env->SetIntArrayRegion(array, 0, length, (const jint *)storageIDs->data());
 
     delete storageIDs;
     return array;
@@ -350,7 +350,7 @@ android_mtp_MtpDevice_get_object_handles(JNIEnv *env, jobject thiz,
     int length = handles->size();
     jintArray array = env->NewIntArray(length);
     // FIXME is this cast safe?
-    env->SetIntArrayRegion(array, 0, length, (const jint *)handles->array());
+    env->SetIntArrayRegion(array, 0, length, (const jint *)handles->data());
 
     delete handles;
     return array;

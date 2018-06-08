@@ -1,0 +1,33 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.app.job;
+
+option java_outer_classname = "JobProtoEnums";
+option java_multiple_files = true;
+
+// Reasons a job is stopped.
+// Primarily used in android.app.job.JobParameters.java.
+enum StopReasonEnum {
+    STOP_REASON_UNKNOWN = -1;
+    STOP_REASON_CANCELLED = 0;
+    STOP_REASON_CONSTRAINTS_NOT_SATISFIED = 1;
+    STOP_REASON_PREEMPT = 2;
+    STOP_REASON_TIMEOUT = 3;
+    STOP_REASON_DEVICE_IDLE = 4;
+}

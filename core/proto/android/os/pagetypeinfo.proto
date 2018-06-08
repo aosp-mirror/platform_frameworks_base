@@ -1,0 +1,84 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+syntax = "proto2";
+
+option java_multiple_files = true;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+package android.os;
+
+/*
+ *  /proc/pagetypeinfo exports free memory distributions.
+ *
+ *  For example, the order of a page ranges form 0 to 10.
+ *  An order-0 page is 4 KB in size and 4 KB aligned.
+ *  An order-1 page is 8 KB in size and 8 KB aligned.
+ *  An order-10 page is 4096 KB in size and 4096 aligned.
+ *  The memory has multiple zones, e.g. DMA zone, Normal zone
+ *  Each zone has 11 free area. Each free area corresponds to pages of the same order.
+ *  Each free area has 6 free list. Each corresponds to one migration type.
+ *  The six migration types are Unmovable, Reclaimable, Movable, Reserve, CMA, and Isolate.
+ *  Each zone has 11 * 6 = 66 free list.
+ *
+ *  Next tag: 5
+ */
+message PageTypeInfoProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 page_block_order = 1;
+
+    optional int32 pages_per_block = 2;
+
+    // Next tag: 5
+    message MigrateType {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 node = 1;
+
+        optional string zone = 2;
+
+        optional string type = 3;
+
+        // order level starts from 0 for 4KB to page_block_order defined above, e.g. 10 for 4096KB
+        repeated int32 free_pages_count = 4;
+    }
+    repeated MigrateType migrate_types = 3;
+
+    // Next tag: 10
+    message Block {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 node = 1;
+
+        optional string zone = 2;
+
+        optional int32 unmovable = 3;
+
+        optional int32 reclaimable = 4;
+
+        optional int32 movable = 5;
+
+        optional int32 cma = 6;
+
+        optional int32 reserve = 7;
+
+        optional int32 isolate = 8;
+
+        optional int32 highatomic = 9;
+    }
+    repeated Block blocks = 4;
+}

@@ -16,17 +16,17 @@
 
 #include <benchmark/benchmark.h>
 
-#include "BakedOpState.h"
 #include "BakedOpDispatcher.h"
 #include "BakedOpRenderer.h"
+#include "BakedOpState.h"
 #include "FrameBuilder.h"
 #include "LayerUpdateQueue.h"
 #include "RecordedOp.h"
 #include "RecordingCanvas.h"
+#include "Vector.h"
 #include "tests/common/TestContext.h"
 #include "tests/common/TestScene.h"
 #include "tests/common/TestUtils.h"
-#include "Vector.h"
 
 #include <vector>
 
@@ -35,25 +35,25 @@ using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;
 using namespace android::uirenderer::test;
 
-const FrameBuilder::LightGeometry sLightGeometry = { {100, 100, 100}, 50};
-const BakedOpRenderer::LightInfo sLightInfo = { 128, 128 };
+const FrameBuilder::LightGeometry sLightGeometry = {{100, 100, 100}, 50};
+const BakedOpRenderer::LightInfo sLightInfo = {128, 128};
 
 static sp<RenderNode> createTestNode() {
-    auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 200, 200,
-            [](RenderProperties& props, RecordingCanvas& canvas) {
-        sk_sp<Bitmap> bitmap(TestUtils::createBitmap(10, 10));
-        SkPaint paint;
+    auto node = TestUtils::createNode<RecordingCanvas>(
+            0, 0, 200, 200, [](RenderProperties& props, RecordingCanvas& canvas) {
+                sk_sp<Bitmap> bitmap(TestUtils::createBitmap(10, 10));
+                SkPaint paint;
 
-        // Alternate between drawing rects and bitmaps, with bitmaps overlapping rects.
-        // Rects don't overlap bitmaps, so bitmaps should be brought to front as a group.
-        canvas.save(SaveFlags::MatrixClip);
-        for (int i = 0; i < 30; i++) {
-            canvas.translate(0, 10);
-            canvas.drawRect(0, 0, 10, 10, paint);
-            canvas.drawBitmap(*bitmap, 5, 0, nullptr);
-        }
-        canvas.restore();
-    });
+                // Alternate between drawing rects and bitmaps, with bitmaps overlapping rects.
+                // Rects don't overlap bitmaps, so bitmaps should be brought to front as a group.
+                canvas.save(SaveFlags::MatrixClip);
+                for (int i = 0; i < 30; i++) {
+                    canvas.translate(0, 10);
+                    canvas.drawRect(0, 0, 10, 10, paint);
+                    canvas.drawBitmap(*bitmap, 5, 0, nullptr);
+                }
+                canvas.restore();
+            });
     TestUtils::syncHierarchyPropertiesAndDisplayList(node);
     return node;
 }
@@ -62,8 +62,8 @@ void BM_FrameBuilder_defer(benchmark::State& state) {
     TestUtils::runOnRenderThread([&state](RenderThread& thread) {
         auto node = createTestNode();
         while (state.KeepRunning()) {
-            FrameBuilder frameBuilder(SkRect::MakeWH(100, 200), 100, 200,
-                    sLightGeometry, Caches::getInstance());
+            FrameBuilder frameBuilder(SkRect::MakeWH(100, 200), 100, 200, sLightGeometry,
+                                      Caches::getInstance());
             frameBuilder.deferRenderNode(*node);
             benchmark::DoNotOptimize(&frameBuilder);
         }
@@ -79,8 +79,7 @@ void BM_FrameBuilder_deferAndRender(benchmark::State& state) {
         Caches& caches = Caches::getInstance();
 
         while (state.KeepRunning()) {
-            FrameBuilder frameBuilder(SkRect::MakeWH(100, 200), 100, 200,
-                    sLightGeometry, caches);
+            FrameBuilder frameBuilder(SkRect::MakeWH(100, 200), 100, 200, sLightGeometry, caches);
             frameBuilder.deferRenderNode(*node);
 
             BakedOpRenderer renderer(caches, renderState, true, false, sLightInfo);
@@ -92,16 +91,17 @@ void BM_FrameBuilder_deferAndRender(benchmark::State& state) {
 BENCHMARK(BM_FrameBuilder_deferAndRender);
 
 static sp<RenderNode> getSyncedSceneNode(const char* sceneName) {
-    gDisplay = getBuiltInDisplay(); // switch to real display if present
+    gDisplay = getBuiltInDisplay();  // switch to real display if present
 
     TestContext testContext;
     TestScene::Options opts;
     std::unique_ptr<TestScene> scene(TestScene::testMap()[sceneName].createScene(opts));
 
-    sp<RenderNode> rootNode = TestUtils::createNode<RecordingCanvas>(0, 0, gDisplay.w, gDisplay.h,
-                [&scene](RenderProperties& props, RecordingCanvas& canvas) {
-            scene->createContent(gDisplay.w, gDisplay.h, canvas);
-    });
+    sp<RenderNode> rootNode = TestUtils::createNode<RecordingCanvas>(
+            0, 0, gDisplay.w, gDisplay.h,
+            [&scene](RenderProperties& props, RecordingCanvas& canvas) {
+                scene->createContent(gDisplay.w, gDisplay.h, canvas);
+            });
 
     TestUtils::syncHierarchyPropertiesAndDisplayList(rootNode);
     return rootNode;
@@ -117,9 +117,8 @@ void BM_FrameBuilder_defer_scene(benchmark::State& state) {
         state.SetLabel(sceneName);
         auto node = getSyncedSceneNode(sceneName);
         while (state.KeepRunning()) {
-            FrameBuilder frameBuilder(SkRect::MakeWH(gDisplay.w, gDisplay.h),
-                    gDisplay.w, gDisplay.h,
-                    sLightGeometry, Caches::getInstance());
+            FrameBuilder frameBuilder(SkRect::MakeWH(gDisplay.w, gDisplay.h), gDisplay.w,
+                                      gDisplay.h, sLightGeometry, Caches::getInstance());
             frameBuilder.deferRenderNode(*node);
             benchmark::DoNotOptimize(&frameBuilder);
         }
@@ -137,9 +136,8 @@ void BM_FrameBuilder_deferAndRender_scene(benchmark::State& state) {
         Caches& caches = Caches::getInstance();
 
         while (state.KeepRunning()) {
-            FrameBuilder frameBuilder(SkRect::MakeWH(gDisplay.w, gDisplay.h),
-                    gDisplay.w, gDisplay.h,
-                    sLightGeometry, Caches::getInstance());
+            FrameBuilder frameBuilder(SkRect::MakeWH(gDisplay.w, gDisplay.h), gDisplay.w,
+                                      gDisplay.h, sLightGeometry, Caches::getInstance());
             frameBuilder.deferRenderNode(*node);
 
             BakedOpRenderer renderer(caches, renderState, true, false, sLightInfo);

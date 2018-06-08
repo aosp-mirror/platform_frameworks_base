@@ -39,25 +39,25 @@ bool GLUtils::dumpGLErrors() {
     while ((status = glGetError()) != GL_NO_ERROR) {
         errorObserved = true;
         switch (status) {
-        case GL_INVALID_ENUM:
-            ALOGE("GL error:  GL_INVALID_ENUM");
-            break;
-        case GL_INVALID_VALUE:
-            ALOGE("GL error:  GL_INVALID_VALUE");
-            break;
-        case GL_INVALID_OPERATION:
-            ALOGE("GL error:  GL_INVALID_OPERATION");
-            break;
-        case GL_OUT_OF_MEMORY:
-            ALOGE("GL error:  Out of memory!");
-            break;
-        default:
-            ALOGE("GL error: 0x%x", status);
+            case GL_INVALID_ENUM:
+                ALOGE("GL error:  GL_INVALID_ENUM");
+                break;
+            case GL_INVALID_VALUE:
+                ALOGE("GL error:  GL_INVALID_VALUE");
+                break;
+            case GL_INVALID_OPERATION:
+                ALOGE("GL error:  GL_INVALID_OPERATION");
+                break;
+            case GL_OUT_OF_MEMORY:
+                ALOGE("GL error:  Out of memory!");
+                break;
+            default:
+                ALOGE("GL error: 0x%x", status);
         }
     }
     return errorObserved;
 #endif
 }
 
-}; // namespace uirenderer
-}; // namespace android
+};  // namespace uirenderer
+};  // namespace android

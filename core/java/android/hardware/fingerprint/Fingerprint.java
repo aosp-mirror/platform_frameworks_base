@@ -15,6 +15,7 @@
  */
 package android.hardware.fingerprint;
 
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -22,7 +23,7 @@ import android.os.Parcelable;
  * Container for fingerprint metadata.
  * @hide
  */
-public final class Fingerprint implements Parcelable {
+public final class Fingerprint extends BiometricAuthenticator.BiometricIdentifier {
     private CharSequence mName;
     private int mGroupId;
     private int mFingerId;

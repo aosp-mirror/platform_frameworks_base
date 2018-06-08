@@ -62,11 +62,11 @@ bool GraphicsJNI::hasException(JNIEnv *env) {
 AutoJavaFloatArray::AutoJavaFloatArray(JNIEnv* env, jfloatArray array,
                                        int minLength, JNIAccess access)
 : fEnv(env), fArray(array), fPtr(NULL), fLen(0) {
-    SkASSERT(env);
+    ALOG_ASSERT(env);
     if (array) {
         fLen = env->GetArrayLength(array);
         if (fLen < minLength) {
-            sk_throw();
+            LOG_ALWAYS_FATAL("bad length");
         }
         fPtr = env->GetFloatArrayElements(array, NULL);
     }
@@ -82,11 +82,11 @@ AutoJavaFloatArray::~AutoJavaFloatArray() {
 AutoJavaIntArray::AutoJavaIntArray(JNIEnv* env, jintArray array,
                                        int minLength)
 : fEnv(env), fArray(array), fPtr(NULL), fLen(0) {
-    SkASSERT(env);
+    ALOG_ASSERT(env);
     if (array) {
         fLen = env->GetArrayLength(array);
         if (fLen < minLength) {
-            sk_throw();
+            LOG_ALWAYS_FATAL("bad length");
         }
         fPtr = env->GetIntArrayElements(array, NULL);
     }
@@ -101,11 +101,11 @@ AutoJavaIntArray::~AutoJavaIntArray() {
 AutoJavaShortArray::AutoJavaShortArray(JNIEnv* env, jshortArray array,
                                        int minLength, JNIAccess access)
 : fEnv(env), fArray(array), fPtr(NULL), fLen(0) {
-    SkASSERT(env);
+    ALOG_ASSERT(env);
     if (array) {
         fLen = env->GetArrayLength(array);
         if (fLen < minLength) {
-            sk_throw();
+            LOG_ALWAYS_FATAL("bad length");
         }
         fPtr = env->GetShortArrayElements(array, NULL);
     }
@@ -121,11 +121,11 @@ AutoJavaShortArray::~AutoJavaShortArray() {
 AutoJavaByteArray::AutoJavaByteArray(JNIEnv* env, jbyteArray array,
                                        int minLength)
 : fEnv(env), fArray(array), fPtr(NULL), fLen(0) {
-    SkASSERT(env);
+    ALOG_ASSERT(env);
     if (array) {
         fLen = env->GetArrayLength(array);
         if (fLen < minLength) {
-            sk_throw();
+            LOG_ALWAYS_FATAL("bad length");
         }
         fPtr = env->GetByteArrayElements(array, NULL);
     }
@@ -211,7 +211,7 @@ static jmethodID gTransferParameters_constructorMethodID;
 
 void GraphicsJNI::get_jrect(JNIEnv* env, jobject obj, int* L, int* T, int* R, int* B)
 {
-    SkASSERT(env->IsInstanceOf(obj, gRect_class));
+    ALOG_ASSERT(env->IsInstanceOf(obj, gRect_class));
 
     *L = env->GetIntField(obj, gRect_leftFieldID);
     *T = env->GetIntField(obj, gRect_topFieldID);
@@ -221,7 +221,7 @@ void GraphicsJNI::get_jrect(JNIEnv* env, jobject obj, int* L, int* T, int* R, in
 
 void GraphicsJNI::set_jrect(JNIEnv* env, jobject obj, int L, int T, int R, int B)
 {
-    SkASSERT(env->IsInstanceOf(obj, gRect_class));
+    ALOG_ASSERT(env->IsInstanceOf(obj, gRect_class));
 
     env->SetIntField(obj, gRect_leftFieldID, L);
     env->SetIntField(obj, gRect_topFieldID, T);
@@ -231,7 +231,7 @@ void GraphicsJNI::set_jrect(JNIEnv* env, jobject obj, int L, int T, int R, int B
 
 SkIRect* GraphicsJNI::jrect_to_irect(JNIEnv* env, jobject obj, SkIRect* ir)
 {
-    SkASSERT(env->IsInstanceOf(obj, gRect_class));
+    ALOG_ASSERT(env->IsInstanceOf(obj, gRect_class));
 
     ir->set(env->GetIntField(obj, gRect_leftFieldID),
             env->GetIntField(obj, gRect_topFieldID),
@@ -242,7 +242,7 @@ SkIRect* GraphicsJNI::jrect_to_irect(JNIEnv* env, jobject obj, SkIRect* ir)
 
 void GraphicsJNI::irect_to_jrect(const SkIRect& ir, JNIEnv* env, jobject obj)
 {
-    SkASSERT(env->IsInstanceOf(obj, gRect_class));
+    ALOG_ASSERT(env->IsInstanceOf(obj, gRect_class));
 
     env->SetIntField(obj, gRect_leftFieldID, ir.fLeft);
     env->SetIntField(obj, gRect_topFieldID, ir.fTop);
@@ -252,7 +252,7 @@ void GraphicsJNI::irect_to_jrect(const SkIRect& ir, JNIEnv* env, jobject obj)
 
 SkRect* GraphicsJNI::jrectf_to_rect(JNIEnv* env, jobject obj, SkRect* r)
 {
-    SkASSERT(env->IsInstanceOf(obj, gRectF_class));
+    ALOG_ASSERT(env->IsInstanceOf(obj, gRectF_class));
 
     r->set(env->GetFloatField(obj, gRectF_leftFieldID),
            env->GetFloatField(obj, gRectF_topFieldID),
@@ -263,7 +263,7 @@ SkRect* GraphicsJNI::jrectf_to_rect(JNIEnv* env, jobject obj, SkRect* r)
 
 SkRect* GraphicsJNI::jrect_to_rect(JNIEnv* env, jobject obj, SkRect* r)
 {
-    SkASSERT(env->IsInstanceOf(obj, gRect_class));
+    ALOG_ASSERT(env->IsInstanceOf(obj, gRect_class));
 
     r->set(SkIntToScalar(env->GetIntField(obj, gRect_leftFieldID)),
            SkIntToScalar(env->GetIntField(obj, gRect_topFieldID)),
@@ -274,7 +274,7 @@ SkRect* GraphicsJNI::jrect_to_rect(JNIEnv* env, jobject obj, SkRect* r)
 
 void GraphicsJNI::rect_to_jrectf(const SkRect& r, JNIEnv* env, jobject obj)
 {
-    SkASSERT(env->IsInstanceOf(obj, gRectF_class));
+    ALOG_ASSERT(env->IsInstanceOf(obj, gRectF_class));
 
     env->SetFloatField(obj, gRectF_leftFieldID, SkScalarToFloat(r.fLeft));
     env->SetFloatField(obj, gRectF_topFieldID, SkScalarToFloat(r.fTop));
@@ -284,7 +284,7 @@ void GraphicsJNI::rect_to_jrectf(const SkRect& r, JNIEnv* env, jobject obj)
 
 SkIPoint* GraphicsJNI::jpoint_to_ipoint(JNIEnv* env, jobject obj, SkIPoint* point)
 {
-    SkASSERT(env->IsInstanceOf(obj, gPoint_class));
+    ALOG_ASSERT(env->IsInstanceOf(obj, gPoint_class));
 
     point->set(env->GetIntField(obj, gPoint_xFieldID),
                env->GetIntField(obj, gPoint_yFieldID));
@@ -293,7 +293,7 @@ SkIPoint* GraphicsJNI::jpoint_to_ipoint(JNIEnv* env, jobject obj, SkIPoint* poin
 
 void GraphicsJNI::ipoint_to_jpoint(const SkIPoint& ir, JNIEnv* env, jobject obj)
 {
-    SkASSERT(env->IsInstanceOf(obj, gPoint_class));
+    ALOG_ASSERT(env->IsInstanceOf(obj, gPoint_class));
 
     env->SetIntField(obj, gPoint_xFieldID, ir.fX);
     env->SetIntField(obj, gPoint_yFieldID, ir.fY);
@@ -301,7 +301,7 @@ void GraphicsJNI::ipoint_to_jpoint(const SkIPoint& ir, JNIEnv* env, jobject obj)
 
 SkPoint* GraphicsJNI::jpointf_to_point(JNIEnv* env, jobject obj, SkPoint* point)
 {
-    SkASSERT(env->IsInstanceOf(obj, gPointF_class));
+    ALOG_ASSERT(env->IsInstanceOf(obj, gPointF_class));
 
     point->set(env->GetIntField(obj, gPointF_xFieldID),
                env->GetIntField(obj, gPointF_yFieldID));
@@ -310,7 +310,7 @@ SkPoint* GraphicsJNI::jpointf_to_point(JNIEnv* env, jobject obj, SkPoint* point)
 
 void GraphicsJNI::point_to_jpointf(const SkPoint& r, JNIEnv* env, jobject obj)
 {
-    SkASSERT(env->IsInstanceOf(obj, gPointF_class));
+    ALOG_ASSERT(env->IsInstanceOf(obj, gPointF_class));
 
     env->SetFloatField(obj, gPointF_xFieldID, SkScalarToFloat(r.fX));
     env->SetFloatField(obj, gPointF_yFieldID, SkScalarToFloat(r.fY));
@@ -364,17 +364,17 @@ SkPixelRef* GraphicsJNI::refSkPixelRef(JNIEnv* env, jobject jbitmap) {
     return &bitmap;
 }
 SkColorType GraphicsJNI::getNativeBitmapColorType(JNIEnv* env, jobject jconfig) {
-    SkASSERT(env);
+    ALOG_ASSERT(env);
     if (NULL == jconfig) {
         return kUnknown_SkColorType;
     }
-    SkASSERT(env->IsInstanceOf(jconfig, gBitmapConfig_class));
+    ALOG_ASSERT(env->IsInstanceOf(jconfig, gBitmapConfig_class));
     int c = env->GetIntField(jconfig, gBitmapConfig_nativeInstanceID);
     return legacyBitmapConfigToColorType(c);
 }
 
 bool GraphicsJNI::isHardwareConfig(JNIEnv* env, jobject jconfig) {
-    SkASSERT(env);
+    ALOG_ASSERT(env);
     if (NULL == jconfig) {
         return false;
     }
@@ -387,9 +387,9 @@ jint GraphicsJNI::hardwareLegacyBitmapConfig() {
 }
 
 android::Canvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {
-    SkASSERT(env);
-    SkASSERT(canvas);
-    SkASSERT(env->IsInstanceOf(canvas, gCanvas_class));
+    ALOG_ASSERT(env);
+    ALOG_ASSERT(canvas);
+    ALOG_ASSERT(env->IsInstanceOf(canvas, gCanvas_class));
     jlong canvasHandle = env->GetLongField(canvas, gCanvas_nativeInstanceID);
     if (!canvasHandle) {
         return NULL;
@@ -399,12 +399,12 @@ android::Canvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {
 
 SkRegion* GraphicsJNI::getNativeRegion(JNIEnv* env, jobject region)
 {
-    SkASSERT(env);
-    SkASSERT(region);
-    SkASSERT(env->IsInstanceOf(region, gRegion_class));
+    ALOG_ASSERT(env);
+    ALOG_ASSERT(region);
+    ALOG_ASSERT(env->IsInstanceOf(region, gRegion_class));
     jlong regionHandle = env->GetLongField(region, gRegion_nativeInstanceID);
     SkRegion* r = reinterpret_cast<SkRegion*>(regionHandle);
-    SkASSERT(r);
+    ALOG_ASSERT(r);
     return r;
 }
 
@@ -412,7 +412,7 @@ SkRegion* GraphicsJNI::getNativeRegion(JNIEnv* env, jobject region)
 
 jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap)
 {
-    SkASSERT(bitmap != NULL);
+    ALOG_ASSERT(bitmap != NULL);
 
     jobject obj = env->NewObject(gBitmapRegionDecoder_class,
             gBitmapRegionDecoder_constructorMethodID,
@@ -423,7 +423,7 @@ jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecode
 
 jobject GraphicsJNI::createRegion(JNIEnv* env, SkRegion* region)
 {
-    SkASSERT(region != NULL);
+    ALOG_ASSERT(region != NULL);
     jobject obj = env->NewObject(gRegion_class, gRegion_constructorMethodID,
                                  reinterpret_cast<jlong>(region), 0);
     hasException(env); // For the side effect of logging.
@@ -645,7 +645,7 @@ bool RecyclingClippingPixelAllocator::allocPixelRef(SkBitmap* bitmap) {
     const int maxHeight = SkTMax(bitmap->height(), mRecycledBitmap->info().height());
     const SkImageInfo maxInfo = bitmap->info().makeWH(maxWidth, maxHeight);
     const size_t rowBytes = maxInfo.minRowBytes();
-    const size_t bytesNeeded = maxInfo.getSafeSize(rowBytes);
+    const size_t bytesNeeded = maxInfo.computeByteSize(rowBytes);
     if (bytesNeeded <= mRecycledBytes) {
         // Here we take advantage of reconfigure() to reset the rowBytes
         // of mRecycledBitmap.  It is very important that we pass in

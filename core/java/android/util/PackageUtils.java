@@ -105,7 +105,7 @@ public final class PackageUtils {
      * @param data The data.
      * @return The digest or null if an error occurs.
      */
-    public static @Nullable String computeSha256Digest(@NonNull byte[] data) {
+    public static @Nullable byte[] computeSha256DigestBytes(@NonNull byte[] data) {
         MessageDigest messageDigest;
         try {
             messageDigest = MessageDigest.getInstance("SHA256");
@@ -116,6 +116,15 @@ public final class PackageUtils {
 
         messageDigest.update(data);
 
-        return ByteStringUtils.toHexString(messageDigest.digest());
+        return messageDigest.digest();
+    }
+
+    /**
+     * Computes the SHA256 digest of some data.
+     * @param data The data.
+     * @return The digest or null if an error occurs.
+     */
+    public static @Nullable String computeSha256Digest(@NonNull byte[] data) {
+        return ByteStringUtils.toHexString(computeSha256DigestBytes(data));
     }
 }

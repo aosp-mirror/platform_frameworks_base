@@ -163,11 +163,14 @@ def assert_font_supports_all_of_chars(font, chars):
             'U+%04X was not found in %s' % (char, font))
 
 
-def assert_font_supports_none_of_chars(font, chars):
+def assert_font_supports_none_of_chars(font, chars, fallbackName):
     best_cmap = get_best_cmap(font)
     for char in chars:
-        assert char not in best_cmap, (
-            'U+%04X was found in %s' % (char, font))
+        if fallbackName:
+            assert char not in best_cmap, 'U+%04X was found in %s' % (char, font)
+        else:
+            assert char not in best_cmap, (
+                'U+%04X was found in %s in fallback %s' % (char, font, fallbackName))
 
 
 def assert_font_supports_all_sequences(font, sequences):
@@ -196,19 +199,21 @@ def check_hyphens(hyphens_dir):
 
 
 class FontRecord(object):
-    def __init__(self, name, scripts, variant, weight, style, font):
+    def __init__(self, name, scripts, variant, weight, style, fallback_for, font):
         self.name = name
         self.scripts = scripts
         self.variant = variant
         self.weight = weight
         self.style = style
+        self.fallback_for = fallback_for
         self.font = font
 
 
 def parse_fonts_xml(fonts_xml_path):
-    global _script_to_font_map, _fallback_chain
+    global _script_to_font_map, _fallback_chains, _all_fonts
     _script_to_font_map = collections.defaultdict(set)
-    _fallback_chain = []
+    _fallback_chains = {}
+    _all_fonts = []
     tree = ElementTree.parse(fonts_xml_path)
     families = tree.findall('family')
     # Minikin supports up to 254 but users can place their own font at the first
@@ -225,9 +230,16 @@ def parse_fonts_xml(fonts_xml_path):
                 'No variant expected for LGC font %s.' % name)
             assert langs is None, (
                 'No language expected for LGC fonts %s.' % name)
+            assert name not in _fallback_chains, 'Duplicated name entry %s' % name
+            _fallback_chains[name] = []
         else:
             assert variant in {None, 'elegant', 'compact'}, (
                 'Unexpected value for variant: %s' % variant)
+
+    for family in families:
+        name = family.get('name')
+        variant = family.get('variant')
+        langs = family.get('lang')
 
         if langs:
             langs = langs.split()
@@ -247,17 +259,39 @@ def parse_fonts_xml(fonts_xml_path):
             assert style in {'normal', 'italic'}, (
                 'Unknown style "%s"' % style)
 
+            fallback_for = child.get('fallbackFor')
+
+            assert not name or not fallback_for, (
+                'name and fallbackFor cannot be present at the same time')
+            assert not fallback_for or fallback_for in _fallback_chains, (
+                'Unknown fallback name: %s' % fallback_for)
+
             index = child.get('index')
             if index:
                 index = int(index)
 
-            _fallback_chain.append(FontRecord(
+            if not path.exists(path.join(_fonts_dir, font_file)):
+                continue # Missing font is a valid case. Just ignore the missing font files.
+
+            record = FontRecord(
                 name,
                 frozenset(scripts),
                 variant,
                 weight,
                 style,
-                (font_file, index)))
+                fallback_for,
+                (font_file, index))
+
+            _all_fonts.append(record)
+
+            if not fallback_for:
+                if not name or name == 'sans-serif':
+                    for _, fallback in _fallback_chains.iteritems():
+                        fallback.append(record)
+                else:
+                    _fallback_chains[name].append(record)
+            else:
+                _fallback_chains[fallback_for].append(record)
 
             if name: # non-empty names are used for default LGC fonts
                 map_scripts = {'Latn', 'Grek', 'Cyrl'}
@@ -274,7 +308,7 @@ def check_emoji_coverage(all_emoji, equivalent_emoji):
 
 def get_emoji_font():
     emoji_fonts = [
-        record.font for record in _fallback_chain
+        record.font for record in _all_fonts
         if 'Zsye' in record.scripts]
     assert len(emoji_fonts) == 1, 'There are %d emoji fonts.' % len(emoji_fonts)
     return emoji_fonts[0]
@@ -318,35 +352,36 @@ def check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji):
 
 def check_emoji_defaults(default_emoji):
     missing_text_chars = _emoji_properties['Emoji'] - default_emoji
-    emoji_font_seen = False
-    for record in _fallback_chain:
-        if 'Zsye' in record.scripts:
-            emoji_font_seen = True
-            # No need to check the emoji font
-            continue
-        # For later fonts, we only check them if they have a script
-        # defined, since the defined script may get them to a higher
-        # score even if they appear after the emoji font. However,
-        # we should skip checking the text symbols font, since
-        # symbol fonts should be able to override the emoji display
-        # style when 'Zsym' is explicitly specified by the user.
-        if emoji_font_seen and (not record.scripts or 'Zsym' in record.scripts):
-            continue
+    for name, fallback_chain in _fallback_chains.iteritems():
+        emoji_font_seen = False
+        for record in fallback_chain:
+            if 'Zsye' in record.scripts:
+                emoji_font_seen = True
+                # No need to check the emoji font
+                continue
+            # For later fonts, we only check them if they have a script
+            # defined, since the defined script may get them to a higher
+            # score even if they appear after the emoji font. However,
+            # we should skip checking the text symbols font, since
+            # symbol fonts should be able to override the emoji display
+            # style when 'Zsym' is explicitly specified by the user.
+            if emoji_font_seen and (not record.scripts or 'Zsym' in record.scripts):
+                continue
 
-        # Check default emoji-style characters
-        assert_font_supports_none_of_chars(record.font, sorted(default_emoji))
+            # Check default emoji-style characters
+            assert_font_supports_none_of_chars(record.font, sorted(default_emoji), name)
 
-        # Mark default text-style characters appearing in fonts above the emoji
-        # font as seen
-        if not emoji_font_seen:
-            missing_text_chars -= set(get_best_cmap(record.font))
+            # Mark default text-style characters appearing in fonts above the emoji
+            # font as seen
+            if not emoji_font_seen:
+                missing_text_chars -= set(get_best_cmap(record.font))
 
-    # Noto does not have monochrome glyphs for Unicode 7.0 wingdings and
-    # webdings yet.
-    missing_text_chars -= _chars_by_age['7.0']
-    assert missing_text_chars == set(), (
-        'Text style version of some emoji characters are missing: ' +
-            repr(missing_text_chars))
+        # Noto does not have monochrome glyphs for Unicode 7.0 wingdings and
+        # webdings yet.
+        missing_text_chars -= _chars_by_age['7.0']
+        assert missing_text_chars == set(), (
+            'Text style version of some emoji characters are missing: ' +
+                repr(missing_text_chars))
 
 
 # Setting reverse to true returns a dictionary that maps the values to sets of
@@ -436,18 +471,23 @@ def parse_ucd(ucd_path):
     _emoji_zwj_sequences.update(parse_unicode_datafile(
         path.join(ucd_path, 'additions', 'emoji-zwj-sequences.txt')))
 
+    exclusions = parse_unicode_datafile(path.join(ucd_path, 'additions', 'emoji-exclusions.txt'))
+    _emoji_sequences = remove_emoji_exclude(_emoji_sequences, exclusions)
+    _emoji_zwj_sequences = remove_emoji_exclude(_emoji_zwj_sequences, exclusions)
+    _emoji_variation_sequences = remove_emoji_variation_exclude(_emoji_variation_sequences, exclusions)
+
+def remove_emoji_variation_exclude(source, items):
+    return source.difference(items.keys())
+
+def remove_emoji_exclude(source, items):
+    return {k: v for k, v in source.items() if k not in items}
 
 def flag_sequence(territory_code):
     return tuple(0x1F1E6 + ord(ch) - ord('A') for ch in territory_code)
 
-
 UNSUPPORTED_FLAGS = frozenset({
-    flag_sequence('BL'), flag_sequence('BQ'), flag_sequence('DG'),
-    flag_sequence('EA'), flag_sequence('EH'), flag_sequence('FK'),
-    flag_sequence('GF'), flag_sequence('GP'), flag_sequence('GS'),
-    flag_sequence('MF'), flag_sequence('MQ'), flag_sequence('NC'),
-    flag_sequence('PM'), flag_sequence('RE'), flag_sequence('TF'),
-    flag_sequence('WF'), flag_sequence('XK'), flag_sequence('YT'),
+    flag_sequence('BL'), flag_sequence('BQ'), flag_sequence('MQ'),
+    flag_sequence('RE'), flag_sequence('TF'),
 })
 
 EQUIVALENT_FLAGS = {
@@ -487,11 +527,16 @@ LEGACY_ANDROID_EMOJI = {
 ZWJ_IDENTICALS = {
     # KISS
     (0x1F469, 0x200D, 0x2764, 0x200D, 0x1F48B, 0x200D, 0x1F468): 0x1F48F,
-    # COUPLE WITH HEART
-    (0x1F469, 0x200D, 0x2764, 0x200D, 0x1F468): 0x1F491,
-    # FAMILY
-    (0x1F468, 0x200D, 0x1F469, 0x200D, 0x1F466): 0x1F46A,
 }
+
+SAME_FLAG_MAPPINGS = [
+    # Diego Garcia and British Indian Ocean Territory
+    ((0x1F1EE, 0x1F1F4), (0x1F1E9, 0x1F1EC)),
+    # St. Martin and France
+    ((0x1F1F2, 0x1F1EB), (0x1F1EB, 0x1F1F7)),
+    # Spain and Ceuta & Melilla
+    ((0x1F1EA, 0x1F1F8), (0x1F1EA, 0x1F1E6)),
+]
 
 ZWJ = 0x200D
 FEMALE_SIGN = 0x2640
@@ -541,6 +586,8 @@ GENDER_DEFAULTS = [
     (0x1F9DD, FEMALE_SIGN), # ELF
     (0x1F9DE, FEMALE_SIGN), # GENIE
     (0x1F9DF, FEMALE_SIGN), # ZOMBIE
+    (0X1F9B8, FEMALE_SIGN), # SUPERVILLAIN
+    (0x1F9B9, FEMALE_SIGN), # SUPERHERO
 ]
 
 def is_fitzpatrick_modifier(cp):
@@ -592,6 +639,9 @@ def compute_expected_emoji():
         all_sequences.add(reversed_seq)
         equivalent_emoji[reversed_seq] = sequence
 
+    for first, second in SAME_FLAG_MAPPINGS:
+        equivalent_emoji[first] = second
+
     # Remove unsupported flags
     all_sequences.difference_update(UNSUPPORTED_FLAGS)
 
@@ -626,8 +676,19 @@ def compute_expected_emoji():
     return all_emoji, default_emoji, equivalent_emoji
 
 
+def check_compact_only_fallback():
+    for name, fallback_chain in _fallback_chains.iteritems():
+        for record in fallback_chain:
+            if record.variant == 'compact':
+                same_script_elegants = [x for x in fallback_chain
+                    if x.scripts == record.scripts and x.variant == 'elegant']
+                assert same_script_elegants, (
+                    '%s must be in elegant of %s as fallback of "%s" too' % (
+                    record.font, record.scripts, record.fallback_for),)
+
+
 def check_vertical_metrics():
-    for record in _fallback_chain:
+    for record in _all_fonts:
         if record.name in ['sans-serif', 'sans-serif-condensed']:
             font = open_font(record.font)
             assert font['head'].yMax == 2163 and font['head'].yMin == -555, (
@@ -646,11 +707,12 @@ def check_vertical_metrics():
 def check_cjk_punctuation():
     cjk_scripts = {'Hans', 'Hant', 'Jpan', 'Kore'}
     cjk_punctuation = range(0x3000, 0x301F + 1)
-    for record in _fallback_chain:
-        if record.scripts.intersection(cjk_scripts):
-            # CJK font seen. Stop checking the rest of the fonts.
-            break
-        assert_font_supports_none_of_chars(record.font, cjk_punctuation)
+    for name, fallback_chain in _fallback_chains.iteritems():
+        for record in fallback_chain:
+            if record.scripts.intersection(cjk_scripts):
+                # CJK font seen. Stop checking the rest of the fonts.
+                break
+            assert_font_supports_none_of_chars(record.font, cjk_punctuation, name)
 
 
 def main():
@@ -660,6 +722,8 @@ def main():
 
     fonts_xml_path = path.join(target_out, 'etc', 'fonts.xml')
     parse_fonts_xml(fonts_xml_path)
+
+    check_compact_only_fallback()
 
     check_vertical_metrics()
 

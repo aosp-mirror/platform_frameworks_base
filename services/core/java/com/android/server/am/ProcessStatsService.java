@@ -23,11 +23,15 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.service.procstats.ProcessStatsProto;
+import android.service.procstats.ProcessStatsServiceDumpProto;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
+import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.DumpUtils;
@@ -117,12 +121,12 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     }
 
     public ProcessState getProcessStateLocked(String packageName,
-            int uid, int versionCode, String processName) {
+            int uid, long versionCode, String processName) {
         return mProcessStats.getProcessStateLocked(packageName, uid, versionCode, processName);
     }
 
     public ServiceState getServiceStateLocked(String packageName, int uid,
-            int versionCode, String processName, String className) {
+            long versionCode, String processName, String className) {
         return mProcessStats.getServiceStateLocked(packageName, uid, versionCode, processName,
                 className);
     }
@@ -131,6 +135,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return mMemFactorLowered;
     }
 
+    @GuardedBy("mAm")
     public boolean setMemFactorLocked(int memFactor, boolean screenOn, long now) {
         mMemFactorLowered = memFactor < mLastMemOnlyState;
         mLastMemOnlyState = memFactor;
@@ -147,12 +152,13 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             }
             mProcessStats.mMemFactor = memFactor;
             mProcessStats.mStartTime = now;
-            final ArrayMap<String, SparseArray<SparseArray<ProcessStats.PackageState>>> pmap
+            final ArrayMap<String, SparseArray<LongSparseArray<ProcessStats.PackageState>>> pmap
                     = mProcessStats.mPackages.getMap();
             for (int ipkg=pmap.size()-1; ipkg>=0; ipkg--) {
-                final SparseArray<SparseArray<ProcessStats.PackageState>> uids = pmap.valueAt(ipkg);
+                final SparseArray<LongSparseArray<ProcessStats.PackageState>> uids =
+                        pmap.valueAt(ipkg);
                 for (int iuid=uids.size()-1; iuid>=0; iuid--) {
-                    final SparseArray<ProcessStats.PackageState> vers = uids.valueAt(iuid);
+                    final LongSparseArray<ProcessStats.PackageState> vers = uids.valueAt(iuid);
                     for (int iver=vers.size()-1; iver>=0; iver--) {
                         final ProcessStats.PackageState pkg = vers.valueAt(iver);
                         final ArrayMap<String, ServiceState> services = pkg.mServices;
@@ -215,8 +221,9 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     }
 
     public void writeStateLocked(boolean sync, final boolean commit) {
+        final long totalTime;
         synchronized (mPendingWriteLock) {
-            long now = SystemClock.uptimeMillis();
+            final long now = SystemClock.uptimeMillis();
             if (mPendingWrite == null || !mPendingWriteCommitted) {
                 mPendingWrite = Parcel.obtain();
                 mProcessStats.mTimePeriodEndRealtime = SystemClock.elapsedRealtime();
@@ -231,21 +238,22 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             if (commit) {
                 mProcessStats.resetSafely();
                 updateFile();
+                mAm.requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
             }
             mLastWriteTime = SystemClock.uptimeMillis();
-            if (DEBUG) Slog.d(TAG, "Prepared write state in "
-                    + (SystemClock.uptimeMillis()-now) + "ms");
+            totalTime = SystemClock.uptimeMillis() - now;
+            if (DEBUG) Slog.d(TAG, "Prepared write state in " + now + "ms");
             if (!sync) {
                 BackgroundThread.getHandler().post(new Runnable() {
                     @Override public void run() {
-                        performWriteState();
+                        performWriteState(totalTime);
                     }
                 });
                 return;
             }
         }
 
-        performWriteState();
+        performWriteState(totalTime);
     }
 
     private void updateFile() {
@@ -254,7 +262,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         mLastWriteTime = SystemClock.uptimeMillis();
     }
 
-    void performWriteState() {
+    void performWriteState(long initialTime) {
         if (DEBUG) Slog.d(TAG, "Performing write to " + mFile.getBaseFile());
         Parcel data;
         AtomicFile file;
@@ -270,12 +278,15 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             mWriteLock.lock();
         }
 
+        final long startTime = SystemClock.uptimeMillis();
         FileOutputStream stream = null;
         try {
             stream = file.startWrite();
             stream.write(data.marshall());
             stream.flush();
             file.finishWrite(stream);
+            com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(
+                    "procstats", SystemClock.uptimeMillis() - startTime + initialTime);
             if (DEBUG) Slog.d(TAG, "Write completed successfully!");
         } catch (IOException e) {
             Slog.w(TAG, "Error writing process statistics", e);
@@ -305,17 +316,17 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                             Slog.w(TAG, "  Uid " + uids.keyAt(iu) + ": " + uids.valueAt(iu));
                         }
                     }
-                    ArrayMap<String, SparseArray<SparseArray<ProcessStats.PackageState>>> pkgMap
+                    ArrayMap<String, SparseArray<LongSparseArray<ProcessStats.PackageState>>> pkgMap
                             = stats.mPackages.getMap();
                     final int NPKG = pkgMap.size();
                     for (int ip=0; ip<NPKG; ip++) {
                         Slog.w(TAG, "Package: " + pkgMap.keyAt(ip));
-                        SparseArray<SparseArray<ProcessStats.PackageState>> uids
+                        SparseArray<LongSparseArray<ProcessStats.PackageState>> uids
                                 = pkgMap.valueAt(ip);
                         final int NUID = uids.size();
                         for (int iu=0; iu<NUID; iu++) {
                             Slog.w(TAG, "  Uid: " + uids.keyAt(iu));
-                            SparseArray<ProcessStats.PackageState> vers = uids.valueAt(iu);
+                            LongSparseArray<ProcessStats.PackageState> vers = uids.valueAt(iu);
                             final int NVERS = vers.size();
                             for (int iv=0; iv<NVERS; iv++) {
                                 Slog.w(TAG, "    Vers: " + vers.keyAt(iv));
@@ -622,13 +633,17 @@ public final class ProcessStatsService extends IProcessStats.Stub {
 
         long ident = Binder.clearCallingIdentity();
         try {
-            dumpInner(fd, pw, args);
+            if (args.length > 0 && "--proto".equals(args[0])) {
+                dumpProto(fd);
+            } else {
+                dumpInner(pw, args);
+            }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    private void dumpInner(FileDescriptor fd, PrintWriter pw, String[] args) {
+    private void dumpInner(PrintWriter pw, String[] args) {
         final long now = SystemClock.uptimeMillis();
 
         boolean isCheckin = false;
@@ -771,12 +786,14 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 } else if ("--reset".equals(arg)) {
                     synchronized (mAm) {
                         mProcessStats.resetSafely();
+                        mAm.requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
                         pw.println("Process stats reset.");
                         quit = true;
                     }
                 } else if ("--clear".equals(arg)) {
                     synchronized (mAm) {
                         mProcessStats.resetSafely();
+                        mAm.requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, false);
                         ArrayList<String> files = getCommittedFiles(0, true, true);
                         if (files != null) {
                             for (int fi=0; fi<files.size(); fi++) {
@@ -1037,5 +1054,39 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                         dumpDetails, dumpFullDetails, dumpAll, activeOnly);
             }
         }
+    }
+
+    private void dumpAggregatedStats(ProtoOutputStream proto, long fieldId, int aggregateHours, long now) {
+        ParcelFileDescriptor pfd = getStatsOverTime(aggregateHours*60*60*1000
+                - (ProcessStats.COMMIT_PERIOD/2));
+        if (pfd == null) {
+            return;
+        }
+        ProcessStats stats = new ProcessStats(false);
+        InputStream stream = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+        stats.read(stream);
+        if (stats.mReadError != null) {
+            return;
+        }
+        stats.writeToProto(proto, fieldId, now);
+    }
+
+    private void dumpProto(FileDescriptor fd) {
+        final ProtoOutputStream proto = new ProtoOutputStream(fd);
+
+        // dump current procstats
+        long now;
+        synchronized (mAm) {
+            now = SystemClock.uptimeMillis();
+            mProcessStats.writeToProto(proto,ProcessStatsServiceDumpProto.PROCSTATS_NOW, now);
+        }
+
+        // aggregated over last 3 hours procstats
+        dumpAggregatedStats(proto, ProcessStatsServiceDumpProto.PROCSTATS_OVER_3HRS, 3, now);
+
+        // aggregated over last 24 hours procstats
+        dumpAggregatedStats(proto, ProcessStatsServiceDumpProto.PROCSTATS_OVER_24HRS, 24, now);
+
+        proto.flush();
     }
 }

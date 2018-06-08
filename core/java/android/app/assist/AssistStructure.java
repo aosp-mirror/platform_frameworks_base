@@ -4,6 +4,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -23,6 +24,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.view.View.AutofillImportance;
 import android.view.ViewRootImpl;
 import android.view.ViewStructure;
 import android.view.ViewStructure.HtmlInfo;
@@ -31,6 +33,8 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -359,6 +363,8 @@ public class AssistStructure implements Parcelable {
             if (DEBUG_PARCEL) Log.d(TAG, "Finished reading: at " + mCurParcel.dataPosition()
                     + ", avail=" + mCurParcel.dataAvail() + ", windows=" + mNumReadWindows
                     + ", views=" + mNumReadViews);
+            mCurParcel.recycle();
+            mCurParcel = null; // Parcel cannot be used after recycled.
         }
 
         Parcel readParcel(int validateToken, int level) {
@@ -396,20 +402,23 @@ public class AssistStructure implements Parcelable {
 
         private void fetchData() {
             Parcel data = Parcel.obtain();
-            data.writeInterfaceToken(DESCRIPTOR);
-            data.writeStrongBinder(mTransferToken);
-            if (DEBUG_PARCEL) Log.d(TAG, "Requesting data with token " + mTransferToken);
-            if (mCurParcel != null) {
-                mCurParcel.recycle();
-            }
-            mCurParcel = Parcel.obtain();
             try {
-                mChannel.transact(TRANSACTION_XFER, data, mCurParcel, 0);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failure reading AssistStructure data", e);
-                throw new IllegalStateException("Failure reading AssistStructure data: " + e);
+                data.writeInterfaceToken(DESCRIPTOR);
+                data.writeStrongBinder(mTransferToken);
+                if (DEBUG_PARCEL) Log.d(TAG, "Requesting data with token " + mTransferToken);
+                if (mCurParcel != null) {
+                    mCurParcel.recycle();
+                }
+                mCurParcel = Parcel.obtain();
+                try {
+                    mChannel.transact(TRANSACTION_XFER, data, mCurParcel, 0);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failure reading AssistStructure data", e);
+                    throw new IllegalStateException("Failure reading AssistStructure data: " + e);
+                }
+            } finally {
+                data.recycle();
             }
-            data.recycle();
             mNumReadWindows = mNumReadViews = 0;
         }
     }
@@ -493,9 +502,8 @@ public class AssistStructure implements Parcelable {
             ViewNodeBuilder builder = new ViewNodeBuilder(assist, mRoot, false);
             if ((root.getWindowFlags() & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
                 if (forAutoFill) {
-                    final int autofillFlags = (flags & FillRequest.FLAG_MANUAL_REQUEST) != 0
-                            ? View.AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
-                    view.onProvideAutofillStructure(builder, autofillFlags);
+                    final int viewFlags = resolveViewAutofillFlags(view.getContext(), flags);
+                    view.onProvideAutofillStructure(builder, viewFlags);
                 } else {
                     // This is a secure window, so it doesn't want a screenshot, and that
                     // means we should also not copy out its view hierarchy for Assist
@@ -505,9 +513,8 @@ public class AssistStructure implements Parcelable {
                 }
             }
             if (forAutoFill) {
-                final int autofillFlags = (flags & FillRequest.FLAG_MANUAL_REQUEST) != 0
-                        ? View.AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
-                view.dispatchProvideAutofillStructure(builder, autofillFlags);
+                final int viewFlags = resolveViewAutofillFlags(view.getContext(), flags);
+                view.dispatchProvideAutofillStructure(builder, viewFlags);
             } else {
                 view.dispatchProvideStructure(builder);
             }
@@ -523,6 +530,12 @@ public class AssistStructure implements Parcelable {
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             mDisplayId = in.readInt();
             mRoot = new ViewNode(reader, 0);
+        }
+
+        int resolveViewAutofillFlags(Context context, int fillRequestFlags) {
+            return (fillRequestFlags & FillRequest.FLAG_MANUAL_REQUEST) != 0
+                        || context.isAutofillCompatibilityEnabled()
+                    ? View.AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
         }
 
         void writeSelfToParcel(Parcel out, PooledStringWriter pwriter, float[] tmpMatrix) {
@@ -616,6 +629,11 @@ public class AssistStructure implements Parcelable {
         CharSequence[] mAutofillOptions;
         boolean mSanitized;
         HtmlInfo mHtmlInfo;
+        int mMinEms = -1;
+        int mMaxEms = -1;
+        int mMaxLength = -1;
+        @Nullable String mTextIdEntry;
+        @AutofillImportance int mImportantForAutofill;
 
         // POJO used to override some autofill-related values when the node is parcelized.
         // Not written to parcel.
@@ -674,6 +692,7 @@ public class AssistStructure implements Parcelable {
 
         ViewNodeText mText;
         int mInputType;
+        String mWebScheme;
         String mWebDomain;
         Bundle mExtras;
         LocaleList mLocaleList;
@@ -692,7 +711,7 @@ public class AssistStructure implements Parcelable {
             final int flags = mFlags;
             if ((flags&FLAGS_HAS_ID) != 0) {
                 mId = in.readInt();
-                if (mId != 0) {
+                if (mId != View.NO_ID) {
                     mIdEntry = preader.readString();
                     if (mIdEntry != null) {
                         mIdType = preader.readString();
@@ -712,6 +731,11 @@ public class AssistStructure implements Parcelable {
                 if (p instanceof HtmlInfo) {
                     mHtmlInfo = (HtmlInfo) p;
                 }
+                mMinEms = in.readInt();
+                mMaxEms = in.readInt();
+                mMaxLength = in.readInt();
+                mTextIdEntry = preader.readString();
+                mImportantForAutofill = in.readInt();
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
                 mX = in.readInt();
@@ -751,6 +775,7 @@ public class AssistStructure implements Parcelable {
                 mInputType = in.readInt();
             }
             if ((flags&FLAGS_HAS_URL) != 0) {
+                mWebScheme = in.readString();
                 mWebDomain = in.readString();
             }
             if ((flags&FLAGS_HAS_LOCALE_LIST) != 0) {
@@ -813,7 +838,7 @@ public class AssistStructure implements Parcelable {
             if (mInputType != 0) {
                 flags |= FLAGS_HAS_INPUT_TYPE;
             }
-            if (mWebDomain != null) {
+            if (mWebScheme != null || mWebDomain != null) {
                 flags |= FLAGS_HAS_URL;
             }
             if (mLocaleList != null) {
@@ -844,7 +869,7 @@ public class AssistStructure implements Parcelable {
             out.writeInt(writtenFlags);
             if ((flags&FLAGS_HAS_ID) != 0) {
                 out.writeInt(mId);
-                if (mId != 0) {
+                if (mId != View.NO_ID) {
                     pwriter.writeString(mIdEntry);
                     if (mIdEntry != null) {
                         pwriter.writeString(mIdType);
@@ -874,6 +899,11 @@ public class AssistStructure implements Parcelable {
                 } else {
                     out.writeParcelable(null, 0);
                 }
+                out.writeInt(mMinEms);
+                out.writeInt(mMaxEms);
+                out.writeInt(mMaxLength);
+                pwriter.writeString(mTextIdEntry);
+                out.writeInt(mImportantForAutofill);
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
                 out.writeInt(mX);
@@ -908,6 +938,7 @@ public class AssistStructure implements Parcelable {
                 out.writeInt(mInputType);
             }
             if ((flags&FLAGS_HAS_URL) != 0) {
+                out.writeString(mWebScheme);
                 out.writeString(mWebDomain);
             }
             if ((flags&FLAGS_HAS_LOCALE_LIST) != 0) {
@@ -1272,6 +1303,35 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
+         * @hide
+         */
+        public void setWebDomain(@Nullable String domain) {
+            if (domain == null) return;
+
+            final Uri uri = Uri.parse(domain);
+            if (uri == null) {
+                // Cannot log domain because it could contain PII;
+                Log.w(TAG, "Failed to parse web domain");
+                return;
+            }
+            mWebScheme = uri.getScheme();
+            mWebDomain = uri.getHost();
+        }
+
+        /**
+         * Returns the scheme of the HTML document represented by this view.
+         *
+         * <p>Typically used when the view associated with the view is a container for an HTML
+         * document.
+         *
+         * @return scheme-only part of the document. For example, if the full URL is
+         * {@code https://example.com/login?user=my_user}, it returns {@code https}.
+         */
+        @Nullable public String getWebScheme() {
+            return mWebScheme;
+        }
+
+        /**
          * Returns the HTML properties associated with this view.
          *
          * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
@@ -1400,6 +1460,17 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
+         * Gets the identifier used to set the text associated with this view.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
+         * not for assist purposes.
+         */
+        @Nullable
+        public String getTextIdEntry() {
+            return mTextIdEntry;
+        }
+
+        /**
          * Return additional hint text associated with the node; this is typically used with
          * a node that takes user input, describing to the user what the input means.
          */
@@ -1427,6 +1498,49 @@ public class AssistStructure implements Parcelable {
          */
         public ViewNode getChildAt(int index) {
             return mChildren[index];
+        }
+
+        /**
+         * Returns the minimum width in ems of the text associated with this node, or {@code -1}
+         * if not supported by the node.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
+         * not for assist purposes.
+         */
+        public int getMinTextEms() {
+            return mMinEms;
+        }
+
+        /**
+         * Returns the maximum width in ems of the text associated with this node, or {@code -1}
+         * if not supported by the node.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
+         * not for assist purposes.
+         */
+        public int getMaxTextEms() {
+            return mMaxEms;
+        }
+
+        /**
+         * Returns the maximum length of the text associated with this node node, or {@code -1}
+         * if not supported by the node or not set.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
+         * not for assist purposes.
+         */
+        public int getMaxTextLength() {
+            return mMaxLength;
+        }
+
+        /**
+         * Gets the {@link View#setImportantForAutofill(int) importantForAutofill mode} of
+         * the view associated with this node.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes.
+         */
+        public @AutofillImportance int getImportantForAutofill() {
+            return mImportantForAutofill;
         }
     }
 
@@ -1621,6 +1735,11 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
+        public void setTextIdEntry(@NonNull String entryName) {
+            mNode.mTextIdEntry = Preconditions.checkNotNull(entryName);
+        }
+
+        @Override
         public void setHint(CharSequence hint) {
             getNodeText().mHint = hint != null ? hint.toString() : null;
         }
@@ -1755,8 +1874,28 @@ public class AssistStructure implements Parcelable {
         }
 
         @Override
+        public void setImportantForAutofill(@AutofillImportance int mode) {
+            mNode.mImportantForAutofill = mode;
+        }
+
+        @Override
         public void setInputType(int inputType) {
             mNode.mInputType = inputType;
+        }
+
+        @Override
+        public void setMinTextEms(int minEms) {
+            mNode.mMinEms = minEms;
+        }
+
+        @Override
+        public void setMaxTextEms(int maxEms) {
+            mNode.mMaxEms = maxEms;
+        }
+
+        @Override
+        public void setMaxTextLength(int maxLength) {
+            mNode.mMaxLength = maxLength;
         }
 
         @Override
@@ -1766,11 +1905,7 @@ public class AssistStructure implements Parcelable {
 
         @Override
         public void setWebDomain(@Nullable String domain) {
-            if (domain == null) {
-                mNode.mWebDomain = null;
-                return;
-            }
-            mNode.mWebDomain = Uri.parse(domain).getHost();
+            mNode.setWebDomain(domain);
         }
 
         @Override
@@ -2001,6 +2136,7 @@ public class AssistStructure implements Parcelable {
             Log.i(TAG, prefix + "  Text color fg: #" + Integer.toHexString(node.getTextColor())
                     + ", bg: #" + Integer.toHexString(node.getTextBackgroundColor()));
             Log.i(TAG, prefix + "  Input type: " + node.getInputType());
+            Log.i(TAG, prefix + "  Resource id: " + node.getTextIdEntry());
         }
         String webDomain = node.getWebDomain();
         if (webDomain != null) {
@@ -2036,7 +2172,8 @@ public class AssistStructure implements Parcelable {
                     + ", options=" + Arrays.toString(node.getAutofillOptions())
                     + ", hints=" + Arrays.toString(node.getAutofillHints())
                     + ", value=" + node.getAutofillValue()
-                    + ", sanitized=" + node.isSanitized());
+                    + ", sanitized=" + node.isSanitized()
+                    + ", importantFor=" + node.getImportantForAutofill());
         }
 
         final int NCHILDREN = node.getChildCount();
@@ -2056,6 +2193,16 @@ public class AssistStructure implements Parcelable {
     public ComponentName getActivityComponent() {
         ensureData();
         return mActivityComponent;
+    }
+
+    /**
+     * Called by Autofill server when app forged a different value.
+     *
+     * @hide
+     */
+    public void setActivityComponent(ComponentName componentName) {
+        ensureData();
+        mActivityComponent = componentName;
     }
 
     /** @hide */
@@ -2088,6 +2235,22 @@ public class AssistStructure implements Parcelable {
     public WindowNode getWindowNodeAt(int index) {
         ensureData();
         return mWindowNodes.get(index);
+    }
+
+    // TODO(b/35708678): temporary method that disable one-way warning flag on binder.
+    /** @hide */
+    public void ensureDataForAutofill() {
+        if (mHaveData) {
+            return;
+        }
+        mHaveData = true;
+        Binder.allowBlocking(mReceiveChannel);
+        try {
+            ParcelTransferReader reader = new ParcelTransferReader(mReceiveChannel);
+            reader.go();
+        } finally {
+            Binder.defaultBlocking(mReceiveChannel);
+        }
     }
 
     /** @hide */

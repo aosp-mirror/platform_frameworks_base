@@ -18,11 +18,14 @@ package android.net.wifi;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
 import android.os.Parcel;
+import android.net.MacAddress;
 import android.net.wifi.WifiConfiguration.NetworkSelectionStatus;
+import android.net.wifi.WifiInfo;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -49,6 +52,7 @@ public class WifiConfigurationTest {
         String cookie = "C O.o |<IE";
         WifiConfiguration config = new WifiConfiguration();
         config.setPasspointManagementObjectTree(cookie);
+        MacAddress macBeforeParcel = config.getOrCreateRandomizedMacAddress();
         Parcel parcelW = Parcel.obtain();
         config.writeToParcel(parcelW, 0);
         byte[] bytes = parcelW.marshall();
@@ -59,8 +63,9 @@ public class WifiConfigurationTest {
         parcelR.setDataPosition(0);
         WifiConfiguration reconfig = WifiConfiguration.CREATOR.createFromParcel(parcelR);
 
-        // lacking a useful config.equals, check one field near the end.
+        // lacking a useful config.equals, check two fields near the end.
         assertEquals(cookie, reconfig.getMoTree());
+        assertEquals(macBeforeParcel, reconfig.getOrCreateRandomizedMacAddress());
 
         Parcel parcelWW = Parcel.obtain();
         reconfig.writeToParcel(parcelWW, 0);
@@ -168,5 +173,69 @@ public class WifiConfigurationTest {
         config.wepKeys = null;
 
         assertFalse(config.isOpenNetwork());
+    }
+
+    @Test
+    public void testGetOrCreateRandomizedMacAddress_SavesAndReturnsSameAddress() {
+        WifiConfiguration config = new WifiConfiguration();
+        MacAddress defaultMac = MacAddress.fromString(WifiInfo.DEFAULT_MAC_ADDRESS);
+        assertEquals(defaultMac, config.getRandomizedMacAddress());
+
+        MacAddress firstMacAddress = config.getOrCreateRandomizedMacAddress();
+        MacAddress secondMacAddress = config.getOrCreateRandomizedMacAddress();
+
+        assertNotEquals(defaultMac, firstMacAddress);
+        assertEquals(firstMacAddress, secondMacAddress);
+    }
+
+    @Test
+    public void testSetRandomizedMacAddress_ChangesSavedAddress() {
+        WifiConfiguration config = new WifiConfiguration();
+        MacAddress defaultMac = MacAddress.fromString(WifiInfo.DEFAULT_MAC_ADDRESS);
+        assertEquals(defaultMac, config.getRandomizedMacAddress());
+
+        MacAddress macToChangeInto = MacAddress.createRandomUnicastAddress();
+        config.setRandomizedMacAddress(macToChangeInto);
+        MacAddress macAfterChange = config.getRandomizedMacAddress();
+
+        assertEquals(macToChangeInto, macAfterChange);
+    }
+
+    @Test
+    public void testGetOrCreateRandomizedMacAddress_ReRandomizesInvalidAddress() {
+        WifiConfiguration config =  new WifiConfiguration();
+
+        MacAddress defaultMac = MacAddress.fromString(WifiInfo.DEFAULT_MAC_ADDRESS);
+        MacAddress macAddressZeroes = MacAddress.ALL_ZEROS_ADDRESS;
+        MacAddress macAddressMulticast = MacAddress.fromString("03:ff:ff:ff:ff:ff");
+        MacAddress macAddressGlobal = MacAddress.fromString("fc:ff:ff:ff:ff:ff");
+
+        config.setRandomizedMacAddress(null);
+        MacAddress macAfterChange = config.getOrCreateRandomizedMacAddress();
+        assertNotEquals(macAfterChange, null);
+
+        config.setRandomizedMacAddress(defaultMac);
+        macAfterChange = config.getOrCreateRandomizedMacAddress();
+        assertNotEquals(macAfterChange, defaultMac);
+
+        config.setRandomizedMacAddress(macAddressZeroes);
+        macAfterChange = config.getOrCreateRandomizedMacAddress();
+        assertNotEquals(macAfterChange, macAddressZeroes);
+
+        config.setRandomizedMacAddress(macAddressMulticast);
+        macAfterChange = config.getOrCreateRandomizedMacAddress();
+        assertNotEquals(macAfterChange, macAddressMulticast);
+
+        config.setRandomizedMacAddress(macAddressGlobal);
+        macAfterChange = config.getOrCreateRandomizedMacAddress();
+        assertNotEquals(macAfterChange, macAddressGlobal);
+    }
+
+    @Test
+    public void testSetRandomizedMacAddress_DoesNothingWhenNull() {
+        WifiConfiguration config = new WifiConfiguration();
+        MacAddress defaultMac = MacAddress.fromString(WifiInfo.DEFAULT_MAC_ADDRESS);
+        config.setRandomizedMacAddress(null);
+        assertEquals(defaultMac, config.getRandomizedMacAddress());
     }
 }

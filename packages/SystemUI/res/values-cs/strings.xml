@@ -35,15 +35,18 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Probíhající"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Oznámení"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Baterie je slabá"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Baterie je téměř vybitá, zapněte spořič baterie"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Zbývá <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Zbývá <xliff:g id="PERCENTAGE">%s</xliff:g>. Spořič baterie je zapnutý."</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Zbývá <xliff:g id="PERCENTAGE">%s</xliff:g>, při obvyklém využití asi <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Zbývá <xliff:g id="PERCENTAGE">%s</xliff:g>, asi <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Zbývá <xliff:g id="PERCENTAGE">%s</xliff:g>. Spořič baterie je zapnutý."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Nabíjení pomocí rozhraní USB není podporováno.\nPoužívejte pouze nabíječku, která byla dodána se zařízením."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Nabíjení přes USB není podporováno."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Používejte pouze nabíječku, která je součástí balení."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Nastavení"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Zapnout úsporu baterie?"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Zapnout spořič baterie?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Zapnout"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Zapnout úsporu baterie"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"Zapnout spořič baterie"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Nastavení"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Autom. otočení obrazovky"</string>
@@ -53,15 +56,15 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Datové připojení Bluetooth se sdílí"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Nastavit metody zadávání"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Fyzická klávesnice"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Povolit aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g> přístup k zařízení USB?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Povolit aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g> přístup k perifernímu zařízení USB?"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Chcete při připojení tohoto zařízení USB otevřít aplikaci <xliff:g id="ACTIVITY">%1$s</xliff:g>?"</string>
-    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Chcete při připojení tohoto periferního zařízení USB otevřít aplikaci <xliff:g id="ACTIVITY">%1$s</xliff:g>?"</string>
+    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"Povolit aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g> přístup k zařízení <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Povolit aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g> přístup k zařízení <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"Otevřít aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g> ke správě zařízení <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"Otevřít aplikaci <xliff:g id="APPLICATION">%1$s</xliff:g> ke správě zařízení <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Žádná nainstalovaná aplikace s tímto zařízením USB nepracuje. Info. najdete na <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Periferní zařízení USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Zobrazit"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"Pro toto zařízení USB použít jako výchozí"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"Pro toto periferní zařízení USB použít jako výchozí"</string>
+    <string name="always_use_device" msgid="4015357883336738417">"Když bude připojeno zařízení <xliff:g id="USB_DEVICE">%2$s</xliff:g>, vždy otevřít <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
+    <string name="always_use_accessory" msgid="3257892669444535154">"Když bude připojeno zařízení <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>, vždy otevřít <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Povolit ladění USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Digitální otisk RSA počítače je:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Vždy povolit z tohoto počítače"</string>
@@ -69,14 +72,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout ladění USB. Chcete-li tuto funkci použít, přepněte na primárního uživatele."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Přiblížit na celou obrazovku"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Na celou obrazovku"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Snímek obrazovky"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Ukládání snímku obrazovky..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Ukládání snímku obrazovky..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Probíhá ukládání snímku obrazovky."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Snímek obrazovky pořízen"</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Klepnutím zobrazíte snímek obrazovky."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Snímek obrazovky se nepodařilo zachytit."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Při ukládání snímku obrazovky došlo k problému."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Snímek obrazovky nelze pořídit kvůli nedostatku místa v úložišti."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Ukládání snímku obrazovky"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Snímek obrazovky byl uložen"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Klepnutím snímek obrazovky zobrazíte"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Snímek obrazovky se nepodařilo zachytit"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Při ukládání snímku obrazovky došlo k problému"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Snímek obrazovky kvůli nedostatku místa v úložišti nelze uložit"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Aplikace nebo organizace zakazuje pořizování snímků obrazovky"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Možnosti přenosu souborů pomocí rozhraní USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Připojit jako přehrávač médií (MTP)"</string>
@@ -86,6 +90,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"Domů"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"Přístupnost"</string>
+    <string name="accessibility_rotate_button" msgid="7402949513740253006">"Otočení obrazovky"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"Přehled"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Hledat"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Fotoaparát"</string>
@@ -100,6 +105,11 @@
     <string name="camera_label" msgid="7261107956054836961">"spustit fotoaparát"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Vybrat nové rozvržení úkolů"</string>
     <string name="cancel" msgid="6442560571259935130">"Zrušit"</string>
+    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
+    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ikona otisku prstu"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Ikona aplikace"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Oblast pro zprávu nápovědy"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Tlačítko úpravy velikosti z důvodu kompatibility"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zvětšit menší obrázek na větší obrazovku."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Rozhraní Bluetooth je připojeno."</string>
@@ -178,13 +188,13 @@
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Tiché vyzvánění."</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
-    <string name="accessibility_work_mode" msgid="2478631941714607225">"Pracovní režim"</string>
+    <!-- no translation found for accessibility_work_mode (702887484664647430) -->
+    <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Zavřít aplikaci <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Aplikace <xliff:g id="APP">%s</xliff:g> byla odebrána."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Všechny naposledy použité aplikace byly odstraněny."</string>
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Otevře informace o aplikaci <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Spouštění aplikace <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Oznámení je zavřeno."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Panel oznámení."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Rychlé nastavení."</string>
@@ -248,8 +258,6 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data jsou pozastavena"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Byl dosažen limit dat. Mobilní datové připojení již nepoužíváte.\n\nPokud jej obnovíte, mohou vám být účtovány poplatky za využití dat."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Pokračovat"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Žádné přip. k internetu"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: připojeno"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Vyhledávání satelitů GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Poloha nastavena pomocí systému GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Aktivní žádosti o polohu"</string>
@@ -272,6 +280,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Pult se sladkostmi"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Spořič obrazovky"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Nerušit"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Pouze prioritní"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Pouze budíky"</string>
@@ -280,6 +290,10 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> zařízení)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Rozhraní Bluetooth je vypnuto"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Nejsou dostupná žádná spárovaná zařízení"</string>
+    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="7106697106764717416">"Baterie: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Zvuk"</string>
+    <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Náhlavní souprava"</string>
+    <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Vstup"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Jas"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Automatické otáčení"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Automatické otočení obrazovky"</string>
@@ -304,6 +318,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi vypnuta"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi je zapnutá"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Žádné sítě Wi-Fi nejsou k dispozici"</string>
+    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Budík"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Odeslat"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Odesílání"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Nepojmenované zařízení"</string>
@@ -320,6 +335,13 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Připojování..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Sdílené připojení"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Zapínání..."</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="few">%d zařízení</item>
+      <item quantity="many">%d zařízení</item>
+      <item quantity="other">%d zařízení</item>
+      <item quantity="one">%d zařízení</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Oznámení"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Svítilna"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Mobilní data"</string>
@@ -329,8 +351,13 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Využito: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Limit: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Upozornění při <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Pracovní režim"</string>
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Pracovní profil"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Oznámení a aplikace jsou vypnuty"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Noční režim"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Zapnout při soumraku"</string>
+    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Do svítání"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Zapnout v <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC je vypnuto"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC je zapnuto"</string>
@@ -349,8 +376,6 @@
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Rozdělit obrazovku nahoru"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Rozdělit obrazovku vlevo"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Rozdělit obrazovku vpravo"</string>
-  <string-array name="recents_blacklist_array">
-  </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Nabito"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Nabíjení"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> do plného nabití"</string>
@@ -410,9 +435,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Odstranit uživatele?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Veškeré aplikace a data tohoto uživatele budou smazána."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Odstranit"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"Režim Úspora baterie je zapnutý."</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"Spořič baterie je zapnutý"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Omezuje výkon a data na pozadí"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Vypnout úsporu baterie"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Vypnout spořič baterie"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"Aplikace <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> začne zaznamenávat vše, co je zobrazeno na obrazovce."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Tuto zprávu příště nezobrazovat"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Smazat vše"</string>
@@ -485,11 +510,18 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Vypnout"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Rozbalit"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Sbalit"</string>
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"Přepnout zařízení pro výstup"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Obrazovka je připnuta"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Obsah bude připnut v zobrazení, dokud jej neuvolníte. Uvolníte jej stisknutím a podržením tlačítek Zpět a Přehled."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="8281145542163727971">"Obsah bude připnut v zobrazení, dokud ho neuvolníte. Uvolníte ho podržením tlačítek Zpět a Plocha."</string>
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Obsah bude připnut v zobrazení, dokud jej neuvolníte. Uvolníte jej stisknutím a podržením tlačítka Přehled."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="6134833683151189507">"Obsah bude připnut v zobrazení, dokud ho neuvolníte. Uvolníte ho podržením tlačítka Plocha."</string>
+    <string name="screen_pinning_toast" msgid="2266705122951934150">"Chcete-li tuto obrazovku uvolnit, podržte tlačítka Zpět a Přehled"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="8252402309499161281">"Chcete-li tuto obrazovku uvolnit, podržte tlačítka Zpět a Plocha"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Rozumím"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Ne, děkuji"</string>
+    <string name="screen_pinning_start" msgid="1022122128489278317">"Obrazovka připnuta"</string>
+    <string name="screen_pinning_exit" msgid="5187339744262325372">"Obrazovka uvolněna"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Skrýt <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Tato položka se znovu zobrazí, až ji v nastavení znovu zapnete."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Skrýt"</string>
@@ -503,13 +535,23 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"Tónová volba"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"Přístupnost"</string>
+    <string name="ring_toggle_title" msgid="3281244519428819576">"Volání"</string>
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Vyzvánění"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Vibrace"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Ztlumení"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Klepnutím zapnete zvuk."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Klepnutím aktivujete režim vibrací. Služby přístupnosti mohou být ztlumeny."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Klepnutím vypnete zvuk. Služby přístupnosti mohou být ztlumeny."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Klepnutím nastavíte vibrace."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Klepnutím vypnete zvuk."</string>
-    <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Ovládací prvky hlasitosti aplikace %s jsou zobrazeny. Zavřete je přejetím prstem."</string>
-    <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Ovládací prvky hlasitosti jsou skryty"</string>
+    <string name="volume_dialog_title" msgid="7272969888820035876">"Ovládací prvky hlasitosti %s"</string>
+    <string name="output_title" msgid="5355078100792942802">"Výstup médií"</string>
+    <string name="output_calls_title" msgid="8717692905017206161">"Výstup telefonního hovoru"</string>
+    <string name="output_none_found" msgid="5544982839808921091">"Nebyla nalezena žádná zařízení"</string>
+    <string name="output_none_found_service_off" msgid="8631969668659757069">"Nebyla nalezena žádná zařízení. Zkuste zapnout <xliff:g id="SERVICE">%1$s</xliff:g>"</string>
+    <string name="output_service_bt" msgid="6224213415445509542">"Bluetooth"</string>
+    <string name="output_service_wifi" msgid="3749735218931825054">"Wi-Fi"</string>
+    <string name="output_service_bt_wifi" msgid="4486837869988770896">"Bluetooth a Wi-Fi"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Nástroj na ladění uživatelského rozhraní systému"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Zobrazovat vložené procento nabití baterie"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Když neprobíhá nabíjení, zobrazit v ikoně na stavovém řádku procento nabití baterie"</string>
@@ -557,30 +599,20 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Vypnuto"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Rozšířené ovládací prvky oznámení umožňují nastavit úroveň důležitosti oznámení aplikace od 0 do 5. \n\n"<b>"Úroveň 5"</b>" \n– Zobrazit na začátku seznamu oznámení \n– Povolit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 4"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 3"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n\n"<b>"Úroveň 2"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat žádný zvukový signál ani nevibrovat \n\n"<b>"Úroveň 1"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat zvukový signál ani nevibrovat \n– Skrýt z obrazovky uzamčení a stavového řádku \n– Zobrazovat na konci seznamu oznámení \n\n"<b>";Úroveň 0"</b>" \n– Blokovat všechna oznámení z aplikace"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Oznámení"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"Tato oznámení již nebudete dostávat"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"Kategorie oznámení: <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Tato aplikace nemá kategorie oznámení"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Oznámení této aplikace nelze vypnout"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="few">1 ze <xliff:g id="NUMBER_1">%s</xliff:g> kategorií oznámení z této aplikace</item>
-      <item quantity="many">1 z <xliff:g id="NUMBER_1">%s</xliff:g> kategorie oznámení z této aplikace</item>
-      <item quantity="other">1 z <xliff:g id="NUMBER_1">%s</xliff:g> kategorií oznámení z této aplikace</item>
-      <item quantity="one">1 z <xliff:g id="NUMBER_0">%s</xliff:g> kategorie oznámení z této aplikace</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="few"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> a <xliff:g id="NUMBER_5">%3$d</xliff:g> další</item>
-      <item quantity="many"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> a <xliff:g id="NUMBER_5">%3$d</xliff:g> dalšího</item>
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> a <xliff:g id="NUMBER_5">%3$d</xliff:g> dalších</item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> a <xliff:g id="NUMBER_2">%3$d</xliff:g> další</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Tato oznámení již nebudete dostávat"</string>
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"Tato oznámení obvykle odmítáte. \nChcete je nadále zobrazovat?"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Mají se tato oznámení nadále zobrazovat?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Přestat zobrazovat oznámení"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Nadále zobrazovat"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Mají se oznámení z této aplikace nadále zobrazovat?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Tato oznámení nelze deaktivovat"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Ovládací prvky oznámení aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> byly otevřeny"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Ovládací prvky oznámení aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> byly zavřeny"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Povolit oznámení z tohoto kanálu"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"Všechny kategorie"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Další nastavení"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"Přizpůsobit: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"Upravit"</string>
     <string name="notification_done" msgid="5279426047273930175">"Hotovo"</string>
+    <string name="inline_undo" msgid="558916737624706010">"Zpět"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"Nastavení oznámení"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"Možnosti odložení oznámení"</string>
@@ -599,8 +631,8 @@
       <item quantity="one">%d minuta</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Využití baterie"</string>
-    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Spořič baterie při nabíjení není k dispozici"</string>
-    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Spořič baterie"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Spořič baterie při nabíjení není k dispozici."</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Spořič baterie"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Omezuje výkon a data na pozadí"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Tlačítko <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -666,7 +698,7 @@
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Schránka"</item>
     <item msgid="5742013440802239414">"Klávesa"</item>
-    <item msgid="8802889973626281575">"Přepínač klávesnice"</item>
+    <item msgid="1951959982985094069">"Potvrzení otočení, přepínač na klávesnici"</item>
     <item msgid="8175437057325747277">"Žádné"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
@@ -739,6 +771,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Rozbalit"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimalizovat"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Zavřít"</string>
+    <string name="pip_phone_settings" msgid="8080777499521528521">"Nastavení"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Nápovědu zavřete přetažením dolů"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Nabídka"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"Aplikace <xliff:g id="NAME">%s</xliff:g> je v režimu obraz v obraze"</string>
@@ -775,7 +808,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Okamžité aplikace"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Okamžité aplikace není třeba instalovat."</string>
     <string name="app_info" msgid="6856026610594615344">"O aplikaci"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Přejít na web"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Přejít do prohlížeče"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobilní data"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi je vypnuta"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth je vypnuto"</string>
@@ -790,4 +823,10 @@
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Klepnutím zobrazíte podrobnosti o využití baterie a dat"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Vypnout mobilní data?"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Žádost o oprávnění je blokována jinou aplikací. Nastavení proto vaši odpověď nemůže ověřit."</string>
+    <string name="slice_permission_title" msgid="7465009437851044444">"Povolit aplikaci <xliff:g id="APP_0">%1$s</xliff:g> zobrazovat ukázky z aplikace <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
+    <string name="slice_permission_text_1" msgid="3514586565609596523">"– Může číst informace z aplikace <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="slice_permission_text_2" msgid="3146758297471143723">"– Může provádět akce v aplikaci <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="slice_permission_checkbox" msgid="7986504458640562900">"Povolit aplikaci <xliff:g id="APP">%1$s</xliff:g> zobrazovat ukázky z libovolné aplikace"</string>
+    <string name="slice_permission_allow" msgid="2340244901366722709">"Povolit"</string>
+    <string name="slice_permission_deny" msgid="7683681514008048807">"Zamítnout"</string>
 </resources>

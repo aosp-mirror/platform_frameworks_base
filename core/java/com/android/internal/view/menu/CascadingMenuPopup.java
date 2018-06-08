@@ -47,6 +47,7 @@ import com.android.internal.util.Preconditions;
  */
 final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKeyListener,
         PopupWindow.OnDismissListener {
+    private static final int ITEM_LAYOUT = com.android.internal.R.layout.cascading_menu_item_layout;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({HORIZ_POSITION_LEFT, HORIZ_POSITION_RIGHT})
@@ -348,7 +349,7 @@ final class CascadingMenuPopup extends MenuPopup implements MenuPresenter, OnKey
      */
     private void showMenu(@NonNull MenuBuilder menu) {
         final LayoutInflater inflater = LayoutInflater.from(mContext);
-        final MenuAdapter adapter = new MenuAdapter(menu, inflater, mOverflowOnly);
+        final MenuAdapter adapter = new MenuAdapter(menu, inflater, mOverflowOnly, ITEM_LAYOUT);
 
         // Apply "force show icon" setting. There are 3 cases:
         // (1) This is the top level menu and icon spacing is forced. Add spacing.

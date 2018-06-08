@@ -30,31 +30,75 @@ import android.widget.RemoteViews;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /**
- * A dataset object represents a group of key/value pairs used to autofill parts of a screen.
+ * A dataset object represents a group of fields (key / value pairs) used to autofill parts of a
+ * screen.
  *
- * <p>In its simplest form, a dataset contains one or more key / value pairs (comprised of
- * {@link AutofillId} and {@link AutofillValue} respectively); and one or more
- * {@link RemoteViews presentation} for these pairs (a pair could have its own
- * {@link RemoteViews presentation}, or use the default {@link RemoteViews presentation} associated
- * with the whole dataset). When an autofill service returns datasets in a {@link FillResponse}
+ * <a name="BasicUsage"></a>
+ * <h3>Basic usage</h3>
+ *
+ * <p>In its simplest form, a dataset contains one or more fields (comprised of
+ * an {@link AutofillId id}, a {@link AutofillValue value}, and an optional filter
+ * {@link Pattern regex}); and one or more {@link RemoteViews presentations} for these fields
+ * (each field could have its own {@link RemoteViews presentation}, or use the default
+ * {@link RemoteViews presentation} associated with the whole dataset).
+ *
+ * <p>When an autofill service returns datasets in a {@link FillResponse}
  * and the screen input is focused in a view that is present in at least one of these datasets,
- * the Android System displays a UI affordance containing the {@link RemoteViews presentation} of
+ * the Android System displays a UI containing the {@link RemoteViews presentation} of
  * all datasets pairs that have that view's {@link AutofillId}. Then, when the user selects a
- * dataset from the affordance, all views in that dataset are autofilled.
+ * dataset from the UI, all views in that dataset are autofilled.
  *
- * <p>In a more sophisticated form, the dataset value can be protected until the user authenticates
- * the dataset - see {@link Dataset.Builder#setAuthentication(IntentSender)}.
+ * <a name="Authentication"></a>
+ * <h3>Dataset authentication</h3>
  *
- * @see android.service.autofill.AutofillService for more information and examples about the
- * role of datasets in the autofill workflow.
+ * <p>In a more sophisticated form, the dataset values can be protected until the user authenticates
+ * the dataset&mdash;in that case, when a dataset is selected by the user, the Android System
+ * launches an intent set by the service to "unlock" the dataset.
+ *
+ * <p>For example, when a data set contains credit card information (such as number,
+ * expiration date, and verification code), you could provide a dataset presentation saying
+ * "Tap to authenticate". Then when the user taps that option, you would launch an activity asking
+ * the user to enter the credit card code, and if the user enters a valid code, you could then
+ * "unlock" the dataset.
+ *
+ * <p>You can also use authenticated datasets to offer an interactive UI for the user. For example,
+ * if the activity being autofilled is an account creation screen, you could use an authenticated
+ * dataset to automatically generate a random password for the user.
+ *
+ * <p>See {@link Dataset.Builder#setAuthentication(IntentSender)} for more details about the dataset
+ * authentication mechanism.
+ *
+ * <a name="Filtering"></a>
+ * <h3>Filtering</h3>
+ * <p>The autofill UI automatically changes which values are shown based on value of the view
+ * anchoring it, following the rules below:
+ * <ol>
+ *   <li>If the view's {@link android.view.View#getAutofillValue() autofill value} is not
+ * {@link AutofillValue#isText() text} or is empty, all datasets are shown.
+ *   <li>Datasets that have a filter regex (set through
+ * {@link Dataset.Builder#setValue(AutofillId, AutofillValue, Pattern)} or
+ * {@link Dataset.Builder#setValue(AutofillId, AutofillValue, Pattern, RemoteViews)}) and whose
+ * regex matches the view's text value converted to lower case are shown.
+ *   <li>Datasets that do not require authentication, have a field value that is
+ * {@link AutofillValue#isText() text} and whose {@link AutofillValue#getTextValue() value} starts
+ * with the lower case value of the view's text are shown.
+ *   <li>All other datasets are hidden.
+ * </ol>
+ *
+ * <a name="MoreInfo"></a>
+ * <h3>More information</h3>
+ * <p>See {@link android.service.autofill.AutofillService} for more information and examples about
+ * the role of datasets in the autofill workflow.
  */
 public final class Dataset implements Parcelable {
 
     private final ArrayList<AutofillId> mFieldIds;
     private final ArrayList<AutofillValue> mFieldValues;
     private final ArrayList<RemoteViews> mFieldPresentations;
+    private final ArrayList<DatasetFieldFilter> mFieldFilters;
     private final RemoteViews mPresentation;
     private final IntentSender mAuthentication;
     @Nullable String mId;
@@ -63,6 +107,7 @@ public final class Dataset implements Parcelable {
         mFieldIds = builder.mFieldIds;
         mFieldValues = builder.mFieldValues;
         mFieldPresentations = builder.mFieldPresentations;
+        mFieldFilters = builder.mFieldFilters;
         mPresentation = builder.mPresentation;
         mAuthentication = builder.mAuthentication;
         mId = builder.mId;
@@ -85,6 +130,12 @@ public final class Dataset implements Parcelable {
     }
 
     /** @hide */
+    @Nullable
+    public DatasetFieldFilter getFilter(int index) {
+        return mFieldFilters.get(index);
+    }
+
+    /** @hide */
     public @Nullable IntentSender getAuthentication() {
         return mAuthentication;
     }
@@ -98,14 +149,33 @@ public final class Dataset implements Parcelable {
     public String toString() {
         if (!sDebug) return super.toString();
 
-        return new StringBuilder("Dataset " + mId + " [")
-                .append("fieldIds=").append(mFieldIds)
-                .append(", fieldValues=").append(mFieldValues)
-                .append(", fieldPresentations=")
-                .append(mFieldPresentations == null ? 0 : mFieldPresentations.size())
-                .append(", hasPresentation=").append(mPresentation != null)
-                .append(", hasAuthentication=").append(mAuthentication != null)
-                .append(']').toString();
+        final StringBuilder builder = new StringBuilder("Dataset[");
+        if (mId == null) {
+            builder.append("noId");
+        } else {
+            // Cannot disclose id because it could contain PII.
+            builder.append("id=").append(mId.length()).append("_chars");
+        }
+        if (mFieldIds != null) {
+            builder.append(", fieldIds=").append(mFieldIds);
+        }
+        if (mFieldValues != null) {
+            builder.append(", fieldValues=").append(mFieldValues);
+        }
+        if (mFieldPresentations != null) {
+            builder.append(", fieldPresentations=").append(mFieldPresentations.size());
+
+        }
+        if (mFieldFilters != null) {
+            builder.append(", fieldFilters=").append(mFieldFilters.size());
+        }
+        if (mPresentation != null) {
+            builder.append(", hasPresentation");
+        }
+        if (mAuthentication != null) {
+            builder.append(", hasAuthentication");
+        }
+        return builder.append(']').toString();
     }
 
     /**
@@ -127,6 +197,7 @@ public final class Dataset implements Parcelable {
         private ArrayList<AutofillId> mFieldIds;
         private ArrayList<AutofillValue> mFieldValues;
         private ArrayList<RemoteViews> mFieldPresentations;
+        private ArrayList<DatasetFieldFilter> mFieldFilters;
         private RemoteViews mPresentation;
         private IntentSender mAuthentication;
         private boolean mDestroyed;
@@ -146,13 +217,19 @@ public final class Dataset implements Parcelable {
          * Creates a new builder for a dataset where each field will be visualized independently.
          *
          * <p>When using this constructor, fields must be set through
-         * {@link #setValue(AutofillId, AutofillValue, RemoteViews)}.
+         * {@link #setValue(AutofillId, AutofillValue, RemoteViews)} or
+         * {@link #setValue(AutofillId, AutofillValue, Pattern, RemoteViews)}.
          */
         public Builder() {
         }
 
         /**
-         * Requires a dataset authentication before autofilling the activity with this dataset.
+         * Triggers a custom UI before before autofilling the screen with the contents of this
+         * dataset.
+         *
+         * <p><b>Note:</b> Although the name of this method suggests that it should be used just for
+         * authentication flow, it can be used for other advanced flows; see {@link AutofillService}
+         * for examples.
          *
          * <p>This method is called when you need to provide an authentication
          * UI for the data set. For example, when a data set contains credit card information
@@ -182,12 +259,12 @@ public final class Dataset implements Parcelable {
          * credit card information without the CVV for the data set in the {@link FillResponse
          * response} then the returned data set should contain the CVV entry.
          *
-         * <p><b>NOTE:</b> Do not make the provided pending intent
+         * <p><b>Note:</b> Do not make the provided pending intent
          * immutable by using {@link android.app.PendingIntent#FLAG_IMMUTABLE} as the
          * platform needs to fill in the authentication arguments.
          *
          * @param authentication Intent to an activity with your authentication flow.
-         * @return This builder.
+         * @return this builder.
          *
          * @see android.app.PendingIntent
          */
@@ -198,20 +275,26 @@ public final class Dataset implements Parcelable {
         }
 
         /**
-         * Sets the id for the dataset so its usage history can be retrieved later.
+         * Sets the id for the dataset so its usage can be tracked.
          *
-         * <p>The id of the last selected dataset can be read from
-         * {@link AutofillService#getFillEventHistory()}. If the id is not set it will not be clear
-         * if a dataset was selected as {@link AutofillService#getFillEventHistory()} uses
-         * {@code null} to indicate that no dataset was selected.
+         * <p>Dataset usage can be tracked for 2 purposes:
+         *
+         * <ul>
+         *   <li>For statistical purposes, the service can call
+         * {@link AutofillService#getFillEventHistory()} when handling {@link
+         * AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)}
+         * calls.
+         *   <li>For normal autofill workflow, the service can call
+         *   {@link SaveRequest#getDatasetIds()} when handling
+         *   {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)} calls.
+         * </ul>
          *
          * @param id id for this dataset or {@code null} to unset.
-
-         * @return This builder.
+         *
+         * @return this builder.
          */
         public @NonNull Builder setId(@Nullable String id) {
             throwIfDestroyed();
-
             mId = id;
             return this;
         }
@@ -219,21 +302,29 @@ public final class Dataset implements Parcelable {
         /**
          * Sets the value of a field.
          *
+         * <b>Note:</b> Prior to Android {@link android.os.Build.VERSION_CODES#P}, this method would
+         * throw an {@link IllegalStateException} if this builder was constructed without a
+         * {@link RemoteViews presentation}. Android {@link android.os.Build.VERSION_CODES#P} and
+         * higher removed this restriction because datasets used as an
+         * {@link android.view.autofill.AutofillManager#EXTRA_AUTHENTICATION_RESULT
+         * authentication result} do not need a presentation. But if you don't set the presentation
+         * in the constructor in a dataset that is meant to be shown to the user, the autofill UI
+         * for this field will not be displayed.
+         *
+         * <p><b>Note:</b> On Android {@link android.os.Build.VERSION_CODES#P} and
+         * higher, datasets that require authentication can be also be filtered by passing a
+         * {@link AutofillValue#forText(CharSequence) text value} as the {@code value} parameter.
+         *
          * @param id id returned by {@link
          *         android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
          * @param value value to be autofilled. Pass {@code null} if you do not have the value
          *        but the target view is a logical part of the dataset. For example, if
-         *        the dataset needs an authentication and you have no access to the value.
-         * @return This builder.
-         * @throws IllegalStateException if the builder was constructed without a
-         * {@link RemoteViews presentation}.
+         *        the dataset needs authentication and you have no access to the value.
+         * @return this builder.
          */
         public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value) {
             throwIfDestroyed();
-            if (mPresentation == null) {
-                throw new IllegalStateException("Dataset presentation not set on constructor");
-            }
-            setValueAndPresentation(id, value, null);
+            setLifeTheUniverseAndEverything(id, value, null, null);
             return this;
         }
 
@@ -241,41 +332,124 @@ public final class Dataset implements Parcelable {
          * Sets the value of a field, using a custom {@link RemoteViews presentation} to
          * visualize it.
          *
+         * <p><b>Note:</b> On Android {@link android.os.Build.VERSION_CODES#P} and
+         * higher, datasets that require authentication can be also be filtered by passing a
+         * {@link AutofillValue#forText(CharSequence) text value} as the  {@code value} parameter.
+         *
+         * <p>Theme does not work with RemoteViews layout. Avoid hardcoded text color
+         * or background color: Autofill on different platforms may have different themes.
+         *
          * @param id id returned by {@link
          *         android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
-         * @param value value to be auto filled. Pass {@code null} if you do not have the value
+         * @param value the value to be autofilled. Pass {@code null} if you do not have the value
          *        but the target view is a logical part of the dataset. For example, if
-         *        the dataset needs an authentication and you have no access to the value.
-         *        Filtering matches any user typed string to {@code null} values.
-         * @param presentation The presentation used to visualize this field.
-         * @return This builder.
+         *        the dataset needs authentication and you have no access to the value.
+         * @param presentation the presentation used to visualize this field.
+         * @return this builder.
+         *
          */
         public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value,
                 @NonNull RemoteViews presentation) {
             throwIfDestroyed();
             Preconditions.checkNotNull(presentation, "presentation cannot be null");
-            setValueAndPresentation(id, value, presentation);
+            setLifeTheUniverseAndEverything(id, value, presentation, null);
             return this;
         }
 
-        private void setValueAndPresentation(AutofillId id, AutofillValue value,
-                RemoteViews presentation) {
+        /**
+         * Sets the value of a field using an <a href="#Filtering">explicit filter</a>.
+         *
+         * <p>This method is typically used when the dataset requires authentication and the service
+         * does not know its value but wants to hide the dataset after the user enters a minimum
+         * number of characters. For example, if the dataset represents a credit card number and the
+         * service does not want to show the "Tap to authenticate" message until the user tapped
+         * 4 digits, in which case the filter would be {@code Pattern.compile("\\d.{4,}")}.
+         *
+         * <p><b>Note:</b> If the dataset requires authentication but the service knows its text
+         * value it's easier to filter by calling {@link #setValue(AutofillId, AutofillValue)} and
+         * use the value to filter.
+         *
+         * @param id id returned by {@link
+         *         android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
+         * @param value the value to be autofilled. Pass {@code null} if you do not have the value
+         *        but the target view is a logical part of the dataset. For example, if
+         *        the dataset needs authentication and you have no access to the value.
+         * @param filter regex used to determine if the dataset should be shown in the autofill UI;
+         *        when {@code null}, it disables filtering on that dataset (this is the recommended
+         *        approach when {@code value} is not {@code null} and field contains sensitive data
+         *        such as passwords).
+         *
+         * @return this builder.
+         * @throws IllegalStateException if the builder was constructed without a
+         *         {@link RemoteViews presentation}.
+         */
+        public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value,
+                @Nullable Pattern filter) {
+            throwIfDestroyed();
+            Preconditions.checkState(mPresentation != null,
+                    "Dataset presentation not set on constructor");
+            setLifeTheUniverseAndEverything(id, value, null, new DatasetFieldFilter(filter));
+            return this;
+        }
+
+        /**
+         * Sets the value of a field, using a custom {@link RemoteViews presentation} to
+         * visualize it and a <a href="#Filtering">explicit filter</a>.
+         *
+         * <p>This method is typically used when the dataset requires authentication and the service
+         * does not know its value but wants to hide the dataset after the user enters a minimum
+         * number of characters. For example, if the dataset represents a credit card number and the
+         * service does not want to show the "Tap to authenticate" message until the user tapped
+         * 4 digits, in which case the filter would be {@code Pattern.compile("\\d.{4,}")}.
+         *
+         * <p><b>Note:</b> If the dataset requires authentication but the service knows its text
+         * value it's easier to filter by calling
+         * {@link #setValue(AutofillId, AutofillValue, RemoteViews)} and using the value to filter.
+         *
+         * @param id id returned by {@link
+         *         android.app.assist.AssistStructure.ViewNode#getAutofillId()}.
+         * @param value the value to be autofilled. Pass {@code null} if you do not have the value
+         *        but the target view is a logical part of the dataset. For example, if
+         *        the dataset needs authentication and you have no access to the value.
+         * @param filter regex used to determine if the dataset should be shown in the autofill UI;
+         *        when {@code null}, it disables filtering on that dataset (this is the recommended
+         *        approach when {@code value} is not {@code null} and field contains sensitive data
+         *        such as passwords).
+         * @param presentation the presentation used to visualize this field.
+         *
+         * @return this builder.
+         */
+        public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value,
+                @Nullable Pattern filter, @NonNull RemoteViews presentation) {
+            throwIfDestroyed();
+            Preconditions.checkNotNull(presentation, "presentation cannot be null");
+            setLifeTheUniverseAndEverything(id, value, presentation,
+                    new DatasetFieldFilter(filter));
+            return this;
+        }
+
+        private void setLifeTheUniverseAndEverything(@NonNull AutofillId id,
+                @Nullable AutofillValue value, @Nullable RemoteViews presentation,
+                @Nullable DatasetFieldFilter filter) {
             Preconditions.checkNotNull(id, "id cannot be null");
             if (mFieldIds != null) {
                 final int existingIdx = mFieldIds.indexOf(id);
                 if (existingIdx >= 0) {
                     mFieldValues.set(existingIdx, value);
                     mFieldPresentations.set(existingIdx, presentation);
+                    mFieldFilters.set(existingIdx, filter);
                     return;
                 }
             } else {
                 mFieldIds = new ArrayList<>();
                 mFieldValues = new ArrayList<>();
                 mFieldPresentations = new ArrayList<>();
+                mFieldFilters = new ArrayList<>();
             }
             mFieldIds.add(id);
             mFieldValues.add(value);
             mFieldPresentations.add(presentation);
+            mFieldFilters.add(filter);
         }
 
         /**
@@ -283,8 +457,9 @@ public final class Dataset implements Parcelable {
          *
          * <p>You should not interact with this builder once this method is called.
          *
-         * <p>It is required that you specify at least one field before calling this method. It's
-         * also mandatory to provide a presentation view to visualize the data set in the UI.
+         * @throws IllegalStateException if no field was set (through
+         * {@link #setValue(AutofillId, AutofillValue)} or
+         * {@link #setValue(AutofillId, AutofillValue, RemoteViews)}).
          *
          * @return The built dataset.
          */
@@ -292,7 +467,7 @@ public final class Dataset implements Parcelable {
             throwIfDestroyed();
             mDestroyed = true;
             if (mFieldIds == null) {
-                throw new IllegalArgumentException("at least one value must be set");
+                throw new IllegalStateException("at least one value must be set");
             }
             return new Dataset(this);
         }
@@ -316,9 +491,10 @@ public final class Dataset implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeParcelable(mPresentation, flags);
-        parcel.writeTypedArrayList(mFieldIds, flags);
-        parcel.writeTypedArrayList(mFieldValues, flags);
-        parcel.writeParcelableList(mFieldPresentations, flags);
+        parcel.writeTypedList(mFieldIds, flags);
+        parcel.writeTypedList(mFieldValues, flags);
+        parcel.writeTypedList(mFieldPresentations, flags);
+        parcel.writeTypedList(mFieldFilters, flags);
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeString(mId);
     }
@@ -333,18 +509,20 @@ public final class Dataset implements Parcelable {
             final Builder builder = (presentation == null)
                     ? new Builder()
                     : new Builder(presentation);
-            final ArrayList<AutofillId> ids = parcel.readTypedArrayList(null);
-            final ArrayList<AutofillValue> values = parcel.readTypedArrayList(null);
-            final ArrayList<RemoteViews> presentations = new ArrayList<>();
-            parcel.readParcelableList(presentations, null);
-            final int idCount = (ids != null) ? ids.size() : 0;
-            final int valueCount = (values != null) ? values.size() : 0;
-            for (int i = 0; i < idCount; i++) {
+            final ArrayList<AutofillId> ids =
+                    parcel.createTypedArrayList(AutofillId.CREATOR);
+            final ArrayList<AutofillValue> values =
+                    parcel.createTypedArrayList(AutofillValue.CREATOR);
+            final ArrayList<RemoteViews> presentations =
+                    parcel.createTypedArrayList(RemoteViews.CREATOR);
+            final ArrayList<DatasetFieldFilter> filters =
+                    parcel.createTypedArrayList(DatasetFieldFilter.CREATOR);
+            for (int i = 0; i < ids.size(); i++) {
                 final AutofillId id = ids.get(i);
-                final AutofillValue value = (valueCount > i) ? values.get(i) : null;
-                final RemoteViews fieldPresentation = presentations.isEmpty() ? null
-                        : presentations.get(i);
-                builder.setValueAndPresentation(id, value, fieldPresentation);
+                final AutofillValue value = values.get(i);
+                final RemoteViews fieldPresentation = presentations.get(i);
+                final DatasetFieldFilter filter = filters.get(i);
+                builder.setLifeTheUniverseAndEverything(id, value, fieldPresentation, filter);
             }
             builder.setAuthentication(parcel.readParcelable(null));
             builder.setId(parcel.readString());
@@ -356,4 +534,55 @@ public final class Dataset implements Parcelable {
             return new Dataset[size];
         }
     };
+
+    /**
+     * Helper class used to indicate when the service explicitly set a {@link Pattern} filter for a
+     * dataset field&dash; we cannot use a {@link Pattern} directly because then we wouldn't be
+     * able to differentiate whether the service explicitly passed a {@code null} filter to disable
+     * filter, or when it called the methods that does not take a filter {@link Pattern}.
+     *
+     * @hide
+     */
+    public static final class DatasetFieldFilter implements Parcelable {
+
+        @Nullable
+        public final Pattern pattern;
+
+        private DatasetFieldFilter(@Nullable Pattern pattern) {
+            this.pattern = pattern;
+        }
+
+        @Override
+        public String toString() {
+            if (!sDebug) return super.toString();
+
+            // Cannot log pattern because it could contain PII
+            return pattern == null ? "null" : pattern.pattern().length() + "_chars";
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int flags) {
+            parcel.writeSerializable(pattern);
+        }
+
+        @SuppressWarnings("hiding")
+        public static final Creator<DatasetFieldFilter> CREATOR =
+                new Creator<DatasetFieldFilter>() {
+
+            @Override
+            public DatasetFieldFilter createFromParcel(Parcel parcel) {
+                return new DatasetFieldFilter((Pattern) parcel.readSerializable());
+            }
+
+            @Override
+            public DatasetFieldFilter[] newArray(int size) {
+                return new DatasetFieldFilter[size];
+            }
+        };
+    }
 }

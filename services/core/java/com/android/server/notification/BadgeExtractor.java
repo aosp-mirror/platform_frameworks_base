@@ -15,6 +15,8 @@
 */
 package com.android.server.notification;
 
+import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
+
 import android.content.Context;
 import android.util.Slog;
 
@@ -54,11 +56,20 @@ public class BadgeExtractor implements NotificationSignalExtractor {
             }
         }
 
+        if (record.isIntercepted()
+                && (record.getSuppressedVisualEffects() & SUPPRESSED_EFFECT_BADGE) != 0) {
+            record.setShowBadge(false);
+        }
+
         return null;
     }
 
     @Override
     public void setConfig(RankingConfig config) {
         mConfig = config;
+    }
+
+    @Override
+    public void setZenHelper(ZenModeHelper helper) {
     }
 }

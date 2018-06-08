@@ -1,0 +1,404 @@
+/*
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+package android.service.print;
+
+option java_multiple_files = true;
+option java_outer_classname = "PrintServiceProto";
+
+import "frameworks/base/core/proto/android/content/component_name.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+message PrintServiceDumpProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Each user has a separate printer state
+    repeated PrintUserStateProto userStates = 1;
+}
+
+message PrintUserStateProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Should be 0, 10, 11, 12, etc. where 0 is the owner.
+    optional int32 user_id = 1;
+
+    // The installed print services
+    repeated InstalledPrintServiceProto installed_services = 2;
+
+    // The disabled print services
+    repeated android.content.ComponentNameProto disabled_services = 3;
+
+    // The active print services
+    repeated ActivePrintServiceProto active_services = 4;
+
+    // The cached print jobs
+    repeated CachedPrintJobProto cached_print_jobs = 5;
+
+    // The printer discovery sessions
+    repeated PrinterDiscoverySessionProto discovery_sessions = 6;
+
+    // The print spooler state
+    optional PrintSpoolerStateProto print_spooler_state = 7;
+}
+
+message PrintSpoolerStateProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Is the print spooler destroyed?
+    optional bool is_destroyed = 1;
+
+    // Is the print spooler bound?
+    optional bool is_bound = 2;
+
+    // State internal to the print spooler
+    optional PrintSpoolerInternalStateProto internal_state = 3;
+}
+
+message PrintSpoolerInternalStateProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Print jobs
+    repeated PrintJobInfoProto print_jobs = 1;
+
+    // Files used by these print jobs
+    repeated string print_job_files = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
+
+    // Approved print services
+    repeated android.content.ComponentNameProto approved_services = 3;
+}
+
+message PrinterCapabilitiesProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Minimum margins of the printer
+    optional MarginsProto min_margins = 1;
+
+    // List of supported media sizes
+    repeated MediaSizeProto media_sizes = 2;
+
+    // List of supported resolutions
+    repeated ResolutionProto resolutions = 3;
+
+    // List of supported color modes
+    repeated PrintAttributesProto.ColorMode color_modes = 4;
+
+    // List of supported duplex modes
+    repeated PrintAttributesProto.DuplexMode duplex_modes = 5;
+}
+
+message PrinterInfoProto {
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+    // The id of the printer
+    optional PrinterIdProto id = 1;
+
+    // The name of the printer
+    optional string name = 2;
+
+    enum Status {
+        // unused
+        __STATUS_UNUSED = 0;
+
+        // Printer is idle
+        STATUS_IDLE = 1;
+
+        // Printer is busy
+        STATUS_BUSY = 2;
+
+        // Printer is unavailable
+        STATUS_UNAVAILABLE = 3;
+    }
+    // The status of the printer
+    optional Status status = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    // The description of the printer
+    optional string description = 4;
+
+    // The capabilities of the printer
+    optional PrinterCapabilitiesProto capabilities = 5;
+}
+
+message PrinterDiscoverySessionProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Is this session destroyed?
+    optional bool is_destroyed = 1;
+
+    // Is printer discovery in progress?
+    optional bool is_printer_discovery_in_progress = 2;
+
+    // List of printer discovery observers
+    repeated string printer_discovery_observers = 3;
+
+    // List of discovery request
+    repeated string discovery_requests = 4;
+
+    // List of ids of printers that are have tracking requests
+    repeated PrinterIdProto tracked_printer_requests = 5;
+
+    // List of printers found
+    repeated PrinterInfoProto printer = 6;
+}
+
+message InstalledPrintServiceProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Component name of the service
+    optional android.content.ComponentNameProto component_name = 1;
+
+    // Settings activity for this service
+    optional string settings_activity = 2;
+
+    // Add printers activity for this service
+    optional string add_printers_activity = 3;
+
+    // Advances options activity for this service
+    optional string advanced_options_activity = 4;
+}
+
+message PrinterIdProto {
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+    // Component name of the service that reported the printer
+    optional android.content.ComponentNameProto service_name = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    // Local id of the printer
+    optional string local_id = 2;
+}
+
+message ActivePrintServiceProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Component name of the service
+    optional android.content.ComponentNameProto component_name = 1;
+
+    // Is the active service destroyed
+    optional bool is_destroyed = 2;
+
+    // Is the active service bound
+    optional bool is_bound = 3;
+
+    // Has the active service a discovery session
+    optional bool has_discovery_session = 4;
+
+    // Has the active service a active print jobs
+    optional bool has_active_print_jobs = 5;
+
+    // Is the active service discovering printers
+    optional bool is_discovering_printers = 6;
+
+    // The tracked printers of this active service
+    repeated PrinterIdProto tracked_printers = 7;
+}
+
+message MediaSizeProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Id of this media size
+    optional string id = 1;
+
+    // Label of this media size
+    optional string label = 2;
+
+    // Height of the media
+    optional int32 height_mils = 3;
+
+    // Width of the media
+    optional int32 width_mils = 4;
+}
+
+message ResolutionProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Id of this resolution
+    optional string id = 1;
+
+    // Label for this resoltion
+    optional string label = 2;
+
+    // Resolution in horizontal orientation
+    optional int32 horizontal_dpi = 3;
+
+    // Resolution in vertical orientation
+    optional int32 vertical_dpi = 4;
+}
+
+message MarginsProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Space at the top
+    optional int32 top_mils = 1;
+
+    // Space at the left
+    optional int32 left_mils = 2;
+
+    // Space at the right
+    optional int32 right_mils = 3;
+
+    // Space at the bottom
+    optional int32 bottom_mils = 4;
+}
+
+message PrintAttributesProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Media to use
+    optional ResolutionProto media_size = 1;
+
+    // Is the media in portrait mode?
+    optional bool is_portrait = 2;
+
+    // Resolution to use
+    optional ResolutionProto resolution = 3;
+
+    // Margins around the document
+    optional MarginsProto min_margins = 4;
+
+    enum ColorMode {
+        // unused
+        __COLOR_MODE_UNUSED = 0;
+
+        // Use black, white, gray
+        COLOR_MODE_MONOCHROME = 1;
+
+        // Use full color is available
+        COLOR_MODE_COLOR = 2;
+    }
+    // Color mode to use
+    optional ColorMode color_mode = 5;
+
+    enum DuplexMode {
+        // unused
+        __DUPLEX_MODE_UNUSED = 0;
+
+        // No duplex
+        DUPLEX_MODE_NONE = 1;
+
+        // Duplex where the long edge attached
+        DUPLEX_MODE_LONG_EDGE = 2;
+
+        // Duplex where the short edge attach
+        DUPLEX_MODE_SHORT_EDGE = 4;
+    }
+    // Duplex mode to use
+    optional DuplexMode duplex_mode = 6;
+}
+
+message PrintDocumentInfoProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Name of the document to print
+    optional string name = 1 [ (android.privacy).dest = DEST_EXPLICIT ];
+
+    // Number of pages in the doc
+    optional int32 page_count = 2;
+
+    // Type of content (see PrintDocumentInfo.ContentType)
+    optional int32 content_type = 3;
+
+    // The size of the the document
+    optional int64 data_size = 4;
+}
+
+message PageRangeProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Start of the range
+    optional int32 start = 1;
+
+    // End of the range (included)
+    optional int32 end = 2;
+}
+
+message PrintJobInfoProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Label of the job
+    optional string label = 1 [ (android.privacy).dest = DEST_EXPLICIT ];
+
+    // Id of the job
+    optional string print_job_id = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
+
+    enum State {
+        // Unknown state
+        STATE_UNKNOWN = 0;
+
+        // The print job is being created but not yet ready to be printed
+        STATE_CREATED = 1;
+
+        // The print jobs is created, it is ready to be printed and should be processed
+        STATE_QUEUED = 2;
+
+        // The print job is being printed
+        STATE_STARTED = 3;
+
+        // The print job is blocked
+        STATE_BLOCKED = 4;
+
+        // The print job is successfully printed
+        STATE_COMPLETED = 5;
+
+        // The print job was printing but printing failed
+        STATE_FAILED = 6;
+
+        // The print job is canceled
+        STATE_CANCELED = 7;
+    }
+
+    // State of the job
+    optional State state = 3;
+
+    // Printer handling the job
+    optional PrinterIdProto printer = 4;
+
+    // Tag assigned to the job
+    optional string tag = 5 [ (android.privacy).dest = DEST_EXPLICIT ];
+
+    // Time the job was created
+    optional int64 creation_time = 6;
+
+    // Attributes of the job
+    optional PrintAttributesProto attributes = 7;
+
+    // Document info of the job
+    optional PrintDocumentInfoProto document_info = 8;
+
+    // If the job current getting canceled
+    optional bool is_canceling = 9;
+
+    // The selected ranges of the job
+    repeated PageRangeProto pages = 10;
+
+    // Does the job have any advanced options
+    optional bool has_advanced_options = 11;
+
+    // Progress of the job
+    optional float progress = 12;
+
+    // The current service set state
+    optional string status = 13;
+}
+
+message CachedPrintJobProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // The id of the app the job belongs to
+    optional int32 app_id = 1;
+
+    // The print job
+    optional PrintJobInfoProto print_job = 2;
+}

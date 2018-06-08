@@ -40,9 +40,11 @@ public class HardwarePropertiesManager {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
-        DEVICE_TEMPERATURE_CPU, DEVICE_TEMPERATURE_GPU, DEVICE_TEMPERATURE_BATTERY,
-                DEVICE_TEMPERATURE_SKIN
+    @IntDef(prefix = { "DEVICE_TEMPERATURE_" }, value = {
+            DEVICE_TEMPERATURE_CPU,
+            DEVICE_TEMPERATURE_GPU,
+            DEVICE_TEMPERATURE_BATTERY,
+            DEVICE_TEMPERATURE_SKIN
     })
     public @interface DeviceTemperatureType {}
 
@@ -50,15 +52,19 @@ public class HardwarePropertiesManager {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
-        TEMPERATURE_CURRENT, TEMPERATURE_THROTTLING, TEMPERATURE_SHUTDOWN,
-                TEMPERATURE_THROTTLING_BELOW_VR_MIN
+    @IntDef(prefix = { "TEMPERATURE_" }, value = {
+            TEMPERATURE_CURRENT,
+            TEMPERATURE_THROTTLING,
+            TEMPERATURE_SHUTDOWN,
+            TEMPERATURE_THROTTLING_BELOW_VR_MIN
     })
     public @interface TemperatureSource {}
 
     /**
      * Device temperature types.
      */
+    // These constants are also defined in android/os/enums.proto.
+    // Any change to the types here or in the thermal hal should be made in the proto as well.
     /** Temperature of CPUs in Celsius. */
     public static final int DEVICE_TEMPERATURE_CPU = Constants.TemperatureType.CPU;
 

@@ -16,6 +16,7 @@
 
 package android.text.style;
 
+import android.annotation.NonNull;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -27,40 +28,71 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 
+/**
+ * Implementation of the {@link ClickableSpan} that allows setting a url string. When
+ * selecting and clicking on the text to which the span is attached, the <code>URLSpan</code>
+ * will try to open the url, by launching an an Activity with an {@link Intent#ACTION_VIEW} intent.
+ * <p>
+ * For example, a <code>URLSpan</code> can be used like this:
+ * <pre>
+ * SpannableString string = new SpannableString("Text with a url span");
+ * string.setSpan(new URLSpan("http://www.developer.android.com"), 12, 15, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+ * </pre>
+ * <img src="{@docRoot}reference/android/images/text/style/urlspan.png" />
+ * <figcaption>Text with <code>URLSpan</code>.</figcaption>
+ */
 public class URLSpan extends ClickableSpan implements ParcelableSpan {
 
     private final String mURL;
 
+    /**
+     * Constructs a {@link URLSpan} from a url string.
+     *
+     * @param url the url string
+     */
     public URLSpan(String url) {
         mURL = url;
     }
 
-    public URLSpan(Parcel src) {
+    /**
+     * Constructs a {@link URLSpan} from a parcel.
+     */
+    public URLSpan(@NonNull Parcel src) {
         mURL = src.readString();
     }
-    
+
+    @Override
     public int getSpanTypeId() {
         return getSpanTypeIdInternal();
     }
 
     /** @hide */
+    @Override
     public int getSpanTypeIdInternal() {
         return TextUtils.URL_SPAN;
     }
-    
+
+    @Override
     public int describeContents() {
         return 0;
     }
 
-    public void writeToParcel(Parcel dest, int flags) {
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         writeToParcelInternal(dest, flags);
     }
 
     /** @hide */
-    public void writeToParcelInternal(Parcel dest, int flags) {
+    @Override
+    public void writeToParcelInternal(@NonNull Parcel dest, int flags) {
         dest.writeString(mURL);
     }
 
+    /**
+     * Get the url string for this span.
+     *
+     * @return the url string.
+     */
     public String getURL() {
         return mURL;
     }

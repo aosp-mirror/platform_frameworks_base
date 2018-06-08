@@ -171,34 +171,42 @@
          permanent protectionLevel. If you are creating a custom permission in an
          application, you can define a protectionLevel attribute with one of the
          values listed below. If no protectionLevel is defined for a custom
-         permission, the system assigns the default ("normal"). -->
+         permission, the system assigns the default ("normal").
+         <p>Each protection level consists of a base permission type and zero or
+         more flags. Use the following functions to extract those.
+         <pre>
+         int basePermissionType = permissionInfo.getProtection();
+         int permissionFlags = permissionInfo.getProtectionFlags();
+         </pre>
+         -->
     <attr name="protectionLevel">
-        <!-- A lower-risk permission that gives an application access to isolated
-             application-level features, with minimal risk to other applications,
-             the system, or the user. The system automatically grants this type
-             of permission to a requesting application at installation, without
-             asking for the user's explicit approval (though the user always
-             has the option to review these permissions before installing). -->
+        <!-- <strong>Base permission type</strong>: a lower-risk permission that gives
+             an application access to isolated application-level features, with minimal
+             risk to other applications, the system, or the user. The system
+             automatically grants this type of permission to a requesting application at
+             installation, without asking for the user's explicit approval (though the
+             user always has the option to review these permissions before installing). -->
         <flag name="normal" value="0" />
-        <!-- A higher-risk permission that would give a requesting application
-             access to private user data or control over the device that can
-             negatively impact the user.  Because this type of permission
-             introduces potential risk, the system may not automatically
-             grant it to the requesting application.  For example, any dangerous
-             permissions requested by an application may be displayed to the
-             user and require confirmation before proceeding, or some other
+        <!-- <strong>Base permission type</strong>: a higher-risk permission that
+             would give a requesting application access to private user data or
+             control over the device that can negatively impact the user.  Because
+             this type of permission introduces potential risk, the system may
+             not automatically grant it to the requesting application.  For example,
+             any dangerous permissions requested by an application may be displayed
+             to the user and require confirmation before proceeding, or some other
              approach may be taken to avoid the user automatically allowing
              the use of such facilities.  -->
         <flag name="dangerous" value="1" />
-        <!-- A permission that the system is to grant only if the requesting
-             application is signed with the same certificate as the application
-             that declared the permission. If the certificates match, the system
-             automatically grants the permission without notifying the user or
-             asking for the user's explicit approval. -->
+        <!-- <strong>Base permission type</strong>: a permission that the system is
+             to grant only if the requesting application is signed with the same
+             certificate as the application that declared the permission. If the
+             certificates match, the system automatically grants the permission
+             without notifying the user or asking for the user's explicit approval. -->
         <flag name="signature" value="2" />
-        <!-- A permission that the system is to grant only to packages in the
-             Android system image <em>or</em> that are signed with the same
-             certificates. Please avoid using this option, as the
+        <!-- Old synonym for "signature|privileged". Deprecated in API level 23.
+             Base permission type: a permission that the system is to grant only
+             to packages in the Android system image <em>or</em> that are signed
+             with the same certificates. Please avoid using this option, as the
              signature protection level should be sufficient for most needs and
              works regardless of exactly where applications are installed.  This
              permission is used for certain special situations where multiple
@@ -216,7 +224,7 @@
              to share specific features explicitly because they are being built
              together. -->
         <flag name="privileged" value="0x10" />
-        <!-- Old synonym for "privileged". -->
+        <!-- Old synonym for "privileged". Deprecated in API level 23. -->
         <flag name="system" value="0x10" />
         <!-- Additional flag from base permission type: this permission can also
              (optionally) be granted to development applications. -->
@@ -249,6 +257,17 @@
              that target runtime permissions ({@link android.os.Build.VERSION_CODES#M} and above)
              -->
         <flag name="runtime" value="0x2000" />
+        <!-- Additional flag from base permission type: this permission can be granted only
+             if its protection level is signature, the requesting app resides on the OEM partition,
+             and the OEM has white-listed the app to receive this permission by the OEM.
+         -->
+        <flag name="oem" value="0x4000" />
+        <!-- Additional flag from base permission type: this permission can be granted to
+             privileged apps in vendor partition. -->
+        <flag name="vendorPrivileged" value="0x8000" />
+        <!-- Additional flag from base permission type: this permission can be automatically
+            granted to the system default text classifier -->
+        <flag name="textClassifier" value="0x10000" />
     </attr>
 
     <!-- Flags indicating more context for a permission group. -->
@@ -303,6 +322,13 @@
          with {@link android.R.attr#versionName}.  When an app is delivered
          as multiple split APKs, each APK must have the exact same versionCode. -->
     <attr name="versionCode" format="integer" />
+
+    <!-- Internal major version code.  This is essentially additional high bits
+         for the base version code; it has no other meaning than
+         that higher numbers are more recent.  This is not a version
+         number generally shown to the user, that is usually supplied
+         with {@link android.R.attr#versionName}. -->
+    <attr name="versionCodeMajor" format="integer" />
 
     <!-- Internal revision code.  This number is the number used to determine
          whether one APK is more recent than another: it has no other meaning
@@ -1329,11 +1355,35 @@
          split that contains the defined component. -->
     <attr name="splitName" format="string" />
 
-    <!-- Specifies the target sandbox this app wants to use. Higher sanbox versions
+    <!-- Specifies the target sandbox this app wants to use. Higher sandbox versions
          will have increasing levels of security.
 
          <p>The default value of this attribute is <code>1</code>. -->
     <attr name="targetSandboxVersion" format="integer" />
+
+    <!-- The user-visible SDK version (ex. 26) of the framework against which the application was
+         compiled. This attribute is automatically specified by the Android build tools and should
+         NOT be manually specified.
+         <p>
+         This attribute is the compile-time equivalent of
+         {@link android.os.Build.VERSION#SDK_INT Build.VERSION.SDK_INT}. -->
+    <attr name="compileSdkVersion" format="integer" />
+
+    <!-- The development codename (ex. "O") of the framework against which the application was
+         compiled, or "REL" if the application was compiled against a release build. This attribute
+         is automatically specified by the Android build tools and should NOT be manually
+         specified.
+         <p>
+         This attribute is the compile-time equivalent of
+         {@link android.os.Build.VERSION#CODENAME Build.VERSION.CODENAME}. -->
+    <attr name="compileSdkVersionCodename" format="string" />
+
+    <!-- The (optional) fully-qualified name for a subclass of
+         {@link android.app.AppComponentFactory} that the system uses to instantiate
+         every other manifest defined class. Most applications
+         don't need this attribute. If it's not specified, the system
+         instantiates items without it.-->
+    <attr name="appComponentFactory" format="string" />
 
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
@@ -1356,6 +1406,7 @@
          {@link #AndroidManifestUsesFeature uses-feature}.  -->
     <declare-styleable name="AndroidManifest">
         <attr name="versionCode" />
+        <attr name="versionCodeMajor" />
         <attr name="versionName" />
         <attr name="revisionCode" />
         <attr name="sharedUserId" />
@@ -1364,6 +1415,8 @@
         <attr name="isolatedSplits" />
         <attr name="isFeatureSplit" />
         <attr name="targetSandboxVersion" />
+        <attr name="compileSdkVersion" />
+        <attr name="compileSdkVersionCodename" />
     </declare-styleable>
 
     <!-- The <code>application</code> tag describes application-level components
@@ -1444,8 +1497,7 @@
              quit it.  Only one such app can be running at a time; if the user
              tries to launch a second such app, they will be prompted
              to quit the first before doing so.  While the
-             application is running, the user will be informed of this.
-             @hide -->
+             application is running, the user will be informed of this. -->
         <attr name="cantSaveState" format="boolean" />
         <attr name="uiOptions" />
         <!-- Declare that your application will be able to deal with RTL (right to left) layouts.
@@ -1504,6 +1556,8 @@
         <!-- Declares the kind of classloader this application's classes must be loaded with -->
         <attr name="classLoader" />
 
+        <attr name="appComponentFactory" />
+
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or
@@ -1527,6 +1581,7 @@
         <attr name="logo" />
         <attr name="permissionGroup" />
         <attr name="description" />
+        <attr name="request" />
         <attr name="protectionLevel" />
         <attr name="permissionFlags" />
     </declare-styleable>
@@ -1554,6 +1609,7 @@
         <attr name="banner" />
         <attr name="logo" />
         <attr name="description" />
+        <attr name="request" />
         <attr name="permissionGroupFlags" />
         <attr name="priority" />
     </declare-styleable>
@@ -1751,6 +1807,10 @@
         <attr name="name" />
         <!-- Required specific library version. -->
         <attr name="version" />
+        <!-- Required specific library major version code.  This matches
+             android:versionCodeMajor of the library. -->
+        <!-- Required specific library version. -->
+        <attr name="versionMajor" format="integer" />
     </declare-styleable>
 
     <!-- The <code>uses-libraries</code> specifies a shared library that this
@@ -2288,6 +2348,16 @@
         <attr name="logo" />
         <attr name="priority" />
         <attr name="autoVerify" />
+        <!-- Within an application, multiple intent filters may match a particular
+             intent. This allows the app author to specify the order filters should
+             be considered. We don't want to use priority because that is global
+             across applications.
+             <p>Only use if you really need to forcibly set the order in which
+             filters are evaluated. It is preferred to target an activity with a
+             directed intent instead.
+             <p>The value is a single integer, with higher numbers considered to
+             be better. If not specified, the default order is 0. -->
+        <attr name="order" />
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml
@@ -2501,6 +2571,9 @@
         <!-- Package name of base package whose resources will be overlaid. -->
         <attr name="targetPackage" />
 
+        <!-- Category of the resource overlay. -->
+        <attr name="category" format="string"/>
+
         <!-- Load order of overlay package. -->
         <attr name="priority" />
 
@@ -2511,9 +2584,9 @@
              e.g. name=ro.oem.sku value=MKT210.
              Overlay will be ignored unless system property exists and is
              set to specified value -->
-        <!-- @hide @SystemApi This shouldn't be public. -->
+        <!-- @hide This shouldn't be public. -->
         <attr name="requiredSystemPropertyName" format="string" />
-        <!-- @hide @SystemApi This shouldn't be public. -->
+        <!-- @hide This shouldn't be public. -->
         <attr name="requiredSystemPropertyValue" format="string" />
     </declare-styleable>
 

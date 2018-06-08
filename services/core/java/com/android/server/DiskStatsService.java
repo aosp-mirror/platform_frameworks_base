@@ -19,6 +19,10 @@ package com.android.server;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.IBinder;
+import android.os.IStoraged;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.storage.StorageManager;
@@ -109,6 +113,12 @@ public class DiskStatsService extends Binder {
             }
         }
 
+        if (protoFormat) {
+            reportDiskWriteSpeedProto(proto);
+        } else {
+            reportDiskWriteSpeed(pw);
+        }
+
         reportFreeSpace(Environment.getDataDirectory(), "Data", pw, proto,
                 DiskStatsFreeSpaceProto.FOLDER_DATA);
         reportFreeSpace(Environment.getDownloadCacheDirectory(), "Cache", pw, proto,
@@ -161,8 +171,8 @@ public class DiskStatsService extends Binder {
             if (proto != null) {
                 long freeSpaceToken = proto.start(DiskStatsServiceDumpProto.PARTITIONS_FREE_SPACE);
                 proto.write(DiskStatsFreeSpaceProto.FOLDER, folderType);
-                proto.write(DiskStatsFreeSpaceProto.AVAILABLE_SPACE, avail * bsize / 1024);
-                proto.write(DiskStatsFreeSpaceProto.TOTAL_SPACE, total * bsize / 1024);
+                proto.write(DiskStatsFreeSpaceProto.AVAILABLE_SPACE_KB, avail * bsize / 1024);
+                proto.write(DiskStatsFreeSpaceProto.TOTAL_SPACE_KB, total * bsize / 1024);
                 proto.end(freeSpaceToken);
             } else {
                 pw.print(name);
@@ -202,6 +212,8 @@ public class DiskStatsService extends Binder {
             JSONObject json = new JSONObject(jsonString);
             pw.print("App Size: ");
             pw.println(json.getLong(DiskStatsFileLogger.APP_SIZE_AGG_KEY));
+            pw.print("App Data Size: ");
+            pw.println(json.getLong(DiskStatsFileLogger.APP_DATA_SIZE_AGG_KEY));
             pw.print("App Cache Size: ");
             pw.println(json.getLong(DiskStatsFileLogger.APP_CACHE_AGG_KEY));
             pw.print("Photos Size: ");
@@ -220,6 +232,8 @@ public class DiskStatsService extends Binder {
             pw.println(json.getJSONArray(DiskStatsFileLogger.PACKAGE_NAMES_KEY));
             pw.print("App Sizes: ");
             pw.println(json.getJSONArray(DiskStatsFileLogger.APP_SIZES_KEY));
+            pw.print("App Data Sizes: ");
+            pw.println(json.getJSONArray(DiskStatsFileLogger.APP_DATA_KEY));
             pw.print("Cache Sizes: ");
             pw.println(json.getJSONArray(DiskStatsFileLogger.APP_CACHES_KEY));
         } catch (IOException | JSONException e) {
@@ -233,46 +247,89 @@ public class DiskStatsService extends Binder {
             JSONObject json = new JSONObject(jsonString);
             long cachedValuesToken = proto.start(DiskStatsServiceDumpProto.CACHED_FOLDER_SIZES);
 
-            proto.write(DiskStatsCachedValuesProto.AGG_APPS_SIZE,
+            proto.write(DiskStatsCachedValuesProto.AGG_APPS_SIZE_KB,
                     json.getLong(DiskStatsFileLogger.APP_SIZE_AGG_KEY));
-            proto.write(DiskStatsCachedValuesProto.AGG_APPS_CACHE_SIZE,
+            proto.write(DiskStatsCachedValuesProto.AGG_APPS_DATA_SIZE_KB,
+                    json.getLong(DiskStatsFileLogger.APP_DATA_SIZE_AGG_KEY));
+            proto.write(DiskStatsCachedValuesProto.AGG_APPS_CACHE_SIZE_KB,
                     json.getLong(DiskStatsFileLogger.APP_CACHE_AGG_KEY));
-            proto.write(DiskStatsCachedValuesProto.PHOTOS_SIZE,
+            proto.write(DiskStatsCachedValuesProto.PHOTOS_SIZE_KB,
                     json.getLong(DiskStatsFileLogger.PHOTOS_KEY));
-            proto.write(DiskStatsCachedValuesProto.VIDEOS_SIZE,
+            proto.write(DiskStatsCachedValuesProto.VIDEOS_SIZE_KB,
                     json.getLong(DiskStatsFileLogger.VIDEOS_KEY));
-            proto.write(DiskStatsCachedValuesProto.AUDIO_SIZE,
+            proto.write(DiskStatsCachedValuesProto.AUDIO_SIZE_KB,
                     json.getLong(DiskStatsFileLogger.AUDIO_KEY));
-            proto.write(DiskStatsCachedValuesProto.DOWNLOADS_SIZE,
+            proto.write(DiskStatsCachedValuesProto.DOWNLOADS_SIZE_KB,
                     json.getLong(DiskStatsFileLogger.DOWNLOADS_KEY));
-            proto.write(DiskStatsCachedValuesProto.SYSTEM_SIZE,
+            proto.write(DiskStatsCachedValuesProto.SYSTEM_SIZE_KB,
                     json.getLong(DiskStatsFileLogger.SYSTEM_KEY));
-            proto.write(DiskStatsCachedValuesProto.OTHER_SIZE,
+            proto.write(DiskStatsCachedValuesProto.OTHER_SIZE_KB,
                     json.getLong(DiskStatsFileLogger.MISC_KEY));
 
             JSONArray packageNamesArray = json.getJSONArray(DiskStatsFileLogger.PACKAGE_NAMES_KEY);
             JSONArray appSizesArray = json.getJSONArray(DiskStatsFileLogger.APP_SIZES_KEY);
+            JSONArray appDataSizesArray = json.getJSONArray(DiskStatsFileLogger.APP_DATA_KEY);
             JSONArray cacheSizesArray = json.getJSONArray(DiskStatsFileLogger.APP_CACHES_KEY);
             final int len = packageNamesArray.length();
-            if (len == appSizesArray.length() && len == cacheSizesArray.length()) {
+            if (len == appSizesArray.length()
+                    && len == appDataSizesArray.length()
+                    && len == cacheSizesArray.length()) {
                 for (int i = 0; i < len; i++) {
                     long packageToken = proto.start(DiskStatsCachedValuesProto.APP_SIZES);
 
                     proto.write(DiskStatsAppSizesProto.PACKAGE_NAME,
                             packageNamesArray.getString(i));
-                    proto.write(DiskStatsAppSizesProto.APP_SIZE, appSizesArray.getLong(i));
-                    proto.write(DiskStatsAppSizesProto.CACHE_SIZE, cacheSizesArray.getLong(i));
+                    proto.write(DiskStatsAppSizesProto.APP_SIZE_KB, appSizesArray.getLong(i));
+                    proto.write(DiskStatsAppSizesProto.APP_DATA_SIZE_KB, appDataSizesArray.getLong(i));
+                    proto.write(DiskStatsAppSizesProto.CACHE_SIZE_KB, cacheSizesArray.getLong(i));
 
                     proto.end(packageToken);
                 }
             } else {
-                Slog.wtf(TAG, "Sizes of packageNamesArray, appSizesArray and cacheSizesArray "
-                        + "are not the same");
+                Slog.wtf(TAG, "Sizes of packageNamesArray, appSizesArray, appDataSizesArray "
+                        + " and cacheSizesArray are not the same");
             }
 
             proto.end(cachedValuesToken);
         } catch (IOException | JSONException e) {
             Log.w(TAG, "exception reading diskstats cache file", e);
+        }
+    }
+
+    private int getRecentPerf() throws RemoteException, IllegalStateException {
+        IBinder binder = ServiceManager.getService("storaged");
+        if (binder == null) throw new IllegalStateException("storaged not found");
+        IStoraged storaged = IStoraged.Stub.asInterface(binder);
+        return storaged.getRecentPerf();
+    }
+
+    // Keep reportDiskWriteSpeed and reportDiskWriteSpeedProto in sync
+    private void reportDiskWriteSpeed(PrintWriter pw) {
+        try {
+            long perf = getRecentPerf();
+            if (perf != 0) {
+                pw.print("Recent Disk Write Speed (kB/s) = ");
+                pw.println(perf);
+            } else {
+                pw.println("Recent Disk Write Speed data unavailable");
+                Log.w(TAG, "Recent Disk Write Speed data unavailable!");
+            }
+        } catch (RemoteException | IllegalStateException e) {
+            pw.println(e.toString());
+            Log.e(TAG, e.toString());
+        }
+    }
+
+    private void reportDiskWriteSpeedProto(ProtoOutputStream proto) {
+        try {
+            long perf = getRecentPerf();
+            if (perf != 0) {
+                proto.write(DiskStatsServiceDumpProto.BENCHMARKED_WRITE_SPEED_KBPS, perf);
+            } else {
+                Log.w(TAG, "Recent Disk Write Speed data unavailable!");
+            }
+        } catch (RemoteException | IllegalStateException e) {
+            Log.e(TAG, e.toString());
         }
     }
 }

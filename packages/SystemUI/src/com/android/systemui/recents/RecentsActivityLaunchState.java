@@ -33,7 +33,6 @@ public class RecentsActivityLaunchState {
     public boolean launchedFromPipApp;
     // Set if the next activity that quick-switch will launch is the PiP activity
     public boolean launchedWithNextPipApp;
-    public boolean launchedFromBlacklistedApp;
     public boolean launchedFromHome;
     public boolean launchedViaDragGesture;
     public boolean launchedViaDockGesture;
@@ -44,50 +43,11 @@ public class RecentsActivityLaunchState {
     public void reset() {
         launchedFromHome = false;
         launchedFromApp = false;
-        launchedFromBlacklistedApp = false;
         launchedFromPipApp = false;
         launchedWithNextPipApp = false;
         launchedToTaskId = -1;
         launchedWithAltTab = false;
         launchedViaDragGesture = false;
         launchedViaDockGesture = false;
-    }
-
-    /**
-     * Returns the task to focus given the current launch state.
-     */
-    public int getInitialFocusTaskIndex(int numTasks, boolean useGridLayout) {
-        RecentsDebugFlags debugFlags = Recents.getDebugFlags();
-        RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
-        if (launchedFromApp) {
-            if (!launchState.launchedWithAltTab && debugFlags.isFastToggleRecentsEnabled()) {
-                // If fast toggling, focus the front most task so that the next tap will launch the
-                // task
-                return numTasks - 1;
-            }
-
-            if (launchState.launchedFromBlacklistedApp) {
-                // If we are launching from a blacklisted app, focus the front most task so that the
-                // next tap will launch the task
-                return numTasks - 1;
-            }
-
-            if (useGridLayout) {
-                // If coming from another app to the grid layout, focus the front most task
-                return numTasks - 1;
-            }
-
-            // If coming from another app, focus the next task
-            return Math.max(0, numTasks - 2);
-        } else {
-            if (!launchState.launchedWithAltTab && debugFlags.isFastToggleRecentsEnabled()) {
-                // If fast toggling, defer focusing until the next tap (which will automatically
-                // focus the front most task)
-                return -1;
-            }
-
-            // If coming from home, focus the front most task
-            return numTasks - 1;
-        }
     }
 }

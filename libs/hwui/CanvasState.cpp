@@ -21,14 +21,8 @@
 namespace android {
 namespace uirenderer {
 
-
 CanvasState::CanvasState(CanvasStateClient& renderer)
-        : mWidth(-1)
-        , mHeight(-1)
-        , mSaveCount(1)
-        , mCanvas(renderer)
-        , mSnapshot(&mFirstSnapshot) {
-}
+        : mWidth(-1), mHeight(-1), mSaveCount(1), mCanvas(renderer), mSnapshot(&mFirstSnapshot) {}
 
 CanvasState::~CanvasState() {
     // First call freeSnapshot on all but mFirstSnapshot
@@ -57,10 +51,9 @@ void CanvasState::initializeRecordingSaveStack(int viewportWidth, int viewportHe
     mSaveCount = 1;
 }
 
-void CanvasState::initializeSaveStack(
-        int viewportWidth, int viewportHeight,
-        float clipLeft, float clipTop,
-        float clipRight, float clipBottom, const Vector3& lightCenter) {
+void CanvasState::initializeSaveStack(int viewportWidth, int viewportHeight, float clipLeft,
+                                      float clipTop, float clipRight, float clipBottom,
+                                      const Vector3& lightCenter) {
     if (mWidth != viewportWidth || mHeight != viewportHeight) {
         mWidth = viewportWidth;
         mHeight = viewportHeight;
@@ -92,7 +85,7 @@ void CanvasState::freeSnapshot(Snapshot* snapshot) {
     snapshot->~Snapshot();
     // Arbitrary number, just don't let this grown unbounded
     if (mSnapshotPoolCount > 10) {
-        free((void*) snapshot);
+        free((void*)snapshot);
     } else {
         snapshot->previous = mSnapshotPool;
         mSnapshotPool = snapshot;
@@ -215,7 +208,7 @@ bool CanvasState::clipPath(const SkPath* path, SkClipOp op) {
 void CanvasState::setClippingOutline(LinearAllocator& allocator, const Outline* outline) {
     Rect bounds;
     float radius;
-    if (!outline->getAsRoundRect(&bounds, &radius)) return; // only RR supported
+    if (!outline->getAsRoundRect(&bounds, &radius)) return;  // only RR supported
 
     bool outlineIsRounded = MathUtils::isPositive(radius);
     if (!outlineIsRounded || currentTransform()->isSimple()) {
@@ -241,10 +234,9 @@ void CanvasState::setClippingOutline(LinearAllocator& allocator, const Outline* 
  * @param snapOut if set, the geometry will be treated as having an AA ramp.
  *         See Rect::snapGeometryToPixelBoundaries()
  */
-bool CanvasState::calculateQuickRejectForScissor(float left, float top,
-        float right, float bottom,
-        bool* clipRequired, bool* roundRectClipRequired,
-        bool snapOut) const {
+bool CanvasState::calculateQuickRejectForScissor(float left, float top, float right, float bottom,
+                                                 bool* clipRequired, bool* roundRectClipRequired,
+                                                 bool snapOut) const {
     if (bottom <= top || right <= left) {
         return true;
     }
@@ -265,21 +257,20 @@ bool CanvasState::calculateQuickRejectForScissor(float left, float top,
 
     // round rect clip is required if RR clip exists, and geometry intersects its corners
     if (roundRectClipRequired) {
-        *roundRectClipRequired = mSnapshot->roundRectClipState != nullptr
-                && mSnapshot->roundRectClipState->areaRequiresRoundRectClip(r);
+        *roundRectClipRequired = mSnapshot->roundRectClipState != nullptr &&
+                                 mSnapshot->roundRectClipState->areaRequiresRoundRectClip(r);
     }
     return false;
 }
 
-bool CanvasState::quickRejectConservative(float left, float top,
-        float right, float bottom) const {
+bool CanvasState::quickRejectConservative(float left, float top, float right, float bottom) const {
     if (bottom <= top || right <= left) {
         return true;
     }
 
     Rect r(left, top, right, bottom);
     currentTransform()->mapRect(r);
-    r.roundOut(); // rounded out to be conservative
+    r.roundOut();  // rounded out to be conservative
 
     Rect clipRect(currentRenderTargetClip());
     clipRect.snapToPixelBoundaries();
@@ -289,5 +280,5 @@ bool CanvasState::quickRejectConservative(float left, float top,
     return false;
 }
 
-} // namespace uirenderer
-} // namespace android
+}  // namespace uirenderer
+}  // namespace android
