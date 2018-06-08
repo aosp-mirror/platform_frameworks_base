@@ -152,6 +152,11 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     }
 
     @Override
+    public long forceNetworkLogs() {
+        return 0;
+    }
+
+    @Override
     public long forceSecurityLogs() {
         return 0;
     }
