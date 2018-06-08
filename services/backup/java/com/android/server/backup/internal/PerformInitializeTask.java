@@ -130,9 +130,13 @@ public class PerformInitializeTask implements Runnable {
 
                 IBackupTransport transport = transportClient.connectOrThrow(callerLogString);
                 int status = transport.initializeDevice();
-
-                if (status == BackupTransport.TRANSPORT_OK) {
+                if (status != BackupTransport.TRANSPORT_OK) {
+                    Slog.e(TAG, "Transport error in initializeDevice()");
+                } else {
                     status = transport.finishBackup();
+                    if (status != BackupTransport.TRANSPORT_OK) {
+                        Slog.e(TAG, "Transport error in finishBackup()");
+                    }
                 }
 
                 // Okay, the wipe really happened.  Clean up our local bookkeeping.
@@ -148,7 +152,6 @@ public class PerformInitializeTask implements Runnable {
                 } else {
                     // If this didn't work, requeue this one and try again
                     // after a suitable interval
-                    Slog.e(TAG, "Transport error in initializeDevice()");
                     EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, "(initialize)");
                     mBackupManagerService.recordInitPending(true, transportName, transportDirName);
                     notifyResult(transportName, status);

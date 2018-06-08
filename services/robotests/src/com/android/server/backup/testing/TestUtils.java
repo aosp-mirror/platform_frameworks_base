@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import org.robolectric.shadows.ShadowLog;
 
 import java.util.concurrent.Callable;
+import java.util.function.Predicate;
 
 public class TestUtils {
     /** Reset logcat with {@link ShadowLog#reset()} before the test case */
@@ -33,6 +34,10 @@ public class TestUtils {
     public static void assertLogcatAtLeast(String tag, int level) {
         assertThat(ShadowLog.getLogsForTag(tag).stream().anyMatch(logItem -> logItem.type >= level))
                 .isTrue();
+    }
+
+    public static void assertLogcatContains(String tag, Predicate<ShadowLog.LogItem> predicate) {
+        assertThat(ShadowLog.getLogsForTag(tag).stream().anyMatch(predicate)).isTrue();
     }
 
     /**
