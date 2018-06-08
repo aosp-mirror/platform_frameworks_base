@@ -1207,11 +1207,6 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
 doc_defaults {
     name: "metalava-framework-docs-default",
     srcs: [
-        // test mock src files.
-        "test-mock/src/android/test/mock/**/*.java",
-        // test runner excluding mock src files.
-        "test-runner/src/**/*.java",
-        "test-base/src/**/*.java",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
         ":openjdk_javadoc_files",
