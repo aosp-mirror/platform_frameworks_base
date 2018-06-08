@@ -650,6 +650,42 @@ $(static_doc_index_redirect): \
 
 $(full_target): $(static_doc_index_redirect)
 
+# ====  Metalava static html in the sdk ==================================
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
+LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
+
+LOCAL_MODULE := metalava-offline-sdk
+LOCAL_DROIDDOC_USE_METALAVA := true
+
+# TODO(nanzhang): Remove -hide, and -since flags for this module.
+LOCAL_DROIDDOC_OPTIONS:=\
+		$(framework_metalava_docs_LOCAL_DROIDDOC_OPTIONS) \
+		--generate-api-levels $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/api-versions.xml \
+		--apply-api-levels $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/api-versions.xml \
+		--android-jar-pattern prebuilts/tools/common/api-versions/android-%/android.jar \
+		--android-jar-pattern prebuilts/sdk/%/android.jar \
+		--current-version $(PLATFORM_SDK_VERSION) \
+		--current-codename $(PLATFORM_VERSION_CODENAME) \
+		--generate-documentation \
+		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
+		-offlinemode \
+		-title "Android SDK" \
+		-proofread $(OUT_DOCS)/$(LOCAL_MODULE)-proofread.txt \
+		-sdkvalues $(OUT_DOCS) \
+		-hdf android.whichdoc offline
+
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
+
+include $(BUILD_DROIDDOC)
 
 # ==== Public API static reference docs ==================================
 include $(CLEAR_VARS)
@@ -756,6 +792,44 @@ LOCAL_ADDITIONAL_HTML_DIR:=docs/html-intl /
 LOCAL_MODULE := online-sdk
 
 LOCAL_DROIDDOC_OPTIONS:= \
+		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
+		-toroot / \
+		-hdf android.whichdoc online \
+		$(sample_groups) \
+		-hdf android.hasSamples true \
+		-samplesdir $(samples_dir)
+
+LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
+
+include $(BUILD_DROIDDOC)
+
+# ==== Metalava docs for the web (on the androiddevdocs app engine server) =======================
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
+LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
+LOCAL_STATIC_JAVA_LIBRARIES:=$(framework_docs_LOCAL_STATIC_JAVA_LIBRARIES)
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
+LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
+LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
+LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
+LOCAL_ADDITIONAL_JAVA_DIR:=$(framework_docs_LOCAL_ADDITIONAL_JAVA_DIR)
+LOCAL_ADDITIONAL_DEPENDENCIES:=$(framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES)
+LOCAL_ADDITIONAL_HTML_DIR:=docs/html-intl /
+
+LOCAL_MODULE := metalava-online-sdk
+LOCAL_DROIDDOC_USE_METALAVA := true
+
+LOCAL_DROIDDOC_OPTIONS:= \
+		$(framework_metalava_docs_LOCAL_DROIDDOC_OPTIONS) \
+		--generate-api-levels $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/api-versions.xml \
+		--apply-api-levels $(TARGET_OUT_COMMON_INTERMEDIATES)/PACKAGING/api-versions.xml \
+		--android-jar-pattern prebuilts/tools/common/api-versions/android-%/android.jar \
+		--android-jar-pattern prebuilts/sdk/%/android.jar \
+		--current-version $(PLATFORM_SDK_VERSION) \
+		--current-codename $(PLATFORM_VERSION_CODENAME) \
+		--generate-documentation \
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
 		-toroot / \
 		-hdf android.whichdoc online \
