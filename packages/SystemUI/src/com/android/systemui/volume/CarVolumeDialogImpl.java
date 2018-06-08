@@ -38,6 +38,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
@@ -527,7 +528,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
 
   private final ICarVolumeCallback mVolumeChangeCallback = new ICarVolumeCallback.Stub() {
     @Override
-    public void onGroupVolumeChanged(int groupId) {
+    public void onGroupVolumeChanged(int groupId, int flags) {
       VolumeItem volumeItem = mAvailableVolumeItems.get(groupId);
       int value = getSeekbarValue(mCarAudioManager, groupId);
       // Do not update the progress if it is the same as before. When car audio manager sets its
@@ -536,12 +537,14 @@ public class CarVolumeDialogImpl implements VolumeDialog {
       if (value != volumeItem.progress) {
         volumeItem.listItem.setProgress(value);
         volumeItem.progress = value;
-        show(Events.SHOW_REASON_VOLUME_CHANGED);
+        if ((flags & AudioManager.FLAG_SHOW_UI) != 0) {
+          show(Events.SHOW_REASON_VOLUME_CHANGED);
+        }
       }
     }
 
     @Override
-    public void onMasterMuteChanged() {
+    public void onMasterMuteChanged(int flags) {
       // ignored
     }
   };
