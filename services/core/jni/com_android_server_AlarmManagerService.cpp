@@ -81,6 +81,7 @@ public:
     int set(int type, struct timespec *ts);
     int setTime(struct timeval *tv);
     int waitForAlarm();
+    int getTime(int type, struct itimerspec *spec);
 
 private:
     const TimerFds fds;
@@ -116,6 +117,16 @@ int AlarmImpl::set(int type, struct timespec *ts)
     memcpy(&spec.it_value, ts, sizeof(spec.it_value));
 
     return timerfd_settime(fds[type], TFD_TIMER_ABSTIME, &spec, NULL);
+}
+
+int AlarmImpl::getTime(int type, struct itimerspec *spec)
+{
+    if (static_cast<size_t>(type) > ANDROID_ALARM_TYPE_COUNT) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    return timerfd_gettime(fds[type], spec);
 }
 
 int AlarmImpl::setTime(struct timeval *tv)
@@ -379,6 +390,23 @@ static jlong android_server_AlarmManagerService_init(JNIEnv*, jobject)
     return reinterpret_cast<jlong>(ret);
 }
 
+static jlong android_server_AlarmManagerService_getNextAlarm(JNIEnv*, jobject, jlong nativeData, jint type)
+{
+    AlarmImpl *impl = reinterpret_cast<AlarmImpl *>(nativeData);
+    struct itimerspec spec;
+    memset(&spec, 0, sizeof(spec));
+    const int result = impl->getTime(type, &spec);
+    if (result < 0)
+    {
+        ALOGE("timerfd_gettime() failed for fd %d: %s\n", static_cast<int>(type), strerror(errno));
+        return result;
+    }
+    struct timespec nextTimespec = spec.it_value;
+    long long millis = nextTimespec.tv_sec * 1000LL;
+    millis += (nextTimespec.tv_nsec / 1000000LL);
+    return static_cast<jlong>(millis);
+}
+
 static void android_server_AlarmManagerService_close(JNIEnv*, jobject, jlong nativeData)
 {
     AlarmImpl *impl = reinterpret_cast<AlarmImpl *>(nativeData);
@@ -429,6 +457,7 @@ static const JNINativeMethod sMethods[] = {
     {"waitForAlarm", "(J)I", (void*)android_server_AlarmManagerService_waitForAlarm},
     {"setKernelTime", "(JJ)I", (void*)android_server_AlarmManagerService_setKernelTime},
     {"setKernelTimezone", "(JI)I", (void*)android_server_AlarmManagerService_setKernelTimezone},
+    {"getNextAlarm", "(JI)J", (void*)android_server_AlarmManagerService_getNextAlarm},
 };
 
 int register_android_server_AlarmManagerService(JNIEnv* env)
