@@ -61,11 +61,12 @@ public final class Helper {
     static int sPartitionMaxCount = 10;
 
     /**
-     * Maximum number of visible datasets in the dataset picker UI.
+     * Maximum number of visible datasets in the dataset picker UI, or {@code 0} to use default
+     * value from resources.
      *
      * <p>Can be modified using {@code cmd autofill set max_visible_datasets}.
      */
-    public static int sVisibleDatasetsMaxCount = 3;
+    public static int sVisibleDatasetsMaxCount = 0;
 
     /**
      * When non-null, overrides whether the UI should be shown on full-screen mode.
