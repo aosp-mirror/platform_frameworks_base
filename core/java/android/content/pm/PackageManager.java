@@ -1957,8 +1957,6 @@ public abstract class PackageManager {
      * </ul>
      * A version of 1.1.0 or higher also indicates:
      * <ul>
-     * <li>The {@code VK_ANDROID_external_memory_android_hardware_buffer} extension is
-     *     supported.</li>
      * <li>{@code SYNC_FD} external semaphore and fence handles are supported.</li>
      * <li>{@code VkPhysicalDeviceSamplerYcbcrConversionFeatures::samplerYcbcrConversion} is
      *     supported.</li>

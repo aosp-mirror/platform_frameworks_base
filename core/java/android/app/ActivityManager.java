@@ -2177,7 +2177,8 @@ public class ActivityManager {
         }
 
         /**
-         * @return Whether or not the snapshot is of a translucent app window.
+         * @return Whether or not the snapshot is of a translucent app window (non-fullscreen or has
+         * a non-opaque pixel format).
          */
         public boolean isTranslucent() {
             return mIsTranslucent;
