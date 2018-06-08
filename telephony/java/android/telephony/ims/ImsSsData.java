@@ -296,6 +296,7 @@ public final class ImsSsData implements Parcelable {
         result = in.readInt();
         mSsInfo = in.createIntArray();
         mCfInfo = (ImsCallForwardInfo[])in.readParcelableArray(this.getClass().getClassLoader());
+        mImsSsInfo = (ImsSsInfo[])in.readParcelableArray(this.getClass().getClassLoader());
     }
 
     public static final Creator<ImsSsData> CREATOR = new Creator<ImsSsData>() {
@@ -319,6 +320,7 @@ public final class ImsSsData implements Parcelable {
         out.writeInt(result);
         out.writeIntArray(mSsInfo);
         out.writeParcelableArray(mCfInfo, 0);
+        out.writeParcelableArray(mImsSsInfo, 0);
     }
 
     @Override
