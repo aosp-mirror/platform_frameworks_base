@@ -282,6 +282,7 @@ public class KeyguardStatusView extends GridLayout implements
         mClockView.setPivotX(mClockView.getWidth() / 2);
         mClockView.setPivotY(0);
         mLastLayoutHeight = getHeight();
+        layoutOwnerInfo();
     }
 
     @Override
@@ -418,9 +419,11 @@ public class KeyguardStatusView extends GridLayout implements
         if (mLogoutView != null) {
             mLogoutView.setAlpha(dark ? 0 : 1);
         }
+
         if (mOwnerInfo != null) {
             boolean hasText = !TextUtils.isEmpty(mOwnerInfo.getText());
-            mOwnerInfo.setVisibility(hasText && mDarkAmount != 1 ? VISIBLE : GONE);
+            mOwnerInfo.setVisibility(hasText ? VISIBLE : GONE);
+            layoutOwnerInfo();
         }
 
         final int blendedTextColor = ColorUtils.blendARGB(mTextColor, Color.WHITE, mDarkAmount);
@@ -428,6 +431,20 @@ public class KeyguardStatusView extends GridLayout implements
         mKeyguardSlice.setDarkAmount(mDarkAmount);
         mClockView.setTextColor(blendedTextColor);
         mClockSeparator.setBackgroundColor(blendedTextColor);
+    }
+
+    private void layoutOwnerInfo() {
+        if (mOwnerInfo != null && mOwnerInfo.getVisibility() != GONE) {
+            // Animate owner info during wake-up transition
+            mOwnerInfo.setAlpha(1f - mDarkAmount);
+
+            float ratio = mDarkAmount;
+            // Calculate how much of it we should crop in order to have a smooth transition
+            int collapsed = mOwnerInfo.getTop() - mOwnerInfo.getPaddingTop();
+            int expanded = mOwnerInfo.getBottom() + mOwnerInfo.getPaddingBottom();
+            int toRemove = (int) ((expanded - collapsed) * ratio);
+            setBottom(getMeasuredHeight() - toRemove);
+        }
     }
 
     public void setPulsing(boolean pulsing, boolean animate) {
