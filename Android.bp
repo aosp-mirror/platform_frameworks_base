@@ -1037,6 +1037,7 @@ droiddoc {
         "core/java/overview.html",
         ":current-support-api",
     ],
+    dex_api_filename: "public-dex.txt",
     private_dex_api_filename: "private-dex.txt",
     removed_dex_api_filename: "removed-dex.txt",
     args: framework_docs_args +
