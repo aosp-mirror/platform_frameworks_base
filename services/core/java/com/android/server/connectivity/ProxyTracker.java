@@ -126,9 +126,9 @@ public class ProxyTracker {
     public ProxyInfo getDefaultProxy() {
         // This information is already available as a world read/writable jvm property.
         synchronized (mProxyLock) {
-            final ProxyInfo ret = mGlobalProxy;
-            if ((ret == null) && mDefaultProxyEnabled) return mDefaultProxy;
-            return ret;
+            if (mGlobalProxy != null) return mGlobalProxy;
+            if (mDefaultProxyEnabled) return mDefaultProxy;
+            return null;
         }
     }
 
@@ -296,14 +296,14 @@ public class ProxyTracker {
                     && (!Uri.EMPTY.equals(proxyInfo.getPacFileUrl()))
                     && proxyInfo.getPacFileUrl().equals(mGlobalProxy.getPacFileUrl())) {
                 mGlobalProxy = proxyInfo;
-                sendProxyBroadcast(mGlobalProxy);
+                sendProxyBroadcast(getDefaultProxy());
                 return;
             }
             mDefaultProxy = proxyInfo;
 
             if (mGlobalProxy != null) return;
             if (mDefaultProxyEnabled) {
-                sendProxyBroadcast(proxyInfo);
+                sendProxyBroadcast(getDefaultProxy());
             }
         }
     }
@@ -320,7 +320,7 @@ public class ProxyTracker {
             if (mDefaultProxyEnabled != enabled) {
                 mDefaultProxyEnabled = enabled;
                 if (mGlobalProxy == null && mDefaultProxy != null) {
-                    sendProxyBroadcast(enabled ? mDefaultProxy : null);
+                    sendProxyBroadcast(getDefaultProxy());
                 }
             }
         }
