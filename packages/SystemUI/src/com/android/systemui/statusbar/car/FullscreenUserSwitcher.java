@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.car;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.pm.UserInfo;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewStub;
 
@@ -60,6 +62,11 @@ public class FullscreenUserSwitcher {
     }
 
     public void show() {
+        // On a switch from the system user, don't show the user switcher
+        if (mUserManagerHelper.isHeadlessSystemUser() && mUserManagerHelper
+            .userIsSystemUser(mUserManagerHelper.getForegroundUserInfo())) {
+            return;
+        }
         if (mShowing) {
             return;
         }
