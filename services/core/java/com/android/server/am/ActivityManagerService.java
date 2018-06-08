@@ -20588,6 +20588,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     // done with this agent
     public void unbindBackupAgent(ApplicationInfo appInfo) {
         if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "unbindBackupAgent: " + appInfo);
+        enforceCallingPermission("android.permission.CONFIRM_FULL_BACKUP", "unbindBackupAgent");
         if (appInfo == null) {
             Slog.w(TAG, "unbind backup agent for null app");
             return;
