@@ -36,11 +36,29 @@ public final class ImsSsInfo implements Parcelable {
 
     // 0: disabled, 1: enabled
     /** @hide */
+    // TODO: Make private, do not modify this field directly, use getter!
     public int mStatus;
     /** @hide */
+    // TODO: Make private, do not modify this field directly, use getter!
     public String mIcbNum;
 
+    /**@hide*/
+    // TODO: Remove! Do not use this constructor, instead use public version.
     public ImsSsInfo() {
+    }
+
+    /**
+     *
+     * @param status The status of the service registration of activation/deactiviation. Valid
+     *    entries include:
+     *    {@link #NOT_REGISTERED},
+     *    {@link #DISABLED},
+     *    {@link #ENABLED}
+     * @param icbNum The Incoming barring number.
+     */
+    public ImsSsInfo(int status, String icbNum) {
+        mStatus = status;
+        mIcbNum = icbNum;
     }
 
     private ImsSsInfo(Parcel in) {
@@ -81,6 +99,12 @@ public final class ImsSsInfo implements Parcelable {
         }
     };
 
+    /**
+     * @return Supplementary Service Configuration status. Valid Values are:
+     *     {@link #NOT_REGISTERED},
+     *     {@link #DISABLED},
+     *     {@link #ENABLED}
+     */
     public int getStatus() {
         return mStatus;
     }
