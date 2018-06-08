@@ -16,6 +16,7 @@
 
 package android.app.timedetector;
 
+import android.annotation.NonNull;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.RemoteException;
@@ -40,15 +41,16 @@ public final class TimeDetector {
     }
 
     /**
-     * Does nothing.
-     * TODO: Remove this when the service implementation is built out.
+     * Suggests the current time to the detector. The detector may ignore the signal if better
+     * signals are available such as those that come from more reliable sources or were
+     * determined more recently.
      */
-    public void stubbedCall() {
+    public void suggestTime(@NonNull TimeSignal timeSignal) {
         if (DEBUG) {
-            Log.d(TAG, "stubbedCall called");
+            Log.d(TAG, "suggestTime called: " + timeSignal);
         }
         try {
-            mITimeDetectorService.stubbedCall();
+            mITimeDetectorService.suggestTime(timeSignal);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
