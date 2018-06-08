@@ -3305,8 +3305,11 @@ public final class ViewRootImpl implements ViewParent,
                 }
 
                 useAsyncReport = true;
-                mAttachInfo.mThreadedRenderer.draw(mView, mAttachInfo, this, mNextRtFrameCallback);
+
+                // draw(...) might invoke post-draw, which might register the next callback already.
+                final FrameDrawingCallback callback = mNextRtFrameCallback;
                 mNextRtFrameCallback = null;
+                mAttachInfo.mThreadedRenderer.draw(mView, mAttachInfo, this, callback);
             } else {
                 // If we get here with a disabled & requested hardware renderer, something went
                 // wrong (an invalidate posted right before we destroyed the hardware surface
