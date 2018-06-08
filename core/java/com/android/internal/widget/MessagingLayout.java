@@ -45,7 +45,7 @@ import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.internal.graphics.ColorUtils;
-import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.util.ContrastColorUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -315,13 +315,13 @@ public class MessagingLayout extends FrameLayout {
     }
 
     private int findColor(CharSequence senderName, int layoutColor) {
-        double luminance = NotificationColorUtil.calculateLuminance(layoutColor);
+        double luminance = ContrastColorUtil.calculateLuminance(layoutColor);
         float shift = Math.abs(senderName.hashCode()) % 5 / 4.0f - 0.5f;
 
         // we need to offset the range if the luminance is too close to the borders
         shift += Math.max(COLOR_SHIFT_AMOUNT / 2.0f / 100 - luminance, 0);
         shift -= Math.max(COLOR_SHIFT_AMOUNT / 2.0f / 100 - (1.0f - luminance), 0);
-        return NotificationColorUtil.getShiftedColor(layoutColor,
+        return ContrastColorUtil.getShiftedColor(layoutColor,
                 (int) (shift * COLOR_SHIFT_AMOUNT));
     }
 

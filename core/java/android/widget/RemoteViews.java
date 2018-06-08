@@ -68,7 +68,7 @@ import android.view.ViewStub;
 import android.widget.AdapterView.OnItemClickListener;
 
 import com.android.internal.R;
-import com.android.internal.util.NotificationColorUtil;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.ElementType;
@@ -2155,7 +2155,7 @@ public class RemoteViews implements Parcelable, Filter {
                 View v = viewsToProcess.pop();
                 if (v instanceof TextView) {
                     TextView textView = (TextView) v;
-                    textView.setText(NotificationColorUtil.clearColorSpans(textView.getText()));
+                    textView.setText(ContrastColorUtil.clearColorSpans(textView.getText()));
                     textView.setTextColor(textColor);
                 }
                 if (v instanceof ViewGroup) {
