@@ -90,6 +90,7 @@ package android {
     field public static final java.lang.String MANAGE_CARRIER_OEM_UNLOCK_STATE = "android.permission.MANAGE_CARRIER_OEM_UNLOCK_STATE";
     field public static final java.lang.String MANAGE_CA_CERTIFICATES = "android.permission.MANAGE_CA_CERTIFICATES";
     field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
+    field public static final java.lang.String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
     field public static final java.lang.String MANAGE_SUBSCRIPTION_PLANS = "android.permission.MANAGE_SUBSCRIPTION_PLANS";
     field public static final java.lang.String MANAGE_USB = "android.permission.MANAGE_USB";
     field public static final java.lang.String MANAGE_USERS = "android.permission.MANAGE_USERS";
@@ -2611,10 +2612,10 @@ package android.net {
   }
 
   public static final class IpSecManager.IpSecTunnelInterface implements java.lang.AutoCloseable {
-    method public void addAddress(android.net.LinkAddress) throws java.io.IOException;
+    method public void addAddress(java.net.InetAddress, int) throws java.io.IOException;
     method public void close();
     method public java.lang.String getInterfaceName();
-    method public void removeAddress(android.net.LinkAddress) throws java.io.IOException;
+    method public void removeAddress(java.net.InetAddress, int) throws java.io.IOException;
   }
 
   public final class IpSecTransform implements java.lang.AutoCloseable {
