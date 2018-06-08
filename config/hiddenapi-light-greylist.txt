@@ -900,6 +900,7 @@ Landroid/app/ResultInfo;->mResultWho:Ljava/lang/String;
 Landroid/app/SearchableInfo$ActionKeyInfo;->getQueryActionMsg()Ljava/lang/String;
 Landroid/app/SearchableInfo$ActionKeyInfo;->getSuggestActionMsg()Ljava/lang/String;
 Landroid/app/SearchableInfo$ActionKeyInfo;->getSuggestActionMsgColumn()Ljava/lang/String;
+Landroid/app/SearchableInfo;-><init>(Landroid/content/Context;Landroid/util/AttributeSet;Landroid/content/ComponentName;)V
 Landroid/app/SearchableInfo;->findActionKey(I)Landroid/app/SearchableInfo$ActionKeyInfo;
 Landroid/app/SearchableInfo;->getActivityContext(Landroid/content/Context;)Landroid/content/Context;
 Landroid/app/SearchableInfo;->getIconId()I
@@ -1501,6 +1502,8 @@ Landroid/content/pm/IPackageInstallObserver2$Stub;->asInterface(Landroid/os/IBin
 Landroid/content/pm/IPackageInstallObserver2;->onPackageInstalled(Ljava/lang/String;ILjava/lang/String;Landroid/os/Bundle;)V
 Landroid/content/pm/IPackageInstallObserver2;->onUserActionRequired(Landroid/content/Intent;)V
 Landroid/content/pm/IPackageManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+Landroid/content/pm/IPackageManager$Stub$Proxy;->checkUidPermission(Ljava/lang/String;I)I
+Landroid/content/pm/IPackageManager$Stub$Proxy;->getAppOpPermissionPackages(Ljava/lang/String;)[Ljava/lang/String;
 Landroid/content/pm/IPackageManager$Stub$Proxy;->getInstalledPackages(II)Landroid/content/pm/ParceledListSlice;
 Landroid/content/pm/IPackageManager$Stub$Proxy;->getInstallLocation()I
 Landroid/content/pm/IPackageManager$Stub$Proxy;->getPackageInfo(Ljava/lang/String;II)Landroid/content/pm/PackageInfo;
@@ -1521,6 +1524,7 @@ Landroid/content/pm/IPackageManager;->currentToCanonicalPackageNames([Ljava/lang
 Landroid/content/pm/IPackageManager;->deleteApplicationCacheFiles(Ljava/lang/String;Landroid/content/pm/IPackageDataObserver;)V
 Landroid/content/pm/IPackageManager;->enterSafeMode()V
 Landroid/content/pm/IPackageManager;->getApplicationEnabledSetting(Ljava/lang/String;I)I
+Landroid/content/pm/IPackageManager;->getAppOpPermissionPackages(Ljava/lang/String;)[Ljava/lang/String;
 Landroid/content/pm/IPackageManager;->getBlockUninstallForUser(Ljava/lang/String;I)Z
 Landroid/content/pm/IPackageManager;->getComponentEnabledSetting(Landroid/content/ComponentName;I)I
 Landroid/content/pm/IPackageManager;->getFlagsForUid(I)I
@@ -1790,6 +1794,7 @@ Landroid/content/pm/UserInfo;->serialNumber:I
 Landroid/content/pm/VerifierInfo;-><init>(Ljava/lang/String;Ljava/security/PublicKey;)V
 Landroid/content/pm/XmlSerializerAndParser;->createFromXml(Lorg/xmlpull/v1/XmlPullParser;)Ljava/lang/Object;
 Landroid/content/pm/XmlSerializerAndParser;->writeAsXml(Ljava/lang/Object;Lorg/xmlpull/v1/XmlSerializer;)V
+Landroid/content/res/ApkAssets;->getAssetPath()Ljava/lang/String;
 Landroid/content/res/AssetFileDescriptor;->mFd:Landroid/os/ParcelFileDescriptor;
 Landroid/content/res/AssetFileDescriptor;->mLength:J
 Landroid/content/res/AssetFileDescriptor;->mStartOffset:J
@@ -1801,6 +1806,7 @@ Landroid/content/res/AssetManager;->addAssetPathAsSharedLibrary(Ljava/lang/Strin
 Landroid/content/res/AssetManager;->addOverlayPath(Ljava/lang/String;)I
 Landroid/content/res/AssetManager;->applyStyle(JIILandroid/content/res/XmlBlock$Parser;[IJJ)V
 Landroid/content/res/AssetManager;->createTheme()J
+Landroid/content/res/AssetManager;->getApkAssets()[Landroid/content/res/ApkAssets;
 Landroid/content/res/AssetManager;->getAssignedPackageIdentifiers()Landroid/util/SparseArray;
 Landroid/content/res/AssetManager;->getGlobalAssetCount()I
 Landroid/content/res/AssetManager;->getGlobalAssetManagerCount()I
