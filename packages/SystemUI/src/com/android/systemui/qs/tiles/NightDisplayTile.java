@@ -26,6 +26,7 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import androidx.annotation.StringRes;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.widget.Switch;
 
@@ -48,6 +49,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
      */
     private static final String PATTERN_HOUR = "h a";
     private static final String PATTERN_HOUR_MINUTE = "h:mm a";
+    private static final String PATTERN_HOUR_NINUTE_24 = "HH:mm";
 
 
     private ColorDisplayController mController;
@@ -145,6 +147,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
                 // Choose between just showing the hour or also showing the minutes (based on the
                 // user-selected toggle time). This helps reduce how much space the label takes.
                 toggleTimeFormat = DateTimeFormatter.ofPattern(
+                        DateFormat.is24HourFormat(mContext) ? PATTERN_HOUR_NINUTE_24 :
                         toggleTime.getMinute() == 0 ? PATTERN_HOUR : PATTERN_HOUR_MINUTE);
 
                 return mContext.getString(toggleTimeStringRes, toggleTime.format(toggleTimeFormat));
