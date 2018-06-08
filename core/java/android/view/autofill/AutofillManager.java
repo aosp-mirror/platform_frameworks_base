@@ -1582,29 +1582,9 @@ public final class AutofillManager {
             Log.v(TAG, "updateSessionLocked(): id=" + id + ", bounds=" + bounds
                     + ", value=" + value + ", action=" + action + ", flags=" + flags);
         }
-        boolean restartIfNecessary = (flags & FLAG_MANUAL_REQUEST) != 0;
-
         try {
-            if (restartIfNecessary) {
-                final AutofillClient client = getClient();
-                if (client == null) return; // NOTE: getClient() already logd it..
-
-                final int newId = mService.updateOrRestartSession(
-                        client.autofillClientGetActivityToken(),
-                        mServiceClient.asBinder(), id, bounds, value, mContext.getUserId(),
-                        mCallback != null, flags, client.autofillClientGetComponentName(),
-                        mSessionId, action, isCompatibilityModeEnabledLocked());
-                if (newId != mSessionId) {
-                    if (sDebug) Log.d(TAG, "Session restarted: " + mSessionId + "=>" + newId);
-                    mSessionId = newId;
-                    mState = (mSessionId == NO_SESSION) ? STATE_UNKNOWN : STATE_ACTIVE;
-                    client.autofillClientResetableStateAvailable();
-                }
-            } else {
-                mService.updateSession(mSessionId, id, bounds, value, action, flags,
-                        mContext.getUserId());
-            }
-
+            mService.updateSession(mSessionId, id, bounds, value, action, flags,
+                    mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

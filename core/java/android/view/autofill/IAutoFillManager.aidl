@@ -45,10 +45,6 @@ interface IAutoFillManager {
     boolean restoreSession(int sessionId, in IBinder activityToken, in IBinder appCallback);
     void updateSession(int sessionId, in AutofillId id, in Rect bounds,
             in AutofillValue value, int action, int flags, int userId);
-    int updateOrRestartSession(IBinder activityToken, in IBinder appCallback,
-            in AutofillId autoFillId, in Rect bounds, in AutofillValue value, int userId,
-            boolean hasCallback, int flags, in ComponentName componentName, int sessionId,
-            int action, boolean compatMode);
     void setAutofillFailure(int sessionId, in List<AutofillId> ids, int userId);
     void finishSession(int sessionId, int userId);
     void cancelSession(int sessionId, int userId);
