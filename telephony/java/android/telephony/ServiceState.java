@@ -1562,13 +1562,14 @@ public class ServiceState implements Parcelable {
     /**
      * Get the network registration states with given transport type and domain.
      *
+     * @param domain The network domain. Must be {@link NetworkRegistrationState#DOMAIN_CS} or
+     * {@link NetworkRegistrationState#DOMAIN_PS}.
      * @param transportType The transport type. See {@link AccessNetworkConstants.TransportType}
-     * @param domain The network domain. Must be DOMAIN_CS or DOMAIN_PS.
      * @return The matching NetworkRegistrationState.
      * @hide
      */
     @SystemApi
-    public NetworkRegistrationState getNetworkRegistrationStates(int transportType, int domain) {
+    public NetworkRegistrationState getNetworkRegistrationStates(int domain, int transportType) {
         synchronized (mNetworkRegistrationStates) {
             for (NetworkRegistrationState networkRegistrationState : mNetworkRegistrationStates) {
                 if (networkRegistrationState.getTransportType() == transportType
