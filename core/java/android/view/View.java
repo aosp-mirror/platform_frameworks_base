@@ -788,6 +788,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected static final String VIEW_LOG_TAG = "View";
 
     /**
+     * The logging tag used by this class when logging verbose, autofill-related messages.
+     */
+    // NOTE: We cannot use android.view.autofill.Helper.sVerbose because that variable is not
+    // set if a session is not started.
+    private static final String AUTOFILL_LOG_TAG = "View.Autofill";
+
+    /**
      * When set to true, apps will draw debugging information about their layouts.
      *
      * @hide
@@ -7979,10 +7986,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private void onProvideVirtualStructureCompat(ViewStructure structure, boolean forAutofill) {
         final AccessibilityNodeProvider provider = getAccessibilityNodeProvider();
         if (provider != null) {
-            if (android.view.autofill.Helper.sVerbose && forAutofill) {
-                Log.v(VIEW_LOG_TAG, "onProvideVirtualStructureCompat() for " + this);
+            if (forAutofill && Log.isLoggable(AUTOFILL_LOG_TAG, Log.VERBOSE)) {
+                Log.v(AUTOFILL_LOG_TAG, "onProvideVirtualStructureCompat() for " + this);
             }
-
             final AccessibilityNodeInfo info = createAccessibilityNodeInfo();
             structure.setChildCount(1);
             final ViewStructure root = structure.newChild(0);
@@ -8220,8 +8226,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setAutofillId(@Nullable AutofillId id) {
         // TODO(b/37566627): add unit / CTS test for all possible combinations below
-        if (android.view.autofill.Helper.sVerbose) {
-            Log.v(VIEW_LOG_TAG, "setAutofill(): from " + mAutofillId + " to " + id);
+        if (Log.isLoggable(AUTOFILL_LOG_TAG, Log.VERBOSE)) {
+            Log.v(AUTOFILL_LOG_TAG, "setAutofill(): from " + mAutofillId + " to " + id);
         }
         if (isAttachedToWindow()) {
             throw new IllegalStateException("Cannot set autofill id when view is attached");
@@ -8424,6 +8430,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             final int parentImportance = ((View) parent).getImportantForAutofill();
             if (parentImportance == IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS
                     || parentImportance == IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS) {
+                if (Log.isLoggable(AUTOFILL_LOG_TAG, Log.VERBOSE)) {
+                    Log.v(AUTOFILL_LOG_TAG, "View (autofillId=" +  getAutofillViewId() + ", "
+                            + getClass() + ") is not important for autofill because parent "
+                            + parent + "'s importance is " + parentImportance);
+                }
                 return false;
             }
             parent = parent.getParent();
@@ -18637,10 +18648,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
                 if ((mPrivateFlags3 & PFLAG3_AUTOFILLID_EXPLICITLY_SET) != 0) {
                     // Ignore when view already set it through setAutofillId();
-                    if (android.view.autofill.Helper.sDebug) {
-                        Log.d(VIEW_LOG_TAG, "onRestoreInstanceState(): not setting autofillId to "
-                                + baseState.mAutofillViewId + " because view explicitly set it to "
-                                + mAutofillId);
+                    if (Log.isLoggable(AUTOFILL_LOG_TAG, Log.DEBUG)) {
+                        Log.d(AUTOFILL_LOG_TAG, "onRestoreInstanceState(): not setting autofillId "
+                                + "to " + baseState.mAutofillViewId + " because view explicitly set"
+                                + " it to " + mAutofillId);
                     }
                 } else {
                     mAutofillViewId = baseState.mAutofillViewId;
