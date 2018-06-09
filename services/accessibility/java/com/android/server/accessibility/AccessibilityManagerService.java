@@ -3743,6 +3743,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         /**
          * Removes a service.
+         * There are three states to a service here: off, bound, and binding.
+         * This stops tracking the service as bound.
          *
          * @param serviceConnection The service.
          */
@@ -3757,6 +3759,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mComponentNameToServiceMap.put(boundClient.mComponentName, boundClient);
             }
             scheduleNotifyClientsOfServicesStateChange(this);
+        }
+
+        /**
+         * Make sure a services disconnected but still 'on' state is reflected in UserState
+         * There are three states to a service here: off, bound, and binding.
+         * This drops a service from a bound state, to the binding state.
+         * The binding state describes the situation where a service is on, but not bound.
+         *
+         * @param serviceConnection The service.
+         */
+        public void serviceDisconnectedLocked(AccessibilityServiceConnection serviceConnection) {
+            removeServiceLocked(serviceConnection);
+            mBindingServices.add(serviceConnection.getComponentName());
         }
 
         public Set<ComponentName> getBindingServicesLocked() {

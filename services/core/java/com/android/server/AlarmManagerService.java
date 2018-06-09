@@ -1953,6 +1953,14 @@ class AlarmManagerService extends SystemService {
                     pw.print(" = "); pw.println(sdf.format(new Date(nextWakeupRTC)));
             pw.print("    set at "); TimeUtils.formatDuration(mLastWakeupSet, nowELAPSED, pw);
                     pw.println();
+
+            pw.print("  Next kernel non-wakeup alarm: ");
+            TimeUtils.formatDuration(getNextAlarm(mNativeData, ELAPSED_REALTIME), pw);
+            pw.println();
+            pw.print("  Next kernel wakeup alarm: ");
+            TimeUtils.formatDuration(getNextAlarm(mNativeData, ELAPSED_REALTIME_WAKEUP), pw);
+            pw.println();
+
             pw.print("  Last wakeup: "); TimeUtils.formatDuration(mLastWakeup, nowELAPSED, pw);
                     pw.print(" = "); pw.println(mLastWakeup);
             pw.print("  Last trigger: "); TimeUtils.formatDuration(mLastTrigger, nowELAPSED, pw);
@@ -3063,6 +3071,7 @@ class AlarmManagerService extends SystemService {
     private native int waitForAlarm(long nativeData);
     private native int setKernelTime(long nativeData, long millis);
     private native int setKernelTimezone(long nativeData, int minuteswest);
+    private native long getNextAlarm(long nativeData, int type);
 
     private long getWhileIdleMinIntervalLocked(int uid) {
         final boolean dozing = mPendingIdleUntil != null;

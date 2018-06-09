@@ -51,8 +51,18 @@ public final class MediaTimestamp
     /**
      * Get the {@link java.lang.System#nanoTime system time} corresponding to the media time
      * in nanoseconds.
+     * @deprecated use {@link #getAnchorSystemNanoTime} instead.
      */
+    @Deprecated
     public long getAnchorSytemNanoTime() {
+        return getAnchorSystemNanoTime();
+    }
+
+    /**
+     * Get the {@link java.lang.System#nanoTime system time} corresponding to the media time
+     * in nanoseconds.
+     */
+    public long getAnchorSystemNanoTime() {
         return nanoTime;
     }
 

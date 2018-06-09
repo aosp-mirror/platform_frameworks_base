@@ -94,7 +94,6 @@ import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.PendingUi;
 
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2854,14 +2853,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
         requestLog.addTaggedData(tag, value);
-    }
-
-    private static String requestLogToString(@NonNull LogMaker log) {
-        final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw);
-        dumpRequestLog(pw, log);
-        pw.flush();
-        return sw.toString();
     }
 
     private void wtf(@Nullable Exception e, String fmt, Object...args) {

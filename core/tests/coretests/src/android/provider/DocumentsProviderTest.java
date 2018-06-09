@@ -24,7 +24,6 @@ import android.support.test.filters.SmallTest;
 import android.test.ProviderTestCase2;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Unit tests for {@link DocumentsProvider}.
@@ -84,7 +83,10 @@ public class DocumentsProviderTest extends ProviderTestCase2<TestDocumentsProvid
 
         final Uri docUri = buildTreeDocumentUri(
                 TestDocumentsProvider.AUTHORITY, PARENT_DOCUMENT_ID, DOCUMENT_ID);
-        assertNull(DocumentsContract.findDocumentPath(mResolver, docUri));
+        try {
+            DocumentsContract.findDocumentPath(mResolver, docUri);
+            fail("Expected a SecurityException to be throw");
+        } catch (SecurityException expected) { }
     }
 
     public void testFindDocumentPath_treeUri_erasesNonNullRootId() throws Exception {

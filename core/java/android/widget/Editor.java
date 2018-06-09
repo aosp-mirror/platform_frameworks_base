@@ -4930,6 +4930,7 @@ public class Editor {
 
         protected final void dismissMagnifier() {
             if (mMagnifierAnimator != null) {
+                mMagnifierAnimator.mMagnifier.setOnOperationCompleteCallback(null);
                 mMagnifierAnimator.dismiss();
                 mRenderCursorRegardlessTiming = false;
                 resumeBlink();
