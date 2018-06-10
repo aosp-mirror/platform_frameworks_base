@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="pip_close" msgid="3480680679023423574">"Kadr ichida kadr – chiqish"</string>
-    <string name="pip_fullscreen" msgid="8604643018538487816">"To‘liq ekran"</string>
+    <string name="pip_fullscreen" msgid="8604643018538487816">"Butun ekran"</string>
     <string name="pip_play" msgid="674145557658227044">"Ijro"</string>
     <string name="pip_pause" msgid="8412075640017218862">"Pauza"</string>
     <string name="pip_hold_home" msgid="340086535668778109">"“Kadr ichida kadr” rejimini boshqarish uchun "<b>"BOSHI"</b>" tugmasini bosib turing"</string>
