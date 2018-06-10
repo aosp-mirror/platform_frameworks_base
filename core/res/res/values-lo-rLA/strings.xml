@@ -1547,7 +1547,7 @@
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"ລອງໃໝ່ອີກຄັ້ງໃນພາຍຫລັງ."</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"ການ​ເບິ່ງ​ເຕັມ​ໜ້າ​ຈໍ"</string>
-    <string name="immersive_cling_description" msgid="3482371193207536040">"ເພື່ອ​ອອກ, ຮູດ​ລົງ​ລຸ່ມ​ຈາກ​ດ້ານ​ເທິງ."</string>
+    <string name="immersive_cling_description" msgid="3482371193207536040">"ຫາກຕ້ອງການອອກ, ໃຫ້ຮູດຈາກທາງເທິງລົງມາທາງລຸ່ມ."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"ໄດ້​ແລ້ວ"</string>
     <string name="done_label" msgid="2093726099505892398">"ແລ້ວໆ"</string>
     <string name="hour_picker_description" msgid="6698199186859736512">"ໂຕໝຸນປັບຊົ່ວໂມງ"</string>

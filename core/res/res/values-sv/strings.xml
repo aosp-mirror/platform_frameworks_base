@@ -1649,7 +1649,7 @@
     <string name="language_picker_section_suggested" msgid="8414489646861640885">"Förslag"</string>
     <string name="language_picker_section_all" msgid="3097279199511617537">"Alla språk"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Alla regioner"</string>
-    <string name="locale_search_menu" msgid="2560710726687249178">"Söka"</string>
+    <string name="locale_search_menu" msgid="2560710726687249178">"Sök"</string>
     <string name="work_mode_off_title" msgid="8954725060677558855">"Arbetsläget är inaktiverat"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"Tillåt att jobbprofilen är aktiv, inklusive appar, bakgrundssynkronisering och andra tillhörande funktioner."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktivera"</string>
