@@ -40,7 +40,14 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * A class representing an APN configuration.
+ * An Access Point Name (APN) configuration for a carrier data connection.
+ *
+ * <p>The APN provides configuration to connect a cellular network device to an IP data network. A
+ * carrier uses the name, type and other configuration in an {@code APNSetting} to decide which IP
+ * address to assign, any security methods to apply, and how the device might be connected to
+ * private networks.
+ *
+ * <p>Use {@link ApnSetting.Builder} to create new instances.
  */
 public class ApnSetting implements Parcelable {
 
@@ -336,7 +343,7 @@ public class ApnSetting implements Parcelable {
     }
 
     /**
-     * Returns the entry name of the APN.
+     * Gets the human-readable name that describes the APN.
      *
      * @return the entry name for the APN
      */
@@ -354,18 +361,21 @@ public class ApnSetting implements Parcelable {
     }
 
     /**
-     * Returns the proxy address of the APN.
+     * Gets the HTTP proxy address configured for the APN. The proxy address might be an IP address
+     * or hostname. This method returns {@code null} if system networking (typically DNS) isn’t
+     * available to resolve a hostname value—values set as IP addresses don’t have this restriction.
+     * This is a known problem and will be addressed in a future release.
      *
-     * @return proxy address.
+     * @return the HTTP proxy address or {@code null} if DNS isn’t available to resolve a hostname
      */
     public InetAddress getProxyAddress() {
         return mProxyAddress;
     }
 
     /**
-     * Returns the proxy port of the APN.
+     * Returns the proxy address of the APN.
      *
-     * @return proxy port
+     * @return proxy address.
      */
     public int getProxyPort() {
         return mProxyPort;
@@ -380,9 +390,12 @@ public class ApnSetting implements Parcelable {
     }
 
     /**
-     * Returns the MMS proxy address of the APN.
+     * Gets the MMS proxy address configured for the APN. The MMS proxy address might be an IP
+     * address or hostname. This method returns {@code null} if system networking (typically DNS)
+     * isn’t available to resolve a hostname value—values set as IP addresses don’t have this
+     * restriction. This is a known problem and will be addressed in a future release.
      *
-     * @return MMS proxy address.
+     * @return the MMS proxy address or {@code null} if DNS isn’t available to resolve a hostname
      */
     public InetAddress getMmsProxyAddress() {
         return mMmsProxyAddress;
@@ -1040,6 +1053,39 @@ public class ApnSetting implements Parcelable {
         return value == null ? NOT_IN_MAP_INT : value;
     }
 
+    /**
+     * Provides a convenient way to set the fields of a {@link ApnSetting} when creating a new
+     * instance. The following settings are required to build an {@code ApnSetting}:
+     *
+     * <ul><li>apnTypeBitmask</li>
+     * <li>apnName</li>
+     * <li>entryName</li></ul>
+     *
+     * <p>The example below shows how you might create a new {@code ApnSetting}:
+     *
+     * <pre><code>
+     * // Create an MMS proxy address with a hostname. A network might not be
+     * // available, so supply a dummy (0.0.0.0) IPv4 address to avoid DNS lookup.
+     * String host = "mms.example.com";
+     * byte[] ipAddress = new byte[4];
+     * InetAddress mmsProxy;
+     * try {
+     *   mmsProxy = InetAddress.getByAddress(host, ipAddress);
+     * } catch (UnknownHostException e) {
+     *   e.printStackTrace();
+     *   return;
+     * }
+     *
+     * ApnSetting apn = new ApnSetting.Builder()
+     *     .setApnTypeBitmask(ApnSetting.TYPE_DEFAULT | ApnSetting.TYPE_MMS)
+     *     .setApnName("apn.example.com")
+     *     .setEntryName("Example Carrier APN")
+     *     .setMmsc(Uri.parse("http://mms.example.com:8002"))
+     *     .setMmsProxyAddress(mmsProxy)
+     *     .setMmsProxyPort(8799)
+     *     .build();
+     * </code></pre>
+     */
     public static class Builder{
         private String mEntryName;
         private String mApnName;
@@ -1160,7 +1206,7 @@ public class ApnSetting implements Parcelable {
         }
 
         /**
-         * Sets the entry name of the APN.
+         * Sets a human-readable name that describes the APN.
          *
          * @param entryName the entry name to set for the APN
          */
@@ -1180,7 +1226,15 @@ public class ApnSetting implements Parcelable {
         }
 
         /**
-         * Sets the proxy address of the APN.
+         * Sets the address of an HTTP proxy for the APN. The proxy address can be an IP address or
+         * hostname. If {@code proxy} contains both an IP address and hostname, this method ignores
+         * the IP address.
+         *
+         * <p>The {@link java.net.InetAddress} methods
+         * {@link java.net.InetAddress#getAllByName getAllByName()} require DNS for hostname
+         * resolution. To avoid this requirement when setting a hostname, call
+         * {@link java.net.InetAddress#getByAddress(java.lang.String, byte[])} with both the
+         * hostname and a dummy IP address. See {@link ApnSetting.Builder above} for an example.
          *
          * @param proxy the proxy address to set for the APN
          */
@@ -1210,7 +1264,16 @@ public class ApnSetting implements Parcelable {
         }
 
         /**
-         * Sets the MMS proxy address of the APN.
+         * Sets the address of an MMS proxy for the APN. The MMS proxy address can be an IP address
+         * or hostname. If {@code mmsProxy} contains both an IP address and hostname, this method
+         * ignores the IP address.
+         *
+         * <p>The {@link java.net.InetAddress} methods
+         * {@link java.net.InetAddress#getByName getByName()} and
+         * {@link java.net.InetAddress#getAllByName getAllByName()} require DNS for hostname
+         * resolution. To avoid this requirement when setting a hostname, call
+         * {@link java.net.InetAddress#getByAddress(java.lang.String, byte[])} with both the
+         * hostname and a dummy IP address. See {@link ApnSetting.Builder above} for an example.
          *
          * @param mmsProxy the MMS proxy address to set for the APN
          */
@@ -1358,4 +1421,3 @@ public class ApnSetting implements Parcelable {
         }
     }
 }
-

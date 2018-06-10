@@ -542,6 +542,18 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testHidesShowWhenLockedActivity_whenAlreadyInAod() {
+        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_TRANSPARENT);
+
+        mScrimController.setKeyguardOccluded(true);
+        mScrimController.finishAnimationsImmediately();
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+    }
+
+    @Test
     public void testEatsTouchEvent() {
         HashSet<ScrimState> eatsTouches =
                 new HashSet<>(Arrays.asList(ScrimState.AOD, ScrimState.PULSING));

@@ -39,7 +39,7 @@
             android:layout_height="match_parent"
             android:layout_marginTop="@dimen/car_user_switcher_margin_top"
             app:verticallyCenterListContent="true"
-            app:dayNightStyle="force_night"
+            app:dayNightStyle="always_light"
             app:showPagedListViewDivider="false"
             app:gutter="both"
             app:itemSpacing="@dimen/car_user_switcher_vertical_spacing_between_users"/>
