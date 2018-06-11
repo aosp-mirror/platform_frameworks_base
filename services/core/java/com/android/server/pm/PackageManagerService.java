@@ -17887,17 +17887,19 @@ public class PackageManagerService extends IPackageManager.Stub
         final int uid = Binder.getCallingUid();
         if (!isOrphaned(internalPackageName)
                 && !isCallerAllowedToSilentlyUninstall(uid, internalPackageName)) {
-            try {
-                final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
-                intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
-                intent.putExtra(PackageInstaller.EXTRA_CALLBACK, observer.asBinder());
-                observer.onUserActionRequired(intent);
-            } catch (RemoteException re) {
-            }
+            mHandler.post(() -> {
+                try {
+                    final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
+                    intent.setData(Uri.fromParts(PACKAGE_SCHEME, packageName, null));
+                    intent.putExtra(PackageInstaller.EXTRA_CALLBACK, observer.asBinder());
+                    observer.onUserActionRequired(intent);
+                } catch (RemoteException re) {
+                }
+            });
             return;
         }
         final boolean deleteAllUsers = (deleteFlags & PackageManager.DELETE_ALL_USERS) != 0;
-        final int[] users = deleteAllUsers ? sUserManager.getUserIds() : new int[]{ userId };
+        final int[] users = deleteAllUsers ? sUserManager.getUserIds() : new int[]{userId};
         if (UserHandle.getUserId(uid) != userId || (deleteAllUsers && users.length > 1)) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
@@ -17905,20 +17907,24 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         if (isUserRestricted(userId, UserManager.DISALLOW_UNINSTALL_APPS)) {
-            try {
-                observer.onPackageDeleted(packageName,
-                        PackageManager.DELETE_FAILED_USER_RESTRICTED, null);
-            } catch (RemoteException re) {
-            }
+            mHandler.post(() -> {
+                try {
+                    observer.onPackageDeleted(packageName,
+                            PackageManager.DELETE_FAILED_USER_RESTRICTED, null);
+                } catch (RemoteException re) {
+                }
+            });
             return;
         }
 
         if (!deleteAllUsers && getBlockUninstallForUser(internalPackageName, userId)) {
-            try {
-                observer.onPackageDeleted(packageName,
-                        PackageManager.DELETE_FAILED_OWNER_BLOCKED, null);
-            } catch (RemoteException re) {
-            }
+            mHandler.post(() -> {
+                try {
+                    observer.onPackageDeleted(packageName,
+                            PackageManager.DELETE_FAILED_OWNER_BLOCKED, null);
+                } catch (RemoteException re) {
+                }
+            });
             return;
         }
 
@@ -17929,56 +17935,53 @@ public class PackageManagerService extends IPackageManager.Stub
                     ? "VERSION_CODE_HIGHEST" : versionCode));
         }
         // Queue up an async operation since the package deletion may take a little while.
-        mHandler.post(new Runnable() {
-            public void run() {
-                mHandler.removeCallbacks(this);
-                int returnCode;
-                final PackageSetting ps = mSettings.mPackages.get(internalPackageName);
-                boolean doDeletePackage = true;
-                if (ps != null) {
-                    final boolean targetIsInstantApp =
-                            ps.getInstantApp(UserHandle.getUserId(callingUid));
-                    doDeletePackage = !targetIsInstantApp
-                            || canViewInstantApps;
-                }
-                if (doDeletePackage) {
-                    if (!deleteAllUsers) {
+        mHandler.post(() -> {
+            int returnCode;
+            final PackageSetting ps = mSettings.mPackages.get(internalPackageName);
+            boolean doDeletePackage = true;
+            if (ps != null) {
+                final boolean targetIsInstantApp =
+                        ps.getInstantApp(UserHandle.getUserId(callingUid));
+                doDeletePackage = !targetIsInstantApp
+                        || canViewInstantApps;
+            }
+            if (doDeletePackage) {
+                if (!deleteAllUsers) {
+                    returnCode = deletePackageX(internalPackageName, versionCode,
+                            userId, deleteFlags);
+                } else {
+                    int[] blockUninstallUserIds = getBlockUninstallForUsers(
+                            internalPackageName, users);
+                    // If nobody is blocking uninstall, proceed with delete for all users
+                    if (ArrayUtils.isEmpty(blockUninstallUserIds)) {
                         returnCode = deletePackageX(internalPackageName, versionCode,
                                 userId, deleteFlags);
                     } else {
-                        int[] blockUninstallUserIds = getBlockUninstallForUsers(
-                                internalPackageName, users);
-                        // If nobody is blocking uninstall, proceed with delete for all users
-                        if (ArrayUtils.isEmpty(blockUninstallUserIds)) {
-                            returnCode = deletePackageX(internalPackageName, versionCode,
-                                    userId, deleteFlags);
-                        } else {
-                            // Otherwise uninstall individually for users with blockUninstalls=false
-                            final int userFlags = deleteFlags & ~PackageManager.DELETE_ALL_USERS;
-                            for (int userId : users) {
-                                if (!ArrayUtils.contains(blockUninstallUserIds, userId)) {
-                                    returnCode = deletePackageX(internalPackageName, versionCode,
-                                            userId, userFlags);
-                                    if (returnCode != PackageManager.DELETE_SUCCEEDED) {
-                                        Slog.w(TAG, "Package delete failed for user " + userId
-                                                + ", returnCode " + returnCode);
-                                    }
+                        // Otherwise uninstall individually for users with blockUninstalls=false
+                        final int userFlags = deleteFlags & ~PackageManager.DELETE_ALL_USERS;
+                        for (int userId1 : users) {
+                            if (!ArrayUtils.contains(blockUninstallUserIds, userId1)) {
+                                returnCode = deletePackageX(internalPackageName, versionCode,
+                                        userId1, userFlags);
+                                if (returnCode != PackageManager.DELETE_SUCCEEDED) {
+                                    Slog.w(TAG, "Package delete failed for user " + userId1
+                                            + ", returnCode " + returnCode);
                                 }
                             }
-                            // The app has only been marked uninstalled for certain users.
-                            // We still need to report that delete was blocked
-                            returnCode = PackageManager.DELETE_FAILED_OWNER_BLOCKED;
                         }
+                        // The app has only been marked uninstalled for certain users.
+                        // We still need to report that delete was blocked
+                        returnCode = PackageManager.DELETE_FAILED_OWNER_BLOCKED;
                     }
-                } else {
-                    returnCode = PackageManager.DELETE_FAILED_INTERNAL_ERROR;
                 }
-                try {
-                    observer.onPackageDeleted(packageName, returnCode, null);
-                } catch (RemoteException e) {
-                    Log.i(TAG, "Observer no longer exists.");
-                } //end catch
-            } //end run
+            } else {
+                returnCode = PackageManager.DELETE_FAILED_INTERNAL_ERROR;
+            }
+            try {
+                observer.onPackageDeleted(packageName, returnCode, null);
+            } catch (RemoteException e) {
+                Log.i(TAG, "Observer no longer exists.");
+            } //end catch
         });
     }
 
@@ -21064,6 +21067,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     public boolean isOrphaned(String packageName) {
         // reader
         synchronized (mPackages) {
+            if (!mPackages.containsKey(packageName)) {
+                return false;
+            }
             return mSettings.isOrphaned(packageName);
         }
     }
