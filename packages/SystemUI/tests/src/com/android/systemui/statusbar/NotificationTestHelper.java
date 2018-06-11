@@ -16,10 +16,13 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Instrumentation;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.content.Context;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
@@ -118,7 +121,7 @@ public class NotificationTestHelper {
                         R.layout.custom_view_dark))
                 .build();
         Notification.Builder notificationBuilder =
-                new Notification.Builder(mContext)
+                new Notification.Builder(mContext, "channelId")
                         .setSmallIcon(R.drawable.ic_person)
                         .setContentTitle("Title")
                         .setContentText("Text")
@@ -166,6 +169,9 @@ public class NotificationTestHelper {
         NotificationData.Entry entry = new NotificationData.Entry(sbn);
         entry.row = row;
         entry.createIcons(mContext, sbn);
+        entry.channel = new NotificationChannel(
+                notification.getChannelId(), notification.getChannelId(), IMPORTANCE_DEFAULT);
+        entry.channel.setBlockableSystem(true);
         NotificationInflaterTest.runThenWaitForInflation(
                 () -> row.updateNotification(entry),
                 row.getNotificationInflater());
