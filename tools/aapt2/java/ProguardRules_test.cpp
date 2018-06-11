@@ -34,6 +34,31 @@ std::string GetKeepSetString(const proguard::KeepSet& set) {
   return out;
 }
 
+TEST(ProguardRulesTest, ManifestRuleDefaultConstructorOnly) {
+  std::unique_ptr<xml::XmlResource> manifest = test::BuildXmlDom(R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+        <application android:backupAgent="com.foo.BarBackupAgent">
+          <activity android:name="com.foo.BarActivity"/>
+          <service android:name="com.foo.BarService"/>
+          <receiver android:name="com.foo.BarReceiver"/>
+          <provider android:name="com.foo.BarProvider"/>
+        </application>
+        <instrumentation android:name="com.foo.BarInstrumentation"/>
+      </manifest>)");
+
+  proguard::KeepSet set;
+  ASSERT_TRUE(proguard::CollectProguardRulesForManifest(manifest.get(), &set, false));
+
+  std::string actual = GetKeepSetString(set);
+
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarBackupAgent { <init>(); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarActivity { <init>(); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarService { <init>(); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarReceiver { <init>(); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarProvider { <init>(); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarInstrumentation { <init>(); }"));
+}
+
 TEST(ProguardRulesTest, FragmentNameRuleIsEmitted) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   std::unique_ptr<xml::XmlResource> layout = test::BuildXmlDom(R"(
