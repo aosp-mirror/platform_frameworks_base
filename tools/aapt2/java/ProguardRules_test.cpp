@@ -77,7 +77,7 @@ TEST(ProguardRulesTest, FragmentNameRuleIsEmitted) {
 
   std::string actual = GetKeepSetString(set);
 
-  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(); }"));
 }
 
 TEST(ProguardRulesTest, FragmentClassRuleIsEmitted) {
@@ -91,7 +91,7 @@ TEST(ProguardRulesTest, FragmentClassRuleIsEmitted) {
 
   std::string actual = GetKeepSetString(set);
 
-  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(); }"));
 }
 
 TEST(ProguardRulesTest, FragmentNameAndClassRulesAreEmitted) {
@@ -107,8 +107,8 @@ TEST(ProguardRulesTest, FragmentNameAndClassRulesAreEmitted) {
 
   std::string actual = GetKeepSetString(set);
 
-  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
-  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Baz { <init>(...); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Baz { <init>(); }"));
 }
 
 TEST(ProguardRulesTest, NavigationFragmentNameAndClassRulesAreEmitted) {
@@ -267,8 +267,8 @@ TEST(ProguardRulesTest, MenuRulesAreEmitted) {
 
   EXPECT_THAT(actual, HasSubstr(
       "-keepclassmembers class * { *** on_click(android.view.MenuItem); }"));
-  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
-  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Baz { <init>(...); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(android.content.Context); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Baz { <init>(android.content.Context); }"));
   EXPECT_THAT(actual, Not(HasSubstr("com.foo.Bat")));
 }
 
@@ -285,7 +285,8 @@ TEST(ProguardRulesTest, TransitionPathMotionRulesAreEmitted) {
 
   std::string actual = GetKeepSetString(set);
 
-  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
+  EXPECT_THAT(actual, HasSubstr(
+      "-keep class com.foo.Bar { <init>(android.content.Context, android.util.AttributeSet); }"));
 }
 
 TEST(ProguardRulesTest, TransitionRulesAreEmitted) {
@@ -301,7 +302,8 @@ TEST(ProguardRulesTest, TransitionRulesAreEmitted) {
 
   std::string actual = GetKeepSetString(set);
 
-  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
+  EXPECT_THAT(actual, HasSubstr(
+      "-keep class com.foo.Bar { <init>(android.content.Context, android.util.AttributeSet); }"));
 }
 
 }  // namespace aapt
