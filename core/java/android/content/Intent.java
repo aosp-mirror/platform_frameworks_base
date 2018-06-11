@@ -4602,30 +4602,12 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_INITIAL_INTENTS = "android.intent.extra.INITIAL_INTENTS";
 
     /**
-     * A {@link IntentSender} to start after ephemeral installation success.
-     * @deprecated Use {@link #EXTRA_INSTANT_APP_SUCCESS).
-     * @removed
-     * @hide
-     */
-    @Deprecated
-    public static final String EXTRA_EPHEMERAL_SUCCESS = "android.intent.extra.EPHEMERAL_SUCCESS";
-
-    /**
      * A {@link IntentSender} to start after instant app installation success.
      * @hide
      */
     @SystemApi
     public static final String EXTRA_INSTANT_APP_SUCCESS =
             "android.intent.extra.INSTANT_APP_SUCCESS";
-
-    /**
-     * A {@link IntentSender} to start after ephemeral installation failure.
-     * @deprecated Use {@link #EXTRA_INSTANT_APP_FAILURE).
-     * @removed
-     * @hide
-     */
-    @Deprecated
-    public static final String EXTRA_EPHEMERAL_FAILURE = "android.intent.extra.EPHEMERAL_FAILURE";
 
     /**
      * A {@link IntentSender} to start after instant app installation failure.
@@ -4636,30 +4618,12 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.INSTANT_APP_FAILURE";
 
     /**
-     * The host name that triggered an ephemeral resolution.
-     * @deprecated Use {@link #EXTRA_INSTANT_APP_HOSTNAME).
-     * @removed
-     * @hide
-     */
-    @Deprecated
-    public static final String EXTRA_EPHEMERAL_HOSTNAME = "android.intent.extra.EPHEMERAL_HOSTNAME";
-
-    /**
      * The host name that triggered an instant app resolution.
      * @hide
      */
     @SystemApi
     public static final String EXTRA_INSTANT_APP_HOSTNAME =
             "android.intent.extra.INSTANT_APP_HOSTNAME";
-
-    /**
-     * An opaque token to track ephemeral resolution.
-     * @deprecated Use {@link #EXTRA_INSTANT_APP_TOKEN).
-     * @removed
-     * @hide
-     */
-    @Deprecated
-    public static final String EXTRA_EPHEMERAL_TOKEN = "android.intent.extra.EPHEMERAL_TOKEN";
 
     /**
      * An opaque token to track instant app resolution.
