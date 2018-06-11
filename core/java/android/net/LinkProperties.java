@@ -774,7 +774,7 @@ public final class LinkProperties implements Parcelable {
         String usePrivateDns = "UsePrivateDns: " + mUsePrivateDns + " ";
 
         String privateDnsServerName = "";
-        if (privateDnsServerName != null) {
+        if (mPrivateDnsServerName != null) {
             privateDnsServerName = "PrivateDnsServerName: " + mPrivateDnsServerName + " ";
         }
 
@@ -810,7 +810,7 @@ public final class LinkProperties implements Parcelable {
             stacked += "] ";
         }
         return "{" + ifaceName + linkAddresses + routes + dns + usePrivateDns
-            + privateDnsServerName + domainName + mtu + tcpBuffSizes + proxy
+            + privateDnsServerName + validatedPrivateDns + domainName + mtu + tcpBuffSizes + proxy
             + stacked + "}";
     }
 

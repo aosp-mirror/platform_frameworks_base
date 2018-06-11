@@ -1828,7 +1828,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (iface != null && (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
                               caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))) {
             try {
-                // the call fails silently if no idletimer setup for this interface
+                // the call fails silently if no idle timer setup for this interface
                 mNetd.removeIdleTimer(iface);
             } catch (Exception e) {
                 loge("Exception in removeDataActivityTracking " + e);
@@ -1837,7 +1837,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
-     * Reads the network specific MTU size from reources.
+     * Reads the network specific MTU size from resources.
      * and set it on it's iface.
      */
     private void updateMtu(LinkProperties newLp, LinkProperties oldLp) {
@@ -2775,7 +2775,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (!accept) {
             // Tell the NetworkAgent to not automatically reconnect to the network.
             nai.asyncChannel.sendMessage(NetworkAgent.CMD_PREVENT_AUTOMATIC_RECONNECT);
-            // Teardown the nework.
+            // Teardown the network.
             teardownUnneededNetwork(nai);
         }
 
@@ -3283,7 +3283,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private ProxyInfo getDefaultProxy() {
         // this information is already available as a world read/writable jvm property
-        // so this API change wouldn't have a benifit.  It also breaks the passing
+        // so this API change wouldn't have a benefit.  It also breaks the passing
         // of proxy info to all the JVMs.
         // enforceAccessPermission();
         synchronized (mProxyLock) {
@@ -3413,7 +3413,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     public ProxyInfo getGlobalProxy() {
         // this information is already available as a world read/writable jvm property
-        // so this API change wouldn't have a benifit.  It also breaks the passing
+        // so this API change wouldn't have a benefit.  It also breaks the passing
         // of proxy info to all the JVMs.
         // enforceAccessPermission();
         synchronized (mProxyLock) {
@@ -3821,7 +3821,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (mVpns) {
             Vpn vpn = mVpns.get(userId);
             if (vpn == null) {
-                // Shouldn't happen as all codepaths that point here should have checked the Vpn
+                // Shouldn't happen as all code paths that point here should have checked the Vpn
                 // exists already.
                 Slog.wtf(TAG, "User " + userId + " has no Vpn configuration");
                 return false;
@@ -3985,7 +3985,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             url = String.format(url,
                     mTelephonyManager.getSimSerialNumber() /* ICCID */,
                     mTelephonyManager.getDeviceId() /* IMEI */,
-                    phoneNumber /* Phone numer */);
+                    phoneNumber /* Phone number */);
         }
 
         return url;
@@ -4658,7 +4658,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void wakeupModifyInterface(String iface, NetworkCapabilities caps, boolean add) {
-        // Marks are only available on WiFi interaces. Checking for
+        // Marks are only available on WiFi interfaces. Checking for
         // marks on unsupported interfaces is harmless.
         if (!caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
             return;
@@ -4725,7 +4725,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         // add routes before removing old in case it helps with continuous connectivity
 
-        // do this twice, adding non-nexthop routes first, then routes they are dependent on
+        // do this twice, adding non-next-hop routes first, then routes they are dependent on
         for (RouteInfo route : routeDiff.added) {
             if (route.hasGateway()) continue;
             if (VDBG) log("Adding Route [" + route + "] to network " + netId);
@@ -5224,7 +5224,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     keep = true;
                     // Tell NetworkFactories about the new score, so they can stop
                     // trying to connect if they know they cannot match it.
-                    // TODO - this could get expensive if we have alot of requests for this
+                    // TODO - this could get expensive if we have a lot of requests for this
                     // network.  Think about if there is a way to reduce this.  Push
                     // netid->request mapping to each factory?
                     sendUpdatedScoreToFactories(nri.request, score);
@@ -5345,7 +5345,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             // This has to happen after the notifyNetworkCallbacks as that tickles each
             // ConnectivityManager instance so that legacy requests correctly bind dns
-            // requests to this network.  The legacy users are listening for this bcast
+            // requests to this network.  The legacy users are listening for this broadcast
             // and will generally do a dns request so they can ensureRouteToHost and if
             // they do that before the callbacks happen they'll use the default network.
             //
@@ -5410,7 +5410,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // TODO: This may get slow.  The "changed" parameter is provided for future optimization
         // to avoid the slowness.  It is not simply enough to process just "changed", for
         // example in the case where "changed"'s score decreases and another network should begin
-        // satifying a NetworkRequest that "changed" currently satisfies.
+        // satisfying a NetworkRequest that "changed" currently satisfies.
 
         // Optimization: Only reprocess "changed" if its score improved.  This is safe because it
         // can only add more NetworkRequests satisfied by "changed", and this is exactly what
@@ -5563,7 +5563,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             disconnectAndDestroyNetwork(networkAgent);
         } else if ((oldInfo != null && oldInfo.getState() == NetworkInfo.State.SUSPENDED) ||
                 state == NetworkInfo.State.SUSPENDED) {
-            // going into or coming out of SUSPEND: rescore and notify
+            // going into or coming out of SUSPEND: re-score and notify
             if (networkAgent.getCurrentScore() != oldScore) {
                 rematchAllNetworksAndRequests(networkAgent, oldScore);
             }
