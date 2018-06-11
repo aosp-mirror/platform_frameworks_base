@@ -125,8 +125,8 @@ public class ConnectivityManager {
     /**
      * A temporary hack until SUPL system can get off the legacy APIS.
      * They do too many network requests and the long list of apps listening
-     * and waking due to the CONNECTIVITY_ACTION bcast makes it expensive.
-     * Use this bcast intent instead for SUPL requests.
+     * and waking due to the CONNECTIVITY_ACTION broadcast makes it expensive.
+     * Use this broadcast intent instead for SUPL requests.
      * @hide
      */
     public static final String CONNECTIVITY_ACTION_SUPL =
@@ -152,7 +152,7 @@ public class ConnectivityManager {
      * call {@link CaptivePortal#reportCaptivePortalDismissed} so the system can
      * reevaluate the network. If reevaluation finds the network no longer
      * subject to a captive portal, the network may become the default active
-     * data network. </li>
+     * data network.</li>
      * <li> When the app handling this action believes the user explicitly wants
      * to ignore the captive portal and the network, the app should call
      * {@link CaptivePortal#ignoreNetwork}. </li>
@@ -260,7 +260,8 @@ public class ConnectivityManager {
      * {@hide}
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_DATA_ACTIVITY_CHANGE = "android.net.conn.DATA_ACTIVITY_CHANGE";
+    public static final String ACTION_DATA_ACTIVITY_CHANGE =
+            "android.net.conn.DATA_ACTIVITY_CHANGE";
     /**
      * The lookup key for an enum that indicates the network device type on which this data activity
      * change happens.
@@ -391,14 +392,14 @@ public class ConnectivityManager {
 
     /**
      * Invalid tethering type.
-     * @see #startTethering(int, OnStartTetheringCallback, boolean)
+     * @see #startTethering(int, boolean, OnStartTetheringCallback)
      * @hide
      */
     public static final int TETHERING_INVALID   = -1;
 
     /**
      * Wifi tethering type.
-     * @see #startTethering(int, OnStartTetheringCallback, boolean)
+     * @see #startTethering(int, boolean, OnStartTetheringCallback)
      * @hide
      */
     @SystemApi
@@ -406,7 +407,7 @@ public class ConnectivityManager {
 
     /**
      * USB tethering type.
-     * @see #startTethering(int, OnStartTetheringCallback, boolean)
+     * @see #startTethering(int, boolean, OnStartTetheringCallback)
      * @hide
      */
     @SystemApi
@@ -414,7 +415,7 @@ public class ConnectivityManager {
 
     /**
      * Bluetooth tethering type.
-     * @see #startTethering(int, OnStartTetheringCallback, boolean)
+     * @see #startTethering(int, boolean, OnStartTetheringCallback)
      * @hide
      */
     @SystemApi
@@ -664,7 +665,7 @@ public class ConnectivityManager {
     /**
      * Static unique request used as a tombstone for NetworkCallbacks that have been unregistered.
      * This allows to distinguish when unregistering NetworkCallbacks those that were never
-     * registered and those that were already unregistered.
+     * registered from those that were already unregistered.
      * @hide
      */
     private static final NetworkRequest ALREADY_UNREGISTERED =
@@ -1494,8 +1495,8 @@ public class ConnectivityManager {
         };
     }
 
-    private static HashMap<NetworkCapabilities, LegacyRequest> sLegacyRequests =
-            new HashMap<NetworkCapabilities, LegacyRequest>();
+    private static final HashMap<NetworkCapabilities, LegacyRequest> sLegacyRequests =
+            new HashMap<>();
 
     private NetworkRequest findRequestForFeature(NetworkCapabilities netCap) {
         synchronized (sLegacyRequests) {
@@ -1635,8 +1636,9 @@ public class ConnectivityManager {
      * {@code onStarted} method will be called. If an error occurs, {@code onError} will be called,
      * specifying one of the {@code ERROR_*} constants in this class.
      *
-     * To stop an existing keepalive, call {@link stop}. The system will call {@code onStopped} if
-     * the operation was successfull or {@code onError} if an error occurred.
+     * To stop an existing keepalive, call {@link PacketKeepalive#stop}. The system will call
+     * {@link PacketKeepaliveCallback#onStopped} if the operation was successful or
+     * {@link PacketKeepaliveCallback#onError} if an error occurred.
      *
      * @hide
      */
@@ -1897,7 +1899,7 @@ public class ConnectivityManager {
          * to initiate network traffic), you can retrieve its instantaneous state with
          * {@link ConnectivityManager#isDefaultNetworkActive}.
          */
-        public void onNetworkActive();
+        void onNetworkActive();
     }
 
     private INetworkManagementService getNetworkManagementService() {
@@ -1912,8 +1914,7 @@ public class ConnectivityManager {
     }
 
     private final ArrayMap<OnNetworkActiveListener, INetworkActivityListener>
-            mNetworkActivityListeners
-                    = new ArrayMap<OnNetworkActiveListener, INetworkActivityListener>();
+            mNetworkActivityListeners = new ArrayMap<>();
 
     /**
      * Start listening to reports when the system's default data network is active, meaning it is
@@ -2216,12 +2217,12 @@ public class ConnectivityManager {
         /**
          * Called when tethering has been successfully started.
          */
-        public void onTetheringStarted() {};
+        public void onTetheringStarted() {}
 
         /**
          * Called when starting tethering failed.
          */
-        public void onTetheringFailed() {};
+        public void onTetheringFailed() {}
     }
 
     /**
@@ -2658,9 +2659,6 @@ public class ConnectivityManager {
     /**
      * Set sign in error notification to visible or in visible
      *
-     * @param visible
-     * @param networkType
-     *
      * {@hide}
      * @deprecated Doesn't properly deal with multiple connected networks of the same type.
      */
@@ -2869,7 +2867,7 @@ public class ConnectivityManager {
      * @hide
      */
     public interface Errors {
-        static int TOO_MANY_REQUESTS = 1;
+        int TOO_MANY_REQUESTS = 1;
     }
 
     /** @hide */
@@ -3126,7 +3124,7 @@ public class ConnectivityManager {
      * as these {@code NetworkCapabilities} represent states that a particular
      * network may never attain, and whether a network will attain these states
      * is unknown prior to bringing up the network so the framework does not
-     * know how to go about satisfing a request with these capabilities.
+     * know how to go about satisfying a request with these capabilities.
      *
      * <p>This method requires the caller to hold either the
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
@@ -3186,7 +3184,7 @@ public class ConnectivityManager {
      * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}, limited
      * by a timeout.
      *
-     * This function behaves identically to the non-timedout version, but if a suitable
+     * This function behaves identically to the version without timeout, but if a suitable
      * network is not found within the given time (in milliseconds) the
      * {@link NetworkCallback#onUnavailable} callback is called. The request can still be
      * released normally by calling {@link #unregisterNetworkCallback(NetworkCallback)} but does
@@ -3267,7 +3265,7 @@ public class ConnectivityManager {
      * as these {@code NetworkCapabilities} represent states that a particular
      * network may never attain, and whether a network will attain these states
      * is unknown prior to bringing up the network so the framework does not
-     * know how to go about satisfing a request with these capabilities.
+     * know how to go about satisfying a request with these capabilities.
      *
      * <p>This method requires the caller to hold either the
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE} permission
@@ -3432,9 +3430,9 @@ public class ConnectivityManager {
         // capabilities, this request is guaranteed, at all times, to be
         // satisfied by the same network, if any, that satisfies the default
         // request, i.e., the system default network.
-        NetworkCapabilities nullCapabilities = null;
         CallbackHandler cbHandler = new CallbackHandler(handler);
-        sendRequestForNetwork(nullCapabilities, networkCallback, 0, REQUEST, TYPE_NONE, cbHandler);
+        sendRequestForNetwork(null /* NetworkCapabilities need */, networkCallback, 0,
+                REQUEST, TYPE_NONE, cbHandler);
     }
 
     /**
@@ -3669,7 +3667,7 @@ public class ConnectivityManager {
      * @return {@code true} on success, {@code false} if the {@link Network} is no longer valid.
      */
     public boolean bindProcessToNetwork(Network network) {
-        // Forcing callers to call thru non-static function ensures ConnectivityManager
+        // Forcing callers to call through non-static function ensures ConnectivityManager
         // instantiated.
         return setProcessDefaultNetwork(network);
     }
