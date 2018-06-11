@@ -39,7 +39,11 @@ class BaseVisitor : public xml::Visitor {
  public:
   using xml::Visitor::Visit;
 
-  BaseVisitor(const ResourceFile& file, KeepSet* keep_set) : file_(file), keep_set_(keep_set) {
+  BaseVisitor(const ResourceFile& file, KeepSet* keep_set) : BaseVisitor(file, keep_set, "...") {
+  }
+
+  BaseVisitor(const ResourceFile& file, KeepSet* keep_set, const std::string& ctor_signature)
+      : file_(file), keep_set_(keep_set), ctor_signature_(ctor_signature) {
   }
 
   void Visit(xml::Element* node) override {
@@ -50,11 +54,11 @@ class BaseVisitor : public xml::Visitor {
         // This is a custom view, let's figure out the class name from this.
         std::string package = maybe_package.value().package + "." + node->name;
         if (util::IsJavaClassName(package)) {
-          AddClass(node->line_number, package, "...");
+          AddClass(node->line_number, package, ctor_signature_);
         }
       }
     } else if (util::IsJavaClassName(node->name)) {
-      AddClass(node->line_number, node->name, "...");
+      AddClass(node->line_number, node->name, ctor_signature_);
     }
 
     for (const auto& child : node->children) {
@@ -74,6 +78,7 @@ class BaseVisitor : public xml::Visitor {
  protected:
   ResourceFile file_;
   KeepSet* keep_set_;
+  std::string ctor_signature_;
 
   virtual void AddClass(size_t line_number, const std::string& class_name,
                         const std::string& ctor_signature) {
@@ -104,7 +109,8 @@ class BaseVisitor : public xml::Visitor {
 
 class LayoutVisitor : public BaseVisitor {
  public:
-  LayoutVisitor(const ResourceFile& file, KeepSet* keep_set) : BaseVisitor(file, keep_set) {
+  LayoutVisitor(const ResourceFile& file, KeepSet* keep_set)
+      : BaseVisitor(file, keep_set, "android.content.Context, android.util.AttributeSet") {
   }
 
   void Visit(xml::Element* node) override {

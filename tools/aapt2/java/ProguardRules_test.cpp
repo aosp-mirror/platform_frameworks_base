@@ -152,7 +152,8 @@ TEST(ProguardRulesTest, CustomViewRulesAreEmitted) {
 
   std::string actual = GetKeepSetString(set);
 
-  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
+  EXPECT_THAT(actual, HasSubstr(
+      "-keep class com.foo.Bar { <init>(android.content.Context, android.util.AttributeSet); }"));
 }
 
 TEST(ProguardRulesTest, IncludedLayoutRulesAreConditional) {
@@ -190,7 +191,8 @@ TEST(ProguardRulesTest, IncludedLayoutRulesAreConditional) {
   std::string actual = GetKeepSetString(set);
 
   EXPECT_THAT(actual, HasSubstr("-if class **.R$layout"));
-  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
+  EXPECT_THAT(actual, HasSubstr(
+      "-keep class com.foo.Bar { <init>(android.content.Context, android.util.AttributeSet); }"));
   EXPECT_THAT(actual, HasSubstr("int foo"));
   EXPECT_THAT(actual, HasSubstr("int bar"));
 }
@@ -209,7 +211,8 @@ TEST(ProguardRulesTest, AliasedLayoutRulesAreConditional) {
 
   std::string actual = GetKeepSetString(set);
 
-  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
+  EXPECT_THAT(actual, HasSubstr(
+      "-keep class com.foo.Bar { <init>(android.content.Context, android.util.AttributeSet); }"));
   EXPECT_THAT(actual, HasSubstr("-if class **.R$layout"));
   EXPECT_THAT(actual, HasSubstr("int foo"));
   EXPECT_THAT(actual, HasSubstr("int bar"));
@@ -230,7 +233,8 @@ TEST(ProguardRulesTest, NonLayoutReferencesAreUnconditional) {
   std::string actual = GetKeepSetString(set);
 
   EXPECT_THAT(actual, Not(HasSubstr("-if")));
-  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
+  EXPECT_THAT(actual, HasSubstr(
+      "-keep class com.foo.Bar { <init>(android.content.Context, android.util.AttributeSet); }"));
 }
 
 TEST(ProguardRulesTest, ViewOnClickRuleIsEmitted) {
