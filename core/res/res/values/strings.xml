@@ -1082,7 +1082,7 @@
         with the operation of the GPS or other location sources.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessFineLocation">access precise only in the foreground</string>
+    <string name="permlab_accessFineLocation">access precise location only in the foreground</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessFineLocation">This app can get your exact location only when it is in the foreground. These location services must be turned on and available on your phone for the app to be able to use them. This may increase battery consumption.</string>
 
