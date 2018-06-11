@@ -37,6 +37,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.ActionMode;
+import android.view.DisplayCutout;
 import android.view.InputDevice;
 import android.view.InputQueue;
 import android.view.KeyEvent;
@@ -112,10 +113,21 @@ public class StatusBarWindowView extends FrameLayout {
             boolean paddingChanged = insets.top != getPaddingTop()
                     || insets.bottom != getPaddingBottom();
 
+            int rightCutout = 0;
+            int leftCutout = 0;
+            DisplayCutout displayCutout = getRootWindowInsets().getDisplayCutout();
+            if (displayCutout != null) {
+                leftCutout = displayCutout.getSafeInsetLeft();
+                rightCutout = displayCutout.getSafeInsetRight();
+            }
+
+            int targetLeft = Math.max(insets.left, leftCutout);
+            int targetRight = Math.max(insets.right, rightCutout);
+
             // Super-special right inset handling, because scrims and backdrop need to ignore it.
-            if (insets.right != mRightInset || insets.left != mLeftInset) {
-                mRightInset = insets.right;
-                mLeftInset = insets.left;
+            if (targetRight != mRightInset || targetLeft != mLeftInset) {
+                mRightInset = targetRight;
+                mLeftInset = targetLeft;
                 applyMargins();
             }
             // Drop top inset, and pass through bottom inset.
