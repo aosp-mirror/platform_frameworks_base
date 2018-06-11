@@ -915,10 +915,13 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     }
 
     // Native bridge library. "0" means that native bridge is disabled.
+    //
+    // Note: bridging is only enabled for the zygote. Other runs of
+    //       app_process may not have the permissions to mount etc.
     property_get("ro.dalvik.vm.native.bridge", propBuf, "");
     if (propBuf[0] == '\0') {
         ALOGW("ro.dalvik.vm.native.bridge is not expected to be empty");
-    } else if (strcmp(propBuf, "0") != 0) {
+    } else if (zygote && strcmp(propBuf, "0") != 0) {
         snprintf(nativeBridgeLibrary, sizeof("-XX:NativeBridge=") + PROPERTY_VALUE_MAX,
                  "-XX:NativeBridge=%s", propBuf);
         addOption(nativeBridgeLibrary);
