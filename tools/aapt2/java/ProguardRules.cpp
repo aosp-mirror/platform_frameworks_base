@@ -79,8 +79,10 @@ class BaseVisitor : public xml::Visitor {
     keep_set_->AddConditionalClass({file_.name, file_.source.WithLine(line_number)}, class_name);
   }
 
-  void AddMethod(size_t line_number, const std::string& method_name) {
-    keep_set_->AddMethod({file_.name, file_.source.WithLine(line_number)}, method_name);
+  void AddMethod(size_t line_number, const std::string& method_name,
+                 const std::string& method_signature) {
+    keep_set_->AddMethod({file_.name, file_.source.WithLine(line_number)},
+        {method_name, method_signature});
   }
 
   void AddReference(size_t line_number, Reference* ref) {
@@ -125,7 +127,7 @@ class LayoutVisitor : public BaseVisitor {
         AddClass(node->line_number, attr.value);
       } else if (attr.namespace_uri == xml::kSchemaAndroid &&
                  attr.name == "onClick") {
-        AddMethod(node->line_number, attr.value);
+        AddMethod(node->line_number, attr.value, "android.view.View");
       }
     }
 
@@ -149,7 +151,7 @@ class MenuVisitor : public BaseVisitor {
               util::IsJavaClassName(attr.value)) {
             AddClass(node->line_number, attr.value);
           } else if (attr.name == "onClick") {
-            AddMethod(node->line_number, attr.value);
+            AddMethod(node->line_number, attr.value, "android.view.MenuItem");
           }
         }
       }
@@ -396,7 +398,8 @@ void WriteKeepSet(const KeepSet& keep_set, OutputStream* out) {
     for (const UsageLocation& location : entry.second) {
       printer.Print("# Referenced at ").Println(location.source.to_string());
     }
-    printer.Print("-keepclassmembers class * { *** ").Print(entry.first).Println("(...); }");
+    printer.Print("-keepclassmembers class * { *** ").Print(entry.first.name)
+        .Print("(").Print(entry.first.signature).Println("); }");
     printer.Println();
   }
 }
