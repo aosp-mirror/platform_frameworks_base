@@ -42,7 +42,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Τοποθετήστε μια κάρτα SIM."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"Η κάρτα SIM δεν υπάρχει ή δεν είναι δυνατή η ανάγνωσή της. Τοποθετήστε μια κάρτα SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Η κάρτα SIM δεν μπορεί να χρησιμοποιηθεί."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Η κάρτα SIM έχει απενεργοποιηθεί οριστικά.\n Επικοινωνήστε με τον παροχέα υπηρεσιών ασύρματου δικτύου για να λάβετε μια νέα κάρτα SIM."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Η κάρτα SIM έχει απενεργοποιηθεί οριστικά.\n Επικοινωνήστε με τον πάροχο υπηρεσιών ασύρματου δικτύου για να λάβετε μια νέα κάρτα SIM."</string>
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"Η κάρτα SIM είναι κλειδωμένη."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Η κάρτα SIM είναι κλειδωμένη με κωδικό PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Ξεκλείδωμα κάρτας SIM…"</string>
