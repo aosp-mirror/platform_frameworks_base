@@ -19,6 +19,7 @@ package com.android.server.backup.internal;
 import static android.app.backup.BackupTransport.TRANSPORT_ERROR;
 import static android.app.backup.BackupTransport.TRANSPORT_OK;
 
+import static com.android.server.backup.testing.TestUtils.assertLogcatContains;
 import static com.android.server.backup.testing.TransportData.backupTransport;
 import static com.android.server.backup.testing.TransportData.d2dTransport;
 import static com.android.server.backup.testing.TransportData.localTransport;
@@ -40,6 +41,7 @@ import android.app.PendingIntent;
 import android.app.backup.IBackupObserver;
 import android.os.DeadObjectException;
 import android.platform.test.annotations.Presubmit;
+import android.util.Log;
 
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.backup.BackupManagerService;
@@ -50,6 +52,8 @@ import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderPackages;
+import com.android.server.testing.shadows.ShadowSlog;
+
 
 import org.junit.Before;
 import org.junit.Test;
@@ -66,7 +70,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 26)
+@Config(manifest = Config.NONE, sdk = 26, shadows = ShadowSlog.class)
 @SystemLoaderPackages({"com.android.server.backup"})
 @Presubmit
 public class PerformInitializeTaskTest {
@@ -199,6 +203,32 @@ public class PerformInitializeTaskTest {
         verify(mObserver).onResult(eq(mTransportName), eq(TRANSPORT_ERROR));
         verify(mObserver).backupFinished(eq(TRANSPORT_ERROR));
         verify(mListener).onFinished(any());
+    }
+
+    @Test
+    public void testRun_whenFinishBackupFails_logs() throws Exception {
+        setUpTransport(mTransport);
+        configureTransport(mTransportBinder, TRANSPORT_OK, TRANSPORT_ERROR);
+        PerformInitializeTask performInitializeTask = createPerformInitializeTask(mTransportName);
+
+        performInitializeTask.run();
+
+        assertLogcatContains(
+                BackupManagerService.TAG,
+                log -> log.msg.contains("finishBackup()") && log.type >= Log.ERROR);
+    }
+
+    @Test
+    public void testRun_whenInitializeDeviceFails_logs() throws Exception {
+        setUpTransport(mTransport);
+        configureTransport(mTransportBinder, TRANSPORT_ERROR, 0);
+        PerformInitializeTask performInitializeTask = createPerformInitializeTask(mTransportName);
+
+        performInitializeTask.run();
+
+        assertLogcatContains(
+                BackupManagerService.TAG,
+                log -> log.msg.contains("initializeDevice()") && log.type >= Log.ERROR);
     }
 
     @Test
