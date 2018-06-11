@@ -1340,6 +1340,13 @@ public final class Parcel {
      * @see Parcelable
      */
     public final <T extends Parcelable> void writeTypedList(List<T> val) {
+        writeTypedList(val, 0);
+    }
+
+    /**
+     * @hide
+     */
+    public <T extends Parcelable> void writeTypedList(List<T> val, int parcelableFlags) {
         if (val == null) {
             writeInt(-1);
             return;
@@ -1348,13 +1355,7 @@ public final class Parcel {
         int i=0;
         writeInt(N);
         while (i < N) {
-            T item = val.get(i);
-            if (item != null) {
-                writeInt(1);
-                item.writeToParcel(this, 0);
-            } else {
-                writeInt(0);
-            }
+            writeTypedObject(val.get(i), parcelableFlags);
             i++;
         }
     }
