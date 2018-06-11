@@ -767,6 +767,24 @@ java_library {
     dxflags: ["--core-library"],
 }
 
+// ====  java proto host library  ==============================
+java_library_host {
+    name: "platformprotos",
+    srcs: [
+        "cmds/am/proto/instrumentation_data.proto",
+        "core/proto/**/*.proto",
+        "libs/incident/proto/**/*.proto",
+        "cmds/statsd/src/**/*.proto",
+    ],
+    proto: {
+        include_dirs: ["external/protobuf/src"],
+        type: "full",
+    },
+    errorprone: {
+        javacflags: ["-Xep:MissingOverride:OFF"],  // b/72714520
+    },
+}
+
 // ====  c++ proto device library  ==============================
 cc_library {
     name: "libplatformprotos",
