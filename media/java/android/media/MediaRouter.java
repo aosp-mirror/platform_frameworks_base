@@ -610,7 +610,9 @@ public class MediaRouter {
                                         && mSelectedRoute != mBluetoothA2dpRoute)) {
                             return;
                         }
-                        Log.v(TAG, "onRestoreRoute() : route=" + mSelectedRoute);
+                        if (DEBUG) {
+                            Log.d(TAG, "onRestoreRoute() : route=" + mSelectedRoute);
+                        }
                         mSelectedRoute.select();
                     }
                 });
@@ -965,19 +967,6 @@ public class MediaRouter {
                 && (route == btRoute || route == sStatic.mDefaultAudioVideo)) {
             try {
                 sStatic.mAudioService.setBluetoothA2dpOn(route == btRoute);
-                // TODO: Remove the following logging when no longer needed.
-                if (route != btRoute) {
-                    StackTraceElement[] callStack = Thread.currentThread().getStackTrace();
-                    StringBuffer sb = new StringBuffer();
-                    // callStack[3] is the caller of this method.
-                    for (int i = 3; i < callStack.length; i++) {
-                        StackTraceElement caller = callStack[i];
-                        sb.append(caller.getClassName() + "." + caller.getMethodName()
-                                + ":" + caller.getLineNumber()).append("  ");
-                    }
-                    Log.w(TAG, "Default route is selected while a BT route is available: pkgName="
-                            + sStatic.mPackageName + ", callers=" + sb.toString());
-                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Error changing Bluetooth A2DP state", e);
             }
@@ -1064,7 +1053,9 @@ public class MediaRouter {
     }
 
     static void addRouteStatic(RouteInfo info) {
-        Log.v(TAG, "Adding route: " + info);
+        if (DEBUG) {
+            Log.d(TAG, "Adding route: " + info);
+        }
         final RouteCategory cat = info.getCategory();
         if (!sStatic.mCategories.contains(cat)) {
             sStatic.mCategories.add(cat);
@@ -1119,7 +1110,9 @@ public class MediaRouter {
     }
 
     static void removeRouteStatic(RouteInfo info) {
-        Log.v(TAG, "Removing route: " + info);
+        if (DEBUG) {
+            Log.d(TAG, "Removing route: " + info);
+        }
         if (sStatic.mRoutes.remove(info)) {
             final RouteCategory removingCat = info.getCategory();
             final int count = sStatic.mRoutes.size();

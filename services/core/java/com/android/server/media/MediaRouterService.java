@@ -414,7 +414,9 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             }
             // We don't need to change a2dp status when bluetooth is not connected.
             if (btDevice != null) {
-                Slog.v(TAG, "restoreBluetoothA2dp(" + a2dpOn + ")");
+                if (DEBUG) {
+                    Slog.d(TAG, "restoreBluetoothA2dp(" + a2dpOn + ")");
+                }
                 mAudioService.setBluetoothA2dpOn(a2dpOn);
             }
         } catch (RemoteException e) {
