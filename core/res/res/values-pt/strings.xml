@@ -380,9 +380,9 @@
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"impedir modo de inatividade do tablet"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"impedir a suspensão da TV"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"impedir modo de inatividade do telefone"</string>
-    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite que o app impeça o tablet de entrar no modo de inatividade."</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite que o app impeça a suspensão do tablet."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Permite que o app impeça a suspensão da TV."</string>
-    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permite que o app impeça o telefone de entrar no modo de inatividade."</string>
+    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permite que o app impeça a suspensão do telefone."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"transmitir infravermelhos"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Permite que o app use o transmissor infravermelho do tablet."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Permite que o app use o transmissor de infravermelho da TV."</string>

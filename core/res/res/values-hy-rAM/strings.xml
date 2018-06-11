@@ -596,7 +596,7 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Տան ֆաքս"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Փեյջեր"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Այլ"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"Ետզանգ"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Հետզանգ"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Մեքենա"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Ընկերության հիմնական"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>

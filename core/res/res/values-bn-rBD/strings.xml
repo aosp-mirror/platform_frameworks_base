@@ -121,7 +121,7 @@
     <string name="roamingText10" msgid="3992906999815316417">"রোমিং - আংশিক পরিষেবা কার্যকারিতা"</string>
     <string name="roamingText11" msgid="4154476854426920970">"রোমিং ব্যানার চালু আছে"</string>
     <string name="roamingText12" msgid="1189071119992726320">"রোমিং ব্যানার বন্ধ আছে"</string>
-    <string name="roamingTextSearching" msgid="8360141885972279963">"পরিষেবা অনুসন্ধান করা হচ্ছে"</string>
+    <string name="roamingTextSearching" msgid="8360141885972279963">"পরিষেবা সার্চ করা হচ্ছে"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"ওয়াই-ফাই কলিং"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="2254967670088539682">"ওয়াই-ফাই এর মাধ্যমে কল করতে ও মেসেজ পাঠাতে, প্রথমে আপনার পরিষেবা প্রদানকারীকে এই পরিষেবার সেট আপ করার বিষয়ে জিজ্ঞাসা করুন। তারপরে আবার সেটিংস থেকে ওয়াই-ফাই কলিং চালু করুন।"</item>
@@ -816,12 +816,12 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"মুছুন"</string>
     <string name="search_go" msgid="8298016669822141719">"খুঁজুন"</string>
-    <string name="search_hint" msgid="1733947260773056054">"অনুসন্ধান..."</string>
+    <string name="search_hint" msgid="1733947260773056054">"সার্চ..."</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"খুঁজুন"</string>
-    <string name="searchview_description_query" msgid="5911778593125355124">"অনুসন্ধান ক্যোয়ারী"</string>
+    <string name="searchview_description_query" msgid="5911778593125355124">"সার্চ ক্যোয়ারী"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"ক্যোয়ারী সাফ করুন"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"ক্যোয়ারী জমা দিন"</string>
-    <string name="searchview_description_voice" msgid="2453203695674994440">"ভয়েস অনুসন্ধান"</string>
+    <string name="searchview_description_voice" msgid="2453203695674994440">"ভয়েস সার্চ"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"\'স্পর্শের মাধ্যমে অন্বেষণ করুন\' সক্ষম করতে চান?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> \'স্পর্শের মাধ্যমে অন্বেষণ করুন\' সক্ষম করতে চাইছে৷ যখন \'স্পর্শের মাধ্যমে অন্বেষণ করুন\' চালু করা হবে তখন আপনার আঙ্গুলের নিয়ন্ত্রণে থাকা জিনিসের বর্ণনাগুলি শুনতে অথবা দেখতে পাবেন অথবা ট্যাবলেটের সাথে ইন্টারঅ্যাক্ট করার জন্য অঙ্গভঙ্গির সাহায্য নিতে পারবেন৷"</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> \'স্পর্শের মাধ্যমে অন্বেষণ করুন\' সক্ষম করতে চাইছে৷ যখন \'স্পর্শের মাধ্যমে অন্বেষণ করুন\' চালু করা হবে তখন আপনার আঙ্গুলের নিয়ন্ত্রণে থাকা জিনিসের বর্ণনাগুলি শুনতে অথবা দেখতে পাবেন অথবা ফোনের সাথে ইন্টারঅ্যাক্ট করার জন্য অঙ্গভঙ্গির সাহায্য নিতে পারবেন৷"</string>
@@ -1201,7 +1201,7 @@
     <string name="ext_media_status_ejecting" msgid="5463887263101234174">"সরিয়ে ফেলা হচ্ছে..."</string>
     <string name="ext_media_status_formatting" msgid="1085079556538644861">"ফরম্যাট করা হচ্ছে..."</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"ঢোকানো হয় নি"</string>
-    <string name="activity_list_empty" msgid="1675388330786841066">"কোনো সমরূপ কার্যকলাপ খুঁজে পাওয়া যায়নি৷"</string>
+    <string name="activity_list_empty" msgid="1675388330786841066">"কোনো সমরূপ অ্যাক্টিভিটি খুঁজে পাওয়া যায়নি৷"</string>
     <string name="permlab_route_media_output" msgid="6243022988998972085">"মিডিয়া আউটপুট রুট করুন"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"অ্যাপ্লিকেশানটিকে অন্যান্য বহিরাগত ডিভাইসে মিডিয়া আউটপুট রুট করার অনুমতি দেয়৷"</string>
     <string name="permlab_readInstallSessions" msgid="3713753067455750349">"ইনস্টল সেশন পড়ুন"</string>
@@ -1268,7 +1268,7 @@
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"SD কার্ড মোছা হচ্ছে…"</string>
     <string name="share" msgid="1778686618230011964">"শেয়ার করুন"</string>
     <string name="find" msgid="4808270900322985960">"খুঁজুন"</string>
-    <string name="websearch" msgid="4337157977400211589">"ওয়েব অনুসন্ধান"</string>
+    <string name="websearch" msgid="4337157977400211589">"ওয়েব সার্চ"</string>
     <string name="find_next" msgid="5742124618942193978">"পরবর্তীটি খুঁজুন"</string>
     <string name="find_previous" msgid="2196723669388360506">"পূর্ববর্তীটি খুঁজুন"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"<xliff:g id="NAME">%s</xliff:g> এর থেকে অবস্থানের অনুরোধ"</string>
@@ -1358,7 +1358,7 @@
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 আঙ্গুলের ছাপ:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 আঙ্গুলের ছাপ:"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"সবগুলো দেখুন"</string>
-    <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"কার্যকলাপ বেছে নিন"</string>
+    <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"অ্যাক্টিভিটি বেছে নিন"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"এর সাথে শেয়ার করুন"</string>
     <string name="sending" msgid="3245653681008218030">"পাঠানো হচ্ছে..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ব্রাউজার লঞ্চ করতে চান?"</string>
@@ -1378,7 +1378,7 @@
     <string name="media_route_button_content_description" msgid="591703006349356016">"কাস্ট করুন"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"ডিভাইসে সংযোগ করুন"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"ডিভাইসে স্ক্রীণ কাস্ট করুন"</string>
-    <string name="media_route_chooser_searching" msgid="4776236202610828706">"ডিভাইসগুলি অনুসন্ধান করা হচ্ছে…"</string>
+    <string name="media_route_chooser_searching" msgid="4776236202610828706">"ডিভাইসগুলি সার্চ করা হচ্ছে…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"সেটিংস"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"সংযোগ বিচ্ছিন্ন করুন"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"স্ক্যান করা হচ্ছে…"</string>

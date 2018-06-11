@@ -688,7 +688,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Τοποθετήστε μια κάρτα SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Η κάρτα SIM δεν υπάρχει ή δεν είναι δυνατή η ανάγνωσή της. Τοποθετήστε μια κάρτα SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Η κάρτα SIM δεν μπορεί να χρησιμοποιηθεί."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Η κάρτα SIM έχει απενεργοποιηθεί οριστικά.\n Επικοινωνήστε με τον παροχέα υπηρεσιών ασύρματου δικτύου για να λάβετε μια νέα κάρτα SIM."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Η κάρτα SIM έχει απενεργοποιηθεί οριστικά.\n Επικοινωνήστε με τον πάροχο υπηρεσιών ασύρματου δικτύου για να λάβετε μια νέα κάρτα SIM."</string>
     <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Προηγούμενο κομμάτι"</string>
     <string name="lockscreen_transport_next_description" msgid="573285210424377338">"Επόμενο κομμάτι"</string>
     <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"Παύση"</string>
