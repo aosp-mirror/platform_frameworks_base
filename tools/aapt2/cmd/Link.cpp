@@ -1775,10 +1775,12 @@ class Linker {
 
     // Before we process anything, remove the resources whose default values don't exist.
     // We want to force any references to these to fail the build.
-    if (!NoDefaultResourceRemover{}.Consume(context_, &final_table_)) {
-      context_->GetDiagnostics()->Error(DiagMessage()
-                                        << "failed removing resources with no defaults");
-      return 1;
+    if (!options_.no_resource_removal) {
+      if (!NoDefaultResourceRemover{}.Consume(context_, &final_table_)) {
+        context_->GetDiagnostics()->Error(DiagMessage()
+                                          << "failed removing resources with no defaults");
+        return 1;
+      }
     }
 
     ReferenceLinker linker;
