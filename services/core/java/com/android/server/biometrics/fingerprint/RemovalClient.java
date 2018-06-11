@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.fingerprint;
+package com.android.server.biometrics.fingerprint;
 
 import android.content.Context;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
@@ -22,7 +22,6 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Slog;
 import com.android.internal.logging.MetricsLogger;
 

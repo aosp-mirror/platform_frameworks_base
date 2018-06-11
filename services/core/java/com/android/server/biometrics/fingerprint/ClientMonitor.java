@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.fingerprint;
+package com.android.server.biometrics.fingerprint;
 
 import android.Manifest;
 import android.content.Context;

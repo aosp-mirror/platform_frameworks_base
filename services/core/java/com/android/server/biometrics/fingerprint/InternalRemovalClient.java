@@ -14,12 +14,12 @@
  * limitations under the License
  */
 
-package com.android.server.fingerprint;
+package com.android.server.biometrics.fingerprint;
 
 import android.content.Context;
 import android.os.IBinder;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
-import com.android.server.fingerprint.RemovalClient;
+import com.android.server.biometrics.fingerprint.RemovalClient;
 
 public abstract class InternalRemovalClient extends RemovalClient {
 

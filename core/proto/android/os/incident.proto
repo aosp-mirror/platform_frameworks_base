@@ -182,7 +182,7 @@ message IncidentProto {
     ];
 
     // System Services
-    optional com.android.server.fingerprint.FingerprintServiceDumpProto fingerprint = 3000 [
+    optional com.android.server.biometrics.fingerprint.FingerprintServiceDumpProto fingerprint = 3000 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "fingerprint --proto --incident"
     ];

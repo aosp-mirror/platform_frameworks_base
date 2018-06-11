@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.fingerprint;
+package com.android.server.biometrics.fingerprint;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
@@ -107,7 +107,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
     private static final String FP_DATA_DIR = "fpdata";
     private static final int MSG_USER_SWITCHING = 10;
     private static final String ACTION_LOCKOUT_RESET =
-            "com.android.server.fingerprint.ACTION_LOCKOUT_RESET";
+            "com.android.server.biometrics.fingerprint.ACTION_LOCKOUT_RESET";
     private static final String KEY_LOCKOUT_RESET_USER = "lockout_reset_user";
 
     private class PerformanceStats {
