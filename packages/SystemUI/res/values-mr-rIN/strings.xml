@@ -74,7 +74,7 @@
     <string name="screenshot_saved_text" msgid="2685605830386712477">"आपला स्क्रीनशॉट पाहण्यासाठी टॅप करा."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"स्क्रीनशॉट कॅप्चर करू शकलो नाही."</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"स्क्रीनशॉट सेव्ह करताना समस्या आली."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"मर्यादित संचय जागेमुळे स्क्रीनशॉट सेव्ह करू शकत नाही."</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"मर्यादित स्टोरेज जागेमुळे स्क्रीनशॉट सेव्ह करू शकत नाही."</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"अॅप किंवा आपल्या संस्थेद्वारे स्क्रीनशॉट घेण्यास अनुमती नाही."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB फाईल स्थानांतरण पर्याय"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"मीडिया प्लेअर म्हणून माउंट करा (MTP)"</string>

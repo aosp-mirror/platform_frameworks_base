@@ -58,8 +58,8 @@
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Hakuna programu zilizosakinishwa zinazofanya kazi na kifaa hiki cha USB. Pata maelezo zaidi kuhusu kifaa hiki kwenye <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Kifaa cha Usb"</string>
     <string name="label_view" msgid="6304565553218192990">"Ona"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"Kwa kifaa hiki cha USB tumia chaguo-msingi"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"Tumia kama chaguo-msingi ya kifuasi hiki cha USB"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"Kwa kifaa hiki cha USB tumia chaguo msingi"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"Tumia kama chaguo msingi ya kifuasi hiki cha USB"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Ruhusu utatuaji wa USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Alama ya kidole ya kitufe cha RSA ya kompyuta ni:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Ruhusu kutoka kwenye kompyuta hii kila wakati"</string>
@@ -609,12 +609,12 @@
     <string name="tuner_time" msgid="6572217313285536011">"Wakati"</string>
   <string-array name="clock_options">
     <item msgid="5965318737560463480">"Onyesha saa, dakika na sekunde"</item>
-    <item msgid="1427801730816895300">"Onyesha saa na dakika (chaguo-msingi)"</item>
+    <item msgid="1427801730816895300">"Onyesha saa na dakika (chaguo msingi)"</item>
     <item msgid="3830170141562534721">"Usionyeshe aikoni hii"</item>
   </string-array>
   <string-array name="battery_options">
     <item msgid="3160236755818672034">"Onyesha asilimia kila wakati"</item>
-    <item msgid="2139628951880142927">"Onyesha asilimia wakati inachaji (chaguo-msingi)"</item>
+    <item msgid="2139628951880142927">"Onyesha asilimia wakati inachaji (chaguo msingi)"</item>
     <item msgid="3327323682209964956">"Usionyeshe aikoni hii"</item>
   </string-array>
     <string name="other" msgid="4060683095962566764">"Nyingine"</string>
