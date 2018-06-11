@@ -63,6 +63,7 @@ import android.os.IBinder;
 import android.os.IProgressListener;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
+import android.os.RemoteCallback;
 import android.os.StrictMode;
 import android.os.WorkSource;
 import android.service.voice.IVoiceInteractionSession;
@@ -288,7 +289,8 @@ interface IActivityManager {
             int modeFlags, int userId);
     // Cause the specified process to dump the specified heap.
     boolean dumpHeap(in String process, int userId, boolean managed, boolean mallocInfo,
-            boolean runGc, in String path, in ParcelFileDescriptor fd);
+            boolean runGc, in String path, in ParcelFileDescriptor fd,
+            in RemoteCallback finishCallback);
     int startActivities(in IApplicationThread caller, in String callingPackage,
             in Intent[] intents, in String[] resolvedTypes, in IBinder resultTo,
             in Bundle options, int userId);
