@@ -30,8 +30,6 @@ import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsVideoCallProvider;
 import android.telephony.ims.ImsVideoCallProvider;
 
-import dalvik.system.CloseGuard;
-
 /**
  * Base implementation of IImsCallSession, which implements stub versions of the methods available.
  *
@@ -510,6 +508,21 @@ public class ImsCallSessionImplBase implements AutoCloseable {
      * and event flash to 16. Currently, event flash is not supported.
      *
      * @param c the DTMF to send. '0' ~ '9', 'A' ~ 'D', '*', '#' are valid inputs.
+     * @param result If non-null, the {@link Message} to send when the operation is complete. This
+     *         is done by using the associated {@link android.os.Messenger} in
+     *         {@link Message#replyTo}. For example:
+     * {@code
+     *     // Send DTMF and other operations...
+     *     try {
+     *         // Notify framework that the DTMF was sent.
+     *         Messenger dtmfMessenger = result.replyTo;
+     *         if (dtmfMessenger != null) {
+     *             dtmfMessenger.send(result);
+     *         }
+     *     } catch (RemoteException e) {
+     *         // Remote side is dead
+     *     }
+     * }
      */
     public void sendDtmf(char c, Message result) {
     }
