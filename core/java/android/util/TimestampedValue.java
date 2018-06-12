@@ -126,4 +126,12 @@ public final class TimestampedValue<T> {
         dest.writeLong(timestampedValue.mReferenceTimeMillis);
         dest.writeValue(timestampedValue.mValue);
     }
+
+    /**
+     * Returns the difference in milliseconds between two instance's reference times.
+     */
+    public static long referenceTimeDifference(
+            @NonNull TimestampedValue<?> one, @NonNull TimestampedValue<?> two) {
+        return one.mReferenceTimeMillis - two.mReferenceTimeMillis;
+    }
 }

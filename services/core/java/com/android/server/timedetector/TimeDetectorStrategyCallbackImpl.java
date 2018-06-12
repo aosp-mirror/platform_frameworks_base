@@ -18,41 +18,108 @@ package com.android.server.timedetector;
 
 import android.annotation.NonNull;
 import android.app.AlarmManager;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Slog;
-import android.util.TimestampedValue;
+
+import java.util.Objects;
 
 /**
  * The real implementation of {@link TimeDetectorStrategy.Callback} used on device.
  */
-public class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrategy.Callback {
+public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrategy.Callback {
 
     private final static String TAG = "timedetector.TimeDetectorStrategyCallbackImpl";
 
-    @NonNull private PowerManager.WakeLock mWakeLock;
-    @NonNull private AlarmManager mAlarmManager;
+    private static final int SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS_DEFAULT = 2 * 1000;
 
-    public TimeDetectorStrategyCallbackImpl(Context context) {
+    /**
+     * If a newly calculated system clock time and the current system clock time differs by this or
+     * more the system clock will actually be updated. Used to prevent the system clock being set
+     * for only minor differences.
+     */
+    private final int mSystemClockUpdateThresholdMillis;
+
+    @NonNull private final Context mContext;
+    @NonNull private final ContentResolver mContentResolver;
+    @NonNull private final PowerManager.WakeLock mWakeLock;
+    @NonNull private final AlarmManager mAlarmManager;
+
+    public TimeDetectorStrategyCallbackImpl(@NonNull Context context) {
+        mContext = Objects.requireNonNull(context);
+        mContentResolver = Objects.requireNonNull(context.getContentResolver());
+
         PowerManager powerManager = context.getSystemService(PowerManager.class);
+        mWakeLock = Objects.requireNonNull(
+                powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG));
 
-        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        mAlarmManager = Objects.requireNonNull(context.getSystemService(AlarmManager.class));
 
-        mAlarmManager = context.getSystemService(AlarmManager.class);
+        mSystemClockUpdateThresholdMillis =
+                SystemProperties.getInt("ro.sys.time_detector_update_diff",
+                        SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS_DEFAULT);
     }
 
     @Override
-    public void setTime(TimestampedValue<Long> time) {
-        mWakeLock.acquire();
+    public int systemClockUpdateThresholdMillis() {
+        return mSystemClockUpdateThresholdMillis;
+    }
+
+    @Override
+    public boolean isTimeDetectionEnabled() {
         try {
-            long elapsedRealtimeMillis = SystemClock.elapsedRealtime();
-            long currentTimeMillis = TimeDetectorStrategy.getTimeAt(time, elapsedRealtimeMillis);
-            Slog.d(TAG, "Setting system clock using time=" + time
-                    + ", elapsedRealtimeMillis=" + elapsedRealtimeMillis);
-            mAlarmManager.setTime(currentTimeMillis);
-        } finally {
-            mWakeLock.release();
+            return Settings.Global.getInt(mContentResolver, Settings.Global.AUTO_TIME) != 0;
+        } catch (Settings.SettingNotFoundException snfe) {
+            return true;
+        }
+    }
+
+    @Override
+    public void acquireWakeLock() {
+        if (mWakeLock.isHeld()) {
+            Slog.wtf(TAG, "WakeLock " + mWakeLock + " already held");
+        }
+        mWakeLock.acquire();
+    }
+
+    @Override
+    public long elapsedRealtimeMillis() {
+        checkWakeLockHeld();
+        return SystemClock.elapsedRealtime();
+    }
+
+    @Override
+    public long systemClockMillis() {
+        checkWakeLockHeld();
+        return System.currentTimeMillis();
+    }
+
+    @Override
+    public void setSystemClock(long newTimeMillis) {
+        checkWakeLockHeld();
+        mAlarmManager.setTime(newTimeMillis);
+    }
+
+    @Override
+    public void releaseWakeLock() {
+        checkWakeLockHeld();
+        mWakeLock.release();
+    }
+
+    @Override
+    public void sendStickyBroadcast(@NonNull Intent intent) {
+        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+    }
+
+    private void checkWakeLockHeld() {
+        if (!mWakeLock.isHeld()) {
+            Slog.wtf(TAG, "WakeLock " + mWakeLock + " not held");
         }
     }
 }
