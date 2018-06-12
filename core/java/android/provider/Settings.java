@@ -6012,7 +6012,7 @@ public final class Settings {
                 new SettingsValidators.ComponentNameListValidator(":");
 
         /**
-         * Whether the hush gesture has ever been used // TODO: beverlyt
+         * Whether the hush gesture has ever been used
          * @hide
          */
         public static final String HUSH_GESTURE_USED = "hush_gesture_used";
