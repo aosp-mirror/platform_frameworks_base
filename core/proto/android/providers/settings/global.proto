@@ -600,14 +600,17 @@ message GlobalSettingsProto {
     }
     optional Ntp ntp = 84;
 
-    // Details about the User Absent, Radios Off feature.
-    message UserAbsentRadiosOff {
+    // Details about the User Absent For Small Battery feature.
+    message UserAbsentSmallBattery {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
-        // Whether or not to enable the User Absent, Radios Off feature on small battery devices.
-        optional SettingProto enabled_for_small_battery = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Whether or not to enable the User Absent, Radios Off feature
+        optional SettingProto radios_off_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        // Whether or not to enable the User Absent, Touch Off feature
+        optional SettingProto touch_off_enabled = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
-    optional UserAbsentRadiosOff user_absent_radios_off = 85;
+    optional UserAbsentSmallBattery user_absent_small_battery = 85;
 
     // Whether to disable the automatic scheduling of system updates.
     optional SettingProto ota_disable_automatic_update = 86 [ (android.privacy).dest = DEST_AUTOMATIC ];

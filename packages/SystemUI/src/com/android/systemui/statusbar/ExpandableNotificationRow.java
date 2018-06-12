@@ -438,7 +438,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     public boolean getIsNonblockable() {
         boolean isNonblockable = Dependency.get(NotificationBlockingHelperManager.class)
-                .isNonblockablePackage(mStatusBarNotification.getPackageName());
+                .isNonblockable(mStatusBarNotification.getPackageName(),
+                        mEntry.channel.getId());
 
         // If the SystemNotifAsyncTask hasn't finished running or retrieved a value, we'll try once
         // again, but in-place on the main thread this time. This should rarely ever get called.

@@ -342,6 +342,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.Process;
+import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -23972,7 +23973,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                                 + myProc + " to " + heapdumpFile);
                                         thread.dumpHeap(/* managed= */ true,
                                                 /* mallocInfo= */ false, /* runGc= */ false,
-                                                heapdumpFile.toString(), fd);
+                                                heapdumpFile.toString(), fd,
+                                                /* finishCallback= */ null);
                                     } catch (RemoteException e) {
                                     }
                                 }
@@ -25865,8 +25867,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         return proc;
     }
 
+    @Override
     public boolean dumpHeap(String process, int userId, boolean managed, boolean mallocInfo,
-            boolean runGc, String path, ParcelFileDescriptor fd) throws RemoteException {
+            boolean runGc, String path, ParcelFileDescriptor fd, RemoteCallback finishCallback) {
 
         try {
             synchronized (this) {
@@ -25894,7 +25897,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
 
-                proc.thread.dumpHeap(managed, mallocInfo, runGc, path, fd);
+                proc.thread.dumpHeap(managed, mallocInfo, runGc, path, fd, finishCallback);
                 fd = null;
                 return true;
             }

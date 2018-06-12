@@ -201,6 +201,8 @@ public final class SystemServer {
             "com.google.android.clockwork.ThermalObserver";
     private static final String WEAR_CONNECTIVITY_SERVICE_CLASS =
             "com.android.clockwork.connectivity.WearConnectivityService";
+    private static final String WEAR_POWER_SERVICE_CLASS =
+            "com.android.clockwork.power.WearPowerService";
     private static final String WEAR_SIDEKICK_SERVICE_CLASS =
             "com.google.android.clockwork.sidekick.SidekickService";
     private static final String WEAR_DISPLAY_SERVICE_CLASS =
@@ -1549,12 +1551,20 @@ public final class SystemServer {
         }
 
         if (isWatch) {
+            // Must be started before services that depend it, e.g. WearConnectivityService
+            traceBeginAndSlog("StartWearPowerService");
+            mSystemServiceManager.startService(WEAR_POWER_SERVICE_CLASS);
+            traceEnd();
+
             traceBeginAndSlog("StartWearConnectivityService");
             mSystemServiceManager.startService(WEAR_CONNECTIVITY_SERVICE_CLASS);
             traceEnd();
 
-            traceBeginAndSlog("StartWearTimeService");
+            traceBeginAndSlog("StartWearDisplayService");
             mSystemServiceManager.startService(WEAR_DISPLAY_SERVICE_CLASS);
+            traceEnd();
+
+            traceBeginAndSlog("StartWearTimeService");
             mSystemServiceManager.startService(WEAR_TIME_SERVICE_CLASS);
             traceEnd();
 

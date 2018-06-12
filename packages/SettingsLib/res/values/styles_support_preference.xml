@@ -20,82 +20,14 @@
 
     <dimen name="preference_no_icon_padding_start">72dp</dimen>
 
-    <!-- Fragment style -->
-    <style name="PreferenceFragmentStyle.SettingsBase" parent="@*android:style/PreferenceFragment.Material">
-        <item name="allowDividerAfterLastItem">false</item>
-    </style>
-
-    <!-- Preferences -->
-    <style name="Preference.SettingsBase" parent="@style/Preference.Material">
-        <item name="allowDividerAbove">false</item>
-        <item name="allowDividerBelow">true</item>
-        <item name="singleLineTitle">false</item>
-        <item name="iconSpaceReserved">true</item>
-    </style>
-
-    <!-- Preference category -->
-    <style name="Preference.Category.SettingsBase" parent="@style/Preference.Category.Material">
-        <item name="allowDividerAbove">true</item>
-        <item name="allowDividerBelow">true</item>
-        <item name="android:layout">@layout/preference_category_material_settings</item>
-    </style>
-
-    <!-- Preference screen -->
-    <style name="Preference.Screen.SettingsBase" parent="@style/Preference.PreferenceScreen.Material">
-        <item name="allowDividerAbove">false</item>
-        <item name="allowDividerBelow">true</item>
-        <item name="iconSpaceReserved">true</item>
-    </style>
-
     <!-- Footer Preferences -->
-    <style name="Preference.FooterPreference.SettingsBase" parent="Preference.SettingsBase">
+    <style name="Preference.FooterPreference.SettingsBase" parent="@style/Preference.Material">
         <item name="android:layout">@layout/preference_footer</item>
         <item name="allowDividerAbove">true</item>
     </style>
 
-    <!-- Dropdown Preferences -->
-    <style name="Preference.DropdownPreference.SettingsBase" parent="Preference.SettingsBase">
-        <item name="android:layout">@layout/preference_dropdown_material_settings</item>
-    </style>
-
-    <!-- Switch Preferences -->
-    <style name="Preference.SwitchPreference.SettingsBase" parent="@style/Preference.SwitchPreference.Material">
-        <item name="allowDividerAbove">false</item>
-        <item name="allowDividerBelow">true</item>
-        <item name="iconSpaceReserved">true</item>
-        <item name="singleLineTitle">false</item>
-    </style>
-
-    <!-- CheckBox Preferences -->
-    <style name="Preference.CheckBoxPreference.SettingsBase" parent="@style/Preference.CheckBoxPreference.Material">
-        <item name="allowDividerAbove">false</item>
-        <item name="allowDividerBelow">true</item>
-        <item name="iconSpaceReserved">true</item>
-        <item name="singleLineTitle">false</item>
-    </style>
-
-    <!-- EditText Preferences -->
-    <style name="Preference.EditTextPreference.SettingsBase"
-           parent="@style/Preference.DialogPreference.EditTextPreference.Material">
-        <item name="allowDividerAbove">false</item>
-        <item name="allowDividerBelow">true</item>
-        <item name="iconSpaceReserved">true</item>
-        <item name="singleLineTitle">false</item>
-    </style>
-
     <style name="PreferenceThemeOverlay.SettingsBase" parent="@style/PreferenceThemeOverlay.v14.Material">
-        <!-- Parent path frameworks/support/v14/preference/res/values/themes.xml -->
-        <item name="android:scrollbars">vertical</item>
-        <item name="preferenceFragmentStyle">@style/PreferenceFragmentStyle.SettingsBase</item>
-        <item name="preferenceCategoryStyle">@style/Preference.Category.SettingsBase</item>
-        <item name="preferenceScreenStyle">@style/Preference.Screen.SettingsBase</item>
-        <item name="preferenceStyle">@style/Preference.SettingsBase</item>
-        <item name="dialogPreferenceStyle">@style/Preference.SettingsBase</item>
-        <item name="editTextPreferenceStyle">@style/Preference.EditTextPreference.SettingsBase</item>
         <item name="footerPreferenceStyle">@style/Preference.FooterPreference.SettingsBase</item>
-        <item name="switchPreferenceStyle">@style/Preference.SwitchPreference.SettingsBase</item>
-        <item name="checkBoxPreferenceStyle">@style/Preference.CheckBoxPreference.SettingsBase</item>
-        <item name="dropdownPreferenceStyle">@style/Preference.DropdownPreference.SettingsBase</item>
     </style>
 
 </resources>

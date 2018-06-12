@@ -47,6 +47,7 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
@@ -609,7 +610,7 @@ public class TransactionParcelTests {
 
         @Override
         public void dumpHeap(boolean managed, boolean mallocInfo, boolean runGc, String path,
-                ParcelFileDescriptor fd) {
+                ParcelFileDescriptor fd, RemoteCallback finishCallback) {
         }
 
         @Override

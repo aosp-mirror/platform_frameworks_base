@@ -94,6 +94,7 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.Process;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -739,6 +740,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         public boolean runGc;
         String path;
         ParcelFileDescriptor fd;
+        RemoteCallback finishCallback;
     }
 
     static final class UpdateCompatibilityData {
@@ -998,13 +1000,14 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         @Override
         public void dumpHeap(boolean managed, boolean mallocInfo, boolean runGc, String path,
-                ParcelFileDescriptor fd) {
+                ParcelFileDescriptor fd, RemoteCallback finishCallback) {
             DumpHeapData dhd = new DumpHeapData();
             dhd.managed = managed;
             dhd.mallocInfo = mallocInfo;
             dhd.runGc = runGc;
             dhd.path = path;
             dhd.fd = fd;
+            dhd.finishCallback = finishCallback;
             sendMessage(H.DUMP_HEAP, dhd, 0, 0, true /*async*/);
         }
 
@@ -5309,6 +5312,9 @@ public final class ActivityThread extends ClientTransactionHandler {
             ActivityManager.getService().dumpHeapFinished(dhd.path);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+        if (dhd.finishCallback != null) {
+            dhd.finishCallback.sendResult(null);
         }
     }
 

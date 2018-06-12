@@ -56,6 +56,8 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteCallback;
+import android.os.RemoteCallback.OnResultListener;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ShellCommand;
@@ -65,6 +67,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
+import android.text.format.Time;
 import android.util.ArrayMap;
 import android.util.DebugUtils;
 import android.util.DisplayMetrics;
@@ -89,6 +92,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -872,7 +876,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
         }
         String process = getNextArgRequired();
-        String heapFile = getNextArgRequired();
+        String heapFile = getNextArg();
+        if (heapFile == null) {
+            final Time t = new Time();
+            t.set(System.currentTimeMillis());
+            heapFile = "/data/local/tmp/heapdump-" + t.format("%Y%m%d-%H%M%S") + ".prof";
+        }
+        pw.println("File: " + heapFile);
+        pw.flush();
 
         File file = new File(heapFile);
         file.delete();
@@ -881,10 +892,28 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        if (!mInterface.dumpHeap(process, userId, managed, mallocInfo, runGc, heapFile, fd)) {
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        final RemoteCallback finishCallback = new RemoteCallback(new OnResultListener() {
+            @Override
+            public void onResult(Bundle result) {
+                latch.countDown();
+            }
+        }, null);
+
+        if (!mInterface.dumpHeap(process, userId, managed, mallocInfo, runGc, heapFile, fd,
+                finishCallback)) {
             err.println("HEAP DUMP FAILED on process " + process);
             return -1;
         }
+        pw.println("Waiting for dump to finish...");
+        pw.flush();
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            err.println("Caught InterruptedException");
+        }
+
         return 0;
     }
 
