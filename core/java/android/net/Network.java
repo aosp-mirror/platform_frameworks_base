@@ -142,7 +142,7 @@ public class Network implements Parcelable {
 
     /**
      * Specify whether or not Private DNS should be bypassed when attempting
-     * to use {@link getAllByName()}/{@link getByName()} methods on the given
+     * to use {@link #getAllByName(String)}/{@link #getByName(String)} methods on the given
      * instance for hostname resolution.
      *
      * @hide
@@ -169,13 +169,6 @@ public class Network implements Parcelable {
      * A {@code SocketFactory} that produces {@code Socket}'s bound to this network.
      */
     private class NetworkBoundSocketFactory extends SocketFactory {
-        private final int mNetId;
-
-        public NetworkBoundSocketFactory(int netId) {
-            super();
-            mNetId = netId;
-        }
-
         private Socket connectToHost(String host, int port, SocketAddress localAddress)
                 throws IOException {
             // Lookup addresses only on this Network.
@@ -201,7 +194,8 @@ public class Network implements Parcelable {
         }
 
         @Override
-        public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException {
+        public Socket createSocket(String host, int port, InetAddress localHost, int localPort)
+                throws IOException {
             return connectToHost(host, port, new InetSocketAddress(localHost, localPort));
         }
 
@@ -265,7 +259,7 @@ public class Network implements Parcelable {
         if (mNetworkBoundSocketFactory == null) {
             synchronized (mLock) {
                 if (mNetworkBoundSocketFactory == null) {
-                    mNetworkBoundSocketFactory = new NetworkBoundSocketFactory(netId);
+                    mNetworkBoundSocketFactory = new NetworkBoundSocketFactory();
                 }
             }
         }
@@ -475,7 +469,7 @@ public class Network implements Parcelable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Network == false) return false;
+        if (!(obj instanceof Network)) return false;
         Network other = (Network)obj;
         return this.netId == other.netId;
     }
