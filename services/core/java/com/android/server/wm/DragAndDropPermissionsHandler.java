@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.content.ClipData;
 import android.net.Uri;
 import android.os.Binder;
@@ -61,7 +62,7 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         mActivityToken = activityToken;
 
         // Will throw if Activity is not found.
-        IBinder permissionOwner = ActivityManager.getService().
+        IBinder permissionOwner = ActivityTaskManager.getService().
                 getUriPermissionOwnerForActivity(mActivityToken);
 
         doTake(permissionOwner);
@@ -101,7 +102,7 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         IBinder permissionOwner = null;
         if (mActivityToken != null) {
             try {
-                permissionOwner = ActivityManager.getService().
+                permissionOwner = ActivityTaskManager.getService().
                         getUriPermissionOwnerForActivity(mActivityToken);
             } catch (Exception e) {
                 // Activity is destroyed, permissions already revoked.

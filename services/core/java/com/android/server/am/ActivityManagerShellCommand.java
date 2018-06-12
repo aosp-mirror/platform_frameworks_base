@@ -479,12 +479,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 options.setLockTaskEnabled(true);
             }
             if (mWaitOption) {
-                result = mInterface.startActivityAndWait(null, null, intent, mimeType,
+                result = mTaskInterface.startActivityAndWait(null, null, intent, mimeType,
                         null, null, 0, mStartFlags, profilerInfo,
                         options != null ? options.toBundle() : null, mUserId);
                 res = result.result;
             } else {
-                res = mInterface.startActivityAsUser(null, null, intent, mimeType,
+                res = mTaskInterface.startActivityAsUser(null, null, intent, mimeType,
                         null, null, 0, mStartFlags, profilerInfo,
                         options != null ? options.toBundle() : null, mUserId);
             }
@@ -578,7 +578,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             }
             mRepeat--;
             if (mRepeat > 0) {
-                mInterface.unhandledBack();
+                mTaskInterface.unhandledBack();
             }
         } while (mRepeat > 0);
         return 0;
@@ -2186,7 +2186,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runSuppressResizeConfigChanges(PrintWriter pw) throws RemoteException {
         boolean suppress = Boolean.valueOf(getNextArgRequired());
-        mInterface.suppressResizeConfigChanges(suppress);
+        mTaskInterface.suppressResizeConfigChanges(suppress);
         return 0;
     }
 
@@ -2453,7 +2453,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         int stackId = Integer.parseInt(stackIdStr);
         String displayIdStr = getNextArgRequired();
         int displayId = Integer.parseInt(displayIdStr);
-        mInterface.moveStackToDisplay(stackId, displayId);
+        mTaskInterface.moveStackToDisplay(stackId, displayId);
         return 0;
     }
 
@@ -2467,7 +2467,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             throw new RuntimeException(e.getMessage(), e);
         }
 
-        final int stackId = mInterface.createStackOnDisplay(displayId);
+        final int stackId = mTaskInterface.createStackOnDisplay(displayId);
         if (stackId != INVALID_STACK_ID) {
             // TODO: Need proper support if this is used by test...
 //            container.startActivity(intent);
@@ -2546,7 +2546,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: invalid input bounds");
             return -1;
         }
-        mInterface.resizeDockedStack(bounds, taskBounds, null, null, null);
+        mTaskInterface.resizeDockedStack(bounds, taskBounds, null, null, null);
         return 0;
     }
 
@@ -2566,12 +2566,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
         String positionStr = getNextArgRequired();
         int position = Integer.parseInt(positionStr);
 
-        mInterface.positionTaskInStack(taskId, stackId, position);
+        mTaskInterface.positionTaskInStack(taskId, stackId, position);
         return 0;
     }
 
     int runStackList(PrintWriter pw) throws RemoteException {
-        List<ActivityManager.StackInfo> stacks = mInterface.getAllStackInfos();
+        List<ActivityManager.StackInfo> stacks = mTaskInterface.getAllStackInfos();
         for (ActivityManager.StackInfo info : stacks) {
             pw.println(info);
         }
@@ -2581,7 +2581,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runStackInfo(PrintWriter pw) throws RemoteException {
         int windowingMode = Integer.parseInt(getNextArgRequired());
         int activityType = Integer.parseInt(getNextArgRequired());
-        ActivityManager.StackInfo info = mInterface.getStackInfo(windowingMode, activityType);
+        ActivityManager.StackInfo info = mTaskInterface.getStackInfo(windowingMode, activityType);
         pw.println(info);
         return 0;
     }
@@ -2589,7 +2589,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runStackRemove(PrintWriter pw) throws RemoteException {
         String stackIdStr = getNextArgRequired();
         int stackId = Integer.parseInt(stackIdStr);
-        mInterface.removeStack(stackId);
+        mTaskInterface.removeStack(stackId);
         return 0;
     }
 
@@ -2601,7 +2601,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        if (!mInterface.moveTopActivityToPinnedStack(stackId, bounds)) {
+        if (!mTaskInterface.moveTopActivityToPinnedStack(stackId, bounds)) {
             getErrPrintWriter().println("Didn't move top activity to pinned stack.");
             return -1;
         }
@@ -2647,12 +2647,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runTaskLock(PrintWriter pw) throws RemoteException {
         String taskIdStr = getNextArgRequired();
         if (taskIdStr.equals("stop")) {
-            mInterface.stopSystemLockTaskMode();
+            mTaskInterface.stopSystemLockTaskMode();
         } else {
             int taskId = Integer.parseInt(taskIdStr);
-            mInterface.startSystemLockTaskMode(taskId);
+            mTaskInterface.startSystemLockTaskMode(taskId);
         }
-        pw.println("Activity manager is " + (mInterface.isInLockTaskMode() ? "" : "not ") +
+        pw.println("Activity manager is " + (mTaskInterface.isInLockTaskMode() ? "" : "not ") +
                 "in lockTaskMode");
         return 0;
     }
@@ -2662,7 +2662,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final int taskId = Integer.parseInt(taskIdStr);
         final String resizeableStr = getNextArgRequired();
         final int resizeableMode = Integer.parseInt(resizeableStr);
-        mInterface.setTaskResizeable(taskId, resizeableMode);
+        mTaskInterface.setTaskResizeable(taskId, resizeableMode);
         return 0;
     }
 
@@ -2681,7 +2681,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     void taskResize(int taskId, Rect bounds, int delay_ms, boolean pretendUserResize)
             throws RemoteException {
         final int resizeMode = pretendUserResize ? RESIZE_MODE_USER : RESIZE_MODE_SYSTEM;
-        mInterface.resizeTask(taskId, bounds, resizeMode);
+        mTaskInterface.resizeTask(taskId, bounds, resizeMode);
         try {
             Thread.sleep(delay_ms);
         } catch (InterruptedException e) {
@@ -2753,7 +2753,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runTaskFocus(PrintWriter pw) throws RemoteException {
         final int taskId = Integer.parseInt(getNextArgRequired());
         pw.println("Setting focus to task " + taskId);
-        mInterface.setFocusedTask(taskId);
+        mTaskInterface.setFocusedTask(taskId);
         return 0;
     }
 

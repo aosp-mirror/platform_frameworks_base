@@ -445,7 +445,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /**
      * Usually empty. Set to the task's tempInsetFrame. See
-     *{@link android.app.IActivityManager#resizeDockedStack}.
+     *{@link android.app.IActivityTaskManager#resizeDockedStack}.
      */
     private final Rect mInsetFrame = new Rect();
 
@@ -2448,7 +2448,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     try {
                         // Note: this calls into ActivityManager, so we must *not* hold the window
                         // manager lock while calling this.
-                        mService.mActivityManager.setSplitScreenResizing(false);
+                        mService.mActivityTaskManager.setSplitScreenResizing(false);
                     } catch (RemoteException e) {
                         // Local call, shouldn't return RemoteException.
                         throw e.rethrowAsRuntimeException();

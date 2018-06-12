@@ -19,6 +19,7 @@ package com.android.server.display;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -937,7 +938,7 @@ public class BrightnessTracker {
         }
 
         public ActivityManager.StackInfo getFocusedStack() throws RemoteException {
-            return ActivityManager.getService().getFocusedStackInfo();
+            return ActivityTaskManager.getService().getFocusedStackInfo();
         }
 
         public void scheduleIdleJob(Context context) {

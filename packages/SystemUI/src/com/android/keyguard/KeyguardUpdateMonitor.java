@@ -32,6 +32,7 @@ import static android.os.BatteryManager.EXTRA_STATUS;
 import android.annotation.AnyThread;
 import android.annotation.MainThread;
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.Instrumentation;
 import android.app.PendingIntent;
@@ -1843,7 +1844,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         @Override
         public void onTaskStackChangedBackground() {
             try {
-                ActivityManager.StackInfo info = ActivityManager.getService().getStackInfo(
+                ActivityManager.StackInfo info = ActivityTaskManager.getService().getStackInfo(
                         WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_ASSISTANT);
                 if (info == null) {
                     return;

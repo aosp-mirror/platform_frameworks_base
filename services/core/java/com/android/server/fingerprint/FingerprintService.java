@@ -25,9 +25,11 @@ import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREG
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
+import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.PendingIntent;
 import android.app.SynchronousUserSwitchObserver;
 import android.app.TaskStackListener;
@@ -140,6 +142,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
     private IBiometricsFingerprint mDaemon;
     private IStatusBarService mStatusBarService;
     private final IActivityManager mActivityManager;
+    private final IActivityTaskManager mActivityTaskManager;
     private final PowerManager mPowerManager;
     private final AlarmManager mAlarmManager;
     private final UserManager mUserManager;
@@ -229,7 +232,8 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 if (isKeyguard(currentClient)) {
                     return; // Keyguard is always allowed
                 }
-                List<ActivityManager.RunningTaskInfo> runningTasks = mActivityManager.getTasks(1);
+                List<ActivityManager.RunningTaskInfo> runningTasks =
+                        mActivityTaskManager.getTasks(1);
                 if (!runningTasks.isEmpty()) {
                     final String topPackage = runningTasks.get(0).topActivity.getPackageName();
                     if (!topPackage.contentEquals(currentClient)) {
@@ -261,6 +265,8 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mActivityManager = ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE))
                 .getService();
+        mActivityTaskManager = ((ActivityTaskManager) context.getSystemService(
+                Context.ACTIVITY_TASK_SERVICE)).getService();
     }
 
     @Override
@@ -871,7 +877,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             @Override
             public void onStart() {
                 try {
-                    mActivityManager.registerTaskStackListener(mTaskStackListener);
+                    mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Could not register task stack listener", e);
                 }
@@ -880,7 +886,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             @Override
             public void onStop() {
                 try {
-                    mActivityManager.unregisterTaskStackListener(mTaskStackListener);
+                    mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Could not unregister task stack listener", e);
                 }

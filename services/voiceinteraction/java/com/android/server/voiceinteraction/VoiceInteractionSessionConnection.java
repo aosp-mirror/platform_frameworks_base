@@ -27,6 +27,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.assist.AssistContent;
@@ -359,7 +360,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                 }
                 if (mSession != null) {
                     try {
-                        mAm.finishVoiceTask(mSession);
+                        ActivityTaskManager.getService().finishVoiceTask(mSession);
                     } catch (RemoteException e) {
                     }
                 }
@@ -387,7 +388,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             }
             if (finishTask && mSession != null) {
                 try {
-                    mAm.finishVoiceTask(mSession);
+                    ActivityTaskManager.getService().finishVoiceTask(mSession);
                 } catch (RemoteException e) {
                 }
             }

@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -171,7 +172,7 @@ public class EmergencyButton extends Button {
         // should be the equivalent to the old userActivity(EMERGENCY_CALL_TIMEOUT)
         mPowerManager.userActivity(SystemClock.uptimeMillis(), true);
         try {
-            ActivityManager.getService().stopSystemLockTaskMode();
+            ActivityTaskManager.getService().stopSystemLockTaskMode();
         } catch (RemoteException e) {
             Slog.w(LOG_TAG, "Failed to stop app pinning");
         }

@@ -21,6 +21,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.Nullable;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.os.RemoteException;
 import android.os.Handler;
 import android.os.Looper;
@@ -38,7 +39,7 @@ class TaskPositioningController {
     private final WindowManagerService mService;
     private final InputManagerService mInputManager;
     private final InputMonitor mInputMonitor;
-    private final IActivityManager mActivityManager;
+    private final IActivityTaskManager mActivityManager;
     private final Handler mHandler;
 
     @GuardedBy("WindowManagerSerivce.mWindowMap")
@@ -53,7 +54,7 @@ class TaskPositioningController {
     }
 
     TaskPositioningController(WindowManagerService service, InputManagerService inputManager,
-            InputMonitor inputMonitor, IActivityManager activityManager, Looper looper) {
+            InputMonitor inputMonitor, IActivityTaskManager activityManager, Looper looper) {
         mService = service;
         mInputMonitor = inputMonitor;
         mInputManager = inputManager;

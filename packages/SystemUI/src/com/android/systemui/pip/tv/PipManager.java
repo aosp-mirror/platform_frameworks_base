@@ -347,7 +347,7 @@ public class PipManager implements BasePipManager {
         mMediaSessionManager.removeOnActiveSessionsChangedListener(mActiveMediaSessionListener);
         if (removePipStack) {
             try {
-                mActivityManager.removeStack(mPinnedStackId);
+                mActivityTaskManager.removeStack(mPinnedStackId);
             } catch (RemoteException e) {
                 Log.e(TAG, "removeStack failed", e);
             } finally {
@@ -515,7 +515,7 @@ public class PipManager implements BasePipManager {
     private StackInfo getPinnedStackInfo() {
         StackInfo stackInfo = null;
         try {
-            stackInfo = mActivityManager.getStackInfo(
+            stackInfo = ActivityTaskManager.getService().getStackInfo(
                     WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
         } catch (RemoteException e) {
             Log.e(TAG, "getStackInfo failed", e);
@@ -608,7 +608,7 @@ public class PipManager implements BasePipManager {
     private boolean isSettingsShown() {
         List<RunningTaskInfo> runningTasks;
         try {
-            runningTasks = mActivityManager.getTasks(1);
+            runningTasks = mActivityTaskManager.getTasks(1);
             if (runningTasks.isEmpty()) {
                 return false;
             }

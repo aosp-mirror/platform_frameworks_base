@@ -116,9 +116,11 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.IAssistDataReceiver;
 import android.app.admin.DevicePolicyCache;
 import android.content.BroadcastReceiver;
@@ -427,6 +429,8 @@ public class WindowManagerService extends IWindowManager.Stub
     final WindowManagerPolicy mPolicy;
 
     final IActivityManager mActivityManager;
+    // TODO: Probably not needed once activities are fully in WM.
+    final IActivityTaskManager mActivityTaskManager;
     final ActivityManagerInternal mAmInternal;
 
     final AppOpsManager mAppOps;
@@ -859,7 +863,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (atoken.mLaunchTaskBehind) {
                 try {
-                    mActivityManager.notifyLaunchTaskBehindComplete(atoken.token);
+                    mActivityTaskManager.notifyLaunchTaskBehindComplete(atoken.token);
                 } catch (RemoteException e) {
                 }
                 atoken.mLaunchTaskBehind = false;
@@ -876,7 +880,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     } else {
                         atoken.mEnteringAnimation = false;
                         try {
-                            mActivityManager.notifyEnterAnimationComplete(atoken.token);
+                            mActivityTaskManager.notifyEnterAnimationComplete(atoken.token);
                         } catch (RemoteException e) {
                         }
                     }
@@ -1009,6 +1013,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 AnimationThread.getHandler(), animationHandler);
 
         mActivityManager = ActivityManager.getService();
+        mActivityTaskManager = ActivityTaskManager.getService();
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
         AppOpsManager.OnOpChangedInternalListener opListener =
@@ -1066,7 +1071,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromWindowLayout);
 
         mTaskPositioningController = new TaskPositioningController(
-                this, mInputManager, mInputMonitor, mActivityManager, mH.getLooper());
+                this, mInputManager, mInputMonitor, mActivityTaskManager, mH.getLooper());
         mDragDropController = new DragDropController(this, mH.getLooper());
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
@@ -4372,7 +4377,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     void sendNewConfiguration(int displayId) {
         try {
-            final boolean configUpdated = mActivityManager.updateDisplayOverrideConfiguration(
+            final boolean configUpdated = mActivityTaskManager.updateDisplayOverrideConfiguration(
                     null /* values */, displayId);
             if (!configUpdated) {
                 // Something changed (E.g. device rotation), but no configuration update is needed.
@@ -4527,7 +4532,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         try {
-            mActivityManager.updateConfiguration(null);
+            mActivityTaskManager.updateConfiguration(null);
         } catch (RemoteException e) {
         }
 
@@ -4538,7 +4543,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         try {
-            mActivityManager.updateConfiguration(null);
+            mActivityTaskManager.updateConfiguration(null);
         } catch (RemoteException e) {
         }
 
@@ -4893,7 +4898,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case NOTIFY_ACTIVITY_DRAWN:
                     try {
-                        mActivityManager.notifyActivityDrawn((IBinder) msg.obj);
+                        mActivityTaskManager.notifyActivityDrawn((IBinder) msg.obj);
                     } catch (RemoteException e) {
                     }
                     break;

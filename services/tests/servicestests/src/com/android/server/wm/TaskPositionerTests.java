@@ -22,6 +22,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import android.app.IActivityTaskManager;
 import android.graphics.Rect;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -75,7 +76,7 @@ public class TaskPositionerTests extends WindowTestsBase {
         mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, dm);
         mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, dm);
 
-        mPositioner = new TaskPositioner(sWm, Mockito.mock(IActivityManager.class));
+        mPositioner = new TaskPositioner(sWm, Mockito.mock(IActivityTaskManager.class));
         mPositioner.register(mDisplayContent);
 
         mWindow = Mockito.spy(createWindow(null, TYPE_BASE_APPLICATION, "window"));
