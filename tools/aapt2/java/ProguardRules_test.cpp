@@ -239,7 +239,8 @@ TEST(ProguardRulesTest, ViewOnClickRuleIsEmitted) {
 
   std::string actual = GetKeepSetString(set);
 
-  EXPECT_THAT(actual, HasSubstr("-keepclassmembers class * { *** bar_method(...); }"));
+  EXPECT_THAT(actual, HasSubstr(
+      "-keepclassmembers class * { *** bar_method(android.view.View); }"));
 }
 
 TEST(ProguardRulesTest, MenuRulesAreEmitted) {
@@ -258,7 +259,8 @@ TEST(ProguardRulesTest, MenuRulesAreEmitted) {
 
   std::string actual = GetKeepSetString(set);
 
-  EXPECT_THAT(actual, HasSubstr("-keepclassmembers class * { *** on_click(...); }"));
+  EXPECT_THAT(actual, HasSubstr(
+      "-keepclassmembers class * { *** on_click(android.view.MenuItem); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Bar { <init>(...); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.Baz { <init>(...); }"));
   EXPECT_THAT(actual, Not(HasSubstr("com.foo.Bat")));
