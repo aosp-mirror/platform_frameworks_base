@@ -19,11 +19,14 @@ package com.android.server.connectivity.tethering;
 import android.content.Context;
 import android.net.INetd;
 import android.net.NetworkRequest;
+import android.net.dhcp.DhcpServer;
+import android.net.dhcp.DhcpServingParams;
 import android.net.ip.RouterAdvertisementDaemon;
 import android.net.util.InterfaceParams;
 import android.net.util.NetdService;
 import android.os.Handler;
 import android.net.util.SharedLog;
+import android.os.Looper;
 
 import com.android.internal.util.StateMachine;
 
@@ -68,5 +71,10 @@ public class TetheringDependencies {
 
     public NetworkRequest getDefaultNetworkRequest() {
         return null;
+    }
+
+    public DhcpServer makeDhcpServer(Looper looper, InterfaceParams iface, DhcpServingParams params,
+            SharedLog log) {
+        return new DhcpServer(looper, iface, params, log);
     }
 }
