@@ -77,6 +77,8 @@ import com.android.systemui.statusbar.stack.AnimationProperties;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -2826,5 +2828,13 @@ public class NotificationPanelView extends PanelView implements
     public void onBouncerPreHideAnimation() {
         setKeyguardStatusViewVisibility(mStatusBarState, true /* keyguardFadingAway */,
                 false /* goingToFullShade */);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        super.dump(fd, pw, args);
+        if (mKeyguardStatusBar != null) {
+            mKeyguardStatusBar.dump(fd, pw, args);
+        }
     }
 }

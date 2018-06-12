@@ -57,6 +57,9 @@ import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChange
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * The header group on Keyguard.
  */
@@ -456,6 +459,17 @@ public class KeyguardStatusBarView extends RelativeLayout
         View v = findViewById(id);
         if (v instanceof DarkReceiver) {
             ((DarkReceiver) v).onDarkChanged(tintArea, intensity, color);
+        }
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("KeyguardStatusBarView:");
+        pw.println("  mBatteryCharging: " + mBatteryCharging);
+        pw.println("  mKeyguardUserSwitcherShowing: " + mKeyguardUserSwitcherShowing);
+        pw.println("  mBatteryListening: " + mBatteryListening);
+        pw.println("  mLayoutState: " + mLayoutState);
+        if (mBatteryView != null) {
+            mBatteryView.dump(fd, pw, args);
         }
     }
 }
