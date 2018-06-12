@@ -2632,6 +2632,7 @@ public class AudioService extends IAudioService.Stub
         broadcastRingerMode(AudioManager.RINGER_MODE_CHANGED_ACTION, ringerMode);
     }
 
+    @GuardedBy("mSettingsLock")
     private void muteRingerModeStreams() {
         // Mute stream if not previously muted by ringer mode and (ringer mode
         // is not RINGER_MODE_NORMAL OR stream is zen muted) and stream is affected by ringer mode.
@@ -2719,9 +2720,8 @@ public class AudioService extends IAudioService.Stub
         synchronized(mSettingsLock) {
             change = mRingerMode != ringerMode;
             mRingerMode = ringerMode;
+            muteRingerModeStreams();
         }
-
-        muteRingerModeStreams();
 
         // Post a persist ringer mode msg
         if (persist) {
