@@ -16,6 +16,8 @@
 
 package android.app.timedetector;
 
+import android.app.timedetector.TimeSignal;
+
 /**
  * System private API to comunicate with time detector service.
  *
@@ -30,5 +32,5 @@ package android.app.timedetector;
  * {@hide}
  */
 interface ITimeDetectorService {
-  void stubbedCall();
+  void suggestTime(in TimeSignal timeSignal);
 }
