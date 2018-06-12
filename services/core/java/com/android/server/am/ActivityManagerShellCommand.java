@@ -18,9 +18,11 @@ package com.android.server.am;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IActivityController;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.IStopUserCallback;
 import android.app.IUidObserver;
 import android.app.KeyguardManager;
@@ -100,9 +102,9 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 
-import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
-import static android.app.ActivityManager.RESIZE_MODE_USER;
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
+import static android.app.ActivityTaskManager.RESIZE_MODE_USER;
+import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
@@ -115,6 +117,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     // IPC interface to activity manager -- don't need to do additional security checks.
     final IActivityManager mInterface;
+    final IActivityTaskManager mTaskInterface;
 
     // Internal service impl -- must perform security checks before touching.
     final ActivityManagerService mInternal;
@@ -147,6 +150,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     ActivityManagerShellCommand(ActivityManagerService service, boolean dumping) {
         mInterface = service;
+        mTaskInterface = service.mActivityTaskManager;
         mInternal = service;
         mPm = AppGlobals.getPackageManager();
         mDumping = dumping;
@@ -2494,7 +2498,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        mInterface.moveTaskToStack(taskId, stackId, toTop);
+        mTaskInterface.moveTaskToStack(taskId, stackId, toTop);
         return 0;
     }
 
@@ -2528,7 +2532,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int resizeStackUnchecked(int stackId, Rect bounds, int delayMs, boolean animate)
             throws RemoteException {
         try {
-            mInterface.resizeStack(stackId, bounds, false, false, animate, -1);
+            mTaskInterface.resizeStack(stackId, bounds, false, false, animate, -1);
             Thread.sleep(delayMs);
         } catch (InterruptedException e) {
         }
@@ -2781,7 +2785,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         if (res == null) {
             return -1;
         }
-        pw.println(ActivityManager.supportsMultiWindow(mInternal.mContext));
+        pw.println(ActivityTaskManager.supportsMultiWindow(mInternal.mContext));
         return 0;
     }
 
@@ -2790,7 +2794,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         if (res == null) {
             return -1;
         }
-        pw.println(ActivityManager.supportsSplitScreenMultiWindow(mInternal.mContext));
+        pw.println(ActivityTaskManager.supportsSplitScreenMultiWindow(mInternal.mContext));
         return 0;
     }
 

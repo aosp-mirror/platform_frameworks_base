@@ -63,6 +63,7 @@ import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.widget.ILockSettings;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.am.ActivityTaskManagerService;
 import com.android.server.audio.AudioService;
 import com.android.server.broadcastradio.BroadcastRadioService;
 import com.android.server.camera.CameraServiceProxy;
@@ -562,6 +563,10 @@ public final class SystemServer {
                 ActivityManagerService.Lifecycle.class).getService();
         mActivityManagerService.setSystemServiceManager(mSystemServiceManager);
         mActivityManagerService.setInstaller(installer);
+        // TODO: Might need to move after migration to WM.
+        ActivityTaskManagerService atm = mSystemServiceManager.startService(
+                ActivityTaskManagerService.Lifecycle.class).getService();
+        mActivityManagerService.setActivityTaskManager(atm);
         traceEnd();
 
         // Power manager needs to be started early because other services need it.

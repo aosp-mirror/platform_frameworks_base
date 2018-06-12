@@ -28,8 +28,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -94,6 +96,7 @@ public class SystemServicesProxy {
     AccessibilityManager mAccm;
     ActivityManager mAm;
     IActivityManager mIam;
+    IActivityTaskManager mIatm;
     PackageManager mPm;
     IPackageManager mIpm;
     private final IDreamManager mDreamManager;
@@ -133,6 +136,7 @@ public class SystemServicesProxy {
         mAccm = AccessibilityManager.getInstance(context);
         mAm = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         mIam = ActivityManager.getService();
+        mIatm = ActivityTaskManager.getService();
         mPm = context.getPackageManager();
         mIpm = AppGlobals.getPackageManager();
         mAssistUtils = new AssistUtils(context);
@@ -261,13 +265,13 @@ public class SystemServicesProxy {
     /** Moves an already resumed task to the side of the screen to initiate split screen. */
     public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode,
             Rect initialBounds) {
-        if (mIam == null) {
+        if (mIatm == null) {
             return false;
         }
 
         try {
-            return mIam.setTaskWindowingModeSplitScreenPrimary(taskId, createMode, true /* onTop */,
-                    false /* animate */, initialBounds, true /* showRecents */);
+            return mIatm.setTaskWindowingModeSplitScreenPrimary(taskId, createMode,
+                    true /* onTop */, false /* animate */, initialBounds, true /* showRecents */);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -324,10 +328,10 @@ public class SystemServicesProxy {
 
     /** Set the task's windowing mode. */
     public void setTaskWindowingMode(int taskId, int windowingMode) {
-        if (mIam == null) return;
+        if (mIatm == null) return;
 
         try {
-            mIam.setTaskWindowingMode(taskId, windowingMode, false /* onTop */);
+            mIatm.setTaskWindowingMode(taskId, windowingMode, false /* onTop */);
         } catch (RemoteException | IllegalArgumentException e) {
             e.printStackTrace();
         }

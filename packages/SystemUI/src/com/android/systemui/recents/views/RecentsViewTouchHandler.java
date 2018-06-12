@@ -17,6 +17,7 @@
 package com.android.systemui.recents.views;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.InputDevice;
@@ -137,7 +138,7 @@ public class RecentsViewTouchHandler {
         }
 
         mVisibleDockStates.clear();
-        if (ActivityManager.supportsMultiWindow(mRv.getContext()) && !ssp.hasDockedTask()
+        if (ActivityTaskManager.supportsMultiWindow(mRv.getContext()) && !ssp.hasDockedTask()
                 && mDividerSnapAlgorithm.isSplitScreenFeasible()) {
             Recents.logDockAttempt(mRv.getContext(), event.task.getTopComponent(),
                     event.task.resizeMode);

@@ -23,9 +23,9 @@ import static com.android.systemui.recents.RecentsImpl.RECENTS_PACKAGE;
 
 import static org.junit.Assert.fail;
 
-import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.IActivityManager;
+import android.app.ActivityTaskManager;
+import android.app.IActivityTaskManager;
 import android.os.SystemClock;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -44,8 +44,8 @@ public class RecentsTest extends SysuiTestCase {
     @Test
     public void testRecentsActivityType() throws Exception {
         // Clear the state
-        final IActivityManager am = ActivityManager.getService();
-        am.removeStacksWithActivityTypes(new int[] { ACTIVITY_TYPE_RECENTS });
+        final IActivityTaskManager atm = ActivityTaskManager.getService();
+        atm.removeStacksWithActivityTypes(new int[] { ACTIVITY_TYPE_RECENTS });
 
         // Toggle recents, use a shell command because it is not exported
         runShellCommand("am start -n " + RECENTS_PACKAGE + "/" + RECENTS_ACTIVITY);
@@ -53,7 +53,7 @@ public class RecentsTest extends SysuiTestCase {
         // Verify that an activity was launched with the right activity type
         int retryCount = 0;
         while (retryCount < 10) {
-            List<RunningTaskInfo> tasks = am.getTasks(Integer.MAX_VALUE);
+            List<RunningTaskInfo> tasks = atm.getTasks(Integer.MAX_VALUE);
             for (RunningTaskInfo info : tasks) {
                 if (info.configuration.windowConfiguration.getActivityType()
                         == ACTIVITY_TYPE_RECENTS) {

@@ -46,7 +46,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -4232,7 +4232,7 @@ public class PackageParser {
                     ActivityInfo.DOCUMENT_LAUNCH_NONE);
             a.info.maxRecents = sa.getInt(
                     R.styleable.AndroidManifestActivity_maxRecents,
-                    ActivityManager.getDefaultAppRecentsLimitStatic());
+                    ActivityTaskManager.getDefaultAppRecentsLimitStatic());
             a.info.configChanges = getActivityConfigChanges(
                     sa.getInt(R.styleable.AndroidManifestActivity_configChanges, 0),
                     sa.getInt(R.styleable.AndroidManifestActivity_recreateOnConfigChanges, 0));

@@ -20,7 +20,9 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -55,6 +57,7 @@ public class PipManager implements BasePipManager {
 
     private Context mContext;
     private IActivityManager mActivityManager;
+    private IActivityTaskManager mActivityTaskManager;
     private IWindowManager mWindowManager;
     private Handler mHandler = new Handler();
 
@@ -172,6 +175,7 @@ public class PipManager implements BasePipManager {
     public void initialize(Context context) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
+        mActivityTaskManager = ActivityTaskManager.getService();
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
 
         try {
@@ -186,8 +190,8 @@ public class PipManager implements BasePipManager {
         mMediaController = new PipMediaController(context, mActivityManager);
         mMenuController = new PipMenuActivityController(context, mActivityManager, mMediaController,
                 mInputConsumerController);
-        mTouchHandler = new PipTouchHandler(context, mActivityManager, mMenuController,
-                mInputConsumerController);
+        mTouchHandler = new PipTouchHandler(context, mActivityManager, mActivityTaskManager,
+                mMenuController, mInputConsumerController);
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
         EventBus.getDefault().register(this);

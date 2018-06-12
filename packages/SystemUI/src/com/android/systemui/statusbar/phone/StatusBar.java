@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
+import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
@@ -1352,8 +1354,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 return false;
             }
             int createMode = navbarPos == NAV_BAR_POS_LEFT
-                    ? ActivityManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT
-                    : ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
+                    ? SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT
+                    : SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
             return mRecents.splitPrimaryTask(NavigationBarGestureHelper.DRAG_MODE_NONE, createMode,
                     null, metricsDockAction);
         } else {

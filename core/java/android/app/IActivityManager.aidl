@@ -393,14 +393,6 @@ interface IActivityManager {
     void setUserIsMonkey(boolean monkey);
     void hang(in IBinder who, boolean allowRestart);
 
-    /**
-     * Sets the windowing mode for a specific task. Only works on tasks of type
-     * {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD}
-     * @param taskId The id of the task to set the windowing mode for.
-     * @param windowingMode The windowing mode to set for the task.
-     * @param toTop If the task should be moved to the top once the windowing mode changes.
-     */
-    void setTaskWindowingMode(int taskId, int windowingMode, boolean toTop);
     void moveTaskToStack(int taskId, int stackId, boolean toTop);
     /**
      * Resizes the input stack id to the given bounds.
@@ -527,8 +519,6 @@ interface IActivityManager {
     void exitFreeformMode(in IBinder token);
     void reportSizeConfigurations(in IBinder token, in int[] horizontalSizeConfiguration,
             in int[] verticalSizeConfigurations, in int[] smallestWidthConfigurations);
-    boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode, boolean toTop,
-            boolean animate, in Rect initialBounds, boolean showRecents);
     /**
      * Dismisses split-screen multi-window mode.
      * {@param toTop} If true the current primary split-screen stack will be placed or left on top.
@@ -596,13 +586,6 @@ interface IActivityManager {
     void notifyPinnedStackAnimationStarted();
     void notifyPinnedStackAnimationEnded();
     void removeStack(int stackId);
-    /**
-     * Removes stacks in the input windowing modes from the system if they are of activity type
-     * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
-     */
-    void removeStacksInWindowingModes(in int[] windowingModes);
-    /** Removes stack of the activity types from the system. */
-    void removeStacksWithActivityTypes(in int[] activityTypes);
     void makePackageIdle(String packageName, int userId);
     int getMemoryTrimLevel();
     /**

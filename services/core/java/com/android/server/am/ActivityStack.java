@@ -4751,8 +4751,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     // TODO: Figure-out a way to consolidate with resize() method below.
     @Override
     public void requestResize(Rect bounds) {
-        mService.resizeStack(mStackId, bounds, true /* allowResizeInDockedMode */,
-                false /* preserveWindows */, false /* animate */, -1 /* animationDuration */);
+        mService.mActivityTaskManager.resizeStack(mStackId, bounds,
+                true /* allowResizeInDockedMode */, false /* preserveWindows */,
+                false /* animate */, -1 /* animationDuration */);
     }
 
     // TODO: Can only be called from special methods in ActivityStackSupervisor.
