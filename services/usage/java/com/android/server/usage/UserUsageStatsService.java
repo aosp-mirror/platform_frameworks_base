@@ -604,6 +604,9 @@ class UserUsageStatsService {
             pw.printPair("standbyBucket", event.getStandbyBucket());
             pw.printPair("reason", UsageStatsManager.reasonToString(event.getStandbyReason()));
         }
+        if (event.mNotificationChannelId != null) {
+            pw.printPair("channelId", event.mNotificationChannelId);
+        }
         pw.printHexPair("flags", event.mFlags);
         pw.println();
     }

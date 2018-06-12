@@ -68,6 +68,7 @@ final class UsageStatsXmlV1 {
     private static final String SHORTCUT_ID_ATTR = "shortcutId";
     private static final String STANDBY_BUCKET_ATTR = "standbyBucket";
     private static final String APP_LAUNCH_COUNT_ATTR = "appLaunchCount";
+    private static final String NOTIFICATION_CHANNEL_ATTR = "notificationChannel";
 
     // Time attributes stored as an offset of the beginTime.
     private static final String LAST_TIME_ACTIVE_ATTR = "lastTimeActive";
@@ -189,6 +190,11 @@ final class UsageStatsXmlV1 {
             case UsageEvents.Event.STANDBY_BUCKET_CHANGED:
                 event.mBucketAndReason = XmlUtils.readIntAttribute(parser, STANDBY_BUCKET_ATTR, 0);
                 break;
+            case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
+                final String channelId =
+                        XmlUtils.readStringAttribute(parser, NOTIFICATION_CHANNEL_ATTR);
+                event.mNotificationChannelId = (channelId != null) ? channelId.intern() : null;
+                break;
         }
 
         if (statsOut.events == null) {
@@ -307,6 +313,13 @@ final class UsageStatsXmlV1 {
                 if (event.mBucketAndReason != 0) {
                     XmlUtils.writeIntAttribute(xml, STANDBY_BUCKET_ATTR, event.mBucketAndReason);
                 }
+                break;
+            case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
+                if (event.mNotificationChannelId != null) {
+                    XmlUtils.writeStringAttribute(
+                            xml, NOTIFICATION_CHANNEL_ATTR, event.mNotificationChannelId);
+                }
+                break;
         }
 
         xml.endTag(null, EVENT_TAG);
