@@ -1130,6 +1130,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationIconAreaController.onDensityOrFontScaleChanged(mContext);
         mHeadsUpManager.onDensityOrFontScaleChanged();
 
+        inflateFooterView();
+        inflateEmptyShadeView();
         reevaluateStyles();
     }
 
@@ -1158,10 +1160,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    protected void reevaluateStyles() {
-        inflateFooterView();
+    private void reevaluateStyles() {
         updateFooter();
-        inflateEmptyShadeView();
         updateEmptyShadeView();
     }
 
@@ -1182,7 +1182,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
     }
 
-    private void inflateFooterView() {
+    @VisibleForTesting
+    protected void inflateFooterView() {
         if (mStackScroller == null) {
             return;
         }
