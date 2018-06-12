@@ -3058,6 +3058,7 @@ public abstract class Context {
             COMPANION_DEVICE_SERVICE,
             CROSS_PROFILE_APPS_SERVICE,
             //@hide: SYSTEM_UPDATE_SERVICE,
+            //@hide: TIME_DETECTOR_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -4208,6 +4209,15 @@ public abstract class Context {
      */
     @SystemApi
     public static final String SECURE_ELEMENT_SERVICE = "secure_element";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.app.timedetector.ITimeDetectorService}.
+     * @hide
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String TIME_DETECTOR_SERVICE = "time_detector";
 
     /**
      * Determine whether the given permission is allowed for a particular
