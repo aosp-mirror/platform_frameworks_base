@@ -15,6 +15,8 @@
  */
 package android.hardware.hdmi;
 
+import android.os.RemoteException;
+
 /**
  * HdmiAudioSystemClient represents HDMI-CEC logical device of type Audio System in the Android
  * system which acts as an audio system device such as sound bar.
@@ -40,5 +42,20 @@ public final class HdmiAudioSystemClient extends HdmiClient {
         return HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM;
     }
 
-
+    /**
+     * Sends a Report Audio Status HDMI CEC command to TV devices when necessary.
+     *
+     * According to HDMI CEC specification, an audio system can report its audio status when System
+     * Audio Mode is on, so that the TV can display the audio status of external amplifier.
+     *
+     * @hide
+     */
+    public void sendReportAudioStatusCecCommand(boolean isMuteAdjust, int volume, int maxVolume,
+            boolean isMute) {
+        try {
+            mService.reportAudioStatus(getDeviceType(), volume, maxVolume, isMute);
+        } catch (RemoteException e) {
+            // do nothing. Reporting audio status is optional.
+        }
+    }
 }

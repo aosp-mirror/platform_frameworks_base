@@ -38,6 +38,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     // Whether the System Audio Control feature is enabled or not. True by default.
     @GuardedBy("mLock")
     private boolean mSystemAudioControlFeatureEnabled;
+    protected Integer mSystemAudioSource;
 
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
@@ -183,7 +184,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
             mService.getAudioManager().adjustStreamVolume(AudioManager.STREAM_MUSIC,
                 systemAudioStatusOn ? AudioManager.ADJUST_UNMUTE : AudioManager.ADJUST_MUTE, 0);
         }
-
+        mSystemAudioSource = systemAudioStatusOn ? message.getSource() : null;
         mService.sendCecCommand(HdmiCecMessageBuilder
             .buildSetSystemAudioMode(mAddress, Constants.ADDR_BROADCAST, systemAudioStatusOn));
         return true;
