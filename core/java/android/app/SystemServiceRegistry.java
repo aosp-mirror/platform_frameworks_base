@@ -997,6 +997,7 @@ final class SystemServiceRegistry {
                                 ServiceManager.getServiceOrThrow(
                                         Context.DEVICE_IDLE_CONTROLLER));
                         return new DeviceIdleManager(ctx.getOuterContext(), service);
+                    }});
 
         registerService(Context.TIME_DETECTOR_SERVICE, TimeDetector.class,
                 new CachedServiceFetcher<TimeDetector>() {
