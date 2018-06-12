@@ -282,9 +282,13 @@ final class FieldClassificationStrategy {
         }
         pw.println(impl.flattenToShortString());
 
-        pw.print(prefix); pw.print("Available algorithms: ");
-        pw.println(Arrays.toString(getAvailableAlgorithms()));
-        pw.print(prefix); pw.print("Default algorithm: "); pw.println(getDefaultAlgorithm());
+        try {
+            pw.print(prefix); pw.print("Available algorithms: ");
+            pw.println(Arrays.toString(getAvailableAlgorithms()));
+            pw.print(prefix); pw.print("Default algorithm: "); pw.println(getDefaultAlgorithm());
+        } catch (Exception e) {
+            pw.print("ERROR CALLING SERVICE: " ); pw.println(e);
+        }
     }
 
     private static interface Command {
