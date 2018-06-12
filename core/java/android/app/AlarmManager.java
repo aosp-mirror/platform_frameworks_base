@@ -28,7 +28,6 @@ import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.os.WorkSource;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -958,6 +957,7 @@ public class AlarmManager {
      *
      * @param millis time in milliseconds since the Epoch
      */
+    @RequiresPermission(android.Manifest.permission.SET_TIME)
     public void setTime(long millis) {
         try {
             mService.setTime(millis);
@@ -981,6 +981,7 @@ public class AlarmManager {
      * @param timeZone one of the Olson ids from the list returned by
      *     {@link java.util.TimeZone#getAvailableIDs}
      */
+    @RequiresPermission(android.Manifest.permission.SET_TIME_ZONE)
     public void setTimeZone(String timeZone) {
         if (TextUtils.isEmpty(timeZone)) {
             return;
