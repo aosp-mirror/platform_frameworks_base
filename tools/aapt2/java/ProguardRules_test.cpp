@@ -37,7 +37,10 @@ std::string GetKeepSetString(const proguard::KeepSet& set) {
 TEST(ProguardRulesTest, ManifestRuleDefaultConstructorOnly) {
   std::unique_ptr<xml::XmlResource> manifest = test::BuildXmlDom(R"(
       <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-        <application android:backupAgent="com.foo.BarBackupAgent">
+        <application
+            android:backupAgent="com.foo.BarBackupAgent"
+            android:name="com.foo.BarApplication"
+            >
           <activity android:name="com.foo.BarActivity"/>
           <service android:name="com.foo.BarService"/>
           <receiver android:name="com.foo.BarReceiver"/>
@@ -52,6 +55,7 @@ TEST(ProguardRulesTest, ManifestRuleDefaultConstructorOnly) {
   std::string actual = GetKeepSetString(set);
 
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarBackupAgent { <init>(); }"));
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarApplication { <init>(); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarActivity { <init>(); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarService { <init>(); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarReceiver { <init>(); }"));
