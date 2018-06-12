@@ -119,8 +119,9 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         mTextServicesManager = (TextServicesManager) mTextView.getContext().
                 getSystemService(Context.TEXT_SERVICES_MANAGER_SERVICE);
-        if (!mTextServicesManager.isSpellCheckerEnabled()
-                || mCurrentLocale == null
+        if (mCurrentLocale == null
+                || mTextView.length() == 0
+                || !mTextServicesManager.isSpellCheckerEnabled()
                 || mTextServicesManager.getCurrentSpellCheckerSubtype(true) == null) {
             mSpellCheckerSession = null;
         } else {
