@@ -24,8 +24,6 @@ import android.os.SystemClock;
 import android.util.Slog;
 import android.util.TimestampedValue;
 
-import java.time.Clock;
-
 /**
  * The real implementation of {@link TimeDetectorStrategy.Callback} used on device.
  */
@@ -35,7 +33,6 @@ public class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrategy.Ca
 
     @NonNull private PowerManager.WakeLock mWakeLock;
     @NonNull private AlarmManager mAlarmManager;
-    @NonNull private Clock mElapsedRealtimeClock;
 
     public TimeDetectorStrategyCallbackImpl(Context context) {
         PowerManager powerManager = context.getSystemService(PowerManager.class);
@@ -43,14 +40,13 @@ public class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrategy.Ca
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
         mAlarmManager = context.getSystemService(AlarmManager.class);
-        mElapsedRealtimeClock = SystemClock.elapsedRealtimeClock();
     }
 
     @Override
     public void setTime(TimestampedValue<Long> time) {
         mWakeLock.acquire();
         try {
-            long elapsedRealtimeMillis = mElapsedRealtimeClock.millis();
+            long elapsedRealtimeMillis = SystemClock.elapsedRealtime();
             long currentTimeMillis = TimeDetectorStrategy.getTimeAt(time, elapsedRealtimeMillis);
             Slog.d(TAG, "Setting system clock using time=" + time
                     + ", elapsedRealtimeMillis=" + elapsedRealtimeMillis);
