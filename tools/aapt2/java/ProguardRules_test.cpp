@@ -38,6 +38,7 @@ TEST(ProguardRulesTest, ManifestRuleDefaultConstructorOnly) {
   std::unique_ptr<xml::XmlResource> manifest = test::BuildXmlDom(R"(
       <manifest xmlns:android="http://schemas.android.com/apk/res/android">
         <application
+            android:appComponentFactory="com.foo.BarAppComponentFactory"
             android:backupAgent="com.foo.BarBackupAgent"
             android:name="com.foo.BarApplication"
             >
@@ -54,6 +55,7 @@ TEST(ProguardRulesTest, ManifestRuleDefaultConstructorOnly) {
 
   std::string actual = GetKeepSetString(set);
 
+  EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarAppComponentFactory { <init>(); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarBackupAgent { <init>(); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarApplication { <init>(); }"));
   EXPECT_THAT(actual, HasSubstr("-keep class com.foo.BarActivity { <init>(); }"));
