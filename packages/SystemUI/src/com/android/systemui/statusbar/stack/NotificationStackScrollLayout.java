@@ -140,7 +140,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mSwipingInProgress;
     private int mCurrentStackHeight = Integer.MAX_VALUE;
     private final Paint mBackgroundPaint = new Paint();
-    private final Path mBackgroundPath = new Path();
     private final boolean mShouldDrawNotificationBackground;
 
     private float mExpandedHeight;
@@ -376,6 +375,11 @@ public class NotificationStackScrollLayout extends ViewGroup
     private View mForcedScroll;
     private View mNeedingPulseAnimation;
     private float mDarkAmount = 0f;
+
+    /**
+     * How fast the background scales in the X direction as a factor of the Y expansion.
+     */
+    private float mBackgroundXFactor = 1f;
     private static final Property<NotificationStackScrollLayout, Float> DARK_AMOUNT =
             new FloatProperty<NotificationStackScrollLayout>("darkAmount") {
                 @Override
@@ -548,7 +552,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             float inverseDark = 1 - mDarkAmount;
             float yProgress = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(inverseDark);
             float xProgress = Interpolators.FAST_OUT_SLOW_IN
-                    .getInterpolation(inverseDark * 2f);
+                    .getInterpolation(inverseDark * mBackgroundXFactor);
 
             mBackgroundAnimationRect.set(
                     (int) MathUtils.lerp(darkLeft, lockScreenLeft, xProgress),
@@ -4028,21 +4032,37 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mDarkAmount;
     }
 
+    /**
+     * Cancel any previous dark animations - to avoid race conditions - and creates a new one.
+     * This function also sets {@code mBackgroundXFactor} based on the current {@code mDarkAmount}.
+     */
     private void startDarkAmountAnimation() {
-        ObjectAnimator darkAnimator = ObjectAnimator.ofFloat(this, DARK_AMOUNT, mDarkAmount,
-                mAmbientState.isDark() ? 1f : 0);
-        darkAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
-        darkAnimator.setInterpolator(Interpolators.ALPHA_IN);
-        darkAnimator.addListener(new AnimatorListenerAdapter() {
+        boolean dark = mAmbientState.isDark();
+        if (mDarkAmountAnimator != null) {
+            mDarkAmountAnimator.cancel();
+        }
+
+        long duration = StackStateAnimator.ANIMATION_DURATION_WAKEUP;
+        // Longer animation when sleeping with more than 1 notification
+        if (dark && getNotGoneChildCount() > 2) {
+            duration *= 1.2f;
+        }
+
+        mDarkAmountAnimator = ObjectAnimator.ofFloat(this, DARK_AMOUNT, mDarkAmount,
+                dark ? 1f : 0);
+        // We only swap the scaling factor if we're fully dark or fully awake to avoid
+        // interpolation issues when playing with the power button.
+        if (mDarkAmount == 0 || mDarkAmount == 1) {
+            mBackgroundXFactor = dark ? 2.5f : 1.5f;
+        }
+        mDarkAmountAnimator.setDuration(duration);
+        mDarkAmountAnimator.setInterpolator(Interpolators.LINEAR);
+        mDarkAmountAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 mDarkAmountAnimator = null;
             }
         });
-        if (mDarkAmountAnimator != null) {
-            mDarkAmountAnimator.cancel();
-        }
-        mDarkAmountAnimator = darkAnimator;
         mDarkAmountAnimator.start();
     }
 
