@@ -625,7 +625,6 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                     .putExtra(Intent.EXTRA_PACKAGE_NAME, appInfo.packageName)
                     .putExtra(Intent.EXTRA_VERSION_CODE, (int) (appInfo.versionCode & 0x7fffffff))
                     .putExtra(Intent.EXTRA_LONG_VERSION_CODE, appInfo.versionCode)
-                    .putExtra(Intent.EXTRA_EPHEMERAL_FAILURE, pendingIntent)
                     .putExtra(Intent.EXTRA_INSTANT_APP_FAILURE, pendingIntent);
 
             PendingIntent webPendingIntent = PendingIntent.getActivity(mContext, 0, goToWebIntent, 0);
