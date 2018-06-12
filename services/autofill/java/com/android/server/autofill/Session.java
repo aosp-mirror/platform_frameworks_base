@@ -703,19 +703,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     // FillServiceCallbacks
     @Override
-    public void onFillRequestFailure(int requestId, @Nullable CharSequence message,
-            @NonNull String servicePackageName) {
-        onFillRequestFailureOrTimeout(requestId, false, message, servicePackageName);
+    public void onFillRequestFailure(int requestId, @Nullable CharSequence message) {
+        onFillRequestFailureOrTimeout(requestId, false, message);
     }
 
     // FillServiceCallbacks
     @Override
-    public void onFillRequestTimeout(int requestId, @NonNull String servicePackageName) {
-        onFillRequestFailureOrTimeout(requestId, true, null, servicePackageName);
+    public void onFillRequestTimeout(int requestId) {
+        onFillRequestFailureOrTimeout(requestId, true, null);
     }
 
     private void onFillRequestFailureOrTimeout(int requestId, boolean timedOut,
-            @Nullable CharSequence message, @NonNull String servicePackageName) {
+            @Nullable CharSequence message) {
         synchronized (mLock) {
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onFillRequestFailureOrTimeout(req=" + requestId

@@ -1718,7 +1718,6 @@ public final class AutofillManager {
             return;
         }
 
-        AutofillCallback callback = null;
         synchronized (mLock) {
             if (mSessionId == sessionId) {
                 AutofillClient client = getClient();
@@ -1803,7 +1802,6 @@ public final class AutofillManager {
             for (int i = 0; i < itemCount; i++) {
                 final AutofillId id = ids.get(i);
                 final AutofillValue value = values.get(i);
-                final int viewId = id.getViewId();
                 final View view = views[i];
                 if (view == null) {
                     // Most likely view has been removed after the initial request was sent to the
@@ -2124,6 +2122,7 @@ public final class AutofillManager {
         pw.print(pfx); pw.print("hasCallback: "); pw.println(mCallback != null);
         pw.print(pfx); pw.print("onInvisibleCalled "); pw.println(mOnInvisibleCalled);
         pw.print(pfx); pw.print("last autofilled data: "); pw.println(mLastAutofilledData);
+        pw.print(pfx); pw.print("id of last fill UI shown: "); pw.println(mIdShownFillUi);
         pw.print(pfx); pw.print("tracked views: ");
         if (mTrackedViews == null) {
             pw.println("null");

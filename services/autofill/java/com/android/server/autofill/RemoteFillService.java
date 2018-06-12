@@ -101,9 +101,8 @@ final class RemoteFillService implements DeathRecipient {
     public interface FillServiceCallbacks {
         void onFillRequestSuccess(int requestId, @Nullable FillResponse response,
                 @NonNull String servicePackageName, int requestFlags);
-        void onFillRequestFailure(int requestId, @Nullable CharSequence message,
-                @NonNull String servicePackageName);
-        void onFillRequestTimeout(int requestId, @NonNull String servicePackageName);
+        void onFillRequestFailure(int requestId, @Nullable CharSequence message);
+        void onFillRequestTimeout(int requestId);
         void onSaveRequestSuccess(@NonNull String servicePackageName,
                 @Nullable IntentSender intentSender);
         // TODO(b/80093094): add timeout here too?
@@ -317,8 +316,7 @@ final class RemoteFillService implements DeathRecipient {
             @Nullable CharSequence message) {
         mHandler.post(() -> {
             if (handleResponseCallbackCommon(pendingRequest)) {
-                mCallbacks.onFillRequestFailure(pendingRequest.mRequest.getId(), message,
-                        mComponentName.getPackageName());
+                mCallbacks.onFillRequestFailure(pendingRequest.mRequest.getId(), message);
             }
         });
     }
@@ -326,8 +324,7 @@ final class RemoteFillService implements DeathRecipient {
     private void dispatchOnFillRequestTimeout(@NonNull PendingFillRequest pendingRequest) {
         mHandler.post(() -> {
             if (handleResponseCallbackCommon(pendingRequest)) {
-                mCallbacks.onFillRequestTimeout(pendingRequest.mRequest.getId(),
-                        mComponentName.getPackageName());
+                mCallbacks.onFillRequestTimeout(pendingRequest.mRequest.getId());
             }
         });
     }
