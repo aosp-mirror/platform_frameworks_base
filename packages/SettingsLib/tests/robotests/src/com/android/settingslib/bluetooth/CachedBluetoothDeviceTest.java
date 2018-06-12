@@ -572,4 +572,22 @@ public class CachedBluetoothDeviceTest {
 
         assertThat(mCachedDevice.isHfpDevice()).isFalse();
     }
+
+    @Test
+    public void isConnectedHearingAidDevice_connected_returnTrue() {
+        when(mProfileManager.getHearingAidProfile()).thenReturn(mHearingAidProfile);
+        when(mHearingAidProfile.getConnectionStatus(mDevice)).
+                thenReturn(BluetoothProfile.STATE_CONNECTED);
+
+        assertThat(mCachedDevice.isConnectedHearingAidDevice()).isTrue();
+    }
+
+    @Test
+    public void isConnectedHearingAidDevice_disconnected_returnFalse() {
+        when(mProfileManager.getHearingAidProfile()).thenReturn(mHearingAidProfile);
+        when(mHearingAidProfile.getConnectionStatus(mDevice)).
+                thenReturn(BluetoothProfile.STATE_DISCONNECTED);
+
+        assertThat(mCachedDevice.isConnectedHearingAidDevice()).isFalse();
+    }
 }

@@ -1205,4 +1205,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         return mProfileManager.getHeadsetProfile().getConnectionStatus(mDevice) ==
                 BluetoothProfile.STATE_CONNECTED;
     }
+
+    /**
+     * @return {@code true} if {@code cachedBluetoothDevice} is Hearing Aid device
+     */
+    public boolean isConnectedHearingAidDevice() {
+        return mProfileManager.getHearingAidProfile().getConnectionStatus(mDevice) ==
+                BluetoothProfile.STATE_CONNECTED;
+    }
 }
