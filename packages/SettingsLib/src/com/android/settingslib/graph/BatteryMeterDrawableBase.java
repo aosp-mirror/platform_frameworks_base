@@ -210,6 +210,10 @@ public class BatteryMeterDrawableBase extends Drawable {
         postInvalidate();
     }
 
+    public boolean getPowerSave() {
+        return mPowerSaveEnabled;
+    }
+
     protected void setPowerSaveAsColorError(boolean asError) {
         mPowerSaveAsColorError = asError;
     }
