@@ -14220,7 +14220,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         unactionedPackages.add(packageName);
                         continue;
                     }
-                    if (!canSuspendPackageForUserLocked(packageName, userId)) {
+                    if (suspended && !canSuspendPackageForUserLocked(packageName, userId)) {
                         unactionedPackages.add(packageName);
                         continue;
                     }
@@ -14375,44 +14375,44 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mPackages")
     private boolean canSuspendPackageForUserLocked(String packageName, int userId) {
         if (isPackageDeviceAdmin(packageName, userId)) {
-            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+            Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": has an active device admin");
             return false;
         }
 
         String activeLauncherPackageName = getActiveLauncherPackageName(userId);
         if (packageName.equals(activeLauncherPackageName)) {
-            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+            Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": contains the active launcher");
             return false;
         }
 
         if (packageName.equals(mRequiredInstallerPackage)) {
-            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+            Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": required for package installation");
             return false;
         }
 
         if (packageName.equals(mRequiredUninstallerPackage)) {
-            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+            Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": required for package uninstallation");
             return false;
         }
 
         if (packageName.equals(mRequiredVerifierPackage)) {
-            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+            Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": required for package verification");
             return false;
         }
 
         if (packageName.equals(getDefaultDialerPackageName(userId))) {
-            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+            Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": is the default dialer");
             return false;
         }
 
         if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
-            Slog.w(TAG, "Cannot suspend/un-suspend package \"" + packageName
+            Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": protected package");
             return false;
         }
