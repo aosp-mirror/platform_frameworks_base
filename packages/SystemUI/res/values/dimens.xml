@@ -1012,4 +1012,7 @@
     <!-- How much into a DisplayCutout's bounds we can go, on each side -->
     <dimen name="display_cutout_margin_consumption">0px</dimen>
 
+    <!-- How much we expand the touchable region of the status bar below the notch to catch touches
+         that just start below the notch. -->
+    <dimen name="display_cutout_touchable_region_size">12dp</dimen>
 </resources>
