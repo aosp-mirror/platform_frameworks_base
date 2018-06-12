@@ -5190,6 +5190,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private void enforceDeviceOwner(ComponentName who) {
+        synchronized (getLockObject()) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+    }
+
     private void enforceProfileOrDeviceOwner(ComponentName who) {
         synchronized (getLockObject()) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
@@ -5364,9 +5370,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         } else {
             // Caller provided - check it is the device owner.
-            synchronized (getLockObject()) {
-                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-            }
+            enforceDeviceOwner(who);
         }
     }
 
@@ -6374,9 +6378,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setRecommendedGlobalProxy(ComponentName who, ProxyInfo proxyInfo) {
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
+        enforceDeviceOwner(who);
         long token = mInjector.binderClearCallingIdentity();
         try {
             ConnectivityManager connectivityManager = (ConnectivityManager)
@@ -7729,11 +7731,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void setProfileName(ComponentName who, String profileName) {
         Preconditions.checkNotNull(who, "ComponentName is null");
-        int userId = UserHandle.getCallingUserId();
-        // Check if this is the profile owner (includes device owner).
-        getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        enforceProfileOrDeviceOwner(who);
 
-        long id = mInjector.binderClearCallingIdentity();
+        final int userId = UserHandle.getCallingUserId();
+        final long id = mInjector.binderClearCallingIdentity();
         try {
             mUserManager.setUserName(userId, profileName);
         } finally {
@@ -8198,9 +8199,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void setDefaultSmsApplication(ComponentName admin, String packageName) {
         Preconditions.checkNotNull(admin, "ComponentName is null");
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
+        enforceDeviceOwner(admin);
         mInjector.binderWithCleanCallingIdentity(() ->
                 SmsApplication.setDefaultApplication(packageName, mContext));
     }
@@ -8987,10 +8986,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public boolean removeUser(ComponentName who, UserHandle userHandle) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         Preconditions.checkNotNull(userHandle, "UserHandle is null");
-
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
+        enforceDeviceOwner(who);
 
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         final long id = mInjector.binderClearCallingIdentity();
@@ -9050,10 +9046,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public int startUserInBackground(ComponentName who, UserHandle userHandle) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         Preconditions.checkNotNull(userHandle, "UserHandle is null");
-
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
+        enforceDeviceOwner(who);
 
         final int userId = userHandle.getIdentifier();
         if (isManagedProfile(userId)) {
@@ -9085,10 +9078,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public int stopUser(ComponentName who, UserHandle userHandle) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         Preconditions.checkNotNull(userHandle, "UserHandle is null");
-
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
+        enforceDeviceOwner(who);
 
         final int userId = userHandle.getIdentifier();
         if (isManagedProfile(userId)) {
@@ -9156,9 +9146,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public List<UserHandle> getSecondaryUsers(ComponentName who) {
         Preconditions.checkNotNull(who, "ComponentName is null");
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
+        enforceDeviceOwner(who);
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
@@ -9180,9 +9168,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean isEphemeralUser(ComponentName who) {
         Preconditions.checkNotNull(who, "ComponentName is null");
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-        }
+        enforceProfileOrDeviceOwner(who);
 
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         final long id = mInjector.binderClearCallingIdentity();
@@ -10001,7 +9987,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean setTime(ComponentName who, long millis) {
         Preconditions.checkNotNull(who, "ComponentName is null in setTime");
-        getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        enforceDeviceOwner(who);
         // Don't allow set time when auto time is on.
         if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME, 0) == 1) {
             return false;
@@ -10013,7 +9999,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean setTimeZone(ComponentName who, String timeZone) {
         Preconditions.checkNotNull(who, "ComponentName is null in setTimeZone");
-        getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        enforceDeviceOwner(who);
         // Don't allow set timezone when auto timezone is on.
         if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) == 1) {
             return false;
@@ -11114,9 +11100,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public String getWifiMacAddress(ComponentName admin) {
         // Make sure caller has DO.
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
+        enforceDeviceOwner(admin);
 
         final long ident = mInjector.binderClearCallingIdentity();
         try {
@@ -11154,9 +11138,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isSystemOnlyUser(ComponentName admin) {
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
+        enforceDeviceOwner(admin);
         final int callingUserId = mInjector.userHandleGetCallingUserId();
         return UserManager.isSplitSystemUser() && callingUserId == UserHandle.USER_SYSTEM;
     }
@@ -11165,9 +11147,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     public void reboot(ComponentName admin) {
         Preconditions.checkNotNull(admin);
         // Make sure caller has DO.
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
+        enforceDeviceOwner(admin);
         long ident = mInjector.binderClearCallingIdentity();
         try {
             // Make sure there are no ongoing calls on the device.
@@ -11986,9 +11966,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Preconditions.checkNotNull(admin);
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
+        enforceDeviceOwner(admin);
 
         final int callingUid = mInjector.binderGetCallingUid();
         final AtomicBoolean success = new AtomicBoolean(false);
@@ -12601,9 +12579,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkNotNull(admin, "ComponentName is null");
         Preconditions.checkNotNull(packageName, "packageName is null");
         Preconditions.checkNotNull(callback, "callback is null");
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-        }
+        enforceProfileOrDeviceOwner(admin);
         final int userId = UserHandle.getCallingUserId();
 
         long ident = mInjector.binderClearCallingIdentity();
@@ -12911,9 +12887,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkNotNull(who, "ComponentName is null in addOverrideApn");
         Preconditions.checkNotNull(apnSetting, "ApnSetting is null in addOverrideApn");
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
+        enforceDeviceOwner(who);
 
         int operatedId = -1;
         Uri resultUri;
@@ -12942,9 +12916,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkNotNull(who, "ComponentName is null in updateOverrideApn");
         Preconditions.checkNotNull(apnSetting, "ApnSetting is null in updateOverrideApn");
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
+        enforceDeviceOwner(who);
 
         if (apnId < 0) {
             return false;
@@ -12965,9 +12937,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Preconditions.checkNotNull(who, "ComponentName is null in removeOverrideApn");
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
+        enforceDeviceOwner(who);
 
         return removeOverrideApnUnchecked(apnId);
     }
@@ -12993,9 +12963,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return Collections.emptyList();
         }
         Preconditions.checkNotNull(who, "ComponentName is null in getOverrideApns");
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
+        enforceDeviceOwner(who);
 
         return getOverrideApnsUnchecked();
     }
@@ -13031,9 +12999,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Preconditions.checkNotNull(who, "ComponentName is null in setOverrideApnEnabled");
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
+        enforceDeviceOwner(who);
 
         setOverrideApnsEnabledUnchecked(enabled);
     }
@@ -13056,9 +13022,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         Preconditions.checkNotNull(who, "ComponentName is null in isOverrideApnEnabled");
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-        }
+        enforceDeviceOwner(who);
 
         Cursor enforceCursor;
         final long id = mInjector.binderClearCallingIdentity();
