@@ -821,6 +821,9 @@
         android:label="@string/permgrouplab_location"
         android:description="@string/permgroupdesc_location"
         android:request="@string/permgrouprequest_location"
+        android:requestDetail="@string/permgrouprequestdetail_location"
+        android:backgroundRequest="@string/permgroupbackgroundrequest_location"
+        android:backgroundRequestDetail="@string/permgroupbackgroundrequestdetail_location"
         android:priority="400" />
 
     <!-- Allows an app to access precise location.
@@ -831,6 +834,7 @@
         android:permissionGroup="android.permission-group.LOCATION"
         android:label="@string/permlab_accessFineLocation"
         android:description="@string/permdesc_accessFineLocation"
+        android:backgroundPermission="android.permission.ACCESS_BACKGROUND_LOCATION"
         android:protectionLevel="dangerous|instant" />
 
     <!-- Allows an app to access approximate location.
@@ -841,6 +845,7 @@
         android:permissionGroup="android.permission-group.LOCATION"
         android:label="@string/permlab_accessCoarseLocation"
         android:description="@string/permdesc_accessCoarseLocation"
+        android:backgroundPermission="android.permission.ACCESS_BACKGROUND_LOCATION"
         android:protectionLevel="dangerous|instant" />
 
     <!-- Allows an app to access location in the background.  If you

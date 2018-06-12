@@ -45,6 +45,42 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
     public @StringRes int requestRes;
 
     /**
+     * A string resource identifier (in the package's resources) used as subtitle when requesting
+     * only access while in the foreground.
+     *
+     * From the "requestDetail" attribute or, if not set, {@link
+     * android.content.res.ResourceId#ID_NULL}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public @StringRes int requestDetailResourceId;
+
+    /**
+     * A string resource identifier (in the package's resources) used when requesting background
+     * access. Also used when requesting both foreground and background access.
+     *
+     * From the "backgroundRequest" attribute or, if not set, {@link
+     * android.content.res.ResourceId#ID_NULL}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public @StringRes int backgroundRequestResourceId;
+
+    /**
+     * A string resource identifier (in the package's resources) used as subtitle when requesting
+     * background access.
+     *
+     * From the "backgroundRequestDetail" attribute or, if not set, {@link
+     * android.content.res.ResourceId#ID_NULL}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public @StringRes int backgroundRequestDetailResourceId;
+
+    /**
      * The description string provided in the AndroidManifest file, if any.  You
      * probably don't want to use this, since it will be null if the description
      * is in a resource.  You probably want
@@ -76,6 +112,9 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
         super(orig);
         descriptionRes = orig.descriptionRes;
         requestRes = orig.requestRes;
+        requestDetailResourceId = orig.requestDetailResourceId;
+        backgroundRequestResourceId = orig.backgroundRequestResourceId;
+        backgroundRequestDetailResourceId = orig.backgroundRequestDetailResourceId;
         nonLocalizedDescription = orig.nonLocalizedDescription;
         flags = orig.flags;
         priority = orig.priority;
@@ -119,6 +158,9 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
         super.writeToParcel(dest, parcelableFlags);
         dest.writeInt(descriptionRes);
         dest.writeInt(requestRes);
+        dest.writeInt(requestDetailResourceId);
+        dest.writeInt(backgroundRequestResourceId);
+        dest.writeInt(backgroundRequestDetailResourceId);
         TextUtils.writeToParcel(nonLocalizedDescription, dest, parcelableFlags);
         dest.writeInt(flags);
         dest.writeInt(priority);
@@ -138,6 +180,9 @@ public class PermissionGroupInfo extends PackageItemInfo implements Parcelable {
         super(source);
         descriptionRes = source.readInt();
         requestRes = source.readInt();
+        requestDetailResourceId = source.readInt();
+        backgroundRequestResourceId = source.readInt();
+        backgroundRequestDetailResourceId = source.readInt();
         nonLocalizedDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         flags = source.readInt();
         priority = source.readInt();

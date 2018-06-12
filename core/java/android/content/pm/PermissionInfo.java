@@ -285,6 +285,21 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     public int requestRes;
 
     /**
+     * Some permissions only grant access while the app is in foreground. Some of these permissions
+     * allow to add background capabilities by adding another permission.
+     *
+     * If this is such a permission, this is the name of the permission adding the background
+     * access.
+     *
+     * From the "backgroundPermission" attribute or, if not set null
+     *
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public String backgroundPermission;
+
+    /**
      * The description string provided in the AndroidManifest file, if any.  You
      * probably don't want to use this, since it will be null if the description
      * is in a resource.  You probably want
@@ -373,6 +388,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         protectionLevel = orig.protectionLevel;
         flags = orig.flags;
         group = orig.group;
+        backgroundPermission = orig.backgroundPermission;
         descriptionRes = orig.descriptionRes;
         requestRes = orig.requestRes;
         nonLocalizedDescription = orig.nonLocalizedDescription;
@@ -436,6 +452,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(protectionLevel);
         dest.writeInt(flags);
         dest.writeString(group);
+        dest.writeString(backgroundPermission);
         dest.writeInt(descriptionRes);
         dest.writeInt(requestRes);
         TextUtils.writeToParcel(nonLocalizedDescription, dest, parcelableFlags);
@@ -475,6 +492,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         protectionLevel = source.readInt();
         flags = source.readInt();
         group = source.readString();
+        backgroundPermission = source.readString();
         descriptionRes = source.readInt();
         requestRes = source.readInt();
         nonLocalizedDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
