@@ -408,12 +408,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Tato aplikace může přidat, odstranit či změnit události v kalendáři uložené v telefonu. Může také odesílat zprávy, které budou zdánlivě přicházet od vlastníka kalendáře, nebo upravovat události bez vědomí vlastníka."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"přístup k dalším příkazům poskytovatele polohy"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Umožňuje aplikaci přístup k dalším příkazům poskytovatele polohy. To aplikaci umožní zasahovat do fungování systému GPS a dalších zdrojů polohy."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"přístup k přesné poloze (pomocí GPS a sítě)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Tato aplikace může zjistit vaši polohu podle GPS a zdrojů polohy sítě, jako jsou vysílací věže nebo sítě Wi-Fi. Aby tyto služby určování polohy mohla aplikace používat, musí být v telefonu dostupné a musí být zapnuté. Tyto služby mohou způsobit rychlejší vybíjení baterie."</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Tato aplikace může zjistit vaši přesnou polohu, jen když běží na popředí. Aby tyto služby určování polohy mohla aplikace používat, musí být v telefonu dostupné a musí být zapnuté. Tyto služby mohou způsobit rychlejší vybíjení baterie."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"přístup k přibližné poloze (pomocí sítě)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Tato aplikace může zjistit vaši polohu podle zdrojů sítě, jako jsou vysílací věže nebo sítě Wi-Fi. Aby tyto služby určování polohy mohla aplikace používat, musí být v tabletu dostupné a musí být zapnuté."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Tato aplikace může zjistit vaši polohu podle zdrojů sítě, jako jsou vysílací věže nebo sítě Wi-Fi. Aby tyto služby určování polohy mohla aplikace používat, musí být v televizi dostupné a musí být zapnuté."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Tato aplikace může zjistit vaši polohu podle zdrojů sítě, jako jsou vysílací věže nebo sítě Wi-Fi. Aby tyto služby určování polohy mohla aplikace používat, musí být v telefonu dostupné a musí být zapnuté."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"přístup k přesné poloze na pozadí"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Tato aplikace může zjistit vaši přesnou polohu vždy, když běží na pozadí. Aby tyto služby určování polohy mohla aplikace používat, musí být v telefonu dostupné a musí být zapnuté. Tyto služby mohou způsobit rychlejší vybíjení baterie."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"změna nastavení zvuku"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Umožňuje aplikaci změnit globální nastavení zvuku, například hlasitost či reproduktor pro výstup zvuku."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"nahrávání zvuku"</string>

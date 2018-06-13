@@ -402,12 +402,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"このアプリは、お使いのスマートフォンでカレンダーの予定を追加、削除、変更できます。また、カレンダーの所有者から発信されたかのように表示されるメッセージを送信したり、所有者に通知することなく予定を変更したりできます。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"位置情報提供者の追加コマンドアクセス"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"位置情報提供元の追加のコマンドにアクセスすることをアプリに許可します。許可すると、アプリがGPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"正確な位置情報（GPSとネットワーク基地局）へのアクセス"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"このアプリは、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得します。これらの位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。これにより電池の消費量が増える可能性があります。"</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"このアプリは、フォアグラウンド状態でのみユーザーの正確な位置情報を取得できます。この位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。これにより、電池の消費量が増える可能性があります。"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"おおよその位置情報（ネットワーク基地局）へのアクセス"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"このアプリは、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得します。これらの位置情報サービスは ON の状態にして、タブレットでアプリがサービスを利用できるようにする必要があります。"</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"このアプリは、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得します。これらの位置情報サービスは ON の状態にして、テレビでアプリがサービスを利用できるようにする必要があります。"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"このアプリは、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得します。これらの位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"バックグラウンドで正確な位置情報にアクセス"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"このアプリは、バックグラウンド状態でも常にユーザーの正確な位置情報を取得できます。この位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。これにより、電池の消費量が増える可能性があります。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"音声設定の変更"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"音声全般の設定（音量、出力に使用するスピーカーなど）の変更をアプリに許可します。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"録音"</string>

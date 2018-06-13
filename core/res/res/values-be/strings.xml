@@ -220,7 +220,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Параметры тэлефона"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Блакіроўка экрана"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Выключыць"</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"SOS-выклік"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Экстранны выклік"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Справаздача пра памылкі"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Скончыць сеанс"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Здымак экрана"</string>
@@ -408,12 +408,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Гэта праграма можа дадаваць, выдаляць або змяняць падзеі календара на вашым тэлефоне. Гэта праграма можа адпраўляць паведамленні, якія могуць здавацца адпраўленымі ўладальнікамі календара, або змяняць падзеі без апавяшчэння іх уладальнікаў."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"доступ да дадатковых камандаў пастаўшчыка месцазнаходжання"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Дазваляе праграме атрымліваць доступ да дадатковых каманд службаў вызначэння месцазнаходжання. Гэта можа дазволіць праграме ўмешвацца ў функцыянаванне GPS або іншых крыніц даных аб месцазнаходжаннi."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"атрымліваць доступ да дакладнага месцазнаходжання (на аснове GPS і сеткі)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне на падставе даных GPS або сеткавых крыніц звестак аб месцазнаходжанні, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Гэтыя сэрвісы вызначэння месцазнаходжання павінны быць уключаны i даступныя на вашым тэлефоне, каб праграма магла іх выкарыстоўваць. Гэта можа павялічыць спажыванне зараду акумулятара."</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Гэта праграма можа атрымліваць звесткі пра ваша дакладнае месцазнаходжанне толькі ў асноўным рэжыме. Службы геалакацыі павінны быць уключаны і даступныя на вашым тэлефоне, каб праграма магла імі карыстацца. Гэта можа павялічыць спажыванне зараду акумулятара."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"атрымліваць доступ да прыблізнага месцазнаходжання (на аснове даных сеткі)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне на падставе даных сеткавых крыніц, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Гэтыя сэрвісы вызначэння месцазнаходжання павінны быць уключаны i даступныя на вашым планшэце, каб праграма магла іх выкарыстоўваць."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне на падставе даных сеткавых крыніц, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Гэтыя сэрвісы вызначэння месцазнаходжання павінны быць уключаны i даступныя на вашым тэлевізары, каб праграма магла іх выкарыстоўваць."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне на падставе даных сеткавых крыніц, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Гэтыя сэрвісы вызначэння месцазнаходжання павінны быць уключаны i даступныя на вашым тэлефоне, каб праграма магла іх выкарыстоўваць."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"доступ да дакладнага месцазнаходжання ў фонавым рэжыме"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Гэта праграма можа атрымліваць звесткі пра ваша дакладнае месцазнаходжанне ў любы час, калі яна працуе ў фонавым рэжыме. Службы геалакацыі павінны быць уключаны і даступныя на вашым тэлефоне, каб праграма магла імі карыстацца. Гэта можа павялічыць спажыванне зараду акумулятара."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"змяняць налады аудыё"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Дазваляе прыкладанням змяняць глабальныя налады гуку, такія як моц і тое, што дынамік выкарыстоўваецца для выхаду."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"запісваць аўдыё"</string>
@@ -741,7 +744,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Націсніце \"Меню\", каб разблакаваць, або зрабіце экстраны выклік."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Націсніце \"Меню\", каб разблакаваць."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Намалюйце камбінацыю разблакоўкі, каб разблакаваць"</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"SOS-выклік"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Экстранны выклік"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Вярнуцца да выкліку"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Правільна!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Паспрабуйце яшчэ раз"</string>

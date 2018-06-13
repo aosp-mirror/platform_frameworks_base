@@ -402,12 +402,18 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"यह ऐप्लिकेशन आपके फ़ोन पर मौजूद कैलेंडर इवेंट जोड़, निकाल या बदल सकता है. यह ऐप्लिकेशन ऐसे संदेश भेज सकता है जो कैलेंडर स्वामियों से आए हुए लग सकते हैं या यह स्वामियों को सूचित किए बिना इवेंट में बदलाव कर सकता है."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"कुछ और जगह बताने वाले आदेशों तक पहुंच"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ऐप को कुछ और जगह की जानकारी देने वाले आदेशों की पहुंच पाने देता है. इससे ऐप जीपीएस या जगह की जानकारी देने वाले दूसरे स्रोतों के काम में रोक-टोक कर सकता है."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"सटीक जगह की जानकारी लेने दें (जीपीएस और नेटवर्क-आधारित)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"यह ऐप सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क स्रोतों या जीपीएस के आधार पर आपकी जगह पता कर सकता है. जगह की जानकारी आपके फ़ोन पर चालू और मौजूद होनी चाहिए ताकि ऐप उनका इस्तेमाल कर सके. इससे ज़्यादा बैटरी खर्च हो सकती है."</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <!-- no translation found for permdesc_accessFineLocation (3520508381065331098) -->
+    <skip />
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"अनुमानित जगह की पहुंच दें (नेटवर्क-आधारित)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"यह ऐप सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क के स्रोतों के आधार पर आपकी जगह का पता कर सकता है. ये जगह की जानकारी आपके टैबलेट पर चालू और मौजूद होनी चाहिए ताकि ऐप उनका इस्तेमाल कर सके."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"यह ऐप सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क के स्रोतों के आधार पर आपकी जगह का पता कर सकता है. ये जगह की जानकारी आपके टीवी पर चालू और मौजूद होनी चाहिए ताकि ऐप उनका इस्तेमाल कर सके."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"यह ऐप सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क के स्रोतों के आधार पर आपकी जगह का पता कर सकता है. ये जगह की जानकारी आपके फ़ोन पर चालू और मौजूद होनी चाहिए ताकि ऐप उनका इस्तेमाल कर सके."</string>
+    <!-- no translation found for permlab_accessBackgroundLocation (5742466381902568536) -->
+    <skip />
+    <!-- no translation found for permdesc_accessBackgroundLocation (6371533283380774135) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"अपनी ऑडियो सेटिंग बदलें"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ऐप्स  को वैश्विक ऑडियो सेटिंग, जैसे वॉल्‍यूम और कौन-सा स्पीकर आउटपुट के लिए उपयोग किया गया, संशोधित करने देता है."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ऑडियो रिकॉर्ड करने"</string>

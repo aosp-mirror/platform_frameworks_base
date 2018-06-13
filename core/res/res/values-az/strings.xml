@@ -402,12 +402,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Bu tətbiq telefonunuzda təqvim tədbirləri əlavə edə, silə və ya dəyişiklik edə bilər. Həmçinin bu tətbiq təqvim sahiblərindən gəlmə ehtimalı olan mesajları göndərə və ya sahiblərinə bildirmədən tədbirlərdə dəyişiklik edə bilər."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"əlavə məkan provayderi əmrlərinə çıxış"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Tətbiqə ekstra məkan provayder əmrlərinə girişə imkan verir. Bu, tətbiqə GPS və ya digər lokal mənbələrlə əməliyyata müdaxiləyə imkan verə bilər."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"dəqiq məkana (GPS və şəbəkə əsasında) giriş"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Bu tətbiq mobil qüllələr və Wi-Fi şəbəkələri kimi şəbəkə mənbələrinin əassında əkanınızı əldə edə bilər. Bu məkan xidmətləri aktiv edilməlidir və telefonda tətbiq tərəfindən istifadə üçün əlçatan olmalıdır. Bu, batareya sərfiyyatını artıra bilər."</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Bu tətbiq yalnız ön fonda olduqda dəqiq məkanınızı əldə edə bilər. Tətbiqin bunlardan istifadə etməsi üçün bu məkan xidmətləri aktiv edilməlidir və telefonda əlçatan olmalıdır. Bu, batareya sərfiyyatını artıra bilər."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"təxmini məkana (şəbəkə əsaslı) giriş"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Bu tətbiq mobil qüllələr və Wi-Fi şəbəkələri kimi şəbəkə mənbələrinin əassında əkanınızı əldə edə bilər. Bu məkan xidmətləri aktiv edilməlidir və planşetdə tətbiq tərəfindən istifadə üçün əlçatan olmalıdır."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Bu tətbiq mobil qüllələr və Wi-Fi şəbəkələri kimi şəbəkə mənbələrinin əassında əkanınızı əldə edə bilər. Bu məkan xidmətləri aktiv edilməlidir və TV\'də tətbiq tərəfindən istifadə üçün əlçatan olmalıdır."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Bu tətbiq mobil qüllələr və Wi-Fi şəbəkələri kimi şəbəkə mənbələrinin əassında əkanınızı əldə edə bilər. Bu məkan xidmətləri aktiv edilməlidir və telefonda tətbiq tərəfindən istifadə üçün əlçatan olmalıdır."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"arxa fonda dəqiq məkana daxil olun"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Bu tətbiq istənilən zaman arxa fonda olduqda dəqiq məkanınızı əldə edə bilər. Tətbiqin bunlardan istifadə etməsi üçün bu məkan xidmətləri aktiv edilməlidir və telefonda əlçatan olmalıdır. Bu, batareya sərfiyyatını artıra bilər."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"audio ayarlarınızı dəyişir"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Tətbiqə səs və hansı spikerin çıxış üçün istifadə olunduğu kimi qlobal səs ayarlarını dəyişdirməyə imkan verir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"səs yaz"</string>

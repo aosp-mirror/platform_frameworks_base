@@ -402,12 +402,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"ይህ መተግበሪያ በእርስዎ ስልክ ላይ የቀን መቁጠሪያ ክስተቶችን ሊያክል፣ ሊያስወግድ ወይም ሊለውጥ ይችላል። ይህ መተግበሪያ ከቀን መቁጠሪያ የመጡ መስለው የሚታዩ መልእክቶችን ሊልክ ወይም ባለቤቶቹን ሳያሳውቅ ክስተቶችን ሊለውጥ ይችላል።"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ተጨማሪ ሥፍራ አቅራቢ ትዕዛዞችን ድረስ።"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"መተግበሪያው ተጨማሪ የአካባቢ አቅራቢ ትእዛዞችን እንዲደርስ ይፈቅድለታል። ይሄ መተግበሪያው በጂፒኤስ ወይም ሌላ የአካባቢ ምንጮች ስራ ላይ ጣልቃ እንዲገባ ሊፈቅድለት ይችላል።"</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"ትክክለኛውን አካባቢ መድረስ (በጂፒኤስ እና አውታረ መረብ ላይ የተመሠረተ)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ከመሳሰሉ የአውታረ መረብ ምንጮች ላይ በመመርኮዝ የእርስዎን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ስልክ ላይ ሊገኙ የሚችሉ መሆን አለባቸው። ይህ የባትሪ ፍጆታን ሊጨምር ይችላል።"</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"ይህ መተግበሪያ ከፊት ላይ ሆኖ ሲበራ ብቻ ትክክለኛውን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ስልክ ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ግምታዊ አካባቢን መድረስ (በአውታረ መረብ ላይ የተመሰረተ)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ከመሳሰሉ የአውታረ መረብ ምንጮች ላይ በመመርኮዝ የእርስዎን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ጡባዊ ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ከመሳሰሉ የአውታረ መረብ ምንጮች ላይ በመመርኮዝ የእርስዎን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች እርስዎ መጠቀም እንዲችሉ ሊበሩ እና በእርስዎ ቴሌቪዥን ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ከመሳሰሉ የአውታረ መረብ ምንጮች ላይ በመመርኮዝ የእርስዎን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ስልክ ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"በበስተጀርባ ትክክለኛ መገኛ አካባቢ ላይ ድረስ"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"ይህ መተግበሪያ በማናቸውም ጊዜ በበስተጀርባ ሲሆን ብቻ ትክክለኛውን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ስልክ ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"የድምፅ ቅንብሮችን ለውጥ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"መተግበሪያው አንደ የድምጽ መጠን እና ለውጽአት የትኛውን የድምጽ ማጉያ ጥቅም ላይ እንደዋለ የመሳሰሉ ሁለንተናዊ የድምጽ ቅንብሮችን እንዲያስተካክል ይፈቅድለታል።"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ኦዲዮ ይቅዱ"</string>
