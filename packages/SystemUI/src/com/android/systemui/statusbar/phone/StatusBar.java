@@ -4461,12 +4461,15 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateScrimController();
     }
 
-    public void cancelCurrentTouch() {
+    /**
+     * Collapses the notification shade if it is tracking or expanded.
+     */
+    public void collapseShade() {
         if (mNotificationPanel.isTracking()) {
             mStatusBarWindow.cancelCurrentTouch();
-            if (mState == StatusBarState.SHADE) {
-                animateCollapsePanels();
-            }
+        }
+        if (mPanelExpanded && mState == StatusBarState.SHADE) {
+            animateCollapsePanels();
         }
     }
 
