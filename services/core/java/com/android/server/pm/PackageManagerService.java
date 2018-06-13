@@ -21330,10 +21330,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 // Right now we only know how to print all.
             } else if ("-h".equals(opt)) {
                 pw.println("Package manager dump options:");
-                pw.println("  [-h] [-f] [--checkin] [cmd] ...");
+                pw.println("  [-h] [-f] [--checkin] [--all-components] [cmd] ...");
                 pw.println("    --checkin: dump for a checkin");
                 pw.println("    -f: print details of intent filters");
                 pw.println("    -h: print this help");
+                pw.println("    --all-components: include all component names in package dump");
                 pw.println("  cmd may be one of:");
                 pw.println("    l[ibraries]: list known shared libraries");
                 pw.println("    f[eatures]: list device features");
@@ -21361,6 +21362,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 return;
             } else if ("--checkin".equals(opt)) {
                 checkin = true;
+            } else if ("--all-components".equals(opt)) {
+                dumpState.setOptionEnabled(DumpState.OPTION_DUMP_ALL_COMPONENTS);
             } else if ("-f".equals(opt)) {
                 dumpState.setOptionEnabled(DumpState.OPTION_SHOW_FILTERS);
             } else if ("--proto".equals(opt)) {

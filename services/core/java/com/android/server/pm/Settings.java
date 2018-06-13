@@ -83,6 +83,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.JournaledFile;
@@ -4471,7 +4472,7 @@ public final class Settings {
 
     void dumpPackageLPr(PrintWriter pw, String prefix, String checkinTag,
             ArraySet<String> permissionNames, PackageSetting ps, SimpleDateFormat sdf,
-            Date date, List<UserInfo> users, boolean dumpAll) {
+            Date date, List<UserInfo> users, boolean dumpAll, boolean dumpAllComponents) {
         if (checkinTag != null) {
             pw.print(checkinTag);
             pw.print(",");
@@ -4756,6 +4757,10 @@ public final class Settings {
             dumpInstallPermissionsLPr(pw, prefix + "  ", permissionNames, permissionsState);
         }
 
+        if (dumpAllComponents) {
+            dumpComponents(pw, prefix + "  ", ps);
+        }
+
         for (UserInfo user : users) {
             pw.print(prefix); pw.print("  User "); pw.print(user.id); pw.print(": ");
             pw.print("ceDataInode=");
@@ -4835,6 +4840,8 @@ public final class Settings {
         final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         final Date date = new Date();
         boolean printedSomething = false;
+        final boolean dumpAllComponents =
+                dumpState.isOptionEnabled(DumpState.OPTION_DUMP_ALL_COMPONENTS);
         List<UserInfo> users = getAllUsers(UserManagerService.getInstance());
         for (final PackageSetting ps : mPackages.values()) {
             if (packageName != null && !packageName.equals(ps.realName)
@@ -4857,7 +4864,7 @@ public final class Settings {
                 printedSomething = true;
             }
             dumpPackageLPr(pw, "  ", checkin ? "pkg" : null, permissionNames, ps, sdf, date, users,
-                    packageName != null);
+                    packageName != null, dumpAllComponents);
         }
 
         printedSomething = false;
@@ -4898,7 +4905,7 @@ public final class Settings {
                     printedSomething = true;
                 }
                 dumpPackageLPr(pw, "  ", checkin ? "dis" : null, permissionNames, ps, sdf, date,
-                        users, packageName != null);
+                        users, packageName != null, dumpAllComponents);
             }
         }
     }
@@ -5104,6 +5111,28 @@ public final class Settings {
                     pw.println(permissionFlagsToString(", flags=",
                         permissionState.getFlags()));
             }
+        }
+    }
+
+    void dumpComponents(PrintWriter pw, String prefix, PackageSetting ps) {
+        dumpComponents(pw, prefix, ps, "activities:", ps.pkg.activities);
+        dumpComponents(pw, prefix, ps, "services:", ps.pkg.services);
+        dumpComponents(pw, prefix, ps, "receivers:", ps.pkg.receivers);
+        dumpComponents(pw, prefix, ps, "providers:", ps.pkg.providers);
+        dumpComponents(pw, prefix, ps, "instrumentations:", ps.pkg.instrumentation);
+    }
+
+    void dumpComponents(PrintWriter pw, String prefix, PackageSetting ps,
+            String label, List<? extends PackageParser.Component<?>> list) {
+        final int size = CollectionUtils.size(list);
+        if (size == 0) {
+            return;
+        }
+        pw.print(prefix);pw.println(label);
+        for (int i = 0; i < size; i++) {
+            final PackageParser.Component<?> component = list.get(i);
+            pw.print(prefix);pw.print("  ");
+            pw.println(component.getComponentName().flattenToShortString());
         }
     }
 
