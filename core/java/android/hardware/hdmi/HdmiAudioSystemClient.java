@@ -16,8 +16,8 @@
 package android.hardware.hdmi;
 
 /**
- * HdmiAudioSystemClient represents HDMI-CEC logical device of type Audio System
- * in the Android system which acts as an audio system device such as sound bar.
+ * HdmiAudioSystemClient represents HDMI-CEC logical device of type Audio System in the Android
+ * system which acts as an audio system device such as sound bar.
  *
  * <p>HdmiAudioSystemClient provides methods that control, get information from TV/Display device
  * connected through HDMI bus.
@@ -27,16 +27,34 @@ package android.hardware.hdmi;
 public final class HdmiAudioSystemClient extends HdmiClient {
     private static final String TAG = "HdmiAudioSystemClient";
 
+    /** Reports if System Audio Mode is supported by the connected TV */
+    interface TvSystemAudioModeSupportedCallback {
+
+        /** {@code supported} is true if the TV is connected and supports System Audio Mode. */
+        void onResult(boolean supported);
+    }
+
     /* package */ HdmiAudioSystemClient(IHdmiControlService service) {
         super(service);
     }
 
-    /**
-     * TODO(b/110094868): unhide and add @SystemApi for Q
-     * @hide
-     */
+    /** @hide */
+    // TODO(b/110094868): unhide and add @SystemApi for Q
     @Override
     public int getDeviceType() {
         return HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM;
+    }
+
+    /**
+     * Queries the connected TV to detect if System Audio Mode is supported by the TV.
+     *
+     * <p>This query may take up to 2 seconds to complete.
+     *
+     * <p>The result of the query may be cached until Audio device type is put in standby or loses
+     * its physical address.
+     */
+    void queryTvSystemAudioModeSupport(TvSystemAudioModeSupportedCallback callback) {
+        // TODO(b/80297382): implement detect TV for system audio mode support.
+        callback.onResult(true);
     }
 }
