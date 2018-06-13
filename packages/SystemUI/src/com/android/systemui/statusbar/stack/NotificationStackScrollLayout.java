@@ -422,6 +422,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mHeadsUpInset;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private NotificationIconAreaController mIconAreaController;
+    private float mVerticalPanelTranslation;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -4003,8 +4004,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         notifyHeightChangeListener(mShelf);
     }
 
-    private void updateAntiBurnInTranslation() {
-        setTranslationX(mAntiBurnInOffsetX * mDarkAmount);
+    private void updatePanelTranslation() {
+        setTranslationX(mVerticalPanelTranslation + mAntiBurnInOffsetX * mDarkAmount);
+    }
+
+    public void setVerticalPanelTranslation(float verticalPanelTranslation) {
+        mVerticalPanelTranslation = verticalPanelTranslation;
+        updatePanelTranslation();
     }
 
     /**
@@ -4034,7 +4040,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         updateAlgorithmHeightAndPadding();
         updateBackgroundDimming();
-        updateAntiBurnInTranslation();
+        updatePanelTranslation();
         requestChildrenUpdate();
     }
 
@@ -4602,7 +4608,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     public void setAntiBurnInOffsetX(int antiBurnInOffsetX) {
         mAntiBurnInOffsetX = antiBurnInOffsetX;
-        updateAntiBurnInTranslation();
+        updatePanelTranslation();
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
