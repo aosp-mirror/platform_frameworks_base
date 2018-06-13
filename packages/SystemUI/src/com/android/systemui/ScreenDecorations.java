@@ -26,8 +26,12 @@ import static com.android.systemui.tuner.TunablePadding.FLAG_END;
 import static com.android.systemui.tuner.TunablePadding.FLAG_START;
 
 import android.annotation.Dimension;
+import android.app.ActivityManager;
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -41,7 +45,6 @@ import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.os.SystemProperties;
 import android.provider.Settings.Secure;
-import androidx.annotation.VisibleForTesting;
 import android.util.DisplayMetrics;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
@@ -68,6 +71,8 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.leak.RotationUtils;
 
+import androidx.annotation.VisibleForTesting;
+
 /**
  * An overlay that draws screen decorations in software (e.g for rounded corners or display cutout)
  * for antialiasing and emulation purposes.
@@ -91,6 +96,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private int mRotation;
     private DisplayCutoutView mCutoutTop;
     private DisplayCutoutView mCutoutBottom;
+    private SecureSetting mColorInversionSetting;
 
     @Override
     public void start() {
@@ -164,22 +170,19 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         Dependency.get(TunerService.class).addTunable(this, SIZE);
 
         // Watch color inversion and invert the overlay as needed.
-        SecureSetting setting = new SecureSetting(mContext, Dependency.get(Dependency.MAIN_HANDLER),
+        mColorInversionSetting = new SecureSetting(mContext, Dependency.get(Dependency.MAIN_HANDLER),
                 Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
-                int tint = value != 0 ? Color.WHITE : Color.BLACK;
-                ColorStateList tintList = ColorStateList.valueOf(tint);
-                ((ImageView) mOverlay.findViewById(R.id.left)).setImageTintList(tintList);
-                ((ImageView) mOverlay.findViewById(R.id.right)).setImageTintList(tintList);
-                ((ImageView) mBottomOverlay.findViewById(R.id.left)).setImageTintList(tintList);
-                ((ImageView) mBottomOverlay.findViewById(R.id.right)).setImageTintList(tintList);
-                mCutoutTop.setColor(tint);
-                mCutoutBottom.setColor(tint);
+                updateColorInversion(value);
             }
         };
-        setting.setListening(true);
-        setting.onChange(false);
+        mColorInversionSetting.setListening(true);
+        mColorInversionSetting.onChange(false);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        mContext.registerReceiver(mIntentReceiver, filter);
 
         mOverlay.addOnLayoutChangeListener(new OnLayoutChangeListener() {
             @Override
@@ -197,6 +200,31 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                         .start();
             }
         });
+    }
+
+    private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_USER_SWITCHED)) {
+                int newUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                        ActivityManager.getCurrentUser());
+                // update color inversion setting to the new user
+                mColorInversionSetting.setUserId(newUserId);
+                updateColorInversion(mColorInversionSetting.getValue());
+            }
+        }
+    };
+
+    private void updateColorInversion(int colorsInvertedValue) {
+        int tint = colorsInvertedValue != 0 ? Color.WHITE : Color.BLACK;
+        ColorStateList tintList = ColorStateList.valueOf(tint);
+        ((ImageView) mOverlay.findViewById(R.id.left)).setImageTintList(tintList);
+        ((ImageView) mOverlay.findViewById(R.id.right)).setImageTintList(tintList);
+        ((ImageView) mBottomOverlay.findViewById(R.id.left)).setImageTintList(tintList);
+        ((ImageView) mBottomOverlay.findViewById(R.id.right)).setImageTintList(tintList);
+        mCutoutTop.setColor(tint);
+        mCutoutBottom.setColor(tint);
     }
 
     @Override
