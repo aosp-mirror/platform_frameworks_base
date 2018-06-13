@@ -590,4 +590,25 @@ public class CachedBluetoothDeviceTest {
 
         assertThat(mCachedDevice.isConnectedHearingAidDevice()).isFalse();
     }
+
+    @Test
+    public void isConnectedHfpDevice_profileIsNull_returnFalse() {
+        when(mProfileManager.getHeadsetProfile()).thenReturn(null);
+
+        assertThat(mCachedDevice.isHfpDevice()).isFalse();
+    }
+
+    @Test
+    public void isConnectedA2dpDevice_profileIsNull_returnFalse() {
+        when(mProfileManager.getA2dpProfile()).thenReturn(null);
+
+        assertThat(mCachedDevice.isA2dpDevice()).isFalse();
+    }
+
+    @Test
+    public void isConnectedHearingAidDevice_profileIsNull_returnFalse() {
+        when(mProfileManager.getHearingAidProfile()).thenReturn(null);
+
+        assertThat(mCachedDevice.isConnectedHearingAidDevice()).isFalse();
+    }
 }
