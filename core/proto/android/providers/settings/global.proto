@@ -739,6 +739,7 @@ message GlobalSettingsProto {
         optional SettingProto short_code_rule = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto short_codes_update_content_url = 5;
         optional SettingProto short_codes_update_metadata_url = 6;
+        optional SettingProto access_restriction_enabled = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Sms sms = 109;
 

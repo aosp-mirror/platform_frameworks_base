@@ -1140,6 +1140,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SMS_SHORT_CODES_UPDATE_METADATA_URL,
                 GlobalSettingsProto.Sms.SHORT_CODES_UPDATE_METADATA_URL);
+        dumpSetting(s, p,
+                Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED,
+                GlobalSettingsProto.Sms.ACCESS_RESTRICTION_ENABLED);
         p.end(smsToken);
 
         final long soundsToken = p.start(GlobalSettingsProto.SOUNDS);

@@ -84,6 +84,7 @@ package android.app {
     method public static java.lang.String opToPermission(int);
     method public static int permissionToOpCode(java.lang.String);
     method public void setMode(int, int, java.lang.String, int);
+    method public void setUidMode(java.lang.String, int, int);
     method public void startWatchingActive(int[], android.app.AppOpsManager.OnOpActiveChangedListener);
     method public void stopWatchingActive(android.app.AppOpsManager.OnOpActiveChangedListener);
     method public static int strOpToOp(java.lang.String);
@@ -953,6 +954,7 @@ package android.provider {
     field public static final java.lang.String LOCATION_GLOBAL_KILL_SWITCH = "location_global_kill_switch";
     field public static final java.lang.String LOW_POWER_MODE = "low_power";
     field public static final java.lang.String LOW_POWER_MODE_STICKY = "low_power_sticky";
+    field public static final java.lang.String SMS_ACCESS_RESTRICTION_ENABLED = "sms_access_restriction_enabled";
     field public static final java.lang.String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
   }
 
