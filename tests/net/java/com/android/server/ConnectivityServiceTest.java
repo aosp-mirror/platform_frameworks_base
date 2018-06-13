@@ -57,6 +57,7 @@ import static com.android.internal.util.TestUtils.waitForIdleLooper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -95,6 +96,7 @@ import android.net.ConnectivityManager.TooManyRequestsException;
 import android.net.ConnectivityThread;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
+import android.net.InterfaceConfiguration;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -125,6 +127,7 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -132,6 +135,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -145,6 +149,7 @@ import com.android.server.connectivity.DefaultNetworkMetrics;
 import com.android.server.connectivity.DnsManager;
 import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.connectivity.MockableSystemProperties;
+import com.android.server.connectivity.Nat464Xlat;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
 import com.android.server.connectivity.Vpn;
@@ -161,10 +166,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -190,6 +198,7 @@ public class ConnectivityServiceTest {
     private static final int TIMEOUT_MS = 500;
     private static final int TEST_LINGER_DELAY_MS = 120;
 
+    private static final String CLAT_PREFIX = "v4-";
     private static final String MOBILE_IFNAME = "test_rmnet_data0";
     private static final String WIFI_IFNAME = "test_wlan0";
 
@@ -948,6 +957,10 @@ public class ConnectivityServiceTest {
                     context, handler, nai, defaultRequest, mock(IpConnectivityLog.class));
             mLastCreatedNetworkMonitor = monitor;
             return monitor;
+        }
+
+        public Nat464Xlat getNat464Xlat(MockNetworkAgent mna) {
+            return getNetworkAgentInfoForNetwork(mna.getNetwork()).clatd;
         }
 
         @Override
@@ -4417,5 +4430,98 @@ public class ConnectivityServiceTest {
                 vpnNetworkAgent);
 
         mMockVpn.disconnect();
+    }
+
+    /**
+     * Make simulated InterfaceConfig for Nat464Xlat to query clat lower layer info.
+     */
+    private InterfaceConfiguration getClatInterfaceConfig(LinkAddress la) {
+        InterfaceConfiguration cfg = new InterfaceConfiguration();
+        cfg.setHardwareAddress("11:22:33:44:55:66");
+        cfg.setLinkAddress(la);
+        return cfg;
+    }
+
+    /**
+     * Make expected stack link properties, copied from Nat464Xlat.
+     */
+    private LinkProperties makeClatLinkProperties(LinkAddress la) {
+        LinkAddress clatAddress = la;
+        LinkProperties stacked = new LinkProperties();
+        stacked.setInterfaceName(CLAT_PREFIX + MOBILE_IFNAME);
+        RouteInfo ipv4Default = new RouteInfo(
+                new LinkAddress(Inet4Address.ANY, 0),
+                clatAddress.getAddress(), CLAT_PREFIX + MOBILE_IFNAME);
+        stacked.addRoute(ipv4Default);
+        stacked.addLinkAddress(clatAddress);
+        return stacked;
+    }
+
+    @Test
+    public void testStackedLinkProperties() throws UnknownHostException, RemoteException {
+        final LinkAddress myIpv4 = new LinkAddress("1.2.3.4/24");
+        final LinkAddress myIpv6 = new LinkAddress("2001:db8:1::1/64");
+        final NetworkRequest networkRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_CELLULAR)
+                .addCapability(NET_CAPABILITY_INTERNET)
+                .build();
+        final TestNetworkCallback networkCallback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(networkRequest, networkCallback);
+
+        // Prepare ipv6 only link properties and connect.
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        final LinkProperties cellLp = new LinkProperties();
+        cellLp.setInterfaceName(MOBILE_IFNAME);
+        cellLp.addLinkAddress(myIpv6);
+        cellLp.addRoute(new RouteInfo((IpPrefix) null, myIpv6.getAddress(), MOBILE_IFNAME));
+        cellLp.addRoute(new RouteInfo(myIpv6, null, MOBILE_IFNAME));
+        reset(mNetworkManagementService);
+        when(mNetworkManagementService.getInterfaceConfig(CLAT_PREFIX + MOBILE_IFNAME))
+                .thenReturn(getClatInterfaceConfig(myIpv4));
+
+        // Connect with ipv6 link properties, then expect clat setup ipv4 and update link
+        // properties properly.
+        mCellNetworkAgent.sendLinkProperties(cellLp);
+        mCellNetworkAgent.connect(true);
+        networkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+        verify(mNetworkManagementService, times(1)).startClatd(MOBILE_IFNAME);
+        Nat464Xlat clat = mService.getNat464Xlat(mCellNetworkAgent);
+
+        // Clat iface up, expect stack link updated.
+        clat.interfaceLinkStateChanged(CLAT_PREFIX + MOBILE_IFNAME, true);
+        waitForIdle();
+        List<LinkProperties> stackedLps = mCm.getLinkProperties(mCellNetworkAgent.getNetwork())
+                .getStackedLinks();
+        assertEquals(makeClatLinkProperties(myIpv4), stackedLps.get(0));
+
+        // Change trivial linkproperties and see if stacked link is preserved.
+        cellLp.addDnsServer(InetAddress.getByName("8.8.8.8"));
+        mCellNetworkAgent.sendLinkProperties(cellLp);
+        waitForIdle();
+        networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
+
+        List<LinkProperties> stackedLpsAfterChange =
+                mCm.getLinkProperties(mCellNetworkAgent.getNetwork()).getStackedLinks();
+        assertNotEquals(stackedLpsAfterChange, Collections.EMPTY_LIST);
+        assertEquals(makeClatLinkProperties(myIpv4), stackedLpsAfterChange.get(0));
+
+        // Add ipv4 address, expect stacked linkproperties be cleaned up
+        cellLp.addLinkAddress(myIpv4);
+        cellLp.addRoute(new RouteInfo(myIpv4, null, MOBILE_IFNAME));
+        mCellNetworkAgent.sendLinkProperties(cellLp);
+        waitForIdle();
+        networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
+        verify(mNetworkManagementService, times(1)).stopClatd(MOBILE_IFNAME);
+
+        // Clat iface removed, expect linkproperties revert to original one
+        clat.interfaceRemoved(CLAT_PREFIX + MOBILE_IFNAME);
+        waitForIdle();
+        networkCallback.expectCallback(CallbackState.LINK_PROPERTIES, mCellNetworkAgent);
+        LinkProperties actualLpAfterIpv4 = mCm.getLinkProperties(mCellNetworkAgent.getNetwork());
+        assertEquals(cellLp, actualLpAfterIpv4);
+
+        // Clean up
+        mCellNetworkAgent.disconnect();
+        mCm.unregisterNetworkCallback(networkCallback);
     }
 }
