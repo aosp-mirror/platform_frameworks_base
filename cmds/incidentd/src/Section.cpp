@@ -151,11 +151,10 @@ DONE:
 }
 
 // ================================================================================
-Section::Section(int i, int64_t timeoutMs, bool userdebugAndEngOnly, bool deviceSpecific)
+Section::Section(int i, int64_t timeoutMs, bool userdebugAndEngOnly)
     : id(i),
       timeoutMs(timeoutMs),
-      userdebugAndEngOnly(userdebugAndEngOnly),
-      deviceSpecific(deviceSpecific) {}
+      userdebugAndEngOnly(userdebugAndEngOnly) {}
 
 Section::~Section() {}
 
@@ -240,9 +239,8 @@ status_t MetadataSection::Execute(ReportRequestSet* requests) const {
 // ================================================================================
 static inline bool isSysfs(const char* filename) { return strncmp(filename, "/sys/", 5) == 0; }
 
-FileSection::FileSection(int id, const char* filename, const bool deviceSpecific,
-                         const int64_t timeoutMs)
-    : Section(id, timeoutMs, false, deviceSpecific), mFilename(filename) {
+FileSection::FileSection(int id, const char* filename, const int64_t timeoutMs)
+    : Section(id, timeoutMs, false), mFilename(filename) {
     name = "file ";
     name += filename;
     mIsSysfs = isSysfs(filename);
@@ -256,7 +254,9 @@ status_t FileSection::Execute(ReportRequestSet* requests) const {
     unique_fd fd(open(mFilename, O_RDONLY | O_CLOEXEC));
     if (fd.get() == -1) {
         ALOGW("[%s] failed to open file", this->name.string());
-        return this->deviceSpecific ? NO_ERROR : -errno;
+        // There may be some devices/architectures that won't have the file.
+        // Just return here without an error.
+        return NO_ERROR;
     }
 
     FdBuffer buffer;

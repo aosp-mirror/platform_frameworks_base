@@ -412,8 +412,7 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
             case SECTION_NONE:
                 continue;
             case SECTION_FILE:
-                printf("    new FileSection(%d, \"%s\", %s),\n", field->number(), s.args().c_str(),
-                       s.device_specific() ? "true" : "false");
+                printf("    new FileSection(%d, \"%s\"),\n", field->number(), s.args().c_str());
                 break;
             case SECTION_COMMAND:
                 printf("    new CommandSection(%d,", field->number());
