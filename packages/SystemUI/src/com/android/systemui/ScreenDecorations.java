@@ -89,6 +89,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private float mDensity;
     private WindowManager mWindowManager;
     private int mRotation;
+    private DisplayCutoutView mCutoutTop;
+    private DisplayCutoutView mCutoutBottom;
 
     @Override
     public void start() {
@@ -135,14 +137,14 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private void setupDecorations() {
         mOverlay = LayoutInflater.from(mContext)
                 .inflate(R.layout.rounded_corners, null);
-        DisplayCutoutView cutoutTop = new DisplayCutoutView(mContext, true,
+        mCutoutTop = new DisplayCutoutView(mContext, true,
                 this::updateWindowVisibilities);
-        ((ViewGroup)mOverlay).addView(cutoutTop);
+        ((ViewGroup)mOverlay).addView(mCutoutTop);
         mBottomOverlay = LayoutInflater.from(mContext)
                 .inflate(R.layout.rounded_corners, null);
-        DisplayCutoutView cutoutBottom = new DisplayCutoutView(mContext, false,
+        mCutoutBottom = new DisplayCutoutView(mContext, false,
                 this::updateWindowVisibilities);
-        ((ViewGroup)mBottomOverlay).addView(cutoutBottom);
+        ((ViewGroup)mBottomOverlay).addView(mCutoutBottom);
 
         mOverlay.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         mOverlay.setAlpha(0);
@@ -172,8 +174,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 ((ImageView) mOverlay.findViewById(R.id.right)).setImageTintList(tintList);
                 ((ImageView) mBottomOverlay.findViewById(R.id.left)).setImageTintList(tintList);
                 ((ImageView) mBottomOverlay.findViewById(R.id.right)).setImageTintList(tintList);
-                cutoutTop.setColor(tint);
-                cutoutBottom.setColor(tint);
+                mCutoutTop.setColor(tint);
+                mCutoutBottom.setColor(tint);
             }
         };
         setting.setListening(true);
@@ -244,6 +246,9 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             updateView(bottomLeft, Gravity.BOTTOM | Gravity.LEFT, 270);
             updateView(bottomRight, Gravity.TOP | Gravity.LEFT, 0);
         }
+
+        mCutoutTop.setRotation(mRotation);
+        mCutoutBottom.setRotation(mRotation);
 
         updateWindowVisibilities();
     }
@@ -416,14 +421,16 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         private final Rect mBoundingRect = new Rect();
         private final Path mBoundingPath = new Path();
         private final int[] mLocation = new int[2];
-        private final boolean mStart;
+        private final boolean mInitialStart;
         private final Runnable mVisibilityChangedListener;
         private int mColor = Color.BLACK;
+        private boolean mStart;
+        private int mRotation;
 
         public DisplayCutoutView(Context context, boolean start,
                 Runnable visibilityChangedListener) {
             super(context);
-            mStart = start;
+            mInitialStart = start;
             mVisibilityChangedListener = visibilityChangedListener;
             setId(R.id.display_cutout);
         }
@@ -475,7 +482,22 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             }
         }
 
+        public void setRotation(int rotation) {
+            mRotation = rotation;
+            update();
+        }
+
+        private boolean isStart() {
+            final boolean flipped = (mRotation == RotationUtils.ROTATION_SEASCAPE
+                    || mRotation == RotationUtils.ROTATION_UPSIDE_DOWN);
+            return flipped ? !mInitialStart : mInitialStart;
+        }
+
         private void update() {
+            mStart = isStart();
+            if (!isAttachedToWindow()) {
+                return;
+            }
             requestLayout();
             getDisplay().getDisplayInfo(mInfo);
             mBounds.setEmpty();
