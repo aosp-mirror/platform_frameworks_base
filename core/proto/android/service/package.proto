@@ -48,7 +48,7 @@ message PackageServiceDumpProto {
     message SharedUserProto {
         option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional int32 user_id = 1;
+        optional int32 uid = 1;
         // Name of the shared UID. eg: android.uid.bluetooth
         optional string name = 2;
     }

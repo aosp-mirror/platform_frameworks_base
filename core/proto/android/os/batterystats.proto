@@ -788,7 +788,7 @@ message UidProto {
     message UserActivity {
         option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional android.os.PowerManagerProto.UserActivityEvent name = 1;
+        optional PowerManagerProto.UserActivityEvent name = 1;
         optional int32 count = 2;
     };
     repeated UserActivity user_activity = 23;

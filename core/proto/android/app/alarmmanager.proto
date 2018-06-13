@@ -53,5 +53,5 @@ message AlarmClockInfoProto {
     // This value is UTC wall clock time in milliseconds, as returned by
     // System#currentTimeMillis() for example.
     optional int64 trigger_time_ms = 1;
-    optional android.app.PendingIntentProto show_intent = 2;
+    optional PendingIntentProto show_intent = 2;
 }

@@ -15,13 +15,13 @@
  */
 
 syntax = "proto2";
+package android.service.procstats;
+
 option java_multiple_files = true;
 option java_outer_classname = "ProcessStatsServiceProto";
 
 import "frameworks/base/core/proto/android/util/common.proto";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
-
-package android.service.procstats;
 
 /**
  * Data from ProcStatsService Dumpsys

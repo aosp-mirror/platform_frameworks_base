@@ -59,7 +59,7 @@ message NotificationRecordProto {
     }
     optional State state = 2;
     optional int32 flags = 3;
-    optional string channelId = 4 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional string channel_id = 4 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional string sound = 5 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional .android.media.AudioAttributesProto audio_attributes = 6;
     optional bool can_vibrate = 7;
@@ -88,6 +88,8 @@ message ManagedServiceInfoProto {
 message ManagedServicesProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
+    // Hard-coded string identifying what the service config is for
+    // (eg: "notification assistant" or "notification listener").
     optional string caption = 1;
 
     message ServiceProto {
@@ -147,8 +149,11 @@ enum ZenMode {
 message ConditionProto {
     option (android.msg_privacy).dest = DEST_EXPLICIT;
 
+    // The URI representing the rule being updated.
     optional string id = 1;
+    // A user visible description of the rule state.
     optional string summary = 2;
+    // Android generated strings that detail when ZenMode will end.
     optional string line_1 = 3;
     optional string line_2 = 4;
     optional int32 icon = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
@@ -189,7 +194,8 @@ message ZenRuleProto {
         (android.privacy).dest = DEST_AUTOMATIC
     ];
 
-    // Required for automatic ZenRules.
+    // Required for automatic ZenRules. The condition's ID, which is the URI
+    // representing the rule being updated.
     optional string condition_id = 8;
     optional ConditionProto condition = 9;
     optional android.content.ComponentNameProto component = 10;
