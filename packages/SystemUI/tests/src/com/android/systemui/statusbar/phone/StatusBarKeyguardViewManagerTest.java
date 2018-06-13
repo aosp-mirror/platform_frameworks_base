@@ -177,6 +177,14 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         verify(mBouncer, never()).setExpansion(anyFloat());
     }
 
+    @Test
+    public void onPanelExpansionChanged_neverTranslatesBouncerWhenLaunchingApp() {
+        when(mStatusBar.isInLaunchTransition()).thenReturn(true);
+        mStatusBarKeyguardViewManager.onPanelExpansionChanged(KeyguardBouncer.EXPANSION_VISIBLE,
+                false /* tracking */);
+        verify(mBouncer, never()).setExpansion(anyFloat());
+    }
+
     private class TestableStatusBarKeyguardViewManager extends StatusBarKeyguardViewManager {
 
         public TestableStatusBarKeyguardViewManager(Context context,
