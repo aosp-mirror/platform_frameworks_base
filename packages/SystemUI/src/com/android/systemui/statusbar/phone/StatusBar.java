@@ -607,6 +607,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                         maybeEscalateHeadsUp();
                     }
                 }
+
+                @Override
+                public void onStrongAuthStateChanged(int userId) {
+                    super.onStrongAuthStateChanged(userId);
+                    mEntryManager.updateNotifications();
+                }
             };
 
     private NavigationBarFragment mNavigationBar;
