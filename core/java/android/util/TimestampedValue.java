@@ -72,6 +72,14 @@ public final class TimestampedValue<T> {
         return Objects.hash(mReferenceTimeMillis, mValue);
     }
 
+    @Override
+    public String toString() {
+        return "TimestampedValue{"
+                + "mReferenceTimeMillis=" + mReferenceTimeMillis
+                + ", mValue=" + mValue
+                + '}';
+    }
+
     /**
      * Read a {@link TimestampedValue} from a parcel that was stored using
      * {@link #writeToParcel(Parcel, TimestampedValue)}.
