@@ -94,6 +94,12 @@ public class StatusBarWindowView extends FrameLayout {
     private boolean mExpandAnimationRunning;
     private boolean mExpandAnimationPending;
 
+    /**
+     * If set to true, the current gesture started below the notch and we need to dispatch touch
+     * events manually as it's outside of the regular view bounds.
+     */
+    private boolean mExpandingBelowNotch;
+
     public StatusBarWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setMotionEventSplittingEnabled(false);
@@ -258,7 +264,16 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         boolean isDown = ev.getActionMasked() == MotionEvent.ACTION_DOWN;
+        boolean isUp = ev.getActionMasked() == MotionEvent.ACTION_UP;
         boolean isCancel = ev.getActionMasked() == MotionEvent.ACTION_CANCEL;
+
+        // Reset manual touch dispatch state here but make sure the UP/CANCEL event still gets
+        // delivered.
+        boolean expandingBelowNotch = mExpandingBelowNotch;
+        if (isUp || isCancel) {
+            mExpandingBelowNotch = false;
+        }
+
         if (!isCancel && mService.shouldIgnoreTouch()) {
             return false;
         }
@@ -289,6 +304,17 @@ public class StatusBarWindowView extends FrameLayout {
         }
         if (mService.isDozing()) {
             mService.mDozeScrimController.extendPulse();
+        }
+
+        // In case we start outside of the view bounds (below the status bar), we need to dispatch
+        // the touch manually as the view system can't accomodate for touches outside of the
+        // regular view bounds.
+        if (isDown && ev.getY() >= mBottom) {
+            mExpandingBelowNotch = true;
+            expandingBelowNotch = true;
+        }
+        if (expandingBelowNotch) {
+            return mNotificationPanel.dispatchTouchEvent(ev);
         }
 
         return super.dispatchTouchEvent(ev);
