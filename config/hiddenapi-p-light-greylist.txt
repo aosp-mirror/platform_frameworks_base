@@ -387,10 +387,6 @@ Landroid/app/AppOpsManager$OpEntry;->getDuration()I
 Landroid/app/AppOpsManager$OpEntry;->getOp()I
 Landroid/app/AppOpsManager$OpEntry;->getRejectTime()J
 Landroid/app/AppOpsManager$OpEntry;->getTime()J
-Landroid/app/AppOpsManager$OpEntry;->isRunning()Z
-Landroid/app/AppOpsManager$PackageOps;->getOps()Ljava/util/List;
-Landroid/app/AppOpsManager$PackageOps;->getPackageName()Ljava/lang/String;
-Landroid/app/AppOpsManager$PackageOps;->getUid()I
 Landroid/app/AppOpsManager;->OP_AUDIO_NOTIFICATION_VOLUME:I
 Landroid/app/AppOpsManager;->OP_COARSE_LOCATION:I
 Landroid/app/AppOpsManager;->OP_FINE_LOCATION:I

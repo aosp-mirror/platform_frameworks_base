@@ -269,6 +269,7 @@ package android.app {
 
   public class AppOpsManager {
     method public static java.lang.String[] getOpStrs();
+    method public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, java.lang.String, int[]);
     method public void setMode(java.lang.String, int, java.lang.String, int);
     method public void setUidMode(java.lang.String, int, int);
     field public static final java.lang.String OPSTR_ACCEPT_HANDOVER = "android:accept_handover";
@@ -314,6 +315,33 @@ package android.app {
     field public static final java.lang.String OPSTR_WRITE_ICC_SMS = "android:write_icc_sms";
     field public static final java.lang.String OPSTR_WRITE_SMS = "android:write_sms";
     field public static final java.lang.String OPSTR_WRITE_WALLPAPER = "android:write_wallpaper";
+  }
+
+  public static final class AppOpsManager.OpEntry implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getDuration();
+    method public long getLastAccessBackgroundTime();
+    method public long getLastAccessForegroundTime();
+    method public long getLastAccessTime();
+    method public long getLastRejectBackgroundTime();
+    method public long getLastRejectForegroundTime();
+    method public long getLastRejectTime();
+    method public int getMode();
+    method public java.lang.String getOpStr();
+    method public java.lang.String getProxyPackageName();
+    method public int getProxyUid();
+    method public boolean isRunning();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.OpEntry> CREATOR;
+  }
+
+  public static final class AppOpsManager.PackageOps implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.util.List<android.app.AppOpsManager.OpEntry> getOps();
+    method public java.lang.String getPackageName();
+    method public int getUid();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.PackageOps> CREATOR;
   }
 
   public class BroadcastOptions {

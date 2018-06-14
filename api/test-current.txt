@@ -260,8 +260,8 @@ package android.content.pm {
   public abstract class PackageManager {
     method public abstract java.lang.String getDefaultBrowserPackageNameAsUser(int);
     method public abstract int getInstallReason(java.lang.String, android.os.UserHandle);
-    method public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
     method public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
+    method public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
     method public abstract java.lang.String[] getNamesForUids(int[]);
     method public abstract java.lang.String getPermissionControllerPackageName();
     method public abstract java.lang.String getServicesSystemSharedLibraryPackageName();
