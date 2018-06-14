@@ -178,7 +178,7 @@ public class StackScrollAlgorithm {
             return false;
         }
         ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-        if (row.areGutsExposed()) {
+        if (row.areGutsExposed() || !row.getEntry().hasFinishedInitialization()) {
             return false;
         }
         return row.canViewBeDismissed();

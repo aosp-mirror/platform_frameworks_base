@@ -4701,10 +4701,13 @@ public class NotificationStackScrollLayout extends ViewGroup
 
             if (currView instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) currView;
-                mCurrMenuRow = row.createMenu();
-                mCurrMenuRow.setSwipeActionHelper(NotificationSwipeHelper.this);
-                mCurrMenuRow.setMenuClickListener(NotificationStackScrollLayout.this);
-                mCurrMenuRow.onTouchEvent(currView, ev, 0 /* velocity */);
+
+                if (row.getEntry().hasFinishedInitialization()) {
+                    mCurrMenuRow = row.createMenu();
+                    mCurrMenuRow.setSwipeActionHelper(NotificationSwipeHelper.this);
+                    mCurrMenuRow.setMenuClickListener(NotificationStackScrollLayout.this);
+                    mCurrMenuRow.onTouchEvent(currView, ev, 0 /* velocity */);
+                }
             }
         }
 
