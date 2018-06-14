@@ -526,7 +526,7 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<CarrierConfigManager>() {
             @Override
             public CarrierConfigManager createService(ContextImpl ctx) {
-                return new CarrierConfigManager();
+                return new CarrierConfigManager(ctx.getOuterContext());
             }});
 
         registerService(Context.TELECOM_SERVICE, TelecomManager.class,
