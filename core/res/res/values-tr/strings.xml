@@ -402,12 +402,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Bu uygulama, telefonunuza takvim etkinlikleri ekleyebilir, mevcut etkinlikleri kaldırabilir ve değiştirebilir. Bu uygulama, takvim sahiplerinden gelmiş gibi görünen iletiler gönderebilir veya takvim sahiplerinin bilgisi olmadan etkinlikleri değiştirebilir."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ek konum sağlayıcı komutlarına eriş"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Uygulamanın, ekstra konum sağlayıcı komutlarına erişmesine izin verir. Bu izin, uygulamanın GPS veya diğer konum kaynaklarının çalışmasını kesmesine olanak sağlayabilir."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"konum bilgilerine hassas olarak erişme (GPS ve ağ tabanlı)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Bu uygulama baz istasyonu ve kablosuz ağ gibi ağ kaynaklarını kullanarak konumunuzu belirleyebilir. Uygulamanın bu hizmetleri kullanabilmesi için telefonunuzda bu konum hizmetleri açık ve kullanılabilir olmalıdır. Bu hizmet pil tüketimini artırabilir."</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Bu uygulama yalnızca ön plandayken kesin konumunuzu alabilir. Uygulamanın bu hizmetleri kullanabilmesi için telefonunuzda bu konum hizmetleri açık ve kullanılabilir olmalıdır. Bu, pil tüketimini artırabilir."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"konum bilgilerine yaklaşık olarak erişme (ağ tabanlı)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Bu uygulama baz istasyonu ve kablosuz ağ gibi ağ kaynaklarını kullanarak konumunuzu belirleyebilir. Uygulamanın bu hizmetleri kullanabilmesi için tabletinizde bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Bu uygulama baz istasyonu ve kablosuz ağ gibi ağ kaynaklarını kullanarak konumunuzu belirleyebilir. Uygulamanın bu hizmetleri kullanabilmesi için TV\'nizde bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Bu uygulama baz istasyonu ve kablosuz ağ gibi ağ kaynaklarını kullanarak konumunuzu belirleyebilir. Uygulamanın bu hizmetleri kullanabilmesi için telefonunuzda bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"arka planda kesin konuma erişme"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Bu uygulama arka plandayken istediği zaman kesin konumunuzu alabilir. Uygulamanın bu hizmetleri kullanabilmesi için telefonunuzda bu konum hizmetleri açık ve kullanılabilir olmalıdır. Bu, pil tüketimini artırabilir."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ses ayarlarınızı değiştirin"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Uygulamaya ses düzeyi ve ses çıkışı için kullanılan hoparlör gibi genel ses ayarlarını değiştirme izni verir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ses kaydet"</string>

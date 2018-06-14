@@ -402,12 +402,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Denne appen kan legge til, fjerne eller endre kalenderaktiviteter på telefonen din. Denne appen kan sende meldinger som kan virke som om kommer fra kalendereiere, eller endre aktiviteter uten at eierne blir varslet."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"bruke ekstra posisjonskommandoer"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Appen gis tillatelse til å bruke ekstra kommandoer fra posisjonsleverandører. Dette kan gi appen tillatelse til å påvirke bruken av GPS eller andre posisjonskilder."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"få tilgang til nøyaktig posisjon (GPS- og nettverksbasert)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Denne appen kan få posisjonen din fra GPS eller nettverksplasseringskilder som mobilmaster og Wi-Fi-nettverk. Disse posisjonstjenestene må være slått på og tilgjengelige på telefonen din for at appen skal kunne bruke dem. Dette kan øke batteriforbruket."</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Denne appen kan bare få den nøyaktige posisjonen din når den er på i forgrunnen. Disse posisjonstjenestene må være slått på og tilgjengelige på telefonen din for at appen skal kunne bruke dem. Dette kan øke batteriforbruket."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"få tilgang til omtrentlig posisjon (nettverksbasert)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Denne appen kan få posisjonen din fra nettverkskilder som mobilmaster og Wi-Fi-nettverk. Disse posisjonstjenestene må være slått på og tilgjengelige på nettbrettet ditt for at appen skal kunne bruke dem."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Denne appen kan få posisjonen din fra nettverkskilder som mobilmaster og Wi-Fi-nettverk. Disse posisjonstjenestene må være slått på og tilgjengelige på TV-en din for at appen skal kunne bruke dem."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Denne appen kan få posisjonen din fra nettverkskilder som mobilmaster og Wi-Fi-nettverk. Disse posisjonstjenestene må være slått på og tilgjengelige på telefonen din for at appen skal kunne bruke dem."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"tilgang til nøyaktig posisjon i bakgrunnen"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Denne appen kan få den nøyaktige posisjonen din når den er på i bakgrunnen. Disse posisjonstjenestene må være slått på og tilgjengelige på telefonen din for at appen skal kunne bruke dem. Dette kan øke batteriforbruket."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"endre lydinnstillinger"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Lar appen endre globale lydinnstillinger slik som volum og hvilken høyttaler som brukes for lydavspilling."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ta opp lyd"</string>

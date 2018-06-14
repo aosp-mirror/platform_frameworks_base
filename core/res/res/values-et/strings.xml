@@ -402,12 +402,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"See rakendus võib teie telefoni kalendrisündmusi lisada, neid eemaldada või muuta. See rakendus võib saata sõnumeid, mis näivad pärinevat kalendri omanikelt, või muuta sündmusi ilma omanikke teavitamata."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"juurdepääs asukohapakkuja lisakäskudele"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Võimaldab rakendusel juurde pääseda asukohapakkuja erikäskudele. See võib lubada rakendusel mõjutada GPS-i või muude asukohaallikate tööd."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"juurdepääs täpsele asukohale (GPS-i ja võrgupõhine)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"See rakendus näeb GPS-i või võrguasukoha allikate (nt mobiilimastid ja WiFi-võrgud) abil teie asukohta. Need asukohateenused peavad olema sisse lülitatud ja teie telefonis saadaval, et rakendus neid kasutada saaks. See võib suurendada akutoite tarbimist."</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"See rakendus hangib teie täpse asukoha ainult siis, kui see töötab esiplaanil. Need asukohateenused peavad olema sisse lülitatud ja teie telefonis saadaval, et rakendus saaks neid kasutada. See võib suurendada akutoite tarbimist."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"juurdepääs ligikaudsele asukohale (võrgupõhine)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"See rakendus näeb võrguallikate (nt mobiilimastid ja WiFi-võrgud) abil teie asukohta. Need asukohateenused peavad olema sisse lülitatud ja teie tahvelarvutis saadaval, et rakendus neid kasutada saaks."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"See rakendus näeb võrguallikate (nt mobiilimastid ja WiFi-võrgud) abil teie asukohta. Need asukohateenused peavad olema sisse lülitatud ja teie teleris saadaval, et rakendus neid kasutada saaks."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"See rakendus näeb võrguallikate (nt mobiilimastid ja WiFi-võrgud) abil teie asukohta. Need asukohateenused peavad olema sisse lülitatud ja teie telefonis saadaval, et rakendus neid kasutada saaks."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"juurdepääs täpsele asukohale taustal"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"See rakendus hangib teie täpse asukoha alati, kui see töötab taustal. Need asukohateenused peavad olema sisse lülitatud ja teie telefonis saadaval, et rakendus saaks neid kasutada. See võib suurendada akutoite tarbimist."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"muuda heliseadeid"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Võimaldab rakendusel muuta üldiseid heliseadeid, näiteks helitugevust ja seda, millist kõlarit kasutatakse väljundiks."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"salvesta heli"</string>

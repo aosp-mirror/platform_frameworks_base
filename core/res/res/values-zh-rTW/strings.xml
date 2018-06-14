@@ -402,12 +402,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"這個應用程式可在手機上新增、移除或變更日曆活動。提醒你，這個應用程式可能會以日曆擁有者的名義傳送訊息，或是在不通知日曆擁有者的情況下變更活動內容。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"接收額外的位置提供者指令"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"允許應用程式存取額外位置資訊提供者指令。這項設定可能會造成應用程式干擾 GPS 或其他位置資訊來源的運作。"</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"存取精確位置 (以 GPS 和網路為依據)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"這個應用程式可根據 GPS 或網路位置來源 (例如基地台和 Wi-Fi 網路) 取得你的位置資訊。你必須在手機上開啟這類定位服務，才能讓這個應用程式取得位置資訊。不過這可能會增加耗電量。"</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"這個應用程式只能在前景中取得你的確切位置。你必須在手機上開啟這些定位服務，才能讓這個應用程式取得確切位置。請注意，這麼做可能會增加耗電量。"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"存取概略位置 (以網路為依據)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"這個應用程式可根據網路來源 (例如基地台和 Wi-Fi 網路) 取得你的位置資訊。你必須在平板電腦上開啟這類定位服務，才能讓這個應用程式取得位置資訊。"</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"這個應用程式可根據網路來源 (例如基地台和 Wi-Fi 網路) 取得你的位置資訊。你必須在電視上開啟這類定位服務，才能讓這個應用程式取得位置資訊。"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"這個應用程式可根據網路來源 (例如基地台和 Wi-Fi 網路) 取得你的位置資訊。你必須在手機上開啟這類定位服務，才能讓這個應用程式取得位置資訊。"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"在背景中取得精確位置"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"這個應用程式可在背景中隨時取得你的確切位置。你必須在手機上開啟這些定位服務，才能讓這個應用程式取得確切位置。請注意，這麼做可能會增加耗電量。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"變更音訊設定"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"允許應用程式修改全域音訊設定，例如音量和用來輸出的喇叭。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"錄製音訊"</string>

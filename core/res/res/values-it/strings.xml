@@ -272,31 +272,31 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Passa a profilo di lavoro"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contatti"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accedere ai contatti"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere ai tuoi contatti?"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere ai tuoi contatti?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Geolocalizzazione"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accedere alla posizione di questo dispositivo"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla posizione di questo dispositivo?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla posizione di questo dispositivo?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendario"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accedere al calendario"</string>
-    <string name="permgrouprequest_calendar" msgid="289900767793189421">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere al tuo calendario?"</string>
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere al tuo calendario?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"inviare e visualizzare SMS"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di inviare e visualizzare SMS?"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di inviare e visualizzare SMS?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Archiviazione"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"accedere a foto, contenuti multimediali e file sul dispositivo"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere a foto, contenuti multimediali e file memorizzati sul dispositivo?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfono"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"registrare audio"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di registrare audio?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di registrare audio?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotocamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"scattare foto e registrare video"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di scattare foto e registrare video?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Registri chiamate"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"leggere e scrivere il registro chiamate del telefono"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Vuoi consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere ai registri chiamate del tuo telefono?"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere ai registri chiamate del tuo telefono?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefono"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"eseguire e gestire le telefonate"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di effettuare e gestire telefonate?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di effettuare e gestire telefonate?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensori per il corpo"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accedere ai dati dei sensori relativi ai tuoi parametri vitali"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere ai dati dei sensori relativi ai parametri vitali?"</string>
@@ -402,12 +402,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Questa app può aggiungere, rimuovere o modificare eventi di calendario sul telefono. Può inviare messaggi che possono sembrare inviati dai proprietari del calendario o modificare eventi senza notificare i proprietari."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"accesso a comandi aggiuntivi provider di geolocalizz."</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Consente all\'app di accedere a ulteriori comandi del fornitore di posizione. Ciò potrebbe consentire all\'app di interferire con il funzionamento del GPS o di altre fonti di geolocalizzazione."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"accesso alla posizione esatta (basata su GPS e rete)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Questa app può accedere alla tua posizione tramite fonti di rete come antenne di telefonia mobile e reti Wi-Fi. Tali servizi di geolocalizzazione devono essere attivati e disponibili sul telefono per consentire all\'app di utilizzarli. Ciò può aumentare il consumo di batteria."</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Questa app può recuperare la tua posizione esatta solo quando è in primo piano. Questi servizi di geolocalizzazione devono essere attivi e disponibili sul telefono affinché l\'app possa usarli. Potrebbe aumentare il consumo della batteria."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"accesso alla posizione approssimativa (basata sulla rete)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Questa app può accedere alla tua posizione tramite fonti di rete come antenne di telefonia mobile e reti Wi-Fi. Tali servizi di geolocalizzazione devono essere attivati e disponibili sul tablet per consentire all\'app di utilizzarli."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Questa app può accedere alla tua posizione tramite fonti di rete come antenne di telefonia mobile e reti Wi-Fi. Tali servizi di geolocalizzazione devono essere attivati e disponibili sulla TV per consentire all\'app di utilizzarli."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Questa app può accedere alla tua posizione tramite fonti di rete come antenne di telefonia mobile e reti Wi-Fi. Tali servizi di geolocalizzazione devono essere attivati e disponibili sul telefono per consentire all\'app di utilizzarli."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"Accesso alla posizione esatta in background"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Questa app può recuperare la tua posizione esatta quando è in background. Questi servizi di geolocalizzazione devono essere attivi e disponibili sul telefono affinché l\'app possa usarli. Potrebbe aumentare il consumo della batteria."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifica impostazioni audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Consente all\'applicazione di modificare le impostazioni audio globali, come il volume e quale altoparlante viene utilizzato per l\'uscita."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"registrare audio"</string>

@@ -133,8 +133,8 @@
     <item msgid="4397097370387921767">"Trucades per Wi-Fi %s"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivat"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferència per a la Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferència per a dades mòbils"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferència per la Wi-Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferència per dades mòbils"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Només Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: no s\'ha desviat"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -402,12 +402,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Aquesta aplicació pot afegir, suprimir i canviar esdeveniments del calendari al telèfon. També pot enviar missatges que sembli que provenen dels propietaris del calendari o canviar esdeveniments sense notificar-los-ho."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"accedir a ordres del proveïdor d\'ubicació addicionals"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permet que l\'aplicació accedeixi a ordres addicionals del proveïdor d\'ubicacions; per tant, és possible que l\'aplicació pugui interferir en el funcionament del GPS o d\'altres fonts d\'ubicacions."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"accedir a la ubicació precisa (basada en el GPS i en la xarxa)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Aquesta aplicació pot obtenir la teva ubicació a partir de sistemes GPS i de fonts de xarxa, com ara torres de telefonia mòbil i xarxes Wi-Fi. Aquests serveis d\'ubicació han d\'estar activats i disponibles al telèfon perquè l\'aplicació els pugui utilitzar, i això pot fer que el consum de bateria augmenti."</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Aquesta aplicació pot obtenir la teva ubicació exacta només quan està en primer pla. Aquests serveis d\'ubicació han d\'estar activats i disponibles al telèfon perquè l\'aplicació els pugui utilitzar, i això pot fer que el consum de bateria augmenti."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"accedir a la ubicació aproximada (basada en la xarxa)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Aquesta aplicació pot obtenir la teva ubicació a partir de fonts de xarxa, com ara torres de telefonia mòbil i xarxes Wi-Fi. Aquests serveis d\'ubicació han d\'estar activats i disponibles a la tauleta perquè l\'aplicació els pugui utilitzar."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Aquesta aplicació pot obtenir la teva ubicació a partir de fonts de xarxa, com ara torres de telefonia mòbil i xarxes Wi-Fi. Aquests serveis d\'ubicació han d\'estar activats i disponibles al televisor perquè l\'aplicació els pugui utilitzar."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Aquesta aplicació pot obtenir la teva ubicació a partir de fonts de xarxa, com ara torres de telefonia mòbil i xarxes Wi-Fi. Aquests serveis d\'ubicació han d\'estar activats i disponibles al telèfon perquè l\'aplicació els pugui utilitzar."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"accedeix a la ubicació exacta en segon pla"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Aquesta aplicació pot obtenir la teva ubicació exacta sempre que estigui en segon pla. Aquests serveis d\'ubicació han d\'estar activats i disponibles al telèfon perquè l\'aplicació els pugui utilitzar, i això pot fer que el consum de bateria augmenti."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"canviar la configuració d\'àudio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permet que l\'aplicació modifiqui la configuració d\'àudio general, com ara el volum i l\'altaveu de sortida que es fa servir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"gravar àudio"</string>

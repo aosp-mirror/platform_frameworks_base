@@ -291,12 +291,9 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"কেমেৰা"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ফট\' তুলিব আৰু ভিডিঅ\' ৰেকৰ্ড কৰিব পাৰে"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক ছবি তুলিবলৈ আৰু ভিডিঅ\' ৰেকৰ্ড কৰিবলৈ অনুমতি দিবনে?"</string>
-    <!-- no translation found for permgrouplab_calllog (8798646184930388160) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_calllog (3006237336748283775) -->
-    <skip />
-    <!-- no translation found for permgrouprequest_calllog (8487355309583773267) -->
-    <skip />
+    <string name="permgrouplab_calllog" msgid="8798646184930388160">"কল লগসমূহ"</string>
+    <string name="permgroupdesc_calllog" msgid="3006237336748283775">"ফ\'নৰ কল লগ পঢ়ক আৰু লিখক"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক আপোনাৰ ফ\'ন কল লগ চাবলৈ অনুমতি দিবনে?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ফ’ন"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ফ\'ন কল কৰিব আৰু পৰিচলনা কৰিব পাৰে"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক ফ\'ন কল কৰিবলৈ আৰু পৰিচালনা কৰিবলৈ অনুমতি দিবনে?"</string>
@@ -405,12 +402,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"এই এপে আপোনাৰ ফ\'নৰ কেলেণ্ডাৰত কার্যক্ৰম যোগ দিব, আঁতৰাব বা সলনি কৰিব পাৰে। ই এনে বাৰ্তা পঠিয়াব পাৰে যিবোৰ কেলেণ্ডাৰৰ গৰাকীৰ পৰা অহা যেন লাগে বা ই গৰাকীক নজনোৱাকৈ কাৰ্যক্ৰম সলনি কৰিব পাৰে৷"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"অতিৰিক্ত অৱস্থান দেখুওৱা নির্দেশত প্ৰৱেশ কৰক"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"অৱস্থানৰ অতিৰিক্ত নির্দেশনাসমূহত প্ৰৱেশ কৰিবলৈ এপক অনুমতি দিয়ে। ইয়ে এপটোক জিপিএছ বা অন্য অৱস্থান উৎসসমূহৰ কাৰ্যকলাপত হস্তক্ষেপ কৰাৰ সুযোগ দিব পাৰে।"</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"সঠিক অৱস্থান (জিপিএছ আৰু নেটৱর্ক ভিত্তিক) ব্যৱহাৰ কৰিব পাৰে"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"এই এপটোৱে জিপিএছ বা নেটৱর্কৰ উৎসসমূহ যেনে চেল টাৱাৰ আৰু ৱাই-ফাই নেটৱর্ক আদিক ভিত্তি কৰি আপোনাৰ অৱস্থান নিৰ্ণয় কৰিব পাৰে। এই অৱস্থানৰ সেৱাসমূহ অন হৈ থাকিলে আৰু আপোনাৰ ফ\'নটোত উপলব্ধ হ\'লেহে এপটোৱে সেইবোৰ ব্যৱহাৰ কৰিবলৈ সক্ষম হ\'ব। এই কার্যই অধিক বেটাৰি খৰচ কৰিব পাৰে।"</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"এই এপটোৱে যেতিয়া ই নেপথ্যত চলি থাকে তেতিয়া আপোনাৰ সঠিক অৱস্থান নিৰ্ণয় কৰিব পাৰে। এপটোৱে ব্যৱহাৰ কৰিব পৰাকৈ এই অৱস্থান সেৱাসমূহ অন হৈ থাকিবই লাগিব আৰু আপোনাৰ ফ\'নত উপলব্ধ হ\'ব লাগিব। ইয়াৰ ফলত বেটাৰিৰ খৰচ বাঢ়িব পাৰে।"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"অনুমানিক অৱস্থান (নেটৱর্ক ভিত্তিক) ব্যৱহাৰ কৰিব পাৰে"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"চেল টাৱাৰ আৰু ৱাই-ফাই নেটৱর্কৰ দৰে নেটৱর্কৰ উৎসসমূহক ভিত্তি কৰি এই এপটোৱে আপোনাৰ অৱস্থান নিৰ্ণয় কৰিব পাৰে। এই অৱস্থানৰ সেৱাসমূহ অন হৈ থাকিলে আৰু আপোনাৰ টেবলেটটোত উপলব্ধ হ\'লেহে এপটোৱে সেইবোৰ ব্যৱহাৰ কৰিবলৈ সক্ষম হ\'ব।"</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"চেল টাৱাৰ আৰু ৱাই-ফাই নেটৱর্কৰ দৰে নেটৱর্কৰ উৎসসমূহক ভিত্তি কৰি এই এপটোৱে আপোনাৰ অৱস্থান নিৰ্ণয় কৰিব পাৰে। এই অৱস্থানৰ সেৱাসমূহ অন হৈ থাকিলে আৰু আপোনাৰ টিভিত উপলব্ধ হ\'লেহে এপটোৱে সেইবোৰ ব্যৱহাৰ কৰিবলৈ সক্ষম হ\'ব।"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"এই এপটোৱে ম\'বাইলৰ টাৱাৰ আৰু ৱাই-ফাইৰ নেটৱৰ্ক আদিৰ দৰে নেটৱৰ্কৰ উৎসসমূহক ভিত্তি কৰি আপোনাৰ অৱস্থান চিনাক্ত কৰিব পাৰে। সেই অৱস্থান সেৱাসমূহ আপোনাৰ ফ\'নত সক্ষম অৱস্থাত থাকিলেহে এপটোৱে সেইবোৰ ব্যৱহাৰ কৰিব পাৰিব।"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"নেপথ্যত সঠিক অৱস্থান পাব পাৰে"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"এই এপটোৱে যেতিয়া ই নেপথ্যত চলি থাকে তেতিয়া আপোনাৰ সঠিক অৱস্থান নিৰ্ণয় কৰিব পাৰে। এপটোৱে ব্যৱহাৰ কৰিব পৰাকৈ এই অৱস্থান সেৱাসমূহ অন হৈ থাকিবই লাগিব আৰু আপোনাৰ ফ\'নত উপলব্ধ হ\'ব লাগিব। ইয়াৰ ফলত বেটাৰিৰ খৰচ বাঢ়িব পাৰে।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"আপোনাৰ অডিঅ\' ছেটিংসমূহ সলনি কৰক"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"এপটোক ভলিউমৰ দৰে গ্ল\'বেল অডিঅ\' ছেটিংসমূহ যাৰ স্পীকাৰক আউটপুটৰ বাবে ব্যৱহাৰ হয় তাক সলনি কৰিবলৈ অনুমতি দিয়ে৷"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"অডিঅ\' ৰেকর্ড কৰক"</string>

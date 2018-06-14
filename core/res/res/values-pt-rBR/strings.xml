@@ -402,12 +402,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Este app pode adicionar, remover ou alterar eventos da agenda no seu smartphone. Ele também pode enviar mensagens que aparentem ser de autoria do proprietário da agenda ou alterar eventos sem notificar o proprietário."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"acessar comandos extras do provedor de localização"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permite que o app acesse comandos do provedor não relacionados à localização. Isso pode permitir que o app interfira no funcionamento do GPS ou de outras fontes de localização."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"acessar localização precisa (GPS e com base na rede)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Este app pode ver seu local com base no GPS ou nas fontes de localização da rede, como torres de celular e redes Wi-Fi. Esses serviços de localização precisam estar ativados e disponíveis no seu smartphone para que o app possa usá-los. Isso pode aumentar o consumo de bateria."</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Este app pode ver sua localização exata a qualquer momento apenas quando está em primeiro plano. Esses serviços de localização precisam estar ativados e disponíveis no seu smartphone para que o app possa usá-los. Isso pode aumentar o consumo de bateria."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"acessar localização aproximada (com base na rede)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Este app pode ver seu local com base nas fontes de rede, como torres de celular e redes Wi-Fi. Esses serviços de localização precisam estar ativados e disponíveis no seu tablet para que o app possa usá-los."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Este app pode ver seu local com base nas fontes de rede, como torres de celular e redes Wi-Fi. Esses serviços de localização precisam estar ativados e disponíveis na sua TV para que o app possa usá-los."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Este app pode ver seu local com base nas fontes de rede, como torres de celular e redes Wi-Fi. Esses serviços de localização precisam estar ativados e disponíveis no seu smartphone para que o app possa usá-los."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"acessar localização precisa em segundo plano"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Este app pode ver sua localização exata a qualquer momento quando está em segundo plano. Esses serviços de localização precisam estar ativados e disponíveis no seu smartphone para que o app possa usá-los. Isso pode aumentar o consumo de bateria."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"alterar as suas configurações de áudio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite que o app modifique configurações de áudio globais como volume e alto-falantes de saída."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"gravar áudio"</string>
@@ -433,9 +436,9 @@
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"impedir modo de inatividade do tablet"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2601193288949154131">"impedir a suspensão da TV"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"impedir modo de inatividade do telefone"</string>
-    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite que o app impeça o tablet de entrar no modo de inatividade."</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite que o app impeça a suspensão do tablet."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="3208534859208996974">"Permite que o app impeça a suspensão da TV."</string>
-    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permite que o app impeça o telefone de entrar no modo de inatividade."</string>
+    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permite que o app impeça a suspensão do telefone."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"transmitir infravermelhos"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Permite que o app use o transmissor infravermelho do tablet."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Permite que o app use o transmissor de infravermelho da TV."</string>
