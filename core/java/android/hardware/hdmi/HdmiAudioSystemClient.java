@@ -27,12 +27,7 @@ package android.hardware.hdmi;
 public final class HdmiAudioSystemClient extends HdmiClient {
     private static final String TAG = "HdmiAudioSystemClient";
 
-    /** Reports if System Audio Mode is supported by the connected TV */
-    interface TvSystemAudioModeSupportedCallback {
 
-        /** {@code supported} is true if the TV is connected and supports System Audio Mode. */
-        void onResult(boolean supported);
-    }
 
     /* package */ HdmiAudioSystemClient(IHdmiControlService service) {
         super(service);
@@ -45,16 +40,5 @@ public final class HdmiAudioSystemClient extends HdmiClient {
         return HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM;
     }
 
-    /**
-     * Queries the connected TV to detect if System Audio Mode is supported by the TV.
-     *
-     * <p>This query may take up to 2 seconds to complete.
-     *
-     * <p>The result of the query may be cached until Audio device type is put in standby or loses
-     * its physical address.
-     */
-    void queryTvSystemAudioModeSupport(TvSystemAudioModeSupportedCallback callback) {
-        // TODO(b/80297382): implement detect TV for system audio mode support.
-        callback.onResult(true);
-    }
+
 }
