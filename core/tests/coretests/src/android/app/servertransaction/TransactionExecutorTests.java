@@ -283,12 +283,12 @@ public class TransactionExecutorTests {
         // Verify resolution that should get to onPause
         mClientRecord.setState(ON_RESUME);
         mExecutor.executeCallbacks(transaction);
-        verify(mExecutor, times(1)).cycleToPath(eq(mClientRecord), eq(ON_PAUSE));
+        verify(mExecutor, times(1)).cycleToPath(eq(mClientRecord), eq(ON_PAUSE), eq(transaction));
 
         // Verify resolution that should get to onStart
         mClientRecord.setState(ON_STOP);
         mExecutor.executeCallbacks(transaction);
-        verify(mExecutor, times(1)).cycleToPath(eq(mClientRecord), eq(ON_START));
+        verify(mExecutor, times(1)).cycleToPath(eq(mClientRecord), eq(ON_START), eq(transaction));
     }
 
     @Test

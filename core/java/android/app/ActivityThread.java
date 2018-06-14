@@ -2731,7 +2731,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     public final Activity getActivity(IBinder token) {
-        return mActivities.get(token).activity;
+        final ActivityClientRecord activityRecord = mActivities.get(token);
+        return activityRecord != null ? activityRecord.activity : null;
     }
 
     @Override
