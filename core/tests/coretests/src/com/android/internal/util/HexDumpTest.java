@@ -25,4 +25,7 @@ public final class HexDumpTest extends TestCase {
         assertEquals("ABCDEF", HexDump.toHexString(
                 new byte[] { (byte) 0xab, (byte) 0xcd, (byte) 0xef }, true));
     }
+    public void testNullArray() {
+        assertEquals("(null)", HexDump.toHexString(null));
+    }
 }
