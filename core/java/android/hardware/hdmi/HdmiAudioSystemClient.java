@@ -15,6 +15,7 @@
  */
 package android.hardware.hdmi;
 
+import android.os.Handler;
 import android.os.RemoteException;
 
 /**
@@ -27,8 +28,18 @@ import android.os.RemoteException;
  * @hide
  */
 public final class HdmiAudioSystemClient extends HdmiClient {
+    // TODO(b/110430593): add tests for this class
     private static final String TAG = "HdmiAudioSystemClient";
 
+    private static final int REPORT_AUDIO_STATUS_INTERVAL_MS = 500;
+
+    private final Handler mHandler = new Handler();
+    private boolean mCanSendAudioStatus = true;
+    private boolean mPendingReportAudioStatus;
+
+    private int mLastVolume;
+    private int mLastMaxVolume;
+    private boolean mLastIsMute;
 
 
     /* package */ HdmiAudioSystemClient(IHdmiControlService service) {
@@ -52,10 +63,48 @@ public final class HdmiAudioSystemClient extends HdmiClient {
      */
     public void sendReportAudioStatusCecCommand(boolean isMuteAdjust, int volume, int maxVolume,
             boolean isMute) {
-        try {
-            mService.reportAudioStatus(getDeviceType(), volume, maxVolume, isMute);
-        } catch (RemoteException e) {
-            // do nothing. Reporting audio status is optional.
+        if (isMuteAdjust) {
+            // always report audio status when it's muted/unmuted
+            try {
+                mService.reportAudioStatus(getDeviceType(), volume, maxVolume, isMute);
+            } catch (RemoteException e) {
+                // do nothing. Reporting audio status is optional.
+            }
+            return;
+        }
+
+        mLastVolume = volume;
+        mLastMaxVolume = maxVolume;
+        mLastIsMute = isMute;
+        if (mCanSendAudioStatus) {
+            try {
+                mService.reportAudioStatus(getDeviceType(), volume, maxVolume, isMute);
+                mCanSendAudioStatus = false;
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mPendingReportAudioStatus) {
+                            // report audio status if there is any pending message
+                            try {
+                                mService.reportAudioStatus(getDeviceType(), mLastVolume,
+                                        mLastMaxVolume, mLastIsMute);
+                                mHandler.postDelayed(this, REPORT_AUDIO_STATUS_INTERVAL_MS);
+                            }  catch (RemoteException e) {
+                                mCanSendAudioStatus = true;
+                            } finally {
+                                mPendingReportAudioStatus = false;
+                            }
+                        } else {
+                            mCanSendAudioStatus = true;
+                        }
+                    }
+                }, REPORT_AUDIO_STATUS_INTERVAL_MS);
+            } catch (RemoteException e) {
+                // do nothing. Reporting audio status is optional.
+            }
+        } else {
+            // if audio status cannot be sent, send it latter
+            mPendingReportAudioStatus = true;
         }
     }
 }
