@@ -57,6 +57,8 @@ import android.view.View;
 import com.android.internal.R;
 import com.android.internal.util.VirtualRefBasePtr;
 
+import dalvik.annotation.optimization.FastNative;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -64,7 +66,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-import dalvik.annotation.optimization.FastNative;
 
 /**
  * This class animates properties of a {@link android.graphics.drawable.VectorDrawable} with
@@ -167,7 +168,7 @@ import dalvik.annotation.optimization.FastNative;
  * </p>
  * Below is an example of a VectorDrawable defined in vectordrawable.xml. This VectorDrawable is
  * referred to by its file name (not including file suffix) in the
- * <a href="AVDExample">AnimatedVectorDrawable XML example</a>.
+ * <a href="#AVDExample">AnimatedVectorDrawable XML example</a>.
  * <pre>
  * &lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
  *     android:height=&quot;64dp&quot;
