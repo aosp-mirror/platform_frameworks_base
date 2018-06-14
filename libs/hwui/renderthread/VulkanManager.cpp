@@ -31,44 +31,242 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-#define GET_PROC(F) m##F = (PFN_vk##F)vkGetInstanceProcAddr(instance, "vk" #F)
-#define GET_DEV_PROC(F) m##F = (PFN_vk##F)vkGetDeviceProcAddr(device, "vk" #F)
+#define GET_PROC(F) m##F = (PFN_vk##F)vkGetInstanceProcAddr(VK_NULL_HANDLE, "vk" #F)
+#define GET_INST_PROC(F) m##F = (PFN_vk##F)vkGetInstanceProcAddr(mInstance, "vk" #F)
+#define GET_DEV_PROC(F) m##F = (PFN_vk##F)vkGetDeviceProcAddr(mDevice, "vk" #F)
 
 VulkanManager::VulkanManager(RenderThread& thread) : mRenderThread(thread) {}
 
 void VulkanManager::destroy() {
-    if (!hasVkContext()) return;
-
     mRenderThread.renderState().onVkContextDestroyed();
     mRenderThread.setGrContext(nullptr);
 
     if (VK_NULL_HANDLE != mCommandPool) {
-        mDestroyCommandPool(mBackendContext->fDevice, mCommandPool, nullptr);
+        mDestroyCommandPool(mDevice, mCommandPool, nullptr);
         mCommandPool = VK_NULL_HANDLE;
     }
-    mBackendContext.reset();
-}
 
-void VulkanManager::initialize() {
-    if (hasVkContext()) {
-        return;
+    if (mDevice != VK_NULL_HANDLE) {
+        mDeviceWaitIdle(mDevice);
+        mDestroyDevice(mDevice, nullptr);
     }
 
-    auto canPresent = [](VkInstance, VkPhysicalDevice, uint32_t) { return true; };
+    if (mInstance != VK_NULL_HANDLE) {
+        mDestroyInstance(mInstance, nullptr);
+    }
 
-    mBackendContext.reset(GrVkBackendContext::Create(vkGetInstanceProcAddr, vkGetDeviceProcAddr,
-                                                     &mPresentQueueIndex, canPresent));
-    LOG_ALWAYS_FATAL_IF(!mBackendContext.get());
+    mGraphicsQueue = VK_NULL_HANDLE;
+    mPresentQueue = VK_NULL_HANDLE;
+    mDevice = VK_NULL_HANDLE;
+    mPhysicalDevice = VK_NULL_HANDLE;
+    mInstance = VK_NULL_HANDLE;
+}
 
-    // Get all the addresses of needed vulkan functions
-    VkInstance instance = mBackendContext->fInstance;
-    VkDevice device = mBackendContext->fDevice;
-    GET_PROC(CreateAndroidSurfaceKHR);
-    GET_PROC(DestroySurfaceKHR);
-    GET_PROC(GetPhysicalDeviceSurfaceSupportKHR);
-    GET_PROC(GetPhysicalDeviceSurfaceCapabilitiesKHR);
-    GET_PROC(GetPhysicalDeviceSurfaceFormatsKHR);
-    GET_PROC(GetPhysicalDeviceSurfacePresentModesKHR);
+bool VulkanManager::setupDevice(VkPhysicalDeviceFeatures& deviceFeatures) {
+    VkResult err;
+
+    constexpr VkApplicationInfo app_info = {
+        VK_STRUCTURE_TYPE_APPLICATION_INFO, // sType
+        nullptr,                            // pNext
+        "android framework",                // pApplicationName
+        0,                                  // applicationVersion
+        "android framework",                // pEngineName
+        0,                                  // engineVerison
+        VK_MAKE_VERSION(1, 0, 0),           // apiVersion
+    };
+
+    std::vector<const char*> instanceExtensions;
+    {
+        GET_PROC(EnumerateInstanceExtensionProperties);
+
+        uint32_t extensionCount = 0;
+        err = mEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+        if (VK_SUCCESS != err) {
+            return false;
+        }
+        std::unique_ptr<VkExtensionProperties[]> extensions(
+                new VkExtensionProperties[extensionCount]);
+        err = mEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.get());
+        if (VK_SUCCESS != err) {
+            return false;
+        }
+        bool hasKHRSurfaceExtension = false;
+        bool hasKHRAndroidSurfaceExtension = false;
+        for (uint32_t i = 0; i < extensionCount; ++i) {
+            instanceExtensions.push_back(extensions[i].extensionName);
+            if (!strcmp(extensions[i].extensionName, VK_KHR_SURFACE_EXTENSION_NAME)) {
+                hasKHRSurfaceExtension = true;
+            }
+            if (!strcmp(extensions[i].extensionName,VK_KHR_ANDROID_SURFACE_EXTENSION_NAME)) {
+                hasKHRAndroidSurfaceExtension = true;
+            }
+        }
+        if (!hasKHRSurfaceExtension || !hasKHRAndroidSurfaceExtension) {
+            this->destroy();
+            return false;
+        }
+    }
+
+    const VkInstanceCreateInfo instance_create = {
+        VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,    // sType
+        nullptr,                                   // pNext
+        0,                                         // flags
+        &app_info,                                 // pApplicationInfo
+        0,                                         // enabledLayerNameCount
+        nullptr,                                   // ppEnabledLayerNames
+        (uint32_t) instanceExtensions.size(),      // enabledExtensionNameCount
+        instanceExtensions.data(),                 // ppEnabledExtensionNames
+    };
+
+    GET_PROC(CreateInstance);
+    err = mCreateInstance(&instance_create, nullptr, &mInstance);
+    if (err < 0) {
+        this->destroy();
+        return false;
+    }
+
+    GET_INST_PROC(DestroyInstance);
+    GET_INST_PROC(EnumeratePhysicalDevices);
+    GET_INST_PROC(GetPhysicalDeviceQueueFamilyProperties);
+    GET_INST_PROC(GetPhysicalDeviceFeatures);
+    GET_INST_PROC(CreateDevice);
+    GET_INST_PROC(EnumerateDeviceExtensionProperties);
+    GET_INST_PROC(CreateAndroidSurfaceKHR);
+    GET_INST_PROC(DestroySurfaceKHR);
+    GET_INST_PROC(GetPhysicalDeviceSurfaceSupportKHR);
+    GET_INST_PROC(GetPhysicalDeviceSurfaceCapabilitiesKHR);
+    GET_INST_PROC(GetPhysicalDeviceSurfaceFormatsKHR);
+    GET_INST_PROC(GetPhysicalDeviceSurfacePresentModesKHR);
+
+    uint32_t gpuCount;
+    err = mEnumeratePhysicalDevices(mInstance, &gpuCount, nullptr);
+    if (err) {
+        this->destroy();
+        return false;
+    }
+    if (!gpuCount) {
+        this->destroy();
+        return false;
+    }
+    // Just returning the first physical device instead of getting the whole array. Since there
+    // should only be one device on android.
+    gpuCount = 1;
+    err = mEnumeratePhysicalDevices(mInstance, &gpuCount, &mPhysicalDevice);
+    // VK_INCOMPLETE is returned when the count we provide is less than the total device count.
+    if (err && VK_INCOMPLETE != err) {
+        this->destroy();
+        return false;
+    }
+
+    // query to get the initial queue props size
+    uint32_t queueCount;
+    mGetPhysicalDeviceQueueFamilyProperties(mPhysicalDevice, &queueCount, nullptr);
+    if (!queueCount) {
+        this->destroy();
+        return false;
+    }
+
+    // now get the actual queue props
+    std::unique_ptr<VkQueueFamilyProperties[]> queueProps(new VkQueueFamilyProperties[queueCount]);
+    mGetPhysicalDeviceQueueFamilyProperties(mPhysicalDevice, &queueCount, queueProps.get());
+
+    // iterate to find the graphics queue
+    mGraphicsQueueIndex = queueCount;
+    for (uint32_t i = 0; i < queueCount; i++) {
+        if (queueProps[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            mGraphicsQueueIndex = i;
+            break;
+        }
+    }
+    if (mGraphicsQueueIndex == queueCount) {
+        this->destroy();
+        return false;
+    }
+
+    // All physical devices and queue families on Android must be capable of
+    // presentation with any native window. So just use the first one.
+    mPresentQueueIndex = 0;
+
+    std::vector<const char*> deviceExtensions;
+    {
+        uint32_t extensionCount = 0;
+        err = mEnumerateDeviceExtensionProperties(mPhysicalDevice, nullptr, &extensionCount,
+                nullptr);
+        if (VK_SUCCESS != err) {
+            this->destroy();
+            return false;
+        }
+        std::unique_ptr<VkExtensionProperties[]> extensions(
+                new VkExtensionProperties[extensionCount]);
+        err = mEnumerateDeviceExtensionProperties(mPhysicalDevice, nullptr, &extensionCount,
+                extensions.get());
+        if (VK_SUCCESS != err) {
+            this->destroy();
+            return false;
+        }
+        bool hasKHRSwapchainExtension = false;
+        for (uint32_t i = 0; i < extensionCount; ++i) {
+            deviceExtensions.push_back(extensions[i].extensionName);
+            if (!strcmp(extensions[i].extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME)) {
+                hasKHRSwapchainExtension = true;
+            }
+        }
+        if (!hasKHRSwapchainExtension) {
+            this->destroy();
+            return false;
+        }
+    }
+
+    // query to get the physical device properties
+    mGetPhysicalDeviceFeatures(mPhysicalDevice, &deviceFeatures);
+    // this looks like it would slow things down,
+    // and we can't depend on it on all platforms
+    deviceFeatures.robustBufferAccess = VK_FALSE;
+
+    float queuePriorities[1] = { 0.0 };
+
+    const VkDeviceQueueCreateInfo queueInfo[2] = {
+        {
+            VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO, // sType
+            nullptr,                                    // pNext
+            0,                                          // VkDeviceQueueCreateFlags
+            mGraphicsQueueIndex,                        // queueFamilyIndex
+            1,                                          // queueCount
+            queuePriorities,                            // pQueuePriorities
+        },
+        {
+            VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO, // sType
+            nullptr,                                    // pNext
+            0,                                          // VkDeviceQueueCreateFlags
+            mPresentQueueIndex,                         // queueFamilyIndex
+            1,                                          // queueCount
+            queuePriorities,                            // pQueuePriorities
+        }
+    };
+    uint32_t queueInfoCount = (mPresentQueueIndex != mGraphicsQueueIndex) ? 2 : 1;
+
+    const VkDeviceCreateInfo deviceInfo = {
+        VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,    // sType
+        nullptr,                                 // pNext
+        0,                                       // VkDeviceCreateFlags
+        queueInfoCount,                          // queueCreateInfoCount
+        queueInfo,                               // pQueueCreateInfos
+        0,                                       // layerCount
+        nullptr,                                 // ppEnabledLayerNames
+        (uint32_t) deviceExtensions.size(),      // extensionCount
+        deviceExtensions.data(),                 // ppEnabledExtensionNames
+        &deviceFeatures                          // ppEnabledFeatures
+    };
+
+    err = mCreateDevice(mPhysicalDevice, &deviceInfo, nullptr, &mDevice);
+    if (err) {
+        this->destroy();
+        return false;
+    }
+
+    GET_DEV_PROC(GetDeviceQueue);
+    GET_DEV_PROC(DeviceWaitIdle);
+    GET_DEV_PROC(DestroyDevice);
     GET_DEV_PROC(CreateSwapchainKHR);
     GET_DEV_PROC(DestroySwapchainKHR);
     GET_DEV_PROC(GetSwapchainImagesKHR);
@@ -93,25 +291,76 @@ void VulkanManager::initialize() {
     GET_DEV_PROC(WaitForFences);
     GET_DEV_PROC(ResetFences);
 
+    return true;
+}
+
+void VulkanManager::initialize() {
+    if (mDevice != VK_NULL_HANDLE) {
+        return;
+    }
+
+    std::vector<const char*> instanceExtensions;
+    std::vector<const char*> deviceExtensions;
+    VkPhysicalDeviceFeatures deviceFeatures;
+    LOG_ALWAYS_FATAL_IF(!this->setupDevice(deviceFeatures));
+
+    mGetDeviceQueue(mDevice, mGraphicsQueueIndex, 0, &mGraphicsQueue);
+
+    uint32_t extensionFlags = kKHR_surface_GrVkExtensionFlag |
+                              kKHR_android_surface_GrVkExtensionFlag |
+                              kKHR_swapchain_GrVkExtensionFlag;
+
+    uint32_t featureFlags = 0;
+    if (deviceFeatures.geometryShader) {
+        featureFlags |= kGeometryShader_GrVkFeatureFlag;
+    }
+    if (deviceFeatures.dualSrcBlend) {
+        featureFlags |= kDualSrcBlend_GrVkFeatureFlag;
+    }
+    if (deviceFeatures.sampleRateShading) {
+        featureFlags |= kSampleRateShading_GrVkFeatureFlag;
+    }
+
+    auto getProc = [] (const char* proc_name, VkInstance instance, VkDevice device) {
+        if (device != VK_NULL_HANDLE) {
+            return vkGetDeviceProcAddr(device, proc_name);
+        }
+        return vkGetInstanceProcAddr(instance, proc_name);
+    };
+    auto interface =
+        sk_make_sp<GrVkInterface>(getProc, mInstance, mDevice, extensionFlags);
+
+    GrVkBackendContext backendContext;
+    backendContext.fInstance = mInstance;
+    backendContext.fPhysicalDevice = mPhysicalDevice;
+    backendContext.fDevice = mDevice;
+    backendContext.fQueue = mGraphicsQueue;
+    backendContext.fGraphicsQueueIndex = mGraphicsQueueIndex;
+    backendContext.fMinAPIVersion = VK_MAKE_VERSION(1, 0, 0);
+    backendContext.fExtensions = extensionFlags;
+    backendContext.fFeatures = featureFlags;
+    backendContext.fInterface = std::move(interface);
+    backendContext.fOwnsInstanceAndDevice = false;
+
     // create the command pool for the command buffers
     if (VK_NULL_HANDLE == mCommandPool) {
         VkCommandPoolCreateInfo commandPoolInfo;
         memset(&commandPoolInfo, 0, sizeof(VkCommandPoolCreateInfo));
         commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         // this needs to be on the render queue
-        commandPoolInfo.queueFamilyIndex = mBackendContext->fGraphicsQueueIndex;
+        commandPoolInfo.queueFamilyIndex = mGraphicsQueueIndex;
         commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        SkDEBUGCODE(VkResult res =) mCreateCommandPool(mBackendContext->fDevice, &commandPoolInfo,
-                                                       nullptr, &mCommandPool);
+        SkDEBUGCODE(VkResult res =) mCreateCommandPool(mDevice, &commandPoolInfo, nullptr,
+                &mCommandPool);
         SkASSERT(VK_SUCCESS == res);
     }
 
-    mGetDeviceQueue(mBackendContext->fDevice, mPresentQueueIndex, 0, &mPresentQueue);
+    mGetDeviceQueue(mDevice, mPresentQueueIndex, 0, &mPresentQueue);
 
     GrContextOptions options;
     options.fDisableDistanceFieldPaths = true;
     mRenderThread.cacheManager().configureContext(&options);
-    sk_sp<GrContext> grContext(GrContext::MakeVulkan(mBackendContext, options));
+    sk_sp<GrContext> grContext(GrContext::MakeVulkan(backendContext, options));
     LOG_ALWAYS_FATAL_IF(!grContext.get());
     mRenderThread.setGrContext(grContext);
     DeviceInfo::initialize(mRenderThread.getGrContext()->maxRenderTargetSize());
@@ -138,8 +387,7 @@ VulkanSurface::BackbufferInfo* VulkanManager::getAvailableBackbuffer(VulkanSurfa
 
     // Before we reuse a backbuffer, make sure its fences have all signaled so that we can safely
     // reuse its commands buffers.
-    VkResult res =
-            mWaitForFences(mBackendContext->fDevice, 2, backbuffer->mUsageFences, true, UINT64_MAX);
+    VkResult res = mWaitForFences(mDevice, 2, backbuffer->mUsageFences, true, UINT64_MAX);
     if (res != VK_SUCCESS) {
         return nullptr;
     }
@@ -153,12 +401,12 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface* surface) {
 
     VkResult res;
 
-    res = mResetFences(mBackendContext->fDevice, 2, backbuffer->mUsageFences);
+    res = mResetFences(mDevice, 2, backbuffer->mUsageFences);
     SkASSERT(VK_SUCCESS == res);
 
     // The acquire will signal the attached mAcquireSemaphore. We use this to know the image has
     // finished presenting and that it is safe to begin sending new commands to the returned image.
-    res = mAcquireNextImageKHR(mBackendContext->fDevice, surface->mSwapchain, UINT64_MAX,
+    res = mAcquireNextImageKHR(mDevice, surface->mSwapchain, UINT64_MAX,
                                backbuffer->mAcquireSemaphore, VK_NULL_HANDLE,
                                &backbuffer->mImageIndex);
 
@@ -173,11 +421,11 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface* surface) {
             return nullptr;
         }
         backbuffer = getAvailableBackbuffer(surface);
-        res = mResetFences(mBackendContext->fDevice, 2, backbuffer->mUsageFences);
+        res = mResetFences(mDevice, 2, backbuffer->mUsageFences);
         SkASSERT(VK_SUCCESS == res);
 
         // acquire the image
-        res = mAcquireNextImageKHR(mBackendContext->fDevice, surface->mSwapchain, UINT64_MAX,
+        res = mAcquireNextImageKHR(mDevice, surface->mSwapchain, UINT64_MAX,
                                    backbuffer->mAcquireSemaphore, VK_NULL_HANDLE,
                                    &backbuffer->mImageIndex);
 
@@ -205,7 +453,7 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface* surface) {
             layout,                                     // oldLayout
             VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,   // newLayout
             mPresentQueueIndex,                         // srcQueueFamilyIndex
-            mBackendContext->fGraphicsQueueIndex,       // dstQueueFamilyIndex
+            mGraphicsQueueIndex,       // dstQueueFamilyIndex
             surface->mImages[backbuffer->mImageIndex],  // image
             {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1}     // subresourceRange
     };
@@ -236,7 +484,7 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface* surface) {
     submitInfo.signalSemaphoreCount = 0;
 
     // Attach first fence to submission here so we can track when the command buffer finishes.
-    mQueueSubmit(mBackendContext->fQueue, 1, &submitInfo, backbuffer->mUsageFences[0]);
+    mQueueSubmit(mGraphicsQueue, 1, &submitInfo, backbuffer->mUsageFences[0]);
 
     // We need to notify Skia that we changed the layout of the wrapped VkImage
     sk_sp<SkSurface> skSurface = surface->mImageInfos[backbuffer->mImageIndex].mSurface;
@@ -255,17 +503,14 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface* surface) {
 void VulkanManager::destroyBuffers(VulkanSurface* surface) {
     if (surface->mBackbuffers) {
         for (uint32_t i = 0; i < surface->mImageCount + 1; ++i) {
-            mWaitForFences(mBackendContext->fDevice, 2, surface->mBackbuffers[i].mUsageFences, true,
-                           UINT64_MAX);
+            mWaitForFences(mDevice, 2, surface->mBackbuffers[i].mUsageFences, true, UINT64_MAX);
             surface->mBackbuffers[i].mImageIndex = -1;
-            mDestroySemaphore(mBackendContext->fDevice, surface->mBackbuffers[i].mAcquireSemaphore,
-                              nullptr);
-            mDestroySemaphore(mBackendContext->fDevice, surface->mBackbuffers[i].mRenderSemaphore,
-                              nullptr);
-            mFreeCommandBuffers(mBackendContext->fDevice, mCommandPool, 2,
-                                surface->mBackbuffers[i].mTransitionCmdBuffers);
-            mDestroyFence(mBackendContext->fDevice, surface->mBackbuffers[i].mUsageFences[0], 0);
-            mDestroyFence(mBackendContext->fDevice, surface->mBackbuffers[i].mUsageFences[1], 0);
+            mDestroySemaphore(mDevice, surface->mBackbuffers[i].mAcquireSemaphore, nullptr);
+            mDestroySemaphore(mDevice, surface->mBackbuffers[i].mRenderSemaphore, nullptr);
+            mFreeCommandBuffers(mDevice, mCommandPool, 2,
+                    surface->mBackbuffers[i].mTransitionCmdBuffers);
+            mDestroyFence(mDevice, surface->mBackbuffers[i].mUsageFences[0], 0);
+            mDestroyFence(mDevice, surface->mBackbuffers[i].mUsageFences[1], 0);
         }
     }
 
@@ -282,29 +527,27 @@ void VulkanManager::destroySurface(VulkanSurface* surface) {
     if (VK_NULL_HANDLE != mPresentQueue) {
         mQueueWaitIdle(mPresentQueue);
     }
-    mDeviceWaitIdle(mBackendContext->fDevice);
+    mDeviceWaitIdle(mDevice);
 
     destroyBuffers(surface);
 
     if (VK_NULL_HANDLE != surface->mSwapchain) {
-        mDestroySwapchainKHR(mBackendContext->fDevice, surface->mSwapchain, nullptr);
+        mDestroySwapchainKHR(mDevice, surface->mSwapchain, nullptr);
         surface->mSwapchain = VK_NULL_HANDLE;
     }
 
     if (VK_NULL_HANDLE != surface->mVkSurface) {
-        mDestroySurfaceKHR(mBackendContext->fInstance, surface->mVkSurface, nullptr);
+        mDestroySurfaceKHR(mInstance, surface->mVkSurface, nullptr);
         surface->mVkSurface = VK_NULL_HANDLE;
     }
     delete surface;
 }
 
 void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExtent2D extent) {
-    mGetSwapchainImagesKHR(mBackendContext->fDevice, surface->mSwapchain, &surface->mImageCount,
-                           nullptr);
+    mGetSwapchainImagesKHR(mDevice, surface->mSwapchain, &surface->mImageCount, nullptr);
     SkASSERT(surface->mImageCount);
     surface->mImages = new VkImage[surface->mImageCount];
-    mGetSwapchainImagesKHR(mBackendContext->fDevice, surface->mSwapchain, &surface->mImageCount,
-                           surface->mImages);
+    mGetSwapchainImagesKHR(mDevice, surface->mSwapchain, &surface->mImageCount, surface->mImages);
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
@@ -354,15 +597,15 @@ void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExt
     for (uint32_t i = 0; i < surface->mImageCount + 1; ++i) {
         SkDEBUGCODE(VkResult res);
         surface->mBackbuffers[i].mImageIndex = -1;
-        SkDEBUGCODE(res =) mCreateSemaphore(mBackendContext->fDevice, &semaphoreInfo, nullptr,
+        SkDEBUGCODE(res =) mCreateSemaphore(mDevice, &semaphoreInfo, nullptr,
                                             &surface->mBackbuffers[i].mAcquireSemaphore);
-        SkDEBUGCODE(res =) mCreateSemaphore(mBackendContext->fDevice, &semaphoreInfo, nullptr,
+        SkDEBUGCODE(res =) mCreateSemaphore(mDevice, &semaphoreInfo, nullptr,
                                             &surface->mBackbuffers[i].mRenderSemaphore);
-        SkDEBUGCODE(res =) mAllocateCommandBuffers(mBackendContext->fDevice, &commandBuffersInfo,
+        SkDEBUGCODE(res =) mAllocateCommandBuffers(mDevice, &commandBuffersInfo,
                                                    surface->mBackbuffers[i].mTransitionCmdBuffers);
-        SkDEBUGCODE(res =) mCreateFence(mBackendContext->fDevice, &fenceInfo, nullptr,
+        SkDEBUGCODE(res =) mCreateFence(mDevice, &fenceInfo, nullptr,
                                         &surface->mBackbuffers[i].mUsageFences[0]);
-        SkDEBUGCODE(res =) mCreateFence(mBackendContext->fDevice, &fenceInfo, nullptr,
+        SkDEBUGCODE(res =) mCreateFence(mDevice, &fenceInfo, nullptr,
                                         &surface->mBackbuffers[i].mUsageFences[1]);
         SkASSERT(VK_SUCCESS == res);
     }
@@ -372,35 +615,35 @@ void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExt
 bool VulkanManager::createSwapchain(VulkanSurface* surface) {
     // check for capabilities
     VkSurfaceCapabilitiesKHR caps;
-    VkResult res = mGetPhysicalDeviceSurfaceCapabilitiesKHR(mBackendContext->fPhysicalDevice,
+    VkResult res = mGetPhysicalDeviceSurfaceCapabilitiesKHR(mPhysicalDevice,
                                                             surface->mVkSurface, &caps);
     if (VK_SUCCESS != res) {
         return false;
     }
 
     uint32_t surfaceFormatCount;
-    res = mGetPhysicalDeviceSurfaceFormatsKHR(mBackendContext->fPhysicalDevice, surface->mVkSurface,
+    res = mGetPhysicalDeviceSurfaceFormatsKHR(mPhysicalDevice, surface->mVkSurface,
                                               &surfaceFormatCount, nullptr);
     if (VK_SUCCESS != res) {
         return false;
     }
 
     FatVector<VkSurfaceFormatKHR, 4> surfaceFormats(surfaceFormatCount);
-    res = mGetPhysicalDeviceSurfaceFormatsKHR(mBackendContext->fPhysicalDevice, surface->mVkSurface,
+    res = mGetPhysicalDeviceSurfaceFormatsKHR(mPhysicalDevice, surface->mVkSurface,
                                               &surfaceFormatCount, surfaceFormats.data());
     if (VK_SUCCESS != res) {
         return false;
     }
 
     uint32_t presentModeCount;
-    res = mGetPhysicalDeviceSurfacePresentModesKHR(mBackendContext->fPhysicalDevice,
+    res = mGetPhysicalDeviceSurfacePresentModesKHR(mPhysicalDevice,
                                                    surface->mVkSurface, &presentModeCount, nullptr);
     if (VK_SUCCESS != res) {
         return false;
     }
 
     FatVector<VkPresentModeKHR, VK_PRESENT_MODE_RANGE_SIZE_KHR> presentModes(presentModeCount);
-    res = mGetPhysicalDeviceSurfacePresentModesKHR(mBackendContext->fPhysicalDevice,
+    res = mGetPhysicalDeviceSurfacePresentModesKHR(mPhysicalDevice,
                                                    surface->mVkSurface, &presentModeCount,
                                                    presentModes.data());
     if (VK_SUCCESS != res) {
@@ -482,8 +725,8 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
     swapchainCreateInfo.imageArrayLayers = 1;
     swapchainCreateInfo.imageUsage = usageFlags;
 
-    uint32_t queueFamilies[] = {mBackendContext->fGraphicsQueueIndex, mPresentQueueIndex};
-    if (mBackendContext->fGraphicsQueueIndex != mPresentQueueIndex) {
+    uint32_t queueFamilies[] = {mGraphicsQueueIndex, mPresentQueueIndex};
+    if (mGraphicsQueueIndex != mPresentQueueIndex) {
         swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         swapchainCreateInfo.queueFamilyIndexCount = 2;
         swapchainCreateInfo.pQueueFamilyIndices = queueFamilies;
@@ -499,19 +742,18 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
     swapchainCreateInfo.clipped = true;
     swapchainCreateInfo.oldSwapchain = surface->mSwapchain;
 
-    res = mCreateSwapchainKHR(mBackendContext->fDevice, &swapchainCreateInfo, nullptr,
-                              &surface->mSwapchain);
+    res = mCreateSwapchainKHR(mDevice, &swapchainCreateInfo, nullptr, &surface->mSwapchain);
     if (VK_SUCCESS != res) {
         return false;
     }
 
     // destroy the old swapchain
     if (swapchainCreateInfo.oldSwapchain != VK_NULL_HANDLE) {
-        mDeviceWaitIdle(mBackendContext->fDevice);
+        mDeviceWaitIdle(mDevice);
 
         destroyBuffers(surface);
 
-        mDestroySwapchainKHR(mBackendContext->fDevice, swapchainCreateInfo.oldSwapchain, nullptr);
+        mDestroySwapchainKHR(mDevice, swapchainCreateInfo.oldSwapchain, nullptr);
     }
 
     createBuffers(surface, surfaceFormat, extent);
@@ -535,20 +777,18 @@ VulkanSurface* VulkanManager::createSurface(ANativeWindow* window) {
     surfaceCreateInfo.flags = 0;
     surfaceCreateInfo.window = window;
 
-    VkResult res = mCreateAndroidSurfaceKHR(mBackendContext->fInstance, &surfaceCreateInfo, nullptr,
-                                            &surface->mVkSurface);
+    VkResult res = mCreateAndroidSurfaceKHR(mInstance, &surfaceCreateInfo, nullptr,
+            &surface->mVkSurface);
     if (VK_SUCCESS != res) {
         delete surface;
         return nullptr;
     }
 
     SkDEBUGCODE(VkBool32 supported; res = mGetPhysicalDeviceSurfaceSupportKHR(
-                                            mBackendContext->fPhysicalDevice, mPresentQueueIndex,
-                                            surface->mVkSurface, &supported);
-                // All physical devices and queue families on Android must be capable of
-                // presentation with any
-                // native window.
-                SkASSERT(VK_SUCCESS == res && supported););
+            mPhysicalDevice, mPresentQueueIndex, surface->mVkSurface, &supported);
+    // All physical devices and queue families on Android must be capable of
+    // presentation with any native window.
+    SkASSERT(VK_SUCCESS == res && supported););
 
     if (!createSwapchain(surface)) {
         destroySurface(surface);
@@ -605,7 +845,7 @@ static VkAccessFlags layoutToSrcAccessMask(const VkImageLayout layout) {
 void VulkanManager::swapBuffers(VulkanSurface* surface) {
     if (CC_UNLIKELY(Properties::waitForGpuCompletion)) {
         ATRACE_NAME("Finishing GPU work");
-        mDeviceWaitIdle(mBackendContext->fDevice);
+        mDeviceWaitIdle(mDevice);
     }
 
     SkASSERT(surface->mBackbuffers);
@@ -638,7 +878,7 @@ void VulkanManager::swapBuffers(VulkanSurface* surface) {
             dstAccessMask,                              // inputMask
             layout,                                     // oldLayout
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,            // newLayout
-            mBackendContext->fGraphicsQueueIndex,       // srcQueueFamilyIndex
+            mGraphicsQueueIndex,                        // srcQueueFamilyIndex
             mPresentQueueIndex,                         // dstQueueFamilyIndex
             surface->mImages[backbuffer->mImageIndex],  // image
             {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1}     // subresourceRange
@@ -670,7 +910,7 @@ void VulkanManager::swapBuffers(VulkanSurface* surface) {
     submitInfo.pSignalSemaphores = &backbuffer->mRenderSemaphore;
 
     // Attach second fence to submission here so we can track when the command buffer finishes.
-    mQueueSubmit(mBackendContext->fQueue, 1, &submitInfo, backbuffer->mUsageFences[1]);
+    mQueueSubmit(mGraphicsQueue, 1, &submitInfo, backbuffer->mUsageFences[1]);
 
     // Submit present operation to present queue. We use a semaphore here to make sure all rendering
     // to the image is complete and that the layout has been change to present on the graphics
