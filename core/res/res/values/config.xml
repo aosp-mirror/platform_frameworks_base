@@ -2576,6 +2576,7 @@
          "silent" = silent mode
          "users" = list of users
          "restart" = restart device
+         "emergency" = Launch emergency dialer
          "lockdown" = Lock down device until the user authenticates
          "logout" =  Logout the current user
          -->
@@ -2585,6 +2586,7 @@
         <item>lockdown</item>
         <item>logout</item>
         <item>bugreport</item>
+        <item>emergency</item>
         <item>screenshot</item>
     </string-array>
 
