@@ -1246,7 +1246,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mPowerKeyHandled = true;
             mHandler.removeMessages(MSG_POWER_LONG_PRESS);
             // See if we deferred screen wake because long press power for torch is enabled
-            if (mResolvedLongPressOnPowerBehavior == LONG_PRESS_POWER_TORCH && !isScreenOn()) {
+            if (mResolvedLongPressOnPowerBehavior == LONG_PRESS_POWER_TORCH &&
+                    (!isScreenOn() || isDozeMode())) {
                 wakeUpFromPowerKey(SystemClock.uptimeMillis());
             }
         }
@@ -1503,11 +1504,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private boolean isDozeMode() {
+        IDreamManager dreamManager = getDreamManager();
+
+        try {
+            if (dreamManager != null && dreamManager.isDreaming()) {
+                return true;
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException when checking if dreaming", e);
+        }
+        return false;
+    }
+
     private int getResolvedLongPressOnPowerBehavior() {
         if (FactoryTest.isLongPressOnPowerOffEnabled()) {
             return LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM;
         }
-        if (mTorchLongPressPowerEnabled && !isScreenOn()) {
+        if (mTorchLongPressPowerEnabled && (!isScreenOn() || isDozeMode())) {
             return LONG_PRESS_POWER_TORCH;
         }
         return mLongPressOnPowerBehavior;
@@ -4952,6 +4966,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return false;
         }
 
+        final boolean isDozing = isDozeMode();
+
+        if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP)
+                && isDozing) {
+            return false;
+        }
+
         // Send events to keyguard while the screen is on and it's showing.
         if (isKeyguardShowingAndNotOccluded() && !displayOff) {
             return true;
@@ -4967,14 +4988,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (isDefaultDisplay) {
             // Send events to a dozing dream even if the screen is off since the dream
             // is in control of the state of the screen.
-            IDreamManager dreamManager = getDreamManager();
-
-            try {
-                if (dreamManager != null && dreamManager.isDreaming()) {
-                    return true;
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "RemoteException when checking if dreaming", e);
+            if (isDozing) {
+                return true;
             }
         }
         // Otherwise, consume events since the user can't see what is being
