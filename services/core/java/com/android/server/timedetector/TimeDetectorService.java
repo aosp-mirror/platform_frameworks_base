@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.timedetector.ITimeDetectorService;
 import android.app.timedetector.TimeSignal;
 import android.content.Context;
+import android.os.Binder;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
@@ -69,7 +70,13 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     @Override
     public void suggestTime(@NonNull TimeSignal timeSignal) {
         enforceSetTimePermission();
-        mTimeDetectorStrategy.suggestTime(timeSignal);
+
+        long callerIdToken = Binder.clearCallingIdentity();
+        try {
+            mTimeDetectorStrategy.suggestTime(timeSignal);
+        } finally {
+            Binder.restoreCallingIdentity(callerIdToken);
+        }
     }
 
     @Override
