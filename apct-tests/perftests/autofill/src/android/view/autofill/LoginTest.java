@@ -69,7 +69,13 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
     public void testFocus_noService() throws Throwable {
         resetService();
 
-        focusTest(false);
+        mActivityRule.runOnUiThread(() -> {
+            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            while (state.keepRunning()) {
+                mUsername.requestFocus();
+                mPassword.requestFocus();
+            }
+        });
     }
 
     /**
@@ -81,7 +87,20 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
         MyAutofillService.newCannedResponse().reply();
         setService();
 
-        focusTest(true);
+        // Must first focus in a field to trigger autofill and wait for service response
+        // outside the loop
+        mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
+        MyAutofillService.getLastFillRequest();
+        // Then focus on password so loop start with focus away from username
+        mActivityRule.runOnUiThread(() -> mPassword.requestFocus());
+
+        mActivityRule.runOnUiThread(() -> {
+            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            while (state.keepRunning()) {
+                mUsername.requestFocus();
+                mPassword.requestFocus();
+            }
+        });
     }
 
     /**
@@ -95,7 +114,45 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
                 .reply();
         setService();
 
-        focusTest(true);
+        // Callback is used to slow down the calls made to the autofill server so the
+        // app is not crashed due to binder exhaustion. But the time spent waiting for the callbacks
+        // is not measured here...
+        MyAutofillCallback callback = new MyAutofillCallback();
+        mAfm.registerCallback(callback);
+
+        // Must first trigger autofill and wait for service response outside the loop
+        mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
+        MyAutofillService.getLastFillRequest();
+        callback.expectEvent(mUsername, EVENT_INPUT_SHOWN);
+
+        // Then focus on password so loop start with focus away from username
+        mActivityRule.runOnUiThread(() -> mPassword.requestFocus());
+        callback.expectEvent(mUsername, EVENT_INPUT_HIDDEN);
+        callback.expectEvent(mPassword, EVENT_INPUT_SHOWN);
+
+
+        // NOTE: we cannot run the whole loop inside the UI thread, because the autofill callback
+        // is called on it, which would cause a deadlock on expectEvent().
+        try {
+            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            while (state.keepRunning()) {
+                mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
+                state.pauseTiming(); // Ignore time spent waiting for callbacks
+                callback.expectEvent(mPassword, EVENT_INPUT_HIDDEN);
+                callback.expectEvent(mUsername, EVENT_INPUT_SHOWN);
+                state.resumeTiming();
+                mActivityRule.runOnUiThread(() -> mPassword.requestFocus());
+                state.pauseTiming(); // Ignore time spent waiting for callbacks
+                callback.expectEvent(mUsername, EVENT_INPUT_HIDDEN);
+                callback.expectEvent(mPassword, EVENT_INPUT_SHOWN);
+                state.resumeTiming();
+            }
+
+            // Sanity check
+            callback.assertNoAsyncErrors();
+        } finally {
+            mAfm.unregisterCallback(callback);
+        }
     }
 
     /**
@@ -110,23 +167,41 @@ public class LoginTest extends AbstractAutofillPerfTestCase {
                 .reply();
         setService();
 
-        focusTest(true);
-    }
+        // Callback is used to slow down the calls made to the autofill server so the
+        // app is not crashed due to binder exhaustion. But the time spent waiting for the callbacks
+        // is not measured here...
+        MyAutofillCallback callback = new MyAutofillCallback();
+        mAfm.registerCallback(callback);
 
-    private void focusTest(boolean waitForService) throws Throwable {
-        // Must first focus in a field to trigger autofill and wait for service response
-        // outside the loop
+        // Must first trigger autofill and wait for service response outside the loop
         mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
-        if (waitForService) {
-            MyAutofillService.getLastFillRequest();
-        }
-        mActivityRule.runOnUiThread(() -> {
+        MyAutofillService.getLastFillRequest();
+        callback.expectEvent(mUsername, EVENT_INPUT_SHOWN);
+
+        // Then focus on password so loop start with focus away from username
+        mActivityRule.runOnUiThread(() -> mPassword.requestFocus());
+        callback.expectEvent(mUsername, EVENT_INPUT_HIDDEN);
+
+        // NOTE: we cannot run the whole loop inside the UI thread, because the autofill callback
+        // is called on it, which would cause a deadlock on expectEvent().
+        try {
             BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
             while (state.keepRunning()) {
-                mUsername.requestFocus();
-                mPassword.requestFocus();
+                mActivityRule.runOnUiThread(() -> mUsername.requestFocus());
+                state.pauseTiming(); // Ignore time spent waiting for callbacks
+                callback.expectEvent(mUsername, EVENT_INPUT_SHOWN);
+                state.resumeTiming();
+                mActivityRule.runOnUiThread(() -> mPassword.requestFocus());
+                state.pauseTiming(); // Ignore time spent waiting for callbacks
+                callback.expectEvent(mUsername, EVENT_INPUT_HIDDEN);
+                state.resumeTiming();
             }
-        });
+
+            // Sanity check
+            callback.assertNoAsyncErrors();
+        } finally {
+            mAfm.unregisterCallback(callback);
+        }
     }
 
     /**
