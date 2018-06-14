@@ -1094,7 +1094,7 @@ TEST(ReorderBarrierDrawable, testShadowMatrix) {
     class ShadowTestCanvas : public SkCanvas {
     public:
         ShadowTestCanvas(int width, int height) : SkCanvas(width, height) {}
-        int getIndex() { return mDrawCounter; }
+        int getDrawCounter() { return mDrawCounter; }
 
         virtual void onDrawDrawable(SkDrawable* drawable, const SkMatrix* matrix) override {
             // expect to draw 2 RenderNodeDrawable, 1 StartReorderBarrierDrawable,
@@ -1109,17 +1109,36 @@ TEST(ReorderBarrierDrawable, testShadowMatrix) {
             EXPECT_EQ(dy, TRANSLATE_Y);
         }
 
-        virtual void didConcat(const SkMatrix& matrix) override {
-            // This function is invoked by EndReorderBarrierDrawable::drawShadow to apply shadow
-            // matrix.
+        virtual void didSetMatrix(const SkMatrix& matrix) override {
             mDrawCounter++;
-            EXPECT_EQ(SkMatrix::MakeTrans(CASTER_X, CASTER_Y), matrix);
-            EXPECT_EQ(SkMatrix::MakeTrans(CASTER_X + TRANSLATE_X, CASTER_Y + TRANSLATE_Y),
-                      getTotalMatrix());
+            // First invocation is EndReorderBarrierDrawable::drawShadow to apply shadow matrix.
+            // Second invocation is preparing the matrix for an elevated RenderNodeDrawable.
+            EXPECT_TRUE(matrix.isIdentity());
+            EXPECT_TRUE(getTotalMatrix().isIdentity());
+        }
+
+        virtual void didConcat(const SkMatrix& matrix) override {
+            mDrawCounter++;
+            if (mFirstDidConcat) {
+                // First invocation is EndReorderBarrierDrawable::drawShadow to apply shadow matrix.
+                mFirstDidConcat = false;
+                EXPECT_EQ(SkMatrix::MakeTrans(CASTER_X + TRANSLATE_X, CASTER_Y + TRANSLATE_Y),
+                          matrix);
+                EXPECT_EQ(SkMatrix::MakeTrans(CASTER_X + TRANSLATE_X, CASTER_Y + TRANSLATE_Y),
+                          getTotalMatrix());
+            } else {
+                // Second invocation is preparing the matrix for an elevated RenderNodeDrawable.
+                EXPECT_EQ(SkMatrix::MakeTrans(TRANSLATE_X, TRANSLATE_Y),
+                          matrix);
+                EXPECT_EQ(SkMatrix::MakeTrans(TRANSLATE_X, TRANSLATE_Y),
+                          getTotalMatrix());
+            }
         }
 
     protected:
         int mDrawCounter = 0;
+    private:
+        bool mFirstDidConcat = true;
     };
 
     auto parent = TestUtils::createSkiaNode(
@@ -1143,7 +1162,7 @@ TEST(ReorderBarrierDrawable, testShadowMatrix) {
     ShadowTestCanvas canvas(CANVAS_WIDTH, CANVAS_HEIGHT);
     RenderNodeDrawable drawable(parent.get(), &canvas, false);
     canvas.drawDrawable(&drawable);
-    EXPECT_EQ(6, canvas.getIndex());
+    EXPECT_EQ(9, canvas.getDrawCounter());
 }
 
 // Draw a vector drawable twice but with different bounds and verify correct bounds are used.
