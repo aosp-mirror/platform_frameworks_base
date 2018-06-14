@@ -479,7 +479,7 @@ public class RecentsOnboarding {
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 x, -mNavBarHeight / 2,
-                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 flags,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
