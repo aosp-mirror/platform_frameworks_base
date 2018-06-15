@@ -236,7 +236,6 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_PERSIST_RINGER_MODE = 3;
     private static final int MSG_AUDIO_SERVER_DIED = 4;
     private static final int MSG_PLAY_SOUND_EFFECT = 5;
-    private static final int MSG_BTA2DP_DOCK_TIMEOUT = 6;
     private static final int MSG_LOAD_SOUND_EFFECTS = 7;
     private static final int MSG_SET_FORCE_USE = 8;
     private static final int MSG_BT_HEADSET_CNCT_FAILED = 9;
@@ -268,6 +267,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_A2DP_DEVICE_CONFIG_CHANGE = 103;
     private static final int MSG_DISABLE_AUDIO_FOR_UID = 104;
     private static final int MSG_SET_HEARING_AID_CONNECTION_STATE = 105;
+    private static final int MSG_BTA2DP_DOCK_TIMEOUT = 106;
     // end of messages handled under wakelock
 
     private static final int BTA2DP_DOCK_TIMEOUT_MILLIS = 8000;
@@ -4521,13 +4521,21 @@ public class AudioService extends IAudioService.Stub
         }
         synchronized (mLastDeviceConnectMsgTime) {
             long time = SystemClock.uptimeMillis() + delay;
-            handler.sendMessageAtTime(handler.obtainMessage(msg, arg1, arg2, obj), time);
-            if (msg == MSG_SET_WIRED_DEVICE_CONNECTION_STATE ||
-                    msg == MSG_SET_A2DP_SRC_CONNECTION_STATE ||
-                    msg == MSG_SET_A2DP_SINK_CONNECTION_STATE ||
-                    msg == MSG_SET_HEARING_AID_CONNECTION_STATE) {
+
+            if (msg == MSG_SET_A2DP_SRC_CONNECTION_STATE ||
+                msg == MSG_SET_A2DP_SINK_CONNECTION_STATE ||
+                msg == MSG_SET_HEARING_AID_CONNECTION_STATE ||
+                msg == MSG_SET_WIRED_DEVICE_CONNECTION_STATE ||
+                msg == MSG_A2DP_DEVICE_CONFIG_CHANGE ||
+                msg == MSG_BTA2DP_DOCK_TIMEOUT) {
+                if (mLastDeviceConnectMsgTime >= time) {
+                  // add a little delay to make sure messages are ordered as expected
+                  time = mLastDeviceConnectMsgTime + 30;
+                }
                 mLastDeviceConnectMsgTime = time;
             }
+
+            handler.sendMessageAtTime(handler.obtainMessage(msg, arg1, arg2, obj), time);
         }
     }
 
@@ -4689,6 +4697,13 @@ public class AudioService extends IAudioService.Stub
             } else {
                 delay = 0;
             }
+
+            if (DEBUG_DEVICES) {
+                Log.d(TAG, "setBluetoothA2dpDeviceConnectionStateInt device: " + device
+                      + " state: " + state + " delay(ms): " + delay
+                      + " suppressNoisyIntent: " + suppressNoisyIntent);
+            }
+
             queueMsgUnderWakeLock(mAudioHandler,
                     (profile == BluetoothProfile.A2DP ?
                         MSG_SET_A2DP_SINK_CONNECTION_STATE : MSG_SET_A2DP_SRC_CONNECTION_STATE),
@@ -5597,6 +5612,7 @@ public class AudioService extends IAudioService.Stub
                     synchronized (mConnectedDevices) {
                         makeA2dpDeviceUnavailableNow( (String) msg.obj );
                     }
+                    mAudioEventWakeLock.release();
                     break;
 
                 case MSG_SET_FORCE_USE:
@@ -5827,6 +5843,9 @@ public class AudioService extends IAudioService.Stub
 
     // must be called synchronized on mConnectedDevices
     private void makeA2dpDeviceUnavailableNow(String address) {
+        if (address == null) {
+            return;
+        }
         synchronized (mA2dpAvrcpLock) {
             mAvrcpAbsVolSupported = false;
         }
@@ -5836,6 +5855,9 @@ public class AudioService extends IAudioService.Stub
                 makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address));
         // Remove A2DP routes as well
         setCurrentAudioRouteName(null);
+        if (mDockAddress == address) {
+            mDockAddress = null;
+        }
     }
 
     // must be called synchronized on mConnectedDevices
@@ -5847,9 +5869,12 @@ public class AudioService extends IAudioService.Stub
         mConnectedDevices.remove(
                 makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address));
         // send the delayed message to make the device unavailable later
-        Message msg = mAudioHandler.obtainMessage(MSG_BTA2DP_DOCK_TIMEOUT, address);
-        mAudioHandler.sendMessageDelayed(msg, delayMs);
-
+        queueMsgUnderWakeLock(mAudioHandler,
+            MSG_BTA2DP_DOCK_TIMEOUT,
+            0,
+            0,
+            address,
+            delayMs);
     }
 
     // must be called synchronized on mConnectedDevices
@@ -5921,7 +5946,8 @@ public class AudioService extends IAudioService.Stub
     private void onSetA2dpSinkConnectionState(BluetoothDevice btDevice, int state, int a2dpVolume)
     {
         if (DEBUG_DEVICES) {
-            Log.d(TAG, "onSetA2dpSinkConnectionState btDevice=" + btDevice+"state=" + state);
+            Log.d(TAG, "onSetA2dpSinkConnectionState btDevice= " + btDevice+" state= " + state
+                + " is dock: "+btDevice.isBluetoothDock());
         }
         if (btDevice == null) {
             return;
@@ -5958,7 +5984,7 @@ public class AudioService extends IAudioService.Stub
                 } else {
                     // this could be a connection of another A2DP device before the timeout of
                     // a dock: cancel the dock timeout, and make the dock unavailable now
-                    if(hasScheduledA2dpDockTimeout()) {
+                    if (hasScheduledA2dpDockTimeout() && mDockAddress != null) {
                         cancelA2dpDeviceTimeout();
                         makeA2dpDeviceUnavailableNow(mDockAddress);
                     }
@@ -6177,17 +6203,6 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
-        if (mAudioHandler.hasMessages(MSG_SET_A2DP_SRC_CONNECTION_STATE) ||
-                mAudioHandler.hasMessages(MSG_SET_A2DP_SINK_CONNECTION_STATE) ||
-                mAudioHandler.hasMessages(MSG_SET_HEARING_AID_CONNECTION_STATE) ||
-                mAudioHandler.hasMessages(MSG_SET_WIRED_DEVICE_CONNECTION_STATE)) {
-            synchronized (mLastDeviceConnectMsgTime) {
-                long time = SystemClock.uptimeMillis();
-                if (mLastDeviceConnectMsgTime > time) {
-                    delay = (int)(mLastDeviceConnectMsgTime - time) + 30;
-                }
-            }
-        }
         return delay;
     }
 
