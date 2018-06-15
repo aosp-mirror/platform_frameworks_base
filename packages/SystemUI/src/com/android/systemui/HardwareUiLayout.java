@@ -27,24 +27,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.leak.RotationUtils;
 
-import java.util.ArrayList;
-
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_NONE;
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
 
-public class HardwareUiLayout extends FrameLayout implements Tunable {
+public class HardwareUiLayout extends LinearLayout implements Tunable {
 
     private static final String EDGE_BLEED = "sysui_hwui_edge_bleed";
     private static final String ROUNDED_DIVIDER = "sysui_hwui_rounded_divider";
     private final int[] mTmp2 = new int[2];
     private View mChild;
+    private View mSeparatedView;
     private int mOldHeight;
     private boolean mAnimating;
     private AnimatorSet mAnimation;
@@ -53,6 +51,7 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
     private HardwareBgDrawable mBackground;
     private Animator mAnimator;
     private boolean mCollapse;
+    private boolean mHasSeparatedButton;
     private int mEndPoint;
     private boolean mEdgeBleed;
     private boolean mRoundedDivider;
@@ -94,6 +93,7 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
         mBackground = new HardwareBgDrawable(mRoundedDivider, !mEdgeBleed, getContext());
         if (mChild != null) {
             mChild.setBackground(mBackground);
+            mSeparatedView.setBackground(mBackground);
             requestLayout();
         }
     }
@@ -110,6 +110,18 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
             }
             mChild.setLayoutParams(params);
         }
+
+        if (mSeparatedView != null) {
+            MarginLayoutParams params = (MarginLayoutParams) mSeparatedView.getLayoutParams();
+            if (mRotation == ROTATION_LANDSCAPE) {
+                params.topMargin = edge;
+            } else if (mRotation == ROTATION_SEASCAPE) {
+                params.bottomMargin = edge;
+            } else {
+                params.rightMargin = edge;
+            }
+            mSeparatedView.setLayoutParams(params);
+        }
     }
 
     private int getEdgePadding() {
@@ -123,6 +135,8 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
             if (getChildCount() != 0) {
                 mChild = getChildAt(0);
                 mChild.setBackground(mBackground);
+                mSeparatedView = getChildAt(1);
+                mSeparatedView.setBackground(mBackground);
                 updateEdgeMargin(mEdgeBleed ? 0 : getEdgePadding());
                 mOldHeight = mChild.getMeasuredHeight();
                 mChild.addOnLayoutChangeListener(
@@ -170,6 +184,17 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
         } else {
             rotateLeft();
         }
+        if (mHasSeparatedButton) {
+            if (from == ROTATION_SEASCAPE || to == ROTATION_SEASCAPE) {
+                // Separated view has top margin, so seascape separated view need special rotation,
+                // not a full left or right rotation.
+                swapLeftAndTop(mSeparatedView);
+            } else if (from == ROTATION_LANDSCAPE) {
+                rotateRight(mSeparatedView);
+            } else {
+                rotateLeft(mSeparatedView);
+            }
+        }
         if (to != ROTATION_NONE) {
             if (mChild instanceof LinearLayout) {
                 mRotatedBackground = true;
@@ -177,8 +202,10 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
                 LinearLayout linearLayout = (LinearLayout) mChild;
                 if (mSwapOrientation) {
                     linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+                    setOrientation(LinearLayout.HORIZONTAL);
                 }
-                swapDimens(this.mChild);
+                swapDimens(mChild);
+                swapDimens(mSeparatedView);
             }
         } else {
             if (mChild instanceof LinearLayout) {
@@ -187,8 +214,10 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
                 LinearLayout linearLayout = (LinearLayout) mChild;
                 if (mSwapOrientation) {
                     linearLayout.setOrientation(LinearLayout.VERTICAL);
+                    setOrientation(LinearLayout.VERTICAL);
                 }
                 swapDimens(mChild);
+                swapDimens(mSeparatedView);
             }
         }
     }
@@ -201,6 +230,12 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
         LayoutParams p = (LayoutParams) mChild.getLayoutParams();
         p.gravity = rotateGravityRight(p.gravity);
         mChild.setLayoutParams(p);
+
+        LayoutParams separatedViewLayoutParams = (LayoutParams) mSeparatedView.getLayoutParams();
+        separatedViewLayoutParams.gravity = rotateGravityRight(separatedViewLayoutParams.gravity);
+        mSeparatedView.setLayoutParams(separatedViewLayoutParams);
+
+        setGravity(p.gravity);
     }
 
     private void swapDimens(View v) {
@@ -253,6 +288,12 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
         LayoutParams p = (LayoutParams) mChild.getLayoutParams();
         p.gravity = rotateGravityLeft(p.gravity);
         mChild.setLayoutParams(p);
+
+        LayoutParams separatedViewLayoutParams = (LayoutParams) mSeparatedView.getLayoutParams();
+        separatedViewLayoutParams.gravity = rotateGravityLeft(separatedViewLayoutParams.gravity);
+        mSeparatedView.setLayoutParams(separatedViewLayoutParams);
+
+        setGravity(p.gravity);
     }
 
     private int rotateGravityLeft(int gravity) {
@@ -310,6 +351,15 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
         v.setLayoutParams(params);
     }
 
+    private void swapLeftAndTop(View v) {
+        v.setPadding(v.getPaddingTop(), v.getPaddingLeft(), v.getPaddingBottom(),
+                v.getPaddingRight());
+        MarginLayoutParams params = (MarginLayoutParams) v.getLayoutParams();
+        params.setMargins(params.topMargin, params.leftMargin, params.bottomMargin,
+                params.rightMargin);
+        v.setLayoutParams(params);
+    }
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
@@ -351,6 +401,9 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
 
     private void updatePosition() {
         if (mChild == null) return;
+        // If got separated button, setRotatedBackground to false,
+        // all items won't get white background.
+        mBackground.setRotatedBackground(mHasSeparatedButton);
         if (mDivision != null && mDivision.getVisibility() == VISIBLE) {
             int index = mRotatedBackground ? 0 : 1;
             mDivision.getLocationOnScreen(mTmp2);
@@ -402,6 +455,10 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
 
     public void setCollapse() {
         mCollapse = true;
+    }
+
+    public void setHasSeparatedButton(boolean hasSeparatedButton) {
+        mHasSeparatedButton = hasSeparatedButton;
     }
 
     public static HardwareUiLayout get(View v) {
