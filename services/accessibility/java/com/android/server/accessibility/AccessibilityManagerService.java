@@ -31,6 +31,7 @@ import android.accessibilityservice.IAccessibilityServiceClient;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityTaskManagerInternal;
 import android.app.AlertDialog;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
@@ -2624,7 +2625,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     PowerManager.USER_ACTIVITY_EVENT_ACCESSIBILITY, 0);
 
             if (activityToken != null) {
-                LocalServices.getService(ActivityManagerInternal.class)
+                LocalServices.getService(ActivityTaskManagerInternal.class)
                         .setFocusedActivity(activityToken);
             }
             connection.mConnection.performAccessibilityAction(accessibilityNodeId, action,

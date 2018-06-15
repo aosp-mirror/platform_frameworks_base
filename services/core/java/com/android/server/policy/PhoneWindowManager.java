@@ -155,7 +155,8 @@ import static com.android.server.wm.WindowManagerPolicyProto.WINDOW_MANAGER_DRAW
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityManagerInternal.SleepToken;
+import android.app.ActivityTaskManagerInternal;
+import android.app.ActivityTaskManagerInternal.SleepToken;
 import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
@@ -454,6 +455,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowManagerInternal mWindowManagerInternal;
     PowerManager mPowerManager;
     ActivityManagerInternal mActivityManagerInternal;
+    ActivityTaskManagerInternal mActivityTaskManagerInternal;
     AutofillManagerInternal mAutofillManagerInternal;
     InputManagerInternal mInputManagerInternal;
     InputMethodManagerInternal mInputMethodManagerInternal;
@@ -1117,7 +1119,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mWindowSleepToken != null) {
             return;
         }
-        mWindowSleepToken = mActivityManagerInternal.acquireSleepToken("WindowSleepToken",
+        mWindowSleepToken = mActivityTaskManagerInternal.acquireSleepToken("WindowSleepToken",
                 DEFAULT_DISPLAY);
     };
 
@@ -2001,6 +2003,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mWindowManagerFuncs = windowManagerFuncs;
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mDreamManagerInternal = LocalServices.getService(DreamManagerInternal.class);
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
@@ -7792,7 +7795,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void updateDreamingSleepToken(boolean acquire) {
         if (acquire) {
             if (mDreamingSleepToken == null) {
-                mDreamingSleepToken = mActivityManagerInternal.acquireSleepToken(
+                mDreamingSleepToken = mActivityTaskManagerInternal.acquireSleepToken(
                         "Dream", DEFAULT_DISPLAY);
             }
         } else {
@@ -7807,7 +7810,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void updateScreenOffSleepToken(boolean acquire) {
         if (acquire) {
             if (mScreenOffSleepToken == null) {
-                mScreenOffSleepToken = mActivityManagerInternal.acquireSleepToken(
+                mScreenOffSleepToken = mActivityTaskManagerInternal.acquireSleepToken(
                         "ScreenOff", DEFAULT_DISPLAY);
             }
         } else {

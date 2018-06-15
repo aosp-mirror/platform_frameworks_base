@@ -19,6 +19,7 @@ package com.android.server.voiceinteraction;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityTaskManagerInternal;
 import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -88,6 +89,7 @@ public class VoiceInteractionManagerService extends SystemService {
     final ContentResolver mResolver;
     final DatabaseHelper mDbHelper;
     final ActivityManagerInternal mAmInternal;
+    final ActivityTaskManagerInternal mAtmInternal;
     final UserManager mUserManager;
     final ArraySet<Integer> mLoadedKeyphraseIds = new ArraySet<>();
     ShortcutServiceInternal mShortcutServiceInternal;
@@ -104,6 +106,8 @@ public class VoiceInteractionManagerService extends SystemService {
         mServiceStub = new VoiceInteractionManagerServiceStub();
         mAmInternal = Preconditions.checkNotNull(
                 LocalServices.getService(ActivityManagerInternal.class));
+        mAtmInternal = Preconditions.checkNotNull(
+                LocalServices.getService(ActivityTaskManagerInternal.class));
         mUserManager = Preconditions.checkNotNull(
                 context.getSystemService(UserManager.class));
 
@@ -212,7 +216,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
                             @Override
                             public void onShown() {
-                                mAmInternal.onLocalVoiceInteractionStarted(token,
+                                mAtmInternal.onLocalVoiceInteractionStarted(token,
                                         mImpl.mActiveSession.mSession,
                                         mImpl.mActiveSession.mInteractor);
                             }

@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityTaskManagerInternal;
 import android.app.AppGlobals;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
@@ -107,6 +108,7 @@ public class LauncherAppsService extends SystemService {
         private final UserManager mUm;
         private final UserManagerInternal mUserManagerInternal;
         private final ActivityManagerInternal mActivityManagerInternal;
+        private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
         private final ShortcutServiceInternal mShortcutServiceInternal;
         private final PackageCallbackList<IOnAppsChangedListener> mListeners
                 = new PackageCallbackList<IOnAppsChangedListener>();
@@ -122,6 +124,8 @@ public class LauncherAppsService extends SystemService {
                     LocalServices.getService(UserManagerInternal.class));
             mActivityManagerInternal = Preconditions.checkNotNull(
                     LocalServices.getService(ActivityManagerInternal.class));
+            mActivityTaskManagerInternal = Preconditions.checkNotNull(
+                    LocalServices.getService(ActivityTaskManagerInternal.class));
             mShortcutServiceInternal = Preconditions.checkNotNull(
                     LocalServices.getService(ShortcutServiceInternal.class));
             mShortcutServiceInternal.addListener(mPackageMonitor);
@@ -521,7 +525,7 @@ public class LauncherAppsService extends SystemService {
                 @NonNull String publisherPackage, Bundle startActivityOptions, int userId) {
             final int code;
             try {
-                code = mActivityManagerInternal.startActivitiesAsPackage(publisherPackage,
+                code = mActivityTaskManagerInternal.startActivitiesAsPackage(publisherPackage,
                         userId, intents, startActivityOptions);
                 if (ActivityManager.isStartResultSuccessful(code)) {
                     return true; // Success
@@ -618,7 +622,7 @@ public class LauncherAppsService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
-            mActivityManagerInternal.startActivityAsUser(caller, callingPackage,
+            mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
                     launchIntent, opts, user.getIdentifier());
         }
 
@@ -641,7 +645,7 @@ public class LauncherAppsService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
-            mActivityManagerInternal.startActivityAsUser(caller, callingPackage,
+            mActivityTaskManagerInternal.startActivityAsUser(caller, callingPackage,
                     intent, opts, user.getIdentifier());
         }
 

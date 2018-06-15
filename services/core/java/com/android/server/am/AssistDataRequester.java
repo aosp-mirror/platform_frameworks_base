@@ -17,7 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.ASSIST_CONTEXT_FULL;
-import static android.app.ActivityManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
+import static android.app.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_NONE;
 

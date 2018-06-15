@@ -196,6 +196,12 @@ public class BoundsAnimationController {
 
         @Override
         public void onAnimationStart(Animator animation) {
+            if (!mTarget.isAttached()) {
+                // No point of trying to animate something that isn't attached to the hierarchy
+                // anymore.
+                cancel();
+            }
+
             if (DEBUG) Slog.d(TAG, "onAnimationStart: mTarget=" + mTarget
                     + " mPrevSchedulePipModeChangedState=" + mPrevSchedulePipModeChangedState
                     + " mSchedulePipModeChangedState=" + mSchedulePipModeChangedState);

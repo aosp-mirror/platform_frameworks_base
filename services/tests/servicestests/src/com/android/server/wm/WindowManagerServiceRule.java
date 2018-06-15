@@ -29,6 +29,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import android.app.ActivityManagerInternal;
+import android.app.ActivityTaskManagerInternal;
 import android.content.Context;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManagerInternal;
@@ -91,15 +92,17 @@ public class WindowManagerServiceRule implements TestRule {
 
                 LocalServices.addService(ActivityManagerInternal.class,
                         mock(ActivityManagerInternal.class));
-                final ActivityManagerInternal am =
-                        LocalServices.getService(ActivityManagerInternal.class);
+                LocalServices.addService(ActivityTaskManagerInternal.class,
+                        mock(ActivityTaskManagerInternal.class));
+                final ActivityTaskManagerInternal atm =
+                        LocalServices.getService(ActivityTaskManagerInternal.class);
                 doAnswer((InvocationOnMock invocationOnMock) -> {
                     final Runnable runnable = invocationOnMock.<Runnable>getArgument(0);
                     if (runnable != null) {
                         runnable.run();
                     }
                     return null;
-                }).when(am).notifyKeyguardFlagsChanged(any());
+                }).when(atm).notifyKeyguardFlagsChanged(any());
 
                 InputManagerService ims = mock(InputManagerService.class);
                 // InputChannel is final and can't be mocked.
@@ -125,6 +128,7 @@ public class WindowManagerServiceRule implements TestRule {
                 LocalServices.removeServiceForTest(DisplayManagerInternal.class);
                 LocalServices.removeServiceForTest(PowerManagerInternal.class);
                 LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+                LocalServices.removeServiceForTest(ActivityTaskManagerInternal.class);
                 LocalServices.removeServiceForTest(WindowManagerInternal.class);
                 LocalServices.removeServiceForTest(WindowManagerPolicy.class);
             }

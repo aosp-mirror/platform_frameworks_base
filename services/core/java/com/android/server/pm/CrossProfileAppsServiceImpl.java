@@ -21,6 +21,7 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
@@ -112,7 +113,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
         launchIntent.setPackage(null);
         launchIntent.setComponent(component);
-        mInjector.getActivityManagerInternal().startActivityAsUser(
+        mInjector.getActivityTaskManagerInternal().startActivityAsUser(
                 caller, callingPackage, launchIntent,
                 ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle(),
                 user.getIdentifier());
@@ -241,6 +242,11 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         public ActivityManagerInternal getActivityManagerInternal() {
             return LocalServices.getService(ActivityManagerInternal.class);
         }
+
+        @Override
+        public ActivityTaskManagerInternal getActivityTaskManagerInternal() {
+            return LocalServices.getService(ActivityTaskManagerInternal.class);
+        }
     }
 
     @VisibleForTesting
@@ -264,5 +270,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         AppOpsManager getAppOpsManager();
 
         ActivityManagerInternal getActivityManagerInternal();
+
+        ActivityTaskManagerInternal getActivityTaskManagerInternal();
     }
 }

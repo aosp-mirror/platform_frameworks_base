@@ -26,6 +26,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManagerInternal;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.content.BroadcastReceiver;
@@ -171,7 +172,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             activityTokens.add(activityToken);
         } else {
             // Let's get top activities from all visible stacks
-            activityTokens = LocalServices.getService(ActivityManagerInternal.class)
+            activityTokens = LocalServices.getService(ActivityTaskManagerInternal.class)
                     .getTopVisibleActivities();
         }
         return mActiveSession.showLocked(args, flags, mDisabledShowContext, showCallback,
