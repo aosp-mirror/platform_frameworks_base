@@ -101,6 +101,7 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
@@ -420,6 +421,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private ArrayList<BiConsumer<Float, Float>> mExpandedHeightListeners = new ArrayList<>();
     private int mHeadsUpInset;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
+    private NotificationIconAreaController mIconAreaController;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -536,10 +538,16 @@ public class NotificationStackScrollLayout extends ViewGroup
         final int lockScreenRight = getWidth() - mSidePaddings;
         final int lockScreenTop = mCurrentBounds.top;
         final int lockScreenBottom = mCurrentBounds.bottom;
-        final int darkLeft = getWidth() / 2 - mSeparatorWidth / 2;
-        final int darkRight = darkLeft + mSeparatorWidth;
-        final int darkTop = (int) (mRegularTopPadding + mSeparatorThickness / 2f);
-        final int darkBottom = darkTop + mSeparatorThickness;
+        int separatorWidth = 0;
+        int separatorThickness = 0;
+        if (mIconAreaController.hasShelfIconsWhenFullyDark()) {
+            separatorThickness = mSeparatorThickness;
+            separatorWidth = mSeparatorWidth;
+        }
+        final int darkLeft = getWidth() / 2 - separatorWidth / 2;
+        final int darkRight = darkLeft + separatorWidth;
+        final int darkTop = (int) (mRegularTopPadding + separatorThickness / 2f);
+        final int darkBottom = darkTop + separatorThickness;
 
         if (mAmbientState.hasPulsingNotifications()) {
             // No divider, we have a notification icon instead
@@ -4015,11 +4023,15 @@ public class NotificationStackScrollLayout extends ViewGroup
         mDarkAmount = darkAmount;
         boolean wasFullyDark = mAmbientState.isFullyDark();
         mAmbientState.setDarkAmount(darkAmount);
-        if (mAmbientState.isFullyDark() != wasFullyDark) {
+        boolean nowFullyDark = mAmbientState.isFullyDark();
+        if (nowFullyDark != wasFullyDark) {
             updateContentHeight();
             DozeParameters dozeParameters = DozeParameters.getInstance(mContext);
-            if (mAmbientState.isFullyDark() && dozeParameters.shouldControlScreenOff()) {
+            if (nowFullyDark && dozeParameters.shouldControlScreenOff()) {
                 mShelf.fadeInTranslating();
+            }
+            if (mIconAreaController != null) {
+                mIconAreaController.setFullyDark(nowFullyDark);
             }
         }
         updateAlgorithmHeightAndPadding();
@@ -4636,6 +4648,10 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setHeadsUpAppearanceController(
             HeadsUpAppearanceController headsUpAppearanceController) {
         mHeadsUpAppearanceController = headsUpAppearanceController;
+    }
+
+    public void setIconAreaController(NotificationIconAreaController controller) {
+        mIconAreaController = controller;
     }
 
     /**
