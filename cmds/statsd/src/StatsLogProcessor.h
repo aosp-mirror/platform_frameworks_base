@@ -45,7 +45,8 @@ enum DumpReportReason {
 
 class StatsLogProcessor : public ConfigListener {
 public:
-    StatsLogProcessor(const sp<UidMap>& uidMap, const sp<AlarmMonitor>& anomalyAlarmMonitor,
+    StatsLogProcessor(const sp<UidMap>& uidMap, const sp<StatsPullerManager>& pullerManager,
+                      const sp<AlarmMonitor>& anomalyAlarmMonitor,
                       const sp<AlarmMonitor>& subscriberTriggerAlarmMonitor,
                       const int64_t timeBaseNs,
                       const std::function<bool(const ConfigKey&)>& sendBroadcast);
@@ -126,7 +127,7 @@ private:
 
     sp<UidMap> mUidMap;  // Reference to the UidMap to lookup app name and version for each uid.
 
-    StatsPullerManager mStatsPullerManager;
+    sp<StatsPullerManager> mPullerManager;  // Reference to StatsPullerManager
 
     sp<AlarmMonitor> mAnomalyAlarmMonitor;
 

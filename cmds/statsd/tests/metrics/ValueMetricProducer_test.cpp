@@ -62,8 +62,7 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     // TODO: pending refactor of StatsPullerManager
     // For now we still need this so that it doesn't do real pulling.
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
 
@@ -140,8 +139,7 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset) {
     metric.set_use_absolute_value_on_reset(true);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
 
@@ -214,8 +212,7 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset) {
     metric.mutable_value_field()->add_child()->set_field(2);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
 
@@ -287,8 +284,7 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
     metric.set_condition(StringToId("SCREEN_ON"));
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillRepeatedly(Return());
 
@@ -365,8 +361,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade) {
     metric.mutable_value_field()->add_child()->set_field(2);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
     valueProducer.setBucketSize(60 * NS_PER_SEC);
@@ -408,8 +403,7 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
     metric.mutable_value_field()->add_child()->set_field(2);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
@@ -464,8 +458,7 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgradeWhileConditionFalse) {
     metric.set_condition(StringToId("SCREEN_ON"));
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
@@ -514,8 +507,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
     metric.mutable_value_field()->add_child()->set_field(2);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
@@ -556,8 +548,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithCondition) {
     metric.mutable_value_field()->add_child()->set_field(2);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
     ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, -1, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
@@ -631,8 +622,10 @@ TEST(ValueMetricProducerTest, TestAnomalyDetection) {
     metric.mutable_value_field()->add_child()->set_field(2);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      -1 /*not pulled*/, bucketStartTimeNs, bucketStartTimeNs);
+                                      -1 /*not pulled*/, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
     valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     sp<AnomalyTracker> anomalyTracker = valueProducer.addAnomalyTracker(alert, alarmMonitor);
@@ -705,8 +698,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition) {
     metric.mutable_value_field()->add_child()->set_field(2);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
 
@@ -790,8 +782,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition) {
     metric.set_condition(StringToId("SCREEN_ON"));
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillRepeatedly(Return());
 
@@ -873,8 +864,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
     metric.set_condition(StringToId("SCREEN_ON"));
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillRepeatedly(Return());
 
@@ -976,8 +966,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition3) {
     metric.set_condition(StringToId("SCREEN_ON"));
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillRepeatedly(Return());
 

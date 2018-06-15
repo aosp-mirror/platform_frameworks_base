@@ -471,7 +471,7 @@ class AppErrors {
                 mService.removeProcessLocked(r, false, true, "crash");
                 if (task != null) {
                     try {
-                        mService.startActivityFromRecents(task.taskId,
+                        mService.mActivityTaskManager.startActivityFromRecents(task.taskId,
                                 ActivityOptions.makeBasic().toBundle());
                     } catch (IllegalArgumentException e) {
                         // Hmm, that didn't work, app might have crashed before creating a

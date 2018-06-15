@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <style name="BrightnessDialogContainer" parent="@style/BaseBrightnessDialogContainer">
-        <item name="android:layout_width">@dimen/standard_notification_panel_width</item>
+        <item name="android:layout_width">@dimen/notification_panel_width</item>
     </style>
 
     <style name="UserDetailView">

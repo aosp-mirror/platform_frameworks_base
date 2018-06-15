@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.StackInfo;
+import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
 import android.app.AppGlobals;
@@ -505,7 +506,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mUiOffloadThread.submit(() -> {
             final int userId;
             try {
-                userId = ActivityManager.getService().getLastResumedActivityUserId();
+                userId = ActivityTaskManager.getService().getLastResumedActivityUserId();
                 boolean isManagedProfile = mUserManager.isManagedProfile(userId);
                 mHandler.post(() -> {
                     final boolean showIcon;
@@ -536,7 +537,8 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         mCurrentNotifs.clear();
         mUiOffloadThread.submit(() -> {
             try {
-                final StackInfo focusedStack = ActivityManager.getService().getFocusedStackInfo();
+                final StackInfo focusedStack =
+                        ActivityTaskManager.getService().getFocusedStackInfo();
                 if (focusedStack != null) {
                     final int windowingMode =
                             focusedStack.configuration.windowConfiguration.getWindowingMode();
@@ -562,7 +564,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
             ArraySet<Pair<String, Integer>> notifs, NotificationManager noMan, IPackageManager pm) {
         try {
             final StackInfo info =
-                    ActivityManager.getService().getStackInfo(windowingMode, activityType);
+                    ActivityTaskManager.getService().getStackInfo(windowingMode, activityType);
             checkStack(info, notifs, noMan, pm);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -625,7 +627,6 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                     .putExtra(Intent.EXTRA_PACKAGE_NAME, appInfo.packageName)
                     .putExtra(Intent.EXTRA_VERSION_CODE, (int) (appInfo.versionCode & 0x7fffffff))
                     .putExtra(Intent.EXTRA_LONG_VERSION_CODE, appInfo.versionCode)
-                    .putExtra(Intent.EXTRA_EPHEMERAL_FAILURE, pendingIntent)
                     .putExtra(Intent.EXTRA_INSTANT_APP_FAILURE, pendingIntent);
 
             PendingIntent webPendingIntent = PendingIntent.getActivity(mContext, 0, goToWebIntent, 0);
@@ -652,7 +653,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     private Intent getTaskIntent(int taskId, int userId) {
         try {
             final List<ActivityManager.RecentTaskInfo> tasks =
-                    ActivityManager.getService().getRecentTasks(
+                    ActivityTaskManager.getService().getRecentTasks(
                             NUM_TASKS_FOR_INSTANT_APP_INFO, 0, userId).getList();
             for (int i = 0; i < tasks.size(); i++) {
                 if (tasks.get(i).id == taskId) {

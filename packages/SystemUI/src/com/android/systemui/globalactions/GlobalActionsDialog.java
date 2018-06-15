@@ -127,6 +127,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private static final String GLOBAL_ACTION_KEY_ASSIST = "assist";
     private static final String GLOBAL_ACTION_KEY_RESTART = "restart";
     private static final String GLOBAL_ACTION_KEY_LOGOUT = "logout";
+    private static final String GLOBAL_ACTION_KEY_EMERGENCY = "emergency";
     private static final String GLOBAL_ACTION_KEY_SCREENSHOT = "screenshot";
 
     private final Context mContext;
@@ -357,6 +358,12 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mItems.add(getAssistAction());
             } else if (GLOBAL_ACTION_KEY_RESTART.equals(actionKey)) {
                 mItems.add(new RestartAction());
+            } else if (GLOBAL_ACTION_KEY_EMERGENCY.equals(actionKey)) {
+                if (Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.FASTER_EMERGENCY_PHONE_CALL_ENABLED, 0) != 0
+                        && !mEmergencyAffordanceManager.needsEmergencyAffordance()) {
+                    mItems.add(new EmergencyAction());
+                }
             } else if (GLOBAL_ACTION_KEY_SCREENSHOT.equals(actionKey)) {
                 mItems.add(new ScreenshotAction());
             } else if (GLOBAL_ACTION_KEY_LOGOUT.equals(actionKey)) {
@@ -438,6 +445,32 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public void onPress() {
             // shutdown by making sure radio and power are handled accordingly.
             mWindowManagerFuncs.shutdown();
+        }
+    }
+
+    private class EmergencyAction extends SinglePressAction {
+        private static final String ACTION_EMERGENCY_DIALER_DIAL =
+                "com.android.phone.EmergencyDialer.DIAL";
+
+        private EmergencyAction() {
+            super(R.drawable.emergency_icon, R.string.global_action_emergency);
+        }
+
+        @Override
+        public void onPress() {
+            Intent intent = new Intent(ACTION_EMERGENCY_DIALER_DIAL);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+        }
+
+        @Override
+        public boolean showDuringKeyguard() {
+            return true;
+        }
+
+        @Override
+        public boolean showBeforeProvisioning() {
+            return true;
         }
     }
 

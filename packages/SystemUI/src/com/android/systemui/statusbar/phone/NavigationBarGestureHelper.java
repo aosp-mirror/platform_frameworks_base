@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
+import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_TOP;
@@ -216,7 +218,7 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
                     && mDivider.getView().getWindowManagerProxy().getDockSide() == DOCKED_INVALID) {
                 Rect initialBounds = null;
                 int dragMode = calculateDragMode();
-                int createMode = ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
+                int createMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
                 if (dragMode == DRAG_MODE_DIVIDER) {
                     initialBounds = new Rect();
                     mDivider.getView().calculateBoundsForPosition(mIsVertical
@@ -228,7 +230,7 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
                             initialBounds);
                 } else if (dragMode == DRAG_MODE_RECENTS && mTouchDownX
                         < mContext.getResources().getDisplayMetrics().widthPixels / 2) {
-                    createMode = ActivityManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
+                    createMode = SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
                 }
                 boolean docked = mRecentsComponent.splitPrimaryTask(dragMode, createMode,
                         initialBounds, MetricsEvent.ACTION_WINDOW_DOCK_SWIPE);

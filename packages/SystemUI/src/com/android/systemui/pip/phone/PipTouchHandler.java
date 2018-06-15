@@ -25,6 +25,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
@@ -69,6 +70,7 @@ public class PipTouchHandler {
     private final boolean mEnableDimissDragToEdge;
     private final Context mContext;
     private final IActivityManager mActivityManager;
+    private final IActivityTaskManager mActivityTaskManager;
     private final ViewConfiguration mViewConfig;
     private final PipMenuListener mMenuListener = new PipMenuListener();
     private IPinnedStackController mPinnedStackController;
@@ -172,12 +174,13 @@ public class PipTouchHandler {
     }
 
     public PipTouchHandler(Context context, IActivityManager activityManager,
-            PipMenuActivityController menuController,
+            IActivityTaskManager activityTaskManager, PipMenuActivityController menuController,
             InputConsumerController inputConsumerController) {
 
         // Initialize the Pip input consumer
         mContext = context;
         mActivityManager = activityManager;
+        mActivityTaskManager = activityTaskManager;
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         mViewConfig = ViewConfiguration.get(context);
         mMenuController = menuController;
@@ -188,8 +191,8 @@ public class PipTouchHandler {
         mGestures = new PipTouchGesture[] {
                 mDefaultMovementGesture
         };
-        mMotionHelper = new PipMotionHelper(mContext, mActivityManager, mMenuController,
-                mSnapAlgorithm, mFlingAnimationUtils);
+        mMotionHelper = new PipMotionHelper(mContext, mActivityManager, mActivityTaskManager,
+                mMenuController, mSnapAlgorithm, mFlingAnimationUtils);
         mTouchState = new PipTouchState(mViewConfig, mHandler,
                 () -> mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
                         mMovementBounds, true /* allowMenuTimeout */, willResizeMenu()));

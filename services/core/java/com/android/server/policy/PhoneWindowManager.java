@@ -156,6 +156,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.SleepToken;
+import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IUiModeManager;
@@ -7987,7 +7988,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     sendCloseSystemWindows();
                     Intent dock = createHomeDockIntent();
                     if (dock != null) {
-                        int result = ActivityManager.getService()
+                        int result = ActivityTaskManager.getService()
                                 .startActivityAsUser(null, null, dock,
                                         dock.resolveTypeIfNeeded(mContext.getContentResolver()),
                                         null, null, 0,
@@ -7998,7 +7999,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         }
                     }
                 }
-                int result = ActivityManager.getService()
+                int result = ActivityTaskManager.getService()
                         .startActivityAsUser(null, null, mHomeIntent,
                                 mHomeIntent.resolveTypeIfNeeded(mContext.getContentResolver()),
                                 null, null, 0,

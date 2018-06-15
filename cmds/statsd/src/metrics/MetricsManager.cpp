@@ -56,10 +56,12 @@ const int FIELD_ID_ANNOTATIONS_INT32 = 2;
 
 MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
                                const int64_t timeBaseNs, const int64_t currentTimeNs,
-                               const sp<UidMap> &uidMap,
+                               const sp<UidMap>& uidMap,
+                               const sp<StatsPullerManager>& pullerManager,
                                const sp<AlarmMonitor>& anomalyAlarmMonitor,
                                const sp<AlarmMonitor>& periodicAlarmMonitor)
-    : mConfigKey(key), mUidMap(uidMap),
+    : mConfigKey(key),
+      mUidMap(uidMap),
       mTtlNs(config.has_ttl_in_seconds() ? config.ttl_in_seconds() * NS_PER_SEC : -1),
       mTtlEndNs(-1),
       mLastReportTimeNs(currentTimeNs),
@@ -67,12 +69,11 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
     // Init the ttl end timestamp.
     refreshTtl(timeBaseNs);
 
-    mConfigValid =
-            initStatsdConfig(key, config, *uidMap, anomalyAlarmMonitor, periodicAlarmMonitor,
-                             timeBaseNs, currentTimeNs, mTagIds, mAllAtomMatchers,
-                             mAllConditionTrackers, mAllMetricProducers, mAllAnomalyTrackers,
-                             mAllPeriodicAlarmTrackers, mConditionToMetricMap, mTrackerToMetricMap,
-                             mTrackerToConditionMap, mNoReportMetricIds);
+    mConfigValid = initStatsdConfig(
+            key, config, *uidMap, pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor,
+            timeBaseNs, currentTimeNs, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
+            mAllMetricProducers, mAllAnomalyTrackers, mAllPeriodicAlarmTrackers,
+            mConditionToMetricMap, mTrackerToMetricMap, mTrackerToConditionMap, mNoReportMetricIds);
 
     mHashStringsInReport = config.hash_strings_in_metric_report();
 

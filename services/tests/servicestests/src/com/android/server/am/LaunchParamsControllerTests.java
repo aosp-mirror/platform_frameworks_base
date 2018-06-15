@@ -200,9 +200,9 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
 
         mController.registerModifier(positioner);
 
-        doNothing().when(mService).moveStackToDisplay(anyInt(), anyInt());
+        doNothing().when(mService.mActivityTaskManager).moveStackToDisplay(anyInt(), anyInt());
         mController.layoutTask(task, null /* windowLayout */);
-        verify(mService, times(1)).moveStackToDisplay(eq(task.getStackId()),
+        verify(mService.mActivityTaskManager, times(1)).moveStackToDisplay(eq(task.getStackId()),
                 eq(params.mPreferredDisplayId));
     }
 

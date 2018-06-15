@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import android.app.ActivityManager.StackInfo;
+import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -39,8 +40,8 @@ public class PipUtils {
             IActivityManager activityManager) {
         try {
             final String sysUiPackageName = context.getPackageName();
-            final StackInfo pinnedStackInfo =
-                    activityManager.getStackInfo(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
+            final StackInfo pinnedStackInfo = ActivityTaskManager.getService().getStackInfo(
+                    WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
             if (pinnedStackInfo != null && pinnedStackInfo.taskIds != null &&
                     pinnedStackInfo.taskIds.length > 0) {
                 for (int i = pinnedStackInfo.taskNames.length - 1; i >= 0; i--) {

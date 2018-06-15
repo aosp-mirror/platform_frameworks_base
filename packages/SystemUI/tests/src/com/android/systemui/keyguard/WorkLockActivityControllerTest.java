@@ -27,7 +27,7 @@ import static org.mockito.Matchers.argThat;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
 import android.content.ComponentName;
@@ -62,7 +62,7 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
 
     private @Mock Context mContext;
     private @Mock ActivityManagerWrapper mActivityManager;
-    private @Mock IActivityManager mIActivityManager;
+    private @Mock IActivityTaskManager mIActivityTaskManager;
 
     private WorkLockActivityController mController;
     private SysUiTaskStackChangeListener mTaskStackListener;
@@ -77,7 +77,8 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
         // Construct controller. Save the TaskStackListener for injecting events.
         final ArgumentCaptor<SysUiTaskStackChangeListener> listenerCaptor =
                 ArgumentCaptor.forClass(SysUiTaskStackChangeListener.class);
-        mController = new WorkLockActivityController(mContext, mActivityManager, mIActivityManager);
+        mController = new WorkLockActivityController(mContext, mActivityManager,
+                mIActivityTaskManager);
 
         verify(mActivityManager).registerTaskStackListener(listenerCaptor.capture());
         mTaskStackListener = listenerCaptor.getValue();
@@ -93,7 +94,7 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
 
         // The overlay should start and the task the activity started in should not be removed.
         verifyStartActivity(TASK_ID, true /*taskOverlay*/);
-        verify(mIActivityManager, never()).removeTask(anyInt() /*taskId*/);
+        verify(mIActivityTaskManager, never()).removeTask(anyInt() /*taskId*/);
     }
 
     @Test
@@ -107,14 +108,14 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
         // The task the activity started in should be removed to prevent the locked task from
         // being shown.
         verifyStartActivity(TASK_ID, true /*taskOverlay*/);
-        verify(mIActivityManager).removeTask(TASK_ID);
+        verify(mIActivityTaskManager).removeTask(TASK_ID);
     }
 
     // End of tests, start of helpers
     // ------------------------------
 
     private void setActivityStartCode(int taskId, boolean taskOverlay, int code) throws Exception {
-        doReturn(code).when(mIActivityManager).startActivityAsUser(
+        doReturn(code).when(mIActivityTaskManager).startActivityAsUser(
                 eq((IApplicationThread) null),
                 eq((String) null),
                 any(Intent.class),
@@ -129,7 +130,7 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
     }
 
     private void verifyStartActivity(int taskId, boolean taskOverlay) throws Exception {
-        verify(mIActivityManager).startActivityAsUser(
+        verify(mIActivityTaskManager).startActivityAsUser(
                 eq((IApplicationThread) null),
                 eq((String) null),
                 any(Intent.class),

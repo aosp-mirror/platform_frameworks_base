@@ -405,12 +405,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Aplikacija može dodavati, uklanjati ili mijenjati kalendarske događaje na telefonu. Može slati poruke koje izgledaju kao da ih je poslao vlasnik kalendara ili mijenjati događaje bez znanja vlasnika."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"pristup dodatnim naredbama davatelja lokacije"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Omogućuje aplikaciji pristup dodatnim naredbama davatelja usluga lokacije. To može omogućiti aplikaciji ometanje rada GPS-a ili drugih izvora lokacije."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"pristupati preciznoj lokaciji (na temelju GPS-a i mreža)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Aplikacija može dohvatiti vašu lokaciju putem GPS-a ili mrežnih izvora lokacije poput baznih stanica i Wi-Fi mreža. Te usluge lokacije moraju biti uključene i dostupne na telefonu da bi ih aplikacija mogla upotrebljavati. To može povećati potrošnju baterije."</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Aplikacija može dobiti vašu točnu lokaciju samo kada je u prednjem planu. Te usluge lokacije moraju biti uključene i dostupne na telefonu da bi ih aplikacija mogla upotrebljavati. To može pojačati potrošnju baterije."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"pristupati približnoj lokaciji (na temelju mreža)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Aplikacija može dohvatiti vašu lokaciju putem mrežnih izvora poput baznih stanica i Wi-Fi mreža. Te usluge lokacije moraju biti uključene i dostupne na tabletu da bi ih aplikacija mogla upotrebljavati."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Aplikacija može dohvatiti vašu lokaciju putem mrežnih izvora poput baznih stanica i Wi-Fi mreža. Te usluge lokacije moraju biti uključene i dostupne na televizoru da bi ih aplikacija mogla upotrebljavati."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Aplikacija može dohvatiti vašu lokaciju putem mrežnih izvora poput baznih stanica i Wi-Fi mreža. Te usluge lokacije moraju biti uključene i dostupne na telefonu da bi ih aplikacija mogla upotrebljavati."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"pristupiti preciznoj lokaciji u pozadini"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Aplikacija može dobiti vašu točnu lokaciju svaki put kada je u pozadini. Te usluge lokacije moraju biti uključene i dostupne na telefonu da bi ih aplikacija mogla upotrebljavati. To može pojačati potrošnju baterije."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"promjena postavki zvuka"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Aplikaciji omogućuje izmjenu globalnih postavki zvuka, primjerice glasnoće i zvučnika koji se upotrebljava za izlaz."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"snimanje zvuka"</string>

@@ -17,7 +17,7 @@
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
-#include "StatsPullerManagerImpl.h"
+#include "StatsPullerManager.h"
 #include "puller_util.h"
 #include "statslog.h"
 
@@ -107,8 +107,8 @@ bool tryMerge(vector<shared_ptr<LogEvent>>& data, int child_pos, const vector<in
  */
 void mergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data, const sp<UidMap>& uidMap,
                                 int tagId) {
-    if (StatsPullerManagerImpl::kAllPullAtomInfo.find(tagId) ==
-        StatsPullerManagerImpl::kAllPullAtomInfo.end()) {
+    if (StatsPullerManager::kAllPullAtomInfo.find(tagId) ==
+        StatsPullerManager::kAllPullAtomInfo.end()) {
         VLOG("Unknown pull atom id %d", tagId);
         return;
     }
@@ -121,9 +121,9 @@ void mergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data, const sp<Uid
         uidField = it->second;  // uidField is the field number in proto,
     }
     const vector<int>& additiveFields =
-            StatsPullerManagerImpl::kAllPullAtomInfo.find(tagId)->second.additiveFields;
+            StatsPullerManager::kAllPullAtomInfo.find(tagId)->second.additiveFields;
     const vector<int>& nonAdditiveFields =
-            StatsPullerManagerImpl::kAllPullAtomInfo.find(tagId)->second.nonAdditiveFields;
+            StatsPullerManager::kAllPullAtomInfo.find(tagId)->second.nonAdditiveFields;
 
     // map of host uid to their position in the original vector
     map<int, vector<int>> hostPosition;

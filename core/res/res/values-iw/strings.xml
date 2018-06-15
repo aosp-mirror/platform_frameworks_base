@@ -408,12 +408,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"אפליקציה זו יכולה להוסיף, להסיר ולשנות אירועי יומן בטלפון. האפליקציה יכולה לשנות אירועים בלי להודיע לבעליהם ולשלוח הודעות שעשויות להיראות כאילו נשלחו מבעלי יומנים."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"גישה לפקודות ספק מיקום נוספות"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏מאפשרת לאפליקציה לגשת לפקודות נוספות של ספק המיקום. הרשאה זו עשויה לאפשר לאפליקציה לשבש את פעולת ה-GPS או מקורות מיקום אחרים."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"‏גישה אל מיקום מדויק (מבוסס GPS ורשת)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך GPS או מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטלפון שלך כדי שהאפליקציה תוכל להשתמש בהם. ייתכן שהדבר יגביר את צריכת הסוללה."</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"אפליקציה זו יכולה לזהות את המיקום המדויק שלך רק כאשר היא פועלת בחזית. כדי שהאפליקציה תוכל להשתמש בשירותי המיקום, עליהם להיות מופעלים וזמינים בטלפון. ייתכן שפעולה זו תגביר את צריכת הסוללה."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"גישה אל מיקום משוער (מבוסס רשת)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטאבלט שלך כדי שהאפליקציה תוכל להשתמש בהם."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטלוויזיה שלך כדי שהאפליקציה תוכל להשתמש בהם."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטלפון שלך כדי שהאפליקציה תוכל להשתמש בהם."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"קבלת גישה למיקום מדויק ברקע"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"אפליקציה זו יכולה לזהות את המיקום המדויק שלך בכל זמן שהיא פועלת ברקע. כדי שהאפליקציה תוכל להשתמש בשירותי המיקום, עליהם להיות מופעלים וזמינים בטלפון. ייתכן שפעולה זו תגביר את צריכת הסוללה."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"שנה את הגדרות האודיו שלך"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"מאפשר לאפליקציה לשנות הגדרות אודיו גלובליות כמו עוצמת קול ובחירת הרמקול המשמש לפלט."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"הקלט אודיו"</string>
@@ -1084,7 +1087,7 @@
     <string name="capital_on" msgid="1544682755514494298">"מופעל"</string>
     <string name="capital_off" msgid="6815870386972805832">"כבוי"</string>
     <string name="whichApplication" msgid="4533185947064773386">"השלמת פעולה באמצעות"</string>
-    <string name="whichApplicationNamed" msgid="8260158865936942783">"‏השלם את הפעולה באמצעות %1$s"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"‏להשלמת הפעולה באמצעות %1$s"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"השלם פעולה"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"פתח באמצעות"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"‏פתח באמצעות %1$s"</string>

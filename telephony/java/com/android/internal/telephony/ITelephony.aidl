@@ -1123,16 +1123,19 @@ interface ITelephony {
     /**
      * Whether the DTMF tone length can be changed.
      *
+     * @param subId The subscription to use.
+     * @param callingPackage The package making the call.
      * @return {@code true} if the DTMF tone length can be changed.
      */
-    boolean canChangeDtmfToneLength();
+    boolean canChangeDtmfToneLength(int subId, String callingPackage);
 
     /**
      * Whether the device is a world phone.
      *
+     * @param callingPackage The package making the call.
      * @return {@code true} if the devices is a world phone.
      */
-    boolean isWorldPhone();
+    boolean isWorldPhone(int subId, String callingPackage);
 
     /**
      * Whether the phone supports TTY mode.

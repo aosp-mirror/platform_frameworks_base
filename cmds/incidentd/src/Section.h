@@ -41,11 +41,9 @@ public:
     const int id;
     const int64_t timeoutMs;  // each section must have a timeout
     const bool userdebugAndEngOnly;
-    const bool deviceSpecific;
     String8 name;
 
-    Section(int id, int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS, bool userdebugAndEngOnly = false,
-            bool deviceSpecific = false);
+    Section(int id, int64_t timeoutMs = REMOTE_CALL_TIMEOUT_MS, bool userdebugAndEngOnly = false);
     virtual ~Section();
 
     virtual status_t Execute(ReportRequestSet* requests) const = 0;
@@ -78,7 +76,7 @@ public:
  */
 class FileSection : public Section {
 public:
-    FileSection(int id, const char* filename, bool deviceSpecific = false,
+    FileSection(int id, const char* filename,
                 int64_t timeoutMs = 5000 /* 5 seconds */);
     virtual ~FileSection();
 

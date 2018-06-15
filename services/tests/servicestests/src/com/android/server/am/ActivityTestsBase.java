@@ -110,6 +110,12 @@ public class ActivityTestsBase {
 
     protected ActivityManagerService setupActivityManagerService(ActivityManagerService service) {
         service = spy(service);
+        // Makes sure the supervisor is using with the spy object.
+        service.mStackSupervisor.setService(service);
+        // Makes sure activity task is created with the spy object.
+        TestActivityTaskManagerService atm =
+                spy(new TestActivityTaskManagerService(service.mContext));
+        service.setActivityTaskManager(atm);
         doReturn(mock(IPackageManager.class)).when(service).getPackageManager();
         doNothing().when(service).grantEphemeralAccessLocked(anyInt(), any(), anyInt(), anyInt());
         service.mWindowManager = prepareMockWindowManager();
@@ -333,6 +339,12 @@ public class ActivityTestsBase {
         }
     }
 
+    protected static class TestActivityTaskManagerService extends ActivityTaskManagerService {
+        TestActivityTaskManagerService(Context context) {
+            super(context);
+        }
+    }
+
     /**
      * An {@link ActivityManagerService} subclass which provides a test
      * {@link ActivityStackSupervisor}.
@@ -365,10 +377,6 @@ public class ActivityTestsBase {
             }
 
             return mLockTaskController;
-        }
-
-        void setLifecycleManager(ClientLifecycleManager manager) {
-            mLifecycleManager = manager;
         }
 
         @Override

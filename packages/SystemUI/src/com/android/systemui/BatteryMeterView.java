@@ -56,6 +56,8 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.Utils.DisableStateTracker;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.text.NumberFormat;
 
 public class BatteryMeterView extends LinearLayout implements
@@ -341,6 +343,17 @@ public class BatteryMeterView extends LinearLayout implements
 
     private int getColorForDarkIntensity(float darkIntensity, int lightColor, int darkColor) {
         return (int) ArgbEvaluator.getInstance().evaluate(darkIntensity, lightColor, darkColor);
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        String powerSave = mDrawable == null ? null : mDrawable.getPowerSave() + "";
+        CharSequence percent = mBatteryPercentView == null ? null : mBatteryPercentView.getText();
+        pw.println("  BatteryMeterView:");
+        pw.println("    mDrawable.getPowerSave: " + powerSave);
+        pw.println("    mBatteryPercentView.getText(): " + percent);
+        pw.println("    mTextColor: #" + Integer.toHexString(mTextColor));
+        pw.println("    mLevel: " + mLevel);
+        pw.println("    mForceShowPercent: " + mForceShowPercent);
     }
 
     private final class SettingObserver extends ContentObserver {

@@ -21,6 +21,7 @@ import static android.app.ActivityManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_NONE;
 
+import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IAssistDataReceiver;
@@ -163,7 +164,8 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
         // Ensure that the current activity supports assist data
         boolean isAssistDataAllowed = false;
         try {
-            isAssistDataAllowed = mService.isAssistDataAllowedOnCurrentActivity();
+            isAssistDataAllowed =
+                    ActivityTaskManager.getService().isAssistDataAllowedOnCurrentActivity();
         } catch (RemoteException e) {
             // Should never happen
         }
@@ -188,9 +190,9 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
                         Bundle receiverExtras = new Bundle();
                         receiverExtras.putInt(KEY_RECEIVER_EXTRA_INDEX, i);
                         receiverExtras.putInt(KEY_RECEIVER_EXTRA_COUNT, numActivities);
-                        if (mService.requestAssistContextExtras(ASSIST_CONTEXT_FULL, this,
-                                receiverExtras, topActivity, /* focused= */ i == 0,
-                                    /* newSessionId= */ i == 0)) {
+                        if (ActivityTaskManager.getService().requestAssistContextExtras(
+                                ASSIST_CONTEXT_FULL, this, receiverExtras, topActivity,
+                                /* focused= */ i == 0, /* newSessionId= */ i == 0)) {
                             mPendingDataCount++;
                         } else if (i == 0) {
                             // Wasn't allowed... given that, let's not do the screenshot either.

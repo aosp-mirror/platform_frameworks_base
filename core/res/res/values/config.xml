@@ -2085,6 +2085,10 @@
          states. -->
     <bool name="config_dozeAlwaysOnDisplayAvailable">false</bool>
 
+    <!-- Control whether the always on display mode is enabled by default. This value will be used
+         during initialization when the setting is still null. -->
+    <bool name="config_dozeAlwaysOnEnabled">true</bool>
+
     <!-- Whether the display blanks itself when transitioning from a doze to a non-doze state -->
     <bool name="config_displayBlanksAfterDoze">false</bool>
 
@@ -2572,6 +2576,7 @@
          "silent" = silent mode
          "users" = list of users
          "restart" = restart device
+         "emergency" = Launch emergency dialer
          "lockdown" = Lock down device until the user authenticates
          "logout" =  Logout the current user
          -->
@@ -2581,6 +2586,7 @@
         <item>lockdown</item>
         <item>logout</item>
         <item>bugreport</item>
+        <item>emergency</item>
         <item>screenshot</item>
     </string-array>
 

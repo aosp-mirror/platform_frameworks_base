@@ -21,7 +21,7 @@ import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.Manifest.permission.RESTRICTED_VR_ACCESS;
-import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
@@ -116,9 +116,11 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.IAssistDataReceiver;
 import android.app.admin.DevicePolicyCache;
 import android.content.BroadcastReceiver;
@@ -342,6 +344,8 @@ public class WindowManagerService extends IWindowManager.Stub
     static final int UPDATE_FOCUS_WILL_ASSIGN_LAYERS = 1;
     static final int UPDATE_FOCUS_PLACING_SURFACES = 2;
     static final int UPDATE_FOCUS_WILL_PLACE_SURFACES = 3;
+    /** Indicates we are removing the focused window when updating the focus. */
+    static final int UPDATE_FOCUS_REMOVING_FOCUS = 4;
 
     private static final String SYSTEM_SECURE = "ro.secure";
     private static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
@@ -427,6 +431,8 @@ public class WindowManagerService extends IWindowManager.Stub
     final WindowManagerPolicy mPolicy;
 
     final IActivityManager mActivityManager;
+    // TODO: Probably not needed once activities are fully in WM.
+    final IActivityTaskManager mActivityTaskManager;
     final ActivityManagerInternal mAmInternal;
 
     final AppOpsManager mAppOps;
@@ -859,7 +865,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (atoken.mLaunchTaskBehind) {
                 try {
-                    mActivityManager.notifyLaunchTaskBehindComplete(atoken.token);
+                    mActivityTaskManager.notifyLaunchTaskBehindComplete(atoken.token);
                 } catch (RemoteException e) {
                 }
                 atoken.mLaunchTaskBehind = false;
@@ -876,7 +882,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     } else {
                         atoken.mEnteringAnimation = false;
                         try {
-                            mActivityManager.notifyEnterAnimationComplete(atoken.token);
+                            mActivityTaskManager.notifyEnterAnimationComplete(atoken.token);
                         } catch (RemoteException e) {
                         }
                     }
@@ -1009,6 +1015,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 AnimationThread.getHandler(), animationHandler);
 
         mActivityManager = ActivityManager.getService();
+        mActivityTaskManager = ActivityTaskManager.getService();
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
         AppOpsManager.OnOpChangedInternalListener opListener =
@@ -1066,7 +1073,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromWindowLayout);
 
         mTaskPositioningController = new TaskPositioningController(
-                this, mInputManager, mInputMonitor, mActivityManager, mH.getLooper());
+                this, mInputManager, mInputMonitor, mActivityTaskManager, mH.getLooper());
         mDragDropController = new DragDropController(this, mH.getLooper());
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
@@ -4372,7 +4379,7 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     void sendNewConfiguration(int displayId) {
         try {
-            final boolean configUpdated = mActivityManager.updateDisplayOverrideConfiguration(
+            final boolean configUpdated = mActivityTaskManager.updateDisplayOverrideConfiguration(
                     null /* values */, displayId);
             if (!configUpdated) {
                 // Something changed (E.g. device rotation), but no configuration update is needed.
@@ -4527,7 +4534,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         try {
-            mActivityManager.updateConfiguration(null);
+            mActivityTaskManager.updateConfiguration(null);
         } catch (RemoteException e) {
         }
 
@@ -4538,7 +4545,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         try {
-            mActivityManager.updateConfiguration(null);
+            mActivityTaskManager.updateConfiguration(null);
         } catch (RemoteException e) {
         }
 
@@ -4893,7 +4900,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case NOTIFY_ACTIVITY_DRAWN:
                     try {
-                        mActivityManager.notifyActivityDrawn((IBinder) msg.obj);
+                        mActivityTaskManager.notifyActivityDrawn((IBinder) msg.obj);
                     } catch (RemoteException e) {
                     }
                     break;
@@ -5707,6 +5714,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent.setLayoutNeeded();
                 if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
                     displayContent.performLayout(true /*initial*/, updateInputWindows);
+                } else if (mode == UPDATE_FOCUS_REMOVING_FOCUS) {
+                    mRoot.performSurfacePlacement(false);
                 }
             }
 

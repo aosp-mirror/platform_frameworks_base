@@ -61,8 +61,7 @@ TEST(GaugeMetricProducerTest, TestNoCondition) {
 
     // TODO: pending refactor of StatsPullerManager
     // For now we still need this so that it doesn't do real pulling.
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
 
@@ -89,8 +88,7 @@ TEST(GaugeMetricProducerTest, TestNoCondition) {
     EXPECT_EQ(0UL, gaugeProducer.mPastBuckets.size());
 
     allData.clear();
-    std::shared_ptr<LogEvent> event2 =
-            std::make_shared<LogEvent>(tagId, bucket3StartTimeNs + 10);
+    std::shared_ptr<LogEvent> event2 = std::make_shared<LogEvent>(tagId, bucket3StartTimeNs + 10);
     event2->write(24);
     event2->write("some value");
     event2->write(25);
@@ -140,8 +138,7 @@ TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade) {
     alert.set_trigger_if_sum_gt(25);
     alert.set_num_buckets(100);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       -1 /* -1 means no pulling */, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
@@ -211,8 +208,7 @@ TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
@@ -280,8 +276,7 @@ TEST(GaugeMetricProducerTest, TestWithCondition) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
@@ -296,8 +291,8 @@ TEST(GaugeMetricProducerTest, TestWithCondition) {
                 return true;
             }));
 
-    GaugeMetricProducer gaugeProducer(kConfigKey, metric, 1, wizard, tagId,
-                                      bucketStartTimeNs, bucketStartTimeNs, pullerManager);
+    GaugeMetricProducer gaugeProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
+                                      bucketStartTimeNs, pullerManager);
     gaugeProducer.setBucketSize(60 * NS_PER_SEC);
 
     gaugeProducer.onConditionChanged(true, bucketStartTimeNs + 8);
@@ -372,8 +367,7 @@ TEST(GaugeMetricProducerTest, TestWithSlicedCondition) {
                         return ConditionState::kTrue;
                     }));
 
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
@@ -421,8 +415,7 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
     sp<AlarmMonitor> alarmMonitor;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    shared_ptr<MockStatsPullerManager> pullerManager =
-            make_shared<StrictMock<MockStatsPullerManager>>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
 
@@ -472,7 +465,7 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
                            .mFields->begin()
                            ->mValue.int_value);
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY),
-            std::ceil(1.0 * event2->GetElapsedTimestampNs() / NS_PER_SEC) + refPeriodSec);
+              std::ceil(1.0 * event2->GetElapsedTimestampNs() / NS_PER_SEC) + refPeriodSec);
 
     std::shared_ptr<LogEvent> event3 =
             std::make_shared<LogEvent>(tagId, bucketStartTimeNs + 2 * bucketSizeNs + 10);
@@ -487,7 +480,7 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
                            .mFields->begin()
                            ->mValue.int_value);
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY),
-            std::ceil(1.0 * event2->GetElapsedTimestampNs() / NS_PER_SEC + refPeriodSec));
+              std::ceil(1.0 * event2->GetElapsedTimestampNs() / NS_PER_SEC + refPeriodSec));
 
     // The event4 does not have the gauge field. Thus the current bucket value is 0.
     std::shared_ptr<LogEvent> event4 =

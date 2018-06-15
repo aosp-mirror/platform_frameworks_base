@@ -2251,7 +2251,8 @@ class ActivityStarter {
 
         final ActivityStack stack = task.getStack();
         if (stack != null && stack.resizeStackWithLaunchBounds()) {
-            mService.resizeStack(stack.mStackId, bounds, true, !PRESERVE_WINDOWS, ANIMATE, -1);
+            mService.mActivityTaskManager.resizeStack(
+                    stack.mStackId, bounds, true, !PRESERVE_WINDOWS, ANIMATE, -1);
         } else {
             task.updateOverrideConfiguration(bounds);
         }

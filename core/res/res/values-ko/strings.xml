@@ -402,12 +402,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"앱이 일정을 추가, 삭제, 변경할 수 있도록 허용합니다. 앱이 메시지를 전송하거나 사용자에게 별도 표시 없이 일정을 수정할 수도 있습니다."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"추가 위치 제공업체 명령에 접근"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"앱이 추가 위치 정보 제공 기능의 명령에 접근하도록 허용합니다. 이 경우 앱이 GPS 또는 기타 위치 소스의 작동을 방해할 수 있습니다."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"정확한 위치(GPS 및 네트워크 기반)에 액세스"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"이 앱은 GPS나 기지국 및 Wi-Fi 네트워크와 같은 네트워크 소스를 통해 내 위치를 알 수 있습니다. 앱에서 위치 서비스를 사용하려면 휴대전화에서 위치 서비스가 사용 설정되어 있으며 사용 가능해야 합니다. 이로 인해 배터리 사용량이 늘어날 수 있습니다."</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"이 앱은 포그라운드에 있을 때만 나의 정확한 위치를 알 수 있습니다. 앱에서 위치 서비스를 사용하려면 휴대전화에서 위치 서비스가 사용 설정되어 있으며 사용할 수 있어야 합니다. 배터리 사용량이 늘어날 수 있습니다."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"대략적인 위치(네트워크 기반)에 액세스"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"이 앱은 기지국 및 Wi-Fi 네트워크와 같은 네트워크 소스를 통해 내 위치를 알 수 있습니다. 앱에서 위치 서비스를 사용하려면 태블릿에서 위치 서비스가 사용 설정되어 있으며 사용 가능해야 합니다."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"이 앱은 기지국 및 Wi-Fi 네트워크와 같은 네트워크 소스를 통해 내 위치를 알 수 있습니다. 앱에서 위치 서비스를 사용하려면 TV에서 위치 서비스가 사용 설정되어 있으며 사용 가능해야 합니다."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"이 앱은 기지국 및 Wi-Fi 네트워크와 같은 네트워크 소스를 통해 내 위치를 알 수 있습니다. 앱에서 위치 서비스를 사용하려면 휴대전화에서 위치 서비스가 사용 설정되어 있으며 사용 가능해야 합니다."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"백그라운드에서 정확한 위치에 액세스"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"이 앱은 백그라운드에서 언제든지 나의 정확한 위치를 알 수 있습니다. 앱에서 위치 서비스를 사용하려면 휴대전화에서 위치 서비스가 사용 설정되어 있으며 사용할 수 있어야 합니다. 배터리 사용량이 늘어날 수 있습니다."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"오디오 설정 변경"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"앱이 음량이나 출력을 위해 사용하는 스피커 등 전체 오디오 설정을 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"오디오 녹음"</string>

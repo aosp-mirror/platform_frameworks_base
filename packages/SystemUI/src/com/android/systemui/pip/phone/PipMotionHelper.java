@@ -30,7 +30,9 @@ import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.ActivityManager.StackInfo;
+import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -81,6 +83,7 @@ public class PipMotionHelper implements Handler.Callback {
 
     private Context mContext;
     private IActivityManager mActivityManager;
+    private IActivityTaskManager mActivityTaskManager;
     private Handler mHandler;
 
     private PipMenuActivityController mMenuController;
@@ -94,11 +97,12 @@ public class PipMotionHelper implements Handler.Callback {
     private ValueAnimator mBoundsAnimator = null;
 
     public PipMotionHelper(Context context, IActivityManager activityManager,
-            PipMenuActivityController menuController, PipSnapAlgorithm snapAlgorithm,
-            FlingAnimationUtils flingAnimationUtils) {
+            IActivityTaskManager activityTaskManager, PipMenuActivityController menuController,
+            PipSnapAlgorithm snapAlgorithm, FlingAnimationUtils flingAnimationUtils) {
         mContext = context;
         mHandler = new Handler(ForegroundThread.get().getLooper(), this);
         mActivityManager = activityManager;
+        mActivityTaskManager = activityTaskManager;
         mMenuController = menuController;
         mSnapAlgorithm = snapAlgorithm;
         mFlingAnimationUtils = flingAnimationUtils;
@@ -121,8 +125,8 @@ public class PipMotionHelper implements Handler.Callback {
     void synchronizePinnedStackBounds() {
         cancelAnimations();
         try {
-            StackInfo stackInfo =
-                    mActivityManager.getStackInfo(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
+            StackInfo stackInfo = mActivityTaskManager.getStackInfo(
+                    WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
             if (stackInfo != null) {
                 mBounds.set(stackInfo.bounds);
             }
@@ -159,7 +163,7 @@ public class PipMotionHelper implements Handler.Callback {
         mMenuController.hideMenuWithoutResize();
         mHandler.post(() -> {
             try {
-                mActivityManager.dismissPip(!skipAnimation, EXPAND_STACK_TO_FULLSCREEN_DURATION);
+                mActivityTaskManager.dismissPip(!skipAnimation, EXPAND_STACK_TO_FULLSCREEN_DURATION);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error expanding PiP activity", e);
             }
@@ -177,7 +181,8 @@ public class PipMotionHelper implements Handler.Callback {
         mMenuController.hideMenuWithoutResize();
         mHandler.post(() -> {
             try {
-                mActivityManager.removeStacksInWindowingModes(new int[]{ WINDOWING_MODE_PINNED });
+                mActivityTaskManager.removeStacksInWindowingModes(
+                        new int[]{ WINDOWING_MODE_PINNED });
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to remove PiP", e);
             }
@@ -512,7 +517,8 @@ public class PipMotionHelper implements Handler.Callback {
                 SomeArgs args = (SomeArgs) msg.obj;
                 Rect toBounds = (Rect) args.arg1;
                 try {
-                    mActivityManager.resizePinnedStack(toBounds, null /* tempPinnedTaskBounds */);
+                    mActivityTaskManager.resizePinnedStack(
+                            toBounds, null /* tempPinnedTaskBounds */);
                     mBounds.set(toBounds);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Could not resize pinned stack to bounds: " + toBounds, e);
@@ -525,7 +531,7 @@ public class PipMotionHelper implements Handler.Callback {
                 Rect toBounds = (Rect) args.arg1;
                 int duration = args.argi1;
                 try {
-                    StackInfo stackInfo = mActivityManager.getStackInfo(
+                    StackInfo stackInfo = mActivityTaskManager.getStackInfo(
                             WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
                     if (stackInfo == null) {
                         // In the case where we've already re-expanded or dismissed the PiP, then
@@ -533,7 +539,7 @@ public class PipMotionHelper implements Handler.Callback {
                         return true;
                     }
 
-                    mActivityManager.resizeStack(stackInfo.stackId, toBounds,
+                    mActivityTaskManager.resizeStack(stackInfo.stackId, toBounds,
                             false /* allowResizeInDockedMode */, true /* preserveWindows */,
                             true /* animate */, duration);
                     mBounds.set(toBounds);

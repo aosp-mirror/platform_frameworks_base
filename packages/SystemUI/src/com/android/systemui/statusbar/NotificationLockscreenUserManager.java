@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.Notification;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -111,7 +112,7 @@ public class NotificationLockscreenUserManager implements Dumpable {
             } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
                 try {
                     final int lastResumedActivityUserId =
-                            ActivityManager.getService().getLastResumedActivityUserId();
+                            ActivityTaskManager.getService().getLastResumedActivityUserId();
                     if (mUserManager.isManagedProfile(lastResumedActivityUserId)) {
                         showForegroundManagedProfileActivityToast();
                     }

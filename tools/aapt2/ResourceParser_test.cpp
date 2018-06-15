@@ -497,6 +497,24 @@ TEST_F(ResourceParserTest, ParseStyleWithPackageAliasedItems) {
   EXPECT_THAT(style->entries[0].key.name, Eq(make_value(test::ParseNameOrDie("android:attr/bar"))));
 }
 
+TEST_F(ResourceParserTest, ParseStyleWithRawStringItem) {
+  std::string input = R"(
+      <style name="foo">
+        <item name="bar">
+          com.helloworld.AppClass
+        </item>
+      </style>)";
+  ASSERT_TRUE(TestParse(input));
+
+  Style* style = test::GetValue<Style>(&table_, "style/foo");
+  ASSERT_THAT(style, NotNull());
+  EXPECT_THAT(style->entries[0].value, NotNull());
+  RawString* value = ValueCast<RawString>(style->entries[0].value.get());
+  EXPECT_THAT(value, NotNull());
+  EXPECT_THAT(*value->value, StrEq(R"(com.helloworld.AppClass)"));
+}
+
+
 TEST_F(ResourceParserTest, ParseStyleWithInferredParent) {
   ASSERT_TRUE(TestParse(R"(<style name="foo.bar"/>)"));
 

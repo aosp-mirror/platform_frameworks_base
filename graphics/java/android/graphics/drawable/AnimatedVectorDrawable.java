@@ -168,7 +168,7 @@ import java.util.ArrayList;
  * </p>
  * Below is an example of a VectorDrawable defined in vectordrawable.xml. This VectorDrawable is
  * referred to by its file name (not including file suffix) in the
- * <a href="AVDExample">AnimatedVectorDrawable XML example</a>.
+ * <a href="#AVDExample">AnimatedVectorDrawable XML example</a>.
  * <pre>
  * &lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
  *     android:height=&quot;64dp&quot;

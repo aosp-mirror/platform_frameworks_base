@@ -40,7 +40,8 @@ class ValueMetricProducer : public virtual MetricProducer, public virtual PullDa
 public:
     ValueMetricProducer(const ConfigKey& key, const ValueMetric& valueMetric,
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int pullTagId, const int64_t timeBaseNs, const int64_t startTimeNs);
+                        const int pullTagId, const int64_t timeBaseNs, const int64_t startTimeNs,
+                        const sp<StatsPullerManager>& pullerManager);
 
     virtual ~ValueMetricProducer();
 
@@ -53,7 +54,7 @@ public:
 
         if (mPullTagId != -1 && (mCondition == true || mConditionTrackerIndex < 0) ) {
             vector<shared_ptr<LogEvent>> allData;
-            mStatsPullerManager->Pull(mPullTagId, eventTimeNs, &allData);
+            mPullerManager->Pull(mPullTagId, eventTimeNs, &allData);
             if (allData.size() == 0) {
                 // This shouldn't happen since this valuemetric is not useful now.
             }
@@ -112,15 +113,9 @@ private:
 
     void dropDataLocked(const int64_t dropTimeNs) override;
 
+    sp<StatsPullerManager> mPullerManager;
+
     const FieldMatcher mValueField;
-
-    std::shared_ptr<StatsPullerManager> mStatsPullerManager;
-
-    // for testing
-    ValueMetricProducer(const ConfigKey& key, const ValueMetric& valueMetric,
-                        const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int pullTagId, const int64_t timeBaseNs, const int64_t startTimeNs,
-                        std::shared_ptr<StatsPullerManager> statsPullerManager);
 
     // tagId for pulled data. -1 if this is not pulled
     const int mPullTagId;

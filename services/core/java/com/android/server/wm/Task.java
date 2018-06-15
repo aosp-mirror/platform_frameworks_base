@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
+import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
@@ -218,7 +218,7 @@ class Task extends WindowContainer<AppWindowToken> {
         }
     }
 
-    /** @see com.android.server.am.ActivityManagerService#positionTaskInStack(int, int, int). */
+    /** @see com.android.server.am.ActivityTaskManagerService#positionTaskInStack(int, int, int). */
     void positionAt(int position) {
         mStack.positionChildAt(position, this, false /* includingParents */);
     }
@@ -298,7 +298,7 @@ class Task extends WindowContainer<AppWindowToken> {
 
     /**
      * Sets the bounds used to calculate the insets. See
-     * {@link android.app.IActivityManager#resizeDockedStack} why this is needed.
+     * {@link android.app.IActivityTaskManager#resizeDockedStack} why this is needed.
      */
     void setTempInsetBounds(Rect tempInsetBounds) {
         if (tempInsetBounds != null) {
@@ -310,7 +310,7 @@ class Task extends WindowContainer<AppWindowToken> {
 
     /**
      * Gets the bounds used to calculate the insets. See
-     * {@link android.app.IActivityManager#resizeDockedStack} why this is needed.
+     * {@link android.app.IActivityTaskManager#resizeDockedStack} why this is needed.
      */
     void getTempInsetBounds(Rect out) {
         out.set(mTempInsetBounds);

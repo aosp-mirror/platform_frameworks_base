@@ -236,6 +236,7 @@ public class SettingsBackupTest {
                     Settings.Global.EUICC_SUPPORTED_COUNTRIES,
                     Settings.Global.EUICC_FACTORY_RESET_TIMEOUT_MILLIS,
                     Settings.Global.FANCY_IME_ANIMATIONS,
+                    Settings.Global.FASTER_EMERGENCY_PHONE_CALL_ENABLED,
                     Settings.Global.FORCE_ALLOW_ON_EXTERNAL,
                     Settings.Global.FORCED_APP_STANDBY_ENABLED,
                     Settings.Global.FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED,

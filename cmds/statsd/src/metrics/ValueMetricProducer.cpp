@@ -74,10 +74,10 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
                                          const int conditionIndex,
                                          const sp<ConditionWizard>& wizard, const int pullTagId,
                                          const int64_t timeBaseNs, const int64_t startTimestampNs,
-                                         shared_ptr<StatsPullerManager> statsPullerManager)
+                                         const sp<StatsPullerManager>& pullerManager)
     : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard),
+      mPullerManager(pullerManager),
       mValueField(metric.value_field()),
-      mStatsPullerManager(statsPullerManager),
       mPullTagId(pullTagId),
       mMinBucketSizeNs(metric.min_bucket_size_nanos()),
       mDimensionSoftLimit(StatsdStats::kAtomDimensionKeySizeLimitMap.find(pullTagId) !=
@@ -127,27 +127,18 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
     // Kicks off the puller immediately.
     flushIfNeededLocked(startTimestampNs);
     if (mPullTagId != -1) {
-        mStatsPullerManager->RegisterReceiver(
-            mPullTagId, this, mCurrentBucketStartTimeNs + mBucketSizeNs, mBucketSizeNs);
+        mPullerManager->RegisterReceiver(mPullTagId, this,
+                                         mCurrentBucketStartTimeNs + mBucketSizeNs, mBucketSizeNs);
     }
 
     VLOG("value metric %lld created. bucket size %lld start_time: %lld",
         (long long)metric.id(), (long long)mBucketSizeNs, (long long)mTimeBaseNs);
 }
 
-// for testing
-ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric& metric,
-                                         const int conditionIndex,
-                                         const sp<ConditionWizard>& wizard, const int pullTagId,
-                                         const int64_t timeBaseNs, const int64_t startTimeNs)
-    : ValueMetricProducer(key, metric, conditionIndex, wizard, pullTagId, timeBaseNs, startTimeNs,
-                          make_shared<StatsPullerManager>()) {
-}
-
 ValueMetricProducer::~ValueMetricProducer() {
     VLOG("~ValueMetricProducer() called");
     if (mPullTagId != -1) {
-        mStatsPullerManager->UnRegisterReceiver(mPullTagId, this);
+        mPullerManager->UnRegisterReceiver(mPullTagId, this);
     }
 }
 
@@ -283,7 +274,7 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
 
     if (mPullTagId != -1) {
         vector<shared_ptr<LogEvent>> allData;
-        if (mStatsPullerManager->Pull(mPullTagId, eventTimeNs, &allData)) {
+        if (mPullerManager->Pull(mPullTagId, eventTimeNs, &allData)) {
             if (allData.size() == 0) {
                 return;
             }

@@ -16,15 +16,20 @@
 
 package com.android.server.timedetector;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.timedetector.ITimeDetectorService;
+import android.app.timedetector.TimeSignal;
+import android.content.Context;
+import android.os.Binder;
+
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 
-import android.app.timedetector.ITimeDetectorService;
-import android.content.Context;
-import android.util.Slog;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Objects;
 
 public final class TimeDetectorService extends ITimeDetectorService.Stub {
 
@@ -47,26 +52,42 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
     }
 
     private final Context mContext;
+    private final TimeDetectorStrategy mTimeDetectorStrategy;
 
     private static TimeDetectorService create(Context context) {
-        return new TimeDetectorService(context);
+        TimeDetectorStrategy timeDetector = new SimpleTimeDetectorStrategy();
+        timeDetector.initialize(new TimeDetectorStrategyCallbackImpl(context));
+        return new TimeDetectorService(context, timeDetector);
     }
 
-    public TimeDetectorService(Context context) {
-        mContext = context;
+    @VisibleForTesting
+    public TimeDetectorService(@NonNull Context context,
+            @NonNull TimeDetectorStrategy timeDetectorStrategy) {
+        mContext = Objects.requireNonNull(context);
+        mTimeDetectorStrategy = Objects.requireNonNull(timeDetectorStrategy);
     }
 
     @Override
-    public void stubbedCall() {
-        // Empty call for initial tests.
-        Slog.d(TAG, "stubbedCall() called");
-        // TODO(nfuller): Remove when there are real methods.
+    public void suggestTime(@NonNull TimeSignal timeSignal) {
+        enforceSetTimePermission();
+
+        long callerIdToken = Binder.clearCallingIdentity();
+        try {
+            mTimeDetectorStrategy.suggestTime(timeSignal);
+        } finally {
+            Binder.restoreCallingIdentity(callerIdToken);
+        }
     }
 
     @Override
-    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
+            @Nullable String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
-        // TODO(nfuller): Implement when there is state.
+        mTimeDetectorStrategy.dump(fd, pw, args);
+    }
+
+    private void enforceSetTimePermission() {
+        mContext.enforceCallingPermission(android.Manifest.permission.SET_TIME, "set time");
     }
 }

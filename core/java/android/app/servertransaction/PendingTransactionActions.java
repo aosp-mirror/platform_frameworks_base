@@ -19,6 +19,7 @@ package android.app.servertransaction;
 import static android.app.ActivityThread.DEBUG_MEMORY_TRIM;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.os.Build;
 import android.os.Bundle;
@@ -141,7 +142,7 @@ public class PendingTransactionActions {
             try {
                 if (DEBUG_MEMORY_TRIM) Slog.v(TAG, "Reporting activity stopped: " + mActivity);
                 // TODO(lifecycler): Use interface callback instead of AMS.
-                ActivityManager.getService().activityStopped(
+                ActivityTaskManager.getService().activityStopped(
                         mActivity.token, mState, mPersistentState, mDescription);
             } catch (RemoteException ex) {
                 // Dump statistics about bundle to help developers debug

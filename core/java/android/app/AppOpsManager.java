@@ -114,7 +114,6 @@ public class AppOpsManager {
      * returned from {@link #checkOp}, {@link #noteOp}, {@link #startOp}; rather, when this
      * mode is set, these functions will return {@link #MODE_ALLOWED} when the app being
      * checked is currently in the foreground, otherwise {@link #MODE_IGNORED}.
-     * @hide
      */
     public static final int MODE_FOREGROUND = 4;
 
@@ -122,7 +121,6 @@ public class AppOpsManager {
      * Flag for {@link #startWatchingMode(String, String, int, OnOpChangedListener)}:
      * Also get reports if the foreground state of an op's uid changes.  This only works
      * when watching a particular op, not when watching a package.
-     * @hide
      */
     public static final int WATCH_FOREGROUND_CHANGES = 1 << 0;
 
@@ -1487,11 +1485,15 @@ public class AppOpsManager {
      * Class holding all of the operation information associated with an app.
      * @hide
      */
-    public static class PackageOps implements Parcelable {
+    @SystemApi
+    public static final class PackageOps implements Parcelable {
         private final String mPackageName;
         private final int mUid;
         private final List<OpEntry> mEntries;
 
+        /**
+         * @hide
+         */
         public PackageOps(String packageName, int uid, List<OpEntry> entries) {
             mPackageName = packageName;
             mUid = uid;
@@ -1550,7 +1552,8 @@ public class AppOpsManager {
      * Class holding the information about one unique operation of an application.
      * @hide
      */
-    public static class OpEntry implements Parcelable {
+    @SystemApi
+    public static final class OpEntry implements Parcelable {
         private final int mOp;
         private final int mMode;
         private final long[] mTimes;
@@ -1560,6 +1563,9 @@ public class AppOpsManager {
         private final boolean mRunning;
         private final String mProxyPackageName;
 
+        /**
+         * @hide
+         */
         public OpEntry(int op, int mode, long time, long rejectTime, int duration,
                 int proxyUid, String proxyPackage) {
             mOp = op;
@@ -1574,6 +1580,9 @@ public class AppOpsManager {
             mProxyPackageName = proxyPackage;
         }
 
+        /**
+         * @hide
+         */
         public OpEntry(int op, int mode, long[] times, long[] rejectTimes, int duration,
                 boolean running, int proxyUid, String proxyPackage) {
             mOp = op;
@@ -1588,55 +1597,104 @@ public class AppOpsManager {
             mProxyPackageName = proxyPackage;
         }
 
+        /**
+         * @hide
+         */
         public OpEntry(int op, int mode, long[] times, long[] rejectTimes, int duration,
                 int proxyUid, String proxyPackage) {
             this(op, mode, times, rejectTimes, duration, duration == -1, proxyUid, proxyPackage);
         }
 
+        /**
+         * @hide
+         */
         public int getOp() {
             return mOp;
         }
 
+        /**
+         * Return this entry's op string name, such as {@link #OPSTR_COARSE_LOCATION}.
+         */
+        public String getOpStr() {
+            return sOpToString[mOp];
+        }
+
+        /**
+         * Return this entry's current mode, such as {@link #MODE_ALLOWED}.
+         */
         public int getMode() {
             return mMode;
         }
 
+        /**
+         * @hide
+         */
         public long getTime() {
             return maxTime(mTimes, 0, _NUM_UID_STATE);
         }
 
+        /**
+         * Return the last wall clock time this op was accessed by the app.
+         */
         public long getLastAccessTime() {
             return maxTime(mTimes, 0, _NUM_UID_STATE);
         }
 
+        /**
+         * Return the last wall clock time this op was accessed by the app while in the foreground.
+         */
         public long getLastAccessForegroundTime() {
             return maxTime(mTimes, UID_STATE_PERSISTENT, UID_STATE_LAST_NON_RESTRICTED + 1);
         }
 
+        /**
+         * Return the last wall clock time this op was accessed by the app while in the background.
+         */
         public long getLastAccessBackgroundTime() {
             return maxTime(mTimes, UID_STATE_LAST_NON_RESTRICTED + 1, _NUM_UID_STATE);
         }
 
+        /**
+         * @hide
+         */
         public long getLastTimeFor(int uidState) {
             return mTimes[uidState];
         }
 
+        /**
+         * @hide
+         */
         public long getRejectTime() {
             return maxTime(mRejectTimes, 0, _NUM_UID_STATE);
         }
 
+        /**
+         * Return the last wall clock time the app made an attempt to access this op but
+         * was rejected.
+         */
         public long getLastRejectTime() {
             return maxTime(mRejectTimes, 0, _NUM_UID_STATE);
         }
 
+        /**
+         * Return the last wall clock time the app made an attempt to access this op while in
+         * the foreground but was rejected.
+         */
         public long getLastRejectForegroundTime() {
             return maxTime(mRejectTimes, UID_STATE_PERSISTENT, UID_STATE_LAST_NON_RESTRICTED + 1);
         }
 
+        /**
+         * Return the last wall clock time the app made an attempt to access this op while in
+         * the background but was rejected.
+         */
         public long getLastRejectBackgroundTime() {
             return maxTime(mRejectTimes, UID_STATE_LAST_NON_RESTRICTED + 1, _NUM_UID_STATE);
         }
 
+        /**
+         * @hide
+         */
         public long getLastRejectTimeFor(int uidState) {
             return mRejectTimes[uidState];
         }
@@ -1759,6 +1817,7 @@ public class AppOpsManager {
      * @param ops The set of operations you are interested in, or null if you want all of them.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
     public List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, int[] ops) {
         try {
@@ -1931,7 +1990,6 @@ public class AppOpsManager {
      * @param packageName The name of the application to monitor.
      * @param flags Option flags: any combination of {@link #WATCH_FOREGROUND_CHANGES} or 0.
      * @param callback Where to report changes.
-     * @hide
      */
     public void startWatchingMode(String op, String packageName, int flags,
             final OnOpChangedListener callback) {
@@ -2126,6 +2184,14 @@ public class AppOpsManager {
      * causing the app to crash).
      * @throws SecurityException If the app has been configured to crash on this op.
      */
+    public int unsafeCheckOp(String op, int uid, String packageName) {
+        return checkOp(strOpToOp(op), uid, packageName);
+    }
+
+    /**
+     * @deprecated Renamed to {@link #unsafeCheckOp(String, int, String)}.
+     */
+    @Deprecated
     public int checkOp(String op, int uid, String packageName) {
         return checkOp(strOpToOp(op), uid, packageName);
     }
@@ -2134,6 +2200,14 @@ public class AppOpsManager {
      * Like {@link #checkOp} but instead of throwing a {@link SecurityException} it
      * returns {@link #MODE_ERRORED}.
      */
+    public int unsafeCheckOpNoThrow(String op, int uid, String packageName) {
+        return checkOpNoThrow(strOpToOp(op), uid, packageName);
+    }
+
+    /**
+     * @deprecated Renamed to {@link #unsafeCheckOpNoThrow(String, int, String)}.
+     */
+    @Deprecated
     public int checkOpNoThrow(String op, int uid, String packageName) {
         return checkOpNoThrow(strOpToOp(op), uid, packageName);
     }
@@ -2141,7 +2215,6 @@ public class AppOpsManager {
     /**
      * Like {@link #checkOp} but returns the <em>raw</em> mode associated with the op.
      * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
-     * @hide
      */
     public int unsafeCheckOpRaw(String op, int uid, String packageName) {
         try {

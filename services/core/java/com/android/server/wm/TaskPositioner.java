@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.RESIZE_MODE_USER;
-import static android.app.ActivityManager.RESIZE_MODE_USER_FORCED;
+import static android.app.ActivityTaskManager.RESIZE_MODE_USER;
+import static android.app.ActivityTaskManager.RESIZE_MODE_USER_FORCED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
@@ -30,6 +30,7 @@ import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP;
 
 import android.annotation.IntDef;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Looper;
@@ -94,7 +95,7 @@ class TaskPositioner {
     static final float MIN_ASPECT = 1.2f;
 
     private final WindowManagerService mService;
-    private final IActivityManager mActivityManager;
+    private final IActivityTaskManager mActivityManager;
     private WindowPositionerEventReceiver mInputEventReceiver;
     private Display mDisplay;
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
@@ -219,14 +220,14 @@ class TaskPositioner {
     }
 
     @VisibleForTesting
-    TaskPositioner(WindowManagerService service, IActivityManager activityManager) {
+    TaskPositioner(WindowManagerService service, IActivityTaskManager activityManager) {
         mService = service;
         mActivityManager = activityManager;
     }
 
     /** Use {@link #create(WindowManagerService)} instead **/
     TaskPositioner(WindowManagerService service) {
-        this(service, service.mActivityManager);
+        this(service, service.mActivityTaskManager);
     }
 
     @VisibleForTesting

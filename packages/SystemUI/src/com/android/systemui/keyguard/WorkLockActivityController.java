@@ -18,7 +18,9 @@ package com.android.systemui.keyguard;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -37,16 +39,17 @@ public class WorkLockActivityController {
     private static final String TAG = WorkLockActivityController.class.getSimpleName();
 
     private final Context mContext;
-    private final IActivityManager mIam;
+    private final IActivityTaskManager mIatm;
 
     public WorkLockActivityController(Context context) {
-        this(context, ActivityManagerWrapper.getInstance(), ActivityManager.getService());
+        this(context, ActivityManagerWrapper.getInstance(), ActivityTaskManager.getService());
     }
 
     @VisibleForTesting
-    WorkLockActivityController(Context context, ActivityManagerWrapper am, IActivityManager iAm) {
+    WorkLockActivityController(
+            Context context, ActivityManagerWrapper am, IActivityTaskManager iAtm) {
         mContext = context;
-        mIam = iAm;
+        mIatm = iAtm;
 
         am.registerTaskStackListener(mLockListener);
     }
@@ -54,7 +57,7 @@ public class WorkLockActivityController {
     private void startWorkChallengeInTask(int taskId, int userId) {
         ActivityManager.TaskDescription taskDescription = null;
         try {
-            taskDescription = mIam.getTaskDescription(taskId);
+            taskDescription = mIatm.getTaskDescription(taskId);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to get description for task=" + taskId);
         }
@@ -76,7 +79,7 @@ public class WorkLockActivityController {
             // Starting the activity inside the task failed. We can't be sure why, so to be
             // safe just remove the whole task if it still exists.
             try {
-                mIam.removeTask(taskId);
+                mIatm.removeTask(taskId);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed to get description for task=" + taskId);
             }
@@ -89,7 +92,7 @@ public class WorkLockActivityController {
      */
     private int startActivityAsUser(Intent intent, Bundle options, int userId) {
         try {
-            return mIam.startActivityAsUser(
+            return mIatm.startActivityAsUser(
                     mContext.getIApplicationThread() /*caller*/,
                     mContext.getBasePackageName() /*callingPackage*/,
                     intent /*intent*/,

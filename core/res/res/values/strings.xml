@@ -147,19 +147,19 @@
     <!-- Displayed to tell the user that they cannot change the caller ID setting. -->
     <string name="CLIRPermanent">You can\'t change the caller ID setting.</string>
 
-    <!-- Notification title to tell the user that data service is blocked by access control. -->
+    <!-- Notification title to tell the user that data service is blocked by access control. [CHAR LIMIT=NOTIF_TITLE] -->
     <string name="RestrictedOnDataTitle">No mobile data service</string>
-    <!-- Notification title to tell the user that emergency calling is blocked by access control. -->
+    <!-- Notification title to tell the user that emergency calling is blocked by access control. [CHAR LIMIT=NOTIF_TITLE] -->
     <string name="RestrictedOnEmergencyTitle">Emergency calling unavailable</string>
-    <!-- Notification title to tell the user that normal service is blocked by access control. -->
+    <!-- Notification title to tell the user that normal service is blocked by access control. [CHAR LIMIT=NOTIF_TITLE] -->
     <string name="RestrictedOnNormalTitle">No voice service</string>
-    <!-- Notification title to tell the user that all emergency and normal voice services are blocked by access control. -->
+    <!-- Notification title to tell the user that all emergency and normal voice services are blocked by access control. [CHAR LIMIT=NOTIF_TITLE] -->
     <string name="RestrictedOnAllVoiceTitle">No voice service or emergency calling</string>
 
-    <!-- Notification content to tell the user that voice/data/emergency service is blocked by access control. -->
+    <!-- Notification content to tell the user that voice/data/emergency service is blocked by access control. [CHAR LIMIT=NOTIF_BODY] -->
     <string name="RestrictedStateContent">Temporarily turned off by your carrier</string>
 
-    <!-- Notification content to tell the user that voice/data/emergency service is blocked by access control when multiple SIMs are active. -->
+    <!-- Notification content to tell the user that voice/data/emergency service is blocked by access control when multiple SIMs are active. [CHAR LIMIT=NOTIF_BODY] -->
     <string name="RestrictedStateContentMsimTemplate">Temporarily turned off by your carrier for SIM <xliff:g id="simNumber" example="1">%d</xliff:g></string>
 
     <!-- Displayed to tell the user that they should switch their network preference. -->
@@ -321,18 +321,18 @@
     <!-- Sync notifications --> <skip />
     <!-- A notification is shown when there is a sync error.  This is the text that will scroll through the notification bar (will be seen by the user as he uses another application). -->
     <string name="contentServiceSync">Sync</string>
-    <!-- A notification is shown when there is a sync error.  This is the title of the notification.  It will be seen in the pull-down notification tray. -->
+    <!-- A notification is shown when there is a sync error.  This is the title of the notification.  It will be seen in the pull-down notification tray. [CHAR LIMIT=NOTIF_TITLE] -->
     <string name="contentServiceSyncNotificationTitle">Can\'t sync</string>
-    <!-- A notification is shown when there is a sync error.  This is the message of the notification.  It describes the error, in this case is there were too many deletes. The argument is the type of content, for example Gmail or Calendar. It will be seen in the pull-down notification tray. -->
+    <!-- A notification is shown when there is a sync error.  This is the message of the notification.  It describes the error, in this case is there were too many deletes. The argument is the type of content, for example Gmail or Calendar. It will be seen in the pull-down notification tray. [CHAR LIMIT=NOTIF_BODY] -->
     <string name="contentServiceTooManyDeletesNotificationDesc">Attempted to delete too many <xliff:g id="content_type">%s</xliff:g>.</string>
 
-    <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. -->
+    <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. [CHAR LIMIT=TOAST] -->
     <string name="low_memory" product="tablet">Tablet storage is full. Delete some files to free space.</string>
-    <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. -->
+    <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. [CHAR LIMIT=TOAST] -->
     <string name="low_memory" product="watch">Watch storage is full. Delete some files to free space.</string>
-    <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. -->
+    <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. [CHAR LIMIT=TOAST] -->
     <string name="low_memory" product="tv">TV storage is full. Delete some files to free space.</string>
-    <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. -->
+    <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. [CHAR LIMIT=TOAST] -->
     <string name="low_memory" product="default">Phone storage is full. Delete some files to free space.</string>
 
     <!-- SSL CA cert notification --> <skip />
@@ -1082,7 +1082,7 @@
         with the operation of the GPS or other location sources.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessFineLocation">access precise only in the foreground</string>
+    <string name="permlab_accessFineLocation">access precise location only in the foreground</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_accessFineLocation">This app can get your exact location only when it is in the foreground. These location services must be turned on and available on your phone for the app to be able to use them. This may increase battery consumption.</string>
 

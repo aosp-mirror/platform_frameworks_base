@@ -402,12 +402,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Aplikasi ini dapat menambahkan, menghapus, atau mengubah acara kalender di ponsel. Aplikasi ini dapat mengirim pesan yang kelihatannya berasal dari pemilik kalender, atau mengubah acara tanpa memberi tahu pemilik."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"akses perintah penyedia lokasi ekstra"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Memungkinkan aplikasi mengakses perintah penyedia lokasi ekstra. Tindakan ini memungkinkan aplikasi mengganggu pengoperasian GPS atau sumber lokasi lain."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"akses lokasi akurat (berbasis jaringan dan GPS)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Aplikasi ini dapat memperoleh lokasi Anda berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi. Layanan lokasi ini harus diaktifkan dan tersedia di ponsel agar aplikasi dapat menggunakannya. Dapat meningkatkan penggunaan baterai."</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Aplikasi ini bisa mendapatkan lokasi pasti Anda ketika aplikasi berada di latar depan. Fitur layanan lokasi ini harus diaktifkan dan tersedia di ponsel agar dapat digunakan oleh aplikasi. Fitur ini dapat meningkatkan konsumsi baterai."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"akses perkiraan lokasi (berbasis jaringan)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Aplikasi ini dapat memperoleh lokasi Anda berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi. Layanan lokasi ini harus diaktifkan dan tersedia di tablet agar aplikasi dapat menggunakannya."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Aplikasi ini dapat memperoleh lokasi Anda berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi. Layanan lokasi ini harus diaktifkan dan tersedia di TV agar aplikasi dapat menggunakannya."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Aplikasi ini dapat memperoleh lokasi Anda berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi. Layanan lokasi ini harus diaktifkan dan tersedia di ponsel agar aplikasi dapat menggunakannya."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"akses lokasi pasti saat di latar belakang"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Aplikasi ini bisa mendapatkan lokasi pasti Anda kapan pun aplikasi ada di latar belakang. Fitur layanan lokasi ini harus diaktifkan dan tersedia di ponsel agar dapat digunakan oleh aplikasi. Fitur ini dapat meningkatkan konsumsi baterai."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ubah setelan audio Anda"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Memungkinkan aplikasi mengubah setelan audio global, misalnya volume dan pengeras suara mana yang digunakan untuk keluaran."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"rekam audio"</string>

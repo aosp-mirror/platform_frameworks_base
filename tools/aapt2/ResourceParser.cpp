@@ -777,7 +777,8 @@ std::unique_ptr<Item> ResourceParser::ParseXml(xml::XmlPullParser* parser,
   if (allow_raw_value) {
     // We can't parse this so return a RawString if we are allowed.
     return util::make_unique<RawString>(
-        table_->string_pool.MakeRef(raw_value, StringPool::Context(config_)));
+        table_->string_pool.MakeRef(util::TrimWhitespace(raw_value),
+                                    StringPool::Context(config_)));
   }
   return {};
 }

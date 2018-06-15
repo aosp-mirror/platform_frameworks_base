@@ -16,6 +16,7 @@
 
 package com.android.systemui.shared.system;
 
+import android.app.ActivityTaskManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.IActivityManager;
 import android.app.TaskStackListener;
@@ -57,7 +58,7 @@ public class TaskStackChangeListeners extends TaskStackListener {
         if (!mRegistered) {
             // Register mTaskStackListener to IActivityManager only once if needed.
             try {
-                am.registerTaskStackListener(this);
+                ActivityTaskManager.getService().registerTaskStackListener(this);
                 mRegistered = true;
             } catch (Exception e) {
                 Log.w(TAG, "Failed to call registerTaskStackListener", e);

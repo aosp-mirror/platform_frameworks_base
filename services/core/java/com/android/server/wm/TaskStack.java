@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
-import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
+import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -1614,7 +1614,7 @@ public class TaskStack extends WindowContainer<Task> implements
         }
 
         try {
-            mService.mActivityManager.resizePinnedStack(stackBounds, tempTaskBounds);
+            mService.mActivityTaskManager.resizePinnedStack(stackBounds, tempTaskBounds);
         } catch (RemoteException e) {
             // I don't believe you.
         }
@@ -1647,7 +1647,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
         if (inPinnedWindowingMode()) {
             try {
-                mService.mActivityManager.notifyPinnedStackAnimationStarted();
+                mService.mActivityTaskManager.notifyPinnedStackAnimationStarted();
             } catch (RemoteException e) {
                 // I don't believe you...
             }
@@ -1689,9 +1689,9 @@ public class TaskStack extends WindowContainer<Task> implements
             }
 
             try {
-                mService.mActivityManager.notifyPinnedStackAnimationEnded();
+                mService.mActivityTaskManager.notifyPinnedStackAnimationEnded();
                 if (moveToFullscreen) {
-                    mService.mActivityManager.moveTasksToFullscreenStack(mStackId,
+                    mService.mActivityTaskManager.moveTasksToFullscreenStack(mStackId,
                             true /* onTop */);
                 }
             } catch (RemoteException e) {

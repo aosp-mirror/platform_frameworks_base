@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.opengl.Matrix;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -309,7 +310,7 @@ public class DisplayTransformManager {
 
     private void updateConfiguration() {
         try {
-            ActivityManager.getService().updateConfiguration(null);
+            ActivityTaskManager.getService().updateConfiguration(null);
         } catch (RemoteException e) {
             Log.e(TAG, "Could not update configuration", e);
         }

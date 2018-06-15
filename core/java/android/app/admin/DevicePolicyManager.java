@@ -9398,9 +9398,9 @@ public class DevicePolicyManager {
      * <ul>
      *   <li>{@link ApnSetting#getOperatorNumeric()}</li>
      *   <li>{@link ApnSetting#getApnName()}</li>
-     *   <li>{@link ApnSetting#getProxyAddress()}</li>
+     *   <li>{@link ApnSetting#getProxyAddressAsString()}</li>
      *   <li>{@link ApnSetting#getProxyPort()}</li>
-     *   <li>{@link ApnSetting#getMmsProxyAddress()}</li>
+     *   <li>{@link ApnSetting#getMmsProxyAddressAsString()}</li>
      *   <li>{@link ApnSetting#getMmsProxyPort()}</li>
      *   <li>{@link ApnSetting#getMmsc()}</li>
      *   <li>{@link ApnSetting#isEnabled()}</li>

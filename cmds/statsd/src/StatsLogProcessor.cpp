@@ -72,18 +72,20 @@ const int FIELD_ID_STRINGS = 9;
 #define STATS_DATA_DIR "/data/misc/stats-data"
 
 StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
+                                     const sp<StatsPullerManager>& pullerManager,
                                      const sp<AlarmMonitor>& anomalyAlarmMonitor,
                                      const sp<AlarmMonitor>& periodicAlarmMonitor,
                                      const int64_t timeBaseNs,
                                      const std::function<bool(const ConfigKey&)>& sendBroadcast)
     : mUidMap(uidMap),
+      mPullerManager(pullerManager),
       mAnomalyAlarmMonitor(anomalyAlarmMonitor),
       mPeriodicAlarmMonitor(periodicAlarmMonitor),
       mSendBroadcast(sendBroadcast),
       mTimeBaseNs(timeBaseNs),
       mLargestTimestampSeen(0),
       mLastTimestampSeen(0) {
-    mStatsPullerManager.ForceClearPullerCache();
+    mPullerManager->ForceClearPullerCache();
 }
 
 StatsLogProcessor::~StatsLogProcessor() {
@@ -238,7 +240,7 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event, bool reconnected) {
 
     int64_t curTimeSec = getElapsedRealtimeSec();
     if (curTimeSec - mLastPullerCacheClearTimeSec > StatsdStats::kPullerCacheClearIntervalSec) {
-        mStatsPullerManager.ClearPullerCacheIfNecessary(curTimeSec * NS_PER_SEC);
+        mPullerManager->ClearPullerCacheIfNecessary(curTimeSec * NS_PER_SEC);
         mLastPullerCacheClearTimeSec = curTimeSec;
     }
 
@@ -266,8 +268,8 @@ void StatsLogProcessor::OnConfigUpdatedLocked(
         const int64_t timestampNs, const ConfigKey& key, const StatsdConfig& config) {
     VLOG("Updated configuration for key %s", key.ToString().c_str());
     sp<MetricsManager> newMetricsManager =
-        new MetricsManager(key, config, mTimeBaseNs, timestampNs, mUidMap,
-                           mAnomalyAlarmMonitor, mPeriodicAlarmMonitor);
+            new MetricsManager(key, config, mTimeBaseNs, timestampNs, mUidMap, mPullerManager,
+                               mAnomalyAlarmMonitor, mPeriodicAlarmMonitor);
     if (newMetricsManager->isConfigValid()) {
         mUidMap->OnConfigUpdated(key);
         if (newMetricsManager->shouldAddUidMapListener()) {
@@ -453,7 +455,7 @@ void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
     mLastBroadcastTimes.erase(key);
 
     if (mMetricsManagers.empty()) {
-        mStatsPullerManager.ForceClearPullerCache();
+        mPullerManager->ForceClearPullerCache();
     }
 }
 
@@ -538,7 +540,7 @@ void StatsLogProcessor::WriteDataToDisk(const DumpReportReason dumpReportReason)
 
 void StatsLogProcessor::informPullAlarmFired(const int64_t timestampNs) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
-    mStatsPullerManager.OnAlarmFired(timestampNs);
+    mPullerManager->OnAlarmFired(timestampNs);
 }
 
 int64_t StatsLogProcessor::getLastReportTimeNs(const ConfigKey& key) {

@@ -28,6 +28,7 @@ import android.accounts.AccountManager;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
+import android.app.IActivityTaskManager;
 import android.app.NotificationManager;
 import android.app.backup.IBackupManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -91,6 +92,7 @@ public class MockSystemServices {
     public final IIpConnectivityMetrics iipConnectivityMetrics;
     public final IWindowManager iwindowManager;
     public final IActivityManager iactivityManager;
+    public final IActivityTaskManager iactivityTaskManager;
     public ActivityManagerInternal activityManagerInternal;
     public final IPackageManager ipackageManager;
     public final IBackupManager ibackupManager;
@@ -129,6 +131,7 @@ public class MockSystemServices {
         iipConnectivityMetrics = mock(IIpConnectivityMetrics.class);
         iwindowManager = mock(IWindowManager.class);
         iactivityManager = mock(IActivityManager.class);
+        iactivityTaskManager = mock(IActivityTaskManager.class);
         activityManagerInternal = mock(ActivityManagerInternal.class);
         ipackageManager = mock(IPackageManager.class);
         ibackupManager = mock(IBackupManager.class);

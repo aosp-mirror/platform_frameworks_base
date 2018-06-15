@@ -64,6 +64,7 @@ public class ActivityView extends ViewGroup {
     private StateCallback mActivityViewCallback;
 
     private IActivityManager mActivityManager;
+    private IActivityTaskManager mActivityTaskManager;
     private IInputForwarder mInputForwarder;
     // Temp container to store view coordinates on screen.
     private final int[] mLocationOnScreen = new int[2];
@@ -85,6 +86,7 @@ public class ActivityView extends ViewGroup {
         super(context, attrs, defStyle);
 
         mActivityManager = ActivityManager.getService();
+        mActivityTaskManager = ActivityTaskManager.getService();
         mSurfaceView = new SurfaceView(context);
         mSurfaceCallback = new SurfaceCallback();
         mSurfaceView.getHolder().addCallback(mSurfaceCallback);
@@ -349,7 +351,7 @@ public class ActivityView extends ViewGroup {
         mInputForwarder = InputManager.getInstance().createInputForwarder(displayId);
         mTaskStackListener = new TaskStackListenerImpl();
         try {
-            mActivityManager.registerTaskStackListener(mTaskStackListener);
+            mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register task stack listener", e);
         }
@@ -369,7 +371,7 @@ public class ActivityView extends ViewGroup {
 
         if (mTaskStackListener != null) {
             try {
-                mActivityManager.unregisterTaskStackListener(mTaskStackListener);
+                mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to unregister task stack listener", e);
             }
@@ -474,7 +476,7 @@ public class ActivityView extends ViewGroup {
             // Find the topmost task on our virtual display - it will define the background
             // color of the surface view during resizing.
             final int displayId = mVirtualDisplay.getDisplay().getDisplayId();
-            final List<StackInfo> stackInfoList = mActivityManager.getAllStackInfos();
+            final List<StackInfo> stackInfoList = mActivityTaskManager.getAllStackInfos();
 
             // Iterate through stacks from top to bottom.
             final int stackCount = stackInfoList.size();

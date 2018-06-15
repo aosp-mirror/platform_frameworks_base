@@ -45,6 +45,7 @@ public class QuickQSPanel extends QSPanel {
     public static final String NUM_QUICK_TILES = "sysui_qqs_count";
 
     private boolean mDisabledByPolicy;
+    private static int mDefaultMaxTiles;
     private int mMaxTiles;
     protected QSPanel mFullPanel;
 
@@ -59,6 +60,7 @@ public class QuickQSPanel extends QSPanel {
             }
             removeView((View) mTileLayout);
         }
+        mDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
         mTileLayout = new HeaderTileLayout(context);
         mTileLayout.setListening(mListening);
         addView((View) mTileLayout, 0 /* Between brightness and footer */);
@@ -149,7 +151,7 @@ public class QuickQSPanel extends QSPanel {
     };
 
     public static int getNumQuickTiles(Context context) {
-        return Dependency.get(TunerService.class).getValue(NUM_QUICK_TILES, 6);
+        return Dependency.get(TunerService.class).getValue(NUM_QUICK_TILES, mDefaultMaxTiles);
     }
 
     void setDisabledByPolicy(boolean disabled) {

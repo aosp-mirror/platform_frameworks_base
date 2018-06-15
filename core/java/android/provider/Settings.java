@@ -6012,7 +6012,7 @@ public final class Settings {
                 new SettingsValidators.ComponentNameListValidator(":");
 
         /**
-         * Whether the hush gesture has ever been used // TODO: beverlyt
+         * Whether the hush gesture has ever been used
          * @hide
          */
         public static final String HUSH_GESTURE_USED = "hush_gesture_used";
@@ -11270,6 +11270,14 @@ public final class Settings {
          * @hide
          */
         public static final String EMERGENCY_AFFORDANCE_NEEDED = "emergency_affordance_needed";
+
+        /**
+         * Enable faster emergency phone call feature.
+         * The value is a boolean (1 or 0).
+         * @hide
+         */
+        public static final String FASTER_EMERGENCY_PHONE_CALL_ENABLED =
+                "faster_emergency_phone_call_enabled";
 
         /**
          * See RIL_PreferredNetworkType in ril.h

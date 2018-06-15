@@ -402,12 +402,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"此应用可在手机上添加、移除或更改日历活动。此应用可能会以日历所有者的身份发送消息，或在不通知所有者的情况下更改活动。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"获取额外的位置信息提供程序命令"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"允许该应用使用其他的位置信息提供程序命令。此权限使该应用可以干扰GPS或其他位置信息源的运作。"</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"访问确切位置信息（以 GPS 和网络为依据）"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"此应用可根据 GPS 或网络来源（例如基站和 WLAN 网络）获取您的位置信息。您的手机必须支持并开启这些位置信息服务，此应用才能使用这些服务。这可能会增加耗电量。"</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"此应用只有在前台运行时才能获取您的精确位置信息。您的手机必须支持并开启这些位置信息服务，此应用才能使用这些服务。这可能会增加耗电量。"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"访问大致位置信息（以网络为依据）"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"此应用可根据网络来源（例如基站和 WLAN 网络）获取您的位置信息。您的平板电脑必须支持并开启这些位置信息服务，此应用才能使用这些服务。"</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"此应用可根据网络来源（例如基站和 WLAN 网络）获取您的位置信息。您的电视必须支持并开启这些位置信息服务，此应用才能使用这些服务。"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"此应用可根据网络来源（例如基站和 WLAN 网络）获取您的位置信息。您的手机必须支持并开启这些位置信息服务，此应用才能使用这些服务。"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"在后台获取精确的位置信息"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"此应用在后台运行时可随时获取您的精确位置信息。您的手机必须支持并开启这些位置信息服务，此应用才能使用这些服务。这可能会增加耗电量。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"更改您的音频设置"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"允许该应用修改全局音频设置，例如音量和用于输出的扬声器。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"录音"</string>

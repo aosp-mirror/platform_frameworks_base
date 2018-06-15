@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
+import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OP_NONE;
@@ -100,6 +100,7 @@ import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_OFFSET;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_REMOVING_FOCUS;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.localLOGV;
@@ -445,7 +446,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /**
      * Usually empty. Set to the task's tempInsetFrame. See
-     *{@link android.app.IActivityManager#resizeDockedStack}.
+     *{@link android.app.IActivityTaskManager#resizeDockedStack}.
      */
     private final Rect mInsetFrame = new Rect();
 
@@ -2061,7 +2062,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (wasVisible && mService.updateOrientationFromAppTokensLocked(displayId)) {
                 mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
             }
-            mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
+            mService.updateFocusedWindowLocked(mService.mCurrentFocus == this
+                            ? UPDATE_FOCUS_REMOVING_FOCUS
+                            : UPDATE_FOCUS_NORMAL,
+                    true /*updateInputWindows*/);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
@@ -2448,7 +2452,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     try {
                         // Note: this calls into ActivityManager, so we must *not* hold the window
                         // manager lock while calling this.
-                        mService.mActivityManager.setSplitScreenResizing(false);
+                        mService.mActivityTaskManager.setSplitScreenResizing(false);
                     } catch (RemoteException e) {
                         // Local call, shouldn't return RemoteException.
                         throw e.rethrowAsRuntimeException();

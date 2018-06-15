@@ -215,6 +215,14 @@ final class SystemServiceRegistry {
                 return new ActivityManager(ctx.getOuterContext(), ctx.mMainThread.getHandler());
             }});
 
+        registerService(Context.ACTIVITY_TASK_SERVICE, ActivityTaskManager.class,
+                new CachedServiceFetcher<ActivityTaskManager>() {
+            @Override
+            public ActivityTaskManager createService(ContextImpl ctx) {
+                return new ActivityTaskManager(
+                        ctx.getOuterContext(), ctx.mMainThread.getHandler());
+            }});
+
         registerService(Context.ALARM_SERVICE, AlarmManager.class,
                 new CachedServiceFetcher<AlarmManager>() {
             @Override
@@ -518,7 +526,7 @@ final class SystemServiceRegistry {
                 new CachedServiceFetcher<CarrierConfigManager>() {
             @Override
             public CarrierConfigManager createService(ContextImpl ctx) {
-                return new CarrierConfigManager();
+                return new CarrierConfigManager(ctx.getOuterContext());
             }});
 
         registerService(Context.TELECOM_SERVICE, TelecomManager.class,

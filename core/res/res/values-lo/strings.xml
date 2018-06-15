@@ -402,12 +402,15 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"This app can add, remove, or change calendar events on your phone. This app can send messages that may appear to come from calendar owners, or change events without notifying their owners."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ເຂົ້າເຖິງຄຳສັ່ງຜູ່ໃຫ້ບໍລິການພິກັດສະຖານທີ່"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ອະນຸຍາດ​ໃຫ້​ແອັບຯ​ເຂົ້າເຖິງ​ຄຳສັ່ງ​ເພີ່ມເຕີມ​ຂອງ​ຜູ່​ໃຫ້​ບໍລິການ​ສະຖານທີ່. ນີ້​ອາດ​ຈະ​ເປັນ​ການ​ເຮັດ​ໃຫ້​ແອັບຯ ລົບກວນ​ການ​ເຮັດ​ວຽກ​ຂອງ GPS ຫຼື​ແຫລ່ງ​ຂໍ້ມູນ​ສະຖານທີ່​ອື່ນໆ​ໄດ້."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"ເຂົ້າ​ຫາທີ່ຕັ້ງທີ່ແນ່ນອນ (ອີງໃສ່ GPS ແລະ ເຄືອຂ່າຍ)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"This app can get your location based on GPS or network location sources such as cell towers and Wi-Fi networks. These location services must be turned on and available on your phone for the app to be able to use them. This may increase battery consumption."</string>
+    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
+    <skip />
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"ແອັບນີ້ສາມາດຮັບເອົາສະຖານທີ່ແນ່ນອນຂອງທ່ານໄດ້ທຸກເວລາທີ່ມັນຢູ່ໃນພື້ນໜ້າ. ການບໍລິການສະຖານທີ່ເຫຼົ່ານີ້ຕ້ອງເປີດຢູ່ ແລະ ສາມາດໃຊ້ໄດ້ໃນໂທລະສັບຂອງທ່ານເພື່ອໃຫ້ແອັບສາມາດໃຊ້ພວກມັນໄດ້. ນີ້ອາດຈະເຮັດໃຫ້ການໃຊ້ແບັດເຕີຣີເພີ່ມຂຶ້ນ."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ເຂົ້າ​ຫາທີ່ຕັ້ງໂດຍປະມານ (ອີງໃສ່ເຄືອຂ່າຍ)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"This app can get your location based on network sources such as cell towers and Wi-Fi networks. These location services must be turned on and available on your tablet for the app to be able to use them."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"This app can get your location based on network sources such as cell towers and Wi-Fi networks. These location services must be turned on and available on your TV for the app to be able to use them."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"This app can get your location based on network sources such as cell towers and Wi-Fi networks. These location services must be turned on and available on your phone for the app to be able to use them."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"ເຂົ້າເຖິງສະຖານທີ່ແນ່ນອນໃນພື້ນຫຼັງ"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"ແອັບນີ້ສາມາດຮັບເອົາສະຖານທີ່ແນ່ນອນຂອງທ່ານໄດ້ທຸກເວລາທີ່ມັນຢູ່ໃນພື້ນຫຼັງ. ການບໍລິການສະຖານທີ່ເຫຼົ່ານີ້ຕ້ອງເປີດຢູ່ ແລະ ສາມາດໃຊ້ໄດ້ໃນໂທລະສັບຂອງທ່ານເພື່ອໃຫ້ແອັບສາມາດໃຊ້ພວກມັນໄດ້. ນີ້ອາດຈະເຮັດໃຫ້ການໃຊ້ແບັດເຕີຣີເພີ່ມຂຶ້ນ."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ປ່ຽນການຕັ້ງຄ່າສຽງຂອງທ່ານ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ອະນຸຍາດໃຫ້ແອັບຯແກ້ໄຂການຕັ້ງຄ່າສຽງສ່ວນກາງ ເຊັ່ນ: ລະດັບສຽງ ແລະລຳໂພງໃດທີ່ຖືກໃຊ້ສົ່ງສຽງອອກ."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ບັນທຶກສຽງ"</string>

@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
+import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
@@ -44,6 +46,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
@@ -607,6 +610,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                         maybeEscalateHeadsUp();
                     }
                 }
+
+                @Override
+                public void onStrongAuthStateChanged(int userId) {
+                    super.onStrongAuthStateChanged(userId);
+                    mEntryManager.updateNotifications();
+                }
             };
 
     private NavigationBarFragment mNavigationBar;
@@ -1122,6 +1131,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationIconAreaController.onDensityOrFontScaleChanged(mContext);
         mHeadsUpManager.onDensityOrFontScaleChanged();
 
+        inflateFooterView();
+        inflateEmptyShadeView();
         reevaluateStyles();
     }
 
@@ -1150,10 +1161,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    protected void reevaluateStyles() {
-        inflateFooterView();
+    private void reevaluateStyles() {
         updateFooter();
-        inflateEmptyShadeView();
         updateEmptyShadeView();
     }
 
@@ -1174,7 +1183,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
     }
 
-    private void inflateFooterView() {
+    @VisibleForTesting
+    protected void inflateFooterView() {
         if (mStackScroller == null) {
             return;
         }
@@ -1352,8 +1362,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 return false;
             }
             int createMode = navbarPos == NAV_BAR_POS_LEFT
-                    ? ActivityManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT
-                    : ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
+                    ? SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT
+                    : SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
             return mRecents.splitPrimaryTask(NavigationBarGestureHelper.DRAG_MODE_NONE, createMode,
                     null, metricsDockAction);
         } else {
@@ -2951,7 +2961,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS);
             }
             try {
-                result = ActivityManager.getService().startActivityAsUser(
+                result = ActivityTaskManager.getService().startActivityAsUser(
                         null, mContext.getBasePackageName(),
                         intent,
                         intent.resolveTypeIfNeeded(mContext.getContentResolver()),
@@ -4451,12 +4461,15 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateScrimController();
     }
 
-    public void cancelCurrentTouch() {
+    /**
+     * Collapses the notification shade if it is tracking or expanded.
+     */
+    public void collapseShade() {
         if (mNotificationPanel.isTracking()) {
             mStatusBarWindow.cancelCurrentTouch();
-            if (mState == StatusBarState.SHADE) {
-                animateCollapsePanels();
-            }
+        }
+        if (mPanelExpanded && mState == StatusBarState.SHADE) {
+            animateCollapsePanels();
         }
     }
 
@@ -5144,7 +5157,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                             row, wasOccluded);
                     try {
                         if (adapter != null) {
-                            ActivityManager.getService()
+                            ActivityTaskManager.getService()
                                     .registerRemoteAnimationForNextActivityStart(
                                             intent.getCreatorPackage(), adapter);
                         }

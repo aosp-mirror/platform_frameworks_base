@@ -19,6 +19,7 @@ package com.android.systemui.pip.phone;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
+import android.app.ActivityTaskManager;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
 import android.app.IActivityManager;
@@ -384,7 +385,7 @@ public class PipMenuActivityController {
     private void startMenuActivity(int menuState, Rect stackBounds, Rect movementBounds,
             boolean allowMenuTimeout, boolean willResizeMenu) {
         try {
-            StackInfo pinnedStackInfo = mActivityManager.getStackInfo(
+            StackInfo pinnedStackInfo = ActivityTaskManager.getService().getStackInfo(
                     WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
             if (pinnedStackInfo != null && pinnedStackInfo.taskIds != null &&
                     pinnedStackInfo.taskIds.length > 0) {
@@ -423,7 +424,7 @@ public class PipMenuActivityController {
             // Fetch the pinned stack bounds
             Rect stackBounds = null;
             try {
-                StackInfo pinnedStackInfo = mActivityManager.getStackInfo(
+                StackInfo pinnedStackInfo = ActivityTaskManager.getService().getStackInfo(
                         WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
                 if (pinnedStackInfo != null) {
                     stackBounds = pinnedStackInfo.bounds;

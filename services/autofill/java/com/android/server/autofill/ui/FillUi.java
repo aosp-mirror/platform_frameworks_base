@@ -21,7 +21,6 @@ import static com.android.server.autofill.Helper.sFullScreenMode;
 import static com.android.server.autofill.Helper.sVerbose;
 import static com.android.server.autofill.Helper.sVisibleDatasetsMaxCount;
 
-import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -37,7 +36,6 @@ import android.service.autofill.Dataset;
 import android.service.autofill.Dataset.DatasetFieldFilter;
 import android.service.autofill.FillResponse;
 import android.text.TextUtils;
-import android.util.AttributeSet;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.view.KeyEvent;
@@ -54,7 +52,6 @@ import android.view.autofill.IAutofillWindowPresenter;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -679,7 +676,7 @@ final class FillUi {
                 // WM throws an ISE if mContentView was added twice; this should never happen -
                 // since show() and hide() are always called in the UIThread - but when it does,
                 // it should not crash the system.
-                Slog.e(TAG, "Exception showing window " + params, e);
+                Slog.wtf(TAG, "Exception showing window " + params, e);
                 mCallback.onDestroy();
             }
         }

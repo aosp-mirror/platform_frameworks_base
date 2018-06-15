@@ -21,6 +21,7 @@ import android.annotation.StringRes;
 import android.annotation.UiThread;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.VoiceInteractor.PickOptionRequest;
 import android.app.VoiceInteractor.PickOptionRequest.Option;
@@ -260,7 +261,7 @@ public class ResolverActivity extends Activity {
         setProfileSwitchMessageId(intent.getContentUserHint());
 
         try {
-            mLaunchedFromUid = ActivityManager.getService().getLaunchedFromUid(
+            mLaunchedFromUid = ActivityTaskManager.getService().getLaunchedFromUid(
                     getActivityToken());
         } catch (RemoteException e) {
             mLaunchedFromUid = -1;
@@ -846,7 +847,7 @@ public class ResolverActivity extends Activity {
         } catch (RuntimeException e) {
             String launchedFromPackage;
             try {
-                launchedFromPackage = ActivityManager.getService().getLaunchedFromPackage(
+                launchedFromPackage = ActivityTaskManager.getService().getLaunchedFromPackage(
                         getActivityToken());
             } catch (RemoteException e2) {
                 launchedFromPackage = "??";
