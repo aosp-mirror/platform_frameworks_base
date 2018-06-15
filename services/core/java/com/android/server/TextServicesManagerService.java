@@ -537,30 +537,39 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 && !allowImplicitlySelectedSubtype) {
             return null;
         }
-        SpellCheckerSubtype candidate = null;
+
+        final int numSubtypes = sci.getSubtypeCount();
+        if (subtypeHashCode != 0) {
+            // Use the user specified spell checker subtype
+            for (int i = 0; i < numSubtypes; ++i) {
+                final SpellCheckerSubtype scs = sci.getSubtypeAt(i);
+                if (scs.hashCode() == subtypeHashCode) {
+                    return scs;
+                }
+            }
+            return null;
+        }
+
+        // subtypeHashCode == 0 means spell checker language settings is "auto"
+
+        if (systemLocale == null) {
+            return null;
+        }
+        SpellCheckerSubtype firstLanguageMatchingSubtype = null;
         for (int i = 0; i < sci.getSubtypeCount(); ++i) {
             final SpellCheckerSubtype scs = sci.getSubtypeAt(i);
-            if (subtypeHashCode == 0) {
-                final Locale scsLocale = scs.getLocaleObject();
-                if (Objects.equals(scsLocale, systemLocale)) {
-                    return scs;
-                } else if (candidate == null && systemLocale != null && scsLocale != null
-                        && TextUtils.equals(systemLocale.getLanguage(), scsLocale.getLanguage())) {
-                    // Fall back to the applicable language
-                    candidate = scs;
-                }
-            } else if (scs.hashCode() == subtypeHashCode) {
-                if (DBG) {
-                    Slog.w(TAG, "Return subtype " + scs.hashCode() + ", " + scs.getLocale());
-                }
-                // Use the user specified spell check language
+            final Locale scsLocale = scs.getLocaleObject();
+            if (Objects.equals(scsLocale, systemLocale)) {
+                // Exact match wins.
                 return scs;
             }
+            if (firstLanguageMatchingSubtype == null && scsLocale != null
+                    && TextUtils.equals(systemLocale.getLanguage(), scsLocale.getLanguage())) {
+                // Remember as a fall back candidate
+                firstLanguageMatchingSubtype = scs;
+            }
         }
-        // Fall back to the applicable language and return it if not null
-        // Simply just return it even if it's null which means we could find no suitable
-        // spell check languages
-        return candidate;
+        return firstLanguageMatchingSubtype;
     }
 
     @Override
