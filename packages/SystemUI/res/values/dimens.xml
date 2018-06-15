@@ -55,7 +55,7 @@
     <dimen name="status_bar_left_clock_end_padding">7dp</dimen>
 
     <!-- Spacing after the wifi signals that is present if there are any icons following it. -->
-    <dimen name="status_bar_wifi_signal_spacer_width">4dp</dimen>
+    <dimen name="status_bar_wifi_signal_spacer_width">2.5dp</dimen>
 
     <!-- Spacing before the airplane mode icon if there are any icons preceding it. -->
     <dimen name="status_bar_airplane_spacer_width">4dp</dimen>
