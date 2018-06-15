@@ -2851,12 +2851,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Override
     public Path getCustomClipPath(View child) {
         if (child instanceof NotificationGuts) {
-            return getClipPath(true, /* ignoreTranslation */
-                    false /* clipRoundedToBottom */);
-        }
-        if (child instanceof NotificationChildrenContainer) {
-            return getClipPath(false, /* ignoreTranslation */
-                    true /* clipRoundedToBottom */);
+            return getClipPath(true /* ignoreTranslation */);
         }
         return super.getCustomClipPath(child);
     }
