@@ -344,6 +344,8 @@ public class WindowManagerService extends IWindowManager.Stub
     static final int UPDATE_FOCUS_WILL_ASSIGN_LAYERS = 1;
     static final int UPDATE_FOCUS_PLACING_SURFACES = 2;
     static final int UPDATE_FOCUS_WILL_PLACE_SURFACES = 3;
+    /** Indicates we are removing the focused window when updating the focus. */
+    static final int UPDATE_FOCUS_REMOVING_FOCUS = 4;
 
     private static final String SYSTEM_SECURE = "ro.secure";
     private static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
@@ -5712,6 +5714,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent.setLayoutNeeded();
                 if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
                     displayContent.performLayout(true /*initial*/, updateInputWindows);
+                } else if (mode == UPDATE_FOCUS_REMOVING_FOCUS) {
+                    mRoot.performSurfacePlacement(false);
                 }
             }
 
