@@ -708,6 +708,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (!focusCandidate.isFocusable()) {
             // The focus candidate isn't focusable. Move focus to the top stack that is focusable.
             focusCandidate = getNextFocusableStackLocked(focusCandidate, false /* ignoreCurrent */);
+            if (focusCandidate == null) {
+                Slog.w(TAG,
+                        "setFocusStackUnchecked: No focusable stack found, focus home as default");
+                focusCandidate = mHomeStack;
+            }
         }
 
         if (focusCandidate != mFocusedStack) {
