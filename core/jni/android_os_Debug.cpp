@@ -902,146 +902,6 @@ jint android_os_Debug_getLocalObjectCount(JNIEnv* env, jobject clazz);
 jint android_os_Debug_getProxyObjectCount(JNIEnv* env, jobject clazz);
 jint android_os_Debug_getDeathObjectCount(JNIEnv* env, jobject clazz);
 
-
-/* pulled out of bionic */
-extern "C" void get_malloc_leak_info(uint8_t** info, size_t* overallSize,
-    size_t* infoSize, size_t* totalMemory, size_t* backtraceSize);
-extern "C" void free_malloc_leak_info(uint8_t* info);
-#define SIZE_FLAG_ZYGOTE_CHILD  (1<<31)
-
-static size_t gNumBacktraceElements;
-
-/*
- * This is a qsort() callback.
- *
- * See dumpNativeHeap() for comments about the data format and sort order.
- */
-static int compareHeapRecords(const void* vrec1, const void* vrec2)
-{
-    const size_t* rec1 = (const size_t*) vrec1;
-    const size_t* rec2 = (const size_t*) vrec2;
-    size_t size1 = *rec1;
-    size_t size2 = *rec2;
-
-    if (size1 < size2) {
-        return 1;
-    } else if (size1 > size2) {
-        return -1;
-    }
-
-    uintptr_t* bt1 = (uintptr_t*)(rec1 + 2);
-    uintptr_t* bt2 = (uintptr_t*)(rec2 + 2);
-    for (size_t idx = 0; idx < gNumBacktraceElements; idx++) {
-        uintptr_t addr1 = bt1[idx];
-        uintptr_t addr2 = bt2[idx];
-        if (addr1 == addr2) {
-            if (addr1 == 0)
-                break;
-            continue;
-        }
-        if (addr1 < addr2) {
-            return -1;
-        } else if (addr1 > addr2) {
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
-/*
- * The get_malloc_leak_info() call returns an array of structs that
- * look like this:
- *
- *   size_t size
- *   size_t allocations
- *   intptr_t backtrace[32]
- *
- * "size" is the size of the allocation, "backtrace" is a fixed-size
- * array of function pointers, and "allocations" is the number of
- * allocations with the exact same size and backtrace.
- *
- * The entries are sorted by descending total size (i.e. size*allocations)
- * then allocation count.  For best results with "diff" we'd like to sort
- * primarily by individual size then stack trace.  Since the entries are
- * fixed-size, and we're allowed (by the current implementation) to mangle
- * them, we can do this in place.
- */
-static void dumpNativeHeap(FILE* fp)
-{
-    uint8_t* info = NULL;
-    size_t overallSize, infoSize, totalMemory, backtraceSize;
-
-    get_malloc_leak_info(&info, &overallSize, &infoSize, &totalMemory,
-        &backtraceSize);
-    if (info == NULL) {
-        fprintf(fp, "Native heap dump not available. To enable, run these"
-                    " commands (requires root):\n");
-        fprintf(fp, "# adb shell stop\n");
-        fprintf(fp, "# adb shell setprop libc.debug.malloc.options "
-                    "backtrace\n");
-        fprintf(fp, "# adb shell start\n");
-        return;
-    }
-    assert(infoSize != 0);
-    assert(overallSize % infoSize == 0);
-
-    fprintf(fp, "Android Native Heap Dump v1.0\n\n");
-
-    size_t recordCount = overallSize / infoSize;
-    fprintf(fp, "Total memory: %zu\n", totalMemory);
-    fprintf(fp, "Allocation records: %zd\n", recordCount);
-    fprintf(fp, "Backtrace size: %zd\n", backtraceSize);
-    fprintf(fp, "\n");
-
-    /* re-sort the entries */
-    gNumBacktraceElements = backtraceSize;
-    qsort(info, recordCount, infoSize, compareHeapRecords);
-
-    /* dump the entries to the file */
-    const uint8_t* ptr = info;
-    for (size_t idx = 0; idx < recordCount; idx++) {
-        size_t size = *(size_t*) ptr;
-        size_t allocations = *(size_t*) (ptr + sizeof(size_t));
-        uintptr_t* backtrace = (uintptr_t*) (ptr + sizeof(size_t) * 2);
-
-        fprintf(fp, "z %d  sz %8zu  num %4zu  bt",
-                (size & SIZE_FLAG_ZYGOTE_CHILD) != 0,
-                size & ~SIZE_FLAG_ZYGOTE_CHILD,
-                allocations);
-        for (size_t bt = 0; bt < backtraceSize; bt++) {
-            if (backtrace[bt] == 0) {
-                break;
-            } else {
-#ifdef __LP64__
-                fprintf(fp, " %016" PRIxPTR, backtrace[bt]);
-#else
-                fprintf(fp, " %08" PRIxPTR, backtrace[bt]);
-#endif
-            }
-        }
-        fprintf(fp, "\n");
-
-        ptr += infoSize;
-    }
-
-    free_malloc_leak_info(info);
-
-    fprintf(fp, "MAPS\n");
-    const char* maps = "/proc/self/maps";
-    UniqueFile in = MakeUniqueFile(maps, "re");
-    if (in == nullptr) {
-        fprintf(fp, "Could not open %s\n", maps);
-        return;
-    }
-    char buf[BUFSIZ];
-    while (size_t n = fread(buf, sizeof(char), BUFSIZ, in.get())) {
-        fwrite(buf, sizeof(char), n, fp);
-    }
-
-    fprintf(fp, "END\n");
-}
-
 static bool openFile(JNIEnv* env, jobject fileDescriptor, UniqueFile& fp)
 {
     if (fileDescriptor == NULL) {
@@ -1072,6 +932,9 @@ static bool openFile(JNIEnv* env, jobject fileDescriptor, UniqueFile& fp)
     return true;
 }
 
+/* pulled out of bionic */
+extern "C" void write_malloc_leak_info(FILE* fp);
+
 /*
  * Dump the native heap, writing human-readable output to the specified
  * file descriptor.
@@ -1085,7 +948,9 @@ static void android_os_Debug_dumpNativeHeap(JNIEnv* env, jobject,
     }
 
     ALOGD("Native heap dump starting...\n");
-    dumpNativeHeap(fp.get());
+    // Formatting of the native heap dump is handled by malloc debug itself.
+    // See https://android.googlesource.com/platform/bionic/+/master/libc/malloc_debug/README.md#backtrace-heap-dump-format
+    write_malloc_leak_info(fp.get());
     ALOGD("Native heap dump complete.\n");
 }
 
