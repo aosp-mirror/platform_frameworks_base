@@ -34,6 +34,9 @@ import android.view.autofill.IAutoFillManagerClient;
  *
  * {@hide}
  */
+ // TODO(b/73536867) STOPSHIP : this whole interface should be either oneway or not, and we're
+ // gradually converting the methods (as some of them return a value form the server and must be
+ // refactored).
 interface IAutoFillManager {
     // Returns flags: FLAG_ADD_CLIENT_ENABLED | FLAG_ADD_CLIENT_DEBUG | FLAG_ADD_CLIENT_VERBOSE
     int addClient(in IAutoFillManagerClient client, int userId);
@@ -43,13 +46,14 @@ interface IAutoFillManager {
             in ComponentName componentName, boolean compatMode);
     FillEventHistory getFillEventHistory();
     boolean restoreSession(int sessionId, in IBinder activityToken, in IBinder appCallback);
-    void updateSession(int sessionId, in AutofillId id, in Rect bounds,
+    oneway void updateSession(int sessionId, in AutofillId id, in Rect bounds,
             in AutofillValue value, int action, int flags, int userId);
-    void setAutofillFailure(int sessionId, in List<AutofillId> ids, int userId);
-    void finishSession(int sessionId, int userId);
-    void cancelSession(int sessionId, int userId);
-    void setAuthenticationResult(in Bundle data, int sessionId, int authenticationId, int userId);
-    void setHasCallback(int sessionId, int userId, boolean hasIt);
+    oneway void setAutofillFailure(int sessionId, in List<AutofillId> ids, int userId);
+    oneway void finishSession(int sessionId, int userId);
+    oneway void cancelSession(int sessionId, int userId);
+    oneway void setAuthenticationResult(in Bundle data, int sessionId, int authenticationId,
+            int userId);
+    oneway void setHasCallback(int sessionId, int userId, boolean hasIt);
     void disableOwnedAutofillServices(int userId);
     boolean isServiceSupported(int userId);
     boolean isServiceEnabled(int userId, String packageName);
