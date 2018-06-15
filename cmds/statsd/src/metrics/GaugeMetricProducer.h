@@ -58,7 +58,8 @@ class GaugeMetricProducer : public virtual MetricProducer, public virtual PullDa
 public:
     GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& gaugeMetric,
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int pullTagId, const int64_t timeBaseNs, const int64_t startTimeNs);
+                        const int pullTagId, const int64_t timeBaseNs, const int64_t startTimeNs,
+                        const sp<StatsPullerManager>& pullerManager);
 
     virtual ~GaugeMetricProducer();
 
@@ -94,13 +95,6 @@ private:
                             android::util::ProtoOutputStream* protoOutput) override;
     void clearPastBucketsLocked(const int64_t dumpTimeNs) override;
 
-    // for testing
-    GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& gaugeMetric,
-                        const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int pullTagId,
-                        const int64_t timeBaseNs, const int64_t startTimeNs,
-                        std::shared_ptr<StatsPullerManager> statsPullerManager);
-
     // Internal interface to handle condition change.
     void onConditionChangedLocked(const bool conditionMet, const int64_t eventTime) override;
 
@@ -123,7 +117,7 @@ private:
 
     int mTagId;
 
-    std::shared_ptr<StatsPullerManager> mStatsPullerManager;
+    sp<StatsPullerManager> mPullerManager;
     // tagId for pulled data. -1 if this is not pulled
     const int mPullTagId;
 

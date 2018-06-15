@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "external/StatsPullerManager.h"
 #include "anomaly/AlarmMonitor.h"
 #include "anomaly/AlarmTracker.h"
 #include "anomaly/AnomalyTracker.h"
@@ -36,9 +37,10 @@ namespace statsd {
 // A MetricsManager is responsible for managing metrics from one single config source.
 class MetricsManager : public PackageInfoListener {
 public:
-    MetricsManager(const ConfigKey& configKey, const StatsdConfig& config,
-                   const int64_t timeBaseNs, const int64_t currentTimeNs,
-                   const sp<UidMap>& uidMap, const sp<AlarmMonitor>& anomalyAlarmMonitor,
+    MetricsManager(const ConfigKey& configKey, const StatsdConfig& config, const int64_t timeBaseNs,
+                   const int64_t currentTimeNs, const sp<UidMap>& uidMap,
+                   const sp<StatsPullerManager>& pullerManager,
+                   const sp<AlarmMonitor>& anomalyAlarmMonitor,
                    const sp<AlarmMonitor>& periodicAlarmMonitor);
 
     virtual ~MetricsManager();

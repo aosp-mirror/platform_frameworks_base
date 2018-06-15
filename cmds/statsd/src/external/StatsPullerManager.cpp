@@ -29,7 +29,7 @@
 #include "ResourceHealthManagerPuller.h"
 #include "ResourceThermalManagerPuller.h"
 #include "StatsCompanionServicePuller.h"
-#include "StatsPullerManagerImpl.h"
+#include "StatsPullerManager.h"
 #include "SubsystemSleepStatePuller.h"
 #include "statslog.h"
 
@@ -49,7 +49,7 @@ namespace statsd {
 // Values smaller than this may require to update the alarm.
 const int64_t NO_ALARM_UPDATE = INT64_MAX;
 
-const std::map<int, PullAtomInfo> StatsPullerManagerImpl::kAllPullAtomInfo = {
+const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // wifi_bytes_transfer
         {android::util::WIFI_BYTES_TRANSFER,
          {{2, 3, 4, 5},
@@ -173,10 +173,10 @@ const std::map<int, PullAtomInfo> StatsPullerManagerImpl::kAllPullAtomInfo = {
         // temperature
         {android::util::TEMPERATURE, {{}, {}, 1, new ResourceThermalManagerPuller()}}};
 
-StatsPullerManagerImpl::StatsPullerManagerImpl() : mNextPullTimeNs(NO_ALARM_UPDATE) {
+StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
 }
 
-bool StatsPullerManagerImpl::Pull(const int tagId, const int64_t timeNs,
+bool StatsPullerManager::Pull(const int tagId, const int64_t timeNs,
                                   vector<shared_ptr<LogEvent>>* data) {
     VLOG("Initiating pulling %d", tagId);
 
@@ -190,16 +190,11 @@ bool StatsPullerManagerImpl::Pull(const int tagId, const int64_t timeNs,
     }
 }
 
-StatsPullerManagerImpl& StatsPullerManagerImpl::GetInstance() {
-    static StatsPullerManagerImpl instance;
-    return instance;
-}
-
-bool StatsPullerManagerImpl::PullerForMatcherExists(int tagId) const {
+bool StatsPullerManager::PullerForMatcherExists(int tagId) const {
     return kAllPullAtomInfo.find(tagId) != kAllPullAtomInfo.end();
 }
 
-void StatsPullerManagerImpl::updateAlarmLocked() {
+void StatsPullerManager::updateAlarmLocked() {
     if (mNextPullTimeNs == NO_ALARM_UPDATE) {
         VLOG("No need to set alarms. Skipping");
         return;
@@ -214,7 +209,7 @@ void StatsPullerManagerImpl::updateAlarmLocked() {
     return;
 }
 
-void StatsPullerManagerImpl::SetStatsCompanionService(
+void StatsPullerManager::SetStatsCompanionService(
         sp<IStatsCompanionService> statsCompanionService) {
     AutoMutex _l(mLock);
     sp<IStatsCompanionService> tmpForLock = mStatsCompanionService;
@@ -227,7 +222,7 @@ void StatsPullerManagerImpl::SetStatsCompanionService(
     }
 }
 
-void StatsPullerManagerImpl::RegisterReceiver(int tagId, wp<PullDataReceiver> receiver,
+void StatsPullerManager::RegisterReceiver(int tagId, wp<PullDataReceiver> receiver,
                                               int64_t nextPullTimeNs, int64_t intervalNs) {
     AutoMutex _l(mLock);
     auto& receivers = mReceivers[tagId];
@@ -262,7 +257,7 @@ void StatsPullerManagerImpl::RegisterReceiver(int tagId, wp<PullDataReceiver> re
     VLOG("Puller for tagId %d registered of %d", tagId, (int)receivers.size());
 }
 
-void StatsPullerManagerImpl::UnRegisterReceiver(int tagId, wp<PullDataReceiver> receiver) {
+void StatsPullerManager::UnRegisterReceiver(int tagId, wp<PullDataReceiver> receiver) {
     AutoMutex _l(mLock);
     if (mReceivers.find(tagId) == mReceivers.end()) {
         VLOG("Unknown pull code or no receivers: %d", tagId);
@@ -278,7 +273,7 @@ void StatsPullerManagerImpl::UnRegisterReceiver(int tagId, wp<PullDataReceiver> 
     }
 }
 
-void StatsPullerManagerImpl::OnAlarmFired(const int64_t currentTimeNs) {
+void StatsPullerManager::OnAlarmFired(const int64_t currentTimeNs) {
     AutoMutex _l(mLock);
 
     int64_t minNextPullTimeNs = NO_ALARM_UPDATE;
@@ -331,7 +326,7 @@ void StatsPullerManagerImpl::OnAlarmFired(const int64_t currentTimeNs) {
     updateAlarmLocked();
 }
 
-int StatsPullerManagerImpl::ForceClearPullerCache() {
+int StatsPullerManager::ForceClearPullerCache() {
     int totalCleared = 0;
     for (const auto& pulledAtom : kAllPullAtomInfo) {
         totalCleared += pulledAtom.second.puller->ForceClearCache();
@@ -339,7 +334,7 @@ int StatsPullerManagerImpl::ForceClearPullerCache() {
     return totalCleared;
 }
 
-int StatsPullerManagerImpl::ClearPullerCacheIfNecessary(int64_t timestampNs) {
+int StatsPullerManager::ClearPullerCacheIfNecessary(int64_t timestampNs) {
     int totalCleared = 0;
     for (const auto& pulledAtom : kAllPullAtomInfo) {
         totalCleared += pulledAtom.second.puller->ClearCacheIfNecessary(timestampNs);

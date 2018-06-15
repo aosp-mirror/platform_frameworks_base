@@ -150,25 +150,26 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
 
       }))  {
     mUidMap = new UidMap();
+    mPullerManager = new StatsPullerManager();
     StatsPuller::SetUidMap(mUidMap);
     mConfigManager = new ConfigManager();
-    mProcessor = new StatsLogProcessor(mUidMap, mAnomalyAlarmMonitor, mPeriodicAlarmMonitor,
-                                       getElapsedRealtimeNs(), [this](const ConfigKey& key) {
-        sp<IStatsCompanionService> sc = getStatsCompanionService();
-        auto receiver = mConfigManager->GetConfigReceiver(key);
-        if (sc == nullptr) {
-            VLOG("Could not find StatsCompanionService");
-            return false;
-        } else if (receiver == nullptr) {
-            VLOG("Statscompanion could not find a broadcast receiver for %s",
-                 key.ToString().c_str());
-            return false;
-        } else {
-            sc->sendDataBroadcast(receiver, mProcessor->getLastReportTimeNs(key));
-            return true;
-        }
-    }
-    );
+    mProcessor = new StatsLogProcessor(
+            mUidMap, mPullerManager, mAnomalyAlarmMonitor, mPeriodicAlarmMonitor,
+            getElapsedRealtimeNs(), [this](const ConfigKey& key) {
+                sp<IStatsCompanionService> sc = getStatsCompanionService();
+                auto receiver = mConfigManager->GetConfigReceiver(key);
+                if (sc == nullptr) {
+                    VLOG("Could not find StatsCompanionService");
+                    return false;
+                } else if (receiver == nullptr) {
+                    VLOG("Statscompanion could not find a broadcast receiver for %s",
+                         key.ToString().c_str());
+                    return false;
+                } else {
+                    sc->sendDataBroadcast(receiver, mProcessor->getLastReportTimeNs(key));
+                    return true;
+                }
+            });
 
     mConfigManager->AddListener(mProcessor);
 
@@ -711,7 +712,7 @@ status_t StatsService::cmd_log_app_breadcrumb(FILE* out, const Vector<String8>& 
 status_t StatsService::cmd_print_pulled_metrics(FILE* out, const Vector<String8>& args) {
     int s = atoi(args[1].c_str());
     vector<shared_ptr<LogEvent> > stats;
-    if (mStatsPullerManager.Pull(s, getElapsedRealtimeNs(), &stats)) {
+    if (mPullerManager->Pull(s, getElapsedRealtimeNs(), &stats)) {
         for (const auto& it : stats) {
             fprintf(out, "Pull from %d: %s\n", s, it->ToString().c_str());
         }
@@ -739,7 +740,7 @@ status_t StatsService::cmd_clear_puller_cache(FILE* out) {
     VLOG("StatsService::cmd_clear_puller_cache with Pid %i, Uid %i",
             ipc->getCallingPid(), ipc->getCallingUid());
     if (checkCallingPermission(String16(kPermissionDump))) {
-        int cleared = mStatsPullerManager.ForceClearPullerCache();
+        int cleared = mPullerManager->ForceClearPullerCache();
         fprintf(out, "Puller removed %d cached data!\n", cleared);
         return NO_ERROR;
     } else {
@@ -870,7 +871,7 @@ Status StatsService::statsCompanionReady() {
     }
     VLOG("StatsService::statsCompanionReady linking to statsCompanion.");
     IInterface::asBinder(statsCompanion)->linkToDeath(this);
-    mStatsPullerManager.SetStatsCompanionService(statsCompanion);
+    mPullerManager->SetStatsCompanionService(statsCompanion);
     mAnomalyAlarmMonitor->setStatsCompanionService(statsCompanion);
     mPeriodicAlarmMonitor->setStatsCompanionService(statsCompanion);
     SubscriberReporter::getInstance().setStatsCompanionService(statsCompanion);
@@ -1014,7 +1015,7 @@ void StatsService::binderDied(const wp <IBinder>& who) {
     mAnomalyAlarmMonitor->setStatsCompanionService(nullptr);
     mPeriodicAlarmMonitor->setStatsCompanionService(nullptr);
     SubscriberReporter::getInstance().setStatsCompanionService(nullptr);
-    mStatsPullerManager.SetStatsCompanionService(nullptr);
+    mPullerManager->SetStatsCompanionService(nullptr);
 }
 
 }  // namespace statsd

@@ -16,54 +16,87 @@
 
 #pragma once
 
-#include "StatsPullerManagerImpl.h"
+#include <android/os/IStatsCompanionService.h>
+#include <binder/IServiceManager.h>
+#include <utils/RefBase.h>
+#include <utils/threads.h>
+#include <list>
+#include <string>
+#include <unordered_map>
+#include <vector>
+#include "PullDataReceiver.h"
+#include "StatsPuller.h"
+#include "logd/LogEvent.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-class StatsPullerManager {
- public:
-    virtual ~StatsPullerManager() {}
+typedef struct {
+    // The field numbers of the fields that need to be summed when merging
+    // isolated uid with host uid.
+    std::vector<int> additiveFields;
+    // The field numbers of the fields that can't be merged when merging
+    // data belong to isolated uid and host uid.
+    std::vector<int> nonAdditiveFields;
+    // How long should the puller wait before doing an actual pull again. Default
+    // 1 sec. Set this to 0 if this is handled elsewhere.
+    int64_t coolDownNs = 1 * NS_PER_SEC;
+    // The actual puller
+    sp<StatsPuller> puller;
+} PullAtomInfo;
+
+class StatsPullerManager : public virtual RefBase {
+public:
+    StatsPullerManager();
+
+    virtual ~StatsPullerManager() {
+    }
 
     virtual void RegisterReceiver(int tagId, wp<PullDataReceiver> receiver, int64_t nextPullTimeNs,
-                                  int64_t intervalNs) {
-        mPullerManager.RegisterReceiver(tagId, receiver, nextPullTimeNs, intervalNs);
-    };
+                                  int64_t intervalNs);
 
-    virtual void UnRegisterReceiver(int tagId, wp <PullDataReceiver> receiver) {
-        mPullerManager.UnRegisterReceiver(tagId, receiver);
-    };
+    virtual void UnRegisterReceiver(int tagId, wp<PullDataReceiver> receiver);
 
     // Verify if we know how to pull for this matcher
-    bool PullerForMatcherExists(int tagId) {
-        return mPullerManager.PullerForMatcherExists(tagId);
-    }
+    bool PullerForMatcherExists(int tagId) const;
 
-    void OnAlarmFired(const int64_t currentTimeNs) {
-        mPullerManager.OnAlarmFired(currentTimeNs);
-    }
+    void OnAlarmFired(const int64_t timeNs);
 
-    virtual bool Pull(const int tagId, const int64_t timesNs,
-                      vector<std::shared_ptr<LogEvent>>* data) {
-        return mPullerManager.Pull(tagId, timesNs, data);
-    }
+    virtual bool Pull(const int tagId, const int64_t timeNs,
+                      vector<std::shared_ptr<LogEvent>>* data);
 
-    int ForceClearPullerCache() {
-        return mPullerManager.ForceClearPullerCache();
-    }
+    int ForceClearPullerCache();
 
-    void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService) {
-        mPullerManager.SetStatsCompanionService(statsCompanionService);
-    }
+    int ClearPullerCacheIfNecessary(int64_t timestampNs);
 
-    int ClearPullerCacheIfNecessary(int64_t timestampNs) {
-        return mPullerManager.ClearPullerCacheIfNecessary(timestampNs);
-    }
+    void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService);
 
- private:
-    StatsPullerManagerImpl
-        & mPullerManager = StatsPullerManagerImpl::GetInstance();
+    const static std::map<int, PullAtomInfo> kAllPullAtomInfo;
+
+private:
+    sp<IStatsCompanionService> mStatsCompanionService = nullptr;
+
+    typedef struct {
+        int64_t nextPullTimeNs;
+        int64_t intervalNs;
+        wp<PullDataReceiver> receiver;
+    } ReceiverInfo;
+
+    // mapping from simple matcher tagId to receivers
+    std::map<int, std::list<ReceiverInfo>> mReceivers;
+
+    // locks for data receiver and StatsCompanionService changes
+    Mutex mLock;
+
+    void updateAlarmLocked();
+
+    int64_t mNextPullTimeNs;
+
+    FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents);
+    FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm);
 };
 
 }  // namespace statsd
