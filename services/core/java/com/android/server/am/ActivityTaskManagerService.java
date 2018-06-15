@@ -2807,20 +2807,23 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
 
                 final Runnable enterPipRunnable = () -> {
-                    // Only update the saved args from the args that are set
-                    r.pictureInPictureArgs.copyOnlySet(params);
-                    final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
-                    final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
-                    // Adjust the source bounds by the insets for the transition down
-                    final Rect sourceBounds = new Rect(r.pictureInPictureArgs.getSourceRectHint());
-                    mStackSupervisor.moveActivityToPinnedStackLocked(r, sourceBounds, aspectRatio,
-                            "enterPictureInPictureMode");
-                    final PinnedActivityStack stack = r.getStack();
-                    stack.setPictureInPictureAspectRatio(aspectRatio);
-                    stack.setPictureInPictureActions(actions);
-                    MetricsLoggerWrapper.logPictureInPictureEnter(mContext, r.appInfo.uid,
-                            r.shortComponentName, r.supportsEnterPipOnTaskSwitch);
-                    logPictureInPictureArgs(params);
+                    synchronized (mGlobalLock) {
+                        // Only update the saved args from the args that are set
+                        r.pictureInPictureArgs.copyOnlySet(params);
+                        final float aspectRatio = r.pictureInPictureArgs.getAspectRatio();
+                        final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
+                        // Adjust the source bounds by the insets for the transition down
+                        final Rect sourceBounds = new Rect(
+                                r.pictureInPictureArgs.getSourceRectHint());
+                        mStackSupervisor.moveActivityToPinnedStackLocked(
+                                r, sourceBounds, aspectRatio, "enterPictureInPictureMode");
+                        final PinnedActivityStack stack = r.getStack();
+                        stack.setPictureInPictureAspectRatio(aspectRatio);
+                        stack.setPictureInPictureActions(actions);
+                        MetricsLoggerWrapper.logPictureInPictureEnter(mContext, r.appInfo.uid,
+                                r.shortComponentName, r.supportsEnterPipOnTaskSwitch);
+                        logPictureInPictureArgs(params);
+                    }
                 };
 
                 if (mAm.isKeyguardLocked()) {
