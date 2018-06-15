@@ -251,7 +251,6 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 for (int j = 0; j < numOnGoingSessionRequests; j++) {
                     final SessionRequest req = grp.mOnGoingSessionRequests.get(j);
                     pw.println("      " + "On going Request #" + j + ":");
-                    ++j;
                     pw.println("        " + "mTsListener=" + req.mTsListener);
                     pw.println("        " + "mScListener=" + req.mScListener);
                     pw.println(
