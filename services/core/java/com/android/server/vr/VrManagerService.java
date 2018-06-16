@@ -19,7 +19,8 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import android.Manifest;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityManagerInternal.ScreenObserver;
+import android.app.ActivityTaskManagerInternal;
+import android.app.ActivityTaskManagerInternal.ScreenObserver;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.INotificationManager;
@@ -777,7 +778,7 @@ public class VrManagerService extends SystemService
     @Override
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
-            LocalServices.getService(ActivityManagerInternal.class)
+            LocalServices.getService(ActivityTaskManagerInternal.class)
                     .registerScreenObserver(this);
 
             mNotificationManager = INotificationManager.Stub.asInterface(

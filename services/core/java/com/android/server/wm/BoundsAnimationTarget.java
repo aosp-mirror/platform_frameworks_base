@@ -65,4 +65,9 @@ interface BoundsAnimationTarget {
      */
     void onAnimationEnd(boolean schedulePipModeChangedCallback, Rect finalStackSize,
             boolean moveToFullscreen);
+
+    /** @return True if the target is attached to the window hierarchy. */
+    default boolean isAttached() {
+        return true;
+    }
 }

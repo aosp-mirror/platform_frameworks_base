@@ -1703,6 +1703,11 @@ public class TaskStack extends WindowContainer<Task> implements
         }
     }
 
+    @Override
+    public boolean isAttached() {
+        return mDisplayContent != null;
+    }
+
     /**
      * Called immediately prior to resizing the tasks at the end of the pinned stack animation.
      */

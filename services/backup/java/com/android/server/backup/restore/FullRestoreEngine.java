@@ -122,15 +122,17 @@ public class FullRestoreEngine extends RestoreEngine {
 
     // Widget blob to be restored out-of-band
     private byte[] mWidgetData = null;
+    private long mAppVersion;
 
     final int mEphemeralOpToken;
 
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
+    final boolean mIsAdbRestore;
 
     public FullRestoreEngine(BackupManagerService backupManagerService,
             BackupRestoreTask monitorTask, IFullBackupRestoreObserver observer,
             IBackupManagerMonitor monitor, PackageInfo onlyPackage, boolean allowApks,
-            boolean allowObbs, int ephemeralOpToken) {
+            boolean allowObbs, int ephemeralOpToken, boolean isAdbRestore) {
         mBackupManagerService = backupManagerService;
         mEphemeralOpToken = ephemeralOpToken;
         mMonitorTask = monitorTask;
@@ -144,6 +146,7 @@ public class FullRestoreEngine extends RestoreEngine {
         mAgentTimeoutParameters = Preconditions.checkNotNull(
                 backupManagerService.getAgentTimeoutParameters(),
                 "Timeout parameters cannot be null");
+        mIsAdbRestore = isAdbRestore;
     }
 
     public IBackupAgent getAgent() {
@@ -209,7 +212,7 @@ public class FullRestoreEngine extends RestoreEngine {
                         }
                         // Now we're really done
                         tearDownPipes();
-                        tearDownAgent(mTargetApp);
+                        tearDownAgent(mTargetApp, mIsAdbRestore);
                         mTargetApp = null;
                         mAgentPackage = null;
                     }
@@ -218,6 +221,9 @@ public class FullRestoreEngine extends RestoreEngine {
                 if (info.path.equals(BACKUP_MANIFEST_FILENAME)) {
                     Signature[] signatures = tarBackupReader.readAppManifestAndReturnSignatures(
                             info);
+                    // readAppManifestAndReturnSignatures() will have extracted the version from
+                    // the manifest, so we save it to use in adb key-value restore later.
+                    mAppVersion = info.version;
                     PackageManagerInternal pmi = LocalServices.getService(
                             PackageManagerInternal.class);
                     RestorePolicy restorePolicy = tarBackupReader.chooseRestorePolicy(
@@ -362,7 +368,9 @@ public class FullRestoreEngine extends RestoreEngine {
                             // All set; now set up the IPC and launch the agent
                             setUpPipes();
                             mAgent = mBackupManagerService.bindToAgentSynchronous(mTargetApp,
-                                    ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL);
+                                    FullBackup.KEY_VALUE_DATA_TOKEN.equals(info.domain)
+                                            ? ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL
+                                            : ApplicationThreadConstants.BACKUP_MODE_RESTORE_FULL);
                             mAgentPackage = pkg;
                         } catch (IOException e) {
                             // fall through to error handling
@@ -419,6 +427,8 @@ public class FullRestoreEngine extends RestoreEngine {
                                     Slog.d(TAG, "Restoring key-value file for " + pkg
                                             + " : " + info.path);
                                 }
+                                // Set the version saved from manifest entry.
+                                info.version = mAppVersion;
                                 KeyValueAdbRestoreEngine restoreEngine =
                                         new KeyValueAdbRestoreEngine(
                                                 mBackupManagerService,
@@ -506,7 +516,7 @@ public class FullRestoreEngine extends RestoreEngine {
                             mBackupManagerService.getBackupHandler().removeMessages(
                                     MSG_RESTORE_OPERATION_TIMEOUT);
                             tearDownPipes();
-                            tearDownAgent(mTargetApp);
+                            tearDownAgent(mTargetApp, false);
                             mAgent = null;
                             mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
 
@@ -559,7 +569,7 @@ public class FullRestoreEngine extends RestoreEngine {
             tearDownPipes();
             setRunning(false);
             if (mustKillAgent) {
-                tearDownAgent(mTargetApp);
+                tearDownAgent(mTargetApp, mIsAdbRestore);
             }
         }
         return (info != null);
@@ -588,9 +598,37 @@ public class FullRestoreEngine extends RestoreEngine {
         }
     }
 
-    private void tearDownAgent(ApplicationInfo app) {
+    private void tearDownAgent(ApplicationInfo app, boolean doRestoreFinished) {
         if (mAgent != null) {
-            mBackupManagerService.tearDownAgentAndKill(app);
+            try {
+                // In the adb restore case, we do restore-finished here
+                if (doRestoreFinished) {
+                    final int token = mBackupManagerService.generateRandomIntegerToken();
+                    long fullBackupAgentTimeoutMillis =
+                            mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis();
+                    final AdbRestoreFinishedLatch latch = new AdbRestoreFinishedLatch(
+                            mBackupManagerService, token);
+                    mBackupManagerService.prepareOperationTimeout(
+                            token, fullBackupAgentTimeoutMillis, latch, OP_TYPE_RESTORE_WAIT);
+                    if (mTargetApp.processName.equals("system")) {
+                        if (MORE_DEBUG) {
+                            Slog.d(TAG, "system agent - restoreFinished on thread");
+                        }
+                        Runnable runner = new AdbRestoreFinishedRunnable(mAgent, token,
+                                mBackupManagerService);
+                        new Thread(runner, "restore-sys-finished-runner").start();
+                    } else {
+                        mAgent.doRestoreFinished(token,
+                                mBackupManagerService.getBackupManagerBinder());
+                    }
+
+                    latch.await();
+                }
+
+                mBackupManagerService.tearDownAgentAndKill(app);
+            } catch (RemoteException e) {
+                Slog.d(TAG, "Lost app trying to shut down");
+            }
             mAgent = null;
         }
     }

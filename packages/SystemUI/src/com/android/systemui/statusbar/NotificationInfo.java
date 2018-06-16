@@ -416,6 +416,12 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             }
         });
         mExpandAnimation.start();
+
+        // Since we're swapping/update the content, reset the timeout so the UI can't close
+        // immediately after the update.
+        if (mGutsContainer != null) {
+            mGutsContainer.resetFalsingCheck();
+        }
     }
 
     @Override

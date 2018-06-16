@@ -64,7 +64,6 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     protected float mOutlineRadius;
     private boolean mAlwaysRoundBothCorners;
     private Path mTmpPath = new Path();
-    private Path mTmpPath2 = new Path();
     private float mCurrentBottomRoundness;
     private float mCurrentTopRoundness;
     private float mBottomRoundness;
@@ -94,7 +93,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
                 int bottom = Math.max(getActualHeight() - mClipBottomAmount, top);
                 outline.setRect(left, top, right, bottom);
             } else {
-                Path clipPath = getClipPath();
+                Path clipPath = getClipPath(false /* ignoreTranslation */);
                 if (clipPath != null && clipPath.isConvex()) {
                     // The path might not be convex in border cases where the view is small and
                     // clipped
@@ -105,36 +104,23 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         }
     };
 
-    private Path getClipPath() {
-        return getClipPath(false, /* ignoreTranslation */
-                false /* clipRoundedToBottom */);
-    }
-
-    protected Path getClipPath(boolean ignoreTranslation, boolean clipRoundedToBottom) {
+    protected Path getClipPath(boolean ignoreTranslation) {
         int left;
         int top;
         int right;
         int bottom;
         int height;
-        Path intersectPath = null;
+        float topRoundness = mAlwaysRoundBothCorners
+                ? mOutlineRadius : getCurrentBackgroundRadiusTop();
         if (!mCustomOutline) {
             int translation = mShouldTranslateContents && !ignoreTranslation
                     ? (int) getTranslation() : 0;
             left = Math.max(translation, 0);
             top = mClipTopAmount + mBackgroundTop;
             right = getWidth() + Math.min(translation, 0);
-            bottom = Math.max(getActualHeight(), top);
-            int intersectBottom = Math.max(getActualHeight() - mClipBottomAmount, top);
-            if (bottom != intersectBottom) {
-                if (clipRoundedToBottom) {
-                    bottom = intersectBottom;
-                } else {
-                    getRoundedRectPath(left, top, right,
-                            intersectBottom, 0.0f,
-                            0.0f, mTmpPath2);
-                    intersectPath = mTmpPath2;
-                }
-            }
+            // If the top is rounded we want the bottom to be at most at the top roundness, in order
+            // to avoid the shadow changing when scrolling up.
+            bottom = Math.max(getActualHeight() - mClipBottomAmount, (int) (top + topRoundness));
         } else {
             left = mOutlineRect.left;
             top = mOutlineRect.top;
@@ -145,8 +131,6 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         if (height == 0) {
             return EMPTY_PATH;
         }
-        float topRoundness = mAlwaysRoundBothCorners
-                ? mOutlineRadius : getCurrentBackgroundRadiusTop();
         float bottomRoundness = mAlwaysRoundBothCorners
                 ? mOutlineRadius : getCurrentBackgroundRadiusBottom();
         if (topRoundness + bottomRoundness > height) {
@@ -158,11 +142,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         }
         getRoundedRectPath(left, top, right, bottom, topRoundness,
                 bottomRoundness, mTmpPath);
-        Path roundedRectPath = mTmpPath;
-        if (intersectPath != null) {
-            roundedRectPath.op(intersectPath, Path.Op.INTERSECT);
-        }
-        return roundedRectPath;
+        return mTmpPath;
     }
 
     public static void getRoundedRectPath(int left, int top, int right, int bottom,
@@ -219,7 +199,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         if (childNeedsClipping(child)) {
             Path clipPath = getCustomClipPath(child);
             if (clipPath == null) {
-                clipPath = getClipPath();
+                clipPath = getClipPath(false /* ignoreTranslation */);
             }
             if (clipPath != null) {
                 if (intersectPath != null) {

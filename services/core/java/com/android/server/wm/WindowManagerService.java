@@ -117,6 +117,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager;
+import android.app.ActivityTaskManagerInternal;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -434,6 +435,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // TODO: Probably not needed once activities are fully in WM.
     final IActivityTaskManager mActivityTaskManager;
     final ActivityManagerInternal mAmInternal;
+    final ActivityTaskManagerInternal mAtmInternal;
 
     final AppOpsManager mAppOps;
     final PackageManagerInternal mPmInternal;
@@ -1017,6 +1019,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mActivityManager = ActivityManager.getService();
         mActivityTaskManager = ActivityTaskManager.getService();
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
         AppOpsManager.OnOpChangedInternalListener opListener =
                 new AppOpsManager.OnOpChangedInternalListener() {
@@ -4987,16 +4990,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 break;
                 case NOTIFY_APP_TRANSITION_STARTING: {
-                    mAmInternal.notifyAppTransitionStarting((SparseIntArray) msg.obj,
+                    mAtmInternal.notifyAppTransitionStarting((SparseIntArray) msg.obj,
                             msg.getWhen());
                 }
                 break;
                 case NOTIFY_APP_TRANSITION_CANCELLED: {
-                    mAmInternal.notifyAppTransitionCancelled();
+                    mAtmInternal.notifyAppTransitionCancelled();
                 }
                 break;
                 case NOTIFY_APP_TRANSITION_FINISHED: {
-                    mAmInternal.notifyAppTransitionFinished();
+                    mAtmInternal.notifyAppTransitionFinished();
                 }
                 break;
                 case WINDOW_HIDE_TIMEOUT: {
@@ -5021,7 +5024,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 break;
                 case NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED: {
-                    mAmInternal.notifyDockedStackMinimizedChanged(msg.arg1 == 1);
+                    mAtmInternal.notifyDockedStackMinimizedChanged(msg.arg1 == 1);
                 }
                 break;
                 case RESTORE_POINTER_ICON: {
@@ -5040,11 +5043,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 break;
                 case NOTIFY_KEYGUARD_FLAGS_CHANGED: {
-                    mAmInternal.notifyKeyguardFlagsChanged((Runnable) msg.obj);
+                    mAtmInternal.notifyKeyguardFlagsChanged((Runnable) msg.obj);
                 }
                 break;
                 case NOTIFY_KEYGUARD_TRUSTED_CHANGED: {
-                    mAmInternal.notifyKeyguardTrustedChanged();
+                    mAtmInternal.notifyKeyguardTrustedChanged();
                 }
                 break;
                 case SET_HAS_OVERLAY_UI: {
@@ -5971,7 +5974,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setRecentsVisibility(boolean visible) {
-        mAmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.STATUS_BAR,
+        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.STATUS_BAR,
                 "setRecentsVisibility()");
         synchronized (mWindowMap) {
             mPolicy.setRecentsVisibilityLw(visible);
@@ -5993,7 +5996,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setShelfHeight(boolean visible, int shelfHeight) {
-        mAmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.STATUS_BAR,
+        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.STATUS_BAR,
                 "setShelfHeight()");
         synchronized (mWindowMap) {
             getDefaultDisplayContentLocked().getPinnedStackController().setAdjustedForShelf(visible,

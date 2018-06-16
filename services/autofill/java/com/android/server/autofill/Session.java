@@ -16,8 +16,8 @@
 
 package com.android.server.autofill;
 
-import static android.app.ActivityManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
-import static android.app.ActivityManagerInternal.ASSIST_KEY_STRUCTURE;
+import static android.app.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
+import static android.app.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
 import static android.service.autofill.AutofillFieldClassificationService.EXTRA_SCORES;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;

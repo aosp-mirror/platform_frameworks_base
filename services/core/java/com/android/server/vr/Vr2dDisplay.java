@@ -3,6 +3,7 @@ package com.android.server.vr;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.app.ActivityManagerInternal;
+import android.app.ActivityTaskManagerInternal;
 import android.app.Vr2dDisplayProperties;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -25,6 +26,7 @@ import android.service.vr.IVrManager;
 import android.util.Log;
 import android.view.Surface;
 
+import com.android.server.LocalServices;
 import com.android.server.wm.WindowManagerInternal;
 
 /**
@@ -319,7 +321,7 @@ class Vr2dDisplay {
     }
 
     private void updateDisplayId(int displayId) {
-        mActivityManagerInternal.setVr2dDisplayId(displayId);
+        LocalServices.getService(ActivityTaskManagerInternal.class).setVr2dDisplayId(displayId);
         mWindowManagerInternal.setVr2dDisplayId(displayId);
     }
 

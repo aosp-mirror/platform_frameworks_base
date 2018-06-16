@@ -16,9 +16,9 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManagerInternal.APP_TRANSITION_SNAPSHOT;
-import static android.app.ActivityManagerInternal.APP_TRANSITION_SPLASH_SCREEN;
-import static android.app.ActivityManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
+import static android.app.ActivityTaskManagerInternal.APP_TRANSITION_SNAPSHOT;
+import static android.app.ActivityTaskManagerInternal.APP_TRANSITION_SPLASH_SCREEN;
+import static android.app.ActivityTaskManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
 
 import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
@@ -44,7 +44,6 @@ import static android.view.WindowManager.TRANSIT_WALLPAPER_INTRA_CLOSE;
 import static android.view.WindowManager.TRANSIT_WALLPAPER_INTRA_OPEN;
 import static android.view.WindowManager.TRANSIT_WALLPAPER_OPEN;
 import static com.android.server.wm.AppTransition.isKeyguardGoingAwayTransit;
-import static com.android.server.wm.AppTransition.isTaskTransit;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;

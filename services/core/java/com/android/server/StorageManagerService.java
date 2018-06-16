@@ -39,7 +39,8 @@ import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityManagerInternal.ScreenObserver;
+import android.app.ActivityTaskManagerInternal;
+import android.app.ActivityTaskManagerInternal.ScreenObserver;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.KeyguardManager;
@@ -1511,7 +1512,7 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void systemReady() {
-        LocalServices.getService(ActivityManagerInternal.class)
+        LocalServices.getService(ActivityTaskManagerInternal.class)
                 .registerScreenObserver(this);
 
         mSystemReady = true;

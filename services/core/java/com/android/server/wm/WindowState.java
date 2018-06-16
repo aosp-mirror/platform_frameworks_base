@@ -152,6 +152,8 @@ import static com.android.server.wm.WindowStateProto.VIEW_VISIBILITY;
 import static com.android.server.wm.WindowStateProto.VISIBLE_FRAME;
 import static com.android.server.wm.WindowStateProto.VISIBLE_INSETS;
 import static com.android.server.wm.WindowStateProto.WINDOW_CONTAINER;
+import static com.android.server.wm.utils.CoordinateTransforms.transformRect;
+import static com.android.server.wm.utils.CoordinateTransforms.transformToRotation;
 
 import android.annotation.CallSuper;
 import android.app.AppOpsManager;
@@ -1813,7 +1815,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && (mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
                 && !isDragResizing() && !adjustedForMinimizedDockOrIme
                 && getWindowConfiguration().hasMovementAnimations()
-                && !mWinAnimator.mLastHidden) {
+                && !mWinAnimator.mLastHidden
+                && !mSeamlesslyRotated) {
             startMoveAnimation(left, top);
         }
 
@@ -4858,6 +4861,29 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void setFrameNumber(long frameNumber) {
         mFrameNumber = frameNumber;
+    }
+
+    @Override
+    void seamlesslyRotate(Transaction t, int oldRotation, int newRotation) {
+        if (!isVisibleNow() || mIsWallpaper) {
+            return;
+        }
+        final Matrix transform = mTmpMatrix;
+
+        mService.markForSeamlessRotation(this, true);
+
+        // We rotated the screen, but have not performed a new layout pass yet. In the mean time,
+        // we recompute the coordinates of mFrame in the new orientation, so the surface can be
+        // properly placed.
+        transformToRotation(oldRotation, newRotation, getDisplayInfo(), transform);
+        transformRect(transform, mFrame, null /* tmpRectF */);
+
+        updateSurfacePosition(t);
+        mWinAnimator.seamlesslyRotate(t, oldRotation, newRotation);
+
+        // Dispatch to children only after mFrame has been updated, as it's needed in the
+        // child's updateSurfacePosition.
+        super.seamlesslyRotate(t, oldRotation, newRotation);
     }
 
     private final class MoveAnimationSpec implements AnimationSpec {

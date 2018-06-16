@@ -35,7 +35,7 @@ import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_UNSET;
 
-import android.app.ActivityManagerInternal.SleepToken;
+import android.app.ActivityTaskManagerInternal.SleepToken;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;

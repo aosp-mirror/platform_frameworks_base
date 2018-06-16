@@ -832,6 +832,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 .createNotificationIconAreaController(context, this);
         inflateShelf();
         mNotificationIconAreaController.setupShelf(mNotificationShelf);
+        mStackScroller.setIconAreaController(mNotificationIconAreaController);
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mNotificationIconAreaController);
         FragmentHostManager.get(mStatusBarWindow)
                 .addTagListener(CollapsedStatusBarFragment.TAG, (tag, fragment) -> {

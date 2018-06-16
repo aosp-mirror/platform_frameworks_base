@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManagerInternal.APP_TRANSITION_RECENTS_ANIM;
+import static android.app.ActivityTaskManagerInternal.APP_TRANSITION_RECENTS_ANIM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
