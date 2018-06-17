@@ -1746,8 +1746,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             String resultWho, int requestCode, int callingPid, int callingUid,
             String callingPackage, boolean ignoreTargetSecurity, boolean launchingInTask,
             ProcessRecord callerApp, ActivityRecord resultRecord, ActivityStack resultStack) {
-        final boolean isCallerRecents = mService.getRecentTasks() != null &&
-                mService.getRecentTasks().isCallerRecents(callingUid);
+        final boolean isCallerRecents = mService.mActivityTaskManager.getRecentTasks() != null
+                && mService.mActivityTaskManager.getRecentTasks().isCallerRecents(callingUid);
         final int startAnyPerm = mService.checkPermission(START_ANY_ACTIVITY, callingPid,
                 callingUid);
         if (startAnyPerm == PERMISSION_GRANTED || (isCallerRecents && launchingInTask)) {

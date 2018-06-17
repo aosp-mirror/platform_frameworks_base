@@ -83,7 +83,7 @@ public class TaskPersister {
 
     private static final String TAG_TASK = "task";
 
-    private final ActivityManagerService mService;
+    private final ActivityTaskManagerService mService;
     private final ActivityStackSupervisor mStackSupervisor;
     private final RecentTasks mRecentTasks;
     private final SparseArray<SparseBooleanArray> mTaskIdsInFile = new SparseArray<>();
@@ -125,7 +125,7 @@ public class TaskPersister {
     ArrayList<WriteQueueItem> mWriteQueue = new ArrayList<WriteQueueItem>();
 
     TaskPersister(File systemDir, ActivityStackSupervisor stackSupervisor,
-            ActivityManagerService service, RecentTasks recentTasks) {
+            ActivityTaskManagerService service, RecentTasks recentTasks) {
 
         final File legacyImagesDir = new File(systemDir, IMAGES_DIRNAME);
         if (legacyImagesDir.exists()) {
@@ -565,7 +565,7 @@ public class TaskPersister {
 
     private void writeTaskIdsFiles() {
         SparseArray<SparseBooleanArray> changedTaskIdsPerUser = new SparseArray<>();
-        synchronized (mService) {
+        synchronized (mService.mGlobalLock) {
             for (int userId : mRecentTasks.usersWithRecentsLoadedLocked()) {
                 SparseBooleanArray taskIdsToSave = mRecentTasks.getTaskIdsForUser(userId);
                 SparseBooleanArray persistedIdsInFile = mTaskIdsInFile.get(userId);
@@ -586,7 +586,7 @@ public class TaskPersister {
 
     private void removeObsoleteFiles(ArraySet<Integer> persistentTaskIds) {
         int[] candidateUserIds;
-        synchronized (mService) {
+        synchronized (mService.mGlobalLock) {
             // Remove only from directories of the users who have recents in memory synchronized
             // with persistent storage.
             candidateUserIds = mRecentTasks.usersWithRecentsLoadedLocked();
@@ -652,10 +652,10 @@ public class TaskPersister {
                 if (probablyDone) {
                     if (DEBUG) Slog.d(TAG, "Looking for obsolete files.");
                     persistentTaskIds.clear();
-                    synchronized (mService) {
+                    synchronized (mService.mGlobalLock) {
                         if (DEBUG) Slog.d(TAG, "mRecents=" + mRecentTasks);
                         mRecentTasks.getPersistableTaskIds(persistentTaskIds);
-                        mService.mWindowManager.removeObsoleteTaskFiles(persistentTaskIds,
+                        mService.mAm.mWindowManager.removeObsoleteTaskFiles(persistentTaskIds,
                                 mRecentTasks.usersWithRecentsLoadedLocked());
                     }
                     removeObsoleteFiles(persistentTaskIds);
@@ -736,7 +736,7 @@ public class TaskPersister {
                 StringWriter stringWriter = null;
                 TaskRecord task = ((TaskWriteQueueItem) item).mTask;
                 if (DEBUG) Slog.d(TAG, "Writing task=" + task);
-                synchronized (mService) {
+                synchronized (mService.mGlobalLock) {
                     if (task.inRecents) {
                         // Still there.
                         try {

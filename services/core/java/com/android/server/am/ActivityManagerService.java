@@ -686,11 +686,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private AppTimeTracker mCurAppTimeTracker;
 
     /**
-     * List of intents that were used to start the most recent tasks.
-     */
-    private final RecentTasks mRecentTasks;
-
-    /**
      * The package name of the DeviceOwner. This package is not permitted to have its data cleared.
      */
     String mDeviceOwnerName;
@@ -2902,7 +2897,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcessCpuThread = null;
         mProcessStats = null;
         mProviderMap = null;
-        mRecentTasks = null;
         mServices = null;
         mStackSupervisor = null;
         mSystemThread = null;
@@ -3008,8 +3002,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mTaskChangeNotificationController =
                 new TaskChangeNotificationController(this, mStackSupervisor, mHandler);
         mActivityStartController = new ActivityStartController(this);
-        mRecentTasks = createRecentTasks();
-        mStackSupervisor.setRecentTasks(mRecentTasks);
         mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mHandler);
         mLifecycleManager = new ClientLifecycleManager();
 
@@ -3071,14 +3063,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         return supervisor;
     }
 
-    protected RecentTasks createRecentTasks() {
-        return new RecentTasks(this, mStackSupervisor);
-    }
-
-    RecentTasks getRecentTasks() {
-        return mRecentTasks;
-    }
-
     public void setSystemServiceManager(SystemServiceManager mgr) {
         mSystemServiceManager = mgr;
     }
@@ -3108,7 +3092,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void onUserStoppedLocked(int userId) {
-        mRecentTasks.unloadUserDataFromMemoryLocked(userId);
+        mActivityTaskManager.getRecentTasks().unloadUserDataFromMemoryLocked(userId);
         mAllowAppSwitchUids.remove(userId);
     }
 
@@ -5603,7 +5587,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 if (appInfo != null) {
                     forceStopPackageLocked(packageName, appInfo.uid, "clear data");
-                    mRecentTasks.removeTasksByPackageName(packageName, resolvedUserId);
+                    mActivityTaskManager.getRecentTasks().removeTasksByPackageName(packageName, resolvedUserId);
                 }
             }
 
@@ -6221,7 +6205,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         // Clean-up disabled tasks
-        mRecentTasks.cleanupDisabledPackageTasksLocked(packageName, disabledClasses, userId);
+        mActivityTaskManager.getRecentTasks().cleanupDisabledPackageTasksLocked(packageName, disabledClasses, userId);
 
         // Clean-up disabled services.
         mServices.bringDownDisabledPackageServicesLocked(
@@ -7833,7 +7817,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * This can be called with or without the global lock held.
      */
     void enforceCallerIsRecentsOrHasPermission(String permission, String func) {
-        if (!mRecentTasks.isCallerRecents(Binder.getCallingUid())) {
+        if (!mActivityTaskManager.getRecentTasks().isCallerRecents(Binder.getCallingUid())) {
             enforceCallingPermission(permission, func);
         }
     }
@@ -9296,7 +9280,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     boolean isGetTasksAllowed(String caller, int callingPid, int callingUid) {
-        if (mRecentTasks.isCallerRecents(callingUid)) {
+        if (mActivityTaskManager.getRecentTasks().isCallerRecents(callingUid)) {
             // Always allow the recents component to get tasks
             return true;
         }
@@ -11011,7 +10995,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     /** Pokes the task persister. */
     void notifyTaskPersisterLocked(TaskRecord task, boolean flush) {
-        mRecentTasks.notifyTaskPersisterLocked(task, flush);
+        mActivityTaskManager.getRecentTasks().notifyTaskPersisterLocked(task, flush);
     }
 
     @Override
@@ -11162,7 +11146,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             return true;
         }
 
-        if (mRecentTasks.isCallerRecents(sourceUid)) {
+        if (mActivityTaskManager.getRecentTasks().isCallerRecents(sourceUid)) {
             return true;
         }
 
@@ -12362,7 +12346,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mVrController.onSystemReady();
             // Make sure we have the current profile info, since it is needed for security checks.
             mUserController.onSystemReady();
-            mRecentTasks.onSystemReadyLocked();
+            mActivityTaskManager.getRecentTasks().onSystemReadyLocked();
             mAppOpsService.systemReady();
             mSystemReady = true;
         }
@@ -13387,8 +13371,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } else if ("recents".equals(cmd) || "r".equals(cmd)) {
                 synchronized (this) {
-                    if (mRecentTasks != null) {
-                        mRecentTasks.dump(pw, true /* dumpAll */, dumpPackage);
+                    if (mActivityTaskManager.getRecentTasks() != null) {
+                        mActivityTaskManager.getRecentTasks().dump(pw, true /* dumpAll */, dumpPackage);
                     }
                 }
             } else if ("binder-proxies".equals(cmd)) {
@@ -13591,8 +13575,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
                 }
-                if (mRecentTasks != null) {
-                    mRecentTasks.dump(pw, dumpAll, dumpPackage);
+                if (mActivityTaskManager.getRecentTasks() != null) {
+                    mActivityTaskManager.getRecentTasks().dump(pw, dumpAll, dumpPackage);
                 }
                 pw.println();
                 if (dumpAll) {
@@ -13668,8 +13652,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
                 }
-                if (mRecentTasks != null) {
-                    mRecentTasks.dump(pw, dumpAll, dumpPackage);
+                if (mActivityTaskManager.getRecentTasks() != null) {
+                    mActivityTaskManager.getRecentTasks().dump(pw, dumpAll, dumpPackage);
                 }
                 pw.println();
                 if (dumpAll) {
@@ -18615,14 +18599,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     forceStopPackageLocked(list[i], -1, false, true, true,
                                             false, false, userId, "storage unmount");
                                 }
-                                mRecentTasks.cleanupLocked(UserHandle.USER_ALL);
+                                mActivityTaskManager.getRecentTasks().cleanupLocked(
+                                        UserHandle.USER_ALL);
                                 sendPackageBroadcastLocked(
                                         ApplicationThreadConstants.EXTERNAL_STORAGE_UNAVAILABLE,
                                         list, userId);
                             }
                             break;
                         case Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE:
-                            mRecentTasks.cleanupLocked(UserHandle.USER_ALL);
+                            mActivityTaskManager.getRecentTasks().cleanupLocked(
+                                    UserHandle.USER_ALL);
                             break;
                         case Intent.ACTION_PACKAGE_REMOVED:
                         case Intent.ACTION_PACKAGE_CHANGED:
@@ -18655,7 +18641,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                         removeUriPermissionsForPackageLocked(ssp, userId, true,
                                                 false);
 
-                                        mRecentTasks.removeTasksByPackageName(ssp, userId);
+                                        mActivityTaskManager.getRecentTasks().removeTasksByPackageName(ssp, userId);
 
                                         mServices.forceStopPackageLocked(ssp, userId);
                                         mAppWarnings.onPackageUninstalled(ssp);
@@ -18685,7 +18671,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
 
                             synchronized(ActivityManagerService.this) {
-                                mRecentTasks.onPackagesSuspendedChanged(
+                                mActivityTaskManager.getRecentTasks().onPackagesSuspendedChanged(
                                         packageNames, suspended, userHandle);
                             }
                             break;
