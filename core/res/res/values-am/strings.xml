@@ -1653,7 +1653,7 @@
     <string name="work_mode_off_title" msgid="8954725060677558855">"የሥራ ሁነታ ጠፍቷል"</string>
     <string name="work_mode_off_message" msgid="3286169091278094476">"መተግበሪያዎችን፣ የበስተጀርባ ሥምረት እና ተዛማጅ ባሕሪዎችን ጨምሮ የሥራ መገለጫ እንዲሰራ ይፍቀዱ።"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"አብራ"</string>
-    <string name="new_sms_notification_title" msgid="8442817549127555977">"አዲስ መልእክቶች አለዎት"</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"አዲስ መልዕክቶች አለዎት"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"ለመመልከት የኤስኤምኤስ መተግበሪያ ይክፈቱ"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"አንዳንድ ተግባሮች የተገደቡ ሊሆኑ ይችላሉ"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"ለመክፈት መታ ያድርጉ"</string>

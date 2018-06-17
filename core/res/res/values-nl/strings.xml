@@ -1431,7 +1431,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Je hebt je ontgrendelingspatroon <xliff:g id="NUMBER_0">%1$d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%2$d</xliff:g> mislukte pogingen wordt u gevraagd je telefoon te ontgrendelen via een e-mailaccount.\n\n Probeer het over <xliff:g id="NUMBER_2">%3$d</xliff:g> seconden opnieuw."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwijderen"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Volume verhogen tot boven het aanbevolen niveau?\n\nAls u langere tijd op hoog volume naar muziek luistert, raakt je gehoor mogelijk beschadigd."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Volume verhogen tot boven het aanbevolen niveau?\n\nAls je langere tijd op hoog volume naar muziek luistert, raakt je gehoor mogelijk beschadigd."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Blijf het scherm met twee vingers aanraken om toegankelijkheid in te schakelen."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Toegankelijkheid ingeschakeld."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Toegankelijkheid geannuleerd."</string>

@@ -1546,7 +1546,7 @@
       <item quantity="one">1초 후에 다시 시도하세요.</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"나중에 다시 시도"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"전체 화면 보기 중"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"전체 화면 모드"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"종료하려면 위에서 아래로 스와이프합니다."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"확인"</string>
     <string name="done_label" msgid="2093726099505892398">"완료"</string>
