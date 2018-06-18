@@ -1185,7 +1185,7 @@ public class VoiceInteractionManagerService extends SystemService {
 
         private void setImplLocked(VoiceInteractionManagerServiceImpl impl) {
             mImpl = impl;
-            mAmInternal.notifyActiveVoiceInteractionServiceChanged(
+            mAtmInternal.notifyActiveVoiceInteractionServiceChanged(
                     getActiveServiceComponentName());
         }
 

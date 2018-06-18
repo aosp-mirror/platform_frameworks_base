@@ -552,7 +552,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 // Looks like we can't launch in split screen mode or the stack we are launching
                 // doesn't support split-screen mode, go ahead an dismiss split-screen and display a
                 // warning toast about it.
-                mService.mTaskChangeNotificationController.notifyActivityDismissingDockedStack();
+                mService.mActivityTaskManager.getTaskChangeNotificationController().notifyActivityDismissingDockedStack();
                 display.getSplitScreenPrimaryStack().setWindowingMode(WINDOWING_MODE_FULLSCREEN,
                         false /* animate */, false /* showRecents */,
                         false /* enteringSplitScreenMode */, true /* deferEnsuringVisibility */);
@@ -573,7 +573,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // Inform the user that they are starting an app that may not work correctly in
             // multi-window mode.
             final String packageName = topActivity.appInfo.packageName;
-            mService.mTaskChangeNotificationController.notifyActivityForcedResizable(
+            mService.mActivityTaskManager.getTaskChangeNotificationController().notifyActivityForcedResizable(
                     topTask.taskId, FORCED_RESIZEABLE_REASON_SPLIT_SCREEN, packageName);
         }
 
@@ -1644,7 +1644,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // task stack changes, because its positioning may depend on it.
         if (mStackSupervisor.mAppVisibilitiesChangedSinceLastPause
                 || getDisplay().hasPinnedStack()) {
-            mService.mTaskChangeNotificationController.notifyTaskStackChanged();
+            mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskStackChanged();
             mStackSupervisor.mAppVisibilitiesChangedSinceLastPause = false;
         }
 
@@ -2696,7 +2696,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     next.clearOptionsLocked();
                     transaction.setLifecycleStateRequest(
                             ResumeActivityItem.obtain(next.app.repProcState,
-                                    mService.isNextTransitionForward()));
+                                    mService.mActivityTaskManager.isNextTransitionForward()));
                     mService.getLifecycleManager().scheduleTransaction(transaction);
 
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Resumed "
@@ -3723,7 +3723,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 if (DEBUG_VISIBILITY || DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
                         "Prepare close transition: finishing " + r);
                 if (endTask) {
-                    mService.mTaskChangeNotificationController.notifyTaskRemovalStarted(
+                    mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskRemovalStarted(
                             task.taskId);
                 }
                 mWindowManager.prepareAppTransition(transit, false);
@@ -4629,7 +4629,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             mStackSupervisor.resumeFocusedStackTopActivityLocked();
             EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.userId, tr.taskId);
 
-            mService.mTaskChangeNotificationController.notifyTaskMovedToFront(tr.taskId);
+            mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskMovedToFront(tr.taskId);
         } finally {
             getDisplay().continueUpdateImeTarget();
         }
@@ -5160,7 +5160,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         // Notify if a task from the pinned stack is being removed (or moved depending on the mode)
         if (inPinnedWindowingMode()) {
-            mService.mTaskChangeNotificationController.notifyActivityUnpinned();
+            mService.mActivityTaskManager.getTaskChangeNotificationController().notifyActivityUnpinned();
         }
     }
 

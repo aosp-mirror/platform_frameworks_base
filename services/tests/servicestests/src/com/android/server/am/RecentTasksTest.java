@@ -145,8 +145,9 @@ public class RecentTasksTest extends ActivityTestsBase {
         super.setUp();
 
         mTaskPersister = new TestTaskPersister(mContext.getFilesDir());
-        mService = setupActivityManagerService(new MyTestActivityManagerService(mContext));
-        mRecentTasks = (TestRecentTasks) mService.getRecentTasks();
+        mService = setupActivityManagerService(new MyTestActivityManagerService(mContext),
+                new MyTestActivityTaskManagerService(mContext));
+        mRecentTasks = (TestRecentTasks) mService.mActivityTaskManager.getRecentTasks();
         mRecentTasks.loadParametersFromResources(mContext.getResources());
         mHomeStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
@@ -827,6 +828,17 @@ public class RecentTasksTest extends ActivityTestsBase {
         }
     }
 
+    private class MyTestActivityTaskManagerService extends TestActivityTaskManagerService {
+        MyTestActivityTaskManagerService(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected RecentTasks createRecentTasks() {
+            return new TestRecentTasks(this, mTaskPersister, new TestUserController(mAm));
+        }
+    }
+
     private class MyTestActivityManagerService extends TestActivityManagerService {
         MyTestActivityManagerService(Context context) {
             super(context);
@@ -835,11 +847,6 @@ public class RecentTasksTest extends ActivityTestsBase {
         @Override
         protected ActivityStackSupervisor createTestSupervisor() {
             return new MyTestActivityStackSupervisor(this, mHandlerThread.getLooper());
-        }
-
-        @Override
-        protected RecentTasks createRecentTasks() {
-            return new TestRecentTasks(this, mTaskPersister, new TestUserController(this));
         }
 
         @Override
@@ -952,7 +959,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         boolean lastAllowed;
 
-        TestRecentTasks(ActivityManagerService service, TaskPersister taskPersister,
+        TestRecentTasks(ActivityTaskManagerService service, TaskPersister taskPersister,
                 UserController userController) {
             super(service, taskPersister, userController);
         }

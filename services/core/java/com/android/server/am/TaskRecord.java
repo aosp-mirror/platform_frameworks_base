@@ -339,7 +339,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         setIntent(_intent, info);
         setMinDimensions(info);
         touchActiveTime();
-        mService.mTaskChangeNotificationController.notifyTaskCreated(_taskId, realActivity);
+        mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
     }
 
     /**
@@ -369,7 +369,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
 
         lastTaskDescription = _taskDescription;
         touchActiveTime();
-        mService.mTaskChangeNotificationController.notifyTaskCreated(_taskId, realActivity);
+        mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
     }
 
     /**
@@ -419,7 +419,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         mSupportsPictureInPicture = supportsPictureInPicture;
         mMinWidth = minWidth;
         mMinHeight = minHeight;
-        mService.mTaskChangeNotificationController.notifyTaskCreated(_taskId, realActivity);
+        mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
     }
 
     TaskWindowContainerController getWindowContainerController() {
@@ -460,13 +460,13 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             // default configuration the next time it launches.
             updateOverrideConfiguration(null);
         }
-        mService.mTaskChangeNotificationController.notifyTaskRemoved(taskId);
+        mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskRemoved(taskId);
         mWindowContainerController = null;
     }
 
     @Override
     public void onSnapshotChanged(TaskSnapshot snapshot) {
-        mService.mTaskChangeNotificationController.notifyTaskSnapshotChanged(taskId, snapshot);
+        mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskSnapshotChanged(taskId, snapshot);
     }
 
     void setResizeMode(int resizeMode) {
@@ -1302,7 +1302,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             // We normally notify listeners of task stack changes on pause, however pinned stack
             // activities are normally in the paused state so no notification will be sent there
             // before the activity is removed. We send it here so instead.
-            mService.mTaskChangeNotificationController.notifyTaskStackChanged();
+            mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskStackChanged();
         }
 
         if (mActivities.isEmpty()) {

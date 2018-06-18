@@ -415,4 +415,7 @@ interface IActivityTaskManager {
 
     /** @see android.app.ActivityManager#alwaysShowUnsupportedCompileSdkWarning */
     void alwaysShowUnsupportedCompileSdkWarning(in ComponentName activity);
+
+    void setVrThread(int tid);
+    void setPersistentVrThread(int tid);
 }

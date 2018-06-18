@@ -4048,7 +4048,7 @@ public class ActivityManager {
      */
     public static void setVrThread(int tid) {
         try {
-            getService().setVrThread(tid);
+            getTaskService().setVrThread(tid);
         } catch (RemoteException e) {
             // pass
         }

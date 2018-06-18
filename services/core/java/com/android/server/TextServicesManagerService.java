@@ -509,7 +509,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     // TODO: Save SpellCheckerSubtype by supported languages by looking at "locale".
     @Override
     public SpellCheckerSubtype getCurrentSpellCheckerSubtype(
-            String locale, boolean allowImplicitlySelectedSubtype) {
+            boolean allowImplicitlySelectedSubtype) {
         final int subtypeHashCode;
         final SpellCheckerInfo sci;
         final Locale systemLocale;
@@ -573,8 +573,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 }
             } else if (scs.hashCode() == subtypeHashCode) {
                 if (DBG) {
-                    Slog.w(TAG, "Return subtype " + scs.hashCode() + ", input= " + locale
-                            + ", " + scs.getLocale());
+                    Slog.w(TAG, "Return subtype " + scs.hashCode() + ", " + scs.getLocale());
                 }
                 // 3. Use the user specified spell check language
                 return scs;

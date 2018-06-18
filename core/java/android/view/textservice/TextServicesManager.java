@@ -222,8 +222,7 @@ public final class TextServicesManager {
     public SpellCheckerSubtype getCurrentSpellCheckerSubtype(
             boolean allowImplicitlySelectedSubtype) {
         try {
-            // Passing null as a locale until we support multiple enabled spell checker subtypes.
-            return mService.getCurrentSpellCheckerSubtype(null, allowImplicitlySelectedSubtype);
+            return mService.getCurrentSpellCheckerSubtype(allowImplicitlySelectedSubtype);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

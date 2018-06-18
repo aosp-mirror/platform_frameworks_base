@@ -108,18 +108,23 @@ public class ActivityTestsBase {
         return service;
     }
 
-    protected ActivityManagerService setupActivityManagerService(ActivityManagerService service) {
+    protected ActivityManagerService setupActivityManagerService(
+            ActivityManagerService service, ActivityTaskManagerService atm) {
         service = spy(service);
+        atm = spy(atm);
         // Makes sure the supervisor is using with the spy object.
         service.mStackSupervisor.setService(service);
-        // Makes sure activity task is created with the spy object.
-        TestActivityTaskManagerService atm =
-                spy(new TestActivityTaskManagerService(service.mContext));
         service.setActivityTaskManager(atm);
         doReturn(mock(IPackageManager.class)).when(service).getPackageManager();
         doNothing().when(service).grantEphemeralAccessLocked(anyInt(), any(), anyInt(), anyInt());
         service.mWindowManager = prepareMockWindowManager();
+        atm.setWindowManager(service.mWindowManager);
         return service;
+    }
+
+    protected ActivityManagerService setupActivityManagerService(ActivityManagerService service) {
+        return setupActivityManagerService(
+                service, new TestActivityTaskManagerService(service.mContext));
     }
 
     /**
@@ -200,7 +205,8 @@ public class ActivityTestsBase {
             aInfo.applicationInfo.uid = mUid;
             aInfo.flags |= mActivityFlags;
 
-            final ActivityRecord activity = new ActivityRecord(mService, null /* caller */,
+            final ActivityRecord activity = new ActivityRecord(mService.mActivityTaskManager,
+                    null /* caller */,
                     0 /* launchedFromPid */, 0, null, intent, null,
                     aInfo /*aInfo*/, new Configuration(), null /* resultTo */, null /* resultWho */,
                     0 /* reqCode */, false /*componentSpecified*/, false /* rootVoiceInteraction */,

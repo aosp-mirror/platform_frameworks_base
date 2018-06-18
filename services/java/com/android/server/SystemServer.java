@@ -559,13 +559,13 @@ public final class SystemServer {
 
         // Activity manager runs the show.
         traceBeginAndSlog("StartActivityManager");
+        // TODO: Might need to move after migration to WM.
+        ActivityTaskManagerService atm = mSystemServiceManager.startService(
+                ActivityTaskManagerService.Lifecycle.class).getService();
         mActivityManagerService = mSystemServiceManager.startService(
                 ActivityManagerService.Lifecycle.class).getService();
         mActivityManagerService.setSystemServiceManager(mSystemServiceManager);
         mActivityManagerService.setInstaller(installer);
-        // TODO: Might need to move after migration to WM.
-        ActivityTaskManagerService atm = mSystemServiceManager.startService(
-                ActivityTaskManagerService.Lifecycle.class).getService();
         mActivityManagerService.setActivityTaskManager(atm);
         traceEnd();
 
