@@ -6118,8 +6118,13 @@ message MetricsEvent {
 
     // ---- End P Constants, all P constants go above this line ----
 
-    // First Q constant in master goes here:
-    // Please delete these lines and use 1500 for your first enum.
+    // Time since this notification last interrupted (visibly or audible) the user
+    NOTIFICATION_SINCE_INTERRUPTION_MILLIS = 1500;
+
+    // OPEN: Notification interrupted the user, either audibly or visually.
+    //   Tagged data: NOTIFICATION_SINCE_INTERRUPTION_MILLIS
+    // CATEGORY: NOTIFICATION
+    NOTIFICATION_INTERRUPTION = 1501;
 
     // ---- End Q Constants, all Q constants go above this line ----
 
