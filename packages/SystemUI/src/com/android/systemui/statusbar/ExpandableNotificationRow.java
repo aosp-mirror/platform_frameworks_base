@@ -37,6 +37,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.SystemClock;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
@@ -992,6 +993,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        mEntry.setInitializationTime(SystemClock.elapsedRealtime());
         Dependency.get(PluginManager.class).addPluginListener(this,
                 NotificationMenuRowPlugin.class, false /* Allow multiple */);
     }
