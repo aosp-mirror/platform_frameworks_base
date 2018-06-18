@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PermissionGroupInfo;
@@ -590,7 +591,8 @@ public class AppSecurityPermissions {
     private void addPermToList(List<MyPermissionInfo> permList,
             MyPermissionInfo pInfo) {
         if (pInfo.mLabel == null) {
-            pInfo.mLabel = pInfo.loadLabel(mPm);
+            pInfo.mLabel = pInfo.loadSafeLabel(mPm, 20000, PackageItemInfo.SAFE_LABEL_FLAG_TRIM
+                    | PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE);
         }
         int idx = Collections.binarySearch(permList, pInfo, mPermComparator);
         if(localLOGV) Log.i(TAG, "idx="+idx+", list.size="+permList.size());
@@ -611,7 +613,9 @@ public class AppSecurityPermissions {
                 }
                 MyPermissionGroupInfo group = mPermGroups.get(pInfo.group);
                 if (group != null) {
-                    pInfo.mLabel = pInfo.loadLabel(mPm);
+                    pInfo.mLabel = pInfo.loadSafeLabel(mPm, 20000,
+                            PackageItemInfo.SAFE_LABEL_FLAG_TRIM
+                            | PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE);
                     addPermToList(group.mAllPermissions, pInfo);
                     if (pInfo.mNew) {
                         addPermToList(group.mNewPermissions, pInfo);
@@ -622,14 +626,18 @@ public class AppSecurityPermissions {
 
         for (MyPermissionGroupInfo pgrp : mPermGroups.values()) {
             if (pgrp.labelRes != 0 || pgrp.nonLocalizedLabel != null) {
-                pgrp.mLabel = pgrp.loadLabel(mPm);
+                pgrp.mLabel = pgrp.loadSafeLabel(mPm, 20000, PackageItemInfo.SAFE_LABEL_FLAG_TRIM
+                        | PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE);
             } else {
                 ApplicationInfo app;
                 try {
                     app = mPm.getApplicationInfo(pgrp.packageName, 0);
-                    pgrp.mLabel = app.loadLabel(mPm);
+                    pgrp.mLabel = app.loadSafeLabel(mPm, 20000, PackageItemInfo.SAFE_LABEL_FLAG_TRIM
+                            | PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE);
                 } catch (NameNotFoundException e) {
-                    pgrp.mLabel = pgrp.loadLabel(mPm);
+                    pgrp.mLabel = pgrp.loadSafeLabel(mPm, 20000,
+                            PackageItemInfo.SAFE_LABEL_FLAG_TRIM
+                            | PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE);
                 }
             }
             mPermGroupsList.add(pgrp);

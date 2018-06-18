@@ -3538,7 +3538,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // docked or freeform stack is visible...except for the home stack/task if the
                 // docked stack is minimized and it actually set something.
                 if (mHomeStack != null && mHomeStack.isVisible()
-                        && mDividerControllerLocked.isMinimizedDock()) {
+                        && mDividerControllerLocked.isMinimizedDock()
+                        // TODO(b/110159357): Work around to unblock the release for failing test
+                        // ActivityManagerAppConfigurationTests#testSplitscreenPortraitAppOrientationRequests
+                        // which shouldn't be failing since home stack shouldn't be visible. We need
+                        // to dig deeper to see why it is failing. NOTE: Not failing on current
+                        // master...
+                        && !(mDividerControllerLocked.isHomeStackResizable()
+                            && mHomeStack.matchParentBounds())) {
                     final int orientation = mHomeStack.getOrientation();
                     if (orientation != SCREEN_ORIENTATION_UNSET) {
                         return orientation;
