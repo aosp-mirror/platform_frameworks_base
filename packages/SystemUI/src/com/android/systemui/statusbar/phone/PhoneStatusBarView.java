@@ -331,30 +331,25 @@ public class PhoneStatusBarView extends PanelBar {
         // or letterboxing from the right or left sides.
 
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
-        if (mDisplayCutout == null) {
+        if (mDisplayCutout == null || mDisplayCutout.isEmpty()
+                || mLastOrientation != ORIENTATION_PORTRAIT || cornerCutoutMargins == null) {
             lp.leftMargin = 0;
             lp.rightMargin = 0;
             return;
         }
 
-        lp.leftMargin = mDisplayCutout.getSafeInsetLeft();
-        lp.rightMargin = mDisplayCutout.getSafeInsetRight();
+        lp.leftMargin = Math.max(lp.leftMargin, cornerCutoutMargins.first);
+        lp.rightMargin = Math.max(lp.rightMargin, cornerCutoutMargins.second);
 
-        if (cornerCutoutMargins != null) {
-            lp.leftMargin = Math.max(lp.leftMargin, cornerCutoutMargins.first);
-            lp.rightMargin = Math.max(lp.rightMargin, cornerCutoutMargins.second);
-
-            // If we're already inset enough (e.g. on the status bar side), we can have 0 margin
-            WindowInsets insets = getRootWindowInsets();
-            int leftInset = insets.getSystemWindowInsetLeft();
-            int rightInset = insets.getSystemWindowInsetRight();
-            if (lp.leftMargin <= leftInset) {
-                lp.leftMargin = 0;
-            }
-            if (lp.rightMargin <= rightInset) {
-                lp.rightMargin = 0;
-            }
-
+        // If we're already inset enough (e.g. on the status bar side), we can have 0 margin
+        WindowInsets insets = getRootWindowInsets();
+        int leftInset = insets.getSystemWindowInsetLeft();
+        int rightInset = insets.getSystemWindowInsetRight();
+        if (lp.leftMargin <= leftInset) {
+            lp.leftMargin = 0;
+        }
+        if (lp.rightMargin <= rightInset) {
+            lp.rightMargin = 0;
         }
     }
 
