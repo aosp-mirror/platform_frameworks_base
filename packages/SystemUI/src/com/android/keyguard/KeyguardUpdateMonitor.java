@@ -1590,6 +1590,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
+    public boolean isKeyguardVisible() {
+        return mKeyguardIsVisible;
+    }
+
     /**
      * Notifies that the visibility state of Keyguard has changed.
      *
