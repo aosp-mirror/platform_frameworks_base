@@ -2802,9 +2802,21 @@ public abstract class Connection extends Conferenceable {
     public void onReject(String replyMessage) {}
 
     /**
-     * Notifies the Connection of a request to silence the ringer.
-     *
-     * @hide
+     * Notifies this Connection of a request to silence the ringer.
+     * <p>
+     * The ringer may be silenced by any of the following methods:
+     * <ul>
+     *     <li>{@link TelecomManager#silenceRinger()}</li>
+     *     <li>The user presses the volume-down button while a call is ringing.</li>
+     * </ul>
+     * <p>
+     * Self-managed {@link ConnectionService} implementations should override this method in their
+     * {@link Connection} implementation and implement logic to silence their app's ringtone.  If
+     * your app set the ringtone as part of the incoming call {@link Notification} (see
+     * {@link #onShowIncomingCallUi()}), it should re-post the notification now, except call
+     * {@link android.app.Notification.Builder#setOnlyAlertOnce(boolean)} with {@code true}.  This
+     * will ensure the ringtone sound associated with your {@link android.app.NotificationChannel}
+     * stops playing.
      */
     public void onSilence() {}
 
@@ -2881,7 +2893,29 @@ public abstract class Connection extends Conferenceable {
      * <p>
      * You should trigger the display of the incoming call user interface for your application by
      * showing a {@link Notification} with a full-screen {@link Intent} specified.
-     * For example:
+     *
+     * In your application code, you should create a {@link android.app.NotificationChannel} for
+     * incoming call notifications from your app:
+     * <pre><code>
+     * NotificationChannel channel = new NotificationChannel(YOUR_CHANNEL_ID, "Incoming Calls",
+     *          NotificationManager.IMPORTANCE_MAX);
+     * // other channel setup stuff goes here.
+     *
+     * // We'll use the default system ringtone for our incoming call notification channel.  You can
+     * // use your own audio resource here.
+     * Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+     * channel.setSound(ringtoneUri, new AudioAttributes.Builder()
+     *          // Setting the AudioAttributes is important as it identifies the purpose of your
+     *          // notification sound.
+     *          .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+     *          .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+     *      .build());
+     *
+     * NotificationManager mgr = getSystemService(NotificationManager.class);
+     * mgr.createNotificationChannel(channel);
+     * </code></pre>
+     * When it comes time to post a notification for your incoming call, ensure it uses your
+     * incoming call {@link android.app.NotificationChannel}.
      * <pre><code>
      *     // Create an intent which triggers your fullscreen incoming call user interface.
      *     Intent intent = new Intent(Intent.ACTION_MAIN, null);
@@ -2907,11 +2941,14 @@ public abstract class Connection extends Conferenceable {
      *     builder.setContentTitle("Your notification title");
      *     builder.setContentText("Your notification content.");
      *
-     *     // Use builder.addAction(..) to add buttons to answer or reject the call.
+     *     // Set notification as insistent to cause your ringtone to loop.
+     *     Notification notification = builder.build();
+     *     notification.flags |= Notification.FLAG_INSISTENT;
      *
+     *     // Use builder.addAction(..) to add buttons to answer or reject the call.
      *     NotificationManager notificationManager = mContext.getSystemService(
      *         NotificationManager.class);
-     *     notificationManager.notify(YOUR_TAG, YOUR_ID, builder.build());
+     *     notificationManager.notify(YOUR_CHANNEL_ID, YOUR_TAG, YOUR_ID, notification);
      * </code></pre>
      */
     public void onShowIncomingCallUi() {}
