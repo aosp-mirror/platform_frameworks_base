@@ -726,18 +726,33 @@ public class TaskStack extends WindowContainer<Task> implements
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         final int prevWindowingMode = getWindowingMode();
+        final boolean prevIsAlwaysOnTop = isAlwaysOnTop();
         super.onConfigurationChanged(newParentConfig);
 
         // Only need to update surface size here since the super method will handle updating
         // surface position.
         updateSurfaceSize(getPendingTransaction());
         final int windowingMode = getWindowingMode();
+        final boolean isAlwaysOnTop = isAlwaysOnTop();
 
-        if (mDisplayContent == null || prevWindowingMode == windowingMode) {
+        if (mDisplayContent == null) {
             return;
         }
-        mDisplayContent.onStackWindowingModeChanged(this);
-        updateBoundsForWindowModeChange();
+
+        if (prevWindowingMode != windowingMode) {
+            mDisplayContent.onStackWindowingModeChanged(this);
+            updateBoundsForWindowModeChange();
+        }
+
+        if (prevIsAlwaysOnTop != isAlwaysOnTop) {
+            // positionStackAt(POSITION_TOP, this) must be called even when always on top gets
+            // turned off because we need to make sure that the stack is moved from among always on
+            // top windows to below other always on top windows. Since the position the stack should
+            // be inserted into is calculated properly in
+            // {@link DisplayContent#findPositionForStack()} in both cases, we can just request that
+            // the stack is put at top here.
+            mDisplayContent.positionStackAt(POSITION_TOP, this);
+        }
     }
 
     private void updateSurfaceBounds() {

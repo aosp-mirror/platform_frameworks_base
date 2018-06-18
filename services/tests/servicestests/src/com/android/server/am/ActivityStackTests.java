@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
@@ -470,6 +471,42 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertTrue(mDefaultDisplay.getStackAbove(homeStack) == fullscreenStack4);
         mDefaultDisplay.moveStackBehindStack(homeStack, fullscreenStack2);
         assertTrue(mDefaultDisplay.getStackAbove(homeStack) == fullscreenStack2);
+    }
+
+    @Test
+    public void testSetAlwaysOnTop() {
+        final TestActivityStack homeStack = createStackForShouldBeVisibleTest(mDefaultDisplay,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
+        final ActivityStack pinnedStack = createStackForShouldBeVisibleTest(mDefaultDisplay,
+                WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        assertTrue(mDefaultDisplay.getStackAbove(homeStack) == pinnedStack);
+
+        final TestActivityStack alwaysOnTopStack = createStackForShouldBeVisibleTest(
+                mDefaultDisplay, WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD,
+                true /* onTop */);
+        alwaysOnTopStack.setAlwaysOnTop(true);
+        assertTrue(alwaysOnTopStack.isAlwaysOnTop());
+        // Ensure (non-pinned) always on top stack is put below pinned stack.
+        assertTrue(mDefaultDisplay.getStackAbove(alwaysOnTopStack) == pinnedStack);
+
+        final TestActivityStack nonAlwaysOnTopStack = createStackForShouldBeVisibleTest(
+                mDefaultDisplay, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
+                true /* onTop */);
+        // Ensure non always on top stack is put below always on top stacks.
+        assertTrue(mDefaultDisplay.getStackAbove(nonAlwaysOnTopStack) == alwaysOnTopStack);
+
+        final TestActivityStack alwaysOnTopStack2 = createStackForShouldBeVisibleTest(
+                mDefaultDisplay, WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD,
+                true /* onTop */);
+        alwaysOnTopStack2.setAlwaysOnTop(true);
+        assertTrue(alwaysOnTopStack2.isAlwaysOnTop());
+        // Ensure newly created always on top stack is placed above other all always on top stacks.
+        assertTrue(mDefaultDisplay.getStackAbove(alwaysOnTopStack2) == pinnedStack);
+
+        alwaysOnTopStack2.setAlwaysOnTop(false);
+        // Ensure, when always on top is turned off for a stack, the stack is put just below all
+        // other always on top stacks.
+        assertTrue(mDefaultDisplay.getStackAbove(alwaysOnTopStack2) == alwaysOnTopStack);
     }
 
     @Test

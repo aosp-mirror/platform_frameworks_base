@@ -246,6 +246,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     + " is already a child of container=" + child.getParent().getName()
                     + " can't add to container=" + getName());
         }
+
+        if ((index < 0 && index != POSITION_BOTTOM)
+                || (index > mChildren.size() && index != POSITION_TOP)) {
+            throw new IllegalArgumentException("addChild: invalid position=" + index
+                    + ", children number=" + mChildren.size());
+        }
+
+        if (index == POSITION_TOP) {
+            index = mChildren.size();
+        } else if (index == POSITION_BOTTOM) {
+            index = 0;
+        }
+
         mChildren.add(index, child);
         onChildAdded(child);
 
