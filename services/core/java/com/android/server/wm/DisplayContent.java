@@ -404,7 +404,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final AppWindowToken atoken = w.mAppToken;
         if (winAnimator.mDrawState == READY_TO_SHOW) {
-            if (atoken == null || atoken.allDrawn) {
+            if (atoken == null || atoken.canShowWindows()) {
                 if (w.performShowLocked()) {
                     pendingLayoutChanges |= FINISH_LAYOUT_REDO_ANIM;
                     if (DEBUG_LAYOUT_REPEATS) {
