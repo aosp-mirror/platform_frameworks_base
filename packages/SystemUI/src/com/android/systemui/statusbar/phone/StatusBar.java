@@ -1652,8 +1652,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                 && mStatusBarKeyguardViewManager.isOccluded();
 
         final boolean hasArtwork = artworkDrawable != null;
+        mColorExtractor.setHasBackdrop(hasArtwork);
+        if (mScrimController != null) {
+            mScrimController.setHasBackdrop(hasArtwork);
+        }
 
-        if ((hasArtwork || DEBUG_MEDIA_FAKE_ARTWORK) && !mDozing
+        if ((hasArtwork || DEBUG_MEDIA_FAKE_ARTWORK)
                 && (mState != StatusBarState.SHADE || allowWhenShade)
                 && mFingerprintUnlockController.getMode()
                         != FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
@@ -1669,7 +1673,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mBackdrop.setAlpha(1f);
                 }
                 mStatusBarWindowManager.setBackdropShowing(true);
-                mColorExtractor.setMediaBackdropVisible(true);
                 metaDataChanged = true;
                 if (DEBUG_MEDIA) {
                     Log.v(TAG, "DEBUG_MEDIA: Fading in album artwork");
@@ -1721,7 +1724,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                 if (DEBUG_MEDIA) {
                     Log.v(TAG, "DEBUG_MEDIA: Fading out album artwork");
                 }
-                mColorExtractor.setMediaBackdropVisible(false);
                 boolean cannotAnimateDoze = mDozing && !ScrimState.AOD.getAnimateChange();
                 if (mFingerprintUnlockController.getMode()
                         == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
@@ -3853,7 +3855,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      * Switches theme from light to dark and vice-versa.
      */
     protected void updateTheme() {
-        final boolean inflated = mStackScroller != null;
+        final boolean inflated = mStackScroller != null && mStatusBarWindowManager != null;
 
         // The system wallpaper defines if QS should be light or dark.
         WallpaperColors systemColors = mColorExtractor
