@@ -302,6 +302,18 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         onOverrideConfigurationChanged(mTmpConfig);
     }
 
+    /** Sets the always on top flag for this configuration container.
+     *  When you call this function, make sure that the following functions are called as well to
+     *  keep proper z-order.
+     *  - {@Link DisplayContent#positionStackAt(POSITION_TOP, TaskStack)};
+     *  - {@Link ActivityDisplay#positionChildAtTop(ActivityStack)};
+     * */
+    public void setAlwaysOnTop(boolean alwaysOnTop) {
+        mTmpConfig.setTo(getOverrideConfiguration());
+        mTmpConfig.windowConfiguration.setAlwaysOnTop(alwaysOnTop);
+        onOverrideConfigurationChanged(mTmpConfig);
+    }
+
     /**
      * Returns true if this container is currently in multi-window mode. I.e. sharing the screen
      * with another activity.
@@ -513,7 +525,7 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return toString();
     }
 
-    boolean isAlwaysOnTop() {
+    public boolean isAlwaysOnTop() {
         return mFullConfiguration.windowConfiguration.isAlwaysOnTop();
     }
 

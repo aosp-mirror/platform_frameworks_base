@@ -173,12 +173,22 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
 
     private int getTopInsertPosition(ActivityStack stack, int candidatePosition) {
         int position = mStacks.size();
-        if (position > 0) {
-            final ActivityStack topStack = mStacks.get(position - 1);
-            if (topStack.getWindowConfiguration().isAlwaysOnTop() && topStack != stack) {
-                // If the top stack is always on top, we move this stack just below it.
-                position--;
+        if (stack.inPinnedWindowingMode()) {
+            // Stack in pinned windowing mode is z-ordered on-top of all other stacks so okay to
+            // just return the candidate position.
+            return Math.min(position, candidatePosition);
+        }
+        while (position > 0) {
+            final ActivityStack targetStack = mStacks.get(position - 1);
+            if (!targetStack.isAlwaysOnTop()) {
+                // We reached a stack that isn't always-on-top.
+                break;
             }
+            if (stack.isAlwaysOnTop() && !targetStack.inPinnedWindowingMode()) {
+                // Always on-top non-pinned windowing mode stacks can go anywhere below pinned stack.
+                break;
+            }
+            position--;
         }
         return Math.min(position, candidatePosition);
     }

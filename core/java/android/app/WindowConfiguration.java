@@ -59,6 +59,11 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** The current windowing mode of the configuration. */
     private @WindowingMode int mWindowingMode;
 
+    private int mFlags;
+
+    /** Indicates that this window should always be on top of the other windows. */
+    private static final int PFLAG_ALWAYS_ON_TOP = 1 << 0;
+
     /** Windowing mode is currently not defined. */
     public static final int WINDOWING_MODE_UNDEFINED = 0;
     /** Occupies the full area of the screen or the parent container. */
@@ -136,13 +141,16 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     /** Bit that indicates that the {@link #mActivityType} changed.
      * @hide */
     public static final int WINDOW_CONFIG_ACTIVITY_TYPE = 1 << 3;
-
+    /** Bit that indicates that the {@link #mFlags} changed.
+     * @hide */
+    public static final int WINDOW_CONFIG_FLAGS = 1 << 4;
     /** @hide */
     @IntDef(flag = true, prefix = { "WINDOW_CONFIG_" }, value = {
             WINDOW_CONFIG_BOUNDS,
             WINDOW_CONFIG_APP_BOUNDS,
             WINDOW_CONFIG_WINDOWING_MODE,
-            WINDOW_CONFIG_ACTIVITY_TYPE
+            WINDOW_CONFIG_ACTIVITY_TYPE,
+            WINDOW_CONFIG_FLAGS
     })
     public @interface WindowConfig {}
 
@@ -168,6 +176,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         dest.writeParcelable(mAppBounds, flags);
         dest.writeInt(mWindowingMode);
         dest.writeInt(mActivityType);
+        dest.writeInt(mFlags);
     }
 
     private void readFromParcel(Parcel source) {
@@ -175,6 +184,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         mAppBounds = source.readParcelable(Rect.class.getClassLoader());
         mWindowingMode = source.readInt();
         mActivityType = source.readInt();
+        mFlags = source.readInt();
     }
 
     @Override
@@ -220,6 +230,23 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         }
 
         setAppBounds(rect.left, rect.top, rect.right, rect.bottom);
+    }
+
+    private void setFlags(int flags) {
+        mFlags = flags;
+    }
+
+    /**
+     * Sets whether this window should be always on top.
+     * @param alwaysOnTop {@code true} to set window always on top, otherwise {@code false}
+     * @hide
+     */
+    public void setAlwaysOnTop(boolean alwaysOnTop) {
+        if (alwaysOnTop) {
+            mFlags |= PFLAG_ALWAYS_ON_TOP;
+        } else {
+            mFlags &= ~PFLAG_ALWAYS_ON_TOP;
+        }
     }
 
     /**
@@ -281,6 +308,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         setAppBounds(other.mAppBounds);
         setWindowingMode(other.mWindowingMode);
         setActivityType(other.mActivityType);
+        setFlags(other.mFlags);
     }
 
     /** Set this object to completely undefined.
@@ -295,6 +323,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         setBounds(null);
         setWindowingMode(WINDOWING_MODE_UNDEFINED);
         setActivityType(ACTIVITY_TYPE_UNDEFINED);
+        setFlags(0);
     }
 
     /**
@@ -311,6 +340,10 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         if (!delta.mBounds.isEmpty() && !delta.mBounds.equals(mBounds)) {
             changed |= WINDOW_CONFIG_BOUNDS;
             setBounds(delta.mBounds);
+        }
+        if (delta.mFlags != mFlags) {
+            changed |= WINDOW_CONFIG_FLAGS;
+            setFlags(delta.mFlags);
         }
         if (delta.mAppBounds != null && !delta.mAppBounds.equals(mAppBounds)) {
             changed |= WINDOW_CONFIG_APP_BOUNDS;
@@ -345,6 +378,10 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
 
         if (!mBounds.equals(other.mBounds)) {
             changes |= WINDOW_CONFIG_BOUNDS;
+        }
+
+        if (mFlags != other.mFlags) {
+            changes |= WINDOW_CONFIG_FLAGS;
         }
 
         // Make sure that one of the values is not null and that they are not equal.
@@ -399,6 +436,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         n = mActivityType - that.mActivityType;
         if (n != 0) return n;
 
+        n = mFlags - that.mFlags;
+        if (n != 0) return n;
+
         // if (n != 0) return n;
         return n;
     }
@@ -425,6 +465,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
 
         result = 31 * result + mWindowingMode;
         result = 31 * result + mActivityType;
+        result = 31 * result + mFlags;
         return result;
     }
 
@@ -434,7 +475,9 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         return "{ mBounds=" + mBounds
                 + " mAppBounds=" + mAppBounds
                 + " mWindowingMode=" + windowingModeToString(mWindowingMode)
-                + " mActivityType=" + activityTypeToString(mActivityType) + "}";
+                + " mActivityType=" + activityTypeToString(mActivityType)
+                + " mFlags=0x" + Integer.toHexString(mFlags)
+                + "}";
     }
 
     /**
@@ -520,7 +563,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * @hide
      */
     public boolean isAlwaysOnTop() {
-        return mWindowingMode == WINDOWING_MODE_PINNED;
+        return mWindowingMode == WINDOWING_MODE_PINNED || (mFlags & PFLAG_ALWAYS_ON_TOP) != 0;
     }
 
     /**
