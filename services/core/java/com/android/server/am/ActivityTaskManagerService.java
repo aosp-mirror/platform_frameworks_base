@@ -222,6 +222,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     KeyguardController mKeyguardController;
     private final ClientLifecycleManager mLifecycleManager;
     private TaskChangeNotificationController mTaskChangeNotificationController;
+    /** The controller for all operations related to locktask. */
+    private LockTaskController mLockTaskController;
 
     boolean mSuppressResizeConfigChanges;
 
@@ -259,6 +261,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mStackSupervisor = mAm.mStackSupervisor;
         mTaskChangeNotificationController =
                 new TaskChangeNotificationController(mAm, mStackSupervisor, mH);
+        mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mH);
         mRecentTasks = createRecentTasks();
         mStackSupervisor.setRecentTasks(mRecentTasks);
         mVrController = new VrController(mAm);
@@ -267,6 +270,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     void setWindowManager(WindowManagerService wm) {
         mWindowManager = wm;
+        mLockTaskController.setWindowManager(wm);
     }
 
     protected RecentTasks createRecentTasks() {
@@ -283,6 +287,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     TaskChangeNotificationController getTaskChangeNotificationController() {
         return mTaskChangeNotificationController;
+    }
+
+    LockTaskController getLockTaskController() {
+        return mLockTaskController;
     }
 
     private void start() {
@@ -769,7 +777,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             // Do not allow task to finish if last task in lockTask mode. Launchable priv-apps can
             // finish.
-            if (mAm.getLockTaskController().activityBlockedFromFinish(r)) {
+            if (getLockTaskController().activityBlockedFromFinish(r)) {
                 return false;
             }
 
@@ -836,7 +844,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // Do not allow task to finish if last task in lockTask mode. Launchable priv-apps
                 // can finish.
                 final TaskRecord task = r.getTask();
-                if (mAm.getLockTaskController().activityBlockedFromFinish(r)) {
+                if (getLockTaskController().activityBlockedFromFinish(r)) {
                     return false;
                 }
                 return task.getStack().finishActivityAffinityLocked(r);
@@ -1442,7 +1450,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 Slog.d(TAG, "Could not find task for id: "+ taskId);
                 return;
             }
-            if (mAm.getLockTaskController().isLockTaskModeViolation(task)) {
+            if (getLockTaskController().isLockTaskModeViolation(task)) {
                 Slog.e(TAG, "moveTaskToFront: Attempt to violate Lock Task Mode");
                 return;
             }
@@ -1812,7 +1820,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // When a task is locked, dismiss the pinned stack if it exists
             mStackSupervisor.removeStacksInWindowingModes(WINDOWING_MODE_PINNED);
 
-            mAm.getLockTaskController().startLockTaskMode(task, isSystemCaller, callingUid);
+            getLockTaskController().startLockTaskMode(task, isSystemCaller, callingUid);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1823,7 +1831,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                mAm.getLockTaskController().stopLockTaskMode(task, isSystemCaller, callingUid);
+                getLockTaskController().stopLockTaskMode(task, isSystemCaller, callingUid);
             }
             // Launch in-call UI if a call is ongoing. This is necessary to allow stopping the lock
             // task and jumping straight into a call in the case of emergency call back.
@@ -1844,7 +1852,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public int getLockTaskModeState() {
         synchronized (mGlobalLock) {
-            return mAm.getLockTaskController().getLockTaskModeState();
+            return getLockTaskController().getLockTaskModeState();
         }
     }
 
@@ -2601,7 +2609,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (r == null) {
                 return;
             }
-            mAm.getLockTaskController().showLockTaskToast();
+            getLockTaskController().showLockTaskToast();
         }
     }
 
@@ -3319,7 +3327,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Allowing features " + userId + ":0x" +
                     Integer.toHexString(flags));
-            mAm.getLockTaskController().updateLockTaskFeatures(userId, flags);
+            getLockTaskController().updateLockTaskFeatures(userId, flags);
         }
     }
 

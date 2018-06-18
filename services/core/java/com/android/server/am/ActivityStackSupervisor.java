@@ -1456,7 +1456,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             mService.updateLruProcessLocked(app, true, null);
             mService.updateOomAdjLocked();
 
-            final LockTaskController lockTaskController = mService.getLockTaskController();
+            final LockTaskController lockTaskController = mService.mActivityTaskManager.getLockTaskController();
             if (task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE
                     || task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE_PRIV
                     || (task.mLockTaskAuth == LOCK_TASK_AUTH_WHITELISTED
@@ -3077,9 +3077,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (tr != null) {
             tr.removeTaskActivitiesLocked(pauseImmediately, reason);
             cleanUpRemovedTaskLocked(tr, killProcess, removeFromRecents);
-            mService.getLockTaskController().clearLockedTask(tr);
+            mService.mActivityTaskManager.getLockTaskController().clearLockedTask(tr);
             if (tr.isPersistable) {
-                mService.notifyTaskPersisterLocked(null, true);
+                mService.mActivityTaskManager.notifyTaskPersisterLocked(null, true);
             }
             return true;
         }
@@ -4005,7 +4005,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         pw.print(mRecentTasks.isRecentsComponentHomeActivity(mCurrentUser));
 
         getKeyguardController().dump(pw, prefix);
-        mService.getLockTaskController().dump(pw, prefix);
+        mService.mActivityTaskManager.getLockTaskController().dump(pw, prefix);
     }
 
     public void writeToProto(ProtoOutputStream proto, long fieldId) {

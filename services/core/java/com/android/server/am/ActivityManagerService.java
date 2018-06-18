@@ -680,11 +680,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     String mDeviceOwnerName;
 
-    /**
-     * The controller for all operations related to locktask.
-     */
-    private final LockTaskController mLockTaskController;
-
     final UserController mUserController;
 
     /**
@@ -2596,7 +2591,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             mWindowManager = wm;
             mActivityTaskManager.setWindowManager(wm);
             mStackSupervisor.setWindowManager(wm);
-            mLockTaskController.setWindowManager(wm);
         }
     }
 
@@ -2864,7 +2858,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mSystemThread = null;
         mUiHandler = injector.getUiHandler(null);
         mUserController = null;
-        mLockTaskController = null;
         mProcStartHandlerThread = null;
         mProcStartHandler = null;
         mHiddenApiBlacklist = null;
@@ -2957,7 +2950,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
         mActivityStartController = new ActivityStartController(this);
-        mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mHandler);
 
         mProcessCpuThread = new Thread("CpuTracker") {
             @Override
@@ -9366,7 +9358,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Whitelisting " + userId + ":" +
                     Arrays.toString(packages));
-            mLockTaskController.updateLockTaskPackages(userId, packages);
+            mActivityTaskManager.getLockTaskController().updateLockTaskPackages(userId, packages);
         }
     }
 
@@ -10142,10 +10134,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mActivityStartController;
     }
 
-    LockTaskController getLockTaskController() {
-        return mLockTaskController;
-    }
-
     ClientLifecycleManager getLifecycleManager() {
         return mActivityTaskManager.getLifecycleManager();
     }
@@ -10913,11 +10901,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    /** Pokes the task persister. */
-    void notifyTaskPersisterLocked(TaskRecord task, boolean flush) {
-        mActivityTaskManager.getRecentTasks().notifyTaskPersisterLocked(task, flush);
-    }
-
     @Override
     public void notifyCleartextNetwork(int uid, byte[] firstPacket) {
         mHandler.obtainMessage(NOTIFY_CLEARTEXT_NETWORK_MSG, uid, 0, firstPacket).sendToTarget();
@@ -10947,7 +10930,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mBatteryStatsService.shutdown();
         synchronized (this) {
             mProcessStats.shutdownLocked();
-            notifyTaskPersisterLocked(null, true);
+            mActivityTaskManager.notifyTaskPersisterLocked(null, true);
         }
 
         return timedout;

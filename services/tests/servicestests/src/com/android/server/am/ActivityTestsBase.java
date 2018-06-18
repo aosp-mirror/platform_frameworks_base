@@ -311,7 +311,7 @@ public class ActivityTestsBase {
             intent.setComponent(mComponent);
             intent.setFlags(mFlags);
 
-            final TestTaskRecord task = new TestTaskRecord(mSupervisor.mService, mTaskId, aInfo,
+            final TestTaskRecord task = new TestTaskRecord(mSupervisor.mService.mActivityTaskManager, mTaskId, aInfo,
                     intent /*intent*/, mVoiceSession, null /*_voiceInteractor*/);
             task.userId = mUserId;
 
@@ -328,7 +328,7 @@ public class ActivityTestsBase {
         }
 
         private static class TestTaskRecord extends TaskRecord {
-            TestTaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info,
+            TestTaskRecord(ActivityTaskManagerService service, int _taskId, ActivityInfo info,
                        Intent _intent, IVoiceInteractionSession _voiceSession,
                        IVoiceInteractor _voiceInteractor) {
                 super(service, _taskId, info, _intent, _voiceSession, _voiceInteractor);
@@ -346,8 +346,19 @@ public class ActivityTestsBase {
     }
 
     protected static class TestActivityTaskManagerService extends ActivityTaskManagerService {
+        private LockTaskController mLockTaskController;
+
         TestActivityTaskManagerService(Context context) {
             super(context);
+        }
+
+        @Override
+        public LockTaskController getLockTaskController() {
+            if (mLockTaskController == null) {
+                mLockTaskController = spy(super.getLockTaskController());
+            }
+
+            return mLockTaskController;
         }
     }
 
@@ -356,8 +367,6 @@ public class ActivityTestsBase {
      * {@link ActivityStackSupervisor}.
      */
     protected static class TestActivityManagerService extends ActivityManagerService {
-        private ClientLifecycleManager mLifecycleManager;
-        private LockTaskController mLockTaskController;
 
         TestActivityManagerService(Context context) {
             super(context);
@@ -367,22 +376,6 @@ public class ActivityTestsBase {
             mSupportsFreeformWindowManagement = true;
             mSupportsPictureInPicture = true;
             mWindowManager = WindowTestUtils.getMockWindowManagerService();
-        }
-
-        @Override
-        public ClientLifecycleManager getLifecycleManager() {
-            if (mLifecycleManager == null) {
-                return super.getLifecycleManager();
-            }
-            return mLifecycleManager;
-        }
-
-        public LockTaskController getLockTaskController() {
-            if (mLockTaskController == null) {
-                mLockTaskController = spy(super.getLockTaskController());
-            }
-
-            return mLockTaskController;
         }
 
         @Override
