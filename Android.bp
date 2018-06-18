@@ -1239,6 +1239,9 @@ doc_defaults {
     local_sourcepaths: frameworks_base_subdirs,
     installable: false,
     metalava_enabled: true,
+    metalava_annotations_enabled: true,
+    metalava_previous_api: ":public-api-for-metalava-annotations",
+    metalava_merge_annotations_dir: "tools/metalava/manual",
 }
 
 droiddoc {
