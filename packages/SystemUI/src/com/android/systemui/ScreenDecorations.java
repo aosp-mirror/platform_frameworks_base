@@ -126,7 +126,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
             @Override
             public void onDisplayChanged(int displayId) {
-                if (mRotation != RotationUtils.getExactRotation(mContext)) {
+                if (mOverlay != null && mBottomOverlay != null
+                        && mRotation != RotationUtils.getExactRotation(mContext)) {
                     // We cannot immediately update the orientation. Otherwise
                     // WindowManager is still deferring layout until it has finished dispatching
                     // the config changes, which may cause divergence between what we draw
