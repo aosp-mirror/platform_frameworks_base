@@ -3378,35 +3378,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 && Uri.EMPTY.equals(proxy.getPacFileUrl())) {
             proxy = null;
         }
-        synchronized (mProxyTracker.mProxyLock) {
-            if (mProxyTracker.mDefaultProxy != null && mProxyTracker.mDefaultProxy.equals(proxy)) {
-                return;
-            }
-            if (mProxyTracker.mDefaultProxy == proxy) return; // catches repeated nulls
-            if (proxy != null &&  !proxy.isValid()) {
-                if (DBG) log("Invalid proxy properties, ignoring: " + proxy.toString());
-                return;
-            }
-
-            // This call could be coming from the PacManager, containing the port of the local
-            // proxy.  If this new proxy matches the global proxy then copy this proxy to the
-            // global (to get the correct local port), and send a broadcast.
-            // TODO: Switch PacManager to have its own message to send back rather than
-            // reusing EVENT_HAS_CHANGED_PROXY and this call to handleApplyDefaultProxy.
-            if ((mProxyTracker.mGlobalProxy != null) && (proxy != null)
-                    && (!Uri.EMPTY.equals(proxy.getPacFileUrl()))
-                    && proxy.getPacFileUrl().equals(mProxyTracker.mGlobalProxy.getPacFileUrl())) {
-                mProxyTracker.mGlobalProxy = proxy;
-                mProxyTracker.sendProxyBroadcast(mProxyTracker.mGlobalProxy);
-                return;
-            }
-            mProxyTracker.mDefaultProxy = proxy;
-
-            if (mProxyTracker.mGlobalProxy != null) return;
-            if (!mProxyTracker.mDefaultProxyDisabled) {
-                mProxyTracker.sendProxyBroadcast(proxy);
-            }
-        }
+        mProxyTracker.setDefaultProxy(proxy);
     }
 
     // If the proxy has changed from oldLp to newLp, resend proxy broadcast with default proxy.

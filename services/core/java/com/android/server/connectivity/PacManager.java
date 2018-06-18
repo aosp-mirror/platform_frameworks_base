@@ -166,14 +166,14 @@ public class PacManager {
 
     /**
      * Updates the PAC Manager with current Proxy information. This is called by
-     * the ConnectivityService directly before a broadcast takes place to allow
+     * the ProxyTracker directly before a broadcast takes place to allow
      * the PacManager to indicate that the broadcast should not be sent and the
      * PacManager will trigger a new broadcast when it is ready.
      *
      * @param proxy Proxy information that is about to be broadcast.
      * @return Returns true when the broadcast should not be sent
      */
-    public synchronized boolean setCurrentProxyScriptUrl(ProxyInfo proxy) {
+    synchronized boolean setCurrentProxyScriptUrl(ProxyInfo proxy) {
         if (!Uri.EMPTY.equals(proxy.getPacFileUrl())) {
             if (proxy.getPacFileUrl().equals(mPacUrl) && (proxy.getPort() > 0)) {
                 // Allow to send broadcast, nothing to do.
