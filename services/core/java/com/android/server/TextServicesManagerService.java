@@ -57,8 +57,6 @@ import android.service.textservice.SpellCheckerService;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.InputMethodSubtype;
 import android.view.textservice.SpellCheckerInfo;
 import android.view.textservice.SpellCheckerSubtype;
 
@@ -540,22 +538,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         String candidateLocale = null;
         if (subtypeHashCode == 0) {
             // Spell checker language settings == "auto"
-            final InputMethodManager imm = mContext.getSystemService(InputMethodManager.class);
-            if (imm != null) {
-                final InputMethodSubtype currentInputMethodSubtype =
-                        imm.getCurrentInputMethodSubtype();
-                if (currentInputMethodSubtype != null) {
-                    final String localeString = currentInputMethodSubtype.getLocale();
-                    if (!TextUtils.isEmpty(localeString)) {
-                        // 1. Use keyboard locale if available in the spell checker
-                        candidateLocale = localeString;
-                    }
-                }
-            }
-            if (candidateLocale == null) {
-                // 2. Use System locale if available in the spell checker
-                candidateLocale = systemLocale.toString();
-            }
+            // Use System locale if available in the spell checker
+            candidateLocale = systemLocale.toString();
         }
         SpellCheckerSubtype candidate = null;
         for (int i = 0; i < sci.getSubtypeCount(); ++i) {
@@ -575,12 +559,12 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 if (DBG) {
                     Slog.w(TAG, "Return subtype " + scs.hashCode() + ", " + scs.getLocale());
                 }
-                // 3. Use the user specified spell check language
+                // Use the user specified spell check language
                 return scs;
             }
         }
-        // 4. Fall back to the applicable language and return it if not null
-        // 5. Simply just return it even if it's null which means we could find no suitable
+        // Fall back to the applicable language and return it if not null
+        // Simply just return it even if it's null which means we could find no suitable
         // spell check languages
         return candidate;
     }
