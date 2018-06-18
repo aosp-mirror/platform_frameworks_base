@@ -28,7 +28,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
-import static org.robolectric.shadow.api.Shadow.extract;
 
 import android.app.ActivityManager;
 import android.content.ContentResolver;
@@ -52,9 +51,6 @@ import android.util.ArrayMap;
 import android.util.Pair;
 import android.widget.RemoteViews;
 
-import com.android.settingslib.R;
-import com.android.settingslib.suggestions.SuggestionParser;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -67,7 +63,6 @@ import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -161,35 +156,6 @@ public class TileUtilsTest {
                 false /* checkCategory */, true /* forceTintExternalIcon */);
 
         assertThat(outTiles.isEmpty()).isTrue();
-    }
-
-    @Test
-    public void getTilesForIntent_shouldSkipFilteredApps() {
-        Intent intent = new Intent();
-        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
-        List<Tile> outTiles = new ArrayList<>();
-        List<ResolveInfo> info = new ArrayList<>();
-        ResolveInfo resolveInfo = newInfo(true, null /* category */, null, URI_GET_ICON,
-                URI_GET_SUMMARY);
-        addMetadataToInfo(resolveInfo, "com.android.settings.require_account", "com.google");
-        addMetadataToInfo(resolveInfo, "com.android.settings.require_connection", "true");
-        info.add(resolveInfo);
-
-        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
-                .thenReturn(info);
-
-        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */, true /* forceTintExternalIcon */);
-
-        assertThat(outTiles.size()).isEqualTo(1);
-        SuggestionParser parser = new SuggestionParser(
-                mContext,
-                null,
-                Collections.emptyList(),
-                "0,10");
-        parser.filterSuggestions(outTiles, 0, false);
-        assertThat(outTiles.size()).isEqualTo(0);
     }
 
     @Test
@@ -390,108 +356,6 @@ public class TileUtilsTest {
                 false /* checkCategory */, true /* forceTintExternalIcon */);
 
         assertThat(outTiles.size()).isEqualTo(1);
-    }
-
-    @Test
-    public void getTilesForIntent_shouldShowRemoteViewIfSpecified() {
-        Intent intent = new Intent();
-        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
-        List<Tile> outTiles = new ArrayList<>();
-        List<ResolveInfo> info = new ArrayList<>();
-        ResolveInfo resolveInfo = newInfo(true, null /* category */);
-        resolveInfo.activityInfo.metaData.putInt("com.android.settings.custom_view",
-                R.layout.user_preference);
-        info.add(resolveInfo);
-
-        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
-                .thenReturn(info);
-
-        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */, true /* forceTintExternalIcon */);
-
-        assertThat(outTiles.size()).isEqualTo(1);
-        Tile tile = outTiles.get(0);
-        assertThat(tile.remoteViews).isNotNull();
-        assertThat(tile.remoteViews.getLayoutId()).isEqualTo(R.layout.user_preference);
-    }
-
-    @Test
-    public void getTilesForIntent_summaryUriSpecified_shouldOverrideRemoteViewSummary()
-            throws RemoteException {
-        Intent intent = new Intent();
-        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
-        List<Tile> outTiles = new ArrayList<>();
-        List<ResolveInfo> info = new ArrayList<>();
-        ResolveInfo resolveInfo = newInfo(true, null /* category */, null,
-                null, URI_GET_SUMMARY);
-        resolveInfo.activityInfo.metaData.putInt("com.android.settings.custom_view",
-                R.layout.user_preference);
-        info.add(resolveInfo);
-
-        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
-                .thenReturn(info);
-
-        // Mock the content provider interaction.
-        Bundle bundle = new Bundle();
-        bundle.putString(TileUtils.META_DATA_PREFERENCE_SUMMARY, "new summary text");
-        when(mIContentProvider.call(anyString(),
-                eq(TileUtils.getMethodFromUri(Uri.parse(URI_GET_SUMMARY))), eq(URI_GET_SUMMARY),
-                any())).thenReturn(bundle);
-        when(mContentResolver.acquireUnstableProvider(anyString()))
-                .thenReturn(mIContentProvider);
-        when(mContentResolver.acquireUnstableProvider(any(Uri.class)))
-                .thenReturn(mIContentProvider);
-
-        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */, true /* forceTintExternalIcon */);
-
-        assertThat(outTiles.size()).isEqualTo(1);
-        Tile tile = outTiles.get(0);
-        assertThat(tile.remoteViews).isNotNull();
-        assertThat(tile.remoteViews.getLayoutId()).isEqualTo(R.layout.user_preference);
-        // Make sure the summary TextView got a new text string.
-        TileUtilsShadowRemoteViews shadowRemoteViews = extract(tile.remoteViews);
-        assertThat(shadowRemoteViews.overrideViewId).isEqualTo(android.R.id.summary);
-        assertThat(shadowRemoteViews.overrideText).isEqualTo("new summary text");
-    }
-
-    @Test
-    public void getTilesForIntent_providerUnavailable_shouldNotOverrideRemoteViewSummary()
-            throws RemoteException {
-        Intent intent = new Intent();
-        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
-        List<Tile> outTiles = new ArrayList<>();
-        List<ResolveInfo> info = new ArrayList<>();
-        ResolveInfo resolveInfo = newInfo(true, null /* category */, null,
-                null, URI_GET_SUMMARY);
-        resolveInfo.activityInfo.metaData.putInt("com.android.settings.custom_view",
-                R.layout.user_preference);
-        info.add(resolveInfo);
-
-        when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
-                .thenReturn(info);
-
-        // Mock the content provider interaction.
-        Bundle bundle = new Bundle();
-        bundle.putString(TileUtils.META_DATA_PREFERENCE_SUMMARY, "new summary text");
-        when(mIContentProvider.call(anyString(),
-                eq(TileUtils.getMethodFromUri(Uri.parse(URI_GET_SUMMARY))), eq(URI_GET_SUMMARY),
-                any())).thenReturn(bundle);
-
-        TileUtils.getTilesForIntent(mContext, UserHandle.CURRENT, intent, addedCache,
-                null /* defaultCategory */, outTiles, false /* usePriority */,
-                false /* checkCategory */, true /* forceTintExternalIcon */);
-
-        assertThat(outTiles.size()).isEqualTo(1);
-        Tile tile = outTiles.get(0);
-        assertThat(tile.remoteViews).isNotNull();
-        assertThat(tile.remoteViews.getLayoutId()).isEqualTo(R.layout.user_preference);
-        // Make sure the summary TextView didn't get any text view updates.
-        TileUtilsShadowRemoteViews shadowRemoteViews = extract(tile.remoteViews);
-        assertThat(shadowRemoteViews.overrideViewId).isNull();
-        assertThat(shadowRemoteViews.overrideText).isNull();
     }
 
     public static ResolveInfo newInfo(boolean systemApp, String category) {
