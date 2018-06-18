@@ -69,6 +69,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public class TextServicesManagerService extends ITextServicesManager.Stub {
@@ -536,25 +537,17 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 && !allowImplicitlySelectedSubtype) {
             return null;
         }
-        String candidateLocale = null;
-        if (subtypeHashCode == 0) {
-            // Spell checker language settings == "auto"
-            // Use System locale if available in the spell checker
-            candidateLocale = systemLocale.toString();
-        }
         SpellCheckerSubtype candidate = null;
         for (int i = 0; i < sci.getSubtypeCount(); ++i) {
             final SpellCheckerSubtype scs = sci.getSubtypeAt(i);
             if (subtypeHashCode == 0) {
-                final String scsLocale = scs.getLocale();
-                if (candidateLocale.equals(scsLocale)) {
+                final Locale scsLocale = scs.getLocaleObject();
+                if (Objects.equals(scsLocale, systemLocale)) {
                     return scs;
-                } else if (candidate == null) {
-                    if (candidateLocale.length() >= 2 && scsLocale.length() >= 2
-                            && candidateLocale.startsWith(scsLocale)) {
-                        // Fall back to the applicable language
-                        candidate = scs;
-                    }
+                } else if (candidate == null && systemLocale != null && scsLocale != null
+                        && TextUtils.equals(systemLocale.getLanguage(), scsLocale.getLanguage())) {
+                    // Fall back to the applicable language
+                    candidate = scs;
                 }
             } else if (scs.hashCode() == subtypeHashCode) {
                 if (DBG) {
