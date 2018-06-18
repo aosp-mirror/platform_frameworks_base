@@ -3408,19 +3408,26 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void applyEnqueuedAdjustmentFromAssistant(INotificationListener token,
-                Adjustment adjustment) throws RemoteException {
+                Adjustment adjustment) {
+            boolean foundEnqueued = false;
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationLock) {
                     mAssistants.checkServiceTokenLocked(token);
                     int N = mEnqueuedNotifications.size();
                     for (int i = 0; i < N; i++) {
-                        final NotificationRecord n = mEnqueuedNotifications.get(i);
-                        if (Objects.equals(adjustment.getKey(), n.getKey())
-                                && Objects.equals(adjustment.getUser(), n.getUserId())) {
-                            applyAdjustment(n, adjustment);
+                        final NotificationRecord r = mEnqueuedNotifications.get(i);
+                        if (Objects.equals(adjustment.getKey(), r.getKey())
+                                && Objects.equals(adjustment.getUser(), r.getUserId())) {
+                            applyAdjustment(r, adjustment);
+                            r.applyAdjustments();
+                            foundEnqueued = true;
                             break;
                         }
+                    }
+                    if (!foundEnqueued) {
+                        // adjustment arrived too late to apply to enqueued; apply to posted
+                        applyAdjustmentFromAssistant(token, adjustment);
                     }
                 }
             } finally {
@@ -3430,7 +3437,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void applyAdjustmentFromAssistant(INotificationListener token,
-                Adjustment adjustment) throws RemoteException {
+                Adjustment adjustment) {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationLock) {
@@ -3446,7 +3453,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void applyAdjustmentsFromAssistant(INotificationListener token,
-                List<Adjustment> adjustments) throws RemoteException {
+                List<Adjustment> adjustments) {
 
             final long identity = Binder.clearCallingIdentity();
             try {
