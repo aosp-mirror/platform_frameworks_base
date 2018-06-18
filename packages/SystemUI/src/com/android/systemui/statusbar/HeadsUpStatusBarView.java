@@ -178,11 +178,7 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
      * @param translationX how to translate the horizontal position
      */
     public void setPanelTranslation(float translationX) {
-        if (isLayoutRtl()) {
-            setTranslationX(translationX + mCutOutInset);
-        } else {
-            setTranslationX(translationX - mCutOutInset);
-        }
+        setTranslationX(translationX);
         updateDrawingRect();
     }
 
