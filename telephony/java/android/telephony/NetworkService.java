@@ -35,8 +35,8 @@ import java.util.List;
 /**
  * Base class of network service. Services that extend NetworkService must register the service in
  * their AndroidManifest to be detected by the framework. They must be protected by the permission
- * "android.permission.BIND_NETWORK_SERVICE". The network service definition in the manifest must
- * follow the following format:
+ * "android.permission.BIND_TELEPHONY_NETWORK_SERVICE". The network service definition in the
+ * manifest must follow the following format:
  * ...
  * <service android:name=".xxxNetworkService"
  *     android:permission="android.permission.BIND_TELEPHONY_NETWORK_SERVICE" >
