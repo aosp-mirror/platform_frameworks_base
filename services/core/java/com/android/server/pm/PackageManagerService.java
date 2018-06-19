@@ -12344,7 +12344,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (DEBUG_REMOVE) Log.d(TAG, "  Activities: " + r);
         }
 
-        mPermissionManager.removeAllPermissions(pkg, chatty);
+        final ArrayList<String> allPackageNames = new ArrayList<>(mPackages.keySet());
+        mPermissionManager.removeAllPermissions(pkg, allPackageNames, mPermissionCallback, chatty);
 
         N = pkg.instrumentation.size();
         r = null;
