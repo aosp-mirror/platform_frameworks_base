@@ -559,7 +559,7 @@ public class NotificationManagerService extends SystemService {
     {
         final int pid;
         final String pkg;
-        ITransientNotification callback;
+        final ITransientNotification callback;
         int duration;
         Binder token;
 
@@ -574,10 +574,6 @@ public class NotificationManagerService extends SystemService {
 
         void update(int duration) {
             this.duration = duration;
-        }
-
-        void update(ITransientNotification callback) {
-            this.callback = callback;
         }
 
         void dump(PrintWriter pw, String prefix, DumpFilter filter) {
@@ -1648,28 +1644,38 @@ public class NotificationManagerService extends SystemService {
                 long callingId = Binder.clearCallingIdentity();
                 try {
                     ToastRecord record;
-                    int index;
-                    // All packages aside from the android package can enqueue one toast at a time
-                    if (!isSystemToast) {
-                        index = indexOfToastPackageLocked(pkg);
-                    } else {
-                        index = indexOfToastLocked(pkg, callback);
-                    }
-
-                    // If the package already has a toast, we update its toast
-                    // in the queue, we don't move it to the end of the queue.
+                    int index = indexOfToastLocked(pkg, callback);
+                    // If it's already in the queue, we update it in place, we don't
+                    // move it to the end of the queue.
                     if (index >= 0) {
                         record = mToastQueue.get(index);
                         record.update(duration);
-                        record.update(callback);
                     } else {
+                        // Limit the number of toasts that any given package except the android
+                        // package can enqueue.  Prevents DOS attacks and deals with leaks.
+                        if (!isSystemToast) {
+                            int count = 0;
+                            final int N = mToastQueue.size();
+                            for (int i=0; i<N; i++) {
+                                 final ToastRecord r = mToastQueue.get(i);
+                                 if (r.pkg.equals(pkg)) {
+                                     count++;
+                                     if (count >= MAX_PACKAGE_NOTIFICATIONS) {
+                                         Slog.e(TAG, "Package has already posted " + count
+                                                + " toasts. Not showing more. Package=" + pkg);
+                                         return;
+                                     }
+                                 }
+                            }
+                        }
+
                         Binder token = new Binder();
                         mWindowManagerInternal.addWindowToken(token, TYPE_TOAST, DEFAULT_DISPLAY);
                         record = new ToastRecord(callingPid, pkg, callback, duration, token);
                         mToastQueue.add(record);
                         index = mToastQueue.size() - 1;
+                        keepProcessAliveIfNeededLocked(callingPid);
                     }
-                    keepProcessAliveIfNeededLocked(callingPid);
                     // If it's at index 0, it's the current toast.  It doesn't matter if it's
                     // new or just been updated.  Call back and tell it to show itself.
                     // If the callback fails, this will remove it from the list, so don't
@@ -4328,21 +4334,7 @@ public class NotificationManagerService extends SystemService {
         int len = list.size();
         for (int i=0; i<len; i++) {
             ToastRecord r = list.get(i);
-            if (r.pkg.equals(pkg) && r.callback.asBinder().equals(cbak)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    @GuardedBy("mToastQueue")
-    int indexOfToastPackageLocked(String pkg)
-    {
-        ArrayList<ToastRecord> list = mToastQueue;
-        int len = list.size();
-        for (int i=0; i<len; i++) {
-            ToastRecord r = list.get(i);
-            if (r.pkg.equals(pkg)) {
+            if (r.pkg.equals(pkg) && r.callback.asBinder() == cbak) {
                 return i;
             }
         }
