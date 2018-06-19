@@ -185,6 +185,10 @@ class ActivityMetricsLogger {
 
         mWindowState = WINDOW_STATE_INVALID;
         ActivityStack stack = mSupervisor.getFocusedStack();
+        if (stack == null) {
+            return;
+        }
+
         if (stack.isActivityTypeAssistant()) {
             mWindowState = WINDOW_STATE_ASSISTANT;
             return;
