@@ -2469,7 +2469,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 }
             }
 
-            final TaskRecord task = create(stackSupervisor.mService.mActivityTaskManager,
+            final TaskRecord task = create(stackSupervisor.mService,
                     taskId, intent, affinityIntent,
                     affinity, rootAffinity, realActivity, origActivity, rootHasReset,
                     autoRemoveRecents, askedCompatMode, userId, effectiveUid, lastDescription,

@@ -453,7 +453,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     ActivityStack(ActivityDisplay display, int stackId, ActivityStackSupervisor supervisor,
             int windowingMode, int activityType, boolean onTop) {
         mStackSupervisor = supervisor;
-        mService = supervisor.mService.mActivityTaskManager;
+        mService = supervisor.mService;
         mHandler = new ActivityStackHandler(supervisor.mLooper);
         mWindowManager = mService.mWindowManager;
         mStackId = stackId;

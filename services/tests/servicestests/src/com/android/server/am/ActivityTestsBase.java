@@ -111,10 +111,11 @@ public class ActivityTestsBase {
     protected ActivityManagerService setupActivityManagerService(
             ActivityManagerService service, ActivityTaskManagerService atm) {
         service = spy(service);
+        // Makes sure activity task is created with the spy object.
         atm = spy(atm);
-        // Makes sure the supervisor is using with the spy object.
-        service.mStackSupervisor.setService(service);
         service.setActivityTaskManager(atm);
+        // Makes sure the supervisor is using with the spy object.
+        atm.mStackSupervisor.setService(atm);
         doReturn(mock(IPackageManager.class)).when(service).getPackageManager();
         doNothing().when(service).grantEphemeralAccessLocked(anyInt(), any(), anyInt(), anyInt());
         service.mWindowManager = prepareMockWindowManager();
@@ -311,7 +312,7 @@ public class ActivityTestsBase {
             intent.setComponent(mComponent);
             intent.setFlags(mFlags);
 
-            final TestTaskRecord task = new TestTaskRecord(mSupervisor.mService.mActivityTaskManager, mTaskId, aInfo,
+            final TestTaskRecord task = new TestTaskRecord(mSupervisor.mService, mTaskId, aInfo,
                     intent /*intent*/, mVoiceSession, null /*_voiceInteractor*/);
             task.userId = mUserId;
 
@@ -360,23 +361,6 @@ public class ActivityTestsBase {
 
             return mLockTaskController;
         }
-    }
-
-    /**
-     * An {@link ActivityManagerService} subclass which provides a test
-     * {@link ActivityStackSupervisor}.
-     */
-    protected static class TestActivityManagerService extends ActivityManagerService {
-
-        TestActivityManagerService(Context context) {
-            super(context);
-            mSupportsMultiWindow = true;
-            mSupportsMultiDisplay = true;
-            mSupportsSplitScreenMultiWindow = true;
-            mSupportsFreeformWindowManagement = true;
-            mSupportsPictureInPicture = true;
-            mWindowManager = WindowTestUtils.getMockWindowManagerService();
-        }
 
         @Override
         final protected ActivityStackSupervisor createStackSupervisor() {
@@ -404,11 +388,32 @@ public class ActivityTestsBase {
         }
 
         protected ActivityStackSupervisor createTestSupervisor() {
-            return new TestActivityStackSupervisor(this, mHandlerThread.getLooper());
+            return new TestActivityStackSupervisor(this, mH.getLooper());
+        }
+    }
+
+    /**
+     * An {@link ActivityManagerService} subclass which provides a test
+     * {@link ActivityStackSupervisor}.
+     */
+    protected static class TestActivityManagerService extends ActivityManagerService {
+
+        TestActivityManagerService(Context context) {
+            super(context);
+            mSupportsMultiWindow = true;
+            mSupportsMultiDisplay = true;
+            mSupportsSplitScreenMultiWindow = true;
+            mSupportsFreeformWindowManagement = true;
+            mSupportsPictureInPicture = true;
         }
 
         @Override
         void updateUsageStats(ActivityRecord component, boolean resumed) {
+        }
+
+        @Override
+        Configuration getGlobalConfiguration() {
+            return mContext.getResources().getConfiguration();
         }
     }
 
@@ -420,7 +425,7 @@ public class ActivityTestsBase {
         private ActivityDisplay mDisplay;
         private KeyguardController mKeyguardController;
 
-        public TestActivityStackSupervisor(ActivityManagerService service, Looper looper) {
+        public TestActivityStackSupervisor(ActivityTaskManagerService service, Looper looper) {
             super(service, looper);
             mDisplayManager =
                     (DisplayManager) mService.mContext.getSystemService(Context.DISPLAY_SERVICE);

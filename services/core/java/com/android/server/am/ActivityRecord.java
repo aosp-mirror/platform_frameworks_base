@@ -1098,7 +1098,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             return true;
         }
         // Allow the recents component to launch the home activity.
-        final RecentTasks recentTasks = mStackSupervisor.mService.mActivityTaskManager.getRecentTasks();
+        final RecentTasks recentTasks = mStackSupervisor.mService.getRecentTasks();
         if (recentTasks != null && recentTasks.isCallerRecents(uid)) {
             return true;
         }
@@ -2930,16 +2930,16 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             throw new XmlPullParserException("restoreActivity error intent=" + intent);
         }
 
-        final ActivityManagerService service = stackSupervisor.mService;
+        final ActivityTaskManagerService service = stackSupervisor.mService;
         final ActivityInfo aInfo = stackSupervisor.resolveActivity(intent, resolvedType, 0, null,
                 userId, Binder.getCallingUid());
         if (aInfo == null) {
             throw new XmlPullParserException("restoreActivity resolver error. Intent=" + intent +
                     " resolvedType=" + resolvedType);
         }
-        final ActivityRecord r = new ActivityRecord(service.mActivityTaskManager, null /* caller */,
+        final ActivityRecord r = new ActivityRecord(service, null /* caller */,
                 0 /* launchedFromPid */, launchedFromUid, launchedFromPackage, intent, resolvedType,
-                aInfo, service.getConfiguration(), null /* resultTo */, null /* resultWho */,
+                aInfo, service.mAm.getConfiguration(), null /* resultTo */, null /* resultWho */,
                 0 /* reqCode */, componentSpecified, false /* rootVoiceInteraction */,
                 stackSupervisor, null /* options */, null /* sourceRecord */);
 

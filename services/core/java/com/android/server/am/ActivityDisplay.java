@@ -140,7 +140,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 + " to displayId=" + mDisplayId + " position=" + position);
         addStackReferenceIfNeeded(stack);
         positionChildAt(stack, position);
-        mSupervisor.mService.updateSleepIfNeededLocked();
+        mSupervisor.mService.mAm.updateSleepIfNeededLocked();
     }
 
     void removeChild(ActivityStack stack) {
@@ -148,7 +148,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 + " from displayId=" + mDisplayId);
         mStacks.remove(stack);
         removeStackReferenceIfNeeded(stack);
-        mSupervisor.mService.updateSleepIfNeededLocked();
+        mSupervisor.mService.mAm.updateSleepIfNeededLocked();
         onStackOrderChanged();
     }
 
@@ -300,7 +300,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             }
         }
 
-        final ActivityManagerService service = mSupervisor.mService;
+        final ActivityManagerService service = mSupervisor.mService.mAm;
         if (!isWindowingModeSupported(windowingMode, service.mSupportsMultiWindow,
                 service.mSupportsSplitScreenMultiWindow, service.mSupportsFreeformWindowManagement,
                 service.mSupportsPictureInPicture, activityType)) {
@@ -536,7 +536,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         }
 
         // Make sure the windowing mode we are trying to use makes sense for what is supported.
-        final ActivityManagerService service = mSupervisor.mService;
+        final ActivityManagerService service = mSupervisor.mService.mAm;
         boolean supportsMultiWindow = service.mSupportsMultiWindow;
         boolean supportsSplitScreen = service.mSupportsSplitScreenMultiWindow;
         boolean supportsFreeform = service.mSupportsFreeformWindowManagement;
@@ -714,7 +714,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
 
     boolean shouldSleep() {
         return (mStacks.isEmpty() || !mAllSleepTokens.isEmpty())
-                && (mSupervisor.mService.mRunningVoice == null);
+                && (mSupervisor.mService.mAm.mRunningVoice == null);
     }
 
     /**

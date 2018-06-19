@@ -59,8 +59,8 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
         super.setUp();
         mService = createActivityManagerService();
         mFactory = mock(Factory.class);
-        mController = new ActivityStartController(mService, mService.mStackSupervisor, mFactory);
-        mStarter = spy(new ActivityStarter(mController, mService, mService.mStackSupervisor,
+        mController = new ActivityStartController(mService.mActivityTaskManager, mService.mStackSupervisor, mFactory);
+        mStarter = spy(new ActivityStarter(mController, mService.mActivityTaskManager, mService.mStackSupervisor,
                 mock(ActivityStartInterceptor.class)));
         doReturn(mStarter).when(mFactory).obtain();
     }
@@ -96,7 +96,7 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
     @Test
     public void testRecycling() throws Exception {
         final Intent intent = new Intent();
-        final ActivityStarter optionStarter = new ActivityStarter(mController, mService,
+        final ActivityStarter optionStarter = new ActivityStarter(mController, mService.mActivityTaskManager,
                 mService.mStackSupervisor, mock(ActivityStartInterceptor.class));
         optionStarter
                 .setIntent(intent)

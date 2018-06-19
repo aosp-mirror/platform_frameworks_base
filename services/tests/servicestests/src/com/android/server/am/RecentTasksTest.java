@@ -837,16 +837,17 @@ public class RecentTasksTest extends ActivityTestsBase {
         protected RecentTasks createRecentTasks() {
             return new TestRecentTasks(this, mTaskPersister, new TestUserController(mAm));
         }
+
+        @Override
+        protected ActivityStackSupervisor createTestSupervisor() {
+            return new MyTestActivityStackSupervisor(this, mH.getLooper());
+        }
+
     }
 
     private class MyTestActivityManagerService extends TestActivityManagerService {
         MyTestActivityManagerService(Context context) {
             super(context);
-        }
-
-        @Override
-        protected ActivityStackSupervisor createTestSupervisor() {
-            return new MyTestActivityStackSupervisor(this, mHandlerThread.getLooper());
         }
 
         @Override
@@ -856,7 +857,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     private class MyTestActivityStackSupervisor extends TestActivityStackSupervisor {
-        public MyTestActivityStackSupervisor(ActivityManagerService service, Looper looper) {
+        public MyTestActivityStackSupervisor(ActivityTaskManagerService service, Looper looper) {
             super(service, looper);
         }
 

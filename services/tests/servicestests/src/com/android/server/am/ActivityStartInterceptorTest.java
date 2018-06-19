@@ -57,7 +57,7 @@ import org.mockito.MockitoAnnotations;
  * Unit tests for {@link ActivityStartInterceptorTest}.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.am.ActivityStartInterceptorTest
+ *  atest FrameworksServicesTests:com.android.server.am.ActivityStartInterceptorTest
  */
 @Presubmit
 @SmallTest
@@ -82,7 +82,9 @@ public class ActivityStartInterceptorTest {
     @Mock
     private Context mContext;
     @Mock
-    private ActivityManagerService mService;
+    private ActivityManagerService mAm;
+    @Mock
+    private ActivityTaskManagerService mService;
     @Mock
     private ActivityStackSupervisor mSupervisor;
     @Mock
@@ -104,6 +106,7 @@ public class ActivityStartInterceptorTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mService.mAm = mAm;
         mInterceptor = new ActivityStartInterceptor(mService, mSupervisor, mContext,
                 mUserController);
         mInterceptor.setStates(TEST_USER_ID, TEST_REAL_CALLING_PID, TEST_REAL_CALLING_UID,
@@ -113,10 +116,9 @@ public class ActivityStartInterceptorTest {
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
         LocalServices.addService(DevicePolicyManagerInternal.class,
                 mDevicePolicyManager);
-        when(mDevicePolicyManager
-                        .createShowAdminSupportIntent(TEST_USER_ID, true))
+        when(mDevicePolicyManager.createShowAdminSupportIntent(TEST_USER_ID, true))
                 .thenReturn(ADMIN_SUPPORT_INTENT);
-        when(mService.getPackageManagerInternalLocked()).thenReturn(mPackageManagerInternal);
+        when(mAm.getPackageManagerInternalLocked()).thenReturn(mPackageManagerInternal);
 
         // Mock UserManager
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
@@ -129,7 +131,7 @@ public class ActivityStartInterceptorTest {
                 thenReturn(CONFIRM_CREDENTIALS_INTENT);
 
         // Mock PackageManager
-        when(mService.getPackageManager()).thenReturn(mPackageManager);
+        when(mAm.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.getHarmfulAppWarning(TEST_PACKAGE_NAME, TEST_USER_ID))
                 .thenReturn(null);
 

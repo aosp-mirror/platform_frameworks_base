@@ -615,8 +615,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     private Installer mInstaller;
 
     /** Run all ActivityStacks through this */
-    final ActivityStackSupervisor mStackSupervisor;
-    final KeyguardController mKeyguardController;
+    ActivityStackSupervisor mStackSupervisor;
 
     final InstrumentationReporter mInstrumentationReporter = new InstrumentationReporter();
 
@@ -734,7 +733,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public boolean canShowErrorDialogs() {
         return mShowDialogs && !mSleeping && !mShuttingDown
-                && !mKeyguardController.isKeyguardOrAodShowing(DEFAULT_DISPLAY)
+                && !mActivityTaskManager.mKeyguardController.isKeyguardOrAodShowing(DEFAULT_DISPLAY)
                 && !mUserController.hasUserRestriction(UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
                         mUserController.getCurrentUserId())
                 && !(UserManager.isDeviceInDemoMode(mContext)
@@ -1285,16 +1284,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Information about and control over application operations
      */
     final AppOpsService mAppOpsService;
-
-    /** Current sequencing integer of the configuration, for skipping old configurations. */
-    private int mConfigurationSeq;
-
-    /**
-     * Temp object used when global and/or display override configuration is updated. It is also
-     * sent to outer world instead of {@link #getGlobalConfiguration} because we don't trust
-     * anyone...
-     */
-    private Configuration mTempConfig = new Configuration();
 
     /**
      * Hardware-reported OpenGLES version.
@@ -2595,8 +2584,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void setActivityTaskManager(ActivityTaskManagerService atm) {
         synchronized (this) {
             mActivityTaskManager = atm;
-            mStackSupervisor.setActivityTaskManager(atm);
             mActivityTaskManager.setActivityManagerService(this);
+            mStackSupervisor = mActivityTaskManager.mStackSupervisor;
         }
     }
 
@@ -2845,13 +2834,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         mHandler = null;
         mHandlerThread = null;
         mIntentFirewall = null;
-        mKeyguardController = null;
         mPermissionReviewRequired = false;
         mProcessCpuThread = null;
         mProcessStats = null;
         mProviderMap = null;
         mServices = null;
-        mStackSupervisor = null;
         mSystemThread = null;
         mUiHandler = injector.getUiHandler(null);
         mUserController = null;
@@ -2938,12 +2925,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         mTrackingAssociations = "1".equals(SystemProperties.get("debug.track-associations"));
-        mTempConfig.setToDefaults();
-        mTempConfig.setLocales(LocaleList.getDefault());
-        mConfigurationSeq = mTempConfig.seq = 1;
-        mStackSupervisor = createStackSupervisor();
-        mStackSupervisor.onConfigurationChanged(mTempConfig);
-        mKeyguardController = mStackSupervisor.getKeyguardController();
         mCompatModePackages = new CompatModePackages(this, systemDir, mHandler);
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
 
@@ -2997,12 +2978,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.w(TAG, "Setting background thread cpuset failed");
         }
 
-    }
-
-    protected ActivityStackSupervisor createStackSupervisor() {
-        final ActivityStackSupervisor supervisor = new ActivityStackSupervisor(this, mHandler.getLooper());
-        supervisor.initialize();
-        return supervisor;
     }
 
     public void setSystemServiceManager(SystemServiceManager mgr) {
@@ -10963,7 +10938,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long ident = Binder.clearCallingIdentity();
             try {
                 if (mUserController.shouldConfirmCredentials(userId)) {
-                    if (mKeyguardController.isKeyguardLocked()) {
+                    if (mActivityTaskManager.mKeyguardController.isKeyguardLocked()) {
                         // Showing launcher to avoid user entering credential twice.
                         final int currentUserId = mUserController.getCurrentUserId();
                         startHomeActivityLocked(currentUserId, "notifyLockedProfile");
@@ -19525,8 +19500,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     /** Update default (global) configuration and notify listeners about changes. */
     private int updateGlobalConfigurationLocked(@NonNull Configuration values, boolean initLocale,
             boolean persistent, int userId, boolean deferResume) {
-        mTempConfig.setTo(getGlobalConfiguration());
-        final int changes = mTempConfig.updateFrom(values);
+        mActivityTaskManager.mTempConfig.setTo(getGlobalConfiguration());
+        final int changes = mActivityTaskManager.mTempConfig.updateFrom(values);
         if (changes == 0) {
             // Since calling to Activity.setRequestedOrientation leads to freezing the window with
             // setting WindowManagerService.mWaitingForConfig to true, it is important that we call
@@ -19576,34 +19551,34 @@ public class ActivityManagerService extends IActivityManager.Stub
                     locales.get(bestLocaleIndex)));
         }
 
-        mConfigurationSeq = Math.max(++mConfigurationSeq, 1);
-        mTempConfig.seq = mConfigurationSeq;
+        mActivityTaskManager.mConfigurationSeq = Math.max(++mActivityTaskManager.mConfigurationSeq, 1);
+        mActivityTaskManager.mTempConfig.seq = mActivityTaskManager.mConfigurationSeq;
 
         // Update stored global config and notify everyone about the change.
-        mStackSupervisor.onConfigurationChanged(mTempConfig);
+        mStackSupervisor.onConfigurationChanged(mActivityTaskManager.mTempConfig);
 
-        Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + mTempConfig);
+        Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + mActivityTaskManager.mTempConfig);
         // TODO(multi-display): Update UsageEvents#Event to include displayId.
-        mUsageStatsService.reportConfigurationChange(mTempConfig,
+        mUsageStatsService.reportConfigurationChange(mActivityTaskManager.mTempConfig,
                 mUserController.getCurrentUserId());
 
         // TODO: If our config changes, should we auto dismiss any currently showing dialogs?
-        updateShouldShowDialogsLocked(mTempConfig);
+        updateShouldShowDialogsLocked(mActivityTaskManager.mTempConfig);
 
         AttributeCache ac = AttributeCache.instance();
         if (ac != null) {
-            ac.updateConfiguration(mTempConfig);
+            ac.updateConfiguration(mActivityTaskManager.mTempConfig);
         }
 
         // Make sure all resources in our process are updated right now, so that anyone who is going
         // to retrieve resource values after we return will be sure to get the new ones. This is
         // especially important during boot, where the first config change needs to guarantee all
         // resources have that config before following boot code is executed.
-        mSystemThread.applyConfigurationToResources(mTempConfig);
+        mSystemThread.applyConfigurationToResources(mActivityTaskManager.mTempConfig);
 
         // We need another copy of global config because we're scheduling some calls instead of
         // running them in place. We need to be sure that object we send will be handled unchanged.
-        final Configuration configCopy = new Configuration(mTempConfig);
+        final Configuration configCopy = new Configuration(mActivityTaskManager.mTempConfig);
         if (persistent && Settings.System.hasInterestingConfigurationChanges(changes)) {
             Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);
             msg.obj = configCopy;
@@ -19714,12 +19689,12 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private int performDisplayOverrideConfigUpdate(Configuration values, boolean deferResume,
             int displayId) {
-        mTempConfig.setTo(mStackSupervisor.getDisplayOverrideConfiguration(displayId));
-        final int changes = mTempConfig.updateFrom(values);
+        mActivityTaskManager.mTempConfig.setTo(mStackSupervisor.getDisplayOverrideConfiguration(displayId));
+        final int changes = mActivityTaskManager.mTempConfig.updateFrom(values);
         if (changes != 0) {
             Slog.i(TAG, "Override config changes=" + Integer.toHexString(changes) + " "
-                    + mTempConfig + " for displayId=" + displayId);
-            mStackSupervisor.setDisplayOverrideConfiguration(mTempConfig, displayId);
+                    + mActivityTaskManager.mTempConfig + " for displayId=" + displayId);
+            mStackSupervisor.setDisplayOverrideConfiguration(mActivityTaskManager.mTempConfig, displayId);
 
             final boolean isDensityChange = (changes & ActivityInfo.CONFIG_DENSITY) != 0;
             if (isDensityChange && displayId == DEFAULT_DISPLAY) {
@@ -19736,7 +19711,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // ensureActivityConfiguration().
         if (mWindowManager != null) {
             final int[] resizedStacks =
-                    mWindowManager.setNewDisplayOverrideConfiguration(mTempConfig, displayId);
+                    mWindowManager.setNewDisplayOverrideConfiguration(mActivityTaskManager.mTempConfig, displayId);
             if (resizedStacks != null) {
                 for (int stackId : resizedStacks) {
                     resizeStackWithBoundsFromWindowManager(stackId, deferResume);
@@ -21778,7 +21753,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private final ActivityRecord resumedAppLocked() {
-        ActivityRecord act = mStackSupervisor.getResumedActivityLocked();
+        final ActivityRecord act =
+                mStackSupervisor != null ? mStackSupervisor.getResumedActivityLocked() : null;
         String pkg;
         int uid;
         if (act != null) {
@@ -21860,7 +21836,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             uidRec.reset();
         }
 
-        mStackSupervisor.rankTaskLayersIfNeeded();
+        if (mStackSupervisor != null) {
+            mStackSupervisor.rankTaskLayersIfNeeded();
+        }
 
         mAdjSeq++;
         mNewNumServiceProcs = 0;

@@ -66,7 +66,7 @@ import com.android.server.LocalServices;
  */
 class ActivityStartInterceptor {
 
-    private final ActivityManagerService mService;
+    private final ActivityTaskManagerService mService;
     private final ActivityStackSupervisor mSupervisor;
     private final Context mServiceContext;
     private final UserController mUserController;
@@ -99,12 +99,13 @@ class ActivityStartInterceptor {
     TaskRecord mInTask;
     ActivityOptions mActivityOptions;
 
-    ActivityStartInterceptor(ActivityManagerService service, ActivityStackSupervisor supervisor) {
-        this(service, supervisor, service.mContext, service.mUserController);
+    ActivityStartInterceptor(
+            ActivityTaskManagerService service, ActivityStackSupervisor supervisor) {
+        this(service, supervisor, service.mContext, service.mAm.mUserController);
     }
 
     @VisibleForTesting
-    ActivityStartInterceptor(ActivityManagerService service, ActivityStackSupervisor supervisor,
+    ActivityStartInterceptor(ActivityTaskManagerService service, ActivityStackSupervisor supervisor,
             Context context, UserController userController) {
         mService = service;
         mSupervisor = supervisor;
@@ -127,7 +128,7 @@ class ActivityStartInterceptor {
 
     private IntentSender createIntentSenderForOriginalIntent(int callingUid, int flags) {
         Bundle activityOptions = deferCrossProfileAppsAnimationIfNecessary();
-        final IIntentSender target = mService.getIntentSenderLocked(
+        final IIntentSender target = mService.mAm.getIntentSenderLocked(
                 INTENT_SENDER_ACTIVITY, mCallingPackage, callingUid, mUserId, null /*token*/,
                 null /*resultCode*/, 0 /*requestCode*/,
                 new Intent[] { mIntent }, new String[] { mResolvedType },
@@ -238,7 +239,7 @@ class ActivityStartInterceptor {
                 (mAInfo.applicationInfo.flags & FLAG_SUSPENDED) == 0) {
             return false;
         }
-        final PackageManagerInternal pmi = mService.getPackageManagerInternalLocked();
+        final PackageManagerInternal pmi = mService.mAm.getPackageManagerInternalLocked();
         if (pmi == null) {
             return false;
         }
@@ -319,7 +320,7 @@ class ActivityStartInterceptor {
     private boolean interceptHarmfulAppIfNeeded() {
         CharSequence harmfulAppWarning;
         try {
-            harmfulAppWarning = mService.getPackageManager()
+            harmfulAppWarning = mService.mAm.getPackageManager()
                     .getHarmfulAppWarning(mAInfo.packageName, mUserId);
         } catch (RemoteException ex) {
             return false;
