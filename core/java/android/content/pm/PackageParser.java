@@ -3100,6 +3100,14 @@ public class PackageParser {
                 0);
         perm.info.requestRes = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_request, 0);
+        perm.info.requestDetailResourceId = sa.getResourceId(
+                com.android.internal.R.styleable.AndroidManifestPermissionGroup_requestDetail, 0);
+        perm.info.backgroundRequestResourceId = sa.getResourceId(
+                com.android.internal.R.styleable.AndroidManifestPermissionGroup_backgroundRequest,
+                0);
+        perm.info.backgroundRequestDetailResourceId = sa.getResourceId(
+                com.android.internal.R.styleable
+                        .AndroidManifestPermissionGroup_backgroundRequestDetail, 0);
         perm.info.flags = sa.getInt(
                 com.android.internal.R.styleable.AndroidManifestPermissionGroup_permissionGroupFlags, 0);
         perm.info.priority = sa.getInt(
@@ -3153,6 +3161,19 @@ public class PackageParser {
 
         perm.info.requestRes = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestPermission_request, 0);
+
+        if (sa.hasValue(
+                com.android.internal.R.styleable.AndroidManifestPermission_backgroundPermission)) {
+            if ("android".equals(owner.packageName)) {
+                perm.info.backgroundPermission = sa.getNonResourceString(
+                        com.android.internal.R.styleable
+                                .AndroidManifestPermission_backgroundPermission);
+            } else {
+                Slog.w(TAG, owner.packageName + " defines permission '" + perm.info.name
+                        + "' with a background permission. Only the 'android' package can do "
+                        + "that.");
+            }
+        }
 
         perm.info.protectionLevel = sa.getInt(
                 com.android.internal.R.styleable.AndroidManifestPermission_protectionLevel,
