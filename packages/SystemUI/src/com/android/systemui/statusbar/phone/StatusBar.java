@@ -4754,10 +4754,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             // Bouncer needs the front scrim when it's on top of an activity,
             // tapping on a notification, editing QS or being dismissed by
             // FLAG_DISMISS_KEYGUARD_ACTIVITY.
-            ScrimState state = mIsOccluded || mStatusBarKeyguardViewManager.bouncerNeedsScrimming()
-                    || mStatusBarKeyguardViewManager.willDismissWithAction()
-                    || mStatusBarKeyguardViewManager.isFullscreenBouncer() ?
-                    ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
+            ScrimState state = mStatusBarKeyguardViewManager.bouncerNeedsScrimming()
+                    ? ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
             mScrimController.transitionTo(state);
         } else if (mLaunchCameraOnScreenTurningOn || isInLaunchTransition()) {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
