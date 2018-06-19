@@ -763,9 +763,6 @@
     <dimen name="volume_expander_margin_end">2dp</dimen>
     <dimen name="volume_expander_margin_top">6dp</dimen>
 
-    <!-- Padding between icon and text for managed profile toast -->
-    <dimen name="managed_profile_toast_padding">4dp</dimen>
-
     <!-- Thickness of the assist disclosure beams -->
     <dimen name="assist_disclosure_thickness">2.5dp</dimen>
 
