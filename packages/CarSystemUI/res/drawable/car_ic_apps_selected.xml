@@ -14,18 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<resources>
-    <string name="config_statusBarComponent" translatable="false">
-        com.android.systemui.statusbar.car.CarStatusBar
-    </string>
-    <string name="config_systemUIFactoryComponent" translatable="false">
-        com.android.systemui.CarSystemUIFactory
-    </string>
-    <bool name="config_enableFullscreenUserSwitcher">true</bool>
-
-    <!-- configure which system ui bars should be displayed -->
-    <bool name="config_enableLeftNavigationBar">false</bool>
-    <bool name="config_enableRightNavigationBar">false</bool>
-    <bool name="config_enableBottomNavigationBar">true</bool>
-
-</resources>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/car_ic_selection_bg" android:gravity="center"/>
+    <item android:drawable="@drawable/car_ic_apps_black" android:gravity="center"/>
+</layer-list>

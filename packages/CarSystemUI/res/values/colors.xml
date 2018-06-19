@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2018 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <color name="nav_bar_ripple_background_color">#40ffffff</color>
+    <color name="car_accent">#356FE5</color>
+    <!-- colors for user switcher -->
+    <color name="car_user_switcher_background_color">#000000</color>
+    <color name="car_user_switcher_name_text_color">@color/car_title2_light</color>
+    <color name="car_user_switcher_add_user_background_color">#131313</color>
+    <color name="car_nav_icon_fill_color">@color/car_grey_50</color>
+    <!-- colors for seekbar -->
+    <color name="car_seekbar_track_background">#131315</color>
+    <color name="car_seekbar_track_secondary_progress">@color/car_accent</color>
+    <!-- colors for volume dialog tint -->
+    <color name="car_volume_dialog_tint">@color/car_tint_light</color>
+
+    <!-- System ui can't depend on car libs so redefine. -->
+    <color name="car_grey_50">#fffafafa</color>
+
+    <color name="docked_divider_background">@color/car_grey_50</color>
+    <color name="system_bar_background_opaque">#ff172026</color>
+
+    <color name="status_bar_background_color">#33000000</color>
+    <drawable name="system_bar_background">@color/status_bar_background_color</drawable>
+
+    <!-- The scrim color for the background of the notifications shade. -->
+    <color name="scrim_behind_color">#172026</color>
+
+    <!-- The color of the dividing line between grouped notifications. -->
+    <color name="notification_divider_color">@*android:color/notification_action_list</color>
+
+    <!-- The color of the ripples on the untinted notifications -->
+    <color name="notification_ripple_untinted_color">@color/ripple_material_light</color>
+
+    <color name="car_teal_700">#ff00796b</color>
+    <color name="car_grey_300">#ffe0e0e0</color>
+    <color name="car_grey_900">#ff212121</color>
+
+    <color name="keyguard_button_text_color">@android:color/black</color>
+</resources>

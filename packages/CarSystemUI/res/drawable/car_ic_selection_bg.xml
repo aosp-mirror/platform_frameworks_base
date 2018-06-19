@@ -14,18 +14,15 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<resources>
-    <string name="config_statusBarComponent" translatable="false">
-        com.android.systemui.statusbar.car.CarStatusBar
-    </string>
-    <string name="config_systemUIFactoryComponent" translatable="false">
-        com.android.systemui.CarSystemUIFactory
-    </string>
-    <bool name="config_enableFullscreenUserSwitcher">true</bool>
-
-    <!-- configure which system ui bars should be displayed -->
-    <bool name="config_enableLeftNavigationBar">false</bool>
-    <bool name="config_enableRightNavigationBar">false</bool>
-    <bool name="config_enableBottomNavigationBar">true</bool>
-
-</resources>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="70dp"
+    android:height="70dp"
+    android:viewportHeight="70.0"
+    android:viewportWidth="70.0">
+    <path
+        android:fillColor="@color/car_accent"
+        android:fillType="evenOdd"
+        android:pathData="M4,0L66,0A4,4 0,0 1,70 4L70,66A4,4 0,0 1,66 70L4,70A4,4 0,0 1,0 66L0,4A4,4 0,0 1,4 0z"
+        android:strokeColor="#00000000"
+        android:strokeWidth="1"/>
+</vector>
