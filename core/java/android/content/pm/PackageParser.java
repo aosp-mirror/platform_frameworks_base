@@ -2199,10 +2199,10 @@ public class PackageParser {
                             com.android.internal.R.styleable.AndroidManifestUsesSdk_minSdkVersion);
                     if (val != null) {
                         if (val.type == TypedValue.TYPE_STRING && val.string != null) {
-                            targetCode = minCode = val.string.toString();
+                            minCode = val.string.toString();
                         } else {
                             // If it's not a string, it's an integer.
-                            targetVers = minVers = val.data;
+                            minVers = val.data;
                         }
                     }
 
@@ -2218,6 +2218,9 @@ public class PackageParser {
                             // If it's not a string, it's an integer.
                             targetVers = val.data;
                         }
+                    } else {
+                        targetVers = minVers;
+                        targetCode = minCode;
                     }
 
                     sa.recycle();
