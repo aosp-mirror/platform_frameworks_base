@@ -63,6 +63,7 @@ import android.view.textservice.SpellCheckerSubtype;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1024,19 +1025,46 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     private static final class ISpellCheckerServiceCallbackBinder
             extends ISpellCheckerServiceCallback.Stub {
         @NonNull
-        private final SpellCheckerBindGroup mBindGroup;
-        @NonNull
-        private final SessionRequest mRequest;
+        private final Object mCallbackLock = new Object();
 
-        ISpellCheckerServiceCallbackBinder(@NonNull final SpellCheckerBindGroup bindGroup,
-                @NonNull final SessionRequest request) {
-            mBindGroup = bindGroup;
-            mRequest = request;
+        @GuardedBy("mCallbackLock")
+        @Nullable
+        private WeakReference<SpellCheckerBindGroup> mBindGroup;
+
+        /**
+         * Original {@link SessionRequest} that is associated with this callback.
+         *
+         * <p>Note that {@link SpellCheckerBindGroup#mOnGoingSessionRequests} guarantees that this
+         * {@link SessionRequest} object is kept alive until the request is canceled.</p>
+         */
+        @GuardedBy("mCallbackLock")
+        @Nullable
+        private WeakReference<SessionRequest> mRequest;
+
+        ISpellCheckerServiceCallbackBinder(@NonNull SpellCheckerBindGroup bindGroup,
+                @NonNull SessionRequest request) {
+            synchronized (mCallbackLock) {
+                mBindGroup = new WeakReference<>(bindGroup);
+                mRequest = new WeakReference<>(request);
+            }
         }
 
         @Override
         public void onSessionCreated(@Nullable ISpellCheckerSession newSession) {
-            mBindGroup.onSessionCreated(newSession, mRequest);
+            final SpellCheckerBindGroup group;
+            final SessionRequest request;
+            synchronized (mCallbackLock) {
+                if (mBindGroup == null || mRequest == null) {
+                    return;
+                }
+                group = mBindGroup.get();
+                request = mRequest.get();
+                mBindGroup = null;
+                mRequest = null;
+            }
+            if (group != null && request != null) {
+                group.onSessionCreated(newSession, request);
+            }
         }
     }
 }
