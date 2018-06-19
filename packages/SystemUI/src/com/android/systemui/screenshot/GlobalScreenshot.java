@@ -60,6 +60,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -246,7 +247,10 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
         try {
             // Create screenshot directory if it doesn't exist
-            mScreenshotDir.mkdirs();
+            boolean madeDirs = mScreenshotDir.mkdirs();
+            if (madeDirs == false) {
+                Log.e(TAG, "Couldn't create screenshot directory: " + mScreenshotDir);
+            }
 
             // media provider uses seconds for DATE_MODIFIED and DATE_ADDED, but milliseconds
             // for DATE_TAKEN
