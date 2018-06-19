@@ -49,10 +49,14 @@ import java.util.List;
  */
 public class NotificationChildrenContainer extends ViewGroup {
 
-    private static final int NUMBER_OF_CHILDREN_WHEN_COLLAPSED = 2;
-    private static final int NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED = 5;
-    private static final int NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED = 8;
-    private static final int NUMBER_OF_CHILDREN_WHEN_AMBIENT = 1;
+    @VisibleForTesting
+    static final int NUMBER_OF_CHILDREN_WHEN_COLLAPSED = 2;
+    @VisibleForTesting
+    static final int NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED = 5;
+    @VisibleForTesting
+    static final int NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED = 8;
+    @VisibleForTesting
+    static final int NUMBER_OF_CHILDREN_WHEN_AMBIENT = 1;
     private static final AnimationProperties ALPHA_FADE_IN = new AnimationProperties() {
         private AnimationFilter mAnimationFilter = new AnimationFilter().animateAlpha();
 
@@ -699,15 +703,18 @@ public class NotificationChildrenContainer extends ViewGroup {
         return childState.height != intrinsicHeight && !childState.hidden;
     }
 
-    private int getMaxAllowedVisibleChildren() {
+    @VisibleForTesting
+    int getMaxAllowedVisibleChildren() {
         return getMaxAllowedVisibleChildren(false /* likeCollapsed */);
     }
 
-    private int getMaxAllowedVisibleChildren(boolean likeCollapsed) {
+    @VisibleForTesting
+    int getMaxAllowedVisibleChildren(boolean likeCollapsed) {
         if (mContainingNotification.isShowingAmbient()) {
             return NUMBER_OF_CHILDREN_WHEN_AMBIENT;
         }
-        if (!likeCollapsed && (mChildrenExpanded || mContainingNotification.isUserLocked())) {
+        if (!likeCollapsed && (mChildrenExpanded || mContainingNotification.isUserLocked())
+                && !showingAsLowPriority()) {
             return NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED;
         }
         if (mIsLowPriority || !mContainingNotification.isOnKeyguard()

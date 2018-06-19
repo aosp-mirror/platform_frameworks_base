@@ -308,4 +308,12 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         mGroupRow.resetTranslation();
         assertEquals(0, mGroupRow.getEntry().expandedIcon.getScrollX());
     }
+
+    @Test
+    public void testIsExpanded_userExpanded() {
+        mGroupRow.setExpandable(true);
+        Assert.assertFalse(mGroupRow.isExpanded());
+        mGroupRow.setUserExpanded(true);
+        Assert.assertTrue(mGroupRow.isExpanded());
+    }
 }
