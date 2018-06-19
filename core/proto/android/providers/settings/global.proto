@@ -384,6 +384,9 @@ message GlobalSettingsProto {
         // App allowed to load GPU debug layers.
         optional SettingProto debug_app = 1;
         optional SettingProto debug_layers = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+        // App will load ANGLE instead of native GLES drivers.
+        optional SettingProto angle_enabled_app = 3;
     }
     optional Gpu gpu = 59;
 
