@@ -254,7 +254,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     // 1 second, or 1 Hz frequency.
     private static final long LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS = 1000;
     // Default update duration in milliseconds for REQUEST_LOCATION.
-    private static final long LOCATION_UPDATE_DURATION_MILLIS = 0;
+    private static final long LOCATION_UPDATE_DURATION_MILLIS = 10 * 1000;
 
     /** simpler wrapper for ProviderRequest + Worksource */
     private static class GpsRequest {
