@@ -28,6 +28,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.app.AppGlobals;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -50,6 +51,8 @@ import android.util.ArraySet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -105,6 +108,8 @@ public class NotificationData {
         public CharSequence remoteInputText;
         public List<SnoozeCriterion> snoozeCriteria;
         public int userSentiment = Ranking.USER_SENTIMENT_NEUTRAL;
+        @NonNull
+        public List<Notification.Action> smartActions = Collections.emptyList();
 
         private int mCachedContrastColor = COLOR_INVALID;
         private int mCachedContrastColorIsFor = COLOR_INVALID;
@@ -131,8 +136,23 @@ public class NotificationData {
         private boolean hasSentReply;
 
         public Entry(StatusBarNotification n) {
+            this(n, null);
+        }
+
+        public Entry(StatusBarNotification n, @Nullable Ranking ranking) {
             this.key = n.getKey();
             this.notification = n;
+            if (ranking != null) {
+                populateFromRanking(ranking);
+            }
+        }
+
+        public void populateFromRanking(@NonNull Ranking ranking) {
+            channel = ranking.getChannel();
+            snoozeCriteria = ranking.getSnoozeCriteria();
+            userSentiment = ranking.getUserSentiment();
+            smartActions = ranking.getSmartActions() == null
+                    ? Collections.emptyList() : ranking.getSmartActions();
         }
 
         public void setInterruption() {
@@ -232,6 +252,7 @@ public class NotificationData {
 
         /**
          * Update the notification icons.
+         *
          * @param context the context to create the icons with.
          * @param sbn the notification to read the icon from.
          * @throws InflationException
@@ -291,7 +312,7 @@ public class NotificationData {
         }
 
         public void onInflationTaskFinished() {
-           mRunningTask = null;
+            mRunningTask = null;
         }
 
         @VisibleForTesting
@@ -607,7 +628,7 @@ public class NotificationData {
             getRanking(key, mTmpRanking);
             return mTmpRanking.getOverrideGroupKey();
         }
-         return null;
+        return null;
     }
 
     public List<SnoozeCriterion> getSnoozeCriteria(String key) {
@@ -658,9 +679,7 @@ public class NotificationData {
                         entry.notification.setOverrideGroupKey(overrideGroupKey);
                         mGroupManager.onEntryUpdated(entry, oldSbn);
                     }
-                    entry.channel = getChannel(entry.key);
-                    entry.snoozeCriteria = getSnoozeCriteria(entry.key);
-                    entry.userSentiment = mTmpRanking.getUserSentiment();
+                    entry.populateFromRanking(mTmpRanking);
                 }
             }
         }
@@ -833,6 +852,7 @@ public class NotificationData {
         public boolean isNotificationForCurrentProfiles(StatusBarNotification sbn);
         public String getCurrentMediaNotificationKey();
         public NotificationGroupManager getGroupManager();
+
         /**
          * @return true iff the device is dozing
          */

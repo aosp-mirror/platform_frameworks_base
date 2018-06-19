@@ -1426,6 +1426,7 @@ public abstract class NotificationListenerService extends Service {
         private boolean mShowBadge;
         private @UserSentiment int mUserSentiment = USER_SENTIMENT_NEUTRAL;
         private boolean mHidden;
+        private ArrayList<Notification.Action> mSmartActions;
 
         public Ranking() {}
 
@@ -1556,6 +1557,13 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
+         * @hide
+         */
+        public List<Notification.Action> getSmartActions() {
+            return mSmartActions;
+        }
+
+        /**
          * Returns whether this notification can be displayed as a badge.
          *
          * @return true if the notification can be displayed as a badge, false otherwise.
@@ -1583,7 +1591,7 @@ public abstract class NotificationListenerService extends Service {
                 CharSequence explanation, String overrideGroupKey,
                 NotificationChannel channel, ArrayList<String> overridePeople,
                 ArrayList<SnoozeCriterion> snoozeCriteria, boolean showBadge,
-                int userSentiment, boolean hidden) {
+                int userSentiment, boolean hidden, ArrayList<Notification.Action> smartActions) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -1599,6 +1607,7 @@ public abstract class NotificationListenerService extends Service {
             mShowBadge = showBadge;
             mUserSentiment = userSentiment;
             mHidden = hidden;
+            mSmartActions = smartActions;
         }
 
         /**
@@ -1648,6 +1657,7 @@ public abstract class NotificationListenerService extends Service {
         private ArrayMap<String, Boolean> mShowBadge;
         private ArrayMap<String, Integer> mUserSentiment;
         private ArrayMap<String, Boolean> mHidden;
+        private ArrayMap<String, ArrayList<Notification.Action>> mSmartActions;
 
         private RankingMap(NotificationRankingUpdate rankingUpdate) {
             mRankingUpdate = rankingUpdate;
@@ -1676,7 +1686,7 @@ public abstract class NotificationListenerService extends Service {
                     getVisibilityOverride(key), getSuppressedVisualEffects(key),
                     getImportance(key), getImportanceExplanation(key), getOverrideGroupKey(key),
                     getChannel(key), getOverridePeople(key), getSnoozeCriteria(key),
-                    getShowBadge(key), getUserSentiment(key), getHidden(key));
+                    getShowBadge(key), getUserSentiment(key), getHidden(key), getSmartActions(key));
             return rank >= 0;
         }
 
@@ -1814,6 +1824,15 @@ public abstract class NotificationListenerService extends Service {
             return hidden == null ? false : hidden.booleanValue();
         }
 
+        private ArrayList<Notification.Action> getSmartActions(String key) {
+            synchronized (this) {
+                if (mSmartActions == null) {
+                    buildSmartActions();
+                }
+            }
+            return mSmartActions.get(key);
+        }
+
         // Locked by 'this'
         private void buildRanksLocked() {
             String[] orderedKeys = mRankingUpdate.getOrderedKeys();
@@ -1928,6 +1947,15 @@ public abstract class NotificationListenerService extends Service {
             mHidden = new ArrayMap<>(hidden.size());
             for (String key : hidden.keySet()) {
                 mHidden.put(key, hidden.getBoolean(key));
+            }
+        }
+
+        // Locked by 'this'
+        private void buildSmartActions() {
+            Bundle smartActions = mRankingUpdate.getSmartActions();
+            mSmartActions = new ArrayMap<>(smartActions.size());
+            for (String key : smartActions.keySet()) {
+                mSmartActions.put(key, smartActions.getParcelableArrayList(key));
             }
         }
 

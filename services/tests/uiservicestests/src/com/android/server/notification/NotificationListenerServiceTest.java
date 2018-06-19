@@ -31,11 +31,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.INotificationManager;
+import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationRankingUpdate;
@@ -91,6 +94,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             assertEquals(getShowBadge(i), ranking.canShowBadge());
             assertEquals(getUserSentiment(i), ranking.getUserSentiment());
             assertEquals(getHidden(i), ranking.isSuspended());
+            assertActionsEqual(getSmartActions(key, i), ranking.getSmartActions());
         }
     }
 
@@ -107,6 +111,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         int[] importance = new int[mKeys.length];
         Bundle userSentiment = new Bundle();
         Bundle mHidden = new Bundle();
+        Bundle smartActions = new Bundle();
 
         for (int i = 0; i < mKeys.length; i++) {
             String key = mKeys[i];
@@ -124,11 +129,13 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             showBadge.putBoolean(key, getShowBadge(i));
             userSentiment.putInt(key, getUserSentiment(i));
             mHidden.putBoolean(key, getHidden(i));
+            smartActions.putParcelableArrayList(key, getSmartActions(key, i));
         }
         NotificationRankingUpdate update = new NotificationRankingUpdate(mKeys,
                 interceptedKeys.toArray(new String[0]), visibilityOverrides,
                 suppressedVisualEffects, importance, explanation, overrideGroupKeys,
-                channels, overridePeople, snoozeCriteria, showBadge, userSentiment, mHidden);
+                channels, overridePeople, snoozeCriteria, showBadge, userSentiment, mHidden,
+                smartActions);
         return update;
     }
 
@@ -194,6 +201,29 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             snooze.add(new SnoozeCriterion(key + i, getExplanation(key), key));
         }
         return snooze;
+    }
+
+    private ArrayList<Notification.Action> getSmartActions(String key, int index) {
+        ArrayList<Notification.Action> actions = new ArrayList<>();
+        for (int i = 0; i < index; i++) {
+            PendingIntent intent = PendingIntent.getBroadcast(
+                    getContext(),
+                    index /*requestCode*/,
+                    new Intent("ACTION_" + key),
+                    0 /*flags*/);
+            actions.add(new Notification.Action.Builder(null /*icon*/, key, intent).build());
+        }
+        return actions;
+    }
+
+    private void assertActionsEqual(
+            List<Notification.Action> expecteds, List<Notification.Action> actuals) {
+        assertEquals(expecteds.size(), actuals.size());
+        for (int i = 0; i < expecteds.size(); i++) {
+            Notification.Action expected = expecteds.get(i);
+            Notification.Action actual = actuals.get(i);
+            assertEquals(expected.title, actual.title);
+        }
     }
 
     public static class TestListenerService extends NotificationListenerService {

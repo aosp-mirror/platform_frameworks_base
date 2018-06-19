@@ -65,6 +65,12 @@ public final class Adjustment implements Parcelable {
     public static final String KEY_USER_SENTIMENT = "key_user_sentiment";
 
     /**
+     * Data type: ArrayList of {@link android.app.Notification.Action}.
+     * Used to suggest extra actions for a notification.
+     */
+    public static final String KEY_SMART_ACTIONS = "key_smart_actions";
+
+    /**
      * Create a notification adjustment.
      *
      * @param pkg The package of the notification.
