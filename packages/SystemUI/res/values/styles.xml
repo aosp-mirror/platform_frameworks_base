@@ -403,6 +403,9 @@
         <item name="fillColor">?android:attr/textColorPrimary</item>
         <item name="singleToneColor">?android:attr/textColorPrimary</item>
     </style>
+    <style name="ScreenPinningRequestTheme" parent="@*android:style/ThemeOverlay.DeviceDefault.Accent">
+        <item name="singleToneColor">@color/light_mode_icon_color_single_tone</item>
+    </style>
 
     <style name="TextAppearance.Volume">
         <item name="android:textStyle">normal</item>
