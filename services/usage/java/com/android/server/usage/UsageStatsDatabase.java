@@ -42,7 +42,7 @@ import java.util.List;
 /**
  * Provides an interface to query for UsageStat data from an XML database.
  */
-class UsageStatsDatabase {
+public class UsageStatsDatabase {
     private static final int CURRENT_VERSION = 3;
 
     // Current version of the backup schema
@@ -369,7 +369,7 @@ class UsageStatsDatabase {
     /**
      * Figures out what to extract from the given IntervalStats object.
      */
-    interface StatCombiner<T> {
+    public interface StatCombiner<T> {
 
         /**
          * Implementations should extract interesting from <code>stats</code> and add it

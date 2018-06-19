@@ -27,7 +27,9 @@ import android.util.ArraySet;
 
 import java.util.List;
 
-class IntervalStats {
+import com.android.internal.annotations.VisibleForTesting;
+
+public class IntervalStats {
     public long beginTime;
     public long endTime;
     public long lastTimeSaved;
@@ -149,7 +151,11 @@ class IntervalStats {
                 && eventType != UsageEvents.Event.STANDBY_BUCKET_CHANGED;
     }
 
-    void update(String packageName, long timeStamp, int eventType) {
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public void update(String packageName, long timeStamp, int eventType) {
         UsageStats usageStats = getOrCreateUsageStats(packageName);
 
         // TODO(adamlesinski): Ensure that we recover from incorrect event sequences
