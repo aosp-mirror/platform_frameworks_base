@@ -385,9 +385,12 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testAlwaysOnTopStackLocation() {
         final TaskStack alwaysOnTopStack = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(alwaysOnTopStack, 0 /* userId */);
         alwaysOnTopStack.setAlwaysOnTop(true);
         mDisplayContent.positionStackAt(POSITION_TOP, alwaysOnTopStack);
         assertTrue(alwaysOnTopStack.isAlwaysOnTop());
+        // Ensure always on top state is synced to the children of the stack.
+        assertTrue(alwaysOnTopStack.getTopChild().isAlwaysOnTop());
         assertEquals(alwaysOnTopStack, mDisplayContent.getTopStack());
 
         final TaskStack pinnedStack = createStackControllerOnStackOnDisplay(
