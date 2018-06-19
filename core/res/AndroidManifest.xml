@@ -556,7 +556,6 @@
     <protected-broadcast android:name="android.intent.action.TWILIGHT_CHANGED" />
 
     <protected-broadcast android:name="com.android.server.fingerprint.ACTION_LOCKOUT_RESET" />
-    <protected-broadcast android:name="com.android.server.face.ACTION_LOCKOUT_RESET" />
     <protected-broadcast android:name="android.net.wifi.PASSPOINT_ICON_RECEIVED" />
     <protected-broadcast android:name="com.android.server.notification.CountdownConditionProvider" />
 
@@ -600,6 +599,7 @@
     <protected-broadcast android:name="android.app.action.DATA_SHARING_RESTRICTION_CHANGED" />
     <protected-broadcast android:name="android.app.action.STATSD_STARTED" />
     <protected-broadcast android:name="com.android.server.biometrics.fingerprint.ACTION_LOCKOUT_RESET" />
+    <protected-broadcast android:name="com.android.server.biometrics.face.ACTION_LOCKOUT_RESET" />
 
     <!-- For IdleController -->
     <protected-broadcast android:name="android.intent.action.DOCK_IDLE" />

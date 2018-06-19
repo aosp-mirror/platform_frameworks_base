@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.face;
+package com.android.server.biometrics.face;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_FACE;
@@ -96,7 +96,7 @@ public class FaceService extends SystemService implements IHwBinder.DeathRecipie
     private static final String FACE_DATA_DIR = "facedata";
     private static final int MSG_USER_SWITCHING = 10;
     private static final String ACTION_LOCKOUT_RESET =
-            "com.android.server.face.ACTION_LOCKOUT_RESET";
+            "com.android.server.biometrics.face.ACTION_LOCKOUT_RESET";
 
     private class PerformanceStats {
         int accept; // number of accepted faces

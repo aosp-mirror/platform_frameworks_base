@@ -14,12 +14,12 @@
  * limitations under the License
  */
 
-package com.android.server.face;
+package com.android.server.biometrics.face;
 
 import android.content.Context;
 import android.os.IBinder;
 import android.hardware.face.IFaceServiceReceiver;
-import com.android.server.face.RemovalClient;
+import com.android.server.biometrics.face.RemovalClient;
 
 public abstract class InternalRemovalClient extends RemovalClient {
 
