@@ -155,7 +155,8 @@ public class TaskRecordTests extends ActivityTestsBase {
     }
 
     private TaskRecord createTaskRecord(int taskId) {
-        return new TaskRecord(mService, taskId, new Intent(), null, null, null, null, null, false,
+        return new TaskRecord(mService.mActivityTaskManager, taskId, new Intent(), null, null, null,
+                null, null, false,
                 false, false, 0, 10050, null, new ArrayList<>(), 0, false, null, 0, 0, 0, 0, 0,
                 null, 0, false, false, false, 0, 0);
     }
@@ -164,7 +165,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         private boolean mCreated = false;
 
         @Override
-        TaskRecord create(ActivityManagerService service, int taskId, ActivityInfo info,
+        TaskRecord create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
                 Intent intent,
                 IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor) {
             mCreated = true;
@@ -172,7 +173,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         }
 
         @Override
-        TaskRecord create(ActivityManagerService service, int taskId, ActivityInfo info,
+        TaskRecord create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
                 Intent intent,
                 ActivityManager.TaskDescription taskDescription) {
             mCreated = true;
@@ -180,7 +181,7 @@ public class TaskRecordTests extends ActivityTestsBase {
         }
 
         @Override
-        TaskRecord create(ActivityManagerService service, int taskId, Intent intent,
+        TaskRecord create(ActivityTaskManagerService service, int taskId, Intent intent,
                 Intent affinityIntent, String affinity, String rootAffinity,
                 ComponentName realActivity,
                 ComponentName origActivity, boolean rootWasReset, boolean autoRemoveRecents,

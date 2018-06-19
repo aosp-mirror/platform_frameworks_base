@@ -404,7 +404,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final AppWindowToken atoken = w.mAppToken;
         if (winAnimator.mDrawState == READY_TO_SHOW) {
-            if (atoken == null || atoken.allDrawn) {
+            if (atoken == null || atoken.canShowWindows()) {
                 if (w.performShowLocked()) {
                     pendingLayoutChanges |= FINISH_LAYOUT_REDO_ANIM;
                     if (DEBUG_LAYOUT_REPEATS) {
@@ -1563,6 +1563,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     TaskStack getStack(int windowingMode, int activityType) {
         return mTaskStackContainers.getStack(windowingMode, activityType);
+    }
+
+    @VisibleForTesting
+    WindowList<TaskStack> getStacks() {
+        return mTaskStackContainers.mChildren;
     }
 
     @VisibleForTesting
@@ -3426,21 +3431,44 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             boolean toTop = requestedPosition == POSITION_TOP;
             toTop |= adding ? requestedPosition >= topChildPosition + 1
                     : requestedPosition >= topChildPosition;
-            int targetPosition = requestedPosition;
 
-            if (toTop && stack.getWindowingMode() != WINDOWING_MODE_PINNED && hasPinnedStack()) {
-                // The pinned stack is always the top most stack (always-on-top) when it is present.
-                TaskStack topStack = mChildren.get(topChildPosition);
-                if (topStack.getWindowingMode() != WINDOWING_MODE_PINNED) {
-                    throw new IllegalStateException("Pinned stack isn't top stack??? " + mChildren);
+            if (stack.inPinnedWindowingMode()) {
+                // Stack in pinned windowing mode is z-ordered on-top of all other stacks so okay to
+                // just return the candidate position.
+                return requestedPosition;
+            }
+
+            // We might call mChildren.get() with targetPosition below, but targetPosition might be
+            // POSITION_TOP (INTEGER_MAX). We need to adjust the value to the actual index in the
+            // array.
+            int targetPosition = toTop ? topChildPosition : requestedPosition;
+            // Note that the index we should return varies depending on the value of adding.
+            // When we're adding a new stack the index is the current target position.
+            // When we're positioning an existing stack the index is the position below the target
+            // stack, because WindowContainer#positionAt() first removes element and then adds
+            // it to specified place.
+            if (toTop && adding) {
+                targetPosition++;
+            }
+
+            // Note we might have multiple always on top windows.
+            while (targetPosition >= 0) {
+                int adjustedTargetStackId = adding ? targetPosition - 1 : targetPosition;
+                if (adjustedTargetStackId < 0 || adjustedTargetStackId > topChildPosition) {
+                    break;
                 }
-
-                // So, stack is moved just below the pinned stack.
-                // When we're adding a new stack the target is the current pinned stack position.
-                // When we're positioning an existing stack the target is the position below pinned
-                // stack, because WindowContainer#positionAt() first removes element and then adds
-                // it to specified place.
-                targetPosition = adding ? topChildPosition : topChildPosition - 1;
+                TaskStack targetStack = mChildren.get(adjustedTargetStackId);
+                if (!targetStack.isAlwaysOnTop()) {
+                    // We reached a stack that isn't always-on-top.
+                    break;
+                }
+                if (stack.isAlwaysOnTop() && !targetStack.inPinnedWindowingMode()) {
+                    // Always on-top non-pinned windowing mode stacks can go anywhere below pinned
+                    // stack.
+                    break;
+                }
+                // We go one level down, looking for the place on which the new stack can be put.
+                targetPosition--;
             }
 
             return targetPosition;

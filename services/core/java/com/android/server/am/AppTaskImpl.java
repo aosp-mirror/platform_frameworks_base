@@ -127,7 +127,7 @@ class AppTaskImpl extends IAppTask.Stub {
             }
         }
 
-        return mService.mAm.getActivityStartController().obtainStarter(intent, "AppTaskImpl")
+        return mService.getActivityStartController().obtainStarter(intent, "AppTaskImpl")
                 .setCaller(appThread)
                 .setCallingPackage(callingPackage)
                 .setResolvedType(resolvedType)

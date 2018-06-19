@@ -128,6 +128,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.LocaleList;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
@@ -222,6 +223,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     KeyguardController mKeyguardController;
     private final ClientLifecycleManager mLifecycleManager;
     private TaskChangeNotificationController mTaskChangeNotificationController;
+    /** The controller for all operations related to locktask. */
+    private LockTaskController mLockTaskController;
+    private ActivityStartController mActivityStartController;
 
     boolean mSuppressResizeConfigChanges;
 
@@ -240,6 +244,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    /** Current sequencing integer of the configuration, for skipping old configurations. */
+    int mConfigurationSeq;
+
+    /**
+     * Temp object used when global and/or display override configuration is updated. It is also
+     * sent to outer world instead of {@link #getGlobalConfiguration} because we don't trust
+     * anyone...
+     */
+    Configuration mTempConfig = new Configuration();
+
     ActivityTaskManagerService(Context context) {
         mContext = context;
         mLifecycleManager = new ClientLifecycleManager();
@@ -256,17 +270,32 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mAm = am;
         mGlobalLock = mAm;
         mH = new H(mAm.mHandlerThread.getLooper());
-        mStackSupervisor = mAm.mStackSupervisor;
+
+        mTempConfig.setToDefaults();
+        mTempConfig.setLocales(LocaleList.getDefault());
+        mConfigurationSeq = mTempConfig.seq = 1;
+        mStackSupervisor = createStackSupervisor();
+        mStackSupervisor.onConfigurationChanged(mTempConfig);
+
         mTaskChangeNotificationController =
                 new TaskChangeNotificationController(mAm, mStackSupervisor, mH);
+        mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mH);
+        mActivityStartController = new ActivityStartController(this);
         mRecentTasks = createRecentTasks();
         mStackSupervisor.setRecentTasks(mRecentTasks);
         mVrController = new VrController(mAm);
         mKeyguardController = mStackSupervisor.getKeyguardController();
     }
 
+    protected ActivityStackSupervisor createStackSupervisor() {
+        final ActivityStackSupervisor supervisor = new ActivityStackSupervisor(this, mH.getLooper());
+        supervisor.initialize();
+        return supervisor;
+    }
+
     void setWindowManager(WindowManagerService wm) {
         mWindowManager = wm;
+        mLockTaskController.setWindowManager(wm);
     }
 
     protected RecentTasks createRecentTasks() {
@@ -281,8 +310,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mLifecycleManager;
     }
 
+    ActivityStartController getActivityStartController() {
+        return mActivityStartController;
+    }
+
     TaskChangeNotificationController getTaskChangeNotificationController() {
         return mTaskChangeNotificationController;
+    }
+
+    LockTaskController getLockTaskController() {
+        return mLockTaskController;
     }
 
     private void start() {
@@ -326,7 +363,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         userId = mAm.mUserController.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), userId, false, ALLOW_FULL_ONLY, reason, null);
         // TODO: Switch to user app stacks here.
-        return mAm.getActivityStartController().startActivities(caller, -1, callingPackage, intents,
+        return getActivityStartController().startActivities(caller, -1, callingPackage, intents,
                 resolvedTypes, resultTo, SafeActivityOptions.fromBundle(bOptions), userId, reason);
     }
 
@@ -345,11 +382,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             boolean validateIncomingUser) {
         mAm.enforceNotIsolatedCaller("startActivityAsUser");
 
-        userId = mAm.getActivityStartController().checkTargetUser(userId, validateIncomingUser,
+        userId = getActivityStartController().checkTargetUser(userId, validateIncomingUser,
                 Binder.getCallingPid(), Binder.getCallingUid(), "startActivityAsUser");
 
         // TODO: Switch to user app stacks here.
-        return mAm.getActivityStartController().obtainStarter(intent, "startActivityAsUser")
+        return getActivityStartController().obtainStarter(intent, "startActivityAsUser")
                 .setCaller(caller)
                 .setCallingPackage(callingPackage)
                 .setResolvedType(resolvedType)
@@ -488,7 +525,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             final long origId = Binder.clearCallingIdentity();
             // TODO(b/64750076): Check if calling pid should really be -1.
-            final int res = mAm.getActivityStartController()
+            final int res = getActivityStartController()
                     .obtainStarter(intent, "startNextMatchingActivity")
                     .setCaller(r.app.thread)
                     .setResolvedType(r.resolvedType)
@@ -524,7 +561,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Binder.getCallingUid(), userId, false, ALLOW_FULL_ONLY,
                     "startActivityAndWait", null);
             // TODO: Switch to user app stacks here.
-            mAm.getActivityStartController().obtainStarter(intent, "startActivityAndWait")
+            getActivityStartController().obtainStarter(intent, "startActivityAndWait")
                     .setCaller(caller)
                     .setCallingPackage(callingPackage)
                     .setResolvedType(resolvedType)
@@ -551,7 +588,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Binder.getCallingUid(), userId, false, ALLOW_FULL_ONLY,
                     "startActivityWithConfig", null);
             // TODO: Switch to user app stacks here.
-            return mAm.getActivityStartController().obtainStarter(intent, "startActivityWithConfig")
+            return getActivityStartController().obtainStarter(intent, "startActivityWithConfig")
                     .setCaller(caller)
                     .setCallingPackage(callingPackage)
                     .setResolvedType(resolvedType)
@@ -626,7 +663,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         // TODO: Switch to user app stacks here.
         try {
-            return mAm.getActivityStartController().obtainStarter(intent, "startActivityAsCaller")
+            return getActivityStartController().obtainStarter(intent, "startActivityAsCaller")
                     .setCallingUid(targetUid)
                     .setCallingPackage(targetPackage)
                     .setResolvedType(resolvedType)
@@ -667,7 +704,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         userId = mAm.mUserController.handleIncomingUser(callingPid, callingUid, userId, false,
                 ALLOW_FULL_ONLY, "startVoiceActivity", null);
         // TODO: Switch to user app stacks here.
-        return mAm.getActivityStartController().obtainStarter(intent, "startVoiceActivity")
+        return getActivityStartController().obtainStarter(intent, "startVoiceActivity")
                 .setCallingUid(callingUid)
                 .setCallingPackage(callingPackage)
                 .setResolvedType(resolvedType)
@@ -687,7 +724,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         userId = mAm.mUserController.handleIncomingUser(callingPid, callingUid, userId, false,
                 ALLOW_FULL_ONLY, "startAssistantActivity", null);
 
-        return mAm.getActivityStartController().obtainStarter(intent, "startAssistantActivity")
+        return getActivityStartController().obtainStarter(intent, "startAssistantActivity")
                 .setCallingUid(callingUid)
                 .setCallingPackage(callingPackage)
                 .setResolvedType(resolvedType)
@@ -709,7 +746,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 // Start a new recents animation
                 final RecentsAnimation anim = new RecentsAnimation(mAm, mStackSupervisor,
-                        mAm.getActivityStartController(), mAm.mWindowManager, mAm.mUserController,
+                        getActivityStartController(), mAm.mWindowManager, mAm.mUserController,
                         callingPid);
                 anim.startRecentsActivity(intent, recentsAnimationRunner, recentsComponent,
                         recentsUid, assistDataReceiver);
@@ -769,7 +806,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             // Do not allow task to finish if last task in lockTask mode. Launchable priv-apps can
             // finish.
-            if (mAm.getLockTaskController().activityBlockedFromFinish(r)) {
+            if (getLockTaskController().activityBlockedFromFinish(r)) {
                 return false;
             }
 
@@ -836,7 +873,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // Do not allow task to finish if last task in lockTask mode. Launchable priv-apps
                 // can finish.
                 final TaskRecord task = r.getTask();
-                if (mAm.getLockTaskController().activityBlockedFromFinish(r)) {
+                if (getLockTaskController().activityBlockedFromFinish(r)) {
                     return false;
                 }
                 return task.getStack().finishActivityAffinityLocked(r);
@@ -1442,7 +1479,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 Slog.d(TAG, "Could not find task for id: "+ taskId);
                 return;
             }
-            if (mAm.getLockTaskController().isLockTaskModeViolation(task)) {
+            if (getLockTaskController().isLockTaskModeViolation(task)) {
                 Slog.e(TAG, "moveTaskToFront: Attempt to violate Lock Task Mode");
                 return;
             }
@@ -1812,7 +1849,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // When a task is locked, dismiss the pinned stack if it exists
             mStackSupervisor.removeStacksInWindowingModes(WINDOWING_MODE_PINNED);
 
-            mAm.getLockTaskController().startLockTaskMode(task, isSystemCaller, callingUid);
+            getLockTaskController().startLockTaskMode(task, isSystemCaller, callingUid);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1823,7 +1860,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                mAm.getLockTaskController().stopLockTaskMode(task, isSystemCaller, callingUid);
+                getLockTaskController().stopLockTaskMode(task, isSystemCaller, callingUid);
             }
             // Launch in-call UI if a call is ongoing. This is necessary to allow stopping the lock
             // task and jumping straight into a call in the case of emergency call back.
@@ -1844,7 +1881,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public int getLockTaskModeState() {
         synchronized (mGlobalLock) {
-            return mAm.getLockTaskController().getLockTaskModeState();
+            return getLockTaskController().getLockTaskModeState();
         }
     }
 
@@ -2601,7 +2638,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (r == null) {
                 return;
             }
-            mAm.getLockTaskController().showLockTaskToast();
+            getLockTaskController().showLockTaskToast();
         }
     }
 
@@ -3319,7 +3356,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Allowing features " + userId + ":0x" +
                     Integer.toHexString(flags));
-            mAm.getLockTaskController().updateLockTaskFeatures(userId, flags);
+            getLockTaskController().updateLockTaskFeatures(userId, flags);
         }
     }
 
@@ -3383,7 +3420,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long origId = Binder.clearCallingIdentity();
             try {
-                mAm.getActivityStartController().registerRemoteAnimationForNextActivityStart(
+                getActivityStartController().registerRemoteAnimationForNextActivityStart(
                         packageName, adapter);
             } finally {
                 Binder.restoreCallingIdentity(origId);
@@ -3595,7 +3632,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
 
             synchronized (mGlobalLock) {
-                return mAm.getActivityStartController().startActivitiesInPackage(
+                return getActivityStartController().startActivitiesInPackage(
                         packageUid, packageName,
                         intents, resolvedTypes, null /* resultTo */,
                         SafeActivityOptions.fromBundle(bOptions), userId,

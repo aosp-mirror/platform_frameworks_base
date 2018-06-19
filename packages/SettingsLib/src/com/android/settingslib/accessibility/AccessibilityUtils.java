@@ -40,9 +40,6 @@ import java.util.Set;
 public class AccessibilityUtils {
     public static final char ENABLED_ACCESSIBILITY_SERVICES_SEPARATOR = ':';
 
-    final static TextUtils.SimpleStringSplitter sStringColonSplitter =
-            new TextUtils.SimpleStringSplitter(ENABLED_ACCESSIBILITY_SERVICES_SEPARATOR);
-
     /**
      * @return the set of enabled accessibility services. If there are no services,
      * it returns the unmodifiable {@link Collections#emptySet()}.
@@ -72,16 +69,16 @@ public class AccessibilityUtils {
         final String enabledServicesSetting = Settings.Secure.getStringForUser(
                 context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
                 userId);
-        if (enabledServicesSetting == null) {
+        if (TextUtils.isEmpty(enabledServicesSetting)) {
             return Collections.emptySet();
         }
 
         final Set<ComponentName> enabledServices = new HashSet<>();
-        final TextUtils.SimpleStringSplitter colonSplitter = sStringColonSplitter;
+        final TextUtils.StringSplitter colonSplitter =
+                new TextUtils.SimpleStringSplitter(ENABLED_ACCESSIBILITY_SERVICES_SEPARATOR);
         colonSplitter.setString(enabledServicesSetting);
 
-        while (colonSplitter.hasNext()) {
-            final String componentNameString = colonSplitter.next();
+        for (String componentNameString : colonSplitter) {
             final ComponentName enabledService = ComponentName.unflattenFromString(
                     componentNameString);
             if (enabledService != null) {
@@ -168,8 +165,7 @@ public class AccessibilityUtils {
      * an OEM-configurable default if the setting has never been set.
      *
      * @param context A valid context
-     * @param userId The user whose settings should be checked
-     *
+     * @param userId  The user whose settings should be checked
      * @return The component name, flattened to a string, of the target service.
      */
     public static String getShortcutTargetServiceComponentNameString(
@@ -187,9 +183,9 @@ public class AccessibilityUtils {
      * Check if the accessibility shortcut is enabled for a user
      *
      * @param context A valid context
-     * @param userId The user of interest
+     * @param userId  The user of interest
      * @return {@code true} if the shortcut is enabled for the user. {@code false} otherwise.
-     *         Note that the shortcut may be enabled, but no action associated with it.
+     * Note that the shortcut may be enabled, but no action associated with it.
      */
     public static boolean isShortcutEnabled(Context context, int userId) {
         return Settings.Secure.getIntForUser(context.getContentResolver(),

@@ -185,6 +185,10 @@ class ActivityMetricsLogger {
 
         mWindowState = WINDOW_STATE_INVALID;
         ActivityStack stack = mSupervisor.getFocusedStack();
+        if (stack == null) {
+            return;
+        }
+
         if (stack.isActivityTypeAssistant()) {
             mWindowState = WINDOW_STATE_ASSISTANT;
             return;
@@ -407,7 +411,7 @@ class ActivityMetricsLogger {
     }
 
     private void checkVisibility(TaskRecord t, ActivityRecord r) {
-        synchronized (mSupervisor.mService) {
+        synchronized (mSupervisor.mService.mGlobalLock) {
 
             final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.get(
                     r.getWindowingMode());
@@ -663,8 +667,8 @@ class ActivityMetricsLogger {
 
     private ProcessRecord findProcessForActivity(ActivityRecord launchedActivity) {
         return launchedActivity != null
-                ? mSupervisor.mService.mProcessNames.get(launchedActivity.processName,
-                        launchedActivity.appInfo.uid)
+                ? mSupervisor.mService.mAm.mProcessNames.get(
+                        launchedActivity.processName, launchedActivity.appInfo.uid)
                 : null;
     }
 

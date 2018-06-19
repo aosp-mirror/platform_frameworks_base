@@ -111,10 +111,11 @@ public class ActivityTestsBase {
     protected ActivityManagerService setupActivityManagerService(
             ActivityManagerService service, ActivityTaskManagerService atm) {
         service = spy(service);
+        // Makes sure activity task is created with the spy object.
         atm = spy(atm);
-        // Makes sure the supervisor is using with the spy object.
-        service.mStackSupervisor.setService(service);
         service.setActivityTaskManager(atm);
+        // Makes sure the supervisor is using with the spy object.
+        atm.mStackSupervisor.setService(atm);
         doReturn(mock(IPackageManager.class)).when(service).getPackageManager();
         doNothing().when(service).grantEphemeralAccessLocked(anyInt(), any(), anyInt(), anyInt());
         service.mWindowManager = prepareMockWindowManager();
@@ -328,7 +329,7 @@ public class ActivityTestsBase {
         }
 
         private static class TestTaskRecord extends TaskRecord {
-            TestTaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info,
+            TestTaskRecord(ActivityTaskManagerService service, int _taskId, ActivityInfo info,
                        Intent _intent, IVoiceInteractionSession _voiceSession,
                        IVoiceInteractor _voiceInteractor) {
                 super(service, _taskId, info, _intent, _voiceSession, _voiceInteractor);
@@ -346,37 +347,13 @@ public class ActivityTestsBase {
     }
 
     protected static class TestActivityTaskManagerService extends ActivityTaskManagerService {
+        private LockTaskController mLockTaskController;
+
         TestActivityTaskManagerService(Context context) {
             super(context);
         }
-    }
-
-    /**
-     * An {@link ActivityManagerService} subclass which provides a test
-     * {@link ActivityStackSupervisor}.
-     */
-    protected static class TestActivityManagerService extends ActivityManagerService {
-        private ClientLifecycleManager mLifecycleManager;
-        private LockTaskController mLockTaskController;
-
-        TestActivityManagerService(Context context) {
-            super(context);
-            mSupportsMultiWindow = true;
-            mSupportsMultiDisplay = true;
-            mSupportsSplitScreenMultiWindow = true;
-            mSupportsFreeformWindowManagement = true;
-            mSupportsPictureInPicture = true;
-            mWindowManager = WindowTestUtils.getMockWindowManagerService();
-        }
 
         @Override
-        public ClientLifecycleManager getLifecycleManager() {
-            if (mLifecycleManager == null) {
-                return super.getLifecycleManager();
-            }
-            return mLifecycleManager;
-        }
-
         public LockTaskController getLockTaskController() {
             if (mLockTaskController == null) {
                 mLockTaskController = spy(super.getLockTaskController());
@@ -411,11 +388,32 @@ public class ActivityTestsBase {
         }
 
         protected ActivityStackSupervisor createTestSupervisor() {
-            return new TestActivityStackSupervisor(this, mHandlerThread.getLooper());
+            return new TestActivityStackSupervisor(this, mH.getLooper());
+        }
+    }
+
+    /**
+     * An {@link ActivityManagerService} subclass which provides a test
+     * {@link ActivityStackSupervisor}.
+     */
+    protected static class TestActivityManagerService extends ActivityManagerService {
+
+        TestActivityManagerService(Context context) {
+            super(context);
+            mSupportsMultiWindow = true;
+            mSupportsMultiDisplay = true;
+            mSupportsSplitScreenMultiWindow = true;
+            mSupportsFreeformWindowManagement = true;
+            mSupportsPictureInPicture = true;
         }
 
         @Override
         void updateUsageStats(ActivityRecord component, boolean resumed) {
+        }
+
+        @Override
+        Configuration getGlobalConfiguration() {
+            return mContext.getResources().getConfiguration();
         }
     }
 
@@ -427,7 +425,7 @@ public class ActivityTestsBase {
         private ActivityDisplay mDisplay;
         private KeyguardController mKeyguardController;
 
-        public TestActivityStackSupervisor(ActivityManagerService service, Looper looper) {
+        public TestActivityStackSupervisor(ActivityTaskManagerService service, Looper looper) {
             super(service, looper);
             mDisplayManager =
                     (DisplayManager) mService.mContext.getSystemService(Context.DISPLAY_SERVICE);

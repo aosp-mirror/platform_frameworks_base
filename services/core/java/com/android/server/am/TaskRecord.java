@@ -295,7 +295,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     int mCallingUid;
     String mCallingPackage;
 
-    final ActivityManagerService mService;
+    final ActivityTaskManagerService mService;
 
     private final Rect mTmpStableBounds = new Rect();
     private final Rect mTmpNonDecorBounds = new Rect();
@@ -320,10 +320,10 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     private TaskWindowContainerController mWindowContainerController;
 
     /**
-     * Don't use constructor directly. Use {@link #create(ActivityManagerService, int, ActivityInfo,
-     * Intent, TaskDescription)} instead.
+     * Don't use constructor directly. Use {@link #create(ActivityTaskManagerService, int,
+     * ActivityInfo, Intent, TaskDescription)} instead.
      */
-    TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
+    TaskRecord(ActivityTaskManagerService service, int _taskId, ActivityInfo info, Intent _intent,
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
         mService = service;
         userId = UserHandle.getUserId(info.applicationInfo.uid);
@@ -339,14 +339,15 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         setIntent(_intent, info);
         setMinDimensions(info);
         touchActiveTime();
-        mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
+        mService.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
     }
 
     /**
-     * Don't use constructor directly. Use {@link #create(ActivityManagerService, int, ActivityInfo,
+     * Don't use constructor directly.
+     * Use {@link #create(ActivityTaskManagerService, int, ActivityInfo,
      * Intent, IVoiceInteractionSession, IVoiceInteractor)} instead.
      */
-    TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
+    TaskRecord(ActivityTaskManagerService service, int _taskId, ActivityInfo info, Intent _intent,
             TaskDescription _taskDescription) {
         mService = service;
         userId = UserHandle.getUserId(info.applicationInfo.uid);
@@ -369,13 +370,13 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
 
         lastTaskDescription = _taskDescription;
         touchActiveTime();
-        mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
+        mService.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
     }
 
     /**
      * Don't use constructor directly. This is only used by XML parser.
      */
-    TaskRecord(ActivityManagerService service, int _taskId, Intent _intent,
+    TaskRecord(ActivityTaskManagerService service, int _taskId, Intent _intent,
             Intent _affinityIntent, String _affinity, String _rootAffinity,
             ComponentName _realActivity, ComponentName _origActivity, boolean _rootWasReset,
             boolean _autoRemoveRecents, boolean _askedCompatMode, int _userId,
@@ -419,7 +420,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         mSupportsPictureInPicture = supportsPictureInPicture;
         mMinWidth = minWidth;
         mMinHeight = minHeight;
-        mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
+        mService.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
     }
 
     TaskWindowContainerController getWindowContainerController() {
@@ -460,13 +461,13 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             // default configuration the next time it launches.
             updateOverrideConfiguration(null);
         }
-        mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskRemoved(taskId);
+        mService.getTaskChangeNotificationController().notifyTaskRemoved(taskId);
         mWindowContainerController = null;
     }
 
     @Override
     public void onSnapshotChanged(TaskSnapshot snapshot) {
-        mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskSnapshotChanged(taskId, snapshot);
+        mService.getTaskChangeNotificationController().notifyTaskSnapshotChanged(taskId, snapshot);
     }
 
     void setResizeMode(int resizeMode) {
@@ -486,7 +487,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     // TODO: Consolidate this with the resize() method below.
     @Override
     public void requestResize(Rect bounds, int resizeMode) {
-        mService.mActivityTaskManager.resizeTask(taskId, bounds, resizeMode);
+        mService.resizeTask(taskId, bounds, resizeMode);
     }
 
     boolean resize(Rect bounds, int resizeMode, boolean preserveWindow, boolean deferResume) {
@@ -1302,7 +1303,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             // We normally notify listeners of task stack changes on pause, however pinned stack
             // activities are normally in the paused state so no notification will be sent there
             // before the activity is removed. We send it here so instead.
-            mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskStackChanged();
+            mService.getTaskChangeNotificationController().notifyTaskStackChanged();
         }
 
         if (mActivities.isEmpty()) {
@@ -1493,7 +1494,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     private boolean isResizeable(boolean checkSupportsPip) {
-        return (mService.mForceResizableActivities || ActivityInfo.isResizeableMode(mResizeMode)
+        return (mService.mAm.mForceResizableActivities || ActivityInfo.isResizeableMode(mResizeMode)
                 || (checkSupportsPip && mSupportsPictureInPicture));
     }
 
@@ -1506,8 +1507,8 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         // A task can not be docked even if it is considered resizeable because it only supports
         // picture-in-picture mode but has a non-resizeable resizeMode
         return super.supportsSplitScreenWindowingMode()
-                && mService.mSupportsSplitScreenMultiWindow
-                && (mService.mForceResizableActivities
+                && mService.mAm.mSupportsSplitScreenMultiWindow
+                && (mService.mAm.mForceResizableActivities
                         || (isResizeable(false /* checkSupportsPip */)
                                 && !ActivityInfo.isPreserveOrientationMode(mResizeMode)));
     }
@@ -2205,14 +2206,14 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         sTaskRecordFactory = factory;
     }
 
-    static TaskRecord create(ActivityManagerService service, int taskId, ActivityInfo info,
+    static TaskRecord create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
             Intent intent, IVoiceInteractionSession voiceSession,
             IVoiceInteractor voiceInteractor) {
         return getTaskRecordFactory().create(
                 service, taskId, info, intent, voiceSession, voiceInteractor);
     }
 
-    static TaskRecord create(ActivityManagerService service, int taskId, ActivityInfo info,
+    static TaskRecord create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
             Intent intent, TaskDescription taskDescription) {
         return getTaskRecordFactory().create(service, taskId, info, intent, taskDescription);
     }
@@ -2229,14 +2230,14 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
      */
     static class TaskRecordFactory {
 
-        TaskRecord create(ActivityManagerService service, int taskId, ActivityInfo info,
+        TaskRecord create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
                 Intent intent, IVoiceInteractionSession voiceSession,
                 IVoiceInteractor voiceInteractor) {
             return new TaskRecord(
                     service, taskId, info, intent, voiceSession, voiceInteractor);
         }
 
-        TaskRecord create(ActivityManagerService service, int taskId, ActivityInfo info,
+        TaskRecord create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
                 Intent intent, TaskDescription taskDescription) {
             return new TaskRecord(service, taskId, info, intent, taskDescription);
         }
@@ -2244,7 +2245,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         /**
          * Should only be used when we're restoring {@link TaskRecord} from storage.
          */
-        TaskRecord create(ActivityManagerService service, int taskId, Intent intent,
+        TaskRecord create(ActivityTaskManagerService service, int taskId, Intent intent,
                 Intent affinityIntent, String affinity, String rootAffinity,
                 ComponentName realActivity, ComponentName origActivity, boolean rootWasReset,
                 boolean autoRemoveRecents, boolean askedCompatMode, int userId,
@@ -2468,7 +2469,8 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 }
             }
 
-            final TaskRecord task = create(stackSupervisor.mService, taskId, intent, affinityIntent,
+            final TaskRecord task = create(stackSupervisor.mService,
+                    taskId, intent, affinityIntent,
                     affinity, rootAffinity, realActivity, origActivity, rootHasReset,
                     autoRemoveRecents, askedCompatMode, userId, effectiveUid, lastDescription,
                     activities, lastTimeOnTop, neverRelinquishIdentity, taskDescription,

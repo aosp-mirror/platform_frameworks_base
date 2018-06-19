@@ -304,7 +304,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     /** The number of distinct task ids that can be assigned to the tasks of a single user */
     private static final int MAX_TASK_IDS_PER_USER = UserHandle.PER_USER_RANGE;
 
-    ActivityManagerService mService;
+    ActivityTaskManagerService mService;
 
     /** The historial list of recent tasks including inactive tasks */
     RecentTasks mRecentTasks;
@@ -318,7 +318,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     /** Short cut */
     WindowManagerService mWindowManager;
     DisplayManager mDisplayManager;
-    ActivityTaskManagerService mAtm;
 
     private LaunchParamsController mLaunchParamsController;
 
@@ -489,7 +488,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // No restrictions for the default display.
             return true;
         }
-        if (!mService.mSupportsMultiDisplay) {
+        if (!mService.mAm.mSupportsMultiDisplay) {
             // Can't launch on secondary displays if feature is not supported.
             return false;
         }
@@ -604,14 +603,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    public ActivityStackSupervisor(ActivityManagerService service, Looper looper) {
+    public ActivityStackSupervisor(ActivityTaskManagerService service, Looper looper) {
         mService = service;
         mLooper = looper;
         mHandler = new ActivityStackSupervisorHandler(looper);
     }
 
     @VisibleForTesting
-    void setService(ActivityManagerService service) {
+    void setService(ActivityTaskManagerService service) {
         mService = service;
     }
 
@@ -622,11 +621,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         mInitialized = true;
         mRunningTasks = createRunningTasks();
-        mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext,
-                mHandler.getLooper());
-        mKeyguardController = new KeyguardController(mService, this);
+        mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext, mHandler.getLooper());
+        mKeyguardController = new KeyguardController(mService.mAm, this);
 
-        mLaunchParamsController = new LaunchParamsController(mService);
+        mLaunchParamsController = new LaunchParamsController(mService.mAm);
         mLaunchParamsController.registerDefaultModifiers(this);
     }
 
@@ -663,10 +661,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 .newWakeLock(PARTIAL_WAKE_LOCK, "ActivityManager-Sleep");
         mLaunchingActivity = mPowerManager.newWakeLock(PARTIAL_WAKE_LOCK, "*launch*");
         mLaunchingActivity.setReferenceCounted(false);
-    }
-
-    void setActivityTaskManager(ActivityTaskManagerService atm) {
-        mAtm = atm;
     }
 
     void setWindowManager(WindowManagerService wm) {
@@ -715,6 +709,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (!focusCandidate.isFocusable()) {
             // The focus candidate isn't focusable. Move focus to the top stack that is focusable.
             focusCandidate = getNextFocusableStackLocked(focusCandidate, false /* ignoreCurrent */);
+            if (focusCandidate == null) {
+                Slog.w(TAG,
+                        "setFocusStackUnchecked: No focusable stack found, focus home as default");
+                focusCandidate = mHomeStack;
+            }
         }
 
         if (focusCandidate != mFocusedStack) {
@@ -727,7 +726,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         final ActivityRecord r = topRunningActivityLocked();
-        if (mService.mBooting || !mService.mBooted) {
+        if (mService.mAm.mBooting || !mService.mAm.mBooted) {
             if (r != null && r.idle) {
                 checkFinishBootingLocked();
             }
@@ -759,7 +758,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     boolean resumeHomeStackTask(ActivityRecord prev, String reason) {
-        if (!mService.mBooting && !mService.mBooted) {
+        if (!mService.mAm.mBooting && !mService.mAm.mBooted) {
             // Not ready yet!
             return false;
         }
@@ -773,7 +772,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             moveFocusableActivityStackToFrontLocked(r, myReason);
             return resumeFocusedStackTopActivityLocked(mHomeStack, prev, null);
         }
-        return mService.startHomeActivityLocked(mCurrentUser, myReason);
+        return mService.mAm.startHomeActivityLocked(mCurrentUser, myReason);
     }
 
     TaskRecord anyTaskForIdLocked(int id) {
@@ -911,7 +910,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         // result to an activity belonging to userId. Example case: a document
                         // picker for personal files, opened by a work app, should still get locked.
                         if (taskTopActivityIsUser(task, userId)) {
-                            mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskProfileLocked(
+                            mService.mAm.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskProfileLocked(
                                     task.taskId, userId);
                         }
                     }
@@ -1166,7 +1165,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
         if (changed) {
-            mService.notifyAll();
+            mService.mAm.notifyAll();
         }
     }
 
@@ -1196,7 +1195,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         if (changed) {
-            mService.notifyAll();
+            mService.mAm.notifyAll();
         }
     }
 
@@ -1217,7 +1216,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
         if (changed) {
-            mService.notifyAll();
+            mService.mAm.notifyAll();
         }
     }
 
@@ -1322,19 +1321,19 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // Don't debug things in the system process
             if (!aInfo.processName.equals("system")) {
                 if ((startFlags & ActivityManager.START_FLAG_DEBUG) != 0) {
-                    mService.setDebugApp(aInfo.processName, true, false);
+                    mService.mAm.setDebugApp(aInfo.processName, true, false);
                 }
 
                 if ((startFlags & ActivityManager.START_FLAG_NATIVE_DEBUGGING) != 0) {
-                    mService.setNativeDebuggingAppLocked(aInfo.applicationInfo, aInfo.processName);
+                    mService.mAm.setNativeDebuggingAppLocked(aInfo.applicationInfo, aInfo.processName);
                 }
 
                 if ((startFlags & ActivityManager.START_FLAG_TRACK_ALLOCATION) != 0) {
-                    mService.setTrackAllocationApp(aInfo.applicationInfo, aInfo.processName);
+                    mService.mAm.setTrackAllocationApp(aInfo.applicationInfo, aInfo.processName);
                 }
 
                 if (profilerInfo != null) {
-                    mService.setProfileApp(aInfo.applicationInfo, aInfo.processName, profilerInfo);
+                    mService.mAm.setProfileApp(aInfo.applicationInfo, aInfo.processName, profilerInfo);
                 }
             }
             final String intentLaunchToken = intent.getLaunchToken();
@@ -1347,7 +1346,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     ResolveInfo resolveIntent(Intent intent, String resolvedType, int userId, int flags,
             int filterCallingUid) {
-        synchronized (mService) {
+        synchronized (mService.mGlobalLock) {
             try {
                 Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "resolveIntent");
                 int modifiedFlags = flags
@@ -1364,7 +1363,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // (e.g. AMS.startActivityAsUser).
                 final long token = Binder.clearCallingIdentity();
                 try {
-                    return mService.getPackageManagerInternalLocked().resolveIntent(
+                    return mService.mAm.getPackageManagerInternalLocked().resolveIntent(
                             intent, resolvedType, modifiedFlags, userId, true, filterCallingUid);
                 } finally {
                     Binder.restoreCallingIdentity(token);
@@ -1453,8 +1452,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             if (idx < 0) {
                 app.activities.add(r);
             }
-            mService.updateLruProcessLocked(app, true, null);
-            mService.updateOomAdjLocked();
+            mService.mAm.updateLruProcessLocked(app, true, null);
+            mService.mAm.updateOomAdjLocked();
 
             final LockTaskController lockTaskController = mService.getLockTaskController();
             if (task.mLockTaskAuth == LOCK_TASK_AUTH_LAUNCHABLE
@@ -1484,20 +1483,20 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         System.identityHashCode(r), task.taskId, r.shortComponentName);
                 if (r.isActivityTypeHome()) {
                     // Home process is the root process of the task.
-                    mService.mHomeProcess = task.mActivities.get(0).app;
+                    mService.mAm.mHomeProcess = task.mActivities.get(0).app;
                 }
-                mService.notifyPackageUse(r.intent.getComponent().getPackageName(),
+                mService.mAm.notifyPackageUse(r.intent.getComponent().getPackageName(),
                         PackageManager.NOTIFY_PACKAGE_USE_ACTIVITY);
                 r.sleeping = false;
                 r.forceNewConfig = false;
-                mService.getAppWarningsLocked().onStartActivity(r);
-                mService.showAskCompatModeDialogLocked(r);
-                r.compat = mService.compatibilityInfoForPackageLocked(r.info.applicationInfo);
+                mService.mAm.getAppWarningsLocked().onStartActivity(r);
+                mService.mAm.showAskCompatModeDialogLocked(r);
+                r.compat = mService.mAm.compatibilityInfoForPackageLocked(r.info.applicationInfo);
                 ProfilerInfo profilerInfo = null;
-                if (mService.mProfileApp != null && mService.mProfileApp.equals(app.processName)) {
-                    if (mService.mProfileProc == null || mService.mProfileProc == app) {
-                        mService.mProfileProc = app;
-                        ProfilerInfo profilerInfoSvc = mService.mProfilerInfo;
+                if (mService.mAm.mProfileApp != null && mService.mAm.mProfileApp.equals(app.processName)) {
+                    if (mService.mAm.mProfileProc == null || mService.mAm.mProfileProc == app) {
+                        mService.mAm.mProfileProc = app;
+                        ProfilerInfo profilerInfoSvc = mService.mAm.mProfilerInfo;
                         if (profilerInfoSvc != null && profilerInfoSvc.profileFile != null) {
                             if (profilerInfoSvc.profileFd != null) {
                                 try {
@@ -1514,13 +1513,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
                 app.hasShownUi = true;
                 app.pendingUiClean = true;
-                app.forceProcessStateUpTo(mService.mTopProcessState);
+                app.forceProcessStateUpTo(mService.mAm.mTopProcessState);
                 // Because we could be starting an Activity in the system process this may not go
                 // across a Binder interface which would create a new Configuration. Consequently
                 // we have to always create a new Configuration here.
 
                 final MergedConfiguration mergedConfiguration = new MergedConfiguration(
-                        mService.getGlobalConfiguration(), r.getMergedOverrideConfiguration());
+                        mService.mAm.getGlobalConfiguration(), r.getMergedOverrideConfiguration());
                 r.setLastReportedConfiguration(mergedConfiguration);
 
                 logIfTransactionTooLarge(r.intent, r.icicle);
@@ -1536,13 +1535,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         mergedConfiguration.getGlobalConfiguration(),
                         mergedConfiguration.getOverrideConfiguration(), r.compat,
                         r.launchedFromPackage, task.voiceInteractor, app.repProcState, r.icicle,
-                        r.persistentState, results, newIntents, mService.mActivityTaskManager.isNextTransitionForward(),
+                        r.persistentState, results, newIntents, mService.isNextTransitionForward(),
                         profilerInfo));
 
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
                 if (andResume) {
-                    lifecycleItem = ResumeActivityItem.obtain(mService.mActivityTaskManager.isNextTransitionForward());
+                    lifecycleItem = ResumeActivityItem.obtain(mService.isNextTransitionForward());
                 } else {
                     lifecycleItem = PauseActivityItem.obtain();
                 }
@@ -1551,25 +1550,24 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // Schedule transaction.
                 mService.getLifecycleManager().scheduleTransaction(clientTransaction);
 
-
                 if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0
-                        && mService.mHasHeavyWeightFeature) {
+                        && mService.mAm.mHasHeavyWeightFeature) {
                     // This may be a heavy-weight process!  Note that the package
                     // manager will ensure that only activity can run in the main
                     // process of the .apk, which is the only thing that will be
                     // considered heavy-weight.
                     if (app.processName.equals(app.info.packageName)) {
-                        if (mService.mHeavyWeightProcess != null
-                                && mService.mHeavyWeightProcess != app) {
+                        if (mService.mAm.mHeavyWeightProcess != null
+                                && mService.mAm.mHeavyWeightProcess != app) {
                             Slog.w(TAG, "Starting new heavy weight process " + app
                                     + " when already running "
-                                    + mService.mHeavyWeightProcess);
+                                    + mService.mAm.mHeavyWeightProcess);
                         }
-                        mService.mHeavyWeightProcess = app;
-                        Message msg = mService.mHandler.obtainMessage(
+                        mService.mAm.mHeavyWeightProcess = app;
+                        Message msg = mService.mAm.mHandler.obtainMessage(
                                 ActivityManagerService.POST_HEAVY_NOTIFICATION_MSG);
                         msg.obj = r;
-                        mService.mHandler.sendMessage(msg);
+                        mService.mAm.mHandler.sendMessage(msg);
                     }
                 }
 
@@ -1580,7 +1578,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     Slog.e(TAG, "Second failure launching "
                             + r.intent.getComponent().flattenToShortString()
                             + ", giving up", e);
-                    mService.appDiedLocked(app);
+                    mService.mAm.appDiedLocked(app);
                     stack.requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
                             "2nd-crash", false);
                     return false;
@@ -1627,7 +1625,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // Update any services we are bound to that might care about whether
         // their client may have activities.
         if (r.app != null) {
-            mService.mServices.updateServiceConnectionActivitiesLocked(r.app);
+            mService.mAm.mServices.updateServiceConnectionActivitiesLocked(r.app);
         }
 
         return true;
@@ -1663,7 +1661,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         // Update the configuration of the activities on the display.
-        return mService.updateDisplayOverrideConfigurationLocked(config, starting, deferResume,
+        return mService.mAm.updateDisplayOverrideConfigurationLocked(config, starting, deferResume,
                 displayId);
     }
 
@@ -1685,7 +1683,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     void startSpecificActivityLocked(ActivityRecord r,
             boolean andResume, boolean checkConfig) {
         // Is this activity's application already running?
-        ProcessRecord app = mService.getProcessRecordLocked(r.processName,
+        ProcessRecord app = mService.mAm.getProcessRecordLocked(r.processName,
                 r.info.applicationInfo.uid, true);
 
         getLaunchTimeTracker().setLaunchTime(r);
@@ -1699,7 +1697,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     // part of the framework so doesn't make sense to track as a
                     // separate apk in the process.
                     app.addPackage(r.info.packageName, r.info.applicationInfo.longVersionCode,
-                            mService.mProcessStats);
+                            mService.mAm.mProcessStats);
                 }
                 realStartActivityLocked(r, app, andResume, checkConfig);
                 return;
@@ -1712,7 +1710,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // restart the application.
         }
 
-        mService.startProcessLocked(r.processName, r.info.applicationInfo, true, 0,
+        mService.mAm.startProcessLocked(r.processName, r.info.applicationInfo, true, 0,
                 "activity", r.intent.getComponent(), false, false, true);
     }
 
@@ -1728,16 +1726,16 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     || !resumedActivity.app.equals(targetActivity.app);
         }
 
-        if (sendHint && mService.mLocalPowerManager != null) {
-            mService.mLocalPowerManager.powerHint(PowerHint.LAUNCH, 1);
+        if (sendHint && mService.mAm.mLocalPowerManager != null) {
+            mService.mAm.mLocalPowerManager.powerHint(PowerHint.LAUNCH, 1);
             mPowerHintSent = true;
         }
     }
 
     void sendPowerHintForLaunchEndIfNeeded() {
         // Trigger launch power hint if activity is launched
-        if (mPowerHintSent && mService.mLocalPowerManager != null) {
-            mService.mLocalPowerManager.powerHint(PowerHint.LAUNCH, 0);
+        if (mPowerHintSent && mService.mAm.mLocalPowerManager != null) {
+            mService.mAm.mLocalPowerManager.powerHint(PowerHint.LAUNCH, 0);
             mPowerHintSent = false;
         }
     }
@@ -1746,9 +1744,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             String resultWho, int requestCode, int callingPid, int callingUid,
             String callingPackage, boolean ignoreTargetSecurity, boolean launchingInTask,
             ProcessRecord callerApp, ActivityRecord resultRecord, ActivityStack resultStack) {
-        final boolean isCallerRecents = mService.mActivityTaskManager.getRecentTasks() != null
-                && mService.mActivityTaskManager.getRecentTasks().isCallerRecents(callingUid);
-        final int startAnyPerm = mService.checkPermission(START_ANY_ACTIVITY, callingPid,
+        final boolean isCallerRecents = mService.getRecentTasks() != null
+                && mService.getRecentTasks().isCallerRecents(callingUid);
+        final int startAnyPerm = mService.mAm.checkPermission(START_ANY_ACTIVITY, callingPid,
                 callingUid);
         if (startAnyPerm == PERMISSION_GRANTED || (isCallerRecents && launchingInTask)) {
             // If the caller has START_ANY_ACTIVITY, ignore all checks below. In addition, if the
@@ -1827,7 +1825,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         // Check if the caller has enough privileges to embed activities and launch to private
         // displays.
-        final int startAnyPerm = mService.checkPermission(INTERNAL_SYSTEM_WINDOW, callingPid,
+        final int startAnyPerm = mService.mAm.checkPermission(INTERNAL_SYSTEM_WINDOW, callingPid,
                 callingUid);
         if (startAnyPerm == PERMISSION_GRANTED) {
             if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
@@ -1849,7 +1847,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 return false;
             }
             // Check if the caller is allowed to embed activities from other apps.
-            if (mService.checkPermission(ACTIVITY_EMBEDDING, callingPid, callingUid)
+            if (mService.mAm.checkPermission(ACTIVITY_EMBEDDING, callingPid, callingUid)
                     == PERMISSION_DENIED && !uidPresentOnDisplay) {
                 if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
                         + " disallow activity embedding without permission.");
@@ -1907,7 +1905,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     private int getComponentRestrictionForCallingPackage(ActivityInfo activityInfo,
             String callingPackage, int callingPid, int callingUid, boolean ignoreTargetSecurity) {
-        if (!ignoreTargetSecurity && mService.checkComponentPermission(activityInfo.permission,
+        if (!ignoreTargetSecurity && mService.mAm.checkComponentPermission(activityInfo.permission,
                 callingPid, callingUid, activityInfo.applicationInfo.uid, activityInfo.exported)
                 == PERMISSION_DENIED) {
             return ACTIVITY_RESTRICTION_PERMISSION;
@@ -1922,7 +1920,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return ACTIVITY_RESTRICTION_NONE;
         }
 
-        if (mService.mAppOpsService.noteOperation(opCode, callingUid,
+        if (mService.mAm.mAppOpsService.noteOperation(opCode, callingUid,
                 callingPackage) != AppOpsManager.MODE_ALLOWED) {
             if (!ignoreTargetSecurity) {
                 return ACTIVITY_RESTRICTION_APPOP;
@@ -1956,7 +1954,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return ACTIVITY_RESTRICTION_NONE;
         }
 
-        if (mService.checkPermission(permission, callingPid, callingUid) == PERMISSION_DENIED) {
+        if (mService.mAm.checkPermission(permission, callingPid, callingUid) == PERMISSION_DENIED) {
             return ACTIVITY_RESTRICTION_PERMISSION;
         }
 
@@ -1965,7 +1963,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return ACTIVITY_RESTRICTION_NONE;
         }
 
-        if (mService.mAppOpsService.noteOperation(opCode, callingUid,
+        if (mService.mAm.mAppOpsService.noteOperation(opCode, callingUid,
                 callingPackage) != AppOpsManager.MODE_ALLOWED) {
             return ACTIVITY_RESTRICTION_APPOP;
         }
@@ -1990,19 +1988,19 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     /**
      * Called when the frontmost task is idle.
-     * @return the state of mService.mBooting before this was called.
+     * @return the state of mService.mAm.mBooting before this was called.
      */
     @GuardedBy("mService")
     private boolean checkFinishBootingLocked() {
-        final boolean booting = mService.mBooting;
+        final boolean booting = mService.mAm.mBooting;
         boolean enableScreen = false;
-        mService.mBooting = false;
-        if (!mService.mBooted) {
-            mService.mBooted = true;
+        mService.mAm.mBooting = false;
+        if (!mService.mAm.mBooted) {
+            mService.mAm.mBooted = true;
             enableScreen = true;
         }
         if (booting || enableScreen) {
-            mService.postFinishBooting(booting, enableScreen);
+            mService.mAm.postFinishBooting(booting, enableScreen);
         }
         return booting;
     }
@@ -2051,7 +2049,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         if (allResumedActivitiesIdle()) {
             if (r != null) {
-                mService.scheduleAppGcsLocked();
+                mService.mAm.scheduleAppGcsLocked();
             }
 
             if (mLaunchingActivity.isHeld()) {
@@ -2108,12 +2106,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // Complete user switch
             if (startingUsers != null) {
                 for (int i = 0; i < startingUsers.size(); i++) {
-                    mService.mUserController.finishUserSwitch(startingUsers.get(i));
+                    mService.mAm.mUserController.finishUserSwitch(startingUsers.get(i));
                 }
             }
         }
 
-        mService.trimApplications();
+        mService.mAm.trimApplications();
         //dump();
         //mWindowManager.dump();
 
@@ -2207,10 +2205,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // Now set this one as the previous process, only if that really
         // makes sense to.
         if (r.app != null && fgApp != null && r.app != fgApp
-                && r.lastVisibleTime > mService.mPreviousProcessVisibleTime
-                && r.app != mService.mHomeProcess) {
-            mService.mPreviousProcess = r.app;
-            mService.mPreviousProcessVisibleTime = r.lastVisibleTime;
+                && r.lastVisibleTime > mService.mAm.mPreviousProcessVisibleTime
+                && r.app != mService.mAm.mHomeProcess) {
+            mService.mAm.mPreviousProcess = r.app;
+            mService.mAm.mPreviousProcessVisibleTime = r.lastVisibleTime;
         }
     }
 
@@ -2349,9 +2347,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (options == null || options.getLaunchBounds() == null) {
             return false;
         }
-        return (mService.mSupportsPictureInPicture
+        return (mService.mAm.mSupportsPictureInPicture
                 && options.getLaunchWindowingMode() == WINDOWING_MODE_PINNED)
-                || mService.mSupportsFreeformWindowManagement;
+                || mService.mAm.mSupportsFreeformWindowManagement;
     }
 
     LaunchParamsController getLaunchParamsController() {
@@ -3098,7 +3096,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         // Find any running services associated with this app and stop if needed.
-        mService.mServices.cleanUpRemovedTaskLocked(tr, component, new Intent(tr.getBaseIntent()));
+        mService.mAm.mServices.cleanUpRemovedTaskLocked(tr, component, new Intent(tr.getBaseIntent()));
 
         if (!killProcess) {
             return;
@@ -3107,7 +3105,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // Determine if the process(es) for this task should be killed.
         final String pkg = component.getPackageName();
         ArrayList<ProcessRecord> procsToKill = new ArrayList<>();
-        ArrayMap<String, SparseArray<ProcessRecord>> pmap = mService.mProcessNames.getMap();
+        ArrayMap<String, SparseArray<ProcessRecord>> pmap = mService.mAm.mProcessNames.getMap();
         for (int i = 0; i < pmap.size(); i++) {
 
             SparseArray<ProcessRecord> uids = pmap.valueAt(i);
@@ -3117,7 +3115,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     // Don't kill process for a different user.
                     continue;
                 }
-                if (proc == mService.mHomeProcess) {
+                if (proc == mService.mAm.mHomeProcess) {
                     // Don't kill the home process along with tasks from the same package.
                     continue;
                 }
@@ -3260,21 +3258,21 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         // Ensure that we aren't trying to move into a multi-window stack without multi-window
         // support
-        if (inMultiWindowMode && !mService.mSupportsMultiWindow) {
+        if (inMultiWindowMode && !mService.mAm.mSupportsMultiWindow) {
             throw new IllegalArgumentException("Device doesn't support multi-window, can not"
                     + " reparent task=" + task + " to stack=" + stack);
         }
 
         // Ensure that we're not moving a task to a dynamic stack if device doesn't support
         // multi-display.
-        if (stack.mDisplayId != DEFAULT_DISPLAY && !mService.mSupportsMultiDisplay) {
+        if (stack.mDisplayId != DEFAULT_DISPLAY && !mService.mAm.mSupportsMultiDisplay) {
             throw new IllegalArgumentException("Device doesn't support multi-display, can not"
                     + " reparent task=" + task + " to stackId=" + stackId);
         }
 
         // Ensure that we aren't trying to move into a freeform stack without freeform support
         if (stack.getWindowingMode() == WINDOWING_MODE_FREEFORM
-                && !mService.mSupportsFreeformWindowManagement) {
+                && !mService.mAm.mSupportsFreeformWindowManagement) {
             throw new IllegalArgumentException("Device doesn't support freeform, can not reparent"
                     + " task=" + task);
         }
@@ -3307,7 +3305,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return false;
         }
 
-        if (!mService.mForceResizableActivities && !r.supportsPictureInPicture()) {
+        if (!mService.mAm.mForceResizableActivities && !r.supportsPictureInPicture()) {
             Slog.w(TAG,
                     "moveTopStackActivityToPinnedStackLocked: Picture-In-Picture not supported for "
                             + " r=" + r);
@@ -3388,7 +3386,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         resumeFocusedStackTopActivityLocked();
 
-        mService.mActivityTaskManager.getTaskChangeNotificationController().notifyActivityPinned(r);
+        mService.getTaskChangeNotificationController().notifyActivityPinned(r);
     }
 
     /** Move activity with its stack to front and make the stack focused. */
@@ -3495,7 +3493,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     throw new IllegalStateException("Calling must be system uid");
                 }
                 mLaunchingActivity.release();
-                mService.mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
+                mService.mAm.mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
             }
         }
 
@@ -3520,7 +3518,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 long timeRemaining = endTime - System.currentTimeMillis();
                 if (timeRemaining > 0) {
                     try {
-                        mService.wait(timeRemaining);
+                        mService.mAm.wait(timeRemaining);
                     } catch (InterruptedException e) {
                     }
                 } else {
@@ -3602,7 +3600,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     void checkReadyForSleepLocked(boolean allowDelay) {
-        if (!mService.isSleepingOrShuttingDownLocked()) {
+        if (!mService.mAm.isSleepingOrShuttingDownLocked()) {
             // Do not care.
             return;
         }
@@ -3619,8 +3617,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (mGoingToSleep.isHeld()) {
             mGoingToSleep.release();
         }
-        if (mService.mShuttingDown) {
-            mService.notifyAll();
+        if (mService.mAm.mShuttingDown) {
+            mService.mAm.notifyAll();
         }
     }
 
@@ -3648,7 +3646,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         final ActivityStack stack = r.getStack();
         if (isFocusedStack(stack)) {
-            mService.updateUsageStats(r, true);
+            mService.mAm.updateUsageStats(r, true);
         }
         if (allResumedActivitiesComplete()) {
             ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
@@ -3675,7 +3673,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         r.mLaunchTaskBehind = false;
         mRecentTasks.add(task);
-        mService.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskStackChanged();
+        mService.getTaskChangeNotificationController().notifyTaskStackChanged();
         r.setVisibility(false);
 
         // When launching tasks behind, update the last active time of the top task after the new
@@ -3875,7 +3873,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     /** Checks whether the userid is a profile of the current user. */
     boolean isCurrentProfileLocked(int userId) {
         if (userId == mCurrentUser) return true;
-        return mService.mUserController.isCurrentProfile(userId);
+        return mService.mAm.mUserController.isCurrentProfile(userId);
     }
 
     /**
@@ -3922,7 +3920,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 final ActivityStack stack = s.getStack();
                 final boolean shouldSleepOrShutDown = stack != null
                         ? stack.shouldSleepOrShutDownActivities()
-                        : mService.isSleepingOrShuttingDownLocked();
+                        : mService.mAm.isSleepingOrShuttingDownLocked();
                 if (!waitingVisible || shouldSleepOrShutDown) {
                     if (!processPausingActivities && s.isState(PAUSING)) {
                         // Defer processing pausing activities in this iteration and reschedule
@@ -4276,7 +4274,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     private void handleDisplayAdded(int displayId) {
-        synchronized (mService) {
+        synchronized (mService.mGlobalLock) {
             getActivityDisplayOrCreateLocked(displayId);
         }
     }
@@ -4339,7 +4337,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             throw new IllegalArgumentException("Can't remove the primary display.");
         }
 
-        synchronized (mService) {
+        synchronized (mService.mGlobalLock) {
             final ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
             if (activityDisplay == null) {
                 return;
@@ -4354,7 +4352,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     private void handleDisplayChanged(int displayId) {
-        synchronized (mService) {
+        synchronized (mService.mGlobalLock) {
             ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
             // TODO: The following code block should be moved into {@link ActivityDisplay}.
             if (activityDisplay != null) {
@@ -4363,7 +4361,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     int displayState = activityDisplay.mDisplay.getState();
                     if (displayState == Display.STATE_OFF && activityDisplay.mOffToken == null) {
                         activityDisplay.mOffToken =
-                                mService.acquireSleepToken("Display-off", displayId);
+                                mService.mAm.acquireSleepToken("Display-off", displayId);
                     } else if (displayState == Display.STATE_ON
                             && activityDisplay.mOffToken != null) {
                         activityDisplay.mOffToken.release();
@@ -4396,7 +4394,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (display != null) {
             display.mAllSleepTokens.remove(token);
             if (display.mAllSleepTokens.isEmpty()) {
-                mService.updateSleepIfNeededLocked();
+                mService.mAm.updateSleepIfNeededLocked();
             }
         }
     }
@@ -4410,7 +4408,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
         display.mAllSleepTokens.clear();
 
-        mService.updateSleepIfNeededLocked();
+        mService.mAm.updateSleepIfNeededLocked();
     }
 
     private StackInfo getStackInfo(ActivityStack stack) {
@@ -4503,12 +4501,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
             // The task might have landed on a display different from requested.
             // TODO(multi-display): Find proper stack for the task on the default display.
-            mAtm.setTaskWindowingMode(task.taskId,
+            mService.setTaskWindowingMode(task.taskId,
                     WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY, true /* toTop */);
             if (preferredDisplayId != actualDisplayId) {
                 // Display a warning toast that we tried to put a non-resizeable task on a secondary
                 // display with config different from global config.
-                mService.mActivityTaskManager.getTaskChangeNotificationController()
+                mService.getTaskChangeNotificationController()
                         .notifyActivityLaunchOnSecondaryDisplayFailed();
                 return;
             }
@@ -4517,7 +4515,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (!task.supportsSplitScreenWindowingMode() || forceNonResizable) {
             // Display a warning toast that we tried to put an app that doesn't support split-screen
             // in split-screen.
-            mService.mActivityTaskManager.getTaskChangeNotificationController().notifyActivityDismissingDockedStack();
+            mService.getTaskChangeNotificationController().notifyActivityDismissingDockedStack();
 
             // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
             // we need to move it to top of fullscreen stack, otherwise it will be covered.
@@ -4537,7 +4535,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             final int reason = isSecondaryDisplayPreferred
                     ? FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY
                     : FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
-            mService.mActivityTaskManager.getTaskChangeNotificationController().notifyActivityForcedResizable(
+            mService.getTaskChangeNotificationController().notifyActivityForcedResizable(
                     task.taskId, reason, packageName);
         }
     }
@@ -4661,7 +4659,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         void activityIdleInternal(ActivityRecord r, boolean processPausingActivities) {
-            synchronized (mService) {
+            synchronized (mService.mGlobalLock) {
                 activityIdleInternalLocked(r != null ? r.appToken : null, true /* fromTimeout */,
                         processPausingActivities, null);
             }
@@ -4671,7 +4669,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case REPORT_MULTI_WINDOW_MODE_CHANGED_MSG: {
-                    synchronized (mService) {
+                    synchronized (mService.mGlobalLock) {
                         for (int i = mMultiWindowModeChangedActivities.size() - 1; i >= 0; i--) {
                             final ActivityRecord r = mMultiWindowModeChangedActivities.remove(i);
                             r.updateMultiWindowMode();
@@ -4679,7 +4677,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     }
                 } break;
                 case REPORT_PIP_MODE_CHANGED_MSG: {
-                    synchronized (mService) {
+                    synchronized (mService.mGlobalLock) {
                         for (int i = mPipModeChangedActivities.size() - 1; i >= 0; i--) {
                             final ActivityRecord r = mPipModeChangedActivities.remove(i);
                             r.updatePictureInPictureMode(mPipModeChangedTargetStackBounds,
@@ -4701,20 +4699,20 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                             false /* processPausingActivities */);
                 } break;
                 case RESUME_TOP_ACTIVITY_MSG: {
-                    synchronized (mService) {
+                    synchronized (mService.mGlobalLock) {
                         resumeFocusedStackTopActivityLocked();
                     }
                 } break;
                 case SLEEP_TIMEOUT_MSG: {
-                    synchronized (mService) {
-                        if (mService.isSleepingOrShuttingDownLocked()) {
+                    synchronized (mService.mGlobalLock) {
+                        if (mService.mAm.isSleepingOrShuttingDownLocked()) {
                             Slog.w(TAG, "Sleep timeout!  Sleeping now.");
                             checkReadyForSleepLocked(false /* allowDelay */);
                         }
                     }
                 } break;
                 case LAUNCH_TIMEOUT_MSG: {
-                    synchronized (mService) {
+                    synchronized (mService.mGlobalLock) {
                         if (mLaunchingActivity.isHeld()) {
                             Slog.w(TAG, "Launch timeout has expired, giving up wake lock!");
                             if (VALIDATE_WAKE_LOCK_CALLER
@@ -4735,7 +4733,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     handleDisplayRemoved(msg.arg1);
                 } break;
                 case LAUNCH_TASK_BEHIND_COMPLETE: {
-                    synchronized (mService) {
+                    synchronized (mService.mGlobalLock) {
                         ActivityRecord r = ActivityRecord.forTokenLocked((IBinder) msg.obj);
                         if (r != null) {
                             handleLaunchTaskBehindCompleteLocked(r);
@@ -4823,14 +4821,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             // If the user must confirm credentials (e.g. when first launching a work app and the
             // Work Challenge is present) let startActivityInPackage handle the intercepting.
-            if (!mService.mUserController.shouldConfirmCredentials(task.userId)
+            if (!mService.mAm.mUserController.shouldConfirmCredentials(task.userId)
                     && task.getRootActivity() != null) {
                 final ActivityRecord targetActivity = task.getTopActivity();
 
                 sendPowerHintForLaunchStartIfNeeded(true /* forceSend */, targetActivity);
                 mActivityMetricsLogger.notifyActivityLaunching();
                 try {
-                    mService.mActivityTaskManager.moveTaskToFrontLocked(task.taskId, 0, options,
+                    mService.moveTaskToFrontLocked(task.taskId, 0, options,
                             true /* fromRecents */);
                 } finally {
                     mActivityMetricsLogger.notifyActivityLaunched(START_TASK_TO_FRONT,
@@ -4951,7 +4949,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         @Override
         public void release() {
-            synchronized (mService) {
+            synchronized (mService.mGlobalLock) {
                 removeSleepTokenLocked(this);
             }
         }

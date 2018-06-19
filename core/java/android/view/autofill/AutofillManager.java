@@ -1435,7 +1435,9 @@ public final class AutofillManager {
         // set the EXTRA_AUTHENTICATION_RESULT extra, but it could cause weird results if the
         // service set the extra and returned RESULT_CANCELED...
 
-        if (sDebug) Log.d(TAG, "onAuthenticationResult(): d=" + data);
+        if (sDebug) {
+            Log.d(TAG, "onAuthenticationResult(): id= " + authenticationId + ", data=" + data);
+        }
 
         synchronized (mLock) {
             if (!isActiveLocked()) {

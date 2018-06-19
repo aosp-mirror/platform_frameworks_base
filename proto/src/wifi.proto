@@ -457,6 +457,8 @@ message WifiLog {
   // Identifier for experimental scoring parameter settings.
   optional string score_experiment_id = 117;
 
+  // Data on wifi radio usage
+  optional WifiRadioUsage wifi_radio_usage = 118;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -1502,4 +1504,13 @@ message WifiRttLog {
     // number of samples in the bucket
     optional int32 count = 2;
   }
+}
+
+// Usage data for the wifi radio while device is running on battery.
+message WifiRadioUsage {
+  // Duration of log (ms)
+  optional int64 logging_duration_ms = 1;
+
+  // Total time for which the radio is awake due to scan.
+  optional int64 scan_time_ms = 2;
 }

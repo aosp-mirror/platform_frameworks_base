@@ -65,7 +65,7 @@ public class ActivityStartController {
 
     private static final int DO_PENDING_ACTIVITY_LAUNCHES_MSG = 1;
 
-    private final ActivityManagerService mService;
+    private final ActivityTaskManagerService mService;
     private final ActivityStackSupervisor mSupervisor;
 
     /** Last home activity record we attempted to start. */
@@ -96,7 +96,7 @@ public class ActivityStartController {
         public void handleMessage(Message msg) {
             switch(msg.what) {
                 case DO_PENDING_ACTIVITY_LAUNCHES_MSG:
-                    synchronized (mService) {
+                    synchronized (mService.mGlobalLock) {
                         doPendingActivityLaunches(true);
                     }
                     break;
@@ -111,22 +111,22 @@ public class ActivityStartController {
      */
     private ActivityStarter mLastStarter;
 
-    ActivityStartController(ActivityManagerService service) {
+    ActivityStartController(ActivityTaskManagerService service) {
         this(service, service.mStackSupervisor,
                 new DefaultFactory(service, service.mStackSupervisor,
                     new ActivityStartInterceptor(service, service.mStackSupervisor)));
     }
 
     @VisibleForTesting
-    ActivityStartController(ActivityManagerService service, ActivityStackSupervisor supervisor,
+    ActivityStartController(ActivityTaskManagerService service, ActivityStackSupervisor supervisor,
             Factory factory) {
         mService = service;
         mSupervisor = supervisor;
-        mHandler = new StartHandler(mService.mHandlerThread.getLooper());
+        mHandler = new StartHandler(mService.mH.getLooper());
         mFactory = factory;
         mFactory.setController(this);
         mPendingRemoteAnimationRegistry = new PendingRemoteAnimationRegistry(service,
-                service.mHandler);
+                service.mH);
     }
 
     /**
@@ -182,7 +182,7 @@ public class ActivityStartController {
      */
     void startSetupActivity() {
         // Only do this once per boot.
-        if (mService.getCheckedForSetup()) {
+        if (mService.mAm.getCheckedForSetup()) {
             return;
         }
 
@@ -190,10 +190,10 @@ public class ActivityStartController {
         // version than the last one shown, and we are not running in
         // low-level factory test mode.
         final ContentResolver resolver = mService.mContext.getContentResolver();
-        if (mService.mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL &&
+        if (mService.mAm.mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL &&
                 Settings.Global.getInt(resolver,
                         Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
-            mService.setCheckedForSetup(true);
+            mService.mAm.setCheckedForSetup(true);
 
             // See if we should be showing the platform update setup UI.
             final Intent intent = new Intent(Intent.ACTION_UPGRADE_SETUP);
@@ -237,10 +237,10 @@ public class ActivityStartController {
     int checkTargetUser(int targetUserId, boolean validateIncomingUser,
             int realCallingPid, int realCallingUid, String reason) {
         if (validateIncomingUser) {
-            return mService.mUserController.handleIncomingUser(realCallingPid, realCallingUid,
+            return mService.mAm.mUserController.handleIncomingUser(realCallingPid, realCallingUid,
                     targetUserId, false, ALLOW_FULL_ONLY, reason, null);
         } else {
-            mService.mUserController.ensureNotSpecialUser(targetUserId);
+            mService.mAm.mUserController.ensureNotSpecialUser(targetUserId);
             return targetUserId;
         }
     }
@@ -320,7 +320,7 @@ public class ActivityStartController {
         }
         final long origId = Binder.clearCallingIdentity();
         try {
-            synchronized (mService) {
+            synchronized (mService.mGlobalLock) {
                 ActivityRecord[] outActivity = new ActivityRecord[1];
                 for (int i=0; i < intents.length; i++) {
                     Intent intent = intents[i];
@@ -343,7 +343,7 @@ public class ActivityStartController {
                             null, userId, ActivityStarter.computeResolveFilterUid(
                                     callingUid, realCallingUid, UserHandle.USER_NULL));
                     // TODO: New, check if this is correct
-                    aInfo = mService.getActivityInfoForUser(aInfo, userId);
+                    aInfo = mService.mAm.getActivityInfoForUser(aInfo, userId);
 
                     if (aInfo != null &&
                             (aInfo.applicationInfo.privateFlags

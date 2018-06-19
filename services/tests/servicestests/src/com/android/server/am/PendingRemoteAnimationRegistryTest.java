@@ -62,7 +62,7 @@ public class PendingRemoteAnimationRegistryTest extends ActivityTestsBase {
         mService.mHandlerThread.getThreadHandler().runWithScissors(() -> {
             mHandler = new TestHandler(null, mClock);
         }, 0);
-        mRegistry = new PendingRemoteAnimationRegistry(mService, mHandler);
+        mRegistry = new PendingRemoteAnimationRegistry(mService.mActivityTaskManager, mHandler);
     }
 
     @Test

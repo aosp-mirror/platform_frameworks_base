@@ -109,7 +109,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         super.setUp();
         mService = createActivityManagerService();
         mController = mock(ActivityStartController.class);
-        mStarter = new ActivityStarter(mController, mService, mService.mStackSupervisor,
+        mStarter = new ActivityStarter(mController, mService.mActivityTaskManager, mService.mStackSupervisor,
                 mock(ActivityStartInterceptor.class));
     }
 
@@ -193,7 +193,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final IPackageManager packageManager = mock(IPackageManager.class);
         final ActivityStartController controller = mock(ActivityStartController.class);
 
-        final ActivityStarter starter = new ActivityStarter(controller, service,
+        final ActivityStarter starter = new ActivityStarter(controller, service.mActivityTaskManager,
                 service.mStackSupervisor, mock(ActivityStartInterceptor.class));
         final IApplicationThread caller = mock(IApplicationThread.class);
 
@@ -282,7 +282,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // Ensure that {@link ActivityOptions} are aborted with unsuccessful result.
         if (expectedResult != START_SUCCESS) {
-            final ActivityStarter optionStarter = new ActivityStarter(mController, mService,
+            final ActivityStarter optionStarter = new ActivityStarter(mController, mService.mActivityTaskManager,
                     mService.mStackSupervisor, mock(ActivityStartInterceptor.class));
             final ActivityOptions options = spy(ActivityOptions.makeBasic());
 
@@ -336,7 +336,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         info.applicationInfo = new ApplicationInfo();
         info.applicationInfo.packageName = ActivityBuilder.getDefaultComponent().getPackageName();
 
-        return new ActivityStarter(mController, mService,
+        return new ActivityStarter(mController, mService.mActivityTaskManager,
                 mService.mStackSupervisor, mock(ActivityStartInterceptor.class))
                 .setIntent(intent)
                 .setActivityInfo(info);
@@ -456,7 +456,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         final ActivityStarter starter = prepareStarter(0);
 
-        final LockTaskController lockTaskController = mService.getLockTaskController();
+        final LockTaskController lockTaskController = mService.mActivityTaskManager.getLockTaskController();
         doReturn(true).when(lockTaskController).isLockTaskModeViolation(any());
 
         final int result = starter.setReason("testTaskModeViolation").execute();

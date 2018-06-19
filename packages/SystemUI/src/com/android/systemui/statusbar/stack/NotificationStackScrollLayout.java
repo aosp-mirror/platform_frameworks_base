@@ -2053,11 +2053,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private int getScrollRange() {
-        int contentHeight = getContentHeight();
-        int scrollRange = Math.max(0, contentHeight - mMaxLayoutHeight);
+        int scrollRange = Math.max(0, mContentHeight - mMaxLayoutHeight);
         int imeInset = getImeInset();
-        scrollRange += Math.min(imeInset, Math.max(0,
-                getContentHeight() - (getHeight() - imeInset)));
+        scrollRange += Math.min(imeInset, Math.max(0, mContentHeight - (getHeight() - imeInset)));
         return scrollRange;
     }
 
@@ -2158,10 +2156,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         return count;
     }
 
-    public int getContentHeight() {
-        return mContentHeight;
-    }
-
     private void updateContentHeight() {
         int height = 0;
         float previousPaddingRequest = mPaddingBetweenElements;
@@ -2225,7 +2219,11 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
         }
         mIntrinsicContentHeight = height;
-        mContentHeight = height + mTopPadding + mBottomMargin;
+
+        // We don't want to use the toppadding since that might be interpolated and we want
+        // to take the final value of the animation.
+        int topPadding = mAmbientState.isFullyDark() ? mDarkTopPadding : mRegularTopPadding;
+        mContentHeight = height + topPadding + mBottomMargin;
         updateScrollability();
         clampScrollPosition();
         mAmbientState.setLayoutMaxHeight(mContentHeight);
@@ -4717,10 +4715,13 @@ public class NotificationStackScrollLayout extends ViewGroup
 
             if (currView instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) currView;
-                mCurrMenuRow = row.createMenu();
-                mCurrMenuRow.setSwipeActionHelper(NotificationSwipeHelper.this);
-                mCurrMenuRow.setMenuClickListener(NotificationStackScrollLayout.this);
-                mCurrMenuRow.onTouchEvent(currView, ev, 0 /* velocity */);
+
+                if (row.getEntry().hasFinishedInitialization()) {
+                    mCurrMenuRow = row.createMenu();
+                    mCurrMenuRow.setSwipeActionHelper(NotificationSwipeHelper.this);
+                    mCurrMenuRow.setMenuClickListener(NotificationStackScrollLayout.this);
+                    mCurrMenuRow.onTouchEvent(currView, ev, 0 /* velocity */);
+                }
             }
         }
 
@@ -5067,11 +5068,13 @@ public class NotificationStackScrollLayout extends ViewGroup
                 // ANIMATION_TYPE_PULSE_APPEAR
                 new AnimationFilter()
                         .animateAlpha()
+                        .hasDelays()
                         .animateY(),
 
                 // ANIMATION_TYPE_PULSE_DISAPPEAR
                 new AnimationFilter()
                         .animateAlpha()
+                        .hasDelays()
                         .animateY(),
         };
 
@@ -5135,10 +5138,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                 StackStateAnimator.ANIMATION_DURATION_STANDARD,
 
                 // ANIMATION_TYPE_PULSE_APPEAR
-                KeyguardSliceView.DEFAULT_ANIM_DURATION,
+                StackStateAnimator.ANIMATION_DURATION_PULSE_APPEAR,
 
                 // ANIMATION_TYPE_PULSE_DISAPPEAR
-                KeyguardSliceView.DEFAULT_ANIM_DURATION / 2,
+                StackStateAnimator.ANIMATION_DURATION_PULSE_APPEAR / 2,
         };
 
         static final int ANIMATION_TYPE_ADD = 0;

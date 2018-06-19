@@ -21,7 +21,6 @@ import android.app.WallpaperManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
@@ -46,7 +45,7 @@ import java.util.Arrays;
 public class SysuiColorExtractor extends ColorExtractor implements Dumpable {
     private static final String TAG = "SysuiColorExtractor";
     private boolean mWallpaperVisible;
-    private boolean mMediaBackdropVisible;
+    private boolean mHasBackdrop;
     // Colors to return when the wallpaper isn't visible
     private final GradientColors mWpHiddenColors;
 
@@ -165,7 +164,7 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable {
                 return mWpHiddenColors;
             }
         } else {
-            if (mMediaBackdropVisible) {
+            if (mHasBackdrop) {
                 return mWpHiddenColors;
             } else {
                 return super.getColors(which, type);
@@ -181,9 +180,9 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable {
         }
     }
 
-    public void setMediaBackdropVisible(boolean visible) {
-        if (mMediaBackdropVisible != visible) {
-            mMediaBackdropVisible = visible;
+    public void setHasBackdrop(boolean hasBackdrop) {
+        if (mHasBackdrop != hasBackdrop) {
+            mHasBackdrop = hasBackdrop;
             triggerColorsChanged(WallpaperManager.FLAG_LOCK);
         }
     }

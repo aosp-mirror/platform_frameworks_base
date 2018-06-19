@@ -84,6 +84,7 @@ public class NotificationData {
     public static final class Entry {
         private static final long LAUNCH_COOLDOWN = 2000;
         private static final long REMOTE_INPUT_COOLDOWN = 500;
+        private static final long INITIALIZATION_DELAY = 400;
         private static final long NOT_LAUNCHED_YET = -LAUNCH_COOLDOWN;
         private static final int COLOR_INVALID = 1;
         public String key;
@@ -114,6 +115,9 @@ public class NotificationData {
         public ArraySet<Integer> mActiveAppOps = new ArraySet<>(3);
         public CharSequence headsUpStatusBarText;
         public CharSequence headsUpStatusBarTextPublic;
+
+        private long initializationTime = -1;
+
         /**
          * Whether or not this row represents a system notification. Note that if this is
          * {@code null}, that means we were either unable to retrieve the info or have yet to
@@ -167,6 +171,11 @@ public class NotificationData {
 
         public boolean hasJustSentRemoteInput() {
             return SystemClock.elapsedRealtime() < lastRemoteInputSent + REMOTE_INPUT_COOLDOWN;
+        }
+
+        public boolean hasFinishedInitialization() {
+            return initializationTime == -1 ||
+                    SystemClock.elapsedRealtime() > initializationTime + INITIALIZATION_DELAY;
         }
 
         /**
@@ -340,6 +349,12 @@ public class NotificationData {
                 }
             }
             return false;
+        }
+
+        public void setInitializationTime(long time) {
+            if (initializationTime == -1) {
+                initializationTime = time;
+            }
         }
     }
 

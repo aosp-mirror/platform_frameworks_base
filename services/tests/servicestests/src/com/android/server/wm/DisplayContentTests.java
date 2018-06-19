@@ -380,21 +380,36 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     /**
-     * This test enforces that the pinned stack is always kept as the top stack.
+     * This test enforces that alwaysOnTop stack is placed at proper position.
      */
     @Test
-    public void testPinnedStackLocation() {
+    public void testAlwaysOnTopStackLocation() {
+        final TaskStack alwaysOnTopStack = createTaskStackOnDisplay(mDisplayContent);
+        alwaysOnTopStack.setAlwaysOnTop(true);
+        mDisplayContent.positionStackAt(POSITION_TOP, alwaysOnTopStack);
+        assertTrue(alwaysOnTopStack.isAlwaysOnTop());
+        assertEquals(alwaysOnTopStack, mDisplayContent.getTopStack());
+
         final TaskStack pinnedStack = createStackControllerOnStackOnDisplay(
                 WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mDisplayContent).mContainer;
-        // Ensure that the pinned stack is the top stack
         assertEquals(pinnedStack, mDisplayContent.getPinnedStack());
         assertEquals(pinnedStack, mDisplayContent.getTopStack());
-        // By default, this should try to create a new stack on top
-        final TaskStack otherStack = createTaskStackOnDisplay(mDisplayContent);
-        // Ensure that the other stack is on the display.
-        assertEquals(mDisplayContent, otherStack.getDisplayContent());
-        // Ensure that the pinned stack is still on top
-        assertEquals(pinnedStack, mDisplayContent.getTopStack());
+
+        final TaskStack anotherAlwaysOnTopStack = createTaskStackOnDisplay(mDisplayContent);
+        anotherAlwaysOnTopStack.setAlwaysOnTop(true);
+        mDisplayContent.positionStackAt(POSITION_TOP, anotherAlwaysOnTopStack);
+        assertTrue(anotherAlwaysOnTopStack.isAlwaysOnTop());
+        int topPosition = mDisplayContent.getStacks().size() - 1;
+        // Ensure the new alwaysOnTop stack is put below the pinned stack, but on top of the
+        // existing alwaysOnTop stack.
+        assertEquals(anotherAlwaysOnTopStack, mDisplayContent.getStacks().get(topPosition - 1));
+
+        final TaskStack nonAlwaysOnTopStack = createTaskStackOnDisplay(mDisplayContent);
+        assertEquals(mDisplayContent, nonAlwaysOnTopStack.getDisplayContent());
+        topPosition = mDisplayContent.getStacks().size() - 1;
+        // Ensure the non-alwaysOnTop stack is put below the three alwaysOnTop stacks, but above the
+        // existing other non-alwaysOnTop stacks.
+        assertEquals(nonAlwaysOnTopStack, mDisplayContent.getStacks().get(topPosition - 3));
     }
 
     /**

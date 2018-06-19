@@ -33,9 +33,9 @@ class PendingRemoteAnimationRegistry {
 
     private final ArrayMap<String, Entry> mEntries = new ArrayMap<>();
     private final Handler mHandler;
-    private final ActivityManagerService mService;
+    private final ActivityTaskManagerService mService;
 
-    PendingRemoteAnimationRegistry(ActivityManagerService service, Handler handler) {
+    PendingRemoteAnimationRegistry(ActivityTaskManagerService service, Handler handler) {
         mService = service;
         mHandler = handler;
     }
@@ -74,7 +74,7 @@ class PendingRemoteAnimationRegistry {
             this.packageName = packageName;
             this.adapter = adapter;
             mHandler.postDelayed(() -> {
-                synchronized (mService) {
+                synchronized (mService.mGlobalLock) {
                     final Entry entry = mEntries.get(packageName);
                     if (entry == this) {
                         mEntries.remove(packageName);

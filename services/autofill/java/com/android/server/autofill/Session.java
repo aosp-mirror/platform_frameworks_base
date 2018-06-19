@@ -993,6 +993,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final int requestId = AutofillManager.getRequestIdFromAuthenticationId(authenticationId);
         final FillResponse authenticatedResponse = mResponses.get(requestId);
         if (authenticatedResponse == null || data == null) {
+            Slog.w(TAG, "no authenticated response");
             removeSelf();
             return;
         }
@@ -1003,6 +1004,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (datasetIdx != AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED) {
             final Dataset dataset = authenticatedResponse.getDatasets().get(datasetIdx);
             if (dataset == null) {
+                Slog.w(TAG, "no dataset with index " + datasetIdx + " on fill response");
                 removeSelf();
                 return;
             }
@@ -1012,7 +1014,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final Bundle newClientState = data.getBundle(AutofillManager.EXTRA_CLIENT_STATE);
         if (sDebug) {
             Slog.d(TAG, "setAuthenticationResultLocked(): result=" + result
-                    + ", clientState=" + newClientState);
+                    + ", clientState=" + newClientState + ", authenticationId=" + authenticationId);
         }
         if (result instanceof FillResponse) {
             logAuthenticationStatusLocked(requestId, MetricsEvent.AUTOFILL_AUTHENTICATED);
@@ -1029,6 +1031,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 authenticatedResponse.getDatasets().set(datasetIdx, dataset);
                 autoFill(requestId, datasetIdx, dataset, false);
             } else {
+                Slog.w(TAG, "invalid index (" + datasetIdx + ") for authentication id "
+                        + authenticationId);
                 logAuthenticationStatusLocked(requestId,
                         MetricsEvent.AUTOFILL_INVALID_DATASET_AUTHENTICATION);
             }

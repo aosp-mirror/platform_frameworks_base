@@ -866,7 +866,7 @@ public class UsageStatsService extends SystemService implements
             final long token = Binder.clearCallingIdentity();
             try {
                 return UsageStatsService.this.queryEventsForPackage(userId, beginTime,
-                        endTime, callingPackage);
+                        endTime, pkg);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
