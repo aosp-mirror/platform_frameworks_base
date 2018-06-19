@@ -198,7 +198,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @VisibleForTesting
     final SparseArray<UidState> mUidStates = new SparseArray<>();
 
-    long mLastUptime;
+    long mLastRealtime;
 
     /*
      * These are app op restrictions imposed per user from various parties.
@@ -770,7 +770,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     } else {
                         settleTime = mConstants.BG_STATE_SETTLE_TIME;
                     }
-                    uidState.pendingStateCommitTime = SystemClock.uptimeMillis() + settleTime;
+                    uidState.pendingStateCommitTime = SystemClock.elapsedRealtime() + settleTime;
                 }
                 if (uidState.startNesting != 0) {
                     // There is some actively running operation...  need to find it
@@ -1881,11 +1881,11 @@ public class AppOpsService extends IAppOpsService.Stub {
             mUidStates.put(uid, uidState);
         } else {
             if (uidState.pendingStateCommitTime != 0) {
-                if (uidState.pendingStateCommitTime < mLastUptime) {
+                if (uidState.pendingStateCommitTime < mLastRealtime) {
                     commitUidPendingStateLocked(uidState);
                 } else {
-                    mLastUptime = SystemClock.uptimeMillis();
-                    if (uidState.pendingStateCommitTime < mLastUptime) {
+                    mLastRealtime = SystemClock.elapsedRealtime();
+                    if (uidState.pendingStateCommitTime < mLastRealtime) {
                         commitUidPendingStateLocked(uidState);
                     }
                 }
@@ -3284,7 +3284,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
                 if (uidState.pendingStateCommitTime != 0) {
                     pw.print("    pendingStateCommitTime=");
-                    TimeUtils.formatDuration(uidState.pendingStateCommitTime, nowUptime, pw);
+                    TimeUtils.formatDuration(uidState.pendingStateCommitTime, nowElapsed, pw);
                     pw.println();
                 }
                 if (uidState.startNesting != 0) {
