@@ -2736,13 +2736,14 @@ public class NotificationPanelView extends PanelView implements
 
     public void setPulsing(boolean pulsing) {
         mPulsing = pulsing;
-        final boolean canAnimatePulse =
-                !DozeParameters.getInstance(mContext).getDisplayNeedsBlanking();
-        if (canAnimatePulse) {
+        DozeParameters dozeParameters = DozeParameters.getInstance(mContext);
+        final boolean animatePulse = !dozeParameters.getDisplayNeedsBlanking()
+                && dozeParameters.getAlwaysOn();
+        if (animatePulse) {
             mAnimateNextPositionUpdate = true;
         }
-        mNotificationStackScroller.setPulsing(pulsing, canAnimatePulse);
-        mKeyguardStatusView.setPulsing(pulsing, canAnimatePulse);
+        mNotificationStackScroller.setPulsing(pulsing, animatePulse);
+        mKeyguardStatusView.setPulsing(pulsing, animatePulse);
     }
 
     public void setAmbientIndicationBottomPadding(int ambientIndicationBottomPadding) {

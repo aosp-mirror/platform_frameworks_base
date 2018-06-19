@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.view.DisplayCutout;
 import android.view.View;
 import android.view.WindowInsets;
 
@@ -159,8 +160,15 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         }
 
         WindowInsets windowInset = mStackScroller.getRootWindowInsets();
-        return windowInset.getSystemWindowInsetLeft() + mStackScroller.getRight()
-                + windowInset.getSystemWindowInsetRight() - realDisplaySize;
+        DisplayCutout cutout = (windowInset != null) ? windowInset.getDisplayCutout() : null;
+        int sysWinLeft = (windowInset != null) ? windowInset.getStableInsetLeft() : 0;
+        int sysWinRight = (windowInset != null) ? windowInset.getStableInsetRight() : 0;
+        int cutoutLeft = (cutout != null) ? cutout.getSafeInsetLeft() : 0;
+        int cutoutRight = (cutout != null) ? cutout.getSafeInsetRight() : 0;
+        int leftInset = Math.max(sysWinLeft, cutoutLeft);
+        int rightInset = Math.max(sysWinRight, cutoutRight);
+
+        return leftInset + mStackScroller.getRight() + rightInset - realDisplaySize;
     }
 
     public void updatePanelTranslation() {
