@@ -41,6 +41,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_bluetooth_while_driving", "false");
         DEFAULT_FLAGS.put("settings_audio_switcher", "true");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
+        DEFAULT_FLAGS.put("settings_dynamic_homepage", "false");
     }
 
     /**
