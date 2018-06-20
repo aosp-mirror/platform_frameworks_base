@@ -136,7 +136,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             return null;
         }
 
-        String mimeType = getTypeForFile(file);
+        String mimeType = getDocumentType(documentId);
         if (!MetadataReader.isSupportedMimeType(mimeType)) {
             return null;
         }
@@ -418,7 +418,19 @@ public abstract class FileSystemProvider extends DocumentsProvider {
     @Override
     public String getDocumentType(String documentId) throws FileNotFoundException {
         final File file = getFileForDocId(documentId);
-        return getTypeForFile(file);
+        if (file.isDirectory()) {
+            return Document.MIME_TYPE_DIR;
+        } else {
+            final int lastDot = documentId.lastIndexOf('.');
+            if (lastDot >= 0) {
+                final String extension = documentId.substring(lastDot + 1).toLowerCase();
+                final String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                if (mime != null) {
+                    return mime;
+                }
+            }
+            return MIMETYPE_OCTET_STREAM;
+        }
     }
 
     @Override
@@ -483,7 +495,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             }
         }
 
-        final String mimeType = getTypeForFile(file);
+        final String mimeType = getDocumentType(docId);
         final String displayName = file.getName();
         if (mimeType.startsWith("image/")) {
             flags |= Document.FLAG_SUPPORTS_THUMBNAIL;
@@ -510,29 +522,8 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         return row;
     }
 
-    private static String getTypeForFile(File file) {
-        if (file.isDirectory()) {
-            return Document.MIME_TYPE_DIR;
-        } else {
-            return getTypeForName(file.getName());
-        }
-    }
-
     protected boolean typeSupportsMetadata(String mimeType) {
         return MetadataReader.isSupportedMimeType(mimeType);
-    }
-
-    private static String getTypeForName(String name) {
-        final int lastDot = name.lastIndexOf('.');
-        if (lastDot >= 0) {
-            final String extension = name.substring(lastDot + 1).toLowerCase();
-            final String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-            if (mime != null) {
-                return mime;
-            }
-        }
-
-        return MIMETYPE_OCTET_STREAM;
     }
 
     protected final File getFileForDocId(String docId) throws FileNotFoundException {
