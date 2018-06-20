@@ -19,20 +19,26 @@ package com.android.server.notification;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNull;
 
 import android.app.NotificationChannel;
+import android.net.Uri;
 import android.os.Parcel;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.UiServiceTestCase;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 @SmallTest
@@ -67,5 +73,24 @@ public class NotificationChannelTest extends UiServiceTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
         channel.writeXml(serializer);
+    }
+
+    @Test
+    public void testBackupEmptySound() throws Exception {
+        NotificationChannel channel = new NotificationChannel("a", "ab", IMPORTANCE_DEFAULT);
+        channel.setSound(Uri.EMPTY, null);
+
+        XmlSerializer serializer = new FastXmlSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+        channel.writeXmlForBackup(serializer, getContext());
+
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), null);
+        NotificationChannel restored = new NotificationChannel("a", "ab", IMPORTANCE_DEFAULT);
+        restored.populateFromXmlForRestore(parser, getContext());
+
+        assertNull(restored.getSound());
     }
 }

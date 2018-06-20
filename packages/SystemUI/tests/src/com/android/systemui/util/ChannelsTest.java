@@ -103,7 +103,7 @@ public class ChannelsTest extends SysuiTestCase {
                 NotificationManager.IMPORTANCE_MIN);
         NotificationChannel newChannel =
                 NotificationChannels.createScreenshotChannel("newName", legacyChannel);
-        assertEquals(Uri.EMPTY, newChannel.getSound());
+        assertEquals(null, newChannel.getSound());
         assertEquals("newName", newChannel.getName());
         // MIN importance not user locked, so HIGH wins out.
         assertEquals(NotificationManager.IMPORTANCE_HIGH, newChannel.getImportance());
@@ -113,7 +113,7 @@ public class ChannelsTest extends SysuiTestCase {
     public void testInheritFromLegacy_noLegacyExists() {
         NotificationChannel newChannel =
                 NotificationChannels.createScreenshotChannel("newName", null);
-        assertEquals(Uri.EMPTY, newChannel.getSound());
+        assertEquals(null, newChannel.getSound());
         assertEquals("newName", newChannel.getName());
         assertEquals(NotificationManager.IMPORTANCE_HIGH, newChannel.getImportance());
     }
