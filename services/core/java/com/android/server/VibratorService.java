@@ -66,6 +66,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Date;
 
 public class VibratorService extends IVibratorService.Stub
@@ -158,6 +159,7 @@ public class VibratorService extends IVibratorService.Stub
         public final int usageHint;
         public final int uid;
         public final String opPkg;
+        public final String reason;
 
         // The actual effect to be played.
         public VibrationEffect effect;
@@ -167,7 +169,7 @@ public class VibratorService extends IVibratorService.Stub
         public VibrationEffect originalEffect;
 
         private Vibration(IBinder token, VibrationEffect effect,
-                int usageHint, int uid, String opPkg) {
+                int usageHint, int uid, String opPkg, String reason) {
             this.token = token;
             this.effect = effect;
             this.startTime = SystemClock.elapsedRealtime();
@@ -175,6 +177,7 @@ public class VibratorService extends IVibratorService.Stub
             this.usageHint = usageHint;
             this.uid = uid;
             this.opPkg = opPkg;
+            this.reason = reason;
         }
 
         public void binderDied() {
@@ -233,7 +236,7 @@ public class VibratorService extends IVibratorService.Stub
 
         public VibrationInfo toInfo() {
             return new VibrationInfo(
-                    startTimeDebug, effect, originalEffect, usageHint, uid, opPkg);
+                    startTimeDebug, effect, originalEffect, usageHint, uid, opPkg, reason);
         }
     }
 
@@ -244,15 +247,18 @@ public class VibratorService extends IVibratorService.Stub
         private final int mUsageHint;
         private final int mUid;
         private final String mOpPkg;
+        private final String mReason;
 
         public VibrationInfo(long startTimeDebug, VibrationEffect effect,
-                VibrationEffect originalEffect, int usageHint, int uid, String opPkg) {
+                VibrationEffect originalEffect, int usageHint, int uid,
+                String opPkg, String reason) {
             mStartTimeDebug = startTimeDebug;
             mEffect = effect;
             mOriginalEffect = originalEffect;
             mUsageHint = usageHint;
             mUid = uid;
             mOpPkg = opPkg;
+            mReason = reason;
         }
 
         @Override
@@ -270,6 +276,8 @@ public class VibratorService extends IVibratorService.Stub
                     .append(mUid)
                     .append(", opPkg: ")
                     .append(mOpPkg)
+                    .append(", reason: ")
+                    .append(mReason)
                     .toString();
         }
     }
@@ -482,9 +490,9 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     @Override // Binder call
-    public void vibrate(int uid, String opPkg, VibrationEffect effect, int usageHint,
+    public void vibrate(int uid, String opPkg, VibrationEffect effect, int usageHint, String reason,
             IBinder token) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "vibrate");
+        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "vibrate, reason = " + reason);
         try {
             if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.VIBRATE)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -531,10 +539,11 @@ public class VibratorService extends IVibratorService.Stub
                     return;
                 }
 
-                Vibration vib = new Vibration(token, effect, usageHint, uid, opPkg);
+                Vibration vib = new Vibration(token, effect, usageHint, uid, opPkg, reason);
                 linkVibration(vib);
                 long ident = Binder.clearCallingIdentity();
                 try {
+
                     doCancelVibrateLocked();
                     startVibrationLocked(vib);
                     addToPreviousVibrationsLocked(vib);
@@ -1001,8 +1010,8 @@ public class VibratorService extends IVibratorService.Stub
                 Slog.w(TAG, "Failed to play prebaked effect, no fallback");
                 return 0;
             }
-            Vibration fallbackVib =
-                    new Vibration(vib.token, effect, vib.usageHint, vib.uid, vib.opPkg);
+            Vibration fallbackVib = new Vibration(vib.token, effect, vib.usageHint, vib.uid,
+                    vib.opPkg, vib.reason + " (fallback)");
             final int intensity = getCurrentIntensityLocked(fallbackVib);
             linkVibration(fallbackVib);
             applyVibrationIntensityScalingLocked(fallbackVib, intensity);
@@ -1292,7 +1301,7 @@ public class VibratorService extends IVibratorService.Stub
                 VibrationEffect effect =
                         VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE);
                 vibrate(Binder.getCallingUid(), description, effect, AudioAttributes.USAGE_UNKNOWN,
-                        mToken);
+                        "Shell Command", mToken);
                 return 0;
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);

@@ -5033,11 +5033,11 @@ public class NotificationManagerService extends SystemService {
                         Thread.sleep(waitMs);
                     } catch (InterruptedException e) { }
                     mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
-                            effect, record.getAudioAttributes());
+                            effect, "Notification (delayed)", record.getAudioAttributes());
                 }).start();
             } else {
                 mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
-                        effect, record.getAudioAttributes());
+                        effect, "Notification", record.getAudioAttributes());
             }
             return true;
         } finally{

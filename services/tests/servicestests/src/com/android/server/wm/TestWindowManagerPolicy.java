@@ -443,7 +443,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public boolean performHapticFeedbackLw(WindowState win, int effectId,
-            boolean always) {
+            boolean always, String reason) {
         return false;
     }
 

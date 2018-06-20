@@ -1191,8 +1191,8 @@ public final class InputManager {
          * @hide
          */
         @Override
-        public void vibrate(int uid, String opPkg,
-                VibrationEffect effect, AudioAttributes attributes) {
+        public void vibrate(int uid, String opPkg, VibrationEffect effect,
+                String reason, AudioAttributes attributes) {
             long[] pattern;
             int repeat;
             if (effect instanceof VibrationEffect.OneShot) {

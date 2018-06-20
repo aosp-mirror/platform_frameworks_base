@@ -364,22 +364,23 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
     private void verifyNeverVibrate() {
         verify(mVibrator, never()).vibrate(anyInt(), anyString(), (VibrationEffect) anyObject(),
-                (AudioAttributes) anyObject());
+                anyString(), (AudioAttributes) anyObject());
     }
 
     private void verifyVibrate() {
         verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), argThat(mVibrateOnceMatcher),
-                (AudioAttributes) anyObject());
+                anyString(), (AudioAttributes) anyObject());
     }
 
     private void verifyVibrateLooped() {
         verify(mVibrator, times(1)).vibrate(anyInt(), anyString(), argThat(mVibrateLoopMatcher),
-                (AudioAttributes) anyObject());
+                anyString(), (AudioAttributes) anyObject());
     }
 
     private void verifyDelayedVibrateLooped() {
         verify(mVibrator, timeout(MAX_VIBRATION_DELAY).times(1)).vibrate(anyInt(), anyString(),
-                argThat(mVibrateLoopMatcher), (AudioAttributes) anyObject());
+                argThat(mVibrateLoopMatcher), anyString(),
+                (AudioAttributes) anyObject());
     }
 
     private void verifyStopVibrate() {
@@ -646,7 +647,8 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         VibrationEffect effect = VibrationEffect.createWaveform(r.getVibration(), -1);
 
         verify(mVibrator, timeout(MAX_VIBRATION_DELAY).times(1)).vibrate(anyInt(), anyString(),
-                eq(effect), (AudioAttributes) anyObject());
+                eq(effect), anyString(),
+                (AudioAttributes) anyObject());
         assertTrue(r.isInterruptive());
     }
 
@@ -680,7 +682,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         mService.buzzBeepBlinkLocked(r);
 
         verify(mVibrator, timeout(MAX_VIBRATION_DELAY).times(1)).vibrate(anyInt(), anyString(),
-                eq(FALLBACK_VIBRATION), (AudioAttributes) anyObject());
+                eq(FALLBACK_VIBRATION), anyString(), (AudioAttributes) anyObject());
         verify(mRingtonePlayer, never()).playAsync
                 (anyObject(), anyObject(), anyBoolean(), anyObject());
         assertTrue(r.isInterruptive());
