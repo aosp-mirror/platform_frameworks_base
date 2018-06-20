@@ -20,8 +20,8 @@
 #include <set>
 #include <vector>
 #include "android-base/macros.h"
+#include "androidfw/ConfigDescription.h"
 
-#include "ConfigDescription.h"
 #include "ResourceTable.h"
 #include "filter/ConfigFilter.h"
 #include "process/IResourceTableConsumer.h"
@@ -29,7 +29,7 @@
 namespace aapt {
 
 struct SplitConstraints {
-  std::set<ConfigDescription> configs;
+  std::set<android::ConfigDescription> configs;
   std::string name;
 };
 

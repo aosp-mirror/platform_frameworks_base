@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "android-base/stringprintf.h"
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/StringPiece.h"
 
 #include "Debug.h"
@@ -233,12 +234,12 @@ int DumpConfigsCommand::Action(const std::vector<std::string>& args) {
   Printer printer(&fout);
 
   // Comparison function used to order configurations
-  auto compare = [](ConfigDescription c1, ConfigDescription c2) -> bool {
+  auto compare = [](android::ConfigDescription c1, android::ConfigDescription c2) -> bool {
       return c1.compare(c2) < 0;
   };
 
   // Insert the configurations into a set in order to keep every configuarion seen
-  std::set<ConfigDescription, decltype(compare)> configs(compare);
+  std::set<android::ConfigDescription, decltype(compare)> configs(compare);
   for (auto& package : table->packages) {
     for (auto& type : package->types) {
       for (auto& entry : type->entries) {

@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-#include "ConfigDescription.h"
+#include "androidfw/ConfigDescription.h"
+#include "androidfw/StringPiece.h"
+
+#include "android-base/logging.h"
+
+#include "gtest/gtest.h"
 
 #include <string>
 
-#include "androidfw/StringPiece.h"
-
-#include "SdkConstants.h"
-#include "test/Test.h"
-
-using android::StringPiece;
-
-namespace aapt {
+namespace android {
 
 static ::testing::AssertionResult TestParse(
     const StringPiece& input, ConfigDescription* config = nullptr) {
@@ -140,9 +138,13 @@ TEST(ConfigDescriptionTest, ParseVrAttribute) {
   EXPECT_EQ(std::string("vrheadset-v26"), config.toString().string());
 }
 
-TEST(ConfigDescriptionTest, RangeQualifiersDoNotConflict) {
-  using test::ParseConfigOrDie;
+static inline ConfigDescription ParseConfigOrDie(const android::StringPiece& str) {
+  ConfigDescription config;
+  CHECK(ConfigDescription::Parse(str, &config)) << "invalid configuration: " << str;
+  return config;
+}
 
+TEST(ConfigDescriptionTest, RangeQualifiersDoNotConflict) {
   EXPECT_FALSE(ParseConfigOrDie("large").ConflictsWith(ParseConfigOrDie("normal-land")));
   EXPECT_FALSE(ParseConfigOrDie("long-hdpi").ConflictsWith(ParseConfigOrDie("xhdpi")));
   EXPECT_FALSE(ParseConfigOrDie("sw600dp").ConflictsWith(ParseConfigOrDie("sw700dp")));
@@ -152,4 +154,4 @@ TEST(ConfigDescriptionTest, RangeQualifiersDoNotConflict) {
   EXPECT_FALSE(ParseConfigOrDie("600x400").ConflictsWith(ParseConfigOrDie("300x200")));
 }
 
-}  // namespace aapt
+}  // namespace android

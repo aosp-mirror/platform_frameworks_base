@@ -17,7 +17,6 @@
 #ifndef AAPT_RESOURCE_TABLE_H
 #define AAPT_RESOURCE_TABLE_H
 
-#include "ConfigDescription.h"
 #include "Diagnostics.h"
 #include "Resource.h"
 #include "ResourceValues.h"
@@ -26,6 +25,7 @@
 #include "io/File.h"
 
 #include "android-base/macros.h"
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/StringPiece.h"
 
 #include <functional>
@@ -66,7 +66,7 @@ struct Overlayable {
 class ResourceConfigValue {
  public:
   // The configuration for which this value is defined.
-  const ConfigDescription config;
+  const android::ConfigDescription config;
 
   // The product for which this value is defined.
   const std::string product;
@@ -74,7 +74,7 @@ class ResourceConfigValue {
   // The actual Value.
   std::unique_ptr<Value> value;
 
-  ResourceConfigValue(const ConfigDescription& config, const android::StringPiece& product)
+  ResourceConfigValue(const android::ConfigDescription& config, const android::StringPiece& product)
       : config(config), product(product.to_string()) {}
 
  private:
@@ -103,14 +103,14 @@ class ResourceEntry {
 
   explicit ResourceEntry(const android::StringPiece& name) : name(name.to_string()) {}
 
-  ResourceConfigValue* FindValue(const ConfigDescription& config);
+  ResourceConfigValue* FindValue(const android::ConfigDescription& config);
 
-  ResourceConfigValue* FindValue(const ConfigDescription& config,
+  ResourceConfigValue* FindValue(const android::ConfigDescription& config,
                                  const android::StringPiece& product);
 
-  ResourceConfigValue* FindOrCreateValue(const ConfigDescription& config,
+  ResourceConfigValue* FindOrCreateValue(const android::ConfigDescription& config,
                                          const android::StringPiece& product);
-  std::vector<ResourceConfigValue*> FindAllValues(const ConfigDescription& config);
+  std::vector<ResourceConfigValue*> FindAllValues(const android::ConfigDescription& config);
 
   template <typename Func>
   std::vector<ResourceConfigValue*> FindValuesIf(Func f) {
@@ -189,29 +189,30 @@ class ResourceTable {
   // When a collision of resources occurs, this method keeps both values
   static CollisionResult IgnoreCollision(Value* existing, Value* incoming);
 
-  bool AddResource(const ResourceNameRef& name, const ConfigDescription& config,
+  bool AddResource(const ResourceNameRef& name, const android::ConfigDescription& config,
                    const android::StringPiece& product, std::unique_ptr<Value> value,
                    IDiagnostics* diag);
 
   bool AddResourceWithId(const ResourceNameRef& name, const ResourceId& res_id,
-                         const ConfigDescription& config, const android::StringPiece& product,
-                         std::unique_ptr<Value> value, IDiagnostics* diag);
+                         const android::ConfigDescription& config,
+                         const android::StringPiece& product, std::unique_ptr<Value> value,
+                         IDiagnostics* diag);
 
-  bool AddFileReference(const ResourceNameRef& name, const ConfigDescription& config,
+  bool AddFileReference(const ResourceNameRef& name, const android::ConfigDescription& config,
                         const Source& source, const android::StringPiece& path, IDiagnostics* diag);
 
-  bool AddFileReferenceMangled(const ResourceNameRef& name, const ConfigDescription& config,
+  bool AddFileReferenceMangled(const ResourceNameRef& name, const android::ConfigDescription& config,
                                const Source& source, const android::StringPiece& path,
                                io::IFile* file, IDiagnostics* diag);
 
   // Same as AddResource, but doesn't verify the validity of the name. This is used
   // when loading resources from an existing binary resource table that may have mangled names.
-  bool AddResourceMangled(const ResourceNameRef& name, const ConfigDescription& config,
+  bool AddResourceMangled(const ResourceNameRef& name, const android::ConfigDescription& config,
                           const android::StringPiece& product, std::unique_ptr<Value> value,
                           IDiagnostics* diag);
 
   bool AddResourceWithIdMangled(const ResourceNameRef& name, const ResourceId& id,
-                                const ConfigDescription& config,
+                                const android::ConfigDescription& config,
                                 const android::StringPiece& product, std::unique_ptr<Value> value,
                                 IDiagnostics* diag);
 
@@ -286,11 +287,12 @@ class ResourceTable {
                     IDiagnostics* diag);
 
   bool AddResourceImpl(const ResourceNameRef& name, const ResourceId& res_id,
-                       const ConfigDescription& config, const android::StringPiece& product,
-                       std::unique_ptr<Value> value, NameValidator name_validator,
-                       const CollisionResolverFunc& conflict_resolver, IDiagnostics* diag);
+                       const android::ConfigDescription& config,
+                       const android::StringPiece& product, std::unique_ptr<Value> value,
+                       NameValidator name_validator, const CollisionResolverFunc& conflict_resolver,
+                       IDiagnostics* diag);
 
-  bool AddFileReferenceImpl(const ResourceNameRef& name, const ConfigDescription& config,
+  bool AddFileReferenceImpl(const ResourceNameRef& name, const android::ConfigDescription& config,
                             const Source& source, const android::StringPiece& path, io::IFile* file,
                             NameValidator name_validator, IDiagnostics* diag);
 

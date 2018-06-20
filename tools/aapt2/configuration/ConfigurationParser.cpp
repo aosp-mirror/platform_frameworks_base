@@ -25,8 +25,8 @@
 
 #include "android-base/file.h"
 #include "android-base/logging.h"
+#include "androidfw/ConfigDescription.h"
 
-#include "ConfigDescription.h"
 #include "Diagnostics.h"
 #include "ResourceUtils.h"
 #include "configuration/ConfigurationParser.internal.h"
@@ -39,6 +39,8 @@
 #include "xml/XmlActionExecutor.h"
 #include "xml/XmlDom.h"
 #include "xml/XmlUtil.h"
+
+using ::android::ConfigDescription;
 
 namespace aapt {
 

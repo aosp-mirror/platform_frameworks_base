@@ -23,9 +23,9 @@
 
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/ResourceTypes.h"
 
-#include "ConfigDescription.h"
 #include "Debug.h"
 #include "NameMangler.h"
 #include "ResourceValues.h"
@@ -34,6 +34,7 @@
 #include "util/Util.h"
 
 using ::aapt::text::IsValidResourceEntryName;
+using ::android::ConfigDescription;
 using ::android::StringPiece;
 using ::android::base::StringPrintf;
 

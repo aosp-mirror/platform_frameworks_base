@@ -22,11 +22,11 @@
 #include "android-base/errors.h"
 #include "android-base/file.h"
 #include "android-base/utf8.h"
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/StringPiece.h"
 #include "google/protobuf/io/coded_stream.h"
 #include "google/protobuf/io/zero_copy_stream_impl_lite.h"
 
-#include "ConfigDescription.h"
 #include "Diagnostics.h"
 #include "ResourceParser.h"
 #include "ResourceTable.h"
@@ -53,6 +53,7 @@
 
 using ::aapt::io::FileInputStream;
 using ::aapt::text::Printer;
+using ::android::ConfigDescription;
 using ::android::StringPiece;
 using ::android::base::SystemErrorCodeToString;
 using ::google::protobuf::io::CopyingOutputStreamAdaptor;

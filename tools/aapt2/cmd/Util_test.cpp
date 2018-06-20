@@ -24,6 +24,8 @@
 #include "test/Test.h"
 #include "util/Files.h"
 
+using ::android::ConfigDescription;
+
 namespace aapt {
 
 #ifdef _WIN32
