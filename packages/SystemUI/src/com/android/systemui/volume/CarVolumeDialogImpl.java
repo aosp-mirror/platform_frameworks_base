@@ -193,11 +193,11 @@ public class CarVolumeDialogImpl implements VolumeDialog {
   }
 
   public void show(int reason) {
-    mHandler.obtainMessage(H.SHOW, reason, 0).sendToTarget();
+    mHandler.obtainMessage(H.SHOW, reason).sendToTarget();
   }
 
   public void dismiss(int reason) {
-    mHandler.obtainMessage(H.DISMISS, reason, 0).sendToTarget();
+    mHandler.obtainMessage(H.DISMISS, reason).sendToTarget();
   }
 
   private void showH(int reason) {
@@ -223,7 +223,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     mHandler.removeMessages(H.DISMISS);
     final int timeout = computeTimeoutH();
     mHandler.sendMessageDelayed(mHandler
-        .obtainMessage(H.DISMISS, Events.DISMISS_REASON_TIMEOUT, 0), timeout);
+        .obtainMessage(H.DISMISS, Events.DISMISS_REASON_TIMEOUT), timeout);
 
     if (D.BUG) {
       Log.d(TAG, "rescheduleTimeout " + timeout + " " + Debug.getCaller());
@@ -246,7 +246,6 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     }
 
     mListView.animate().cancel();
-    mShowing = false;
 
     mListView.setTranslationY(0);
     mListView.setAlpha(1);
@@ -260,6 +259,7 @@ public class CarVolumeDialogImpl implements VolumeDialog {
             Log.d(TAG, "mDialog.dismiss()");
           }
           mDialog.dismiss();
+          mShowing = false;
         }, DISMISS_DELAY_IN_MILLIS))
         .start();
 
@@ -436,7 +436,8 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     public boolean onTouchEvent(MotionEvent event) {
       if (isShowing()) {
         if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-          dismissH(Events.DISMISS_REASON_TOUCH_OUTSIDE);
+          mHandler.obtainMessage(
+            H.DISMISS, Events.DISMISS_REASON_TOUCH_OUTSIDE).sendToTarget();
           return true;
         }
       }
