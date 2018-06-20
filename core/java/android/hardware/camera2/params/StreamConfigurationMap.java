@@ -725,7 +725,7 @@ public final class StreamConfigurationMap {
      * Get the minimum {@link CaptureRequest#SENSOR_FRAME_DURATION frame duration}
      * for the class/size combination (in nanoseconds).
      *
-     * <p>This assumes a the {@code klass} is set up to use {@link ImageFormat#PRIVATE}.
+     * <p>This assumes that the {@code klass} is set up to use {@link ImageFormat#PRIVATE}.
      * For user-defined formats, use {@link #getOutputMinFrameDuration(int, Size)}.</p>
      *
      * <p>{@code klass} should be one of the ones which is supported by
@@ -870,7 +870,7 @@ public final class StreamConfigurationMap {
     /**
      * Get the stall duration for the class/size combination (in nanoseconds).
      *
-     * <p>This assumes a the {@code klass} is set up to use {@link ImageFormat#PRIVATE}.
+     * <p>This assumes that the {@code klass} is set up to use {@link ImageFormat#PRIVATE}.
      * For user-defined formats, use {@link #getOutputMinFrameDuration(int, Size)}.</p>
      *
      * <p>{@code klass} should be one of the ones with a non-empty array returned by
