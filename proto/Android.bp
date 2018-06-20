@@ -17,3 +17,33 @@ java_library_static {
         },
     },
 }
+
+cc_library {
+    name: "libmetricprotos",
+    host_supported: true,
+    proto: {
+        export_proto_headers: true,
+        include_dirs: ["external/protobuf/src"],
+    },
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+    ],
+    srcs: ["src/metrics_constants.proto"],
+    target: {
+        host: {
+            proto: {
+                type: "full",
+            },
+        },
+        android: {
+            proto: {
+                type: "lite",
+            },
+            shared: {
+                enabled: false,
+            },
+        },
+    },
+}

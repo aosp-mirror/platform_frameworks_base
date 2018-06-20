@@ -84,8 +84,7 @@ statsd_common_aidl_includes := \
     $(LOCAL_PATH)/../../core/java
 
 statsd_common_static_libraries := \
-    libhealthhalutils \
-    libplatformprotos \
+    libhealthhalutils
 
 statsd_common_shared_libraries := \
     libbase \
@@ -234,7 +233,9 @@ LOCAL_SRC_FILES := \
 
 LOCAL_STATIC_LIBRARIES := \
     $(statsd_common_static_libraries) \
-    libgmock
+    libgmock \
+    libmetricprotos \
+    libplatformprotos
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := full
 
@@ -254,6 +255,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := statsdprotolite
 
 LOCAL_SRC_FILES := \
+    src/metrics_constants/metrics_constants.proto \
     src/stats_log.proto \
     src/statsd_config.proto \
     src/perfetto/perfetto_config.proto \
@@ -301,7 +303,6 @@ LOCAL_PROTOC_FLAGS := \
 LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries) \
                         libprotobuf-cpp-full
 
-
 LOCAL_STATIC_JAVA_LIBRARIES := \
     platformprotoslite
 
@@ -319,7 +320,9 @@ LOCAL_CFLAGS += -Wno-varargs
 LOCAL_AIDL_INCLUDES := $(statsd_common_aidl_includes)
 
 LOCAL_STATIC_LIBRARIES := \
-    $(statsd_common_static_libraries)
+    $(statsd_common_static_libraries) \
+    libmetricprotos \
+    libplatformprotos
 
 LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries) \
     libgtest_prod \
