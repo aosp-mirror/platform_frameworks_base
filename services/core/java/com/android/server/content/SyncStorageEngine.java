@@ -30,10 +30,6 @@ import android.content.SyncInfo;
 import android.content.SyncRequest;
 import android.content.SyncStatusInfo;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -510,10 +506,6 @@ public class SyncStorageEngine {
         readAccountInfoLocked();
         readStatusLocked();
         readStatisticsLocked();
-        readAndDeleteLegacyAccountInfoLocked();
-        writeAccountInfoLocked();
-        writeStatusLocked();
-        writeStatisticsLocked();
 
         if (mLogger.enabled()) {
             final int size = mAuthorities.size();
@@ -1581,7 +1573,6 @@ public class SyncStorageEngine {
             readAccountInfoLocked();
             readStatusLocked();
             readStatisticsLocked();
-            readAndDeleteLegacyAccountInfoLocked();
             writeAccountInfoLocked();
             writeStatusLocked();
             writeStatisticsLocked();
@@ -1995,146 +1986,6 @@ public class SyncStorageEngine {
             if (fos != null) {
                 mAccountInfoFile.failWrite(fos);
             }
-        }
-    }
-
-    static int getIntColumn(Cursor c, String name) {
-        return c.getInt(c.getColumnIndex(name));
-    }
-
-    static long getLongColumn(Cursor c, String name) {
-        return c.getLong(c.getColumnIndex(name));
-    }
-
-    /**
-     * TODO Remove it. It's super old code that was used to migrate the information from a sqlite
-     * database that we used a long time ago, and is no longer relevant.
-     */
-    private void readAndDeleteLegacyAccountInfoLocked() {
-        // Look for old database to initialize from.
-        File file = mContext.getDatabasePath("syncmanager.db");
-        if (!file.exists()) {
-            return;
-        }
-        String path = file.getPath();
-        SQLiteDatabase db = null;
-        try {
-            db = SQLiteDatabase.openDatabase(path, null,
-                    SQLiteDatabase.OPEN_READONLY);
-        } catch (SQLiteException e) {
-        }
-
-        if (db != null) {
-            final boolean hasType = db.getVersion() >= 11;
-
-            // Copy in all of the status information, as well as accounts.
-            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
-                Slog.v(TAG_FILE, "Reading legacy sync accounts db");
-            }
-            SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-            qb.setTables("stats, status");
-            HashMap<String,String> map = new HashMap<String,String>();
-            map.put("_id", "status._id as _id");
-            map.put("account", "stats.account as account");
-            if (hasType) {
-                map.put("account_type", "stats.account_type as account_type");
-            }
-            map.put("authority", "stats.authority as authority");
-            map.put("totalElapsedTime", "totalElapsedTime");
-            map.put("numSyncs", "numSyncs");
-            map.put("numSourceLocal", "numSourceLocal");
-            map.put("numSourcePoll", "numSourcePoll");
-            map.put("numSourceServer", "numSourceServer");
-            map.put("numSourceUser", "numSourceUser");
-            map.put("lastSuccessSource", "lastSuccessSource");
-            map.put("lastSuccessTime", "lastSuccessTime");
-            map.put("lastFailureSource", "lastFailureSource");
-            map.put("lastFailureTime", "lastFailureTime");
-            map.put("lastFailureMesg", "lastFailureMesg");
-            map.put("pending", "pending");
-            qb.setProjectionMap(map);
-            qb.appendWhere("stats._id = status.stats_id");
-            Cursor c = qb.query(db, null, null, null, null, null, null);
-            while (c.moveToNext()) {
-                String accountName = c.getString(c.getColumnIndex("account"));
-                String accountType = hasType
-                        ? c.getString(c.getColumnIndex("account_type")) : null;
-                if (accountType == null) {
-                    accountType = "com.google";
-                }
-                String authorityName = c.getString(c.getColumnIndex("authority"));
-                AuthorityInfo authority =
-                        this.getOrCreateAuthorityLocked(
-                                new EndPoint(new Account(accountName, accountType),
-                                        authorityName,
-                                        0 /* legacy is single-user */)
-                                , -1,
-                                false);
-                if (authority != null) {
-                    int i = mSyncStatus.size();
-                    boolean found = false;
-                    SyncStatusInfo st = null;
-                    while (i > 0) {
-                        i--;
-                        st = mSyncStatus.valueAt(i);
-                        if (st.authorityId == authority.ident) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        st = new SyncStatusInfo(authority.ident);
-                        mSyncStatus.put(authority.ident, st);
-                    }
-                    st.totalStats.totalElapsedTime = getLongColumn(c, "totalElapsedTime");
-                    st.totalStats.numSyncs = getIntColumn(c, "numSyncs");
-                    st.totalStats.numSourceLocal = getIntColumn(c, "numSourceLocal");
-                    st.totalStats.numSourcePoll = getIntColumn(c, "numSourcePoll");
-                    st.totalStats.numSourceOther = getIntColumn(c, "numSourceServer");
-                    st.totalStats.numSourceUser = getIntColumn(c, "numSourceUser");
-                    st.totalStats.numSourcePeriodic = 0;
-                    st.lastSuccessSource = getIntColumn(c, "lastSuccessSource");
-                    st.lastSuccessTime = getLongColumn(c, "lastSuccessTime");
-                    st.lastFailureSource = getIntColumn(c, "lastFailureSource");
-                    st.lastFailureTime = getLongColumn(c, "lastFailureTime");
-                    st.lastFailureMesg = c.getString(c.getColumnIndex("lastFailureMesg"));
-                    st.pending = getIntColumn(c, "pending") != 0;
-                }
-            }
-
-            c.close();
-
-            // Retrieve the settings.
-            qb = new SQLiteQueryBuilder();
-            qb.setTables("settings");
-            c = qb.query(db, null, null, null, null, null, null);
-            while (c.moveToNext()) {
-                String name = c.getString(c.getColumnIndex("name"));
-                String value = c.getString(c.getColumnIndex("value"));
-                if (name == null) continue;
-                if (name.equals("listen_for_tickles")) {
-                    setMasterSyncAutomatically(value == null || Boolean.parseBoolean(value), 0,
-                            ContentResolver.SYNC_EXEMPTION_NONE, SyncLogger.CALLING_UID_SELF);
-                } else if (name.startsWith("sync_provider_")) {
-                    String provider = name.substring("sync_provider_".length(),
-                            name.length());
-                    int i = mAuthorities.size();
-                    while (i > 0) {
-                        i--;
-                        AuthorityInfo authority = mAuthorities.valueAt(i);
-                        if (authority.target.provider.equals(provider)) {
-                            authority.enabled = value == null || Boolean.parseBoolean(value);
-                            authority.syncable = 1;
-                        }
-                    }
-                }
-            }
-
-            c.close();
-
-            db.close();
-
-            (new File(path)).delete();
         }
     }
 
