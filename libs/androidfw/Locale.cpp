@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#include "Locale.h"
+#include "androidfw/Locale.h"
+#include "androidfw/Util.h"
 
 #include <ctype.h>
 
@@ -22,12 +23,10 @@
 #include <string>
 #include <vector>
 
-#include "util/Util.h"
-
 using ::android::ResTable_config;
 using ::android::StringPiece;
 
-namespace aapt {
+namespace android {
 
 void LocaleValue::set_language(const char* language_chars) {
   size_t i = 0;
@@ -258,4 +257,4 @@ void LocaleValue::WriteTo(ResTable_config* out) const {
   }
 }
 
-}  // namespace aapt
+}  // namespace android

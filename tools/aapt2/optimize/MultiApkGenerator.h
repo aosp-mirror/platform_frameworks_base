@@ -22,6 +22,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include "androidfw/ConfigDescription.h"
+
 #include "Diagnostics.h"
 #include "LoadedApk.h"
 #include "configuration/ConfigurationParser.h"
@@ -66,7 +68,7 @@ class MultiApkGenerator {
   /**
    * Adds the <screen> elements to the parent node for the provided density configuration.
    */
-  void AddScreens(const ConfigDescription& config, xml::Element* parent);
+  void AddScreens(const android::ConfigDescription& config, xml::Element* parent);
 
   LoadedApk* apk_;
   IAaptContext* context_;

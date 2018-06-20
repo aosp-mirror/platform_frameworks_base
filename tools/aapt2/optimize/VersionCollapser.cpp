@@ -21,6 +21,8 @@
 
 #include "ResourceTable.h"
 
+using android::ConfigDescription;
+
 namespace aapt {
 
 template <typename Iterator, typename Pred>
