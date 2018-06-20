@@ -2493,8 +2493,6 @@ Landroid/hardware/display/WifiDisplayStatus;->getScanState()I
 Landroid/hardware/display/WifiDisplayStatus;->mActiveDisplay:Landroid/hardware/display/WifiDisplay;
 Landroid/hardware/display/WifiDisplayStatus;->mDisplays:[Landroid/hardware/display/WifiDisplay;
 Landroid/hardware/display/WifiDisplayStatus;->SCAN_STATE_NOT_SCANNING:I
-Landroid/hardware/fingerprint/Fingerprint;->getFingerId()I
-Landroid/hardware/fingerprint/Fingerprint;->getName()Ljava/lang/CharSequence;
 Landroid/hardware/fingerprint/FingerprintManager$AuthenticationResult;->getFingerprint()Landroid/hardware/fingerprint/Fingerprint;
 Landroid/hardware/fingerprint/FingerprintManager;->getAuthenticatorId()J
 Landroid/hardware/fingerprint/FingerprintManager;->getEnrolledFingerprints()Ljava/util/List;

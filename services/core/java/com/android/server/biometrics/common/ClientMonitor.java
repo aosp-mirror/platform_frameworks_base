@@ -17,6 +17,7 @@
 package com.android.server.biometrics.common;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.media.AudioAttributes;
 import android.os.IBinder;
@@ -124,10 +125,13 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     // respective client (e.g. enrolling shouldn't get authenticate events).
     // All of these return 'true' if the operation is completed and it's ok to move
     // to the next client (e.g. authentication accepts or rejects a biometric).
-    public abstract boolean onEnrollResult(int fingerId, int groupId, int rem);
-    public abstract boolean onAuthenticated(int fingerId, int groupId);
-    public abstract boolean onRemoved(int fingerId, int groupId, int remaining);
-    public abstract boolean onEnumerationResult(int fingerId, int groupId, int remaining);
+    public abstract boolean onEnrollResult(BiometricAuthenticator.Identifier identifier,
+            int remaining);
+    public abstract boolean onAuthenticated(int biometricId, int groupId);
+    public abstract boolean onRemoved(BiometricAuthenticator.Identifier identifier,
+            int remaining);
+    public abstract boolean onEnumerationResult(
+            BiometricAuthenticator.Identifier identifier, int remaining);
 
     /**
      * Called when we get notification from the biometric's HAL that an image has been acquired.
@@ -137,7 +141,9 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
      */
     public boolean onAcquired(int acquiredInfo, int vendorCode) {
         try {
-            mListener.onAcquired(getHalDeviceId(), acquiredInfo, vendorCode);
+            if (mListener != null) {
+                mListener.onAcquired(getHalDeviceId(), acquiredInfo, vendorCode);
+            }
             return false; // acquisition continues...
         } catch (RemoteException e) {
             Slog.w(getLogTag(), "Failed to invoke sendAcquired", e);
@@ -156,9 +162,11 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
      * @param error
      * @return true if client should be removed
      */
-    public boolean onError(int error, int vendorCode) {
+    public boolean onError(long deviceId, int error, int vendorCode) {
         try {
-            mListener.onError(getHalDeviceId(), error, vendorCode);
+            if (mListener != null) {
+                mListener.onError(deviceId, error, vendorCode);
+            }
         } catch (RemoteException e) {
             Slog.w(getLogTag(), "Failed to invoke sendError", e);
         }
@@ -182,7 +190,8 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     public void binderDied() {
         mToken = null;
         mListener = null;
-        onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
+        onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                0 /* vendorCode */);
     }
 
     @Override
@@ -190,7 +199,8 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
         try {
             if (mToken != null) {
                 if (DEBUG) Slog.w(getLogTag(), "removing leaked reference: " + mToken);
-                onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
+                onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                        0 /* vendorCode */);
             }
         } finally {
             super.finalize();

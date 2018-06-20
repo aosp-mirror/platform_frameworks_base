@@ -17,15 +17,20 @@
 package com.android.server.biometrics.face;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.face.Face;
+import android.text.TextUtils;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.biometrics.common.BiometricUtils;
+
+import java.util.List;
 
 /**
  * Utility class for dealing with faces and face settings.
  */
-public class FaceUtils {
+public class FaceUtils implements BiometricUtils {
 
     private static final Object sInstanceLock = new Object();
     private static FaceUtils sInstance;
@@ -45,16 +50,34 @@ public class FaceUtils {
     private FaceUtils() {
     }
 
-    public Face getFaceForUser(Context ctx, int userId) {
-        return getStateForUser(ctx, userId).getFace();
+    @Override
+    public List<Face> getBiometricsForUser(Context ctx, int userId) {
+        return getStateForUser(ctx, userId).getBiometrics();
     }
 
-    public void addFaceForUser(Context ctx, int faceId, int userId) {
-        getStateForUser(ctx, userId).addFace(faceId);
+    @Override
+    public void addBiometricForUser(Context ctx, int userId,
+            BiometricAuthenticator.Identifier identifier) {
+        getStateForUser(ctx, userId).addBiometric(identifier);
     }
 
-    public void removeFaceForUser(Context ctx, int userId) {
-        getStateForUser(ctx, userId).removeFace();
+    @Override
+    public void removeBiometricForUser(Context ctx, int userId, int faceId) {
+        getStateForUser(ctx, userId).removeBiometric(faceId);
+    }
+
+    @Override
+    public void renameBiometricForUser(Context ctx, int userId, int faceId, CharSequence name) {
+        if (TextUtils.isEmpty(name)) {
+            // Don't do the rename if it's empty
+            return;
+        }
+        getStateForUser(ctx, userId).renameBiometric(faceId, name);
+    }
+
+    @Override
+    public CharSequence getUniqueName(Context context, int userId) {
+        return getStateForUser(context, userId).getUniqueName();
     }
 
     private FaceUserState getStateForUser(Context ctx, int userId) {

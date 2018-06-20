@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License
  */
 
-package com.android.server.biometrics.face;
+package com.android.server.biometrics.fingerprint;
 
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
-import android.hardware.face.Face;
+import android.hardware.fingerprint.Fingerprint;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.biometrics.common.BiometricUserState;
 
 import libcore.io.IoUtils;
@@ -35,56 +36,57 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-
 /**
- * Class managing the set of faces per user across device reboots.
+ * Class managing the set of fingerprint per user across device reboots.
  * @hide
  */
-public class FaceUserState extends BiometricUserState {
+public class FingerprintUserState extends BiometricUserState {
 
-    private static final String TAG = "FaceState";
-    private static final String FACE_FILE = "settings_face.xml";
+    private static final String TAG = "FingerprintState";
+    private static final String FINGERPRINT_FILE = "settings_fingerprint.xml";
 
-    private static final String TAG_FACES = "faces";
-    private static final String TAG_FACE = "face";
+    private static final String TAG_FINGERPRINTS = "fingerprints";
+    private static final String TAG_FINGERPRINT = "fingerprint";
     private static final String ATTR_NAME = "name";
-    private static final String ATTR_FACE_ID = "faceId";
+    private static final String ATTR_GROUP_ID = "groupId";
+    private static final String ATTR_FINGER_ID = "fingerId";
     private static final String ATTR_DEVICE_ID = "deviceId";
 
-    public FaceUserState(Context ctx, int userId) {
-        super(ctx, userId);
+    public FingerprintUserState(Context context, int userId) {
+        super(context, userId);
     }
 
     @Override
     protected String getBiometricsTag() {
-        return TAG_FACES;
+        return TAG_FINGERPRINTS;
     }
 
     @Override
     protected String getBiometricFile() {
-        return FACE_FILE;
+        return FINGERPRINT_FILE;
     }
 
     @Override
     protected int getNameTemplateResource() {
-        return com.android.internal.R.string.face_name_template;
+        return com.android.internal.R.string.fingerprint_name_template;
     }
 
     @Override
     public void addBiometric(BiometricAuthenticator.Identifier identifier) {
-        if (identifier instanceof Face) {
+        if (identifier instanceof Fingerprint) {
             super.addBiometric(identifier);
         } else {
-            Slog.w(TAG, "Attempted to add non-face identifier");
+            Slog.w(TAG, "Attempted to add non-fingerprint identifier");
         }
     }
 
     @Override
     protected ArrayList getCopy(ArrayList array) {
-        ArrayList<Face> result = new ArrayList<>(array.size());
+        ArrayList<Fingerprint> result = new ArrayList<>();
         for (int i = 0; i < array.size(); i++) {
-            Face f = (Face) array.get(i);
-            result.add(new Face(f.getName(), f.getFaceId(), f.getDeviceId()));
+            Fingerprint fp = (Fingerprint) array.get(i);
+            result.add(new Fingerprint(fp.getName(), fp.getGroupId(), fp.getBiometricId(),
+                    fp.getDeviceId()));
         }
         return result;
     }
@@ -93,10 +95,10 @@ public class FaceUserState extends BiometricUserState {
     protected void doWriteState() {
         AtomicFile destination = new AtomicFile(mFile);
 
-        ArrayList<Face> faces;
+        ArrayList<Fingerprint> fingerprints;
 
         synchronized (this) {
-            faces = getCopy(mBiometrics);
+            fingerprints = getCopy(mBiometrics);
         }
 
         FileOutputStream out = null;
@@ -107,19 +109,20 @@ public class FaceUserState extends BiometricUserState {
             serializer.setOutput(out, "utf-8");
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             serializer.startDocument(null, true);
-            serializer.startTag(null, TAG_FACES);
+            serializer.startTag(null, TAG_FINGERPRINTS);
 
-            final int count = faces.size();
+            final int count = fingerprints.size();
             for (int i = 0; i < count; i++) {
-                Face f = faces.get(i);
-                serializer.startTag(null, TAG_FACE);
-                serializer.attribute(null, ATTR_FACE_ID, Integer.toString(f.getFaceId()));
-                serializer.attribute(null, ATTR_NAME, f.getName().toString());
-                serializer.attribute(null, ATTR_DEVICE_ID, Long.toString(f.getDeviceId()));
-                serializer.endTag(null, TAG_FACE);
+                Fingerprint fp = fingerprints.get(i);
+                serializer.startTag(null, TAG_FINGERPRINT);
+                serializer.attribute(null, ATTR_FINGER_ID, Integer.toString(fp.getBiometricId()));
+                serializer.attribute(null, ATTR_NAME, fp.getName().toString());
+                serializer.attribute(null, ATTR_GROUP_ID, Integer.toString(fp.getGroupId()));
+                serializer.attribute(null, ATTR_DEVICE_ID, Long.toString(fp.getDeviceId()));
+                serializer.endTag(null, TAG_FINGERPRINT);
             }
 
-            serializer.endTag(null, TAG_FACES);
+            serializer.endTag(null, TAG_FINGERPRINTS);
             serializer.endDocument();
             destination.finishWrite(out);
 
@@ -127,15 +130,17 @@ public class FaceUserState extends BiometricUserState {
         } catch (Throwable t) {
             Slog.wtf(TAG, "Failed to write settings, restoring backup", t);
             destination.failWrite(out);
-            throw new IllegalStateException("Failed to write faces", t);
+            throw new IllegalStateException("Failed to write fingerprints", t);
         } finally {
             IoUtils.closeQuietly(out);
         }
     }
 
+    @GuardedBy("this")
     @Override
     protected void parseBiometricsLocked(XmlPullParser parser)
             throws IOException, XmlPullParserException {
+
         final int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -145,11 +150,13 @@ public class FaceUserState extends BiometricUserState {
             }
 
             String tagName = parser.getName();
-            if (tagName.equals(TAG_FACE)) {
+            if (tagName.equals(TAG_FINGERPRINT)) {
                 String name = parser.getAttributeValue(null, ATTR_NAME);
-                String faceId = parser.getAttributeValue(null, ATTR_FACE_ID);
+                String groupId = parser.getAttributeValue(null, ATTR_GROUP_ID);
+                String fingerId = parser.getAttributeValue(null, ATTR_FINGER_ID);
                 String deviceId = parser.getAttributeValue(null, ATTR_DEVICE_ID);
-                mBiometrics.add(new Face(name, Integer.parseInt(faceId), Integer.parseInt(deviceId)));
+                mBiometrics.add(new Fingerprint(name, Integer.parseInt(groupId),
+                        Integer.parseInt(fingerId), Long.parseLong(deviceId)));
             }
         }
     }

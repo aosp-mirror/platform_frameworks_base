@@ -20,13 +20,21 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_FACE;
 import static android.Manifest.permission.USE_BIOMETRIC;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricFaceConstants;
+import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.CryptoObject;
+import android.hardware.biometrics.IBiometricPromptReceiver;
+import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.CancellationSignal.OnCancelListener;
 import android.os.Handler;
@@ -36,182 +44,22 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.security.keystore.AndroidKeyStoreProvider;
 import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.R;
 
-import java.security.Signature;
-
-import javax.crypto.Cipher;
-import javax.crypto.Mac;
+import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * A class that coordinates access to the face authentication hardware.
  * @hide
  */
 @SystemService(Context.FACE_SERVICE)
-public class FaceManager {
-    /**
-     * The hardware is unavailable. Try again later.
-     */
-    public static final int FACE_ERROR_HW_UNAVAILABLE = 1;
-    /**
-     * Error state returned when the sensor was unable to process the current image.
-     */
-    public static final int FACE_ERROR_UNABLE_TO_PROCESS = 2;
-    /**
-     * Error state returned when the current request has been running too long. This is intended to
-     * prevent programs from waiting for the face authentication sensor indefinitely. The timeout is
-     * platform and sensor-specific, but is generally on the order of 30 seconds.
-     */
-    public static final int FACE_ERROR_TIMEOUT = 3;
-    /**
-     * Error state returned for operations like enrollment; the operation cannot be completed
-     * because there's not enough storage remaining to complete the operation.
-     */
-    public static final int FACE_ERROR_NO_SPACE = 4;
-    /**
-     * The operation was canceled because the face authentication sensor is unavailable. For
-     * example, this may happen when the user is switched, the device is locked or another pending
-     * operation prevents or disables it.
-     */
-    public static final int FACE_ERROR_CANCELED = 5;
-    /**
-     * The {@link FaceManager#remove} call failed. Typically this will happen when the
-     * provided face id was incorrect.
-     *
-     * @hide
-     */
-    public static final int FACE_ERROR_UNABLE_TO_REMOVE = 6;
-    /**
-     * The operation was canceled because the API is locked out due to too many attempts.
-     * This occurs after 5 failed attempts, and lasts for 30 seconds.
-     */
-    public static final int FACE_ERROR_LOCKOUT = 7;
-    /**
-     * Hardware vendors may extend this list if there are conditions that do not fall under one of
-     * the above categories. Vendors are responsible for providing error strings for these errors.
-     * These messages are typically reserved for internal operations such as enrollment, but may be
-     * used to express vendor errors not covered by the ones in HAL h file. Applications are
-     * expected to show the error message string if they happen, but are advised not to rely on the
-     * message id since they will be device and vendor-specific
-     */
-    public static final int FACE_ERROR_VENDOR = 8;
-    //
-    // Error messages from face authentication hardware during initialization, enrollment,
-    // authentication or removal. Must agree with the list in HAL h file
-    //
-    /**
-     * The operation was canceled because FACE_ERROR_LOCKOUT occurred too many times.
-     * Face authentication is disabled until the user unlocks with strong authentication
-     * (PIN/Pattern/Password)
-     */
-    public static final int FACE_ERROR_LOCKOUT_PERMANENT = 9;
-    /**
-     * The user canceled the operation. Upon receiving this, applications should use alternate
-     * authentication (e.g. a password). The application should also provide the means to return
-     * to face authentication, such as a "use face authentication" button.
-     */
-    public static final int FACE_ERROR_USER_CANCELED = 10;
-    /**
-     * The user does not have a face enrolled.
-     */
-    public static final int FACE_ERROR_NOT_ENROLLED = 11;
-    /**
-     * The device does not have a face sensor. This message will propagate if the calling app
-     * ignores the result from PackageManager.hasFeature(FEATURE_FACE) and calls
-     * this API anyway. Apps should always check for the feature before calling this API.
-     */
-    public static final int FACE_ERROR_HW_NOT_PRESENT = 12;
-    /**
-     * @hide
-     */
-    public static final int FACE_ERROR_VENDOR_BASE = 1000;
-    /**
-     * The image acquired was good.
-     */
-    public static final int FACE_ACQUIRED_GOOD = 0;
-    /**
-     * The face image was not good enough to process due to a detected condition.
-     * (See {@link #FACE_ACQUIRED_TOO_BRIGHT or @link #FACE_ACQUIRED_TOO_DARK}).
-     */
-    public static final int FACE_ACQUIRED_INSUFFICIENT = 1;
-    /**
-     * The face image was too bright due to too much ambient light.
-     * For example, it's reasonable to return this after multiple
-     * {@link #FACE_ACQUIRED_INSUFFICIENT}
-     * The user is expected to take action to retry in better lighting conditions
-     * when this is returned.
-     */
-    public static final int FACE_ACQUIRED_TOO_BRIGHT = 2;
-    /**
-     * The face image was too dark due to illumination light obscured.
-     * For example, it's reasonable to return this after multiple
-     * {@link #FACE_ACQUIRED_INSUFFICIENT}
-     * The user is expected to take action to retry in better lighting conditions
-     * when this is returned.
-     */
-    public static final int FACE_ACQUIRED_TOO_DARK = 3;
-    /**
-     * The detected face is too close to the sensor, and the image can't be processed.
-     * The user should be informed to move farther from the sensor when this is returned.
-     */
-    public static final int FACE_ACQUIRED_TOO_CLOSE = 4;
-    /**
-     * The detected face is too small, as the user might be too far from the sensor.
-     * The user should be informed to move closer to the sensor when this is returned.
-     */
-    public static final int FACE_ACQUIRED_TOO_FAR = 5;
-    /**
-     * Only the upper part of the face was detected. The sensor field of view is too high.
-     * The user should be informed to move up with respect to the sensor when this is returned.
-     */
-    public static final int FACE_ACQUIRED_TOO_HIGH = 6;
-    /**
-     * Only the lower part of the face was detected. The sensor field of view is too low.
-     * The user should be informed to move down with respect to the sensor when this is returned.
-     */
-    public static final int FACE_ACQUIRED_TOO_LOW = 7;
+public class FaceManager implements BiometricFaceConstants {
 
-    //
-    // Image acquisition messages. Must agree with those in HAL h file
-    //
-    /**
-     * Only the right part of the face was detected. The sensor field of view is too far right.
-     * The user should be informed to move to the right with respect to the sensor
-     * when this is returned.
-     */
-    public static final int FACE_ACQUIRED_TOO_RIGHT = 8;
-    /**
-     * Only the left part of the face was detected. The sensor field of view is too far left.
-     * The user should be informed to move to the left with respect to the sensor
-     * when this is returned.
-     */
-    public static final int FACE_ACQUIRED_TOO_LEFT = 9;
-    /**
-     * User's gaze strayed too far from the sensor causing significant parts of the user's face
-     * to be hidden.
-     * The user should be informed to turn the face front to the sensor.
-     */
-    public static final int FACE_ACQUIRED_POOR_GAZE = 10;
-    /**
-     * No face was detected in front of the sensor.
-     * The user should be informed to point the sensor to a face when this is returned.
-     */
-    public static final int FACE_ACQUIRED_NOT_DETECTED = 11;
-    /**
-     * Hardware vendors may extend this list if there are conditions that do not fall under one of
-     * the above categories. Vendors are responsible for providing error strings for these errors.
-     *
-     * @hide
-     */
-    public static final int FACE_ACQUIRED_VENDOR = 12;
-    /**
-     * @hide
-     */
-    public static final int FACE_ACQUIRED_VENDOR_BASE = 1000;
+
     private static final String TAG = "FaceManager";
     private static final boolean DEBUG = true;
     private static final int MSG_ENROLL_RESULT = 100;
@@ -220,15 +68,18 @@ public class FaceManager {
     private static final int MSG_AUTHENTICATION_FAILED = 103;
     private static final int MSG_ERROR = 104;
     private static final int MSG_REMOVED = 105;
-    private final Context mContext;
+
     private IFaceService mService;
+    private final Context mContext;
     private IBinder mToken = new Binder();
-    private AuthenticationCallback mAuthenticationCallback;
+    private BiometricAuthenticator.AuthenticationCallback mAuthenticationCallback;
     private EnrollmentCallback mEnrollmentCallback;
     private RemovalCallback mRemovalCallback;
     private CryptoObject mCryptoObject;
     private Face mRemovalFace;
     private Handler mHandler;
+    private Executor mExecutor;
+
     private IFaceServiceReceiver mServiceReceiver = new IFaceServiceReceiver.Stub() {
 
         @Override // binder call
@@ -294,32 +145,11 @@ public class FaceManager {
      *                                  <a href="{@docRoot}training/articles/keystore.html">Android
      *                                  Keystore facility</a>.
      * @throws IllegalStateException    if the crypto primitive is not initialized.
-     */
-    @RequiresPermission(USE_BIOMETRIC)
-    public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
-            int flags, @NonNull AuthenticationCallback callback, @Nullable Handler handler) {
-        authenticate(crypto, cancel, flags, callback, handler, UserHandle.myUserId());
-    }
-
-    /**
-     * Use the provided handler thread for events.
-     */
-    private void useHandler(Handler handler) {
-        if (handler != null) {
-            mHandler = new MyHandler(handler.getLooper());
-        } else if (mHandler.getLooper() != mContext.getMainLooper()) {
-            mHandler = new MyHandler(mContext.getMainLooper());
-        }
-    }
-
-    /**
-     * Per-user version
-     *
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC)
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
-            int flags, @NonNull AuthenticationCallback callback, Handler handler, int userId) {
+            int flags, @NonNull AuthenticationCallback callback, @Nullable Handler handler) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an authentication callback");
         }
@@ -340,7 +170,7 @@ public class FaceManager {
                 mCryptoObject = crypto;
                 long sessionId = crypto != null ? crypto.getOpId() : 0;
                 mService.authenticate(mToken, sessionId, mServiceReceiver, flags,
-                        mContext.getOpPackageName());
+                        mContext.getOpPackageName(), null /* bundle */, null /* receiver */);
             } catch (RemoteException e) {
                 Log.w(TAG, "Remote exception while authenticating: ", e);
                 if (callback != null) {
@@ -351,6 +181,119 @@ public class FaceManager {
                 }
             }
         }
+    }
+
+    /**
+     * Use the provided handler thread for events.
+     */
+    private void useHandler(Handler handler) {
+        if (handler != null) {
+            mHandler = new MyHandler(handler.getLooper());
+        } else if (mHandler.getLooper() != mContext.getMainLooper()) {
+            mHandler = new MyHandler(mContext.getMainLooper());
+        }
+    }
+
+    /**
+     * This method invokes the BiometricPrompt.
+     */
+    private void authenticateWithPrompt(@Nullable android.hardware.biometrics.CryptoObject crypto,
+            @NonNull CancellationSignal cancel,
+            @NonNull Bundle bundle,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull IBiometricPromptReceiver receiver,
+            @NonNull BiometricAuthenticator.AuthenticationCallback callback) {
+        mCryptoObject = crypto;
+        if (cancel.isCanceled()) {
+            Slog.w(TAG, "authentication already canceled");
+            return;
+        } else {
+            cancel.setOnCancelListener(new OnAuthenticationCancelListener(crypto));
+        }
+
+        if (mService != null) {
+            try {
+                mExecutor = executor;
+                mAuthenticationCallback = callback;
+                final long sessionId = crypto != null ? crypto.getOpId() : 0;
+                mService.authenticate(mToken, sessionId, mServiceReceiver,
+                        0 /* flags */, mContext.getOpPackageName(), bundle, receiver);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Remote exception while authenticating", e);
+                mExecutor.execute(() -> {
+                    callback.onAuthenticationError(FACE_ERROR_HW_UNAVAILABLE,
+                            getErrorString(FACE_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */));
+                });
+            }
+        }
+    }
+
+    /**
+     * Private method, see {@link BiometricPrompt#authenticate(CancellationSignal, Executor,
+     * BiometricPrompt.AuthenticationCallback)}
+     * @param cancel
+     * @param executor
+     * @param callback
+     * @hide
+     */
+    public void authenticate(
+            @NonNull CancellationSignal cancel,
+            @NonNull Bundle bundle,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull IBiometricPromptReceiver receiver,
+            @NonNull BiometricAuthenticator.AuthenticationCallback callback) {
+        if (cancel == null) {
+            throw new IllegalArgumentException("Must supply a cancellation signal");
+        }
+        if (bundle == null) {
+            throw new IllegalArgumentException("Must supply a bundle");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must supply an executor");
+        }
+        if (receiver == null) {
+            throw new IllegalArgumentException("Must supply a receiver");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("Must supply a calback");
+        }
+        authenticateWithPrompt(null, cancel, bundle, executor, receiver, callback);
+    }
+
+    /**
+     * Private method, see {@link BiometricPrompt#authenticate(BiometricPrompt.CryptoObject,
+     * CancellationSignal, Executor, BiometricPrompt.AuthenticationCallback)}
+     * @param crypto
+     * @param cancel
+     * @param executor
+     * @param callback
+     * @hide
+     */
+    public void authenticate(@NonNull android.hardware.biometrics.CryptoObject crypto,
+            @NonNull CancellationSignal cancel,
+            @NonNull Bundle bundle,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull IBiometricPromptReceiver receiver,
+            @NonNull BiometricAuthenticator.AuthenticationCallback callback) {
+        if (crypto == null) {
+            throw new IllegalArgumentException("Must supply a crypto object");
+        }
+        if (cancel == null) {
+            throw new IllegalArgumentException("Must supply a cancellation signal");
+        }
+        if (bundle == null) {
+            throw new IllegalArgumentException("Must supply a bundle");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must supply an executor");
+        }
+        if (receiver == null) {
+            throw new IllegalArgumentException("Must supply a receiver");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("Must supply a callback");
+        }
+        authenticateWithPrompt(crypto, cancel, bundle, executor, receiver, callback);
     }
 
     /**
@@ -475,7 +418,7 @@ public class FaceManager {
             try {
                 mRemovalCallback = callback;
                 mRemovalFace = face;
-                mService.remove(mToken, userId, mServiceReceiver);
+                mService.remove(mToken, face.getFaceId(), userId, mServiceReceiver);
             } catch (RemoteException e) {
                 Log.w(TAG, "Remote exception in remove: ", e);
                 if (callback != null) {
@@ -493,10 +436,10 @@ public class FaceManager {
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC)
-    public Face getEnrolledFace(int userId) {
+    public List<Face> getEnrolledFaces(int userId) {
         if (mService != null) {
             try {
-                return mService.getEnrolledFace(userId, mContext.getOpPackageName());
+                return mService.getEnrolledFaces(userId, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -511,8 +454,8 @@ public class FaceManager {
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC)
-    public Face getEnrolledFace() {
-        return getEnrolledFace(UserHandle.myUserId());
+    public List<Face> getEnrolledFaces() {
+        return getEnrolledFaces(UserHandle.myUserId());
     }
 
     /**
@@ -521,10 +464,10 @@ public class FaceManager {
      * @return true if a face is enrolled, false otherwise
      */
     @RequiresPermission(USE_BIOMETRIC)
-    public boolean hasEnrolledFace() {
+    public boolean hasEnrolledFaces() {
         if (mService != null) {
             try {
-                return mService.hasEnrolledFace(
+                return mService.hasEnrolledFaces(
                         UserHandle.myUserId(), mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -539,10 +482,10 @@ public class FaceManager {
     @RequiresPermission(allOf = {
             USE_BIOMETRIC,
             INTERACT_ACROSS_USERS})
-    public boolean hasEnrolledFace(int userId) {
+    public boolean hasEnrolledFaces(int userId) {
         if (mService != null) {
             try {
-                return mService.hasEnrolledFace(userId, mContext.getOpPackageName());
+                return mService.hasEnrolledFaces(userId, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -615,7 +558,7 @@ public class FaceManager {
             try {
                 final PowerManager powerManager = mContext.getSystemService(PowerManager.class);
                 mService.addLockoutResetCallback(
-                        new IFaceServiceLockoutResetCallback.Stub() {
+                        new IBiometricServiceLockoutResetCallback.Stub() {
 
                             @Override
                             public void onLockoutReset(long deviceId,
@@ -748,62 +691,6 @@ public class FaceManager {
     }
 
     /**
-     * A wrapper class for the crypto objects supported by FaceAuthenticationManager.
-     */
-    public static final class CryptoObject {
-
-        private final Object mCrypto;
-
-        public CryptoObject(@NonNull Signature signature) {
-            mCrypto = signature;
-        }
-
-        public CryptoObject(@NonNull Cipher cipher) {
-            mCrypto = cipher;
-        }
-
-        public CryptoObject(@NonNull Mac mac) {
-            mCrypto = mac;
-        }
-
-        /**
-         * Get {@link Signature} object.
-         *
-         * @return {@link Signature} object or null if this doesn't contain one.
-         */
-        public Signature getSignature() {
-            return mCrypto instanceof Signature ? (Signature) mCrypto : null;
-        }
-
-        /**
-         * Get {@link Cipher} object.
-         *
-         * @return {@link Cipher} object or null if this doesn't contain one.
-         */
-        public Cipher getCipher() {
-            return mCrypto instanceof Cipher ? (Cipher) mCrypto : null;
-        }
-
-        /**
-         * Get {@link Mac} object.
-         *
-         * @return {@link Mac} object or null if this doesn't contain one.
-         */
-        public Mac getMac() {
-            return mCrypto instanceof Mac ? (Mac) mCrypto : null;
-        }
-
-        /**
-         * @return the opId associated with this object or 0 if none
-         * @hide
-         */
-        public long getOpId() {
-            return mCrypto != null
-                    ? AndroidKeyStoreProvider.getKeyStoreOperationHandle(mCrypto) : 0;
-        }
-    }
-
-    /**
      * Container for callback data from {@link FaceManager#authenticate(CryptoObject,
      * CancellationSignal, int, AuthenticationCallback, Handler)}.
      */
@@ -863,7 +750,8 @@ public class FaceManager {
      * int, AuthenticationCallback, Handler) } must provide an implementation of this for listening
      * to face events.
      */
-    public abstract static class AuthenticationCallback {
+    public abstract static class AuthenticationCallback
+            extends BiometricAuthenticator.AuthenticationCallback {
 
         /**
          * Called when an unrecoverable error has been encountered and the operation is complete.
@@ -1053,73 +941,73 @@ public class FaceManager {
                     break;
             }
         }
+    };
 
-        private void sendRemovedResult(Face face) {
-            if (mRemovalCallback == null) {
-                return;
-            }
-            if (face == null) {
-                Log.e(TAG, "Received MSG_REMOVED, but face is null");
-                return;
-            }
-
-
-            mRemovalCallback.onRemovalSucceeded(face);
+    private void sendRemovedResult(Face face) {
+        if (mRemovalCallback == null) {
+            return;
+        }
+        if (face == null) {
+            Log.e(TAG, "Received MSG_REMOVED, but face is null");
+            return;
         }
 
-        private void sendErrorResult(long deviceId, int errMsgId, int vendorCode) {
-            // emulate HAL 2.1 behavior and send real errMsgId
-            final int clientErrMsgId = errMsgId == FACE_ERROR_VENDOR
-                    ? (vendorCode + FACE_ERROR_VENDOR_BASE) : errMsgId;
-            if (mEnrollmentCallback != null) {
-                mEnrollmentCallback.onEnrollmentError(clientErrMsgId,
-                        getErrorString(errMsgId, vendorCode));
-            } else if (mAuthenticationCallback != null) {
-                mAuthenticationCallback.onAuthenticationError(clientErrMsgId,
-                        getErrorString(errMsgId, vendorCode));
-            } else if (mRemovalCallback != null) {
-                mRemovalCallback.onRemovalError(mRemovalFace, clientErrMsgId,
-                        getErrorString(errMsgId, vendorCode));
-            }
-        }
 
-        private void sendEnrollResult(EnrollResultMsg faceWrapper) {
-            if (mEnrollmentCallback != null) {
-                int remaining = faceWrapper.getRemaining();
-                long vendorMsg = faceWrapper.getVendorMsg();
-                mEnrollmentCallback.onEnrollmentProgress(remaining, vendorMsg);
-            }
-        }
+        mRemovalCallback.onRemovalSucceeded(face);
+    }
 
-        private void sendAuthenticatedSucceeded(Face face, int userId) {
-            if (mAuthenticationCallback != null) {
-                final AuthenticationResult result =
-                        new AuthenticationResult(mCryptoObject, face, userId);
-                mAuthenticationCallback.onAuthenticationSucceeded(result);
-            }
+    private void sendErrorResult(long deviceId, int errMsgId, int vendorCode) {
+        // emulate HAL 2.1 behavior and send real errMsgId
+        final int clientErrMsgId = errMsgId == FACE_ERROR_VENDOR
+                ? (vendorCode + FACE_ERROR_VENDOR_BASE) : errMsgId;
+        if (mEnrollmentCallback != null) {
+            mEnrollmentCallback.onEnrollmentError(clientErrMsgId,
+                    getErrorString(errMsgId, vendorCode));
+        } else if (mAuthenticationCallback != null) {
+            mAuthenticationCallback.onAuthenticationError(clientErrMsgId,
+                    getErrorString(errMsgId, vendorCode));
+        } else if (mRemovalCallback != null) {
+            mRemovalCallback.onRemovalError(mRemovalFace, clientErrMsgId,
+                    getErrorString(errMsgId, vendorCode));
         }
+    }
 
-        private void sendAuthenticatedFailed() {
-            if (mAuthenticationCallback != null) {
-                mAuthenticationCallback.onAuthenticationFailed();
-            }
+    private void sendEnrollResult(EnrollResultMsg faceWrapper) {
+        if (mEnrollmentCallback != null) {
+            int remaining = faceWrapper.getRemaining();
+            long vendorMsg = faceWrapper.getVendorMsg();
+            mEnrollmentCallback.onEnrollmentProgress(remaining, vendorMsg);
         }
+    }
 
-        private void sendAcquiredResult(long deviceId, int acquireInfo, int vendorCode) {
-            if (mAuthenticationCallback != null) {
-                mAuthenticationCallback.onAuthenticationAcquired(acquireInfo);
-            }
-            final String msg = getAcquiredString(acquireInfo, vendorCode);
-            if (msg == null) {
-                return;
-            }
-            final int clientInfo = acquireInfo == FACE_ACQUIRED_VENDOR
-                    ? (vendorCode + FACE_ACQUIRED_VENDOR_BASE) : acquireInfo;
-            if (mEnrollmentCallback != null) {
-                mEnrollmentCallback.onEnrollmentHelp(clientInfo, msg);
-            } else if (mAuthenticationCallback != null) {
-                mAuthenticationCallback.onAuthenticationHelp(clientInfo, msg);
-            }
+    private void sendAuthenticatedSucceeded(Face face, int userId) {
+        if (mAuthenticationCallback != null) {
+            final BiometricAuthenticator.AuthenticationResult result =
+                    new BiometricAuthenticator.AuthenticationResult(mCryptoObject, face, userId);
+            mAuthenticationCallback.onAuthenticationSucceeded(result);
+        }
+    }
+
+    private void sendAuthenticatedFailed() {
+        if (mAuthenticationCallback != null) {
+            mAuthenticationCallback.onAuthenticationFailed();
+        }
+    }
+
+    private void sendAcquiredResult(long deviceId, int acquireInfo, int vendorCode) {
+        if (mAuthenticationCallback != null) {
+            mAuthenticationCallback.onAuthenticationAcquired(acquireInfo);
+        }
+        final String msg = getAcquiredString(acquireInfo, vendorCode);
+        if (msg == null) {
+            return;
+        }
+        final int clientInfo = acquireInfo == FACE_ACQUIRED_VENDOR
+                ? (vendorCode + FACE_ACQUIRED_VENDOR_BASE) : acquireInfo;
+        if (mEnrollmentCallback != null) {
+            mEnrollmentCallback.onEnrollmentHelp(clientInfo, msg);
+        } else if (mAuthenticationCallback != null) {
+            mAuthenticationCallback.onAuthenticationHelp(clientInfo, msg);
         }
     }
 

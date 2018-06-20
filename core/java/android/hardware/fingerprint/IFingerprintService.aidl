@@ -17,9 +17,9 @@ package android.hardware.fingerprint;
 
 import android.os.Bundle;
 import android.hardware.biometrics.IBiometricPromptReceiver;
+import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
-import android.hardware.fingerprint.IFingerprintServiceLockoutResetCallback;
 import android.hardware.fingerprint.Fingerprint;
 import java.util.List;
 
@@ -78,7 +78,7 @@ interface IFingerprintService {
     void resetTimeout(in byte [] cryptoToken);
 
     // Add a callback which gets notified when the fingerprint lockout period expired.
-    void addLockoutResetCallback(IFingerprintServiceLockoutResetCallback callback);
+    void addLockoutResetCallback(IBiometricServiceLockoutResetCallback callback);
 
     // Explicitly set the active user (for enrolling work profile)
     void setActiveUser(int uid);

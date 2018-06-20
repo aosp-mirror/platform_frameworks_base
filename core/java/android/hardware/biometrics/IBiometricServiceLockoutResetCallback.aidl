@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.hardware.fingerprint;
+package android.hardware.biometrics;
 
-import android.hardware.fingerprint.Fingerprint;
-import android.os.Bundle;
 import android.os.IRemoteCallback;
-import android.os.UserHandle;
 
 /**
  * Callback when lockout period expired and clients are allowed to authenticate again.
  * @hide
  */
-oneway interface IFingerprintServiceLockoutResetCallback {
+oneway interface IBiometricServiceLockoutResetCallback {
 
     /**
      * A wakelock will be held until the reciever calls back into {@param callback}

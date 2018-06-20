@@ -17,6 +17,7 @@
 package com.android.server.biometrics.common;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -42,7 +43,8 @@ public abstract class EnumerateClient extends ClientMonitor {
                 Slog.w(getLogTag(), "start enumerate for user " + getTargetUserId()
                     + " failed, result=" + result);
                 mMetricsLogger.histogram(mMetrics.tagEnumerateStartError(), result);
-                onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
+                onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                        0 /* vendorCode */);
                 return result;
             }
         } catch (RemoteException e) {
@@ -72,16 +74,18 @@ public abstract class EnumerateClient extends ClientMonitor {
         // We don't actually stop enumerate, but inform the client that the cancel operation
         // succeeded so we can start the next operation.
         if (initiatedByClient) {
-            onError(BiometricConstants.BIOMETRIC_ERROR_CANCELED, 0 /* vendorCode */);
+            onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_CANCELED,
+                    0 /* vendorCode */);
         }
         mAlreadyCancelled = true;
         return 0; // success
     }
 
     @Override
-    public boolean onEnumerationResult(int fingerId, int groupId, int remaining) {
+    public boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier,
+            int remaining) {
         try {
-            getListener().onEnumerated(getHalDeviceId(), fingerId, groupId, remaining);
+            getListener().onEnumerated(identifier, remaining);
         } catch (RemoteException e) {
             Slog.w(getLogTag(), "Failed to notify enumerated:", e);
         }
@@ -89,19 +93,19 @@ public abstract class EnumerateClient extends ClientMonitor {
     }
 
     @Override
-    public boolean onAuthenticated(int fingerId, int groupId) {
+    public boolean onAuthenticated(int biometricId, int groupId) {
         if (DEBUG) Slog.w(getLogTag(), "onAuthenticated() called for enumerate!");
         return true; // Invalid for Enumerate.
     }
 
     @Override
-    public boolean onEnrollResult(int fingerId, int groupId, int rem) {
+    public boolean onEnrollResult(BiometricAuthenticator.Identifier identifier, int rem) {
         if (DEBUG) Slog.w(getLogTag(), "onEnrollResult() called for enumerate!");
         return true; // Invalid for Enumerate.
     }
 
     @Override
-    public boolean onRemoved(int fingerId, int groupId, int remaining) {
+    public boolean onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
         if (DEBUG) Slog.w(getLogTag(), "onRemoved() called for enumerate!");
         return true; // Invalid for Enumerate.
     }

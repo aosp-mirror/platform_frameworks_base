@@ -16,8 +16,9 @@
 package android.hardware.face;
 
 import android.os.Bundle;
+import android.hardware.biometrics.IBiometricPromptReceiver;
+import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.face.IFaceServiceReceiver;
-import android.hardware.face.IFaceServiceLockoutResetCallback;
 import android.hardware.face.Face;
 
 /**
@@ -27,7 +28,8 @@ import android.hardware.face.Face;
 interface IFaceService {
     // Authenticate the given sessionId with a face
     void authenticate(IBinder token, long sessionId,
-            IFaceServiceReceiver receiver, int flags, String opPackageName);
+            IFaceServiceReceiver receiver, int flags, String opPackageName,
+            in Bundle bundle, IBiometricPromptReceiver dialogReceiver);
 
     // Cancel authentication for the given sessionId
     void cancelAuthentication(IBinder token, String opPackageName);
@@ -40,10 +42,13 @@ interface IFaceService {
     void cancelEnrollment(IBinder token);
 
     // Any errors resulting from this call will be returned to the listener
-    void remove(IBinder token, int userId, IFaceServiceReceiver receiver);
+    void remove(IBinder token, int faceId, int userId, IFaceServiceReceiver receiver);
+
+    // Rename the face specified by faceId to the given name
+    void rename(int faceId, String name);
 
     // Get the enrolled face for user.
-    Face getEnrolledFace(int userId, String opPackageName);
+    List<Face> getEnrolledFaces(int userId, String opPackageName);
 
     // Determine if HAL is loaded and ready
     boolean isHardwareDetected(long deviceId, String opPackageName);
@@ -54,8 +59,8 @@ interface IFaceService {
     // Finish an enrollment sequence and invalidate the authentication token
     int postEnroll(IBinder token);
 
-    // Determine if a user has enrolled a face
-    boolean hasEnrolledFace(int userId, String opPackageName);
+    // Determine if a user has at least one enrolled face
+    boolean hasEnrolledFaces(int userId, String opPackageName);
 
     // Gets the number of hardware devices
     // int getHardwareDeviceCount();
@@ -70,8 +75,11 @@ interface IFaceService {
     void resetTimeout(in byte [] cryptoToken);
 
     // Add a callback which gets notified when the face lockout period expired.
-    void addLockoutResetCallback(IFaceServiceLockoutResetCallback callback);
+    void addLockoutResetCallback(IBiometricServiceLockoutResetCallback callback);
 
     // Explicitly set the active user (for enrolling work profile)
     void setActiveUser(int uid);
+
+    // Enumerate all faces
+    void enumerate(IBinder token, int userId, IFaceServiceReceiver receiver);
 }

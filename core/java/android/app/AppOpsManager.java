@@ -599,9 +599,7 @@ public class AppOpsManager {
     public static final String OPSTR_BLUETOOTH_SCAN = "android:bluetooth_scan";
 
     /** @hide Use the face authentication API. */
-    public static final String OPSTR_USE_FACE = "android:use_FACE";
-
-
+    public static final String OPSTR_USE_FACE = "android:use_face";
 
     // Warning: If an permission is added here it also has to be added to
     // com.android.packageinstaller.permission.utils.EventLogger

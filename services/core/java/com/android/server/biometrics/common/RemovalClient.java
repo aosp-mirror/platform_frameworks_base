@@ -17,37 +17,40 @@
 package com.android.server.biometrics.common;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.fingerprint.FingerprintUtils;
-
 /**
  * A class to keep track of the remove state for a given client.
  */
 public abstract class RemovalClient extends ClientMonitor {
-    private int mFingerId;
+    private final int mBiometricId;
+    private final BiometricUtils mBiometricUtils;
 
     public RemovalClient(Context context, Metrics metrics, BiometricService.DaemonWrapper daemon,
             long halDeviceId, IBinder token, BiometricService.ServiceListener listener,
-            int fingerId, int groupId, int userId, boolean restricted, String owner) {
+            int biometricId, int groupId, int userId, boolean restricted, String owner,
+            BiometricUtils utils) {
         super(context, metrics, daemon, halDeviceId, token, listener, userId, groupId, restricted,
                 owner);
-        mFingerId = fingerId;
+        mBiometricId = biometricId;
+        mBiometricUtils = utils;
     }
 
     @Override
     public int start() {
         // The biometric template ids will be removed when we get confirmation from the HAL
         try {
-            final int result = getDaemonWrapper().remove(getGroupId(), mFingerId);
+            final int result = getDaemonWrapper().remove(getGroupId(), mBiometricId);
             if (result != 0) {
-                Slog.w(getLogTag(), "startRemove with id = " + mFingerId + " failed, result=" +
+                Slog.w(getLogTag(), "startRemove with id = " + mBiometricId + " failed, result=" +
                         result);
                 mMetricsLogger.histogram(mMetrics.tagRemoveStartError(), result);
-                onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
+                onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                        0 /* vendorCode */);
                 return result;
             }
         } catch (RemoteException e) {
@@ -81,9 +84,10 @@ public abstract class RemovalClient extends ClientMonitor {
     /*
      * @return true if we're done.
      */
-    private boolean sendRemoved(int fingerId, int groupId, int remaining) {
+    private boolean sendRemoved(BiometricAuthenticator.Identifier identifier,
+            int remaining) {
         try {
-            getListener().onRemoved(getHalDeviceId(), fingerId, groupId, remaining);
+            getListener().onRemoved(identifier, remaining);
         } catch (RemoteException e) {
             Slog.w(getLogTag(), "Failed to notify Removed:", e);
         }
@@ -91,29 +95,29 @@ public abstract class RemovalClient extends ClientMonitor {
     }
 
     @Override
-    public boolean onRemoved(int fingerId, int groupId, int remaining) {
-        if (fingerId != 0) {
-            // TODO: biometric
-            FingerprintUtils.getInstance().removeFingerprintIdForUser(getContext(), fingerId,
-                    getTargetUserId());
+    public boolean onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
+        if (identifier.getBiometricId() != 0) {
+            mBiometricUtils.removeBiometricForUser(getContext(), getTargetUserId(),
+                    identifier.getBiometricId());
         }
-        return sendRemoved(fingerId, getGroupId(), remaining);
+        return sendRemoved(identifier, remaining);
     }
 
     @Override
-    public boolean onEnrollResult(int fingerId, int groupId, int rem) {
+    public boolean onEnrollResult(BiometricAuthenticator.Identifier identifier, int rem) {
         if (DEBUG) Slog.w(getLogTag(), "onEnrollResult() called for remove!");
         return true; // Invalid for Remove
     }
 
     @Override
-    public boolean onAuthenticated(int fingerId, int groupId) {
+    public boolean onAuthenticated(int biometricId, int groupId) {
         if (DEBUG) Slog.w(getLogTag(), "onAuthenticated() called for remove!");
         return true; // Invalid for Remove.
     }
 
     @Override
-    public boolean onEnumerationResult(int fingerId, int groupId, int remaining) {
+    public boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier,
+            int remaining) {
         if (DEBUG) Slog.w(getLogTag(), "onEnumerationResult() called for remove!");
         return true; // Invalid for Remove.
     }
