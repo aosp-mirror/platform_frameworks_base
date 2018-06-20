@@ -173,6 +173,11 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         native_setup(new WeakReference<MediaPlayer2Impl>(this));
     }
 
+    @Override
+    public MediaPlayerBase getMediaPlayerBase() {
+        return null;
+    }
+
     /**
      * Releases the resources held by this {@code MediaPlayer2} object.
      *
@@ -313,39 +318,11 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     @Override
-    public @PlayerState int getPlayerState() {
-        int mediaplayer2State = getMediaPlayer2State();
-        int playerState;
-        switch (mediaplayer2State) {
-            case MEDIAPLAYER2_STATE_IDLE:
-                playerState = PLAYER_STATE_IDLE;
-                break;
-            case MEDIAPLAYER2_STATE_PREPARED:
-            case MEDIAPLAYER2_STATE_PAUSED:
-                playerState = PLAYER_STATE_PAUSED;
-                break;
-            case MEDIAPLAYER2_STATE_PLAYING:
-                playerState = PLAYER_STATE_PLAYING;
-                break;
-            case MEDIAPLAYER2_STATE_ERROR:
-            default:
-                playerState = PLAYER_STATE_ERROR;
-                break;
-        }
-
-        return playerState;
+    public @MediaPlayer2State int getState() {
+        return native_getState();
     }
 
-    /**
-     * Gets the current buffering state of the player.
-     * During buffering, see {@link #getBufferedPosition()} for the quantifying the amount already
-     * buffered.
-     */
-    @Override
-    public @BuffState int getBufferingState() {
-        // TODO: use cached state or call native function.
-        return BUFFERING_STATE_UNKNOWN;
-    }
+    private native int native_getState();
 
     /**
      * Sets the audio attributes for this MediaPlayer2.
@@ -427,8 +404,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     mNextSourceState = NEXT_SOURCE_STATE_INIT;
                     mNextSourcePlayPending = false;
                 }
-                int state = getMediaPlayer2State();
-                if (state != MEDIAPLAYER2_STATE_IDLE) {
+                int state = getState();
+                if (state != PLAYER_STATE_IDLE) {
                     synchronized (mSrcLock) {
                         prepareNextDataSource_l();
                     }
@@ -465,8 +442,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     mNextSourceState = NEXT_SOURCE_STATE_INIT;
                     mNextSourcePlayPending = false;
                 }
-                int state = getMediaPlayer2State();
-                if (state != MEDIAPLAYER2_STATE_IDLE) {
+                int state = getState();
+                if (state != PLAYER_STATE_IDLE) {
                     synchronized (mSrcLock) {
                         prepareNextDataSource_l();
                     }
@@ -498,46 +475,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     private native void setLooping(boolean looping);
-
-    /**
-     * Sets the playback speed.
-     * A value of 1.0f is the default playback value.
-     * A negative value indicates reverse playback, check {@link #isReversePlaybackSupported()}
-     * before using negative values.<br>
-     * After changing the playback speed, it is recommended to query the actual speed supported
-     * by the player, see {@link #getPlaybackSpeed()}.
-     * @param speed the desired playback speed
-     */
-    @Override
-    public void setPlaybackSpeed(float speed) {
-        addTask(new Task(CALL_COMPLETED_SET_PLAYBACK_SPEED, false) {
-            @Override
-            void process() {
-                _setPlaybackParams(getPlaybackParams().setSpeed(speed));
-            }
-        });
-    }
-
-    /**
-     * Returns the actual playback speed to be used by the player when playing.
-     * Note that it may differ from the speed set in {@link #setPlaybackSpeed(float)}.
-     * @return the actual playback speed
-     */
-    @Override
-    public float getPlaybackSpeed() {
-        return getPlaybackParams().getSpeed();
-    }
-
-    /**
-     * Indicates whether reverse playback is supported.
-     * Reverse playback is indicated by negative playback speeds, see
-     * {@link #setPlaybackSpeed(float)}.
-     * @return true if reverse playback is supported.
-     */
-    @Override
-    public boolean isReversePlaybackSupported() {
-        return false;
-    }
 
     /**
      * Sets the volume of the audio of the media to play, expressed as a linear multiplier
@@ -578,25 +515,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     public float getMaxPlayerVolume() {
         return 1.0f;
     }
-
-    /**
-     * Adds a callback to be notified of events for this player.
-     * @param e the {@link Executor} to be used for the events.
-     * @param cb the callback to receive the events.
-     */
-    @Override
-    public void registerPlayerEventCallback(@NonNull Executor e,
-            @NonNull PlayerEventCallback cb) {
-    }
-
-    /**
-     * Removes a previously registered callback for player events
-     * @param cb the callback to remove
-     */
-    @Override
-    public void unregisterPlayerEventCallback(@NonNull PlayerEventCallback cb) {
-    }
-
 
     private static final int NEXT_SOURCE_STATE_ERROR = -1;
     private static final int NEXT_SOURCE_STATE_INIT = 0;
@@ -1354,13 +1272,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public native boolean isPlaying();
-
-    @Override
-    public @MediaPlayer2State int getMediaPlayer2State() {
-        return native_getMediaPlayer2State();
-    }
-
-    private native int native_getMediaPlayer2State();
 
     /**
      * Gets the current buffering management params used by the source component.
