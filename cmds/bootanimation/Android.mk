@@ -27,7 +27,9 @@ ifeq ($(PRODUCT_IOT),true)
 
 LOCAL_SHARED_LIBRARIES += \
     libandroidthings \
+    libandroidthings_protos \
     libchrome \
+    libprotobuf-cpp-lite \
 
 LOCAL_STATIC_LIBRARIES += \
     libjsoncpp

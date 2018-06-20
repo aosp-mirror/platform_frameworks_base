@@ -22,7 +22,7 @@
 #include <vector>
 
 #include <boot_action/boot_action.h>  // libandroidthings native API.
-#include <json/json.h>
+#include <boot_parameters.pb.h>
 
 namespace android {
 
@@ -39,22 +39,33 @@ public:
     // Returns the additional boot parameters that were set on reboot.
     const std::vector<ABootActionParameter>& getParameters() const { return mParameters; }
 
-    // Exposed for testing. Updates the parameters with new JSON values.
-    void loadParameters(const std::string& raw_json);
-private:
+    // Exposed for testing. Sets the parameters to the serialized proto.
+    void parseBootParameters(const std::string &contents);
+
+    // For devices that OTA from N to O.
+    // Exposed for testing. Sets the parameters to the raw JSON.
+    void parseLegacyBootParameters(const std::string &contents);
+
+    // Exposed for testing. Loads the contents from |nextBootFile| and replaces
+    // |lastBootFile| with |nextBootFile|.
+    static bool swapAndLoadBootConfigContents(const char *lastBootFile, const char *nextBootFile,
+                                              std::string *contents);
+
+  private:
     void loadParameters();
 
-    void parseBootParameters();
+    // Replaces the legacy JSON blob with the updated version, allowing the
+    // framework to read it.
+    void storeParameters();
+
+    void loadStateFromProto();
 
     bool mIsSilentBoot = false;
 
     std::vector<ABootActionParameter> mParameters;
 
-    // Store parsed JSON because mParameters makes a shallow copy.
-    Json::Value mJson;
-
-    // Store parameter keys because mParameters makes a shallow copy.
-    Json::Value::Members mKeys;
+    // Store the proto because mParameters makes a shallow copy.
+    android::things::proto::BootParameters mProto;
 };
 
 }  // namespace android
