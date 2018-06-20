@@ -8300,6 +8300,22 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Makes all accumulated network logs available to DPC in a new batch.
+     * Only callable by ADB. If throttled, returns time to wait in milliseconds, otherwise 0.
+     * @hide
+     */
+    public long forceNetworkLogs() {
+        if (mService == null) {
+            return -1;
+        }
+        try {
+            return mService.forceNetworkLogs();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Forces a batch of security logs to be fetched from logd and makes it available for DPC.
      * Only callable by ADB. If throttled, returns time to wait in milliseconds, otherwise 0.
      * @hide
