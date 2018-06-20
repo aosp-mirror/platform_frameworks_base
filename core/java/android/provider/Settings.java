@@ -9935,6 +9935,14 @@ public final class Settings {
         public static final String WIFI_DATA_STALL_MIN_TX_SUCCESS_WITHOUT_RX =
                 "wifi_data_stall_min_tx_success_without_rx";
 
+        /**
+         * Setting to enable logging Wifi LinkSpeedCounts in metrics.
+         * Disabled by default, and setting it to 1 will enable it.
+         * @hide
+         */
+        public static final String WIFI_LINK_SPEED_METRICS_ENABLED =
+                "wifi_link_speed_metrics_enabled";
+
        /**
         * The maximum number of times we will retry a connection to an access
         * point for which we have failed in acquiring an IP address from DHCP.
