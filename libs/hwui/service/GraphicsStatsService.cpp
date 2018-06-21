@@ -127,7 +127,7 @@ bool GraphicsStatsService::parseFromFile(const std::string& path,
         return false;
     }
     void* addr = mmap(nullptr, sb.st_size, PROT_READ, MAP_SHARED, fd, 0);
-    if (!addr) {
+    if (addr == MAP_FAILED) {
         int err = errno;
         // The file not existing is normal for addToDump(), so only log if
         // we get an unexpected error
