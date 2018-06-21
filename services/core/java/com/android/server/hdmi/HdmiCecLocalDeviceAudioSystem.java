@@ -49,6 +49,18 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
+    protected void onStandby(boolean initiatedByCec, int standbyAction) {
+        assertRunOnServiceThread();
+        if (setSystemAudioMode(false)) {
+          mService.sendCecCommand(
+              HdmiCecMessageBuilder.buildSetSystemAudioMode(
+                  mAddress, Constants.ADDR_BROADCAST, false)
+          );
+        }
+    }
+
+    @Override
+    @ServiceThreadOnly
     protected void onAddressAllocated(int logicalAddress, int reason) {
         assertRunOnServiceThread();
         mService.sendCecCommand(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(

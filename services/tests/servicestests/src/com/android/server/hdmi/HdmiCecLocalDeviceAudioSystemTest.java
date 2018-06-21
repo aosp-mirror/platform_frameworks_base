@@ -19,6 +19,7 @@ import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
+import static com.android.server.hdmi.HdmiControlService.STANDBY_SCREEN_OFF;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.assertEquals;
@@ -41,6 +42,7 @@ import org.junit.runners.JUnit4;
  */
 public class HdmiCecLocalDeviceAudioSystemTest {
 
+    private static final String TAG = "HdmiCecLocalDeviceAudioSystemTest";
     private HdmiControlService mHdmiControlService;
     private HdmiCecController mHdmiCecController;
     private HdmiCecLocalDeviceAudioSystem mHdmiCecLocalDeviceAudioSystem;
@@ -234,6 +236,20 @@ public class HdmiCecLocalDeviceAudioSystemTest {
             .buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, false);
         assertTrue(mHdmiCecLocalDeviceAudioSystem.handleGiveSystemAudioModeStatus(messageGive));
         mTestLooper.dispatchAll();
+        assertEquals(expectMessage, mNativeWrapper.getResultMessage());
+        assertTrue(mMusicMute);
+    }
+
+    @Test
+    public void onStandbyAudioSystem_currentSystemAudioControlOn() {
+        // Set system audio control on first
+        mHdmiCecLocalDeviceAudioSystem.setSystemAudioMode(true);
+
+        // Check if standby correctly turns off the feature
+        mHdmiCecLocalDeviceAudioSystem.onStandby(false, STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+        HdmiCecMessage expectMessage = HdmiCecMessageBuilder
+            .buildSetSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_BROADCAST, false);
         assertEquals(expectMessage, mNativeWrapper.getResultMessage());
         assertTrue(mMusicMute);
     }

@@ -2041,6 +2041,10 @@ public class HdmiControlService extends SystemService {
         return mLocalDevices.contains(HdmiDeviceInfo.DEVICE_TV);
     }
 
+    boolean isAudioSystemDevice() {
+        return mLocalDevices.contains(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+    }
+
     boolean isTvDeviceEnabled() {
         return isTvDevice() && tv() != null;
     }
@@ -2229,8 +2233,10 @@ public class HdmiControlService extends SystemService {
             device.onStandby(mStandbyMessageReceived, standbyAction);
         }
         mStandbyMessageReceived = false;
-        mCecController.setOption(OptionKey.SYSTEM_CEC_CONTROL, false);
-        mMhlController.setOption(OPTION_MHL_SERVICE_CONTROL, DISABLED);
+        if (!isAudioSystemDevice()) {
+            mCecController.setOption(OptionKey.SYSTEM_CEC_CONTROL, false);
+            mMhlController.setOption(OPTION_MHL_SERVICE_CONTROL, DISABLED);
+        }
     }
 
     private void addVendorCommandListener(IHdmiVendorCommandListener listener, int deviceType) {
