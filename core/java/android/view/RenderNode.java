@@ -139,7 +139,9 @@ public class RenderNode {
                 RenderNode.class.getClassLoader(), nGetNativeFinalizer(), 1024);
     }
 
-    // Do not access directly unless you are ThreadedRenderer
+    /** Not for general use; use only if you are ThreadedRenderer or DisplayListCanvas.
+     * @hide
+     */
     final long mNativeRenderNode;
     private final View mOwningView;
 
@@ -156,15 +158,6 @@ public class RenderNode {
         mNativeRenderNode = nativePtr;
         NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativeRenderNode);
         mOwningView = null;
-    }
-
-    /**
-     * Immediately destroys the RenderNode
-     * Only suitable for testing/benchmarking where waiting for the GC/finalizer
-     * is not feasible.
-     */
-    public void destroy() {
-        // TODO: Removed temporarily
     }
 
     /**
@@ -219,6 +212,14 @@ public class RenderNode {
     }
 
     /**
+     * Same as {@link #start(int, int)} but with the RenderNode's width & height
+     */
+    public DisplayListCanvas start() {
+        return DisplayListCanvas.obtain(this,
+                nGetWidth(mNativeRenderNode), nGetHeight(mNativeRenderNode));
+    }
+
+    /**
      * Ends the recording for this display list. A display list cannot be
      * replayed if recording is not finished. Calling this method marks
      * the display list valid and {@link #isValid()} will return true.
@@ -249,13 +250,6 @@ public class RenderNode {
      */
     public boolean isValid() {
         return nIsValid(mNativeRenderNode);
-    }
-
-    long getNativeDisplayList() {
-        if (!isValid()) {
-            throw new IllegalStateException("The display list is not valid.");
-        }
-        return mNativeRenderNode;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -463,7 +457,6 @@ public class RenderNode {
      * @see #setHasOverlappingRendering(boolean)
      */
     public boolean hasOverlappingRendering() {
-        //noinspection SimplifiableIfStatement
         return nHasOverlappingRendering(mNativeRenderNode);
     }
 
@@ -1009,4 +1002,8 @@ public class RenderNode {
     private static native float nGetPivotX(long renderNode);
     @CriticalNative
     private static native float nGetPivotY(long renderNode);
+    @CriticalNative
+    private static native int nGetWidth(long renderNode);
+    @CriticalNative
+    private static native int nGetHeight(long renderNode);
 }

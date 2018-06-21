@@ -180,13 +180,12 @@ public final class DisplayListCanvas extends RecordingCanvas {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * Draws the specified display list onto this canvas. The display list can only
-     * be drawn if {@link android.view.RenderNode#isValid()} returns true.
+     * Draws the specified display list onto this canvas.
      *
      * @param renderNode The RenderNode to draw.
      */
     public void drawRenderNode(RenderNode renderNode) {
-        nDrawRenderNode(mNativeCanvasWrapper, renderNode.getNativeDisplayList());
+        nDrawRenderNode(mNativeCanvasWrapper, renderNode.mNativeRenderNode);
     }
 
     ///////////////////////////////////////////////////////////////////////////

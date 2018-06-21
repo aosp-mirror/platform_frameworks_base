@@ -611,7 +611,6 @@ public final class Magnifier {
                 mRenderer.destroy();
                 mSurfaceControl.destroy();
                 mSurfaceSession.kill();
-                mBitmapRenderNode.destroy();
                 mHandler.removeCallbacks(mMagnifierUpdater);
                 if (mBitmap != null) {
                     mBitmap.recycle();
