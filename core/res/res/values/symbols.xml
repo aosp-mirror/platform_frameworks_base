@@ -2200,6 +2200,7 @@
   <java-symbol type="string" name="ext_media_move_failure_message" />
   <java-symbol type="style" name="Animation.RecentApplications" />
   <java-symbol type="integer" name="dock_enter_exit_duration" />
+  <java-symbol type="bool" name="config_battery_percentage_setting_available" />
 
   <!-- ImfTest -->
   <java-symbol type="layout" name="auto_complete_list" />
