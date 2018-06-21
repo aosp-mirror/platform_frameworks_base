@@ -26,6 +26,7 @@ import org.junit.runners.Suite;
         BatteryStatsDualTimerTest.class,
         BatteryStatsDurationTimerTest.class,
         BatteryStatsHelperTest.class,
+        BatteryStatsHistoryTest.class,
         BatteryStatsImplTest.class,
         BatteryStatsNoteTest.class,
         BatteryStatsSamplingTimerTest.class,
