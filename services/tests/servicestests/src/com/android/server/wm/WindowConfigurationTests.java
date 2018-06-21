@@ -31,6 +31,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOW_CONFIG_ALWAYS_ON_TOP;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_WINDOWING_MODE;
 import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
@@ -81,6 +82,11 @@ public class WindowConfigurationTests extends WindowTestsBase {
         assertEquals(WINDOW_CONFIG_APP_BOUNDS | WINDOW_CONFIG_WINDOWING_MODE,
                 winConfig1.diff(winConfig2, false /* compareUndefined */));
 
+        winConfig2.setAlwaysOnTop(true);
+        assertEquals(WINDOW_CONFIG_APP_BOUNDS | WINDOW_CONFIG_WINDOWING_MODE
+                | WINDOW_CONFIG_ALWAYS_ON_TOP,
+                winConfig1.diff(winConfig2, false /* compareUndefined */));
+
         assertEquals(0, config1.diff(config3));
         assertEquals(0, config1.diffPublicOnly(config3));
         assertEquals(0, winConfig1.diff(winConfig3, false /* compareUndefined */));
@@ -107,6 +113,12 @@ public class WindowConfigurationTests extends WindowTestsBase {
         assertNotEquals(config1.compareTo(config2), 0);
         assertNotEquals(winConfig1.compareTo(winConfig2), 0);
         winConfig2.setWindowingMode(winConfig1.getWindowingMode());
+
+        // Different always on top state
+        winConfig2.setAlwaysOnTop(true);
+        assertNotEquals(config1.compareTo(config2), 0);
+        assertNotEquals(winConfig1.compareTo(winConfig2), 0);
+        winConfig2.setAlwaysOnTop(winConfig1.isAlwaysOnTop());
 
         // Different bounds
         winConfig2.setAppBounds(0, 2, 3, 4);
