@@ -172,7 +172,8 @@ class AlarmManagerService extends SystemService {
     long mNativeData;
     private long mNextWakeup;
     private long mNextNonWakeup;
-    private long mLastWakeupSet;
+    private long mNextWakeUpSetAt;
+    private long mNextNonWakeUpSetAt;
     private long mLastWakeup;
     private long mLastTrigger;
     private long mLastTickSet;
@@ -1939,7 +1940,7 @@ class AlarmManagerService extends SystemService {
             TimeUtils.formatDuration(nowELAPSED - mLastAlarmDeliveryTime, pw);
             pw.println();
             pw.print("  Next non-wakeup delivery time: ");
-            TimeUtils.formatDuration(nowELAPSED - mNextNonWakeupDeliveryTime, pw);
+            TimeUtils.formatDuration(mNextNonWakeupDeliveryTime, nowELAPSED, pw);
             pw.println();
 
             long nextWakeupRTC = mNextWakeup + (nowRTC - nowELAPSED);
@@ -1948,10 +1949,12 @@ class AlarmManagerService extends SystemService {
                     TimeUtils.formatDuration(mNextNonWakeup, nowELAPSED, pw);
                     pw.print(" = "); pw.print(mNextNonWakeup);
                     pw.print(" = "); pw.println(sdf.format(new Date(nextNonWakeupRTC)));
+            pw.print("    set at "); TimeUtils.formatDuration(mNextNonWakeUpSetAt, nowELAPSED, pw);
+            pw.println();
             pw.print("  Next wakeup alarm: "); TimeUtils.formatDuration(mNextWakeup, nowELAPSED, pw);
                     pw.print(" = "); pw.print(mNextWakeup);
                     pw.print(" = "); pw.println(sdf.format(new Date(nextWakeupRTC)));
-            pw.print("    set at "); TimeUtils.formatDuration(mLastWakeupSet, nowELAPSED, pw);
+            pw.print("    set at "); TimeUtils.formatDuration(mNextWakeUpSetAt, nowELAPSED, pw);
                     pw.println();
 
             pw.print("  Next kernel non-wakeup alarm: ");
@@ -2290,7 +2293,7 @@ class AlarmManagerService extends SystemService {
             proto.write(AlarmManagerServiceDumpProto.TIME_SINCE_LAST_WAKEUP_MS,
                     nowElapsed - mLastWakeup);
             proto.write(AlarmManagerServiceDumpProto.TIME_SINCE_LAST_WAKEUP_SET_MS,
-                    nowElapsed - mLastWakeupSet);
+                    nowElapsed - mNextWakeUpSetAt);
             proto.write(AlarmManagerServiceDumpProto.TIME_CHANGE_EVENT_COUNT, mNumTimeChanged);
 
             final TreeSet<Integer> users = new TreeSet<>();
@@ -2675,16 +2678,49 @@ class AlarmManagerService extends SystemService {
                 DateFormat.format(pattern, info.getTriggerTime()).toString();
     }
 
+    /**
+     * If the last time AlarmThread woke up precedes any due wakeup or non-wakeup alarm that we set
+     * by more than half a minute, log a wtf.
+     */
+    private void validateLastAlarmExpiredLocked(long nowElapsed) {
+        final StringBuilder errorMsg = new StringBuilder();
+        boolean stuck = false;
+        if (mNextNonWakeup < nowElapsed && mLastWakeup < (mNextNonWakeup - 30_000)) {
+            stuck = true;
+            errorMsg.append("[mNextNonWakeup=");
+            TimeUtils.formatDuration(mNextNonWakeup - nowElapsed, errorMsg);
+            errorMsg.append(", mLastWakeup=");
+            TimeUtils.formatDuration(mLastWakeup - nowElapsed, errorMsg);
+            errorMsg.append(", timerfd_gettime=" + getNextAlarm(mNativeData, ELAPSED_REALTIME));
+            errorMsg.append("];");
+        }
+        if (mNextWakeup < nowElapsed && mLastWakeup < (mNextWakeup - 30_000)) {
+            stuck = true;
+            errorMsg.append("[mNextWakeup=");
+            TimeUtils.formatDuration(mNextWakeup - nowElapsed, errorMsg);
+            errorMsg.append(", mLastWakeup=");
+            TimeUtils.formatDuration(mLastWakeup - nowElapsed, errorMsg);
+            errorMsg.append(", timerfd_gettime="
+                    + getNextAlarm(mNativeData, ELAPSED_REALTIME_WAKEUP));
+            errorMsg.append("];");
+        }
+        if (stuck) {
+            Slog.wtf(TAG, "Alarm delivery stuck: " + errorMsg.toString());
+        }
+    }
+
     void rescheduleKernelAlarmsLocked() {
         // Schedule the next upcoming wakeup alarm.  If there is a deliverable batch
         // prior to that which contains no wakeups, we schedule that as well.
+        final long nowElapsed = SystemClock.elapsedRealtime();
+        validateLastAlarmExpiredLocked(nowElapsed);
         long nextNonWakeup = 0;
         if (mAlarmBatches.size() > 0) {
             final Batch firstWakeup = findFirstWakeupBatchLocked();
             final Batch firstBatch = mAlarmBatches.get(0);
             if (firstWakeup != null) {
                 mNextWakeup = firstWakeup.start;
-                mLastWakeupSet = SystemClock.elapsedRealtime();
+                mNextWakeUpSetAt = nowElapsed;
                 setLocked(ELAPSED_REALTIME_WAKEUP, firstWakeup.start);
             }
             if (firstBatch != firstWakeup) {
@@ -2698,6 +2734,7 @@ class AlarmManagerService extends SystemService {
         }
         if (nextNonWakeup != 0) {
             mNextNonWakeup = nextNonWakeup;
+            mNextNonWakeUpSetAt = nowElapsed;
             setLocked(ELAPSED_REALTIME, nextNonWakeup);
         }
     }
