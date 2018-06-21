@@ -847,6 +847,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     }
                     mHeadsUpAppearanceController = new HeadsUpAppearanceController(
                             mNotificationIconAreaController, mHeadsUpManager, mStatusBarWindow);
+                    mStatusBarWindow.setStatusBarView(mStatusBarView);
                     setAreThereNotifications();
                     checkBarModes();
                 }).getFragmentManager()
