@@ -3479,4 +3479,6 @@
     <!-- Whether or not swipe up gesture's opt-in setting is available on this device -->
     <bool name="config_swipe_up_gesture_setting_available">false</bool>
 
+    <!-- Whether or not we should show the option to show battery percentage -->
+    <bool name="config_battery_percentage_setting_available">true</bool>
 </resources>
