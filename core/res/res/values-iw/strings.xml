@@ -1084,7 +1084,7 @@
     <string name="capital_on" msgid="1544682755514494298">"מופעל"</string>
     <string name="capital_off" msgid="6815870386972805832">"כבוי"</string>
     <string name="whichApplication" msgid="4533185947064773386">"השלמת פעולה באמצעות"</string>
-    <string name="whichApplicationNamed" msgid="8260158865936942783">"‏השלם את הפעולה באמצעות %1$s"</string>
+    <string name="whichApplicationNamed" msgid="8260158865936942783">"‏להשלמת הפעולה באמצעות %1$s"</string>
     <string name="whichApplicationLabel" msgid="7425855495383818784">"השלם פעולה"</string>
     <string name="whichViewApplication" msgid="3272778576700572102">"פתח באמצעות"</string>
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"‏פתח באמצעות %1$s"</string>

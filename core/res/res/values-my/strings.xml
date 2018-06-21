@@ -566,7 +566,7 @@
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM လက်မှတ်များကို ရယူသုံးခြင်း"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"အပလီကေးရှင်းတစ်ခုအား စီမံလုပ်ကိုင်ခွင့် DRM လက်မှတ်များ သုံးခွင့် ပြုသည်။ သာမန် အက်ပ်များ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။"</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android ရဲ့ အလင်းတန်းထိုး လွှဲပြောင်းမှု အခြေအနေကို ရယူရန်"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ဒီအပလီကေးရှင်းအား အန်ဒရွိုက်၏ လက်ရှိ အလင်းတန်းထိုး လွှဲပြောင်းမှု အကြောင်း အချက်အလက်ကို ရယူခွင့် ပြုသည်"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ဒီအပလီကေးရှင်းအား Android၏ လက်ရှိ အလင်းတန်းထိုး လွှဲပြောင်းမှု အကြောင်း အချက်အလက်ကို ရယူခွင့် ပြုသည်"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM လက်မှတ်များ ဖယ်ရှားရန်"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"အပလီကေးရှင်းအား DRM လက်မှတ်များကို ဖယ်ရှားခွင့် ပြုသည်။  သာမန် အက်ပ်များ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"စာပို့စာယူ ဆက်သွယ်ရေးဝန်ဆောင်မှုတစ်ခုအား ပူးပေါင်းခွင့်ပြုရန်"</string>
