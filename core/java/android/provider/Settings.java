@@ -9032,6 +9032,14 @@ public final class Settings {
             "location_background_throttle_package_whitelist";
 
         /**
+         * Maximum staleness allowed for last location when returned to clients with only foreground
+         * location permissions.
+         * @hide
+         */
+        public static final String LOCATION_LAST_LOCATION_MAX_AGE_MILLIS =
+                "location_last_location_max_age_millis";
+
+        /**
         * Whether TV will switch to MHL port when a mobile device is plugged in.
         * (0 = false, 1 = true)
         * @hide
