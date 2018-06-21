@@ -71,6 +71,7 @@ import android.net.MacAddress;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
@@ -127,6 +128,10 @@ public class TetheringTest {
     private static final String TEST_XLAT_MOBILE_IFNAME = "v4-test_rmnet_data0";
     private static final String TEST_USB_IFNAME = "test_rndis0";
     private static final String TEST_WLAN_IFNAME = "test_wlan0";
+
+    // Actual contents of the request don't matter for this test. The lack of
+    // any specific TRANSPORT_* is sufficient to identify this request.
+    private static final NetworkRequest mDefaultRequest = new NetworkRequest.Builder().build();
 
     @Mock private ApplicationInfo mApplicationInfo;
     @Mock private Context mContext;
@@ -238,6 +243,11 @@ public class TetheringTest {
             isTetheringSupportedCalls++;
             return true;
         }
+
+        @Override
+        public NetworkRequest getDefaultNetworkRequest() {
+            return mDefaultRequest;
+        }
     }
 
     private static NetworkState buildMobileUpstreamState(boolean withIPv4, boolean withIPv6,
@@ -305,6 +315,8 @@ public class TetheringTest {
                 .thenReturn(new String[0]);
         when(mResources.getIntArray(com.android.internal.R.array.config_tether_upstream_types))
                 .thenReturn(new int[0]);
+        when(mResources.getBoolean(com.android.internal.R.bool.config_tether_upstream_automatic))
+                .thenReturn(false);
         when(mNMService.listInterfaces())
                 .thenReturn(new String[] {
                         TEST_MOBILE_IFNAME, TEST_WLAN_IFNAME, TEST_USB_IFNAME});
@@ -458,6 +470,7 @@ public class TetheringTest {
     }
 
     private void prepareUsbTethering(NetworkState upstreamState) {
+        when(mUpstreamNetworkMonitor.getCurrentPreferredUpstream()).thenReturn(upstreamState);
         when(mUpstreamNetworkMonitor.selectPreferredUpstreamType(any()))
                 .thenReturn(upstreamState);
 
@@ -519,7 +532,7 @@ public class TetheringTest {
                 TEST_WLAN_IFNAME, WifiManager.IFACE_IP_MODE_LOCAL_ONLY);
         verifyNoMoreInteractions(mWifiManager);
         verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_ACTIVE_LOCAL_ONLY);
-        verify(mUpstreamNetworkMonitor, times(1)).start();
+        verify(mUpstreamNetworkMonitor, times(1)).start(any(NetworkRequest.class));
         // TODO: Figure out why this isn't exactly once, for sendTetherStateChangedBroadcast().
         assertTrue(1 <= mTetheringDependencies.isTetheringSupportedCalls);
 
@@ -652,6 +665,24 @@ public class TetheringTest {
     }
 
     @Test
+    public void configTetherUpstreamAutomaticIgnoresConfigTetherUpstreamTypes() throws Exception {
+        when(mResources.getBoolean(com.android.internal.R.bool.config_tether_upstream_automatic))
+                .thenReturn(true);
+        sendConfigurationChanged();
+
+        // Setup IPv6
+        final NetworkState upstreamState = buildMobileIPv6UpstreamState();
+        runUsbTethering(upstreamState);
+
+        // UpstreamNetworkMonitor should choose upstream automatically
+        // (in this specific case: choose the default network).
+        verify(mUpstreamNetworkMonitor, times(1)).getCurrentPreferredUpstream();
+        verify(mUpstreamNetworkMonitor, never()).selectPreferredUpstreamType(any());
+
+        verify(mUpstreamNetworkMonitor, times(1)).setCurrentUpstream(upstreamState.network);
+    }
+
+    @Test
     public void workingLocalOnlyHotspotEnrichedApBroadcastWithIfaceChanged() throws Exception {
         workingLocalOnlyHotspotEnrichedApBroadcast(true);
     }
@@ -714,7 +745,7 @@ public class TetheringTest {
                 TEST_WLAN_IFNAME, WifiManager.IFACE_IP_MODE_TETHERED);
         verifyNoMoreInteractions(mWifiManager);
         verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_ACTIVE_TETHER);
-        verify(mUpstreamNetworkMonitor, times(1)).start();
+        verify(mUpstreamNetworkMonitor, times(1)).start(any(NetworkRequest.class));
         // In tethering mode, in the default configuration, an explicit request
         // for a mobile network is also made.
         verify(mUpstreamNetworkMonitor, times(1)).registerMobileNetworkRequest();

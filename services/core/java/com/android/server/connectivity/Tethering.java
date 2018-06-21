@@ -1350,8 +1350,11 @@ public class Tethering extends BaseNetworkObserver {
             // do not currently know how to watch for changes in DUN settings.
             maybeUpdateConfiguration();
 
-            final NetworkState ns = mUpstreamNetworkMonitor.selectPreferredUpstreamType(
-                    mConfig.preferredUpstreamIfaceTypes);
+            final TetheringConfiguration config = mConfig;
+            final NetworkState ns = (config.chooseUpstreamAutomatically)
+                    ? mUpstreamNetworkMonitor.getCurrentPreferredUpstream()
+                    : mUpstreamNetworkMonitor.selectPreferredUpstreamType(
+                            config.preferredUpstreamIfaceTypes);
             if (ns == null) {
                 if (tryCell) {
                     mUpstreamNetworkMonitor.registerMobileNetworkRequest();
@@ -1380,9 +1383,7 @@ public class Tethering extends BaseNetworkObserver {
             }
             notifyDownstreamsOfNewUpstreamIface(ifaces);
             if (ns != null && pertainsToCurrentUpstream(ns)) {
-                // If we already have NetworkState for this network examine
-                // it immediately, because there likely will be no second
-                // EVENT_ON_AVAILABLE (it was already received).
+                // If we already have NetworkState for this network update it immediately.
                 handleNewUpstreamNetworkState(ns);
             } else if (mCurrentUpstreamIfaceSet == null) {
                 // There are no available upstream networks.
@@ -1498,15 +1499,6 @@ public class Tethering extends BaseNetworkObserver {
             }
 
             switch (arg1) {
-                case UpstreamNetworkMonitor.EVENT_ON_AVAILABLE:
-                    // The default network changed, or DUN connected
-                    // before this callback was processed. Updates
-                    // for the current NetworkCapabilities and
-                    // LinkProperties have been requested (default
-                    // request) or are being sent shortly (DUN). Do
-                    // nothing until they arrive; if no updates
-                    // arrive there's nothing to do.
-                    break;
                 case UpstreamNetworkMonitor.EVENT_ON_CAPABILITIES:
                     handleNewUpstreamNetworkState(ns);
                     break;
@@ -1539,7 +1531,7 @@ public class Tethering extends BaseNetworkObserver {
                 }
 
                 mSimChange.startListening();
-                mUpstreamNetworkMonitor.start();
+                mUpstreamNetworkMonitor.start(mDeps.getDefaultNetworkRequest());
 
                 // TODO: De-duplicate with updateUpstreamWanted() below.
                 if (upstreamWanted()) {
