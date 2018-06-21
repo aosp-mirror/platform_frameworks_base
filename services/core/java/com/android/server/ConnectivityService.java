@@ -1020,7 +1020,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private NetworkAgentInfo getNetworkAgentInfoForNetwork(Network network) {
+    @VisibleForTesting
+    protected NetworkAgentInfo getNetworkAgentInfoForNetwork(Network network) {
         if (network == null) {
             return null;
         }
