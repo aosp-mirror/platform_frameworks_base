@@ -6126,6 +6126,11 @@ message MetricsEvent {
     // CATEGORY: NOTIFICATION
     NOTIFICATION_INTERRUPTION = 1501;
 
+    // OPEN: Settings
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_HOMEPAGE = 1502;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.
