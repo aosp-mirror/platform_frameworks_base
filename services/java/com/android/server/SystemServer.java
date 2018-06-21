@@ -1205,21 +1205,24 @@ public final class SystemServer {
                 traceEnd();
             }
 
-            traceBeginAndSlog("StartTimeDetectorService");
-            try {
-                mSystemServiceManager.startService(TIME_DETECTOR_SERVICE_CLASS);
-            } catch (Throwable e) {
-                reportWtf("starting StartTimeDetectorService service", e);
-            }
-            traceEnd();
+            final boolean useNewTimeServices = true;
+            if (useNewTimeServices) {
+                traceBeginAndSlog("StartTimeDetectorService");
+                try {
+                    mSystemServiceManager.startService(TIME_DETECTOR_SERVICE_CLASS);
+                } catch (Throwable e) {
+                    reportWtf("starting StartTimeDetectorService service", e);
+                }
+                traceEnd();
 
-            traceBeginAndSlog("StartTimeZoneDetectorService");
-            try {
-                mSystemServiceManager.startService(TIME_ZONE_DETECTOR_SERVICE_CLASS);
-            } catch (Throwable e) {
-                reportWtf("starting StartTimeZoneDetectorService service", e);
+                traceBeginAndSlog("StartTimeZoneDetectorService");
+                try {
+                    mSystemServiceManager.startService(TIME_ZONE_DETECTOR_SERVICE_CLASS);
+                } catch (Throwable e) {
+                    reportWtf("starting StartTimeZoneDetectorService service", e);
+                }
+                traceEnd();
             }
-            traceEnd();
 
             if (!disableNonCoreServices && !disableSearchManager) {
                 traceBeginAndSlog("StartSearchManagerService");
@@ -1394,7 +1397,12 @@ public final class SystemServer {
             if (!disableNetwork && !disableNetworkTime) {
                 traceBeginAndSlog("StartNetworkTimeUpdateService");
                 try {
-                    networkTimeUpdater = new NetworkTimeUpdateService(context);
+                    if (useNewTimeServices) {
+                        networkTimeUpdater = new NewNetworkTimeUpdateService(context);
+                    } else {
+                        networkTimeUpdater = new OldNetworkTimeUpdateService(context);
+                    }
+                    Slog.d(TAG, "Using networkTimeUpdater class=" + networkTimeUpdater.getClass());
                     ServiceManager.addService("network_time_update_service", networkTimeUpdater);
                 } catch (Throwable e) {
                     reportWtf("starting NetworkTimeUpdate service", e);
