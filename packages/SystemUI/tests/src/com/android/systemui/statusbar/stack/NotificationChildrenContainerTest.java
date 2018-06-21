@@ -40,30 +40,117 @@ public class NotificationChildrenContainerTest extends SysuiTestCase {
     private ExpandableNotificationRow mGroup;
     private int mId;
     private NotificationTestHelper mNotificationTestHelper;
+    private NotificationChildrenContainer mChildrenContainer;
 
     @Before
     public void setUp() throws Exception {
         mNotificationTestHelper = new NotificationTestHelper(mContext);
         mGroup = mNotificationTestHelper.createGroup();
+        mChildrenContainer = mGroup.getChildrenContainer();
+    }
+
+    @Test
+    public void testGetMaxAllowedVisibleChildren_ambient() {
+        mGroup.setShowAmbient(true);
+        Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
+            NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_AMBIENT);
+    }
+
+    @Test
+    public void testGetMaxAllowedVisibleChildren_lowPriority() {
+        mChildrenContainer.setIsLowPriority(true);
+        Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
+            NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED);
+    }
+
+    @Test
+    public void testGetMaxAllowedVisibleChildren_headsUp() {
+        mGroup.setHeadsUp(true);
+        Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
+                NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED);
+    }
+
+    @Test
+    public void testGetMaxAllowedVisibleChildren_lowPriority_expandedChildren() {
+        mChildrenContainer.setIsLowPriority(true);
+        mChildrenContainer.setChildrenExpanded(true);
+        Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
+            NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED);
+    }
+
+    @Test
+    public void testGetMaxAllowedVisibleChildren_lowPriority_userLocked() {
+        mChildrenContainer.setIsLowPriority(true);
+        mChildrenContainer.setUserLocked(true);
+        Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
+            NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_SYSTEM_EXPANDED);
+    }
+
+    @Test
+    public void testGetMaxAllowedVisibleChildren_likeCollapsed() {
+        Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(true),
+            NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_COLLAPSED);
+    }
+
+
+    @Test
+    public void testGetMaxAllowedVisibleChildren_expandedChildren() {
+        mChildrenContainer.setChildrenExpanded(true);
+        Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
+                NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED);
+    }
+
+    @Test
+    public void testGetMaxAllowedVisibleChildren_userLocked() {
+        mGroup.setUserLocked(true);
+        Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
+                NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED);
+    }
+
+    @Test
+    public void testShowingAsLowPriority_lowPriority() {
+        mChildrenContainer.setIsLowPriority(true);
+        Assert.assertTrue(mChildrenContainer.showingAsLowPriority());
+    }
+
+    @Test
+    public void testShowingAsLowPriority_notLowPriority() {
+        Assert.assertFalse(mChildrenContainer.showingAsLowPriority());
+    }
+
+    @Test
+    public void testShowingAsLowPriority_lowPriority_expanded() {
+        mChildrenContainer.setIsLowPriority(true);
+        mGroup.setExpandable(true);
+        mGroup.setUserExpanded(true, false);
+        Assert.assertFalse(mChildrenContainer.showingAsLowPriority());
+    }
+
+    @Test
+    public void testGetMaxAllowedVisibleChildren_userLocked_expandedChildren_lowPriority() {
+        mGroup.setUserLocked(true);
+        mGroup.setExpandable(true);
+        mGroup.setUserExpanded(true);
+        mChildrenContainer.setIsLowPriority(true);
+        Assert.assertEquals(mChildrenContainer.getMaxAllowedVisibleChildren(),
+                NotificationChildrenContainer.NUMBER_OF_CHILDREN_WHEN_CHILDREN_EXPANDED);
     }
 
     @Test
     public void testLowPriorityHeaderCleared() {
         mGroup.setIsLowPriority(true);
-        NotificationChildrenContainer childrenContainer = mGroup.getChildrenContainer();
-        NotificationHeaderView lowPriorityHeaderView = childrenContainer.getLowPriorityHeaderView();
+        NotificationHeaderView lowPriorityHeaderView = mChildrenContainer.getLowPriorityHeaderView();
         Assert.assertTrue(lowPriorityHeaderView.getVisibility() == View.VISIBLE);
-        Assert.assertTrue(lowPriorityHeaderView.getParent() == childrenContainer);
+        Assert.assertTrue(lowPriorityHeaderView.getParent() == mChildrenContainer);
         mGroup.setIsLowPriority(false);
         Assert.assertTrue(lowPriorityHeaderView.getParent() == null);
-        Assert.assertTrue(childrenContainer.getLowPriorityHeaderView() == null);
+        Assert.assertTrue(mChildrenContainer.getLowPriorityHeaderView() == null);
     }
 
     @Test
     public void testRecreateNotificationHeader_hasHeader() {
-        NotificationChildrenContainer childrenContainer = mGroup.getChildrenContainer();
-        childrenContainer.recreateNotificationHeader(null);
+        mChildrenContainer.recreateNotificationHeader(null);
         Assert.assertNotNull("Children container must have a header after recreation",
-                childrenContainer.getCurrentHeaderView());
+                mChildrenContainer.getCurrentHeaderView());
     }
 }
