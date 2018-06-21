@@ -810,7 +810,7 @@ public class ApnSetting implements Parcelable {
             version = 1;
         }
 
-        String[] a = data.split("\\s*,\\s*");
+        String[] a = data.split("\\s*,\\s*", -1);
         if (a.length < 14) {
             return null;
         }
