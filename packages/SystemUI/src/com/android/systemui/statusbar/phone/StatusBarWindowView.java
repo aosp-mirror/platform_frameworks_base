@@ -76,6 +76,7 @@ public class StatusBarWindowView extends FrameLayout {
     private NotificationStackScrollLayout mStackScrollLayout;
     private NotificationPanelView mNotificationPanel;
     private View mBrightnessMirror;
+    private PhoneStatusBarView mStatusBarView;
 
     private int mRightInset = 0;
     private int mLeftInset = 0;
@@ -204,6 +205,10 @@ public class StatusBarWindowView extends FrameLayout {
         }
     }
 
+    public void setStatusBarView(PhoneStatusBarView statusBarView) {
+        mStatusBarView = statusBarView;
+    }
+
     public void setService(StatusBar service) {
         mService = service;
         setDragDownHelper(new DragDownHelper(getContext(), this, mStackScrollLayout, mService));
@@ -326,7 +331,7 @@ public class StatusBarWindowView extends FrameLayout {
             expandingBelowNotch = true;
         }
         if (expandingBelowNotch) {
-            return mNotificationPanel.dispatchTouchEvent(ev);
+            return mStatusBarView.dispatchTouchEvent(ev);
         }
 
         return super.dispatchTouchEvent(ev);
