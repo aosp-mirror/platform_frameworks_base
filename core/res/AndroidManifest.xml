@@ -3995,6 +3995,11 @@
     <permission android:name="android.permission.DISABLE_HIDDEN_API_CHECKS"
                 android:protectionLevel="signature" />
 
+    <!-- Allows an application to read emergency info name.
+         @hide <p>Not for use by third-party applications. -->
+    <permission android:name="com.android.emergency.permission.READ_EMERGENCY_INFO_NAME"
+                android:protectionLevel="signature" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
