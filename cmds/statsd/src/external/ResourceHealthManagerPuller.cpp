@@ -54,7 +54,7 @@ bool getHealthHal() {
 ResourceHealthManagerPuller::ResourceHealthManagerPuller(int tagId) : StatsPuller(tagId) {
 }
 
-// TODO: add other health atoms (eg. Temperature).
+// TODO(b/110565992): add other health atoms (eg. Temperature).
 bool ResourceHealthManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
     if (!getHealthHal()) {
         ALOGE("Health Hal not loaded");

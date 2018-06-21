@@ -440,7 +440,6 @@ status_t StatsService::cmd_trigger_broadcast(FILE* out, Vector<String8>& args) {
     if (argCount == 2) {
         // Automatically pick the UID
         uid = IPCThreadState::self()->getCallingUid();
-        // TODO: What if this isn't a binder call? Should we fail?
         name.assign(args[1].c_str(), args[1].size());
         good = true;
     } else if (argCount == 3) {
@@ -493,7 +492,6 @@ status_t StatsService::cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8
             if (argCount == 3) {
                 // Automatically pick the UID
                 uid = IPCThreadState::self()->getCallingUid();
-                // TODO: What if this isn't a binder call? Should we fail?
                 name.assign(args[2].c_str(), args[2].size());
                 good = true;
             } else if (argCount == 4) {
@@ -578,7 +576,6 @@ status_t StatsService::cmd_dump_report(FILE* out, FILE* err, const Vector<String
         if (argCount == 2) {
             // Automatically pick the UID
             uid = IPCThreadState::self()->getCallingUid();
-            // TODO: What if this isn't a binder call? Should we fail?
             name.assign(args[1].c_str(), args[1].size());
             good = true;
         } else if (argCount == 3) {
@@ -604,7 +601,6 @@ status_t StatsService::cmd_dump_report(FILE* out, FILE* err, const Vector<String
             vector<uint8_t> data;
             mProcessor->onDumpReport(ConfigKey(uid, StrToInt64(name)), getElapsedRealtimeNs(),
                                      false /* include_current_bucket*/, ADB_DUMP, &data);
-            // TODO: print the returned StatsLogReport to file instead of printing to logcat.
             if (proto) {
                 for (size_t i = 0; i < data.size(); i ++) {
                     fprintf(out, "%c", data[i]);

@@ -326,7 +326,6 @@ void OringDurationTracker::onConditionChanged(bool condition, const int64_t time
 
 int64_t OringDurationTracker::predictAnomalyTimestampNs(
         const DurationAnomalyTracker& anomalyTracker, const int64_t eventTimestampNs) const {
-    // TODO: Unit-test this and see if it can be done more efficiently (e.g. use int32).
 
     // The anomaly threshold.
     const int64_t thresholdNs = anomalyTracker.getAnomalyThreshold();

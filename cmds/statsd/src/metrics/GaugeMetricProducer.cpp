@@ -101,7 +101,6 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
         translateFieldMatcher(metric.gauge_fields_filter().fields(), &mFieldMatchers);
     }
 
-    // TODO: use UidMap if uid->pkg_name is required
     if (metric.has_dimensions_in_what()) {
         translateFieldMatcher(metric.dimensions_in_what(), &mDimensionsInWhat);
         mContainANYPositionInDimensionsInWhat = HasPositionANY(metric.dimensions_in_what());
@@ -299,7 +298,6 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     protoOutput->end(protoToken);
 
     mPastBuckets.clear();
-    // TODO: Clear mDimensionKeyMap once the report is dumped.
 }
 
 void GaugeMetricProducer::pullLocked(const int64_t timestampNs) {

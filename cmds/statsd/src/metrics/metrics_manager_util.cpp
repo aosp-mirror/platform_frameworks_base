@@ -103,7 +103,6 @@ bool handleMetricWithConditions(
         }
         allConditionTrackers[condition_it->second]->setSliced(true);
         allConditionTrackers[it->second]->setSliced(true);
-        // TODO: We need to verify the link is valid.
     }
     conditionIndex = condition_it->second;
 
@@ -169,7 +168,6 @@ bool initLogTrackers(const StatsdConfig& config, const UidMap& uidMap,
 bool isStateTracker(const SimplePredicate& simplePredicate, vector<Matcher>* primaryKeys) {
     // 1. must not have "stop". must have "dimension"
     if (!simplePredicate.has_stop() && simplePredicate.has_dimensions()) {
-        // TODO: need to check the start atom matcher too.
         auto it = android::util::AtomsInfo::kStateAtomsFieldOptions.find(
                 simplePredicate.dimensions().field());
         // 2. must be based on a state atom.

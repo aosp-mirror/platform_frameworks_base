@@ -122,7 +122,6 @@ private:
     const int mPullTagId;
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
-    // TODO: Add a lock to mPastBuckets.
     std::unordered_map<MetricDimensionKey, std::vector<GaugeBucket>> mPastBuckets;
 
     // The current partial bucket.

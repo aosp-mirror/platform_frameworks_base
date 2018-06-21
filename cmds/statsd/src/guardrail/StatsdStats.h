@@ -86,7 +86,6 @@ public:
     static StatsdStats& getInstance();
     ~StatsdStats(){};
 
-    // TODO: set different limit if the device is low ram.
     const static int kDimensionKeySizeSoftLimit = 500;
     const static int kDimensionKeySizeHardLimit = 800;
 

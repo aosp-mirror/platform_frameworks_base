@@ -208,7 +208,8 @@ bool AnomalyTracker::detectAnomaly(const int64_t& currentBucketNum,
 }
 
 void AnomalyTracker::declareAnomaly(const int64_t& timestampNs, const MetricDimensionKey& key) {
-    // TODO: Why receive timestamp? RefractoryPeriod should always be based on real time right now.
+    // TODO(b/110563466): Why receive timestamp? RefractoryPeriod should always be based on
+    // real time right now.
     if (isInRefractoryPeriod(timestampNs, key)) {
         VLOG("Skipping anomaly declaration since within refractory period");
         return;
@@ -216,7 +217,8 @@ void AnomalyTracker::declareAnomaly(const int64_t& timestampNs, const MetricDime
     if (mAlert.has_refractory_period_secs()) {
         mRefractoryPeriodEndsSec[key] = ((timestampNs + NS_PER_SEC - 1) / NS_PER_SEC) // round up
                                         + mAlert.refractory_period_secs();
-        // TODO: If we had access to the bucket_size_millis, consider calling resetStorage()
+        // TODO(b/110563466): If we had access to the bucket_size_millis, consider
+        // calling resetStorage()
         // if (mAlert.refractory_period_secs() > mNumOfPastBuckets * bucketSizeNs) {resetStorage();}
     }
 
@@ -230,7 +232,7 @@ void AnomalyTracker::declareAnomaly(const int64_t& timestampNs, const MetricDime
 
     StatsdStats::getInstance().noteAnomalyDeclared(mConfigKey, mAlert.id());
 
-    // TODO: This should also take in the const MetricDimensionKey& key?
+    // TODO(b/110564268): This should also take in the const MetricDimensionKey& key?
     android::util::stats_write(android::util::ANOMALY_DETECTED, mConfigKey.GetUid(),
                                mConfigKey.GetId(), mAlert.id());
 }
