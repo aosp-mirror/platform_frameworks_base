@@ -51,9 +51,11 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     private int mMusicVolume;
     private int mMusicMaxVolume;
     private boolean mMusicMute;
+    private boolean isAwake;
 
     @Before
     public void SetUp() {
+        isAwake = false;
         mHdmiControlService = new HdmiControlService(null) {
             @Override
             AudioManager getAudioManager() {
@@ -102,6 +104,12 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                     }
                 };
             }
+
+            @Override
+            void wakeUp() {
+                isAwake = true;
+            }
+
         };
         mMyLooper = mTestLooper.getLooper();
         mHdmiCecLocalDeviceAudioSystem = new HdmiCecLocalDeviceAudioSystem(mHdmiControlService);
@@ -117,6 +125,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
         mLocalDevices.add(mHdmiCecLocalDeviceAudioSystem);
         mHdmiControlService.initPortInfo();
+        // System Audio Control will be turned on after allocating address during waking up
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
 
         mTestLooper.dispatchAll();
@@ -139,9 +148,10 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
-    public void handleGiveSystemAudioModeStatus_off() {
+    public void handleGiveSystemAudioModeStatus_originalOn() {
+        assertTrue(isAwake);
         HdmiCecMessage expectMessage = HdmiCecMessageBuilder
-            .buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, false);
+            .buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, true);
         HdmiCecMessage messageGive = HdmiCecMessageBuilder
             .buildGiveSystemAudioModeStatus(ADDR_TV, ADDR_AUDIO_SYSTEM);
 
@@ -177,69 +187,51 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
-    public void handleSystemAudioModeRequest_turnOffByTv_originalOff() {
-        HdmiCecMessage messageRequest = HdmiCecMessageBuilder
-            .buildSystemAudioModeRequest(ADDR_TV, ADDR_AUDIO_SYSTEM, 2, false);
-        HdmiCecMessage expectMessage = HdmiCecMessageBuilder
-            .buildSetSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_BROADCAST, false);
-
-        assertTrue(mHdmiCecLocalDeviceAudioSystem.handleSystemAudioModeRequest(messageRequest));
-        mTestLooper.dispatchAll();
-        assertEquals(expectMessage, mNativeWrapper.getResultMessage());
-    }
-
-    @Test
-    public void handleSetSystemAudioMode_setOn() {
+    public void handleSetSystemAudioMode_setOff_orignalOn() {
+        assertFalse(mMusicMute);
         HdmiCecMessage messageSet = HdmiCecMessageBuilder
-            .buildSetSystemAudioMode(ADDR_TV, ADDR_AUDIO_SYSTEM, true);
+            .buildSetSystemAudioMode(ADDR_TV, ADDR_AUDIO_SYSTEM, false);
         HdmiCecMessage messageGive = HdmiCecMessageBuilder
             .buildGiveSystemAudioModeStatus(ADDR_TV, ADDR_AUDIO_SYSTEM);
 
-        // Check if originally off
+        // Check if originally on
         HdmiCecMessage expectMessage = HdmiCecMessageBuilder
-            .buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, false);
+            .buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, true);
 
         assertTrue(mHdmiCecLocalDeviceAudioSystem.handleGiveSystemAudioModeStatus(messageGive));
         mTestLooper.dispatchAll();
         assertEquals(expectMessage, mNativeWrapper.getResultMessage());
 
-        // Check if correctly turned on
+        // Check if correctly turned off
         expectMessage = HdmiCecMessageBuilder
-            .buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, true);
+            .buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, false);
 
         assertTrue(mHdmiCecLocalDeviceAudioSystem.handleSetSystemAudioMode(messageSet));
         mTestLooper.dispatchAll();
         assertTrue(mHdmiCecLocalDeviceAudioSystem.handleGiveSystemAudioModeStatus(messageGive));
         mTestLooper.dispatchAll();
         assertEquals(expectMessage, mNativeWrapper.getResultMessage());
+        assertTrue(mMusicMute);
     }
 
     @Test
-    public void handleSystemAudioModeRequest_turnOnByTv_thenTurnOffByTv() {
-        mMusicMute = true;
-        HdmiCecMessage messageRequestOn = HdmiCecMessageBuilder
-            .buildSystemAudioModeRequest(ADDR_TV, ADDR_AUDIO_SYSTEM, 2, true);
-        HdmiCecMessage messageGive = HdmiCecMessageBuilder
-            .buildGiveSystemAudioModeStatus(ADDR_TV, ADDR_AUDIO_SYSTEM);
-        // Turn the feature on
-        HdmiCecMessage expectMessage = HdmiCecMessageBuilder
-            .buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, true);
-
-        assertTrue(mHdmiCecLocalDeviceAudioSystem.handleSystemAudioModeRequest(messageRequestOn));
-        mTestLooper.dispatchAll();
-        assertTrue(mHdmiCecLocalDeviceAudioSystem.handleGiveSystemAudioModeStatus(messageGive));
-        mTestLooper.dispatchAll();
-        assertEquals(expectMessage, mNativeWrapper.getResultMessage());
+    public void handleSystemAudioModeRequest_turnOffByTv() {
         assertFalse(mMusicMute);
 
         // Check if feature correctly turned off
+        HdmiCecMessage messageGive = HdmiCecMessageBuilder
+            .buildGiveSystemAudioModeStatus(ADDR_TV, ADDR_AUDIO_SYSTEM);
         HdmiCecMessage messageRequestOff = HdmiCecMessageBuilder
             .buildSystemAudioModeRequest(ADDR_TV, ADDR_AUDIO_SYSTEM, 2, false);
-        expectMessage = HdmiCecMessageBuilder
-            .buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, false);
 
+        HdmiCecMessage expectMessage = HdmiCecMessageBuilder
+            .buildSetSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_BROADCAST, false);
         assertTrue(mHdmiCecLocalDeviceAudioSystem.handleSystemAudioModeRequest(messageRequestOff));
         mTestLooper.dispatchAll();
+        assertEquals(expectMessage, mNativeWrapper.getResultMessage());
+
+        expectMessage = HdmiCecMessageBuilder
+            .buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, false);
         assertTrue(mHdmiCecLocalDeviceAudioSystem.handleGiveSystemAudioModeStatus(messageGive));
         mTestLooper.dispatchAll();
         assertEquals(expectMessage, mNativeWrapper.getResultMessage());

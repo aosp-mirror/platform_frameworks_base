@@ -56,6 +56,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
                 mAddress, mService.getPhysicalAddress(), mDeviceType));
         mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, mService.getVendorId()));
+        // TODO(amyjojo): check PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON to decide the action
+        addAndStartAction(new SystemAudioInitiationActionFromAvr(this));
         startQueuedActions();
     }
 
@@ -171,20 +173,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
             return true;
         }
 
-        if (systemAudioStatusOn) {
-            // TODO(amyjojo): Bring up device when it's on standby mode
-
-            // TODO(amyjojo): Switch to the corresponding input
-
-        }
-        // Mute device when feature is turned off and unmute device when feature is turned on
-        boolean currentMuteStatus =
-            mService.getAudioManager().isStreamMute(AudioManager.STREAM_MUSIC);
-        if (currentMuteStatus == systemAudioStatusOn) {
-            mService.getAudioManager().adjustStreamVolume(AudioManager.STREAM_MUSIC,
-                systemAudioStatusOn ? AudioManager.ADJUST_UNMUTE : AudioManager.ADJUST_MUTE, 0);
-        }
-        mSystemAudioSource = systemAudioStatusOn ? message.getSource() : null;
         mService.sendCecCommand(HdmiCecMessageBuilder
             .buildSetSystemAudioMode(mAddress, Constants.ADDR_BROADCAST, systemAudioStatusOn));
         return true;
@@ -231,6 +219,18 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         }
         HdmiLogger.debug("System Audio Mode change[old:%b new:%b]",
             mSystemAudioActivated, newSystemAudioMode);
+        // Wake up device if System Audio Control is turned on but device is still on standby
+        if (newSystemAudioMode && mService.isPowerStandbyOrTransient()) {
+            mService.wakeUp();
+            // TODO(amyjojo): Switch to the corresponding input
+        }
+        // Mute device when feature is turned off and unmute device when feature is turned on
+        boolean currentMuteStatus =
+            mService.getAudioManager().isStreamMute(AudioManager.STREAM_MUSIC);
+        if (currentMuteStatus == newSystemAudioMode) {
+            mService.getAudioManager().adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                newSystemAudioMode ? AudioManager.ADJUST_UNMUTE : AudioManager.ADJUST_MUTE, 0);
+        }
         updateAudioManagerForSystemAudio(newSystemAudioMode);
         synchronized (mLock) {
             if (mSystemAudioActivated != newSystemAudioMode) {
