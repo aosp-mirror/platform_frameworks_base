@@ -300,7 +300,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             }
         }
 
-        final ActivityManagerService service = mSupervisor.mService.mAm;
+        final ActivityTaskManagerService service = mSupervisor.mService;
         if (!isWindowingModeSupported(windowingMode, service.mSupportsMultiWindow,
                 service.mSupportsSplitScreenMultiWindow, service.mSupportsFreeformWindowManagement,
                 service.mSupportsPictureInPicture, activityType)) {
@@ -536,7 +536,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         }
 
         // Make sure the windowing mode we are trying to use makes sense for what is supported.
-        final ActivityManagerService service = mSupervisor.mService.mAm;
+        final ActivityTaskManagerService service = mSupervisor.mService;
         boolean supportsMultiWindow = service.mSupportsMultiWindow;
         boolean supportsSplitScreen = service.mSupportsSplitScreenMultiWindow;
         boolean supportsFreeform = service.mSupportsFreeformWindowManagement;

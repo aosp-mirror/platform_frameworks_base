@@ -65,7 +65,7 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
     public void setUp() throws Exception {
         super.setUp();
         mService = createActivityManagerService();
-        mController = new LaunchParamsController(mService);
+        mController = new LaunchParamsController(mService.mActivityTaskManager);
     }
 
     /**

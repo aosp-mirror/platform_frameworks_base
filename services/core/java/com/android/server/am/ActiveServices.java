@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
@@ -59,7 +59,6 @@ import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.TransferPipe;
-import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.server.AppStateTracker;
@@ -1869,7 +1868,7 @@ public final class ActiveServices {
                 + " type=" + resolvedType + " callingUid=" + callingUid);
 
         userId = mAm.mUserController.handleIncomingUser(callingPid, callingUid, userId, false,
-                ActivityManagerService.ALLOW_NON_FULL_IN_PROFILE, "service", null);
+                ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE, "service", null);
 
         ServiceMap smap = getServiceMapLocked(userId);
         final ComponentName comp = service.getComponent();

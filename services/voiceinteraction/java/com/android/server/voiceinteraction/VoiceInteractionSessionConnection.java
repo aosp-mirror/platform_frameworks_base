@@ -144,7 +144,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mAppOps = context.getSystemService(AppOpsManager.class);
-        mAssistDataRequester = new AssistDataRequester(mContext, mAm, mIWindowManager,
+        mAssistDataRequester = new AssistDataRequester(mContext, mIWindowManager,
                 (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE),
                 this, mLock, OP_ASSIST_STRUCTURE, OP_ASSIST_SCREENSHOT);
         IBinder permOwner = null;

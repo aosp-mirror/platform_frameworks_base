@@ -21,7 +21,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityManagerService.ALLOW_FULL_ONLY;
+import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 
 import android.app.IApplicationThread;
 import android.content.ComponentName;
@@ -237,8 +237,8 @@ public class ActivityStartController {
     int checkTargetUser(int targetUserId, boolean validateIncomingUser,
             int realCallingPid, int realCallingUid, String reason) {
         if (validateIncomingUser) {
-            return mService.mAm.mUserController.handleIncomingUser(realCallingPid, realCallingUid,
-                    targetUserId, false, ALLOW_FULL_ONLY, reason, null);
+            return mService.handleIncomingUser(
+                    realCallingPid, realCallingUid, targetUserId, reason);
         } else {
             mService.mAm.mUserController.ensureNotSpecialUser(targetUserId);
             return targetUserId;

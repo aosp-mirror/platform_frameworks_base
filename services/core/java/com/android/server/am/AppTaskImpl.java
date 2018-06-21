@@ -20,7 +20,6 @@ import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS
 import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 
 import android.app.ActivityManager;
-import android.app.ActivityOptions;
 import android.app.IAppTask;
 import android.app.IApplicationThread;
 import android.content.Intent;

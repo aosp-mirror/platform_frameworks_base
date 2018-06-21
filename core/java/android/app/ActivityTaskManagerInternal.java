@@ -243,4 +243,24 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract void notifyActiveVoiceInteractionServiceChanged(ComponentName component);
 
+    /**
+     * Set a uid that is allowed to bypass stopped app switches, launching an app
+     * whenever it wants.
+     *
+     * @param type Type of the caller -- unique string the caller supplies to identify itself
+     * and disambiguate with other calles.
+     * @param uid The uid of the app to be allowed, or -1 to clear the uid for this type.
+     * @param userId The user it is allowed for.
+     */
+    public abstract void setAllowAppSwitches(@NonNull String type, int uid, int userId);
+
+    /**
+     * Called when a user has been deleted. This can happen during normal device usage
+     * or just at startup, when partially removed users are purged. Any state persisted by the
+     * ActivityManager should be purged now.
+     *
+     * @param userId The user being cleaned up.
+     */
+    public abstract void onUserStopped(int userId);
+    public abstract boolean isGetTasksAllowed(String caller, int callingPid, int callingUid);
 }

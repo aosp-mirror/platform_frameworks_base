@@ -28,9 +28,9 @@ import static android.os.Process.SYSTEM_UID;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityManagerService.ALLOW_FULL_ONLY;
-import static com.android.server.am.ActivityManagerService.ALLOW_NON_FULL;
-import static com.android.server.am.ActivityManagerService.ALLOW_NON_FULL_IN_PROFILE;
+import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
+import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
+import static android.app.ActivityManagerInternal.ALLOW_NON_FULL_IN_PROFILE;
 import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.am.UserState.STATE_BOOTING;
 import static com.android.server.am.UserState.STATE_RUNNING_LOCKED;
@@ -41,6 +41,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityTaskManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.Dialog;
@@ -80,7 +81,6 @@ import android.os.storage.StorageManager;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.IntArray;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -88,7 +88,6 @@ import android.util.SparseIntArray;
 import android.util.TimingsTraceLog;
 import android.util.proto.ProtoOutputStream;
 
-import android.view.Window;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -2097,9 +2096,7 @@ class UserController implements Handler.Callback {
             return mService.mWindowManager;
         }
         void activityManagerOnUserStopped(int userId) {
-            synchronized (mService) {
-                mService.onUserStoppedLocked(userId);
-            }
+            LocalServices.getService(ActivityTaskManagerInternal.class).onUserStopped(userId);
         }
 
         void systemServiceManagerCleanupUser(int userId) {
@@ -2174,9 +2171,7 @@ class UserController implements Handler.Callback {
         }
 
         void updateUserConfiguration() {
-            synchronized (mService) {
-                mService.updateUserConfigurationLocked();
-            }
+            mService.mActivityTaskManager.updateUserConfiguration();
         }
 
         void clearBroadcastQueueForUser(int userId) {

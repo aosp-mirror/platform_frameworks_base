@@ -49,7 +49,6 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
     public static final String KEY_RECEIVER_EXTRA_COUNT = "count";
     public static final String KEY_RECEIVER_EXTRA_INDEX = "index";
 
-    private IActivityManager mService;
     private IWindowManager mWindowManager;
     private Context mContext;
     private AppOpsManager mAppOpsManager;
@@ -118,14 +117,13 @@ public class AssistDataRequester extends IAssistDataReceiver.Stub {
      *                                This can be {@link AppOpsManager#OP_NONE} to indicate that
      *                                screenshots should never be fetched.
      */
-    public AssistDataRequester(Context context, IActivityManager service,
+    public AssistDataRequester(Context context,
             IWindowManager windowManager, AppOpsManager appOpsManager,
             AssistDataRequesterCallbacks callbacks, Object callbacksLock,
             int requestStructureAppOps, int requestScreenshotAppOps) {
         mCallbacks = callbacks;
         mCallbacksLock = callbacksLock;
         mWindowManager = windowManager;
-        mService = service;
         mContext = context;
         mAppOpsManager = appOpsManager;
         mRequestStructureAppOps = requestStructureAppOps;

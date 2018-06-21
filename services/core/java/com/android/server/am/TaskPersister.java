@@ -655,7 +655,7 @@ public class TaskPersister {
                     synchronized (mService.mGlobalLock) {
                         if (DEBUG) Slog.d(TAG, "mRecents=" + mRecentTasks);
                         mRecentTasks.getPersistableTaskIds(persistentTaskIds);
-                        mService.mAm.mWindowManager.removeObsoleteTaskFiles(persistentTaskIds,
+                        mService.mWindowManager.removeObsoleteTaskFiles(persistentTaskIds,
                                 mRecentTasks.usersWithRecentsLoadedLocked());
                     }
                     removeObsoleteFiles(persistentTaskIds);

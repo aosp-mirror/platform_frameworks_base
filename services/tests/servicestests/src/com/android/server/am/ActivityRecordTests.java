@@ -236,7 +236,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     private void testSupportsLaunchingResizeable(boolean taskPresent, boolean taskResizeable,
             boolean activityResizeable, boolean expected) {
-        mService.mSupportsMultiWindow = true;
+        mService.mActivityTaskManager.mSupportsMultiWindow = true;
 
         final TaskRecord task = taskPresent
                 ? new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build() : null;

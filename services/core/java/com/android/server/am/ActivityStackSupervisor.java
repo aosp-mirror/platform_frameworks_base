@@ -488,7 +488,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // No restrictions for the default display.
             return true;
         }
-        if (!mService.mAm.mSupportsMultiDisplay) {
+        if (!mService.mSupportsMultiDisplay) {
             // Can't launch on secondary displays if feature is not supported.
             return false;
         }
@@ -624,7 +624,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext, mHandler.getLooper());
         mKeyguardController = new KeyguardController(mService.mAm, this);
 
-        mLaunchParamsController = new LaunchParamsController(mService.mAm);
+        mLaunchParamsController = new LaunchParamsController(mService);
         mLaunchParamsController.registerDefaultModifiers(this);
     }
 
@@ -1661,7 +1661,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         // Update the configuration of the activities on the display.
-        return mService.mAm.updateDisplayOverrideConfigurationLocked(config, starting, deferResume,
+        return mService.updateDisplayOverrideConfigurationLocked(config, starting, deferResume,
                 displayId);
     }
 
@@ -2347,9 +2347,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (options == null || options.getLaunchBounds() == null) {
             return false;
         }
-        return (mService.mAm.mSupportsPictureInPicture
+        return (mService.mSupportsPictureInPicture
                 && options.getLaunchWindowingMode() == WINDOWING_MODE_PINNED)
-                || mService.mAm.mSupportsFreeformWindowManagement;
+                || mService.mSupportsFreeformWindowManagement;
     }
 
     LaunchParamsController getLaunchParamsController() {
@@ -3258,21 +3258,21 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         // Ensure that we aren't trying to move into a multi-window stack without multi-window
         // support
-        if (inMultiWindowMode && !mService.mAm.mSupportsMultiWindow) {
+        if (inMultiWindowMode && !mService.mSupportsMultiWindow) {
             throw new IllegalArgumentException("Device doesn't support multi-window, can not"
                     + " reparent task=" + task + " to stack=" + stack);
         }
 
         // Ensure that we're not moving a task to a dynamic stack if device doesn't support
         // multi-display.
-        if (stack.mDisplayId != DEFAULT_DISPLAY && !mService.mAm.mSupportsMultiDisplay) {
+        if (stack.mDisplayId != DEFAULT_DISPLAY && !mService.mSupportsMultiDisplay) {
             throw new IllegalArgumentException("Device doesn't support multi-display, can not"
                     + " reparent task=" + task + " to stackId=" + stackId);
         }
 
         // Ensure that we aren't trying to move into a freeform stack without freeform support
         if (stack.getWindowingMode() == WINDOWING_MODE_FREEFORM
-                && !mService.mAm.mSupportsFreeformWindowManagement) {
+                && !mService.mSupportsFreeformWindowManagement) {
             throw new IllegalArgumentException("Device doesn't support freeform, can not reparent"
                     + " task=" + task);
         }
@@ -3305,7 +3305,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return false;
         }
 
-        if (!mService.mAm.mForceResizableActivities && !r.supportsPictureInPicture()) {
+        if (!mService.mForceResizableActivities && !r.supportsPictureInPicture()) {
             Slog.w(TAG,
                     "moveTopStackActivityToPinnedStackLocked: Picture-In-Picture not supported for "
                             + " r=" + r);

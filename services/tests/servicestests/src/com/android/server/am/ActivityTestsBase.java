@@ -29,11 +29,14 @@ import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
+import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import com.android.server.wm.DisplayWindowController;
 
 import org.junit.Rule;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 
 import android.app.IApplicationThread;
@@ -114,6 +117,7 @@ public class ActivityTestsBase {
         // Makes sure activity task is created with the spy object.
         atm = spy(atm);
         service.setActivityTaskManager(atm);
+        atm.mAmInternal = service.new LocalService();
         // Makes sure the supervisor is using with the spy object.
         atm.mStackSupervisor.setService(atm);
         doReturn(mock(IPackageManager.class)).when(service).getPackageManager();
@@ -351,6 +355,16 @@ public class ActivityTestsBase {
 
         TestActivityTaskManagerService(Context context) {
             super(context);
+            mSupportsMultiWindow = true;
+            mSupportsMultiDisplay = true;
+            mSupportsSplitScreenMultiWindow = true;
+            mSupportsFreeformWindowManagement = true;
+            mSupportsPictureInPicture = true;
+        }
+
+        @Override
+        int handleIncomingUser(int callingPid, int callingUid, int userId, String name) {
+            return userId;
         }
 
         @Override
@@ -400,11 +414,6 @@ public class ActivityTestsBase {
 
         TestActivityManagerService(Context context) {
             super(context);
-            mSupportsMultiWindow = true;
-            mSupportsMultiDisplay = true;
-            mSupportsSplitScreenMultiWindow = true;
-            mSupportsFreeformWindowManagement = true;
-            mSupportsPictureInPicture = true;
         }
 
         @Override

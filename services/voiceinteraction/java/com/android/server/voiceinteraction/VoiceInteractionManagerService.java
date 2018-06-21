@@ -433,11 +433,11 @@ public class VoiceInteractionManagerService extends SystemService {
                     if (hasComponent) {
                         mShortcutServiceInternal.setShortcutHostPackage(TAG,
                                 serviceComponent.getPackageName(), mCurUser);
-                        mAmInternal.setAllowAppSwitches(TAG,
+                        mAtmInternal.setAllowAppSwitches(TAG,
                                 serviceInfo.applicationInfo.uid, mCurUser);
                     } else {
                         mShortcutServiceInternal.setShortcutHostPackage(TAG, null, mCurUser);
-                        mAmInternal.setAllowAppSwitches(TAG, -1, mCurUser);
+                        mAtmInternal.setAllowAppSwitches(TAG, -1, mCurUser);
                     }
                 }
 
