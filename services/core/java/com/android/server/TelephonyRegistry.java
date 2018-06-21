@@ -1588,10 +1588,10 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // Wakeup apps for the (SUBSCRIPTION_)PHONE_STATE broadcast.
         intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
 
+        // Create a version of the intent with the number always populated.
         Intent intentWithPhoneNumber = new Intent(intent);
-        if (!TextUtils.isEmpty(incomingNumber)) {
-            intentWithPhoneNumber.putExtra(TelephonyManager.EXTRA_INCOMING_NUMBER, incomingNumber);
-        }
+        intentWithPhoneNumber.putExtra(TelephonyManager.EXTRA_INCOMING_NUMBER, incomingNumber);
+
         // Send broadcast twice, once for apps that have PRIVILEGED permission and once for those
         // that have the runtime one
         mContext.sendBroadcastAsUser(intentWithPhoneNumber, UserHandle.ALL,
