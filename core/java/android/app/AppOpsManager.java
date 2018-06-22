@@ -350,8 +350,10 @@ public class AppOpsManager {
     public static final int OP_START_FOREGROUND = 76;
     /** @hide */
     public static final int OP_BLUETOOTH_SCAN = 77;
+    /** @hide Use the face authentication API. */
+    public static final int OP_USE_FACE = 78;
     /** @hide */
-    public static final int _NUM_OP = 78;
+    public static final int _NUM_OP = 79;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -596,6 +598,11 @@ public class AppOpsManager {
     /** @hide */
     public static final String OPSTR_BLUETOOTH_SCAN = "android:bluetooth_scan";
 
+    /** @hide Use the face authentication API. */
+    public static final String OPSTR_USE_FACE = "android:use_FACE";
+
+
+
     // Warning: If an permission is added here it also has to be added to
     // com.android.packageinstaller.permission.utils.EventLogger
     private static final int[] RUNTIME_AND_APPOP_PERMISSIONS_OPS = {
@@ -733,6 +740,7 @@ public class AppOpsManager {
             OP_MANAGE_IPSEC_TUNNELS,            // MANAGE_IPSEC_HANDOVERS
             OP_START_FOREGROUND,                // START_FOREGROUND
             OP_COARSE_LOCATION,                 // BLUETOOTH_SCAN
+            OP_USE_FACE,                        // FACE
     };
 
     /**
@@ -817,6 +825,7 @@ public class AppOpsManager {
             OPSTR_MANAGE_IPSEC_TUNNELS,
             OPSTR_START_FOREGROUND,
             OPSTR_BLUETOOTH_SCAN,
+            OPSTR_USE_FACE,
     };
 
     /**
@@ -902,6 +911,7 @@ public class AppOpsManager {
             "MANAGE_IPSEC_TUNNELS",
             "START_FOREGROUND",
             "BLUETOOTH_SCAN",
+            "USE_FACE",
     };
 
     /**
@@ -987,6 +997,7 @@ public class AppOpsManager {
             null, // no permission for OP_MANAGE_IPSEC_TUNNELS
             Manifest.permission.FOREGROUND_SERVICE,
             null, // no permission for OP_BLUETOOTH_SCAN
+            Manifest.permission.USE_BIOMETRIC,
     };
 
     /**
@@ -1073,6 +1084,7 @@ public class AppOpsManager {
             null, // MANAGE_IPSEC_TUNNELS
             null, // START_FOREGROUND
             null, // maybe should be UserManager.DISALLOW_SHARE_LOCATION, //BLUETOOTH_SCAN
+            null, // USE_FACE
     };
 
     /**
@@ -1158,6 +1170,7 @@ public class AppOpsManager {
             false, // MANAGE_IPSEC_HANDOVERS
             false, // START_FOREGROUND
             true, // BLUETOOTH_SCAN
+            false, // USE_FACE
     };
 
     /**
@@ -1242,6 +1255,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ERRORED,  // MANAGE_IPSEC_TUNNELS
             AppOpsManager.MODE_ALLOWED,  // OP_START_FOREGROUND
             AppOpsManager.MODE_ALLOWED,  // OP_BLUETOOTH_SCAN
+            AppOpsManager.MODE_ALLOWED,  // USE_FACE
     };
 
     /**
@@ -1330,6 +1344,7 @@ public class AppOpsManager {
             false, // MANAGE_IPSEC_TUNNELS
             false, // START_FOREGROUND
             false, // BLUETOOTH_SCAN
+            false, // USE_FACE
     };
 
     /**

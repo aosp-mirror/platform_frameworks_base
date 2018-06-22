@@ -75,6 +75,7 @@ import com.android.server.display.ColorDisplayService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.emergency.EmergencyAffordanceService;
+import com.android.server.biometrics.face.FaceService;
 import com.android.server.biometrics.fingerprint.FingerprintService;
 import com.android.server.hdmi.HdmiControlService;
 import com.android.server.input.InputManagerService;
@@ -1512,6 +1513,12 @@ public final class SystemServer {
                 reportWtf("starting MediaRouterService", e);
             }
             traceEnd();
+
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+                traceBeginAndSlog("StartFaceSensor");
+                mSystemServiceManager.startService(FaceService.class);
+                traceEnd();
+            }
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
                 traceBeginAndSlog("StartFingerprintSensor");

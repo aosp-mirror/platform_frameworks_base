@@ -120,6 +120,7 @@
     <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
     <uses-permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE" />
     <uses-permission android:name="android.permission.TRUST_LISTENER" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.RESET_FINGERPRINT_LOCKOUT" />
     <uses-permission android:name="android.permission.MANAGE_SLICE_PERMISSIONS" />

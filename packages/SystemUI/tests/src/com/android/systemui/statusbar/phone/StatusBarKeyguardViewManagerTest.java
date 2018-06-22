@@ -60,7 +60,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock
     private NotificationPanelView mNotificationPanelView;
     @Mock
-    private FingerprintUnlockController mFingerprintUnlockController;
+    private BiometricUnlockController mBiometrucUnlockController;
     @Mock
     private DismissCallbackRegistry mDismissCallbackRegistry;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -72,7 +72,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mStatusBarKeyguardViewManager = new TestableStatusBarKeyguardViewManager(getContext(),
                 mViewMediatorCallback, mLockPatternUtils);
         mStatusBarKeyguardViewManager.registerStatusBar(mStatusBar, mContainer,
-                mNotificationPanelView, mFingerprintUnlockController, mDismissCallbackRegistry);
+                mNotificationPanelView, mBiometrucUnlockController, mDismissCallbackRegistry);
         mStatusBarKeyguardViewManager.show(null);
     }
 
@@ -170,8 +170,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
     @Test
     public void onPanelExpansionChanged_neverTranslatesBouncerWhenWakeAndUnlock() {
-        when(mFingerprintUnlockController.getMode())
-                .thenReturn(FingerprintUnlockController.MODE_WAKE_AND_UNLOCK);
+        when(mBiometrucUnlockController.getMode())
+                .thenReturn(BiometricUnlockController.MODE_WAKE_AND_UNLOCK);
         mStatusBarKeyguardViewManager.onPanelExpansionChanged(KeyguardBouncer.EXPANSION_VISIBLE,
                 false /* tracking */);
         verify(mBouncer, never()).setExpansion(anyFloat());
@@ -196,7 +196,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         @Override
         public void registerStatusBar(StatusBar statusBar, ViewGroup container,
                 NotificationPanelView notificationPanelView,
-                FingerprintUnlockController fingerprintUnlockController,
+                BiometricUnlockController fingerprintUnlockController,
                 DismissCallbackRegistry dismissCallbackRegistry) {
             super.registerStatusBar(statusBar, container, notificationPanelView,
                     fingerprintUnlockController, dismissCallbackRegistry);

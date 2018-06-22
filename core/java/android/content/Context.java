@@ -3005,6 +3005,7 @@ public abstract class Context {
             NSD_SERVICE,
             AUDIO_SERVICE,
             FINGERPRINT_SERVICE,
+            //@hide: FACE_SERVICE,
             MEDIA_ROUTER_SERVICE,
             TELEPHONY_SERVICE,
             TELEPHONY_SUBSCRIPTION_SERVICE,
@@ -3652,6 +3653,18 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.hardware.face.FaceManager} for handling management
+     * of face authentication.
+     *
+     * @hide
+     * @see #getSystemService
+     * @see android.hardware.face.FaceManager
+     */
+    public static final String FACE_SERVICE = "face";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.media.MediaRouter} for controlling and managing
      * routing of media.
      *

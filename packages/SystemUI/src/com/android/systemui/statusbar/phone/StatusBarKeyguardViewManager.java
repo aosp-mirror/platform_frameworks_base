@@ -17,8 +17,8 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
-import static com.android.systemui.statusbar.phone.FingerprintUnlockController.MODE_WAKE_AND_UNLOCK;
-import static com.android.systemui.statusbar.phone.FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
+import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
+import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
 
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -91,7 +91,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     protected ViewMediatorCallback mViewMediatorCallback;
     protected StatusBar mStatusBar;
     private NotificationPanelView mNotificationPanelView;
-    private FingerprintUnlockController mFingerprintUnlockController;
+    private BiometricUnlockController mBiometricUnlockController;
 
     private ViewGroup mContainer;
 
@@ -108,7 +108,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private boolean mLastBouncerDismissible;
     protected boolean mLastRemoteInputActive;
     private boolean mLastDozing;
-    private int mLastFpMode;
+    private int mLastBiometricMode;
     private boolean mGoingToSleepVisibleNotOccluded;
 
     private OnDismissAction mAfterKeyguardGoneAction;
@@ -142,11 +142,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void registerStatusBar(StatusBar statusBar,
             ViewGroup container,
             NotificationPanelView notificationPanelView,
-            FingerprintUnlockController fingerprintUnlockController,
+            BiometricUnlockController biometricUnlockController,
             DismissCallbackRegistry dismissCallbackRegistry) {
         mStatusBar = statusBar;
         mContainer = container;
-        mFingerprintUnlockController = fingerprintUnlockController;
+        mBiometricUnlockController = biometricUnlockController;
         mBouncer = SystemUIFactory.getInstance().createKeyguardBouncer(mContext,
                 mViewMediatorCallback, mLockPatternUtils, container, dismissCallbackRegistry,
                 mExpansionCallback);
@@ -259,7 +259,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private boolean isWakeAndUnlocking() {
-        int mode = mFingerprintUnlockController.getMode();
+        int mode = mBiometricUnlockController.getMode();
         return mode == MODE_WAKE_AND_UNLOCK || mode == MODE_WAKE_AND_UNLOCK_PULSING;
     }
 
@@ -442,13 +442,13 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         } else {
             executeAfterKeyguardGoneAction();
             boolean wakeUnlockPulsing =
-                    mFingerprintUnlockController.getMode() == MODE_WAKE_AND_UNLOCK_PULSING;
+                    mBiometricUnlockController.getMode() == MODE_WAKE_AND_UNLOCK_PULSING;
             if (wakeUnlockPulsing) {
                 delay = 0;
                 fadeoutDuration = 240;
             }
             mStatusBar.setKeyguardFadingAway(startTime, delay, fadeoutDuration);
-            mFingerprintUnlockController.startKeyguardFadingAway();
+            mBiometricUnlockController.startKeyguardFadingAway();
             hideBouncer(true /* destroyView */);
             if (wakeUnlockPulsing) {
                 mStatusBar.fadeKeyguardWhilePulsing();
@@ -460,7 +460,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                     wakeAndUnlockDejank();
                 } else {
                     mStatusBar.finishKeyguardFadingAway();
-                    mFingerprintUnlockController.finishKeyguardFadingAway();
+                    mBiometricUnlockController.finishKeyguardFadingAway();
                 }
             }
             updateStates();
@@ -484,14 +484,14 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mContainer.postDelayed(() -> mStatusBarWindowManager.setKeyguardFadingAway(false),
                 100);
         mStatusBar.finishKeyguardFadingAway();
-        mFingerprintUnlockController.finishKeyguardFadingAway();
+        mBiometricUnlockController.finishKeyguardFadingAway();
         WindowManagerGlobal.getInstance().trimMemory(
                 ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN);
 
     }
 
     private void wakeAndUnlockDejank() {
-        if (mFingerprintUnlockController.getMode() == MODE_WAKE_AND_UNLOCK
+        if (mBiometricUnlockController.getMode() == MODE_WAKE_AND_UNLOCK
                 && LatencyTracker.isEnabled(mContext)) {
             DejankUtils.postAfterTraversal(() ->
                     LatencyTracker.getInstance(mContext).onActionEnd(
@@ -618,7 +618,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mLastBouncerDismissible = bouncerDismissible;
         mLastRemoteInputActive = remoteInputActive;
         mLastDozing = mDozing;
-        mLastFpMode = mFingerprintUnlockController.getMode();
+        mLastBiometricMode = mBiometricUnlockController.getMode();
         mStatusBar.onKeyguardViewManagerStatesUpdated();
     }
 
@@ -643,9 +643,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * @return Whether the navigation bar should be made visible based on the current state.
      */
     protected boolean isNavBarVisible() {
-        int fpMode = mFingerprintUnlockController.getMode();
+        int biometricMode = mBiometricUnlockController.getMode();
         boolean keyguardShowing = mShowing && !mOccluded;
-        boolean hideWhileDozing = mDozing && fpMode != MODE_WAKE_AND_UNLOCK_PULSING;
+        boolean hideWhileDozing = mDozing && biometricMode != MODE_WAKE_AND_UNLOCK_PULSING;
         return (!keyguardShowing && !hideWhileDozing || mBouncer.isShowing()
                 || mRemoteInputActive);
     }
@@ -655,7 +655,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     protected boolean getLastNavBarVisible() {
         boolean keyguardShowing = mLastShowing && !mLastOccluded;
-        boolean hideWhileDozing = mLastDozing && mLastFpMode != MODE_WAKE_AND_UNLOCK_PULSING;
+        boolean hideWhileDozing = mLastDozing && mLastBiometricMode != MODE_WAKE_AND_UNLOCK_PULSING;
         return (!keyguardShowing && !hideWhileDozing || mLastBouncerShowing
                 || mLastRemoteInputActive);
     }
