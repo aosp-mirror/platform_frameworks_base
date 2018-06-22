@@ -3927,6 +3927,7 @@ package android.os {
     method public void readFromParcel(android.os.Parcel);
     method public int sectionCount();
     method public void setAll(boolean);
+    method public void setPrivacyPolicy(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.os.IncidentReportArgs> CREATOR;
   }

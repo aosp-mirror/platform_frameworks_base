@@ -144,7 +144,6 @@ public final class IncidentReportArgs implements Parcelable {
 
     /**
      * Set this incident report privacy policy spec.
-     * @hide
      */
     public void setPrivacyPolicy(int dest) {
         switch (dest) {
