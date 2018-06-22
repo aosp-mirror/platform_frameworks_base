@@ -983,7 +983,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      *         Measured relative to the resting position.
      */
     private float getExpandTranslationStart() {
-        return - mTopPadding;
+        return -mTopPadding + getMinExpansionHeight();
     }
 
     /**
