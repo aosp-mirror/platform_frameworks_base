@@ -292,8 +292,7 @@ public class Assistant extends NotificationAssistantService {
         if (DEBUG) Log.d(TAG, "User probably doesn't want " + key);
         Bundle signals = new Bundle();
         signals.putInt(Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEGATIVE);
-        return new Adjustment(packageName, key,  signals,
-                getContext().getString(R.string.prompt_block_reason), user);
+        return new Adjustment(packageName, key,  signals, "", user);
     }
 
     // for testing
