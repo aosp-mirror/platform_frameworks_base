@@ -6131,6 +6131,10 @@ message MetricsEvent {
     // OS: Q
     SETTINGS_HOMEPAGE = 1502;
 
+    // OPEN: Settings > Create shortcut(widget)
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_CREATE_SHORTCUT = 1503;
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.
