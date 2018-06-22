@@ -833,6 +833,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     CollapsedStatusBarFragment statusBarFragment =
                             (CollapsedStatusBarFragment) fragment;
                     statusBarFragment.initNotificationIconArea(mNotificationIconAreaController);
+                    PhoneStatusBarView oldStatusBarView = mStatusBarView;
                     mStatusBarView = (PhoneStatusBarView) fragment.getView();
                     mStatusBarView.setBar(this);
                     mStatusBarView.setPanel(mNotificationPanel);
@@ -849,6 +850,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mNotificationPanel.notifyBarPanelExpansionChanged();
                     }
                     mStatusBarView.setBouncerShowing(mBouncerShowing);
+                    if (oldStatusBarView != null) {
+                        float fraction = oldStatusBarView.getExpansionFraction();
+                        boolean expanded = oldStatusBarView.isExpanded();
+                        mStatusBarView.panelExpansionChanged(fraction, expanded);
+                    }
 
                     HeadsUpAppearanceController oldController = mHeadsUpAppearanceController;
                     if (mHeadsUpAppearanceController != null) {
