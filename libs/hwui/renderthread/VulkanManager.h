@@ -79,7 +79,7 @@ public:
     void initialize();
 
     // Quick check to see if the VulkanManager has been initialized.
-    bool hasVkContext() { return mBackendContext.get() != nullptr; }
+    bool hasVkContext() { return mDevice != VK_NULL_HANDLE; }
 
     // Given a window this creates a new VkSurfaceKHR and VkSwapchain and stores them inside a new
     // VulkanSurface object which is returned.
@@ -187,8 +187,6 @@ private:
     VkPtr<PFN_vkResetFences> mResetFences;
 
     RenderThread& mRenderThread;
-
-    sk_sp<const GrVkBackendContext> mBackendContext;
 
     VkInstance mInstance = VK_NULL_HANDLE;
     VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
