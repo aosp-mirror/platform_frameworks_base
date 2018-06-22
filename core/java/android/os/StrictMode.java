@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.strictmode.CleartextNetworkViolation;
@@ -36,6 +37,7 @@ import android.os.strictmode.DiskReadViolation;
 import android.os.strictmode.DiskWriteViolation;
 import android.os.strictmode.ExplicitGcViolation;
 import android.os.strictmode.FileUriExposedViolation;
+import android.os.strictmode.ImplicitDirectBootViolation;
 import android.os.strictmode.InstanceCountViolation;
 import android.os.strictmode.IntentReceiverLeakedViolation;
 import android.os.strictmode.LeakedClosableViolation;
@@ -272,6 +274,9 @@ public final class StrictMode {
     /** @hide */
     @TestApi public static final int DETECT_VM_NON_SDK_API_USAGE = 0x40 << 24; // for VmPolicy
 
+    /** @hide */
+    @TestApi public static final int DETECT_VM_IMPLICIT_DIRECT_BOOT = 0x20 << 24; // for VmPolicy
+
     private static final int ALL_VM_DETECT_BITS =
             DETECT_VM_CURSOR_LEAKS
                     | DETECT_VM_CLOSABLE_LEAKS
@@ -282,7 +287,8 @@ public final class StrictMode {
                     | DETECT_VM_CLEARTEXT_NETWORK
                     | DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION
                     | DETECT_VM_UNTAGGED_SOCKET
-                    | DETECT_VM_NON_SDK_API_USAGE;
+                    | DETECT_VM_NON_SDK_API_USAGE
+                    | DETECT_VM_IMPLICIT_DIRECT_BOOT;
 
 
     // Byte 3: Penalty
@@ -891,6 +897,8 @@ public final class StrictMode {
                 }
 
                 // TODO: Decide whether to detect non SDK API usage beyond a certain API level.
+                // TODO: enable detectImplicitDirectBoot() once system is less noisy
+
                 return this;
             }
 
@@ -996,6 +1004,29 @@ public final class StrictMode {
             /** @hide */
             public Builder permitUntaggedSockets() {
                 return disable(DETECT_VM_UNTAGGED_SOCKET);
+            }
+
+            /**
+             * Detect any implicit reliance on Direct Boot automatic filtering
+             * of {@link PackageManager} values. Violations are only triggered
+             * when implicit calls are made while the user is locked.
+             * <p>
+             * Apps becoming Direct Boot aware need to carefully inspect each
+             * query site and explicitly decide which combination of flags they
+             * want to use:
+             * <ul>
+             * <li>{@link PackageManager#MATCH_DIRECT_BOOT_AWARE}
+             * <li>{@link PackageManager#MATCH_DIRECT_BOOT_UNAWARE}
+             * <li>{@link PackageManager#MATCH_DIRECT_BOOT_AUTO}
+             * </ul>
+             */
+            public Builder detectImplicitDirectBoot() {
+                return enable(DETECT_VM_IMPLICIT_DIRECT_BOOT);
+            }
+
+            /** @hide */
+            public Builder permitImplicitDirectBoot() {
+                return disable(DETECT_VM_IMPLICIT_DIRECT_BOOT);
             }
 
             /**
@@ -1991,6 +2022,11 @@ public final class StrictMode {
     }
 
     /** @hide */
+    public static boolean vmImplicitDirectBootEnabled() {
+        return (sVmPolicy.mask & DETECT_VM_IMPLICIT_DIRECT_BOOT) != 0;
+    }
+
+    /** @hide */
     public static void onSqliteObjectLeaked(String message, Throwable originStack) {
         onVmPolicyViolation(new SqliteObjectLeakedViolation(message, originStack));
     }
@@ -2060,6 +2096,11 @@ public final class StrictMode {
     /** @hide */
     public static void onUntaggedSocket() {
         onVmPolicyViolation(new UntaggedSocketViolation());
+    }
+
+    /** @hide */
+    public static void onImplicitDirectBoot() {
+        onVmPolicyViolation(new ImplicitDirectBootViolation());
     }
 
     // Map from VM violation fingerprint to uptime millis.
@@ -2665,6 +2706,8 @@ public final class StrictMode {
                 return DETECT_EXPLICIT_GC;
             } else if (mViolation instanceof NonSdkApiUsedViolation) {
                 return DETECT_VM_NON_SDK_API_USAGE;
+            } else if (mViolation instanceof ImplicitDirectBootViolation) {
+                return DETECT_VM_IMPLICIT_DIRECT_BOOT;
             }
             throw new IllegalStateException("missing violation bit");
         }
