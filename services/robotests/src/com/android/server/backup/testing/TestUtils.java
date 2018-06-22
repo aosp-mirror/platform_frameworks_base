@@ -18,15 +18,33 @@ package com.android.server.backup.testing;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.robolectric.Shadows.shadowOf;
+
+import android.os.Looper;
+
 import com.android.server.testing.shadows.ShadowEventLog;
 
 import org.robolectric.shadows.ShadowLog;
+import org.robolectric.shadows.ShadowLooper;
+import org.robolectric.shadows.ShadowSystemClock;
 
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 
 public class TestUtils {
+    /** Version of {@link ShadowLooper#runToEndOfTasks()} that also advances the system clock. */
+    public static void runToEndOfTasks(Looper looper) {
+        ShadowLooper shadowLooper = shadowOf(looper);
+        shadowLooper.runToEndOfTasks();
+        // Handler instances have their own clock, so advancing looper (with runToEndOfTasks())
+        // above does NOT advance the handlers' clock, hence whenever a handler post messages with
+        // specific time to the looper the time of those messages will be before the looper's time.
+        // To fix this we advance SystemClock as well since that is from where the handlers read
+        // time.
+        ShadowSystemClock.setCurrentTimeMillis(shadowLooper.getScheduler().getCurrentTime());
+    }
+
     /** Reset logcat with {@link ShadowLog#reset()} before the test case. */
     public static void assertLogcatAtMost(String tag, int level) {
         assertThat(ShadowLog.getLogsForTag(tag).stream().allMatch(logItem -> logItem.type <= level))
