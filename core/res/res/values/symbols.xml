@@ -1061,6 +1061,9 @@
   <java-symbol type="string" name="network_switch_type_name_unknown" />
   <java-symbol type="string" name="wifi_no_internet" />
   <java-symbol type="string" name="wifi_no_internet_detailed" />
+  <java-symbol type="string" name="wifi_softap_config_change" />
+  <java-symbol type="string" name="wifi_softap_config_change_summary" />
+  <java-symbol type="string" name="wifi_softap_config_change_detailed" />
   <java-symbol type="string" name="wifi_connect_alert_title" />
   <java-symbol type="string" name="wifi_connect_alert_message" />
   <java-symbol type="string" name="wifi_connect_default_application" />
