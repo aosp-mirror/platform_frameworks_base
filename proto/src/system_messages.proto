@@ -212,6 +212,10 @@ message SystemMessage {
     // Package: android
     NOTE_AUTO_SAVER_SUGGESTION = 49;
 
+    // Notify the user that their softap config preference has changed.
+    // Package: android
+    NOTE_SOFTAP_CONFIG_CHANGED = 50;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
