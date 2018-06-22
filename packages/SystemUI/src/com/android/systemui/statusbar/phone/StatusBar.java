@@ -505,7 +505,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationLockscreenUserManager mLockscreenUserManager;
     protected NotificationRemoteInputManager mRemoteInputManager;
 
-    private BroadcastReceiver mWallpaperChangedReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mWallpaperChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             WallpaperManager wallpaperManager = context.getSystemService(WallpaperManager.class);
@@ -513,7 +513,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 Log.w(TAG, "WallpaperManager not available");
                 return;
             }
-            WallpaperInfo info = wallpaperManager.getWallpaperInfo();
+            WallpaperInfo info = wallpaperManager.getWallpaperInfo(UserHandle.USER_CURRENT);
             final boolean supportsAmbientMode = info != null &&
                     info.getSupportsAmbientMode();
 
@@ -707,7 +707,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Make sure we always have the most current wallpaper info.
         IntentFilter wallpaperChangedFilter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
-        mContext.registerReceiver(mWallpaperChangedReceiver, wallpaperChangedFilter);
+        mContext.registerReceiverAsUser(mWallpaperChangedReceiver, UserHandle.ALL,
+                wallpaperChangedFilter, null /* broadcastPermission */, null /* scheduler */);
         mWallpaperChangedReceiver.onReceive(mContext, null);
 
         mLockscreenUserManager.setUpWithPresenter(this, mEntryManager);
@@ -3156,6 +3157,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateNotificationViews();
         mMediaManager.clearCurrentMediaNotification();
         setLockscreenUser(newUserId);
+        mWallpaperChangedReceiver.onReceive(mContext, null);
     }
 
     @Override

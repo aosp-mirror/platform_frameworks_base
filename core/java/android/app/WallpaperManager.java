@@ -996,17 +996,29 @@ public class WallpaperManager {
     }
 
     /**
-     * If the current wallpaper is a live wallpaper component, return the
-     * information about that wallpaper.  Otherwise, if it is a static image,
-     * simply return null.
+     * Returns the information about the wallpaper if the current wallpaper is
+     * a live wallpaper component. Otherwise, if the wallpaper is a static image,
+     * this returns null.
      */
     public WallpaperInfo getWallpaperInfo() {
+        return getWallpaperInfo(mContext.getUserId());
+    }
+
+    /**
+     * Returns the information about the wallpaper if the current wallpaper is
+     * a live wallpaper component. Otherwise, if the wallpaper is a static image,
+     * this returns null.
+     *
+     * @param userId Owner of the wallpaper.
+     * @hide
+     */
+    public WallpaperInfo getWallpaperInfo(int userId) {
         try {
             if (sGlobals.mService == null) {
                 Log.w(TAG, "WallpaperService not running");
                 throw new RuntimeException(new DeadSystemException());
             } else {
-                return sGlobals.mService.getWallpaperInfo(mContext.getUserId());
+                return sGlobals.mService.getWallpaperInfo(userId);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
