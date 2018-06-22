@@ -3542,6 +3542,12 @@ public final class Telephony {
             public static final String ICCID_PREFIX = "iccid_prefix";
 
             /**
+             * Certificate for carrier privilege access rules.
+             * <P>Type: TEXT in hex string </P>
+             */
+            public static final String PRIVILEGE_ACCESS_RULE = "privilege_access_rule";
+
+            /**
              * The {@code content://} URI for this table.
              */
             public static final Uri CONTENT_URI = Uri.parse("content://carrier_id/all");
