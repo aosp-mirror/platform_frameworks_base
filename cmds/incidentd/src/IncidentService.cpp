@@ -314,6 +314,19 @@ status_t IncidentService::command(FILE* in, FILE* out, FILE* err, Vector<String8
             mThrottler->dump(out);
             return NO_ERROR;
         }
+        if (!args[0].compare(String8("section"))) {
+            int id = atoi(args[1]);
+            int idx = 0;
+            while (SECTION_LIST[idx] != NULL) {
+                const Section* section = SECTION_LIST[idx];
+                if (section->id == id) {
+                    fprintf(out, "Section[%d] %s\n", id, section->name.string());
+                    break;
+                }
+                idx++;
+            }
+            return NO_ERROR;
+        }
     }
     return cmd_help(out);
 }
@@ -321,8 +334,9 @@ status_t IncidentService::command(FILE* in, FILE* out, FILE* err, Vector<String8
 status_t IncidentService::cmd_help(FILE* out) {
     fprintf(out, "usage: adb shell cmd incident privacy print <section_id>\n");
     fprintf(out, "usage: adb shell cmd incident privacy parse <section_id> < proto.txt\n");
-    fprintf(out, "    Prints/parses for the section id.\n");
-    fprintf(out, "\n");
+    fprintf(out, "    Prints/parses for the section id.\n\n");
+    fprintf(out, "usage: adb shell cmd incident section <section_id>\n");
+    fprintf(out, "    Prints section id and its name.\n\n");
     fprintf(out, "usage: adb shell cmd incident throttler\n");
     fprintf(out, "    Prints the current throttler state\n");
     return NO_ERROR;

@@ -73,7 +73,8 @@ static TextParserBase* selectParser(int section) {
         case 2006:
             return new BatteryTypeParser();
         default:
-            return NULL;
+            // Return no op parser when no specific ones are implemented.
+            return new NoopParser();
     }
 }
 
