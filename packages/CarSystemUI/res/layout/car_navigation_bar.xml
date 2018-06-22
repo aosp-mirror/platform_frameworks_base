@@ -107,11 +107,27 @@
             android:layout_height="match_parent"
             android:layout_weight="1"/>
 
-        <com.android.keyguard.AlphaOptimizedImageButton
-            android:id="@+id/notifications"
+        <com.android.systemui.statusbar.car.CarFacetButton
+            android:id="@+id/note"
             style="@style/NavigationBarButton"
-            android:background="?android:attr/selectableItemBackground"
-            android:src="@drawable/car_ic_notification"
+            systemui:icon="@drawable/car_ic_notification"
+            systemui:intent="intent:#Intent;component=com.android.car.notification/.CarNotificationCenterActivity;launchFlags=0x14000000;end"
+            systemui:packages="com.android.car.notification"
+            systemui:selectedIcon="@drawable/car_ic_notification_selected"
+            systemui:useMoreIcon="false"
+        />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+
+        <com.android.systemui.statusbar.car.CarFacetButton
+            android:id="@+id/assist"
+            style="@style/NavigationBarButton"
+            systemui:icon="@drawable/ic_mic_white"
+            systemui:intent="intent:#Intent;action=com.google.android.demandspace.START;end"
+            systemui:useMoreIcon="false"
         />
     </LinearLayout>
 
