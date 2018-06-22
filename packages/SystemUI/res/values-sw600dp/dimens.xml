@@ -19,9 +19,6 @@
     <!-- Standard notification width + gravity -->
     <dimen name="notification_panel_width">416dp</dimen>
 
-    <!-- Width for the spacer, used between QS tiles depend on notification_panel_width -->
-    <dimen name="qs_quick_tile_space_width">0dp</dimen>
-
     <!-- Diameter of outer shape drawable shown in navbar search-->
     <dimen name="navbar_search_outerring_diameter">430dip</dimen>
 

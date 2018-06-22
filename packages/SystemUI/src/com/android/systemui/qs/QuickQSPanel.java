@@ -192,29 +192,21 @@ public class QuickQSPanel extends QSPanel {
 
             mTileDimensionSize = mContext.getResources().getDimensionPixelSize(
                     R.dimen.qs_quick_tile_size);
-
-            setGravity(Gravity.CENTER);
-            setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+            updateLayoutParams();
         }
 
         @Override
         protected void onConfigurationChanged(Configuration newConfig) {
             super.onConfigurationChanged(newConfig);
+            updateLayoutParams();
+        }
 
+        private void updateLayoutParams() {
             setGravity(Gravity.CENTER);
-            LayoutParams staticSpaceLayoutParams = generateSpaceLayoutParams(
-                    mContext.getResources().getDimensionPixelSize(
-                            R.dimen.qs_quick_tile_space_width));
-
-            // Update space params since they fill any open space in portrait orientation and have
-            // a static width in landscape orientation.
-            final int childViewCount = getChildCount();
-            for (int i = 0; i < childViewCount; i++) {
-                View childView = getChildAt(i);
-                if (childView instanceof Space) {
-                    childView.setLayoutParams(staticSpaceLayoutParams);
-                }
-            }
+            int width = getResources().getDimensionPixelSize(R.dimen.qs_quick_layout_width);
+            LayoutParams lp = new LayoutParams(width, LayoutParams.MATCH_PARENT);
+            lp.gravity = Gravity.CENTER_HORIZONTAL;
+            setLayoutParams(lp);
         }
 
         /**
@@ -222,11 +214,9 @@ public class QuickQSPanel extends QSPanel {
          * then we're going to have the space expand to take up as much space as possible. If the
          * width is non-zero, we want the inter-tile spacers to be fixed.
          */
-        private LayoutParams generateSpaceLayoutParams(int spaceWidth) {
-            LayoutParams lp = new LayoutParams(spaceWidth, mTileDimensionSize);
-            if (spaceWidth == 0) {
-                lp.weight = 1;
-            }
+        private LayoutParams generateSpaceLayoutParams() {
+            LayoutParams lp = new LayoutParams(0, mTileDimensionSize);
+            lp.weight = 1;
             lp.gravity = Gravity.CENTER;
             return lp;
         }
@@ -243,13 +233,7 @@ public class QuickQSPanel extends QSPanel {
         @Override
         public void addTile(TileRecord tile) {
             if (getChildCount() != 0) {
-                // Add a spacer between tiles. We want static-width spaces if we're in landscape to
-                // keep the tiles close. For portrait, we stick with spaces that fill up any
-                // available space.
-                LayoutParams spaceLayoutParams = generateSpaceLayoutParams(
-                        mContext.getResources().getDimensionPixelSize(
-                                R.dimen.qs_quick_tile_space_width));
-                addView(new Space(mContext), getChildCount(), spaceLayoutParams);
+                addView(new Space(mContext), getChildCount(), generateSpaceLayoutParams());
             }
 
             addView(tile.tileView, getChildCount(), generateTileLayoutParams());
@@ -305,6 +289,10 @@ public class QuickQSPanel extends QSPanel {
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            if (hideOverflowingChildren(widthMeasureSpec)) {
+                return; // Rely on visibility change to trigger remeasure.
+            }
+
             if (mRecords != null && mRecords.size() > 0) {
                 View previousView = this;
                 for (TileRecord record : mRecords) {
@@ -316,6 +304,33 @@ public class QuickQSPanel extends QSPanel {
                 mRecords.get(mRecords.size() - 1).tileView.setAccessibilityTraversalBefore(
                         R.id.expand_indicator);
             }
+        }
+
+        /**
+         * Hide child views that would otherwise be clipped.
+         * @return {@code true} if any child visibilities have changed.
+         */
+        private boolean hideOverflowingChildren(int widthMeasureSpec) {
+            if (getChildCount() == 0) {
+                return false;
+            }
+            boolean childVisibilityChanged = false;
+            int widthRemaining = MeasureSpec.getSize(widthMeasureSpec)
+                - getChildAt(0).getMeasuredWidth() - getPaddingStart() - getPaddingEnd();
+            for (int i = 2; i < getChildCount(); i += 2) {
+                View tileChild = getChildAt(i);
+                LayoutParams lp = (LayoutParams) tileChild.getLayoutParams();
+                // All Space views have 0 width; only tiles contribute to the total width.
+                widthRemaining = widthRemaining
+                    - tileChild.getMeasuredWidth() - lp.getMarginEnd() - lp.getMarginStart();
+                int newVisibility = widthRemaining < 0 ? View.GONE : View.VISIBLE;
+                if (tileChild.getVisibility() != newVisibility) {
+                    tileChild.setVisibility(newVisibility);
+                    getChildAt(i - 1).setVisibility(newVisibility); // Hide spacer as well.
+                    childVisibilityChanged = true;
+                }
+            }
+            return childVisibilityChanged;
         }
     }
 }

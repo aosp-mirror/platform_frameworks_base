@@ -1827,50 +1827,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("mMethodMap")
     @NonNull
-    InputBindResult startInputLocked(
-            /* @InputMethodClient.StartInputReason */ final int startInputReason,
-            IInputMethodClient client, IInputContext inputContext,
-            /* @InputConnectionInspector.missingMethods */ final int missingMethods,
-            @Nullable EditorInfo attribute, int controlFlags) {
-        // If no method is currently selected, do nothing.
-        if (mCurMethodId == null) {
-            return InputBindResult.NO_IME;
-        }
-
-        ClientState cs = mClients.get(client.asBinder());
-        if (cs == null) {
-            throw new IllegalArgumentException("unknown client "
-                    + client.asBinder());
-        }
-
-        if (attribute == null) {
-            Slog.w(TAG, "Ignoring startInput with null EditorInfo."
-                    + " uid=" + cs.uid + " pid=" + cs.pid);
-            return InputBindResult.NULL_EDITOR_INFO;
-        }
-
-        try {
-            if (!mIWindowManager.inputMethodClientHasFocus(cs.client)) {
-                // Check with the window manager to make sure this client actually
-                // has a window with focus.  If not, reject.  This is thread safe
-                // because if the focus changes some time before or after, the
-                // next client receiving focus that has any interest in input will
-                // be calling through here after that change happens.
-                if (DEBUG) {
-                    Slog.w(TAG, "Starting input on non-focused client " + cs.client
-                            + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
-                }
-                return InputBindResult.NOT_IME_TARGET_WINDOW;
-            }
-        } catch (RemoteException e) {
-        }
-
-        return startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
-                controlFlags, startInputReason);
-    }
-
-    @GuardedBy("mMethodMap")
-    @NonNull
     InputBindResult startInputUncheckedLocked(@NonNull ClientState cs, IInputContext inputContext,
             /* @InputConnectionInspector.missingMethods */ final int missingMethods,
             @NonNull EditorInfo attribute, int controlFlags,
@@ -1995,36 +1951,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mCurIntent = null;
         Slog.w(TAG, "Failure connecting to input method service: " + mCurIntent);
         return InputBindResult.IME_NOT_CONNECTED;
-    }
-
-    @NonNull
-    private InputBindResult startInput(
-            /* @InputMethodClient.StartInputReason */ final int startInputReason,
-            IInputMethodClient client, IInputContext inputContext,
-            /* @InputConnectionInspector.missingMethods */ final int missingMethods,
-            @Nullable EditorInfo attribute, int controlFlags) {
-        if (!calledFromValidUser()) {
-            return InputBindResult.INVALID_USER;
-        }
-        synchronized (mMethodMap) {
-            if (DEBUG) {
-                Slog.v(TAG, "startInput: reason="
-                        + InputMethodClient.getStartInputReason(startInputReason)
-                        + " client = " + client.asBinder()
-                        + " inputContext=" + inputContext
-                        + " missingMethods="
-                        + InputConnectionInspector.getMissingMethodFlagsAsString(missingMethods)
-                        + " attribute=" + attribute
-                        + " controlFlags=#" + Integer.toHexString(controlFlags));
-            }
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                return startInputLocked(startInputReason, client, inputContext, missingMethods,
-                        attribute, controlFlags);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
     }
 
     @Override
@@ -2741,15 +2667,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             int windowFlags, @Nullable EditorInfo attribute, IInputContext inputContext,
             /* @InputConnectionInspector.missingMethods */ final int missingMethods,
             int unverifiedTargetSdkVersion) {
-        final InputBindResult result;
-        if (windowToken != null) {
-            result = windowGainedFocus(startInputReason, client, windowToken, controlFlags,
-                    softInputMode, windowFlags, attribute, inputContext, missingMethods,
-                    unverifiedTargetSdkVersion);
-        } else {
-            result = startInput(startInputReason, client, inputContext, missingMethods, attribute,
-                    controlFlags);
+        if (windowToken == null) {
+            Slog.e(TAG, "windowToken cannot be null.");
+            return InputBindResult.NULL;
         }
+        final InputBindResult result = startInputOrWindowGainedFocusInternal(startInputReason,
+                client, windowToken, controlFlags, softInputMode, windowFlags, attribute,
+                inputContext, missingMethods, unverifiedTargetSdkVersion);
         if (result == null) {
             // This must never happen, but just in case.
             Slog.wtf(TAG, "InputBindResult is @NonNull. startInputReason="
@@ -2762,9 +2686,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @NonNull
-    private InputBindResult windowGainedFocus(
+    private InputBindResult startInputOrWindowGainedFocusInternal(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
-            IInputMethodClient client, IBinder windowToken, int controlFlags,
+            IInputMethodClient client, @NonNull IBinder windowToken, int controlFlags,
             /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
             int windowFlags, EditorInfo attribute, IInputContext inputContext,
             /* @InputConnectionInspector.missingMethods */  final int missingMethods,
@@ -2775,7 +2699,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mMethodMap) {
-                if (DEBUG) Slog.v(TAG, "windowGainedFocus: reason="
+                if (DEBUG) Slog.v(TAG, "startInputOrWindowGainedFocusInternal: reason="
                         + InputMethodClient.getStartInputReason(startInputReason)
                         + " client=" + client.asBinder()
                         + " inputContext=" + inputContext

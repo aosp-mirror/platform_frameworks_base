@@ -418,4 +418,7 @@ interface IActivityTaskManager {
 
     void setVrThread(int tid);
     void setPersistentVrThread(int tid);
+    void stopAppSwitches();
+    void resumeAppSwitches();
+    void setActivityController(in IActivityController watcher, boolean imAMonkey);
 }

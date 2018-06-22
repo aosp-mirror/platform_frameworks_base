@@ -898,6 +898,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             public boolean isTetheringSupported() {
                 return ConnectivityService.this.isTetheringSupported();
             }
+            @Override
+            public NetworkRequest getDefaultNetworkRequest() {
+                return mDefaultRequest;
+            }
         };
         return new Tethering(mContext, mNetd, mStatsService, mPolicyManager,
                 IoThread.get().getLooper(), new MockableSystemProperties(),
@@ -915,7 +919,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private NetworkRequest createDefaultInternetRequestForTransport(
             int transportType, NetworkRequest.Type type) {
-        NetworkCapabilities netCap = new NetworkCapabilities();
+        final NetworkCapabilities netCap = new NetworkCapabilities();
         netCap.addCapability(NET_CAPABILITY_INTERNET);
         netCap.addCapability(NET_CAPABILITY_NOT_RESTRICTED);
         if (transportType > -1) {
@@ -1020,7 +1024,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private NetworkAgentInfo getNetworkAgentInfoForNetwork(Network network) {
+    @VisibleForTesting
+    protected NetworkAgentInfo getNetworkAgentInfoForNetwork(Network network) {
         if (network == null) {
             return null;
         }

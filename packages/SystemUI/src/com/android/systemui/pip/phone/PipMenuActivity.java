@@ -229,7 +229,9 @@ public class PipMenuActivity extends Activity {
         mSettingsButton = findViewById(R.id.settings);
         mSettingsButton.setAlpha(0);
         mSettingsButton.setOnClickListener((v) -> {
-            showSettings();
+            if (v.getAlpha() != 0) {
+                showSettings();
+            }
         });
         mDismissButton = findViewById(R.id.dismiss);
         mDismissButton.setAlpha(0);

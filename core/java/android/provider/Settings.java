@@ -9910,6 +9910,39 @@ public final class Settings {
         public static final String WIFI_SCORE_PARAMS =
                 "wifi_score_params";
 
+        /**
+         * Setting to enable logging WifiIsUnusableEvent in metrics
+         * which gets triggered when wifi becomes unusable.
+         * Disabled by default, and setting it to 1 will enable it.
+         * @hide
+         */
+        public static final String WIFI_IS_UNUSABLE_EVENT_METRICS_ENABLED =
+                "wifi_is_unusable_event_metrics_enabled";
+
+        /**
+         * The minimum number of txBad the framework has to observe
+         * to trigger a wifi data stall.
+         * @hide
+         */
+        public static final String WIFI_DATA_STALL_MIN_TX_BAD =
+                "wifi_data_stall_min_tx_bad";
+
+        /**
+         * The minimum number of txSuccess the framework has to observe
+         * to trigger a wifi data stall when rxSuccess is 0.
+         * @hide
+         */
+        public static final String WIFI_DATA_STALL_MIN_TX_SUCCESS_WITHOUT_RX =
+                "wifi_data_stall_min_tx_success_without_rx";
+
+        /**
+         * Setting to enable logging Wifi LinkSpeedCounts in metrics.
+         * Disabled by default, and setting it to 1 will enable it.
+         * @hide
+         */
+        public static final String WIFI_LINK_SPEED_METRICS_ENABLED =
+                "wifi_link_speed_metrics_enabled";
+
        /**
         * The maximum number of times we will retry a connection to an access
         * point for which we have failed in acquiring an IP address from DHCP.
@@ -11061,6 +11094,7 @@ public final class Settings {
          *
          * <pre>
          * enabled                  (boolean)
+         * disable_home             (boolean)
          * disable_tilt_to_wake     (boolean)
          * disable_touch_to_wake    (boolean)
          * </pre>

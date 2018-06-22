@@ -1580,6 +1580,7 @@
         <attr name="banner" />
         <attr name="logo" />
         <attr name="permissionGroup" />
+        <attr name="backgroundPermission" />
         <attr name="description" />
         <attr name="request" />
         <attr name="protectionLevel" />
@@ -1610,6 +1611,9 @@
         <attr name="logo" />
         <attr name="description" />
         <attr name="request" />
+        <attr name="requestDetail" />
+        <attr name="backgroundRequest" />
+        <attr name="backgroundRequestDetail" />
         <attr name="permissionGroupFlags" />
         <attr name="priority" />
     </declare-styleable>

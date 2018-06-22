@@ -682,6 +682,13 @@
     <!-- Message shown to the user when the apps requests permission from this group -->
     <string name="permgrouprequest_location">Allow
         &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access this device\'s location?</string>
+    <!-- Subtitle of the message shown to the user when the apps requests permission to use the location only while app is in foreground [CHAR LIMIT=none]-->
+    <string name="permgrouprequestdetail_location">The app will only have access to the location while you\u2019re using the app.</string>
+    <!-- Message shown to the user when the apps requests permission to use the location while app is in foreground and background [CHAR LIMIT=60] -->
+    <string name="permgroupbackgroundrequest_location">Always allow
+        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access this device\u2019s location?</string>
+    <!-- Subtitle of the message shown to the user when the apps requests permission to use the location while app is in foreground and background [CHAR LIMIT=none] -->
+    <string name="permgroupbackgroundrequestdetail_location">The app will always have access to the location, even when you\u2019re not using the app.</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_calendar">Calendar</string>

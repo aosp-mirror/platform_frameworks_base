@@ -423,13 +423,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected KeyguardViewMediator mKeyguardViewMediator;
     private ZenModeController mZenController;
 
-    /**
-     * Helper that is responsible for showing the right toast when a disallowed activity operation
-     * occurred. In pinned mode, we show instructions on how to break out of this mode, whilst in
-     * fully locked mode we only show that unlocking is blocked.
-     */
-    private ScreenPinningNotify mScreenPinningNotify;
-
     // for disabling the status bar
     private int mDisabled1 = 0;
     private int mDisabled2 = 0;
@@ -864,6 +857,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mHeadsUpAppearanceController = new HeadsUpAppearanceController(
                             mNotificationIconAreaController, mHeadsUpManager, mStatusBarWindow);
                     mHeadsUpAppearanceController.readFrom(oldController);
+                    mStatusBarWindow.setStatusBarView(mStatusBarView);
                     setAreThereNotifications();
                     checkBarModes();
                 }).getFragmentManager()
@@ -901,7 +895,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         } catch (RemoteException ex) {
             // no window manager? good luck with that
         }
-        mScreenPinningNotify = new ScreenPinningNotify(mContext);
         mStackScroller.setLongPressListener(mEntryManager.getNotificationLongClicker());
         mStackScroller.setStatusBar(this);
         mStackScroller.setGroupManager(mGroupManager);
@@ -2240,17 +2233,16 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void showPinningEnterExitToast(boolean entering) {
-        if (entering) {
-            mScreenPinningNotify.showPinningStartToast();
-        } else {
-            mScreenPinningNotify.showPinningExitToast();
+        if (getNavigationBarView() != null) {
+            getNavigationBarView().showPinningEnterExitToast(entering);
         }
     }
 
     @Override
     public void showPinningEscapeToast() {
-        mScreenPinningNotify.showEscapeToast(getNavigationBarView() == null
-                || getNavigationBarView().isRecentsButtonVisible());
+        if (getNavigationBarView() != null) {
+            getNavigationBarView().showPinningEscapeToast();
+        }
     }
 
     boolean panelsEnabled() {
@@ -4754,10 +4746,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             // Bouncer needs the front scrim when it's on top of an activity,
             // tapping on a notification, editing QS or being dismissed by
             // FLAG_DISMISS_KEYGUARD_ACTIVITY.
-            ScrimState state = mIsOccluded || mStatusBarKeyguardViewManager.bouncerNeedsScrimming()
-                    || mStatusBarKeyguardViewManager.willDismissWithAction()
-                    || mStatusBarKeyguardViewManager.isFullscreenBouncer() ?
-                    ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
+            ScrimState state = mStatusBarKeyguardViewManager.bouncerNeedsScrimming()
+                    ? ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
             mScrimController.transitionTo(state);
         } else if (mLaunchCameraOnScreenTurningOn || isInLaunchTransition()) {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);

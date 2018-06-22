@@ -47,8 +47,7 @@ public class RenderNodePerfTest {
     public void testCreateRenderNodeNoName() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            RenderNode node = RenderNode.create(null, null);
-            node.destroy();
+            RenderNode.create(null, null);
         }
     }
 
@@ -56,8 +55,7 @@ public class RenderNodePerfTest {
     public void testCreateRenderNode() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            RenderNode node = RenderNode.create("LinearLayout", null);
-            node.destroy();
+            RenderNode.create("LinearLayout", null);
         }
     }
 

@@ -532,7 +532,7 @@ class AppErrors {
                                                        String shortMsg, String longMsg,
                                                        String stackTrace, long timeMillis,
                                                        int callingPid, int callingUid) {
-        if (mService.mController == null) {
+        if (mService.mActivityTaskManager.mController == null) {
             return false;
         }
 
@@ -540,7 +540,7 @@ class AppErrors {
             String name = r != null ? r.processName : null;
             int pid = r != null ? r.pid : callingPid;
             int uid = r != null ? r.info.uid : callingUid;
-            if (!mService.mController.appCrashed(name, pid,
+            if (!mService.mActivityTaskManager.mController.appCrashed(name, pid,
                     shortMsg, longMsg, timeMillis, crashInfo.stackTrace)) {
                 if ("1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"))
                         && "Native crash".equals(crashInfo.exceptionClassName)) {
@@ -563,7 +563,7 @@ class AppErrors {
                 return true;
             }
         } catch (RemoteException e) {
-            mService.mController = null;
+            mService.mActivityTaskManager.mController = null;
             Watchdog.getInstance().setActivityController(null);
         }
         return false;
@@ -887,16 +887,16 @@ class AppErrors {
         ArrayList<Integer> firstPids = new ArrayList<Integer>(5);
         SparseArray<Boolean> lastPids = new SparseArray<Boolean>(20);
 
-        if (mService.mController != null) {
+        if (mService.mActivityTaskManager.mController != null) {
             try {
                 // 0 == continue, -1 = kill process immediately
-                int res = mService.mController.appEarlyNotResponding(
+                int res = mService.mActivityTaskManager.mController.appEarlyNotResponding(
                         app.processName, app.pid, annotation);
                 if (res < 0 && app.pid != MY_PID) {
                     app.kill("anr", true);
                 }
             } catch (RemoteException e) {
-                mService.mController = null;
+                mService.mActivityTaskManager.mController = null;
                 Watchdog.getInstance().setActivityController(null);
             }
         }
@@ -1054,10 +1054,10 @@ class AppErrors {
         mService.addErrorToDropBox("anr", app, app.processName, activity, parent, annotation,
                 cpuInfo, tracesFile, null);
 
-        if (mService.mController != null) {
+        if (mService.mActivityTaskManager.mController != null) {
             try {
                 // 0 == show dialog, 1 = keep waiting, -1 = kill process immediately
-                int res = mService.mController.appNotResponding(
+                int res = mService.mActivityTaskManager.mController.appNotResponding(
                         app.processName, app.pid, info.toString());
                 if (res != 0) {
                     if (res < 0 && app.pid != MY_PID) {
@@ -1070,7 +1070,7 @@ class AppErrors {
                     return;
                 }
             } catch (RemoteException e) {
-                mService.mController = null;
+                mService.mActivityTaskManager.mController = null;
                 Watchdog.getInstance().setActivityController(null);
             }
         }

@@ -1494,7 +1494,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     private boolean isResizeable(boolean checkSupportsPip) {
-        return (mService.mAm.mForceResizableActivities || ActivityInfo.isResizeableMode(mResizeMode)
+        return (mService.mForceResizableActivities || ActivityInfo.isResizeableMode(mResizeMode)
                 || (checkSupportsPip && mSupportsPictureInPicture));
     }
 
@@ -1507,8 +1507,8 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         // A task can not be docked even if it is considered resizeable because it only supports
         // picture-in-picture mode but has a non-resizeable resizeMode
         return super.supportsSplitScreenWindowingMode()
-                && mService.mAm.mSupportsSplitScreenMultiWindow
-                && (mService.mAm.mForceResizableActivities
+                && mService.mSupportsSplitScreenMultiWindow
+                && (mService.mForceResizableActivities
                         || (isResizeable(false /* checkSupportsPip */)
                                 && !ActivityInfo.isPreserveOrientationMode(mResizeMode)));
     }

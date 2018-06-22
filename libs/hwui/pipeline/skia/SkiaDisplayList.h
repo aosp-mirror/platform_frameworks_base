@@ -173,12 +173,12 @@ public:
     // node is drawn.
     const Outline* mProjectedOutline = nullptr;
 
-    // mProjectedReceiverParentMatrix is valid when render node tree is traversed during the draw
-    // pass. Render nodes that have a child receiver node, will store their matrix in
-    // mProjectedReceiverParentMatrix. Child receiver node will set the matrix and then clip with
-    // the
-    // outline of their parent.
-    SkMatrix mProjectedReceiverParentMatrix;
+    // mParentMatrix is set and valid when render node tree is traversed during the draw
+    // pass. Render nodes, which draw in a order different than recording order (e.g. nodes with a
+    // child receiver node or Z elevation), can use mParentMatrix to calculate the final transform
+    // without replaying the matrix transform OPs from the display list.
+    // Child receiver node will set the matrix and then clip with the outline of their parent.
+    SkMatrix mParentMatrix;
 };
 
 };  // namespace skiapipeline

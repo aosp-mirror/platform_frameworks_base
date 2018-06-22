@@ -786,13 +786,13 @@ android_media_MediaPlayer2_notifyAt(JNIEnv *env, jobject thiz, jlong mediaTimeUs
 }
 
 static jint
-android_media_MediaPlayer2_getMediaPlayer2State(JNIEnv *env, jobject thiz)
+android_media_MediaPlayer2_getState(JNIEnv *env, jobject thiz)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
         return MEDIAPLAYER2_STATE_IDLE;
     }
-    return (jint)mp->getMediaPlayer2State();
+    return (jint)mp->getState();
 }
 
 static jint
@@ -1502,7 +1502,7 @@ static const JNINativeMethod gMethods[] = {
     {"_prepare",            "()V",                              (void *)android_media_MediaPlayer2_prepare},
     {"_start",              "()V",                              (void *)android_media_MediaPlayer2_start},
     {"_stop",               "()V",                              (void *)android_media_MediaPlayer2_stop},
-    {"native_getMediaPlayer2State", "()I",                      (void *)android_media_MediaPlayer2_getMediaPlayer2State},
+    {"native_getState",     "()I",                              (void *)android_media_MediaPlayer2_getState},
     {"getVideoWidth",       "()I",                              (void *)android_media_MediaPlayer2_getVideoWidth},
     {"getVideoHeight",      "()I",                              (void *)android_media_MediaPlayer2_getVideoHeight},
     {"native_getMetrics",   "()Landroid/os/PersistableBundle;", (void *)android_media_MediaPlayer2_native_getMetrics},

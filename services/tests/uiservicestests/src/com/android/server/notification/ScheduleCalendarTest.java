@@ -121,7 +121,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         cal.set(Calendar.MINUTE, 15);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        mScheduleInfo.days = new int[] {getTodayDay(), getTodayDay() + 1};
+        mScheduleInfo.days = new int[] {getTodayDay(), getTodayDay(1)};
         mScheduleInfo.startHour = 1;
         mScheduleInfo.endHour = 3;
         mScheduleInfo.startMinute = 15;
@@ -149,7 +149,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         cal.set(Calendar.MINUTE, 15);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        mScheduleInfo.days = new int[] {getTodayDay(), getTodayDay() + 1};
+        mScheduleInfo.days = new int[] {getTodayDay(), getTodayDay(1)};
         mScheduleInfo.startHour = 22;
         mScheduleInfo.endHour = 3;
         mScheduleInfo.startMinute = 15;
@@ -250,7 +250,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         calAlarm.add(Calendar.DATE, 1); // add a day
 
         // ScheduleInfo: day 1, day 2: 9pm-7am
-        mScheduleInfo.days = new int[] {getTodayDay(), getTodayDay() + 1};
+        mScheduleInfo.days = new int[] {getTodayDay(), getTodayDay(1)};
         mScheduleInfo.startHour = 21;
         mScheduleInfo.endHour = 7;
         mScheduleInfo.startMinute = 0;
@@ -418,7 +418,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         now.set(Calendar.MILLISECOND, 0);
         now.add(Calendar.DATE, 1); // add a day
 
-        mScheduleInfo.days = new int[] {getTodayDay(), getTodayDay() + 1};
+        mScheduleInfo.days = new int[] {getTodayDay(), getTodayDay(1)};
         mScheduleInfo.startHour = 22;
         mScheduleInfo.startMinute = 15;
         mScheduleInfo.endHour = 3;
@@ -446,7 +446,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         now.set(Calendar.MILLISECOND, 0);
         now.add(Calendar.DATE, 1); // add a day
 
-        mScheduleInfo.days = new int[] {getTodayDay(), getTodayDay() + 1};
+        mScheduleInfo.days = new int[] {getTodayDay(), getTodayDay(1)};
         mScheduleInfo.startHour = 22;
         mScheduleInfo.startMinute = 15;
         mScheduleInfo.endHour = 3;
@@ -463,5 +463,11 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
 
     private int getTodayDay() {
         return new GregorianCalendar().get(Calendar.DAY_OF_WEEK);
+    }
+
+    private int getTodayDay(int offset) {
+        Calendar cal = new GregorianCalendar();
+        cal.add(Calendar.DATE, offset);
+        return cal.get(Calendar.DAY_OF_WEEK);
     }
 }

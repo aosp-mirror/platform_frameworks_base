@@ -142,7 +142,7 @@ void RenderNodeDrawable::forceDraw(SkCanvas* canvas) {
             LOG_ALWAYS_FATAL_IF(!mProjectedDisplayList->mProjectedOutline);
             const bool shouldClip = mProjectedDisplayList->mProjectedOutline->getPath();
             SkAutoCanvasRestore acr2(canvas, shouldClip);
-            canvas->setMatrix(mProjectedDisplayList->mProjectedReceiverParentMatrix);
+            canvas->setMatrix(mProjectedDisplayList->mParentMatrix);
             if (shouldClip) {
                 clipOutline(*mProjectedDisplayList->mProjectedOutline, canvas, nullptr);
             }
@@ -200,9 +200,7 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
         setViewProperties(properties, canvas, &alphaMultiplier);
     }
     SkiaDisplayList* displayList = (SkiaDisplayList*)mRenderNode->getDisplayList();
-    if (displayList->containsProjectionReceiver()) {
-        displayList->mProjectedReceiverParentMatrix = canvas->getTotalMatrix();
-    }
+    displayList->mParentMatrix = canvas->getTotalMatrix();
 
     // TODO should we let the bound of the drawable do this for us?
     const SkRect bounds = SkRect::MakeWH(properties.getWidth(), properties.getHeight());

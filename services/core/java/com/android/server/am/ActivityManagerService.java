@@ -22,11 +22,10 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.REMOVE_TASKS;
-import static android.Manifest.permission.STOP_APP_SWITCHES;
+import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
+import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
 import static android.app.AppOpsManager.OP_NONE;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
@@ -120,7 +119,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_B
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_LIGHT;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_IMMERSIVE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
@@ -134,9 +132,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESS_OBS
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROVIDER;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PSS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SERVICE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_UID_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_URI_PERMISSION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_USAGE_STATS;
@@ -169,10 +165,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
-import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
-import static android.view.WindowManager.TRANSIT_NONE;
-import static android.view.WindowManager.TRANSIT_TASK_OPEN;
-import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -187,6 +179,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityTaskManagerInternal;
 import android.app.ActivityTaskManagerInternal.ScreenObserver;
 import android.app.ActivityTaskManagerInternal.SleepToken;
 import android.app.ActivityManagerProto;
@@ -307,7 +300,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.TransactionTooLargeException;
-import android.os.UpdateLock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
@@ -471,8 +463,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final String TAG_BROADCAST = TAG + POSTFIX_BROADCAST;
     private static final String TAG_CLEANUP = TAG + POSTFIX_CLEANUP;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
-    private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
-    private static final String TAG_IMMERSIVE = TAG + POSTFIX_IMMERSIVE;
     private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
     private static final String TAG_LRU = TAG + POSTFIX_LRU;
     private static final String TAG_MU = TAG + POSTFIX_MU;
@@ -483,13 +473,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final String TAG_PROCESSES = TAG + POSTFIX_PROCESSES;
     private static final String TAG_PROVIDER = TAG + POSTFIX_PROVIDER;
     private static final String TAG_PSS = TAG + POSTFIX_PSS;
-    private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
     private static final String TAG_SERVICE = TAG + POSTFIX_SERVICE;
-    private static final String TAG_STACK = TAG + POSTFIX_STACK;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_UID_OBSERVERS = TAG + POSTFIX_UID_OBSERVERS;
     private static final String TAG_URI_PERMISSION = TAG + POSTFIX_URI_PERMISSION;
-    private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
 
     // Mock "pretend we're idle now" broadcast action to the job scheduler; declared
     // here so that while the job scheduler can depend on AMS, the other way around
@@ -513,10 +500,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     // Maximum number of receivers an app can register.
     private static final int MAX_RECEIVERS_ALLOWED_PER_APP = 1000;
-
-    // Amount of time after a call to stopAppSwitches() during which we will
-    // prevent further untrusted switches from happening.
-    static final long APP_SWITCH_DELAY_TIME = 5*1000;
 
     // How long we wait for a launched process to attach to the activity manager
     // before we decide it's never going to come up for real.
@@ -561,11 +544,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     /** If a UID observer takes more than this long, send a WTF. */
     private static final int SLOW_UID_OBSERVER_THRESHOLD_MS = 20;
 
-    // Access modes for handleIncomingUser.
-    static final int ALLOW_NON_FULL = 0;
-    static final int ALLOW_NON_FULL_IN_PROFILE = 1;
-    static final int ALLOW_FULL_ONLY = 2;
-
     // Necessary ApplicationInfo flags to mark an app as persistent
     private static final int PERSISTENT_MASK =
             ApplicationInfo.FLAG_SYSTEM|ApplicationInfo.FLAG_PERSISTENT;
@@ -576,9 +554,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     // Used to indicate that an app transition should be animated.
     static final boolean ANIMATE = true;
-
-    // Determines whether to take full screen screenshots
-    static final boolean TAKE_FULLSCREEN_SCREENSHOTS = true;
 
     /**
      * Default value for {@link Settings.Global#NETWORK_ACCESS_TIMEOUT_MS}.
@@ -628,9 +603,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     // devices.
     private boolean mShowDialogs = true;
 
-    // VR Vr2d Display Id.
-    int mVr2dDisplayId = INVALID_DISPLAY;
-
     // Whether we should use SCHED_FIFO for UI and RenderThreads.
     private boolean mUseFifoUiScheduling = false;
 
@@ -678,12 +650,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     String mDeviceOwnerName;
 
     final UserController mUserController;
-
-    /**
-     * Packages that are being allowed to perform unrestricted app switches.  Mapping is
-     * User -> Type -> uid.
-     */
-    final SparseArray<ArrayMap<String, Integer>> mAllowAppSwitchUids = new SparseArray<>();
 
     final AppErrors mAppErrors;
 
@@ -1329,18 +1295,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     final Context mUiContext;
 
     /**
-     * The time at which we will allow normal application switches again,
-     * after a call to {@link #stopAppSwitches()}.
-     */
-    long mAppSwitchesAllowedTime;
-
-    /**
-     * This is set to true after the first switch after mAppSwitchesAllowedTime
-     * is set; any switches after that will clear the time.
-     */
-    boolean mDidAppSwitch;
-
-    /**
      * Last time (in uptime) at which we checked for power usage.
      */
     long mLastPowerCheckUptime;
@@ -1491,29 +1445,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     String mOrigDebugApp = null;
     boolean mOrigWaitForDebugger = false;
     boolean mAlwaysFinishActivities = false;
-    boolean mForceResizableActivities;
-    /**
-     * Flag that indicates if multi-window is enabled.
-     *
-     * For any particular form of multi-window to be enabled, generic multi-window must be enabled
-     * in {@link com.android.internal.R.bool#config_supportsMultiWindow} config or
-     * {@link Settings.Global#DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES} development option set.
-     * At least one of the forms of multi-window must be enabled in order for this flag to be
-     * initialized to 'true'.
-     *
-     * @see #mSupportsSplitScreenMultiWindow
-     * @see #mSupportsFreeformWindowManagement
-     * @see #mSupportsPictureInPicture
-     * @see #mSupportsMultiDisplay
-     */
-    boolean mSupportsMultiWindow;
-    boolean mSupportsSplitScreenMultiWindow;
-    boolean mSupportsFreeformWindowManagement;
-    boolean mSupportsPictureInPicture;
-    boolean mSupportsMultiDisplay;
-    boolean mSupportsLeanbackOnly;
-    IActivityController mController = null;
-    boolean mControllerIsAMonkey = false;
+
     String mProfileApp = null;
     ProcessRecord mProfileProc = null;
     ProfilerInfo mProfilerInfo = null;
@@ -1637,8 +1569,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    final List<ScreenObserver> mScreenObservers = new ArrayList<>();
-
     final RemoteCallbackList<IProcessObserver> mProcessObservers = new RemoteCallbackList<>();
     ProcessChangeItem[] mActiveProcessChanges = new ProcessChangeItem[5];
 
@@ -1680,12 +1610,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     long mLastWriteTime = 0;
 
     /**
-     * Used to retain an update lock when the foreground activity is in
-     * immersive mode.
-     */
-    final UpdateLock mUpdateLock = new UpdateLock("immersive");
-
-    /**
      * Set to true after the system has finished booting.
      */
     boolean mBooted = false;
@@ -1697,6 +1621,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     WindowManagerService mWindowManager;
     ActivityTaskManagerService mActivityTaskManager;
+    ActivityTaskManagerInternal mAtmInternal;
     final ActivityThread mSystemThread;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
@@ -1748,7 +1673,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int DISPATCH_PROCESSES_CHANGED_UI_MSG = 31;
     static final int DISPATCH_PROCESS_DIED_UI_MSG = 32;
     static final int REPORT_MEM_USAGE_MSG = 33;
-    static final int IMMERSIVE_MODE_LOCK_MSG = 37;
     static final int PERSIST_URI_GRANTS_MSG = 38;
     static final int UPDATE_TIME_PREFERENCE_MSG = 41;
     static final int FINISH_BOOTING_MSG = 45;
@@ -1763,8 +1687,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT_MSG = 57;
     static final int IDLE_UIDS_MSG = 58;
     static final int HANDLE_TRUST_STORAGE_UPDATE_MSG = 63;
-    static final int DISPATCH_SCREEN_AWAKE_MSG = 64;
-    static final int DISPATCH_SCREEN_KEYGUARD_MSG = 65;
     static final int SERVICE_FOREGROUND_TIMEOUT_MSG = 66;
     static final int DISPATCH_PENDING_INTENT_CANCEL_MSG = 67;
     static final int PUSH_TEMP_WHITELIST_UI_MSG = 68;
@@ -1789,11 +1711,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      * the UI is driven by a UI automation tool.
      */
     private boolean mUserIsMonkey;
-
-    /** The dimensions of the thumbnails in the Recents UI. */
-    int mThumbnailWidth;
-    int mThumbnailHeight;
-    float mFullscreenThumbnailScale;
 
     final ServiceThread mHandlerThread;
     final MainHandler mHandler;
@@ -2038,6 +1955,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
                 callbacks.finishBroadcast();
+                // We have to clean up the RemoteCallbackList here, because otherwise it will
+                // needlessly hold the enclosed callbacks until the remote process dies.
+                callbacks.kill();
             } break;
             case UPDATE_TIME_ZONE: {
                 synchronized (ActivityManagerService.this) {
@@ -2196,20 +2116,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 };
                 thread.start();
-                break;
-            }
-            case IMMERSIVE_MODE_LOCK_MSG: {
-                final boolean nextState = (msg.arg1 != 0);
-                if (mUpdateLock.isHeld() != nextState) {
-                    if (DEBUG_IMMERSIVE) Slog.d(TAG_IMMERSIVE,
-                            "Applying new update lock state '" + nextState
-                            + "' for " + (ActivityRecord)msg.obj);
-                    if (nextState) {
-                        mUpdateLock.acquire();
-                    } else {
-                        mUpdateLock.release();
-                    }
-                }
                 break;
             }
             case PERSIST_URI_GRANTS_MSG: {
@@ -2378,18 +2284,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             } break;
             case IDLE_UIDS_MSG: {
                 idleUids();
-            } break;
-            case DISPATCH_SCREEN_AWAKE_MSG: {
-                final boolean isAwake = msg.arg1 != 0;
-                for (int i = mScreenObservers.size() - 1; i >= 0; i--) {
-                    mScreenObservers.get(i).onAwakeStateChanged(isAwake);
-                }
-            } break;
-            case DISPATCH_SCREEN_KEYGUARD_MSG: {
-                final boolean isShowing = msg.arg1 != 0;
-                for (int i = mScreenObservers.size() - 1; i >= 0; i--) {
-                    mScreenObservers.get(i).onKeyguardStateChanged(isShowing);
-                }
             } break;
             case HANDLE_TRUST_STORAGE_UPDATE_MSG: {
                 synchronized (ActivityManagerService.this) {
@@ -2585,6 +2479,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             mActivityTaskManager = atm;
             mActivityTaskManager.setActivityManagerService(this);
+            mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
             mStackSupervisor = mActivityTaskManager.mStackSupervisor;
         }
     }
@@ -3008,11 +2903,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    void onUserStoppedLocked(int userId) {
-        mActivityTaskManager.getRecentTasks().unloadUserDataFromMemoryLocked(userId);
-        mAllowAppSwitchUids.remove(userId);
-    }
-
     public void initPowerManagement() {
         mStackSupervisor.initPowerManagement();
         mBatteryStatsService.initPowerManagement();
@@ -3335,7 +3225,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mWindowManager.setFocusedApp(r.appToken, true);
 
-        applyUpdateLockStateLocked(r);
+        mActivityTaskManager.applyUpdateLockStateLocked(r);
         mActivityTaskManager.applyUpdateVrModeLocked(r);
 
         EventLogTags.writeAmSetResumedActivity(
@@ -3377,16 +3267,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void unregisterTaskStackListener(ITaskStackListener listener) {
         mActivityTaskManager.unregisterTaskStackListener(listener);
-    }
-
-    final void applyUpdateLockStateLocked(ActivityRecord r) {
-        // Modifications to the UpdateLock state are done on our handler, outside
-        // the activity manager's locks.  The new state is determined based on the
-        // state *now* of the relevant activity record.  The object is passed to
-        // the handler solely for logging detail, not to be consulted/modified.
-        final boolean nextState = r != null && r.immersive;
-        mHandler.sendMessage(
-                mHandler.obtainMessage(IMMERSIVE_MODE_LOCK_MSG, (nextState) ? 1 : 0, 0, r));
     }
 
     final void showAskCompatModeDialogLocked(ActivityRecord r) {
@@ -4413,7 +4293,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mCompatModePackages.compatibilityInfoForPackageLocked(ai);
     }
 
-    void enforceNotIsolatedCaller(String caller) {
+    private void enforceNotIsolatedCaller(String caller) {
         if (UserHandle.isIsolated(Binder.getCallingUid())) {
             throw new SecurityException("Isolated process not allowed to call " + caller);
         }
@@ -5648,7 +5528,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param maxProcState the process state at or below which to preserve
      *                     processes, or {@code -1} to ignore the process state
      */
-    private void killAllBackgroundProcessesExcept(int minTargetSdk, int maxProcState) {
+    void killAllBackgroundProcessesExcept(int minTargetSdk, int maxProcState) {
         if (checkCallingPermission(android.Manifest.permission.KILL_BACKGROUND_PROCESSES)
                 != PackageManager.PERMISSION_GRANTED) {
             final String msg = "Permission Denial: killAllBackgroundProcessesExcept() from pid="
@@ -7609,7 +7489,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    int checkComponentPermission(String permission, int pid, int uid,
+    static int checkComponentPermission(String permission, int pid, int uid,
             int owningUid, boolean exported) {
         if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
@@ -7694,15 +7574,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 + " requires " + permission;
         Slog.w(TAG, msg);
         throw new SecurityException(msg);
-    }
-
-    /**
-     * This can be called with or without the global lock held.
-     */
-    void enforceCallerIsRecentsOrHasPermission(String permission, String func) {
-        if (!mActivityTaskManager.getRecentTasks().isCallerRecents(Binder.getCallingUid())) {
-            enforceCallingPermission(permission, func);
-        }
     }
 
     /**
@@ -9160,38 +9031,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void cancelTaskWindowTransition(int taskId) {
         mActivityTaskManager.cancelTaskWindowTransition(taskId);
-    }
-
-    boolean isGetTasksAllowed(String caller, int callingPid, int callingUid) {
-        if (mActivityTaskManager.getRecentTasks().isCallerRecents(callingUid)) {
-            // Always allow the recents component to get tasks
-            return true;
-        }
-
-        boolean allowed = checkPermission(android.Manifest.permission.REAL_GET_TASKS,
-                callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
-        if (!allowed) {
-            if (checkPermission(android.Manifest.permission.GET_TASKS,
-                    callingPid, callingUid) == PackageManager.PERMISSION_GRANTED) {
-                // Temporary compatibility: some existing apps on the system image may
-                // still be requesting the old permission and not switched to the new
-                // one; if so, we'll still allow them full access.  This means we need
-                // to see if they are holding the old permission and are a system app.
-                try {
-                    if (AppGlobals.getPackageManager().isUidPrivileged(callingUid)) {
-                        allowed = true;
-                        if (DEBUG_TASKS) Slog.w(TAG, caller + ": caller " + callingUid
-                                + " is using old GET_TASKS but privileged; allowing");
-                    }
-                } catch (RemoteException e) {
-                }
-            }
-        }
-        if (!allowed) {
-            if (DEBUG_TASKS) Slog.w(TAG, caller + ": caller " + callingUid
-                    + " does not hold REAL_GET_TASKS; limiting output");
-        }
-        return allowed;
     }
 
     @Override
@@ -10810,8 +10649,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Also update state in a special way for running foreground services UI.
                 mServices.updateScreenStateLocked(isAwake);
                 reportCurWakefulnessUsageEventLocked();
-                mHandler.obtainMessage(DISPATCH_SCREEN_AWAKE_MSG, isAwake ? 1 : 0, 0)
-                        .sendToTarget();
+                mActivityTaskManager.onScreenAwakeChanged(isAwake);
             }
             updateOomAdjLocked();
         }
@@ -10975,69 +10813,12 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void stopAppSwitches() {
-        enforceCallerIsRecentsOrHasPermission(STOP_APP_SWITCHES, "stopAppSwitches");
-        synchronized(this) {
-            mAppSwitchesAllowedTime = SystemClock.uptimeMillis()
-                    + APP_SWITCH_DELAY_TIME;
-            mDidAppSwitch = false;
-            mActivityTaskManager.getActivityStartController().schedulePendingActivityLaunches(APP_SWITCH_DELAY_TIME);
-        }
+        mActivityTaskManager.stopAppSwitches();
     }
 
+    @Override
     public void resumeAppSwitches() {
-        enforceCallerIsRecentsOrHasPermission(STOP_APP_SWITCHES, "resumeAppSwitches");
-        synchronized(this) {
-            // Note that we don't execute any pending app switches... we will
-            // let those wait until either the timeout, or the next start
-            // activity request.
-            mAppSwitchesAllowedTime = 0;
-        }
-    }
-
-    boolean checkAllowAppSwitchUid(int uid) {
-        ArrayMap<String, Integer> types = mAllowAppSwitchUids.get(UserHandle.getUserId(uid));
-        if (types != null) {
-            for (int i = types.size() - 1; i >= 0; i--) {
-                if (types.valueAt(i).intValue() == uid) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    boolean checkAppSwitchAllowedLocked(int sourcePid, int sourceUid,
-            int callingPid, int callingUid, String name) {
-        if (mAppSwitchesAllowedTime < SystemClock.uptimeMillis()) {
-            return true;
-        }
-
-        if (mActivityTaskManager.getRecentTasks().isCallerRecents(sourceUid)) {
-            return true;
-        }
-
-        int perm = checkComponentPermission(STOP_APP_SWITCHES, sourcePid, sourceUid, -1, true);
-        if (perm == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (checkAllowAppSwitchUid(sourceUid)) {
-            return true;
-        }
-
-        // If the actual IPC caller is different from the logical source, then
-        // also see if they are allowed to control app switches.
-        if (callingUid != -1 && callingUid != sourceUid) {
-            perm = checkComponentPermission(STOP_APP_SWITCHES, callingPid, callingUid, -1, true);
-            if (perm == PackageManager.PERMISSION_GRANTED) {
-                return true;
-            }
-            if (checkAllowAppSwitchUid(callingUid)) {
-                return true;
-            }
-        }
-
-        Slog.w(TAG, name + " request from " + sourceUid + " stopped");
-        return false;
+        mActivityTaskManager.resumeAppSwitches();
     }
 
     public void setDebugApp(String packageName, boolean waitForDebugger,
@@ -11191,13 +10972,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void setActivityController(IActivityController controller, boolean imAMonkey) {
-        enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,
-                "setActivityController()");
-        synchronized (this) {
-            mController = controller;
-            mControllerIsAMonkey = imAMonkey;
-            Watchdog.getInstance().setActivityController(controller);
-        }
+        mActivityTaskManager.setActivityController(controller, imAMonkey);
     }
 
     @Override
@@ -11222,7 +10997,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public boolean isUserAMonkey() {
         synchronized (this) {
             // If there is a controller also implies the user is a monkey.
-            return (mUserIsMonkey || (mController != null && mControllerIsAMonkey));
+            return mUserIsMonkey || mActivityTaskManager.isControllerAMonkey();
         }
     }
 
@@ -11529,17 +11304,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         return false;
     }
 
-    /**
-     * Check that we have the features required for VR-related API calls, and throw an exception if
-     * not.
-     */
-    void enforceSystemHasVrFeature() {
-        if (!mContext.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_VR_MODE_HIGH_PERFORMANCE)) {
-            throw new UnsupportedOperationException("VR mode not supported on this device!");
-        }
-    }
-
     @Override
     public void setRenderThread(int tid) {
         synchronized (this) {
@@ -11594,7 +11358,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public boolean isVrModePackageEnabled(ComponentName packageName) {
-        enforceSystemHasVrFeature();
+        mActivityTaskManager.enforceSystemHasVrFeature();
 
         final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
 
@@ -12067,78 +11831,22 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private void retrieveSettings() {
         final ContentResolver resolver = mContext.getContentResolver();
-        final boolean freeformWindowManagement =
-                mContext.getPackageManager().hasSystemFeature(FEATURE_FREEFORM_WINDOW_MANAGEMENT)
-                        || Settings.Global.getInt(
-                                resolver, DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
+        mActivityTaskManager.retrieveSettings(resolver);
 
-        final boolean supportsMultiWindow = ActivityTaskManager.supportsMultiWindow(mContext);
-        final boolean supportsPictureInPicture = supportsMultiWindow &&
-                mContext.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE);
-        final boolean supportsSplitScreenMultiWindow =
-                ActivityTaskManager.supportsSplitScreenMultiWindow(mContext);
-        final boolean supportsMultiDisplay = mContext.getPackageManager()
-                .hasSystemFeature(FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS);
         final String debugApp = Settings.Global.getString(resolver, DEBUG_APP);
         final boolean waitForDebugger = Settings.Global.getInt(resolver, WAIT_FOR_DEBUGGER, 0) != 0;
         final boolean alwaysFinishActivities =
                 Settings.Global.getInt(resolver, ALWAYS_FINISH_ACTIVITIES, 0) != 0;
-        final boolean forceRtl = Settings.Global.getInt(resolver, DEVELOPMENT_FORCE_RTL, 0) != 0;
-        final boolean forceResizable = Settings.Global.getInt(
-                resolver, DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
         final long waitForNetworkTimeoutMs = Settings.Global.getLong(resolver,
                 NETWORK_ACCESS_TIMEOUT_MS, NETWORK_ACCESS_TIMEOUT_DEFAULT_MS);
-        final boolean supportsLeanbackOnly =
-                mContext.getPackageManager().hasSystemFeature(FEATURE_LEANBACK_ONLY);
         mHiddenApiBlacklist.registerObserver();
-
-        // Transfer any global setting for forcing RTL layout, into a System Property
-        SystemProperties.set(DEVELOPMENT_FORCE_RTL, forceRtl ? "1":"0");
-
-        final Configuration configuration = new Configuration();
-        Settings.System.getConfiguration(resolver, configuration);
-        if (forceRtl) {
-            // This will take care of setting the correct layout direction flags
-            configuration.setLayoutDirection(configuration.locale);
-        }
 
         synchronized (this) {
             mDebugApp = mOrigDebugApp = debugApp;
             mWaitForDebugger = mOrigWaitForDebugger = waitForDebugger;
             mAlwaysFinishActivities = alwaysFinishActivities;
-            mSupportsLeanbackOnly = supportsLeanbackOnly;
-            mForceResizableActivities = forceResizable;
-            final boolean multiWindowFormEnabled = freeformWindowManagement
-                    || supportsSplitScreenMultiWindow
-                    || supportsPictureInPicture
-                    || supportsMultiDisplay;
-            if ((supportsMultiWindow || forceResizable) && multiWindowFormEnabled) {
-                mSupportsMultiWindow = true;
-                mSupportsFreeformWindowManagement = freeformWindowManagement;
-                mSupportsSplitScreenMultiWindow = supportsSplitScreenMultiWindow;
-                mSupportsPictureInPicture = supportsPictureInPicture;
-                mSupportsMultiDisplay = supportsMultiDisplay;
-            } else {
-                mSupportsMultiWindow = false;
-                mSupportsFreeformWindowManagement = false;
-                mSupportsSplitScreenMultiWindow = false;
-                mSupportsPictureInPicture = false;
-                mSupportsMultiDisplay = false;
-            }
-            mWindowManager.setForceResizableTasks(mForceResizableActivities);
-            mWindowManager.setSupportsPictureInPicture(mSupportsPictureInPicture);
-            // This happens before any activities are started, so we can change global configuration
-            // in-place.
-            updateConfigurationLocked(configuration, null, true);
-            final Configuration globalConfig = getGlobalConfiguration();
-            if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Initial config: " + globalConfig);
-
             // Load resources only after the current configuration has been set.
             final Resources res = mContext.getResources();
-            mThumbnailWidth = res.getDimensionPixelSize(
-                    com.android.internal.R.dimen.thumbnail_width);
-            mThumbnailHeight = res.getDimensionPixelSize(
-                    com.android.internal.R.dimen.thumbnail_height);
             mAppErrors.loadAppsNotReportingCrashesFromConfigLocked(res.getString(
                     com.android.internal.R.string.config_appsNotReportingCrashes));
             mUserController.mUserSwitchUiEnabled = !res.getBoolean(
@@ -12146,14 +11854,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUserController.mMaxRunningUsers = res.getInteger(
                     com.android.internal.R.integer.config_multiuserMaxRunningUsers);
 
-            if ((globalConfig.uiMode & UI_MODE_TYPE_TELEVISION) == UI_MODE_TYPE_TELEVISION) {
-                mFullscreenThumbnailScale = (float) res
-                    .getInteger(com.android.internal.R.integer.thumbnail_width_tv) /
-                    (float) globalConfig.screenWidthDp;
-            } else {
-                mFullscreenThumbnailScale = res.getFraction(
-                    com.android.internal.R.fraction.thumbnail_fullscreen_scale, 1, 1);
-            }
             mWaitForNetworkTimeoutMs = waitForNetworkTimeoutMs;
         }
     }
@@ -12934,7 +12634,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final boolean allUsers = ActivityManager.checkUidPermission(INTERACT_ACROSS_USERS_FULL,
                 callingUid) == PackageManager.PERMISSION_GRANTED;
         final int userId = UserHandle.getUserId(callingUid);
-        final boolean allUids = isGetTasksAllowed(
+        final boolean allUids = mAtmInternal.isGetTasksAllowed(
                 "getRunningAppProcesses", Binder.getCallingPid(), callingUid);
 
         synchronized (this) {
@@ -13962,7 +13662,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (dumpAll) {
             if (dumpPackage == null) {
-                pw.println("  mConfigWillChange: " + getFocusedStack().mConfigWillChange);
+                pw.println("  mConfigWillChange: " + mActivityTaskManager.getFocusedStack().mConfigWillChange);
             }
             if (mCompatModePackages.getPackages().size() > 0) {
                 boolean printed = false;
@@ -14127,10 +13827,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("  mNativeDebuggingApp=" + mNativeDebuggingApp);
             }
         }
-        if (mAllowAppSwitchUids.size() > 0) {
+        if (mActivityTaskManager.mAllowAppSwitchUids.size() > 0) {
             boolean printed = false;
-            for (int i = 0; i < mAllowAppSwitchUids.size(); i++) {
-                ArrayMap<String, Integer> types = mAllowAppSwitchUids.valueAt(i);
+            for (int i = 0; i < mActivityTaskManager.mAllowAppSwitchUids.size(); i++) {
+                ArrayMap<String, Integer> types = mActivityTaskManager.mAllowAppSwitchUids.valueAt(i);
                 for (int j = 0; j < types.size(); j++) {
                     if (dumpPackage == null ||
                             UserHandle.getAppId(types.valueAt(j).intValue()) == dumpAppId) {
@@ -14143,7 +13843,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             printed = true;
                         }
                         pw.print("    User ");
-                        pw.print(mAllowAppSwitchUids.keyAt(i));
+                        pw.print(mActivityTaskManager.mAllowAppSwitchUids.keyAt(i));
                         pw.print(": Type ");
                         pw.print(types.keyAt(j));
                         pw.print(" = ");
@@ -14157,9 +13857,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (mAlwaysFinishActivities) {
                 pw.println("  mAlwaysFinishActivities=" + mAlwaysFinishActivities);
             }
-            if (mController != null) {
-                pw.println("  mController=" + mController
-                        + " mControllerIsAMonkey=" + mControllerIsAMonkey);
+            if (mActivityTaskManager.mController != null) {
+                pw.println("  mController=" + mActivityTaskManager.mController
+                        + " mControllerIsAMonkey=" + mActivityTaskManager.mControllerIsAMonkey);
             }
             if (dumpAll) {
                 pw.println("  Total persistent processes: " + numPers);
@@ -14340,7 +14040,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (dumpPackage == null) {
             mUserController.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.USER_CONTROLLER);
             getGlobalConfiguration().writeToProto(proto, ActivityManagerServiceDumpProcessesProto.GLOBAL_CONFIGURATION);
-            proto.write(ActivityManagerServiceDumpProcessesProto.CONFIG_WILL_CHANGE, getFocusedStack().mConfigWillChange);
+            proto.write(ActivityManagerServiceDumpProcessesProto.CONFIG_WILL_CHANGE, mActivityTaskManager.getFocusedStack().mConfigWillChange);
         }
 
         if (mHomeProcess != null && (dumpPackage == null
@@ -14490,10 +14190,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (dumpPackage == null) {
             proto.write(ActivityManagerServiceDumpProcessesProto.ALWAYS_FINISH_ACTIVITIES, mAlwaysFinishActivities);
-            if (mController != null) {
+            if (mActivityTaskManager.mController != null) {
                 final long token = proto.start(ActivityManagerServiceDumpProcessesProto.CONTROLLER);
-                proto.write(ActivityManagerServiceDumpProcessesProto.Controller.CONTROLLER, mController.toString());
-                proto.write(ActivityManagerServiceDumpProcessesProto.Controller.IS_A_MONKEY, mControllerIsAMonkey);
+                proto.write(ActivityManagerServiceDumpProcessesProto.Controller.CONTROLLER, mActivityTaskManager.mController.toString());
+                proto.write(ActivityManagerServiceDumpProcessesProto.Controller.IS_A_MONKEY, mActivityTaskManager.mControllerIsAMonkey);
                 proto.end(token);
             }
             proto.write(ActivityManagerServiceDumpProcessesProto.TOTAL_PERSISTENT_PROCS, numPers);
@@ -17360,8 +17060,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int callingUid = Binder.getCallingUid();
         final boolean canInteractAcrossUsers = (ActivityManager.checkUidPermission(
             INTERACT_ACROSS_USERS_FULL, callingUid) == PERMISSION_GRANTED);
-        final boolean allowed = isGetTasksAllowed("getServices", Binder.getCallingPid(),
-            callingUid);
+        final boolean allowed = mAtmInternal.isGetTasksAllowed("getServices",
+                Binder.getCallingPid(), callingUid);
         synchronized (this) {
             return mServices.getRunningServiceInfoLocked(maxNum, flags, callingUid,
                 allowed, canInteractAcrossUsers);
@@ -19333,10 +19033,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         return config;
     }
 
-    ActivityStack getFocusedStack() {
-        return mStackSupervisor.getFocusedStack();
-    }
-
     @Override
     public StackInfo getFocusedStackInfo() throws RemoteException {
         return mActivityTaskManager.getFocusedStackInfo();
@@ -19366,18 +19062,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         int userId = UserHandle.getCallingUserId();
 
-        synchronized(this) {
-            updatePersistentConfigurationLocked(values, userId);
-        }
-    }
-
-    private void updatePersistentConfigurationLocked(Configuration values, @UserIdInt int userId) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            updateConfigurationLocked(values, null, false, true, userId, false /* deferResume */);
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
+        mActivityTaskManager.updatePersistentConfiguration(values, userId);
     }
 
     private void updateFontScaleIfNeeded(@UserIdInt int userId) {
@@ -19392,7 +19077,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             final Configuration configuration
                     = mWindowManager.computeNewConfiguration(DEFAULT_DISPLAY);
             configuration.fontScale = scaleFactor;
-            updatePersistentConfigurationLocked(configuration, userId);
+            mActivityTaskManager.updatePersistentConfiguration(configuration, userId);
         }
     }
 
@@ -19420,356 +19105,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mActivityTaskManager.updateConfiguration(values);
     }
 
-    void updateUserConfigurationLocked() {
-        final Configuration configuration = new Configuration(getGlobalConfiguration());
-        final int currentUserId = mUserController.getCurrentUserId();
-        Settings.System.adjustConfigurationForUser(mContext.getContentResolver(), configuration,
-                currentUserId, Settings.System.canWrite(mContext));
-        updateConfigurationLocked(configuration, null /* starting */, false /* initLocale */,
-                false /* persistent */, currentUserId, false /* deferResume */);
-    }
-
-    boolean updateConfigurationLocked(Configuration values, ActivityRecord starting,
-            boolean initLocale) {
-        return updateConfigurationLocked(values, starting, initLocale, false /* deferResume */);
-    }
-
-    boolean updateConfigurationLocked(Configuration values, ActivityRecord starting,
-            boolean initLocale, boolean deferResume) {
-        // pass UserHandle.USER_NULL as userId because we don't persist configuration for any user
-        return updateConfigurationLocked(values, starting, initLocale, false /* persistent */,
-                UserHandle.USER_NULL, deferResume);
-    }
-
-    // To cache the list of supported system locales
-    private String[] mSupportedSystemLocales = null;
-
-    private boolean updateConfigurationLocked(Configuration values, ActivityRecord starting,
-            boolean initLocale, boolean persistent, int userId, boolean deferResume) {
-        return updateConfigurationLocked(values, starting, initLocale, persistent, userId,
-                deferResume, null /* result */);
-    }
-
-    /**
-     * Do either or both things: (1) change the current configuration, and (2)
-     * make sure the given activity is running with the (now) current
-     * configuration.  Returns true if the activity has been left running, or
-     * false if <var>starting</var> is being destroyed to match the new
-     * configuration.
-     *
-     * @param userId is only used when persistent parameter is set to true to persist configuration
-     *               for that particular user
-     */
-    boolean updateConfigurationLocked(Configuration values, ActivityRecord starting,
-            boolean initLocale, boolean persistent, int userId, boolean deferResume,
-            ActivityTaskManagerService.UpdateConfigurationResult result) {
-        int changes = 0;
-        boolean kept = true;
-
-        if (mWindowManager != null) {
-            mWindowManager.deferSurfaceLayout();
-        }
-        try {
-            if (values != null) {
-                changes = updateGlobalConfigurationLocked(values, initLocale, persistent, userId,
-                        deferResume);
-            }
-
-            kept = ensureConfigAndVisibilityAfterUpdate(starting, changes);
-        } finally {
-            if (mWindowManager != null) {
-                mWindowManager.continueSurfaceLayout();
-            }
-        }
-
-        if (result != null) {
-            result.changes = changes;
-            result.activityRelaunched = !kept;
-        }
-        return kept;
-    }
-
-    /**
-     * Returns true if this configuration change is interesting enough to send an
-     * {@link Intent#ACTION_SPLIT_CONFIGURATION_CHANGED} broadcast.
-     */
-    private static boolean isSplitConfigurationChange(int configDiff) {
-        return (configDiff & (ActivityInfo.CONFIG_LOCALE | ActivityInfo.CONFIG_DENSITY)) != 0;
-    }
-
-    /** Update default (global) configuration and notify listeners about changes. */
-    private int updateGlobalConfigurationLocked(@NonNull Configuration values, boolean initLocale,
-            boolean persistent, int userId, boolean deferResume) {
-        mActivityTaskManager.mTempConfig.setTo(getGlobalConfiguration());
-        final int changes = mActivityTaskManager.mTempConfig.updateFrom(values);
-        if (changes == 0) {
-            // Since calling to Activity.setRequestedOrientation leads to freezing the window with
-            // setting WindowManagerService.mWaitingForConfig to true, it is important that we call
-            // performDisplayOverrideConfigUpdate in order to send the new display configuration
-            // (even if there are no actual changes) to unfreeze the window.
-            performDisplayOverrideConfigUpdate(values, deferResume, DEFAULT_DISPLAY);
-            return 0;
-        }
-
-        if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.i(TAG_CONFIGURATION,
-                "Updating global configuration to: " + values);
-
-        EventLog.writeEvent(EventLogTags.CONFIGURATION_CHANGED, changes);
-        StatsLog.write(StatsLog.RESOURCE_CONFIGURATION_CHANGED,
-                values.colorMode,
-                values.densityDpi,
-                values.fontScale,
-                values.hardKeyboardHidden,
-                values.keyboard,
-                values.keyboardHidden,
-                values.mcc,
-                values.mnc,
-                values.navigation,
-                values.navigationHidden,
-                values.orientation,
-                values.screenHeightDp,
-                values.screenLayout,
-                values.screenWidthDp,
-                values.smallestScreenWidthDp,
-                values.touchscreen,
-                values.uiMode);
-
-
-        if (!initLocale && !values.getLocales().isEmpty() && values.userSetLocale) {
-            final LocaleList locales = values.getLocales();
-            int bestLocaleIndex = 0;
-            if (locales.size() > 1) {
-                if (mSupportedSystemLocales == null) {
-                    mSupportedSystemLocales = Resources.getSystem().getAssets().getLocales();
-                }
-                bestLocaleIndex = Math.max(0, locales.getFirstMatchIndex(mSupportedSystemLocales));
-            }
-            SystemProperties.set("persist.sys.locale",
-                    locales.get(bestLocaleIndex).toLanguageTag());
-            LocaleList.setDefault(locales, bestLocaleIndex);
-            mHandler.sendMessage(mHandler.obtainMessage(SEND_LOCALE_TO_MOUNT_DAEMON_MSG,
-                    locales.get(bestLocaleIndex)));
-        }
-
-        mActivityTaskManager.mConfigurationSeq = Math.max(++mActivityTaskManager.mConfigurationSeq, 1);
-        mActivityTaskManager.mTempConfig.seq = mActivityTaskManager.mConfigurationSeq;
-
-        // Update stored global config and notify everyone about the change.
-        mStackSupervisor.onConfigurationChanged(mActivityTaskManager.mTempConfig);
-
-        Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + mActivityTaskManager.mTempConfig);
-        // TODO(multi-display): Update UsageEvents#Event to include displayId.
-        mUsageStatsService.reportConfigurationChange(mActivityTaskManager.mTempConfig,
-                mUserController.getCurrentUserId());
-
-        // TODO: If our config changes, should we auto dismiss any currently showing dialogs?
-        updateShouldShowDialogsLocked(mActivityTaskManager.mTempConfig);
-
-        AttributeCache ac = AttributeCache.instance();
-        if (ac != null) {
-            ac.updateConfiguration(mActivityTaskManager.mTempConfig);
-        }
-
-        // Make sure all resources in our process are updated right now, so that anyone who is going
-        // to retrieve resource values after we return will be sure to get the new ones. This is
-        // especially important during boot, where the first config change needs to guarantee all
-        // resources have that config before following boot code is executed.
-        mSystemThread.applyConfigurationToResources(mActivityTaskManager.mTempConfig);
-
-        // We need another copy of global config because we're scheduling some calls instead of
-        // running them in place. We need to be sure that object we send will be handled unchanged.
-        final Configuration configCopy = new Configuration(mActivityTaskManager.mTempConfig);
-        if (persistent && Settings.System.hasInterestingConfigurationChanges(changes)) {
-            Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);
-            msg.obj = configCopy;
-            msg.arg1 = userId;
-            mHandler.sendMessage(msg);
-        }
-
-        for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
-            ProcessRecord app = mLruProcesses.get(i);
-            try {
-                if (app.thread != null) {
-                    if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending to proc "
-                            + app.processName + " new config " + configCopy);
-                    mActivityTaskManager.getLifecycleManager().scheduleTransaction(app.thread,
-                            ConfigurationChangeItem.obtain(configCopy));
-                }
-            } catch (Exception e) {
-                Slog.e(TAG_CONFIGURATION, "Failed to schedule configuration change", e);
-            }
-        }
-
-        Intent intent = new Intent(Intent.ACTION_CONFIGURATION_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_REPLACE_PENDING
-                | Intent.FLAG_RECEIVER_FOREGROUND
-                | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-        broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
-                OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
-                UserHandle.USER_ALL);
-        if ((changes & ActivityInfo.CONFIG_LOCALE) != 0) {
-            intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
-            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND
-                    | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
-                    | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-            if (initLocale || !mProcessesReady) {
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            }
-            broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
-                    OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
-                    UserHandle.USER_ALL);
-        }
-
-        // Send a broadcast to PackageInstallers if the configuration change is interesting
-        // for the purposes of installing additional splits.
-        if (!initLocale && isSplitConfigurationChange(changes)) {
-            intent = new Intent(Intent.ACTION_SPLIT_CONFIGURATION_CHANGED);
-            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
-                    | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-
-            // Typically only app stores will have this permission.
-            String[] permissions = new String[] { android.Manifest.permission.INSTALL_PACKAGES };
-            broadcastIntentLocked(null, null, intent, null, null, 0, null, null, permissions,
-                    OP_NONE, null, false, false, MY_PID, SYSTEM_UID, UserHandle.USER_ALL);
-        }
-
-        // Override configuration of the default display duplicates global config, so we need to
-        // update it also. This will also notify WindowManager about changes.
-        performDisplayOverrideConfigUpdate(mStackSupervisor.getConfiguration(), deferResume,
-                DEFAULT_DISPLAY);
-
-        return changes;
-    }
-
-    boolean updateDisplayOverrideConfigurationLocked(Configuration values, ActivityRecord starting,
-            boolean deferResume, int displayId) {
-        return updateDisplayOverrideConfigurationLocked(values, starting, deferResume /* deferResume */,
-                displayId, null /* result */);
-    }
-
-    /**
-     * Updates override configuration specific for the selected display. If no config is provided,
-     * new one will be computed in WM based on current display info.
-     */
-    boolean updateDisplayOverrideConfigurationLocked(Configuration values,
-            ActivityRecord starting, boolean deferResume, int displayId,
-            ActivityTaskManagerService.UpdateConfigurationResult result) {
-        int changes = 0;
-        boolean kept = true;
-
-        if (mWindowManager != null) {
-            mWindowManager.deferSurfaceLayout();
-        }
-        try {
-            if (values != null) {
-                if (displayId == DEFAULT_DISPLAY) {
-                    // Override configuration of the default display duplicates global config, so
-                    // we're calling global config update instead for default display. It will also
-                    // apply the correct override config.
-                    changes = updateGlobalConfigurationLocked(values, false /* initLocale */,
-                            false /* persistent */, UserHandle.USER_NULL /* userId */, deferResume);
-                } else {
-                    changes = performDisplayOverrideConfigUpdate(values, deferResume, displayId);
-                }
-            }
-
-            kept = ensureConfigAndVisibilityAfterUpdate(starting, changes);
-        } finally {
-            if (mWindowManager != null) {
-                mWindowManager.continueSurfaceLayout();
-            }
-        }
-
-        if (result != null) {
-            result.changes = changes;
-            result.activityRelaunched = !kept;
-        }
-        return kept;
-    }
-
-    private int performDisplayOverrideConfigUpdate(Configuration values, boolean deferResume,
-            int displayId) {
-        mActivityTaskManager.mTempConfig.setTo(mStackSupervisor.getDisplayOverrideConfiguration(displayId));
-        final int changes = mActivityTaskManager.mTempConfig.updateFrom(values);
-        if (changes != 0) {
-            Slog.i(TAG, "Override config changes=" + Integer.toHexString(changes) + " "
-                    + mActivityTaskManager.mTempConfig + " for displayId=" + displayId);
-            mStackSupervisor.setDisplayOverrideConfiguration(mActivityTaskManager.mTempConfig, displayId);
-
-            final boolean isDensityChange = (changes & ActivityInfo.CONFIG_DENSITY) != 0;
-            if (isDensityChange && displayId == DEFAULT_DISPLAY) {
-                mAppWarnings.onDensityChanged();
-
-                killAllBackgroundProcessesExcept(N,
-                        ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
-            }
-        }
-
-        // Update the configuration with WM first and check if any of the stacks need to be resized
-        // due to the configuration change. If so, resize the stacks now and do any relaunches if
-        // necessary. This way we don't need to relaunch again afterwards in
-        // ensureActivityConfiguration().
-        if (mWindowManager != null) {
-            final int[] resizedStacks =
-                    mWindowManager.setNewDisplayOverrideConfiguration(mActivityTaskManager.mTempConfig, displayId);
-            if (resizedStacks != null) {
-                for (int stackId : resizedStacks) {
-                    resizeStackWithBoundsFromWindowManager(stackId, deferResume);
-                }
-            }
-        }
-
-        return changes;
-    }
-
-    /** Applies latest configuration and/or visibility updates if needed. */
-    private boolean ensureConfigAndVisibilityAfterUpdate(ActivityRecord starting, int changes) {
-        boolean kept = true;
-        final ActivityStack mainStack = mStackSupervisor.getFocusedStack();
-        // mainStack is null during startup.
-        if (mainStack != null) {
-            if (changes != 0 && starting == null) {
-                // If the configuration changed, and the caller is not already
-                // in the process of starting an activity, then find the top
-                // activity to check if its configuration needs to change.
-                starting = mainStack.topRunningActivityLocked();
-            }
-
-            if (starting != null) {
-                kept = starting.ensureActivityConfiguration(changes,
-                        false /* preserveWindow */);
-                // And we need to make sure at this point that all other activities
-                // are made visible with the correct configuration.
-                mStackSupervisor.ensureActivitiesVisibleLocked(starting, changes,
-                        !PRESERVE_WINDOWS);
-            }
-        }
-
-        return kept;
-    }
-
-    /** Helper method that requests bounds from WM and applies them to stack. */
-    private void resizeStackWithBoundsFromWindowManager(int stackId, boolean deferResume) {
-        final Rect newStackBounds = new Rect();
-        final ActivityStack stack = mStackSupervisor.getStack(stackId);
-
-        // TODO(b/71548119): Revert CL introducing below once cause of mismatch is found.
-        if (stack == null) {
-            final StringWriter writer = new StringWriter();
-            final PrintWriter printWriter = new PrintWriter(writer);
-            mStackSupervisor.dumpDisplays(printWriter);
-            printWriter.flush();
-
-            Log.wtf(TAG, "stack not found:" + stackId + " displays:" + writer);
-        }
-
-        stack.getBoundsForNewConfiguration(newStackBounds);
-        mStackSupervisor.resizeStackLocked(
-                stack, !newStackBounds.isEmpty() ? newStackBounds : null /* bounds */,
-                null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
-                false /* preserveWindows */, false /* allowResizeInDockedMode */, deferResume);
-    }
-
     /**
      * Decide based on the configuration whether we should show the ANR,
      * crash, etc dialogs.  The idea is that if there is no affordance to
@@ -19779,7 +19114,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * A thought: SystemUI might also want to get told about this, the Power
      * dialog / global actions also might want different behaviors.
      */
-    private void updateShouldShowDialogsLocked(Configuration config) {
+    void updateShouldShowDialogsLocked(Configuration config) {
         final boolean inputMethodExists = !(config.keyboard == Configuration.KEYBOARD_NOKEYS
                                    && config.touchscreen == Configuration.TOUCHSCREEN_NOTOUCH
                                    && config.navigation == Configuration.NAVIGATION_NONAV);
@@ -23230,15 +22565,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void onUserRemoved(int userId) {
-            synchronized (ActivityManagerService.this) {
-                ActivityManagerService.this.onUserStoppedLocked(userId);
-            }
-            mBatteryStatsService.onUserRemoved(userId);
-            mUserController.onUserRemoved(userId);
-        }
-
-        @Override
         public void killForegroundAppsForUser(int userHandle) {
             synchronized (ActivityManagerService.this) {
                 final ArrayList<ProcessRecord> procs = new ArrayList<>();
@@ -23293,17 +22619,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (ActivityManagerService.this) {
                 mDeviceIdleTempWhitelist = appids;
                 setAppIdTempWhitelistStateLocked(changingAppId, adding);
-            }
-        }
-
-        @Override
-        public void updatePersistentConfigurationForUser(@NonNull Configuration values,
-                int userId) {
-            Preconditions.checkNotNull(values, "Configuration must not be null");
-            Preconditions.checkArgumentNonnegative(userId, "userId " + userId + " not supported");
-            synchronized (ActivityManagerService.this) {
-                updateConfigurationLocked(values, null, false, true, userId,
-                        false /* deferResume */);
             }
         }
 
@@ -23425,27 +22740,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void setAllowAppSwitches(@NonNull String type, int uid, int userId) {
-            synchronized (ActivityManagerService.this) {
-                if (mUserController.isUserRunning(userId, ActivityManager.FLAG_OR_STOPPED)) {
-                    ArrayMap<String, Integer> types = mAllowAppSwitchUids.get(userId);
-                    if (types == null) {
-                        if (uid < 0) {
-                            return;
-                        }
-                        types = new ArrayMap<>();
-                        mAllowAppSwitchUids.put(userId, types);
-                    }
-                    if (uid < 0) {
-                        types.remove(type);
-                    } else {
-                        types.put(type, uid);
-                    }
-                }
-            }
-        }
-
-        @Override
         public boolean isRuntimeRestarted() {
             return mSystemServiceManager.isRuntimeRestarted();
         }
@@ -23507,6 +22801,51 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             return processMemoryStates;
+        }
+
+        @Override
+        public int handleIncomingUser(int callingPid, int callingUid, int userId,
+                boolean allowAll, int allowMode, String name, String callerPackage) {
+            return mUserController.handleIncomingUser(callingPid, callingUid, userId, allowAll,
+                    allowMode, name, callerPackage);
+        }
+
+        @Override
+        public void enforceCallingPermission(String permission, String func) {
+            ActivityManagerService.this.enforceCallingPermission(permission, func);
+        }
+
+        @Override
+        public int getCurrentUserId() {
+            return mUserController.getCurrentUserIdLU();
+        }
+
+        @Override
+        public boolean isUserRunning(int userId, int flags) {
+            synchronized (ActivityManagerService.this) {
+                return mUserController.isUserRunning(userId, flags);
+            }
+        }
+
+        @Override
+        public void trimApplications() {
+            ActivityManagerService.this.trimApplications();
+        }
+
+        public int getPackageScreenCompatMode(ApplicationInfo ai) {
+            synchronized (ActivityManagerService.this) {
+                return mCompatModePackages.computeCompatModeLocked(ai);
+            }
+        }
+
+        public void setPackageScreenCompatMode(ApplicationInfo ai, int mode) {
+            synchronized (ActivityManagerService.this) {
+                mCompatModePackages.setPackageScreenCompatModeLocked(ai, mode);
+            }
+        }
+
+        public void closeSystemDialogs(String reason) {
+            ActivityManagerService.this.closeSystemDialogs(reason);
         }
     }
 

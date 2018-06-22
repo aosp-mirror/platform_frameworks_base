@@ -367,10 +367,10 @@ public class KeyguardAffordanceHelper {
         }
     }
 
-    private void startFinishingCircleAnimation(float velocity, Runnable mAnimationEndRunnable,
+    private void startFinishingCircleAnimation(float velocity, Runnable animationEndRunnable,
             boolean right) {
         KeyguardAffordanceView targetView = right ? mRightIcon : mLeftIcon;
-        targetView.finishAnimation(velocity, mAnimationEndRunnable);
+        targetView.finishAnimation(velocity, animationEndRunnable);
     }
 
     private void setTranslation(float translation, boolean isReset, boolean animateReset) {

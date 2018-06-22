@@ -459,6 +459,17 @@ message WifiLog {
 
   // Data on wifi radio usage
   optional WifiRadioUsage wifi_radio_usage = 118;
+
+  // Stores settings values used for metrics testing.
+  optional ExperimentValues experiment_values = 119;
+
+  // List of WifiIsUnusableEvents which get logged when we notice that WiFi is unusable.
+  // Collected only when WIFI_IS_UNUSABLE_EVENT_METRICS_ENABLED Settings is enabled.
+  repeated WifiIsUnusableEvent wifi_is_unusable_event_list = 120;
+
+  // Counts the occurrences of each link speed (Mbps) level
+  // with rssi (dBm) and rssi^2 sums (dBm^2)
+  repeated LinkSpeedCount link_speed_counts = 121;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -642,6 +653,22 @@ message WifiScoreCount {
 
   // Number of Wifi score reports with this score
   optional int32 count = 2;
+}
+
+// Number of occurrences of a specific link speed (Mbps)
+// and sum of rssi (dBm) and rssi^2 (dBm^2)
+message LinkSpeedCount {
+  // Link speed (Mbps)
+  optional int32 link_speed_mbps = 1;
+
+  // Number of RSSI polls with link_speed
+  optional int32 count = 2;
+
+  // Sum of absolute values of rssi values (dBm)
+  optional int32 rssi_sum_dbm = 3;
+
+  // Sum of squares of rssi values (dBm^2)
+  optional int64 rssi_sum_of_squares_dbm_sq = 4;
 }
 
 // Number of occurrences of Soft AP session durations
@@ -876,7 +903,7 @@ message StaEvent {
     STATE_INVALID = 12;
   }
 
-  // Bit mask of all supplicant state changes that occured since the last event
+  // Bit mask of all supplicant state changes that occurred since the last event
   optional uint32 supplicant_state_changes_bitmask = 9 [default = 0];
 
   // The number of milliseconds that have elapsed since the device booted
@@ -884,7 +911,7 @@ message StaEvent {
 
   optional FrameworkDisconnectReason framework_disconnect_reason = 11 [default = DISCONNECT_UNKNOWN];
 
-  // Flag which indicates if an association rejection event occured due to a timeout
+  // Flag which indicates if an association rejection event occurred due to a timeout
   optional bool association_timed_out = 12 [default = false];
 
   // Authentication failure reason, as reported by WifiManager (calculated from state & deauth code)
@@ -1513,4 +1540,75 @@ message WifiRadioUsage {
 
   // Total time for which the radio is awake due to scan.
   optional int64 scan_time_ms = 2;
+}
+
+message ExperimentValues {
+  // Indicates if we are logging WifiIsUnusableEvent in metrics
+  optional bool wifi_is_unusable_logging_enabled = 1;
+
+  // Minimum number of txBad to trigger a data stall
+  optional int32 wifi_data_stall_min_tx_bad = 2;
+
+  // Minimum number of txSuccess to trigger a data stall
+  // when rxSuccess is 0
+  optional int32 wifi_data_stall_min_tx_success_without_rx = 3;
+
+  // Indicates if we are logging LinkSpeedCount in metrics
+  optional bool link_speed_counts_logging_enabled = 4;
+}
+
+message WifiIsUnusableEvent {
+  enum TriggerType {
+    // Default/Invalid event
+    TYPE_UNKNOWN = 0;
+
+    // There is a data stall from tx failures
+    TYPE_DATA_STALL_BAD_TX = 1;
+
+    // There is a data stall from rx failures
+    TYPE_DATA_STALL_TX_WITHOUT_RX = 2;
+
+    // There is a data stall from both tx and rx failures
+    TYPE_DATA_STALL_BOTH = 3;
+
+    // Firmware generated an alert
+    TYPE_FIRMWARE_ALERT = 4;
+  }
+
+  // What event triggered WifiIsUnusableEvent.
+  optional TriggerType type = 1;
+
+  // The timestamp at which this event occurred.
+  // Measured in milliseconds that have elapsed since the device booted.
+  optional int64 start_time_millis = 2;
+
+  // NetworkAgent score of connected wifi.
+  // Defaults to -1 if the score was never set.
+  optional int32 last_score = 3 [default = -1];
+
+  // Delta of successfully transmitted (ACKed) unicast data packets
+  // between the last two WifiLinkLayerStats.
+  optional int64 tx_success_delta = 4;
+
+  // Delta of transmitted unicast data retry packets
+  // between the last two WifiLinkLayerStats.
+  optional int64 tx_retries_delta = 5;
+
+  // Delta of lost (not ACKed) transmitted unicast data packets
+  // between the last two WifiLinkLayerStats.
+  optional int64 tx_bad_delta = 6;
+
+  // Delta of received unicast data packets
+  // between the last two WifiLinkLayerStats.
+  optional int64 rx_success_delta = 7;
+
+  // Time in millisecond between the last two WifiLinkLayerStats.
+  optional int64 packet_update_time_delta = 8;
+
+  // The timestamp at which the last WifiLinkLayerStats was updated.
+  // Measured in milliseconds that have elapsed since the device booted.
+  optional int64 last_link_layer_stats_update_time = 9;
+
+  // Firmware alert code. Only valid when the event was triggered by a firmware alert, otherwise -1.
+  optional int32 firmware_alert_code = 10 [default = -1];
 }

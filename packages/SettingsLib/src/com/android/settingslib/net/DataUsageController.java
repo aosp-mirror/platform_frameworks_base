@@ -41,6 +41,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -86,7 +87,8 @@ public class DataUsageController {
                 * mContext.getResources().getInteger(R.integer.default_data_warning_level_mb);
     }
 
-    private INetworkStatsSession getSession() {
+    @VisibleForTesting
+    INetworkStatsSession getSession() {
         if (mSession == null) {
             try {
                 mSession = mStatsService.openSession();
@@ -174,6 +176,30 @@ public class DataUsageController {
         } catch (RemoteException e) {
             return warn("remote call failed");
         }
+    }
+
+    /**
+     * Get the total usage level recorded in the network history
+     * @param template the network template to retrieve the network history
+     * @return the total usage level recorded in the network history
+     */
+    public long getHistoriclUsageLevel(NetworkTemplate template) {
+        final INetworkStatsSession session = getSession();
+        if (session != null) {
+            try {
+                final NetworkStatsHistory history = session.getHistoryForNetwork(template, FIELDS);
+                final long now = System.currentTimeMillis();
+                final NetworkStatsHistory.Entry entry =
+                        history.getValues(0L /* start */, now /* end */, now, null /* recycle */);
+                if (entry != null) {
+                    return entry.rxBytes + entry.txBytes;
+                }
+                Log.w(TAG, "Failed to get data usage, no entry data");
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed to get data usage, remote call failed");
+            }
+        }
+        return 0L;
     }
 
     private NetworkPolicy findNetworkPolicy(NetworkTemplate template) {

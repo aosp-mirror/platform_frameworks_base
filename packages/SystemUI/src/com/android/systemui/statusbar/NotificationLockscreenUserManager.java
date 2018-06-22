@@ -109,16 +109,6 @@ public class NotificationLockscreenUserManager implements Dumpable {
             } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
                 // Start the overview connection to the launcher service
                 Dependency.get(OverviewProxyService.class).startConnectionToCurrentUser();
-            } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
-                try {
-                    final int lastResumedActivityUserId =
-                            ActivityTaskManager.getService().getLastResumedActivityUserId();
-                    if (mUserManager.isManagedProfile(lastResumedActivityUserId)) {
-                        showForegroundManagedProfileActivityToast();
-                    }
-                } catch (RemoteException e) {
-                    // Abandon hope activity manager not running.
-                }
             } else if (NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION.equals(action)) {
                 final IntentSender intentSender = intent.getParcelableExtra(Intent.EXTRA_INTENT);
                 final String notificationKey = intent.getStringExtra(Intent.EXTRA_INDEX);
@@ -225,7 +215,6 @@ public class NotificationLockscreenUserManager implements Dumpable {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_ADDED);
-        filter.addAction(Intent.ACTION_USER_PRESENT);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
         mContext.registerReceiver(mBaseBroadcastReceiver, filter);
 
@@ -236,19 +225,6 @@ public class NotificationLockscreenUserManager implements Dumpable {
         updateCurrentProfilesCache();
 
         mSettingsObserver.onChange(false);  // set up
-    }
-
-    private void showForegroundManagedProfileActivityToast() {
-        Toast toast = Toast.makeText(mContext,
-                R.string.managed_profile_foreground_toast,
-                Toast.LENGTH_SHORT);
-        TextView text = toast.getView().findViewById(android.R.id.message);
-        text.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                R.drawable.stat_sys_managed_profile_status, 0, 0, 0);
-        int paddingPx = mContext.getResources().getDimensionPixelSize(
-                R.dimen.managed_profile_toast_padding);
-        text.setCompoundDrawablePadding(paddingPx);
-        toast.show();
     }
 
     public boolean shouldShowLockscreenNotifications() {

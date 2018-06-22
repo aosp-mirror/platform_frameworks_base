@@ -794,6 +794,11 @@ public class AudioManager {
      * <p>
      * This method should only be used by applications that replace the platform-wide
      * management of audio settings or the main telephony application.
+     * <p>This method has no effect if the device implements a fixed volume policy
+     * as indicated by {@link #isVolumeFixed()}.
+     * <p>From N onward, ringer mode adjustments that would toggle Do Not Disturb are not allowed
+     * unless the app has been granted Do Not Disturb Access.
+     * See {@link NotificationManager#isNotificationPolicyAccessGranted()}.
      *
      * @param streamType The stream type to adjust. One of {@link #STREAM_VOICE_CALL},
      * {@link #STREAM_SYSTEM}, {@link #STREAM_RING}, {@link #STREAM_MUSIC},
@@ -804,6 +809,8 @@ public class AudioManager {
      * @param flags One or more flags.
      * @see #adjustVolume(int, int)
      * @see #setStreamVolume(int, int, int)
+     * @throws SecurityException if the adjustment triggers a Do Not Disturb change
+     *   and the caller is not granted notification policy access.
      */
     public void adjustStreamVolume(int streamType, int direction, int flags) {
         final IAudioService service = getService();
@@ -1121,6 +1128,8 @@ public class AudioManager {
      * @see #getStreamMaxVolume(int)
      * @see #getStreamVolume(int)
      * @see #isVolumeFixed()
+     * @throws SecurityException if the volume change triggers a Do Not Disturb change
+     *   and the caller is not granted notification policy access.
      */
     public void setStreamVolume(int streamType, int index, int flags) {
         final IAudioService service = getService();

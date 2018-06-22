@@ -54,11 +54,10 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
     private static final String TAG = RecentsAnimation.class.getSimpleName();
     private static final boolean DEBUG = false;
 
-    private final ActivityManagerService mService;
+    private final ActivityTaskManagerService mService;
     private final ActivityStackSupervisor mStackSupervisor;
     private final ActivityStartController mActivityStartController;
     private final WindowManagerService mWindowManager;
-    private final UserController mUserController;
     private final ActivityDisplay mDefaultDisplay;
     private final int mCallingPid;
 
@@ -68,15 +67,14 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
     // The stack to restore the target stack behind when the animation is finished
     private ActivityStack mRestoreTargetBehindStack;
 
-    RecentsAnimation(ActivityManagerService am, ActivityStackSupervisor stackSupervisor,
+    RecentsAnimation(ActivityTaskManagerService atm, ActivityStackSupervisor stackSupervisor,
             ActivityStartController activityStartController, WindowManagerService wm,
-            UserController userController, int callingPid) {
-        mService = am;
+            int callingPid) {
+        mService = atm;
         mStackSupervisor = stackSupervisor;
         mDefaultDisplay = stackSupervisor.getDefaultDisplay();
         mActivityStartController = activityStartController;
         mWindowManager = wm;
-        mUserController = userController;
         mCallingPid = callingPid;
     }
 
@@ -122,7 +120,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
         mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunching();
 
-        mService.setRunningRemoteAnimation(mCallingPid, true);
+        mService.mAmInternal.setRunningRemoteAnimation(mCallingPid, true);
 
         mWindowManager.deferSurfaceLayout();
         try {
@@ -132,7 +130,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         mService.mContext.getSystemService(Context.APP_OPS_SERVICE);
                 final AssistDataReceiverProxy proxy = new AssistDataReceiverProxy(
                         assistDataReceiver, recentsComponent.getPackageName());
-                mAssistDataRequester = new AssistDataRequester(mService.mContext, mService,
+                mAssistDataRequester = new AssistDataRequester(mService.mContext,
                         mWindowManager, appOpsManager, proxy, this, OP_ASSIST_STRUCTURE, OP_NONE);
                 mAssistDataRequester.requestAssistData(mStackSupervisor.getTopVisibleActivities(),
                         true /* fetchData */, false /* fetchScreenshots */,
@@ -165,7 +163,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                         .setCallingUid(recentsUid)
                         .setCallingPackage(recentsComponent.getPackageName())
                         .setActivityOptions(SafeActivityOptions.fromBundle(options.toBundle()))
-                        .setMayWait(mUserController.getCurrentUserId())
+                        .setMayWait(mService.getCurrentUserId())
                         .execute();
                 mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
                 mWindowManager.executeAppTransition();
@@ -210,7 +208,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
     }
 
     private void finishAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {
-        synchronized (mService) {
+        synchronized (mService.mGlobalLock) {
             if (DEBUG) Slog.d(TAG, "onAnimationFinished(): controller="
                     + mWindowManager.getRecentsAnimationController()
                     + " reorderMode=" + reorderMode);
@@ -232,7 +230,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 mStackSupervisor.sendPowerHintForLaunchEndIfNeeded();
             }
 
-            mService.setRunningRemoteAnimation(mCallingPid, false);
+            mService.mAmInternal.setRunningRemoteAnimation(mCallingPid, false);
 
             mWindowManager.inSurfaceTransaction(() -> {
                 Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER,
@@ -317,7 +315,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
         if (runSychronously) {
             finishAnimation(reorderMode);
         } else {
-            mService.mHandler.post(() -> finishAnimation(reorderMode));
+            mService.mH.post(() -> finishAnimation(reorderMode));
         }
     }
 

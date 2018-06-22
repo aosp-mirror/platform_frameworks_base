@@ -1239,7 +1239,7 @@ public final class InputMethodManager {
     }
 
     boolean startInputInner(@InputMethodClient.StartInputReason final int startInputReason,
-            IBinder windowGainingFocus, int controlFlags, int softInputMode,
+            @Nullable IBinder windowGainingFocus, int controlFlags, int softInputMode,
             int windowFlags) {
         final View view;
         synchronized (mH) {
@@ -1254,6 +1254,20 @@ public final class InputMethodManager {
                 if (DEBUG) Log.v(TAG, "ABORT input: no served view!");
                 return false;
             }
+        }
+
+        if (windowGainingFocus == null) {
+            windowGainingFocus = view.getWindowToken();
+            if (windowGainingFocus == null) {
+                Log.e(TAG, "ABORT input: ServedView must be attached to a Window");
+                return false;
+            }
+            controlFlags |= CONTROL_WINDOW_VIEW_HAS_FOCUS;
+            if (view.onCheckIsTextEditor()) {
+                controlFlags |= CONTROL_WINDOW_IS_TEXT_EDITOR;
+            }
+            softInputMode = view.getViewRootImpl().mWindowAttributes.softInputMode;
+            windowFlags = view.getViewRootImpl().mWindowAttributes.flags;
         }
 
         // Now we need to get an input connection from the served view.

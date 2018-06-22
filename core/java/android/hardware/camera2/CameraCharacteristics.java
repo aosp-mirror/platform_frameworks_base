@@ -2365,13 +2365,25 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, is defined relative to the active array rectangle given in
      * this field, with <code>(0, 0)</code> being the top-left of this rectangle.</p>
      * <p>The active array may be smaller than the full pixel array, since the full array may
-     * include black calibration pixels or other inactive regions, and geometric correction
-     * resulting in scaling or cropping may have been applied.</p>
+     * include black calibration pixels or other inactive regions.</p>
+     * <p>For devices that do not support {@link CaptureRequest#DISTORTION_CORRECTION_MODE android.distortionCorrection.mode} control, the active
+     * array must be the same as {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}.</p>
+     * <p>For devices that support {@link CaptureRequest#DISTORTION_CORRECTION_MODE android.distortionCorrection.mode} control, the active array must
+     * be enclosed by {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}. The difference between
+     * pre-correction active array and active array accounts for scaling or cropping caused
+     * by lens geometric distortion correction.</p>
+     * <p>In general, application should always refer to active array size for controls like
+     * metering regions or crop region. Two exceptions are when the application is dealing with
+     * RAW image buffers (RAW_SENSOR, RAW10, RAW12 etc), or when application explicitly set
+     * {@link CaptureRequest#DISTORTION_CORRECTION_MODE android.distortionCorrection.mode} to OFF. In these cases, application should refer
+     * to {@link CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE android.sensor.info.preCorrectionActiveArraySize}.</p>
      * <p><b>Units</b>: Pixel coordinates on the image sensor</p>
      * <p>This key is available on all devices.</p>
      *
+     * @see CaptureRequest#DISTORTION_CORRECTION_MODE
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
      */
     @PublicKey
     public static final Key<android.graphics.Rect> SENSOR_INFO_ACTIVE_ARRAY_SIZE =
@@ -2616,9 +2628,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <ol>
      * <li>{@link CameraCharacteristics#LENS_DISTORTION android.lens.distortion}.</li>
      * </ol>
-     * <p>If all of the geometric distortion fields are no-ops, this rectangle will be the same
-     * as the post-distortion-corrected rectangle given in
-     * {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</p>
+     * <p>If the camera device doesn't support geometric distortion correction, or all of the
+     * geometric distortion fields are no-ops, this rectangle will be the same as the
+     * post-distortion-corrected rectangle given in {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}.</p>
      * <p>This rectangle is defined relative to the full pixel array; (0,0) is the top-left of
      * the full pixel array, and the size of the full pixel array is given by
      * {@link CameraCharacteristics#SENSOR_INFO_PIXEL_ARRAY_SIZE android.sensor.info.pixelArraySize}.</p>

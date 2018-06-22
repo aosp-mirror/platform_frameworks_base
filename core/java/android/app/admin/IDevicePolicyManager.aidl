@@ -347,6 +347,7 @@ interface IDevicePolicyManager {
     boolean isSecurityLoggingEnabled(in ComponentName admin);
     ParceledListSlice retrieveSecurityLogs(in ComponentName admin);
     ParceledListSlice retrievePreRebootSecurityLogs(in ComponentName admin);
+    long forceNetworkLogs();
     long forceSecurityLogs();
 
     boolean isUninstallInQueue(String packageName);

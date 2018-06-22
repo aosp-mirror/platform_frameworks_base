@@ -219,23 +219,8 @@ public final class CompatModePackages {
                 : ActivityManager.COMPAT_MODE_DISABLED;
     }
 
-    public boolean getFrontActivityAskCompatModeLocked() {
-        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked();
-        if (r == null) {
-            return false;
-        }
-        return getPackageAskCompatModeLocked(r.packageName);
-    }
-
     public boolean getPackageAskCompatModeLocked(String packageName) {
         return (getPackageFlags(packageName)&COMPAT_FLAG_DONT_ASK) == 0;
-    }
-
-    public void setFrontActivityAskCompatModeLocked(boolean ask) {
-        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked();
-        if (r != null) {
-            setPackageAskCompatModeLocked(r.packageName, ask);
-        }
     }
 
     public void setPackageAskCompatModeLocked(String packageName, boolean ask) {
@@ -253,23 +238,6 @@ public final class CompatModePackages {
             }
             scheduleWrite();
         }
-    }
-
-    public int getFrontActivityScreenCompatModeLocked() {
-        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked();
-        if (r == null) {
-            return ActivityManager.COMPAT_MODE_UNKNOWN;
-        }
-        return computeCompatModeLocked(r.info.applicationInfo);
-    }
-
-    public void setFrontActivityScreenCompatModeLocked(int mode) {
-        ActivityRecord r = mService.getFocusedStack().topRunningActivityLocked();
-        if (r == null) {
-            Slog.w(TAG, "setFrontActivityScreenCompatMode failed: no top activity");
-            return;
-        }
-        setPackageScreenCompatModeLocked(r.info.applicationInfo, mode);
     }
 
     public int getPackageScreenCompatModeLocked(String packageName) {
@@ -297,7 +265,7 @@ public final class CompatModePackages {
         setPackageScreenCompatModeLocked(ai, mode);
     }
 
-    private void setPackageScreenCompatModeLocked(ApplicationInfo ai, int mode) {
+    void setPackageScreenCompatModeLocked(ApplicationInfo ai, int mode) {
         final String packageName = ai.packageName;
 
         int curFlags = getPackageFlags(packageName);
@@ -349,7 +317,7 @@ public final class CompatModePackages {
 
             scheduleWrite();
 
-            final ActivityStack stack = mService.getFocusedStack();
+            final ActivityStack stack = mService.mActivityTaskManager.getFocusedStack();
             ActivityRecord starting = stack.restartPackage(packageName);
 
             // Tell all processes that loaded this package about the change.

@@ -1,0 +1,973 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.server.biometrics.common;
+
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
+
+import android.app.ActivityManager;
+import android.app.ActivityTaskManager;
+import android.app.AlarmManager;
+import android.app.AppOpsManager;
+import android.app.IActivityTaskManager;
+import android.app.PendingIntent;
+import android.app.SynchronousUserSwitchObserver;
+import android.app.TaskStackListener;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
+import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.IBiometricPromptReceiver;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.IHwBinder;
+import android.os.PowerManager;
+import android.os.RemoteException;
+import android.os.SystemClock;
+import android.os.UserHandle;
+import android.os.UserManager;
+import android.security.KeyStore;
+import android.util.Slog;
+import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
+
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.statusbar.IStatusBarService;
+import com.android.server.SystemService;
+import com.android.server.biometrics.fingerprint.FingerprintService;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+/**
+ * Abstract base class containing all of the business logic for biometric services, e.g.
+ * Fingerprint, Face, Iris.
+ *
+ * @hide
+ */
+public abstract class BiometricService extends SystemService implements IHwBinder.DeathRecipient {
+
+    protected static final boolean DEBUG = true;
+
+    private static final String KEY_LOCKOUT_RESET_USER = "lockout_reset_user";
+    private static final int MSG_USER_SWITCHING = 10;
+    private static final long FAIL_LOCKOUT_TIMEOUT_MS = 30 * 1000;
+    private static final long CANCEL_TIMEOUT_LIMIT = 3000; // max wait for onCancel() from HAL,in ms
+
+    private final Context mContext;
+    private final String mKeyguardPackage;
+    private final AppOpsManager mAppOps;
+    private final SparseBooleanArray mTimedLockoutCleared;
+    private final SparseIntArray mFailedAttempts;
+    private final IActivityTaskManager mActivityTaskManager;
+    private final AlarmManager mAlarmManager;
+    private final PowerManager mPowerManager;
+    private final UserManager mUserManager;
+    private final MetricsLogger mMetricsLogger;
+    private final BiometricTaskStackListener mTaskStackListener = new BiometricTaskStackListener();
+    private final ResetClientStateRunnable mResetClientState = new ResetClientStateRunnable();
+    private final LockoutReceiver mLockoutReceiver = new LockoutReceiver();
+
+    protected final ResetFailedAttemptsForUserRunnablle mResetFailedAttemptsForCurrentUserRunnable =
+            new ResetFailedAttemptsForUserRunnablle();
+    protected final H mHandler = new H();
+
+    private ClientMonitor mCurrentClient;
+    private ClientMonitor mPendingClient;
+    private PerformanceStats mPerformanceStats;
+    protected int mCurrentUserId = UserHandle.USER_NULL;
+    // Normal authentications are tracked by mPerformanceMap.
+    protected HashMap<Integer, PerformanceStats> mPerformanceMap = new HashMap<>();
+    // Transactions that make use of CryptoObjects are tracked by mCryptoPerformaceMap.
+    protected HashMap<Integer, PerformanceStats> mCryptoPerformanceMap = new HashMap<>();
+
+    protected class PerformanceStats {
+        public int accept; // number of accepted biometrics
+        public int reject; // number of rejected biometrics
+        public int acquire; // total number of acquisitions. Should be >= accept+reject due to poor
+        // image acquisition in some cases (too fast, too slow, dirty sensor, etc.)
+        public int lockout; // total number of lockouts
+        public int permanentLockout; // total number of permanent lockouts
+    }
+
+    /**
+     * @return the log tag.
+     */
+    protected abstract String getTag();
+
+    /**
+     * @return the number of failed attempts after which the user will be temporarily locked out
+     *         from using the biometric. A strong auth (pin/pattern/pass) clears this counter.
+     */
+    protected abstract int getFailedAttemptsLockoutTimed();
+
+    /**
+     * @return the number of failed attempts after which the user will be permanently locked out
+     *         from using the biometric. A strong auth (pin/pattern/pass) clears this counter.
+     */
+    protected abstract int getFailedAttemptsLockoutPermanent();
+
+    /**
+     * @return the metrics constants for a biometric implementation.
+     */
+    protected abstract Metrics getMetrics();
+
+    /**
+     * @param userId
+     * @return true if the enrollment limit has been reached.
+     */
+    protected abstract boolean hasReachedEnrollmentLimit(int userId);
+
+    /**
+     * Notifies the HAL that the user has changed.
+     * @param userId
+     * @param clientPackage
+     */
+    protected abstract void updateActiveGroup(int userId, String clientPackage);
+
+    /**
+     * @return The protected intent to reset lockout for a specific biometric.
+     */
+    protected abstract String getLockoutResetIntent();
+
+    /**
+     * @return The permission the sender is required to have in order for the lockout reset intent
+     *         to be received by the BiometricService implementation.
+     */
+    protected abstract String getLockoutBroadcastPermission();
+
+    /**
+     * @return The HAL ID.
+     */
+    protected abstract long getHalDeviceId();
+
+    /**
+     * This method is called when the user switches. Implementations should probably notify the
+     * HAL.
+     * @param userId
+     */
+    protected abstract void handleUserSwitching(int userId);
+
+    /**
+     * @param userId
+     * @return Returns true if the user has any enrolled biometrics.
+     */
+    protected abstract boolean hasEnrolledBiometrics(int userId);
+
+    /**
+     * @return Returns the MANAGE_* permission string, which is required for enrollment, removal
+     * etc.
+     */
+    protected abstract String getManageBiometricPermission();
+
+    /**
+     * Checks if the caller has permission to use the biometric service - throws a SecurityException
+     * if not.
+     */
+    protected abstract void checkUseBiometricPermission();
+
+    /**
+     * @return Returns one of the {@link AppOpsManager} constants which pertains to the specific
+     *         biometric service.
+     */
+    protected abstract int getAppOp();
+
+    /**
+     * Notifies clients that lockout has been reset.
+     */
+    protected abstract void notifyLockoutResetMonitors();
+
+    /**
+     * Notifies clients of any change in the biometric state (active / idle). This is mainly for
+     * Fingerprint navigation gestures.
+     * @param isActive
+     */
+    protected void notifyClientActiveCallbacks(boolean isActive) {}
+
+    protected class AuthenticationClientImpl extends AuthenticationClient {
+
+        public AuthenticationClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
+                IBinder token, ServiceListener listener, int targetUserId, int groupId, long opId,
+                boolean restricted, String owner, Bundle bundle,
+                IBiometricPromptReceiver dialogReceiver,
+                IStatusBarService statusBarService) {
+            super(context, getMetrics(), daemon, halDeviceId, token, listener,
+                    targetUserId, groupId, opId, restricted, owner, bundle, dialogReceiver,
+                    statusBarService);
+        }
+
+        @Override
+        public void onStart() {
+            try {
+                mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
+            } catch (RemoteException e) {
+                Slog.e(getTag(), "Could not register task stack listener", e);
+            }
+        }
+
+        @Override
+        public void onStop() {
+            try {
+                mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
+            } catch (RemoteException e) {
+                Slog.e(getTag(), "Could not unregister task stack listener", e);
+            }
+        }
+
+        @Override
+        public void resetFailedAttempts() {
+            resetFailedAttemptsForUser(true /* clearAttemptCounter */,
+                    ActivityManager.getCurrentUser());
+        }
+
+        @Override
+        public void notifyUserActivity() {
+            userActivity();
+        }
+
+        @Override
+        public int handleFailedAttempt() {
+            final int currentUser = ActivityManager.getCurrentUser();
+            mFailedAttempts.put(currentUser, mFailedAttempts.get(currentUser, 0) + 1);
+            mTimedLockoutCleared.put(ActivityManager.getCurrentUser(), false);
+            final int lockoutMode = getLockoutMode();
+            if (lockoutMode == AuthenticationClient.LOCKOUT_PERMANENT) {
+                mPerformanceStats.permanentLockout++;
+            } else if (lockoutMode == AuthenticationClient.LOCKOUT_TIMED) {
+                mPerformanceStats.lockout++;
+            }
+
+            // Failing multiple times will continue to push out the lockout time
+            if (lockoutMode != AuthenticationClient.LOCKOUT_NONE) {
+                scheduleLockoutResetForUser(currentUser);
+                return lockoutMode;
+            }
+            return AuthenticationClient.LOCKOUT_NONE;
+        }
+    }
+
+    protected class EnrollClientImpl extends EnrollClient {
+
+        public EnrollClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
+                IBinder token, ServiceListener listener, int userId, int groupId,
+                byte[] cryptoToken, boolean restricted, String owner) {
+            super(context, getMetrics(), daemon, halDeviceId, token, listener,
+                    userId, groupId, cryptoToken, restricted, owner);
+        }
+
+        @Override
+        public void notifyUserActivity() {
+            userActivity();
+        }
+    }
+
+    protected class RemovalClientImpl extends RemovalClient {
+        private boolean mShouldNotify;
+
+        public RemovalClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
+                IBinder token, ServiceListener listener, int fingerId, int groupId, int userId,
+                boolean restricted, String owner) {
+            super(context, getMetrics(), daemon, halDeviceId, token, listener, fingerId, groupId,
+                    userId, restricted, owner);
+        }
+
+        public void setShouldNotifyUserActivity(boolean shouldNotify) {
+            mShouldNotify = shouldNotify;
+        }
+
+        @Override
+        public void notifyUserActivity() {
+            if (mShouldNotify) {
+                userActivity();
+            }
+        }
+    }
+
+    protected class EnumerateClientImpl extends EnumerateClient {
+
+        public EnumerateClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
+                IBinder token, ServiceListener listener, int groupId, int userId,
+                boolean restricted, String owner) {
+            super(context, getMetrics(), daemon, halDeviceId, token, listener, groupId, userId,
+                    restricted, owner);
+        }
+
+        @Override
+        public void notifyUserActivity() {
+            userActivity();
+        }
+    }
+
+    /**
+     * Wraps the callback interface from Service -> Manager
+     */
+    protected interface ServiceListener {
+        void onEnrollResult(long deviceId, int fingerId, int groupId, int remaining)
+                throws RemoteException;
+
+        void onAcquired(long deviceId, int acquiredInfo, int vendorCode)
+                throws RemoteException;
+
+        void onAuthenticationSucceeded(long deviceId,
+                BiometricAuthenticator.BiometricIdentifier biometric, int userId)
+                throws RemoteException;
+
+        void onAuthenticationFailed(long deviceId)
+                throws RemoteException;
+
+        void onError(long deviceId, int error, int vendorCode)
+                throws RemoteException;
+
+        void onRemoved(long deviceId, int fingerId, int groupId, int remaining)
+                throws RemoteException;
+
+        void onEnumerated(long deviceId, int fingerId, int groupId, int remaining)
+                throws RemoteException;
+    }
+
+    /**
+     * Wraps a portion of the interface from Service -> Daemon that is used by the ClientMonitor
+     * subclasses.
+     */
+    protected interface DaemonWrapper {
+        int authenticate(long operationId, int groupId) throws RemoteException;
+        int cancel() throws RemoteException;
+        int remove(int groupId, int biometricId) throws RemoteException;
+        int enumerate() throws RemoteException;
+        int enroll(byte[] cryptoToken, int groupId, int timeout) throws RemoteException;
+    }
+
+    /**
+     * Handler which all subclasses should post events to.
+     */
+    protected final class H extends Handler {
+        @Override
+        public void handleMessage(android.os.Message msg) {
+            switch (msg.what) {
+                case MSG_USER_SWITCHING:
+                    handleUserSwitching(msg.arg1);
+                    break;
+
+                default:
+                    Slog.w(getTag(), "Unknown message:" + msg.what);
+            }
+        }
+    };
+
+    private final class BiometricTaskStackListener extends TaskStackListener {
+        @Override
+        public void onTaskStackChanged() {
+            try {
+                if (!(mCurrentClient instanceof AuthenticationClient)) {
+                    return;
+                }
+                final String currentClient = mCurrentClient.getOwnerString();
+                if (isKeyguard(currentClient)) {
+                    return; // Keyguard is always allowed
+                }
+                List<ActivityManager.RunningTaskInfo> runningTasks =
+                        mActivityTaskManager.getTasks(1);
+                if (!runningTasks.isEmpty()) {
+                    final String topPackage = runningTasks.get(0).topActivity.getPackageName();
+                    if (!topPackage.contentEquals(currentClient)) {
+                        Slog.e(getTag(), "Stopping background authentication, top: " + topPackage
+                                + " currentClient: " + currentClient);
+                        mCurrentClient.stop(false /* initiatedByClient */);
+                    }
+                }
+            } catch (RemoteException e) {
+                Slog.e(getTag(), "Unable to get running tasks", e);
+            }
+        }
+    };
+
+    private final class ResetClientStateRunnable implements Runnable {
+        @Override
+        public void run() {
+            /**
+             * Warning: if we get here, the driver never confirmed our call to cancel the current
+             * operation (authenticate, enroll, remove, enumerate, etc), which is
+             * really bad.  The result will be a 3-second delay in starting each new client.
+             * If you see this on a device, make certain the driver notifies with
+             * {@link BiometricConstants#BIOMETRIC_ERROR_CANCELED} in response to cancel()
+             * once it has successfully switched to the IDLE state in the HAL.
+             * Additionally,{@link BiometricConstants#BIOMETRIC_ERROR_CANCELED} should only be sent
+             * in response to an actual cancel() call.
+             */
+            Slog.w(getTag(), "Client "
+                    + (mCurrentClient != null ? mCurrentClient.getOwnerString() : "null")
+                    + " failed to respond to cancel, starting client "
+                    + (mPendingClient != null ? mPendingClient.getOwnerString() : "null"));
+
+            mCurrentClient = null;
+            startClient(mPendingClient, false);
+        }
+    };
+
+    private final class LockoutReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (getLockoutResetIntent().equals(intent.getAction())) {
+                final int user = intent.getIntExtra(KEY_LOCKOUT_RESET_USER, 0);
+                resetFailedAttemptsForUser(false /* clearAttemptCounter */, user);
+            }
+        }
+    };
+
+    private final class ResetFailedAttemptsForUserRunnablle implements Runnable {
+        @Override
+        public void run() {
+            resetFailedAttemptsForUser(true /* clearAttemptCounter */,
+                    ActivityManager.getCurrentUser());
+        }
+    };
+
+    /**
+     * Initializes the system service.
+     * <p>
+     * Subclasses must define a single argument constructor that accepts the context
+     * and passes it to super.
+     * </p>
+     *
+     * @param context The system server context.
+     */
+    public BiometricService(Context context) {
+        super(context);
+        mContext = context;
+        mKeyguardPackage = ComponentName.unflattenFromString(context.getResources().getString(
+                com.android.internal.R.string.config_keyguardComponent)).getPackageName();
+        mAppOps = context.getSystemService(AppOpsManager.class);
+        mTimedLockoutCleared = new SparseBooleanArray();
+        mFailedAttempts = new SparseIntArray();
+        mActivityTaskManager = ((ActivityTaskManager) context.getSystemService(
+                Context.ACTIVITY_TASK_SERVICE)).getService();
+        mPowerManager = mContext.getSystemService(PowerManager.class);
+        mAlarmManager = mContext.getSystemService(AlarmManager.class);
+        mUserManager = UserManager.get(mContext);
+        mMetricsLogger = new MetricsLogger();
+        mContext.registerReceiver(mLockoutReceiver, new IntentFilter(getLockoutResetIntent()),
+                getLockoutBroadcastPermission(), null /* handler */);
+    }
+
+    @Override
+    public void onStart() {
+        listenForUserSwitches();
+    }
+
+    @Override
+    public void serviceDied(long cookie) {
+        Slog.e(getTag(), "HAL died");
+        mMetricsLogger.count(getMetrics().tagHalDied(), 1);
+        handleError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                0 /*vendorCode */);
+    }
+
+    protected ClientMonitor getCurrentClient() {
+        return mCurrentClient;
+    }
+
+    protected ClientMonitor getPendingClient() {
+        return mPendingClient;
+    }
+
+    /**
+     * Callback handlers from the daemon. The caller must put this on a handler.
+     */
+
+    protected void handleAcquired(long deviceId, int acquiredInfo, int vendorCode) {
+        ClientMonitor client = mCurrentClient;
+        if (client != null && client.onAcquired(acquiredInfo, vendorCode)) {
+            removeClient(client);
+        }
+        if (mPerformanceStats != null && getLockoutMode() == AuthenticationClient.LOCKOUT_NONE
+                && client instanceof AuthenticationClient) {
+            // ignore enrollment acquisitions or acquisitions when we're locked out
+            mPerformanceStats.acquire++;
+        }
+    }
+
+    protected void handleAuthenticated(long deviceId, int biometricId, int groupId,
+            ArrayList<Byte> token) {
+        ClientMonitor client = mCurrentClient;
+        if (biometricId != 0) {
+            final byte[] byteToken = new byte[token.size()];
+            for (int i = 0; i < token.size(); i++) {
+                byteToken[i] = token.get(i);
+            }
+            KeyStore.getInstance().addAuthToken(byteToken);
+        }
+        if (client != null && client.onAuthenticated(biometricId, groupId)) {
+            removeClient(client);
+        }
+        if (biometricId != 0) {
+            mPerformanceStats.accept++;
+        } else {
+            mPerformanceStats.reject++;
+        }
+    }
+
+    protected void handleEnrollResult(long deviceId, int biometricId, int groupId, int remaining) {
+        ClientMonitor client = mCurrentClient;
+        if (client != null && client.onEnrollResult(biometricId, groupId, remaining)) {
+            removeClient(client);
+            // When enrollment finishes, update this group's authenticator id, as the HAL has
+            // already generated a new authenticator id when the new biometric is enrolled.
+            updateActiveGroup(groupId, null);
+        }
+    }
+
+    protected void handleError(long deviceId, int error, int vendorCode) {
+        final ClientMonitor client = mCurrentClient;
+
+        if (DEBUG) Slog.v(getTag(), "handleError(client="
+                + (client != null ? client.getOwnerString() : "null") + ", error = " + error + ")");
+
+        if (client != null && client.onError(error, vendorCode)) {
+            removeClient(client);
+        }
+
+        if (error == BiometricConstants.BIOMETRIC_ERROR_CANCELED) {
+            mHandler.removeCallbacks(mResetClientState);
+            if (mPendingClient != null) {
+                if (DEBUG) Slog.v(getTag(), "start pending client " + mPendingClient.getOwnerString());
+                startClient(mPendingClient, false);
+                mPendingClient = null;
+            }
+        }
+    }
+
+    protected void handleRemoved(final long deviceId,
+            final int biometricId,
+            final int groupId,
+            final int remaining) {
+        if (DEBUG) Slog.w(getTag(), "Removed: fid=" + biometricId
+                + ", gid=" + groupId
+                + ", dev=" + deviceId
+                + ", rem=" + remaining);
+
+        ClientMonitor client = mCurrentClient;
+        if (client != null && client.onRemoved(biometricId, groupId, remaining)) {
+            removeClient(client);
+            // When the last biometric of a group is removed, update the authenticator id
+            if (!hasEnrolledBiometrics(groupId)) {
+                updateActiveGroup(groupId, null);
+            }
+        }
+    }
+
+    /**
+     * Calls from the Manager. These are still on the calling binder's thread.
+     */
+
+    protected void enrollInternal(EnrollClientImpl client, int userId) {
+        if (hasReachedEnrollmentLimit(userId)) {
+            return;
+        }
+
+        // Group ID is arbitrarily set to parent profile user ID. It just represents
+        // the default biometrics for the user.
+        if (!isCurrentUserOrProfile(userId)) {
+            return;
+        }
+
+        mHandler.post(() -> {
+            startClient(client, true /* initiatedByClient */);
+        });
+    }
+
+    protected void cancelEnrollmentInternal(IBinder token) {
+        mHandler.post(() -> {
+            ClientMonitor client = mCurrentClient;
+            if (client instanceof EnrollClient && client.getToken() == token) {
+                client.stop(client.getToken() == token);
+            }
+        });
+    }
+
+    protected void authenticateInternal(AuthenticationClientImpl client, long opId,
+            String opPackageName) {
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        final int callingUserId = UserHandle.getCallingUserId();
+
+        if (!canUseBiometric(opPackageName, true /* foregroundOnly */, callingUid, callingPid,
+                callingUserId)) {
+            if (DEBUG) Slog.v(getTag(), "authenticate(): reject " + opPackageName);
+            return;
+        }
+
+        mHandler.post(() -> {
+            mMetricsLogger.histogram(getMetrics().tagAuthToken(), opId != 0L ? 1 : 0);
+
+            // Get performance stats object for this user.
+            HashMap<Integer, PerformanceStats> pmap
+                    = (opId == 0) ? mPerformanceMap : mCryptoPerformanceMap;
+            PerformanceStats stats = pmap.get(mCurrentUserId);
+            if (stats == null) {
+                stats = new PerformanceStats();
+                pmap.put(mCurrentUserId, stats);
+            }
+            mPerformanceStats = stats;
+
+            startAuthentication(client, opPackageName);
+        });
+    }
+
+    protected void cancelAuthenticationInternal(final IBinder token, final String opPackageName) {
+        final int callingUid = Binder.getCallingUid();
+        final int callingPid = Binder.getCallingPid();
+        final int callingUserId = UserHandle.getCallingUserId();
+
+        if (!canUseBiometric(opPackageName, true /* foregroundOnly */, callingUid, callingPid,
+                callingUserId)) {
+            if (DEBUG) Slog.v(getTag(), "cancelAuthentication(): reject " + opPackageName);
+            return;
+        }
+
+        mHandler.post(() -> {
+            ClientMonitor client = mCurrentClient;
+            if (client instanceof AuthenticationClient) {
+                if (client.getToken() == token) {
+                    if (DEBUG) Slog.v(getTag(), "stop client " + client.getOwnerString());
+                    client.stop(client.getToken() == token);
+                } else {
+                    if (DEBUG) Slog.v(getTag(), "can't stop client "
+                            + client.getOwnerString() + " since tokens don't match");
+                }
+            } else if (client != null) {
+                if (DEBUG) Slog.v(getTag(), "can't cancel non-authenticating client "
+                        + client.getOwnerString());
+            }
+        });
+    }
+
+    protected void setActiveUserInternal(int userId) {
+        mHandler.post(() -> {
+            updateActiveGroup(userId, null /* clientPackage */);
+        });
+    }
+
+    protected void removeInternal(RemovalClientImpl client) {
+        mHandler.post(() -> {
+            startClient(client, true /* initiatedByClient */);
+        });
+    }
+
+    protected void enumerateInternal(EnumerateClientImpl client) {
+        mHandler.post(() -> {
+            startClient(client, true /* initiatedByClient */);
+        });
+    }
+
+    // Should be done on a handler thread - not on the Binder's thread.
+    private void startAuthentication(AuthenticationClientImpl client, String opPackageName) {
+        updateActiveGroup(client.getGroupId(), opPackageName);
+
+        if (DEBUG) Slog.v(getTag(), "startAuthentication(" + opPackageName + ")");
+
+        int lockoutMode = getLockoutMode();
+        if (lockoutMode != AuthenticationClient.LOCKOUT_NONE) {
+            Slog.v(getTag(), "In lockout mode(" + lockoutMode +
+                    ") ; disallowing authentication");
+            int errorCode = lockoutMode == AuthenticationClient.LOCKOUT_TIMED ?
+                    BiometricConstants.BIOMETRIC_ERROR_LOCKOUT :
+                    BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
+            if (!client.onError(errorCode, 0 /* vendorCode */)) {
+                Slog.w(getTag(), "Cannot send permanent lockout message to client");
+            }
+            return;
+        }
+        startClient(client, true /* initiatedByClient */);
+    }
+
+    /**
+     * Helper methods.
+     */
+
+    /**
+     * @param opPackageName name of package for caller
+     * @param requireForeground only allow this call while app is in the foreground
+     * @return true if caller can use the biometric API
+     */
+    protected boolean canUseBiometric(String opPackageName, boolean requireForeground, int uid,
+            int pid, int userId) {
+        checkUseBiometricPermission();
+
+        if (isKeyguard(opPackageName)) {
+            return true; // Keyguard is always allowed
+        }
+        if (!isCurrentUserOrProfile(userId)) {
+            Slog.w(getTag(), "Rejecting " + opPackageName + "; not a current user or profile");
+            return false;
+        }
+        if (mAppOps.noteOp(getAppOp(), uid, opPackageName) != AppOpsManager.MODE_ALLOWED) {
+            Slog.w(getTag(), "Rejecting " + opPackageName + "; permission denied");
+            return false;
+        }
+        if (requireForeground && !(isForegroundActivity(uid, pid) || isCurrentClient(
+                opPackageName))) {
+            Slog.w(getTag(), "Rejecting " + opPackageName + "; not in foreground");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @param opPackageName package of the caller
+     * @return true if this is the same client currently using the biometric
+     */
+    private boolean isCurrentClient(String opPackageName) {
+        return mCurrentClient != null && mCurrentClient.getOwnerString().equals(opPackageName);
+    }
+
+    /**
+     * @return true if this is keyguard package
+     */
+    private boolean isKeyguard(String clientPackage) {
+        return mKeyguardPackage.equals(clientPackage);
+    }
+
+    private int getLockoutMode() {
+        final int currentUser = ActivityManager.getCurrentUser();
+        final int failedAttempts = mFailedAttempts.get(currentUser, 0);
+        if (failedAttempts >= getFailedAttemptsLockoutPermanent()) {
+            return AuthenticationClient.LOCKOUT_PERMANENT;
+        } else if (failedAttempts > 0 &&
+                mTimedLockoutCleared.get(currentUser, false) == false
+                && (failedAttempts % getFailedAttemptsLockoutTimed() == 0)) {
+            return AuthenticationClient.LOCKOUT_TIMED;
+        }
+        return AuthenticationClient.LOCKOUT_NONE;
+    }
+
+    private boolean isForegroundActivity(int uid, int pid) {
+        try {
+            List<ActivityManager.RunningAppProcessInfo> procs =
+                    ActivityManager.getService().getRunningAppProcesses();
+            int N = procs.size();
+            for (int i = 0; i < N; i++) {
+                ActivityManager.RunningAppProcessInfo proc = procs.get(i);
+                if (proc.pid == pid && proc.uid == uid
+                        && proc.importance <= IMPORTANCE_FOREGROUND_SERVICE) {
+                    return true;
+                }
+            }
+        } catch (RemoteException e) {
+            Slog.w(getTag(), "am.getRunningAppProcesses() failed");
+        }
+        return false;
+    }
+
+    /**
+     * Calls the HAL to switch states to the new task. If there's already a current task,
+     * it calls cancel() and sets mPendingClient to begin when the current task finishes
+     * ({@link BiometricConstants#BIOMETRIC_ERROR_CANCELED}).
+     *
+     * @param newClient the new client that wants to connect
+     * @param initiatedByClient true for authenticate, remove and enroll
+     */
+    private void startClient(ClientMonitor newClient, boolean initiatedByClient) {
+        ClientMonitor currentClient = mCurrentClient;
+        if (currentClient != null) {
+            if (DEBUG) Slog.v(getTag(), "request stop current client " +
+                    currentClient.getOwnerString());
+
+            // This check only matters for FingerprintService, since enumerate may call back
+            // multiple times.
+            if (currentClient instanceof FingerprintService.EnumerateClientImpl ||
+                    currentClient instanceof FingerprintService.RemovalClientImpl) {
+                // This condition means we're currently running internal diagnostics to
+                // remove extra fingerprints in the hardware and/or the software
+                // TODO: design an escape hatch in case client never finishes
+                if (newClient != null) {
+                    Slog.w(getTag(), "Internal cleanup in progress but trying to start client "
+                            + newClient.getClass().getSuperclass().getSimpleName()
+                            + "(" + newClient.getOwnerString() + ")"
+                            + ", initiatedByClient = " + initiatedByClient);
+                }
+            } else {
+                currentClient.stop(initiatedByClient);
+            }
+            mPendingClient = newClient;
+            mHandler.removeCallbacks(mResetClientState);
+            mHandler.postDelayed(mResetClientState, CANCEL_TIMEOUT_LIMIT);
+        } else if (newClient != null) {
+            mCurrentClient = newClient;
+            if (DEBUG) Slog.v(getTag(), "starting client "
+                    + newClient.getClass().getSuperclass().getSimpleName()
+                    + "(" + newClient.getOwnerString() + ")"
+                    + ", initiatedByClient = " + initiatedByClient);
+            notifyClientActiveCallbacks(true);
+
+            newClient.start();
+        }
+    }
+
+    protected void removeClient(ClientMonitor client) {
+        if (client != null) {
+            client.destroy();
+            if (client != mCurrentClient && mCurrentClient != null) {
+                Slog.w(getTag(), "Unexpected client: " + client.getOwnerString() + "expected: "
+                        + mCurrentClient.getOwnerString());
+            }
+        }
+        if (mCurrentClient != null) {
+            if (DEBUG) Slog.v(getTag(), "Done with client: " + client.getOwnerString());
+            mCurrentClient = null;
+        }
+        if (mPendingClient == null) {
+            notifyClientActiveCallbacks(false);
+        }
+    }
+
+    /**
+     * @param clientPackage the package of the caller
+     * @return the profile id
+     */
+    protected int getUserOrWorkProfileId(String clientPackage, int userId) {
+        if (!isKeyguard(clientPackage) && isWorkProfile(userId)) {
+            return userId;
+        }
+        return getEffectiveUserId(userId);
+    }
+
+    protected boolean isRestricted() {
+        // Only give privileged apps (like Settings) access to biometric info
+        final boolean restricted = !hasPermission(getManageBiometricPermission());
+        return restricted;
+    }
+
+    protected boolean hasPermission(String permission) {
+        return getContext().checkCallingOrSelfPermission(permission)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    protected void checkPermission(String permission) {
+        getContext().enforceCallingOrSelfPermission(permission,
+                "Must have " + permission + " permission.");
+    }
+
+    protected boolean isCurrentUserOrProfile(int userId) {
+        UserManager um = UserManager.get(mContext);
+        if (um == null) {
+            Slog.e(getTag(), "Unable to acquire UserManager");
+            return false;
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            // Allow current user or profiles of the current user...
+            for (int profileId : um.getEnabledProfileIds(ActivityManager.getCurrentUser())) {
+                if (profileId == userId) {
+                    return true;
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        return false;
+    }
+
+    private void scheduleLockoutResetForUser(int userId) {
+        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + FAIL_LOCKOUT_TIMEOUT_MS,
+                getLockoutResetIntentForUser(userId));
+    }
+
+    private PendingIntent getLockoutResetIntentForUser(int userId) {
+        return PendingIntent.getBroadcast(mContext, userId,
+                new Intent(getLockoutResetIntent()).putExtra(KEY_LOCKOUT_RESET_USER, userId),
+                PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    private void userActivity() {
+        long now = SystemClock.uptimeMillis();
+        mPowerManager.userActivity(now, PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
+    }
+
+    /**
+     * @param userId
+     * @return true if this is a work profile
+     */
+    private boolean isWorkProfile(int userId) {
+        UserInfo userInfo = null;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            userInfo = mUserManager.getUserInfo(userId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return userInfo != null && userInfo.isManagedProfile();
+    }
+
+
+    private int getEffectiveUserId(int userId) {
+        UserManager um = UserManager.get(mContext);
+        if (um != null) {
+            final long callingIdentity = Binder.clearCallingIdentity();
+            userId = um.getCredentialOwnerProfile(userId);
+            Binder.restoreCallingIdentity(callingIdentity);
+        } else {
+            Slog.e(getTag(), "Unable to acquire UserManager");
+        }
+        return userId;
+    }
+
+    // Attempt counter should only be cleared when Keyguard goes away or when
+    // a biometric is successfully authenticated.
+    private void resetFailedAttemptsForUser(boolean clearAttemptCounter, int userId) {
+        if (DEBUG && getLockoutMode() != AuthenticationClient.LOCKOUT_NONE) {
+            Slog.v(getTag(), "Reset biometric lockout, clearAttemptCounter=" + clearAttemptCounter);
+        }
+        if (clearAttemptCounter) {
+            mFailedAttempts.put(userId, 0);
+        }
+        mTimedLockoutCleared.put(userId, true);
+        // If we're asked to reset failed attempts externally (i.e. from Keyguard),
+        // the alarm might still be pending; remove it.
+        cancelLockoutResetForUser(userId);
+        notifyLockoutResetMonitors();
+    }
+
+    private void cancelLockoutResetForUser(int userId) {
+        mAlarmManager.cancel(getLockoutResetIntentForUser(userId));
+    }
+
+    private void listenForUserSwitches() {
+        try {
+            ActivityManager.getService().registerUserSwitchObserver(
+                    new SynchronousUserSwitchObserver() {
+                        @Override
+                        public void onUserSwitching(int newUserId) throws RemoteException {
+                            mHandler.obtainMessage(MSG_USER_SWITCHING, newUserId, 0 /* unused */)
+                                    .sendToTarget();
+                        }
+                    }, getTag());
+        } catch (RemoteException e) {
+            Slog.w(getTag(), "Failed to listen for user switching event" ,e);
+        }
+    }
+
+}

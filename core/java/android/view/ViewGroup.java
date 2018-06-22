@@ -4652,7 +4652,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * which is added in order to fade it out in its old location should be removed
      * once the animation is complete.</p>
      *
-     * @param view The view to be added
+     * @param view The view to be added. The view must not have a parent.
      * @param index The index at which this view should be drawn, must be >= 0.
      * This value is relative to the {@link #getChildAt(int) index} values in the normal
      * child list of this container, where any transient view at a particular index will
@@ -4661,9 +4661,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     public void addTransientView(View view, int index) {
-        if (index < 0) {
+        if (index < 0 || view == null) {
             return;
         }
+        if (view.mParent != null) {
+            throw new IllegalStateException("The specified view already has a parent "
+                    + view.mParent);
+        }
+
         if (mTransientIndices == null) {
             mTransientIndices = new ArrayList<Integer>();
             mTransientViews = new ArrayList<View>();
@@ -4683,7 +4688,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mTransientViews.add(view);
         }
         view.mParent = this;
-        view.dispatchAttachedToWindow(mAttachInfo, (mViewFlags&VISIBILITY_MASK));
+        if (mAttachInfo != null) {
+            view.dispatchAttachedToWindow(mAttachInfo, (mViewFlags & VISIBILITY_MASK));
+        }
         invalidate(true);
     }
 
@@ -4705,7 +4712,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 mTransientViews.remove(i);
                 mTransientIndices.remove(i);
                 view.mParent = null;
-                view.dispatchDetachedFromWindow();
+                if (view.mAttachInfo != null) {
+                    view.dispatchDetachedFromWindow();
+                }
                 invalidate(true);
                 return;
             }

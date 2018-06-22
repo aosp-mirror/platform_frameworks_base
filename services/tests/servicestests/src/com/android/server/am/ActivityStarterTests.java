@@ -236,8 +236,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
         }
 
         if (containsConditions(preconditions, PRECONDITION_DISALLOW_APP_SWITCHING)) {
-            doReturn(false).when(service).checkAppSwitchAllowedLocked(anyInt(), anyInt(), anyInt(),
-                    anyInt(), any());
+            doReturn(false).when(service.mActivityTaskManager).checkAppSwitchAllowedLocked(
+                    anyInt(), anyInt(), anyInt(), anyInt(), any());
         }
 
         if (containsConditions(preconditions,PRECONDITION_CANNOT_START_ANY_ACTIVITY)) {

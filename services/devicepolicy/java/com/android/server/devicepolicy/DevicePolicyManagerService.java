@@ -10694,7 +10694,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     return false;
                 }
         }
-
         return false;
     }
 
@@ -12279,6 +12278,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             } finally {
                 mInjector.binderRestoreCallingIdentity(callingIdentity);
             }
+        }
+    }
+
+    @Override
+    public long forceNetworkLogs() {
+        enforceShell("forceNetworkLogs");
+        synchronized (getLockObject()) {
+            if (!isNetworkLoggingEnabledInternalLocked()) {
+                throw new IllegalStateException("logging is not available");
+            }
+            if (mNetworkLogger != null) {
+                return mNetworkLogger.forceBatchFinalization();
+            }
+            return 0;
         }
     }
 

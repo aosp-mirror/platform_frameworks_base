@@ -38,7 +38,7 @@ import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.
  * registered {@link LaunchParamsModifier}s.
  */
 class LaunchParamsController {
-    private final ActivityManagerService mService;
+    private final ActivityTaskManagerService mService;
     private final List<LaunchParamsModifier> mModifiers = new ArrayList<>();
 
     // Temporary {@link LaunchParams} for internal calculations. This is kept separate from
@@ -48,7 +48,7 @@ class LaunchParamsController {
     private final LaunchParams mTmpCurrent = new LaunchParams();
     private final LaunchParams mTmpResult = new LaunchParams();
 
-    LaunchParamsController(ActivityManagerService service) {
+    LaunchParamsController(ActivityTaskManagerService service) {
        mService = service;
     }
 
@@ -125,7 +125,7 @@ class LaunchParamsController {
         try {
             if (mTmpParams.hasPreferredDisplay()
                     && mTmpParams.mPreferredDisplayId != task.getStack().getDisplay().mDisplayId) {
-                mService.mActivityTaskManager.moveStackToDisplay(task.getStackId(), mTmpParams.mPreferredDisplayId);
+                mService.moveStackToDisplay(task.getStackId(), mTmpParams.mPreferredDisplayId);
             }
 
             if (mTmpParams.hasWindowingMode()
