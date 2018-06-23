@@ -94,7 +94,7 @@ public class RecentTasksTest extends ActivityTestsBase {
     private static int INVALID_STACK_ID = 999;
 
     private Context mContext = InstrumentationRegistry.getContext();
-    private ActivityTaskManagerService mService;
+    private TestActivityTaskManagerService mService;
     private ActivityDisplay mDisplay;
     private ActivityDisplay mOtherDisplay;
     private ActivityStack mStack;
@@ -145,8 +145,9 @@ public class RecentTasksTest extends ActivityTestsBase {
         super.setUp();
 
         mTaskPersister = new TestTaskPersister(mContext.getFilesDir());
-        mService = setupActivityManagerService(new MyTestActivityManagerService(mContext),
-                new MyTestActivityTaskManagerService(mContext)).mActivityTaskManager;
+        mService = spy(new MyTestActivityTaskManagerService(mContext));
+        final ActivityManagerService am = spy(new MyTestActivityManagerService(mContext, mService));
+        setupActivityManagerService(am, mService);
         mRecentTasks = (TestRecentTasks) mService.getRecentTasks();
         mRecentTasks.loadParametersFromResources(mContext.getResources());
         mHomeStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
@@ -839,8 +840,8 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     private class MyTestActivityManagerService extends TestActivityManagerService {
-        MyTestActivityManagerService(Context context) {
-            super(context);
+        MyTestActivityManagerService(Context context, TestActivityTaskManagerService atm) {
+            super(context, atm);
         }
 
         @Override

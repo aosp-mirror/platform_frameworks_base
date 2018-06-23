@@ -19,7 +19,7 @@ package com.android.server.voiceinteraction;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityTaskManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.ContentResolver;

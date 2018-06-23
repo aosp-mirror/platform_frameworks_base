@@ -29,7 +29,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.InterruptedIOException;
-import java.net.InetSocketAddress;
 
 /**
  * Set up a Unix domain socket that debuggerd will connect() to in
@@ -226,7 +225,7 @@ final class NativeCrashListener extends Thread {
                 }
                 if (pr != null) {
                     // Don't attempt crash reporting for persistent apps
-                    if (pr.persistent) {
+                    if (pr.isPersistent()) {
                         if (DEBUG) {
                             Slog.v(TAG, "Skipping report for persistent app " + pr);
                         }
@@ -260,7 +259,7 @@ final class NativeCrashListener extends Thread {
                     // even though the process will vanish as soon as we let
                     // debuggerd proceed.
                     synchronized (mAm) {
-                        pr.crashing = true;
+                        pr.setCrashing(true);
                         pr.forceCrashReport = true;
                     }
 

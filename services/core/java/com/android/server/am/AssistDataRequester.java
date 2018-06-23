@@ -17,13 +17,12 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.ASSIST_CONTEXT_FULL;
-import static android.app.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_NONE;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
-import android.app.IActivityManager;
 import android.app.IAssistDataReceiver;
 import android.content.Context;
 import android.graphics.Bitmap;

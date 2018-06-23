@@ -57,7 +57,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
 
     private final static Rect STACK_BOUNDS = new Rect(0, 0, STACK_WIDTH, STACK_HEIGHT);
 
-    private ActivityManagerService mService;
+    private ActivityTaskManagerService mService;
     private ActivityStack mStack;
     private TaskRecord mTask;
 
@@ -71,7 +71,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     public void setUp() throws Exception {
         super.setUp();
 
-        mService = createActivityManagerService();
+        mService = createActivityTaskManagerService();
         mStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         mStack.requestResize(STACK_BOUNDS);

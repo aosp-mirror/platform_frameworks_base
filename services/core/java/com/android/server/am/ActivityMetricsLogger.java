@@ -2,7 +2,7 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
-import static android.app.ActivityTaskManagerInternal.APP_TRANSITION_TIMEOUT;
+import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_TIMEOUT;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -154,7 +154,7 @@ class ActivityMetricsLogger {
             launchedActivityLaunchToken = info.launchedActivity.info.launchToken;
             launchedActivityAppRecordRequiredAbi = info.launchedActivity.app == null
                     ? null
-                    : info.launchedActivity.app.requiredAbi;
+                    : info.launchedActivity.app.getRequiredAbi();
             reason = info.reason;
             startingWindowDelayMs = info.startingWindowDelayMs;
             bindApplicationDelayMs = info.bindApplicationDelayMs;
@@ -246,23 +246,9 @@ class ActivityMetricsLogger {
         // of caches might be purged so the time until it produces the first frame is very
         // interesting.
         final boolean processSwitch = processRecord == null
-                || !hasStartedActivity(processRecord, launchedActivity);
+                || !processRecord.getWindowProcessController().hasStartedActivity(launchedActivity);
 
         notifyActivityLaunched(resultCode, launchedActivity, processRunning, processSwitch);
-    }
-
-    private boolean hasStartedActivity(ProcessRecord record, ActivityRecord launchedActivity) {
-        final ArrayList<ActivityRecord> activities = record.activities;
-        for (int i = activities.size() - 1; i >= 0; i--) {
-            final ActivityRecord activity = activities.get(i);
-            if (launchedActivity == activity) {
-                continue;
-            }
-            if (!activity.stopped) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

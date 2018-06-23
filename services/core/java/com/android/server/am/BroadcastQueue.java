@@ -304,7 +304,7 @@ public final class BroadcastQueue {
             app.thread.scheduleReceiver(new Intent(r.intent), r.curReceiver,
                     mService.compatibilityInfoForPackageLocked(r.curReceiver.applicationInfo),
                     r.resultCode, r.resultData, r.resultExtras, r.ordered, r.userId,
-                    app.repProcState);
+                    app.getReportedProcState());
             if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                     "Process cur broadcast " + r + " DELIVERED for app " + app);
             started = true;
@@ -492,7 +492,7 @@ public final class BroadcastQueue {
                 // correctly ordered with other one-way calls.
                 try {
                     app.thread.scheduleRegisteredReceiver(receiver, intent, resultCode,
-                            data, extras, ordered, sticky, sendingUser, app.repProcState);
+                            data, extras, ordered, sticky, sendingUser, app.getReportedProcState());
                 // TODO: Uncomment this when (b/28322359) is fixed and we aren't getting
                 // DeadObjectException when the process isn't actually dead.
                 //} catch (DeadObjectException ex) {
@@ -618,7 +618,7 @@ public final class BroadcastQueue {
         }
 
         if (!skip && (filter.receiverList.app == null || filter.receiverList.app.killed
-                || filter.receiverList.app.crashing)) {
+                || filter.receiverList.app.isCrashing())) {
             Slog.w(TAG, "Skipping deliver [" + mQueueName + "] " + r
                     + " to " + filter.receiverList + ": process gone or crashing");
             skip = true;
@@ -885,7 +885,7 @@ public final class BroadcastQueue {
                 synchronized (mService.mPidsSelfLocked) {
                     ProcessRecord proc = mService.mPidsSelfLocked.get(
                             mPendingBroadcast.curApp.pid);
-                    isDead = proc == null || proc.crashing;
+                    isDead = proc == null || proc.isCrashing();
                 }
             } else {
                 final ProcessRecord proc = mService.mProcessNames.get(
@@ -1210,7 +1210,7 @@ public final class BroadcastQueue {
                     + " (uid " + r.callingUid + ")");
             skip = true;
         }
-        if (r.curApp != null && r.curApp.crashing) {
+        if (r.curApp != null && r.curApp.isCrashing()) {
             // If the target process is crashing, just skip it.
             Slog.w(TAG, "Skipping deliver ordered [" + mQueueName + "] " + r
                     + " to " + r.curApp + ": process crashing");

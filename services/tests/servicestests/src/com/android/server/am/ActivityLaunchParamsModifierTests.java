@@ -50,7 +50,7 @@ import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.
 @RunWith(AndroidJUnit4.class)
 public class ActivityLaunchParamsModifierTests extends ActivityTestsBase {
     private ActivityLaunchParamsModifier mModifier;
-    private ActivityManagerService mService;
+    private ActivityTaskManagerService mService;
     private ActivityStack mStack;
     private TaskRecord mTask;
     private ActivityRecord mActivity;
@@ -62,7 +62,7 @@ public class ActivityLaunchParamsModifierTests extends ActivityTestsBase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        mService = createActivityManagerService();
+        mService = createActivityTaskManagerService();
         mModifier = new ActivityLaunchParamsModifier(mService.mStackSupervisor);
         mCurrent = new LaunchParams();
         mResult = new LaunchParams();
@@ -104,12 +104,12 @@ public class ActivityLaunchParamsModifierTests extends ActivityTestsBase {
                 mActivity, null /*source*/, options /*options*/, mCurrent, mResult));
 
         // Does not support freeform
-        mService.mActivityTaskManager.mSupportsFreeformWindowManagement = false;
+        mService.mSupportsFreeformWindowManagement = false;
         assertFalse(mService.mStackSupervisor.canUseActivityOptionsLaunchBounds(options));
         assertEquals(RESULT_SKIP, mModifier.onCalculate(null /*task*/, null /*layout*/,
                 mActivity, null /*source*/, options /*options*/, mCurrent, mResult));
 
-        mService.mActivityTaskManager.mSupportsFreeformWindowManagement = true;
+        mService.mSupportsFreeformWindowManagement = true;
         options.setLaunchBounds(new Rect());
         assertTrue(mService.mStackSupervisor.canUseActivityOptionsLaunchBounds(options));
 
@@ -130,7 +130,7 @@ public class ActivityLaunchParamsModifierTests extends ActivityTestsBase {
     public void testBoundsExtraction() throws Exception {
         // Make activity resizeable and enable freeform mode.
         mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
-        mService.mActivityTaskManager.mSupportsFreeformWindowManagement = true;
+        mService.mSupportsFreeformWindowManagement = true;
 
         ActivityOptions options = ActivityOptions.makeBasic();
         final Rect proposedBounds = new Rect(20, 30, 45, 40);

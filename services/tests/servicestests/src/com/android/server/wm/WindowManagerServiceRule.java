@@ -29,7 +29,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import android.app.ActivityManagerInternal;
-import android.app.ActivityTaskManagerInternal;
 import android.content.Context;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManagerInternal;

@@ -50,7 +50,7 @@ import java.util.ArrayList;
 public class RunningTasksTest extends ActivityTestsBase {
 
     private Context mContext = InstrumentationRegistry.getContext();
-    private ActivityManagerService mService;
+    private ActivityTaskManagerService mService;
 
     private RunningTasks mRunningTasks;
 
@@ -59,7 +59,7 @@ public class RunningTasksTest extends ActivityTestsBase {
     public void setUp() throws Exception {
         super.setUp();
 
-        mService = createActivityManagerService();
+        mService = createActivityTaskManagerService();
         mRunningTasks = new RunningTasks();
     }
 

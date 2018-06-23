@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityTaskManagerInternal;
 import android.app.AppGlobals;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
@@ -64,6 +63,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.util.Collections;
 import java.util.List;

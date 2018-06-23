@@ -25,6 +25,7 @@ import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -50,7 +51,7 @@ import org.junit.runner.RunWith;
 public class RecentsAnimationTest extends ActivityTestsBase {
 
     private Context mContext = InstrumentationRegistry.getContext();
-    private ActivityTaskManagerService mService;
+    private TestActivityTaskManagerService mService;
     private ComponentName mRecentsComponent;
 
     @Before
@@ -59,9 +60,8 @@ public class RecentsAnimationTest extends ActivityTestsBase {
         super.setUp();
 
         mRecentsComponent = new ComponentName(mContext.getPackageName(), "RecentsActivity");
-        mService = setupActivityManagerService(new TestActivityManagerService(mContext),
-                new MyTestActivityTaskManagerService(mContext)).mActivityTaskManager;
-        AttributeCache.init(mContext);
+        mService = spy(new MyTestActivityTaskManagerService(mContext));
+        setupActivityManagerService(mService);
     }
 
     @Test
@@ -70,14 +70,14 @@ public class RecentsAnimationTest extends ActivityTestsBase {
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         ActivityStack recentsStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_RECENTS, true /* onTop */);
-        ActivityRecord recentsActivity = new ActivityBuilder(mService.mAm)
+        ActivityRecord recentsActivity = new ActivityBuilder(mService)
                 .setComponent(mRecentsComponent)
                 .setCreateTask(true)
                 .setStack(recentsStack)
                 .build();
         ActivityStack fullscreenStack2 = mService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        ActivityRecord fsActivity = new ActivityBuilder(mService.mAm)
+        ActivityRecord fsActivity = new ActivityBuilder(mService)
                 .setComponent(new ComponentName(mContext.getPackageName(), "App1"))
                 .setCreateTask(true)
                 .setStack(fullscreenStack2)
