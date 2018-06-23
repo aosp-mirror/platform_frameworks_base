@@ -368,14 +368,25 @@ public abstract class WindowManagerInternal {
      *                         to be synchronized with state in WindowManagerService.
      * @param dismissImeOnBackKeyPressed {@code true} if the software keyboard is shown and the back
      *                                   key is expected to dismiss the software keyboard.
-     * @param targetWindowToken token to identify the target window that the IME is associated with.
-     *                          {@code null} when application, system, or the IME itself decided to
-     *                          change its window visibility before being associated with any target
-     *                          window.
      */
     public abstract void updateInputMethodWindowStatus(@NonNull IBinder imeToken,
-            boolean imeWindowVisible, boolean dismissImeOnBackKeyPressed,
-            @Nullable IBinder targetWindowToken);
+            boolean imeWindowVisible, boolean dismissImeOnBackKeyPressed);
+
+    /**
+     * Notifies WindowManagerService that the current IME window status is being changed.
+     *
+     * <p>Only {@link com.android.server.InputMethodManagerService} is the expected and tested
+     * caller of this method.</p>
+     *
+     * @param imeToken token to track the active input method. Corresponding IME windows can be
+     *                 identified by checking {@link android.view.WindowManager.LayoutParams#token}.
+     *                 Note that there is no guarantee that the corresponding window is already
+     *                 created
+     * @param imeTargetWindowToken token to identify the target window that the IME is associated
+     *                             with
+     */
+    public abstract void updateInputMethodTargetWindow(@NonNull IBinder imeToken,
+            @NonNull IBinder imeTargetWindowToken);
 
     /**
       * Returns true when the hardware keyboard is available.

@@ -74,8 +74,8 @@ interface IInputMethodManager {
     void hideMySoftInput(in IBinder token, int flags);
     void showMySoftInput(in IBinder token, int flags);
     void updateStatusIcon(in IBinder token, String packageName, int iconId);
-    void setImeWindowStatus(in IBinder token, in IBinder startInputToken, int vis,
-            int backDisposition);
+    void setImeWindowStatus(in IBinder token, int vis, int backDisposition);
+    void reportStartInput(in IBinder token, in IBinder startInputToken);
     void registerSuggestionSpansForNotification(in SuggestionSpan[] spans);
     boolean notifySuggestionPicked(in SuggestionSpan span, String originalString, int index);
     InputMethodSubtype getCurrentInputMethodSubtype();

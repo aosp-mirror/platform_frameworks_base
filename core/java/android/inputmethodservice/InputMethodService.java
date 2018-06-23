@@ -370,19 +370,6 @@ public class InputMethodService extends AbstractInputMethodService {
     InputConnection mStartedInputConnection;
     EditorInfo mInputEditorInfo;
 
-    /**
-     * A token to keep tracking the last IPC that triggered
-     * {@link #doStartInput(InputConnection, EditorInfo, boolean)}. If
-     * {@link #doStartInput(InputConnection, EditorInfo, boolean)} was not caused by IPCs from
-     * {@link com.android.server.InputMethodManagerService}, this needs to remain unchanged.
-     *
-     * <p>Some IPCs to {@link com.android.server.InputMethodManagerService} require this token to
-     * disentangle event flows for various purposes such as better window animation and providing
-     * fine-grained debugging information.</p>
-     */
-    @Nullable
-    private IBinder mStartInputToken;
-
     int mShowInputFlags;
     boolean mShowInputRequested;
     boolean mLastShowInputRequested;
@@ -528,7 +515,7 @@ public class InputMethodService extends AbstractInputMethodService {
         public void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
                 @NonNull EditorInfo editorInfo, boolean restarting,
                 @NonNull IBinder startInputToken) {
-            mStartInputToken = startInputToken;
+            mImm.reportStartInput(mToken, startInputToken);
 
             // This needs to be dispatched to interface methods rather than doStartInput().
             // Otherwise IME developers who have overridden those interface methods will lose
@@ -579,8 +566,8 @@ public class InputMethodService extends AbstractInputMethodService {
             }
             clearInsetOfPreviousIme();
             // If user uses hard keyboard, IME button should always be shown.
-            mImm.setImeWindowStatus(mToken, mStartInputToken,
-                    mapToImeWindowStatus(isInputViewShown()), mBackDisposition);
+            mImm.setImeWindowStatus(mToken, mapToImeWindowStatus(isInputViewShown()),
+                    mBackDisposition);
             if (resultReceiver != null) {
                 resultReceiver.send(wasVis != isInputViewShown()
                         ? InputMethodManager.RESULT_SHOWN
@@ -1059,8 +1046,8 @@ public class InputMethodService extends AbstractInputMethodService {
             }
             // If user uses hard keyboard, IME button should always be shown.
             boolean showing = onEvaluateInputViewShown();
-            mImm.setImeWindowStatus(mToken, mStartInputToken,
-                    IME_ACTIVE | (showing ? IME_VISIBLE : 0), mBackDisposition);
+            mImm.setImeWindowStatus(mToken, IME_ACTIVE | (showing ? IME_VISIBLE : 0),
+                    mBackDisposition);
         }
     }
 
@@ -1110,8 +1097,7 @@ public class InputMethodService extends AbstractInputMethodService {
             return;
         }
         mBackDisposition = disposition;
-        mImm.setImeWindowStatus(mToken, mStartInputToken, mapToImeWindowStatus(isInputViewShown()),
-                mBackDisposition);
+        mImm.setImeWindowStatus(mToken, mapToImeWindowStatus(isInputViewShown()), mBackDisposition);
     }
 
     /**
@@ -1861,8 +1847,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
         final int nextImeWindowStatus = mapToImeWindowStatus(isInputViewShown());
         if (previousImeWindowStatus != nextImeWindowStatus) {
-            mImm.setImeWindowStatus(mToken, mStartInputToken, nextImeWindowStatus,
-                    mBackDisposition);
+            mImm.setImeWindowStatus(mToken, nextImeWindowStatus, mBackDisposition);
         }
         if ((previousImeWindowStatus & IME_ACTIVE) == 0) {
             if (DEBUG) Log.v(TAG, "showWindow: showing!");
@@ -1887,7 +1872,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     private void doHideWindow() {
-        mImm.setImeWindowStatus(mToken, mStartInputToken, 0, mBackDisposition);
+        mImm.setImeWindowStatus(mToken, 0, mBackDisposition);
         hideWindow();
     }
 
@@ -2869,7 +2854,6 @@ public class InputMethodService extends AbstractInputMethodService {
         p.println("  mInputStarted=" + mInputStarted
                 + " mInputViewStarted=" + mInputViewStarted
                 + " mCandidatesViewStarted=" + mCandidatesViewStarted);
-        p.println("  mStartInputToken=" + mStartInputToken);
 
         if (mInputEditorInfo != null) {
             p.println("  mInputEditorInfo:");
