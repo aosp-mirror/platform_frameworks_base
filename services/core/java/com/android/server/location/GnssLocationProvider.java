@@ -68,7 +68,6 @@ import android.os.WorkSource;
 import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
 import android.provider.Telephony.Carriers;
-import android.provider.Telephony.Sms.Intents;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
@@ -2402,28 +2401,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
                     .addOnSubscriptionsChangedListener(mOnSubscriptionsChangedListener);
 
             // listen for events
-            IntentFilter intentFilter;
-            if (native_is_agps_ril_supported()) {
-                intentFilter = new IntentFilter();
-                intentFilter.addAction(Intents.DATA_SMS_RECEIVED_ACTION);
-                intentFilter.addDataScheme("sms");
-                intentFilter.addDataAuthority("localhost", "7275");
-                mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, this);
-
-                intentFilter = new IntentFilter();
-                intentFilter.addAction(Intents.WAP_PUSH_RECEIVED_ACTION);
-                try {
-                    intentFilter.addDataType("application/vnd.omaloc-supl-init");
-                } catch (IntentFilter.MalformedMimeTypeException e) {
-                    Log.w(TAG, "Malformed SUPL init mime type");
-                }
-                mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, this);
-            } else if (DEBUG) {
-                Log.d(TAG, "Skipped registration for SMS/WAP-PUSH messages because AGPS Ril in GPS"
-                        + " HAL is not supported");
-            }
-
-            intentFilter = new IntentFilter();
+            IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(ALARM_WAKEUP);
             intentFilter.addAction(ALARM_TIMEOUT);
             intentFilter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
