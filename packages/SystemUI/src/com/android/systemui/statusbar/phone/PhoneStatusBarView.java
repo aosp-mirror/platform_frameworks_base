@@ -59,7 +59,6 @@ public class PhoneStatusBarView extends PanelBar {
     private final PhoneStatusBarTransitions mBarTransitions;
     private ScrimController mScrimController;
     private float mMinFraction;
-    private float mPanelFraction;
     private Runnable mHideExpandedRunnable = new Runnable() {
         @Override
         public void run() {
@@ -269,7 +268,6 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     public void panelExpansionChanged(float frac, boolean expanded) {
         super.panelExpansionChanged(frac, expanded);
-        mPanelFraction = frac;
         updateScrimFraction();
         if ((frac == 0 || frac == 1) && mBar.getNavigationBarView() != null) {
             mBar.getNavigationBarView().onPanelExpandedChange(expanded);

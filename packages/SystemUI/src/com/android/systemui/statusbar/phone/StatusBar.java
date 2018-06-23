@@ -836,11 +836,17 @@ public class StatusBar extends SystemUI implements DemoMode,
                     CollapsedStatusBarFragment statusBarFragment =
                             (CollapsedStatusBarFragment) fragment;
                     statusBarFragment.initNotificationIconArea(mNotificationIconAreaController);
+                    PhoneStatusBarView oldStatusBarView = mStatusBarView;
                     mStatusBarView = (PhoneStatusBarView) fragment.getView();
                     mStatusBarView.setBar(this);
                     mStatusBarView.setPanel(mNotificationPanel);
                     mStatusBarView.setScrimController(mScrimController);
                     mStatusBarView.setBouncerShowing(mBouncerShowing);
+                    if (oldStatusBarView != null) {
+                        float fraction = oldStatusBarView.getExpansionFraction();
+                        boolean expanded = oldStatusBarView.isExpanded();
+                        mStatusBarView.panelExpansionChanged(fraction, expanded);
+                    }
                     if (mHeadsUpAppearanceController != null) {
                         // This view is being recreated, let's destroy the old one
                         mHeadsUpAppearanceController.destroy();
