@@ -92,7 +92,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         attrs.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR
                 | WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         getWindow().setAttributes(attrs);
-        if (mProc.persistent) {
+        if (mProc.isPersistent()) {
             getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
         }
 

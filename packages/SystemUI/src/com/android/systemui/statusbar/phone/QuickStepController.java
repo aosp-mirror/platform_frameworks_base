@@ -22,6 +22,7 @@ import static com.android.systemui.Interpolators.ALPHA_IN;
 import static com.android.systemui.Interpolators.ALPHA_OUT;
 import static com.android.systemui.OverviewProxyService.DEBUG_OVERVIEW_PROXY;
 import static com.android.systemui.OverviewProxyService.TAG_OPS;
+import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_DEAD_ZONE;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -185,6 +186,8 @@ public class QuickStepController implements GestureHelper {
     }
 
     private boolean handleTouchEvent(MotionEvent event) {
+        final boolean deadZoneConsumed =
+                mNavigationBarView.getDownHitTarget() == HIT_TARGET_DEAD_ZONE;
         if (mOverviewEventSender.getProxy() == null || (!mNavigationBarView.isQuickScrubEnabled()
                 && !mNavigationBarView.isQuickStepSwipeUpEnabled())) {
             return false;
@@ -304,7 +307,7 @@ public class QuickStepController implements GestureHelper {
                 || action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP)) {
             proxyMotionEvents(event);
         }
-        return mQuickScrubActive || mQuickStepStarted;
+        return mQuickScrubActive || mQuickStepStarted || deadZoneConsumed;
     }
 
     @Override
@@ -437,6 +440,9 @@ public class QuickStepController implements GestureHelper {
             mTrackAnimator = new AnimatorSet();
             mTrackAnimator.playTogether(trackAnimator, navBarAnimator);
             mTrackAnimator.start();
+
+            // Disable slippery for quick scrub to not cancel outside the nav bar
+            mNavigationBarView.updateSlippery();
 
             try {
                 mOverviewEventSender.getProxy().onQuickScrubStart();

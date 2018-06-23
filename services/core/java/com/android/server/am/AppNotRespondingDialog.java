@@ -157,7 +157,7 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
                                     System.currentTimeMillis(), null);
                         }
 
-                        app.notResponding = false;
+                        app.setNotResponding(false);
                         app.notRespondingReport = null;
                         if (app.anrDialog == AppNotRespondingDialog.this) {
                             app.anrDialog = null;

@@ -132,7 +132,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private IStatusBarService mBarService;
     @Mock private ScrimController mScrimController;
     @Mock private ArrayList<Entry> mNotificationList;
-    @Mock private FingerprintUnlockController mFingerprintUnlockController;
+    @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private NotificationData mNotificationData;
 
     // Mock dependencies:
@@ -207,7 +207,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mKeyguardIndicationController, mStackScroller, mHeadsUpManager,
                 mPowerManager, mNotificationPanelView, mBarService, mNotificationListener,
                 mNotificationLogger, mVisualStabilityManager, mViewHierarchyManager,
-                mEntryManager, mScrimController, mFingerprintUnlockController,
+                mEntryManager, mScrimController, mBiometricUnlockController,
                 mock(ActivityLaunchAnimator.class), mKeyguardViewMediator,
                 mRemoteInputManager, mock(NotificationGroupManager.class),
                 mock(FalsingManager.class), mock(StatusBarWindowManager.class),
@@ -572,15 +572,15 @@ public class StatusBarTest extends SysuiTestCase {
 
     @Test
     public void testFingerprintNotification_UpdatesScrims() {
-        mStatusBar.notifyFpAuthModeChanged();
+        mStatusBar.notifyBiometricAuthModeChanged();
         verify(mScrimController).transitionTo(any(), any());
     }
 
     @Test
     public void testFingerprintUnlock_UpdatesScrims() {
         // Simulate unlocking from AoD with fingerprint.
-        when(mFingerprintUnlockController.getMode())
-                .thenReturn(FingerprintUnlockController.MODE_WAKE_AND_UNLOCK);
+        when(mBiometricUnlockController.getMode())
+                .thenReturn(BiometricUnlockController.MODE_WAKE_AND_UNLOCK);
         mStatusBar.updateScrimController();
         verify(mScrimController).transitionTo(eq(ScrimState.UNLOCKED), any());
     }
@@ -717,7 +717,7 @@ public class StatusBarTest extends SysuiTestCase {
                 VisualStabilityManager visualStabilityManager,
                 NotificationViewHierarchyManager viewHierarchyManager,
                 TestableNotificationEntryManager entryManager, ScrimController scrimController,
-                FingerprintUnlockController fingerprintUnlockController,
+                BiometricUnlockController biometricUnlockController,
                 ActivityLaunchAnimator launchAnimator, KeyguardViewMediator keyguardViewMediator,
                 NotificationRemoteInputManager notificationRemoteInputManager,
                 NotificationGroupManager notificationGroupManager,
@@ -743,7 +743,7 @@ public class StatusBarTest extends SysuiTestCase {
             mViewHierarchyManager = viewHierarchyManager;
             mEntryManager = entryManager;
             mScrimController = scrimController;
-            mFingerprintUnlockController = fingerprintUnlockController;
+            mBiometricUnlockController = biometricUnlockController;
             mActivityLaunchAnimator = launchAnimator;
             mKeyguardViewMediator = keyguardViewMediator;
             mClearAllEnabled = true;

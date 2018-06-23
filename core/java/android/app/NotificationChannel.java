@@ -644,7 +644,7 @@ public final class NotificationChannel implements Parcelable {
 
     @Nullable
     private Uri restoreSoundUri(Context context, @Nullable Uri uri) {
-        if (uri == null) {
+        if (uri == null || Uri.EMPTY.equals(uri)) {
             return null;
         }
         ContentResolver contentResolver = context.getContentResolver();
@@ -680,7 +680,7 @@ public final class NotificationChannel implements Parcelable {
 
     private Uri getSoundForBackup(Context context) {
         Uri sound = getSound();
-        if (sound == null) {
+        if (sound == null || Uri.EMPTY.equals(sound)) {
             return null;
         }
         Uri canonicalSound = context.getContentResolver().canonicalize(sound);

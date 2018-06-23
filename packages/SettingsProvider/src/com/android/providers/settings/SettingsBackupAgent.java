@@ -841,7 +841,19 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             WifiConfiguration config = WifiConfiguration
                     .getWifiConfigFromBackup(new DataInputStream(new ByteArrayInputStream(data)));
             if (DEBUG) Log.d(TAG, "Successfully unMarshaled WifiConfiguration ");
+            int originalApBand = config.apBand;
             mWifiManager.setWifiApConfiguration(config);
+
+            // Depending on device hardware, we may need to notify the user of a setting change for
+            // the apBand preference
+            boolean dualMode = mWifiManager.isDualModeSupported();
+            int storedApBand = mWifiManager.getWifiApConfiguration().apBand;
+            if (dualMode) {
+                if (storedApBand != originalApBand) {
+                    Log.d(TAG, "restored ap configuration requires a conversion, notify the user");
+                    mWifiManager.notifyUserOfApBandConversion();
+                }
+            }
         } catch (IOException | BackupUtils.BadVersionException e) {
             Log.e(TAG, "Failed to unMarshal SoftAPConfiguration " + e.getMessage());
         }

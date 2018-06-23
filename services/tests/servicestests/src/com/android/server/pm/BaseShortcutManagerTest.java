@@ -41,7 +41,6 @@ import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.ActivityTaskManagerInternal;
 import android.app.IUidObserver;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
@@ -93,6 +92,7 @@ import com.android.server.SystemService;
 import com.android.server.pm.LauncherAppsService.LauncherAppsImpl;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
 
+import com.android.server.wm.ActivityTaskManagerInternal;
 import org.junit.Assert;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;

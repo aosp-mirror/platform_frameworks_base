@@ -17,6 +17,7 @@
 package android.app.trust;
 
 import android.app.trust.ITrustListener;
+import android.hardware.biometrics.BiometricSourceType;
 
 /**
  * System private API to comunicate with trust service.
@@ -34,6 +35,6 @@ interface ITrustManager {
     boolean isDeviceLocked(int userId);
     boolean isDeviceSecure(int userId);
     boolean isTrustUsuallyManaged(int userId);
-    void unlockedByFingerprintForUser(int userId);
-    void clearAllFingerprints();
+    void unlockedByBiometricForUser(int userId, in BiometricSourceType source);
+    void clearAllBiometricRecognized(in BiometricSourceType target);
 }

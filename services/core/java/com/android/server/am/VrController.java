@@ -147,14 +147,15 @@ final class VrController {
      *
      * <p>Note: This must be called with the global ActivityManagerService lock held.
      *
-     * @param proc is the ProcessRecord of the process that entered or left the TOP_APP scheduling
-     *        group.
+     * @param proc is the WindowProcessController of the process that entered or left the TOP_APP
+     *            scheduling group.
      */
-    public void onTopProcChangedLocked(ProcessRecord proc) {
-        if (proc.curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP) {
-            setVrRenderThreadLocked(proc.vrThreadTid, proc.curSchedGroup, true);
+    public void onTopProcChangedLocked(WindowProcessController proc) {
+        final int curSchedGroup = proc.getCurrentSchedulingGroup();
+        if (curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP) {
+            setVrRenderThreadLocked(proc.mVrThreadTid, curSchedGroup, true);
         } else {
-            if (proc.vrThreadTid == mVrRenderThreadTid) {
+            if (proc.mVrThreadTid == mVrRenderThreadTid) {
                 clearVrRenderThreadLocked(true);
             }
         }
@@ -190,7 +191,7 @@ final class VrController {
             changed = changeVrModeLocked(vrMode, record.app);
 
             if (record.app != null) {
-                processId = record.app.pid;
+                processId = record.app.getPid();
             }
         }
 
@@ -213,9 +214,9 @@ final class VrController {
      *
      * @param tid the tid of the thread to set, or 0 to unset the current thread.
      * @param pid the pid of the process owning the thread to set.
-     * @param proc the ProcessRecord of the process owning the thread to set.
+     * @param proc the WindowProcessController of the process owning the thread to set.
      */
-    public void setVrThreadLocked(int tid, int pid, ProcessRecord proc) {
+    public void setVrThreadLocked(int tid, int pid, WindowProcessController proc) {
         if (hasPersistentVrFlagSet()) {
             Slog.w(TAG, "VR thread cannot be set in persistent VR mode!");
             return;
@@ -230,9 +231,9 @@ final class VrController {
         if (!inVrMode()) {
             Slog.w(TAG, "VR thread cannot be set when not in VR mode!");
         } else {
-            setVrRenderThreadLocked(tid, proc.curSchedGroup, false);
+            setVrRenderThreadLocked(tid, proc.getCurrentSchedulingGroup(), false);
         }
-        proc.vrThreadTid = (tid > 0) ? tid : 0;
+        proc.mVrThreadTid = (tid > 0) ? tid : 0;
     }
 
     /**
@@ -280,11 +281,11 @@ final class VrController {
      * <p>Note: This must be called with the global ActivityManagerService lock held.
      *
      * @param vrMode {@code true} if the system VR mode is being enabled.
-     * @param proc the ProcessRecord of the process enabling the system VR mode.
+     * @param proc the WindowProcessController of the process enabling the system VR mode.
      *
      * @return {@code true} if our state changed.
      */
-    private boolean changeVrModeLocked(boolean vrMode, ProcessRecord proc) {
+    private boolean changeVrModeLocked(boolean vrMode, WindowProcessController proc) {
         final int oldVrState = mVrState;
 
         // This is the only place where mVrState should have its FLAG_VR_MODE setting
@@ -299,8 +300,9 @@ final class VrController {
 
         if (changed) {
             if (proc != null) {
-                if (proc.vrThreadTid > 0) {
-                    setVrRenderThreadLocked(proc.vrThreadTid, proc.curSchedGroup, false);
+                if (proc.mVrThreadTid > 0) {
+                    setVrRenderThreadLocked(
+                            proc.mVrThreadTid, proc.getCurrentSchedulingGroup(), false);
                 }
             } else {
               clearVrRenderThreadLocked(false);

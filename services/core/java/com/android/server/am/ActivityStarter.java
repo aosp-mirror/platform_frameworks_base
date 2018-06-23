@@ -720,10 +720,11 @@ class ActivityStarter {
         abort |= !mService.mAm.mIntentFirewall.checkStartActivity(intent, callingUid,
                 callingPid, resolvedType, aInfo.applicationInfo);
 
+        final WindowProcessController callerWpc =
+                callerApp != null ? callerApp.getWindowProcessController() : null;
         // Merge the two options bundles, while realCallerOptions takes precedence.
         ActivityOptions checkedOptions = options != null
-                ? options.getOptions(intent, aInfo, callerApp, mSupervisor)
-                : null;
+                ? options.getOptions(intent, aInfo, callerWpc, mSupervisor) : null;
         if (allowPendingRemoteAnimationRegistryLookup) {
             checkedOptions = mService.getActivityStartController()
                     .getPendingRemoteAnimationRegistry()
@@ -847,7 +848,7 @@ class ActivityStarter {
             if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid,
                     realCallingPid, realCallingUid, "Activity start")) {
                 mController.addPendingActivityLaunch(new PendingActivityLaunch(r,
-                        sourceRecord, startFlags, stack, callerApp));
+                        sourceRecord, startFlags, stack, callerWpc));
                 ActivityOptions.abort(checkedOptions);
                 return ActivityManager.START_SWITCHES_CANCELED;
             }
@@ -1057,13 +1058,8 @@ class ActivityStarter {
                         }
                         newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_INTENT,
                                 new IntentSender(target));
-                        if (heavy.activities.size() > 0) {
-                            ActivityRecord hist = heavy.activities.get(0);
-                            newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_APP,
-                                    hist.packageName);
-                            newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_CUR_TASK,
-                                    hist.getTask().taskId);
-                        }
+                        heavy.getWindowProcessController().updateIntentForHeavyWeightActivity(
+                                newIntent);
                         newIntent.putExtra(HeavyWeightSwitcherActivity.KEY_NEW_APP,
                                 aInfo.packageName);
                         newIntent.setFlags(intent.getFlags());
@@ -1364,7 +1360,7 @@ class ActivityStarter {
         final boolean dontStart = top != null && mStartActivity.resultTo == null
                 && top.realActivity.equals(mStartActivity.realActivity)
                 && top.userId == mStartActivity.userId
-                && top.app != null && top.app.thread != null
+                && top.attachedToProcess()
                 && ((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
                 || isLaunchModeOneOf(LAUNCH_SINGLE_TOP, LAUNCH_SINGLE_TASK));
         if (dontStart) {

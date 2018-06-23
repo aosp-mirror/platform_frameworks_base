@@ -113,7 +113,7 @@ public class NotificationChannels extends SystemUI {
         NotificationChannel screenshotChannel = new NotificationChannel(SCREENSHOTS_HEADSUP,
                 name, NotificationManager.IMPORTANCE_HIGH); // pop on screen
 
-        screenshotChannel.setSound(Uri.parse(""), // silent
+        screenshotChannel.setSound(null, // silent
                 new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build());
         screenshotChannel.setBlockableSystem(true);
 

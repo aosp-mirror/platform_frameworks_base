@@ -54,6 +54,8 @@ import android.hardware.SerialManager;
 import android.hardware.SystemSensorManager;
 import android.hardware.camera2.CameraManager;
 import android.hardware.display.DisplayManager;
+import android.hardware.face.FaceManager;
+import android.hardware.face.IFaceService;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.hdmi.HdmiControlManager;
@@ -790,6 +792,22 @@ final class SystemServiceRegistry {
                 IFingerprintService service = IFingerprintService.Stub.asInterface(binder);
                 return new FingerprintManager(ctx.getOuterContext(), service);
             }});
+
+        registerService(Context.FACE_SERVICE, FaceManager.class,
+                new CachedServiceFetcher<FaceManager>() {
+                    @Override
+                    public FaceManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        final IBinder binder;
+                        if (ctx.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.O) {
+                            binder = ServiceManager.getServiceOrThrow(Context.FACE_SERVICE);
+                        } else {
+                            binder = ServiceManager.getService(Context.FACE_SERVICE);
+                        }
+                        IFaceService service = IFaceService.Stub.asInterface(binder);
+                        return new FaceManager(ctx.getOuterContext(), service);
+                    }
+                });
 
         registerService(Context.TV_INPUT_SERVICE, TvInputManager.class,
                 new CachedServiceFetcher<TvInputManager>() {

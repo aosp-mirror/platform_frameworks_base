@@ -117,7 +117,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager;
-import android.app.ActivityTaskManagerInternal;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
@@ -7364,16 +7363,18 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public void updateInputMethodWindowStatus(@NonNull IBinder imeToken,
-                boolean imeWindowVisible, boolean dismissImeOnBackKeyPressed,
-                @Nullable IBinder targetWindowToken) {
+                boolean imeWindowVisible, boolean dismissImeOnBackKeyPressed) {
+            mPolicy.setDismissImeOnBackKeyPressed(dismissImeOnBackKeyPressed);
+        }
+
+        @Override
+        public void updateInputMethodTargetWindow(@NonNull IBinder imeToken,
+                @NonNull IBinder imeTargetWindowToken) {
             // TODO (b/34628091): Use this method to address the window animation issue.
             if (DEBUG_INPUT_METHOD) {
-                Slog.w(TAG_WM, "updateInputMethodWindowStatus: imeToken=" + imeToken
-                        + " dismissImeOnBackKeyPressed=" + dismissImeOnBackKeyPressed
-                        + " imeWindowVisible=" + imeWindowVisible
-                        + " targetWindowToken=" + targetWindowToken);
+                Slog.w(TAG_WM, "updateInputMethodTargetWindow: imeToken=" + imeToken
+                        + " imeTargetWindowToken=" + imeTargetWindowToken);
             }
-            mPolicy.setDismissImeOnBackKeyPressed(dismissImeOnBackKeyPressed);
         }
 
         @Override

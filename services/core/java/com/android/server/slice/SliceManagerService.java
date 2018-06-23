@@ -197,6 +197,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     public SliceSpec[] getPinnedSpecs(Uri uri, String pkg) throws RemoteException {
         verifyCaller(pkg);
         enforceAccess(pkg, uri);
+        uri = maybeAddUserId(uri, Binder.getCallingUserHandle().getIdentifier());
         return getPinnedSlice(uri).getSpecs();
     }
 

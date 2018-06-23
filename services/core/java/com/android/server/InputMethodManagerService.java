@@ -468,6 +468,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     IBinder mCurFocusedWindow;
 
     /**
+     * The last window token that we confirmed that IME started talking to.  This is always updated
+     * upon reports from the input method.  If the window state is already changed before the report
+     * is handled, this field just keeps the last value.
+     */
+    IBinder mLastImeTargetWindow;
+
+    /**
      * {@link WindowManager.LayoutParams#softInputMode} of {@link #mCurFocusedWindow}.
      *
      * @see #mCurFocusedWindow
@@ -688,7 +695,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("mMethodMap")
-    private final WeakHashMap<IBinder, StartInputInfo> mStartInputMap = new WeakHashMap<>();
+    private final WeakHashMap<IBinder, IBinder> mImeTargetWindowMap = new WeakHashMap<>();
 
     /**
      * A ring buffer to store the history of {@link StartInputInfo}.
@@ -1809,7 +1816,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final StartInputInfo info = new StartInputInfo(mCurToken, mCurId, startInputReason,
                 !initial, mCurFocusedWindow, mCurAttribute, mCurFocusedWindowSoftInputMode,
                 mCurSeq);
-        mStartInputMap.put(startInputToken, info);
+        mImeTargetWindowMap.put(startInputToken, mCurFocusedWindow);
         mStartInputHistory.addEntry(info);
 
         final SessionState session = mCurClient.curSession;
@@ -2219,15 +2226,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     @SuppressWarnings("deprecation")
     @Override
-    public void setImeWindowStatus(IBinder token, IBinder startInputToken, int vis,
-            int backDisposition) {
+    public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
         if (!calledWithValidToken(token)) {
             return;
         }
 
-        final StartInputInfo info;
         synchronized (mMethodMap) {
-            info = mStartInputMap.get(startInputToken);
             mImeWindowVis = vis;
             mBackDisposition = backDisposition;
             updateSystemUiLocked(token, vis, backDisposition);
@@ -2247,13 +2251,28 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 break;
         }
         mWindowManagerInternal.updateInputMethodWindowStatus(token,
-                (vis & InputMethodService.IME_VISIBLE) != 0,
-                dismissImeOnBackKeyPressed, info != null ? info.mTargetWindow : null);
+                (vis & InputMethodService.IME_VISIBLE) != 0, dismissImeOnBackKeyPressed);
     }
 
     private void updateSystemUi(IBinder token, int vis, int backDisposition) {
         synchronized (mMethodMap) {
             updateSystemUiLocked(token, vis, backDisposition);
+        }
+    }
+
+    @BinderThread
+    @Override
+    public void reportStartInput(IBinder token, IBinder startInputToken) {
+        if (!calledWithValidToken(token)) {
+            return;
+        }
+
+        synchronized (mMethodMap) {
+            final IBinder targetWindow = mImeTargetWindowMap.get(startInputToken);
+            if (targetWindow != null && mLastImeTargetWindow != targetWindow) {
+                mWindowManagerInternal.updateInputMethodTargetWindow(token, targetWindow);
+            }
+            mLastImeTargetWindow = targetWindow;
         }
     }
 

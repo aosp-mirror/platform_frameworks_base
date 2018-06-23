@@ -44,7 +44,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
 
     private final DarkIconDispatcher mStatusBarIconController;
     private final BatteryController mBatteryController;
-    private FingerprintUnlockController mFingerprintUnlockController;
+    private BiometricUnlockController mBiometricUnlockController;
 
     private LightBarTransitionsController mNavigationBarController;
     private int mSystemUiVisibility;
@@ -89,9 +89,9 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         updateNavigation();
     }
 
-    public void setFingerprintUnlockController(
-            FingerprintUnlockController fingerprintUnlockController) {
-        mFingerprintUnlockController = fingerprintUnlockController;
+    public void setBiometricUnlockController(
+            BiometricUnlockController biometricUnlockController) {
+        mBiometricUnlockController = biometricUnlockController;
     }
 
     public void onSystemUiVisibilityChanged(int fullscreenStackVis, int dockedStackVis,
@@ -178,12 +178,12 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     }
 
     private boolean animateChange() {
-        if (mFingerprintUnlockController == null) {
+        if (mBiometricUnlockController == null) {
             return false;
         }
-        int unlockMode = mFingerprintUnlockController.getMode();
-        return unlockMode != FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
-                && unlockMode != FingerprintUnlockController.MODE_WAKE_AND_UNLOCK;
+        int unlockMode = mBiometricUnlockController.getMode();
+        return unlockMode != BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
+                && unlockMode != BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
     }
 
     private void updateStatus(Rect fullscreenStackBounds, Rect dockedStackBounds) {

@@ -16,8 +16,6 @@
 
 package com.android.server.autofill;
 
-import static android.app.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
-import static android.app.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
 import static android.service.autofill.AutofillFieldClassificationService.EXTRA_SCORES;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
@@ -33,6 +31,8 @@ import static com.android.server.autofill.Helper.sPartitionMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
 import static com.android.server.autofill.Helper.toArray;
 import static com.android.server.autofill.ViewState.STATE_RESTARTED_SESSION;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
+import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;

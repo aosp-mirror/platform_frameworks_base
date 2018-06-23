@@ -79,7 +79,7 @@ public:
     void initialize();
 
     // Quick check to see if the VulkanManager has been initialized.
-    bool hasVkContext() { return mBackendContext.get() != nullptr; }
+    bool hasVkContext() { return mDevice != VK_NULL_HANDLE; }
 
     // Given a window this creates a new VkSurfaceKHR and VkSwapchain and stores them inside a new
     // VulkanSurface object which is returned.
@@ -110,6 +110,10 @@ private:
 
     explicit VulkanManager(RenderThread& thread);
     ~VulkanManager() { destroy(); }
+
+    // Sets up the VkInstance and VkDevice objects. Also fills out the passed in
+    // VkPhysicalDeviceFeatures struct.
+    bool setupDevice(VkPhysicalDeviceFeatures& deviceFeatures);
 
     void destroyBuffers(VulkanSurface* surface);
 
@@ -148,7 +152,21 @@ private:
     VkPtr<PFN_vkQueuePresentKHR> mQueuePresentKHR;
     VkPtr<PFN_vkCreateSharedSwapchainsKHR> mCreateSharedSwapchainsKHR;
 
-    // Additional vulkan functions
+    // Instance Functions
+    VkPtr<PFN_vkEnumerateInstanceExtensionProperties> mEnumerateInstanceExtensionProperties;
+    VkPtr<PFN_vkCreateInstance> mCreateInstance;
+
+    VkPtr<PFN_vkDestroyInstance> mDestroyInstance;
+    VkPtr<PFN_vkEnumeratePhysicalDevices> mEnumeratePhysicalDevices;
+    VkPtr<PFN_vkGetPhysicalDeviceQueueFamilyProperties> mGetPhysicalDeviceQueueFamilyProperties;
+    VkPtr<PFN_vkGetPhysicalDeviceFeatures> mGetPhysicalDeviceFeatures;
+    VkPtr<PFN_vkCreateDevice> mCreateDevice;
+    VkPtr<PFN_vkEnumerateDeviceExtensionProperties> mEnumerateDeviceExtensionProperties;
+
+    // Device Functions
+    VkPtr<PFN_vkGetDeviceQueue> mGetDeviceQueue;
+    VkPtr<PFN_vkDeviceWaitIdle> mDeviceWaitIdle;
+    VkPtr<PFN_vkDestroyDevice> mDestroyDevice;
     VkPtr<PFN_vkCreateCommandPool> mCreateCommandPool;
     VkPtr<PFN_vkDestroyCommandPool> mDestroyCommandPool;
     VkPtr<PFN_vkAllocateCommandBuffers> mAllocateCommandBuffers;
@@ -158,10 +176,8 @@ private:
     VkPtr<PFN_vkEndCommandBuffer> mEndCommandBuffer;
     VkPtr<PFN_vkCmdPipelineBarrier> mCmdPipelineBarrier;
 
-    VkPtr<PFN_vkGetDeviceQueue> mGetDeviceQueue;
     VkPtr<PFN_vkQueueSubmit> mQueueSubmit;
     VkPtr<PFN_vkQueueWaitIdle> mQueueWaitIdle;
-    VkPtr<PFN_vkDeviceWaitIdle> mDeviceWaitIdle;
 
     VkPtr<PFN_vkCreateSemaphore> mCreateSemaphore;
     VkPtr<PFN_vkDestroySemaphore> mDestroySemaphore;
@@ -172,7 +188,12 @@ private:
 
     RenderThread& mRenderThread;
 
-    sk_sp<const GrVkBackendContext> mBackendContext;
+    VkInstance mInstance = VK_NULL_HANDLE;
+    VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
+    VkDevice mDevice = VK_NULL_HANDLE;
+
+    uint32_t mGraphicsQueueIndex;
+    VkQueue mGraphicsQueue = VK_NULL_HANDLE;
     uint32_t mPresentQueueIndex;
     VkQueue mPresentQueue = VK_NULL_HANDLE;
     VkCommandPool mCommandPool = VK_NULL_HANDLE;

@@ -20,8 +20,8 @@ import static com.android.internal.usb.DumpUtils.writeAccessory;
 import static com.android.internal.util.dump.DumpUtils.writeStringIfNotNull;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerInternal;
-import android.app.ActivityTaskManagerInternal;
+
+import com.android.server.wm.ActivityTaskManagerInternal;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;

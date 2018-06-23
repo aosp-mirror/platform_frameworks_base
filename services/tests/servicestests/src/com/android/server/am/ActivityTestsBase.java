@@ -51,6 +51,7 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.support.test.InstrumentationRegistry;
 import android.testing.DexmakerShareClassLoaderRule;
@@ -104,32 +105,33 @@ public class ActivityTestsBase {
         mHandlerThread.quitSafely();
     }
 
-    protected ActivityManagerService createActivityManagerService() {
-        final ActivityManagerService service =
-                setupActivityManagerService(new TestActivityManagerService(mContext));
-        AttributeCache.init(mContext);
-        return service;
+    protected ActivityTaskManagerService createActivityTaskManagerService() {
+        final TestActivityTaskManagerService atm = spy(new TestActivityTaskManagerService(mContext));
+        setupActivityManagerService(atm);
+        return atm;
     }
 
-    protected ActivityManagerService setupActivityManagerService(
-            ActivityManagerService service, ActivityTaskManagerService atm) {
-        service = spy(service);
-        // Makes sure activity task is created with the spy object.
-        atm = spy(atm);
-        service.setActivityTaskManager(atm);
-        atm.mAmInternal = service.new LocalService();
+    protected ActivityManagerService createActivityManagerService() {
+        final TestActivityTaskManagerService atm = spy(new TestActivityTaskManagerService(mContext));
+        return setupActivityManagerService(atm);
+    }
+
+    ActivityManagerService setupActivityManagerService(TestActivityTaskManagerService atm) {
+        final ActivityManagerService am = spy(new TestActivityManagerService(mContext, atm));
+        setupActivityManagerService(am, atm);
+        AttributeCache.init(mContext);
+        return am;
+    }
+
+    void setupActivityManagerService(ActivityManagerService am, ActivityTaskManagerService atm) {
+        atm.setActivityManagerService(am);
+        atm.mAmInternal = am.new LocalService();
         // Makes sure the supervisor is using with the spy object.
         atm.mStackSupervisor.setService(atm);
-        doReturn(mock(IPackageManager.class)).when(service).getPackageManager();
-        doNothing().when(service).grantEphemeralAccessLocked(anyInt(), any(), anyInt(), anyInt());
-        service.mWindowManager = prepareMockWindowManager();
-        atm.setWindowManager(service.mWindowManager);
-        return service;
-    }
-
-    protected ActivityManagerService setupActivityManagerService(ActivityManagerService service) {
-        return setupActivityManagerService(
-                service, new TestActivityTaskManagerService(service.mContext));
+        doReturn(mock(IPackageManager.class)).when(am).getPackageManager();
+        doNothing().when(am).grantEphemeralAccessLocked(anyInt(), any(), anyInt(), anyInt());
+        am.mWindowManager = prepareMockWindowManager();
+        atm.setWindowManager(am.mWindowManager);
     }
 
     /**
@@ -141,7 +143,7 @@ public class ActivityTestsBase {
 
 
 
-        private final ActivityManagerService mService;
+        private final ActivityTaskManagerService mService;
 
         private ComponentName mComponent;
         private TaskRecord mTaskRecord;
@@ -150,7 +152,7 @@ public class ActivityTestsBase {
         private ActivityStack mStack;
         private int mActivityFlags;
 
-        ActivityBuilder(ActivityManagerService service) {
+        ActivityBuilder(ActivityTaskManagerService service) {
             mService = service;
         }
 
@@ -210,8 +212,7 @@ public class ActivityTestsBase {
             aInfo.applicationInfo.uid = mUid;
             aInfo.flags |= mActivityFlags;
 
-            final ActivityRecord activity = new ActivityRecord(mService.mActivityTaskManager,
-                    null /* caller */,
+            final ActivityRecord activity = new ActivityRecord(mService, null /* caller */,
                     0 /* launchedFromPid */, 0, null, intent, null,
                     aInfo /*aInfo*/, new Configuration(), null /* resultTo */, null /* resultWho */,
                     0 /* reqCode */, false /*componentSpecified*/, false /* rootVoiceInteraction */,
@@ -222,10 +223,12 @@ public class ActivityTestsBase {
                 mTaskRecord.addActivityToTop(activity);
             }
 
-            activity.setProcess(new ProcessRecord(null, null,
-                    mService.mContext.getApplicationInfo(), "name", 12345));
-            activity.app.thread = mock(IApplicationThread.class);
-
+            final WindowProcessController wpc = new WindowProcessController(mService,
+                    mService.mContext.getApplicationInfo(), "name", 12345,
+                    UserHandle.getUserId(12345), mock(Object.class),
+                    mock(WindowProcessListener.class));
+            wpc.setThread(mock(IApplicationThread.class));
+            activity.setProcess(wpc);
             return activity;
         }
     }
@@ -412,8 +415,8 @@ public class ActivityTestsBase {
      */
     protected static class TestActivityManagerService extends ActivityManagerService {
 
-        TestActivityManagerService(Context context) {
-            super(context);
+        TestActivityManagerService(Context context, TestActivityTaskManagerService atm) {
+            super(context, atm);
         }
 
         @Override
