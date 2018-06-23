@@ -568,18 +568,6 @@ android_media_MediaPlayer2_start(JNIEnv *env, jobject thiz)
 }
 
 static void
-android_media_MediaPlayer2_stop(JNIEnv *env, jobject thiz)
-{
-    ALOGV("stop");
-    sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return;
-    }
-    process_media_player_call( env, thiz, mp->stop(), NULL, NULL );
-}
-
-static void
 android_media_MediaPlayer2_pause(JNIEnv *env, jobject thiz)
 {
     ALOGV("pause");
@@ -1501,7 +1489,6 @@ static const JNINativeMethod gMethods[] = {
     {"_setBufferingParams", "(Landroid/media/BufferingParams;)V", (void *)android_media_MediaPlayer2_setBufferingParams},
     {"_prepare",            "()V",                              (void *)android_media_MediaPlayer2_prepare},
     {"_start",              "()V",                              (void *)android_media_MediaPlayer2_start},
-    {"_stop",               "()V",                              (void *)android_media_MediaPlayer2_stop},
     {"native_getState",     "()I",                              (void *)android_media_MediaPlayer2_getState},
     {"getVideoWidth",       "()I",                              (void *)android_media_MediaPlayer2_getVideoWidth},
     {"getVideoHeight",      "()I",                              (void *)android_media_MediaPlayer2_getVideoHeight},

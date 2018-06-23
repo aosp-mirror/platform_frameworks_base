@@ -998,20 +998,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private native int _getAudioStreamType() throws IllegalStateException;
 
-    /**
-     * Stops playback after playback has been started or paused.
-     *
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized.
-     * #hide
-     */
-    @Override
-    public void stop() {
-        stayAwake(false);
-        _stop();
-    }
-
-    private native void _stop() throws IllegalStateException;
 
     //--------------------------------------------------------------------------
     // Explicit Routing
@@ -2059,9 +2045,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private int mSelectedSubtitleTrackIndex = -1;
     private Vector<InputStream> mOpenSubtitleSources;
 
-    private OnSubtitleDataListener mSubtitleDataListener = new OnSubtitleDataListener() {
+    private EventCallback mSubtitleDataCallback = new EventCallback() {
         @Override
-        public void onSubtitleData(MediaPlayer2 mp, SubtitleData data) {
+        public void onSubtitleData(MediaPlayer2 mp, DataSourceDesc dsd, SubtitleData data) {
             int index = data.getTrackIndex();
             synchronized (mIndexTrackPairs) {
                 for (Pair<Integer, SubtitleTrack> p : mIndexTrackPairs) {
@@ -2085,7 +2071,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             }
             mSelectedSubtitleTrackIndex = -1;
         }
-        setOnSubtitleDataListener(null);
+        unregisterEventCallback(mSubtitleDataCallback);
         if (track == null) {
             return;
         }
@@ -2105,7 +2091,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 selectOrDeselectInbandTrack(mSelectedSubtitleTrackIndex, true);
             } catch (IllegalStateException e) {
             }
-            setOnSubtitleDataListener(mSubtitleDataListener);
+            final Executor executor = (runnable) -> mEventHandler.post(runnable);
+            registerEventCallback(executor, mSubtitleDataCallback);
         }
         // no need to select out-of-band tracks
     }
@@ -2628,7 +2615,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             mTimeProvider.close();
             mTimeProvider = null;
         }
-        mOnSubtitleDataListener = null;
 
         // Modular DRM clean up
         mOnDrmConfigHelper = null;
@@ -2969,7 +2955,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
                 synchronized (mEventCbLock) {
                     for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                        cb.first.execute(() -> cb.second.onTimedText(mMediaPlayer, mCurrentDSD, text));
+                        cb.first.execute(() -> cb.second.onTimedText(
+                                mMediaPlayer, mCurrentDSD, text));
                     }
                 }
                 return;
@@ -2977,15 +2964,16 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
             case MEDIA_SUBTITLE_DATA:
             {
-                OnSubtitleDataListener onSubtitleDataListener = mOnSubtitleDataListener;
-                if (onSubtitleDataListener == null) {
-                    return;
-                }
                 if (msg.obj instanceof Parcel) {
                     Parcel parcel = (Parcel) msg.obj;
                     SubtitleData data = new SubtitleData(parcel);
                     parcel.recycle();
-                    onSubtitleDataListener.onSubtitleData(mMediaPlayer, data);
+                    synchronized (mEventCbLock) {
+                        for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
+                            cb.first.execute(() -> cb.second.onSubtitleData(
+                                    mMediaPlayer, mCurrentDSD, data));
+                        }
+                    }
                 }
                 return;
             }
@@ -3118,7 +3106,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @param executor the executor through which the callback should be invoked
      */
     @Override
-    public void setEventCallback(@NonNull @CallbackExecutor Executor executor,
+    public void registerEventCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull EventCallback eventCallback) {
         if (eventCallback == null) {
             throw new IllegalArgumentException("Illegal null EventCallback");
@@ -3136,26 +3124,15 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * Clears the {@link EventCallback}.
      */
     @Override
-    public void clearEventCallback() {
+    public void unregisterEventCallback(EventCallback eventCallback) {
         synchronized (mEventCbLock) {
-            mEventCallbackRecords.clear();
+            for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
+                if (cb.second == eventCallback) {
+                    mEventCallbackRecords.remove(cb);
+                }
+            }
         }
     }
-
-    /**
-     * Register a callback to be invoked when a track has data available.
-     *
-     * @param listener the callback that will be run
-     *
-     * @hide
-     */
-    @Override
-    public void setOnSubtitleDataListener(OnSubtitleDataListener listener) {
-        mOnSubtitleDataListener = listener;
-    }
-
-    private OnSubtitleDataListener mOnSubtitleDataListener;
-
 
     // Modular DRM begin
 
