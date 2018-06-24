@@ -1450,7 +1450,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"Dodaj konto"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Zwiększ"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Zmniejsz"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> dotknij i przytrzymaj."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> naciśnij i przytrzymaj."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Przesuń w górę, by zwiększyć, i w dół, by zmniejszyć."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Zmień minutę na późniejszą"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Zmień minutę na wcześniejszą"</string>
@@ -1477,7 +1477,7 @@
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Nie udało się uruchomić aplikacji <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Udostępnij przez:"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Udostępnij przez <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="content_description_sliding_handle" msgid="415975056159262248">"Uchwyt przesuwny. Dotknij i przytrzymaj."</string>
+    <string name="content_description_sliding_handle" msgid="415975056159262248">"Uchwyt przesuwny. Naciśnij i przytrzymaj."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Przesuń, aby odblokować."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Przejdź do strony głównej"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Przejdź wyżej"</string>

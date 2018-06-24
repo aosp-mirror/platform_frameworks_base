@@ -4522,6 +4522,15 @@ public class NotificationManagerService extends SystemService {
     @GuardedBy("mNotificationLock")
     @VisibleForTesting
     protected boolean isVisuallyInterruptive(NotificationRecord old, NotificationRecord r) {
+        // Ignore summary updates because we don't display most of the information.
+        if (r.sbn.isGroup() && r.sbn.getNotification().isGroupSummary()) {
+            if (DEBUG_INTERRUPTIVENESS) {
+                Log.v(TAG, "INTERRUPTIVENESS: "
+                        +  r.getKey() + " is not interruptive: summary");
+            }
+            return false;
+        }
+
         if (old == null) {
             if (DEBUG_INTERRUPTIVENESS) {
                 Log.v(TAG, "INTERRUPTIVENESS: "
@@ -4555,15 +4564,6 @@ public class NotificationManagerService extends SystemService {
             if (DEBUG_INTERRUPTIVENESS) {
                 Log.v(TAG, "INTERRUPTIVENESS: "
                         +  r.getKey() + " is not interruptive: foreground service");
-            }
-            return false;
-        }
-
-        // Ignore summary updates because we don't display most of the information.
-        if (r.sbn.isGroup() && r.sbn.getNotification().isGroupSummary()) {
-            if (DEBUG_INTERRUPTIVENESS) {
-                Log.v(TAG, "INTERRUPTIVENESS: "
-                        +  r.getKey() + " is not interruptive: summary");
             }
             return false;
         }

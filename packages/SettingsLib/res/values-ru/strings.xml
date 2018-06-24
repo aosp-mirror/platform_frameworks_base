@@ -56,7 +56,7 @@
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Отключение..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Подключение..."</string>
     <string name="bluetooth_connected" msgid="5427152882755735944">"Подключено<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="1426882272690346242">"Сопряжение..."</string>
+    <string name="bluetooth_pairing" msgid="1426882272690346242">"Устанавливается соединение..."</string>
     <string name="bluetooth_connected_no_headset" msgid="616068069034994802">"Подключено (кроме звонков)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="3736431800395923868">"Подключено (кроме аудио)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3200033913678466453">"Подключено (кроме сообщений)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -102,11 +102,11 @@
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Добавить"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ДОБАВИТЬ"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Отмена"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Сопряжение обеспечивает доступ к вашим контактам и журналу звонков при подключении."</string>
-    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Не удалось установить сопряжение с устройством \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Не удалось установить сопряжение с устройством \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\", так как введен неверный PIN-код или пароль."</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Установление соединения обеспечивает доступ к вашим контактам и журналу звонков при подключении."</string>
+    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Не удалось подключиться к устройству \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Не удалось подключиться к устройству \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\", так как введен неверный PIN-код или пароль."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Не удается установить соединение с устройством \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\"."</string>
-    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> не разрешает сопряжение."</string>
+    <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> не разрешает подключение."</string>
     <string name="bluetooth_talkback_computer" msgid="4875089335641234463">"Компьютер"</string>
     <string name="bluetooth_talkback_headset" msgid="5140152177885220949">"Гарнитура"</string>
     <string name="bluetooth_talkback_phone" msgid="4260255181240622896">"Телефон"</string>
