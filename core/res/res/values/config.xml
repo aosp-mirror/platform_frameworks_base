@@ -488,12 +488,20 @@
 
          Note also: the order of this is important. The first upstream type
          for which a satisfying network exists is used.
-      -->
+    -->
     <integer-array translatable="false" name="config_tether_upstream_types">
         <item>1</item>
         <item>7</item>
         <item>0</item>
     </integer-array>
+
+    <!-- When true, the tethering upstream network follows the current default
+         Internet network (except when the current default network is mobile,
+         in which case a DUN network will be used if required).
+
+         When true, overrides the config_tether_upstream_types setting above.
+    -->
+    <bool translatable="false" name="config_tether_upstream_automatic">false</bool>
 
     <!-- If the DUN connection for this CDMA device supports more than just DUN -->
     <!-- traffic you should list them here. -->
