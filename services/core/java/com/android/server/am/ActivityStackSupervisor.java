@@ -3930,6 +3930,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         stops = new ArrayList<>();
                     }
                     stops.add(s);
+
+                    // Make sure to remove it in all cases in case we entered this block with
+                    // shouldSleepOrShutDown
+                    mActivitiesWaitingForVisibleActivity.remove(s);
                     mStoppingActivities.remove(activityNdx);
                 }
             }
