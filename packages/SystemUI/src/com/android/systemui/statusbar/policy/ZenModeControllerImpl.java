@@ -32,32 +32,33 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
-import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ZenRule;
+import android.text.format.DateFormat;
 import android.util.Log;
-import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Dumpable;
 import com.android.systemui.qs.GlobalSetting;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.util.Utils;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.Objects;
 
 /** Platform implementation of the zen mode controller. **/
-public class ZenModeControllerImpl extends CurrentUserTracker implements ZenModeController {
+public class ZenModeControllerImpl extends CurrentUserTracker
+        implements ZenModeController, Dumpable {
     private static final String TAG = "ZenModeController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
+    private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     private final Context mContext;
     private final GlobalSetting mModeSetting;
     private final GlobalSetting mConfigSetting;
     private final NotificationManager mNoMan;
-    private final LinkedHashMap<Uri, Condition> mConditions = new LinkedHashMap<Uri, Condition>();
     private final AlarmManager mAlarmManager;
     private final SetupObserver mSetupObserver;
     private final UserManager mUserManager;
@@ -66,6 +67,7 @@ public class ZenModeControllerImpl extends CurrentUserTracker implements ZenMode
     private boolean mRegistered;
     private ZenModeConfig mConfig;
     private int mZenMode;
+    private long mZenUpdateTime;
 
     public ZenModeControllerImpl(Context context, Handler handler) {
         super(context);
@@ -84,7 +86,6 @@ public class ZenModeControllerImpl extends CurrentUserTracker implements ZenMode
             }
         };
         mNoMan = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        mConfig = mNoMan.getZenModeConfig();
         mModeSetting.setListening(true);
         updateZenMode(mModeSetting.getValue());
         mConfigSetting.setListening(true);
@@ -209,6 +210,7 @@ public class ZenModeControllerImpl extends CurrentUserTracker implements ZenMode
     @VisibleForTesting
     protected void updateZenMode(int mode) {
         mZenMode = mode;
+        mZenUpdateTime = System.currentTimeMillis();
     }
 
     @VisibleForTesting
@@ -217,6 +219,7 @@ public class ZenModeControllerImpl extends CurrentUserTracker implements ZenMode
         if (Objects.equals(config, mConfig)) return;
         final ZenRule oldRule = mConfig != null ? mConfig.manualRule : null;
         mConfig = config;
+        mZenUpdateTime = System.currentTimeMillis();
         fireConfigChanged(config);
         final ZenRule newRule = config != null ? config.manualRule : null;
         if (Objects.equals(oldRule, newRule)) return;
@@ -234,6 +237,14 @@ public class ZenModeControllerImpl extends CurrentUserTracker implements ZenMode
             }
         }
     };
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("ZenModeControllerImpl:");
+        pw.println("  mZenMode=" + mZenMode);
+        pw.println("  mConfig=" + mConfig);
+        pw.println("  mZenUpdateTime=" + DateFormat.format("MM-dd HH:mm:ss", mZenUpdateTime));
+    }
 
     private final class SetupObserver extends ContentObserver {
         private final ContentResolver mResolver;
@@ -261,6 +272,7 @@ public class ZenModeControllerImpl extends CurrentUserTracker implements ZenMode
                     Global.getUriFor(Global.DEVICE_PROVISIONED), false, this);
             mResolver.registerContentObserver(
                     Secure.getUriFor(Secure.USER_SETUP_COMPLETE), false, this, mUserId);
+            mRegistered = true;
             fireZenAvailableChanged(isZenAvailable());
         }
 
