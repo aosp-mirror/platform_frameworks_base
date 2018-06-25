@@ -341,15 +341,15 @@ public abstract class ImsFeature {
         }
     }
 
+    /** @hide */
+    protected Context mContext;
+    /** @hide */
+    protected final Object mLock = new Object();
+
     private final Set<IImsFeatureStatusCallback> mStatusCallbacks = Collections.newSetFromMap(
             new WeakHashMap<IImsFeatureStatusCallback, Boolean>());
     private @ImsState int mState = STATE_UNAVAILABLE;
     private int mSlotId = SubscriptionManager.INVALID_SIM_SLOT_INDEX;
-    /**
-     * @hide
-     */
-    protected Context mContext;
-    private final Object mLock = new Object();
     private final RemoteCallbackList<IImsCapabilityCallback> mCapabilityCallbacks
             = new RemoteCallbackList<>();
     private Capabilities mCapabilityStatus = new Capabilities();
