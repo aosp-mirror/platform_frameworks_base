@@ -407,4 +407,27 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         // Assert that the primary stack is returned.
         assertEquals(primaryStack, result);
     }
+
+    /**
+     * Verify split-screen primary stack & task can resized by
+     * {@link android.app.IActivityTaskManager#resizeDockedStack} as expect.
+     */
+    @Test
+    public void testResizeDockedStackForSplitScreenPrimary() throws Exception {
+        final Rect TASK_SIZE = new Rect(0, 0, 600, 600);
+        final Rect STACK_SIZE = new Rect(0, 0, 300, 300);
+
+        // Create primary split-screen stack with a task.
+        final ActivityStack primaryStack = mService.mStackSupervisor.getDefaultDisplay()
+                .createStack(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD,
+                        true /* onTop */);
+        final TaskRecord task = new TaskBuilder(mSupervisor).setStack(primaryStack).build();
+
+        // Resize dock stack.
+        mService.resizeDockedStack(STACK_SIZE, TASK_SIZE, null, null, null);
+
+        // Verify dock stack & its task bounds if is equal as resized result.
+        assertEquals(primaryStack.getBounds(), STACK_SIZE);
+        assertEquals(task.getBounds(), TASK_SIZE);
+    }
 }
