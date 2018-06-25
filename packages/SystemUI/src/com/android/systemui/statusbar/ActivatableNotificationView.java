@@ -98,8 +98,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             = new PathInterpolator(0.6f, 0, 0.5f, 1);
     private static final Interpolator ACTIVATE_INVERSE_ALPHA_INTERPOLATOR
             = new PathInterpolator(0, 0, 0.5f, 1);
-    private final int mTintedRippleColor;
-    protected final int mNormalRippleColor;
+    private int mTintedRippleColor;
+    protected int mNormalRippleColor;
     private final AccessibilityManager mAccessibilityManager;
     private final DoubleTapHelper mDoubleTapHelper;
 
@@ -132,7 +132,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private ValueAnimator mBackgroundColorAnimator;
     private float mAppearAnimationFraction = -1.0f;
     private float mAppearAnimationTranslation;
-    private final int mNormalColor;
+    private int mNormalColor;
     private boolean mIsBelowSpeedBump;
     private FalsingManager mFalsingManager;
 
@@ -188,11 +188,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mSlowOutLinearInInterpolator = new PathInterpolator(0.8f, 0.0f, 1.0f, 1.0f);
         setClipChildren(false);
         setClipToPadding(false);
-        mNormalColor = context.getColor(R.color.notification_material_background_color);
-        mTintedRippleColor = context.getColor(
-                R.color.notification_ripple_tinted_color);
-        mNormalRippleColor = context.getColor(
-                R.color.notification_ripple_untinted_color);
+        updateColors();
         mFalsingManager = FalsingManager.getInstance(context);
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
 
@@ -206,6 +202,16 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         initDimens();
     }
 
+    private void updateColors() {
+        mNormalColor = mContext.getColor(R.color.notification_material_background_color);
+        mTintedRippleColor = mContext.getColor(
+                R.color.notification_ripple_tinted_color);
+        mNormalRippleColor = mContext.getColor(
+                R.color.notification_ripple_untinted_color);
+        mDimmedAlpha = Color.alpha(mContext.getColor(
+                R.color.notification_material_background_dimmed_color));
+    }
+
     private void initDimens() {
         mHeadsUpAddStartLocation = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_content_margin_start);
@@ -217,6 +223,12 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         initDimens();
     }
 
+    public void onUiModeChanged() {
+        updateColors();
+        initBackground();
+        updateBackgroundTint();
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -224,8 +236,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mFakeShadow = findViewById(R.id.fake_shadow);
         mShadowHidden = mFakeShadow.getVisibility() != VISIBLE;
         mBackgroundDimmed = findViewById(R.id.backgroundDimmed);
-        mDimmedAlpha = Color.alpha(mContext.getColor(
-                R.color.notification_material_background_dimmed_color));
         initBackground();
         updateBackground();
         updateBackgroundTint();

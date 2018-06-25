@@ -3414,7 +3414,7 @@
     <string-array translatable="false" name="config_batteryPackageTypeService"/>
 
     <!-- Flag indicating whether or not to enable night mode detection. -->
-    <bool name="config_enableNightMode">false</bool>
+    <bool name="config_enableNightMode">true</bool>
 
     <!-- Flag indicating that the actions buttons for a notification should be tinted with by the
          color supplied by the Notification.Builder if present. -->

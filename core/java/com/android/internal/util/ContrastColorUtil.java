@@ -454,9 +454,12 @@ public class ContrastColorUtil {
     /**
      * Resolves {@param color} to an actual color if it is {@link Notification#COLOR_DEFAULT}
      */
-    public static int resolveColor(Context context, int color) {
+    public static int resolveColor(Context context, int color, boolean defaultBackgroundIsDark) {
         if (color == Notification.COLOR_DEFAULT) {
-            return context.getColor(com.android.internal.R.color.notification_default_color_light);
+            int res = defaultBackgroundIsDark
+                    ? com.android.internal.R.color.notification_default_color_dark
+                    : com.android.internal.R.color.notification_default_color_light;
+            return context.getColor(res);
         }
         return color;
     }
@@ -486,7 +489,7 @@ public class ContrastColorUtil {
      */
     public static int resolveContrastColor(Context context, int notificationColor,
             int backgroundColor, boolean isDark) {
-        final int resolvedColor = resolveColor(context, notificationColor);
+        final int resolvedColor = resolveColor(context, notificationColor, isDark);
 
         int color = resolvedColor;
         color = ContrastColorUtil.ensureTextContrast(color, backgroundColor, isDark);
@@ -520,7 +523,8 @@ public class ContrastColorUtil {
     }
 
     public static int resolveAmbientColor(Context context, int notificationColor) {
-        final int resolvedColor = resolveColor(context, notificationColor);
+        final int resolvedColor = resolveColor(context, notificationColor,
+                true /* defaultBackgroundIsDark */);
 
         int color = resolvedColor;
         color = ContrastColorUtil.ensureTextContrastOnBlack(color);
@@ -538,8 +542,9 @@ public class ContrastColorUtil {
         return color;
     }
 
-    public static int resolvePrimaryColor(Context context, int backgroundColor) {
-        boolean useDark = shouldUseDark(backgroundColor);
+    public static int resolvePrimaryColor(Context context, int backgroundColor,
+                                          boolean defaultBackgroundIsDark) {
+        boolean useDark = shouldUseDark(backgroundColor, defaultBackgroundIsDark);
         if (useDark) {
             return context.getColor(
                     com.android.internal.R.color.notification_primary_text_color_light);
@@ -549,8 +554,9 @@ public class ContrastColorUtil {
         }
     }
 
-    public static int resolveSecondaryColor(Context context, int backgroundColor) {
-        boolean useDark = shouldUseDark(backgroundColor);
+    public static int resolveSecondaryColor(Context context, int backgroundColor,
+                                            boolean defaultBackgroundIsDark) {
+        boolean useDark = shouldUseDark(backgroundColor, defaultBackgroundIsDark);
         if (useDark) {
             return context.getColor(
                     com.android.internal.R.color.notification_secondary_text_color_light);
@@ -560,8 +566,9 @@ public class ContrastColorUtil {
         }
     }
 
-    public static int resolveDefaultColor(Context context, int backgroundColor) {
-        boolean useDark = shouldUseDark(backgroundColor);
+    public static int resolveDefaultColor(Context context, int backgroundColor,
+                                          boolean defaultBackgroundIsDark) {
+        boolean useDark = shouldUseDark(backgroundColor, defaultBackgroundIsDark);
         if (useDark) {
             return context.getColor(
                     com.android.internal.R.color.notification_default_color_light);
@@ -591,12 +598,11 @@ public class ContrastColorUtil {
         return ColorUtilsFromCompat.LABToColor(result[0], result[1], result[2]);
     }
 
-    private static boolean shouldUseDark(int backgroundColor) {
-        boolean useDark = backgroundColor == Notification.COLOR_DEFAULT;
-        if (!useDark) {
-            useDark = ColorUtilsFromCompat.calculateLuminance(backgroundColor) > 0.5;
+    private static boolean shouldUseDark(int backgroundColor, boolean defaultBackgroundIsDark) {
+        if (backgroundColor == Notification.COLOR_DEFAULT) {
+            return !defaultBackgroundIsDark;
         }
-        return useDark;
+        return ColorUtilsFromCompat.calculateLuminance(backgroundColor) > 0.5;
     }
 
     public static double calculateLuminance(int backgroundColor) {

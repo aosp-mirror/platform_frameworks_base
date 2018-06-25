@@ -187,6 +187,21 @@ public final class MathUtils {
     }
 
     /**
+     * Perform Hermite interpolation between two values.
+     * Eg:
+     *   smoothStep(0, 0.5f, 0.5f) = 1f
+     *   smoothStep(0, 0.5f, 0.25f) = 0.5f
+     *
+     * @param start Left edge.
+     * @param end Right edge.
+     * @param x A value between {@code start} and {@code end}.
+     * @return A number between 0 and 1 representing where {@code x} is in the interpolation.
+     */
+    public static float smoothStep(float start, float end, float x) {
+        return constrain((x - start) / (end - start), 0f, 1f);
+    }
+
+    /**
      * Returns the sum of the two parameters, or throws an exception if the resulting sum would
      * cause an overflow or underflow.
      * @throws IllegalArgumentException when overflow or underflow would occur.

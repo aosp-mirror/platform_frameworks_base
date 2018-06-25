@@ -561,7 +561,7 @@ public class NotificationInflater {
         }
     }
 
-    public void onDensityOrFontScaleChanged() {
+    public void clearCachesAndReInflate() {
         NotificationData.Entry entry = mRow.getEntry();
         entry.cachedAmbientContentView = null;
         entry.cachedBigContentView = null;

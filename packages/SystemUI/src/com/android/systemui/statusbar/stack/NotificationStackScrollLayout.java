@@ -514,6 +514,20 @@ public class NotificationStackScrollLayout extends ViewGroup
         mSwipeHelper.onMenuShown(row);
     }
 
+    public void onUiModeChanged() {
+        mBgColor = mContext.getColor(R.color.notification_shade_background_color);
+        updateBackgroundDimming();
+
+        // Re-inflate all notification views
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child instanceof ActivatableNotificationView) {
+                ((ActivatableNotificationView) child).onUiModeChanged();
+            }
+        }
+    }
+
     protected void onDraw(Canvas canvas) {
         if (mShouldDrawNotificationBackground
                 && (mCurrentBounds.top < mCurrentBounds.bottom || mAmbientState.isDark())) {
@@ -588,8 +602,8 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         // Interpolate between semi-transparent notification panel background color
         // and white AOD separator.
-        float colorInterpolation = Interpolators.DECELERATE_QUINT.getInterpolation(
-                mInterpolatedDarkAmount);
+        float colorInterpolation = MathUtils.smoothStep(0.4f /* start */, 1f /* end */,
+                mLinearDarkAmount);
         int color = ColorUtils.blendARGB(awakeColor, Color.WHITE, colorInterpolation);
 
         if (mCachedBackgroundColor != color) {

@@ -661,8 +661,9 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
             if (hsl[1] < 0.2f) {
                 contrastedColor = Notification.COLOR_DEFAULT;
             }
+            boolean isDark = !ContrastColorUtil.isColorLight(mCachedContrastBackgroundColor);
             contrastedColor = ContrastColorUtil.resolveContrastColor(mContext,
-                    contrastedColor, mCachedContrastBackgroundColor);
+                    contrastedColor, mCachedContrastBackgroundColor, isDark);
         }
         mContrastedDrawableColor = contrastedColor;
     }
