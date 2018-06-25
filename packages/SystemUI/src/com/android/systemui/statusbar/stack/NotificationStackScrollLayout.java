@@ -3169,7 +3169,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void startAnimationToState() {
         if (mNeedsAnimation) {
-            generateChildHierarchyEvents();
+            generateAllAnimationEvents();
             mNeedsAnimation = false;
         }
         if (!mAnimationEvents.isEmpty() || isCurrentlyAnimating()) {
@@ -3186,7 +3186,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mGoToFullShadeDelay = 0;
     }
 
-    private void generateChildHierarchyEvents() {
+    private void generateAllAnimationEvents() {
         generateHeadsUpAnimationEvents();
         generateChildRemovalEvents();
         generateChildAdditionEvents();
@@ -3203,7 +3203,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         generateGroupExpansionEvent();
         generateAnimateEverythingEvent();
         generatePulsingAnimationEvent();
-        mNeedsAnimation = false;
     }
 
     private void generateHeadsUpAnimationEvents() {
