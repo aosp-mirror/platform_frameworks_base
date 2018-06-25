@@ -7422,6 +7422,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 return UserHandle.USER_NULL;
             }
         }
+
+        @Override
+        public boolean isUidFocused(int uid) {
+            synchronized (mWindowMap) {
+                return mCurrentFocus != null ? uid == mCurrentFocus.getOwningUid() : false;
+            }
+        }
     }
 
     void registerAppFreezeListener(AppFreezeListener listener) {

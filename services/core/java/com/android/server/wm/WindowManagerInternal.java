@@ -436,4 +436,9 @@ public abstract class WindowManagerInternal {
      * the window token is not found.
      */
     public abstract int getWindowOwnerUserId(IBinder windowToken);
+
+    /**
+     * Returns {@code true} if a Window owned by {@code uid} has focus.
+     */
+    public abstract boolean isUidFocused(int uid);
 }
