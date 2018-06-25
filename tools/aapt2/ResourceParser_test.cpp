@@ -989,4 +989,40 @@ TEST_F(ResourceParserTest, ParseIdItem) {
   ASSERT_FALSE(TestParse(input));
 }
 
+TEST_F(ResourceParserTest, ParseCData) {
+  std::string input = R"(
+      <string name="foo"><![CDATA[some text and ' apostrophe]]></string>)";
+
+  ASSERT_TRUE(TestParse(input));
+  String* output = test::GetValue<String>(&table_, "string/foo");
+  ASSERT_THAT(output, NotNull());
+  EXPECT_THAT(*output, StrValueEq("some text and ' apostrophe"));
+
+  // Double quotes should not change the state of whitespace processing
+  input = R"(<string name="foo2">Hello<![CDATA[ "</string>' ]]>      World</string>)";
+  ASSERT_TRUE(TestParse(input));
+  output = test::GetValue<String>(&table_, "string/foo2");
+  ASSERT_THAT(output, NotNull());
+  EXPECT_THAT(*output, StrValueEq(std::string("Hello \"</string>'  World").data()));
+
+  // Cdata blocks should not have their whitespace trimmed
+  input = R"(<string name="foo3">     <![CDATA[ text ]]>     </string>)";
+  ASSERT_TRUE(TestParse(input));
+  output = test::GetValue<String>(&table_, "string/foo3");
+  ASSERT_THAT(output, NotNull());
+  EXPECT_THAT(*output, StrValueEq(std::string(" text ").data()));
+
+  input = R"(<string name="foo4">     <![CDATA[]]>     </string>)";
+  ASSERT_TRUE(TestParse(input));
+  output = test::GetValue<String>(&table_, "string/foo4");
+  ASSERT_THAT(output, NotNull());
+  EXPECT_THAT(*output, StrValueEq(std::string("").data()));
+
+  input = R"(<string name="foo5">     <![CDATA[    ]]>     </string>)";
+  ASSERT_TRUE(TestParse(input));
+  output = test::GetValue<String>(&table_, "string/foo5");
+  ASSERT_THAT(output, NotNull());
+  EXPECT_THAT(*output, StrValueEq(std::string("    ").data()));
+}
+
 }  // namespace aapt
