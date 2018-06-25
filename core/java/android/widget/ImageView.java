@@ -80,7 +80,7 @@ import java.io.IOException;
  *
  * <p>
  * To learn more about Drawables, see: <a href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a>.
- * To learn more about working with Bitmaps, see: <a href="{@docRoot}topic/performance/graphics/index.htm">Handling Bitmaps</a>.
+ * To learn more about working with Bitmaps, see: <a href="{@docRoot}topic/performance/graphics/index.html">Handling Bitmaps</a>.
  * </p>
  *
  * @attr ref android.R.styleable#ImageView_adjustViewBounds
