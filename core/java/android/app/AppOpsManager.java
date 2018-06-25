@@ -2513,7 +2513,7 @@ public class AppOpsManager {
      */
     public int noteProxyOpNoThrow(int op, String proxiedPackageName) {
         try {
-            return mService.noteProxyOperation(op, mContext.getOpPackageName(),
+            return mService.noteProxyOperation(op, Process.myUid(), mContext.getOpPackageName(),
                     Binder.getCallingUid(), proxiedPackageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

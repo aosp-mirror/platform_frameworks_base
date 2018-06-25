@@ -35,6 +35,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -52,6 +53,7 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 
 import com.android.internal.util.function.pooled.PooledLambda;
+
 import libcore.io.IoUtils;
 
 import java.io.IOException;
@@ -349,6 +351,46 @@ public final class UiAutomation {
     public void destroy() {
         disconnect();
         mIsDestroyed = true;
+    }
+
+    /**
+     * Adopt the permission identity of the shell UID. This allows you to call APIs protected
+     * permissions which normal apps cannot hold but are granted to the shell UID. If you
+     * already adopted the shell permission identity this method would be a no-op.
+     * Note that your permission state becomes that of the shell UID and it is not a
+     * combination of your and the shell UID permissions.
+     *
+     * @see #dropShellPermissionIdentity()
+     */
+    public void adoptShellPermissionIdentity() {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+        try {
+            // Calling out without a lock held.
+            mUiAutomationConnection.adoptShellPermissionIdentity(Process.myUid());
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error executing adopting shell permission identity!", re);
+        }
+    }
+
+    /**
+     * Drop the shell permission identity adopted by a previous call to
+     * {@link #adoptShellPermissionIdentity()}. If you did not adopt the shell permission
+     * identity this method would be a no-op.
+     *
+     * @see #adoptShellPermissionIdentity()
+     */
+    public void dropShellPermissionIdentity() {
+        synchronized (mLock) {
+            throwIfNotConnectedLocked();
+        }
+        try {
+            // Calling out without a lock held.
+            mUiAutomationConnection.dropShellPermissionIdentity();
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error executing dropping shell permission identity!", re);
+        }
     }
 
     /**
@@ -1004,6 +1046,8 @@ public final class UiAutomation {
      *
      * @param command The command to execute.
      * @return A file descriptor to the standard output stream.
+     *
+     * @see #adoptShellPermissionIdentity()
      */
     public ParcelFileDescriptor executeShellCommand(String command) {
         synchronized (mLock) {
@@ -1084,22 +1128,6 @@ public final class UiAutomation {
         result[0] = source_read;
         result[1] = sink_write;
         return result;
-    }
-
-    private static float getDegreesForRotation(int value) {
-        switch (value) {
-            case Surface.ROTATION_90: {
-                return 360f - 90f;
-            }
-            case Surface.ROTATION_180: {
-                return 360f - 180f;
-            }
-            case Surface.ROTATION_270: {
-                return 360f - 270f;
-            } default: {
-                return 0;
-            }
-        }
     }
 
     private boolean isConnectedLocked() {

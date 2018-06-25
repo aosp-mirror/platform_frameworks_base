@@ -263,7 +263,9 @@ package android.content.pm {
     method public abstract String getPermissionControllerPackageName();
     method @NonNull public abstract String getServicesSystemSharedLibraryPackageName();
     method @NonNull public abstract String getSharedSystemSharedLibraryPackageName();
+    method @RequiresPermission("android.permission.GRANT_RUNTIME_PERMISSIONS") public abstract void grantRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method public abstract boolean isPermissionReviewModeEnabled();
+    method @RequiresPermission("android.permission.REVOKE_RUNTIME_PERMISSIONS") public abstract void revokeRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     field public static final String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
     field public static final String FEATURE_FILE_BASED_ENCRYPTION = "android.software.file_based_encryption";
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000

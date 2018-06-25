@@ -714,4 +714,19 @@ interface IActivityManager {
 
     /** @see android.app.ActivityManager#alwaysShowUnsupportedCompileSdkWarning */
     void alwaysShowUnsupportedCompileSdkWarning(in ComponentName activity);
+
+    /**
+     * Method for the shell UID to start deletating its permission identity to an
+     * active instrumenation. The shell can delegate permissions only to one active
+     * instrumentation at a time. An active instrumentation is one running and
+     * started from the shell.
+     */
+    void startDelegateShellPermissionIdentity(int uid);
+
+    /**
+     * Method for the shell UID to stop deletating its permission identity to an
+     * active instrumenation. An active instrumentation is one running and
+     * started from the shell.
+     */
+    void stopDelegateShellPermissionIdentity();
 }
