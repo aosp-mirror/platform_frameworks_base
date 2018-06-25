@@ -33,7 +33,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -487,8 +486,9 @@ public class TextToSpeech {
          * intent. The possible values for this extra are
          * {@link TextToSpeech#SUCCESS} and {@link TextToSpeech#ERROR}.
          *
-         * @deprecated No longer in use. If client ise interested in information about what
-         * changed, is should send ACTION_CHECK_TTS_DATA intent to discover available voices.
+         * @deprecated No longer in use. If client is interested in information about what
+         * changed, it should use the ACTION_CHECK_TTS_DATA
+         * intent to discover available voices.
          */
         @Deprecated
         public static final String EXTRA_TTS_DATA_INSTALLED = "dataInstalled";
