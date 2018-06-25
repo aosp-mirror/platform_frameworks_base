@@ -203,7 +203,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         v.set(icon);
         v.setStaticDrawableColor(mColor);
         v.setDecorColor(mColor);
-        addView(v, 0, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize));
+        addView(v, 0, createLayoutParams());
     }
 
     public void addDemoWifiView(WifiIconState state) {
@@ -223,7 +223,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         mWifiView = view;
         mWifiView.applyWifiState(state);
         mWifiView.setStaticDrawableColor(mColor);
-        addView(view, viewIndex);
+        addView(view, viewIndex, createLayoutParams());
     }
 
     public void updateWifiState(WifiIconState state) {
@@ -244,7 +244,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
 
         // mobile always goes at the end
         mMobileViews.add(view);
-        addView(view, getChildCount());
+        addView(view, getChildCount(), createLayoutParams());
     }
 
     public void updateMobileState(MobileIconState state) {
@@ -288,6 +288,10 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         }
 
         return null;
+    }
+
+    private LayoutParams createLayoutParams() {
+        return new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize);
     }
 
     @Override

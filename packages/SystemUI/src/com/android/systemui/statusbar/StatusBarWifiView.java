@@ -191,23 +191,26 @@ public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
     }
 
     public void applyWifiState(WifiIconState state) {
+        boolean requestLayout = false;
+
         if (state == null) {
+            requestLayout = getVisibility() != View.GONE;
             setVisibility(View.GONE);
             mState = null;
-            return;
-        }
-
-        if (mState == null) {
+        } else if (mState == null) {
+            requestLayout = true;
             mState = state.copy();
             initViewState();
+        } else if (!mState.equals(state)) {
+            requestLayout = updateState(state.copy());
         }
 
-        if (!mState.equals(state)) {
-            updateState(state.copy());
+        if (requestLayout) {
+            requestLayout();
         }
     }
 
-    private void updateState(WifiIconState state) {
+    private boolean updateState(WifiIconState state) {
         setContentDescription(state.contentDescription);
         if (mState.resId != state.resId && state.resId >= 0) {
             NeutralGoodDrawable drawable = NeutralGoodDrawable
@@ -222,11 +225,17 @@ public class StatusBarWifiView extends FrameLayout implements DarkReceiver,
                 (state.activityIn || state.activityOut) ? View.VISIBLE : View.GONE);
         mAirplaneSpacer.setVisibility(state.airplaneSpacerVisible ? View.VISIBLE : View.GONE);
         mSignalSpacer.setVisibility(state.signalSpacerVisible ? View.VISIBLE : View.GONE);
+
+        boolean needsLayout = state.activityIn != mState.activityIn
+                ||state.activityOut != mState.activityOut;
+
         if (mState.visible != state.visible) {
+            needsLayout |= true;
             setVisibility(state.visible ? View.VISIBLE : View.GONE);
         }
 
         mState = state;
+        return needsLayout;
     }
 
     private void initViewState() {
