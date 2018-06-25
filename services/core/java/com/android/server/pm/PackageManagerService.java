@@ -169,6 +169,7 @@ import android.content.pm.PackageList;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageManagerInternal.CheckPermissionDelegate;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ActivityIntentInfo;
@@ -289,6 +290,8 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.TriFunction;
 import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleController;
 import com.android.server.EventLogTags;
@@ -363,6 +366,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 import dalvik.system.CloseGuard;
@@ -1030,6 +1034,9 @@ public class PackageManagerService extends IPackageManager.Stub
         void startVerifications(int userId);
         void receiveVerificationResponse(int verificationId);
     }
+
+    @GuardedBy("mPackages")
+    private CheckPermissionDelegate mCheckPermissionDelegate;
 
     private class IntentVerifierProxy implements IntentFilterVerifier<ActivityIntentInfo> {
         private Context mContext;
@@ -5260,11 +5267,35 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public int checkPermission(String permName, String pkgName, int userId) {
+        final CheckPermissionDelegate checkPermissionDelegate;
+        synchronized (mPackages) {
+            if (mCheckPermissionDelegate == null)  {
+                return checkPermissionImpl(permName, pkgName, userId);
+            }
+            checkPermissionDelegate = mCheckPermissionDelegate;
+        }
+        return checkPermissionDelegate.checkPermission(permName, pkgName, userId,
+                PackageManagerService.this::checkPermissionImpl);
+    }
+
+    private int checkPermissionImpl(String permName, String pkgName, int userId) {
         return mPermissionManager.checkPermission(permName, pkgName, getCallingUid(), userId);
     }
 
     @Override
     public int checkUidPermission(String permName, int uid) {
+        final CheckPermissionDelegate checkPermissionDelegate;
+        synchronized (mPackages) {
+            if (mCheckPermissionDelegate == null)  {
+                return checkUidPermissionImpl(permName, uid);
+            }
+            checkPermissionDelegate = mCheckPermissionDelegate;
+        }
+        return checkPermissionDelegate.checkUidPermission(permName, uid,
+                PackageManagerService.this::checkUidPermissionImpl);
+    }
+
+    private int checkUidPermissionImpl(String permName, int uid) {
         synchronized (mPackages) {
             final String[] packageNames = getPackagesForUid(uid);
             final PackageParser.Package pkg = (packageNames != null && packageNames.length > 0)
@@ -9147,6 +9178,16 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             notifyPackageUseLocked(packageName, reason);
         }
+    }
+
+    @GuardedBy("mPackages")
+    public CheckPermissionDelegate getCheckPermissionDelegateLocked() {
+        return mCheckPermissionDelegate;
+    }
+
+    @GuardedBy("mPackages")
+    public void setCheckPermissionDelegateLocked(CheckPermissionDelegate delegate) {
+        mCheckPermissionDelegate = delegate;
     }
 
     @GuardedBy("mPackages")
@@ -24148,6 +24189,20 @@ public class PackageManagerService extends IPackageManager.Stub
         public void notifyPackageUse(String packageName, int reason) {
             synchronized (mPackages) {
                 PackageManagerService.this.notifyPackageUseLocked(packageName, reason);
+            }
+        }
+
+        @Override
+        public CheckPermissionDelegate getCheckPermissionDelegate() {
+            synchronized (mPackages) {
+                return PackageManagerService.this.getCheckPermissionDelegateLocked();
+            }
+        }
+
+        @Override
+        public void setCheckPermissionDelegate(CheckPermissionDelegate delegate) {
+            synchronized (mPackages) {
+                PackageManagerService.this.setCheckPermissionDelegateLocked(delegate);
             }
         }
     }
