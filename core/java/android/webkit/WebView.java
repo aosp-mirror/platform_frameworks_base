@@ -143,7 +143,7 @@ import java.util.Map;
  *       This class is called when something that might impact a
  *       browser UI happens, for instance, progress updates and
  *       JavaScript alerts are sent here (see <a
- * href="{@docRoot}guide/developing/debug-tasks.html#DebuggingWebPages">Debugging Tasks</a>).
+ * href="{@docRoot}guide/webapps/debugging.html">Debugging Web Apps</a>).
  *   </li>
  *   <li>Creating and setting a {@link android.webkit.WebViewClient} subclass.
  *       It will be called when things happen that impact the
