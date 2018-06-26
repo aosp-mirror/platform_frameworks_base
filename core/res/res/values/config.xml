@@ -501,7 +501,7 @@
 
          When true, overrides the config_tether_upstream_types setting above.
     -->
-    <bool translatable="false" name="config_tether_upstream_automatic">false</bool>
+    <bool translatable="false" name="config_tether_upstream_automatic">true</bool>
 
     <!-- If the DUN connection for this CDMA device supports more than just DUN -->
     <!-- traffic you should list them here. -->
