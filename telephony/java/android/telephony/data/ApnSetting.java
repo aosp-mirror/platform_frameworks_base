@@ -70,7 +70,12 @@ public class ApnSetting implements Parcelable {
     private static final String UNSPECIFIED_STRING = "";
 
     /**
-     * All APN types.
+     * APN type for none. Should only be used for initialization.
+     * @hide
+     */
+    public static final int TYPE_NONE = ApnTypes.NONE;
+    /**
+     * APN type for all APNs.
      * @hide
      */
     public static final int TYPE_ALL = ApnTypes.ALL;
