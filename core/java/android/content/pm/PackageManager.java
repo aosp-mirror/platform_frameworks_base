@@ -179,6 +179,7 @@ public abstract class PackageManager {
             MATCH_DEFAULT_ONLY,
             MATCH_DISABLED_COMPONENTS,
             MATCH_DISABLED_UNTIL_USED_COMPONENTS,
+            MATCH_DIRECT_BOOT_AUTO,
             MATCH_DIRECT_BOOT_AWARE,
             MATCH_DIRECT_BOOT_UNAWARE,
             MATCH_SYSTEM_ONLY,
@@ -202,6 +203,7 @@ public abstract class PackageManager {
             MATCH_DISABLED_COMPONENTS,
             MATCH_DISABLED_UNTIL_USED_COMPONENTS,
             MATCH_DEFAULT_ONLY,
+            MATCH_DIRECT_BOOT_AUTO,
             MATCH_DIRECT_BOOT_AWARE,
             MATCH_DIRECT_BOOT_UNAWARE,
             MATCH_SYSTEM_ONLY,
@@ -506,22 +508,29 @@ public abstract class PackageManager {
     public static final int GET_SIGNING_CERTIFICATES = 0x08000000;
 
     /**
-     * Internal flag used to indicate that a system component has done their
-     * homework and verified that they correctly handle packages and components
-     * that come and go over time. In particular:
+     * Querying flag: automatically match components based on their Direct Boot
+     * awareness and the current user state.
+     * <p>
+     * Since the default behavior is to automatically apply the current user
+     * state, this is effectively a sentinel value that doesn't change the
+     * output of any queries based on its presence or absence.
+     * <p>
+     * Instead, this value can be useful in conjunction with
+     * {@link android.os.StrictMode.VmPolicy.Builder#detectImplicitDirectBoot()}
+     * to detect when a caller is relying on implicit automatic matching,
+     * instead of confirming the explicit behavior they want, using a
+     * combination of these flags:
      * <ul>
-     * <li>Apps installed on external storage, which will appear to be
-     * uninstalled while the the device is ejected.
-     * <li>Apps with encryption unaware components, which will appear to not
-     * exist while the device is locked.
+     * <li>{@link #MATCH_DIRECT_BOOT_AWARE}
+     * <li>{@link #MATCH_DIRECT_BOOT_UNAWARE}
+     * <li>{@link #MATCH_DIRECT_BOOT_AUTO}
      * </ul>
-     *
-     * @see #MATCH_UNINSTALLED_PACKAGES
-     * @see #MATCH_DIRECT_BOOT_AWARE
-     * @see #MATCH_DIRECT_BOOT_UNAWARE
-     * @hide
      */
-    public static final int MATCH_DEBUG_TRIAGED_MISSING = 0x10000000;
+    public static final int MATCH_DIRECT_BOOT_AUTO = 0x10000000;
+
+    /** @hide */
+    @Deprecated
+    public static final int MATCH_DEBUG_TRIAGED_MISSING = MATCH_DIRECT_BOOT_AUTO;
 
     /**
      * Internal flag used to indicate that a package is a hidden system app.
