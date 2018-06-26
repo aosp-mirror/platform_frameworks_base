@@ -26,7 +26,6 @@ java_library_static {
         "android.hardware.light-V2.0-java",
         "android.hardware.power-V1.0-java",
         "android.hardware.tv.cec-V1.0-java",
-        "android.hidl.manager-V1.0-java",
     ],
 
     static_libs: [
@@ -43,6 +42,7 @@ java_library_static {
         "android.hardware.vibrator-V1.0-java",
         "android.hardware.configstore-V1.0-java",
         "android.hardware.contexthub-V1.0-java",
+        "android.hidl.manager-V1.0-java",
     ],
 }
 
