@@ -104,18 +104,13 @@ public class AccessPointTest {
     }
 
     @Test
-    public void testSsidIsTelephoneSpan() {
+    public void testSsidIsSpannableString_returnFalse() {
         final Bundle bundle = new Bundle();
         bundle.putString("key_ssid", TEST_SSID);
         final AccessPoint ap = new AccessPoint(InstrumentationRegistry.getTargetContext(), bundle);
         final CharSequence ssid = ap.getSsid();
 
-        assertThat(ssid instanceof SpannableString).isTrue();
-
-        TtsSpan[] spans = ((SpannableString) ssid).getSpans(0, TEST_SSID.length(), TtsSpan.class);
-
-        assertThat(spans.length).isEqualTo(1);
-        assertThat(spans[0].getType()).isEqualTo(TtsSpan.TYPE_TELEPHONE);
+        assertThat(ssid instanceof SpannableString).isFalse();
     }
 
     @Test
