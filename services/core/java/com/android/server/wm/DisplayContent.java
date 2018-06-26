@@ -3427,48 +3427,51 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
          * @return The proper position for the stack.
          */
         private int findPositionForStack(int requestedPosition, TaskStack stack, boolean adding) {
-            final int topChildPosition = mChildren.size() - 1;
-            boolean toTop = requestedPosition == POSITION_TOP;
-            toTop |= adding ? requestedPosition >= topChildPosition + 1
-                    : requestedPosition >= topChildPosition;
-
             if (stack.inPinnedWindowingMode()) {
-                // Stack in pinned windowing mode is z-ordered on-top of all other stacks so okay to
-                // just return the candidate position.
-                return requestedPosition;
+                return POSITION_TOP;
             }
 
-            // We might call mChildren.get() with targetPosition below, but targetPosition might be
-            // POSITION_TOP (INTEGER_MAX). We need to adjust the value to the actual index in the
-            // array.
-            int targetPosition = toTop ? topChildPosition : requestedPosition;
-            // Note that the index we should return varies depending on the value of adding.
-            // When we're adding a new stack the index is the current target position.
-            // When we're positioning an existing stack the index is the position below the target
-            // stack, because WindowContainer#positionAt() first removes element and then adds
-            // it to specified place.
-            if (toTop && adding) {
+            final int topChildPosition = mChildren.size() - 1;
+            int belowAlwaysOnTopPosition = POSITION_BOTTOM;
+            for (int i = topChildPosition; i >= 0; --i) {
+                if (getStacks().get(i) != stack && !getStacks().get(i).isAlwaysOnTop()) {
+                    belowAlwaysOnTopPosition = i;
+                    break;
+                }
+            }
+
+            // The max possible position we can insert the stack at.
+            int maxPosition = POSITION_TOP;
+            // The min possible position we can insert the stack at.
+            int minPosition = POSITION_BOTTOM;
+
+            if (stack.isAlwaysOnTop()) {
+                if (hasPinnedStack()) {
+                    // Always-on-top stacks go below the pinned stack.
+                    maxPosition = getStacks().indexOf(mPinnedStack) - 1;
+                }
+                // Always-on-top stacks need to be above all other stacks.
+                minPosition = belowAlwaysOnTopPosition !=
+                        POSITION_BOTTOM ? belowAlwaysOnTopPosition : topChildPosition;
+            } else {
+                // Other stacks need to be below the always-on-top stacks.
+                maxPosition = belowAlwaysOnTopPosition !=
+                        POSITION_BOTTOM ? belowAlwaysOnTopPosition : topChildPosition;
+            }
+
+            int targetPosition = requestedPosition;
+            targetPosition = Math.min(targetPosition, maxPosition);
+            targetPosition = Math.max(targetPosition, minPosition);
+
+            int prevPosition = getStacks().indexOf(stack);
+            // The positions we calculated above (maxPosition, minPosition) do not take into
+            // consideration the following edge cases.
+            // 1) We need to adjust the position depending on the value "adding".
+            // 2) When we are moving a stack to another position, we also need to adjust the
+            //    position depending on whether the stack is moving to a higher or lower position.
+            if ((targetPosition != requestedPosition) &&
+                    (adding || targetPosition < prevPosition)) {
                 targetPosition++;
-            }
-
-            // Note we might have multiple always on top windows.
-            while (targetPosition >= 0) {
-                int adjustedTargetStackId = adding ? targetPosition - 1 : targetPosition;
-                if (adjustedTargetStackId < 0 || adjustedTargetStackId > topChildPosition) {
-                    break;
-                }
-                TaskStack targetStack = mChildren.get(adjustedTargetStackId);
-                if (!targetStack.isAlwaysOnTop()) {
-                    // We reached a stack that isn't always-on-top.
-                    break;
-                }
-                if (stack.isAlwaysOnTop() && !targetStack.inPinnedWindowingMode()) {
-                    // Always on-top non-pinned windowing mode stacks can go anywhere below pinned
-                    // stack.
-                    break;
-                }
-                // We go one level down, looking for the place on which the new stack can be put.
-                targetPosition--;
             }
 
             return targetPosition;
