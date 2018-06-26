@@ -223,6 +223,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mClosingWithAlphaFadeOut;
     private boolean mHeadsUpAnimatingAway;
     private boolean mLaunchingAffordance;
+    private boolean mAffordanceHasPreview;
     private FalsingManager mFalsingManager;
     private String mLastCameraLaunchSource = KeyguardBottomAreaView.CAMERA_LAUNCH_SOURCE_AFFORDANCE;
 
@@ -2571,6 +2572,7 @@ public class NotificationPanelView extends PanelView implements
         } else {
             animate = false;
         }
+        mAffordanceHasPreview = mKeyguardBottomArea.getRightPreview() != null;
         mAffordanceHelper.launchAffordance(animate, getLayoutDirection() == LAYOUT_DIRECTION_RTL);
     }
 
@@ -2613,6 +2615,13 @@ public class NotificationPanelView extends PanelView implements
         getLeftIcon().setLaunchingAffordance(launchingAffordance);
         getRightIcon().setLaunchingAffordance(launchingAffordance);
         getCenterIcon().setLaunchingAffordance(launchingAffordance);
+    }
+
+    /**
+     * Return true when a bottom affordance is launching an occluded activity with a splash screen.
+     */
+    public boolean isLaunchingAffordanceWithPreview() {
+        return mLaunchingAffordance && mAffordanceHasPreview;
     }
 
     /**
