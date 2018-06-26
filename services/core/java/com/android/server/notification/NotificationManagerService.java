@@ -3125,14 +3125,19 @@ public class NotificationManagerService extends SystemService {
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpAndUsageStatsPermission(getContext(), TAG, pw)) return;
             final DumpFilter filter = DumpFilter.parseFromArguments(args);
-            if (filter.stats) {
-                dumpJson(pw, filter);
-            } else if (filter.proto) {
-                dumpProto(fd, filter);
-            } else if (filter.criticalPriority) {
-                dumpNotificationRecords(pw, filter);
-            } else {
-                dumpImpl(pw, filter);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (filter.stats) {
+                    dumpJson(pw, filter);
+                } else if (filter.proto) {
+                    dumpProto(fd, filter);
+                } else if (filter.criticalPriority) {
+                    dumpNotificationRecords(pw, filter);
+                } else {
+                    dumpImpl(pw, filter);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
 
