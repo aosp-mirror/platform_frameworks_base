@@ -82,7 +82,6 @@ static status_t start_log_reader_thread(const sp<StatsService>& service) {
     if (err != NO_ERROR) {
         return err;
     }
-    // TODO: Do we need to tweak thread priority?
     err = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     if (err != NO_ERROR) {
         pthread_attr_destroy(&attr);

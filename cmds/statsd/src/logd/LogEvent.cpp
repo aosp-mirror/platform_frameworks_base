@@ -273,7 +273,7 @@ void LogEvent::init(android_log_context context) {
 }
 
 int64_t LogEvent::GetLong(size_t key, status_t* err) const {
-    // TODO: encapsulate the magical operations all in Field struct as a static function.
+    // TODO(b/110561208): encapsulate the magical operations in Field struct as static functions
     int field = getSimpleField(key);
     for (const auto& value : mValues) {
         if (value.mField.getField() == field) {

@@ -60,8 +60,6 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
     metric.mutable_value_field()->add_child()->set_field(2);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    // TODO: pending refactor of StatsPullerManager
-    // For now we still need this so that it doesn't do real pulling.
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());

@@ -40,7 +40,6 @@ struct CountBucket {
 
 class CountMetricProducer : public MetricProducer {
 public:
-    // TODO: Pass in the start time from MetricsManager, it should be consistent for all metrics.
     CountMetricProducer(const ConfigKey& key, const CountMetric& countMetric,
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
                         const int64_t startTimeNs);
@@ -80,7 +79,6 @@ private:
 
     void flushCurrentBucketLocked(const int64_t& eventTimeNs) override;
 
-    // TODO: Add a lock to mPastBuckets.
     std::unordered_map<MetricDimensionKey, std::vector<CountBucket>> mPastBuckets;
 
     // The current bucket (may be a partial bucket).

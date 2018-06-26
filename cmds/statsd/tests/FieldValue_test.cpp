@@ -312,7 +312,8 @@ TEST(AtomMatcherTest, TestSubscriberDimensionWrite) {
     dim.addValue(FieldValue(field4, value4));
 
     SubscriberReporter::getStatsDimensionsValue(dim);
-    // TODO: can't test anything here because SubscriberReport class doesn't have any read api.
+    // TODO(b/110562792): can't test anything here because StatsDimensionsValue class doesn't
+    // have any read api.
 }
 
 TEST(AtomMatcherTest, TestWriteDimensionToProto) {

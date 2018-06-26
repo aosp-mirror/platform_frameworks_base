@@ -39,8 +39,6 @@ using android::os::statsd::Predicate;
 
 #ifdef __ANDROID__
 
-// TODO: ADD MORE TEST CASES.
-
 const ConfigKey kConfigKey(0, 12345);
 
 const long timeBaseSec = 1000;
