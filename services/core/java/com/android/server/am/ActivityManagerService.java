@@ -392,11 +392,13 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -475,6 +477,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES;
 
     static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
+
+    private static final String ANR_TRACE_DIR = "/data/anr";
 
     // Maximum number of receivers an app can register.
     private static final int MAX_RECEIVERS_ALLOWED_PER_APP = 1000;
@@ -5022,7 +5026,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        final File tracesDir = new File("/data/anr");
+        final File tracesDir = new File(ANR_TRACE_DIR);
         // Each set of ANR traces is written to a separate file and dumpstate will process
         // all such files and add them to a captured bug report if they're recent enough.
         maybePruneOldTraces(tracesDir);
@@ -12785,6 +12789,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (this) {
                     dumpLastANRLocked(pw);
                 }
+            } else if ("lastanr-traces".equals(cmd)) {
+                synchronized (this) {
+                    dumpLastANRTracesLocked(pw);
+                }
             } else if ("starter".equals(cmd)) {
                 synchronized (this) {
                     dumpActivityStarterLocked(pw, dumpPackage);
@@ -13131,6 +13139,35 @@ public class ActivityManagerService extends IActivityManager.Stub
             pw.println("  <no ANR has occurred since boot>");
         } else {
             pw.println(mLastANRState);
+        }
+    }
+
+    private void dumpLastANRTracesLocked(PrintWriter pw) {
+        pw.println("ACTIVITY MANAGER LAST ANR TRACES (dumpsys activity lastanr-traces)");
+
+        final File[] files = new File(ANR_TRACE_DIR).listFiles();
+        if (ArrayUtils.isEmpty(files)) {
+            return;
+        }
+        // Find the latest file.
+        File latest = null;
+        for (File f : files) {
+            if (latest == null || latest.getName().compareTo(f.getName()) < 0) {
+                latest = f;
+            }
+        }
+        pw.print("File: ");
+        pw.print(latest.getName());
+        pw.println();
+        try (BufferedReader in = new BufferedReader(new FileReader(latest))) {
+            String line;
+            while ((line = in.readLine()) != null) {
+                pw.println(line);
+            }
+        } catch (IOException e) {
+            pw.print("Unable to read: ");
+            pw.print(e);
+            pw.println();
         }
     }
 
