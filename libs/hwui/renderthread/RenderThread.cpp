@@ -236,10 +236,8 @@ void RenderThread::dumpGraphicsMemory(int fd) {
             break;
     }
 
-    FILE *file = fdopen(fd, "a");
-    fprintf(file, "\n%s\n", cachesOutput.string());
-    fprintf(file, "\nPipeline=%s\n", pipeline.string());
-    fflush(file);
+    dprintf(fd, "\n%s\n", cachesOutput.string());
+    dprintf(fd, "\nPipeline=%s\n", pipeline.string());
 }
 
 Readback& RenderThread::readback() {
