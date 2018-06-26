@@ -247,6 +247,7 @@ import java.util.function.Supplier;
  * @attr ref android.R.styleable#TextView_textColorHint
  * @attr ref android.R.styleable#TextView_textAppearance
  * @attr ref android.R.styleable#TextView_textColorLink
+ * @attr ref android.R.styleable#TextView_textFontWeight
  * @attr ref android.R.styleable#TextView_textSize
  * @attr ref android.R.styleable#TextView_textScaleX
  * @attr ref android.R.styleable#TextView_fontFamily
