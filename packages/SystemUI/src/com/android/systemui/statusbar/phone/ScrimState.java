@@ -144,6 +144,7 @@ public enum ScrimState {
             mCurrentBehindAlpha = 0;
             mCurrentInFrontAlpha = 0;
             mAnimationDuration = StatusBar.FADE_KEYGUARD_DURATION;
+            mAnimateChange = !mLaunchingAffordanceWithPreview;
 
             if (previousState == ScrimState.AOD || previousState == ScrimState.PULSING) {
                 // Fade from black to transparent when coming directly from AOD
@@ -177,6 +178,7 @@ public enum ScrimState {
     boolean mWallpaperSupportsAmbientMode;
     int mIndex;
     boolean mHasBackdrop;
+    boolean mLaunchingAffordanceWithPreview;
 
     ScrimState(int index) {
         mIndex = index;
@@ -247,6 +249,10 @@ public enum ScrimState {
 
     public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {
         mWallpaperSupportsAmbientMode = wallpaperSupportsAmbientMode;
+    }
+
+    public void setLaunchingAffordanceWithPreview(boolean launchingAffordanceWithPreview) {
+        mLaunchingAffordanceWithPreview = launchingAffordanceWithPreview;
     }
 
     public boolean isLowPowerState() {
