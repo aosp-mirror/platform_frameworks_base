@@ -142,6 +142,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             mSecurityViewFlipper.addView(v);
             updateSecurityView(v);
             view = (KeyguardSecurityView)v;
+            view.reset();
         }
 
         return view;
