@@ -1839,7 +1839,9 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         final int compatScreenHeightDp = (int) (mTmpNonDecorBounds.height() / density);
         // We're only overriding LONG, SIZE and COMPAT parts of screenLayout, so we start override
         // calculation with partial default.
-        final int sl = Configuration.SCREENLAYOUT_LONG_YES | Configuration.SCREENLAYOUT_SIZE_XLARGE;
+        // Reducing the screen layout starting from its parent config.
+        final int sl = parentConfig.screenLayout &
+                (Configuration.SCREENLAYOUT_LONG_MASK | Configuration.SCREENLAYOUT_SIZE_MASK);
         final int longSize = Math.max(compatScreenHeightDp, compatScreenWidthDp);
         final int shortSize = Math.min(compatScreenHeightDp, compatScreenWidthDp);
         config.screenLayout = Configuration.reduceScreenLayout(sl, longSize, shortSize);
