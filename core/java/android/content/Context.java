@@ -3059,6 +3059,7 @@ public abstract class Context {
             CROSS_PROFILE_APPS_SERVICE,
             //@hide: SYSTEM_UPDATE_SERVICE,
             //@hide: TIME_DETECTOR_SERVICE,
+            //@hide: TIME_ZONE_DETECTOR_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -4218,6 +4219,15 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     public static final String TIME_DETECTOR_SERVICE = "time_detector";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.app.timezonedetector.ITimeZoneDetectorService}.
+     * @hide
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String TIME_ZONE_DETECTOR_SERVICE = "time_zone_detector";
 
     /**
      * Determine whether the given permission is allowed for a particular
