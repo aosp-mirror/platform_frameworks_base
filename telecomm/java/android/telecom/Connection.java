@@ -45,6 +45,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.channels.Channels;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -861,8 +862,11 @@ public abstract class Connection extends Conferenceable {
         public RttTextStream(ParcelFileDescriptor toInCall, ParcelFileDescriptor fromInCall) {
             mFdFromInCall = fromInCall;
             mFdToInCall = toInCall;
+
+            // Wrap the FileInputStream in a Channel so that it's interruptible.
             mPipeFromInCall = new InputStreamReader(
-                    new FileInputStream(fromInCall.getFileDescriptor()));
+                    Channels.newInputStream(Channels.newChannel(
+                            new FileInputStream(fromInCall.getFileDescriptor()))));
             mPipeToInCall = new OutputStreamWriter(
                     new FileOutputStream(toInCall.getFileDescriptor()));
         }
