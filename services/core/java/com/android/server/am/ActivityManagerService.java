@@ -12042,13 +12042,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public void handleApplicationStrictModeViolation(
             IBinder app,
-            int violationMask,
+            int penaltyMask,
             StrictMode.ViolationInfo info) {
         // We're okay if the ProcessRecord is missing; it probably means that
         // we're reporting a violation from the system process itself.
         final ProcessRecord r = findAppProcess(app, "StrictMode");
 
-        if ((violationMask & StrictMode.PENALTY_DROPBOX) != 0) {
+        if ((penaltyMask & StrictMode.PENALTY_DROPBOX) != 0) {
             Integer stackFingerprint = info.hashCode();
             boolean logIt = true;
             synchronized (mAlreadyLoggedViolatedStacks) {
@@ -12072,7 +12072,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if ((violationMask & StrictMode.PENALTY_DIALOG) != 0) {
+        if ((penaltyMask & StrictMode.PENALTY_DIALOG) != 0) {
             AppErrorResult result = new AppErrorResult();
             synchronized (this) {
                 final long origId = Binder.clearCallingIdentity();
@@ -12082,7 +12082,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 HashMap<String, Object> data = new HashMap<String, Object>();
                 data.put("result", result);
                 data.put("app", r);
-                data.put("violationMask", violationMask);
                 data.put("info", info);
                 msg.obj = data;
                 mUiHandler.sendMessage(msg);
