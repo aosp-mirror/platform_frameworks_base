@@ -327,6 +327,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.SystemUserHomeActivity;
+import com.android.internal.app.procstats.AssociationState;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -9316,6 +9317,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             ContentProviderConnection conn = new ContentProviderConnection(cpr, r);
+            conn.startAssociationIfNeeded();
             if (stable) {
                 conn.stableCount = 1;
                 conn.numStableIncs = 1;
@@ -9326,7 +9328,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             cpr.connections.add(conn);
             r.conProviders.add(conn);
             startAssociationLocked(r.uid, r.processName, r.curProcState,
-                    cpr.uid, cpr.name, cpr.info.processName);
+                    cpr.uid, cpr.appInfo.longVersionCode, cpr.name, cpr.info.processName);
             return conn;
         }
         cpr.addExternalProcessHandleLocked(externalProcessToken);
@@ -9348,6 +9350,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 conn.unstableCount--;
             }
             if (conn.stableCount == 0 && conn.unstableCount == 0) {
+                conn.stopAssociation();
                 cpr.connections.remove(conn);
                 conn.client.conProviders.remove(conn);
                 if (conn.client.setProcState < PROCESS_STATE_LAST_ACTIVITY) {
@@ -9358,7 +9361,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         cpr.proc.lastProviderTime = SystemClock.uptimeMillis();
                     }
                 }
-                stopAssociationLocked(conn.client.uid, conn.client.processName, cpr.uid, cpr.name);
+                stopAssociationLocked(conn.client.uid, conn.client.processName, cpr.uid,
+                        cpr.appInfo.longVersionCode, cpr.name, cpr.info.processName);
                 return true;
             }
             return false;
@@ -9988,7 +9992,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     synchronized (dst) {
                         dst.provider = src.provider;
-                        dst.proc = r;
+                        dst.setProcess(r);
                         dst.notifyAll();
                     }
                     updateOomAdjLocked(r, true);
@@ -16740,7 +16744,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // clean up this connection, we'll just remove it.
                 cpr.connections.remove(i);
                 if (conn.client.conProviders.remove(conn)) {
-                    stopAssociationLocked(capp.uid, capp.processName, cpr.uid, cpr.name);
+                    stopAssociationLocked(capp.uid, capp.processName, cpr.uid,
+                            cpr.appInfo.longVersionCode, cpr.name, cpr.info.processName);
                 }
             }
         }
@@ -16816,7 +16821,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             cpr.provider = null;
-            cpr.proc = null;
+            cpr.setProcess(null);
         }
         app.pubProviders.clear();
 
@@ -16831,7 +16836,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ContentProviderConnection conn = app.conProviders.get(i);
                 conn.provider.connections.remove(conn);
                 stopAssociationLocked(app.uid, app.processName, conn.provider.uid,
-                        conn.provider.name);
+                        conn.provider.appInfo.longVersionCode, conn.provider.name,
+                        conn.provider.info.processName);
             }
             app.conProviders.clear();
         }
@@ -19094,7 +19100,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     Association startAssociationLocked(int sourceUid, String sourceProcess, int sourceState,
-            int targetUid, ComponentName targetComponent, String targetProcess) {
+            int targetUid, long targetVersionCode, ComponentName targetComponent,
+            String targetProcess) {
         if (!mTrackingAssociations) {
             return null;
         }
@@ -19130,7 +19137,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void stopAssociationLocked(int sourceUid, String sourceProcess, int targetUid,
-            ComponentName targetComponent) {
+            long targetVersionCode, ComponentName targetComponent, String targetProcess) {
         if (!mTrackingAssociations) {
             return;
         }

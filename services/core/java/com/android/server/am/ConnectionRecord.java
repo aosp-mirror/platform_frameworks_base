@@ -16,11 +16,17 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+
 import android.app.IServiceConnection;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
+
+import com.android.internal.app.procstats.AssociationState;
+import com.android.internal.app.procstats.ProcessStats;
 
 import java.io.PrintWriter;
 
@@ -34,6 +40,9 @@ final class ConnectionRecord {
     final int flags;                // Binding options.
     final int clientLabel;          // String resource labeling this client.
     final PendingIntent clientIntent; // How to launch the client.
+    final int clientUid;            // The identity of this connection's client
+    final String clientProcessName; // The source process of this connection's client
+    public AssociationState.SourceState association; // Association tracking
     String stringName;              // Caching of toString.
     boolean serviceDead;            // Well is it?
 
@@ -83,14 +92,43 @@ final class ConnectionRecord {
     }
 
     ConnectionRecord(AppBindRecord _binding, ActivityRecord _activity,
-               IServiceConnection _conn, int _flags,
-               int _clientLabel, PendingIntent _clientIntent) {
+            IServiceConnection _conn, int _flags,
+            int _clientLabel, PendingIntent _clientIntent,
+            int _clientUid, String _clientProcessName) {
         binding = _binding;
         activity = _activity;
         conn = _conn;
         flags = _flags;
         clientLabel = _clientLabel;
         clientIntent = _clientIntent;
+        clientUid = _clientUid;
+        clientProcessName = _clientProcessName;
+    }
+
+    public void startAssociationIfNeeded() {
+        if (association == null) {
+            ProcessStats.ProcessStateHolder holder = binding.service.app != null
+                    ? binding.service.app.pkgList.get(binding.service.name.getPackageName()) : null;
+            if (holder == null) {
+                Slog.wtf(TAG_AM, "No package in referenced service "
+                        + binding.service.name.toShortString() + ": proc=" + binding.service.app);
+            } else if (holder.pkg == null) {
+                Slog.wtf(TAG_AM, "Inactive holder in referenced service "
+                        + binding.service.name.toShortString() + ": proc=" + binding.service.app);
+            } else {
+                association = holder.pkg.getAssociationStateLocked(binding.service.processName,
+                        binding.service.name.getClassName()).startSource(clientUid,
+                        clientProcessName);
+
+            }
+        }
+    }
+
+    public void stopAssociation() {
+        if (association != null) {
+            association.stop();
+            association = null;
+        }
     }
 
     public String toString() {
