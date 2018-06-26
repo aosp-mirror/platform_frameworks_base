@@ -116,4 +116,14 @@ public class TimestampedValueTest {
             parcel.recycle();
         }
     }
+
+    @Test
+    public void testReferenceTimeDifference() {
+        TimestampedValue<Long> value1 = new TimestampedValue<>(1000, 123L);
+        assertEquals(0, TimestampedValue.referenceTimeDifference(value1, value1));
+
+        TimestampedValue<Long> value2 = new TimestampedValue<>(1, 321L);
+        assertEquals(999, TimestampedValue.referenceTimeDifference(value1, value2));
+        assertEquals(-999, TimestampedValue.referenceTimeDifference(value2, value1));
+    }
 }
