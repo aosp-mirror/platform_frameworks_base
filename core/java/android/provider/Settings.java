@@ -6985,8 +6985,9 @@ public final class Settings {
         private static final Validator SELECTED_SPELL_CHECKER_VALIDATOR = COMPONENT_NAME_VALIDATOR;
 
         /**
-         * The {@link ComponentName} string of the selected subtype of the selected spell checker
-         * service which is one of the services managed by the text service manager.
+         * {@link android.view.textservice.SpellCheckerSubtype#hashCode()} of the selected subtype
+         * of the selected spell checker service which is one of the services managed by the text
+         * service manager.
          *
          * @hide
          */
@@ -6994,7 +6995,7 @@ public final class Settings {
                 "selected_spell_checker_subtype";
 
         private static final Validator SELECTED_SPELL_CHECKER_SUBTYPE_VALIDATOR =
-                COMPONENT_NAME_VALIDATOR;
+                ANY_INTEGER_VALIDATOR;
 
         /**
          * Whether spell checker is enabled or not.
@@ -9021,6 +9022,14 @@ public final class Settings {
          */
         public static final String LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST =
             "location_background_throttle_package_whitelist";
+
+        /**
+         * Maximum staleness allowed for last location when returned to clients with only foreground
+         * location permissions.
+         * @hide
+         */
+        public static final String LOCATION_LAST_LOCATION_MAX_AGE_MILLIS =
+                "location_last_location_max_age_millis";
 
         /**
         * Whether TV will switch to MHL port when a mobile device is plugged in.

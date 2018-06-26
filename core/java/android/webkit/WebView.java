@@ -41,7 +41,6 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.print.PrintDocumentAdapter;
-import android.security.KeyChain;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -143,7 +142,7 @@ import java.util.Map;
  *       This class is called when something that might impact a
  *       browser UI happens, for instance, progress updates and
  *       JavaScript alerts are sent here (see <a
- * href="{@docRoot}guide/developing/debug-tasks.html#DebuggingWebPages">Debugging Tasks</a>).
+ * href="{@docRoot}guide/webapps/debugging.html">Debugging Web Apps</a>).
  *   </li>
  *   <li>Creating and setting a {@link android.webkit.WebViewClient} subclass.
  *       It will be called when things happen that impact the
@@ -1671,9 +1670,8 @@ public class WebView extends AbsoluteLayout
     /**
      * Clears the client certificate preferences stored in response
      * to proceeding/cancelling client cert requests. Note that WebView
-     * automatically clears these preferences when it receives a
-     * {@link KeyChain#ACTION_STORAGE_CHANGED} intent. The preferences are
-     * shared by all the WebViews that are created by the embedder application.
+     * automatically clears these preferences when the system keychain is updated.
+     * The preferences are shared by all the WebViews that are created by the embedder application.
      *
      * @param onCleared  A runnable to be invoked when client certs are cleared.
      *                   The runnable will be called in UI thread.

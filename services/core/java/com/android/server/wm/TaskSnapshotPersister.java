@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 
 /**
  * Persists {@link TaskSnapshot}s to disk.
@@ -399,8 +400,8 @@ class TaskSnapshotPersister {
         @VisibleForTesting
         RemoveObsoleteFilesQueueItem(ArraySet<Integer> persistentTaskIds,
                 int[] runningUserIds) {
-            mPersistentTaskIds = persistentTaskIds;
-            mRunningUserIds = runningUserIds;
+            mPersistentTaskIds = new ArraySet<>(persistentTaskIds);
+            mRunningUserIds = Arrays.copyOf(runningUserIds, runningUserIds.length);
         }
 
         @Override

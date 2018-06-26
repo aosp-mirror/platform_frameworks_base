@@ -2783,7 +2783,8 @@ public class TelephonyManager {
     }
 
     /**
-     * Gets all the UICC slots.
+     * Gets all the UICC slots. The objects in the array can be null if the slot info is not
+     * available, which is possible between phone process starting and getting slot info from modem.
      *
      * @return UiccSlotInfo array.
      *

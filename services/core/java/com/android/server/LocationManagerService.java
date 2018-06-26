@@ -153,6 +153,10 @@ public class LocationManagerService extends ILocationManager.Stub {
     // default background throttling interval if not overriden in settings
     private static final long DEFAULT_BACKGROUND_THROTTLE_INTERVAL_MS = 30 * 60 * 1000;
 
+    // Default value for maximum age of last location returned to applications with foreground-only
+    // location permissions.
+    private static final long DEFAULT_LAST_LOCATION_MAX_AGE_MS = 20 * 60 * 1000;
+
     // Location Providers may sometimes deliver location updates
     // slightly faster that requested - provide grace period so
     // we don't unnecessarily filter events that are otherwise on
@@ -241,6 +245,9 @@ public class LocationManagerService extends ILocationManager.Stub {
     private int mCurrentUserId = UserHandle.USER_SYSTEM;
     private int[] mCurrentUserProfiles = new int[]{UserHandle.USER_SYSTEM};
 
+    // Maximum age of last location returned to clients with foreground-only location permissions.
+    private long mLastLocationMaxAgeMs;
+
     private GnssLocationProvider.GnssSystemInfoProvider mGnssSystemInfoProvider;
 
     private GnssLocationProvider.GnssMetricsProvider mGnssMetricsProvider;
@@ -308,7 +315,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                     }
                 }
             };
-            mAppOps.startWatchingMode(AppOpsManager.OP_COARSE_LOCATION, null, callback);
+            mAppOps.startWatchingMode(AppOpsManager.OP_COARSE_LOCATION, null,
+                    AppOpsManager.WATCH_FOREGROUND_CHANGES, callback);
 
             PackageManager.OnPermissionsChangedListener permissionListener
                     = new PackageManager.OnPermissionsChangedListener() {
@@ -341,6 +349,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             updateUserProfiles(mCurrentUserId);
 
             updateBackgroundThrottlingWhitelistLocked();
+            updateLastLocationMaxAgeLocked();
 
             // prepare providers
             loadProvidersLocked();
@@ -370,6 +379,18 @@ public class LocationManagerService extends ILocationManager.Stub {
                     }
                 }, UserHandle.USER_ALL);
         mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.LOCATION_LAST_LOCATION_MAX_AGE_MILLIS),
+                true,
+                new ContentObserver(mLocationHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        synchronized (mLock) {
+                            updateLastLocationMaxAgeLocked();
+                        }
+                    }
+                }
+        );
+        mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(
                         Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST),
                 true,
@@ -382,6 +403,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                         }
                     }
                 }, UserHandle.USER_ALL);
+
         mPackageMonitor.register(mContext, mLocationHandler.getLooper(), true);
 
         // listen for user change
@@ -841,6 +863,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             for (String p : mUpdateRecords.keySet()) {
                 s.append(" ").append(mUpdateRecords.get(p).toString());
             }
+            s.append(" monitoring location: ").append(mOpMonitoring);
             s.append("]");
             return s.toString();
         }
@@ -913,7 +936,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
             } else {
                 if (!allowMonitoring
-                        || mAppOps.checkOpNoThrow(op, mIdentity.mUid, mIdentity.mPackageName)
+                        || mAppOps.noteOpNoThrow(op, mIdentity.mUid, mIdentity.mPackageName)
                         != AppOpsManager.MODE_ALLOWED) {
                     mAppOps.finishOp(op, mIdentity.mUid, mIdentity.mPackageName);
                     return false;
@@ -1541,7 +1564,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     boolean checkLocationAccess(int pid, int uid, String packageName, int allowedResolutionLevel) {
         int op = resolutionLevelToOp(allowedResolutionLevel);
         if (op >= 0) {
-            if (mAppOps.checkOp(op, uid, packageName) != AppOpsManager.MODE_ALLOWED) {
+            if (mAppOps.noteOp(op, uid, packageName) != AppOpsManager.MODE_ALLOWED) {
                 return false;
             }
         }
@@ -1855,6 +1878,14 @@ public class LocationManagerService extends ILocationManager.Stub {
                 SystemConfig.getInstance().getAllowUnthrottledLocation());
         mBackgroundThrottlePackageWhitelist.addAll(
                 Arrays.asList(setting.split(",")));
+    }
+
+    private void updateLastLocationMaxAgeLocked() {
+        mLastLocationMaxAgeMs =
+                Settings.Global.getLong(
+                        mContext.getContentResolver(),
+                        Settings.Global.LOCATION_LAST_LOCATION_MAX_AGE_MILLIS,
+                        DEFAULT_LAST_LOCATION_MAX_AGE_MS);
     }
 
     private boolean isThrottlingExemptLocked(Identity identity) {
@@ -2262,6 +2293,17 @@ public class LocationManagerService extends ILocationManager.Stub {
                 if (location == null) {
                     return null;
                 }
+
+                // Don't return stale location to apps with foreground-only location permission.
+                String op = getResolutionPermission(allowedResolutionLevel);
+                long locationAgeMs = SystemClock.elapsedRealtime() -
+                        location.getElapsedRealtimeNanos() / NANOS_PER_MILLI;
+                if ((locationAgeMs > mLastLocationMaxAgeMs)
+                        && (mAppOps.unsafeCheckOp(op, uid, packageName)
+                            == AppOpsManager.MODE_FOREGROUND)) {
+                    return null;
+                }
+
                 if (allowedResolutionLevel < RESOLUTION_LEVEL_FINE) {
                     Location noGPSLocation = location.getExtraLocation(
                             Location.EXTRA_NO_GPS_LOCATION);
