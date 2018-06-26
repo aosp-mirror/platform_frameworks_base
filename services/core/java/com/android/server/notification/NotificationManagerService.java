@@ -400,6 +400,7 @@ public class NotificationManagerService extends SystemService {
 
     private SnoozeHelper mSnoozeHelper;
     private GroupHelper mGroupHelper;
+    private int mAutoGroupAtCount;
     private boolean mIsTelevision;
 
     private MetricsLogger mMetricsLogger;
@@ -1565,7 +1566,9 @@ public class NotificationManagerService extends SystemService {
     }
 
     private GroupHelper getGroupHelper() {
-        return new GroupHelper(new GroupHelper.Callback() {
+        mAutoGroupAtCount =
+                getContext().getResources().getInteger(R.integer.config_autoGroupAtCount);
+        return new GroupHelper(mAutoGroupAtCount, new GroupHelper.Callback() {
             @Override
             public void addAutoGroup(String key) {
                 synchronized (mNotificationLock) {
