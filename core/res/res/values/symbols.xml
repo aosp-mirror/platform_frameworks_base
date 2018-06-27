@@ -2443,6 +2443,10 @@
   <java-symbol type="string" name="face_acquired_poor_gaze" />
   <java-symbol type="string" name="face_acquired_not_detected" />
   <java-symbol type="array" name="face_acquired_vendor" />
+  <java-symbol type="string" name="face_name_template" />
+
+  <!-- Face config -->
+  <java-symbol type="integer" name="config_face_MaxTemplatesPerUser" />
 
   <!-- From various Material changes -->
   <java-symbol type="attr" name="titleTextAppearance" />

@@ -34,6 +34,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricPromptReceiver;
+import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -403,7 +404,8 @@ public class FingerprintManager implements BiometricFingerprintConstants {
 
     /**
      * Per-user version, see {@link FingerprintManager#authenticate(CryptoObject,
-     * CancellationSignal, int, AuthenticationCallback, Handler)}
+     * CancellationSignal, int, AuthenticationCallback, Handler)}. This version does not
+     * display the BiometricPrompt.
      * @param userId the user ID that the fingerprint hardware will authenticate for.
      * @hide
      */
@@ -442,9 +444,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
     }
 
     /**
-     * Per-user version, see {@link FingerprintManager#authenticate(CryptoObject,
-     * CancellationSignal, Bundle, Executor, IBiometricPromptReceiver, AuthenticationCallback)}
-     * @param userId the user ID that the fingerprint hardware will authenticate for.
+     * Per-user version. This method invokes the BiometricPrompt.
      */
     private void authenticate(int userId,
             @Nullable android.hardware.biometrics.CryptoObject crypto,
@@ -657,7 +657,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
         if (mService != null) try {
             mRemovalCallback = callback;
             mRemovalFingerprint = fp;
-            mService.remove(mToken, fp.getFingerId(), fp.getGroupId(), userId, mServiceReceiver);
+            mService.remove(mToken, fp.getBiometricId(), fp.getGroupId(), userId, mServiceReceiver);
         } catch (RemoteException e) {
             Slog.w(TAG, "Remote exception in remove: ", e);
             if (callback != null) {
@@ -841,7 +841,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
             try {
                 final PowerManager powerManager = mContext.getSystemService(PowerManager.class);
                 mService.addLockoutResetCallback(
-                        new IFingerprintServiceLockoutResetCallback.Stub() {
+                        new IBiometricServiceLockoutResetCallback.Stub() {
 
                     @Override
                     public void onLockoutReset(long deviceId, IRemoteCallback serverCallback)
@@ -881,7 +881,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
 
         @Override
         public void handleMessage(android.os.Message msg) {
-            switch(msg.what) {
+            switch (msg.what) {
                 case MSG_ENROLL_RESULT:
                     sendEnrollResult((Fingerprint) msg.obj, msg.arg1 /* remaining */);
                     break;
@@ -908,44 +908,44 @@ public class FingerprintManager implements BiometricFingerprintConstants {
                     break;
             }
         }
-
-        private void sendRemovedResult(Fingerprint fingerprint, int remaining) {
-            if (mRemovalCallback == null) {
-                return;
-            }
-            if (fingerprint == null) {
-                Slog.e(TAG, "Received MSG_REMOVED, but fingerprint is null");
-                return;
-            }
-
-            int fingerId = fingerprint.getFingerId();
-            int reqFingerId = mRemovalFingerprint.getFingerId();
-            if (reqFingerId != 0 && fingerId != 0 && fingerId != reqFingerId) {
-                Slog.w(TAG, "Finger id didn't match: " + fingerId + " != " + reqFingerId);
-                return;
-            }
-            int groupId = fingerprint.getGroupId();
-            int reqGroupId = mRemovalFingerprint.getGroupId();
-            if (groupId != reqGroupId) {
-                Slog.w(TAG, "Group id didn't match: " + groupId + " != " + reqGroupId);
-                return;
-            }
-
-            mRemovalCallback.onRemovalSucceeded(fingerprint, remaining);
-        }
-
-        private void sendEnumeratedResult(long deviceId, int fingerId, int groupId) {
-            if (mEnumerateCallback != null) {
-                mEnumerateCallback.onEnumerate(new Fingerprint(null, groupId, fingerId, deviceId));
-            }
-        }
-
-        private void sendEnrollResult(Fingerprint fp, int remaining) {
-            if (mEnrollmentCallback != null) {
-                mEnrollmentCallback.onEnrollmentProgress(remaining);
-            }
-        }
     };
+
+    private void sendRemovedResult(Fingerprint fingerprint, int remaining) {
+        if (mRemovalCallback == null) {
+            return;
+        }
+        if (fingerprint == null) {
+            Slog.e(TAG, "Received MSG_REMOVED, but fingerprint is null");
+            return;
+        }
+
+        int fingerId = fingerprint.getBiometricId();
+        int reqFingerId = mRemovalFingerprint.getBiometricId();
+        if (reqFingerId != 0 && fingerId != 0 && fingerId != reqFingerId) {
+            Slog.w(TAG, "Finger id didn't match: " + fingerId + " != " + reqFingerId);
+            return;
+        }
+        int groupId = fingerprint.getGroupId();
+        int reqGroupId = mRemovalFingerprint.getGroupId();
+        if (groupId != reqGroupId) {
+            Slog.w(TAG, "Group id didn't match: " + groupId + " != " + reqGroupId);
+            return;
+        }
+
+        mRemovalCallback.onRemovalSucceeded(fingerprint, remaining);
+    }
+
+    private void sendEnumeratedResult(long deviceId, int fingerId, int groupId) {
+        if (mEnumerateCallback != null) {
+            mEnumerateCallback.onEnumerate(new Fingerprint(null, groupId, fingerId, deviceId));
+        }
+    }
+
+    private void sendEnrollResult(Fingerprint fp, int remaining) {
+        if (mEnrollmentCallback != null) {
+            mEnrollmentCallback.onEnrollmentProgress(remaining);
+        }
+    }
 
     private void sendAuthenticatedSucceeded(Fingerprint fp, int userId) {
         if (mAuthenticationCallback != null) {

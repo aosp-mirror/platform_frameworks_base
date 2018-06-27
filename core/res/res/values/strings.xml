@@ -1430,8 +1430,6 @@
     <string name="face_acquired_poor_gaze">Please look at the sensor.</string>
     <!-- Message shown during face acquisition when the user is not detected [CHAR LIMIT=50] -->
     <string name="face_acquired_not_detected">No face detected.</string>
-
-
     <!-- Message shown during face acquisition when the face is not kept steady infront of device [CHAR LIMIT=50] -->
     <string name="face_acquired_not_steady">Keep face steady infront of device.</string>
     <!-- Array containing custom messages shown during face acquisition from vendor.  Vendor is expected to add and translate these strings -->

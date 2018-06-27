@@ -17,12 +17,11 @@
 package com.android.server.biometrics.common;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
-
-import com.android.server.biometrics.fingerprint.FingerprintUtils;
 
 import java.util.Arrays;
 
@@ -32,38 +31,37 @@ import java.util.Arrays;
 public abstract class EnrollClient extends ClientMonitor {
     private static final long MS_PER_SEC = 1000;
     private static final int ENROLLMENT_TIMEOUT_MS = 60 * 1000; // 1 minute
-    private byte[] mCryptoToken;
+    private final byte[] mCryptoToken;
+    private final BiometricUtils mBiometricUtils;
 
     public EnrollClient(Context context, Metrics metrics, BiometricService.DaemonWrapper daemon,
             long halDeviceId, IBinder token, BiometricService.ServiceListener listener, int userId,
-            int groupId, byte[] cryptoToken, boolean restricted, String owner) {
+            int groupId, byte[] cryptoToken, boolean restricted, String owner,
+            BiometricUtils utils) {
         super(context, metrics, daemon, halDeviceId, token, listener, userId, groupId, restricted,
                 owner);
+        mBiometricUtils = utils;
         mCryptoToken = Arrays.copyOf(cryptoToken, cryptoToken.length);
     }
 
     @Override
-    public boolean onEnrollResult(int fingerId, int groupId, int remaining) {
-        if (groupId != getGroupId()) {
-            Slog.w(getLogTag(), "groupId != getGroupId(), groupId: " + groupId +
-                    " getGroupId():" + getGroupId());
-        }
+    public boolean onEnrollResult(BiometricAuthenticator.Identifier identifier,
+            int remaining) {
         if (remaining == 0) {
-            // TODO: handle other biometrics
-            FingerprintUtils.getInstance().addFingerprintForUser(getContext(), fingerId,
-                    getTargetUserId());
+            mBiometricUtils.addBiometricForUser(getContext(), getTargetUserId(), identifier);
         }
-        return sendEnrollResult(fingerId, groupId, remaining);
+        return sendEnrollResult(identifier, remaining);
     }
 
     /*
      * @return true if we're done.
      */
-    private boolean sendEnrollResult(int fpId, int groupId, int remaining) {
+    private boolean sendEnrollResult(BiometricAuthenticator.Identifier identifier,
+            int remaining) {
         vibrateSuccess();
         mMetricsLogger.action(mMetrics.actionBiometricEnroll());
         try {
-            getListener().onEnrollResult(getHalDeviceId(), fpId, groupId, remaining);
+            getListener().onEnrollResult(identifier, remaining);
             return remaining == 0;
         } catch (RemoteException e) {
             Slog.w(getLogTag(), "Failed to notify EnrollResult:", e);
@@ -79,7 +77,8 @@ public abstract class EnrollClient extends ClientMonitor {
             if (result != 0) {
                 Slog.w(getLogTag(), "startEnroll failed, result=" + result);
                 mMetricsLogger.histogram(mMetrics.tagEnrollStartError(), result);
-                onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
+                onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                        0 /* vendorCode */);
                 return result;
             }
         } catch (RemoteException e) {
@@ -105,26 +104,28 @@ public abstract class EnrollClient extends ClientMonitor {
             Slog.e(getLogTag(), "stopEnrollment failed", e);
         }
         if (initiatedByClient) {
-            onError(BiometricConstants.BIOMETRIC_ERROR_CANCELED, 0 /* vendorCode */);
+            onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_CANCELED,
+                    0 /* vendorCode */);
         }
         mAlreadyCancelled = true;
         return 0;
     }
 
     @Override
-    public boolean onRemoved(int fingerId, int groupId, int remaining) {
+    public boolean onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
         if (DEBUG) Slog.w(getLogTag(), "onRemoved() called for enroll!");
         return true; // Invalid for EnrollClient
     }
 
     @Override
-    public boolean onEnumerationResult(int fingerId, int groupId, int remaining) {
+    public boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier,
+            int remaining) {
         if (DEBUG) Slog.w(getLogTag(), "onEnumerationResult() called for enroll!");
         return true; // Invalid for EnrollClient
     }
 
     @Override
-    public boolean onAuthenticated(int fingerId, int groupId) {
+    public boolean onAuthenticated(int biometricId, int groupId) {
         if (DEBUG) Slog.w(getLogTag(), "onAuthenticated() called for enroll!");
         return true; // Invalid for EnrollClient
     }

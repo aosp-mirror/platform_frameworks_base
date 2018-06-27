@@ -14,44 +14,54 @@
  * limitations under the License.
  */
 
-syntax = "proto3";
+syntax = "proto2";
+package com.android.server.biometrics.face;
 
-package android.service.face;
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 option java_multiple_files = true;
 option java_outer_classname = "FaceServiceProto";
 
 message FaceServiceDumpProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Each log may include multiple user_id for different users.
     repeated FaceUserStatsProto users = 1;
 }
 
 message FaceUserStatsProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Refer to the UserHandle documentation.
-    int32 user_id = 1;
+    optional int32 user_id = 1;
+
+    // The number of faces registered to this user.
+    optional int32 num_faces = 2;
 
     // Normal face authentications stats (e.g. lockscreen).
-    FaceActionStatsProto normal = 2;
+    optional FaceActionStatsProto normal = 3;
 
     // Crypto authentications (e.g. to unlock password storage, make secure
     // purchases, etc).
-    FaceActionStatsProto crypto = 3;
+    optional FaceActionStatsProto crypto = 4;
 }
 
 message FaceActionStatsProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Number of accepted faces.
-    int32 accept = 1;
+    optional int32 accept = 1;
 
     // Number of rejected faces.
-    int32 reject = 2;
+    optional int32 reject = 2;
 
     // Total number of acquisitions. Should be >= accept+reject due to poor
     // image acquisition in some cases (too high, too low, poor gaze, etc.)
-    int32 acquire = 3;
+    optional int32 acquire = 3;
 
     // Total number of lockouts.
-    int32 lockout = 4;
+    optional int32 lockout = 4;
 
     // Total number of permanent lockouts.
-    int32 lockout_permanent = 5;
+    optional int32 lockout_permanent = 5;
 }
