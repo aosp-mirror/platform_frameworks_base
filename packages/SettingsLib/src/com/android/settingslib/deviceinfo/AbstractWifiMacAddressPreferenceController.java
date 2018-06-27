@@ -38,6 +38,10 @@ public abstract class AbstractWifiMacAddressPreferenceController
 
     @VisibleForTesting
     static final String KEY_WIFI_MAC_ADDRESS = "wifi_mac_address";
+    @VisibleForTesting
+    static final int OFF = 0;
+    @VisibleForTesting
+    static final int ON = 1;
 
     private static final String[] CONNECTIVITY_INTENTS = {
             ConnectivityManager.CONNECTIVITY_ACTION,
@@ -80,13 +84,14 @@ public abstract class AbstractWifiMacAddressPreferenceController
     protected void updateConnectivity() {
         WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
         final int macRandomizationMode = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED, 0);
+                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED, OFF);
         final String macAddress = wifiInfo == null ? null : wifiInfo.getMacAddress();
 
-        if (TextUtils.isEmpty(macAddress)) {
-            mWifiMacAddress.setSummary(R.string.status_unavailable);
-        } else if (macRandomizationMode == 1 && WifiInfo.DEFAULT_MAC_ADDRESS.equals(macAddress)) {
+        if (macRandomizationMode == ON && WifiInfo.DEFAULT_MAC_ADDRESS.equals(macAddress)) {
             mWifiMacAddress.setSummary(R.string.wifi_status_mac_randomized);
+        } else if (TextUtils.isEmpty(macAddress)
+                || WifiInfo.DEFAULT_MAC_ADDRESS.equals(macAddress)) {
+            mWifiMacAddress.setSummary(R.string.status_unavailable);
         } else {
             mWifiMacAddress.setSummary(macAddress);
         }
