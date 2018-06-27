@@ -12498,7 +12498,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return imp;
     }
 
-    private void fillInProcMemInfo(ProcessRecord app,
+    private void fillInProcMemInfoLocked(ProcessRecord app,
             ActivityManager.RunningAppProcessInfo outInfo,
             int clientTargetSdk) {
         outInfo.pid = app.pid;
@@ -12518,6 +12518,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         outInfo.importance = procStateToImportance(procState, adj, outInfo, clientTargetSdk);
         outInfo.importanceReasonCode = app.adjTypeCode;
         outInfo.processState = app.curProcState;
+        outInfo.isFocused = (app == getTopAppLocked());
+        outInfo.lastActivityTime = app.lastActivityTime;
     }
 
     @Override
@@ -12548,7 +12550,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ActivityManager.RunningAppProcessInfo currApp =
                         new ActivityManager.RunningAppProcessInfo(app.processName,
                                 app.pid, app.getPackageList());
-                    fillInProcMemInfo(app, currApp, clientTargetSdk);
+                    fillInProcMemInfoLocked(app, currApp, clientTargetSdk);
                     if (app.adjSource instanceof ProcessRecord) {
                         currApp.importanceReasonPid = ((ProcessRecord)app.adjSource).pid;
                         currApp.importanceReasonImportance =
@@ -12617,7 +12619,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 proc = mPidsSelfLocked.get(Binder.getCallingPid());
             }
             if (proc != null) {
-                fillInProcMemInfo(proc, outState, clientTargetSdk);
+                fillInProcMemInfoLocked(proc, outState, clientTargetSdk);
             }
         }
     }
@@ -21082,20 +21084,22 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    final void updateOomAdjLocked() {
+    ProcessRecord getTopAppLocked() {
         final ActivityRecord TOP_ACT = resumedAppLocked();
-        final ProcessRecord TOP_APP = TOP_ACT != null && TOP_ACT.hasProcess()
-                ? (ProcessRecord) TOP_ACT.app.mOwner : null;
+        if (TOP_ACT != null && TOP_ACT.hasProcess()) {
+            return (ProcessRecord) TOP_ACT.app.mOwner;
+        } else {
+            return null;
+        }
+    }
+
+    @GuardedBy("this")
+    final void updateOomAdjLocked() {
+        final ProcessRecord TOP_APP = getTopAppLocked();
         final long now = SystemClock.uptimeMillis();
         final long nowElapsed = SystemClock.elapsedRealtime();
         final long oldTime = now - ProcessList.MAX_EMPTY_TIME;
         final int N = mLruProcesses.size();
-
-        if (false) {
-            RuntimeException e = new RuntimeException();
-            e.fillInStackTrace();
-            Slog.i(TAG, "updateOomAdj: top=" + TOP_ACT, e);
-        }
 
         // Reset state in all uid records.
         for (int i=mActiveUids.size()-1; i>=0; i--) {
