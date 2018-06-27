@@ -45,6 +45,7 @@
 #include <unistd.h>
 
 #include "android-base/logging.h"
+#include <android-base/properties.h>
 #include <android-base/file.h>
 #include <android-base/stringprintf.h>
 #include <cutils/fs.h>
@@ -70,6 +71,7 @@ namespace {
 using android::String8;
 using android::base::StringPrintf;
 using android::base::WriteStringToFile;
+using android::base::GetBoolProperty;
 
 #define CREATE_ERROR(...) StringPrintf("%s:%d: ", __FILE__, __LINE__). \
                               append(StringPrintf(__VA_ARGS__))
@@ -889,12 +891,16 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
           RuntimeAbort(env, __LINE__, "System server process has died. Restarting Zygote!");
       }
 
-      // Assign system_server to the correct memory cgroup.
-      // Not all devices mount /dev/memcg so check for the file first
-      // to avoid unnecessarily printing errors and denials in the logs.
-      if (!access("/dev/memcg/system/tasks", F_OK) &&
+      bool low_ram_device = GetBoolProperty("ro.config.low_ram", false);
+      bool per_app_memcg = GetBoolProperty("ro.config.per_app_memcg", low_ram_device);
+      if (per_app_memcg) {
+          // Assign system_server to the correct memory cgroup.
+          // Not all devices mount /dev/memcg so check for the file first
+          // to avoid unnecessarily printing errors and denials in the logs.
+          if (!access("/dev/memcg/system/tasks", F_OK) &&
                 !WriteStringToFile(StringPrintf("%d", pid), "/dev/memcg/system/tasks")) {
-        ALOGE("couldn't write %d to /dev/memcg/system/tasks", pid);
+              ALOGE("couldn't write %d to /dev/memcg/system/tasks", pid);
+          }
       }
   }
   return pid;
