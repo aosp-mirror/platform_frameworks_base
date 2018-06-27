@@ -756,10 +756,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     public CharSequence getSsid() {
-        final SpannableString str = new SpannableString(ssid);
-        str.setSpan(new TtsSpan.TelephoneBuilder(ssid).build(), 0, ssid.length(),
-                Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        return str;
+        return ssid;
     }
 
     public String getConfigName() {
