@@ -140,7 +140,8 @@
       <item quantity="one">መሣሪያው ለ<xliff:g id="NUMBER_1">%d</xliff:g> ሰዓቶች አልተከፈተም ነበር። የይለፍ ቃል ያረጋግጡ።</item>
       <item quantity="other">መሣሪያው ለ<xliff:g id="NUMBER_1">%d</xliff:g> ሰዓቶች አልተከፈተም ነበር። የይለፍ ቃል ያረጋግጡ።</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"አልታወቀም"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"አልታወቀም"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"አልታወቀም"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">የሲም ፒን ያስገቡ። <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>
       <item quantity="other">የሲም ፒን ያስገቡ። <xliff:g id="NUMBER_1">%d</xliff:g> ሙከራዎች ይቀረዎታል።</item>

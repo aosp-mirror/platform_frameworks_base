@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Ungependa kuficha <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Itaonekana tena wakati mwingine utakapoiwasha katika mipangilio."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Ficha"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Unatumia wasifu wako wa kazini"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Piga simu"</string>
     <string name="stream_system" msgid="7493299064422163147">"Mfumo"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Piga"</string>
@@ -706,7 +705,7 @@
     <string name="nav_bar_layout" msgid="3664072994198772020">"Mpangilio"</string>
     <string name="left_nav_bar_button_type" msgid="8555981238887546528">"Aina ya kitufe cha kushoto cha ziada"</string>
     <string name="right_nav_bar_button_type" msgid="2481056627065649656">"Aina ya kitufe cha kulia cha ziada"</string>
-    <string name="nav_bar_default" msgid="8587114043070993007">"(chaguo msingi)"</string>
+    <string name="nav_bar_default" msgid="8587114043070993007">"(chaguomsingi)"</string>
   <string-array name="nav_bar_buttons">
     <item msgid="1545641631806817203">"Ubao wa kunakili"</item>
     <item msgid="5742013440802239414">"Msimbo wa ufunguo"</item>
@@ -736,12 +735,12 @@
     <string name="tuner_time" msgid="6572217313285536011">"Wakati"</string>
   <string-array name="clock_options">
     <item msgid="5965318737560463480">"Onyesha saa, dakika na sekunde"</item>
-    <item msgid="1427801730816895300">"Onyesha saa na dakika (chaguo msingi)"</item>
+    <item msgid="1427801730816895300">"Onyesha saa na dakika (chaguomsingi)"</item>
     <item msgid="3830170141562534721">"Usionyeshe aikoni hii"</item>
   </string-array>
   <string-array name="battery_options">
     <item msgid="3160236755818672034">"Onyesha asilimia kila wakati"</item>
-    <item msgid="2139628951880142927">"Onyesha asilimia wakati inachaji (chaguo msingi)"</item>
+    <item msgid="2139628951880142927">"Onyesha asilimia wakati inachaji (chaguomsingi)"</item>
     <item msgid="3327323682209964956">"Usionyeshe aikoni hii"</item>
   </string-array>
     <string name="other" msgid="4060683095962566764">"Nyingine"</string>

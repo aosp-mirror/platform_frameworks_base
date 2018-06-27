@@ -140,7 +140,10 @@
       <item quantity="other">यन्त्र <xliff:g id="NUMBER_1">%d</xliff:g> घन्टा देखि अनलक भएको छैन। पासवर्ड पुष्टि गर्नुहोस्।</item>
       <item quantity="one">यन्त्र <xliff:g id="NUMBER_0">%d</xliff:g> घन्टा देखि अनलक भएको छैन। पासवर्ड पुष्टि गर्नुहोस्।</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"पहिचान भएन"</string>
+    <!-- no translation found for kg_fingerprint_not_recognized (7854413849848459418) -->
+    <skip />
+    <!-- no translation found for kg_face_not_recognized (6382535088345875294) -->
+    <skip />
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">SIM को PIN प्रविष्ट गर्नुहोस्। तपाईंसँग <xliff:g id="NUMBER_1">%d</xliff:g>  प्रयासहरू बाँकी छन्।</item>
       <item quantity="one">SIM को PIN प्रविष्ट गर्नुहोस्। तपाईंसँग <xliff:g id="NUMBER_0">%d</xliff:g> प्रयास बाँकी छ, त्यसपछि भने आफ्नो यन्त्र अनलक गर्नका लागि तपाईंले अनिवार्य रूपमा आफ्नो सेवा प्रदायकलाई सम्पर्क गर्नु पर्ने हुन्छ।</item>

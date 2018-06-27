@@ -152,7 +152,8 @@
       <item quantity="many">Įrenginys nebuvo atrakintas <xliff:g id="NUMBER_1">%d</xliff:g> valandos. Patvirtinkite slaptažodį.</item>
       <item quantity="other">Įrenginys nebuvo atrakintas <xliff:g id="NUMBER_1">%d</xliff:g> valandų. Patvirtinkite slaptažodį.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Neatpažinta"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Neatpažinta"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Neatpažinta"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">Įveskite SIM kortelės PIN kodą. Jums liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymas.</item>
       <item quantity="few">Įveskite SIM kortelės PIN kodą. Jums liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymai.</item>

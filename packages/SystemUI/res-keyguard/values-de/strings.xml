@@ -140,7 +140,8 @@
       <item quantity="other">Das Gerät wurde seit <xliff:g id="NUMBER_1">%d</xliff:g> Stunden nicht mehr entsperrt. Bitte bestätige das Passwort.</item>
       <item quantity="one">Das Gerät wurde seit <xliff:g id="NUMBER_0">%d</xliff:g> Stunde nicht mehr entsperrt. Bitte bestätige das Passwort.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Nicht erkannt"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Nicht erkannt"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Nicht erkannt"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">Gib die PIN für die SIM-Karte ein. Du hast noch <xliff:g id="NUMBER_1">%d</xliff:g> Versuche.</item>
       <item quantity="one">Gib die PIN für die SIM-Karte ein. Du hast noch <xliff:g id="NUMBER_0">%d</xliff:g> Versuch, bevor das Gerät nur noch vom Mobilfunkanbieter entsperrt werden kann.</item>

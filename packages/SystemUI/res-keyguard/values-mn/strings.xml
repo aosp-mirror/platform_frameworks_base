@@ -140,7 +140,8 @@
       <item quantity="other">Төхөөрөмжийн түгжээг <xliff:g id="NUMBER_1">%d</xliff:g> цагийн турш тайлаагүй байна. Нууц үгээ баталгаажуулна уу.</item>
       <item quantity="one">Төхөөрөмжийн түгжээг <xliff:g id="NUMBER_0">%d</xliff:g> цагийн турш тайлаагүй байна. Нууц үгээ баталгаажуулна уу.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Танигдахгүй байна"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Таньж чадсангүй"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Таньж чадсангүй"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">SIM-н ПИН кодыг оруулна уу. Танд <xliff:g id="NUMBER_1">%d</xliff:g> оролдлого үлдлээ.</item>
       <item quantity="one">SIM-н ПИН кодыг оруулна уу. Танд оператор компанитайгаа холбогдохгүйгээр төхөөрөмжийн түгжээг тайлах <xliff:g id="NUMBER_0">%d</xliff:g> оролдлого үлдлээ.</item>

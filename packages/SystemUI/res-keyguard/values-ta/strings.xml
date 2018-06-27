@@ -140,7 +140,10 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> மணிநேரமாகச் சாதனம் திறக்கப்படவில்லை. கடவுச்சொல்லை உறுதிப்படுத்தவும்.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> மணிநேரமாகச் சாதனம் திறக்கப்படவில்லை. கடவுச்சொல்லை உறுதிப்படுத்தவும்.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"அடையாளங்காண முடியவில்லை"</string>
+    <!-- no translation found for kg_fingerprint_not_recognized (7854413849848459418) -->
+    <skip />
+    <!-- no translation found for kg_face_not_recognized (6382535088345875294) -->
+    <skip />
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">சிம் பின்னை உள்ளிடவும். மேலும், <xliff:g id="NUMBER_1">%d</xliff:g> வாய்ப்புகள் மீதமுள்ளன.</item>
       <item quantity="one">சிம் பின்னை உள்ளிடவும். மீதமுள்ள <xliff:g id="NUMBER_0">%d</xliff:g> வாய்ப்பில் தவறுதலான பின் உள்ளிடப்பட்டால், உங்கள் தொலைத்தொடர்பு நிறுவனத்தைத் தொடர்பு கொண்டு மட்டுமே சாதனத்தைத் திறக்க முடியும்.</item>

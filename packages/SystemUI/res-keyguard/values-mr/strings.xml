@@ -140,7 +140,10 @@
       <item quantity="one">डिव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासासाठी अनलॉक केले गेले नाही. पासवर्डची खात्री करा.</item>
       <item quantity="other">डिव्हाइस <xliff:g id="NUMBER_1">%d</xliff:g> तासांसाठी अनलॉक केले गेले नाही. पासवर्डची खात्री करा.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"ओळखले नाही"</string>
+    <!-- no translation found for kg_fingerprint_not_recognized (7854413849848459418) -->
+    <skip />
+    <!-- no translation found for kg_face_not_recognized (6382535088345875294) -->
+    <skip />
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">सिम पिन एंटर करा, तुमच्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहे.</item>
       <item quantity="other">सिम पिन एंटर करा, तुमच्याकडे <xliff:g id="NUMBER_1">%d</xliff:g> प्रयत्न शिल्लक आहेत.</item>

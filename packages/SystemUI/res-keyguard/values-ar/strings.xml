@@ -164,7 +164,8 @@
       <item quantity="other">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_1">%d</xliff:g> ساعة. تأكيد كلمة المرور.</item>
       <item quantity="one">لم يتم إلغاء تأمين الجهاز لمدة <xliff:g id="NUMBER_0">%d</xliff:g> ساعة. تأكيد كلمة المرور.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"لم يتم التعرف عليها"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"لم يتم التعرف عليها."</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"لم يتم التعرّف عليه."</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="zero">‏أدخل رقم التعريف الشخصي لشريحة SIM. تتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة.</item>
       <item quantity="two">‏أدخل رقم التعريف الشخصي لشريحة SIM. تتبقى لديك محاولتان (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>

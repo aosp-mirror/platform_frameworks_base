@@ -140,7 +140,8 @@
       <item quantity="one">Idivayisi ayikavulwa ngamahora angu-<xliff:g id="NUMBER_1">%d</xliff:g>. Qinisekisa iphasiwedi.</item>
       <item quantity="other">Idivayisi ayikavulwa ngamahora angu-<xliff:g id="NUMBER_1">%d</xliff:g>. Qinisekisa iphasiwedi.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Akubonwa"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Akwaziwa"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Akwaziwa"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">Faka i-PIN ye-SIM, unemizamo engu-<xliff:g id="NUMBER_1">%d</xliff:g> esele.</item>
       <item quantity="other">Faka i-PIN ye-SIM, unemizamo engu-<xliff:g id="NUMBER_1">%d</xliff:g> esele.</item>

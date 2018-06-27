@@ -140,7 +140,8 @@
       <item quantity="other">Fa <xliff:g id="NUMBER_1">%d</xliff:g> hores que no es desbloqueja el dispositiu. Confirma la contrasenya.</item>
       <item quantity="one">Fa <xliff:g id="NUMBER_0">%d</xliff:g> hora que no es desbloqueja el dispositiu. Confirma la contrasenya.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"No s\'ha reconegut"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"No s\'ha reconegut"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"No s\'ha reconegut"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">Introdueix el PIN de la SIM. Et queden <xliff:g id="NUMBER_1">%d</xliff:g> intents.</item>
       <item quantity="one">Introdueix el PIN de la SIM. Et queda <xliff:g id="NUMBER_0">%d</xliff:g> intent; si no l\'encertes, contacta amb l\'operador de telefonia mòbil per desbloquejar el dispositiu.</item>

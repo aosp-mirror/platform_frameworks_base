@@ -140,7 +140,10 @@
       <item quantity="one">ಸಾಧನವನ್ನು <xliff:g id="NUMBER_1">%d</xliff:g> ಗಂಟೆಗಳವರೆಗೆ ಅನ್‌ಲಾಕ್‌ ಮಾಡಿರಲಿಲ್ಲ. ಪಾಸ್‌ವರ್ಡ್‌ ಖಚಿತಪಡಿಸಿ.</item>
       <item quantity="other">ಸಾಧನವನ್ನು <xliff:g id="NUMBER_1">%d</xliff:g> ಗಂಟೆಗಳವರೆಗೆ ಅನ್‌ಲಾಕ್‌ ಮಾಡಿರಲಿಲ್ಲ. ಪಾಸ್‌ವರ್ಡ್‌ ಖಚಿತಪಡಿಸಿ.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
+    <!-- no translation found for kg_fingerprint_not_recognized (7854413849848459418) -->
+    <skip />
+    <!-- no translation found for kg_face_not_recognized (6382535088345875294) -->
+    <skip />
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">ಸಿಮ್ ಪಿನ್ ನಮೂದಿಸಿ. ನಿಮ್ಮಲ್ಲಿ <xliff:g id="NUMBER_1">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ.</item>
       <item quantity="other">ಸಿಮ್ ಪಿನ್ ನಮೂದಿಸಿ. ನಿಮ್ಮಲ್ಲಿ <xliff:g id="NUMBER_1">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ.</item>

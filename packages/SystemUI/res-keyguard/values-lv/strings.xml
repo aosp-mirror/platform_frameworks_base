@@ -146,7 +146,8 @@
       <item quantity="one">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundu. Apstipriniet paroli.</item>
       <item quantity="other">Ierīce nav tikusi atbloķēta <xliff:g id="NUMBER_1">%d</xliff:g> stundas. Apstipriniet paroli.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Nav atpazīts"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Nav atpazīts"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Nav atpazīts"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="zero">Ievadiet SIM kartes PIN. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes.</item>
       <item quantity="one">Ievadiet SIM kartes PIN. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizi.</item>

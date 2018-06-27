@@ -140,7 +140,10 @@
       <item quantity="other">设备已保持锁定状态达 <xliff:g id="NUMBER_1">%d</xliff:g> 小时。请确认密码。</item>
       <item quantity="one">设备已保持锁定状态达 <xliff:g id="NUMBER_0">%d</xliff:g> 小时。请确认密码。</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"无法识别"</string>
+    <!-- no translation found for kg_fingerprint_not_recognized (7854413849848459418) -->
+    <skip />
+    <!-- no translation found for kg_face_not_recognized (6382535088345875294) -->
+    <skip />
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">请输入 SIM 卡 PIN 码，您还可以尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次。</item>
       <item quantity="one">请输入 SIM 卡 PIN 码，您还可以尝试 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍不正确，则需要联系运营商帮您解锁设备。</item>

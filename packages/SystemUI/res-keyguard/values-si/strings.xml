@@ -140,7 +140,8 @@
       <item quantity="one">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>ක් අගුලු හැර නැත. මුරපදය තහවුරු කරන්න.</item>
       <item quantity="other">උපාංගය පැය <xliff:g id="NUMBER_1">%d</xliff:g>ක් අගුලු හැර නැත. මුරපදය තහවුරු කරන්න.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"හඳුනා නොගන්නා ලදී"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"හඳුනා නොගන්නා ලදී"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"හඳුනා නොගන්නා ලදී"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">SIM PIN ඇතුළු කරන්න, ඔබ සතුව උත්සාහයන් <xliff:g id="NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත.</item>
       <item quantity="other">SIM PIN ඇතුළු කරන්න, ඔබ සතුව උත්සාහයන් <xliff:g id="NUMBER_1">%d</xliff:g>ක් ඉතිරිව ඇත.</item>

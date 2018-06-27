@@ -146,7 +146,8 @@
       <item quantity="few">Нисте откључали уређај <xliff:g id="NUMBER_1">%d</xliff:g> сата. Потврдите лозинку.</item>
       <item quantity="other">Нисте откључали уређај <xliff:g id="NUMBER_1">%d</xliff:g> сати. Потврдите лозинку.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Није препознат"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Није препознат"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Није препознат"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">Унесите PIN за SIM. Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушај.</item>
       <item quantity="few">Унесите PIN за SIM. Имате још <xliff:g id="NUMBER_1">%d</xliff:g> покушаја.</item>

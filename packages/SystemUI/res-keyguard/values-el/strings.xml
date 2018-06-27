@@ -46,7 +46,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="7350295932015220392">"Τοποθετήστε μια κάρτα SIM."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="589889372883904477">"Η κάρτα SIM δεν υπάρχει ή δεν είναι δυνατή η ανάγνωσή της. Τοποθετήστε μια κάρτα SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="654102080186420706">"Η κάρτα SIM δεν μπορεί να χρησιμοποιηθεί."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"Η κάρτα SIM έχει απενεργοποιηθεί οριστικά.\n Επικοινωνήστε με τον παροχέα υπηρεσιών ασύρματου δικτύου για να λάβετε μια νέα κάρτα SIM."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="4683178224791318347">"Η κάρτα SIM έχει απενεργοποιηθεί οριστικά.\n Επικοινωνήστε με τον πάροχο υπηρεσιών ασύρματου δικτύου για να λάβετε μια νέα κάρτα SIM."</string>
     <string name="keyguard_sim_locked_message" msgid="953766009432168127">"Η κάρτα SIM είναι κλειδωμένη."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="1772789643694942073">"Η κάρτα SIM είναι κλειδωμένη με κωδικό PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="3586601150825821675">"Ξεκλείδωμα κάρτας SIM…"</string>
@@ -140,7 +140,8 @@
       <item quantity="other">Η συσκευή δεν έχει ξεκλειδωθεί εδώ και <xliff:g id="NUMBER_1">%d</xliff:g> ώρες. Επιβεβαιώστε τον κωδικό πρόσβασης.</item>
       <item quantity="one">Η συσκευή δεν έχει ξεκλειδωθεί εδώ και <xliff:g id="NUMBER_0">%d</xliff:g> ώρα. Επιβεβαιώστε τον κωδικό πρόσβασης.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Δεν αναγνωρίστηκε"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Δεν αναγνωρίστηκε"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Δεν αναγνωρίστηκε"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">Εισαγάγετε τον αριθμό PIN της κάρτας SIM. Απομένουν άλλες <xliff:g id="NUMBER_1">%d</xliff:g> προσπάθειες.</item>
       <item quantity="one">Εισαγάγετε τον αριθμό PIN της κάρτας SIM. Απομένει άλλη <xliff:g id="NUMBER_0">%d</xliff:g> προσπάθεια. Στη συνέχεια, θα πρέπει να επικοινωνήσετε με τον πάροχο κινητής τηλεφωνίας, για να ξεκλειδώσετε τη συσκευή.</item>

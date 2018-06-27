@@ -140,7 +140,8 @@
       <item quantity="other">ឧបករណ៍​បាន​ជាប់​សោ​អស់រយៈ​ពេល <xliff:g id="NUMBER_1">%d</xliff:g> ម៉ោង​ហើយ។ សូម​បញ្ជាក់​ពាក្យ​សម្ងាត់។</item>
       <item quantity="one">ឧបករណ៍​បាន​ជាប់​សោ​អស់រយៈ​ពេល <xliff:g id="NUMBER_0">%d</xliff:g> ម៉ោង​ហើយ។ សូម​បញ្ជាក់​ពាក្យ​សម្ងាត់។</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"មិនអាចសម្គាល់បានទេ"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"មិនអាចសម្គាល់បានទេ"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"មិនអាចសម្គាល់បានទេ"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">បញ្ចូល​កូដ PIN របស់ស៊ីម។ អ្នកនៅ​សល់ការ​ព្យាយាម <xliff:g id="NUMBER_1">%d</xliff:g> ដងទៀត។</item>
       <item quantity="one">បញ្ចូលកូដ PIN របស់ស៊ីម។ អ្នក​នៅសល់​ការព្យាយាម <xliff:g id="NUMBER_0">%d</xliff:g> ដង​ទៀត មុន​ពេល​ដែលអ្នក​ត្រូវទាក់ទង​ទៅ​ក្រុមហ៊ុន​សេវា​ទូរសព្ទ​របស់អ្នក​ដើម្បី​ដោះសោ​ឧបករណ៍​របស់អ្នក។</item>
