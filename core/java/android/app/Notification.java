@@ -202,6 +202,11 @@ public class Notification implements Parcelable
      */
     private static final int MAX_REPLY_HISTORY = 5;
 
+    /**
+     * Maximum numbers of action buttons in a notification.
+     * @hide
+     */
+    public static final int MAX_ACTION_BUTTONS = 3;
 
     /**
      * If the notification contained an unsent draft for a RemoteInput when the user clicked on it,
@@ -3150,8 +3155,6 @@ public class Notification implements Parcelable
          */
         public static final String EXTRA_REBUILD_HEADS_UP_CONTENT_VIEW_ACTION_COUNT
                 = "android.rebuild.hudViewActionCount";
-
-        private static final int MAX_ACTION_BUTTONS = 3;
 
         private static final boolean USE_ONLY_TITLE_IN_LOW_PRIORITY_SUMMARY =
                 SystemProperties.getBoolean("notifications.only_title", true);
@@ -7162,8 +7165,8 @@ public class Notification implements Parcelable
         }
 
         public static final class Message {
-
-            static final String KEY_TEXT = "text";
+            /** @hide */
+            public static final String KEY_TEXT = "text";
             static final String KEY_TIMESTAMP = "time";
             static final String KEY_SENDER = "sender";
             static final String KEY_SENDER_PERSON = "sender_person";

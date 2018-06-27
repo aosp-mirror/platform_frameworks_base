@@ -19,7 +19,9 @@ package android.ext.services.notification;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 
+import android.annotation.NonNull;
 import android.app.INotificationManager;
+import android.app.Notification;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -80,6 +82,7 @@ public class Assistant extends NotificationAssistantService {
 
     private float mDismissToViewRatioLimit;
     private int mStreakLimit;
+    private SmartActionsHelper mSmartActionsHelper;
 
     // key : impressions tracker
     // TODO: prune deleted channels and apps
@@ -99,6 +102,7 @@ public class Assistant extends NotificationAssistantService {
         // Contexts are correctly hooked up by the creation step, which is required for the observer
         // to be hooked up/initialized.
         new SettingsObserver(mHandler);
+        mSmartActionsHelper = new SmartActionsHelper();
     }
 
     private void loadFile() {
@@ -187,7 +191,26 @@ public class Assistant extends NotificationAssistantService {
     @Override
     public Adjustment onNotificationEnqueued(StatusBarNotification sbn) {
         if (DEBUG) Log.i(TAG, "ENQUEUED " + sbn.getKey());
-        return null;
+        ArrayList<Notification.Action> actions =
+                mSmartActionsHelper.suggestActions(this, sbn);
+        if (actions.isEmpty()) {
+            return null;
+        }
+        return createEnqueuedNotificationAdjustment(sbn, actions);
+    }
+
+    /** A convenience helper for creating an adjustment for an SBN. */
+    private Adjustment createEnqueuedNotificationAdjustment(
+            @NonNull StatusBarNotification statusBarNotification,
+            @NonNull ArrayList<Notification.Action> smartActions) {
+        Bundle signals = new Bundle();
+        signals.putParcelableArrayList(Adjustment.KEY_SMART_ACTIONS, smartActions);
+        return new Adjustment(
+                statusBarNotification.getPackageName(),
+                statusBarNotification.getKey(),
+                signals,
+                "smart action" /* explanation */,
+                statusBarNotification.getUserId());
     }
 
     @Override
