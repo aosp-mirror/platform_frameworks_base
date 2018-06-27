@@ -381,7 +381,7 @@ public class ZoneGetter {
 
             // Create a lookup of local zone IDs.
             final List<String> zoneIds = lookupTimeZoneIdsByCountry(locale.getCountry());
-            localZoneIds = new HashSet<>(zoneIds);
+            localZoneIds = zoneIds != null ? new HashSet<>(zoneIds) : new HashSet<>();
         }
 
         @VisibleForTesting
