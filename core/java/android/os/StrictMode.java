@@ -31,8 +31,10 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.TrafficStats;
 import android.net.Uri;
+import android.os.storage.IStorageManager;
 import android.os.strictmode.CleartextNetworkViolation;
 import android.os.strictmode.ContentUriWithoutPermissionViolation;
+import android.os.strictmode.CredentialProtectedWhileLockedViolation;
 import android.os.strictmode.CustomViolation;
 import android.os.strictmode.DiskReadViolation;
 import android.os.strictmode.DiskWriteViolation;
@@ -284,6 +286,8 @@ public final class StrictMode {
     private static final int DETECT_VM_NON_SDK_API_USAGE = 1 << 9;
     /** @hide */
     private static final int DETECT_VM_IMPLICIT_DIRECT_BOOT = 1 << 10;
+    /** @hide */
+    private static final int DETECT_VM_CREDENTIAL_PROTECTED_WHILE_LOCKED = 1 << 11;
 
     /** @hide */
     private static final int DETECT_VM_ALL = 0x0000ffff;
@@ -859,6 +863,9 @@ public final class StrictMode {
                     detectContentUriWithoutPermission();
                     detectUntaggedSockets();
                 }
+                if (targetSdk >= Build.VERSION_CODES.Q) {
+                    detectCredentialProtectedWhileLocked();
+                }
 
                 // TODO: Decide whether to detect non SDK API usage beyond a certain API level.
                 // TODO: enable detectImplicitDirectBoot() once system is less noisy
@@ -991,6 +998,28 @@ public final class StrictMode {
             /** @hide */
             public Builder permitImplicitDirectBoot() {
                 return disable(DETECT_VM_IMPLICIT_DIRECT_BOOT);
+            }
+
+            /**
+             * Detect access to filesystem paths stored in credential protected
+             * storage areas while the user is locked.
+             * <p>
+             * When a user is locked, credential protected storage is
+             * unavailable, and files stored in these locations appear to not
+             * exist, which can result in subtle app bugs if they assume default
+             * behaviors or empty states. Instead, apps should store data needed
+             * while a user is locked under device protected storage areas.
+             *
+             * @see Context#createCredentialProtectedStorageContext()
+             * @see Context#createDeviceProtectedStorageContext()
+             */
+            public Builder detectCredentialProtectedWhileLocked() {
+                return enable(DETECT_VM_CREDENTIAL_PROTECTED_WHILE_LOCKED);
+            }
+
+            /** @hide */
+            public Builder permitCredentialProtectedWhileLocked() {
+                return disable(DETECT_VM_CREDENTIAL_PROTECTED_WHILE_LOCKED);
             }
 
             /**
@@ -1152,6 +1181,16 @@ public final class StrictMode {
             BlockGuard.setThreadPolicy(androidPolicy);
         }
         androidPolicy.setThreadPolicyMask(threadPolicyMask);
+    }
+
+    private static void setBlockGuardVmPolicy(@VmPolicyMask int vmPolicyMask) {
+        // We only need to install BlockGuard for a small subset of VM policies
+        vmPolicyMask &= DETECT_VM_CREDENTIAL_PROTECTED_WHILE_LOCKED;
+        if (vmPolicyMask != 0) {
+            BlockGuard.setVmPolicy(VM_ANDROID_POLICY);
+        } else {
+            BlockGuard.setVmPolicy(BlockGuard.LAX_VM_POLICY);
+        }
     }
 
     // Sets up CloseGuard in Dalvik/libcore
@@ -1741,6 +1780,34 @@ public final class StrictMode {
         }
     }
 
+    private static final BlockGuard.VmPolicy VM_ANDROID_POLICY = new BlockGuard.VmPolicy() {
+        @Override
+        public void onPathAccess(String path) {
+            if (path == null) return;
+
+            // NOTE: keep credential-protected paths in sync with Environment.java
+            if (path.startsWith("/data/user/")
+                    || path.startsWith("/data/media/")
+                    || path.startsWith("/data/system_ce/")
+                    || path.startsWith("/data/misc_ce/")
+                    || path.startsWith("/data/vendor_ce/")
+                    || path.startsWith("/storage/emulated/")) {
+                final int second = path.indexOf('/', 1);
+                final int third = path.indexOf('/', second + 1);
+                final int fourth = path.indexOf('/', third + 1);
+                if (fourth == -1) return;
+
+                try {
+                    final int userId = Integer.parseInt(path.substring(third + 1, fourth));
+                    onCredentialProtectedPathAccess(path, userId);
+                } catch (NumberFormatException ignored) {
+                }
+            } else if (path.startsWith("/data/data/")) {
+                onCredentialProtectedPathAccess(path, UserHandle.USER_SYSTEM);
+            }
+        }
+    };
+
     /**
      * In the common case, as set by conditionallyEnableDebugLogging, we're just dropboxing any
      * violations but not showing a dialog, not loggging, and not killing the process. In these
@@ -1907,6 +1974,8 @@ public final class StrictMode {
                 VMRuntime.setNonSdkApiUsageConsumer(null);
                 VMRuntime.setDedupeHiddenApiWarnings(true);
             }
+
+            setBlockGuardVmPolicy(sVmPolicy.mask);
         }
     }
 
@@ -1967,6 +2036,11 @@ public final class StrictMode {
     /** @hide */
     public static boolean vmImplicitDirectBootEnabled() {
         return (sVmPolicy.mask & DETECT_VM_IMPLICIT_DIRECT_BOOT) != 0;
+    }
+
+    /** @hide */
+    public static boolean vmCredentialProtectedWhileLockedEnabled() {
+        return (sVmPolicy.mask & DETECT_VM_CREDENTIAL_PROTECTED_WHILE_LOCKED) != 0;
     }
 
     /** @hide */
@@ -2044,6 +2118,42 @@ public final class StrictMode {
     /** @hide */
     public static void onImplicitDirectBoot() {
         onVmPolicyViolation(new ImplicitDirectBootViolation());
+    }
+
+    /** Assume locked until we hear otherwise */
+    private static volatile boolean sUserKeyUnlocked = false;
+
+    private static boolean isUserKeyUnlocked(int userId) {
+        final IStorageManager storage = IStorageManager.Stub
+                .asInterface(ServiceManager.getService("mount"));
+        if (storage != null) {
+            try {
+                return storage.isUserKeyUnlocked(userId);
+            } catch (RemoteException ignored) {
+            }
+        }
+        return false;
+    }
+
+    /** @hide */
+    private static void onCredentialProtectedPathAccess(String path, int userId) {
+        // We can cache the unlocked state for the userId we're running as,
+        // since any relocking of that user will always result in our
+        // process being killed to release any CE FDs we're holding onto.
+        if (userId == UserHandle.myUserId()) {
+            if (sUserKeyUnlocked) {
+                return;
+            } else if (isUserKeyUnlocked(userId)) {
+                sUserKeyUnlocked = true;
+                return;
+            }
+        } else if (isUserKeyUnlocked(userId)) {
+            return;
+        }
+
+        onVmPolicyViolation(new CredentialProtectedWhileLockedViolation(
+                "Accessed credential protected path " + path + " while user " + userId
+                        + " was locked"));
     }
 
     // Map from VM violation fingerprint to uptime millis.

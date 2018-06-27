@@ -33,6 +33,8 @@ import java.util.LinkedList;
 public class Environment {
     private static final String TAG = "Environment";
 
+    // NOTE: keep credential-protected paths in sync with StrictMode.java
+
     private static final String ENV_EXTERNAL_STORAGE = "EXTERNAL_STORAGE";
     private static final String ENV_ANDROID_ROOT = "ANDROID_ROOT";
     private static final String ENV_ANDROID_DATA = "ANDROID_DATA";
