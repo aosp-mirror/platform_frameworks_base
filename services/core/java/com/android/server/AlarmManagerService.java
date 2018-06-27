@@ -2685,19 +2685,23 @@ class AlarmManagerService extends SystemService {
     private void validateLastAlarmExpiredLocked(long nowElapsed) {
         final StringBuilder errorMsg = new StringBuilder();
         boolean stuck = false;
-        if (mNextNonWakeup < nowElapsed && mLastWakeup < (mNextNonWakeup - 30_000)) {
+        if (mNextNonWakeup < (nowElapsed - 10_000) && mLastWakeup < mNextNonWakeup) {
             stuck = true;
             errorMsg.append("[mNextNonWakeup=");
             TimeUtils.formatDuration(mNextNonWakeup - nowElapsed, errorMsg);
+            errorMsg.append(" set at ");
+            TimeUtils.formatDuration(mNextNonWakeUpSetAt, errorMsg);
             errorMsg.append(", mLastWakeup=");
             TimeUtils.formatDuration(mLastWakeup - nowElapsed, errorMsg);
             errorMsg.append(", timerfd_gettime=" + getNextAlarm(mNativeData, ELAPSED_REALTIME));
             errorMsg.append("];");
         }
-        if (mNextWakeup < nowElapsed && mLastWakeup < (mNextWakeup - 30_000)) {
+        if (mNextWakeup < (nowElapsed - 10_000) && mLastWakeup < mNextWakeup) {
             stuck = true;
             errorMsg.append("[mNextWakeup=");
             TimeUtils.formatDuration(mNextWakeup - nowElapsed, errorMsg);
+            errorMsg.append(" set at ");
+            TimeUtils.formatDuration(mNextWakeUpSetAt, errorMsg);
             errorMsg.append(", mLastWakeup=");
             TimeUtils.formatDuration(mLastWakeup - nowElapsed, errorMsg);
             errorMsg.append(", timerfd_gettime="
