@@ -351,8 +351,16 @@ public class TextUtils {
     }
 
     /**
-     * String.split() returns [''] when the string to be split is empty. This returns []. This does
-     * not remove any empty strings from the result. For example split("a,", ","  ) returns {"a", ""}.
+     *
+     * This method yields the same result as {@code text.split(expression, -1)} except that if
+     * {@code text.isEmpty()} then this method returns an empty array whereas
+     * {@code "".split(expression, -1)} would have returned an array with a single {@code ""}.
+     *
+     * The {@code -1} means that trailing empty Strings are not removed from the result; for
+     * example split("a,", ","  ) returns {"a", ""}. Note that whether a leading zero-width match
+     * can result in a leading {@code ""} depends on whether your app
+     * {@link android.content.pm.ApplicationInfo#targetSdkVersion targets an SDK version}
+     * {@code <= 28}; see {@link Pattern#split(CharSequence, int)}.
      *
      * @param text the string to split
      * @param expression the regular expression to match
@@ -369,8 +377,16 @@ public class TextUtils {
     }
 
     /**
-     * Splits a string on a pattern. String.split() returns [''] when the string to be
-     * split is empty. This returns []. This does not remove any empty strings from the result.
+     * Splits a string on a pattern. This method yields the same result as
+     * {@code pattern.split(text, -1)} except that if {@code text.isEmpty()} then this method
+     * returns an empty array whereas {@code pattern.split("", -1)} would have returned an array
+     * with a single {@code ""}.
+     *
+     * The {@code -1} means that trailing empty Strings are not removed from the result;
+     * Note that whether a leading zero-width match can result in a leading {@code ""} depends
+     * on whether your app {@link android.content.pm.ApplicationInfo#targetSdkVersion targets
+     * an SDK version} {@code <= 28}; see {@link Pattern#split(CharSequence, int)}.
+     *
      * @param text the string to split
      * @param pattern the regular expression to match
      * @return an array of strings. The array will be empty if text is empty
