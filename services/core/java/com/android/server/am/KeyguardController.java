@@ -58,7 +58,7 @@ class KeyguardController {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "KeyguardController" : TAG_AM;
 
-    private final ActivityManagerService mService;
+    private final ActivityTaskManagerService mService;
     private final ActivityStackSupervisor mStackSupervisor;
     private WindowManagerService mWindowManager;
     private boolean mKeyguardShowing;
@@ -72,7 +72,7 @@ class KeyguardController {
     private SleepToken mSleepToken;
     private int mSecondaryDisplayShowing = INVALID_DISPLAY;
 
-    KeyguardController(ActivityManagerService service,
+    KeyguardController(ActivityTaskManagerService service,
             ActivityStackSupervisor stackSupervisor) {
         mService = service;
         mStackSupervisor = stackSupervisor;

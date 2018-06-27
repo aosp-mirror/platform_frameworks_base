@@ -824,7 +824,8 @@ class AppErrors {
                     mService.mUserController.getCurrentUserId()) != 0;
             final boolean crashSilenced = mAppsNotReportingCrashes != null &&
                     mAppsNotReportingCrashes.contains(proc.info.packageName);
-            if ((mService.canShowErrorDialogs() || showBackground) && !crashSilenced
+            if ((mService.mActivityTaskManager.canShowErrorDialogs() || showBackground)
+                    && !crashSilenced
                     && (showFirstCrash || showFirstCrashDevOption || data.repeating)) {
                 proc.crashDialog = dialogToShow = new AppErrorDialog(mContext, mService, data);
             } else {
@@ -901,7 +902,7 @@ class AppErrors {
 
         synchronized (mService) {
             // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
-            if (mService.mShuttingDown) {
+            if (mService.mActivityTaskManager.mShuttingDown) {
                 Slog.i(TAG, "During shutdown skipping ANR: " + app + " " + annotation);
                 return;
             } else if (app.isNotResponding()) {
@@ -1122,7 +1123,7 @@ class AppErrors {
 
             boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
-            if (mService.canShowErrorDialogs() || showBackground) {
+            if (mService.mActivityTaskManager.canShowErrorDialogs() || showBackground) {
                 dialogToShow = new AppNotRespondingDialog(mService, mContext, data);
                 proc.anrDialog = dialogToShow;
             } else {

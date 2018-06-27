@@ -2107,7 +2107,7 @@ public final class ActiveServices {
     private final boolean scheduleServiceRestartLocked(ServiceRecord r, boolean allowCancel) {
         boolean canceled = false;
 
-        if (mAm.isShuttingDownLocked()) {
+        if (mAm.mAtmInternal.isShuttingDown()) {
             Slog.w(TAG, "Not scheduling restart of crashed service " + r.shortName
                     + " - system is shutting down");
             return false;

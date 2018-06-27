@@ -230,7 +230,7 @@ class SafeActivityOptions {
 
         // Check permission for remote animations
         final RemoteAnimationAdapter adapter = options.getRemoteAnimationAdapter();
-        if (adapter != null && supervisor.mService.mAm.checkPermission(
+        if (adapter != null && supervisor.mService.checkPermission(
                 CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS, callingPid, callingUid)
                         != PERMISSION_GRANTED) {
             final String msg = "Permission Denial: starting " + getIntentString(intent)

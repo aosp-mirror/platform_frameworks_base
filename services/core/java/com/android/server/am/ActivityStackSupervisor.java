@@ -624,7 +624,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mInitialized = true;
         mRunningTasks = createRunningTasks();
         mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext, mHandler.getLooper());
-        mKeyguardController = new KeyguardController(mService.mAm, this);
+        mKeyguardController = new KeyguardController(mService, this);
 
         mLaunchParamsController = new LaunchParamsController(mService);
         mLaunchParamsController.registerDefaultModifiers(this);
@@ -912,7 +912,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         // result to an activity belonging to userId. Example case: a document
                         // picker for personal files, opened by a work app, should still get locked.
                         if (taskTopActivityIsUser(task, userId)) {
-                            mService.mAm.mActivityTaskManager.getTaskChangeNotificationController().notifyTaskProfileLocked(
+                            mService.getTaskChangeNotificationController().notifyTaskProfileLocked(
                                     task.taskId, userId);
                         }
                     }
@@ -1167,7 +1167,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
         if (changed) {
-            mService.mAm.notifyAll();
+            mService.mGlobalLock.notifyAll();
         }
     }
 
@@ -1197,7 +1197,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         if (changed) {
-            mService.mAm.notifyAll();
+            mService.mGlobalLock.notifyAll();
         }
     }
 
@@ -1218,7 +1218,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
         if (changed) {
-            mService.mAm.notifyAll();
+            mService.mGlobalLock.notifyAll();
         }
     }
 
@@ -1512,13 +1512,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
                 app.hasShownUi = true;
                 app.pendingUiClean = true;
-                app.forceProcessStateUpTo(mService.mAm.mTopProcessState);
+                app.forceProcessStateUpTo(mService.mTopProcessState);
                 // Because we could be starting an Activity in the system process this may not go
                 // across a Binder interface which would create a new Configuration. Consequently
                 // we have to always create a new Configuration here.
 
                 final MergedConfiguration mergedConfiguration = new MergedConfiguration(
-                        mService.mAm.getGlobalConfiguration(), r.getMergedOverrideConfiguration());
+                        mService.getGlobalConfiguration(), r.getMergedOverrideConfiguration());
                 r.setLastReportedConfiguration(mergedConfiguration);
 
                 logIfTransactionTooLarge(r.intent, r.icicle);
@@ -1752,7 +1752,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             ProcessRecord callerApp, ActivityRecord resultRecord, ActivityStack resultStack) {
         final boolean isCallerRecents = mService.getRecentTasks() != null
                 && mService.getRecentTasks().isCallerRecents(callingUid);
-        final int startAnyPerm = mService.mAm.checkPermission(START_ANY_ACTIVITY, callingPid,
+        final int startAnyPerm = mService.checkPermission(START_ANY_ACTIVITY, callingPid,
                 callingUid);
         if (startAnyPerm == PERMISSION_GRANTED || (isCallerRecents && launchingInTask)) {
             // If the caller has START_ANY_ACTIVITY, ignore all checks below. In addition, if the
@@ -1831,7 +1831,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         // Check if the caller has enough privileges to embed activities and launch to private
         // displays.
-        final int startAnyPerm = mService.mAm.checkPermission(INTERNAL_SYSTEM_WINDOW, callingPid,
+        final int startAnyPerm = mService.checkPermission(INTERNAL_SYSTEM_WINDOW, callingPid,
                 callingUid);
         if (startAnyPerm == PERMISSION_GRANTED) {
             if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
@@ -1853,7 +1853,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 return false;
             }
             // Check if the caller is allowed to embed activities from other apps.
-            if (mService.mAm.checkPermission(ACTIVITY_EMBEDDING, callingPid, callingUid)
+            if (mService.checkPermission(ACTIVITY_EMBEDDING, callingPid, callingUid)
                     == PERMISSION_DENIED && !uidPresentOnDisplay) {
                 if (DEBUG_TASKS) Slog.d(TAG, "Launch on display check:"
                         + " disallow activity embedding without permission.");
@@ -1926,8 +1926,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return ACTIVITY_RESTRICTION_NONE;
         }
 
-        if (mService.mAm.mAppOpsService.noteOperation(opCode, callingUid,
-                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+        if (mService.getAppOpsService().noteOperation(opCode, callingUid, callingPackage)
+                != AppOpsManager.MODE_ALLOWED) {
             if (!ignoreTargetSecurity) {
                 return ACTIVITY_RESTRICTION_APPOP;
             }
@@ -1960,7 +1960,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return ACTIVITY_RESTRICTION_NONE;
         }
 
-        if (mService.mAm.checkPermission(permission, callingPid, callingUid) == PERMISSION_DENIED) {
+        if (mService.checkPermission(permission, callingPid, callingUid) == PERMISSION_DENIED) {
             return ACTIVITY_RESTRICTION_PERMISSION;
         }
 
@@ -1969,8 +1969,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return ACTIVITY_RESTRICTION_NONE;
         }
 
-        if (mService.mAm.mAppOpsService.noteOperation(opCode, callingUid,
-                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+        if (mService.getAppOpsService().noteOperation(opCode, callingUid, callingPackage)
+                != AppOpsManager.MODE_ALLOWED) {
             return ACTIVITY_RESTRICTION_APPOP;
         }
 
@@ -3517,7 +3517,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 long timeRemaining = endTime - System.currentTimeMillis();
                 if (timeRemaining > 0) {
                     try {
-                        mService.mAm.wait(timeRemaining);
+                        mService.mGlobalLock.wait(timeRemaining);
                     } catch (InterruptedException e) {
                     }
                 } else {
@@ -3599,7 +3599,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     void checkReadyForSleepLocked(boolean allowDelay) {
-        if (!mService.mAm.isSleepingOrShuttingDownLocked()) {
+        if (!mService.isSleepingOrShuttingDownLocked()) {
             // Do not care.
             return;
         }
@@ -3616,8 +3616,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (mGoingToSleep.isHeld()) {
             mGoingToSleep.release();
         }
-        if (mService.mAm.mShuttingDown) {
-            mService.mAm.notifyAll();
+        if (mService.mShuttingDown) {
+            mService.mGlobalLock.notifyAll();
         }
     }
 
@@ -3884,7 +3884,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 final ActivityStack stack = s.getStack();
                 final boolean shouldSleepOrShutDown = stack != null
                         ? stack.shouldSleepOrShutDownActivities()
-                        : mService.mAm.isSleepingOrShuttingDownLocked();
+                        : mService.isSleepingOrShuttingDownLocked();
                 if (!waitingVisible || shouldSleepOrShutDown) {
                     if (!processPausingActivities && s.isState(PAUSING)) {
                         // Defer processing pausing activities in this iteration and reschedule
@@ -4329,7 +4329,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     int displayState = activityDisplay.mDisplay.getState();
                     if (displayState == Display.STATE_OFF && activityDisplay.mOffToken == null) {
                         activityDisplay.mOffToken =
-                                mService.mAm.acquireSleepToken("Display-off", displayId);
+                                mService.acquireSleepToken("Display-off", displayId);
                     } else if (displayState == Display.STATE_ON
                             && activityDisplay.mOffToken != null) {
                         activityDisplay.mOffToken.release();
@@ -4362,7 +4362,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (display != null) {
             display.mAllSleepTokens.remove(token);
             if (display.mAllSleepTokens.isEmpty()) {
-                mService.mAm.updateSleepIfNeededLocked();
+                mService.updateSleepIfNeededLocked();
             }
         }
     }
@@ -4376,7 +4376,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
         display.mAllSleepTokens.clear();
 
-        mService.mAm.updateSleepIfNeededLocked();
+        mService.updateSleepIfNeededLocked();
     }
 
     private StackInfo getStackInfo(ActivityStack stack) {
@@ -4673,7 +4673,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 } break;
                 case SLEEP_TIMEOUT_MSG: {
                     synchronized (mService.mGlobalLock) {
-                        if (mService.mAm.isSleepingOrShuttingDownLocked()) {
+                        if (mService.isSleepingOrShuttingDownLocked()) {
                             Slog.w(TAG, "Sleep timeout!  Sleeping now.");
                             checkReadyForSleepLocked(false /* allowDelay */);
                         }

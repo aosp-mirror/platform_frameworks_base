@@ -213,4 +213,7 @@ public abstract class ActivityManagerInternal {
      * Returns {@code true} if {@code uid} is running an activity from {@code packageName}.
      */
     public abstract boolean hasRunningActivity(int uid, @Nullable String packageName);
+
+    public abstract void updateOomAdj();
+    public abstract void sendForegroundProfileChanged(int userId);
 }

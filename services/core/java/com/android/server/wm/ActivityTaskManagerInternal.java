@@ -266,4 +266,12 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onProcessAdded(WindowProcessController proc);
     public abstract void onProcessRemoved(String name, int uid);
     public abstract void onCleanUpApplicationRecord(WindowProcessController proc);
+    public abstract int getTopProcessState();
+
+    public abstract boolean isSleeping();
+    public abstract boolean isShuttingDown();
+    public abstract boolean shuttingDown(boolean booted, int timeout);
+    public abstract void enableScreenAfterBoot(boolean booted);
+    public abstract boolean showStrictModeViolationDialog();
+    public abstract void showSystemReadyErrorDialogsIfNeeded();
 }
