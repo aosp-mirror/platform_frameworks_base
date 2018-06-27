@@ -71,10 +71,10 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Ukataaji wa simu zinazokera zisizohitajika"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Kuonyeshwa kwa nambari inayopiga"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Usinisumbue"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Chaguo msingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo: Imezuiliwa"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Chaguo msingi za kitambulisho cha mpigaji simu huwa kuzuiwa. Simu ifuatayo: Haijazuiliwa"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Chaguo msingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo:Imezuiliwa"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Chaguo msingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo: Haijazuiliwa"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Chaguomsingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo: Imezuiliwa"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Chaguomsingi za kitambulisho cha mpigaji simu huwa kuzuiwa. Simu ifuatayo: Haijazuiliwa"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Chaguomsingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo:Imezuiliwa"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Chaguomsingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo: Haijazuiliwa"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Huduma haitathminiwi."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Hauwezi kubadilisha mpangilio wa kitambulisho cha anayepiga."</string>
     <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Hakuna huduma ya data kwa vifaa vya mkononi"</string>
@@ -274,6 +274,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Mahali"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"itambue mahali kifaa hiki kilipo"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; itambue mahali kifaa kilipo?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Programu itafikia tu data ya mahali ulipo unaipotumia."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Ungependa kuruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie data ya mahali kifaa hiki kilipo kila wakati?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Programu itaweza kufikia data ya mahali kifaa kilipo hata wakati huitumii."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ifikie kalenda yako"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ifikie kalenda yako?"</string>
@@ -400,8 +403,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Programu hii inaweza kuongeza, kuondoa au kubadilisha matukio kwenye simu yako. Pogramu hii inaweza kutuma ujumbe unaoonekana kuwa umetoka kwa wamiliki wa kalenda au kurekebisha matukio bila kuwataarifu wamiliki."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"fikia amri za ziada za mtoa huduma ya mahali"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ruhusu programu kufikia amri za ziada za mtoa huduma za mahali. Hii huenda ikaruhusu programu ikatize matumizi ya GPS au vyanzo vingine vya eneo."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"kufikia mahali mahususi ikiwa tu programu imefunguliwa kwenye skrini"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Programu hii inaweza kupata mahali halisi ikiwa tu umeifungua kwenye skrini. Ni lazima uwashe huduma hizi za mahali na zipatikane kwenye simu yako ili programu iweze kuzitumia. Hatua hii inaweza kuongeza utumiaji wa betri."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"fikia mahali karibu na hapo (inategemea mtandao)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi. Huduma hizi za mahali lazima ziwashwe na zipatikane kwenye kompyuta yako kibao ili programu iweze kuzitumia."</string>
@@ -516,6 +518,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Aikoni ya kitambulisho"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"dhibiti maunzi ya kuthibitisha uso"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Huruhusu programu iombe njia za kuongeza na kufuta violezo vya uso vitakavyotumiwa."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"tumia maunzi ya kuthibistiha uso"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Huruhusu programu ithibitishe uso kwa kutumia maunzi ya kuthibitisha"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Imeshindwa kuchakata uso. Tafadhali jaribu tena."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Uso unang\'aa sana. Tafadhalia punguza mwangaza."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Uso hauna mwangaza wa kutosha. Tafadhali ongeza mwangaza."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Tafadhali sogeza kitambuzi mbali na uso."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Tafadhali sogeza kitambuzi karibu na uso."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Tafadhali sogeza kitambuzi juu."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Tafadhali sogeza kitambuzi chini."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Tafadhali sogeza kitambuzi kulia."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Tafadhali sogeza kitambuzi kushoto."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Tafadhali angalia kitambuzi."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Haikutambua uso wowote"</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Weka uso vizuri mbele ya kifaa."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Maunzi ya uso hayapatikani."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Muda wa kutambua uso umeisha. Jaribu tena."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Huwezi kuhifadhi uso."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Utendaji wa kitambulisho umeghairiwa."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Umejaribu mara nyingi mno. Jaribu tena baadaye."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Umejaribu mara nyingi mno. Kitambuzi cha uso kimezimwa."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Jaribu tena."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Hujasajili uso wowote."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Kifaa hiki hakina kitambuzi kinachothibitisha uso"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Uso wa <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Aikoni ya uso"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"kusoma mipangilio ya usawazishaji"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Inaruhusu programu kusoma mipangilio ya upatanishi wa akaunti. Kwa mfano, huku kunaweza kuamua kama programu ya Watu imepatanishwa na akaunti."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"kuwasha na kuzima usawazishaji"</string>
@@ -773,9 +806,9 @@
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Umejaribu kufungua kompyuta kibao kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukijaribu tena mara <xliff:g id="NUMBER_1">%2$d</xliff:g> bila mafanikio, kompyuta ndogo itarejeshwa kwenye mipangilio iliyotoka nayo kiwandani na data yote iliyomo itafutwa."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Umekosea majaribio ya kufungua runinga mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukikosea majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> zaidi, runinga itarejeshwa katika hali iliyotoka nayo kiwandani na data yote ya watumiaji itafutwa."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Umejaribu kufungua simu kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukijaribu tena mara <xliff:g id="NUMBER_1">%2$d</xliff:g> bila mafanikio, simu itarejeshwa kwenye mipangilio iliyotoka nayo kiwandani na data yote iliyomo itafutwa."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Kompyuta ndogo haitaweza kuwekwa upya kwa kiwanda chaguo msingi."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Kompyuta ndogo haitaweza kuwekwa upya kwa kiwanda chaguomsingi."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Umekosea majaribio ya kufungua runinga mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa runinga itarejeshwa katika mipangilio iliyotoka nayo kiwandani."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Kompyuta ndogo haitaweza kuwekwa upya kwa kiwanda chaguo msingi."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Kompyuta ndogo haitaweza kuwekwa upya kwa kiwanda chaguomsingi."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Jaribu tena kwa sekunde <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Umesahau mchoro?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Fungua akaunti"</string>
@@ -1065,9 +1098,9 @@
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Piga picha ukitumia"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Piga picha ukitumia %1$s"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Piga picha"</string>
-    <string name="alwaysUse" msgid="4583018368000610438">"Tumia kama chaguo msingi la kitendo hiki."</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"Tumia kama chaguomsingi la kitendo hiki."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Tumia programu tofauti"</string>
-    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Futa chaguo msingi katika mipangilio ya Mfumo &gt; Apps &gt; iliyopakuliwa."</string>
+    <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Futa chaguomsingi katika mipangilio ya Mfumo &gt; Apps &gt; iliyopakuliwa."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Chagua kitendo"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Chagua programu ya kifaa cha USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"Hakuna programu zinazoweza kufanya tendo hili."</string>
@@ -1142,8 +1175,8 @@
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Sauti ya simu"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Sauti ya faili"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Sauti ya arifa"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"Mlio chaguo msingi"</string>
-    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Chaguo msingi (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"Mlio chaguomsingi"</string>
+    <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Chaguomsingi (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Hamna"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Toni za mlio"</string>
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Sauti za kengele"</string>
@@ -1176,6 +1209,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi haina muunganisho wa intaneti"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Gusa ili upate chaguo"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Mabadiliko kwenye mipangilio ya mtandao-hewa"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Bendi ya mtandao-hewa wako imebadilika."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Kifaa hiki hakitumii mapendeleo yako ya GHz 5 pekee. Badala yake, kifaa hiki kitatumia bendi ya GHz 5 itakapopatikana."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Sasa inatumia <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Kifaa hutumia <xliff:g id="NEW_NETWORK">%1$s</xliff:g> wakati <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> haina intaneti. Huenda ukalipishwa."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Imebadilisha mtandao kutoka <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na sasa inatumia <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1540,12 +1576,12 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Umeingiza nenosiri lako kwa makosa mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Umeingiza nenosiri lako kwa makosa mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Umechora ruwaza yako ya kufunga kwa makosa mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> zaidi yasiyofaulu, kompyuta ndogo itarejeshwa katika mfumo chaguo msingi ilivyotoka kiwandani data yote ya mtumiaji itapotea."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> zaidi yasiyofaulu, kompyuta ndogo itarejeshwa katika mfumo chaguomsingi ilivyotoka kiwandani data yote ya mtumiaji itapotea."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Umekosea majaribio ya kufungua runinga mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukikosea majaribio mengine <xliff:g id="NUMBER_1">%2$d</xliff:g>, runinga itarejeshwa katika hali iliyotoka nayo kiwandani na data yote ya watumiaji itafutwa."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Umejaribu kufungua simu kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> zaidi yasiyofaulu, simu itarejeshwa katika mfumo chaguo msingi ilivyotoka kiwandani na data yote ya mtumiaji itapotea."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa kompyuta ndogo itarejeshwa katika mfumo chaguo msingi ilivyotoka kiwandani."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Umejaribu kufungua simu kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> zaidi yasiyofaulu, simu itarejeshwa katika mfumo chaguomsingi ilivyotoka kiwandani na data yote ya mtumiaji itapotea."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa kompyuta ndogo itarejeshwa katika mfumo chaguomsingi ilivyotoka kiwandani."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Umekosea majaribio ya kufungua runinga mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa runinga itarejeshwa katika hali iliyotoka nayo kiwandani."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Umejaribu kufungua simu kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa simu  itarejeshwa katika mfumo chaguo msingi ilivyotoka kiwandani."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Umejaribu kufungua simu kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa simu  itarejeshwa katika mfumo chaguomsingi ilivyotoka kiwandani."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Umekosea katika kuweka mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> bila kufaulu, utaombwa kufungua kompyuta yako ndogo kwa kutumia akaunti yako ya barua pepe.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Umekosea kuchora mchoro wa kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Ukikosea majaribio mengine <xliff:g id="NUMBER_1">%2$d</xliff:g>, utaombwa ufungue runinga yako ukitumia akaunti ya barua pepe.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Umekosea kuchora mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%2$d</xliff:g> yasiyofaulu, utaombwa kufungua simu yako kwa kutumia akaunti ya barua pepe.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%3$d</xliff:g>."</string>

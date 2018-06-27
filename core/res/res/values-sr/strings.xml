@@ -279,6 +279,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Локација"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"приступи локацији овог уређаја"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; приступа локацији овог уређаја?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Апликација ће имати приступ локацији само док користите апликацију."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; приступа локацији овог уређаја?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Апликација ће увек имати приступ локацији, чак и када не користите апликацију."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календар"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"приступи календару"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Желите ли да омогућите да &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; приступа календару?"</string>
@@ -405,8 +408,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Ова апликацији може да додаје, уклања или мења догађаје из календара на телефону. Ова апликација може да шаље поруке које изгледају као да их шаљу власници календара или да мења догађаје без знања власника."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"приступ додатним командама добављача локације"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Омогућава апликацији да приступа додатним командама даваоца услуга локације. То може да омогући апликацији да утиче на рад GPS-а или других извора локације."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"приступ прецизној локацији само у првом плану"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Ова апликација може да одреди вашу тачну локацију само када ради у првом плану. Ове услуге локације морају да буду укључене и доступне на телефону да би апликација могла да их користи. То може да повећа потрошњу батерије."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"приступ приближној локацији (утврђена преко мреже)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ова апликација може да приступи вашој локацији помоћу извора мреже, као што су мобилни предајници и Wi-Fi мреже. Ове услуге локације морају да буду укључене и доступне на таблету да би апликација могла да их користи."</string>
@@ -521,6 +523,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Икона отиска прста"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"управљање хардв. за потврду идентитета помоћу лица"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Дозвољава да апликација активира методе за додавање и брисање шаблона лица ради коришћења."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"коришћење хардв. за потврду идентитета помоћу лица"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Дозвољава да апликација користи хардвер за потврду идентитета помоћу лица"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Обрада лица није успела. Пробајте поново."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Лице је пресветло. Пробајте са слабијим осветљењем."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Лице је исувише тамно. Откријте извор светла."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Удаљите сензор од лица."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Приближите сензор лицу."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Померите сензор навише."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Померите сензор наниже."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Померите сензор удесно."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Померите сензор улево."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Гледајте у сензор."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Није откривено ниједно лице."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Задржите лице испред уређаја без померања."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Харвдер за лице није доступан."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Истекло је време за проверу лица. Пробајте поново."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Није могуће сачувати лице."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Обрада лица је отказана."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Превише покушаја. Пробајте поново касније."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Више покушаја. Потврда идентитета је онемогућена."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Пробајте поново."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Није регистровано ниједно лице."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Овај уређај нема сензор за потврду идентитета помоћу лица"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Лице <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Икона лица"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"читање подешавања синхронизације"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Дозвољава апликацији да чита подешавања синхронизације за налог. На пример, овако може да се утврди да ли је апликација Људи синхронизована са налогом."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"укључивање и искључивање синхронизације"</string>
@@ -1200,6 +1233,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi нема приступ интернету"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Додирните за опције"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Промене подешавања за хотспот"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Опсег хотспота је промењен."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Овај уређај не подржава подешавање само за 5 GHz. Уређај ће користити опсег од 5 GHz када буде доступан."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Прешли сте на тип мреже <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Уређај користи тип мреже <xliff:g id="NEW_NETWORK">%1$s</xliff:g> када тип мреже <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> нема приступ интернету. Можда ће се наплаћивати трошкови."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Прешли сте са типа мреже <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> на тип мреже <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

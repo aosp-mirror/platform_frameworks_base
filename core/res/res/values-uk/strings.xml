@@ -282,6 +282,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Геодані"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"доступ до геоданих пристрою"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до геоданих пристрою?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Додаток матиме доступ до геоданих, лише коли ви ним користуєтеся."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Завжди надавати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до геоданих цього пристрою?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Додаток матиме доступ до геоданих, навіть коли ви ним не користуєтеся."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календар"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"отримувати доступ до календаря"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до календаря?"</string>
@@ -408,8 +411,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Цей додаток може додавати, вилучати та змінювати події календаря на вашому телефоні. Він також може надсилати повідомлення від імені власників календаря або редагувати події без відома власників."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"отр. дост. до додат. команд пров. місцезн."</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Додаток отримуватиме доступ до додаткових команд постачальника геоданих. Можливе втручання додатка в роботу GPS чи інших джерел геоданих."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"отримувати доступ до даних про точне місцезнаходження лише в активному режимі"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Цей додаток може отримувати дані про ваше точне місцезнаходження лише в активному режимі. Щоб додаток користувався службами локації, вони мають бути наявні й увімкнені на вашому телефоні. Через це може швидше розряджатись акумулятор."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"отримувати дані про приблизне місцезнаходження (на основі мережі)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Цей додаток може отримувати дані про ваше місцезнаходження на основі джерел мережі, як-от антен мобільного зв’язку та мереж Wi-Fi. Щоб додаток міг користуватися цими службами локації, вони мають бути доступними й увімкненими на вашому планшеті."</string>
@@ -524,6 +526,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Значок відбитка пальця"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"керувати обладнанням для автентифікації облич"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Додаток може активувати способи додавання й видалення шаблонів облич."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"застосовувати обладнання для автентифікації облич"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Додаток може застосовувати обладнання для автентифікації облич"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Не вдалося розпізнати обличчя. Повторіть спробу."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Обличчя засвітле. Спробуйте знизити яскравість."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Обличчя затемне. Не заступайте джерело світла."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Перемістіть сканер далі від обличчя."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Перемістіть сканер ближче до обличчя."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Перемістіть сканер вище."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Перемістіть сканер нижче."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Перемістіть сканер праворуч."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Перемістіть сканер ліворуч."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Дивіться на сканер."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Обличчя не виявлено."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Тримайте обличчя нерухомо перед пристроєм."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Обладнання для сканування облич недоступне."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Час очікування обличчя минув. Повторіть спробу."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Не вдається зберегти обличчя."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Дію з обличчям скасовано."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Забагато спроб. Повторіть пізніше."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Забагато спроб. Автентифікацію обличчя вимкнено."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Повторіть спробу."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Немає зареєстрованих облич."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"На цьому пристрої немає сканера для автентифікації облич"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Обличчя <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Значок обличчя"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"читати налаштування синхронізації"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Дозволяє програмі читати налаштування синхронізації для облікового запису, наприклад, визначати, чи програма Люди синхронізується з обліковим записом."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"вмикати й вимикати синхронізацію"</string>
@@ -1222,6 +1255,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Мережа Wi-Fi не має доступу до Інтернету"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Торкніться, щоб відкрити опції"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Зміни в налаштуваннях точки доступу"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Діапазон точки доступу змінено."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"На цьому пристрої не підтримується налаштування лише 5 ГГц. Замість цього буде використовуватися діапазон 5 ГГц, якщо доступно."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Пристрій перейшов на мережу <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Коли мережа <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> не має доступу до Інтернету, використовується <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Може стягуватися плата."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Пристрій перейшов з мережі <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> на мережу <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

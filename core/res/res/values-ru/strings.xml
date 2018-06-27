@@ -278,22 +278,25 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Переключиться на рабочий профиль"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контакты"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"доступ к контактам"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Разрешить приложению &lt;b&gt;\"<xliff:g id="APP_NAME">%1$s</xliff:g>\"&lt;/b&gt; доступ к контактам?"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к контактам?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Местоположение"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"доступ к данным о местоположении устройства"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Разрешить приложению &lt;b&gt;\"<xliff:g id="APP_NAME">%1$s</xliff:g>\"&lt;/b&gt; доступ к данным о местоположении устройства?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к данным о местоположении устройства?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Доступ будет открыт, только когда вы пользуетесь приложением."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Всегда разрешать приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к геоданным устройства?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Доступ будет открыт, даже когда вы не пользуетесь приложением."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календарь"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"доступ к календарю"</string>
-    <string name="permgrouprequest_calendar" msgid="289900767793189421">"Разрешить приложению &lt;b&gt;\"<xliff:g id="APP_NAME">%1$s</xliff:g>\"&lt;/b&gt; доступ к календарю?"</string>
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к календарю?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"отправлять и просматривать SMS-сообщения"</string>
-    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Разрешить приложению &lt;b&gt;\"<xliff:g id="APP_NAME">%1$s</xliff:g>\"&lt;/b&gt; отправлять и просматривать SMS?"</string>
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; отправлять и просматривать SMS?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Хранилище"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"доступ к фото, мультимедиа и файлам на вашем устройстве"</string>
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"Разрешить приложению &lt;b&gt;\"<xliff:g id="APP_NAME">%1$s</xliff:g>\"&lt;/b&gt; доступ к фото, мультимедиа и файлам на устройстве?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"записывать аудио"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Разрешить приложению &lt;b&gt;\"<xliff:g id="APP_NAME">%1$s</xliff:g>\"&lt;/b&gt; записывать аудио?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; записывать аудио?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"снимать фото и видео"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Разрешить приложению &lt;b&gt;\"<xliff:g id="APP_NAME">%1$s</xliff:g>\"&lt;/b&gt; снимать фото и видео?"</string>
@@ -302,7 +305,7 @@
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к списку вызовов?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"осуществлять вызовы и управлять ими"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Разрешить приложению &lt;b&gt;\"<xliff:g id="APP_NAME">%1$s</xliff:g>\"&lt;/b&gt; совершать звонки и управлять ими?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; совершать звонки и управлять ими?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Нательные датчики"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"доступ к данным датчиков о состоянии организма"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Разрешить приложению &lt;b&gt;\"<xliff:g id="APP_NAME">%1$s</xliff:g>\"&lt;/b&gt; доступ к данным датчиков о состоянии организма?"</string>
@@ -408,8 +411,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Приложение может добавлять, удалять или изменять мероприятия в календаре на телефоне. Оно также может отправлять сообщения от имени владельцев календаря, а также изменять мероприятия без ведома владельца."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"Доступ к дополнительным командам управления источниками геоданных"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Доступ к дополнительным командам управления источниками геоданных и вмешательство в работу системы GPS или других источников геоданных."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"Доступ к точному местоположению только в фоновом режиме"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Приложение может получать сведения о вашем точном местоположении только в фоновом режиме. Для этого необходимо включить соответствующие параметры на телефоне и разрешить использовать геоданные. Может увеличиться расход заряда батареи."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"Доступ к примерному местоположению (по координатам сети)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Приложение может получать сведения о вашем местоположении от сетевых источников, таких как вышки сотовой связи и точки доступа Wi-Fi. Необходимо включить соответствующие параметры на планшете и разрешить приложению использовать геоданные."</string>
@@ -524,6 +526,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Значок отпечатка пальца"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"Управлять оборудованием для распознавания лиц"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Приложение сможет добавлять и удалять шаблоны лиц."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"Использовать оборудование для распознавания лиц"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Приложение сможет использовать распознающее оборудование для аутентификации."</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Не удалось распознать лицо. Повторите попытку."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Лицо слишком яркое. Притушите свет."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Лицо слишком темное. Сделайте свет ярче."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Уберите устройство дальше от лица"</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Поднесите устройство ближе к лицу"</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Поднимите устройство выше"</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Опустите устройство ниже"</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Сдвиньте устройство правее"</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Сдвиньте устройство левее"</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Посмотрите в камеру устройства"</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Лица не обнаружены"</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Расположите лицо напротив устройства"</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Оборудование для распознавания лица недоступно"</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Превышено время ожидания. Повторите попытку."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Невозможно сохранить распознанное лицо"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Распознавание отменено"</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Слишком много попыток. Повторите позже."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Слишком много попыток. Сканер отключен."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Попробуйте ещё раз"</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Нет зарегистрированных лиц"</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"На этом устройстве нет сканера для распознавания лица"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Лицо <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Значок лица"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Просмотр настроек синхронизации"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Приложение сможет просматривать настройки синхронизации аккаунта, например определять, включена ли синхронизация для приложения \"Контакты\"."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"Включение/выключение синхронизации"</string>
@@ -1222,6 +1255,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Сеть Wi-Fi не подключена к Интернету"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Нажмите, чтобы показать варианты."</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Изменения в настройках точки доступа"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Частота точки доступа изменена."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Устройство не может работать только на частоте 5 ГГц. Эта частота будет использоваться, когда это возможно."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Новое подключение: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Устройство использует <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, если подключение к сети <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> недоступно. Может взиматься плата за передачу данных."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Устройство отключено от сети <xliff:g id="NEW_NETWORK">%2$s</xliff:g> и теперь использует <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>"</string>

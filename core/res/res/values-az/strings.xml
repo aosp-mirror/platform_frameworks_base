@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Yer"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"cihazın yerini bilmək"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinə bu cihazın məkanına daxil olmaq icazəsi verilsin?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Tətbiq yalnız ondan istifadə etiyiniz zaman məkanı əldə edə bilər."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinə bu cihazın məkanına daxil olmaq icazəsi verilsin?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Tətbiq hətta ondan istifadə etmədiyiniz zaman belə məkanı əldə edə bilər."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Təqvim"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"təqvimə daxil olun"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinə təqvimə daxil olmaq icazəsi verilsin?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Bu tətbiq telefonunuzda təqvim tədbirləri əlavə edə, silə və ya dəyişiklik edə bilər. Həmçinin bu tətbiq təqvim sahiblərindən gəlmə ehtimalı olan mesajları göndərə və ya sahiblərinə bildirmədən tədbirlərdə dəyişiklik edə bilər."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"əlavə məkan provayderi əmrlərinə çıxış"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Tətbiqə ekstra məkan provayder əmrlərinə girişə imkan verir. Bu, tətbiqə GPS və ya digər lokal mənbələrlə əməliyyata müdaxiləyə imkan verə bilər."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"yalnız ön planda dəqiq məkana daxil olun"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Bu tətbiq yalnız ön fonda olduqda dəqiq məkanınızı əldə edə bilər. Tətbiqin bunlardan istifadə etməsi üçün bu məkan xidmətləri aktiv edilməlidir və telefonda əlçatan olmalıdır. Bu, batareya sərfiyyatını artıra bilər."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"təxmini məkana (şəbəkə əsaslı) giriş"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Bu tətbiq mobil qüllələr və Wi-Fi şəbəkələri kimi şəbəkə mənbələrinin əassında əkanınızı əldə edə bilər. Bu məkan xidmətləri aktiv edilməlidir və planşetdə tətbiq tərəfindən istifadə üçün əlçatan olmalıdır."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Barmaq izi ikonası"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"üz identifikasiyası proqramını idarə edin"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Proqramdan istifadə üçün barmaq izi şablonlarını əlavə etmək və silmək məqsədilə üsullara müraciət etməyə imkan verir."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"üz identifikasiyası proqramından istifadə edin"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Tətbiqin üz identifikasiyası proqramından identifikasiya zamanı istifadə etməsinə icazə verir"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Üz tanınmadı. Yenidən cəhd edin."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Üz çox parlaqdır. Daha zəif işıqda sınayın."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Üz çox tünddür. İşığı ortaya çıxarın."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Sensoru üzdən kənara gətirin."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Sensoru üzə biraz da yaxınlaşdırın."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Sensoru daha yuxarı gətirin."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Sensoru daha aşağı gətirin."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Sensoru sağa gətirin."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Sensoru sola gətirin."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Sensora baxın."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Üz aşkarlanmadı."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Üzü cihazın qarşısında sabit saxlayın."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Üz proqramı əlçatan deyil."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Üz proqramı taymerinin vaxtı bitdi. Yenidən cəhd edin."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Üz bərpa edilmədi."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Üz əməliyyatı ləğv edildi."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Həddindən çox cəhd. Sonraya saxlayın."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Həddindən çox cəhd. Üz identifikasiyası deaktiv edildi."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Yenidən cəhd edin."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Üz qeydə alınmayıb."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Bu cihazda üz identifikasiyası sensoru yoxdur."</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Üz <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Üz işarəsi"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"sinx ayarlarını oxu"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Tətbiqə hesablar üçün sinxronizasiya nizamlarını oxuma icazəsi verir. Məsələn, bu Şəxslər tətbiqinin sinxronizə olunub-olunmadığını təyin edə bilər."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"sinxronizasiyaya davam edir və onu söndürür"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi şəbəkəsinin internetə girişi yoxdur"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Seçimlər üçün tıklayın"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Hotspot ayarlarınızda dəyişiklik"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Hotspot qrupu dəyişdi."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Bu cihaz yalnız 5GHz üçün tərcihinizi dəstəkləmir. Əvəzinə əlçatan olduqda bu cihaz 5GHz qrupundan istifadə edəcək."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> şəbəkə növünə keçirildi"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> şəbəkəsinin internetə girişi olmadıqda, cihaz <xliff:g id="NEW_NETWORK">%1$s</xliff:g> şəbəkəsini istifadə edir. Xidmət haqqı tutula bilər."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> şəbəkəsindən <xliff:g id="NEW_NETWORK">%2$s</xliff:g> şəbəkəsinə keçirildi"</string>

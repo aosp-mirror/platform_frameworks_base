@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"مقام"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"اس آلہ کے مقام تک رسائی حاصل کریں"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; کو اس آلہ کے مقام تک رسائی کی اجازت دیں؟"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"جب آپ ایپ استعمال کریں گے تبھی ایپ کو مقام تک رسائی حاصل ہوگی۔"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"‏‎&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;‎ کو ہمیشہ اس آلہ کے مقام تک رسائی کرنے کی اجازت دیں؟"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"اگرچہ آپ ایپ استعمال نہ کر رہے ہوں تب بھی ایپ کو ہمیشہ مقام تک رسائی حاصل ہوگی۔"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"کیلنڈر"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"اپنے کیلنڈر تک رسائی حاصل کریں"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; کو آپ کے کیلنڈر تک رسائی کی اجازت دیں؟"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"یہ اپپ آپ کے فون پر کیلنڈر ایونٹس کو شامل، ہٹا یا ترمیم کر سکتی ہے۔ یہ ایپ وہ پیغامات بھیج سکتی ہے جو کیلنڈر کے مالکان کی جانب سے آنے والے معلوم ہو سکتے ہیں یا ان مالکان کو اطلاع دیے بغیر ایونٹس تبدیل کر سکتی ہے۔"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"اضافی مقام فراہم کنندہ کی کمانڈز تک رسائی حاصل کریں"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏ایپ کو اضافی مقام فراہم کنندہ کی کمانڈز تک رسائی حاصل کرنے کی اجازت دیتی ہے۔ یہ ایپ کو GPS یا دوسرے مقام کے مآخذ کے عمل کے ساتھ مداخلت کرنے کی اجازت دے سکتی ہے۔"</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"صرف پیش منظر میں درست مقام تک رسائی حاصل کریں"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"یہ ایپ جب پس منظر میں ہوتی ہے تبھی یہ آپ کا صحیح مقام حاصل کر سکتی ہے۔ ایپ کو ان مقام کی سروسز کو استعمال کر سکنے کیلئے ان کا آن ہونا اور آپ کے فون پر دستیاب ہونا ضروری ہے۔"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"تخمینی مقام تک رسائی حاصل کریں (نیٹ ورک پر مبنی)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"‏نیٹ ورک مآخذات جیسے کہ سیل ٹاورز اور Wi-Fi نیٹ ورکس کی بنیاد پر یہ ایپ آپ کا مقام حاصل کر سکتی ہے۔ ایپ کو ان مقام کی سروسز کو استعمال کرنے کیلئے ان کا آن ہونا اور آپ کے ٹیبلیٹ پر دستیاب ہونا ضروری ہے۔"</string>
@@ -518,6 +520,64 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"فنگر پرنٹ آئیکن"</string>
+    <!-- no translation found for permlab_manageFace (2137540986007309781) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFace (8919637120670185330) -->
+    <skip />
+    <!-- no translation found for permlab_useFaceAuthentication (8996134460546804535) -->
+    <skip />
+    <!-- no translation found for permdesc_useFaceAuthentication (5011118722951833089) -->
+    <skip />
+    <!-- no translation found for face_acquired_insufficient (5901287247766106330) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (610606792381297174) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (7229162716976778371) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1980310037427755293) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (4494571381828850007) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (228411096134808372) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (4539774649296349109) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (1650292067226118760) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (2712489669456176505) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8344973502980415859) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (5707782294589511391) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_steady (3722829465011040042) -->
+    <skip />
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <!-- no translation found for face_error_hw_not_available (6255891785768984615) -->
+    <skip />
+    <!-- no translation found for face_error_timeout (4014326147867150054) -->
+    <skip />
+    <!-- no translation found for face_error_no_space (8224993703466381314) -->
+    <skip />
+    <!-- no translation found for face_error_canceled (283945501061931023) -->
+    <skip />
+    <!-- no translation found for face_error_lockout (3407426963155388504) -->
+    <skip />
+    <!-- no translation found for face_error_lockout_permanent (8198354656746088890) -->
+    <skip />
+    <!-- no translation found for face_error_unable_to_process (238761109287767270) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (9166792142679691323) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (4737289254517095671) -->
+    <skip />
+    <!-- no translation found for face_name_template (7004562145809595384) -->
+    <skip />
+  <string-array name="face_error_vendor">
+  </string-array>
+    <!-- no translation found for face_icon_content_description (4024817159806482191) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"مطابقت پذیری کی ترتیبات پڑھیں"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"‏ایپ کو کسی اکاؤنٹ کیلئے مطابقت پذیری کی ترتیبات پڑھنے کی اجازت دیتا ہے۔ مثلا، یہ تعین کرسکتا ہے کہ آیا People ایپ کسی اکاؤنٹ کے ساتھ مطابقت پذیر ہے۔"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"مطابقت پذیری آن اور آف ٹوگل کریں"</string>
@@ -1178,6 +1238,12 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"‏Wi-Fi کو انٹرنیٹ تک رسائی نہیں ہے"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"اختیارات کیلئے تھپتھپائیں"</string>
+    <!-- no translation found for wifi_softap_config_change (8475911871165857607) -->
+    <skip />
+    <!-- no translation found for wifi_softap_config_change_summary (7601233252456548891) -->
+    <skip />
+    <!-- no translation found for wifi_softap_config_change_detailed (8022936822860678033) -->
+    <skip />
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> پر سوئچ ہو گیا"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"جب <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> کو انٹرنیٹ تک رسائی نہیں ہوتی ہے تو آلہ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> کا استعمال کرتا ہے۔ چارجز لاگو ہو سکتے ہیں۔"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> سے <xliff:g id="NEW_NETWORK">%2$s</xliff:g> پر سوئچ ہو گیا"</string>

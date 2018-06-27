@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"स्थान"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"यस यन्त्रको स्थानमाथि पहुँच"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; लाई यो यन्त्रको स्थानमाथि पहुँच राख्न दिने हो?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"तपाईं उक्त अनुप्रयोग प्रयोग गरिरहेका बेलामा त्यससँग स्थानमाथिको पहुँच रहने छ।"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; लाई यो यन्त्रको स्थानमाथि पहुँच राख्न दिने हो?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"तपाईं उक्त अनुप्रयोग प्रयोग नगरिरहेका बेलामा पनि त्यससँग स्थानमाथिको पहुँच रहने छ।"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"पात्रो"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"तपाईंको पात्रोमाथि पहुँच गर्नुहोस्"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; लाई आफ्नो पात्रोमाथि पहुँच राख्न दिने हो?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"यस अनुप्रयोगले तपाईंको फोनमा पात्रोका कार्यक्रमहरू थप्न, हटाउन वा परिवर्तन गर्न सक्छ। यस अनुप्रयोगले पात्रोका मालिकहरू मार्फत आएको जस्तो लाग्ने सन्देशहरू पठाउन वा तिनीहरूका मालिकहरूलाई सूचित नगरिकन कार्यक्रमहरू परिवर्तन गर्न सक्छ।"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"अधिक स्थान प्रदायक आदेशहरू पहुँच गर्नुहोस्"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"अनुप्रयोगलाई अतिरिक्त स्थान प्रदायक आदेशहरू पहुँच गर्न अनुमति दिन्छ। यो अनुप्रयोगलाई GPS वा अन्य स्थान स्रोतहरूको संचालन साथै हस्तक्षेप गर्न अनुमति दिन सक्छ।"</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"अग्रभूमिमा मात्र सटीक स्थानमाथि पहुँच राख्नुहोस्"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"यो अनुप्रयोगले अग्रभागमा चलिरहेको अवस्थामा मात्र तपाईंलाई स्थानको सटिक जानकारी दिन सक्छ। यी स्थानसम्बन्धी सेवाहरू अनिवार्य रूपमा सक्रिय गरिएका हुनु पर्छ र अनुप्रयोगले यिनीहरूको प्रयोग गर्न सकोस् भन्नाका खातिर तपाईंको फोनमै उपलब्ध हुन्छन्। यस कार्यले गर्दा ब्याट्री बढी खर्च हुन सक्छ।"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"अनुमानित स्थान पहुँच गराउनुहोस् (नेटवर्कमा आधारित)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"यस अनुप्रयोगले सेलका टावर र Wi-Fi नेटवर्कहरू जस्ता नेटवर्कका स्रोतहरूको आधारमा तपाईंको स्थान बारे जानकारी प्राप्त गर्न सक्छ। यो अनुप्रयोग ती स्रोतहरूको प्रयोग गर्न सक्षम होस् भन्नका खातिर यी स्थान सम्बन्धी सेवाहरूलाई अनिवार्य रूपमा सक्रिय पार्नुपर्छ र यी तपाईंको ट्याब्लेटमा उपलब्ध हुनु पर्छ।"</string>
@@ -518,6 +520,64 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"फिंगरप्रिन्ट आइकन"</string>
+    <!-- no translation found for permlab_manageFace (2137540986007309781) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFace (8919637120670185330) -->
+    <skip />
+    <!-- no translation found for permlab_useFaceAuthentication (8996134460546804535) -->
+    <skip />
+    <!-- no translation found for permdesc_useFaceAuthentication (5011118722951833089) -->
+    <skip />
+    <!-- no translation found for face_acquired_insufficient (5901287247766106330) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (610606792381297174) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (7229162716976778371) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1980310037427755293) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (4494571381828850007) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (228411096134808372) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (4539774649296349109) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (1650292067226118760) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (2712489669456176505) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8344973502980415859) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (5707782294589511391) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_steady (3722829465011040042) -->
+    <skip />
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <!-- no translation found for face_error_hw_not_available (6255891785768984615) -->
+    <skip />
+    <!-- no translation found for face_error_timeout (4014326147867150054) -->
+    <skip />
+    <!-- no translation found for face_error_no_space (8224993703466381314) -->
+    <skip />
+    <!-- no translation found for face_error_canceled (283945501061931023) -->
+    <skip />
+    <!-- no translation found for face_error_lockout (3407426963155388504) -->
+    <skip />
+    <!-- no translation found for face_error_lockout_permanent (8198354656746088890) -->
+    <skip />
+    <!-- no translation found for face_error_unable_to_process (238761109287767270) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (9166792142679691323) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (4737289254517095671) -->
+    <skip />
+    <!-- no translation found for face_name_template (7004562145809595384) -->
+    <skip />
+  <string-array name="face_error_vendor">
+  </string-array>
+    <!-- no translation found for face_icon_content_description (4024817159806482191) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"समीकरण सेटिङहरू पढ्नुहोस्"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"अनुप्रयोगलाई खाताको लागि सिंक सेटिङहरू पढ्न अनुमति दिन्छ। उदाहरणको लागि यसले व्यक्तिहरको अनुप्रयोग खातासँग सिंक भएको नभएको निर्धारण गर्न सक्दछ।"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"टगल सिंक खुला र बन्द"</string>
@@ -1184,6 +1244,12 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi मार्फत इन्टरनेटमाथि पहुँच राख्न सकिँदैन"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"विकल्पहरूका लागि ट्याप गर्नुहोस्"</string>
+    <!-- no translation found for wifi_softap_config_change (8475911871165857607) -->
+    <skip />
+    <!-- no translation found for wifi_softap_config_change_summary (7601233252456548891) -->
+    <skip />
+    <!-- no translation found for wifi_softap_config_change_detailed (8022936822860678033) -->
+    <skip />
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> मा बदल्नुहोस्"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> मार्फत इन्टरनेटमाथि पहुँच राख्न नसकेको अवस्थामा यन्त्रले <xliff:g id="NEW_NETWORK">%1$s</xliff:g> प्रयोग गर्दछ। शुल्क लाग्न सक्छ।"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> बाट <xliff:g id="NEW_NETWORK">%2$s</xliff:g> मा परिवर्तन गरियो"</string>

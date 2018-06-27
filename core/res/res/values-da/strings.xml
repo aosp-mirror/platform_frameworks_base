@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Placering"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"få adgang til enhedens placering"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Vil du give &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; adgang til enhedens placering?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Appen har kun adgang til placeringen, når du bruger appen."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Skal &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; altid have adgang til enhedens placering?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Appen har altid adgang til placeringen, også selvom du ikke bruger appen."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"have adgang til din kalender"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Vil du give &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; adgang til din kalender?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Denne app kan tilføje, fjerne eller ændre kalenderbegivenheder på din telefon. Denne app kan sende meddelelser, der kan se ud, som om de kommer fra kalenderejere, eller ændre begivenheder uden at give ejeren besked."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"få adgang til yderligere kommandoer for placeringsudbyder"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Tillader, at appen kan få adgang til yderligere kommandoer for placeringsudbydere. Dette kan gøre det muligt for appen at forstyrre GPS-funktionen eller andre placeringskilder."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"få kun adgang til nøjagtig placering i forgrunden"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Denne app kan kun få din nøjagtige placering, når den er i forgrunden. Disse placeringstjenester skal være aktiverede og tilgængelige på din telefon, før appen kan bruge dem. Dette kan øge batteriforbruget."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"få adgang til omtrentlig placering (netværksbaseret)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Denne app kan bestemme din placering ved hjælp af netværkskilder, som f.eks. mobilmaster og Wi-Fi-netværk. Disse placeringstjenester skal være aktiverede og tilgængelige på din tablet, før appen kan bruge dem."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikon for fingeraftryk"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"administrer hardware til ansigtsgenkendelse"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Tillader, at appen kan køre metoder til at tilføje og slette ansigtsskabeloner."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"brug hardware til ansigtsgenkendelse"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Tillader, at appen kan bruge hardware til ansigtsgenkendelse"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Ansigtet kunne ikke behandles. Prøv igen."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Ansigtet er for lyst. Prøv i svagere belysning."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Ansigtet er for mørkt. Ryk nærmere en lyskilde."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Flyt sensoren længere væk fra ansigtet."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Ryk sensoren tættere på ansigtet."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Flyt sensoren højere op."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Flyt sensoren længere ned."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Flyt sensoren til højre."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Flyt sensoren til venstre."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Kig på sensoren."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Der er ikke registreret noget ansigt."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Hold ansigtet stille foran enheden."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hardwaren til ansigtsregistrering er ikke klar."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Ansigtsgenkendelse fik timeout. Prøv igen."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Ansigtet kan ikke gemmes."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Ansigtshandlingen blev annulleret."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Du har prøvet for mange gange. Prøv igen senere."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"For mange forsøg – Ansigtsgenkendelse deaktiveret."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Prøv igen."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Der er ikke registreret nogen ansigter."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Denne enhed har ingen sensor til ansigtsgenkendelse"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Ansigt <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Ansigt"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"læse indstillinger for synkronisering"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Tillader, at appen kan læse synkroniseringsindstillingerne for en konto. Denne tilladelse kan f.eks. fastslå, om appen Personer er synkroniseret med en konto."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"slå synkronisering til og fra"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi-netværket har ikke internetadgang"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tryk for at se valgmuligheder"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Ændringer af dine indstillinger for hotspot"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Dit hotspotbånd er ændret."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Denne enhed understøtter ikke din præferencer om kun 5 GHz. Denne enhed vil i stedet bruge 5 GHz-båndet, når det er muligt."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Der blev skiftet til <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Enheden benytter <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, når der ikke er internetadgang via <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>. Der opkræves muligvis betaling."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Der blev skiftet fra <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> til <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

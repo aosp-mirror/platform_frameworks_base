@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Vị trí"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"truy cập vị trí của thiết bị này"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Cho phép &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; truy cập vào vị trí của thiết bị này?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Ứng dụng sẽ chỉ có quyền truy cập vào vị trí khi bạn sử dụng."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Luôn cho phép &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; truy cập vị trí thiết bị?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Ứng dụng sẽ luôn có quyền truy cập vào vị trí, ngay cả khi bạn không sử dụng."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Lịch"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"truy cập lịch của bạn"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Cho phép &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; truy cập vào lịch của bạn?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Ứng dụng này có thể thêm, xóa hoặc thay đổi sự kiện lịch trên điện thoại của bạn. Ứng dụng này có thể gửi các tin nhắn trông có vẻ như được gửi từ các chủ sở hữu lịch hoặc thay đổi sự kiện mà không thông báo cho chủ sở hữu."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"truy cập vào các lệnh của nhà cung cấp vị trí bổ sung"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Cho phép ứng dụng truy cập vào các lệnh của nhà cung cấp vị trí bổ sung. Điều này có thể cho phép ứng dụng can thiệp vào hoạt động của Hệ thống định vị toàn cầu (GPS) hoặc các nguồn vị trí khác."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"chỉ truy cập vị trí chính xác trong nền trước"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Bất cứ khi nào chạy trong nền trước, ứng dụng này có thể nhận thông tin vị trí chính xác của bạn. Để ứng dụng có thể sử các dụng dịch vụ vị trí, điện thoại của bạn phải có các dịch vụ này và dịch vụ ở trạng thái bật. Hoạt động này có thể tăng mức tiêu thụ pin."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"truy cập vị trí gần đúng (dựa vào mạng)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ứng dụng này có thể nhận thông tin vị trí của bạn dựa trên các nguồn mạng như tháp phát sóng di động và mạng Wi-Fi. Các dịch vụ vị trí này phải được bật và khả dụng trên máy tính bảng của bạn để ứng dụng có thể sử dụng chúng."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Biểu tượng vân tay"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"quản lý phần cứng xác thực khuôn mặt"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Cho phép ứng dụng gọi ra các phương pháp để thêm và xóa mẫu khuôn mặt sử dụng."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"sử dụng phần cứng xác thực khuôn mặt"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Cho phép ứng dụng sử dụng phần cứng xác thực khuôn mặt để tiến hành xác thực"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Không thể xử lý khuôn mặt. Vui lòng thử lại."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Khuôn mặt quá sáng. Hãy thử dưới ánh sáng yếu hơn."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Khuôn mặt quá tối. Hãy tìm nguồn sáng tốt hơn."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Hãy đưa cảm biến ra xa khuôn mặt hơn."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Hãy đưa cảm biến lại gần khuôn mặt hơn."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Hãy đưa cảm biến lên cao hơn."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Hãy đưa cảm biến xuống thấp hơn."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Hãy đưa cảm biến sang bên phải."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Hay đưa cảm biến sang bên trái."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Hãy nhìn vào cảm biến."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Không phát hiện được khuôn mặt nào."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Hãy giữ yên khuôn mặt trước thiết bị."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Không truy cập được phần cứng nhận dạng khuôn mặt."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Đã hết thời gian chờ khuôn mặt. Hãy thử lại."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Không thể lưu khuôn mặt."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Đã hủy thao tác dùng khuôn mặt."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Bạn đã thử quá nhiều lần. Hãy thử lại sau."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Đã thử quá nhiều lần. Đã tắt xác thực khuôn mặt."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Hãy thử lại."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Bạn chưa đăng ký khuôn mặt."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Thiết bị này không có cảm biến xác thực khuôn mặt"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Khuôn mặt <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Biểu tượng khuôn mặt"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"đọc cài đặt đồng bộ hóa"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Cho phép ứng dụng đọc cài đặt đồng bộ hóa cho tài khoản. Ví dụ: việc này có thể xác định liệu ứng dụng Mọi người đã được đồng bộ hóa với tài khoản chưa."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"chuyển đổi bật và tắt đồng bộ hóa"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi không có quyền truy cập Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Nhấn để biết tùy chọn"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Những thay đổi trong mục cài đặt điểm phát sóng của bạn"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Bằng tần của điểm phát sóng đã thay đổi."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Thiết bị này không hỗ trợ tùy chọn chỉ sử dụng băng tần 5 GHz. Thay vào đó, thiết bị này sẽ sử dụng băng tần 5 GHz khi có thể."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Đã chuyển sang <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Thiết bị sử dụng <xliff:g id="NEW_NETWORK">%1$s</xliff:g> khi <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> không có quyền truy cập Internet. Bạn có thể phải trả phí."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Đã chuyển từ <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> sang <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

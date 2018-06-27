@@ -279,6 +279,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokacija"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"pristupa lokaciji ovog uređaja"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristup lokaciji ovog uređaja?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Ova aplikacija će moći pristupiti lokaciji uređaja samo kada je koristite."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Uvijek dozvoliti da &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pristupi lokaciji uređaja?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Ova aplikacija će uvijek moći pristupiti lokaciji uređaja, čak i kada je ne koristite."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"pristupa vašem kalendaru"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; da pristupi vašem kalendaru?"</string>
@@ -405,8 +408,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Ova aplikacija može dodavati, uklanjati ili mijenjati događaje u kalendaru na vašem telefonu. Aplikacija može slati poruke koje mogu izgledati kao da dolazi od vlasnika kalendara ili promijeniti događaje bez obavještenja vlasnika."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"pristup dodatnim informacijama o lokaciji"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Dozvoljava aplikaciji pristup dodatnim naredbama pružatelja lokacija. Ovim se aplikaciji može dozvoliti da ometa rad GPS-a ili drugih izvora lokacija."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"pristup tačnoj lokaciji samo u prvom planu"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Ova aplikacija može odrediti vašu tačnu lokaciju samo kada je u prvom planu. Ove usluge lokacije moraju biti uključene i dostupne na vašem telefonu da ih aplikacija može koristiti. To može dovesti do povećane potrošnje baterije."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"pristup približnoj lokaciji (utvrđena preko mreže)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ova aplikacija može odrediti vašu lokaciju na osnovu izvora mreže kao što su predajnici za mobilnu mrežu i WiFi mreže. Ove usluge za određivanje lokacije moraju biti uključene i omogućene na vašem tabletu kako bi ih aplikacija mogla koristiti."</string>
@@ -521,6 +523,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona za otisak prsta"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"upravljanje hardverom za autentifikaciju licem"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Omogućava aplikaciji da koristi metode za dodavanje i brisanje šablona lica za upotrebu."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"upotreba hardvera za autentifikaciju licem"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Omogućava aplikaciji da za autentifikaciju koristi hardver za autentifikaciju licem"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Obrada lica nije uspjela. Pokušajte ponovo."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Lice je presvijetlo. Pokušajte s manje svjetla."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Lice je pretamno. Pojačajte izvor svjetlosti."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Odmaknite senzor od lica."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Približite senzor licu."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Pomjerite senzor prema gore."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Pomjerite senzor prema dolje."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Pomjerite senzor udesno."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Pomjerite senzor ulijevo."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Gledajte u senzor."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Nije pronađeno lice."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Mirno držite lice ispred uređaja."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hardver za prepoznavanje lica nije dostupan."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Isteklo vrijeme za prepoznavanje. Pokušajte ponovo."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Nije moguće pohraniti lice."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Prepoznavanje lica je otkazano."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Previše pokušaja. Pokušajte ponovo kasnije."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Previše pokušaja. Autentifikacija lica onemogućena."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Pokušajte ponovo."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Nije prijavljeno nijedno lice."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Ovaj uređaj nema senzor za autentifikaciju lica"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Lice <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Ikona lica"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čitanje postavki za sinhroniziranje"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Omogućava aplikaciji čitanje postavki sinhroniziranja za račun. Naprimjer, ovim se može utvrditi da li je aplikacija People sinhronizirana sa računom."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"aktiviranje/deaktiviranje sinhroniziranja"</string>
@@ -1202,6 +1235,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"WiFi nema pristup internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Dodirnite za opcije"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Promjene postavki vaše pristupne tačke"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Opseg vaše pristupne tačke je promijenjen."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Ovaj uređaj ne podržava vašu postavku za mreže od isključivo 5GHz. Uređaj će koristiti opseg of 5GHz kada je dostupan."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Prebačeno na: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Kada <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nema pristup internetu, uređaj koristi mrežu <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Moguća je naplata usluge."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Prebačeno iz mreže <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> u <xliff:g id="NEW_NETWORK">%2$s</xliff:g> mrežu"</string>
@@ -1226,7 +1262,7 @@
     <string name="accept" msgid="1645267259272829559">"Prihvati"</string>
     <string name="decline" msgid="2112225451706137894">"Odbijte"</string>
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"Pozivnica poslana"</string>
-    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Poziv za povezivanje"</string>
+    <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"Pozivnica za povezivanje"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"Pošiljalac:"</string>
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Prima:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Unesite potrebni PIN:"</string>

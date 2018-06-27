@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Vendndodhja"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"qaset te vendndodhja e kësaj pajisjeje"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te vendndodhja e kësaj pajisjeje?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Aplikacioni do të ketë qasje te vendndodhja vetëm kur po e përdor aplikacionin."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Të lejohet gjithmonë që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te vendndodhja?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Aplikacioni do të ketë gjithmonë qasje te vendndodhja, edhe kur nuk po e përdor aplikacionin."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendari"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"qasje te kalendari yt"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të ketë qasje te kalendari yt?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Ky aplikacion mund të shtojë, të heqë ose të ndryshojë ngjarjet e kalendarit në telefonin tënd. Ky aplikacion mund të dërgojë mesazhe që mund të duket se vijnë nga zotëruesit e kalendarit ose të ndryshojë ngjarjet pa i njoftuar zotëruesit e tyre."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"qasje në komandat shtesë të ofruesit të vendndodhjes"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Lejon aplikacionin të ketë qasje në komandat shtesë të ofruesit për vendndodhjen. Kjo mund ta lejojë aplikacionin të ndërhyjë në operacionin e GPS-së apo të burimeve të tjera për vendndodhjen."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"qasu në vendndodhjen e saktë vetëm në plan të parë"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Ky aplikacion mund të marrë vendndodhjen tënde të saktë në çdo kohë kur është në plan të parë. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në telefonin tënd që aplikacioni të mund t\'i përdorë. Kjo gjë mund të rritë konsumin e baterisë."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"qasu te vendndodhja e përafërt (bazuar në rrjet)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në tabletin tënd që aplikacioni të mund t\'i përdorë."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona e gjurmës së gishtit"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"menaxho harduerin për vërtetimin e fytyrës"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Lejon aplikacionin të aktivizojë mënyra për shtim e fshirje të shablloneve të përdorura."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"përdor harduerin për vërtetimin e fytyrës"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Lejon aplikacionin të përdorë harduer vërtetimi të fytyrës për procesin e vërtetimit"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Fytyra nuk mund të përpunohej. Provo sërish."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Fytyra ka shumë ndriçim. Provo me më pak ndriçim."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Fytyra shumë e errët. Zbulo burimin e dritës."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Lëvize sensorin pak më larg fytyrës."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Sille sensorin më pranë fytyrës."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Lëvize sensorin më lart."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Lëvize sensorin më poshtë."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Lëvize sensorin djathtas."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Lëvize sensorin majtas."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Shiko nga sensori"</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Nuk u diktua fytyrë"</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Mbaje fytyrën pa lëvizur përpara pajisjes."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Nuk ka harduer për fytyrën."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Mbaroi afati për fytyrën. Provo sërish."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Fytyra nuk mund të ruhet."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Veprimi me fytyrën u anulua."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Shumë përpjekje. Provo sërish më vonë."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Shumë përpjekje. Vërtetimi për fytyrën joaktiv."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Provo sërish."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Nuk ka fytyrë të regjistruar."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Kjo pajisje nuk ka sensor vërtetimi për fytyrën"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Fytyra <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Ikona e fytyrës"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lexo cilësimet e sinkronizimit"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Lejon aplikacionin të lexojë cilësimet e sinkronizimit për një llogari. Për shembull, kjo mund të përcaktojë nëse aplikacioni \"Kontaktet\" është i sinkronizuar me një llogari."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ndiz ose fik sinkronizimin"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi nuk ka qasje në internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Trokit për opsionet"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Ndryshimet në cilësimet e zonës së qasjes për internet"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Brezi yt i zonës së qasjes për internet ka ndryshuar."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Kjo pajisje nuk e mbështet preferencën për vetëm 5 GHz. Përkundrazi, pajisja do të përdorë brezin 5 GHz nëse ka."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Kaloi te <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Pajisja përdor <xliff:g id="NEW_NETWORK">%1$s</xliff:g> kur <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nuk ka qasje në internet. Mund të zbatohen tarifa."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Kaloi nga <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> te <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

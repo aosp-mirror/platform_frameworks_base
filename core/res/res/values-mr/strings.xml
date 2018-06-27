@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"स्थान"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"या डिव्हाइसच्या स्थानावर प्रवेश"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला या डिव्हाइसचे स्थान अॅक्सेस करू द्यायचे?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"तुम्ही अॅप वापरत असताना, अॅपला फक्त स्थानाचा अॅक्सेस असेल."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"या डिव्हाइसचे स्थान अॅक्सेस करण्याची &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला नेहेमी अनुमती द्यायची का?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"तुम्ही अॅप वापरत नसलात तरीही, अॅपला स्थानाचा नेहेमी अॅक्सेस असेल."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"कॅलेंडर"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"आपल्या कॅलेंडरवर प्रवेश"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे कॅलेंडर अॅक्सेस करू द्यायचे?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"हा अॅप आपल्या फोनवर कॅलेंडर इव्हेंट जोडू, काढू किंवा बदलू शकतो. हा अॅप कॅलेंडर मालकांकडून येत आहेत असे वाटणारे मेसेज पाठवू किंवा त्यांच्या मालकांना सूचित केल्याशिवाय इव्हेंट बदलू शकतो."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"अतिरिक्त स्थान प्रदाता आदेश अॅक्सेस करा"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"अ‍ॅपला अतिरिक्त स्‍थान प्रदाता आदेशावर प्रवेश करण्‍याची अनुमती देते. हे कदाचित अ‍ॅपला GPS किंवा इतर स्‍थान स्त्रोत च्या ऑपरेशनमध्‍ये हस्तक्षेप करण्‍याची अनुमती देऊ शकते."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"फक्त फोरग्राउंडमध्ये अचूकपणे अ‍ॅक्सेस करा"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"हे अ‍ॅप फक्त फोरग्राउंडमध्ये असतानाच तुमचे अचूक स्थान मिळवू शकते. या स्थान सेवा सुरू करणे आणि त्या वापरण्यासाठी अ‍ॅपसाठी तुमच्या फोनवर उपलब्ध करणे आवश्यक आहे, यामुळे बॅटरी वापर वाढू शकतो."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"अंदाजे स्‍थानामध्ये (नेटवर्क-आधारित) अॅक्सेस करा"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"हा अॅप सेल टॉवर आणि वाय-फाय नेटवर्क सारख्या नेटवर्क स्रोतांच्या आधारावर तुमचे स्थान मिळवू शकतो. अॅपला या स्थान सेवा वापरण्यास सक्षम असण्यासाठी तुमच्या टॅब्लेटवर त्या चालू केलेल्या आणि उपलब्ध असणे आवश्यक आहे."</string>
@@ -518,6 +520,64 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"फिंगरप्रिंट आयकन"</string>
+    <!-- no translation found for permlab_manageFace (2137540986007309781) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFace (8919637120670185330) -->
+    <skip />
+    <!-- no translation found for permlab_useFaceAuthentication (8996134460546804535) -->
+    <skip />
+    <!-- no translation found for permdesc_useFaceAuthentication (5011118722951833089) -->
+    <skip />
+    <!-- no translation found for face_acquired_insufficient (5901287247766106330) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (610606792381297174) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (7229162716976778371) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1980310037427755293) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (4494571381828850007) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (228411096134808372) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (4539774649296349109) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (1650292067226118760) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (2712489669456176505) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8344973502980415859) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (5707782294589511391) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_steady (3722829465011040042) -->
+    <skip />
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <!-- no translation found for face_error_hw_not_available (6255891785768984615) -->
+    <skip />
+    <!-- no translation found for face_error_timeout (4014326147867150054) -->
+    <skip />
+    <!-- no translation found for face_error_no_space (8224993703466381314) -->
+    <skip />
+    <!-- no translation found for face_error_canceled (283945501061931023) -->
+    <skip />
+    <!-- no translation found for face_error_lockout (3407426963155388504) -->
+    <skip />
+    <!-- no translation found for face_error_lockout_permanent (8198354656746088890) -->
+    <skip />
+    <!-- no translation found for face_error_unable_to_process (238761109287767270) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (9166792142679691323) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (4737289254517095671) -->
+    <skip />
+    <!-- no translation found for face_name_template (7004562145809595384) -->
+    <skip />
+  <string-array name="face_error_vendor">
+  </string-array>
+    <!-- no translation found for face_icon_content_description (4024817159806482191) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"सिंक सेटिंग्‍ज वाचा"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"खात्याच्या सिंक सेटिंग्ज वाचण्यासाठी अॅप ला अनुमती देते. उदाहरणार्थ, हे खात्यासह लोकांचा अॅप संकालित केला आहे किंवा नाही हे निर्धारित करू शकते."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"सिंक चालू आणि बंद करा टॉगल करा"</string>
@@ -1178,6 +1238,12 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"वाय-फाय ला इंटरनेटचा अॅक्सेस नाही"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"पर्यायांसाठी टॅप करा"</string>
+    <!-- no translation found for wifi_softap_config_change (8475911871165857607) -->
+    <skip />
+    <!-- no translation found for wifi_softap_config_change_summary (7601233252456548891) -->
+    <skip />
+    <!-- no translation found for wifi_softap_config_change_detailed (8022936822860678033) -->
+    <skip />
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> वर स्विच केले"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> कडे इंटरनेटचा अॅक्सेस नसताना डिव्हाइस <xliff:g id="NEW_NETWORK">%1$s</xliff:g> वापरते. शुल्क लागू शकते."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> वरून <xliff:g id="NEW_NETWORK">%2$s</xliff:g> वर स्विच केले"</string>

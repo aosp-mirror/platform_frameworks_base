@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"መገኛ አካባቢ"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"የዚህን መሣሪያ አካባቢ ይድረሱበት"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; የዚህ መሣሪያ አካባቢን እንዲደርስ ይፈቀድለት?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"መተግበሪያው እርስዎ ሲጠቀሙበት ብቻ ነው የአካባቢው መዳረሻ የሚኖረው።"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"ሁልጊዜ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; የዚህ መሣሪያ አካባቢን እንዲደርስ ይፈቀድለት?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"መተግበሪያው ሁልጊዜ የአካባቢው መዳረሽ ይኖረዋል፣ እርስዎ መተግበሪያውን እየተጠቀሙ ባይሆኑም እንኳ።"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ቀን መቁጠሪያ"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"የእርስዎን ቀን መቁጠሪያ ይድረሱበት"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ቀን መቁጠሪያዎን እንዲደርስ ይፈቀድለት?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"ይህ መተግበሪያ በእርስዎ ስልክ ላይ የቀን መቁጠሪያ ክስተቶችን ሊያክል፣ ሊያስወግድ ወይም ሊለውጥ ይችላል። ይህ መተግበሪያ ከቀን መቁጠሪያ የመጡ መስለው የሚታዩ መልእክቶችን ሊልክ ወይም ባለቤቶቹን ሳያሳውቅ ክስተቶችን ሊለውጥ ይችላል።"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ተጨማሪ ሥፍራ አቅራቢ ትዕዛዞችን ድረስ።"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"መተግበሪያው ተጨማሪ የአካባቢ አቅራቢ ትእዛዞችን እንዲደርስ ይፈቅድለታል። ይሄ መተግበሪያው በጂፒኤስ ወይም ሌላ የአካባቢ ምንጮች ስራ ላይ ጣልቃ እንዲገባ ሊፈቅድለት ይችላል።"</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"መዳረሻ ከፊት ለፊት ብቻ ትክክለኛ ነው"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"ይህ መተግበሪያ ከፊት ላይ ሆኖ ሲበራ ብቻ ትክክለኛውን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ስልክ ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ግምታዊ አካባቢን መድረስ (በአውታረ መረብ ላይ የተመሰረተ)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ከመሳሰሉ የአውታረ መረብ ምንጮች ላይ በመመርኮዝ የእርስዎን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ጡባዊ ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"የጣት አሻራ አዶ"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"የማረጋገጫ ሃርድዌር ፊትን ያስተዳድሩ"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"መተግበሪያው ጥቅም ላይ እንዲውሉ የፊት ቅንብር ደንቦችን ለማከል እና ለመሰረዝ የሚያስችሉ ስልቶችን እንዲያስጀምር ያስችለዋል።"</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"የፊት ማረጋገጫ ሃርድዌር ይጠቀሙ"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"መተግበሪያው የማረጋገጫ ሃርድዌር ለማረጋገጥ ሥራ እንዲጠቀም ያስችለዋል"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"ፊትን መሥራት አልተቻለም። እባክዎ እንደገና ይሞክሩ።"</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"ፊት ከልክ በላይ ብሩህ ነው። እባክዎ በዝቅተኛ ብርሃን ውስጥ ይሞክሩት።"</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"ፊት ከልክ በላይ ጨለም ያለ ነው። እባክዎ የብርሃን ምንጩን ይግለጹት።"</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"እባክዎ ዳሳሹን ከፊት አሁንም ያርቁት።"</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"እባክዎ ዳሳሹን ወደ ፊት ያስጠጉት።"</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"እባክዎ ዳሳሽን ከፍ ያድርጉት።"</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"እባክዎ ዳሳሽን ዝቅ ያድርጉት።"</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"እባክዎ ዳስሽን ወደ ቀኝ ያንቀሳቅሱት።"</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"እባክዎ ዳስሽን ወደ ግራ ያንቀሳቅሱት።"</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"እባክዎ ዳሳሹ ላይ ይመልከቱ።"</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"ምንም መልክ አልተገኘም።"</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"ፊትዎትን ከመሣሪያው ፊት ለፊት ሳያነቃንቁ ያቆዩት።"</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"የፊት ሃርድዌር አይገኝም።"</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"የፊት ማብቂያ ጊዜ ደርሷል። እንደገና ይሞክሩ።"</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"ፊት ሊከማች አይችልም።"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"የፊት ሥርዓተ ክወና ተሰርዟል።"</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"ከልክ በላይ ብዙ ሙከራዎች። በኋላ ላይ እንደገና ይሞክሩ።"</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"በጣም ብዙ ሙከራዎች። የፊት ማረጋገጫ ተሰናክሏል።"</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"እንደገና ይሞክሩ።"</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"ምንም ፊት አልተመዘገበም።"</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"ይህ መሣሪያ የፊት ማረጋገጫ ዳሳሽ የለውም"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"ፊት <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"የፊት አዶ"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"የሥምሪያ ቅንብሮች አንብብ"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"መተግበሪያው የአንድ መለያ የማመሳሰል ቅንብሮችን እንዲያነብ ይፈቅድለታል። ለምሳሌ ይህ የሰዎች መተግበሪያ ከመለያ ጋር መመሳሰሉን አለመመሳሰሉን ሊወስን ይችላል።"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ማመሳሰያ በማብራትና በማጥፋት መካከል ቀያይር"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi በይነመረብ መዳረሻ የለውም"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ለአማራጮች መታ ያድርጉ"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"በእርስዎ ሆትስፖት ቅንብሮች ላይ ለውጦች"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"የእርስዎ ሆትስፖት ባንድ ተለውጧል።"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ይህ መሣሪያ የእርስዎን ምርጫ ለ5GHz ብቻ አይደግፍም። በምትኩ፣ ይህ መሣሪያ ሲገኝ 5GHz ባንድ ይጠቀማል።"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"ወደ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ተቀይሯል"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ምንም ዓይነት የበይነመረብ ግንኙነት በማይኖረው ጊዜ መሣሪያዎች <xliff:g id="NEW_NETWORK">%1$s</xliff:g>ን ይጠቀማሉ። ክፍያዎች ተፈጻሚ ሊሆኑ ይችላሉ።"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"ከ<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ወደ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> ተቀይሯል"</string>
@@ -1792,7 +1828,7 @@
     <string name="work_mode_turn_on" msgid="2062544985670564875">"አብራ"</string>
     <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"ይህ መተግበሪያ ለቆየ የAndroid ስሪት ነው የተገነባው፣ እና በአግባቡ ላይሰራ ይችላል። ዝማኔዎች ካሉ ለመመልከት ይሞክሩ፣ ወይም ደግሞ ገንቢውን ያነጋግሩ።"</string>
     <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"ዝማኔ ካለ አረጋግጥ"</string>
-    <string name="new_sms_notification_title" msgid="8442817549127555977">"አዲስ መልእክቶች አለዎት"</string>
+    <string name="new_sms_notification_title" msgid="8442817549127555977">"አዲስ መልዕክቶች አለዎት"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"ለመመልከት የኤስኤምኤስ መተግበሪያ ይክፈቱ"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"አንዳንድ ተግባሮች የተገደቡ ሊሆኑ ይችላሉ"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"ለመክፈት መታ ያድርጉ"</string>
@@ -1849,7 +1885,7 @@
     <string name="etws_primary_default_message_earthquake" msgid="5541962250262769193">"ረጋ ይበሉና በአቅራቢያ ያለ መጠለያ ይፈልጉ።"</string>
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"ወዲያውኑ ከባህር ዳርቻ አካባቢዎች እና የወንዝ ዳርቻ አካባቢዎች ይውጡና እንደ ከፍ ያለ መሬት ያሉ ከአደጋ የተሻለ ደህንነት ወዳቸው ቦታዎች ይሂዱ።"</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"ረጋ ይበሉና በአቅራቢያ ያለ መጠለያ ይፈልጉ።"</string>
-    <string name="etws_primary_default_message_test" msgid="2709597093560037455">"የአስቸኳይ አደጋ መልእክቶች ሙከራ"</string>
+    <string name="etws_primary_default_message_test" msgid="2709597093560037455">"የአስቸኳይ አደጋ መልዕክቶች ሙከራ"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"ምላሽ ስጥ"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="5767701075994754356">"ሲም ለድምጽ አይፈቀድም"</string>

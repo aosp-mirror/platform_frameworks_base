@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Local"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"acesse o local do dispositivo"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse a localização deste dispositivo?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"O app só terá acesso ao local enquanto estiver sendo usado."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Sempre permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse o local deste disp.?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"O app sempre terá acesso ao local, mesmo quando não estiver sendo usado."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"acesse sua agenda"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acesse sua agenda?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Este app pode adicionar, remover ou alterar eventos da agenda no seu smartphone. Ele também pode enviar mensagens que aparentem ser de autoria do proprietário da agenda ou alterar eventos sem notificar o proprietário."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"acessar comandos extras do provedor de localização"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permite que o app acesse comandos do provedor não relacionados à localização. Isso pode permitir que o app interfira no funcionamento do GPS ou de outras fontes de localização."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"acessar localização precisa apenas em primeiro plano"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Este app pode ver sua localização exata a qualquer momento apenas quando está em primeiro plano. Esses serviços de localização precisam estar ativados e disponíveis no seu smartphone para que o app possa usá-los. Isso pode aumentar o consumo de bateria."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"acessar localização aproximada (com base na rede)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Este app pode ver seu local com base nas fontes de rede, como torres de celular e redes Wi-Fi. Esses serviços de localização precisam estar ativados e disponíveis no seu tablet para que o app possa usá-los."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ícone de impressão digital"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"gerenciar hardware de autenticação facial"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Permite que o app execute métodos para adicionar e excluir modelos de rosto para uso."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"usar hardware de autenticação facial"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Permite que o app use o hardware de autenticação facial para autenticação"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Falha ao processar o rosto. Tente novamente."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Rosto muito iluminado. Tente com menos iluminação."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Rosto muito escuro. Acrescente uma fonte de luz."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Afaste o sensor do rosto."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Aproxime o sensor do rosto."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Mova o sensor para cima."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Mova o sensor para baixo."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Mova o sensor para a direita."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Mova o sensor para a esquerda."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Olhe para o sensor."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Nenhum rosto detectado."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Mantenha o rosto parado na frente do dispositivo."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hardware de rosto não disponível."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Tempo máx. p/ captura facial atingido. Tente novamente."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Não é possível armazenar um rosto."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Operação facial cancelada."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Excesso de tentativas. Tente novamente mais tarde."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Excesso de tentativas. Autenticação facial desat."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Tente novamente."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Nenhum rosto registrado."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Este dispositivo não tem um sensor de autenticação facial"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Rosto <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Ícone facial"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ler as configurações de sincronização"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permite que o app leia as configurações de sincronização de uma conta. Por exemplo, pode determinar se o app People está sincronizado com uma conta."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ativar e desativar sincronização"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"O Wi‑Fi não tem acesso à Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Toque para ver opções"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Mudanças nas suas configurações de ponto de acesso"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Sua banda de ponto de acesso foi alterada."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Este dispositivo não é compatível com sua preferência apenas por 5 GHz. Em vez disso, o dispositivo usará a banda de 5 GHz quando ela estiver disponível."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Alternado para <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"O dispositivo usa <xliff:g id="NEW_NETWORK">%1$s</xliff:g> quando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> não tem acesso à Internet. Esse serviço pode ser cobrado."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Alternado de <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> para <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

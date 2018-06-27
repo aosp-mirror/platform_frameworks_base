@@ -282,6 +282,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokalizacja"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"dostęp do informacji o lokalizacji tego urządzenia"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Zezwolić aplikacji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na dostęp do lokalizacji urządzenia?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Aplikacja będzie mieć dostęp do lokalizacji tylko wtedy, gdy jest używana."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Zawsze zezwalać aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g> na dostęp do lokalizacji urządzenia?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Aplikacja będzie zawsze mieć dostęp do lokalizacji, nawet wtedy, gdy nie jest używana."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendarz"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"dostęp do kalendarza"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Zezwolić aplikacji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na dostęp do kalendarza?"</string>
@@ -408,8 +411,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Ta aplikacja może dodawać, usuwać i zmieniać wydarzenia z kalendarza na telefonie. Ta aplikacja może wysyłać wiadomości wyglądające jak utworzone przez właścicieli kalendarza lub zmieniać wydarzenia bez wiedzy ich właścicieli."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"dostęp do dodatkowych poleceń dostawcy informacji o lokalizacji"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Pozwala aplikacji na dostęp do dodatkowych poleceń dostawcy informacji o lokalizacji. Aplikacje z tym uprawnieniem mogą wpływać na działanie GPS-a lub innych źródeł lokalizacji."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"dostęp do dokładnej lokalizacji tylko na pierwszym planie"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Ta aplikacja może określić Twoją dokładną lokalizację tylko wtedy, gdy działa na pierwszym planie. Te usługi lokalizacyjne muszą być włączone i dostępne na telefonie, by aplikacja mogła z nich korzystać. Może to zwiększyć zużycie baterii."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"dostęp do przybliżonej lokalizacji (na podstawie sieci)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ta aplikacja może określać Twoją lokalizację na podstawie źródeł sieciowych, takich jak stacje bazowe i sieci Wi-Fi. Te usługi lokalizacyjne muszą być włączone i dostępne na tablecie, by aplikacja mogła z nich korzystać."</string>
@@ -524,6 +526,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona odcisku palca"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"zarządzanie sprzętem do uwierzytelniania za pomocą twarzy"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Zezwala na aktywowanie przez aplikację metody dodawania i usuwania szablonów twarzy."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"używanie sprzętu do uwierzytelniania za pomocą twarzy"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Zezwala na używanie przez aplikację sprzętu do analizy twarzy na potrzeby uwierzytelniania"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Nie można przeanalizować twarzy. Spróbuj ponownie."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Zbyt jasna twarz. Spróbuj w ciemniejszym miejscu."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Zbyt ciemna twarz. Spróbuj w jaśniejszym miejscu."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Oddal czujnik od twarzy."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Przybliż czujnik do twarzy."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Przesuń czujnik wyżej."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Przesuń czujnik niżej."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Przesuń czujnik w prawo."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Przesuń czujnik w lewo."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Spójrz na czujnik."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Nie wykryto twarzy."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Nie ruszaj twarzą, patrząc na urządzenie."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Czujnik twarzy nie jest dostępny."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Upłynął limit czasu analizy twarzy. Spróbuj ponownie."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Nie można zapisać informacji o twarzy."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Analiza twarzy została anulowana."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Zbyt wiele prób. Spróbuj ponownie później."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Zbyt wiele prób. Wyłączono uwierzytelnianie za pomocą twarzy."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Spróbuj ponownie."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Nie zarejestrowano twarzy."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"To urządzenie nie jest wyposażone w czujnik twarzy"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Twarz <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Ikona twarzy"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"czytanie ustawień synchronizacji"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Zezwala aplikacji na odczyt ustawień synchronizacji konta. Pozwala to na przykład określić, czy aplikacja Ludzie jest zsynchronizowana z kontem."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"włączanie i wyłączanie synchronizacji"</string>
@@ -1222,6 +1255,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Sieć Wi-Fi nie ma dostępu do internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Kliknij, by wyświetlić opcje"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Zmieniono ustawienia hotspotu"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Zmieniono pasmo hotspotu."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"To urządzenie nie może korzystać tylko z częstotliwości 5 GHz. Będzie korzystać z tego pasma, jeśli będzie ono dostępne."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Zmieniono na połączenie typu <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Urządzenie korzysta z połączenia typu <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, gdy <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nie dostępu do internetu. Mogą zostać naliczone opłaty."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Przełączono z połączenia typu <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na <xliff:g id="NEW_NETWORK">%2$s</xliff:g>."</string>
@@ -1453,7 +1489,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"Dodaj konto"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Zwiększ"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Zmniejsz"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> dotknij i przytrzymaj."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> naciśnij i przytrzymaj."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Przesuń w górę, by zwiększyć, i w dół, by zmniejszyć."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Zmień minutę na późniejszą"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Zmień minutę na wcześniejszą"</string>
@@ -1480,7 +1516,7 @@
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Nie udało się uruchomić aplikacji <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Udostępnij przez:"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Udostępnij przez <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="content_description_sliding_handle" msgid="415975056159262248">"Uchwyt przesuwny. Dotknij i przytrzymaj."</string>
+    <string name="content_description_sliding_handle" msgid="415975056159262248">"Uchwyt przesuwny. Naciśnij i przytrzymaj."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Przesuń, aby odblokować."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Przejdź do strony głównej"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Przejdź wyżej"</string>

@@ -282,6 +282,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Месцазнаходжанне"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"атрымліваць доступ да месцазнаходжання гэтай прылады"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Дазволіць праграме &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ да звестак аб месцазнаходжанні гэтай прылады?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Праграма будзе мець доступ да звестак пра месцазнаходжанне, толькі калі яна выкарыстоўваецца."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Дазволіць праграме &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; мець доступ да месцазнаходжання?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Праграма заўсёды будзе мець доступ да звестак пра месцазнаходжанне, нават калі яна не выкарыстоўваецца."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Каляндар"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"атрымліваць доступ да вашага календара"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Дазволіць праграме &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ да вашага календара?"</string>
@@ -408,8 +411,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Гэта праграма можа дадаваць, выдаляць або змяняць падзеі календара на вашым тэлефоне. Гэта праграма можа адпраўляць паведамленні, якія могуць здавацца адпраўленымі ўладальнікамі календара, або змяняць падзеі без апавяшчэння іх уладальнікаў."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"доступ да дадатковых камандаў пастаўшчыка месцазнаходжання"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Дазваляе праграме атрымліваць доступ да дадатковых каманд службаў вызначэння месцазнаходжання. Гэта можа дазволіць праграме ўмешвацца ў функцыянаванне GPS або іншых крыніц даных аб месцазнаходжаннi."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"доступ да дакладнага месцазнаходжання толькі ў асноўным рэжыме"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Гэта праграма можа атрымліваць звесткі пра ваша дакладнае месцазнаходжанне толькі ў асноўным рэжыме. Службы геалакацыі павінны быць уключаны і даступныя на вашым тэлефоне, каб праграма магла імі карыстацца. Гэта можа павялічыць спажыванне зараду акумулятара."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"атрымліваць доступ да прыблізнага месцазнаходжання (на аснове даных сеткі)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне на падставе даных сеткавых крыніц, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Гэтыя сэрвісы вызначэння месцазнаходжання павінны быць уключаны i даступныя на вашым планшэце, каб праграма магла іх выкарыстоўваць."</string>
@@ -524,6 +526,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Значок адбіткаў пальцаў"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"кіраваць абсталяваннем для распазнавання твару"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Праграма зможа дадаваць і выдаляць шаблоны твару."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"карыстацца абсталяваннем для распазнавання твару"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Праграма зможа выкарыстоўваць абсталяванне распазнавання твару для аўтэнтыфікацыі"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Не ўдалося распазнаць твар. Паўтарыце спробу."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Твар занадта светлы. Паспрабуйце зменшыць святло."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Твар занадта цёмны. Павялічце асвятленне."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Перамясціце датчык далей ад твару."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Наблізьце датчык да твару."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Падыміце датчык вышэй."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Апусціце датчык ніжэй."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Перамясціце датчык управа."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Перамясціце датчык улева."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Глядзіце на датчык."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Твар не знойдзены."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Трымайце твар перад прыладай."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Абсталяванне для распазнавання твару недаступнае."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Час чакання твару выйшаў. Паўтарыце спробу."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Не ўдалося захаваць твар."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Распазнаванне твару скасавана."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Занадта шмат спроб. Паўтарыце спробу пазней."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Занадта шмат спроб. Аўтэнтыфікацыя твару адключана"</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Паўтарыце спробу."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Твар не зарэгістраваны."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"На гэтай прыладзе адсутнічае датчык аўтэнтыфікацыі твару"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Твар <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Значок твару"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"чытаць параметры сінхранізацыі"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Дазваляе прыкладанням чытаць параметры сінхранізацыі для ўліковага запісу. Напрыклад, яны могуць вызначыць, цi сiнхранiзавана з улiковым запiсам прыкладанне \"Кантакты\"."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"уключэнне ці адключэнне сінхранізацыi"</string>
@@ -1222,6 +1255,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"У Wi-Fi няма доступу да інтэрнэту"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Дакраніцеся, каб убачыць параметры"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Змяненні ў наладах хот-спота"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Частата хот-спота змянілася."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Прылада не можа працаваць толькі на частаце 5 ГГц. Гэта частата будзе выкарыстоўвацца, калі гэта магчыма."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Выкананы пераход да <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Прылада выкарыстоўвае сетку <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, калі ў сетцы <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> няма доступу да інтэрнэту. Можа спаганяцца плата."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Выкананы пераход з <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> да <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"સ્થાન"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"આ ઉપકરણના સ્થાનને ઍક્સેસ કરવાની"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને આ ઉપકરણના સ્થાનને ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"માત્ર જ્યારે તમે ઍપનો ઉપયોગ કરી રહ્યાં હોય ત્યારે જ ઍપ સ્થાનને ઍક્સેસ કરી શકશે."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને હંમેશાં આ ઉપકરણના સ્થાનને ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"તમે ઍપનો ઉપયોગ કરી રહ્યાં ન હોય, તો પણ ઍપ હંમેશાં સ્થાનને ઍક્સેસ કરી શકશે."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"કૅલેન્ડર"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"તમારા કેલેન્ડરને ઍક્સેસ કરવાની"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને તમારા કૅલેન્ડરને ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"આ ઍપ્લિકેશન, તમારા ફોન પર કૅલેન્ડર ઇવેન્ટ્સ ઉમેરી, દૂર કરી અથવા બદલી શકે છે. આ ઍપ્લિકેશન, કૅલેન્ડર માલિકો તરફથી આવતાં હોય તેવા લાગતાં સંદેશા મોકલી શકે છે અથવા તેમના માલિકોને સૂચિત કર્યા વિના ઇવેન્ટ્સ બદલી શકે છે."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"વધારાના સ્થાન પ્રદાતા આદેશોને ઍક્સેસ કરો"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"એપ્લિકેશનને વધારાના સ્થાન પ્રદાતા આદેશોને ઍક્સેસ કરવાની મંજૂરી આપે છે. આ એપ્લિકેશનને GPS અથવા અન્ય સ્થાન સ્રોતોના ઓપરેશનમાં દખલ કરવાની મંજૂરી આપી શકે છે."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"ફૉરગ્રાઉન્ડમાં ફક્ત ચોક્કસ સ્થાન ઍક્સેસ કરો"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"આ ઍપ ફક્ત બૅકગ્રાઉન્ડમાં હોય ત્યારે જ તમારું ચોક્કસ સ્થાન મેળવી શકે છે. ઍપ આ સ્થાન સેવાઓનો ઉપયોગ કરી શકે તે માટે તમારા ફોન પર આ સેવાઓ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે. આ બૅટરી વપરાશ વધારી શકે છે."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"અંદાજિત સ્થાન ઍક્સેસ કરો (નેટવર્ક-આધારિત)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"આ ઍપ્લિકેશન, સેલ ટાવર્સ અને વાઇ-ફાઇ નેટવર્ક્સ જેવા નેટવર્ક સ્રોતોના આધારે તમારું સ્થાન મેળવી શકે છે. ઍપ્લિકેશન દ્વારા આ સ્થાન સેવાઓનો ઉપયોગ કરવામાં સમર્થ થવા માટે તમારા ટેબ્લેટ પર આ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે."</string>
@@ -518,6 +520,64 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ફિંગરપ્રિન્ટ આયકન"</string>
+    <!-- no translation found for permlab_manageFace (2137540986007309781) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFace (8919637120670185330) -->
+    <skip />
+    <!-- no translation found for permlab_useFaceAuthentication (8996134460546804535) -->
+    <skip />
+    <!-- no translation found for permdesc_useFaceAuthentication (5011118722951833089) -->
+    <skip />
+    <!-- no translation found for face_acquired_insufficient (5901287247766106330) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (610606792381297174) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (7229162716976778371) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1980310037427755293) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (4494571381828850007) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (228411096134808372) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (4539774649296349109) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (1650292067226118760) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (2712489669456176505) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8344973502980415859) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (5707782294589511391) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_steady (3722829465011040042) -->
+    <skip />
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <!-- no translation found for face_error_hw_not_available (6255891785768984615) -->
+    <skip />
+    <!-- no translation found for face_error_timeout (4014326147867150054) -->
+    <skip />
+    <!-- no translation found for face_error_no_space (8224993703466381314) -->
+    <skip />
+    <!-- no translation found for face_error_canceled (283945501061931023) -->
+    <skip />
+    <!-- no translation found for face_error_lockout (3407426963155388504) -->
+    <skip />
+    <!-- no translation found for face_error_lockout_permanent (8198354656746088890) -->
+    <skip />
+    <!-- no translation found for face_error_unable_to_process (238761109287767270) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (9166792142679691323) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (4737289254517095671) -->
+    <skip />
+    <!-- no translation found for face_name_template (7004562145809595384) -->
+    <skip />
+  <string-array name="face_error_vendor">
+  </string-array>
+    <!-- no translation found for face_icon_content_description (4024817159806482191) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"સમન્વયન સેટિંગ્સ વાંચો"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ઍપ્લિકેશનને એકાઉન્ટ માટે સમન્વયન સેટિંગ્સને વાંચવાની મંજૂરી આપે છે. ઉદાહરણ તરીકે, આ એકાઉન્ટ સાથે લોકો ઍપ્લિકેશન સમન્વયિત થઈ છે કે કેમ તે નિર્ધારિત કરી શકે છે."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"સમન્વયન ચાલુ અને બંધ ટોગલ કરો"</string>
@@ -1178,6 +1238,12 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"વાઇ-ફાઇને કોઈ ઇન્ટરનેટ ઍક્સેસ નથી"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"વિકલ્પો માટે ટૅપ કરો"</string>
+    <!-- no translation found for wifi_softap_config_change (8475911871165857607) -->
+    <skip />
+    <!-- no translation found for wifi_softap_config_change_summary (7601233252456548891) -->
+    <skip />
+    <!-- no translation found for wifi_softap_config_change_detailed (8022936822860678033) -->
+    <skip />
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> પર સ્વિચ કર્યું"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"જ્યારે <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> પાસે કોઈ ઇન્ટરનેટ ઍક્સેસ ન હોય ત્યારે ઉપકરણ <xliff:g id="NEW_NETWORK">%1$s</xliff:g>નો ઉપયોગ કરે છે. શુલ્ક લાગુ થઈ શકે છે."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> પરથી <xliff:g id="NEW_NETWORK">%2$s</xliff:g> પર સ્વિચ કર્યું"</string>
