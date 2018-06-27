@@ -3404,6 +3404,7 @@
   <java-symbol type="string" name="notification_app_name_settings" />
 
   <java-symbol type="integer" name="config_lowBatteryAutoTriggerDefaultLevel" />
+  <java-symbol type="bool" name="config_batterySaverStickyBehaviourDisabled" />
 
   <!-- For car devices -->
   <java-symbol type="string" name="car_loading_profile" />

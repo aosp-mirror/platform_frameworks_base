@@ -23,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.ContentResolver;
+import android.content.res.Resources;
 import android.provider.Settings.Global;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -48,11 +49,17 @@ public class BatterySaverStateMachineTest {
     private BatterySaverController mMockBatterySaverController;
     private Device mDevice;
     private TestableBatterySaverStateMachine mTarget;
+    private Resources mMockResources;
 
     private class MyMockContext extends MockContext {
         @Override
         public ContentResolver getContentResolver() {
             return mMockContextResolver;
+        }
+
+        @Override
+        public Resources getResources() {
+            return mMockResources;
         }
     }
 
@@ -157,11 +164,15 @@ public class BatterySaverStateMachineTest {
         mMockContext = new MyMockContext();
         mMockContextResolver = mock(ContentResolver.class);
         mMockBatterySaverController = mock(BatterySaverController.class);
+        mMockResources = mock(Resources.class);
 
         doAnswer((inv) -> mDevice.batterySaverEnabled = inv.getArgument(0))
                 .when(mMockBatterySaverController).enableBatterySaver(anyBoolean(), anyInt());
         when(mMockBatterySaverController.isEnabled())
                 .thenAnswer((inv) -> mDevice.batterySaverEnabled);
+        when(mMockResources.getBoolean(
+                com.android.internal.R.bool.config_batterySaverStickyBehaviourDisabled))
+                .thenReturn(false);
 
         mPersistedState = new DevicePersistedState();
         initDevice();
@@ -173,7 +184,6 @@ public class BatterySaverStateMachineTest {
         mTarget = new TestableBatterySaverStateMachine();
 
         mDevice.pushBatteryStatus();
-        mDevice.pushGlobalSettings();
         mTarget.onBootCompleted();
     }
 
@@ -498,8 +508,83 @@ public class BatterySaverStateMachineTest {
     }
 
     @Test
-    public void testNoAutoBatterySaver_fromAdb() {
+    public void testAutoBatterySaver_withStickyDisabled() {
+        when(mMockResources.getBoolean(
+                com.android.internal.R.bool.config_batterySaverStickyBehaviourDisabled))
+                .thenReturn(true);
+        initDevice();
+        mDevice.putGlobalSetting(Global.LOW_POWER_MODE_TRIGGER_LEVEL, 50);
 
+        mTarget.setBatterySaverEnabledManually(true);
+
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(100, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        mDevice.setBatteryLevel(30);
+
+        assertEquals(true, mDevice.batterySaverEnabled);
+        assertEquals(30, mPersistedState.batteryLevel);
+        assertEquals(true, mPersistedState.batteryLow);
+
+        mDevice.setBatteryLevel(80);
+
+        assertEquals(false, mDevice.batterySaverEnabled); // Not sticky.
+        assertEquals(80, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        mDevice.setPowered(true);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(80, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        mDevice.setBatteryLevel(30);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(30, mPersistedState.batteryLevel);
+        assertEquals(true, mPersistedState.batteryLow);
+
+        mDevice.setPowered(false);
+
+        assertEquals(true, mDevice.batterySaverEnabled); // Restores BS.
+        assertEquals(30, mPersistedState.batteryLevel);
+        assertEquals(true, mPersistedState.batteryLow);
+
+        mDevice.setPowered(true);
+        mDevice.setBatteryLevel(90);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(90, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        initDevice();
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(90, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        mDevice.setPowered(false);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(90, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        mTarget.setBatterySaverEnabledManually(false);
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(90, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+
+        initDevice();
+
+        assertEquals(false, mDevice.batterySaverEnabled);
+        assertEquals(90, mPersistedState.batteryLevel);
+        assertEquals(false, mPersistedState.batteryLow);
+    }
+
+    @Test
+    public void testNoAutoBatterySaver_fromAdb() {
         assertEquals(0, mDevice.getLowPowerModeTriggerLevel());
 
         assertEquals(false, mDevice.batterySaverEnabled);

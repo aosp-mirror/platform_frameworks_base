@@ -72,7 +72,7 @@ public class BatterySaverStateMachine {
     @GuardedBy("mLock")
     private int mBatteryLevel;
 
-    /** Whether the battery level is considered to be "low" or not.*/
+    /** Whether the battery level is considered to be "low" or not. */
     @GuardedBy("mLock")
     private boolean mIsBatteryLevelLow;
 
@@ -83,6 +83,9 @@ public class BatterySaverStateMachine {
     /** Previously known value of Global.LOW_POWER_MODE_STICKY. */
     @GuardedBy("mLock")
     private boolean mSettingBatterySaverEnabledSticky;
+
+    /** Config flag to track if battery saver's sticky behaviour is disabled. */
+    private final boolean mBatterySaverStickyBehaviourDisabled;
 
     /**
      * Previously known value of Global.LOW_POWER_MODE_TRIGGER_LEVEL.
@@ -124,6 +127,9 @@ public class BatterySaverStateMachine {
         mLock = lock;
         mContext = context;
         mBatterySaverController = batterySaverController;
+
+        mBatterySaverStickyBehaviourDisabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_batterySaverStickyBehaviourDisabled);
     }
 
     private boolean isBatterySaverEnabled() {
@@ -304,7 +310,7 @@ public class BatterySaverStateMachine {
                     BatterySaverController.REASON_PLUGGED_IN,
                     "Plugged in");
 
-        } else if (mSettingBatterySaverEnabledSticky) {
+        } else if (mSettingBatterySaverEnabledSticky && !mBatterySaverStickyBehaviourDisabled) {
             // Re-enable BS.
             enableBatterySaverLocked(/*enable=*/ true, /*manual=*/ true,
                     BatterySaverController.REASON_STICKY_RESTORE,
@@ -383,8 +389,9 @@ public class BatterySaverStateMachine {
         putGlobalSetting(Global.LOW_POWER_MODE, enable ? 1 : 0);
 
         if (manual) {
-            mSettingBatterySaverEnabledSticky = enable;
-            putGlobalSetting(Global.LOW_POWER_MODE_STICKY, enable ? 1 : 0);
+            mSettingBatterySaverEnabledSticky = !mBatterySaverStickyBehaviourDisabled && enable;
+            putGlobalSetting(Global.LOW_POWER_MODE_STICKY,
+                    mSettingBatterySaverEnabledSticky ? 1 : 0);
         }
         mBatterySaverController.enableBatterySaver(enable, intReason);
 
@@ -449,6 +456,8 @@ public class BatterySaverStateMachine {
             pw.println(mSettingBatterySaverEnabledSticky);
             pw.print("  mSettingBatterySaverTriggerThreshold=");
             pw.println(mSettingBatterySaverTriggerThreshold);
+            pw.print("  mBatterySaverStickyBehaviourDisabled=");
+            pw.println(mBatterySaverStickyBehaviourDisabled);
         }
     }
 

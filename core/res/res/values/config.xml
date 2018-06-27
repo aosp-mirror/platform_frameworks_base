@@ -3484,4 +3484,7 @@
 
     <!-- Whether or not we should show the option to show battery percentage -->
     <bool name="config_battery_percentage_setting_available">true</bool>
+
+    <!-- Whether or not battery saver should be "sticky" when manually enabled. -->
+    <bool name="config_batterySaverStickyBehaviourDisabled">false</bool>
 </resources>
