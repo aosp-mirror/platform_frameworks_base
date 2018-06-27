@@ -90,9 +90,7 @@ cc_library_shared {
     srcs: [
         "android_media_Media2HTTPConnection.cpp",
         "android_media_Media2HTTPService.cpp",
-        "android_media_MediaCrypto.cpp",
         "android_media_Media2DataSource.cpp",
-        "android_media_MediaDrm.cpp",
         "android_media_MediaPlayer2.cpp",
         "android_media_SyncParams.cpp",
     ],
@@ -100,19 +98,23 @@ cc_library_shared {
     shared_libs: [
         "android.hardware.cas@1.0",  // for CasManager. VNDK???
         "android.hardware.cas.native@1.0",  // CasManager. VNDK???
-        "libandroid",  // NDK
         "libandroid_runtime",  // ???
         "libaudioclient",  // for use of AudioTrack, AudioSystem. to be removed
-        "liblog",  // NDK
         "libdrmframework",  // for FileSource, MediaHTTP
         "libgui",  // for VideoFrameScheduler
         "libhidlallocatorutils",
         "libhidlbase",  // VNDK???
-        "libmediandk",  // NDK
         "libpowermanager",  // for JWakeLock. to be removed
 
         "libutils",  // Have to use shared lib to make libandroid_runtime behave correctly.
                      // Otherwise, AndroidRuntime::getJNIEnv() will return NULL.
+
+        // NDK or NDK-compliant
+        "libandroid",
+        "libmediandk",
+        "libnativehelper_compat_libc++",
+        "liblog",
+        "libz",
     ],
 
     header_libs: ["libhardware_headers"],
@@ -133,7 +135,6 @@ cc_library_shared {
         "libmediametrics",
         "libmediaplayer2",
         "libmediautils",
-        "libnativehelper",
         "libnetd_client",
         "libstagefright_esds",
         "libstagefright_foundation",
@@ -146,7 +147,6 @@ cc_library_shared {
         "libstagefright_timedtext",
         "libunwindstack",
         "libutilscallstack",
-        "libz",
         "libziparchive",
     ],
 
@@ -168,7 +168,7 @@ cc_library_shared {
         "-Wunreachable-code",
     ],
 
-    ldflags: ["-Wl,--exclude-libs=ALL"],
+    ldflags: ["-Wl,--exclude-libs=ALL,-error-limit=0"],
 }
 
 subdirs = [
