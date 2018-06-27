@@ -4736,6 +4736,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         mScrimController.setExpansionAffectsAlpha(
                 !mFingerprintUnlockController.isFingerprintUnlock());
 
+        boolean launchingAffordanceWithPreview =
+                mNotificationPanel.isLaunchingAffordanceWithPreview();
+        mScrimController.setLaunchingAffordanceWithPreview(launchingAffordanceWithPreview);
+
         if (mBouncerShowing) {
             // Bouncer needs the front scrim when it's on top of an activity,
             // tapping on a notification, editing QS or being dismissed by
@@ -4745,7 +4749,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                     || mStatusBarKeyguardViewManager.isFullscreenBouncer() ?
                     ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
             mScrimController.transitionTo(state);
-        } else if (mLaunchCameraOnScreenTurningOn || isInLaunchTransition()) {
+        } else if (isInLaunchTransition() || mLaunchCameraOnScreenTurningOn
+                || launchingAffordanceWithPreview) {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         } else if (mBrightnessMirrorVisible) {
             mScrimController.transitionTo(ScrimState.BRIGHTNESS_MIRROR);
