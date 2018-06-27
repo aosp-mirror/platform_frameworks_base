@@ -575,7 +575,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * @hide
      */
     public boolean isAlwaysOnTop() {
-        return mWindowingMode == WINDOWING_MODE_PINNED || mAlwaysOnTop == ALWAYS_ON_TOP_ON;
+        return mWindowingMode == WINDOWING_MODE_PINNED
+                || (mWindowingMode == WINDOWING_MODE_FREEFORM && mAlwaysOnTop == ALWAYS_ON_TOP_ON);
     }
 
     /**
