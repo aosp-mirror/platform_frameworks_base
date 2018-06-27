@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Location"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"access this device\'s location"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Allow &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; to access this device\'s location?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"The app will only have access to the location while you’re using the app."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Always allow &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; to access this device’s location?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"The app will always have access to the location, even when you’re not using the app."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"access your calendar"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Allow &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; to access your calendar?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"This app can add, remove or change calendar events on your phone. This app can send messages that may appear to come from calendar owners or change events without notifying their owners."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"access extra location provider commands"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Allows the app to access extra location provider commands. This may allow the app to interfere with the operation of the GPS or other location sources."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"access precise location only in the foreground"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"This app can get your exact location only when it is in the foreground. These location services must be turned on and available on your phone for the app to be able to use them. This may increase battery consumption."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"access approximate location (network-based)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"This app can pick up your location based on network sources such as phone masts and Wi-Fi networks. These location services must be turned on and available on your tablet for the app to be able to use them."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Fingerprint icon"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"manage face authentication hardware"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Allows the app to invoke methods to add and delete facial templates for use."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"use face authentication hardware"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Allows the app to use face authentication hardware for authentication"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Couldn’t process face. Please try again."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Face is too bright. Please try in lower light."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Face is too dark. Please uncover light source."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Please move sensor farther away from face."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Please bring sensor closer to face."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Please move sensor higher."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Please move sensor lower."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Please move sensor to the right."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Please move sensor to the left."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Please look at the sensor."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"No face detected."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Keep face steady in front of device."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Face hardware not available."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Face time out reached. Try again."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Face can’t be stored."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Face operation cancelled."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Too many attempts. Try again later."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Too many attempts. Facial authentication disabled."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Try again."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"No face enrolled."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"This device does not have a face authentication sensor"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Face <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Face icon"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"read sync settings"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Allows the app to read the sync settings for an account. For example, this can determine whether the People app is synced with an account."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"toggle sync on and off"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi has no Internet access"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tap for options"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Changes to your hotspot settings"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Your hotspot band has changed."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"This device doesn’t support your preference for 5 GHz only. Instead, this device will use the 5 GHz band when available."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Switched to <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Device uses <xliff:g id="NEW_NETWORK">%1$s</xliff:g> when <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> has no Internet access. Charges may apply."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Switched from <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> to <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

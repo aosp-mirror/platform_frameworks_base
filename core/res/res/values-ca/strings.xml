@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Ubicació"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accedir a la ubicació del dispositiu"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; accedeixi a la ubicació del dispositiu?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"L\'aplicació només tindrà accés a la ubicació quan l\'estiguis utilitzant."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; accedeixi sempre a la ubicació del dispositiu?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"L\'aplicació tindrà accés sempre a la ubicació, fins i tot quan no l\'estiguis utilitzant."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendari"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accedir al calendari"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; accedeixi al calendari?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Aquesta aplicació pot afegir, suprimir i canviar esdeveniments del calendari al telèfon. També pot enviar missatges que sembli que provenen dels propietaris del calendari o canviar esdeveniments sense notificar-los-ho."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"accedir a ordres del proveïdor d\'ubicació addicionals"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permet que l\'aplicació accedeixi a ordres addicionals del proveïdor d\'ubicacions; per tant, és possible que l\'aplicació pugui interferir en el funcionament del GPS o d\'altres fonts d\'ubicacions."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"accedeix a la ubicació exacta només en primer pla"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Aquesta aplicació pot obtenir la teva ubicació exacta només quan està en primer pla. Aquests serveis d\'ubicació han d\'estar activats i disponibles al telèfon perquè l\'aplicació els pugui utilitzar, i això pot fer que el consum de bateria augmenti."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"accedir a la ubicació aproximada (basada en la xarxa)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Aquesta aplicació pot obtenir la teva ubicació a partir de fonts de xarxa, com ara torres de telefonia mòbil i xarxes Wi-Fi. Aquests serveis d\'ubicació han d\'estar activats i disponibles a la tauleta perquè l\'aplicació els pugui utilitzar."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icona d\'empremta digital"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"gestiona el maquinari d\'autenticació facial"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Permet que l\'aplicació afegeixi i suprimeixi plantilles de cares que es puguin fer servir."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"utilitza el maquinari d\'autenticació facial"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Permet que l\'aplicació faci servir maquinari d\'autenticació facial"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Error en processar la cara. Torna-ho a provar."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"La cara brilla massa. Prova amb menys llum."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"La cara és massa fosca. Prova amb més llum."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Allunya el sensor de la cara."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Apropa el sensor a la cara."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Puja el sensor més amunt."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Baixa el sensor més avall."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Mou el sensor cap a la dreta."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Mou el sensor cap a l\'esquerra."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Mira el sensor."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"No s\'ha detectat cap cara."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Mantén la cara quieta davant del dispositiu."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Maquinari de reconeixement facial no disponible."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"S\'ha esgotat el temps d\'espera. Torna-ho a provar."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"La cara no es pot desar."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"S\'ha cancel·lat el reconeixement facial."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Massa intents. Torna-ho a provar més tard."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Massa intents. Autenticació facial desactivada."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Torna-ho a provar."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"No s\'ha registrat cap cara."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Aquest dispositiu no té sensor d\'autenticació facial"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Cara <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Icona facial"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"llegir la configuració de sincronització"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permet que l\'aplicació llegeixi la configuració de sincronització d\'un compte. Per exemple, això pot determinar que l\'aplicació Persones estigui sincronitzada amb un compte."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activar o desactivar la sincronització"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"La Wi-Fi no té accés a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Toca per veure les opcions"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Canvis en la configuració del punt d\'accés Wi-Fi"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Ha canviat la teva banda del punt d\'accés Wi-Fi."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Aquest dispositiu no admet utilitzar exclusivament una banda de 5 GHz. El dispositiu utilitzarà una banda de 5 GHz quan estigui disponible."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Actualment en ús: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"El dispositiu utilitza <xliff:g id="NEW_NETWORK">%1$s</xliff:g> en cas que <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> no tingui accés a Internet. És possible que s\'hi apliquin càrrecs."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Abans es feia servir la xarxa <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>; ara s\'utilitza <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

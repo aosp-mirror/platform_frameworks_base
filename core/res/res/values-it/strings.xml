@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Geolocalizzazione"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accedere alla posizione di questo dispositivo"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla posizione di questo dispositivo?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"L\'app avrà accesso alla posizione soltanto quando la usi."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Vuoi consentire sempre a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere alla posizione di questo dispositivo?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"L\'app avrà sempre accesso alla posizione, anche quando non la usi."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendario"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accedere al calendario"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di accedere al tuo calendario?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Questa app può aggiungere, rimuovere o modificare eventi di calendario sul telefono. Può inviare messaggi che possono sembrare inviati dai proprietari del calendario o modificare eventi senza notificare i proprietari."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"accesso a comandi aggiuntivi provider di geolocalizz."</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Consente all\'app di accedere a ulteriori comandi del fornitore di posizione. Ciò potrebbe consentire all\'app di interferire con il funzionamento del GPS o di altre fonti di geolocalizzazione."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"Accesso alla posizione esatta solo in primo piano"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Questa app può recuperare la tua posizione esatta solo quando è in primo piano. Questi servizi di geolocalizzazione devono essere attivi e disponibili sul telefono affinché l\'app possa usarli. Potrebbe aumentare il consumo della batteria."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"accesso alla posizione approssimativa (basata sulla rete)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Questa app può accedere alla tua posizione tramite fonti di rete come antenne di telefonia mobile e reti Wi-Fi. Tali servizi di geolocalizzazione devono essere attivati e disponibili sul tablet per consentire all\'app di utilizzarli."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icona dell\'impronta digitale"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"gestisci l\'hardware per l\'autenticazione dei volti"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Consente all\'app di richiamare i metodi per aggiungere e rimuovere i modelli di volti."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"utilizza l\'hardware per l\'autenticazione dei volti"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Consente all\'app di utilizzare hardware per l\'autenticazione dei volti"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Impossibile elaborare il volto. Riprova."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Volto troppo luminoso. Prova dove c\'è meno luce."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Volto troppo scuro. Non coprire la fonte di luce."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Allontana i sensori dal volto."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Avvicina i sensori al volto."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Sposta i sensori verso l\'alto."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Sposta i sensori verso il basso."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Sposta i sensori verso destra."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Sposta i sensori verso sinistra."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Guarda i sensori."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Nessun volto rilevato."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Tieni il volto fermo davanti al dispositivo."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hardware per il volto non disponibile."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Timeout operazione associata al volto. Riprova."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Il volto non può essere memorizzato."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Operazione associata al volto annullata."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Troppi tentativi. Riprova più tardi."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Troppi tentativi. Autenticazione disattivata."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Riprova."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Nessun volto registrato."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Nessun sensore di autenticazione del volto sul dispositivo."</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Volto <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Icona volto"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lettura impostazioni di sincronizz."</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Consente all\'applicazione di leggere le impostazioni di sincronizzazione per un account. Ad esempio, questa autorizzazione può determinare se l\'applicazione Persone è sincronizzata con un account."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"attivazione e disattivazione della sincronizzazione"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"La rete Wi-Fi non ha accesso a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tocca per le opzioni"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Modifiche alle tue impostazioni dell\'hotspot"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"La tua banda di hotspot è cambiata."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Questo dispositivo non supporta la tua preferenza esclusiva per 5 GHz. Utilizzerà invece la banda a 5 GHz solo quando è disponibile."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Passato a <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Il dispositivo utilizza <xliff:g id="NEW_NETWORK">%1$s</xliff:g> quando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> non ha accesso a Internet. Potrebbero essere applicati costi."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Passato da <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> a <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

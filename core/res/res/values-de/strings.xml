@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Standort"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"auf den Standort deines Geräts zugreifen"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; erlauben, den Gerätestandort abzurufen?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Die App hat nur Zugriff auf den Gerätestandort, wenn du sie verwendest."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; immer erlauben, den Gerätestandort abzurufen?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Die App hat immer Zugriff auf den Gerätestandort, auch wenn du sie gerade nicht verwendest."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"auf deinen Kalender zugreifen"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; Zugriff auf deinen Kalender erlauben?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Diese App kann Kalendertermine auf deinem Smartphone hinzufügen, entfernen oder ändern. Diese App kann Nachrichten senden, die scheinbar von Kalendereigentümern stammen, oder Termine ohne Benachrichtigung der Eigentümer ändern."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"Auf zusätzliche Dienstanbieterbefehle für Standort zugreifen"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ermöglicht der App, auf zusätzliche Standortanbieterbefehle zuzugreifen. Damit könnte die App die Funktionsweise von GPS oder anderen Standortquellen beeinträchtigen."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"Nur bei Ausführung im Vordergrund auf den genauen Standort zugreifen"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Diese App kann deinen genauen Standort nur dann ermitteln, wenn sie im Vordergrund ausgeführt wird. Die App kann diese Standortdienste nur verwenden, wenn sie auf deinem Smartphone aktiviert und verfügbar sind. Hierdurch kann sich der Akkuverbrauch erhöhen."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"Auf den ungefähren Standort zugreifen (netzwerkbasiert)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Diese App kann deinen Standort mithilfe von Netzwerkquellen wie Mobilfunkmasten und WLAN ermitteln. Die App kann diese Standortdienste nur verwenden, wenn sie auf deinem Tablet aktiviert und verfügbar sind."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Fingerabdruck-Symbol"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"Gesichtserkennungshardware verwalten"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Ermöglicht der App, Methoden zum Hinzufügen oder Entfernen von Gesichtsvorlagen anzuwenden."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"Gesichtserkennungshardware verwenden"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Ermöglicht der App, für die Authentifizierung Gesichtserkennungshardware zu verwenden"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Kann Gesicht nicht verarbeiten. Versuch es erneut."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Gesicht zu hell. Bei weniger Licht versuchen."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Gesicht zu dunkel. Bei mehr Licht versuchen."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Sensor weiter weg vom Gesicht halten."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Sensor näher an das Gesicht halten."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Sensor höher halten."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Sensor niedriger halten."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Sensor nach rechts bewegen."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Sensor nach links bewegen."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Blick auf den Sensor richten."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Kein Gesicht erkannt."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Gerät vor das Gesicht halten und nicht bewegen."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hardware zur Gesichtserkennung nicht verfügbar."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Zeitüberschreitung für Gesicht. Versuch es erneut."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Gesicht kann nicht gespeichert werden."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Gesichtserkennung abgebrochen."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Zu viele Versuche. Versuch es später noch einmal."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Zu viele Versuche. Gesichtserkennung deaktiviert."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Versuch es noch einmal."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Kein Gesicht erfasst."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Dieses Gerät hat keinen Gesichtserkennungssensor"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Gesicht <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Gesichtssymbol"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Synchronisierungseinstellungen lesen"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Ermöglicht der App, die Synchronisierungseinstellungen eines Kontos zu lesen. Beispielsweise kann damit festgestellt werden, ob Kontakte mit einem Konto synchronisiert werden."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"Synchronisierung aktivieren oder deaktivieren"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"WLAN hat keinen Internetzugriff"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Für Optionen tippen"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Änderungen an deinen Hotspot-Einstellungen"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Dein Hotspot-Band hat sich geändert."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Dieses Gerät unterstützt die ausschließliche Nutzung von 5 GHz nicht. Es greift aber immer auf das 5-GHz-Band zurück, wenn dieses verfügbar ist."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Zu <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> gewechselt"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Auf dem Gerät werden <xliff:g id="NEW_NETWORK">%1$s</xliff:g> genutzt, wenn über <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> kein Internet verfügbar ist. Eventuell fallen Gebühren an."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Von \"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>\" zu \"<xliff:g id="NEW_NETWORK">%2$s</xliff:g>\" gewechselt"</string>

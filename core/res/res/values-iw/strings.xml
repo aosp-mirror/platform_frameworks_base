@@ -282,6 +282,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"מיקום"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"גישה אל מיקום המכשיר הזה"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"‏לתת לאפליקציה &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; הרשאת גישה למיקום המכשיר?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"לאפליקציה תהיה גישה אל נתוני המיקום רק במהלך השימוש באפליקציה."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"‏תמיד לתת לאפליקציה &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; הרשאת גישה למיקום המכשיר?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"לאפליקציה תמיד תהיה גישה לנתוני המיקום, גם כשהאפליקציה אינה בשימוש."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"יומן"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"גישה אל היומן"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"‏לתת לאפליקציה &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; הרשאת גישה ליומן?"</string>
@@ -408,8 +411,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"אפליקציה זו יכולה להוסיף, להסיר ולשנות אירועי יומן בטלפון. האפליקציה יכולה לשנות אירועים בלי להודיע לבעליהם ולשלוח הודעות שעשויות להיראות כאילו נשלחו מבעלי יומנים."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"גישה לפקודות ספק מיקום נוספות"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏מאפשרת לאפליקציה לגשת לפקודות נוספות של ספק המיקום. הרשאה זו עשויה לאפשר לאפליקציה לשבש את פעולת ה-GPS או מקורות מיקום אחרים."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"קבלת גישה למיקום מדויק בחזית בלבד"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"אפליקציה זו יכולה לזהות את המיקום המדויק שלך רק כאשר היא פועלת בחזית. כדי שהאפליקציה תוכל להשתמש בשירותי המיקום, עליהם להיות מופעלים וזמינים בטלפון. ייתכן שפעולה זו תגביר את צריכת הסוללה."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"גישה אל מיקום משוער (מבוסס רשת)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטאבלט שלך כדי שהאפליקציה תוכל להשתמש בהם."</string>
@@ -524,6 +526,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"סמל טביעת אצבע"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"ניהול של חומרה של זיהוי פנים לצורך אימות"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"מאפשרת לאפליקציה להפעיל שיטות להוספה ומחיקה של תבניות פנים שבהן ייעשה שימוש."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"שימוש בחומרה של זיהוי פנים לצורך אימות"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"מאפשרת לאפליקציה להשתמש בחומרה של זיהוי פנים לצורך אימות"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"לא ניתן היה לעבד את הפנים. יש לנסות שוב."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"הפנים בהירים מדי. יש לנסות באור עמום יותר."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"הפנים כהים מדי. יש להוסיף מקור אור."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"יש להרחיק את החיישן מהפנים."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"יש לקרב את החיישן לפנים."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"יש להזיז את החיישן גבוה יותר."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"יש להזיז את החיישן נמוך יותר."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"יש להזיז את החיישן ימינה."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"יש להזיז את החיישן שמאלה."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"יש להסתכל על החיישן."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"לא זוהו פנים."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"יש להחזיק את הפנים באופן יציב מול המכשיר."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"החומרה לזיהוי הפנים לא זמינה."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"חלף הזמן הקצוב לזיהוי הפנים. יש לנסות שוב."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"לא ניתן לשמור את הפנים."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"פעולת הפנים בוטלה."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"יותר מדי ניסיונות. יש לנסות שוב מאוחר יותר."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"יותר מדי ניסיונות. אימות הפנים הושבת."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"יש לנסות שוב."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"לא נרשמו פנים."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"במכשיר זה אין חיישן לאימות פנים"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"פנים <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"סמל הפנים"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"קרא את הגדרות הסינכרון"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"מאפשר לאפליקציה לקרוא את הגדרות הסנכרון של חשבון. לדוגמה, ניתן לגלות כך האם האפליקציה \'אנשים\' מסונכרן עם חשבון כלשהו."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"הפעלת וכיבוי סנכרון"</string>
@@ -1222,6 +1255,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"‏לרשת ה-Wi-Fi אין גישה לאינטרנט"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"הקש לקבלת אפשרויות"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"שינויים להגדרות של הנקודה לשיתוף אינטרנט"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"התדר של הנקודה לשיתוף אינטרנט השתנה."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"‏מכשיר זה לא תומך בהעדפות שלך ל-5GHz בלבד. במקום זאת, מכשיר זה ישתמש בתדר 5GHz כשיהיה זמין."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"מעבר אל <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"המכשיר משתמש ברשת <xliff:g id="NEW_NETWORK">%1$s</xliff:g> כשלרשת <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> אין גישה לאינטרנט. עשויים לחול חיובים."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"עבר מרשת <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> לרשת <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

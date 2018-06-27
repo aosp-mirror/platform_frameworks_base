@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokasi"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"mengakses lokasi peranti ini"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Benarkan &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; mengakses lokasi peranti ini?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Apl ini hanya dapat mengakses lokasi semasa anda menggunakan apl tersebut."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Sentiasa benarkan &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; mengakses lokasi peranti ini?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Apl ini akan dapat mengakses lokasi pada sepanjang masa, meskipun apabila anda tidak menggunakan apl tersebut."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"mengakses kalendar"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Benarkan &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; mengakses kalendar anda?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Apl ini boleh menambah, mengalih keluar atau mengubah acara kalendar pada telefon anda. Apl ini boleh menghantar mesej yang mungkin kelihatan seperti dihantar oleh pemilik kalendar atau mengubah acara tanpa memaklumi pemilik acara itu."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"akses perintah tambahan pembekal lokasi"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Membenarkan apl mengakses arahan pembekal lokasi tambahan. Ini boleh membenarkan apl untuk campur tangan dengan operasi GPS atau sumber lokasi lain."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"akses lokasi tepat hanya di latar depan"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Apl ini boleh mendapatkan lokasi tepat anda hanya apabila apl tersebut berada di latar depan. Perkhidmatan lokasi ini mesti dihidupkan dan tersedia pada telefon anda untuk membolehkan apl menggunakan perkhidmatan tersebut. Tindakan ini mungkin meningkatkan penggunaan bateri."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"akses lokasi anggaran (berasaskan rangkaian)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Apl ini boleh mendapatkan lokasi anda berdasarkan sumber rangkaian seperti menara selular dan rangkaian Wi-Fi. Perkhidmatan lokasi ini mesti dihidupkan dan tersedia pada tablet anda untuk membolehkan apl menggunakan perkhidmatan tersebut."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikon cap jari"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"urus perkakasan pengesahan wajah"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Membenarkan apl menggunakan kaedah untuk menambahkan dan memadamkan templat wajah untuk digunakan."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"gunakan perkakasan pengesahan wajah"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Membenarkan apl menggunakan perkakasan pengesahan wajah untuk pengesahan"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Tidak dapat memproses wajah. Sila cuba lagi."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Wajah terlalu cerah. Cuba dlm cahaya lebih rendah."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Wajah terlalu gelap. Sila buka sumber cahaya."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Sila alihkan penderia lebih jauh dari wajah."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Sila dekatkan penderia ke wajah."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Sila alihkan penderia ke kedudukan lebih tinggi."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Sila alihkan penderia ke kedudukan lebih rendah."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Sila alihkan penderia ke kanan."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Sila alihkan penderia ke kiri."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Sila lihat penderia."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Tiada wajah dikesan."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Pastikan wajah tidak bergerak di hadapan peranti."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Perkakasan wajah tidak tersedia."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Tamat masa wajah dicapai. Cuba lagi."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Wajah tidak dapat disimpan."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Pengendalian wajah dibatalkan."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Terlalu banyak percubaan. Cuba sebentar lagi."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Terlalu banyak percubaan. Pengesahan wajah dilumpuhkan."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Cuba lagi."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Tiada wajah didaftarkan."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Peranti ini tiada penderia pengesahan wajah"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Wajah <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Ikon wajah"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"membaca tetapan penyegerakan"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Membenarkan apl membaca tetapan segerak untuk akaun. Sebagai contoh, ini boleh menentukan sama ada apl Orang disegerakkan dengan akaun."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"togol segerak hidup dan mati"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi tiada akses Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Ketik untuk mendapatkan pilihan"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Perubahan kepada tetapan tempat liputan anda"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Jalur tempat liputan anda telah berubah."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Peranti ini tidak menyokong pilihan anda untuk 5GHz sahaja. Sebaliknya, peranti ini akan menggunakan jalur 5GHz apabila tersedia."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Beralih kepada <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Peranti menggunakan <xliff:g id="NEW_NETWORK">%1$s</xliff:g> apabila <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> tiada akses Internet. Bayaran mungkin dikenakan."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Beralih daripada <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> kepada <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

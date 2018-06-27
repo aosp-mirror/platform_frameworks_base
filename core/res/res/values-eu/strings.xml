@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Kokapena"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"atzitu gailuaren kokapena"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari gailuaren kokapena atzitzea baimendu nahi diozu?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Aplikazioa erabiltzen ari zarenean soilik atzituko du aplikazioak kokapena."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari gailuaren kokapena beti atzitzea baimendu?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Aplikazioak beti atzituko du kokapena, baita aplikazioa erabiltzen ari ez bazara ere."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Egutegia"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"atzitu egutegia"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; aplikazioari egutegia atzitzea baimendu nahi diozu?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Telefonoko gertaerak gehitzeko, kentzeko edo aldatzeko aukera du aplikazioak. Gainera, egutegien jabeenak diruditen mezuak bidal ditzake, eta gertaerak alda ditzake jabeei beraiei jakinarazi gabe."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"atzitu kokapen-hornitzaileen komando gehigarriak"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Kokapen-hornitzailearen agindu gehigarriak atzitzea baimentzen die aplikazioei. Horrela, agian aplikazioek GPSaren edo bestelako kokapenaren iturburuen funtzionamenduan eragina izan dezakete."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"lortu kokapen zehatza aurreko planoan bakarrik"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Aplikazioak zure kokapen zehatza lor dezake aurreko planoan funtzionatzen duenean bakarrik. Kokapen-zerbitzu horiek aktibatuta eta erabilgarri izan behar dituzu telefonoan, aplikazioak erabil ditzan. Baliteke bateria gehiago erabiltzea."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"atzitu gutxi gorabeherako kokapena (sarean oinarrituta)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Aplikazioak zure kokapenaren berri izan dezake sareen iturburuak (adibidez, telefonia mugikorreko dorreak eta Wi-Fi sareak) erabilita. Kokapen-zerbitzu horiek aktibatuta eta erabilgarri izan behar dituzu tabletan, aplikazioak erabil ditzan."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Hatz-markaren ikonoa"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"kudeatu aurpegi bidez autentifikatzeko hardwarea"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Aurpegi-txantiloiak gehitu eta ezabatzeko metodoei dei egitea baimentzen dio aplikazioari."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"erabili aurpegi bidez autentifikatzeko hardwarea"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Aurpegi bidez autentifikatzeko hardwarea erabiltzea baimentzen dio aplikazioari"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Ezin izan da prozesatu aurpegia. Saiatu berriro."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Aurpegiak distira gehiegi du. Jarri argi gutxiago."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Aurpegia ilunegi dago. Estalgabetu argi-iturburua."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Urrundu sentsorea aurpegitik."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Hurbildu sentsorea aurpegira."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Eraman sentsorea gora."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Eraman sentsorea behera."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Eraman sentsorea eskuinera."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Eraman sentsorea ezkerrera."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Begiratu sentsorea."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Ez dugu hauteman aurpegirik."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Egon geldi, aurpegia gailuaren aurrean jarrita."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Aurpegiaren hardwarea ez dago erabilgarri."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Gainditu da aurpegiak prozesatzeko denbora-muga. Saiatu berriro."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Ezin da gorde aurpegia."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Utzi da aurpegiaren bidezko eragiketa."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Saiakera gehiegi egin dituzu. Saiatu berriro geroago."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Saiakera gehiegi egin dituzu. Desgaitu da aurpegiaren autentifikazioa."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Saiatu berriro."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Ez dago aurpegirik erregistratuta."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Gailu honek ez du aurpegia autentifikatzeko sentsorerik"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"<xliff:g id="FACEID">%d</xliff:g> aurpegia"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Aurpegiaren ikonoa"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"irakurri sinkronizazio-ezarpenak"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Kontu baten sinkronizazio-ezarpenak irakurtzeko baimena ematen die aplikazioei. Adibidez, Jendea aplikazioa konturen batekin sinkronizatuta dagoen zehatz dezake."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"aktibatu eta desaktibatu sinkronizazioa"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Ezin da konektatu Internetera Wi-Fi bidez"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Sakatu aukerak ikusteko"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Aldaketak sare publiko eramangarriaren ezarpenetan"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Aldatu da sare eramangarriaren banda."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Gailuak ez du onartzen 5 GHz-ko banda soilik erabiltzeko hobespena. Horren ordez, erabilgarri dagoen bakoitzean erabiliko da 5 GHz-ko banda."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> erabiltzen ari zara orain"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> Internetera konektatzeko gauza ez denean, <xliff:g id="NEW_NETWORK">%1$s</xliff:g> erabiltzen du gailuak. Agian kostuak ordaindu beharko dituzu."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> erabiltzen ari zinen, baina <xliff:g id="NEW_NETWORK">%2$s</xliff:g> erabiltzen ari zara orain"</string>

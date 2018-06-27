@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Localización"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"acceder á localización deste dispositivo"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Queres permitir que a aplicación &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acceda á localización deste dispositivo?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"A aplicación só terá acceso á localización mentres a esteas utilizando."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Queres permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acceda á localización?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"A aplicación sempre terá acceso á localización, aínda que non a esteas utilizando."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendario"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"acceder ao teu calendario"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Queres permitir que a aplicación &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; acceda ao teu calendario?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Esta aplicación pode engadir, quitar ou cambiar eventos do calendario almacenados no teu teléfono. Tamén pode enviar mensaxes que parezan dos propietarios do calendario e cambiar eventos sen comunicárllelo aos propietarios."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"acceder a comandos adicionais do provedor de localización"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permite á aplicación acceder a comandos adicionais de fornecedor de localizacións. É posible que isto provoque que a aplicación interfira co funcionamento do GPS ou doutras fontes da localización."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"acceder á localización exacta só en primeiro plano"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Esta aplicación pode obter a túa localización exacta só cando se atope en primeiro plano. É necesario activar estes servizos de localización e deben estar dispoñibles no teléfono para que a aplicación poida utilizalos. Ademais, poden supoñer un aumento do consumo de batería."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"acceder á localización aproximada (baseada na rede)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Esta aplicación pode obter a túa localización a partir de fontes de rede como torres de telecomunicacións e redes wifi. Para que a aplicación poida utilizar os servizos de localización, deben estar activados e dispoñibles na túa tableta."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icona de impresión dixital"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"xestionar hardware de autenticación facial"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Permite que a aplicación invoque métodos para engadir e eliminar modelos faciais de uso."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"usar hardware de autenticación facial"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Permite que a aplicación utilice hardware facial para a autenticación"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Non se puido procesar a cara. Téntao de novo."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"A cara brilla moito. Proba con menos luz."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"A cara está moi escura. Proba con máis luz."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Afasta o sensor da cara."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Achega o sensor á cara."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Sube máis o sensor."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Baixa o sensor."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Move o sensor cara á dereita."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Move o sensor cara á esquerda."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Mira ao sensor."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Non se detectou ningunha cara."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Mantén a cara fixa diante do dispositivo."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"O hardware facial non está dispoñible."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Esgotouse o tempo de espera. Téntao de novo."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Non se puido almacenar a cara."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Cancelouse a operación relacionada coa cara"</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Demasiados intentos. Téntao de novo máis tarde."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Demasiados intentos. Autenticación desactivada."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Téntao de novo."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Non se rexistrou ningunha cara."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Este dispositivo non ten un sensor de autenticación facial"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Cara <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Icona cara"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ler a configuración de sincronización"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permite á aplicación ler a configuración de sincronización dunha conta. Por exemplo, esta acción pode determinar se a aplicación Contactos se sincroniza cunha conta."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activar e desactivar a sincronización"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"A wifi non ten acceso a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Toca para ver opcións."</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Cambios na configuración da zona wifi"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Modificouse a banda da zona wifi."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Este dispositivo non admite a opción de conectarse só a bandas de 5 GHz, pero usaraas se están dispoñibles."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Cambiouse a: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"O dispositivo utiliza <xliff:g id="NEW_NETWORK">%1$s</xliff:g> cando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> non ten acceso a Internet. Pódense aplicar cargos."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Cambiouse de <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> a <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
