@@ -39,7 +39,8 @@ import java.util.List;
  * @hide
  */
 public final class LocationAccessPolicy {
-    private static final String LOG_TAG = LocationAccessPolicy.class.getSimpleName();
+    private static final String TAG = "LocationAccessPolicy";
+    private static final boolean DBG = false;
 
     /**
      * API to determine if the caller has permissions to get cell location.
@@ -52,12 +53,13 @@ public final class LocationAccessPolicy {
      */
     public static boolean canAccessCellLocation(@NonNull Context context, @NonNull String pkgName,
             int uid, int pid, boolean throwOnDeniedPermission) throws SecurityException {
-        Trace.beginSection("TelephonyLohcationCheck");
+        Trace.beginSection("TelephonyLocationCheck");
         try {
-            // Always allow the phone process to access location. This avoid breaking legacy code
-            // that rely on public-facing APIs to access cell location, and it doesn't create a
-            // info leak risk because the cell location is stored in the phone process anyway.
-            if (uid == Process.PHONE_UID) {
+            // Always allow the phone process and system server to access location. This avoid
+            // breaking legacy code that rely on public-facing APIs to access cell location, and
+            // it doesn't create an info leak risk because the cell location is stored in the phone
+            // process anyway, and the system server already has location access.
+            if (uid == Process.PHONE_UID || uid == Process.SYSTEM_UID || uid == Process.ROOT_UID) {
                 return true;
             }
 
@@ -72,15 +74,18 @@ public final class LocationAccessPolicy {
                         pid, uid, "canAccessCellLocation");
             } else if (context.checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION,
                     pid, uid) == PackageManager.PERMISSION_DENIED) {
+                if (DBG) Log.w(TAG, "Permission checked failed (" + pid + "," + uid + ")");
                 return false;
             }
             final int opCode = AppOpsManager.permissionToOpCode(
                     Manifest.permission.ACCESS_COARSE_LOCATION);
             if (opCode != AppOpsManager.OP_NONE && context.getSystemService(AppOpsManager.class)
                     .noteOpNoThrow(opCode, uid, pkgName) != AppOpsManager.MODE_ALLOWED) {
+                if (DBG) Log.w(TAG, "AppOp check failed (" + uid + "," + pkgName + ")");
                 return false;
             }
             if (!isLocationModeEnabled(context, UserHandle.getUserId(uid))) {
+                if (DBG) Log.w(TAG, "Location disabled, failed, (" + uid + ")");
                 return false;
             }
             // If the user or profile is current, permission is granted.
@@ -94,7 +99,7 @@ public final class LocationAccessPolicy {
     private static boolean isLocationModeEnabled(@NonNull Context context, @UserIdInt int userId) {
         LocationManager locationManager = context.getSystemService(LocationManager.class);
         if (locationManager == null) {
-            Log.w(LOG_TAG, "Couldn't get location manager, denying location access");
+            Log.w(TAG, "Couldn't get location manager, denying location access");
             return false;
         }
         return locationManager.isLocationEnabledForUser(UserHandle.of(userId));
