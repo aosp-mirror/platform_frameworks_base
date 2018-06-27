@@ -140,7 +140,8 @@
       <item quantity="other">Cihaz <xliff:g id="NUMBER_1">%d</xliff:g> saat kiliddən çıxarılmayıb. Parolu təsdiq edin.</item>
       <item quantity="one">Cihaz <xliff:g id="NUMBER_0">%d</xliff:g> saat kiliddən çıxarılmayıb. Parolu təsdiq edin.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Tanınmır"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Tanınmır"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Tanınmır"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">SIM PIN-ni daxil edin. <xliff:g id="NUMBER_1">%d</xliff:g> cəhdiniz qalır.</item>
       <item quantity="one">SIM PIN-ni daxil edin. Cihazınızı kiliddən çıxarmaq üçün operatorunuzla əlaqə saxlamadan öncə <xliff:g id="NUMBER_0">%d</xliff:g> cəhdiniz qalır.</item>

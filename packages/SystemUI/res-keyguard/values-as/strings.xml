@@ -140,7 +140,8 @@
       <item quantity="one">ডিভাইচটো <xliff:g id="NUMBER_1">%d</xliff:g> ঘণ্টা ধৰি আনলক কৰা হোৱা নাই। পাছৱৰ্ড নিশ্চিত কৰক।</item>
       <item quantity="other">ডিভাইচটো <xliff:g id="NUMBER_1">%d</xliff:g> ঘণ্টা ধৰি আনলক কৰা হোৱা নাই। পাছৱৰ্ড নিশ্চিত কৰক।</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"চিনাক্ত কৰিব পৰা নগ\'ল"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"চিনাক্ত কৰিব পৰা নাই"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"চিনাক্ত কৰিব পৰা নাই"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">ছিমৰ পিন দিয়ক। আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g>বাৰ প্ৰয়াস কৰিব পাৰে।</item>
       <item quantity="other">ছিমৰ পিন দিয়ক। আপুনি আৰু <xliff:g id="NUMBER_1">%d</xliff:g>বাৰ প্ৰয়াস কৰিব পাৰে।</item>

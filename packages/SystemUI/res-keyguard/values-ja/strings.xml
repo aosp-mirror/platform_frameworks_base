@@ -140,7 +140,8 @@
       <item quantity="other">端末のロックが <xliff:g id="NUMBER_1">%d</xliff:g> 時間、解除されていません。パスワードを確認してください。</item>
       <item quantity="one">端末のロックが <xliff:g id="NUMBER_0">%d</xliff:g> 時間、解除されていません。パスワードを確認してください。</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"認識されませんでした"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"認識されませんでした"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"認識されませんでした"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">SIM PIN を入力してください。入力できるのはあと <xliff:g id="NUMBER_1">%d</xliff:g> 回です。</item>
       <item quantity="one">SIM PIN を入力してください。入力できるのはあと <xliff:g id="NUMBER_0">%d</xliff:g> 回です。この回数を超えた場合は、携帯通信会社にお問い合わせください。</item>

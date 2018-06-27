@@ -140,7 +140,8 @@
       <item quantity="other">Enheten har inte låsts upp på <xliff:g id="NUMBER_1">%d</xliff:g> timmar. Bekräfta lösenordet.</item>
       <item quantity="one">Enheten har inte låsts upp på <xliff:g id="NUMBER_0">%d</xliff:g> timme. Bekräfta lösenordet.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Identifierades inte"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Identifierades inte"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Identifierades inte"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">Ange pinkod för SIM-kortet. <xliff:g id="NUMBER_1">%d</xliff:g> försök återstår.</item>
       <item quantity="one">Ange pinkod för SIM-kortet. <xliff:g id="NUMBER_0">%d</xliff:g> försök återstår innan du måste kontakta operatören för att låsa upp enheten.</item>

@@ -140,7 +140,10 @@
       <item quantity="other">آلہ <xliff:g id="NUMBER_1">%d</xliff:g> گھنٹوں سے غیر مقفل نہیں کیا گيا۔ پاسورڈ کی توثیق کریں۔</item>
       <item quantity="one">آلہ <xliff:g id="NUMBER_0">%d</xliff:g> گھنٹہ سے غیر مقفل نہیں کیا گیا۔ پاسورڈ کی توثیق کریں۔</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"تسلیم شدہ نہیں ہے"</string>
+    <!-- no translation found for kg_fingerprint_not_recognized (7854413849848459418) -->
+    <skip />
+    <!-- no translation found for kg_face_not_recognized (6382535088345875294) -->
+    <skip />
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">‏SIM کا PIN درج کریں، آپ کے پاس <xliff:g id="NUMBER_1">%d</xliff:g> کوششیں بچی ہیں۔</item>
       <item quantity="one">‏SIM کا PIN درج کریں، آپ کے پاس <xliff:g id="NUMBER_0">%d</xliff:g> کوشش بچی ہے، اس کے بعد آپ کو اپنا آلہ غیر مقفل کرنے کے لیے اپنے کیریئر سے رابطہ کرنا ہوگا۔</item>

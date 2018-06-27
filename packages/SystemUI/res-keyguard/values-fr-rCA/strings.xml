@@ -140,7 +140,8 @@
       <item quantity="one">L\'appareil n\'a pas été déverrouillé depuis <xliff:g id="NUMBER_1">%d</xliff:g> heure. Confirmez le mot de passe.</item>
       <item quantity="other">L\'appareil n\'a pas été déverrouillé depuis <xliff:g id="NUMBER_1">%d</xliff:g> heures. Confirmez le mot de passe.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Doigt non reconnu"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Doigt non reconnu"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Doigt non reconnu"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">Entrez le NIP de votre carte SIM. Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentative.</item>
       <item quantity="other">Entrez le NIP de votre carte SIM. Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives.</item>

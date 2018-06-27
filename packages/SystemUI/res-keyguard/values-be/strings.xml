@@ -152,7 +152,8 @@
       <item quantity="many">Прылада не была разблакіравана на працягу <xliff:g id="NUMBER_1">%d</xliff:g> гадзін. Увядзіце пароль.</item>
       <item quantity="other">Прылада не была разблакіравана на працягу <xliff:g id="NUMBER_1">%d</xliff:g> гадзіны. Увядзіце пароль.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Не распазнаны"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Не распазнана"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Не распазнана"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">Увядзіце PIN-код SIM-карты. У вас засталася <xliff:g id="NUMBER_1">%d</xliff:g> спроба.</item>
       <item quantity="few">Увядзіце PIN-код SIM-карты. У вас засталося <xliff:g id="NUMBER_1">%d</xliff:g> спробы.</item>

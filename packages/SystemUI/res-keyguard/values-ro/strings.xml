@@ -146,7 +146,8 @@
       <item quantity="other">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_1">%d</xliff:g> de ore. Confirmați parola.</item>
       <item quantity="one">Dispozitivul nu a fost deblocat de <xliff:g id="NUMBER_0">%d</xliff:g> oră. Confirmați parola.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Nu este recunoscută"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Nu este recunoscută"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Nu este recunoscut"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="few">Introduceți codul PIN pentru cardul SIM. V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> încercări.</item>
       <item quantity="other">Introduceți codul PIN pentru cardul SIM. V-au mai rămas <xliff:g id="NUMBER_1">%d</xliff:g> de încercări.</item>

@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ને છુપાવીએ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"તે સેટિંગ્સમાં તમે તેને ચાલુ કરશો ત્યારે આગલી વખતે ફરીથી દેખાશે."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"છુપાવો"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"તમે તમારી કાર્ય પ્રોફાઇલનો ઉપયોગ કરી રહ્યાં છો"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"કૉલ કરો"</string>
     <string name="stream_system" msgid="7493299064422163147">"સિસ્ટમ"</string>
     <string name="stream_ring" msgid="8213049469184048338">"રિંગ વગાડો"</string>

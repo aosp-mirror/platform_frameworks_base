@@ -140,7 +140,8 @@
       <item quantity="other">Perangkat belum dibuka kuncinya selama <xliff:g id="NUMBER_1">%d</xliff:g> jam. Konfirmasi sandi.</item>
       <item quantity="one">Perangkat belum dibuka kuncinya selama <xliff:g id="NUMBER_0">%d</xliff:g> jam. Konfirmasi sandi.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Tidak dikenali"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Tidak dikenali"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Tidak dikenali"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">Masukkan PIN SIM. Tersisa <xliff:g id="NUMBER_1">%d</xliff:g> percobaan.</item>
       <item quantity="one">Masukkan PIN SIM. Tersisa <xliff:g id="NUMBER_0">%d</xliff:g> percobaan sebelum Anda harus menghubungi operator untuk membuka kunci perangkat.</item>

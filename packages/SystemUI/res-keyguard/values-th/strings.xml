@@ -140,7 +140,8 @@
       <item quantity="other">ไม่มีการปลดล็อกอุปกรณ์มา <xliff:g id="NUMBER_1">%d</xliff:g> ชั่วโมงแล้ว ยืนยันรหัสผ่าน</item>
       <item quantity="one">ไม่มีการปลดล็อกอุปกรณ์มา <xliff:g id="NUMBER_0">%d</xliff:g> ชั่วโมงแล้ว ยืนยันรหัสผ่าน</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"ไม่รู้จัก"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"ไม่รู้จัก"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"ไม่รู้จัก"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">โปรดป้อน PIN ของซิม คุณพยายามได้อีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง</item>
       <item quantity="one">โปรดป้อน PIN ของซิม คุณพยายามได้อีก <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งก่อนที่จะต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์</item>

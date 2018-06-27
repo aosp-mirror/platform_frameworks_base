@@ -140,7 +140,8 @@
       <item quantity="other">Устройството не е отключвано от <xliff:g id="NUMBER_1">%d</xliff:g> часа. Потвърдете паролата.</item>
       <item quantity="one">Устройството не е отключвано от <xliff:g id="NUMBER_0">%d</xliff:g> час. Потвърдете паролата.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Не е разпознато"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Не е разпознато"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Не е разпознато"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">Въведете ПИН кода за SIM картата – остават ви <xliff:g id="NUMBER_1">%d</xliff:g> опита.</item>
       <item quantity="one">Въведете ПИН кода за SIM картата – остава ви <xliff:g id="NUMBER_0">%d</xliff:g> опит, преди да се наложи да се свържете с оператора си, за да отключите устройството.</item>

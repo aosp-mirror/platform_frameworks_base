@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> مخفی شود؟"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"دفعه بعد که آن را روشن کنید، در تنظیمات نشان داده می‌شود."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"پنهان کردن"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"درحال استفاده از نمایه کاری‌تان هستید"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"تماس"</string>
     <string name="stream_system" msgid="7493299064422163147">"سیستم"</string>
     <string name="stream_ring" msgid="8213049469184048338">"زنگ زدن"</string>
