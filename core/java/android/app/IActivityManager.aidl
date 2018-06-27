@@ -237,11 +237,8 @@ interface IActivityManager {
     // running.
     List<ApplicationInfo> getRunningExternalApplications();
     void finishHeavyWeightApp();
-    // A StrictMode violation to be handled.  The violationMask is a
-    // subset of the original StrictMode policy bitmask, with only the
-    // bit violated and penalty bits to be executed by the
-    // ActivityManagerService remaining set.
-    void handleApplicationStrictModeViolation(in IBinder app, int violationMask,
+    // A StrictMode violation to be handled.
+    void handleApplicationStrictModeViolation(in IBinder app, int penaltyMask,
             in StrictMode.ViolationInfo crashInfo);
     boolean isTopActivityImmersive();
     void crashApplication(int uid, int initialPid, in String packageName, int userId, in String message);
