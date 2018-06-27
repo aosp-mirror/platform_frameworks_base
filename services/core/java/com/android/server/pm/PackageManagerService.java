@@ -4473,7 +4473,9 @@ public class PackageManagerService extends IPackageManager.Stub
             triaged = false;
         }
         if ((flags & PackageManager.MATCH_ANY_USER) != 0) {
-            enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false,
+            // require the permission to be held; the calling uid and given user id referring
+            // to the same user is not sufficient
+            enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, true,
                     "MATCH_ANY_USER flag requires INTERACT_ACROSS_USERS permission at "
                     + Debug.getCallers(5));
         } else if ((flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0 && isCallerSystemUser
@@ -5126,13 +5128,25 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     void enforceCrossUserPermission(int callingUid, int userId, boolean requireFullPermission,
             boolean checkShell, String message) {
+        enforceCrossUserPermission(
+              callingUid,
+              userId,
+              requireFullPermission,
+              checkShell,
+              false,
+              message);
+    }
+
+    private void enforceCrossUserPermission(int callingUid, int userId,
+            boolean requireFullPermission, boolean checkShell,
+            boolean requirePermissionWhenSameUser, String message) {
         if (userId < 0) {
             throw new IllegalArgumentException("Invalid userId " + userId);
         }
         if (checkShell) {
             enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, callingUid, userId);
         }
-        if (userId == UserHandle.getUserId(callingUid)) return;
+        if (!requirePermissionWhenSameUser && userId == UserHandle.getUserId(callingUid)) return;
         if (callingUid != Process.SYSTEM_UID && callingUid != 0) {
             if (requireFullPermission) {
                 mContext.enforceCallingOrSelfPermission(
@@ -8194,7 +8208,7 @@ public class PackageManagerService extends IPackageManager.Stub
         flags = updateFlagsForPackage(flags, userId, null);
         final boolean listUninstalled = (flags & MATCH_KNOWN_PACKAGES) != 0;
         enforceCrossUserPermission(callingUid, userId,
-                true /* requireFullPermission */, false /* checkShell */,
+                false /* requireFullPermission */, false /* checkShell */,
                 "get installed packages");
 
         // writer
@@ -8317,6 +8331,13 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!sUserManager.exists(userId)) return ParceledListSlice.emptyList();
         flags = updateFlagsForApplication(flags, userId, null);
         final boolean listUninstalled = (flags & MATCH_KNOWN_PACKAGES) != 0;
+
+        enforceCrossUserPermission(
+            callingUid,
+            userId,
+            false /* requireFullPermission */,
+            false /* checkShell */,
+            "get installed application info");
 
         // writer
         synchronized (mPackages) {
