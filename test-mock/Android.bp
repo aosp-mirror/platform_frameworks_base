@@ -91,6 +91,7 @@ java_library_static {
             enabled: false,
         },
     },
+    compile_dex: true,
 }
 
 java_library_static {
@@ -104,4 +105,5 @@ java_library_static {
             enabled: false,
         },
     },
+    compile_dex: true,
 }
