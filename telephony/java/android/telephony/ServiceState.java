@@ -756,17 +756,8 @@ public class ServiceState implements Parcelable {
 
     @Override
     public boolean equals (Object o) {
-        ServiceState s;
-
-        try {
-            s = (ServiceState) o;
-        } catch (ClassCastException ex) {
-            return false;
-        }
-
-        if (o == null) {
-            return false;
-        }
+        if (!(o instanceof ServiceState)) return false;
+        ServiceState s = (ServiceState) o;
 
         return (mVoiceRegState == s.mVoiceRegState
                 && mDataRegState == s.mDataRegState
