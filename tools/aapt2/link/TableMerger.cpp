@@ -281,8 +281,17 @@ bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
           dst_config_value->value = std::move(new_file_ref);
 
         } else {
+          Maybe<std::string> original_comment = (dst_config_value->value)
+              ? dst_config_value->value->GetComment() : Maybe<std::string>();
+
           dst_config_value->value = std::unique_ptr<Value>(
               src_config_value->value->Clone(&master_table_->string_pool));
+
+          // Keep the comment from the original resource and ignore all comments from overlaying
+          // resources
+          if (overlay && original_comment) {
+            dst_config_value->value->SetComment(original_comment.value());
+          }
         }
       }
     }
