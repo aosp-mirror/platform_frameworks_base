@@ -7303,7 +7303,7 @@ public final class Settings {
          * see and assist with all of the user's notifications.
          *
          * @deprecated Use
-         * {@link NotificationManager#isNotificationListenerAccessGranted(ComponentName)}.
+         * {@link NotificationManager#isNotificationAssistantAccessGranted(ComponentName)}.
          * @hide
          */
         @Deprecated
@@ -7319,7 +7319,7 @@ public final class Settings {
          *
          * @hide
          * @deprecated Use
-         * {@link NotificationManager#isNotificationAssistantAccessGranted(ComponentName)}.
+         * {@link NotificationManager#isNotificationListenerAccessGranted(ComponentName)}.
          */
         @Deprecated
         public static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
