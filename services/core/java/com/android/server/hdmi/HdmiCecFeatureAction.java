@@ -256,6 +256,10 @@ abstract class HdmiCecFeatureAction {
         return (HdmiCecLocalDeviceTv) mSource;
     }
 
+    protected final HdmiCecLocalDeviceAudioSystem audioSystem() {
+        return (HdmiCecLocalDeviceAudioSystem) mSource;
+    }
+
     protected final int getSourceAddress() {
         return mSource.getDeviceInfo().getLogicalAddress();
     }

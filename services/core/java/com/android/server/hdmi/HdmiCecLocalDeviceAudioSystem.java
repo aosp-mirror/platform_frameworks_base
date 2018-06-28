@@ -18,7 +18,6 @@ package com.android.server.hdmi;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.AudioManager;
 import android.os.SystemProperties;
-import android.provider.Settings.Global;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
@@ -249,6 +248,12 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     protected boolean isSystemAudioControlFeatureEnabled() {
         synchronized (mLock) {
             return mSystemAudioControlFeatureEnabled;
+        }
+    }
+
+    protected boolean isSystemAudioActivated() {
+        synchronized (mLock) {
+            return mSystemAudioActivated;
         }
     }
 

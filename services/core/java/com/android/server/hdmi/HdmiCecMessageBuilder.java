@@ -277,6 +277,16 @@ public class HdmiCecMessageBuilder {
     }
 
     /**
+     * Build &lt;Request Active Source&gt; command.
+     *
+     * @param src source address of command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildRequestActiveSource(int src) {
+        return buildCommand(src, Constants.ADDR_BROADCAST, Constants.MESSAGE_REQUEST_ACTIVE_SOURCE);
+    }
+
+    /**
      * Build &lt;Active Source&gt; command.
      *
      * @param src source address of command
