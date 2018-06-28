@@ -600,6 +600,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, // candidate?
                  Settings.Secure.SHOW_ROTATION_SUGGESTIONS,
                  Settings.Secure.SKIP_FIRST_USE_HINTS, // candidate?
+                 Settings.Secure.SLEEP_TIMEOUT,
                  Settings.Secure.SMS_DEFAULT_APPLICATION,
                  Settings.Secure.THEME_MODE,
                  Settings.Secure.TRUST_AGENTS_INITIALIZED,
