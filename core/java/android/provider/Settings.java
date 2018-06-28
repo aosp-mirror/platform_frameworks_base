@@ -6029,6 +6029,15 @@ public final class Settings {
                 NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
+         * Whether the in call notification is enabled to play sound during calls.  The value is
+         * boolean (1 or 0).
+         * @hide
+         */
+        public static final String IN_CALL_NOTIFICATION_ENABLED = "in_call_notification_enabled";
+
+        private static final Validator IN_CALL_NOTIFICATION_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * Uri of the slice that's presented on the keyguard.
          * Defaults to a slice with the date and next alarm.
          *
@@ -8048,6 +8057,7 @@ public final class Settings {
             VOLUME_HUSH_GESTURE,
             MANUAL_RINGER_TOGGLE_COUNT,
             HUSH_GESTURE_USED,
+            IN_CALL_NOTIFICATION_ENABLED,
         };
 
         /**
@@ -8193,6 +8203,7 @@ public final class Settings {
                     ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES_VALIDATOR); //legacy restore setting
             VALIDATORS.put(HUSH_GESTURE_USED, HUSH_GESTURE_USED_VALIDATOR);
             VALIDATORS.put(MANUAL_RINGER_TOGGLE_COUNT, MANUAL_RINGER_TOGGLE_COUNT_VALIDATOR);
+            VALIDATORS.put(IN_CALL_NOTIFICATION_ENABLED, IN_CALL_NOTIFICATION_ENABLED_VALIDATOR);
         }
 
         /**

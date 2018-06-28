@@ -4979,27 +4979,31 @@ public class NotificationManagerService extends SystemService {
     }
 
     protected void playInCallNotification() {
-        new Thread() {
-            @Override
-            public void run() {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    final IRingtonePlayer player = mAudioManager.getRingtonePlayer();
-                    if (player != null) {
-                        if (mCallNotificationToken != null) {
-                            player.stop(mCallNotificationToken);
+        if (mAudioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_NORMAL
+                && Settings.Secure.getInt(getContext().getContentResolver(),
+                Settings.Secure.IN_CALL_NOTIFICATION_ENABLED, 1) != 0) {
+            new Thread() {
+                @Override
+                public void run() {
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        final IRingtonePlayer player = mAudioManager.getRingtonePlayer();
+                        if (player != null) {
+                            if (mCallNotificationToken != null) {
+                                player.stop(mCallNotificationToken);
+                            }
+                            mCallNotificationToken = new Binder();
+                            player.play(mCallNotificationToken, mInCallNotificationUri,
+                                    mInCallNotificationAudioAttributes,
+                                    mInCallNotificationVolume, false);
                         }
-                        mCallNotificationToken = new Binder();
-                        player.play(mCallNotificationToken, mInCallNotificationUri,
-                                mInCallNotificationAudioAttributes,
-                                mInCallNotificationVolume, false);
+                    } catch (RemoteException e) {
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
                     }
-                } catch (RemoteException e) {
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
                 }
-            }
-        }.start();
+            }.start();
+        }
     }
 
     @GuardedBy("mToastQueue")
