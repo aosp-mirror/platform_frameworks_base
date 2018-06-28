@@ -571,9 +571,7 @@ public class Camera {
     /**
      * An empty Camera for testing purpose.
      */
-    Camera() {
-        initAppOps();
-    }
+    Camera() {}
 
     private void initAppOps() {
         IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
