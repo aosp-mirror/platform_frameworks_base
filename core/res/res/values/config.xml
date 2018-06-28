@@ -2612,8 +2612,8 @@
         <item>lockdown</item>
         <item>logout</item>
         <item>bugreport</item>
-        <item>emergency</item>
         <item>screenshot</item>
+        <item>emergency</item>
     </string-array>
 
     <!-- Number of milliseconds to hold a wake lock to ensure that drawing is fully
