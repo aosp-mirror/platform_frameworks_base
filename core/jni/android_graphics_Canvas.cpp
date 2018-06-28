@@ -22,13 +22,13 @@
 #include <androidfw/ResourceTypes.h>
 #include <hwui/Canvas.h>
 #include <hwui/Paint.h>
+#include <hwui/PaintFilter.h>
 #include <hwui/Typeface.h>
 #include <minikin/Layout.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedStringChars.h>
 
 #include "Bitmap.h"
-#include "SkDrawFilter.h"
 #include "SkGraphics.h"
 #include "SkRegion.h"
 #include "SkVertices.h"
@@ -582,8 +582,9 @@ static void drawTextOnPathString(JNIEnv* env, jobject, jlong canvasHandle, jstri
     env->ReleaseStringChars(text, jchars);
 }
 
-static void setDrawFilter(jlong canvasHandle, jlong filterHandle) {
-    get_canvas(canvasHandle)->setDrawFilter(reinterpret_cast<SkDrawFilter*>(filterHandle));
+static void setPaintFilter(jlong canvasHandle, jlong filterHandle) {
+    PaintFilter* paintFilter = reinterpret_cast<PaintFilter*>(filterHandle);
+    get_canvas(canvasHandle)->setPaintFilter(sk_ref_sp(paintFilter));
 }
 
 static void freeCaches(JNIEnv* env, jobject) {
@@ -633,7 +634,7 @@ static const JNINativeMethod gMethods[] = {
     {"nQuickReject","(JFFFF)Z", (void*)CanvasJNI::quickRejectRect},
     {"nClipRect","(JFFFFI)Z", (void*) CanvasJNI::clipRect},
     {"nClipPath","(JJI)Z", (void*) CanvasJNI::clipPath},
-    {"nSetDrawFilter", "(JJ)V", (void*) CanvasJNI::setDrawFilter},
+    {"nSetDrawFilter", "(JJ)V", (void*) CanvasJNI::setPaintFilter},
 };
 
 // If called from Canvas these are regular JNI

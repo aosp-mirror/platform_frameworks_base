@@ -89,44 +89,7 @@ private:
      */
     void initDisplayList(uirenderer::RenderNode* renderNode, int width, int height);
 
-    inline static const SkPaint* bitmapPaint(const SkPaint* origPaint, SkPaint* tmpPaint,
-                                             sk_sp<SkColorFilter> colorSpaceFilter) {
-        bool fixBlending = false;
-        bool fixAA = false;
-        if (origPaint) {
-            // kClear blend mode is drawn as kDstOut on HW for compatibility with Android O and
-            // older.
-            fixBlending = sApiLevel <= 27 && origPaint->getBlendMode() == SkBlendMode::kClear;
-            fixAA = origPaint->isAntiAlias();
-        }
-
-        if (fixBlending || fixAA || colorSpaceFilter) {
-            if (origPaint) {
-                *tmpPaint = *origPaint;
-            }
-
-            if (fixBlending) {
-                tmpPaint->setBlendMode(SkBlendMode::kDstOut);
-            }
-
-            if (colorSpaceFilter) {
-                if (tmpPaint->getColorFilter()) {
-                    tmpPaint->setColorFilter(SkColorFilter::MakeComposeFilter(
-                            tmpPaint->refColorFilter(), colorSpaceFilter));
-                } else {
-                    tmpPaint->setColorFilter(colorSpaceFilter);
-                }
-                LOG_ALWAYS_FATAL_IF(!tmpPaint->getColorFilter());
-            }
-
-            // disabling AA on bitmap draws matches legacy HWUI behavior
-            tmpPaint->setAntiAlias(false);
-            return tmpPaint;
-        } else {
-            return origPaint;
-        }
-    }
-
+    PaintCoW&& filterBitmap(PaintCoW&& paint, sk_sp<SkColorFilter> colorSpaceFilter);
 };
 
 };  // namespace skiapipeline

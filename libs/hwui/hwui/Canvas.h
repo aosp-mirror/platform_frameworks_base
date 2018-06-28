@@ -39,6 +39,7 @@ enum class Bidi : uint8_t;
 }
 
 namespace android {
+class PaintFilter;
 
 namespace uirenderer {
 class CanvasPropertyPaint;
@@ -213,8 +214,8 @@ public:
     virtual bool clipPath(const SkPath* path, SkClipOp op) = 0;
 
     // filters
-    virtual SkDrawFilter* getDrawFilter() = 0;
-    virtual void setDrawFilter(SkDrawFilter* drawFilter) = 0;
+    virtual PaintFilter* getPaintFilter() = 0;
+    virtual void setPaintFilter(sk_sp<PaintFilter> paintFilter) = 0;
 
     // WebView only
     virtual SkCanvasState* captureCanvasState() const { return nullptr; }
