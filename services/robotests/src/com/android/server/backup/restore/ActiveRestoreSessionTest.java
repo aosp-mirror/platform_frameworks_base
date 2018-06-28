@@ -77,10 +77,9 @@ import java.util.ArrayDeque;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
 @Config(
-    manifest = Config.NONE,
-    sdk = 26,
-    shadows = {ShadowEventLog.class, ShadowPerformUnifiedRestoreTask.class, ShadowBinder.class}
-)
+        manifest = Config.NONE,
+        sdk = 26,
+        shadows = {ShadowEventLog.class, ShadowPerformUnifiedRestoreTask.class, ShadowBinder.class})
 @SystemLoaderPackages({"com.android.server.backup"})
 @Presubmit
 public class ActiveRestoreSessionTest {
@@ -130,6 +129,7 @@ public class ActiveRestoreSessionTest {
 
         mWakeLock = createBackupWakeLock(application);
 
+        // TODO: Migrate to use spy(createInitializedBackupManagerService())
         setUpBackupManagerServiceBasics(
                 mBackupManagerService,
                 application,

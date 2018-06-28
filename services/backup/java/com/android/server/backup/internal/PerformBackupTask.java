@@ -30,6 +30,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_RESTOR
 import android.annotation.Nullable;
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
+import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupManager;
@@ -205,10 +206,8 @@ public class PerformBackupTask implements BackupRestoreTask {
      * Put this task in the repository of running tasks.
      */
     private void registerTask() {
-        synchronized (backupManagerService.getCurrentOpLock()) {
-            backupManagerService.getCurrentOperations().put(
-                    mCurrentOpToken, new Operation(OP_PENDING, this, OP_TYPE_BACKUP));
-        }
+        backupManagerService.putOperation(
+                mCurrentOpToken, new Operation(OP_PENDING, this, OP_TYPE_BACKUP));
     }
 
     /**
@@ -358,7 +357,7 @@ public class PerformBackupTask implements BackupRestoreTask {
             // The package manager doesn't have a proper <application> etc, but since it's running
             // here in the system process we can just set up its agent directly and use a synthetic
             // BackupRequest.
-            PackageManagerBackupAgent pmAgent = backupManagerService.makeMetadataAgent();
+            BackupAgent pmAgent = backupManagerService.makeMetadataAgent();
             mStatus = invokeAgentForBackup(
                     PACKAGE_MANAGER_SENTINEL,
                     IBackupAgent.Stub.asInterface(pmAgent.onBind()));
