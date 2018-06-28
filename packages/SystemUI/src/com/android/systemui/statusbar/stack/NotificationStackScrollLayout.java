@@ -665,11 +665,15 @@ public class NotificationStackScrollLayout extends ViewGroup
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int childWidthSpec = MeasureSpec.makeMeasureSpec(width - mSidePaddings * 2,
                 MeasureSpec.getMode(widthMeasureSpec));
+        // Don't constrain the height of the children so we know how big they'd like to be
+        int childHeightSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec),
+                MeasureSpec.UNSPECIFIED);
+
         // We need to measure all children even the GONE ones, such that the heights are calculated
         // correctly as they are used to calculate how many we can fit on the screen.
         final int size = getChildCount();
         for (int i = 0; i < size; i++) {
-            measureChild(getChildAt(i), childWidthSpec, heightMeasureSpec);
+            measureChild(getChildAt(i), childWidthSpec, childHeightSpec);
         }
     }
 
