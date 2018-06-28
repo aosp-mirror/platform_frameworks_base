@@ -30,8 +30,9 @@ interface BoundsAnimationTarget {
      *
      * @param schedulePipModeChangedCallback whether or not to schedule the PiP mode changed
      * callbacks
+     * @return whether to continue the animation
      */
-    void onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate);
+    boolean onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate);
 
     /**
      * @return Whether the animation should be paused waiting for the windows to draw before
