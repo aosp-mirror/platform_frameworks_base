@@ -37,7 +37,12 @@ public final class SurfaceSession {
     }
 
     public SurfaceSession(Surface root) {
-        mNativeClient = nativeCreateScoped(root.mNativeObject);
+        synchronized (root.mLock) {
+            if (root.mNativeObject == 0) {
+                throw new IllegalStateException("Surface is not initialized or has been released");
+            }
+            mNativeClient = nativeCreateScoped(root.mNativeObject);
+        }
     }
 
     /* no user serviceable parts here ... */
