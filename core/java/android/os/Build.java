@@ -165,6 +165,11 @@ public class Build {
     public static final String[] SUPPORTED_64_BIT_ABIS =
             getStringList("ro.product.cpu.abilist64", ",");
 
+    /** {@hide} */
+    @TestApi
+    public static boolean is64BitAbi(String abi) {
+        return VMRuntime.is64BitAbi(abi);
+    }
 
     static {
         /*

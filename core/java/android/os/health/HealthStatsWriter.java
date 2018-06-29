@@ -16,6 +16,7 @@
 
 package android.os.health;
 
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
@@ -31,6 +32,7 @@ import java.util.Map;
  *
  * @hide
  */
+@TestApi
 public class HealthStatsWriter {
     private final HealthKeys.Constants mConstants;
 

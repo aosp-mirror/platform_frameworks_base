@@ -17,6 +17,7 @@
 package android.os.storage;
 
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -162,6 +163,7 @@ public final class StorageVolume implements Parcelable {
      * @return the mount path
      * @hide
      */
+    @TestApi
     public String getPath() {
         return mPath.toString();
     }

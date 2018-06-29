@@ -2937,6 +2937,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @TestApi
     public static final String SYSTEM_SHARED_LIBRARY_SERVICES = "android.ext.services";
 
     /**
@@ -2948,6 +2949,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @TestApi
     public static final String SYSTEM_SHARED_LIBRARY_SHARED = "android.ext.shared";
 
     /**

@@ -54,6 +54,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
+    @TestApi
     public static final int EFFECT_CLICK = Effect.CLICK;
 
     /**
@@ -62,6 +63,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
+    @TestApi
     public static final int EFFECT_DOUBLE_CLICK = Effect.DOUBLE_CLICK;
 
     /**
@@ -69,6 +71,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
+    @TestApi
     public static final int EFFECT_TICK = Effect.TICK;
 
     /**
@@ -76,6 +79,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
+    @TestApi
     public static final int EFFECT_THUD = Effect.THUD;
 
     /**
@@ -83,6 +87,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
+    @TestApi
     public static final int EFFECT_POP = Effect.POP;
 
     /**
@@ -90,8 +95,20 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
+    @TestApi
     public static final int EFFECT_HEAVY_CLICK = Effect.HEAVY_CLICK;
 
+    /** {@hide} */
+    @TestApi
+    public static final int EFFECT_STRENGTH_LIGHT = EffectStrength.LIGHT;
+
+    /** {@hide} */
+    @TestApi
+    public static final int EFFECT_STRENGTH_MEDIUM = EffectStrength.MEDIUM;
+
+    /** {@hide} */
+    @TestApi
+    public static final int EFFECT_STRENGTH_STRONG = EffectStrength.STRONG;
 
     /**
      * Ringtone patterns. They may correspond with the device's ringtone audio, or may just be a
@@ -307,6 +324,7 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * @hide
      */
+    @TestApi
     public abstract long getDuration();
 
     /**

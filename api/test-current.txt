@@ -257,6 +257,8 @@ package android.content.pm {
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
     method public boolean isPrivilegedApp();
     method public boolean isSystemApp();
+    field public static final int PRIVATE_FLAG_PRIVILEGED = 8; // 0x8
+    field public int privateFlags;
   }
 
   public class LauncherApps {
@@ -277,6 +279,8 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_FILE_BASED_ENCRYPTION = "android.software.file_based_encryption";
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
     field public static final int MATCH_KNOWN_PACKAGES = 4202496; // 0x402000
+    field public static final java.lang.String SYSTEM_SHARED_LIBRARY_SERVICES = "android.ext.services";
+    field public static final java.lang.String SYSTEM_SHARED_LIBRARY_SHARED = "android.ext.shared";
   }
 
   public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
@@ -632,6 +636,10 @@ package android.net {
 
 package android.os {
 
+  public class Build {
+    method public static boolean is64BitAbi(java.lang.String);
+  }
+
   public static class Build.VERSION {
     field public static final int FIRST_SDK_INT;
     field public static final int RESOURCES_SDK_INT;
@@ -644,6 +652,7 @@ package android.os {
 
   public class Environment {
     method public static java.io.File buildPath(java.io.File, java.lang.String...);
+    method public static java.io.File getStorageDirectory();
   }
 
   public class IncidentManager {
@@ -666,8 +675,9 @@ package android.os {
     field public static final android.os.Parcelable.Creator<android.os.IncidentReportArgs> CREATOR;
   }
 
-  public final class PowerManager {
-    method public void nap(long);
+  public final class MessageQueue {
+    method public int postSyncBarrier();
+    method public void removeSyncBarrier(int);
   }
 
   public class Process {
@@ -688,7 +698,12 @@ package android.os {
   }
 
   public final class StrictMode {
+    method public static void conditionallyCheckInstanceCounts();
     method public static void setViolationLogger(android.os.StrictMode.ViolationLogger);
+  }
+
+  public static final class StrictMode.ThreadPolicy.Builder {
+    method public android.os.StrictMode.ThreadPolicy.Builder detectExplicitGc();
   }
 
   public static final class StrictMode.ViolationInfo implements android.os.Parcelable {
@@ -715,6 +730,7 @@ package android.os {
   }
 
   public class SystemProperties {
+    method public static java.lang.String get(java.lang.String);
     method public static java.lang.String get(java.lang.String, java.lang.String);
   }
 
@@ -734,7 +750,17 @@ package android.os {
     method public static android.os.VibrationEffect get(int);
     method public static android.os.VibrationEffect get(int, boolean);
     method public static android.os.VibrationEffect get(android.net.Uri, android.content.Context);
+    method public abstract long getDuration();
     method protected static int scale(int, float, int);
+    field public static final int EFFECT_CLICK = 0; // 0x0
+    field public static final int EFFECT_DOUBLE_CLICK = 1; // 0x1
+    field public static final int EFFECT_HEAVY_CLICK = 5; // 0x5
+    field public static final int EFFECT_POP = 4; // 0x4
+    field public static final int EFFECT_STRENGTH_LIGHT = 0; // 0x0
+    field public static final int EFFECT_STRENGTH_MEDIUM = 1; // 0x1
+    field public static final int EFFECT_STRENGTH_STRONG = 2; // 0x2
+    field public static final int EFFECT_THUD = 3; // 0x3
+    field public static final int EFFECT_TICK = 2; // 0x2
     field public static final int[] RINGTONES;
   }
 
@@ -773,6 +799,86 @@ package android.os {
     method public void validate();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Waveform> CREATOR;
+  }
+
+  public class WorkSource implements android.os.Parcelable {
+    ctor public WorkSource(int);
+    method public boolean add(int);
+    method public boolean add(int, java.lang.String);
+    method public deprecated android.os.WorkSource addReturningNewbs(android.os.WorkSource);
+    method public int get(int);
+    method public java.lang.String getName(int);
+    method public deprecated android.os.WorkSource[] setReturningDiffs(android.os.WorkSource);
+    method public int size();
+  }
+
+}
+
+package android.os.health {
+
+  public class HealthKeys {
+    ctor public HealthKeys();
+    field public static final int BASE_PACKAGE = 40000; // 0x9c40
+    field public static final int BASE_PID = 20000; // 0x4e20
+    field public static final int BASE_PROCESS = 30000; // 0x7530
+    field public static final int BASE_SERVICE = 50000; // 0xc350
+    field public static final int BASE_UID = 10000; // 0x2710
+    field public static final int TYPE_COUNT = 5; // 0x5
+    field public static final int TYPE_MEASUREMENT = 1; // 0x1
+    field public static final int TYPE_MEASUREMENTS = 4; // 0x4
+    field public static final int TYPE_STATS = 2; // 0x2
+    field public static final int TYPE_TIMER = 0; // 0x0
+    field public static final int TYPE_TIMERS = 3; // 0x3
+    field public static final int UNKNOWN_KEY = 0; // 0x0
+  }
+
+  public static abstract class HealthKeys.Constant implements java.lang.annotation.Annotation {
+  }
+
+  public static class HealthKeys.Constants {
+    ctor public HealthKeys.Constants(java.lang.Class);
+    method public java.lang.String getDataType();
+    method public int getIndex(int, int);
+    method public int[] getKeys(int);
+    method public int getSize(int);
+  }
+
+  public class HealthStats {
+    ctor public HealthStats(android.os.Parcel);
+  }
+
+  public class HealthStatsParceler implements android.os.Parcelable {
+    ctor public HealthStatsParceler(android.os.health.HealthStatsWriter);
+    ctor public HealthStatsParceler(android.os.Parcel);
+    method public int describeContents();
+    method public android.os.health.HealthStats getHealthStats();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.os.health.HealthStatsParceler> CREATOR;
+  }
+
+  public class HealthStatsWriter {
+    ctor public HealthStatsWriter(android.os.health.HealthKeys.Constants);
+    method public void addMeasurement(int, long);
+    method public void addMeasurements(int, java.lang.String, long);
+    method public void addStats(int, java.lang.String, android.os.health.HealthStatsWriter);
+    method public void addTimer(int, int, long);
+    method public void addTimers(int, java.lang.String, android.os.health.TimerStat);
+    method public void flattenToParcel(android.os.Parcel);
+  }
+
+}
+
+package android.os.storage {
+
+  public final class StorageVolume implements android.os.Parcelable {
+    method public java.lang.String getPath();
+  }
+
+}
+
+package android.os.strictmode {
+
+  public final class ExplicitGcViolation extends android.os.strictmode.Violation {
   }
 
 }
