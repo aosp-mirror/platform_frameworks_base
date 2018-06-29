@@ -130,6 +130,12 @@ package android.app {
     method public android.content.ComponentName getEffectsSuppressor();
   }
 
+  public final class PictureInPictureParams implements android.os.Parcelable {
+    method public java.util.List<android.app.RemoteAction> getActions();
+    method public float getAspectRatio();
+    method public android.graphics.Rect getSourceRectHint();
+  }
+
   public class TimePickerDialog extends android.app.AlertDialog implements android.content.DialogInterface.OnClickListener android.widget.TimePicker.OnTimeChangedListener {
     method public android.widget.TimePicker getTimePicker();
   }
