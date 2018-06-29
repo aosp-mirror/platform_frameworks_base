@@ -3451,7 +3451,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         ColorStateList mTextColor = null;
         ColorStateList mTextColorHint = null;
         ColorStateList mTextColorLink = null;
-        int mTextSize = 0;
+        int mTextSize = -1;
         String mFontFamily = null;
         Typeface mFontTypeface = null;
         boolean mFontFamilyExplicit = false;
@@ -3662,7 +3662,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setHighlightColor(attributes.mTextColorHighlight);
         }
 
-        if (attributes.mTextSize != 0) {
+        if (attributes.mTextSize != -1) {
             setRawTextSize(attributes.mTextSize, true /* shouldRequestLayout */);
         }
 
