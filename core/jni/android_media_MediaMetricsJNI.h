@@ -17,7 +17,6 @@
 #ifndef _ANDROID_MEDIA_MEDIAMETRICSJNI_H_
 #define _ANDROID_MEDIA_MEDIAMETRICSJNI_H_
 
-#include <android_runtime/AndroidRuntime.h>
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
 #include <media/MediaAnalyticsItem.h>

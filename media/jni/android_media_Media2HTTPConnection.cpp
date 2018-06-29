@@ -18,14 +18,14 @@
 #define LOG_TAG "Media2HTTPConnection-JNI"
 #include <utils/Log.h>
 
+#include <mediaplayer2/JavaVMHelper.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <nativehelper/ScopedLocalRef.h>
 
 #include "android_media_Media2HTTPConnection.h"
 #include "android_util_Binder.h"
 
-#include "android_runtime/AndroidRuntime.h"
-#include "android_runtime/Log.h"
+#include "log/log.h"
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 
@@ -84,7 +84,7 @@ JMedia2HTTPConnection::JMedia2HTTPConnection(JNIEnv *env, jobject thiz) {
 }
 
 JMedia2HTTPConnection::~JMedia2HTTPConnection() {
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    JNIEnv *env = JavaVMHelper::getJNIEnv();
     env->DeleteGlobalRef(mMedia2HTTPConnectionObj);
     env->DeleteGlobalRef(mByteArrayObj);
 }
@@ -101,7 +101,7 @@ bool JMedia2HTTPConnection::connect(
         }
     }
 
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = JavaVMHelper::getJNIEnv();
     jstring juri = env->NewStringUTF(uri);
     jstring jheaders = env->NewStringUTF(tmp.string());
 
@@ -115,12 +115,12 @@ bool JMedia2HTTPConnection::connect(
 }
 
 void JMedia2HTTPConnection::disconnect() {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = JavaVMHelper::getJNIEnv();
     env->CallVoidMethod(mMedia2HTTPConnectionObj, mDisconnectMethod);
 }
 
 ssize_t JMedia2HTTPConnection::readAt(off64_t offset, void *data, size_t size) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = JavaVMHelper::getJNIEnv();
 
     if (size > kBufferSize) {
         size = kBufferSize;
@@ -141,12 +141,12 @@ ssize_t JMedia2HTTPConnection::readAt(off64_t offset, void *data, size_t size) {
 }
 
 off64_t JMedia2HTTPConnection::getSize() {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = JavaVMHelper::getJNIEnv();
     return (off64_t)(env->CallLongMethod(mMedia2HTTPConnectionObj, mGetSizeMethod));
 }
 
 status_t JMedia2HTTPConnection::getMIMEType(String8 *mimeType) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = JavaVMHelper::getJNIEnv();
     jstring jmime = (jstring)env->CallObjectMethod(mMedia2HTTPConnectionObj, mGetMIMETypeMethod);
     jboolean flag = env->ExceptionCheck();
     if (flag) {
@@ -165,7 +165,7 @@ status_t JMedia2HTTPConnection::getMIMEType(String8 *mimeType) {
 }
 
 status_t JMedia2HTTPConnection::getUri(String8 *uri) {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = JavaVMHelper::getJNIEnv();
     jstring juri = (jstring)env->CallObjectMethod(mMedia2HTTPConnectionObj, mGetUriMethod);
     jboolean flag = env->ExceptionCheck();
     if (flag) {

@@ -21,11 +21,11 @@
 #include "android_media_Media2HTTPConnection.h"
 #include "android_media_Media2HTTPService.h"
 
-#include "android_runtime/AndroidRuntime.h"
-#include "android_runtime/Log.h"
+#include "log/log.h"
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 
+#include <mediaplayer2/JavaVMHelper.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <nativehelper/ScopedLocalRef.h>
 
@@ -46,12 +46,12 @@ JMedia2HTTPService::JMedia2HTTPService(JNIEnv *env, jobject thiz) {
 }
 
 JMedia2HTTPService::~JMedia2HTTPService() {
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    JNIEnv *env = JavaVMHelper::getJNIEnv();
     env->DeleteGlobalRef(mMedia2HTTPServiceObj);
 }
 
 sp<MediaHTTPConnection> JMedia2HTTPService::makeHTTPConnection() {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = JavaVMHelper::getJNIEnv();
     jobject media2HTTPConnectionObj =
         env->CallObjectMethod(mMedia2HTTPServiceObj, mMakeHTTPConnectionMethod);
 
