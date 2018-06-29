@@ -40,6 +40,7 @@ import android.os.Message;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.RemoteAnimationAdapter;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -404,7 +405,7 @@ public class ActivityStartController {
                     "pendingActivityLaunch");
             try {
                 starter.startResolvedActivity(pal.r, pal.sourceRecord, null, null, pal.startFlags,
-                        resume, null, null, null /* outRecords */);
+                        resume, pal.r.pendingOptions, null, null /* outRecords */);
             } catch (Exception e) {
                 Slog.e(TAG, "Exception during pending activity launch pal=" + pal, e);
                 pal.sendErrorResult(e.getMessage());
@@ -470,6 +471,12 @@ public class ActivityStartController {
         if (dumpPackagePresent) {
             pw.print(prefix);
             pw.println("(nothing)");
+        }
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        for (PendingActivityLaunch activity: mPendingActivityLaunches) {
+            activity.r.writeIdentifierToProto(proto, fieldId);
         }
     }
 }
