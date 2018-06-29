@@ -99,7 +99,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             long token = Binder.clearCallingIdentity();
             try {
                 mHandler.post(() -> {
-                    StatusBar statusBar = ((SystemUIApplication) mContext).getComponent(
+                    StatusBar statusBar = SysUiServiceProvider.getComponent(mContext,
                             StatusBar.class);
                     if (statusBar != null) {
                         statusBar.showScreenPinningRequest(taskId, false /* allowCancel */);
@@ -152,7 +152,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         public Rect getNonMinimizedSplitScreenSecondaryBounds() {
             long token = Binder.clearCallingIdentity();
             try {
-                Divider divider = ((SystemUIApplication) mContext).getComponent(Divider.class);
+                Divider divider = SysUiServiceProvider.getComponent(mContext, Divider.class);
                 if (divider != null) {
                     return divider.getView().getNonMinimizedSplitScreenSecondaryBounds();
                 }
