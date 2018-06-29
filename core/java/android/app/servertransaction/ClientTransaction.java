@@ -164,6 +164,31 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
         ObjectPool.recycle(this);
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(64);
+        sb.append("ClientTransaction{");
+        if (mActivityToken != null) {
+            sb.append(" a:").append(Integer.toHexString(System.identityHashCode(mActivityToken)));
+        }
+        if (mActivityCallbacks != null && !mActivityCallbacks.isEmpty()) {
+            sb.append(" c:");
+            final int size = mActivityCallbacks.size();
+            for (int i = 0; i < size; i++) {
+                sb.append(mActivityCallbacks.get(i).getClass().getSimpleName());
+                if (i < size - 1) {
+                    sb.append(",");
+                }
+            }
+        }
+        if (mLifecycleStateRequest != null) {
+            sb.append(" s:");
+            sb.append(mLifecycleStateRequest.getClass().getSimpleName());
+        }
+        sb.append(" }");
+        return sb.toString();
+    }
+
 
     // Parcelable implementation
 
