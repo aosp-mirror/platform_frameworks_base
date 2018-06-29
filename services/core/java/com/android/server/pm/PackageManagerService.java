@@ -430,7 +430,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static final boolean DEBUG_ABI_SELECTION = false;
     private static final boolean DEBUG_INSTANT = Build.IS_DEBUGGABLE;
-    private static final boolean DEBUG_TRIAGED_MISSING = false;
     private static final boolean DEBUG_APP_DATA = false;
 
     /** REMOVE. According to Svet, this was only used to reset permissions during development. */
@@ -4750,22 +4749,6 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private int updateFlagsForPackage(int flags, int userId, Object cookie) {
         final boolean isCallerSystemUser = UserHandle.getCallingUserId() == UserHandle.USER_SYSTEM;
-        boolean triaged = true;
-        if ((flags & (PackageManager.GET_ACTIVITIES | PackageManager.GET_RECEIVERS
-                | PackageManager.GET_SERVICES | PackageManager.GET_PROVIDERS)) != 0) {
-            // Caller is asking for component details, so they'd better be
-            // asking for specific encryption matching behavior, or be triaged
-            if ((flags & (PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                    | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                    | PackageManager.MATCH_DEBUG_TRIAGED_MISSING)) == 0) {
-                triaged = false;
-            }
-        }
-        if ((flags & (PackageManager.MATCH_UNINSTALLED_PACKAGES
-                | PackageManager.MATCH_SYSTEM_ONLY
-                | PackageManager.MATCH_DEBUG_TRIAGED_MISSING)) == 0) {
-            triaged = false;
-        }
         if ((flags & PackageManager.MATCH_ANY_USER) != 0) {
             // require the permission to be held; the calling uid and given user id referring
             // to the same user is not sufficient
@@ -4782,10 +4765,6 @@ public class PackageManagerService extends IPackageManager.Stub
             // MATCH_UNINSTALLED_PACKAGES to query apps in other profiles. b/31000380
             flags |= PackageManager.MATCH_ANY_USER;
         }
-        if (DEBUG_TRIAGED_MISSING && (Binder.getCallingUid() == Process.SYSTEM_UID) && !triaged) {
-            Log.w(TAG, "Caller hasn't been triaged for missing apps; they asked about " + cookie
-                    + " with flags 0x" + Integer.toHexString(flags), new Throwable());
-        }
         return updateFlags(flags, userId);
     }
 
@@ -4800,25 +4779,6 @@ public class PackageManagerService extends IPackageManager.Stub
      * Update given flags when being used to request {@link ComponentInfo}.
      */
     private int updateFlagsForComponent(int flags, int userId, Object cookie) {
-        if (cookie instanceof Intent) {
-            if ((((Intent) cookie).getFlags() & Intent.FLAG_DEBUG_TRIAGED_MISSING) != 0) {
-                flags |= PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
-            }
-        }
-
-        boolean triaged = true;
-        // Caller is asking for component details, so they'd better be
-        // asking for specific encryption matching behavior, or be triaged
-        if ((flags & (PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                | PackageManager.MATCH_DEBUG_TRIAGED_MISSING)) == 0) {
-            triaged = false;
-        }
-        if (DEBUG_TRIAGED_MISSING && (Binder.getCallingUid() == Process.SYSTEM_UID) && !triaged) {
-            Log.w(TAG, "Caller hasn't been triaged for missing apps; they asked about " + cookie
-                    + " with flags 0x" + Integer.toHexString(flags), new Throwable());
-        }
-
         return updateFlags(flags, userId);
     }
 
@@ -13962,6 +13922,68 @@ public class PackageManagerService extends IPackageManager.Stub
         return false;
     }
 
+    @Override
+    public void setSystemAppHiddenUntilInstalled(String packageName, boolean hidden) {
+        enforceSystemOrPhoneCaller("setSystemAppHiddenUntilInstalled");
+        synchronized (mPackages) {
+            final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+            if (pkgSetting == null || !pkgSetting.isSystem()) {
+                return;
+            }
+            PackageParser.Package pkg = pkgSetting.pkg;
+            if (pkg != null && pkg.applicationInfo != null) {
+                pkg.applicationInfo.hiddenUntilInstalled = hidden;
+            }
+            final PackageSetting disabledPs = mSettings.getDisabledSystemPkgLPr(packageName);
+            if (disabledPs == null) {
+                return;
+            }
+            pkg = disabledPs.pkg;
+            if (pkg != null && pkg.applicationInfo != null) {
+                pkg.applicationInfo.hiddenUntilInstalled = hidden;
+            }
+        }
+    }
+
+    @Override
+    public boolean setSystemAppInstallState(String packageName, boolean installed, int userId) {
+        enforceSystemOrPhoneCaller("setSystemAppInstallState");
+        synchronized (mPackages) {
+            final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
+            // The target app should always be in system
+            if (pkgSetting == null || !pkgSetting.isSystem()) {
+                return false;
+            }
+            // Check if the install state is the same
+            if (pkgSetting.getInstalled(userId) == installed) {
+                return false;
+            }
+        }
+
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            if (installed) {
+                // install the app from uninstalled state
+                installExistingPackageAsUser(
+                        packageName,
+                        userId,
+                        0 /*installFlags*/,
+                        PackageManager.INSTALL_REASON_DEVICE_SETUP);
+                return true;
+            }
+
+            // uninstall the app from installed state
+            deletePackageVersioned(
+                    new VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
+                    new LegacyPackageDeleteObserver(null).getBinder(),
+                    userId,
+                    PackageManager.DELETE_SYSTEM_APP);
+            return true;
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
     private void sendApplicationHiddenForUser(String packageName, PackageSetting pkgSetting,
             int userId) {
         final PackageRemovedInfo info = new PackageRemovedInfo(this);
@@ -14026,10 +14048,16 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public int installExistingPackageAsUser(String packageName, int userId, int installFlags,
             int installReason) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES,
-                null);
-        PackageSetting pkgSetting;
         final int callingUid = Binder.getCallingUid();
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED
+                && mContext.checkCallingOrSelfPermission(
+                        android.Manifest.permission.INSTALL_EXISTING_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Neither user " + callingUid + " nor current process has "
+                    + android.Manifest.permission.INSTALL_PACKAGES + ".");
+        }
+        PackageSetting pkgSetting;
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, true /* checkShell */,
                 "installExistingPackage for user " + userId);

@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> എന്നത് മറയ്‌ക്കണോ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"അടുത്ത തവണ നിങ്ങൾ അത് ക്രമീകരണങ്ങളിൽ ഓണാക്കുമ്പോൾ അത് വീണ്ടും ദൃശ്യമാകും."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"മറയ്‌ക്കുക"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"നിങ്ങൾ ഉപയോഗിക്കുന്നത് ഔദ്യോഗിക പ്രൊഫൈലാണ്"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"കോള്‍"</string>
     <string name="stream_system" msgid="7493299064422163147">"സിസ്റ്റം"</string>
     <string name="stream_ring" msgid="8213049469184048338">"റിംഗുചെയ്യുക"</string>

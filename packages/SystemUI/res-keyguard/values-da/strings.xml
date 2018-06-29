@@ -140,7 +140,8 @@
       <item quantity="one">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> time siden. Bekræft adgangskoden.</item>
       <item quantity="other">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft adgangskoden.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Ikke genkendt"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Ikke genkendt"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Ikke genkendt"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">Angiv pinkoden til SIM-kortet. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage.</item>
       <item quantity="other">Angiv pinkoden til SIM-kortet. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage.</item>

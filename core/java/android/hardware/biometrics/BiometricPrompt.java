@@ -293,7 +293,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @param userId
          * @hide
          */
-        public AuthenticationResult(CryptoObject crypto, BiometricIdentifier identifier,
+        public AuthenticationResult(CryptoObject crypto, Identifier identifier,
                 int userId) {
             super(crypto, identifier, userId);
         }

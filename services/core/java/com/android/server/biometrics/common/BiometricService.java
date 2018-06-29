@@ -36,11 +36,15 @@ import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.IBiometricPromptReceiver;
+import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.fingerprint.Fingerprint;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IHwBinder;
+import android.os.IRemoteCallback;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -54,11 +58,14 @@ import android.util.SparseIntArray;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.server.SystemService;
+import com.android.server.biometrics.face.FaceService;
 import com.android.server.biometrics.fingerprint.FingerprintService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Abstract base class containing all of the business logic for biometric services, e.g.
@@ -88,9 +95,12 @@ public abstract class BiometricService extends SystemService implements IHwBinde
     private final BiometricTaskStackListener mTaskStackListener = new BiometricTaskStackListener();
     private final ResetClientStateRunnable mResetClientState = new ResetClientStateRunnable();
     private final LockoutReceiver mLockoutReceiver = new LockoutReceiver();
+    private final ArrayList<LockoutResetMonitor> mLockoutMonitors = new ArrayList<>();
 
-    protected final ResetFailedAttemptsForUserRunnablle mResetFailedAttemptsForCurrentUserRunnable =
-            new ResetFailedAttemptsForUserRunnablle();
+    protected final Map<Integer, Long> mAuthenticatorIds =
+            Collections.synchronizedMap(new HashMap<>());
+    protected final ResetFailedAttemptsForUserRunnable mResetFailedAttemptsForCurrentUserRunnable =
+            new ResetFailedAttemptsForUserRunnable();
     protected final H mHandler = new H();
 
     private ClientMonitor mCurrentClient;
@@ -115,6 +125,11 @@ public abstract class BiometricService extends SystemService implements IHwBinde
      * @return the log tag.
      */
     protected abstract String getTag();
+
+    /**
+     * @return the biometric utilities for a specific implementation.
+     */
+    protected abstract BiometricUtils getBiometricUtils();
 
     /**
      * @return the number of failed attempts after which the user will be temporarily locked out
@@ -193,10 +208,6 @@ public abstract class BiometricService extends SystemService implements IHwBinde
      */
     protected abstract int getAppOp();
 
-    /**
-     * Notifies clients that lockout has been reset.
-     */
-    protected abstract void notifyLockoutResetMonitors();
 
     /**
      * Notifies clients of any change in the biometric state (active / idle). This is mainly for
@@ -273,7 +284,7 @@ public abstract class BiometricService extends SystemService implements IHwBinde
                 IBinder token, ServiceListener listener, int userId, int groupId,
                 byte[] cryptoToken, boolean restricted, String owner) {
             super(context, getMetrics(), daemon, halDeviceId, token, listener,
-                    userId, groupId, cryptoToken, restricted, owner);
+                    userId, groupId, cryptoToken, restricted, owner, getBiometricUtils());
         }
 
         @Override
@@ -289,7 +300,7 @@ public abstract class BiometricService extends SystemService implements IHwBinde
                 IBinder token, ServiceListener listener, int fingerId, int groupId, int userId,
                 boolean restricted, String owner) {
             super(context, getMetrics(), daemon, halDeviceId, token, listener, fingerId, groupId,
-                    userId, restricted, owner);
+                    userId, restricted, owner, getBiometricUtils());
         }
 
         public void setShouldNotifyUserActivity(boolean shouldNotify) {
@@ -323,14 +334,14 @@ public abstract class BiometricService extends SystemService implements IHwBinde
      * Wraps the callback interface from Service -> Manager
      */
     protected interface ServiceListener {
-        void onEnrollResult(long deviceId, int fingerId, int groupId, int remaining)
-                throws RemoteException;
+        void onEnrollResult(BiometricAuthenticator.Identifier identifier,
+                int remaining) throws RemoteException;
 
         void onAcquired(long deviceId, int acquiredInfo, int vendorCode)
                 throws RemoteException;
 
         void onAuthenticationSucceeded(long deviceId,
-                BiometricAuthenticator.BiometricIdentifier biometric, int userId)
+                BiometricAuthenticator.Identifier biometric, int userId)
                 throws RemoteException;
 
         void onAuthenticationFailed(long deviceId)
@@ -339,11 +350,11 @@ public abstract class BiometricService extends SystemService implements IHwBinde
         void onError(long deviceId, int error, int vendorCode)
                 throws RemoteException;
 
-        void onRemoved(long deviceId, int fingerId, int groupId, int remaining)
-                throws RemoteException;
+        void onRemoved(BiometricAuthenticator.Identifier identifier,
+                int remaining) throws RemoteException;
 
-        void onEnumerated(long deviceId, int fingerId, int groupId, int remaining)
-                throws RemoteException;
+        void onEnumerated(BiometricAuthenticator.Identifier identifier,
+                int remaining) throws RemoteException;
     }
 
     /**
@@ -351,6 +362,7 @@ public abstract class BiometricService extends SystemService implements IHwBinde
      * subclasses.
      */
     protected interface DaemonWrapper {
+        int ERROR_ESRCH = 3; // Likely fingerprint HAL is dead. see errno.h.
         int authenticate(long operationId, int groupId) throws RemoteException;
         int cancel() throws RemoteException;
         int remove(int groupId, int biometricId) throws RemoteException;
@@ -373,7 +385,7 @@ public abstract class BiometricService extends SystemService implements IHwBinde
                     Slog.w(getTag(), "Unknown message:" + msg.what);
             }
         }
-    };
+    }
 
     private final class BiometricTaskStackListener extends TaskStackListener {
         @Override
@@ -400,7 +412,7 @@ public abstract class BiometricService extends SystemService implements IHwBinde
                 Slog.e(getTag(), "Unable to get running tasks", e);
             }
         }
-    };
+    }
 
     private final class ResetClientStateRunnable implements Runnable {
         @Override
@@ -423,25 +435,83 @@ public abstract class BiometricService extends SystemService implements IHwBinde
             mCurrentClient = null;
             startClient(mPendingClient, false);
         }
-    };
+    }
 
     private final class LockoutReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Slog.v(getTag(), "Resetting lockout: " + intent.getAction());
             if (getLockoutResetIntent().equals(intent.getAction())) {
                 final int user = intent.getIntExtra(KEY_LOCKOUT_RESET_USER, 0);
                 resetFailedAttemptsForUser(false /* clearAttemptCounter */, user);
             }
         }
-    };
+    }
 
-    private final class ResetFailedAttemptsForUserRunnablle implements Runnable {
+    private final class ResetFailedAttemptsForUserRunnable implements Runnable {
         @Override
         public void run() {
             resetFailedAttemptsForUser(true /* clearAttemptCounter */,
                     ActivityManager.getCurrentUser());
         }
-    };
+    }
+
+    private final class LockoutResetMonitor implements IBinder.DeathRecipient {
+        private static final long WAKELOCK_TIMEOUT_MS = 2000;
+        private final IBiometricServiceLockoutResetCallback mCallback;
+        private final PowerManager.WakeLock mWakeLock;
+
+        public LockoutResetMonitor(IBiometricServiceLockoutResetCallback callback) {
+            mCallback = callback;
+            mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    "lockout reset callback");
+            try {
+                mCallback.asBinder().linkToDeath(LockoutResetMonitor.this, 0);
+            } catch (RemoteException e) {
+                Slog.w(getTag(), "caught remote exception in linkToDeath", e);
+            }
+        }
+
+        public void sendLockoutReset() {
+            if (mCallback != null) {
+                try {
+                    mWakeLock.acquire(WAKELOCK_TIMEOUT_MS);
+                    mCallback.onLockoutReset(getHalDeviceId(), new IRemoteCallback.Stub() {
+                        @Override
+                        public void sendResult(Bundle data) throws RemoteException {
+                            releaseWakelock();
+                        }
+                    });
+                } catch (DeadObjectException e) {
+                    Slog.w(getTag(), "Death object while invoking onLockoutReset: ", e);
+                    mHandler.post(mRemoveCallbackRunnable);
+                } catch (RemoteException e) {
+                    Slog.w(getTag(), "Failed to invoke onLockoutReset: ", e);
+                    releaseWakelock();
+                }
+            }
+        }
+
+        private final Runnable mRemoveCallbackRunnable = new Runnable() {
+            @Override
+            public void run() {
+                releaseWakelock();
+                removeLockoutResetCallback(LockoutResetMonitor.this);
+            }
+        };
+
+        @Override
+        public void binderDied() {
+            Slog.e(getTag(), "Lockout reset callback binder died");
+            mHandler.post(mRemoveCallbackRunnable);
+        }
+
+        private void releaseWakelock() {
+            if (mWakeLock.isHeld()) {
+                mWakeLock.release();
+            }
+        }
+    }
 
     /**
      * Initializes the system service.
@@ -527,13 +597,19 @@ public abstract class BiometricService extends SystemService implements IHwBinde
         }
     }
 
-    protected void handleEnrollResult(long deviceId, int biometricId, int groupId, int remaining) {
+    protected void handleEnrollResult(BiometricAuthenticator.Identifier identifier,
+            int remaining) {
         ClientMonitor client = mCurrentClient;
-        if (client != null && client.onEnrollResult(biometricId, groupId, remaining)) {
+        if (client != null && client.onEnrollResult(identifier, remaining)) {
             removeClient(client);
             // When enrollment finishes, update this group's authenticator id, as the HAL has
             // already generated a new authenticator id when the new biometric is enrolled.
-            updateActiveGroup(groupId, null);
+            if (identifier instanceof Fingerprint) {
+                updateActiveGroup(((Fingerprint)identifier).getGroupId(), null);
+            } else {
+                updateActiveGroup(mCurrentUserId, null);
+            }
+
         }
     }
 
@@ -543,7 +619,7 @@ public abstract class BiometricService extends SystemService implements IHwBinde
         if (DEBUG) Slog.v(getTag(), "handleError(client="
                 + (client != null ? client.getOwnerString() : "null") + ", error = " + error + ")");
 
-        if (client != null && client.onError(error, vendorCode)) {
+        if (client != null && client.onError(deviceId, error, vendorCode)) {
             removeClient(client);
         }
 
@@ -557,21 +633,22 @@ public abstract class BiometricService extends SystemService implements IHwBinde
         }
     }
 
-    protected void handleRemoved(final long deviceId,
-            final int biometricId,
-            final int groupId,
+    protected void handleRemoved(BiometricAuthenticator.Identifier identifier,
             final int remaining) {
-        if (DEBUG) Slog.w(getTag(), "Removed: fid=" + biometricId
-                + ", gid=" + groupId
-                + ", dev=" + deviceId
+        if (DEBUG) Slog.w(getTag(), "Removed: fid=" + identifier.getBiometricId()
+                + ", dev=" + identifier.getDeviceId()
                 + ", rem=" + remaining);
 
         ClientMonitor client = mCurrentClient;
-        if (client != null && client.onRemoved(biometricId, groupId, remaining)) {
+        if (client != null && client.onRemoved(identifier, remaining)) {
             removeClient(client);
             // When the last biometric of a group is removed, update the authenticator id
-            if (!hasEnrolledBiometrics(groupId)) {
-                updateActiveGroup(groupId, null);
+            int userId = mCurrentUserId;
+            if (identifier instanceof Fingerprint) {
+                userId = ((Fingerprint) identifier).getGroupId();
+            }
+            if (!hasEnrolledBiometrics(userId)) {
+                updateActiveGroup(userId, null);
             }
         }
     }
@@ -693,12 +770,21 @@ public abstract class BiometricService extends SystemService implements IHwBinde
             int errorCode = lockoutMode == AuthenticationClient.LOCKOUT_TIMED ?
                     BiometricConstants.BIOMETRIC_ERROR_LOCKOUT :
                     BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
-            if (!client.onError(errorCode, 0 /* vendorCode */)) {
+            if (!client.onError(getHalDeviceId(), errorCode, 0 /* vendorCode */)) {
                 Slog.w(getTag(), "Cannot send permanent lockout message to client");
             }
             return;
         }
         startClient(client, true /* initiatedByClient */);
+    }
+
+    protected void addLockoutResetCallback(IBiometricServiceLockoutResetCallback callback) {
+        mHandler.post(() -> {
+           final LockoutResetMonitor monitor = new LockoutResetMonitor(callback);
+           if (!mLockoutMonitors.contains(monitor)) {
+               mLockoutMonitors.add(monitor);
+           }
+        });
     }
 
     /**
@@ -842,6 +928,27 @@ public abstract class BiometricService extends SystemService implements IHwBinde
     }
 
     /**
+     * Populates existing authenticator ids. To be used only during the start of the service.
+     */
+    protected void loadAuthenticatorIds() {
+        // This operation can be expensive, so keep track of the elapsed time. Might need to move to
+        // background if it takes too long.
+        long t = System.currentTimeMillis();
+        mAuthenticatorIds.clear();
+        for (UserInfo user : UserManager.get(getContext()).getUsers(true /* excludeDying */)) {
+            int userId = getUserOrWorkProfileId(null, user.id);
+            if (!mAuthenticatorIds.containsKey(userId)) {
+                updateActiveGroup(userId, null);
+            }
+        }
+
+        t = System.currentTimeMillis() - t;
+        if (t > 1000) {
+            Slog.w(getTag(), "loadAuthenticatorIds() taking too long: " + t + "ms");
+        }
+    }
+
+    /**
      * @param clientPackage the package of the caller
      * @return the profile id
      */
@@ -888,6 +995,15 @@ public abstract class BiometricService extends SystemService implements IHwBinde
         }
 
         return false;
+    }
+
+    /***
+     * @param opPackageName the name of the calling package
+     * @return authenticator id for the calling user
+     */
+    protected long getAuthenticatorId(String opPackageName) {
+        final int userId = getUserOrWorkProfileId(opPackageName, UserHandle.getCallingUserId());
+        return mAuthenticatorIds.getOrDefault(userId, 0L);
     }
 
     private void scheduleLockoutResetForUser(int userId) {
@@ -970,4 +1086,14 @@ public abstract class BiometricService extends SystemService implements IHwBinde
         }
     }
 
+    private void notifyLockoutResetMonitors() {
+        for (int i = 0; i < mLockoutMonitors.size(); i++) {
+            mLockoutMonitors.get(i).sendLockoutReset();
+        }
+    }
+
+    private void removeLockoutResetCallback(
+            LockoutResetMonitor monitor) {
+        mLockoutMonitors.remove(monitor);
+    }
 }

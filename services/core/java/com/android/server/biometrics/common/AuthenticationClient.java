@@ -17,6 +17,7 @@
 package com.android.server.biometrics.common;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.IBiometricPromptReceiver;
@@ -60,7 +61,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 try {
                     mDialogReceiverFromClient.onDialogDismissed(reason);
                     if (reason == BiometricPrompt.DISMISSED_REASON_USER_CANCEL) {
-                        onError(BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED,
+                        onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED,
                                 0 /* vendorCode */);
                     }
                     mDialogDismissed = true;
@@ -132,7 +133,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
     }
 
     @Override
-    public boolean onError(int error, int vendorCode) {
+    public boolean onError(long deviceId, int error, int vendorCode) {
         if (mDialogDismissed) {
             // If user cancels authentication, the application has already received the
             // FingerprintManager.FINGERPRINT_ERROR_USER_CANCELED message from onDialogDismissed()
@@ -148,7 +149,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 Slog.e(getLogTag(), "Remote exception when sending error", e);
             }
         }
-        return super.onError(error, vendorCode);
+        return super.onError(deviceId, error, vendorCode);
     }
 
     @Override
@@ -246,7 +247,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
             if (result != 0) {
                 Slog.w(getLogTag(), "startAuthentication failed, result=" + result);
                 mMetricsLogger.histogram(mMetrics.tagAuthStartError(), result);
-                onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
+                onError(getHalDeviceId(), BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                        0 /* vendorCode */);
                 return result;
             }
             if (DEBUG) Slog.w(getLogTag(), "client " + getOwnerString() + " is authenticating...");
@@ -304,19 +306,21 @@ public abstract class AuthenticationClient extends ClientMonitor {
     }
 
     @Override
-    public boolean onEnrollResult(int fingerId, int groupId, int remaining) {
+    public boolean onEnrollResult(BiometricAuthenticator.Identifier identifier,
+            int remaining) {
         if (DEBUG) Slog.w(getLogTag(), "onEnrollResult() called for authenticate!");
         return true; // Invalid for Authenticate
     }
 
     @Override
-    public boolean onRemoved(int fingerId, int groupId, int remaining) {
+    public boolean onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
         if (DEBUG) Slog.w(getLogTag(), "onRemoved() called for authenticate!");
         return true; // Invalid for Authenticate
     }
 
     @Override
-    public boolean onEnumerationResult(int fingerId, int groupId, int remaining) {
+    public boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier,
+            int remaining) {
         if (DEBUG) Slog.w(getLogTag(), "onEnumerationResult() called for authenticate!");
         return true; // Invalid for Authenticate
     }

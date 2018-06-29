@@ -42,13 +42,13 @@
         <item><xliff:g id="id">@string/status_bar_phone_evdo_signal</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_phone_signal</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_secure</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_bluetooth</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_managed_profile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_vpn</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_bluetooth</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_location</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_mute</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_volume</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_location</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_zen</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_ethernet</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_wifi</xliff:g></item>
@@ -504,7 +504,7 @@
 
          When true, overrides the config_tether_upstream_types setting above.
     -->
-    <bool translatable="false" name="config_tether_upstream_automatic">false</bool>
+    <bool translatable="false" name="config_tether_upstream_automatic">true</bool>
 
     <!-- If the DUN connection for this CDMA device supports more than just DUN -->
     <!-- traffic you should list them here. -->
@@ -2612,8 +2612,8 @@
         <item>lockdown</item>
         <item>logout</item>
         <item>bugreport</item>
-        <item>emergency</item>
         <item>screenshot</item>
+        <item>emergency</item>
     </string-array>
 
     <!-- Number of milliseconds to hold a wake lock to ensure that drawing is fully
@@ -2912,6 +2912,9 @@
 
     <!-- Keyguard component -->
     <string name="config_keyguardComponent" translatable="false">com.android.systemui/com.android.systemui.keyguard.KeyguardService</string>
+
+    <!-- Limit for the number of face templates per user -->
+    <integer name="config_face_MaxTemplatesPerUser">1</integer>
 
     <!-- For performance and storage reasons, limit the number of fingerprints per user -->
     <integer name="config_fingerprintMaxTemplatesPerUser">5</integer>
@@ -3370,6 +3373,9 @@
 
     <!-- URI for in call notification sound -->
     <string translatable="false" name="config_inCallNotificationSound">/system/media/audio/ui/InCallNotification.ogg</string>
+
+    <!-- Default number of notifications from the same app before they are automatically grouped by the OS -->
+    <integer translatable="false" name="config_autoGroupAtCount">4</integer>
 
     <!-- The OEM specified sensor type for the lift trigger to launch the camera app. -->
     <integer name="config_cameraLiftTriggerSensorType">-1</integer>

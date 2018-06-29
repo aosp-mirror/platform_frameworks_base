@@ -288,6 +288,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"الموقع الجغرافي"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"الوصول إلى موقع هذا الجهاز"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى الموقع الجغرافي لهذا الجهاز؟"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"لن يكون بإمكان التطبيق الوصول إلى الموقع الجغرافي إلا عند استخدامك لهذا التطبيق."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"‏هل تريد السماح دائمًا لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى الموقع الجغرافي لهذا الجهاز؟"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"سيكون بإمكان التطبيق دائمًا الوصول إلى الموقع الجغرافي، حتى عند عدم استخدامك لهذا التطبيق."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"التقويم"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"الوصول تقويمك"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالدخول إلى التقويم؟"</string>
@@ -414,8 +417,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"يمكن لهذا التطبيق إضافة أحداث تقويم أو إزالتها أو تغييرها على الهاتف. كما يمكنه إرسال رسائل يبدو أنها واردة من مالكي التقويم، ويمكنه كذلك تغيير الأحداث بدون إشعار مالكيها."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"الدخول إلى المزيد من أوامر موفر الموقع"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏للسماح للتطبيق بالدخول إلى أوامر إضافية لموفر الموقع. قد يتيح هذا للتطبيق التداخل مع تشغيل تقنية نظام تحديد المواقع العالمي (GPS) أو مصادر الموقع الأخرى."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"الوصول إلى الموقع الجغرافي الدقيق في الواجهة الأمامية فقط"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"لا يمكن لهذا التطبيق معرفة موقعك الجغرافي بالضبط إلا عندما يعمل في الخلفية. ويجب تفعيل خدمات الموقع الجغرافي هذه وأن تكون متاحة على الهاتف حتى يتمكن التطبيق من استخدامها. وقد يؤدي هذا إلى زيادة استهلاك طاقة البطارية."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"الوصول إلى الموقع التقريبي (استنادًا إلى الشبكة)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"‏يمكن لهذا التطبيق معرفة موقعك من خلال مصادر الشبكات مثل أبراج الجوّال وشبكات Wi-Fi. ويجب تشغيل خدمات المواقع هذه وأن تكون متاحة على الجهاز اللوحي حتى يتمكن التطبيق من استخدامها."</string>
@@ -530,6 +532,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"رمز بصمة الإصبع"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"إدارة أجهزة مصادقة الوجه"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"السماح للتطبيق باستدعاء طرق لإضافة نماذج من الوجوه وحذفها"</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"استخدام أجهزة مصادقة الوجه"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"السماح للتطبيق باستخدام أجهزة مصادقة الوجه"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"تعذَّر التعرُّف على الوجه. يُرجى إعادة المحاولة."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"الوجه ساطع جدًا. يُرجى إعادة المحاولة بإضاءة أقل."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"الوجه مظلم جدًا. يُرجى الاستعانة بمصدر إضاءة."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"يُرجى إبعاد جهاز الاستشعار عن الوجه."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"يُرجى تقريب جهاز الاستشعار من الوجه."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"يُرجى تحريك جهاز الاستشعار للأعلى."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"يُرجى تحريك جهاز الاستشعار للأسفل."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"يُرجى تحريك جهاز الاستشعار جهة اليمين."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"يُرجى تحريك جهاز الاستشعار جهة اليسار."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"يُرجى النظر إلى جهاز الاستشعار."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"لم يتم رصد أي وجه."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"يُرجى جعل الوجه ثابتًا أمام الجهاز."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"أجهزة مصادقة الوجه غير متاحة."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"انتهت مهلة التعرُّف على الوجه. أعِد المحاولة."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"يتعذَّر حفظ الوجه."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"تمّ إلغاء عملية مصادقة الوجه."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"تمّ إجراء محاولات كثيرة. أعِد المحاولة لاحقًا."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"تمّ إجراء محاولات كثيرة. ميزة مصادقة الوجه متوقفة."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"يُرجى إعادة المحاولة."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"ليس هناك وجه مسجّل."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"لا يحتوي هذا الجهاز على جهاز استشعار مصادقة الوجه."</string>
+    <string name="face_name_template" msgid="7004562145809595384">"الوجه <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"رمز الوجه"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"قراءة إعدادات المزامنة"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"للسماح للتطبيق بقراءة الإعدادات المتزامنة لحساب ما. على سبيل المثال، يمكن أن يؤدي هذا إلى تحديد ما إذا تمت مزامنة تطبيق \"الأشخاص\" مع حساب ما."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"التبديل بين تشغيل المزامنة وإيقافها"</string>
@@ -1191,7 +1224,7 @@
     <string name="android_start_title" product="default" msgid="4536778526365907780">"جارٍ بدء تشغيل الهاتف…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"جارٍ بدء تشغيل الجهاز اللوحي…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"جارٍ بدء تشغيل الجهاز…"</string>
-    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"جارٍ تحسين السعة التخزينية."</string>
+    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"جارٍ تحسين سعة التخزين."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="1511552415039349062">"جارٍ إنهاء تحديث النظام…"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"جارٍ ترقية <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"جارٍ تحسين التطبيق <xliff:g id="NUMBER_0">%1$d</xliff:g> من <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
@@ -1266,6 +1299,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"‏شبكة Wi-Fi غير متصلة بالإنترنت"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"انقر للحصول على الخيارات."</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"التغييرات التي طرأت على إعدادات نقطة الاتصال"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"تمّ تغيير نطاق نقطة الاتصال الخاصة بك."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"لا يتوافق هذا الجهاز مع إعدادك المفضّل الخاص باستخدام النطاق 5 غيغاهرتز فقط. وسيستخدم الجهاز بدلاً من ذلك النطاق 5 غيغاهرتز عندما يكون متاحًا."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"تم التبديل إلى <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"يستخدم الجهاز <xliff:g id="NEW_NETWORK">%1$s</xliff:g> عندما لا يتوفر اتصال بالإنترنت في شبكة <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>، ويمكن أن يتم فرض رسوم مقابل ذلك."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"تم التبديل من <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> إلى <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1533,7 +1569,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"المزيد من الخيارات"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s، %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s، %2$s، %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"السعة التخزينية المشتركة الداخلية"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"سعة التخزين المشتركة الداخلية"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"‏بطاقة SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"‏بطاقة SD من <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"‏محرك أقراص USB"</string>
@@ -1954,7 +1990,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"الأخبار والمجلات"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"الخرائط والتنقل"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"الإنتاجية"</string>
-    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"السعة التخزينية للجهاز"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"سعة التخزين للجهاز"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"‏تصحيح أخطاء USB"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"ساعة"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"دقيقة"</string>

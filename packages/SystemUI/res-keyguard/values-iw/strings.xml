@@ -152,7 +152,8 @@
       <item quantity="other">נעילת המכשיר לא בוטלה במשך <xliff:g id="NUMBER_1">%d</xliff:g> שעות. הזן את הסיסמה.</item>
       <item quantity="one">נעילת המכשיר לא בוטלה במשך <xliff:g id="NUMBER_0">%d</xliff:g> שעה. הזן את הסיסמה.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"לא זוהתה"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"לא זוהתה"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"לא זוהתה"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="two">‏יש להזין קוד גישה לכרטיס SIM. נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסונות נוספים.</item>
       <item quantity="many">‏יש להזין קוד גישה לכרטיס SIM. נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסונות נוספים.</item>

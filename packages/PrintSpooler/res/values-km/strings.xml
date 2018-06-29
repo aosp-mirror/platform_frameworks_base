@@ -27,7 +27,7 @@
     <string name="label_duplex" msgid="5370037254347072243">"សងខាង"</string>
     <string name="label_orientation" msgid="2853142581990496477">"ទិស"</string>
     <string name="label_pages" msgid="7768589729282182230">"ទំព័រ"</string>
-    <string name="destination_default_text" msgid="5422708056807065710">"ជ្រើសម៉ាស៊ីនបោះពុម្ព"</string>
+    <string name="destination_default_text" msgid="5422708056807065710">"ជ្រើសរើសម៉ាស៊ីនបោះពុម្ព"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"<xliff:g id="PAGE_COUNT">%1$s</xliff:g> ទាំងអស់"</string>
     <string name="template_page_range" msgid="428638530038286328">"ជួរ​នៃ <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
     <string name="pages_range_example" msgid="8558694453556945172">"ឧ. 1—5,8,11—13"</string>
@@ -103,7 +103,7 @@
     <item msgid="3199660090246166812">"ផ្ដេក"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"មិន​អាច​សរសេរ​ទៅ​កាន់​ឯកសារ"</string>
-    <string name="print_error_default_message" msgid="8602678405502922346">"សូម​ទោស វា​មិន​ដំណើរ​ការ​ទេ។ ព្យាយាម​ម្ដងទៀត។"</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"សូមអភ័យ​ទោស វា​មិន​ដំណើរ​ការ​ទេ។ ព្យាយាម​ម្ដងទៀត។"</string>
     <string name="print_error_retry" msgid="1426421728784259538">"ព្យាយាម​ម្ដងទៀត"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"ឥឡូវ​នេះ ម៉ាស៊ីន​បោះពុម្ព​នេះ​មិន​អាច​ប្រើ​បាន។"</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"មិនអាចបង្ហាញការមើលជាមុនបានទេ"</string>

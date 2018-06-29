@@ -524,7 +524,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Masquer <xliff:g id="TILE_LABEL">%1$s</xliff:g> ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Cet élément réapparaîtra la prochaine fois que vous l\'activerez dans les paramètres."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Masquer"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Vous utilisez votre profil professionnel."</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Appel"</string>
     <string name="stream_system" msgid="7493299064422163147">"Système"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Sonnerie"</string>

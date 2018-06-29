@@ -140,7 +140,8 @@
       <item quantity="other">Az eszköz zárolása <xliff:g id="NUMBER_1">%d</xliff:g> órája nem lett feloldva. Erősítse meg a jelszót.</item>
       <item quantity="one">Az eszköz zárolása <xliff:g id="NUMBER_0">%d</xliff:g> órája nem lett feloldva. Erősítse meg a jelszót.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Nem sikerült felismerni"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Nem ismerhető fel"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Nem ismerhető fel"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">Adja meg a SIM-kártya PIN-kódját. <xliff:g id="NUMBER_1">%d</xliff:g> próbálkozása maradt.</item>
       <item quantity="one">Adja meg a SIM-kártya PIN-kódját. <xliff:g id="NUMBER_0">%d</xliff:g> próbálkozása maradt. Ha elfogynak a próbálkozási lehetőségek, az eszköz feloldásához fel kell vennie a kapcsolatot szolgáltatójával.</item>

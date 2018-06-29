@@ -146,7 +146,6 @@ private:
 
     void getListenerListCopyLocked(std::vector<wp<PackageInfoListener>>* output);
 
-    // TODO: Use shared_mutex for improved read-locking if a library can be found in Android.
     mutable mutex mMutex;
     mutable mutex mIsolatedMutex;
 

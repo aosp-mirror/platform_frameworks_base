@@ -33,7 +33,50 @@ public interface BiometricAuthenticator {
      * Container for biometric data
      * @hide
      */
-    abstract class BiometricIdentifier implements Parcelable {}
+    abstract class Identifier implements Parcelable {
+        private CharSequence mName;
+        private int mBiometricId;
+        private long mDeviceId; // physical device this is associated with
+
+        public Identifier() {}
+
+        public Identifier(CharSequence name, int biometricId, long deviceId) {
+            mName = name;
+            mBiometricId = biometricId;
+            mDeviceId = deviceId;
+        }
+
+        /**
+         * Gets the human-readable name for the given biometric.
+         * @return name given to the biometric
+         */
+        public CharSequence getName() {
+            return mName;
+        }
+
+        /**
+         * Gets the device-specific biometric id.  Used by Settings to map a name to a specific
+         * biometric template.
+         */
+        public int getBiometricId() {
+            return mBiometricId;
+        }
+
+        /**
+         * Device this biometric belongs to.
+         */
+        public long getDeviceId() {
+            return mDeviceId;
+        }
+
+        public void setName(CharSequence name) {
+            mName = name;
+        }
+
+        public void setDeviceId(long deviceId) {
+            mDeviceId = deviceId;
+        }
+    }
 
     /**
      * Container for callback data from {@link BiometricAuthenticator#authenticate(
@@ -42,7 +85,7 @@ public interface BiometricAuthenticator {
      * AuthenticationCallback)}
      */
     class AuthenticationResult {
-        private BiometricIdentifier mIdentifier;
+        private Identifier mIdentifier;
         private CryptoObject mCryptoObject;
         private int mUserId;
 
@@ -58,7 +101,7 @@ public interface BiometricAuthenticator {
          * @param userId
          * @hide
          */
-        public AuthenticationResult(CryptoObject crypto, BiometricIdentifier identifier,
+        public AuthenticationResult(CryptoObject crypto, Identifier identifier,
                 int userId) {
             mCryptoObject = crypto;
             mIdentifier = identifier;
@@ -80,7 +123,7 @@ public interface BiometricAuthenticator {
          * operations.
          * @hide
          */
-        public BiometricIdentifier getId() {
+        public Identifier getId() {
             return mIdentifier;
         }
 

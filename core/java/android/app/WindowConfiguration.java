@@ -488,7 +488,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
                 + " mAppBounds=" + mAppBounds
                 + " mWindowingMode=" + windowingModeToString(mWindowingMode)
                 + " mActivityType=" + activityTypeToString(mActivityType)
-                + " mAlwaysOnTop=" + activityTypeToString(mAlwaysOnTop)
+                + " mAlwaysOnTop=" + alwaysOnTopToString(mAlwaysOnTop)
                 + "}";
     }
 
@@ -651,5 +651,15 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             case ACTIVITY_TYPE_ASSISTANT: return "assistant";
         }
         return String.valueOf(applicationType);
+    }
+
+    /** @hide */
+    public static String alwaysOnTopToString(@AlwaysOnTop int alwaysOnTop) {
+        switch (alwaysOnTop) {
+            case ALWAYS_ON_TOP_UNDEFINED: return "undefined";
+            case ALWAYS_ON_TOP_ON: return "on";
+            case ALWAYS_ON_TOP_OFF: return "off";
+        }
+        return String.valueOf(alwaysOnTop);
     }
 }

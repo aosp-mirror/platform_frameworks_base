@@ -140,7 +140,8 @@
       <item quantity="other">Toestel is <xliff:g id="NUMBER_1">%d</xliff:g> uur lank nie ontsluit nie. Bevestig wagwoord.</item>
       <item quantity="one">Toestel is <xliff:g id="NUMBER_0">%d</xliff:g> uur lank nie ontsluit nie. Bevestig wagwoord.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Nie herken nie"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Nie herken nie"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Nie herken nie"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">Voer SIM-PIN in. Jy het <xliff:g id="NUMBER_1">%d</xliff:g> pogings oor.</item>
       <item quantity="one">Voer SIM-PIN in. Jy het <xliff:g id="NUMBER_0">%d</xliff:g> poging oor voordat jy jou diensverskaffer moet kontak om jou toestel te ontsluit.</item>

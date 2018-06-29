@@ -89,7 +89,6 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
                                   ? StatsdStats::kAtomDimensionKeySizeLimitMap.at(pullTagId).second
                                   : StatsdStats::kDimensionKeySizeHardLimit),
       mUseAbsoluteValueOnReset(metric.use_absolute_value_on_reset()) {
-    // TODO: valuemetric for pushed events may need unlimited bucket length
     int64_t bucketSizeMills = 0;
     if (metric.has_bucket()) {
         bucketSizeMills = TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket());

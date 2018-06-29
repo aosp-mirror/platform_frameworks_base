@@ -65,7 +65,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     public static final String TAG_OPS = "OverviewProxyService";
     public static final boolean DEBUG_OVERVIEW_PROXY = false;
-    private static final long BACKOFF_MILLIS = 5000;
+    private static final long BACKOFF_MILLIS = 1000;
     private static final long DEFERRED_CALLBACK_MILLIS = 5000;
 
     private final Context mContext;

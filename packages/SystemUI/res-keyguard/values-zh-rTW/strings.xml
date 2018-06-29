@@ -140,7 +140,8 @@
       <item quantity="other">裝置已有 <xliff:g id="NUMBER_1">%d</xliff:g> 小時未解鎖。請確認密碼。</item>
       <item quantity="one">裝置已有 <xliff:g id="NUMBER_0">%d</xliff:g> 小時未解鎖。請確認密碼。</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"無法識別"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"無法識別"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"無法識別"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">請輸入 SIM 卡的 PIN 碼，你還可以再試 <xliff:g id="NUMBER_1">%d</xliff:g> 次。</item>
       <item quantity="one">請輸入 SIM 卡的 PIN 碼，你還可以再試 <xliff:g id="NUMBER_0">%d</xliff:g> 次。如果仍然失敗，就必須請電信業者為裝置解鎖。</item>

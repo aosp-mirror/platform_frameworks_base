@@ -282,6 +282,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Vietovė"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"pasiekti įrenginio vietovės informaciją"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Suteikti &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; galimybę pasiekti įrenginio vietovę?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Programa galės pasiekti vietovę, tik kai ją naudosite."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Visada leisti programai &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; pasiekti šio įrenginio vietovę?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Programa visada galės pasiekti vietovę, net kai jos nenaudosite."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendorius"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"pasiekti kalendorių"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Suteikti &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; galimybę pasiekti kalendorių?"</string>
@@ -408,8 +411,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Ši programa gali pridėti, pašalinti arba pakeisti telefone esančius kalendoriaus įvykius. Ši programa gali siųsti pranešimus, kurie atrodys atsiųsti kalendoriaus savininkų, arba pakeisti įvykius nepranešusi jų savininkams."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"pasiekti papildomas vietos teikimo įrankio komandas"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Programai leidžiama pasiekti papildomas vietovės nustatymo paslaugų teikėjų komandas. Dėl to programa gali trukdyti veikti GPS ar kitiems vietovės nustatymo šaltiniams."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"pasiekti tikslią vietovę, tik kai programa veikia priekiniame plane"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Ši programa gali gauti tikslius jūsų vietovės duomenis bet kuriuo metu, kai veikia priekiniame plane. Šios vietovės paslaugos turi būti įjungtos ir pasiekiamos telefone, kad programa galėtų jas naudoti. Tai gali padidinti akumuliatoriaus energijos suvartojimą."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"pasiekti apytikslę vietą (nustatytą atsižvelgiant į tinklą)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ši programa gali gauti jūsų vietos informaciją naudodamasi tinklo šaltinių, pvz., mobiliojo ryšio bokštų ir „Wi-Fi“ tinklų, duomenimis. Šios vietovės paslaugos turi būti įjungtos ir pasiekiamos planšetiniame kompiuteryje, kad programa galėtų jas naudoti."</string>
@@ -524,6 +526,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Kontrolinio kodo piktograma"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"tvarkyti veido autentifikavimo aparatinę įrangą"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Programai leidžiama aktyv. metodus, norint pridėti ir ištrinti naudojamus veidų šablonus."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"naudoti veido autentifikavimo aparatinę įrangą"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Programai leidžiama naudoti veido autentifikavimo aparatinę įrangą tapatybei nustatyti"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Nepavyko apdoroti veido. Bandykite dar kartą."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Veidas per šviesus. Band. sumažinti apšvietimą."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Veidas per tamsus. Atidenkite apšvietimo šaltinį."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Patraukite jutiklį toliau nuo veido."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Laikykite jutiklį arčiau veido."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Pakelkite jutiklį aukščiau."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Nuleiskite jutiklį žemiau."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Patraukite jutiklį dešinėn."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Patraukite jutiklį kairėn."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Žiūrėkite į jutiklį."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Neaptikta jokių veidų."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Stabiliai laikykite veidą prieš įrenginį."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Veido atpažinimo aparatinė įranga nepasiekiama."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Baigėsi veido atpaž. skirt. laik. Band. dar kartą."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Nepavyko išsaugoti veido duomenų."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Veido atpažinimo operacija atšaukta."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Per daug bandymų. Vėliau bandykite dar kartą."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Per daug bandymų. Veido autentifik. išjungtas."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Bandykite dar kartą."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Neužregistruota jokių veidų."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Šiame įrenginyje nėra veido autentifikavimo jutiklio"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"<xliff:g id="FACEID">%d</xliff:g> veidas"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Veido pkt."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"skaityti sinchronizavimo nustatymus"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Leidžiama programai skaityti ir sinchronizuoti paskyros nustatymus. Pvz., taip gali būti nustatoma, ar su paskyra sinchronizuota Žmonių programa."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"įjungti arba išjungti sinchronizavimą"</string>
@@ -1222,6 +1255,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"„Wi‑Fi“ tinkle nėra interneto ryšio"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Palieskite, kad būtų rodomos parinktys."</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Viešosios interneto prieigos taško nustatymų pakeitimai"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Viešosios prieigos taško dažnio juosta pasikeitė."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Šiame įrenginyje nepalaikoma tik 5 GHz nuostata. Vietoj to šiame įrenginyje bus naudojama 5 GHz dažnio juosta, kai bus pasiekiama."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Perjungta į tinklą <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Įrenginyje naudojamas kitas tinklas (<xliff:g id="NEW_NETWORK">%1$s</xliff:g>), kai dabartiniame tinkle (<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>) nėra interneto ryšio. Gali būti taikomi mokesčiai."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Perjungta iš tinklo <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> į tinklą <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

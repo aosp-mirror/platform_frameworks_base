@@ -76,9 +76,6 @@ DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const Durat
       mStopAllIndex(stopAllIndex),
       mNested(nesting),
       mContainANYPositionInInternalDimensions(false) {
-    // TODO: The following boiler plate code appears in all MetricProducers, but we can't abstract
-    // them in the base class, because the proto generated CountMetric, and DurationMetric are
-    // not related. Maybe we should add a template in the future??
     if (metric.has_bucket()) {
         mBucketSizeNs =
                 TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket()) * 1000000;
@@ -434,8 +431,6 @@ void DurationMetricProducer::onConditionChangedLocked(const bool conditionMet,
     VLOG("Metric %lld onConditionChanged", (long long)mMetricId);
     mCondition = conditionMet;
     flushIfNeededLocked(eventTime);
-    // TODO: need to populate the condition change time from the event which triggers the condition
-    // change, instead of using current time.
     for (auto& whatIt : mCurrentSlicedDurationTrackerMap) {
         for (auto& pair : whatIt.second) {
             pair.second->onConditionChanged(conditionMet, eventTime);

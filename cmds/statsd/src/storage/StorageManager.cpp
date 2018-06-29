@@ -57,7 +57,7 @@ static void parseFileName(char* name, int64_t* result) {
     }
     // When index ends before hitting 3, file name is corrupted. We
     // intentionally put -1 at index 0 to indicate the error to caller.
-    // TODO: consider removing files with unexpected name format.
+    // TODO(b/110563137): consider removing files with unexpected name format.
     if (index < 3) {
         result[0] = -1;
     }

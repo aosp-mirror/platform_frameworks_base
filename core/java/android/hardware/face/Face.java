@@ -25,7 +25,7 @@ import android.os.Parcelable;
  *
  * @hide
  */
-public final class Face extends BiometricAuthenticator.BiometricIdentifier {
+public final class Face extends BiometricAuthenticator.Identifier {
     private CharSequence mName;
     private int mFaceId;
     private long mDeviceId; // physical device this face is associated with

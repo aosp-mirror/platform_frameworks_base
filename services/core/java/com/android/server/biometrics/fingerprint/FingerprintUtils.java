@@ -17,24 +17,26 @@
 package com.android.server.biometrics.fingerprint;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.fingerprint.Fingerprint;
 import android.text.TextUtils;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.biometrics.common.BiometricUtils;
 
 import java.util.List;
 
 /**
  * Utility class for dealing with fingerprints and fingerprint settings.
  */
-public class FingerprintUtils {
+public class FingerprintUtils implements BiometricUtils {
 
     private static final Object sInstanceLock = new Object();
     private static FingerprintUtils sInstance;
 
     @GuardedBy("this")
-    private final SparseArray<FingerprintsUserState> mUsers = new SparseArray<>();
+    private final SparseArray<FingerprintUserState> mUsers = new SparseArray<>();
 
     public static FingerprintUtils getInstance() {
         synchronized (sInstanceLock) {
@@ -48,31 +50,42 @@ public class FingerprintUtils {
     private FingerprintUtils() {
     }
 
-    public List<Fingerprint> getFingerprintsForUser(Context ctx, int userId) {
-        return getStateForUser(ctx, userId).getFingerprints();
+    @Override
+    public List<Fingerprint> getBiometricsForUser(Context ctx, int userId) {
+        return getStateForUser(ctx, userId).getBiometrics();
     }
 
-    public void addFingerprintForUser(Context ctx, int fingerId, int userId) {
-        getStateForUser(ctx, userId).addFingerprint(fingerId, userId);
+    @Override
+    public void addBiometricForUser(Context context, int userId,
+            BiometricAuthenticator.Identifier identifier) {
+        getStateForUser(context, userId).addBiometric(identifier);
     }
 
-    public void removeFingerprintIdForUser(Context ctx, int fingerId, int userId) {
-        getStateForUser(ctx, userId).removeFingerprint(fingerId);
+    @Override
+    public void removeBiometricForUser(Context context, int userId, int fingerId) {
+        getStateForUser(context, userId).removeBiometric(fingerId);
     }
 
-    public void renameFingerprintForUser(Context ctx, int fingerId, int userId, CharSequence name) {
+    @Override
+    public void renameBiometricForUser(Context context, int userId, int fingerId,
+            CharSequence name) {
         if (TextUtils.isEmpty(name)) {
             // Don't do the rename if it's empty
             return;
         }
-        getStateForUser(ctx, userId).renameFingerprint(fingerId, name);
+        getStateForUser(context, userId).renameBiometric(fingerId, name);
     }
 
-    private FingerprintsUserState getStateForUser(Context ctx, int userId) {
+    @Override
+    public CharSequence getUniqueName(Context context, int userId) {
+        return getStateForUser(context, userId).getUniqueName();
+    }
+
+    private FingerprintUserState getStateForUser(Context ctx, int userId) {
         synchronized (this) {
-            FingerprintsUserState state = mUsers.get(userId);
+            FingerprintUserState state = mUsers.get(userId);
             if (state == null) {
-                state = new FingerprintsUserState(ctx, userId);
+                state = new FingerprintUserState(ctx, userId);
                 mUsers.put(userId, state);
             }
             return state;

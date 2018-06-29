@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Lokasyon"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"i-access ang lokasyon ng device na ito"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang lokasyon ng device na ito?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Maa-access lang ng app ang lokasyon habang ginagamit mo ang app."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Laging payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang lokasyon?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Palaging maa-access ng app ang lokasyon, kahit na hindi mo ginagamit ang app."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendaryo"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"i-access ang iyong kalendaryo"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Payagan ang &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; na i-access ang iyong kalendaryo?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Makakapagdagdag, makakapag-alis o makakapagbago ang app na ito ng mga event sa kalendaryo sa iyong telepono. Magagawa ng app na ito na magpadala ng mga mensahe na maaaring mukhang mula sa mga may-ari ng kalendaryo o magbago ng mga event nang hindi inaabisuhan ang mga may-ari nito."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"i-access ang mga dagdag na command ng provider ng lokasyon"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Nagbibigay-daan sa app na mag-access ng mga karagdagang command ng provider ng lokasyon. Maaari nitong bigyang-daan ang app na gambalain ang pagpapatakbo ng GPS o ng iba pang mga pinagmulan ng lokasyon."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"i-access lang ang tumpak na lokasyon sa foreground"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Makukuha lang ng app na ito ang iyong eksaktong lokasyon kapag nasa foreground ito. Ang mga serbisyo ng lokasyon na ito ay dapat naka-on at available sa iyong telepono para magamit ng app ang mga ito. Maaaring lumakas ang pagkonsumo ng baterya dahil dito."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"i-access ang tinatantyang lokasyon (batay sa network)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Makukuha ng app na ito ang iyong lokasyon batay sa mga pinagmulan ng network gaya ng mga cell tower at Wi-Fi network. Ang mga serbisyo ng lokasyon na ito ay dapat naka-on at available sa iyong tablet para sa app upang magamit ang mga ito."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icon ng fingerprint"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"pamahalaan ang hardware sa authentication ng mukha"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Pumapayag na mag-invoke ang app ng paraang magdagdag at mag-delete ng template ng mukha."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"gumamit ng hardware sa pag-authenticate ng mukha"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Pumapayag na gumamit ng face authentication hardware ang app para sa pag-authenticate"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Hindi maiproseso ang mukha. Pakisubukang muli."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Masyadong maliwanag. Pakisubukan sa mas madilim."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Masyadong madilim. Huwag takpan ang ilaw."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Pakilayo sa mukha ang sensor."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Pakilapit sa mukha ang sensor."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Pakitaas ang sensor."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Pakibaba ang sensor."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Pakiusog pakanan ang sensor."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Pakiusog pakaliwa ang sensor."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Tumingin sa sensor."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Walang natukoy na mukha."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Panatilihin sa harap ng device ang mukha."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hindi available ang hardware para sa mukha."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Nag-time out ang mukha. Subukang muli."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Hindi ma-store ang mukha."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Nakansela ang operation kaugnay ng mukha."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Masyadong maraming pagsubok. Subukang muli mamaya."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Sobrang pagsubok. Bawal na: facial authentication."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Subukang muli."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Walang naka-enroll na mukha."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Walang sensor ng pag-authenticate ng mukha ang device na ito"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Mukha <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Face icon"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"basahin ang mga setting ng sync"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Pinapayagan ang app na basahin ang mga setting ng pag-sync para sa isang account. Halimbawa, matutukoy nito kung naka-sync ang app na Mga Tao sa isang account."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"I-toggle on at off ang pag-sync"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Walang access sa internet ang Wi-Fi"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"I-tap para sa mga opsyon"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Mga pagbabago sa mga setting ng iyong hotspot"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Nagbago ang band ng iyong hotspot."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Hindi sinusuportahan ng device na ito ang kagustuhan mong gumamit lang ng 5GHz. Sa halip, gagamitin ng device na ito ang 5GHz na band kapag available."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Lumipat sa <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Ginagamit ng device ang <xliff:g id="NEW_NETWORK">%1$s</xliff:g> kapag walang access sa internet ang <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>. Maaaring may mga malapat na singilin."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Lumipat sa <xliff:g id="NEW_NETWORK">%2$s</xliff:g> mula sa <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>"</string>

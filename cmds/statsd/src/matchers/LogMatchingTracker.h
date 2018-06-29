@@ -86,8 +86,6 @@ protected:
     // The collection of the event tag ids that this LogMatchingTracker cares. So we can quickly
     // return kNotMatched when we receive an event with an id not in the list. This is especially
     // useful when we have a complex CombinationLogMatcherTracker.
-    // TODO: Consider use an array instead of stl set. In reality, the number of the tag ids a
-    // LogMatchingTracker cares is only a few.
     std::set<int> mAtomIds;
 };
 

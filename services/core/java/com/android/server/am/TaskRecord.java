@@ -542,8 +542,14 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 if (r != null && !deferResume) {
                     kept = r.ensureActivityConfiguration(0 /* globalChanges */,
                             preserveWindow);
+                    // Preserve other windows for resizing because if resizing happens when there
+                    // is a dialog activity in the front, the activity that still shows some
+                    // content to the user will become black and cause flickers. Note in most cases
+                    // this won't cause tons of irrelevant windows being preserved because only
+                    // activities in this task may experience a bounds change. Configs for other
+                    // activities stay the same.
                     mService.mStackSupervisor.ensureActivitiesVisibleLocked(r, 0,
-                            !PRESERVE_WINDOWS);
+                            preserveWindow);
                     if (!kept) {
                         mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
                     }
@@ -1841,7 +1847,9 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         final int compatScreenHeightDp = (int) (mTmpNonDecorBounds.height() / density);
         // We're only overriding LONG, SIZE and COMPAT parts of screenLayout, so we start override
         // calculation with partial default.
-        final int sl = Configuration.SCREENLAYOUT_LONG_YES | Configuration.SCREENLAYOUT_SIZE_XLARGE;
+        // Reducing the screen layout starting from its parent config.
+        final int sl = parentConfig.screenLayout &
+                (Configuration.SCREENLAYOUT_LONG_MASK | Configuration.SCREENLAYOUT_SIZE_MASK);
         final int longSize = Math.max(compatScreenHeightDp, compatScreenWidthDp);
         final int shortSize = Math.min(compatScreenHeightDp, compatScreenWidthDp);
         config.screenLayout = Configuration.reduceScreenLayout(sl, longSize, shortSize);

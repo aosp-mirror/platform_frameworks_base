@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Ligging"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"toegang te verkry tot hierdie toestel se ligging"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Gee &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot hierdie toestel se ligging?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Die program sal net toegang tot die ligging hê terwyl jy die program gebruik."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Gee &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; altyd toegang tot toestelligging?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Die program sal altyd toegang tot die ligging hê, selfs wanneer jy nie die program gebruik nie."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"by jou kalender in te gaan"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Gee &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang tot jou kalender?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Hierdie program kan kalendergebeurtenisse op jou foon byvoeg, verwyder of verander. Hierdie program kan boodskappe stuur wat lyk of dit van kalendereienaars af kom of gebeurtenisse verander sonder om hul eienaars in te lig."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"Kry toegang tot ekstra liggingverskaffer-bevele"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Gee die program toegang tot ekstra liggingverskaffer-bevele. Dit kan die program dalk toelaat om in te meng met die werking van die GPS of ander liggingbronne."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"kry net op die voorgrond toegang tot presiese ligging"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Hierdie program kan jou presiese ligging kry net wanneer dit op die voorgrond is. Hierdie liggingdienste moet aangeskakel wees en op jou foon beskikbaar wees sodat die program hulle kan gebruik. Dit kan veroorsaak dat meer batterykrag gebruik word."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"verkry toegang tot benaderde ligging (netwerkgegrond)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Hierdie program kan jou ligging kry op grond van jou netwerkhulpbronne soos selfoontorings en Wi-Fi-netwerke. Hierdie liggingdienste moet aangeskakel en op jou tablet beskikbaar wees sodat die program hulle kan gebruik."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Vingerafdrukikoon"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"bestuur gesigstawinghardeware"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Laat program toe om metodes te benut om gesigtemplate vir gebruik by te voeg en uit te vee."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"gebruik gesigstawinghardeware"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Laat die program toe om gesigstawinghardeware vir stawing te gebruik"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Kon nie gesig verwerk nie. Probeer weer."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Gesig is te helder. Probeer met minder lig."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Gesig is te donker. Maak ligbron oop."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Beweeg sensor verder weg van gesig af."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Bring sensor nader aan gesig."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Beweeg sensor na bo."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Beweeg sensor na onder."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Beweeg sensor na regs."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Beweeg sensor na links."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Kyk na die sensor."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Geen gesig bespeur nie."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Hou gesig stil voor toestel."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Gesighardeware is nie beskikbaar nie."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Gesiguittelling is bereik. Probeer weer."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Gesig kan nie geberg word nie."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Gesighandeling is gekanselleer."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Te veel pogings. Probeer later weer."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Te veel pogings. Gesigstawingsensor is gedeaktiveer."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Probeer weer."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Geen gesigte is geregistreer nie."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Hierdie toestel het nie \'n gesigstawingsensor nie"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Gesig <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Gesig-ikoon"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lees sinkroniseer-instellings"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Laat die program toe om die sinkroniseringinstellings van \'n rekening te lees. Byvoorbeeld, dit kan bepaal of die People-program met \'n rekening gesinkroniseer is."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"wissel tussen sinkronisasie aan en af"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi‑Fi het geen internettoegang nie"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tik vir opsies"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Veranderings aan jou warmkolinstellings"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Jou warmkolband het verander."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Hierdie toestel steun nie jou voorkeur vir net 5 GHz nie. Hierdie toestel sal in plaas daarvan die 5 GHz-band gebruik wanneer dit beskikbaar is."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Het oorgeskakel na <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Toestel gebruik <xliff:g id="NEW_NETWORK">%1$s</xliff:g> wanneer <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> geen internettoegang het nie. Heffings kan geld."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Het oorgeskakel van <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

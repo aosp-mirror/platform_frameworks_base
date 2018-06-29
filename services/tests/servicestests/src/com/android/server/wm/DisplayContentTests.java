@@ -413,6 +413,14 @@ public class DisplayContentTests extends WindowTestsBase {
         // Ensure the non-alwaysOnTop stack is put below the three alwaysOnTop stacks, but above the
         // existing other non-alwaysOnTop stacks.
         assertEquals(nonAlwaysOnTopStack, mDisplayContent.getStacks().get(topPosition - 3));
+
+        anotherAlwaysOnTopStack.setAlwaysOnTop(false);
+        mDisplayContent.positionStackAt(POSITION_TOP, anotherAlwaysOnTopStack);
+        assertFalse(anotherAlwaysOnTopStack.isAlwaysOnTop());
+        topPosition = mDisplayContent.getStacks().size() - 1;
+        // Ensure, when always on top is turned off for a stack, the stack is put just below all
+        // other always on top stacks.
+        assertEquals(anotherAlwaysOnTopStack, mDisplayContent.getStacks().get(topPosition - 2));
     }
 
     /**

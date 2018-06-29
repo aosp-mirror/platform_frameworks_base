@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"ទីតាំង"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"ចូលដំណើរការទីតាំងរបស់ឧបករណ៍នេះ"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"អនុញ្ញាតឱ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ចូលប្រើ​ទីតាំងរបស់ឧបករណ៍នេះ?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"កម្មវិធីនេះ​នឹងមាន​សិទ្ធិ​ចូលប្រើ​ទីតាំង នៅពេល​អ្នកប្រើ​កម្មវិធីនេះ​តែ​ប៉ុណ្ណោះ។"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"អនុញ្ញាត​ឱ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ចូលប្រើ​ទីតាំង​របស់ឧបករណ៍​នេះ​ជានិច្ច​មែនទេ?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"កម្មវិធីនេះ​នឹងមាន​សិទ្ធិ​ចូលប្រើ​ទីតាំង​ជានិច្ច ទោះបីជា​នៅពេល​អ្នក​មិនប្រើ​កម្មវិធីនេះ​ក៏​ដោយ។"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ប្រតិទិន"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ចូលប្រើប្រិតិទិនរបស់អ្នក"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"អនុញ្ញាតឱ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ចូលប្រើ​ប្រតិទិនរបស់អ្នក?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"កម្មវិធី​នេះ​អាច​បញ្ចូល​ លុប​ ឬ​ប្តូរ​ព្រឹត្តិការណ៍​ប្រតិទិន​នៅលើ​ទូរសព្ទ​របស់​អ្នក​។ កម្មវិធី​នេះ​អាច​ផ្ញើ​សារ​ ដែល​អាច​បង្ហាញ​ថា​សារ​នោះ​ចេញ​មក​ពី​ម្ចាស់​ប្រតិទិន​ ឬ​ផ្លាស់ប្តូរ​ព្រឹត្តិការណ៍​ដោយ​គ្មាន​ការ​ជូន​ដំណឹង​ដល់​ម្ចាស់​របស់​ពួកវា​ទេ​។"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ចូល​ដំណើរការ​ពាក្យ​បញ្ជា​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​ពាក្យ​បញ្ជា​កម្មវិធី​ផ្ដល់​​ទីតាំង​បន្ថែម។ វា​អាច​អនុញ្ញាត​ឲ្យ​កម្មវិធី​ទាក់ទង​ជា​មួយ​ប្រតិបត្តិការ​ជីភីអេស ឬ​ប្រភព​ទីតាំង​ផ្សេង។"</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"ចូល​ប្រើ​ទីតាំង​ជាក់លាក់​តែ​នៅផ្ទៃ​ខាងមុខ​ប៉ុណ្ណោះ"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"កម្មវិធីនេះ​អាចទទួល​បានទីតាំង​ពិតប្រាកដ​របស់អ្នក​តែនៅពេល​វាស្ថិតនៅ​ផ្ទៃខាងមុខប៉ុណ្ណោះ។ សេវាកម្ម​ទីតាំង​ទាំងនេះ​ត្រូវតែ​បើក និងមាន​នៅលើ​ទូរសព្ទ​របស់អ្នក ដើម្បីឱ្យ​កម្មវិធី​នេះអាចប្រើ​ពួកវាបាន។ វាអាចប្រើ​ថាមពល​ច្រើន​ជាងមុន។"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ចូលដំណើរការទីតាំងប្រហាក់ប្រហែល (ផ្អែកលើបណ្តាញ)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"កម្មវិធី​នេះ​អាច​ទទួល​បាន​ទីតាំង​របស់​អ្នក​ ដោយ​ផ្អែក​លើ​ប្រភព​បណ្តាញ​ ដូចជា​៖​ អង់តែន​ និង​បណ្តាញ​ Wi-Fi​ ។​ សេវាកម្ម​ទីតាំង​ទាំងនេះ​ត្រូវតែ​បើក​ និង​ត្រូវតែ​មាន​នៅ​លើ​ថេប្លេត​របស់​អ្នក ដើម្បី​ឲ្យ​កម្មវិធី​នេះ​អាច​ប្រើ​វា​បាន​។"</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"រូបតំណាងស្នាមម្រាមដៃ"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"គ្រប់គ្រង​ផ្នែករឹង​ផ្ទៀងផ្ទាត់​ផ្ទៃ​មុខ"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"អនុញ្ញាតឱ្យកម្មវិធីប្រើវិធីសាស្ត្រដើម្បី​បញ្ចូល និងលុបទម្រង់​គំរូ​ផ្ទៃមុខសម្រាប់ប្រើប្រាស់។"</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ប្រើ​ផ្នែករឹង​ផ្ទៀងផ្ទាត់​ផ្ទៃ​មុខ"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​ប្រើ​ផ្នែករឹង​ផ្ទៀងផ្ទាត់​ផ្ទៃមុខ​សម្រាប់​ការផ្ទៀងផ្ទាត់"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"មិនអាចដំណើរការ​ផ្ទៃមុខបានទេ។ សូមព្យាយាមម្តងទៀត។"</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"ផ្ទៃ​មុខ​ចាំង​ពេក។ សូម​សាកល្បង​នៅកន្លែងដែលមាន​ពន្លឺ​ទាប​ជាងនេះ។"</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"ផ្ទៃ​មុខ​ងងឹត​ពេក។ សូមរកកន្លែង​ដែលមាន​ប្រភពពន្លឺ។"</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"សូម​ផ្លាស់ទីឧបករណ៍​ចាប់សញ្ញា​ឱ្យ​ឆ្ងាយ​ពី​ផ្ទៃ​មុខ​របស់អ្នកជាងនេះ។"</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"សូម​ដាក់​ឧបករណ៍​ចាប់សញ្ញា​ឱ្យនៅជិត​ផ្ទៃ​មុខ​ជាងនេះ។"</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"សូម​ផ្លាស់ទី​ឧបករណ៍​ចាប់សញ្ញា​ឱ្យខ្ពស់​ជាងនេះ។"</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"សូម​ផ្លាស់ទី​ឧបករណ៍ចាប់សញ្ញា​ឱ្យ​ទាបជាងនេះ។"</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"សូម​ផ្លាស់ទី​ឧបករណ៍ចាប់សញ្ញា​ទៅ​ស្ដាំ។"</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"សូម​ផ្លាស់ទី​ឧបករណ៍ចាប់សញ្ញា​ទៅឆ្វេង។"</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"សូម​មើល​ទៅ​ឧបករណ៍​ចាប់សញ្ញា។"</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"រកមិន​ឃើញ​ផ្ទៃមុខទេ។"</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"រក្សាផ្ទៃ​មុខ​របស់អ្នក​ឱ្យ​នឹង​នៅមុខ​ឧបករណ៍​។"</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"មិន​អាច​ប្រើ​ផ្នែករឹង​ផ្ទៃ​មុខ​បានទេ។"</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"ការសម្គាល់​ផ្ទៃមុខ​បាន​អស់ម៉ោង។ សូមព្យាយាមម្ដងទៀត។"</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"មិន​អាច​រក្សាទុក​ផ្ទៃ​មុខ​បានទេ។"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"បាន​បោះបង់​ប្រតិបត្តិការ​ផ្ទៃមុខ។"</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"ព្យាយាមចូលច្រើនពេកហើយ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។"</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"ព្យាយាមចូលច្រើនពេកហើយ។ បាន​បិទការផ្ទៀងផ្ទាត់​ផ្ទៃ​មុខ។"</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"សូមព្យាយាម​ម្ដងទៀត។"</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"មិន​អាច​ចុះឈ្មោះ​ផ្ទៃ​មុខ​បានទេ។"</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"ឧបករណ៍​នេះ​មិន​មាន​ឧបករណ៍​ផ្ទៀងផ្ទាត់​ផ្ទៃមុខ​នោះទេ"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"ផ្ទៃមុខទី <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"រូប​ផ្ទៃមុខ"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"អាន​ការ​កំណត់​ធ្វើ​សម​កាល​កម្ម"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ឲ្យ​កម្មវិធី​អាន​ការ​កំណត់​ធ្វើ​សម​កាល​កម្ម​សម្រាប់​គណនី។ ឧទាហរណ៍ វា​អាច​កំណត់​ថា​តើ​​​កម្មវិធី​ត្រូវ​បាន​បើក​ជា​មួយ​គណនី​ដែរ​ឬទេ។"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"បិទ/បើក​ការ​ធ្វើ​សម​កាល​កម្ម"</string>
@@ -1180,6 +1213,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi មិនមាន​ការតភ្ជាប់​អ៊ីនធឺណិតទេ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ប៉ះសម្រាប់ជម្រើស"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"ប្ដូរ​ទៅ​ការ​កំណត់​ហតស្ប៉ត​របស់អ្នក"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"រលកសញ្ញាហតស្ប៉តរបស់​អ្នកបាន​ផ្លាស់ប្ដូរ។"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ឧបករណ៍​នេះ​មិន​អាច​ប្រើចំណូល​ចិត្ត​របស់អ្នកសម្រាប់តែ 5GHz ទេ។ ផ្ទុយ​មកវិញ ឧបករណ៍​នេះ​នឹង​ប្រើរលកសញ្ញា​ 5GHz នៅពេល​ដែលអាច​ប្រើបាន។"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"បានប្តូរទៅ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"ឧបករណ៍​ប្រើ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> នៅ​ពេល​ដែល <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> មិនមាន​ការ​តភ្ជាប់​អ៊ីនធឺណិត។ អាច​គិតថ្លៃ​លើការ​ប្រើប្រាស់​ទិន្នន័យ។"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"បានប្តូរពី <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ទៅ <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

@@ -45,6 +45,7 @@ public final class ImsExternalCallState implements Parcelable {
     private int mCallId;
     // Number
     private Uri mAddress;
+    private Uri mLocalAddress;
     private boolean mIsPullable;
     // CALL_STATE_CONFIRMED / CALL_STATE_TERMINATED
     private int mCallState;
@@ -61,6 +62,19 @@ public final class ImsExternalCallState implements Parcelable {
             int callType, boolean isCallheld) {
         mCallId = callId;
         mAddress = address;
+        mIsPullable = isPullable;
+        mCallState = callState;
+        mCallType = callType;
+        mIsHeld = isCallheld;
+        Rlog.d(TAG, "ImsExternalCallState = " + this);
+    }
+
+    /** @hide */
+    public ImsExternalCallState(int callId, Uri address, Uri localAddress,
+            boolean isPullable, int callState, int callType, boolean isCallheld) {
+        mCallId = callId;
+        mAddress = address;
+        mLocalAddress = localAddress;
         mIsPullable = isPullable;
         mCallState = callState;
         mCallType = callType;

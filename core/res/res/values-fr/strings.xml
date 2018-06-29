@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Localisation"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accéder à la position de l\'appareil"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'accéder à la position de cet appareil ?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"L\'application n\'a accès à la position de l\'appareil que lorsqu\'elle est en cours d\'utilisation."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Toujours autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder à la position de l\'appareil ?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"L\'application a toujours accès à la position de l\'appareil, même lorsqu\'elle n\'est pas en cours d\'utilisation."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accéder à votre agenda"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'accéder à votre agenda ?"</string>
@@ -293,7 +296,7 @@
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; de prendre des photos et de filmer des vidéos ?"</string>
     <string name="permgrouplab_calllog" msgid="8798646184930388160">"Journaux d\'appels"</string>
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"Lire et écrire les journaux d\'appels du téléphone"</string>
-    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Autoriser &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; à accéder aux journaux d\'appels de votre téléphone ?"</string>
+    <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; d\'accéder aux journaux d\'appels de votre téléphone ?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Téléphone"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"effectuer et gérer des appels téléphoniques"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Permettre à &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; de passer et gérer des appels téléphoniques ?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Cette application peut ajouter, supprimer ou modifier les événements d\'agenda enregistrés sur votre téléphone. Elle peut en outre envoyer des messages qui semblent provenir du propriétaire de l\'agenda, ou modifier des événements sans en informer leur propriétaire."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"Accès aux commandes de fournisseur de position géographique supplémentaires"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permet à l\'application d\'accéder à des commandes de localisation supplémentaires offertes par le fournisseur. Elle est ainsi susceptible d\'interférer avec le bon fonctionnement du GPS ou de toute autre source de localisation."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"accéder à la position exacte au premier plan uniquement"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Cette application peut obtenir votre position exacte uniquement lorsqu\'elle s\'exécute au premier plan. Ces services de localisation doivent être activés et disponibles sur votre téléphone pour que l\'application puisse les utiliser. Ceci peut réduire l\'autonomie de la batterie."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"accéder à votre position approximative (selon le réseau)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Cette application peut obtenir votre position via des sources de réseau telles que les antennes-relais et les réseaux Wi-Fi. Ces services de localisation doivent être activés et disponibles sur votre tablette pour que l\'application puisse les utiliser."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Icône d\'empreinte digitale"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"gérer le matériel d\'authentification faciale"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Autorise l\'appli à invoquer des méthodes pour ajouter et supprimer des modèles de visages."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"utiliser le matériel d\'authentification faciale"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Autorise l\'appli à utiliser le matériel d\'authentification faciale pour l\'authentification"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Impossible reconnaître visage. Veuillez réessayer."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Visage trop éclairé. Veuillez réduire la lumière."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Visage trop sombre. Veuillez accroître la lumière."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Veuillez éloigner le capteur de votre visage."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Veuillez rapprocher le capteur de votre visage."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Veuillez déplacer le capteur vers le haut."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Veuillez déplacer le capteur vers le bas."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Veuillez déplacer le capteur vers la droite."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Veuillez déplacer le capteur vers la gauche."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Veuillez regarder le capteur."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Aucun visage détecté."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Maintenez votre visage stable devant l\'appareil."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Matériel de reconnaissance faciale indisponible."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Délai de détection du visage expiré. Réessayez."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Impossible de stocker les informations du visage."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Opération de reconnaissance faciale annulée."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Trop de tentatives. Réessayez plus tard."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Trop d\'essais. Authentification faciale désactivée."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Réessayez."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Aucun visage enregistré."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Aucun capteur d\'authentification faciale sur cet appareil"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Visage <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Icône visage"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lire les paramètres de synchronisation"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permet à l\'application d\'accéder aux paramètres de synchronisation d\'un compte. Par exemple, cette autorisation peut permettre de déterminer si l\'application Contacts est synchronisée avec un compte ou non."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activer/désactiver la synchronisation"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Impossible de se connecter à Internet via le réseau Wi-Fi"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Appuyez ici pour afficher des options."</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Modifications apportées à vos paramètres de point d\'accès"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Votre bande de point d\'accès a été modifiée."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Cet appareil n\'est pas compatible avec votre préférence d\'utilisation de la bande 5 GHz uniquement. Il utilisera la bande 5 GHz lorsqu\'elle sera disponible."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Nouveau réseau : <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"L\'appareil utilise <xliff:g id="NEW_NETWORK">%1$s</xliff:g> lorsque <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> n\'a pas de connexion Internet. Des frais peuvent s\'appliquer."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Ancien réseau : <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>. Nouveau réseau : <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

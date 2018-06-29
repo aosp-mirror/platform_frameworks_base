@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Helyadatok"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"hozzáférés az eszköz földrajzi helyéhez"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Engedélyezi a(z) &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; számára, hogy hozzáférjen az eszköz helyadataihoz?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Az alkalmazás csak akkor férhet hozzá a helyadatokhoz, amikor használja az alkalmazást."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Engedélyezi, hogy a(z) &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; hozzáférjen a helyadatokhoz?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Az alkalmazás bármikor hozzáférhet majd a helyadatokhoz, akkor is, amikor nem használja az alkalmazást."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Naptár"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"hozzáférés a naptárhoz"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Engedélyezi a(z) &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; számára, hogy hozzáférjen a naptárhoz?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Az alkalmazás hozzáadhatja, eltávolíthatja vagy módosíthatja a telefonon található naptáreseményeket. Az alkalmazás olyan üzeneteket küldhet, amelyekről úgy tűnhet, hogy a naptár tulajdonosaitól származnak, illetve a tulajdonosok értesítése nélkül módosíthat eseményeket."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"további helyszolgáltatói parancsok elérése"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Lehetővé teszi az alkalmazás számára további helyszolgáltatói parancsok elérését. Ezáltal az alkalmazás beavatkozhat a GPS vagy más helyforrások működésébe."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"pontos helyadatokhoz való hozzáférés csak előtérben"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Ez az alkalmazás csak akkor férhet hozzá az eszköz pontos helyadataihoz, amikor az előtérben fut. A helyszolgáltatásoknak bekapcsolt és hozzáférhető állapotban kell lenniük a telefonon ahhoz, hogy az alkalmazás használhassa őket. Ez növelheti az akkumulátorhasználatot."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"hozzáférés a hozzávetőleges (hálózatalapú) helyadatokhoz"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Az alkalmazás hozzáférhet hálózati forrásokon (például az adótornyokon és a Wi-Fi-hálózatokon) alapuló helyadataihoz. A helyszolgáltatásoknak bekapcsolt és elérhető állapotban kell lenniük a táblagépen ahhoz, hogy az alkalmazás használhassa őket."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ujjlenyomat ikon"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"arcfelismerő hardver kezelése"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Engedélyezi, hogy az alkalmazás arcsablon-hozzáadási és -törlési metódusokat hívjon."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"arcfelismerő hardver használata"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Engedélyezi, hogy az alkalmazás hitelesítésre használja az arcfelismerő hardvert"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Nem sikerült feldolgozni az arcot. Próbálja újra."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Az arc túl világos. Kevesebb fény szükséges."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Az arc túl sötét. Több fény szükséges."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Tartsa az érzékelőt távolabb az arctól."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Tartsa az érzékelőt közelebb az archoz."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Emelje magasabbra az érzékelőt."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Engedje lejjebb az érzékelőt."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Mozdítsa el jobbra az érzékelőt."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Mozdítsa el balra az érzékelőt."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Nézzen az érzékelőbe."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Nem észlelhető arc."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Tartsa az eszközt egyenesen az arc előtt."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Az arcfelismerő hardver nem áll rendelkezésre."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Időtúllépés az arcbeolvasásnál. Próbálja újra."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Az arc nem tárolható."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Az arccal kapcsolatos művelet törölve."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Túl sok próbálkozás. Próbálja újra később."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Túl sok próbálkozás. Arcfelismerés letiltva."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Próbálkozzon újra."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Nincs regisztrált arc."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Ez az eszköz nem rendelkezik arcfelismerő érzékelővel"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"<xliff:g id="FACEID">%d</xliff:g> arc"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Arcikon"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"szinkronizálási beállítások olvasása"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Lehetővé teszi az alkalmazás számára egy fiók szinkronizálási beállításainak beolvasását. Például ellenőrizheti, hogy a Személyek alkalmazás szinkronizálva van-e egy fiókkal."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"szinkronizálás be-és kikapcsolása"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"A Wi-Fi-hálózaton nincs internetkapcsolat"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Koppintson a beállítások megjelenítéséhez"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"A hotspot beállításainak módosítása"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"A hotspot sávja megváltozott."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Ez az eszköz nem támogatja a csak 5 GHz-es sávra vonatkozó beállítást. Az eszköz akkor használ 5 GHz-es sávot, ha a sáv rendelkezésre áll."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Átváltva erre: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="NEW_NETWORK">%1$s</xliff:g> használata, ha nincs internet-hozzáférés <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>-kapcsolaton keresztül. A szolgáltató díjat számíthat fel."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Átváltva <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>-hálózatról erre: <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

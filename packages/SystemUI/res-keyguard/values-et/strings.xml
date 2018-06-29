@@ -140,7 +140,8 @@
       <item quantity="other">Seadet pole avatud <xliff:g id="NUMBER_1">%d</xliff:g> tundi. Kinnitage parool.</item>
       <item quantity="one">Seadet pole avatud <xliff:g id="NUMBER_0">%d</xliff:g> tund. Kinnitage parool.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Ei tuvastatud"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Ei tuvastatud"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Ei tuvastatud"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">Sisestage SIM-kaardi PIN-kood. Jäänud on <xliff:g id="NUMBER_1">%d</xliff:g> katset.</item>
       <item quantity="one">Sisestage SIM-kaardi PIN-kood. Jäänud on <xliff:g id="NUMBER_0">%d</xliff:g> katse enne, kui peate seadme avamiseks ühendust võtma operaatoriga.</item>

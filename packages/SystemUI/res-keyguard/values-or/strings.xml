@@ -140,7 +140,8 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> ଘଣ୍ଟା ପାଇଁ ଡିଭାଇସ୍‍ ଅନଲକ୍‍ କରାଯାଇ ନାହିଁ। ପାସୱର୍ଡ ସୁନିଶ୍ଚିତ କରନ୍ତୁ</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> ଘଣ୍ଟା ପାଇଁ ଡିଭାଇସ୍‍ ଅନଲକ୍‍ କରାଯାଇ ନାହିଁ। ପାସୱର୍ଡ ସୁନିଶ୍ଚିତ କରନ୍ତୁ</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"ଚିହ୍ନଟ ହେଲାନାହିଁ"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"ଚିହ୍ନଟ ହେଲାନାହିଁ"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"ଚିହ୍ନଟ ହେଲାନାହିଁ"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">SIM PIN ପ୍ରବେଶ କରନ୍ତୁ। ଆପଣଙ୍କ ପାଇଁ <xliff:g id="NUMBER_1">%d</xliff:g>ଟି ପ୍ରୟାସ ବଳକା ଅଛି।</item>
       <item quantity="one">SIM PIN ପ୍ରବେଶ କରନ୍ତୁ। ଆପଣଙ୍କ ଡିଭାଇସ୍‍କୁ ଅନଲକ୍ କରିବା ପାଇଁ ପାଖରେ ବଳକା ଥିବା <xliff:g id="NUMBER_0">%d</xliff:g>ଟି ପ୍ରୟାସର ବ୍ୟବହାର କରିବା ପୂର୍ବରୁ ନିଜର କେରିଅର୍‍ଙ୍କୁ ସମ୍ପର୍କ କରନ୍ତୁ।</item>

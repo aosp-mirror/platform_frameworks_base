@@ -140,7 +140,8 @@
       <item quantity="other">El dispositivo no se ha desbloqueado durante <xliff:g id="NUMBER_1">%d</xliff:g> horas. Confirma la contraseña.</item>
       <item quantity="one">El dispositivo no se ha desbloqueado durante <xliff:g id="NUMBER_0">%d</xliff:g> hora. Confirma la contraseña.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"No reconocido"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"No reconocida"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"No reconocida"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">Introduce el PIN de la tarjeta SIM. Te quedan <xliff:g id="NUMBER_1">%d</xliff:g> intentos.</item>
       <item quantity="one">Introduce el PIN de la tarjeta SIM. Te queda <xliff:g id="NUMBER_0">%d</xliff:g> intento para tener que ponerte en contacto con tu operador para desbloquear el dispositivo.</item>

@@ -1566,7 +1566,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             }
             mFaceCancelSignal = new CancellationSignal();
             mFaceAuthenticationManager.authenticate(null, mFaceCancelSignal, 0,
-                    mFaceAuthenticationCallback, null, userId);
+                    mFaceAuthenticationCallback, null);
             setFaceRunningState(BIOMETRIC_STATE_RUNNING);
         }
     }
@@ -1579,7 +1579,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     public boolean isUnlockWithFacePossible(int userId) {
         return mFaceAuthenticationManager != null && mFaceAuthenticationManager.isHardwareDetected()
                 && !isFaceDisabled(userId)
-                && mFaceAuthenticationManager.hasEnrolledFace(userId);
+                && mFaceAuthenticationManager.hasEnrolledFaces(userId);
     }
 
     private void stopListeningForFingerprint() {

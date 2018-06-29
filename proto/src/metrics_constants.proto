@@ -6135,6 +6135,16 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: Q
     SETTINGS_CREATE_SHORTCUT = 1503;
+
+    // ACTION: Authenticate using fingerprint
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_FACE_AUTH = 1504;
+
+    // ACTION: Add fingerprint > Enroll fingerprint
+    // CATEGORY: SETTINGS
+    // OS: Q
+    ACTION_FACE_ENROLL = 1505;
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.

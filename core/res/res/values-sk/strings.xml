@@ -282,6 +282,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Poloha"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"prístup k polohe tohto zariadenia"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; prístup k polohe tohto zariadenia?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Aplikácia bude mať prístup k polohe iba vtedy, keď ju budete používať."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Chcete vždy povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; prístup k polohe tohto zariadenia?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Aplikácia bude mať vždy prístup k polohe, aj keď ju nebudete používať."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendár"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"prístup ku kalendáru"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Povoliť aplikácii &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; prístup ku kalendáru?"</string>
@@ -408,8 +411,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Táto aplikácia môže pridávať, odstraňovať alebo meniť udalosti kalendára vo vašom telefóne. Táto aplikácia môže odosielať správy od vlastníkov kalendára alebo meniť udalosti bez upozornenia ich vlastníkov."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"prístup k ďalším príkazom poskytovateľa polohy"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Umožňuje aplikácii pristupovať k ďalším príkazom poskytovateľa informácií o polohe. Aplikácii to môže umožniť zasahovať do činnosti systému GPS alebo iných zdrojov informácií o polohe."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"prístup k presnej polohe iba v popredí"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Táto aplikácia dokáže získať vašu presnú polohu iba vtedy, keď je spustená v popredí. Na to, aby mohla používať služby určovania polohy, musia byť tieto služby zapnuté a k dispozícii v telefóne. Môže to zvýšiť spotebu batérie."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"prístup k približnej polohe (pomocou siete)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Táto aplikácia môže získať údaje o vašej polohe na základe sieťových zdrojov, ako sú mobilné veže a siete Wi‑Fi. Na to, aby aplikácia mohla používať služby určovania polohy, musia byť tieto služby zapnuté a k dispozícii na tablete."</string>
@@ -524,6 +526,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikona odtlačku prsta"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"správa hardvéru na overenie tváre"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Umožňuje aplikácii vyvolať metódy, ktoré pridávajú a odstraňujú šablóny tvárí."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"používanie hardvéru na overenie tváre"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Umožňuje aplikácii používať na overenie totožnosti hardvér na overenie tváre"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Tvár sa nepodarilo spracovať. Skúste to znova."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Tvár je príliš svetlá. Skúste to pri nižšom osvetlení."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Tvár je príliš tmavá. Zvýšte osvetlenie."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Oddiaľte senzor od tváre."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Priblížte senzor k tvári."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Pohnite senzor vyššie."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Pohnite senzor nižšie."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Pohnite senzor doprava."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Pohnite senzor doľava."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Pozerajte sa na senzor."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Nebola rozpoznaná žiadna tvár."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Udržte tvár nehybne oproti zariadeniu."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hardvér na snímanie tváre nie je k dispozícii"</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Limit rozpoznania tváre vypršal. Skúste to znova."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Tvár sa nedá uchovať."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Operácia týkajúca sa tváre bola zrušená"</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Príliš veľa pokusov. Skúste to znova neskôr."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Príliš veľa pokusov. Overenie tváre je zakázané."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Skúste to znova."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Nemáte zaregistrovanú žiadnu tvár."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Toto zariadenie nemá senzor na overenie tváre."</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Tvár <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Ikona tváre"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čítať nastavenia synchronizácie"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Umožňuje aplikácii čítať nastavenia synchronizácie v účte. Môže napríklad určiť, či je s účtom synchronizovaná aplikácia Ľudia."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"zapnúť alebo vypnúť synchronizáciu"</string>
@@ -1222,6 +1255,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Sieť Wi‑Fi nemá prístup k internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Klepnutím získate možnosti"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Zmeny nastavení hotspotu"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Pásmo vášho hotspotu sa zmenilo."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Toto zariadenie nepodporuje vašu predvoľbu používať iba 5 GHz. Namiesto toho bude pásmo 5 GHz používať vtedy, keď bude k dispozícii."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Prepnuté na sieť: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Keď <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nemá prístup k internetu, zariadenie používa <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Môžu sa účtovať poplatky."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Prepnuté zo siete <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na sieť <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

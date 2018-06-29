@@ -115,7 +115,6 @@ private:
     ConditionState mUnSlicedPartCondition;
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
-    // TODO: Add a lock to mPastBuckets.
     std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>> mPastBuckets;
 
     // The duration trackers in the current bucket.

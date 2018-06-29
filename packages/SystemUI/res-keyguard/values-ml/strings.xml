@@ -140,7 +140,10 @@
       <item quantity="other">ഉപകരണം <xliff:g id="NUMBER_1">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. പാസ്‌വേഡ് സ്ഥിരീകരിക്കുക.</item>
       <item quantity="one">ഉപകരണം <xliff:g id="NUMBER_0">%d</xliff:g> മണിക്കൂറായി അൺലോക്ക് ചെയ്തിട്ടില്ല. പാസ്‌വേഡ് സ്ഥിരീകരിക്കുക.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"തിരിച്ചറിഞ്ഞില്ല"</string>
+    <!-- no translation found for kg_fingerprint_not_recognized (7854413849848459418) -->
+    <skip />
+    <!-- no translation found for kg_face_not_recognized (6382535088345875294) -->
+    <skip />
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">സിം പിൻ നൽകുക. നിങ്ങൾക്ക് <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി ശേഷിക്കുന്നു.</item>
       <item quantity="one">സിം പിൻ നൽകുക. ഉപകരണം അൺലോക്ക് ചെയ്യാൻ കാരിയറുമായി ബന്ധപ്പെടേണ്ടിവരുന്നതിന് മുമ്പ് <xliff:g id="NUMBER_0">%d</xliff:g> ശ്രമം കൂടി ശേഷിക്കുന്നു.</item>

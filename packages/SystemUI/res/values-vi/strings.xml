@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Ẩn <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Thông báo này sẽ xuất hiện lại vào lần tiếp theo bạn bật thông báo trong cài đặt."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Ẩn"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Bạn đang sử dụng hồ sơ công việc của mình"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Gọi"</string>
     <string name="stream_system" msgid="7493299064422163147">"Hệ thống"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Chuông"</string>

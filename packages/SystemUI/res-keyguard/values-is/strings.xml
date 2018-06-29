@@ -140,7 +140,8 @@
       <item quantity="one">Tækið hefur ekki verið tekið úr lás í <xliff:g id="NUMBER_1">%d</xliff:g> klukkustund. Staðfestu aðgangsorðið.</item>
       <item quantity="other">Tækið hefur ekki verið tekið úr lás í <xliff:g id="NUMBER_1">%d</xliff:g> klukkustundir. Staðfestu aðgangsorðið.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Þekktist ekki"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Þekktist ekki"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Þekktist ekki"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">Sláðu inn PIN-númer SIM-korts. Þú átt <xliff:g id="NUMBER_1">%d</xliff:g> tilraun eftir.</item>
       <item quantity="other">Sláðu inn PIN-númer SIM-korts. Þú átt <xliff:g id="NUMBER_1">%d</xliff:g> tilraunir eftir.</item>

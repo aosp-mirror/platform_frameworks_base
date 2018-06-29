@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"ଲୋକେଶନ୍‌"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"ଏହି ଡିଭାଇସ୍‌ର ଲୋକେଶନ୍‍ ଆକ୍ସେସ୍‍ କରେ"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;କୁ ଏହି ଡିଭାଇସ୍‌ର ଲୋକେଶନ୍‍ ଆକ୍ସେସ୍‍ କରିବା ପାଇଁ ଅନୁମତି ଦେବେ କି?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"ଆପଣ ଆପ୍‍ ବ୍ୟବହାର କରୁଥିବା ବେଳେ କେବଳ ଲୋକେସନ୍‍କୁ ଆପ୍‍‍ର ଆକ୍ସେସ୍‍ ରହିବ।"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"ସଦାବେଳେ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;କୁ ଏହି ଡିଭାଇସ୍‌ର ଲୋକେସନ୍‍ ଆକ୍ସେସ୍‍ କରିବା ପାଇଁ ଅନୁମତି ଦେବେ କି?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"ଆପଣ ଆପ୍‍ ବ୍ୟବହାର କରୁନଥିଲେ ମଧ୍ୟ, ଲୋକେସନ୍‍କୁ ସଦାବେଳେ ଆପ୍‍‍ର ଆକ୍ସେସ୍‍ ରହିବ।"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"କ୍ୟାଲେଣ୍ଡର୍"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ଆପଣଙ୍କ କ୍ୟାଲେଣ୍ଡର୍‍ ଆକ୍ସେସ୍‍ କରେ"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;କୁ ଆପଣଙ୍କ କ୍ୟାଲେଣ୍ଡର୍‌କୁ ଆକ୍ସେସ୍‍ କରିବା ପାଇଁ ଅନୁମତି ଦେବେ କି?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"ଏହି ଆପ୍‍, ଆପଣଙ୍କ ଫୋନ୍‌ରେ କ୍ୟାଲେଣ୍ଡର୍‌ ଇଭେଣ୍ଟଗୁଡ଼ିକୁ ଯୋଡ଼ିପାରେ, ବାହାର କରିପାରେ କିମ୍ବା ବଦଳାଇପାରେ। କ୍ୟାଲେଣ୍ଡର୍‌ ମାଲିକଙ୍କ ପାଖରୁ ଆସିଥିବା ପରି ଜଣା‍ପଡ଼ିବା ମେସେଜ୍‍କୁ ଏହି ଆପ୍‍ ପଠାଇପାରେ କିମ୍ବା ମାଲିକଙ୍କୁ ନଜଣାଇ ଇଭେଣ୍ଟ ବଦଳାଇପାରେ।"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"ଅତିରିକ୍ତ ଲୋକେଶନ୍ ପ୍ରଦାନକାରୀ କମାଣ୍ଡକୁ ଆକ୍ସେସ୍‍ କରନ୍ତୁ"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ଅତିରିକ୍ତ ଲୋକେଶନ୍‍ ପ୍ରଦାନକାରୀ କମାଣ୍ଡ ଆକ୍ସେସ୍‌ କରିବା ପାଇଁ ଆପ୍‍କୁ ଅନୁମତି ଦିଏ। GPS କିମ୍ବା ଅନ୍ୟ ଲୋକେଶନ୍‍ ସୋର୍ସଗୁଡିକରେ ଆପ୍‍ଟି ପ୍ରଭାବ ପକାଇପାରେ।"</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"କେବଳ ସମ୍ମୁଖଭାଗରେ ସଠିକ୍‍ ଲୋକେଶନ୍‍ର ଆକ୍ସେସ୍‍ କରନ୍ତୁ"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"ଏହି ଆପ୍‍ ଯେତେବେଳେ ସମ୍ମୁଖଭାଗରେ ଥିବାବେଳେ ଆପଣଙ୍କର ସଠିକ୍‍ ଲୋକେଶନ୍‍ ପ୍ରାପ୍ତ କରିପାରିବ। ଏହି ଲୋକେଶନ୍‍ ସେବାଗୁଡ଼ିକ ନିଶ୍ଚିତରୂପେ ଅନ୍‍ ରହିବା ଦରକାର ଏବଂ ଆପ୍‍ର ବ୍ୟବହାର ପାଇଁ ଫୋନ୍‍ରେ ଉପଲବ୍ଧ ଥିବା ଦରକାର। ଏହା ବ୍ୟାଟେରୀ ଅଧିକା ଖର୍ଚ୍ଚ କରିପାରେ।"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ପାଖାପାଖି ଲୋକେଶନ୍‍ ଆକ୍ସେସ୍‍ କରେ (ନେଟ୍‌ୱର୍କ-ଆଧାରିତ)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"ଏହି ଆପ୍‍, ନେଟ୍‌ୱର୍କ ସୋର୍ସ ଉପରେ ଆଧାର କରି ଆପଣଙ୍କ ଲୋକେଶନ୍‍ ପ୍ରାପ୍ତ କରିପାରେ, ଯେପରିକି ସେଲ୍‍ ଟାୱାର୍‍ ଓ ୱାଇ-ଫାଇ ନେଟ୍‌ୱର୍କ। ଏହି ଲୋକେଶନ୍‌ ସେବା, ଆପଣଙ୍କ ଟାବଲେଟ୍‌ରେ ଅନ୍‍ ରହିଥିବା ଓ ଉପଲବ୍ଧ ଥିବା ଦରକାର, ଯେଉଁଥିରୁ ଆପ୍‌ ସେଗୁଡ଼ିକର ବ୍ୟବହାର କରିପାରିବ।"</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ଆଇକନ୍"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"ଫେସ୍‍ ପ୍ରମାଣୀକରଣ ହାର୍ଡୱେର୍‌ର ପରିଚାଳନା କରନ୍ତୁ"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"ବ୍ୟବହାର ପାଇଁ ଆପ୍‍କୁ ଫେସିଆଲ୍‍ ଟେମ୍ପଲେଟ୍‍ ଯୋଡିବା ଓ ଡିଲିଟ୍‍ ର ପଦ୍ଧତି ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ଫେସ୍‍ ପ୍ରମାଣୀକରଣ ହାର୍ଡୱେର୍‌ ବ୍ୟବହାର କରନ୍ତୁ"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ଫେସ୍‍ ପ୍ରମାଣୀକରଣ ହାର୍ଡୱେର୍‌ର ପ୍ରମାଣ ପାଇଁ ଆପ୍‍କୁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"ଫେସ୍‍ ଚିହ୍ନଟ ହେଲାନାହିଁ ।ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"ଫେସ୍‍ଟି ବହୁତ ଉଜ୍ଵଳ ଦେଖାଯାଉଛି। ଦୟାକରି, କମ ଆଲୋକରେ ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"ଫେସ୍‍ଟି ବହୁତ କଳା ଦେଖାଯାଉଛି। ଦୟାକରି ଆଲୋକକୁ ଅନାବୃତ କରନ୍ତୁ।"</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"ଦୟାକରି ସେନ୍‍ସର୍‍କୁ ଫେସ୍‍ ପାଖରୁ ଦୂରେଇ ରଖନ୍ତୁ"</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"ଦୟାକରି ସେନ୍‍ସର୍‍କୁ ଫେସ୍‍ର ଅତି ନିକଟକୁ ଆଣନ୍ତୁ।"</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"ଦୟାକରି ସେନ୍‍ସର୍‍କୁ ଆହୁରି ଉପରକୁ ଘୁଞ୍ଚାନ୍ତୁ।"</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"ଦୟାକରି ସେନ୍‍ସର୍‍କୁ ତଳକୁ ଘୁଞ୍ଚାନ୍ତୁ।"</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"ଦୟାକରି ସେନ୍‍ସର୍‍କୁ ଦକ୍ଷିଣକୁ ଘୁଞ୍ଚାନ୍ତୁ।"</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"ଦୟାକରି ସେନ୍‍ସର୍‍କୁ ବାମକୁ ଘୁଞ୍ଚାନ୍ତୁ।"</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"ଦୟାକରି ସେନ୍‍ସର୍‍କୁ ଦେଖନ୍ତୁ"</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"କୌଣସି ଫେସ୍‍ ଚିହ୍ନଟ ହେଲା ନାହିଁ"</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"ଡିଭାଇସ୍‍ର ସାମ୍ନାରେ ଫେସ୍‍ ସିଧା ରଖନ୍ତୁ।"</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"ଫେସ୍‍ର ହାର୍ଡୱେୟାର୍‍ ଉପଲବ୍ଧ ନାହିଁ।"</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"ଫେସ୍‍ର ସମୟସୀମା ସରିଗଲା। ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"ଫେସ୍‍ ମେମୋରୀରେ ଷ୍ଟୋର୍‍ କରାଯାଇପାରିବ ନାହିଁ।"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"ଫେସ୍‍ର ଅପରେଶନ୍‍ କ୍ୟାନ୍ସଲ୍‍ ହୋ‍ଇଗଲା"</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"ବାରମ୍ବାର ଚେଷ୍ଟା। ପରେ ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"ବାରମ୍ବାର ଚେଷ୍ଟା। ଫେସ୍‍ ପ୍ରମାଣୀକରଣ ଅକ୍ଷମ କରାଗଲା।"</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"କୌଣସି ଫେସ୍‍ ପଞ୍ଜୀକୃତ ହୋ‍ଇନଥିଲା।"</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"ଡିଭାଇସ୍‍ର ଗୋଟିଏ ଫେସ୍‍ ପ୍ରମାଣୀକରଣ ସେନ୍‍ସର୍‍ ନାହିଁ"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"<xliff:g id="FACEID">%d</xliff:g>ଙ୍କ ଫେସ୍‍"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"ଫେସ୍ ଆଇକନ୍"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ସିଙ୍କ ସେଟିଙ୍ଗକୁ ପଢ଼ନ୍ତୁ"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ଏକ ଆକାଉଣ୍ଟ ପାଇଁ ସିଙ୍କ ସେଟିଙ୍ଗ ପଢ଼ିବାକୁ ଆପ୍‍ଟିକୁ ଅନୁମତି ଦିଏ। ଉଦାହରଣସ୍ୱରୂପ, ଲୋକଙ୍କ ଆପ୍‍ ଏକ ଆକାଉଣ୍ଟରେ ସିଙ୍କ ହୋଇଛି କି ନାହିଁ ଏହା ଜାଣିପାରେ।"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ସିଙ୍କ ଅନ୍‍ ଓ ଅଫ୍‍ ଟୋଗଲ୍‌ କରନ୍ତୁ"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"ୱାଇ-ଫାଇର କୌଣସି ଇଣ୍ଟରନେଟ୍‍ ଆକ୍ସେସ୍‍ ନାହିଁ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ବିକଳ୍ପ ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"ଆପଣଙ୍କର ହଟ୍‌ସ୍ପଟ୍‍ ସେଟିଙ୍ଗକୁ ବଦଳିଯାଇଛି"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"ଆପଣଙ୍କର ହଟ୍‍ସ୍ପଟ୍‌ ପରିବର୍ତ୍ତନ କରାଯାଇଛି"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"କେବଳ 5GHz ପାଇଁ, ଏହି ଡିଭାଇସ୍‍ ଆପଣଙ୍କର ପସନ୍ଦକୁ ସପୋର୍ଟ କରେନାହିଁ। ଏହା ପରିବର୍ତ୍ତେ, ଏହି ଡିଭାଇସ୍‍ 5GHz ବ୍ୟାଣ୍ଡ ବ୍ୟବହାର କରିବ।"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>କୁ ବଦଳାଗଲା"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>ର ଇଣ୍ଟରନେଟ୍‍ ଆକ୍ସେସ୍ ନଥିବାବେଳେ ଡିଭାଇସ୍‍ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ବ୍ୟବହାର କରିଥାଏ। ଶୁଳ୍କ ଲାଗୁ ହୋଇପାରେ।"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ରୁ <xliff:g id="NEW_NETWORK">%2$s</xliff:g>କୁ ବଦଳାଗଲା"</string>
@@ -1698,8 +1734,7 @@
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଅପଡେଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଡିଲିଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="battery_saver_description_with_learn_more" msgid="6323937147992667707">"ବ୍ୟାଟେରୀର କାର୍ଯ୍ୟକାଳକୁ ବଢ଼ାଇବା ପାଇଁ, ବ୍ୟାଟେରୀ ସେଭର୍ କିଛି ଡିଭାଇସ୍‍ ଫିଚର୍‌କୁ ବନ୍ଦ କରିବା ସହ କେତେକ ଆପ୍‌କୁ ଚାଲିବାରୁ ରୋକିଥାଏ। "<annotation id="url">"ଅଧିକ ଜାଣନ୍ତୁ"</annotation></string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"ଆପଣଙ୍କ ବ୍ୟାଟେରୀ ଆୟୁଶ ବଢାଇବାକୁ, ବ୍ୟାଟେରୀ ସେଭର୍‌ କିଛି ଡିଭାଇସ୍ ‌ଫିଚର୍‌ଗୁଡିକୁ ବନ୍ଦ କରେ ଏବଂ ଆପ୍‌ଗୁଡିକୁ ପ୍ରତିବନ୍ଧିତ କରିଥାଏ।"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ଡାଟା ବ୍ୟବହାର କମ୍‍ କରିବାରେ ସାହାଯ୍ୟ କରିବାକୁ, ଡାଟା ସେଭର୍‍ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡରେ ଡାଟା ପଠାଇବା କିମ୍ବା ପ୍ରାପ୍ତ କରିବାକୁ କିଛି ଆପ୍‍କୁ ବ୍ଲକ୍‌ କରେ। ଆପଣ ବର୍ତ୍ତମାନ ବ୍ୟବହାର କରୁଥିବା ଆପ୍‍, ଡାଟା ଆକ୍ସେସ୍‍ କରିପାରେ, କିନ୍ତୁ ଏହା କମ୍‍ ସମୟରେ କରିପାରେ। ଏହାର ଅର୍ଥ ହୋଇପାରେ, ଯେପରି, ଆପଣ ଟାପ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଯେଉଁ ଇମେଜ୍‍ ଦେଖାଯାଏ ନାହିଁ।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ଡାଟା ସେଭର୍‌ ଅନ୍ କରିବେ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ଅନ୍ କରନ୍ତୁ"</string>
@@ -1878,10 +1913,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"କଲ୍ ଓ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ନିଃଶବ୍ଦ କରିଦିଆଯିବ"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"ସିଷ୍ଟମ୍‌ରେ ପରିବର୍ତ୍ତନ"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"ନୂଆ: \"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ମୋଡ୍‌ ଅନ୍‌ ଥିବା ଯୋଗୁଁ ବିଜ୍ଞପ୍ତି ଲୁଚାଇ ଦିଆଯାଉଛି"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"ଅଧିକ ଜାଣିବାକୁ ଟ୍ୟାପ୍‌ କରନ୍ତୁ ଏବଂ ବଦଳାନ୍ତୁ।"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"’ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ’ ବଦଳିଯାଇଛି"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"କ’ଣ ଅବରୋଧ ହୋଇଛି ଯାଞ୍ଚ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ସିଷ୍ଟମ୍‌"</string>

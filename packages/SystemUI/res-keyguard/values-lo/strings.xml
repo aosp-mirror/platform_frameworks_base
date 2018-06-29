@@ -140,7 +140,8 @@
       <item quantity="other">ອຸປະກອນບໍ່ໄດ້ຖືກປົດລັອກເປັນເວລາ <xliff:g id="NUMBER_1">%d</xliff:g> ຊົ່ວໂມງ. ຢືນຢັນລະຫັດຜ່ານ.</item>
       <item quantity="one">ອຸປະກອນບໍ່ໄດ້ຖືກປົດລັອກເປັນເວລາ <xliff:g id="NUMBER_0">%d</xliff:g> ຊົ່ວໂມງ. ຢືນຢັນລະຫັດຜ່ານ.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"ບໍ່ຮັບຮູ້"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"ບໍ່ຮູ້ຈັກ"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"ບໍ່ຮູ້ຈັກ"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">ລະຫັດ SIM PIN ບໍ່ຖືກຕ້ອງ. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ.</item>
       <item quantity="one">ໃສ່ລະຫັດ SIM PIN. ທ່ານສາມາດລອງໄດ້ອີກ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອກ່ອນທີ່ຈະຕ້ອງຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການເພື່ອປົດລັອກ.</item>

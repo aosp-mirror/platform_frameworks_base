@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"ස්ථානය"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"මෙම උපාංගයේ ස්ථානයට ප්‍රවේශ කරන්න"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt; වෙත මෙම උපාංගයේ ස්ථානය ලබා ගැනීමට ඉඩ දෙන්නද?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"ඔබ යෙදුම භාවිතා විට පමණක් යෙදුමට ස්ථානයට ප්‍රවේශය ඇත."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt; වෙත මෙම උපාංගයේ ස්ථානය ලබා ගැනීමට සැම විට ඉඩ දෙන්නද?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"ඔබ යෙදුම භාවිතා නොකරන විට පවා යෙදුමට සැම විටම ස්ථානයට ප්‍රවේශය ඇත."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"දින දර්ශනය"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ඔබේ දින දර්ශනයට පිවිසෙන්න"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt; වෙත ඔබගේ දින දර්ශනය ප්‍රවේශ කිරීමට ඉඩ දෙන්නද?"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"මෙම යෙදුමට ඔබේ දුරකථනය මත දින දර්ශන සිදුවීම් එක් කිරීමට, ඉවත් කිරීමට, හෝ වෙනස් කිරීමට හැකිය. මෙම යෙදුමට දින දර්ශන හිමිකරුවන් වෙතින් වන ඒවා ලෙස දිස් විය හැකි පණිවිඩ එවීමට, හෝ සිදුවීම්වල හිමිකරුවන්ට දැනුම් දීමෙන් තොරව ඒවා වෙනස් කිරීමට හැකිය."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"අමතර ස්ථාන සැපයුම්කරු විධාන වෙත ප්‍රවේශ වීම"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ස්ථානය සපයන අමතර අණ වලට ප්‍රවේශය කිරීමට යෙදුමට අවසර දෙන්න. GPS ක්‍රියාවන් හෝ වෙනත් ස්ථාන මූලාශ්‍ර සමඟ මැදිහත් වීමට මෙයින් යෙදුමට ඉඩ ලැබේ."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"පෙරබිම තුළ පමණක් නිශ්චිත ස්ථානය වෙත පිවිසෙන්න"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"මෙම යෙදුම පෙරබිම තුළ ඇති විට පමණක් එයට ඔබේ නිශ්චිත ස්ථානය ලබා ගත හැකිය. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර සහ ඔබේ දුරකථනය මත ලබා ගත හැකිව තිබිය යුතුය. මෙය බැටරි පරිභෝජනය වැඩි කළ හැකිය."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ආසන්නතම ස්ථානයට (ජාලය-පාදක වූ) පිවිසීම"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකිය. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර සහ ඔබේ ටැබ්ලට් පරිගණකය මත ලබා ගත හැකිව තිබිය යුතුය."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ඇඟිලි සලකුණු නිරූපකය"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"මුහුණු සත්‍යාපක දෘඪාංග කළමනාකරණය කරන්න"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"මුහුණු අච්චු එකතු කිරීමට සහ ඉවත් කිරීමට අදාළ ක්‍රම භාවිතය සඳහා මෙම යෙදුමට ඉඩ දෙයි."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"මුහුණු සත්‍යාපක දෘඪාංග භාවිතා කරන්න"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"සත්‍යාපනය සඳහා සත්‍යාපක දෘඪාංග භාවිත කිරීමට යෙදුමට ඉඩ දෙයි"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"මුහුණ සැකසීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කර."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"මුහුණ දීප්තිමත් වැඩිය. කරුණාකර අඩු ආලෝකය උත්සාහ කරන්න."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"මුහුණ අඳුරු වැඩිය. කරුණාර ආලෝක ප්‍රභවය නිරාවරණය කරන්න."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"කරුණාකර සංවේදකය මුහුණෙන් වඩා ඈත් කරන්න."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"කරුණාකර සංවේදකය මුහුණ සමීපයට ගෙන එන්න."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"කරුණාකර සංවේදකය ඉහළට ගෙන යන්න."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"කරුණාකර සංවේදකය පහළට ගෙන යන්න."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"කරුණාකර සංවේදකය දකුණට ගෙන යන්න."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"කරුණාකර සංවේදකය වමට ගෙන යන්න."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"කරුණාකර සංවේදකය දෙස බලන්න."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"මුහුණ අනාවරණය කර නොගන්නා ලදී."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"උපාංගය ඉදිරියේ මුහුණ ස්ථාවරව තබන්න."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"මුහුණු දෘඪාංගය ලද නොහැකිය."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"මුහුණු කාල නිමාව ළඟා විය. නැවත උත්සාහ කරන්න."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"මුහුණ ගබඩා කළ නොහැක."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"මුහුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"උත්සාහයන් ඉතා වැඩි ගණනකි. කරුණාකර පසුව නැවත උත්සාහ කරන්න."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"උත්සාහයන් ඉතා වැඩි ගණනකි. මුහුණු සත්‍යාපනය අබල කරන ලදී."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"නැවත උත්සාහ කරන්න."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"මුහුණක් ඇතුළත් කර නොමැත."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"මෙම උපාංගයේ මුහුණු සත්‍යාපක සංවේදකයක් නොමැත"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"මුහුණු <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"මුහුණ නිරූපකය"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"සමමුහුර්ත සැකසීම් කියවන්න"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ගිණුම සඳහා සමමුහුර්ත සැකසීම් කියවීමට යෙදුමට අවසර දෙන්න. උදාහරණයක් ලෙස, ගිණුමක් සමඟ පුද්ගල යෙදුම සමමුහුර්ත දැයි මෙයට හඳුනා ගත හැක."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"සමමුහුර්ත කිරීම සක්‍රිය කරන්න සහ අක්‍රිය කරන්න"</string>
@@ -1180,6 +1213,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi සඳහා අන්තර්ජාල ප්‍රවේශය නැත"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"විකල්ප සඳහා තට්ටු කරන්න"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"ඔබගේ හොට්ස්පොට් සැකසීම්වලට වෙනස් කිරීම්"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"ඔබගේ හොට්ස්පොට් කලාපය වෙනස් වී ඇත."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"මෙම උපාංගය 5GHz සඳහා ඔබේ මනාපවලට සහාය නොදක්වයි. ඒ වෙනුවට, මෙම උපාංගය ලබා ගත හැකි විට 5GHz කලාපය භාවිතා කරනු ඇත."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> වෙත මාරු විය"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"උපාංගය <xliff:g id="NEW_NETWORK">%1$s</xliff:g> <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> සඳහා අන්තර්ජාල ප්‍රවේශය නැති විට භාවිත කරයි. ගාස්තු අදාළ විය හැකිය."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> සිට <xliff:g id="NEW_NETWORK">%2$s</xliff:g> වෙත මාරු විය"</string>

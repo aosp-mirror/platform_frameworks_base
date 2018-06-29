@@ -1776,9 +1776,6 @@
   <java-symbol type="string" name="global_action_silent_mode_off_status" />
   <java-symbol type="string" name="global_action_silent_mode_on_status" />
   <java-symbol type="string" name="global_action_toggle_silent_mode" />
-  <java-symbol type="string" name="global_action_battery_saver_off_status" />
-  <java-symbol type="string" name="global_action_battery_saver_on_status" />
-  <java-symbol type="string" name="global_action_toggle_battery_saver" />
   <java-symbol type="string" name="global_action_lockdown" />
   <java-symbol type="string" name="global_action_voice_assist" />
   <java-symbol type="string" name="global_action_assist" />
@@ -2446,6 +2443,10 @@
   <java-symbol type="string" name="face_acquired_poor_gaze" />
   <java-symbol type="string" name="face_acquired_not_detected" />
   <java-symbol type="array" name="face_acquired_vendor" />
+  <java-symbol type="string" name="face_name_template" />
+
+  <!-- Face config -->
+  <java-symbol type="integer" name="config_face_MaxTemplatesPerUser" />
 
   <!-- From various Material changes -->
   <java-symbol type="attr" name="titleTextAppearance" />
@@ -3265,6 +3266,7 @@
   <java-symbol type="bool" name="config_handleVolumeKeysInWindowManager" />
   <java-symbol type="dimen" name="config_inCallNotificationVolume" />
   <java-symbol type="string" name="config_inCallNotificationSound" />
+  <java-symbol type="integer" name="config_autoGroupAtCount" />
   <java-symbol type="bool" name="config_dozeAlwaysOnDisplayAvailable" />
   <java-symbol type="bool" name="config_dozeAlwaysOnEnabled" />
   <java-symbol type="bool" name="config_displayBlanksAfterDoze" />

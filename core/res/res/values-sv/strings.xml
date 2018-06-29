@@ -272,19 +272,22 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Byt till jobbprofilen"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"få tillgång till dina kontakter"</string>
-    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomstbehörighet till dina kontakter?"</string>
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomst till dina kontakter?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Plats"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"komma åt enhetens platsuppgifter"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomstbehörighet till enhetens plats?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomst till enhetens plats?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Appen har endast åtkomst till platsen när du använder den."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomst till enhetens plats?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Appen har alltid åtkomst till platsen, även om du inte använder den."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"få tillgång till din kalender"</string>
-    <string name="permgrouprequest_calendar" msgid="289900767793189421">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomstbehörighet till din kalender?"</string>
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomst till din kalender?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"Sms"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"skicka och visa sms"</string>
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att skicka och visa sms?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"få åtkomst till foton, media och filer på din enhet"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomstbehörighet till foton, mediafiler och andra filer på enheten?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomst till foton, mediefiler och andra filer på enheten?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"spela in ljud"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att spela in ljud?"</string>
@@ -299,7 +302,7 @@
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att ringa och hantera telefonsamtal?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Kroppssensorer"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"få åtkomst till sensordata om dina vitalparametrar"</string>
-    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomstbehörighet till sensordata om vitalparametrar?"</string>
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; åtkomst till sensordata om vitalparametrar?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Hämta fönsterinnehåll"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Granska innehållet i ett fönster som du interagerar med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktivera Explore by touch"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Appen kan lägga till, ta bort eller ändra kalenderhändelser på mobilen. Appen kan skicka meddelanden som ser ut att komma från kalenderns ägare eller ändra uppgifter utan ägarens vetskap."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"få åtkomst till extra kommandon för platsleverantör"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Tillåter att appen får åtkomst till extra kommandon för platsleverantör. Detta kan innebära att appen tillåts störa funktionen för GPS eller andra platskällor."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"endast åtkomst till exakt plats i förgrunden"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Den här appen kan endast få information om din exakta plats när den körs i förgrunden. Platstjänsterna måste ha aktiverats och finnas på mobilen om appen ska kunna använda dem. Detta kan leda till ökad batteriförbrukning."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"få åtkomst till din ungefärliga position (nätverksbaserad)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Appen kan få information om din plats från källor i nätverket, som mobilmaster och Wi-Fi-nätverk. De platstjänsterna måste ha aktiverats och finnas på surfplattan om appen ska kunna använda dem."</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Ikon för fingeravtryck"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"hantera maskinvara för ansiktsautentisering"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Tillåter att appen anropar metoder för att lägga till och radera ansiktsmallar."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"använda maskinvara för ansiktsautentisering"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Tillåter att appen använder maskinvara för ansiktsigenkänning vid autentisering"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Det gick inte att läsa av ansiktet. Försök igen."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Ansiktet är för ljust. Testa i svagare belysning."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Ansiktet är för mörkt. Testa i starkare belysning."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Flytta sensorn längre ifrån ansiktet."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Ha sensorn närmare ansiktet."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Flytta sensorn uppåt."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Flytta sensorn nedåt."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Flytta sensorn åt höger."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Flytta sensorn åt vänster."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Titta på sensorn."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Inget ansikte hittades."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Håll ansiktet stilla framför enheten."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Maskinvara för ansiktsigenkänning saknas."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Tidsgränsen för ansikte har nåtts. Försök igen."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Det gick inte att lagra ansiktet."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Ansiktsåtgärden har avbrutits."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Du har gjort för många försök. Försök igen senare."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"För många försök. Ansiktsautentisering inaktiverad"</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Försök igen."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Inget ansikte har registrerats."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Enheten har ingen sensor för ansiktsautentisering"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Ansikte <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Ansikte"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"läsa synkroniseringsinställningar"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Tillåter att appen läser synkroniseringsinställningarna för ett konto. Detta kan användas till exempel för att avgöra om appen Personer är synkroniserad med ett konto."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"aktivera/inaktivera synkronisering"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi-nätverket är inte anslutet till internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tryck för alternativ"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Ändringar i inställningarna för surfzon"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Frekvensbandet för surfzonen har ändrats."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Den här enheten har inte stöd för inställningen för att endast använda 5 GHz. I stället används 5 GHz när det är möjligt."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Byte av nätverk till <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="NEW_NETWORK">%1$s</xliff:g> används på enheten när det inte finns internetåtkomst via <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>. Avgifter kan tillkomma."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Byte av nätverk från <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> till <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

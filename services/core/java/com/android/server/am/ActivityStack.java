@@ -1654,6 +1654,16 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     void addToStopping(ActivityRecord r, boolean scheduleIdle, boolean idleDelayed) {
         if (!mStackSupervisor.mStoppingActivities.contains(r)) {
             mStackSupervisor.mStoppingActivities.add(r);
+
+            // Some activity is waiting for another activity to become visible before it's being
+            // stopped, which means that we also want to wait with stopping this one to avoid
+            // flickers.
+            if (!mStackSupervisor.mActivitiesWaitingForVisibleActivity.isEmpty()
+                    && !mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(r)) {
+                if (DEBUG_SWITCH) Slog.i(TAG_SWITCH, "adding to waiting visible activity=" + r
+                        + " existing=" + mStackSupervisor.mActivitiesWaitingForVisibleActivity);
+                mStackSupervisor.mActivitiesWaitingForVisibleActivity.add(r);
+            }
         }
 
         // If we already have a few activities waiting to stop, then give up
@@ -5277,6 +5287,20 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             } catch (RemoteException e) {
             }
         }
+    }
+
+    public void setAlwaysOnTop(boolean alwaysOnTop) {
+        if (isAlwaysOnTop() == alwaysOnTop) {
+            return;
+        }
+        super.setAlwaysOnTop(alwaysOnTop);
+        final ActivityDisplay display = getDisplay();
+        // positionChildAtTop() must be called even when always on top gets turned off because we
+        // need to make sure that the stack is moved from among always on top windows to below other
+        // always on top windows. Since the position the stack should be inserted into is calculated
+        // properly in {@link ActivityDisplay#getTopInsertPosition()} in both cases, we can just
+        // request that the stack is put at top here.
+        display.positionChildAtTop(this);
     }
 
     void moveToFrontAndResumeStateIfNeeded(ActivityRecord r, boolean moveToFront, boolean setResume,

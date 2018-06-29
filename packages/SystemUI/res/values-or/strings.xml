@@ -95,8 +95,7 @@
     <string name="accessibility_unlock_button" msgid="128158454631118828">"ଅନଲକ୍‌ କରନ୍ତୁ"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ପାଇଁ ଅପେକ୍ଷା କରିଛି"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ଆଙ୍ଗୁଠିଚିହ୍ନ ବ୍ୟବହାର ନକରି ଅନଲକ୍‍ କରନ୍ତୁ"</string>
-    <!-- no translation found for accessibility_scanning_face (769545173211758586) -->
-    <skip />
+    <string name="accessibility_scanning_face" msgid="769545173211758586">"ଫେସ୍ ସ୍କାନିଙ୍ଗ କରାଯାଉଛି"</string>
     <string name="accessibility_send_smart_reply" msgid="7766727839703044493">"ପଠାନ୍ତୁ"</string>
     <string name="unlock_label" msgid="8779712358041029439">"ଅନଲକ୍‌"</string>
     <string name="phone_label" msgid="2320074140205331708">"ଫୋନ୍‌ ଖୋଲନ୍ତୁ"</string>
@@ -151,16 +150,13 @@
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
-    <!-- no translation found for data_connection_3_5g (3164370985817123144) -->
-    <skip />
-    <!-- no translation found for data_connection_3_5g_plus (4464630787664529264) -->
-    <skip />
+    <string name="data_connection_3_5g" msgid="3164370985817123144">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="4464630787664529264">"H+"</string>
     <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <!-- no translation found for data_connection_cdma (8176597308239086780) -->
-    <skip />
+    <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"ରୋମିଙ୍ଗ"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"ୱାଇ-ଫାଇ"</string>
@@ -526,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ଲୁଚାନ୍ତୁ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"ଆଗକୁ ଆପଣ ଯେତେବେଳେ ଏହି ସେଟିଙ୍ଗକୁ ଚାଲୁ କରିବେ, ଏହା ପୁଣି ଦେଖାଦେବ।"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"ଲୁଚାନ୍ତୁ"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"ଆପଣ ନିଜ ୱର୍କ ପ୍ରୋଫାଇଲ୍‌ ବ୍ୟବହାର କରୁଛନ୍ତି"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"କଲ୍ କରନ୍ତୁ"</string>
     <string name="stream_system" msgid="7493299064422163147">"ସିଷ୍ଟମ୍‌"</string>
     <string name="stream_ring" msgid="8213049469184048338">"ରିଙ୍ଗ"</string>
@@ -857,6 +852,5 @@
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"ଚାର୍ଜ <xliff:g id="PERCENTAGE">%d</xliff:g>%%ରୁ କମ୍‌ ହେଲେ ବ୍ୟାଟେରୀ ସେଭର୍‌ ଆପେ ଅନ୍‌ ହୋଇଯିବ।"</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"ସେଟିଙ୍ଗ"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"ବୁଝିଲି"</string>
-    <!-- no translation found for heap_dump_tile_name (9141031328971226374) -->
-    <skip />
+    <string name="heap_dump_tile_name" msgid="9141031328971226374">"SysUI ହିପ୍ ଡମ୍ପ୍ କରନ୍ତୁ"</string>
 </resources>

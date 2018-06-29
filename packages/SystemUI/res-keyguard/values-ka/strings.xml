@@ -140,7 +140,8 @@
       <item quantity="other">მოწყობილობა არ განბლოკილა <xliff:g id="NUMBER_1">%d</xliff:g> საათის განმავლობაში. დაადასტურეთ პაროლი.</item>
       <item quantity="one">მოწყობილობა არ განბლოკილა <xliff:g id="NUMBER_0">%d</xliff:g> საათის განმავლობაში. დაადასტურეთ პაროლი.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"არ არის ამოცნობილი"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"არ არის ამოცნობილი"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"არ არის ამოცნობილი"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">შეიყვანეთ SIM ბარათის PIN-კოდი. თქვენ დაგრჩათ <xliff:g id="NUMBER_1">%d</xliff:g> მცდელობა.</item>
       <item quantity="one">შეიყვანეთ SIM ბარათის PIN-კოდი. თქვენ დაგრჩათ <xliff:g id="NUMBER_0">%d</xliff:g> მცდელობა, რომლის შემდეგაც მოწყობილობის განსაბლოკად დაგჭირდებათ თქვენს ოპერატორთან დაკავშირება.</item>

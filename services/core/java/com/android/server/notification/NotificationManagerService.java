@@ -400,6 +400,7 @@ public class NotificationManagerService extends SystemService {
 
     private SnoozeHelper mSnoozeHelper;
     private GroupHelper mGroupHelper;
+    private int mAutoGroupAtCount;
     private boolean mIsTelevision;
 
     private MetricsLogger mMetricsLogger;
@@ -1565,7 +1566,9 @@ public class NotificationManagerService extends SystemService {
     }
 
     private GroupHelper getGroupHelper() {
-        return new GroupHelper(new GroupHelper.Callback() {
+        mAutoGroupAtCount =
+                getContext().getResources().getInteger(R.integer.config_autoGroupAtCount);
+        return new GroupHelper(mAutoGroupAtCount, new GroupHelper.Callback() {
             @Override
             public void addAutoGroup(String key) {
                 synchronized (mNotificationLock) {
@@ -3125,14 +3128,19 @@ public class NotificationManagerService extends SystemService {
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpAndUsageStatsPermission(getContext(), TAG, pw)) return;
             final DumpFilter filter = DumpFilter.parseFromArguments(args);
-            if (filter.stats) {
-                dumpJson(pw, filter);
-            } else if (filter.proto) {
-                dumpProto(fd, filter);
-            } else if (filter.criticalPriority) {
-                dumpNotificationRecords(pw, filter);
-            } else {
-                dumpImpl(pw, filter);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (filter.stats) {
+                    dumpJson(pw, filter);
+                } else if (filter.proto) {
+                    dumpProto(fd, filter);
+                } else if (filter.criticalPriority) {
+                    dumpNotificationRecords(pw, filter);
+                } else {
+                    dumpImpl(pw, filter);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
 

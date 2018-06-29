@@ -17,101 +17,86 @@
 package com.android.server.biometrics.face;
 
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.face.Face;
-import android.os.AsyncTask;
-import android.os.Environment;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
 
-import com.android.internal.annotations.GuardedBy;
+import com.android.server.biometrics.common.BiometricUserState;
 
 import libcore.io.IoUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 
 /**
  * Class managing the set of faces per user across device reboots.
+ * @hide
  */
-class FaceUserState {
+public class FaceUserState extends BiometricUserState {
 
     private static final String TAG = "FaceState";
     private static final String FACE_FILE = "settings_face.xml";
 
+    private static final String TAG_FACES = "faces";
     private static final String TAG_FACE = "face";
+    private static final String ATTR_NAME = "name";
+    private static final String ATTR_FACE_ID = "faceId";
     private static final String ATTR_DEVICE_ID = "deviceId";
 
-    private final File mFile;
-
-    @GuardedBy("this")
-    private Face mFace = null;
-    private final Context mCtx;
-
     public FaceUserState(Context ctx, int userId) {
-        mFile = getFileForUser(userId);
-        mCtx = ctx;
-        synchronized (this) {
-            readStateSyncLocked();
+        super(ctx, userId);
+    }
+
+    @Override
+    protected String getBiometricsTag() {
+        return TAG_FACES;
+    }
+
+    @Override
+    protected String getBiometricFile() {
+        return FACE_FILE;
+    }
+
+    @Override
+    protected int getNameTemplateResource() {
+        return com.android.internal.R.string.face_name_template;
+    }
+
+    @Override
+    public void addBiometric(BiometricAuthenticator.Identifier identifier) {
+        if (identifier instanceof Face) {
+            super.addBiometric(identifier);
+        } else {
+            Slog.w(TAG, "Attempted to add non-face identifier");
         }
     }
 
-    public void addFace(int faceId) {
-        synchronized (this) {
-            mFace = new Face("Face", faceId, 0);
-            scheduleWriteStateLocked();
+    @Override
+    protected ArrayList getCopy(ArrayList array) {
+        ArrayList<Face> result = new ArrayList<>(array.size());
+        for (int i = 0; i < array.size(); i++) {
+            Face f = (Face) array.get(i);
+            result.add(new Face(f.getName(), f.getFaceId(), f.getDeviceId()));
         }
+        return result;
     }
 
-    public void removeFace() {
-        synchronized (this) {
-            mFace = null;
-            scheduleWriteStateLocked();
-        }
-    }
-
-    public Face getFace() {
-        synchronized (this) {
-            return getCopy(mFace);
-        }
-    }
-
-    private static File getFileForUser(int userId) {
-        return new File(Environment.getUserSystemDirectory(userId), FACE_FILE);
-    }
-
-    private final Runnable mWriteStateRunnable = new Runnable() {
-        @Override
-        public void run() {
-            doWriteState();
-        }
-    };
-
-    private void scheduleWriteStateLocked() {
-        AsyncTask.execute(mWriteStateRunnable);
-    }
-
-    private Face getCopy(Face f) {
-        if (f == null) {
-            return null;
-        }
-        return new Face(f.getName(), f.getFaceId(), f.getDeviceId());
-    }
-
-    private void doWriteState() {
+    @Override
+    protected void doWriteState() {
         AtomicFile destination = new AtomicFile(mFile);
 
-        Face face;
+        ArrayList<Face> faces;
 
         synchronized (this) {
-            face = getCopy(mFace);
+            faces = getCopy(mBiometrics);
         }
 
         FileOutputStream out = null;
@@ -122,11 +107,19 @@ class FaceUserState {
             serializer.setOutput(out, "utf-8");
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             serializer.startDocument(null, true);
-            serializer.startTag(null, TAG_FACE);
-            if (face != null) {
-                serializer.attribute(null, ATTR_DEVICE_ID, Long.toString(face.getDeviceId()));
+            serializer.startTag(null, TAG_FACES);
+
+            final int count = faces.size();
+            for (int i = 0; i < count; i++) {
+                Face f = faces.get(i);
+                serializer.startTag(null, TAG_FACE);
+                serializer.attribute(null, ATTR_FACE_ID, Integer.toString(f.getFaceId()));
+                serializer.attribute(null, ATTR_NAME, f.getName().toString());
+                serializer.attribute(null, ATTR_DEVICE_ID, Long.toString(f.getDeviceId()));
+                serializer.endTag(null, TAG_FACE);
             }
-            serializer.endTag(null, TAG_FACE);
+
+            serializer.endTag(null, TAG_FACES);
             serializer.endDocument();
             destination.finishWrite(out);
 
@@ -134,37 +127,14 @@ class FaceUserState {
         } catch (Throwable t) {
             Slog.wtf(TAG, "Failed to write settings, restoring backup", t);
             destination.failWrite(out);
-            throw new IllegalStateException("Failed to write face", t);
+            throw new IllegalStateException("Failed to write faces", t);
         } finally {
             IoUtils.closeQuietly(out);
         }
     }
 
-    private void readStateSyncLocked() {
-        FileInputStream in;
-        if (!mFile.exists()) {
-            return;
-        }
-        try {
-            in = new FileInputStream(mFile);
-        } catch (FileNotFoundException fnfe) {
-            Slog.i(TAG, "No face state");
-            return;
-        }
-        try {
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(in, null);
-            parseStateLocked(parser);
-
-        } catch (XmlPullParserException | IOException e) {
-            throw new IllegalStateException("Failed parsing settings file: "
-                    + mFile , e);
-        } finally {
-            IoUtils.closeQuietly(in);
-        }
-    }
-
-    private void parseStateLocked(XmlPullParser parser)
+    @Override
+    protected void parseBiometricsLocked(XmlPullParser parser)
             throws IOException, XmlPullParserException {
         final int outerDepth = parser.getDepth();
         int type;
@@ -176,16 +146,11 @@ class FaceUserState {
 
             String tagName = parser.getName();
             if (tagName.equals(TAG_FACE)) {
-                parseFaceLocked(parser);
+                String name = parser.getAttributeValue(null, ATTR_NAME);
+                String faceId = parser.getAttributeValue(null, ATTR_FACE_ID);
+                String deviceId = parser.getAttributeValue(null, ATTR_DEVICE_ID);
+                mBiometrics.add(new Face(name, Integer.parseInt(faceId), Integer.parseInt(deviceId)));
             }
         }
     }
-
-    private void parseFaceLocked(XmlPullParser parser)
-            throws IOException, XmlPullParserException {
-        String deviceId = parser.getAttributeValue(null, ATTR_DEVICE_ID);
-
-        mFace = new Face("", 0, Integer.parseInt(deviceId));
-    }
-
 }

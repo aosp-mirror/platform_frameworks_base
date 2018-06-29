@@ -515,6 +515,9 @@ public class QuickStepController implements GestureHelper {
     }
 
     private void updateHighlight() {
+        if (mTrackRect.isEmpty()) {
+            return;
+        }
         int colorBase, colorGrad;
         if (mDarkIntensity > 0.5f) {
             colorBase = mContext.getColor(R.color.quick_step_track_background_background_dark);

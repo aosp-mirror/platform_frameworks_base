@@ -71,6 +71,12 @@ message IncidentProto {
         (section).args = "getprop"
     ];
 
+    optional string kernel_version = 1002 [
+        (section).type = SECTION_FILE,
+        (section).args = "/proc/version",
+        (privacy).dest = DEST_AUTOMATIC
+    ];
+
     // Device Logs
     optional android.util.EventLogTagMapProto event_log_tag_map = 1100 [
         (section).type = SECTION_FILE,

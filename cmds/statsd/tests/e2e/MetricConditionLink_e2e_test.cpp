@@ -99,7 +99,6 @@ StatsdConfig CreateStatsdConfig() {
 
 // If we want to test multiple dump data, we must do it in separate tests, because in the e2e tests,
 // we should use the real API which will clear the data after dump data is called.
-// TODO: better refactor the code so that the tests are not so verbose.
 TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks1) {
     auto config = CreateStatsdConfig();
     uint64_t bucketStartTimeNs = 10000000000;

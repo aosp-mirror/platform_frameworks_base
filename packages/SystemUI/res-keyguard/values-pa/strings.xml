@@ -140,7 +140,10 @@
       <item quantity="one">ਡੀਵਾਈਸ <xliff:g id="NUMBER_1">%d</xliff:g> ਘੰਟੇ ਤੋਂ ਅਣਲਾਕ ਨਹੀਂ ਕੀਤਾ ਗਿਆ ਹੈ। ਪਾਸਵਰਡ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ</item>
       <item quantity="other">ਡੀਵਾਈਸ <xliff:g id="NUMBER_1">%d</xliff:g> ਘੰਟਿਆਂ ਤੋਂ ਅਣਲਾਕ ਨਹੀਂ ਕੀਤਾ ਗਿਆ ਹੈ। ਪਾਸਵਰਡ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"ਪਛਾਣ ਨਹੀਂ ਹੋਈ"</string>
+    <!-- no translation found for kg_fingerprint_not_recognized (7854413849848459418) -->
+    <skip />
+    <!-- no translation found for kg_face_not_recognized (6382535088345875294) -->
+    <skip />
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">ਸਿਮ ਪਿੰਨ ਦਾਖਲ ਕਰੋ। ਤੁਹਾਡੇ ਕੋਲ <xliff:g id="NUMBER_1">%d</xliff:g> ਕੋਸ਼ਿਸ਼ ਬਾਕੀ ਹੈ।</item>
       <item quantity="other">ਸਿਮ ਪਿੰਨ ਦਾਖਲ ਕਰੋ। ਤੁਹਾਡੇ ਕੋਲ <xliff:g id="NUMBER_1">%d</xliff:g> ਕੋਸ਼ਿਸ਼ਾਂ ਬਾਕੀ ਹਨ।</item>

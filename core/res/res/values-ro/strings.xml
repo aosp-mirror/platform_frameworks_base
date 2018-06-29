@@ -279,6 +279,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"Locație"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"acceseze locația acestui dispozitiv"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să acceseze locația acestui dispozitiv?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"Aplicația va avea acces la locație doar atunci când o folosiți."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să acceseze locația dispozitivului?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"Aplicația va avea în permanență acces la locație, chiar și atunci când nu o folosiți."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Calendar"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"acceseze calendarul"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să vă acceseze calendarul?"</string>
@@ -405,8 +408,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Această aplicație poate să adauge, să elimine sau să modifice evenimente din calendarul de pe telefon. Această aplicație poate să trimită mesaje care par trimise de proprietarii calendarului sau să modifice evenimentele fără notificarea acestora."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"accesare comenzi suplimentare ale furnizorului locației"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permite aplicației să acceseze comenzi suplimentare pentru furnizorul locației. Aplicația ar putea să utilizeze această permisiune pentru a influența operațiile GPS sau ale altor surse de locații."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"să acceseze locația exactă în prim-plan"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Aplicația vă poate obține locația exactă numai când rulează în prim-plan. Serviciile de localizare trebuie să fie activate și disponibile pe telefon pentru ca aplicația să le poată folosi. Acest lucru poate accelera descărcarea bateriei."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"să acceseze locația aproximativă (bazată pe rețea)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Această aplicație vă poate obține locația cu ajutorul surselor rețelei, cum ar fi turnurile de telefonie mobilă și rețelele Wi-Fi. Aceste servicii de localizare trebuie să fie activate și disponibile pe tabletă pentru ca aplicația să le poată folosi."</string>
@@ -521,6 +523,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Pictograma amprentă"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"să gestioneze hardware-ul de autentificare facială"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"Permite aplicației să invoce metode pentru a adăuga și a șterge șabloane faciale pentru utilizare."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"să folosească hardware de autentificare facială"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Permite aplicației să folosească hardware de autentificare facială pentru autentificare"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"Chipul nu a putut fi procesat. Încercați din nou."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Chip prea luminat. Încercați cu mai puțină lumină."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"Chip prea întunecat. Măriți sursa de lumină."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Deplasați senzorul mai departe de chip."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Aduceți senzorul mai aproape de chip."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Deplasați senzorul mai sus."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Deplasați senzorul mai jos."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Deplasați senzorul spre dreapta."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Deplasați senzorul spre stânga."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Priviți spre senzor."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"Nu s-a detectat niciun chip."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Țineți chipul nemișcat în fața dispozitivului."</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Hardware-ul pentru chip nu este disponibil."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"Timpul pentru reunoaștere facială a expirat. Încercați din nou."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"Chipul nu poate fi stocat."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"Operațiunea privind chipul a fost anulată."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"Prea multe încercări. Reîncercați mai târziu."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Prea multe încercări. Autentificarea facială este dezactivată."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"Încercați din nou."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"Nu au fost înregistrate chipuri."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"Dispozitivul nu are un senzor de autentificare a chipului"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"Chip <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Pictograma chip"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"citire setări sincronizare"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permite aplicației să citească setările de sincronizare ale unui cont. De exemplu, cu această permisiune aplicația poate determina dacă aplicația Persoane este sincronizată cu un anumit cont."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activează/dezactivează sincronizarea"</string>
@@ -1200,6 +1233,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Rețeaua Wi-Fi nu are acces la internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Atingeți pentru opțiuni"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Modificări aduse setărilor pentru hotspot"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"S-a schimbat banda de frecvență a hotspotului."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Dispozitivul nu acceptă doar preferința pentru 5 GHz. Dispozitivul va folosi banda de 5 GHz când este disponibilă."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"S-a comutat la <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Dispozitivul folosește <xliff:g id="NEW_NETWORK">%1$s</xliff:g> când <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nu are acces la internet. Se pot aplica taxe."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"S-a comutat de la <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> la <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

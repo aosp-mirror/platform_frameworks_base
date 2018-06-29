@@ -140,7 +140,8 @@
       <item quantity="other">စက်ပစ္စည်းကို <xliff:g id="NUMBER_1">%d</xliff:g> နာရီကြာ လော့ခ်ဖွင့်ခဲ့ခြင်း မရှိပါ။ စကားဝှက်အား အတည်ပြုပါ။</item>
       <item quantity="one">စက်ပစ္စည်းကို <xliff:g id="NUMBER_0">%d</xliff:g> နာရီကြာ လော့ခ်ဖွင့်ခဲ့ခြင်း မရှိပါ။ စကားဝှက်အား အတည်ပြုပါ။</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"မသိပါ"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"မသိပါ"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"မသိပါ"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">ဆင်းမ်ကဒ် ပင်နံပါတ် ထည့်ပါ။ <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့်ရှိပါသေးသည်။</item>
       <item quantity="one">ဆင်းမ်ကဒ် ပင်နံပါတ် ထည့်ပါ။ သင့်စက်ကို လော့ခ်ဖွင့်ပေးရန်အတွက် ဝန်ဆောင်မှုပေးသူသို့ မဆက်သွယ်မီ <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် စမ်းသပ်ခွင့်ရှိပါသေးသည်။</item>

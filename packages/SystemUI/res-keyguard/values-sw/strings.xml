@@ -140,7 +140,8 @@
       <item quantity="other">Hujafungua kifaa kwa saa <xliff:g id="NUMBER_1">%d</xliff:g>. Thibitisha nenosiri.</item>
       <item quantity="one">Hujafungua kifaa kwa saa <xliff:g id="NUMBER_0">%d</xliff:g>. Thibitisha nenosiri.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"Haikutambua alama ya kidole"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Haikutambua alama ya kidole"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Haitambuliwi"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">Weka PIN ya SIM. Zimesalia mara <xliff:g id="NUMBER_1">%d</xliff:g> za kujaribu.</item>
       <item quantity="one">Weka PIN ya SIM. Ukijaribu tena mara <xliff:g id="NUMBER_0">%d</xliff:g> bila kufaulu, kifaa chako kitafungwa na utalazimika uwasiliane na mtoa huduma wako ili akifungue.</item>

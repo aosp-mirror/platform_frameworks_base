@@ -256,6 +256,33 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testAddChildByIndex() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.setLayer(0).build();
+
+        final TestWindowContainer child = root.addChildWindow();
+
+        final TestWindowContainer child2 = builder.setLayer(1).build();
+        final TestWindowContainer child3 = builder.setLayer(2).build();
+        final TestWindowContainer child4 = builder.setLayer(3).build();
+
+        // Test adding at top.
+        root.addChild(child2, POSITION_TOP);
+        assertEquals(child2, root.getChildAt(root.getChildrenCount() - 1));
+
+        // Test adding at bottom.
+        root.addChild(child3, POSITION_BOTTOM);
+        assertEquals(child3, root.getChildAt(0));
+
+        // Test adding in the middle.
+        root.addChild(child4, 1);
+        assertEquals(child3, root.getChildAt(0));
+        assertEquals(child4, root.getChildAt(1));
+        assertEquals(child, root.getChildAt(2));
+        assertEquals(child2, root.getChildAt(3));
+    }
+
+    @Test
     public void testPositionChildAt() throws Exception {
         final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
         final TestWindowContainer root = builder.setLayer(0).build();

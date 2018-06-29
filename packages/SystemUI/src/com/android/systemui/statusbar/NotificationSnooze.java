@@ -256,10 +256,14 @@ public class NotificationSnooze extends LinearLayout
         int count = showInHours ? (minutes / 60) : minutes;
         String description = res.getQuantityString(pluralResId, count, count);
         String resultText = String.format(res.getString(R.string.snoozed_for_time), description);
+        AccessibilityAction action = new AccessibilityAction(accessibilityActionId, description);
+        final int index = resultText.indexOf(description);
+        if (index == -1) {
+            return new NotificationSnoozeOption(null, minutes, description, resultText, action);
+        }
         SpannableString string = new SpannableString(resultText);
         string.setSpan(new StyleSpan(Typeface.BOLD),
-                resultText.length() - description.length(), resultText.length(), 0 /* flags */);
-        AccessibilityAction action = new AccessibilityAction(accessibilityActionId, description);
+                index, index + description.length(), 0 /* flags */);
         return new NotificationSnoozeOption(null, minutes, description, string,
                 action);
     }

@@ -275,7 +275,10 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपने संपर्क देखने की अनुमति देना चाहते हैं?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"जगह"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"इस डिवाइस की जगह तक पहुंचने दें"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को इस डिवाइस की जगह की जानकारी देखने की अनुमति देना चाहते हैं?"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को इस डिवाइस की \'जगह की जानकारी\' ऐक्सेस करने की अनुमति देना चाहते हैं?"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"ऐप्लिकेशन, डिवाइस की \'जगह की जानकारी\' सिर्फ़ तभी देख पाएगा जब आप इसका इस्तेमाल कर रहे हों."</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को हमेशा डिवाइस की \'जगह की जानकारी\' एक्सेस करने दें?"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"ऐप्लिकेशन के पास हमेशा डिवाइस की \'जगह की जानकारी\' देखने की मंज़ूरी होगी, तब भी जब आप इसका इस्तेमाल न कर रहे हों."</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"कैलेंडर"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"अपने कैलेंडर को ऐक्सेस करने"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपना कैलेंडर देखने की अनुमति देना चाहते हैं?"</string>
@@ -402,18 +405,14 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"यह ऐप्लिकेशन आपके फ़ोन पर मौजूद कैलेंडर इवेंट जोड़, निकाल या बदल सकता है. यह ऐप्लिकेशन ऐसे संदेश भेज सकता है जो कैलेंडर स्वामियों से आए हुए लग सकते हैं या यह स्वामियों को सूचित किए बिना इवेंट में बदलाव कर सकता है."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"कुछ और जगह बताने वाले आदेशों तक पहुंच"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ऐप को कुछ और जगह की जानकारी देने वाले आदेशों की पहुंच पाने देता है. इससे ऐप जीपीएस या जगह की जानकारी देने वाले दूसरे स्रोतों के काम में रोक-टोक कर सकता है."</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
-    <!-- no translation found for permdesc_accessFineLocation (3520508381065331098) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"ऐप्लिकेशन \'जगह की सटीक जानकारी\' सिर्फ़ सामने खुली होने पर एक्सेस करे"</string>
+    <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"यह ऐप्लिकेशन सिर्फ़ तब आपकी \'जगह की सटीक जानकारी\' का इस्तेमाल कर सकता है जब यह स्क्रीन पर दिखाई दे रहा हो. यह ज़रूरी है कि \'जगह की जानकारी\' वाली ये सेवाएं आपके फ़ोन में मौजूद हों और चालू की गई हों ताकि ऐप्लिकेशन उनका इस्तेमाल कर पाए. ऐसा करने से ज़्यादा बैटरी खर्च हो सकती है."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"अनुमानित जगह की पहुंच दें (नेटवर्क-आधारित)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"यह ऐप सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क के स्रोतों के आधार पर आपकी जगह का पता कर सकता है. ये जगह की जानकारी आपके टैबलेट पर चालू और मौजूद होनी चाहिए ताकि ऐप उनका इस्तेमाल कर सके."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"यह ऐप सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क के स्रोतों के आधार पर आपकी जगह का पता कर सकता है. ये जगह की जानकारी आपके टीवी पर चालू और मौजूद होनी चाहिए ताकि ऐप उनका इस्तेमाल कर सके."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"यह ऐप सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क के स्रोतों के आधार पर आपकी जगह का पता कर सकता है. ये जगह की जानकारी आपके फ़ोन पर चालू और मौजूद होनी चाहिए ताकि ऐप उनका इस्तेमाल कर सके."</string>
-    <!-- no translation found for permlab_accessBackgroundLocation (5742466381902568536) -->
-    <skip />
-    <!-- no translation found for permdesc_accessBackgroundLocation (6371533283380774135) -->
-    <skip />
+    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"बैकग्राउंड में होने पर \'जगह की सटीक जानकारी\' एक्सेस करें"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"यह ऐप्लिकेशन बैकग्राउंड में चलते हुए, किसी भी समय आपकी \'जगह की सटीक जानकारी\' का इस्तेमाल कर सकता है. यह ज़रूरी है कि \'जगह की जानकारी\' वाली ये सेवाएं आपके फ़ोन में मौजूद हों और चालू की गई हों ताकि ऐप्लिकेशन उनका इस्तेमाल कर पाए. ऐसा करने से ज़्यादा बैटरी खर्च हो सकती है."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"अपनी ऑडियो सेटिंग बदलें"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ऐप्स  को वैश्विक ऑडियो सेटिंग, जैसे वॉल्‍यूम और कौन-सा स्पीकर आउटपुट के लिए उपयोग किया गया, संशोधित करने देता है."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ऑडियो रिकॉर्ड करने"</string>
@@ -521,6 +520,64 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"फ़िंगरप्रिंट आइकॉन"</string>
+    <!-- no translation found for permlab_manageFace (2137540986007309781) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFace (8919637120670185330) -->
+    <skip />
+    <!-- no translation found for permlab_useFaceAuthentication (8996134460546804535) -->
+    <skip />
+    <!-- no translation found for permdesc_useFaceAuthentication (5011118722951833089) -->
+    <skip />
+    <!-- no translation found for face_acquired_insufficient (5901287247766106330) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_bright (610606792381297174) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_dark (7229162716976778371) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_close (1980310037427755293) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_far (4494571381828850007) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_high (228411096134808372) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_low (4539774649296349109) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_right (1650292067226118760) -->
+    <skip />
+    <!-- no translation found for face_acquired_too_left (2712489669456176505) -->
+    <skip />
+    <!-- no translation found for face_acquired_poor_gaze (8344973502980415859) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_detected (5707782294589511391) -->
+    <skip />
+    <!-- no translation found for face_acquired_not_steady (3722829465011040042) -->
+    <skip />
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <!-- no translation found for face_error_hw_not_available (6255891785768984615) -->
+    <skip />
+    <!-- no translation found for face_error_timeout (4014326147867150054) -->
+    <skip />
+    <!-- no translation found for face_error_no_space (8224993703466381314) -->
+    <skip />
+    <!-- no translation found for face_error_canceled (283945501061931023) -->
+    <skip />
+    <!-- no translation found for face_error_lockout (3407426963155388504) -->
+    <skip />
+    <!-- no translation found for face_error_lockout_permanent (8198354656746088890) -->
+    <skip />
+    <!-- no translation found for face_error_unable_to_process (238761109287767270) -->
+    <skip />
+    <!-- no translation found for face_error_not_enrolled (9166792142679691323) -->
+    <skip />
+    <!-- no translation found for face_error_hw_not_present (4737289254517095671) -->
+    <skip />
+    <!-- no translation found for face_name_template (7004562145809595384) -->
+    <skip />
+  <string-array name="face_error_vendor">
+  </string-array>
+    <!-- no translation found for face_icon_content_description (4024817159806482191) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"समन्वयन सेटिंग पढ़ें"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ऐप्स  को किसी खाते की समन्वयन सेटिंग पढ़ने देता है. उदाहरण के लिए, इससे यह निर्धारित किया जा सकता है कि लोग ऐप्स  किसी खाते के साथ समन्‍वयित है या नहीं."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"समन्‍वयन बंद या चालू टॉगल करें"</string>
@@ -1181,6 +1238,12 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"वाई-फ़ाई के लिए इंटरनेट नहीं मिल रहा है"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"विकल्पों के लिए टैप करें"</string>
+    <!-- no translation found for wifi_softap_config_change (8475911871165857607) -->
+    <skip />
+    <!-- no translation found for wifi_softap_config_change_summary (7601233252456548891) -->
+    <skip />
+    <!-- no translation found for wifi_softap_config_change_detailed (8022936822860678033) -->
+    <skip />
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> पर ले जाया गया"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> में इंटरनेट की सुविधा नहीं होने पर डिवाइस <xliff:g id="NEW_NETWORK">%1$s</xliff:g> का इस्तेमाल करता है. इसके लिए शुल्क लिया जा सकता है."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> से <xliff:g id="NEW_NETWORK">%2$s</xliff:g> पर ले जाया गया"</string>
@@ -1679,7 +1742,7 @@
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> सेकंड में पुन: प्रयास करें</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"बाद में फिर से प्रयास करें"</string>
-    <string name="immersive_cling_title" msgid="8394201622932303336">"पूरे स्क्रीन पर देखें"</string>
+    <string name="immersive_cling_title" msgid="8394201622932303336">"आप पूरे स्क्रीन पर देख रहे हैं"</string>
     <string name="immersive_cling_description" msgid="3482371193207536040">"बाहर निकलने के लिए, ऊपर से नीचे स्वा‍इप करें."</string>
     <string name="immersive_cling_positive" msgid="5016839404568297683">"ठीक है"</string>
     <string name="done_label" msgid="2093726099505892398">"हो गया"</string>

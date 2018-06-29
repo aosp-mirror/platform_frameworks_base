@@ -392,11 +392,13 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -475,6 +477,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES;
 
     static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
+
+    private static final String ANR_TRACE_DIR = "/data/anr";
 
     // Maximum number of receivers an app can register.
     private static final int MAX_RECEIVERS_ALLOWED_PER_APP = 1000;
@@ -5022,7 +5026,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        final File tracesDir = new File("/data/anr");
+        final File tracesDir = new File(ANR_TRACE_DIR);
         // Each set of ANR traces is written to a separate file and dumpstate will process
         // all such files and add them to a captured bug report if they're recent enough.
         maybePruneOldTraces(tracesDir);
@@ -12042,13 +12046,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public void handleApplicationStrictModeViolation(
             IBinder app,
-            int violationMask,
+            int penaltyMask,
             StrictMode.ViolationInfo info) {
         // We're okay if the ProcessRecord is missing; it probably means that
         // we're reporting a violation from the system process itself.
         final ProcessRecord r = findAppProcess(app, "StrictMode");
 
-        if ((violationMask & StrictMode.PENALTY_DROPBOX) != 0) {
+        if ((penaltyMask & StrictMode.PENALTY_DROPBOX) != 0) {
             Integer stackFingerprint = info.hashCode();
             boolean logIt = true;
             synchronized (mAlreadyLoggedViolatedStacks) {
@@ -12072,7 +12076,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if ((violationMask & StrictMode.PENALTY_DIALOG) != 0) {
+        if ((penaltyMask & StrictMode.PENALTY_DIALOG) != 0) {
             AppErrorResult result = new AppErrorResult();
             synchronized (this) {
                 final long origId = Binder.clearCallingIdentity();
@@ -12082,7 +12086,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 HashMap<String, Object> data = new HashMap<String, Object>();
                 data.put("result", result);
                 data.put("app", r);
-                data.put("violationMask", violationMask);
                 data.put("info", info);
                 msg.obj = data;
                 mUiHandler.sendMessage(msg);
@@ -12494,7 +12497,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return imp;
     }
 
-    private void fillInProcMemInfo(ProcessRecord app,
+    private void fillInProcMemInfoLocked(ProcessRecord app,
             ActivityManager.RunningAppProcessInfo outInfo,
             int clientTargetSdk) {
         outInfo.pid = app.pid;
@@ -12514,6 +12517,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         outInfo.importance = procStateToImportance(procState, adj, outInfo, clientTargetSdk);
         outInfo.importanceReasonCode = app.adjTypeCode;
         outInfo.processState = app.curProcState;
+        outInfo.isFocused = (app == getTopAppLocked());
+        outInfo.lastActivityTime = app.lastActivityTime;
     }
 
     @Override
@@ -12544,7 +12549,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ActivityManager.RunningAppProcessInfo currApp =
                         new ActivityManager.RunningAppProcessInfo(app.processName,
                                 app.pid, app.getPackageList());
-                    fillInProcMemInfo(app, currApp, clientTargetSdk);
+                    fillInProcMemInfoLocked(app, currApp, clientTargetSdk);
                     if (app.adjSource instanceof ProcessRecord) {
                         currApp.importanceReasonPid = ((ProcessRecord)app.adjSource).pid;
                         currApp.importanceReasonImportance =
@@ -12613,7 +12618,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 proc = mPidsSelfLocked.get(Binder.getCallingPid());
             }
             if (proc != null) {
-                fillInProcMemInfo(proc, outState, clientTargetSdk);
+                fillInProcMemInfoLocked(proc, outState, clientTargetSdk);
             }
         }
     }
@@ -12784,6 +12789,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if ("lastanr".equals(cmd)) {
                 synchronized (this) {
                     dumpLastANRLocked(pw);
+                }
+            } else if ("lastanr-traces".equals(cmd)) {
+                synchronized (this) {
+                    dumpLastANRTracesLocked(pw);
                 }
             } else if ("starter".equals(cmd)) {
                 synchronized (this) {
@@ -13131,6 +13140,35 @@ public class ActivityManagerService extends IActivityManager.Stub
             pw.println("  <no ANR has occurred since boot>");
         } else {
             pw.println(mLastANRState);
+        }
+    }
+
+    private void dumpLastANRTracesLocked(PrintWriter pw) {
+        pw.println("ACTIVITY MANAGER LAST ANR TRACES (dumpsys activity lastanr-traces)");
+
+        final File[] files = new File(ANR_TRACE_DIR).listFiles();
+        if (ArrayUtils.isEmpty(files)) {
+            return;
+        }
+        // Find the latest file.
+        File latest = null;
+        for (File f : files) {
+            if (latest == null || latest.getName().compareTo(f.getName()) < 0) {
+                latest = f;
+            }
+        }
+        pw.print("File: ");
+        pw.print(latest.getName());
+        pw.println();
+        try (BufferedReader in = new BufferedReader(new FileReader(latest))) {
+            String line;
+            while ((line = in.readLine()) != null) {
+                pw.println(line);
+            }
+        } catch (IOException e) {
+            pw.print("Unable to read: ");
+            pw.print(e);
+            pw.println();
         }
     }
 
@@ -21045,20 +21083,22 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    final void updateOomAdjLocked() {
+    ProcessRecord getTopAppLocked() {
         final ActivityRecord TOP_ACT = resumedAppLocked();
-        final ProcessRecord TOP_APP = TOP_ACT != null && TOP_ACT.hasProcess()
-                ? (ProcessRecord) TOP_ACT.app.mOwner : null;
+        if (TOP_ACT != null && TOP_ACT.hasProcess()) {
+            return (ProcessRecord) TOP_ACT.app.mOwner;
+        } else {
+            return null;
+        }
+    }
+
+    @GuardedBy("this")
+    final void updateOomAdjLocked() {
+        final ProcessRecord TOP_APP = getTopAppLocked();
         final long now = SystemClock.uptimeMillis();
         final long nowElapsed = SystemClock.elapsedRealtime();
         final long oldTime = now - ProcessList.MAX_EMPTY_TIME;
         final int N = mLruProcesses.size();
-
-        if (false) {
-            RuntimeException e = new RuntimeException();
-            e.fillInStackTrace();
-            Slog.i(TAG, "updateOomAdj: top=" + TOP_ACT, e);
-        }
 
         // Reset state in all uid records.
         for (int i=mActiveUids.size()-1; i>=0; i--) {

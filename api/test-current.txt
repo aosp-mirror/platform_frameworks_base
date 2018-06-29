@@ -683,22 +683,6 @@ package android.os {
 
   public final class StrictMode {
     method public static void setViolationLogger(android.os.StrictMode.ViolationLogger);
-    field public static final int DETECT_CUSTOM = 8; // 0x8
-    field public static final int DETECT_DISK_READ = 2; // 0x2
-    field public static final int DETECT_DISK_WRITE = 1; // 0x1
-    field public static final int DETECT_NETWORK = 4; // 0x4
-    field public static final int DETECT_RESOURCE_MISMATCH = 16; // 0x10
-    field public static final int DETECT_UNBUFFERED_IO = 32; // 0x20
-    field public static final int DETECT_VM_ACTIVITY_LEAKS = 1024; // 0x400
-    field public static final int DETECT_VM_CLEARTEXT_NETWORK = 16384; // 0x4000
-    field public static final int DETECT_VM_CLOSABLE_LEAKS = 512; // 0x200
-    field public static final int DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION = 32768; // 0x8000
-    field public static final int DETECT_VM_CURSOR_LEAKS = 256; // 0x100
-    field public static final int DETECT_VM_FILE_URI_EXPOSURE = 8192; // 0x2000
-    field public static final int DETECT_VM_INSTANCE_LEAKS = 2048; // 0x800
-    field public static final int DETECT_VM_NON_SDK_API_USAGE = 1073741824; // 0x40000000
-    field public static final int DETECT_VM_REGISTRATION_LEAKS = 4096; // 0x1000
-    field public static final int DETECT_VM_UNTAGGED_SOCKET = -2147483648; // 0x80000000
   }
 
   public static final class StrictMode.ViolationInfo implements android.os.Parcelable {
@@ -706,9 +690,8 @@ package android.os {
     ctor public StrictMode.ViolationInfo(android.os.Parcel, boolean);
     method public int describeContents();
     method public void dump(android.util.Printer, java.lang.String);
-    method public int getPolicyMask();
     method public java.lang.String getStackTrace();
-    method public int getViolationBit();
+    method public java.lang.Class<? extends android.os.strictmode.Violation> getViolationClass();
     method public java.lang.String getViolationDetails();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.os.StrictMode.ViolationInfo> CREATOR;

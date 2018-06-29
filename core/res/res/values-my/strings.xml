@@ -276,6 +276,9 @@
     <string name="permgrouplab_location" msgid="7275582855722310164">"တည်နေရာ"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"ဤစက်ပစ္စည်း၏ တည်နေရာကို ရယူရန်"</string>
     <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား ဤစက်ပစ္စည်း၏တည်နေရာကို သုံးခွင့်ပေးလိုပါသလား။"</string>
+    <string name="permgrouprequestdetail_location" msgid="1113400215566814664">"အက်ပ်ကိုအသုံးပြုသည့် အချိန်တွင်သာ ၎င်းကတည်နေရာကို အသုံးပြုခွင့်ရပါမည်။"</string>
+    <string name="permgroupbackgroundrequest_location" msgid="8461841153030844390">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား ဤစက်ပစ္စည်း၏တည်နေရာကို အမြဲ အသုံးပြုခွင့်ပေးလိုပါသလား။"</string>
+    <string name="permgroupbackgroundrequestdetail_location" msgid="1715668276378108654">"သင် အက်ပ်ကိုအသုံးပြုမနေသော်လည်း ၎င်းကတည်နေရာကို အမြဲ အသုံးပြုခွင့်ရနေပါမည်။"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ပြက္ခဒိန်"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"သင့်ပြက္ခဒိန်အား ဝင်ရောက်သုံးရန်"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; အား သင်၏ပြက္ခဒိန်ကို သုံးခွင့်ပေးလိုပါသလား။"</string>
@@ -402,8 +405,7 @@
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"ဤအက်ပ်သည် သင့်ဖုန်းပေါ်ရှိ ပြက္ခဒိန်ဖြစ်ရပ်များကို ထည့်ခြင်း၊ ဖယ်ရှားခြင်း သို့မဟုတ် ပြောင်းလဲခြင်းတို့ ပြုလုပ်နိုင်ပါသည်။ ဤအက်ပ်သည် ပြက္ခဒိန်ပိုင်ရှင်များမှ လာခြင်းဖြစ်နိုင်သည့် မက်ဆေ့ဂျ်များကို ပို့နိုင်ပြီး ပိုင်ရှင်များကို အသိမပေးဘဲ ဖြစ်ရပ်များကို ပြောင်းလဲနိုင်ပါသည်။"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"တည်နေရာပံ့ပိုးမှုညွှန်ကြားချက်အပိုအား ဝင်ရောက်ကြည့်ခြင်း"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"အက်ပ်အား တည်နေရာ စီမံပေးရေး ညွှန်ကြားချက် အပိုများကို ရယူခွင့်ပြုသည်။ သို့ဖြစ်၍ အက်ပ်သည် GPS သို့မဟုတ် အခြား တည်နေရာ ရင်းမြစ်ကို သုံးကြသူတို့၏ လုပ်ငန်းများကို ဝင်စွက်ခွင့် ပြုနိုင်သည်။"</string>
-    <!-- no translation found for permlab_accessFineLocation (6265109654698562427) -->
-    <skip />
+    <string name="permlab_accessFineLocation" msgid="6265109654698562427">"မျက်နှာစာတွင်သာ တည်နေရာအတိအကျ အသုံးပြုခြင်း"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"မျက်နှာစာတွင် ဖွင့်ထားမှသာ ဤအက်ပ်က သင်၏တည်နေရာအတိအကျကို ရယူနိုင်ပါသည်။ သင်၏ဖုန်းတွင် အက်ပ်ကအသုံးပြုရန်အတွက် ဤတည်နေရာဝန်ဆောင်မှုများကို ဖွင့်ထားပြီး အသုံးပြု၍ ရပါမည်။ ၎င်းက ဘက်ထရီ ပိုကုန်နိုင်ပါသည်။"</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"အနီးစပ်ဆုံး တည်နေရာ (ကွန်ရက် အခြေခံ)ကို ရယူသုံးရန်"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"ဤအက်ပ်သည် ဆဲလ်တာဝါများနှင့် Wi-Fi ကွန်ရက်များကဲ့သို့ ကွန်ရက်အရင်းအမြစ်ပေါ် အခြေခံပြီး သင့်တည်နေရာအချက်အလက်ကို ရယူနိုင်ပါသည်။ အက်ပ်က အသုံးပြုနိုင်ရန်အတွက် ဤတည်နေရာ ဝန်ဆောင်မှုများကို ဖွင့်ထားရမည် ဖြစ်ပြီး သင့်တက်ဘလက်ပေါ်တွင် ရရှိနိုင်ရပါမည်။"</string>
@@ -518,6 +520,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"လက်ဗွေ အိုင်ကွန်"</string>
+    <string name="permlab_manageFace" msgid="2137540986007309781">"မျက်နှာအထောက်အထားစိစစ်ခြင်း စက်ပစ္စည်းကို စီမံပါ"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"အသုံးပြုရန်အတွက် မျက်နှာပုံစံထည့်ရန် (သို့) ဖျက်ရန်နည်းလမ်းကို အက်ပ်အားသုံးခွင့်ပြုသည်။"</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"မျက်နှာအထောက်အထားစိစစ်ခြင်း စက်ပစ္စည်းကို သုံးပါ"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"အထောက်အထားစိစစ်ရန်အတွက် ဤအက်ပ်အား မျက်နှာအထောက်အထားစိစစ်ခြင်း စက်ပစ္စည်းကိုသုံးခွင့်ပြုသည်"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"မျက်နှာကို မဆောင်ရွက်နိုင်ပါ။ ထပ်လုပ်ကြည့်ပါ။"</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"မျက်နှာအလွန်လင်းနေသည်။ အလင်းနည်းနည်းတွင်ထပ်စမ်းပါ။"</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"မျက်နှာအလွန်မှောင်နေသည်။ ပြတင်းပေါက်ဖွင့်လိုက်ပါ။"</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"အာရုံခံကိရိယာကို မျက်နှာနှင့် ခွာလိုက်ပါ။"</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"အာရုံခံကိရိယာကို မျက်နှာနှင့် ကပ်လိုက်ပါ။"</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"အာရုံခံကိရိယာကို ပိုမြင့်အောင်ထားပါ။"</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"အာရုံခံကိရိယာကို ပိုနိမ့်အောင်ထားပါ။"</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"အာရုံခံကိရိယာကို ညာဘက်သို့ ရွှေ့ပါ။"</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"အာရုံခံကိရိယာကို ဘယ်ဘက်သို့ ရွှေ့ပါ။"</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"အာရုံခံကိရိယာကို ကြည့်ပါ။"</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"မျက်နှာတစ်ခုမျှ မတွေ့ပါ။"</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"မျက်နှာကို စက်ပစ္စည်း၏ အရှေ့တွင် အဆင်သင့်ထားပါ။"</string>
+  <string-array name="face_acquired_vendor">
+  </string-array>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"မျက်နှာ စက်ပစ္စည်း မရနိုင်ပါ။"</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"မျက်နှာ သက်တမ်းကုန်သွားပါပြီ။ ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"မျက်နှာကို သိုလှောင်၍မရပါ။"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"မျက်နှာ ဆောင်ရွက်ခြင်းကို ပယ်ဖျက်လိုက်ပါပြီ။"</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"အကြိမ်များစွာ စမ်းပြီးပါပြီ။ နောက်မှထပ်စမ်းပါ။"</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"အကြိမ်များစွာ စမ်းပြီးပါပြီ။ ပိတ်လိုက်ပါပြီ။"</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"ထပ်စမ်းကြည့်ပါ။"</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"စာရင်းသွင်းထားသည့် မျက်နှာတစ်ခုမျှ မရှိပါ။"</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"ဤစက်တွင် မျက်နှာအထောက်အထားစိစစ်ခြင်း အာရုံခံကိရိယာမရှိပါ"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"မျက်နှာ <xliff:g id="FACEID">%d</xliff:g>"</string>
+  <string-array name="face_error_vendor">
+  </string-array>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"မျက်နှာသင်္ကေတ"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ထပ်တူပြုအဆင်အပြင်အားဖတ်ခြင်း"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"အပလီကေးရှင်းအား အကောင့်တစ်ခုအတွက် ထပ်တူညီအောင် လုပ်ဆောင်မှု ဆက်တင်အား ကြည့်ခွင့် ပြုပါ။ ဥပမာ People အက်ပ်က အကောင့်တစ်ခုနဲ့ ထပ်တူညီအောင် လုပ်ရန် ဆက်သွယ်ထားမှု ရှိမရှိ သိရှိနိုင်ခြင်း"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ထပ်တူညီအောင် လုပ်ခြင်းအား ပြုနိုင်၊ မပြုနိုင် အပြောင်းအလဲလုပ်ခြင်း"</string>
@@ -569,7 +602,7 @@
     <string name="permlab_accessDrmCertificates" msgid="7436886640723203615">"DRM လက်မှတ်များကို ရယူသုံးခြင်း"</string>
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"အပလီကေးရှင်းတစ်ခုအား စီမံလုပ်ကိုင်ခွင့် DRM လက်မှတ်များ သုံးခွင့် ပြုသည်။ သာမန် အက်ပ်များ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။"</string>
     <string name="permlab_handoverStatus" msgid="7820353257219300883">"Android ရဲ့ အလင်းတန်းထိုး လွှဲပြောင်းမှု အခြေအနေကို ရယူရန်"</string>
-    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ဒီအပလီကေးရှင်းအား အန်ဒရွိုက်၏ လက်ရှိ အလင်းတန်းထိုး လွှဲပြောင်းမှု အကြောင်း အချက်အလက်ကို ရယူခွင့် ပြုသည်"</string>
+    <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ဒီအပလီကေးရှင်းအား Android၏ လက်ရှိ အလင်းတန်းထိုး လွှဲပြောင်းမှု အကြောင်း အချက်အလက်ကို ရယူခွင့် ပြုသည်"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM လက်မှတ်များ ဖယ်ရှားရန်"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"အပလီကေးရှင်းအား DRM လက်မှတ်များကို ဖယ်ရှားခွင့် ပြုသည်။  သာမန် အက်ပ်များ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။"</string>
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"စာပို့စာယူ ဆက်သွယ်ရေးဝန်ဆောင်မှုတစ်ခုအား ပူးပေါင်းခွင့်ပြုရန်"</string>
@@ -1178,6 +1211,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi တွင် အင်တာနက်ချိတ်ဆက်မှု မရှိပါ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"အခြားရွေးချယ်စရာများကိုကြည့်ရန် တို့ပါ"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"သင်၏ဟော့စပေါ့ ဆက်တင်များ ပြောင်းလဲမှု"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"သင်၏ ဟော့စပေါ့လိုင်း ပြောင်းသွားပါပြီ။"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ဤစက်ပစ္စည်းသည် သင်၏ 5GHz သီးသန့်ရွေးချယ်မှုအတွက် ပံ့ပိုးမထားပါ။ ၎င်းအစား ဤစက်ပစ္စည်းသည် ရနိုင်သည့်အခါ 5GHz လိုင်းကို သုံးသွားပါမည်။"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> သို့ ပြောင်းလိုက်ပြီ"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ဖြင့် အင်တာနက် အသုံးမပြုနိုင်သည့်အချိန်တွင် စက်ပစ္စည်းသည် <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ကို သုံးပါသည်။ ဒေတာသုံးစွဲခ ကျသင့်နိုင်ပါသည်။"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> မှ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> သို့ ပြောင်းလိုက်ပြီ"</string>
