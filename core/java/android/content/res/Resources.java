@@ -642,8 +642,7 @@ public class Resources {
      *           tool. This integer encodes the package, type, and resource
      *           entry. The value 0 is an invalid identifier.
      * 
-     * @return Resource dimension value multiplied by the appropriate 
-     * metric.
+     * @return Resource dimension value multiplied by the appropriate metric to convert to pixels.
      * 
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      *
