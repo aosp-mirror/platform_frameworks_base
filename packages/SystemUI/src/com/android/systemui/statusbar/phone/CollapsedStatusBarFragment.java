@@ -184,6 +184,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             state |= DISABLE_SYSTEM_INFO;
             state |= DISABLE_CLOCK;
         }
+
+        // In landscape, the heads up show but shouldHideNotificationIcons() return false
+        // because the visual icon is in notification icon area rather than heads up's space.
+        // whether the notification icon show or not, clock should hide when heads up show.
+        if (mStatusBarComponent.isHeadsUpShouldBeVisible()) {
+            state |= DISABLE_CLOCK;
+        }
+
         if (mNetworkController != null && EncryptionHelper.IS_DATA_ENCRYPTED) {
             if (mNetworkController.hasEmergencyCryptKeeperText()) {
                 state |= DISABLE_NOTIFICATION_ICONS;
