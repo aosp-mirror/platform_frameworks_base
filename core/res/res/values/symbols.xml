@@ -2446,7 +2446,7 @@
   <java-symbol type="string" name="face_name_template" />
 
   <!-- Face config -->
-  <java-symbol type="integer" name="config_face_MaxTemplatesPerUser" />
+  <java-symbol type="integer" name="config_faceMaxTemplatesPerUser" />
 
   <!-- From various Material changes -->
   <java-symbol type="attr" name="titleTextAppearance" />
