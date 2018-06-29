@@ -23993,6 +23993,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             Log.w(VIEW_LOG_TAG, "startDragAndDrop called on a detached view.");
             return false;
         }
+        if (!mAttachInfo.mViewRootImpl.mSurface.isValid()) {
+            Log.w(VIEW_LOG_TAG, "startDragAndDrop called with an invalid surface.");
+            return false;
+        }
 
         if (data != null) {
             data.prepareToLeaveProcess((flags & View.DRAG_FLAG_GLOBAL) != 0);
