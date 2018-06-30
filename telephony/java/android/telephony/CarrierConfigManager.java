@@ -77,6 +77,30 @@ public class CarrierConfigManager {
     public static final String
             KEY_CARRIER_VOLTE_PROVISIONED_BOOL = "carrier_volte_provisioned_bool";
 
+    /**
+     * Boolean indicating if the "Call forwarding" item is visible in the Call Settings menu.
+     * true means visible. false means gone.
+     * @hide
+     */
+    public static final String KEY_CALL_FORWARDING_VISIBILITY_BOOL =
+            "call_forwarding_visibility_bool";
+
+    /**
+     * Boolean indicating if the "Caller ID" item is visible in the Additional Settings menu.
+     * true means visible. false means gone.
+     * @hide
+     */
+    public static final String KEY_ADDITIONAL_SETTINGS_CALLER_ID_VISIBILITY_BOOL =
+            "additional_settings_caller_id_visibility_bool";
+
+    /**
+     * Boolean indicating if the "Call Waiting" item is visible in the Additional Settings menu.
+     * true means visible. false means gone.
+     * @hide
+     */
+    public static final String KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL =
+            "additional_settings_call_waiting_visibility_bool";
+
    /**
     * Boolean indicating if the "Call barring" item is visible in the Call Settings menu.
     * true means visible. false means gone.
@@ -2035,6 +2059,9 @@ public class CarrierConfigManager {
 
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONED_BOOL, false);
         sDefaults.putBoolean(KEY_CALL_BARRING_VISIBILITY_BOOL, false);
+        sDefaults.putBoolean(KEY_CALL_FORWARDING_VISIBILITY_BOOL, true);
+        sDefaults.putBoolean(KEY_ADDITIONAL_SETTINGS_CALLER_ID_VISIBILITY_BOOL, true);
+        sDefaults.putBoolean(KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_IGNORE_SIM_NETWORK_LOCKED_EVENTS_BOOL, false);
         sDefaults.putBoolean(KEY_MDN_IS_ADDITIONAL_VOICEMAIL_NUMBER_BOOL, false);
         sDefaults.putBoolean(KEY_OPERATOR_SELECTION_EXPAND_BOOL, true);
