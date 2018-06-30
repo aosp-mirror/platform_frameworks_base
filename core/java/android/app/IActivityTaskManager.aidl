@@ -421,4 +421,5 @@ interface IActivityTaskManager {
     void stopAppSwitches();
     void resumeAppSwitches();
     void setActivityController(in IActivityController watcher, boolean imAMonkey);
+    void setVoiceKeepAwake(in IVoiceInteractionSession session, boolean keepAwake);
 }

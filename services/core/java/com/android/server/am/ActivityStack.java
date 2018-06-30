@@ -495,7 +495,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (DEBUG_STACK) Slog.v(TAG_STACK, "set resumed activity to:" + record + " reason:"
                     + reason);
             setResumedActivity(record, reason + " - onActivityStateChanged");
-            mService.mAm.setResumedActivityUncheckLocked(record, reason);
+            mService.setResumedActivityUncheckLocked(record, reason);
             mStackSupervisor.mRecentTasks.add(record.getTask());
         }
     }
@@ -1478,7 +1478,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         // If we are not going to sleep, we want to ensure the device is
         // awake until the next activity is started.
-        if (!uiSleeping && !mService.mAm.isSleepingOrShuttingDownLocked()) {
+        if (!uiSleeping && !mService.isSleepingOrShuttingDownLocked()) {
             mStackSupervisor.acquireLaunchWakelock();
         }
 
@@ -2702,8 +2702,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     next.sleeping = false;
                     mService.mAm.getAppWarningsLocked().onResumeActivity(next);
                     mService.mAm.showAskCompatModeDialogLocked(next);
-                    next.app.setPendingUiCleanAndForceProcessStateUpTo(
-                            mService.mAm.mTopProcessState);
+                    next.app.setPendingUiCleanAndForceProcessStateUpTo(mService.mTopProcessState);
                     next.clearOptionsLocked();
                     transaction.setLifecycleStateRequest(
                             ResumeActivityItem.obtain(next.app.getReportedProcState(),
@@ -3546,7 +3545,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
             }
         }
-        mService.mAm.updateOomAdjLocked();
+        mService.updateOomAdj();
     }
 
     /**
@@ -3626,7 +3625,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         } catch (RemoteException re) {
                             // Ok
                         }
-                        mService.mAm.finishRunningVoiceLocked();
+                        mService.finishRunningVoiceLocked();
                         break;
                     }
                 }
@@ -3634,7 +3633,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
 
         if (didOne) {
-            mService.mAm.updateOomAdjLocked();
+            mService.updateOomAdj();
         }
     }
 
@@ -3823,7 +3822,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     "Moving to STOPPING: "+ r + " (finish requested)");
             r.setState(STOPPING, "finishCurrentActivityLocked");
             if (oomAdj) {
-                mService.mAm.updateOomAdjLocked();
+                mService.updateOomAdj();
             }
             return r;
         }
@@ -5362,11 +5361,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             return false;
         }
 
-        return display != null ? display.isSleeping() : mService.mAm.isSleepingLocked();
+        return display != null ? display.isSleeping() : mService.isSleepingLocked();
     }
 
     boolean shouldSleepOrShutDownActivities() {
-        return shouldSleepActivities() || mService.mAm.isShuttingDownLocked();
+        return shouldSleepActivities() || mService.mShuttingDown;
     }
 
     public void writeToProto(ProtoOutputStream proto, long fieldId) {

@@ -126,6 +126,7 @@ public class ActivityTestsBase {
     void setupActivityManagerService(ActivityManagerService am, ActivityTaskManagerService atm) {
         atm.setActivityManagerService(am);
         atm.mAmInternal = am.new LocalService();
+        am.mAtmInternal = atm.new LocalService();
         // Makes sure the supervisor is using with the spy object.
         atm.mStackSupervisor.setService(atm);
         doReturn(mock(IPackageManager.class)).when(am).getPackageManager();

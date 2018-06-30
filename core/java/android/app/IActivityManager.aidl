@@ -393,7 +393,6 @@ interface IActivityManager {
     void setDumpHeapDebugLimit(in String processName, int uid, long maxMemSize,
             in String reportPackage);
     void dumpHeapFinished(in String path);
-    void setVoiceKeepAwake(in IVoiceInteractionSession session, boolean keepAwake);
     void updateLockTaskPackages(int userId, in String[] packages);
     void noteAlarmStart(in IIntentSender sender, in WorkSource workSource, int sourceUid, in String tag);
     void noteAlarmFinish(in IIntentSender sender, in WorkSource workSource, int sourceUid, in String tag);

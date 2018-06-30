@@ -141,7 +141,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 + " to displayId=" + mDisplayId + " position=" + position);
         addStackReferenceIfNeeded(stack);
         positionChildAt(stack, position);
-        mSupervisor.mService.mAm.updateSleepIfNeededLocked();
+        mSupervisor.mService.updateSleepIfNeededLocked();
     }
 
     void removeChild(ActivityStack stack) {
@@ -149,7 +149,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 + " from displayId=" + mDisplayId);
         mStacks.remove(stack);
         removeStackReferenceIfNeeded(stack);
-        mSupervisor.mService.mAm.updateSleepIfNeededLocked();
+        mSupervisor.mService.updateSleepIfNeededLocked();
         onStackOrderChanged();
     }
 
@@ -715,7 +715,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
 
     boolean shouldSleep() {
         return (mStacks.isEmpty() || !mAllSleepTokens.isEmpty())
-                && (mSupervisor.mService.mAm.mRunningVoice == null);
+                && (mSupervisor.mService.mRunningVoice == null);
     }
 
     /**

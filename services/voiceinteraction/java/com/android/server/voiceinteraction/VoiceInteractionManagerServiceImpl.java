@@ -244,7 +244,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
                 Slog.w(TAG, "setKeepAwake does not match active session");
                 return;
             }
-            mAm.setVoiceKeepAwake(mActiveSession.mSession, keepAwake);
+            mAtm.setVoiceKeepAwake(mActiveSession.mSession, keepAwake);
         } catch (RemoteException e) {
             throw new IllegalStateException("Unexpected remote error", e);
         }

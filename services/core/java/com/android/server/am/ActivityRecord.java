@@ -641,7 +641,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     private void scheduleConfigurationChanged(Configuration config) {
-        if (attachedToProcess()) {
+        if (!attachedToProcess()) {
             if (DEBUG_CONFIGURATION) Slog.w(TAG,
                     "Can't report activity configuration update - client not running"
                             + ", activityRecord=" + this);
@@ -1343,13 +1343,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      * @return Whether AppOps allows this package to enter picture-in-picture.
      */
     private boolean checkEnterPictureInPictureAppOpsState() {
-        try {
-            return service.mAm.getAppOpsService().checkOperation(
-                    OP_PICTURE_IN_PICTURE, appInfo.uid, packageName) == MODE_ALLOWED;
-        } catch (RemoteException e) {
-            // Local call
-        }
-        return false;
+        return service.getAppOpsService().checkOperation(
+                OP_PICTURE_IN_PICTURE, appInfo.uid, packageName) == MODE_ALLOWED;
     }
 
     boolean isAlwaysFocusable() {
@@ -1424,7 +1419,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     final boolean isSleeping() {
         final ActivityStack stack = getStack();
-        return stack != null ? stack.shouldSleepActivities() : service.mAm.isSleepingLocked();
+        return stack != null ? stack.shouldSleepActivities() : service.isSleepingLocked();
     }
 
     /**
@@ -2015,7 +2010,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 EventLog.writeEvent(AM_ACTIVITY_FULLY_DRAWN_TIME,
                         userId, System.identityHashCode(this), shortComponentName,
                         thisTime, totalTime);
-                StringBuilder sb = service.mAm.mStringBuilder;
+                StringBuilder sb = service.mStringBuilder;
                 sb.setLength(0);
                 sb.append("Fully drawn ");
                 sb.append(shortComponentName);
@@ -2052,7 +2047,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             EventLog.writeEvent(AM_ACTIVITY_LAUNCH_TIME,
                     userId, System.identityHashCode(this), shortComponentName,
                     thisTime, totalTime);
-            StringBuilder sb = service.mAm.mStringBuilder;
+            StringBuilder sb = service.mStringBuilder;
             sb.setLength(0);
             sb.append("Displayed ");
             sb.append(shortComponentName);
@@ -2570,8 +2565,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // Update last reported values.
         final Configuration newMergedOverrideConfig = getMergedOverrideConfiguration();
 
-        setLastReportedConfiguration(service.mAm.getGlobalConfiguration(),
-                newMergedOverrideConfig);
+        setLastReportedConfiguration(service.getGlobalConfiguration(), newMergedOverrideConfig);
 
         if (mState == INITIALIZING) {
             // No need to relaunch or schedule new config for activity that hasn't been launched
@@ -2773,7 +2767,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             mStackSupervisor.activityRelaunchingLocked(this);
             final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(pendingResults,
                     pendingNewIntents, configChangeFlags,
-                    new MergedConfiguration(service.mAm.getGlobalConfiguration(),
+                    new MergedConfiguration(service.getGlobalConfiguration(),
                             getMergedOverrideConfiguration()),
                     preserveWindow);
             final ActivityLifecycleItem lifecycleItem;
@@ -2947,7 +2941,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
         final ActivityRecord r = new ActivityRecord(service, null /* caller */,
                 0 /* launchedFromPid */, launchedFromUid, launchedFromPackage, intent, resolvedType,
-                aInfo, service.mAm.getConfiguration(), null /* resultTo */, null /* resultWho */,
+                aInfo, service.getConfiguration(), null /* resultTo */, null /* resultWho */,
                 0 /* reqCode */, componentSpecified, false /* rootVoiceInteraction */,
                 stackSupervisor, null /* options */, null /* sourceRecord */);
 

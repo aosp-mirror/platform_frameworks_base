@@ -826,7 +826,7 @@ class ActivityStarter {
 
         ActivityRecord r = new ActivityRecord(mService, callerApp, callingPid,
                 callingUid,
-                callingPackage, intent, resolvedType, aInfo, mService.mAm.getGlobalConfiguration(),
+                callingPackage, intent, resolvedType, aInfo, mService.getGlobalConfiguration(),
                 resultRecord, resultWho, requestCode, componentSpecified, voiceSession != null,
                 mSupervisor, checkedOptions, sourceRecord);
         if (outActivity != null) {
@@ -1015,7 +1015,7 @@ class ActivityStarter {
         synchronized (mService.mGlobalLock) {
             final ActivityStack stack = mSupervisor.mFocusedStack;
             stack.mConfigWillChange = globalConfig != null
-                    && mService.mAm.getGlobalConfiguration().diff(globalConfig) != 0;
+                    && mService.getGlobalConfiguration().diff(globalConfig) != 0;
             if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                     "Starting activity when config will change = " + stack.mConfigWillChange);
 
