@@ -6145,6 +6145,21 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: Q
     ACTION_FACE_ENROLL = 1505;
+
+    // OPEN: Face Enroll introduction
+    // CATEGORY: SETTINGS
+    // OS: Q
+    FACE_ENROLL_INTRO = 1506;
+
+    // OPEN: Face Enroll introduction
+    // CATEGORY: SETTINGS
+    // OS: Q
+    FACE_ENROLL_ENROLLING = 1507;
+
+    // OPEN: Face Enroll introduction
+    // CATEGORY: SETTINGS
+    // OS: Q
+    FACE_ENROLL_FINISHED = 1508;
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.
