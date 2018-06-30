@@ -149,6 +149,7 @@ public class Environment {
     }
 
     /** {@hide} */
+    @TestApi
     public static File getStorageDirectory() {
         return DIR_ANDROID_STORAGE;
     }

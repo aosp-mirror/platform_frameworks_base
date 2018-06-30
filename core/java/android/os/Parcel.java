@@ -1465,7 +1465,6 @@ public final class Parcel {
      * {@link #readParcelableList(List, ClassLoader)} if required.
      *
      * @see #readParcelableList(List, ClassLoader)
-     * @hide
      */
     public final <T extends Parcelable> void writeParcelableList(@Nullable List<T> val, int flags) {
         if (val == null) {
@@ -2570,7 +2569,6 @@ public final class Parcel {
      * list was {@code null}, {@code list} is cleared.
      *
      * @see #writeParcelableList(List, int)
-     * @hide
      */
     @NonNull
     public final <T extends Parcelable> List<T> readParcelableList(@NonNull List<T> list,

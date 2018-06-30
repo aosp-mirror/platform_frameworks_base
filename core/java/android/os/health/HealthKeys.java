@@ -16,10 +16,8 @@
 
 package android.os.health;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.annotation.TestApi;
 
-import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,6 +30,7 @@ import java.util.Arrays;
  *
  * @hide
  */
+@TestApi
 public class HealthKeys {
 
     /**
@@ -81,6 +80,7 @@ public class HealthKeys {
      *
      * @hide
      */
+    @TestApi
     public static class Constants {
         private final String mDataType;
         private final int[][] mKeys = new int[TYPE_COUNT][];

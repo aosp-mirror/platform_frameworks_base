@@ -26,12 +26,8 @@ import android.content.pm.PackageManager;
  */
 public final class ImplicitDirectBootViolation extends Violation {
     /** @hide */
-    public static final String MESSAGE =
-            "Implicitly relying on automatic Direct Boot filtering; request explicit"
-                    + " filtering with PackageManager.MATCH_DIRECT_BOOT flags";
-
-    /** @hide */
     public ImplicitDirectBootViolation() {
-        super(MESSAGE);
+        super("Implicitly relying on automatic Direct Boot filtering; request explicit"
+                + " filtering with PackageManager.MATCH_DIRECT_BOOT flags");
     }
 }

@@ -577,6 +577,7 @@ public final class StrictMode {
              *
              * @hide
              */
+            @TestApi
             public Builder detectExplicitGc() {
                 // TODO(b/3400644): Un-hide this for next API update
                 // TODO(b/3400644): Un-hide ExplicitGcViolation for next API update
@@ -1814,6 +1815,7 @@ public final class StrictMode {
     }
 
     /** @hide */
+    @TestApi
     public static void conditionallyCheckInstanceCounts() {
         VmPolicy policy = getVmPolicy();
         int policySize = policy.classInstanceLimit.size();
@@ -2005,10 +2007,6 @@ public final class StrictMode {
     }
 
     /** @hide */
-    public static final String CLEARTEXT_DETECTED_MSG =
-            "Detected cleartext network traffic from UID ";
-
-    /** @hide */
     public static void onCleartextNetworkDetected(byte[] firstPacket) {
         byte[] rawAddr = null;
         if (firstPacket != null) {
@@ -2024,7 +2022,7 @@ public final class StrictMode {
         }
 
         final int uid = android.os.Process.myUid();
-        String msg = CLEARTEXT_DETECTED_MSG + uid;
+        String msg = "Detected cleartext network traffic from UID " + uid;
         if (rawAddr != null) {
             try {
                 msg += " to " + InetAddress.getByAddress(rawAddr);
