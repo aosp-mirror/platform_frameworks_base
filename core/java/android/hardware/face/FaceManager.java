@@ -869,7 +869,7 @@ public class FaceManager implements BiometricFaceConstants {
          *
          * @param face The face template that was removed.
          */
-        public void onRemovalSucceeded(Face face) {
+        public void onRemovalSucceeded(Face face, int remaining) {
         }
     }
 
@@ -937,13 +937,13 @@ public class FaceManager implements BiometricFaceConstants {
                             msg.arg2 /* vendorCode */);
                     break;
                 case MSG_REMOVED:
-                    sendRemovedResult((Face) msg.obj);
+                    sendRemovedResult((Face) msg.obj, msg.arg1 /* remaining */);
                     break;
             }
         }
     };
 
-    private void sendRemovedResult(Face face) {
+    private void sendRemovedResult(Face face, int remaining) {
         if (mRemovalCallback == null) {
             return;
         }
@@ -953,7 +953,7 @@ public class FaceManager implements BiometricFaceConstants {
         }
 
 
-        mRemovalCallback.onRemovalSucceeded(face);
+        mRemovalCallback.onRemovalSucceeded(face, remaining);
     }
 
     private void sendErrorResult(long deviceId, int errMsgId, int vendorCode) {

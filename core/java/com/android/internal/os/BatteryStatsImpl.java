@@ -107,6 +107,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -1068,7 +1069,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     // methods are protected not private to be VisibleForTesting
     public static class TimeBase {
-        protected final ArrayList<TimeBaseObs> mObservers = new ArrayList<>();
+        protected final ArrayList<WeakReference<TimeBaseObs>> mObservers = new ArrayList<>();
 
         protected long mUptime;
         protected long mRealtime;
@@ -1112,17 +1113,24 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         public void add(TimeBaseObs observer) {
-            mObservers.add(observer);
+            mObservers.add(new WeakReference<TimeBaseObs>(observer));
         }
 
         public void remove(TimeBaseObs observer) {
-            if (!mObservers.remove(observer)) {
-                Slog.wtf(TAG, "Removed unknown observer: " + observer);
-            }
+           if (!mObservers.removeIf(ref -> ref.get() == observer)) {
+             Slog.wtf(TAG, "Removed unknown observer: " + observer);
+           }
         }
 
         public boolean hasObserver(TimeBaseObs observer) {
-            return mObservers.contains(observer);
+            Iterator<WeakReference<TimeBaseObs>> i = mObservers.iterator();
+            while (i.hasNext()) {
+                TimeBaseObs obs = i.next().get();
+                if (obs == observer) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public void init(long uptime, long realtime) {
@@ -1211,9 +1219,11 @@ public class BatteryStatsImpl extends BatteryStats {
                     mRealtimeStart = realtime;
                     long batteryUptime = mUnpluggedUptime = getUptime(uptime);
                     long batteryRealtime = mUnpluggedRealtime = getRealtime(realtime);
-
-                    for (int i = mObservers.size() - 1; i >= 0; i--) {
-                        mObservers.get(i).onTimeStarted(realtime, batteryUptime, batteryRealtime);
+                    for (WeakReference<TimeBaseObs> ref : mObservers) {
+                        TimeBaseObs obs = ref.get();
+                        if (obs != null) {
+                            obs.onTimeStarted(realtime, batteryUptime, batteryRealtime);
+                        }
                     }
                 } else {
                     mPastUptime += uptime - mUptimeStart;
@@ -1221,11 +1231,14 @@ public class BatteryStatsImpl extends BatteryStats {
 
                     long batteryUptime = getUptime(uptime);
                     long batteryRealtime = getRealtime(realtime);
-
-                    for (int i = mObservers.size() - 1; i >= 0; i--) {
-                        mObservers.get(i).onTimeStopped(realtime, batteryUptime, batteryRealtime);
+                    for (WeakReference<TimeBaseObs> ref : mObservers) {
+                        TimeBaseObs obs = ref.get();
+                        if (obs != null) {
+                            obs.onTimeStopped(realtime, batteryUptime, batteryRealtime);
+                        }
                     }
                 }
+                mObservers.removeIf(ref -> ref.get() == null);
                 return true;
             }
             return false;
@@ -4021,7 +4034,9 @@ public class BatteryStatsImpl extends BatteryStats {
         try {
             IBatteryPropertiesRegistrar registrar = IBatteryPropertiesRegistrar.Stub.asInterface(
                     ServiceManager.getService("batteryproperties"));
-            registrar.scheduleUpdate();
+            if (registrar != null) {
+                registrar.scheduleUpdate();
+            }
         } catch (RemoteException e) {
             // Ignore.
         }

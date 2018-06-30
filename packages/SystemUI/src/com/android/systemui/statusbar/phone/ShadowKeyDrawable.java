@@ -82,7 +82,12 @@ public class ShadowKeyDrawable extends Drawable {
         if (bounds.isEmpty()) {
             return;
         }
-        if (mState.mLastDrawnBitmap == null) {
+
+        // If no cache or previous cached bitmap is hardware/software acceleration does not match
+        // the current canvas on draw then regenerate
+        if (mState.mLastDrawnBitmap == null
+                || mState.mIsHardwareBitmap != canvas.isHardwareAccelerated()) {
+            mState.mIsHardwareBitmap = canvas.isHardwareAccelerated();
             regenerateBitmapCache();
         }
         canvas.drawBitmap(mState.mLastDrawnBitmap, null, bounds, mPaint);
@@ -171,7 +176,10 @@ public class ShadowKeyDrawable extends Drawable {
             d.draw(canvas);
         }
 
-        bitmap = bitmap.copy(Bitmap.Config.HARDWARE, false);
+        if (mState.mIsHardwareBitmap) {
+            bitmap = bitmap.copy(Bitmap.Config.HARDWARE, false);
+        }
+
         mState.mLastDrawnBitmap = bitmap;
         canvas.restore();
     }
@@ -186,6 +194,7 @@ public class ShadowKeyDrawable extends Drawable {
         int mShadowSize;
         int mShadowColor;
 
+        boolean mIsHardwareBitmap;
         Bitmap mLastDrawnBitmap;
         ConstantState mChildState;
 

@@ -30,6 +30,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Contains phone state and service related information.
@@ -723,38 +724,40 @@ public class ServiceState implements Parcelable {
 
     @Override
     public int hashCode() {
-        return ((mVoiceRegState * 31)
-                + (mDataRegState * 37)
-                + mVoiceRoamingType
-                + mDataRoamingType
-                + mChannelNumber
-                + Arrays.hashCode(mCellBandwidths)
-                + (mIsManualNetworkSelection ? 1 : 0)
-                + ((null == mVoiceOperatorAlphaLong) ? 0 : mVoiceOperatorAlphaLong.hashCode())
-                + ((null == mVoiceOperatorAlphaShort) ? 0 : mVoiceOperatorAlphaShort.hashCode())
-                + ((null == mVoiceOperatorNumeric) ? 0 : mVoiceOperatorNumeric.hashCode())
-                + ((null == mDataOperatorAlphaLong) ? 0 : mDataOperatorAlphaLong.hashCode())
-                + ((null == mDataOperatorAlphaShort) ? 0 : mDataOperatorAlphaShort.hashCode())
-                + ((null == mDataOperatorNumeric) ? 0 : mDataOperatorNumeric.hashCode())
-                + mCdmaRoamingIndicator
-                + mCdmaDefaultRoamingIndicator
-                + (mIsEmergencyOnly ? 1 : 0)
-                + (mIsDataRoamingFromRegistration ? 1 : 0));
+        return Objects.hash(
+                mVoiceRegState,
+                mDataRegState,
+                mVoiceRoamingType,
+                mDataRoamingType,
+                mChannelNumber,
+                mCellBandwidths,
+                mVoiceOperatorAlphaLong,
+                mVoiceOperatorAlphaShort,
+                mVoiceOperatorNumeric,
+                mDataOperatorAlphaLong,
+                mDataOperatorAlphaShort,
+                mDataOperatorNumeric,
+                mIsManualNetworkSelection,
+                mRilVoiceRadioTechnology,
+                mRilDataRadioTechnology,
+                mCssIndicator,
+                mNetworkId,
+                mSystemId,
+                mCdmaRoamingIndicator,
+                mCdmaDefaultRoamingIndicator,
+                mCdmaEriIconIndex,
+                mCdmaEriIconMode,
+                mIsEmergencyOnly,
+                mIsDataRoamingFromRegistration,
+                mIsUsingCarrierAggregation,
+                mLteEarfcnRsrpBoost,
+                mNetworkRegistrationStates);
     }
 
     @Override
     public boolean equals (Object o) {
-        ServiceState s;
-
-        try {
-            s = (ServiceState) o;
-        } catch (ClassCastException ex) {
-            return false;
-        }
-
-        if (o == null) {
-            return false;
-        }
+        if (!(o instanceof ServiceState)) return false;
+        ServiceState s = (ServiceState) o;
 
         return (mVoiceRegState == s.mVoiceRegState
                 && mDataRegState == s.mDataRegState

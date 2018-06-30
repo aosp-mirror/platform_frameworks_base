@@ -133,7 +133,7 @@ class ActivityMetricsLogger {
 
     private final class WindowingModeTransitionInfoSnapshot {
         final private ApplicationInfo applicationInfo;
-        final private ProcessRecord processRecord;
+        final private WindowProcessController processRecord;
         final private String packageName;
         final private String launchedActivityName;
         final private String launchedActivityLaunchedFromPackage;
@@ -238,7 +238,7 @@ class ActivityMetricsLogger {
      * @param launchedActivity the activity that is being launched
      */
     void notifyActivityLaunched(int resultCode, ActivityRecord launchedActivity) {
-        final ProcessRecord processRecord = findProcessForActivity(launchedActivity);
+        final WindowProcessController processRecord = findProcessForActivity(launchedActivity);
         final boolean processRunning = processRecord != null;
 
         // We consider this a "process switch" if the process of the activity that gets launched
@@ -246,7 +246,7 @@ class ActivityMetricsLogger {
         // of caches might be purged so the time until it produces the first frame is very
         // interesting.
         final boolean processSwitch = processRecord == null
-                || !processRecord.getWindowProcessController().hasStartedActivity(launchedActivity);
+                || !processRecord.hasStartedActivity(launchedActivity);
 
         notifyActivityLaunched(resultCode, launchedActivity, processRunning, processSwitch);
     }
@@ -631,7 +631,7 @@ class ActivityMetricsLogger {
             return;
         }
 
-        final int pid = info.processRecord.pid;
+        final int pid = info.processRecord.getPid();
         final int uid = info.applicationInfo.uid;
         final MemoryStat memoryStat = readMemoryStatFromFilesystem(uid, pid);
         if (memoryStat == null) {
@@ -651,9 +651,9 @@ class ActivityMetricsLogger {
                 memoryStat.swapInBytes);
     }
 
-    private ProcessRecord findProcessForActivity(ActivityRecord launchedActivity) {
+    private WindowProcessController findProcessForActivity(ActivityRecord launchedActivity) {
         return launchedActivity != null
-                ? mSupervisor.mService.mAm.mProcessNames.get(
+                ? mSupervisor.mService.mProcessNames.get(
                         launchedActivity.processName, launchedActivity.appInfo.uid)
                 : null;
     }

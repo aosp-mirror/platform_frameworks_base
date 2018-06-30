@@ -541,7 +541,7 @@ public class FaceService extends BiometricService {
     @Override
     protected boolean hasReachedEnrollmentLimit(int userId) {
         final int limit = getContext().getResources().getInteger(
-                com.android.internal.R.integer.config_face_MaxTemplatesPerUser);
+                com.android.internal.R.integer.config_faceMaxTemplatesPerUser);
         final int enrolled = FaceService.this.getEnrolledFaces(userId).size();
         if (enrolled >= limit) {
             Slog.w(TAG, "Too many faces registered");

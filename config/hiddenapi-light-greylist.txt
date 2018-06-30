@@ -857,9 +857,6 @@ Landroid/app/PendingIntent;->setOnMarshaledListener(Landroid/app/PendingIntent$O
 Landroid/app/PictureInPictureArgs;-><init>()V
 Landroid/app/PictureInPictureArgs;->setActions(Ljava/util/List;)V
 Landroid/app/PictureInPictureArgs;->setAspectRatio(F)V
-Landroid/app/PictureInPictureParams;->getActions()Ljava/util/List;
-Landroid/app/PictureInPictureParams;->getAspectRatio()F
-Landroid/app/PictureInPictureParams;->getSourceRectHint()Landroid/graphics/Rect;
 Landroid/app/Presentation;->createPresentationContext(Landroid/content/Context;Landroid/view/Display;I)Landroid/content/Context;
 Landroid/app/ProgressDialog;->mMessageView:Landroid/widget/TextView;
 Landroid/app/ProgressDialog;->mProgress:Landroid/widget/ProgressBar;
