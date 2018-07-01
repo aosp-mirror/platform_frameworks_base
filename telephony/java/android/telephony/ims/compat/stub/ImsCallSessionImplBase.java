@@ -591,5 +591,11 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
         public void callSessionRttMessageReceived(String rttMessage) throws RemoteException {
             mNewListener.callSessionRttMessageReceived(rttMessage);
         }
+
+        @Override
+        public void callSessionRttAudioIndicatorChanged(ImsStreamMediaProfile profile)
+                throws RemoteException {
+            mNewListener.callSessionRttAudioIndicatorChanged(profile);
+        }
     }
 }
