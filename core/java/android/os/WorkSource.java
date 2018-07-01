@@ -2,6 +2,7 @@ package android.os;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.os.WorkSourceProto;
 import android.provider.Settings;
@@ -83,6 +84,7 @@ public class WorkSource implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public WorkSource(int uid) {
         mNum = 1;
         mUids = new int[] { uid, 0 };
@@ -127,16 +129,19 @@ public class WorkSource implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public int size() {
         return mNum;
     }
 
     /** @hide */
+    @TestApi
     public int get(int index) {
         return mUids[index];
     }
 
     /** @hide */
+    @TestApi
     public String getName(int index) {
         return mNames != null ? mNames[index] : null;
     }
@@ -328,6 +333,7 @@ public class WorkSource implements Parcelable {
      *     to be aware of internal differences.
      */
     @Deprecated
+    @TestApi
     public WorkSource[] setReturningDiffs(WorkSource other) {
         synchronized (sTmpWorkSource) {
             sNewbWork = null;
@@ -379,6 +385,7 @@ public class WorkSource implements Parcelable {
      * @deprecated meant for unit testing use only. Will be removed in a future API revision.
      */
     @Deprecated
+    @TestApi
     public WorkSource addReturningNewbs(WorkSource other) {
         synchronized (sTmpWorkSource) {
             sNewbWork = null;
@@ -388,6 +395,7 @@ public class WorkSource implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public boolean add(int uid) {
         if (mNum <= 0) {
             mNames = null;
@@ -407,6 +415,7 @@ public class WorkSource implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public boolean add(int uid, String name) {
         if (mNum <= 0) {
             insert(0, uid, name);

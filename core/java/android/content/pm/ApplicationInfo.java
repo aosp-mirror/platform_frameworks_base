@@ -477,6 +477,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * {@hide}
      */
+    @TestApi
     public static final int PRIVATE_FLAG_PRIVILEGED = 1<<3;
 
     /**
@@ -649,6 +650,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
      * @hide
      */
+    @TestApi
     public @ApplicationInfoPrivateFlags int privateFlags;
 
     /**

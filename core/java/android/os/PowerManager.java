@@ -961,7 +961,6 @@ public final class PowerManager {
      *
      * @hide Requires signature permission.
      */
-    @TestApi
     public void nap(long time) {
         try {
             mService.nap(time);

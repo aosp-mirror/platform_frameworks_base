@@ -96,6 +96,7 @@ public class SystemProperties {
      */
     @NonNull
     @SystemApi
+    @TestApi
     public static String get(@NonNull String key) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get(key);
