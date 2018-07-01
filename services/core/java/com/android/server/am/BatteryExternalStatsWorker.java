@@ -543,14 +543,25 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         final long idleTimeMs = latest.mControllerIdleTimeMs - lastIdleMs;
         final long scanTimeMs = latest.mControllerScanTimeMs - lastScanMs;
 
-        if (txTimeMs < 0 || rxTimeMs < 0 || scanTimeMs < 0) {
+        if (txTimeMs < 0 || rxTimeMs < 0 || scanTimeMs < 0 || idleTimeMs < 0) {
             // The stats were reset by the WiFi system (which is why our delta is negative).
-            // Returns the unaltered stats.
-            delta.mControllerEnergyUsed = latest.mControllerEnergyUsed;
-            delta.mControllerRxTimeMs = latest.mControllerRxTimeMs;
-            delta.mControllerTxTimeMs = latest.mControllerTxTimeMs;
-            delta.mControllerIdleTimeMs = latest.mControllerIdleTimeMs;
-            delta.mControllerScanTimeMs = latest.mControllerScanTimeMs;
+            // Returns the unaltered stats. The total on time should not exceed the time
+            // duartion between reports.
+            final long totalOnTimeMs = latest.mControllerTxTimeMs + latest.mControllerRxTimeMs
+                        + latest.mControllerIdleTimeMs;
+            if (totalOnTimeMs <= timePeriodMs + MAX_WIFI_STATS_SAMPLE_ERROR_MILLIS) {
+                delta.mControllerEnergyUsed = latest.mControllerEnergyUsed;
+                delta.mControllerRxTimeMs = latest.mControllerRxTimeMs;
+                delta.mControllerTxTimeMs = latest.mControllerTxTimeMs;
+                delta.mControllerIdleTimeMs = latest.mControllerIdleTimeMs;
+                delta.mControllerScanTimeMs = latest.mControllerScanTimeMs;
+            } else {
+                delta.mControllerEnergyUsed = 0;
+                delta.mControllerRxTimeMs = 0;
+                delta.mControllerTxTimeMs = 0;
+                delta.mControllerIdleTimeMs = 0;
+                delta.mControllerScanTimeMs = 0;
+            }
             Slog.v(TAG, "WiFi energy data was reset, new WiFi energy data is " + delta);
         } else {
             final long totalActiveTimeMs = txTimeMs + rxTimeMs;
