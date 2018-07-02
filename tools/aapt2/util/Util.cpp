@@ -297,6 +297,53 @@ bool VerifyJavaStringFormat(const StringPiece& str) {
   return true;
 }
 
+std::string Utf8ToModifiedUtf8(const std::string& utf8) {
+  // Java uses Modified UTF-8 which only supports the 1, 2, and 3 byte formats of UTF-8. To encode
+  // 4 byte UTF-8 codepoints, Modified UTF-8 allows the use of surrogate pairs in the same format
+  // of CESU-8 surrogate pairs. Calculate the size of the utf8 string with all 4 byte UTF-8
+  // codepoints replaced with 2 3 byte surrogate pairs
+  size_t modified_size = 0;
+  const size_t size = utf8.size();
+  for (size_t i = 0; i < size; i++) {
+    if (((uint8_t) utf8[i] >> 4) == 0xF) {
+      modified_size += 6;
+      i += 3;
+    } else {
+      modified_size++;
+    }
+  }
+
+  // Early out if no 4 byte codepoints are found
+  if (size == modified_size) {
+    return utf8;
+  }
+
+  std::string output;
+  output.reserve(modified_size);
+  for (size_t i = 0; i < size; i++) {
+    if (((uint8_t) utf8[i] >> 4) == 0xF) {
+      auto codepoint = (char32_t) utf32_from_utf8_at(utf8.data(), size, i, nullptr);
+
+      // Calculate the high and low surrogates as UTF-16 would
+      char32_t high = ((codepoint - 0x10000) / 0x400) + 0xD800;
+      char32_t low = ((codepoint - 0x10000) % 0x400) + 0xDC00;
+
+      // Encode each surrogate in UTF-8
+      output.push_back((char) (0xE4 | ((high >> 12) & 0xF)));
+      output.push_back((char) (0x80 | ((high >> 6) & 0x3F)));
+      output.push_back((char) (0x80 | (high & 0x3F)));
+      output.push_back((char) (0xE4 | ((low >> 12) & 0xF)));
+      output.push_back((char) (0x80 | ((low >> 6) & 0x3F)));
+      output.push_back((char) (0x80 | (low & 0x3F)));
+      i += 3;
+    } else {
+      output.push_back(utf8[i]);
+    }
+  }
+
+  return output;
+}
+
 std::u16string Utf8ToUtf16(const StringPiece& utf8) {
   ssize_t utf16_length = utf8_to_utf16_length(
       reinterpret_cast<const uint8_t*>(utf8.data()), utf8.length());
