@@ -2100,6 +2100,9 @@ public class KeyguardViewMediator extends SystemUI {
         pw.print("  mDrawnCallback: "); pw.println(mDrawnCallback);
     }
 
+    /**
+     * @param aodShowing true when AOD - or ambient mode - is showing.
+     */
     public void setAodShowing(boolean aodShowing) {
         setShowingLocked(mShowing, aodShowing);
     }
