@@ -1828,6 +1828,13 @@ public class CarrierConfigManager {
             "notify_international_call_on_wfc_bool";
 
     /**
+     * Flag to hide Preset APN details. If true, user cannot enter ApnEditor view of Preset APN,
+     * and cannot view details of the APN. If false, user can enter ApnEditor view of Preset APN.
+     * Default value is false.
+     */
+    public static final String KEY_HIDE_PRESET_APN_DETAILS_BOOL = "hide_preset_apn_details_bool";
+
+    /**
      * Flag specifying whether to show an alert dialog for video call charges.
      * By default this value is {@code false}.
      * @hide
@@ -2595,6 +2602,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DISPLAY_VOICEMAIL_NUMBER_AS_DEFAULT_CALL_FORWARDING_NUMBER_BOOL,
                 false);
         sDefaults.putBoolean(KEY_NOTIFY_INTERNATIONAL_CALL_ON_WFC_BOOL, false);
+        sDefaults.putBoolean(KEY_HIDE_PRESET_APN_DETAILS_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_VIDEO_CALL_CHARGES_ALERT_DIALOG_BOOL, false);
         sDefaults.putStringArray(KEY_CALL_FORWARDING_BLOCKS_WHILE_ROAMING_STRING_ARRAY,
                 null);
