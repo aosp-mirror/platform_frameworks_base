@@ -48,6 +48,7 @@ import android.widget.Toast;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.OverviewProxyService;
+import com.android.systemui.SysUiServiceProvider;
 import com.google.android.collect.Lists;
 
 import com.android.internal.logging.MetricsLogger;
@@ -1095,7 +1096,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     private StatusBar getStatusBar() {
-        return ((SystemUIApplication) mContext).getComponent(StatusBar.class);
+        return SysUiServiceProvider.getComponent(mContext, StatusBar.class);
     }
 
     /**

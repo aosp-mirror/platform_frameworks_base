@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.SystemUIApplication;
 
 /**
@@ -40,8 +41,7 @@ public class RecentsSystemUserService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        SystemUIApplication app = (SystemUIApplication) getApplication();
-        Recents recents = app.getComponent(Recents.class);
+        Recents recents = SysUiServiceProvider.getComponent(this, Recents.class);
         if (DEBUG) {
             Log.d(TAG, "onBind: " + recents);
         }
