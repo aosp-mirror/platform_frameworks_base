@@ -141,4 +141,15 @@ public class AccessibilityServiceConnectionTest {
         when(mMockUserState.getBindingServicesLocked())
                 .thenReturn(new HashSet<>(Arrays.asList(componentName)));
     }
+
+    @Test
+    public void binderDied_keysGetFlushed() {
+        IBinder mockBinder = mock(IBinder.class);
+        setServiceBinding(COMPONENT_NAME);
+        mConnection.bindLocked();
+        mConnection.onServiceConnected(COMPONENT_NAME, mockBinder);
+        mConnection.binderDied();
+        assertTrue(mConnection.getServiceInfo().crashed);
+        verify(mMockKeyEventDispatcher).flush(mConnection);
+    }
 }
