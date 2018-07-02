@@ -171,6 +171,11 @@ enum DebugLevel {
 #define PROPERTY_CAPTURE_SKP_ENABLED "debug.hwui.capture_skp_enabled"
 
 /**
+ * Allows to record Skia drawing commands with systrace.
+ */
+#define PROPERTY_SKIA_ATRACE_ENABLED "debug.hwui.skia_atrace_enabled"
+
+/**
  * Defines how many frames in a sequence to capture.
  */
 #define PROPERTY_CAPTURE_SKP_FRAMES "debug.hwui.capture_skp_frames"
