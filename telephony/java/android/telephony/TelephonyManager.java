@@ -6038,7 +6038,11 @@ public class TelephonyManager {
         }
     }
 
-    /** @hide */
+    /**
+     * @deprecated Use {@link android.telecom.TelecomManager#isInCall} instead
+     * @hide
+     */
+    @Deprecated
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
@@ -6055,7 +6059,11 @@ public class TelephonyManager {
         return false;
     }
 
-    /** @hide */
+    /**
+     * @deprecated Use {@link android.telecom.TelecomManager#isRinging} instead
+     * @hide
+     */
+    @Deprecated
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
@@ -6072,7 +6080,11 @@ public class TelephonyManager {
         return false;
     }
 
-    /** @hide */
+    /**
+     * @deprecated Use {@link android.telecom.TelecomManager#isInCall} instead
+     * @hide
+     */
+    @Deprecated
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
@@ -6089,7 +6101,11 @@ public class TelephonyManager {
         return true;
     }
 
-    /** @hide */
+    /**
+     * @deprecated Use {@link android.telephony.TelephonyManager#getServiceState} instead
+     * @hide
+     */
+    @Deprecated
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
