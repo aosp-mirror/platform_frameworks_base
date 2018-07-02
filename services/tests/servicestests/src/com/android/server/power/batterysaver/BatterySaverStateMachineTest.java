@@ -173,7 +173,6 @@ public class BatterySaverStateMachineTest {
         mTarget = new TestableBatterySaverStateMachine();
 
         mDevice.pushBatteryStatus();
-        mDevice.pushGlobalSettings();
         mTarget.onBootCompleted();
     }
 
