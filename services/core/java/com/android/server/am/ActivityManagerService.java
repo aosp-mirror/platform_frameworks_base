@@ -12763,12 +12763,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final File[] files = new File(ANR_TRACE_DIR).listFiles();
         if (ArrayUtils.isEmpty(files)) {
+            pw.println("  <no ANR has occurred since boot>");
             return;
         }
         // Find the latest file.
         File latest = null;
         for (File f : files) {
-            if (latest == null || latest.getName().compareTo(f.getName()) < 0) {
+            if ((latest == null) || (latest.lastModified() < f.lastModified())) {
                 latest = f;
             }
         }
