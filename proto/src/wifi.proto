@@ -470,6 +470,9 @@ message WifiLog {
   // Counts the occurrences of each link speed (Mbps) level
   // with rssi (dBm) and rssi^2 sums (dBm^2)
   repeated LinkSpeedCount link_speed_counts = 121;
+
+  // Number of times the SarManager failed to register SAR sensor listener
+  optional int32 num_sar_sensor_registration_failures = 122;
 }
 
 // Information that gets logged for every WiFi connection.
