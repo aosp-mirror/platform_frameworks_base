@@ -6991,8 +6991,6 @@ public final class Settings {
          */
         public static final String SELECTED_SPELL_CHECKER = "selected_spell_checker";
 
-        private static final Validator SELECTED_SPELL_CHECKER_VALIDATOR = COMPONENT_NAME_VALIDATOR;
-
         /**
          * {@link android.view.textservice.SpellCheckerSubtype#hashCode()} of the selected subtype
          * of the selected spell checker service which is one of the services managed by the text
@@ -7003,17 +7001,12 @@ public final class Settings {
         public static final String SELECTED_SPELL_CHECKER_SUBTYPE =
                 "selected_spell_checker_subtype";
 
-        private static final Validator SELECTED_SPELL_CHECKER_SUBTYPE_VALIDATOR =
-                ANY_INTEGER_VALIDATOR;
-
         /**
          * Whether spell checker is enabled or not.
          *
          * @hide
          */
         public static final String SPELL_CHECKER_ENABLED = "spell_checker_enabled";
-
-        private static final Validator SPELL_CHECKER_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * What happens when the user presses the Power button while in-call
@@ -8007,9 +8000,6 @@ public final class Settings {
             WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,            // moved to global
             WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,               // moved to global
             WIFI_NUM_OPEN_NETWORKS_KEPT,                        // moved to global
-            SELECTED_SPELL_CHECKER,
-            SELECTED_SPELL_CHECKER_SUBTYPE,
-            SPELL_CHECKER_ENABLED,
             MOUNT_PLAY_NOTIFICATION_SND,
             MOUNT_UMS_AUTOSTART,
             MOUNT_UMS_PROMPT,
@@ -8134,10 +8124,6 @@ public final class Settings {
             VALIDATORS.put(WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
                     WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY_VALIDATOR);
             VALIDATORS.put(WIFI_NUM_OPEN_NETWORKS_KEPT, WIFI_NUM_OPEN_NETWORKS_KEPT_VALIDATOR);
-            VALIDATORS.put(SELECTED_SPELL_CHECKER, SELECTED_SPELL_CHECKER_VALIDATOR);
-            VALIDATORS.put(SELECTED_SPELL_CHECKER_SUBTYPE,
-                    SELECTED_SPELL_CHECKER_SUBTYPE_VALIDATOR);
-            VALIDATORS.put(SPELL_CHECKER_ENABLED, SPELL_CHECKER_ENABLED_VALIDATOR);
             VALIDATORS.put(MOUNT_PLAY_NOTIFICATION_SND, MOUNT_PLAY_NOTIFICATION_SND_VALIDATOR);
             VALIDATORS.put(MOUNT_UMS_AUTOSTART, MOUNT_UMS_AUTOSTART_VALIDATOR);
             VALIDATORS.put(MOUNT_UMS_PROMPT, MOUNT_UMS_PROMPT_VALIDATOR);
