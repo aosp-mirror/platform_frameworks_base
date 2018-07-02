@@ -500,6 +500,21 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         restartTracker.setRestarting(true, memFactor, now);
     }
 
+    public void setProcess(ProcessRecord _proc) {
+        app = _proc;
+        for (int conni=connections.size()-1; conni>=0; conni--) {
+            ArrayList<ConnectionRecord> cr = connections.valueAt(conni);
+            for (int i=0; i<cr.size(); i++) {
+                final ConnectionRecord conn = cr.get(i);
+                if (_proc != null) {
+                    conn.startAssociationIfNeeded();
+                } else {
+                    conn.stopAssociation();
+                }
+            }
+        }
+    }
+
     public AppBindRecord retrieveAppBindingLocked(Intent intent,
             ProcessRecord app) {
         Intent.FilterComparison filter = new Intent.FilterComparison(intent);

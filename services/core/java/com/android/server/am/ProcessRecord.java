@@ -91,6 +91,10 @@ final class ProcessRecord implements WindowProcessListener {
             return mPkgList.valueAt(index);
         }
 
+        ProcessStats.ProcessStateHolder get(String pkgName) {
+            return mPkgList.get(pkgName);
+        }
+
         boolean containsKey(Object key) {
             return mPkgList.containsKey(key);
         }
@@ -546,7 +550,7 @@ final class ProcessRecord implements WindowProcessListener {
                 if (holder.state != null && holder.state != origBase) {
                     holder.state.makeInactive();
                 }
-                holder.state = tracker.getProcessStateLocked(pkgList.keyAt(i), uid,
+                tracker.updateProcessStateHolderLocked(holder, pkgList.keyAt(i), uid,
                         info.longVersionCode, processName);
                 if (holder.state != baseProcessTracker) {
                     holder.state.makeActive();
@@ -573,6 +577,7 @@ final class ProcessRecord implements WindowProcessListener {
                 if (holder.state != null && holder.state != origBase) {
                     holder.state.makeInactive();
                 }
+                holder.pkg = null;
                 holder.state = null;
             }
         }
@@ -801,8 +806,7 @@ final class ProcessRecord implements WindowProcessListener {
             ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
                     versionCode);
             if (baseProcessTracker != null) {
-                holder.state = tracker.getProcessStateLocked(
-                        pkg, uid, versionCode, processName);
+                tracker.updateProcessStateHolderLocked(holder, pkg, uid, versionCode, processName);
                 pkgList.put(pkg, holder);
                 if (holder.state != baseProcessTracker) {
                     holder.state.makeActive();
@@ -848,14 +852,13 @@ final class ProcessRecord implements WindowProcessListener {
 
                 }
                 pkgList.clear();
-                ProcessState ps = tracker.getProcessStateLocked(
-                        info.packageName, uid, info.longVersionCode, processName);
                 ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
                         info.longVersionCode);
-                holder.state = ps;
+                tracker.updateProcessStateHolderLocked(holder, info.packageName, uid,
+                        info.longVersionCode, processName);
                 pkgList.put(info.packageName, holder);
-                if (ps != baseProcessTracker) {
-                    ps.makeActive();
+                if (holder.state != baseProcessTracker) {
+                    holder.state.makeActive();
                 }
             }
         } else if (N != 1) {

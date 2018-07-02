@@ -362,12 +362,13 @@ public final class DumpUtils {
         }
     }
 
-    public static void dumpProcessSummaryLocked(PrintWriter pw, String prefix,
+    public static void dumpProcessSummaryLocked(PrintWriter pw, String prefix, String header,
             ArrayList<ProcessState> procs, int[] screenStates, int[] memStates, int[] procStates,
             long now, long totalTime) {
         for (int i=procs.size()-1; i>=0; i--) {
             final ProcessState proc = procs.get(i);
-            proc.dumpSummary(pw, prefix, screenStates, memStates, procStates, now, totalTime);
+            proc.dumpSummary(pw, prefix, header, screenStates, memStates, procStates, now,
+                    totalTime);
         }
     }
 

@@ -83,6 +83,18 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
         return holder;
     }
 
+    public void setProcess(ProcessRecord proc) {
+        this.proc = proc;
+        for (int iconn = connections.size() - 1; iconn >= 0; iconn--) {
+            final ContentProviderConnection conn = connections.get(iconn);
+            if (proc != null) {
+                conn.startAssociationIfNeeded();
+            } else {
+                conn.stopAssociation();
+            }
+        }
+    }
+
     public boolean canRunHere(ProcessRecord app) {
         return (info.multiprocess || info.processName.equals(app.processName))
                 && uid == app.info.uid;
