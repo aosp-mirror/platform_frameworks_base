@@ -266,6 +266,12 @@ public class MtpDatabase implements AutoCloseable {
                 if (MtpDatabase.this.mServer != null)
                     MtpDatabase.this.mServer.sendObjectRemoved(id);
             }
+
+            @Override
+            public void sendObjectInfoChanged(int id) {
+                if (MtpDatabase.this.mServer != null)
+                    MtpDatabase.this.mServer.sendObjectInfoChanged(id);
+            }
         }, subDirectories == null ? null : Sets.newHashSet(subDirectories));
 
         initDeviceProperties(context);
