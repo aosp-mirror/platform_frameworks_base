@@ -379,7 +379,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
                     // that adding routes that already exist does not cause an
                     // error (EEXIST is silently ignored).
                     mNMService.addInterfaceToLocalNetwork(mIfaceName, toBeAdded);
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     mLog.e("Failed to add IPv6 routes to local table: " + e);
                 }
 
