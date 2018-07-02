@@ -142,14 +142,14 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     @Override
     public void showDetail(boolean show) {
-        int zenDuration = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.ZEN_DURATION, 0);
-        boolean showOnboarding = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0;
+        int zenDuration = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.ZEN_DURATION, 0);
+        boolean showOnboarding = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0;
         if (showOnboarding) {
             // don't show on-boarding again or notification ever
-            Settings.Global.putInt(mContext.getContentResolver(),
-                    Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
             // turn on DND
             mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
             // show on-boarding screen
@@ -158,7 +158,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
             Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(intent, 0);
         } else {
             switch (zenDuration) {
-                case Settings.Global.ZEN_DURATION_PROMPT:
+                case Settings.Secure.ZEN_DURATION_PROMPT:
                     mUiHandler.post(() -> {
                         Dialog mDialog = new EnableZenModeDialog(mContext).createDialog();
                         mDialog.getWindow().setType(
@@ -170,7 +170,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
                         mHost.collapsePanels();
                     });
                     break;
-                case Settings.Global.ZEN_DURATION_FOREVER:
+                case Settings.Secure.ZEN_DURATION_FOREVER:
                     mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
                     break;
                 default:

@@ -72,7 +72,7 @@ public class ZenDurationDialogTest {
 
     @Test
     public void testAlwaysPrompt() {
-        Settings.Global.putInt(mContentResolver, Settings.Global.ZEN_DURATION,
+        Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION,
                 Settings.Global.ZEN_DURATION_PROMPT);
         mController.createDialog();
 
@@ -86,8 +86,8 @@ public class ZenDurationDialogTest {
 
     @Test
     public void testForever() {
-        Settings.Global.putInt(mContentResolver, Settings.Global.ZEN_DURATION,
-                Settings.Global.ZEN_DURATION_FOREVER);
+        Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION,
+                Settings.Secure.ZEN_DURATION_FOREVER);
         mController.createDialog();
 
         assertTrue(mController.getConditionTagAt(ZenDurationDialog.FOREVER_CONDITION_INDEX).rb
@@ -100,7 +100,7 @@ public class ZenDurationDialogTest {
 
     @Test
     public void testSpecificDuration() {
-        Settings.Global.putInt(mContentResolver, Settings.Global.ZEN_DURATION, 45);
+        Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION, 45);
         mController.createDialog();
 
         assertFalse(mController.getConditionTagAt(ZenDurationDialog.FOREVER_CONDITION_INDEX).rb
@@ -114,51 +114,51 @@ public class ZenDurationDialogTest {
 
     @Test
     public void testChooseAlwaysPromptSetting() {
-        Settings.Global.putInt(mContentResolver, Settings.Global.ZEN_DURATION,
-                Settings.Global.ZEN_DURATION_FOREVER);
+        Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION,
+                Settings.Secure.ZEN_DURATION_FOREVER);
 
         AlertDialog dialog = (AlertDialog) mController.createDialog();
         mController.getConditionTagAt(ZenDurationDialog.ALWAYS_ASK_CONDITION_INDEX).rb.setChecked(
                 true);
-        mController.updateZenDuration(Settings.Global.ZEN_DURATION_FOREVER);
+        mController.updateZenDuration(Settings.Secure.ZEN_DURATION_FOREVER);
 
-        assertEquals(Settings.Global.ZEN_DURATION_PROMPT, Settings.Global.getInt(mContentResolver,
-                Settings.Global.ZEN_DURATION, Settings.Global.ZEN_DURATION_FOREVER));
+        assertEquals(Settings.Secure.ZEN_DURATION_PROMPT, Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.ZEN_DURATION, Settings.Secure.ZEN_DURATION_FOREVER));
     }
 
     @Test
     public void testChooseForeverSetting() {
-        Settings.Global.putInt(mContentResolver, Settings.Global.ZEN_DURATION,
-                Settings.Global.ZEN_DURATION_PROMPT);
+        Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION,
+                Settings.Secure.ZEN_DURATION_PROMPT);
 
         AlertDialog dialog = (AlertDialog) mController.createDialog();
         mController.getConditionTagAt(ZenDurationDialog.FOREVER_CONDITION_INDEX).rb.setChecked(
                 true);
-        mController.updateZenDuration(Settings.Global.ZEN_DURATION_PROMPT);
+        mController.updateZenDuration(Settings.Secure.ZEN_DURATION_PROMPT);
 
-        assertEquals(Settings.Global.ZEN_DURATION_FOREVER, Settings.Global.getInt(mContentResolver,
-                Settings.Global.ZEN_DURATION, Settings.Global.ZEN_DURATION_PROMPT));
+        assertEquals(Settings.Secure.ZEN_DURATION_FOREVER, Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.ZEN_DURATION, Settings.Secure.ZEN_DURATION_PROMPT));
     }
 
     @Test
     public void testChooseTimeSetting() {
-        Settings.Global.putInt(mContentResolver, Settings.Global.ZEN_DURATION,
-                Settings.Global.ZEN_DURATION_PROMPT);
+        Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION,
+                Settings.Secure.ZEN_DURATION_PROMPT);
 
         AlertDialog dialog = (AlertDialog) mController.createDialog();
         mController.getConditionTagAt(ZenDurationDialog.COUNTDOWN_CONDITION_INDEX).rb.setChecked(
                 true);
-        mController.updateZenDuration(Settings.Global.ZEN_DURATION_PROMPT);
+        mController.updateZenDuration(Settings.Secure.ZEN_DURATION_PROMPT);
 
         // countdown defaults to 60 minutes:
-        assertEquals(60, Settings.Global.getInt(mContentResolver,
-                Settings.Global.ZEN_DURATION, Settings.Global.ZEN_DURATION_PROMPT));
+        assertEquals(60, Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.ZEN_DURATION, Settings.Secure.ZEN_DURATION_PROMPT));
     }
 
     @Test
     public void testGetTimeFromBucket() {
-        Settings.Global.putInt(mContentResolver, Settings.Global.ZEN_DURATION,
-                Settings.Global.ZEN_DURATION_PROMPT);
+        Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION,
+                Settings.Secure.ZEN_DURATION_PROMPT);
 
         AlertDialog dialog = (AlertDialog) mController.createDialog();
         // click time button starts at 60 minutes

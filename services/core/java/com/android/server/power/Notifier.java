@@ -585,9 +585,9 @@ final class Notifier {
     }
 
     /**
-     * Called when wireless charging has started so as to provide user feedback (sound and visual).
+     * Called when wireless charging has started - to provide user feedback (sound and visual).
      */
-    public void onWirelessChargingStarted(int batteryLevel) {
+    public void onWirelessChargingStarted(int batteryLevel, @UserIdInt int userId) {
         if (DEBUG) {
             Slog.d(TAG, "onWirelessChargingStarted");
         }
@@ -596,13 +596,14 @@ final class Notifier {
         Message msg = mHandler.obtainMessage(MSG_WIRELESS_CHARGING_STARTED);
         msg.setAsynchronous(true);
         msg.arg1 = batteryLevel;
+        msg.arg2 = userId;
         mHandler.sendMessage(msg);
     }
 
     /**
-     * Called when wired charging has started so as to provide user feedback
+     * Called when wired charging has started - to provide user feedback
      */
-    public void onWiredChargingStarted() {
+    public void onWiredChargingStarted(@UserIdInt int userId) {
         if (DEBUG) {
             Slog.d(TAG, "onWiredChargingStarted");
         }
@@ -610,6 +611,7 @@ final class Notifier {
         mSuspendBlocker.acquire();
         Message msg = mHandler.obtainMessage(MSG_WIRED_CHARGING_STARTED);
         msg.setAsynchronous(true);
+        msg.arg1 = userId;
         mHandler.sendMessage(msg);
     }
 
@@ -748,10 +750,10 @@ final class Notifier {
     /**
      * Plays the wireless charging sound for both wireless and non-wireless charging
      */
-    private void playChargingStartedSound() {
+    private void playChargingStartedSound(@UserIdInt int userId) {
         final String soundPath = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.CHARGING_STARTED_SOUND);
-        if (isChargingFeedbackEnabled() && soundPath != null) {
+        if (isChargingFeedbackEnabled(userId) && soundPath != null) {
             final Uri soundUri = Uri.parse("file://" + soundPath);
             if (soundUri != null) {
                 final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
@@ -763,17 +765,17 @@ final class Notifier {
         }
     }
 
-    private void showWirelessChargingStarted(int batteryLevel) {
-        playWirelessChargingVibration();
-        playChargingStartedSound();
+    private void showWirelessChargingStarted(int batteryLevel, @UserIdInt int userId) {
+        playWirelessChargingVibration(userId);
+        playChargingStartedSound(userId);
         if (mStatusBarManagerInternal != null) {
             mStatusBarManagerInternal.showChargingAnimation(batteryLevel);
         }
         mSuspendBlocker.release();
     }
 
-    private void showWiredChargingStarted() {
-        playChargingStartedSound();
+    private void showWiredChargingStarted(@UserIdInt int userId) {
+        playChargingStartedSound(userId);
         mSuspendBlocker.release();
     }
 
@@ -781,17 +783,17 @@ final class Notifier {
         mTrustManager.setDeviceLockedForUser(userId, true /*locked*/);
     }
 
-    private void playWirelessChargingVibration() {
-        final boolean vibrateEnabled = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.CHARGING_VIBRATION_ENABLED, 0) != 0;
-        if (vibrateEnabled && isChargingFeedbackEnabled()) {
+    private void playWirelessChargingVibration(@UserIdInt int userId) {
+        final boolean vibrateEnabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.CHARGING_VIBRATION_ENABLED, 1, userId) != 0;
+        if (vibrateEnabled && isChargingFeedbackEnabled(userId)) {
             mVibrator.vibrate(WIRELESS_CHARGING_VIBRATION_EFFECT, VIBRATION_ATTRIBUTES);
         }
     }
 
-    private boolean isChargingFeedbackEnabled() {
-        final boolean enabled = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.CHARGING_SOUNDS_ENABLED, 1) != 0;
+    private boolean isChargingFeedbackEnabled(@UserIdInt int userId) {
+        final boolean enabled = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.CHARGING_SOUNDS_ENABLED, 1, userId) != 0;
         final boolean dndOff = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS)
                 == Settings.Global.ZEN_MODE_OFF;
@@ -813,7 +815,7 @@ final class Notifier {
                     sendNextBroadcast();
                     break;
                 case MSG_WIRELESS_CHARGING_STARTED:
-                    showWirelessChargingStarted(msg.arg1);
+                    showWirelessChargingStarted(msg.arg1, msg.arg2);
                     break;
                 case MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED:
                     sendBrightnessBoostChangedBroadcast();
@@ -822,7 +824,7 @@ final class Notifier {
                     lockProfile(msg.arg1);
                     break;
                 case MSG_WIRED_CHARGING_STARTED:
-                    showWiredChargingStarted();
+                    showWiredChargingStarted(msg.arg1);
                     break;
             }
         }
