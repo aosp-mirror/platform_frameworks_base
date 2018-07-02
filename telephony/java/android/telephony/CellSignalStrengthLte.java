@@ -121,6 +121,8 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
 
     /**
      * Get reference signal received quality
+     *
+     * @return the RSRQ if available or Integer.MAX_VALUE if unavailable.
      */
     public int getRsrq() {
         return mRsrq;
@@ -128,13 +130,17 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
 
     /**
      * Get reference signal signal-to-noise ratio
+     *
+     * @return the RSSNR if available or Integer.MAX_VALUE if unavailable.
      */
     public int getRssnr() {
         return mRssnr;
     }
 
     /**
-     * Get reference signal received power
+     * Get reference signal received power in dBm
+     *
+     * @return the RSRP of the measured cell.
      */
     public int getRsrp() {
         return mRsrp;
@@ -142,13 +148,17 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
 
     /**
      * Get channel quality indicator
+     *
+     * @return the CQI if available or Integer.MAX_VALUE if unavailable.
      */
     public int getCqi() {
         return mCqi;
     }
 
     /**
-     * Get signal strength as dBm
+     * Get signal strength in dBm
+     *
+     * @return the RSRP of the measured cell.
      */
     @Override
     public int getDbm() {
@@ -175,7 +185,8 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
      * Get the timing advance value for LTE, as a value in range of 0..1282.
      * Integer.MAX_VALUE is reported when there is no active RRC
      * connection. Refer to 3GPP 36.213 Sec 4.2.3
-     * @return the LTE timing advance, if available.
+     *
+     * @return the LTE timing advance if available or Integer.MAX_VALUE if unavailable.
      */
     public int getTimingAdvance() {
         return mTimingAdvance;
