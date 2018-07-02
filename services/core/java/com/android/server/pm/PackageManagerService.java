@@ -173,7 +173,6 @@ import android.content.pm.PackageManagerInternal.CheckPermissionDelegate;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ActivityIntentInfo;
-import android.content.pm.PackageParser.Package;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.ParseFlags;
@@ -290,8 +289,6 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
-import com.android.internal.util.function.QuadFunction;
-import com.android.internal.util.function.TriFunction;
 import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleController;
 import com.android.server.EventLogTags;
@@ -366,7 +363,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 import dalvik.system.CloseGuard;
@@ -17051,17 +17047,91 @@ public class PackageManagerService extends IPackageManager.Stub
 
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
+    private static class InstallRequest {
+        final InstallArgs args;
+        final PackageInstalledInfo res;
+
+        private InstallRequest(InstallArgs args, PackageInstalledInfo res) {
+            this.args = args;
+            this.res = res;
+        }
+    }
 
     private void installPackageTracedLI(InstallArgs args, PackageInstalledInfo res) {
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackage");
-            installPackageLI(args, res);
+            installPackagesLI(Collections.singletonList(new InstallRequest(args, res)));
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
     }
 
-    private void installPackageLI(InstallArgs args, PackageInstalledInfo res) {
+    private static class CommitRequest {
+        final Map<String, ReconciledPackage> reconciledPackages;
+
+        private CommitRequest(Map<String, ReconciledPackage> reconciledPackages) {
+            this.reconciledPackages = reconciledPackages;
+        }
+    }
+    private static class ReconcileRequest {
+        final Map<String, ScanResult> scannedPackages;
+
+        private ReconcileRequest(Map<String, ScanResult> scannedPackages) {
+            this.scannedPackages = scannedPackages;
+        }
+    }
+    private static class ReconcileFailure extends PackageManagerException {
+        public ReconcileFailure(String message) {
+            super("Invalid reconcile request: " + message);
+        }
+    };
+
+    /**
+     * A container of all data needed to commit a package to in-memory data structures and to disk.
+     * Ideally most of the data contained in this class will move into a PackageSetting it contains.
+     */
+    private static class ReconciledPackage {}
+
+    @GuardedBy("mPackages")
+    private static Map<String, ReconciledPackage> reconcilePackagesLocked(
+            final ReconcileRequest request) throws ReconcileFailure {
+        return Collections.emptyMap();
+    }
+
+    @GuardedBy("mPackages")
+    private boolean commitPackagesLocked(final CommitRequest request) {
+        return true;
+    }
+
+    @GuardedBy("mInstallLock")
+    private void installPackagesLI(List<InstallRequest> requests) {
+        Map<String, ScanResult> scans = new ArrayMap<>(requests.size());
+        for (InstallRequest request : requests) {
+            // TODO(b/109941548): remove this once we've pulled everything from it and into scan,
+            // reconcile or commit.
+            preparePackageLI(request.args, request.res);
+
+            // TODO(b/109941548): scan package and get result
+        }
+        ReconcileRequest reconcileRequest = new ReconcileRequest(scans);
+        Map<String, ReconciledPackage> reconciledPackages;
+        try {
+            reconciledPackages = reconcilePackagesLocked(reconcileRequest);
+        } catch (ReconcileFailure e) {
+            // TODO(b/109941548): set install args error
+            return;
+        }
+        CommitRequest request = new CommitRequest(reconciledPackages);
+        if (!commitPackagesLocked(request)) {
+            // TODO(b/109941548): set install args error
+            return;
+        }
+        // TODO(b/109941548) post-commit actions (dex-opt, etc.)
+    }
+
+    @Deprecated
+    @GuardedBy("mInstallLock")
+    private void preparePackageLI(InstallArgs args, PackageInstalledInfo res) {
         final int installFlags = args.installFlags;
         final String installerPackageName = args.installerPackageName;
         final String volumeUuid = args.volumeUuid;
@@ -24127,7 +24197,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public boolean isLegacySystemApp(Package pkg) {
+        public boolean isLegacySystemApp(PackageParser.Package pkg) {
             synchronized (mPackages) {
                 final PackageSetting ps = (PackageSetting) pkg.mExtras;
                 return mPromoteSystemApps
