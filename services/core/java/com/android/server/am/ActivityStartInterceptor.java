@@ -69,7 +69,6 @@ class ActivityStartInterceptor {
     private final ActivityTaskManagerService mService;
     private final ActivityStackSupervisor mSupervisor;
     private final Context mServiceContext;
-    private final UserController mUserController;
 
     // UserManager cannot be final as it's not ready when this class is instantiated during boot
     private UserManager mUserManager;
@@ -101,16 +100,15 @@ class ActivityStartInterceptor {
 
     ActivityStartInterceptor(
             ActivityTaskManagerService service, ActivityStackSupervisor supervisor) {
-        this(service, supervisor, service.mContext, service.mAm.mUserController);
+        this(service, supervisor, service.mContext);
     }
 
     @VisibleForTesting
     ActivityStartInterceptor(ActivityTaskManagerService service, ActivityStackSupervisor supervisor,
-            Context context, UserController userController) {
+            Context context) {
         mService = service;
         mSupervisor = supervisor;
         mServiceContext = context;
-        mUserController = userController;
     }
 
     /**
@@ -298,7 +296,7 @@ class ActivityStartInterceptor {
      * @return The intercepting intent if needed.
      */
     private Intent interceptWithConfirmCredentialsIfNeeded(ActivityInfo aInfo, int userId) {
-        if (!mUserController.shouldConfirmCredentials(userId)) {
+        if (!mService.mAmInternal.shouldConfirmCredentials(userId)) {
             return null;
         }
         // TODO(b/28935539): should allow certain activities to bypass work challenge

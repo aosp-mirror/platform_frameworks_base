@@ -999,4 +999,11 @@ final class ProcessRecord implements WindowProcessListener {
         }
     }
 
+    /**
+     * Returns the total time (in milliseconds) spent executing in both user and system code.
+     * Safe to call without lock held.
+     */
+    public long getCpuTime() {
+        return mService.mProcessCpuTracker.getCpuTimeForPid(pid);
+    }
 }

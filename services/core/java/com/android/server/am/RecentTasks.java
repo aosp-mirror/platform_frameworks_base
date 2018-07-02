@@ -78,6 +78,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -140,7 +141,6 @@ class RecentTasks {
     private final TaskPersister mTaskPersister;
     private final ActivityTaskManagerService mService;
     private final ActivityStackSupervisor mSupervisor;
-    private final UserController mUserController;
 
     /**
      * Keeps track of the static recents package/component which is granted additional permissions
@@ -181,11 +181,9 @@ class RecentTasks {
     private final TaskActivitiesReport mTmpReport = new TaskActivitiesReport();
 
     @VisibleForTesting
-    RecentTasks(ActivityTaskManagerService service, TaskPersister taskPersister,
-            UserController userController) {
+    RecentTasks(ActivityTaskManagerService service, TaskPersister taskPersister) {
         mService = service;
         mSupervisor = mService.mStackSupervisor;
-        mUserController = userController;
         mTaskPersister = taskPersister;
         mGlobalMaxNumTasks = ActivityTaskManager.getMaxRecentTasksStatic();
         mHasVisibleRecentTasks = true;
@@ -196,7 +194,6 @@ class RecentTasks {
         final Resources res = service.mContext.getResources();
         mService = service;
         mSupervisor = mService.mStackSupervisor;
-        mUserController = service.mAm.mUserController;
         mTaskPersister = new TaskPersister(systemDir, stackSupervisor, service, this);
         mGlobalMaxNumTasks = ActivityTaskManager.getMaxRecentTasksStatic();
         mHasVisibleRecentTasks = res.getBoolean(com.android.internal.R.bool.config_hasRecents);
@@ -712,6 +709,27 @@ class RecentTasks {
         return list;
     }
 
+    @VisibleForTesting
+    Set<Integer> getProfileIds(int userId) {
+        Set<Integer> userIds = new ArraySet<>();
+        final List<UserInfo> profiles = mService.getUserManager().getProfiles(userId,
+                false /* enabledOnly */);
+        for (int i = profiles.size() - 1; i >= 0; --i) {
+            userIds.add(profiles.get(i).id);
+        }
+        return userIds;
+    }
+
+    @VisibleForTesting
+    UserInfo getUserInfo(int userId) {
+        return mService.getUserManager().getUserInfo(userId);
+    }
+
+    @VisibleForTesting
+    int[] getCurrentProfileIds() {
+        return mService.mAmInternal.getCurrentProfileIds();
+    }
+
     /**
      * @return the list of recent tasks for presentation.
      */
@@ -725,7 +743,7 @@ class RecentTasks {
         }
         loadUserRecentsLocked(userId);
 
-        final Set<Integer> includedUsers = mUserController.getProfileIds(userId);
+        final Set<Integer> includedUsers = getProfileIds(userId);
         includedUsers.add(Integer.valueOf(userId));
 
         final ArrayList<ActivityManager.RecentTaskInfo> res = new ArrayList<>();
@@ -1040,10 +1058,10 @@ class RecentTasks {
         }
 
         // Remove any tasks that belong to currently quiet profiles
-        final int[] profileUserIds = mUserController.getCurrentProfileIds();
+        final int[] profileUserIds = getCurrentProfileIds();
         mTmpQuietProfileUserIds.clear();
         for (int userId : profileUserIds) {
-            final UserInfo userInfo = mUserController.getUserInfo(userId);
+            final UserInfo userInfo = getUserInfo(userId);
             if (userInfo != null && userInfo.isManagedProfile() && userInfo.isQuietModeEnabled()) {
                 mTmpQuietProfileUserIds.put(userId, true);
             }

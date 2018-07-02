@@ -457,7 +457,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mHandler = new ActivityStackHandler(supervisor.mLooper);
         mWindowManager = mService.mWindowManager;
         mStackId = stackId;
-        mCurrentUser = mService.mAm.mUserController.getCurrentUserId();
+        mCurrentUser = mService.mAmInternal.getCurrentUserId();
         mTmpRect2.setEmpty();
         // Set display id before setting activity and window type to make sure it won't affect
         // stacks on a wrong display.
@@ -1622,8 +1622,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
             if (prev.hasProcess() && prev.cpuTimeAtResume > 0
                     && mService.mAm.mBatteryStatsService.isOnBattery()) {
-                long diff = mService.mAm.mProcessCpuTracker.getCpuTimeForPid(prev.app.getPid())
-                        - prev.cpuTimeAtResume;
+                long diff = prev.app.getCpuTime() - prev.cpuTimeAtResume;
                 if (diff > 0) {
                     BatteryStatsImpl bsi = mService.mAm.mBatteryStatsService.getActiveStatistics();
                     synchronized (bsi) {
@@ -2398,7 +2397,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // Make sure that the user who owns this activity is started.  If not,
         // we will just leave it as is because someone should be bringing
         // another user's activities to the top of the stack.
-        if (!mService.mAm.mUserController.hasStartedUserState(next.userId)) {
+        if (!mService.mAmInternal.hasStartedUserState(next.userId)) {
             Slog.w(TAG, "Skipping resume of top activity " + next
                     + ": user " + next.userId + " is stopped");
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
