@@ -443,6 +443,8 @@ public final class NotificationRecord {
         pw.println(prefix + "fullscreenIntent=" + notification.fullScreenIntent);
         pw.println(prefix + "contentIntent=" + notification.contentIntent);
         pw.println(prefix + "deleteIntent=" + notification.deleteIntent);
+        pw.println(prefix + "number=" + notification.number);
+        pw.println(prefix + "groupAlertBehavior=" + notification.getGroupAlertBehavior());
 
         pw.print(prefix + "tickerText=");
         if (!TextUtils.isEmpty(notification.tickerText)) {
