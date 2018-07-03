@@ -18749,6 +18749,129 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    private final ComputeOomAdjWindowCallback mTmpComputeOomAdjWindowCallback =
+            new ComputeOomAdjWindowCallback();
+
+    private final class ComputeOomAdjWindowCallback
+            implements WindowProcessController.ComputeOomAdjCallback {
+
+        ProcessRecord app;
+        int adj;
+        boolean foregroundActivities;
+        int procState;
+        int schedGroup;
+        int appUid;
+        int logUid;
+        int processStateCurTop;
+
+        void initialize(ProcessRecord app, int adj, boolean foregroundActivities,
+                int procState, int schedGroup, int appUid, int logUid, int processStateCurTop) {
+            this.app = app;
+            this.adj = adj;
+            this.foregroundActivities = foregroundActivities;
+            this.procState = procState;
+            this.schedGroup = schedGroup;
+            this.appUid = appUid;
+            this.logUid = logUid;
+            this.processStateCurTop = processStateCurTop;
+        }
+
+        @Override
+        public void onVisibleActivity() {
+            // App has a visible activity; only upgrade adjustment.
+            if (adj > ProcessList.VISIBLE_APP_ADJ) {
+                adj = ProcessList.VISIBLE_APP_ADJ;
+                app.adjType = "vis-activity";
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to vis-activity: " + app);
+                }
+            }
+            if (procState > processStateCurTop) {
+                procState = processStateCurTop;
+                app.adjType = "vis-activity";
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                            "Raise procstate to vis-activity (top): " + app);
+                }
+            }
+            if (schedGroup < ProcessList.SCHED_GROUP_DEFAULT) {
+                schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+            }
+            app.cached = false;
+            app.empty = false;
+            foregroundActivities = true;
+        }
+
+        @Override
+        public void onPausedActivity() {
+            if (adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
+                adj = ProcessList.PERCEPTIBLE_APP_ADJ;
+                app.adjType = "pause-activity";
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to pause-activity: "  + app);
+                }
+            }
+            if (procState > processStateCurTop) {
+                procState = processStateCurTop;
+                app.adjType = "pause-activity";
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                            "Raise procstate to pause-activity (top): "  + app);
+                }
+            }
+            if (schedGroup < ProcessList.SCHED_GROUP_DEFAULT) {
+                schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+            }
+            app.cached = false;
+            app.empty = false;
+            foregroundActivities = true;
+        }
+
+        @Override
+        public void onStoppingActivity(boolean finishing) {
+            if (adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
+                adj = ProcessList.PERCEPTIBLE_APP_ADJ;
+                app.adjType = "stop-activity";
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                            "Raise adj to stop-activity: "  + app);
+                }
+            }
+
+            // For the process state, we will at this point consider the process to be cached. It
+            // will be cached either as an activity or empty depending on whether the activity is
+            // finishing. We do this so that we can treat the process as cached for purposes of
+            // memory trimming (determining current memory level, trim command to send to process)
+            // since there can be an arbitrary number of stopping processes and they should soon all
+            // go into the cached state.
+            if (!finishing) {
+                if (procState > PROCESS_STATE_LAST_ACTIVITY) {
+                    procState = PROCESS_STATE_LAST_ACTIVITY;
+                    app.adjType = "stop-activity";
+                    if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                        reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                                "Raise procstate to stop-activity: " + app);
+                    }
+                }
+            }
+            app.cached = false;
+            app.empty = false;
+            foregroundActivities = true;
+        }
+
+        @Override
+        public void onOtherActivity() {
+            if (procState > PROCESS_STATE_CACHED_ACTIVITY) {
+                procState = PROCESS_STATE_CACHED_ACTIVITY;
+                app.adjType = "cch-act";
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                            "Raise procstate to cached activity: " + app);
+                }
+            }
+        }
+    }
+
     private final boolean computeOomAdjLocked(ProcessRecord app, int cachedAdj, ProcessRecord TOP_APP,
             boolean doingAll, long now) {
         if (mAdjSeq == app.adjSeq) {
@@ -18920,119 +19043,15 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // Examine all activities if not already foreground.
         if (!foregroundActivities && wpc.hasActivities()) {
-            final int[] adjHolder = new int[1];
-            adjHolder[0] = adj;
-            final boolean[] foregroundActivitiesHolder = new boolean[1];
-            foregroundActivitiesHolder[0] = foregroundActivities;
-            int[] procStateHolder = new int[1];
-            procStateHolder[0] = procState;
-            int[] schedGroupHolder = new int[1];
-            schedGroupHolder[0] = schedGroup;
+            mTmpComputeOomAdjWindowCallback.initialize(app, adj, foregroundActivities, procState,
+                    schedGroup, appUid, logUid, PROCESS_STATE_CUR_TOP);
+            final int minLayer = wpc.computeOomAdjFromActivities(
+                    ProcessList.VISIBLE_APP_LAYER_MAX, mTmpComputeOomAdjWindowCallback);
 
-            int minLayer = wpc.computeOomAdjFromActivities(ProcessList.VISIBLE_APP_LAYER_MAX,
-                    new WindowProcessController.ComputeOomAdjCallback() {
-                        @Override
-                        public void onVisibleActivity() {
-                            // App has a visible activity; only upgrade adjustment.
-                            if (adjHolder[0] > ProcessList.VISIBLE_APP_ADJ) {
-                                adjHolder[0] = ProcessList.VISIBLE_APP_ADJ;
-                                app.adjType = "vis-activity";
-                                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
-                                            "Raise adj to vis-activity: " + app);
-                                }
-                            }
-                            if (procStateHolder[0] > PROCESS_STATE_CUR_TOP) {
-                                procStateHolder[0] = PROCESS_STATE_CUR_TOP;
-                                app.adjType = "vis-activity";
-                                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
-                                            "Raise procstate to vis-activity (top): " + app);
-                                }
-                            }
-                            if (schedGroupHolder[0] < ProcessList.SCHED_GROUP_DEFAULT) {
-                                schedGroupHolder[0] = ProcessList.SCHED_GROUP_DEFAULT;
-                            }
-                            app.cached = false;
-                            app.empty = false;
-                            foregroundActivitiesHolder[0] = true;
-                        }
-
-                        @Override
-                        public void onPausedActivity() {
-                            if (adjHolder[0] > ProcessList.PERCEPTIBLE_APP_ADJ) {
-                                adjHolder[0] = ProcessList.PERCEPTIBLE_APP_ADJ;
-                                app.adjType = "pause-activity";
-                                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
-                                            "Raise adj to pause-activity: "  + app);
-                                }
-                            }
-                            if (procStateHolder[0] > PROCESS_STATE_CUR_TOP) {
-                                procStateHolder[0] = PROCESS_STATE_CUR_TOP;
-                                app.adjType = "pause-activity";
-                                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
-                                            "Raise procstate to pause-activity (top): "  + app);
-                                }
-                            }
-                            if (schedGroupHolder[0] < ProcessList.SCHED_GROUP_DEFAULT) {
-                                schedGroupHolder[0] = ProcessList.SCHED_GROUP_DEFAULT;
-                            }
-                            app.cached = false;
-                            app.empty = false;
-                            foregroundActivitiesHolder[0] = true;
-                        }
-
-                        @Override
-                        public void onStoppingActivity(boolean finishing) {
-                            if (adjHolder[0] > ProcessList.PERCEPTIBLE_APP_ADJ) {
-                                adjHolder[0] = ProcessList.PERCEPTIBLE_APP_ADJ;
-                                app.adjType = "stop-activity";
-                                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
-                                            "Raise adj to stop-activity: "  + app);
-                                }
-                            }
-                            // For the process state, we will at this point consider the process to
-                            // be cached. It will be cached either as an activity or empty depending
-                            // on whether the activity is finishing. We do this so that we can treat
-                            // the process as cached for purposes of memory trimming (determining
-                            // current memory level, trim command to send to process) since there
-                            // can be an arbitrary number of stopping processes and they should soon
-                            // all go into the cached state.
-                            if (!finishing) {
-                                if (procStateHolder[0] > PROCESS_STATE_LAST_ACTIVITY) {
-                                    procStateHolder[0] = PROCESS_STATE_LAST_ACTIVITY;
-                                    app.adjType = "stop-activity";
-                                    if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                                        reportOomAdjMessageLocked(TAG_OOM_ADJ,
-                                                "Raise procstate to stop-activity: " + app);
-                                    }
-                                }
-                            }
-                            app.cached = false;
-                            app.empty = false;
-                            foregroundActivitiesHolder[0] = true;
-                        }
-
-                        @Override
-                        public void onOtherActivity() {
-                            if (procStateHolder[0] > PROCESS_STATE_CACHED_ACTIVITY) {
-                                procStateHolder[0] = PROCESS_STATE_CACHED_ACTIVITY;
-                                app.adjType = "cch-act";
-                                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
-                                            "Raise procstate to cached activity: " + app);
-                                }
-                            }
-                        }
-                    });
-
-            adj = adjHolder[0];
-            foregroundActivities = foregroundActivitiesHolder[0];
-            procState = procStateHolder[0];
-            schedGroup = schedGroupHolder[0];
+            adj = mTmpComputeOomAdjWindowCallback.adj;
+            foregroundActivities = mTmpComputeOomAdjWindowCallback.foregroundActivities;
+            procState = mTmpComputeOomAdjWindowCallback.procState;
+            schedGroup = mTmpComputeOomAdjWindowCallback.schedGroup;
 
             if (adj == ProcessList.VISIBLE_APP_ADJ) {
                 adj += minLayer;
