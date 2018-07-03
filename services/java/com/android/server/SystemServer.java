@@ -722,7 +722,7 @@ public final class SystemServer {
 
         // Tracks cpu time spent in binder calls
         traceBeginAndSlog("StartBinderCallsStatsService");
-        BinderCallsStatsService.start();
+        mSystemServiceManager.startService(BinderCallsStatsService.LifeCycle.class);
         traceEnd();
     }
 

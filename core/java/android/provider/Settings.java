@@ -13008,6 +13008,21 @@ public final class Settings {
          */
         public static final String GNSS_HAL_LOCATION_REQUEST_DURATION_MILLIS =
                 "gnss_hal_location_request_duration_millis";
+
+        /**
+         * Binder call stats settings.
+         *
+         * The following strings are supported as keys:
+         * <pre>
+         *     enabled              (boolean)
+         *     detailed_tracking    (boolean)
+         *     upload_data          (boolean)
+         *     sampling_interval    (int)
+         * </pre>
+         *
+         * @hide
+         */
+        public static final String BINDER_CALLS_STATS = "binder_calls_stats";
     }
 
     /**
