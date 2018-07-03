@@ -35,6 +35,7 @@ import android.test.mock.MockContentResolver;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.R;
 import com.android.internal.app.ColorDisplayController;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
@@ -911,7 +912,11 @@ public class ColorDisplayServiceTest {
         startService();
         assertAccessibilityTransformActivated(true /* activated */ );
         assertUserColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
-        assertActiveColorMode(ColorDisplayController.COLOR_MODE_SATURATED);
+        if (isColorModeValid(ColorDisplayController.COLOR_MODE_SATURATED)) {
+            assertActiveColorMode(ColorDisplayController.COLOR_MODE_SATURATED);
+        } else if (isColorModeValid(ColorDisplayController.COLOR_MODE_AUTOMATIC)) {
+            assertActiveColorMode(ColorDisplayController.COLOR_MODE_AUTOMATIC);
+        }
     }
 
     @Test
@@ -926,7 +931,11 @@ public class ColorDisplayServiceTest {
         startService();
         assertAccessibilityTransformActivated(true /* activated */ );
         assertUserColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
-        assertActiveColorMode(ColorDisplayController.COLOR_MODE_SATURATED);
+        if (isColorModeValid(ColorDisplayController.COLOR_MODE_SATURATED)) {
+            assertActiveColorMode(ColorDisplayController.COLOR_MODE_SATURATED);
+        } else if (isColorModeValid(ColorDisplayController.COLOR_MODE_AUTOMATIC)) {
+            assertActiveColorMode(ColorDisplayController.COLOR_MODE_AUTOMATIC);
+        }
     }
 
     @Test
@@ -942,7 +951,11 @@ public class ColorDisplayServiceTest {
         startService();
         assertAccessibilityTransformActivated(true /* activated */ );
         assertUserColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
-        assertActiveColorMode(ColorDisplayController.COLOR_MODE_SATURATED);
+        if (isColorModeValid(ColorDisplayController.COLOR_MODE_SATURATED)) {
+            assertActiveColorMode(ColorDisplayController.COLOR_MODE_SATURATED);
+        } else if (isColorModeValid(ColorDisplayController.COLOR_MODE_AUTOMATIC)) {
+            assertActiveColorMode(ColorDisplayController.COLOR_MODE_AUTOMATIC);
+        }
     }
 
     @Test
@@ -1030,6 +1043,24 @@ public class ColorDisplayServiceTest {
     }
 
     /**
+     * Returns whether the color mode is valid on the device the tests are running on.
+     *
+     * @param mode the mode to check
+     */
+    private boolean isColorModeValid(int mode) {
+        final int[] availableColorModes = mContext.getResources().getIntArray(
+            R.array.config_availableColorModes);
+        if (availableColorModes != null) {
+            for (int availableMode : availableColorModes) {
+                if (mode == availableMode) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Convenience method to start {@link #mColorDisplayService}.
      */
     private void startService() {
@@ -1038,7 +1069,6 @@ public class ColorDisplayServiceTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(new Runnable() {
             @Override
             public void run() {
-                mColorDisplayService.onStart();
                 mColorDisplayService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
                 mColorDisplayService.onStartUser(mUserId);
             }
