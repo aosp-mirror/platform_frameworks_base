@@ -187,7 +187,7 @@ public class ChooserActivity extends ResolverActivity {
     // TODO(b/121287224): Re-evaluate this limit
     private static final int SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
 
-    private static final int QUERY_TARGET_SERVICE_LIMIT = 5;
+    private static final int QUERY_TARGET_SERVICE_LIMIT = 3;
 
     private static final int DEFAULT_SALT_EXPIRATION_DAYS = 7;
     private int mMaxHashSaltDays = DeviceConfig.getInt(DeviceConfig.NAMESPACE_SYSTEMUI,
