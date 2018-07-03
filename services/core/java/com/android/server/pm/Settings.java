@@ -44,6 +44,7 @@ import android.content.pm.ComponentInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.PermissionInfo;
@@ -88,6 +89,7 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
+import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.permission.BasePermission;
 import com.android.server.pm.permission.PermissionSettings;
@@ -422,11 +424,8 @@ public final class Settings {
     /** Settings and other information about permissions */
     final PermissionSettings mPermissions;
 
-    Settings(PermissionSettings permissions, Object lock) {
-        this(Environment.getDataDirectory(), permissions, lock);
-    }
-
-    Settings(File dataDir, PermissionSettings permission, Object lock) {
+    Settings(File dataDir, PermissionSettings permission,
+            Object lock) {
         mLock = lock;
         mPermissions = permission;
         mRuntimePermissionsPersistence = new RuntimePermissionPersistence(mLock);
@@ -3232,8 +3231,10 @@ public final class Settings {
         return true;
     }
 
-    void applyDefaultPreferredAppsLPw(PackageManagerService service, int userId) {
+    void applyDefaultPreferredAppsLPw(int userId) {
         // First pull data from any pre-installed apps.
+        final PackageManagerInternal pmInternal =
+                LocalServices.getService(PackageManagerInternal.class);
         for (PackageSetting ps : mPackages.values()) {
             if ((ps.pkgFlags&ApplicationInfo.FLAG_SYSTEM) != 0 && ps.pkg != null
                     && ps.pkg.preferredActivityFilters != null) {
@@ -3241,8 +3242,8 @@ public final class Settings {
                         = ps.pkg.preferredActivityFilters;
                 for (int i=0; i<intents.size(); i++) {
                     PackageParser.ActivityIntentInfo aii = intents.get(i);
-                    applyDefaultPreferredActivityLPw(service, aii, new ComponentName(
-                            ps.name, aii.activity.className), userId);
+                    applyDefaultPreferredActivityLPw(pmInternal, aii, new ComponentName(
+                                    ps.name, aii.activity.className), userId);
                 }
             }
         }
@@ -3290,7 +3291,7 @@ public final class Settings {
                             + " does not start with 'preferred-activities'");
                     continue;
                 }
-                readDefaultPreferredActivitiesLPw(service, parser, userId);
+                readDefaultPreferredActivitiesLPw(parser, userId);
             } catch (XmlPullParserException e) {
                 Slog.w(TAG, "Error reading apps file " + f, e);
             } catch (IOException e) {
@@ -3306,8 +3307,8 @@ public final class Settings {
         }
     }
 
-    private void applyDefaultPreferredActivityLPw(PackageManagerService service,
-            IntentFilter tmpPa, ComponentName cn, int userId) {
+    private void applyDefaultPreferredActivityLPw(
+            PackageManagerInternal pmInternal, IntentFilter tmpPa, ComponentName cn, int userId) {
         // The initial preferences only specify the target activity
         // component and intent-filter, not the set of matches.  So we
         // now need to query for the matches to build the correct
@@ -3332,27 +3333,31 @@ public final class Settings {
         boolean doNonData = true;
         boolean hasSchemes = false;
 
-        for (int ischeme=0; ischeme<tmpPa.countDataSchemes(); ischeme++) {
+        final int dataSchemesCount = tmpPa.countDataSchemes();
+        for (int ischeme = 0; ischeme < dataSchemesCount; ischeme++) {
             boolean doScheme = true;
-            String scheme = tmpPa.getDataScheme(ischeme);
+            final String scheme = tmpPa.getDataScheme(ischeme);
             if (scheme != null && !scheme.isEmpty()) {
                 hasSchemes = true;
             }
-            for (int issp=0; issp<tmpPa.countDataSchemeSpecificParts(); issp++) {
+            final int dataSchemeSpecificPartsCount = tmpPa.countDataSchemeSpecificParts();
+            for (int issp = 0; issp < dataSchemeSpecificPartsCount; issp++) {
                 Uri.Builder builder = new Uri.Builder();
                 builder.scheme(scheme);
                 PatternMatcher ssp = tmpPa.getDataSchemeSpecificPart(issp);
                 builder.opaquePart(ssp.getPath());
                 Intent finalIntent = new Intent(intent);
                 finalIntent.setData(builder.build());
-                applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
+                applyDefaultPreferredActivityLPw(pmInternal, finalIntent, flags, cn,
                         scheme, ssp, null, null, userId);
                 doScheme = false;
             }
-            for (int iauth=0; iauth<tmpPa.countDataAuthorities(); iauth++) {
+            final int dataAuthoritiesCount = tmpPa.countDataAuthorities();
+            for (int iauth = 0; iauth < dataAuthoritiesCount; iauth++) {
                 boolean doAuth = true;
-                IntentFilter.AuthorityEntry auth = tmpPa.getDataAuthority(iauth);
-                for (int ipath=0; ipath<tmpPa.countDataPaths(); ipath++) {
+                final IntentFilter.AuthorityEntry auth = tmpPa.getDataAuthority(iauth);
+                final int dataPathsCount = tmpPa.countDataPaths();
+                for (int ipath = 0; ipath < dataPathsCount; ipath++) {
                     Uri.Builder builder = new Uri.Builder();
                     builder.scheme(scheme);
                     if (auth.getHost() != null) {
@@ -3362,7 +3367,7 @@ public final class Settings {
                     builder.path(path.getPath());
                     Intent finalIntent = new Intent(intent);
                     finalIntent.setData(builder.build());
-                    applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
+                    applyDefaultPreferredActivityLPw(pmInternal, finalIntent, flags, cn,
                             scheme, null, auth, path, userId);
                     doAuth = doScheme = false;
                 }
@@ -3374,7 +3379,7 @@ public final class Settings {
                     }
                     Intent finalIntent = new Intent(intent);
                     finalIntent.setData(builder.build());
-                    applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
+                    applyDefaultPreferredActivityLPw(pmInternal, finalIntent, flags, cn,
                             scheme, null, auth, null, userId);
                     doScheme = false;
                 }
@@ -3384,7 +3389,7 @@ public final class Settings {
                 builder.scheme(scheme);
                 Intent finalIntent = new Intent(intent);
                 finalIntent.setData(builder.build());
-                applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
+                applyDefaultPreferredActivityLPw(pmInternal, finalIntent, flags, cn,
                         scheme, null, null, null, userId);
             }
             doNonData = false;
@@ -3400,129 +3405,134 @@ public final class Settings {
                         Intent finalIntent = new Intent(intent);
                         builder.scheme(scheme);
                         finalIntent.setDataAndType(builder.build(), mimeType);
-                        applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
+                        applyDefaultPreferredActivityLPw(pmInternal, finalIntent, flags, cn,
                                 scheme, null, null, null, userId);
                     }
                 }
             } else {
                 Intent finalIntent = new Intent(intent);
                 finalIntent.setType(mimeType);
-                applyDefaultPreferredActivityLPw(service, finalIntent, flags, cn,
+                applyDefaultPreferredActivityLPw(pmInternal, finalIntent, flags, cn,
                         null, null, null, null, userId);
             }
             doNonData = false;
         }
 
         if (doNonData) {
-            applyDefaultPreferredActivityLPw(service, intent, flags, cn,
+            applyDefaultPreferredActivityLPw(pmInternal, intent, flags, cn,
                     null, null, null, null, userId);
         }
     }
 
-    private void applyDefaultPreferredActivityLPw(PackageManagerService service,
-            Intent intent, int flags, ComponentName cn, String scheme, PatternMatcher ssp,
+    private void applyDefaultPreferredActivityLPw(PackageManagerInternal pmInternal, Intent intent,
+            int flags, ComponentName cn, String scheme, PatternMatcher ssp,
             IntentFilter.AuthorityEntry auth, PatternMatcher path, int userId) {
-        flags = service.updateFlagsForResolve(flags, userId, intent, Binder.getCallingUid(), false);
-        List<ResolveInfo> ri = service.mActivities.queryIntent(intent,
-                intent.getType(), flags, 0);
-        if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Queried " + intent
-                + " results: " + ri);
+        final List<ResolveInfo> ri =
+                pmInternal.queryIntentActivities(intent, flags, Binder.getCallingUid(), 0);
+        if (PackageManagerService.DEBUG_PREFERRED) {
+            Log.d(TAG, "Queried " + intent + " results: " + ri);
+        }
         int systemMatch = 0;
         int thirdPartyMatch = 0;
-        if (ri != null && ri.size() > 1) {
-            boolean haveAct = false;
-            ComponentName haveNonSys = null;
-            ComponentName[] set = new ComponentName[ri.size()];
-            for (int i=0; i<ri.size(); i++) {
-                ActivityInfo ai = ri.get(i).activityInfo;
-                set[i] = new ComponentName(ai.packageName, ai.name);
-                if ((ai.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) == 0) {
-                    if (ri.get(i).match >= thirdPartyMatch) {
-                        // Keep track of the best match we find of all third
-                        // party apps, for use later to determine if we actually
-                        // want to set a preferred app for this intent.
-                        if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
-                                + ai.packageName + "/" + ai.name + ": non-system!");
-                        haveNonSys = set[i];
-                        break;
+        final int numMatches = (ri == null ? 0 : ri.size());
+        if (numMatches <= 1) {
+            Slog.w(TAG, "No potential matches found for " + intent
+                    + " while setting preferred " + cn.flattenToShortString());
+            return;
+        }
+        boolean haveAct = false;
+        ComponentName haveNonSys = null;
+        ComponentName[] set = new ComponentName[ri.size()];
+        for (int i = 0; i < numMatches; i++) {
+            final ActivityInfo ai = ri.get(i).activityInfo;
+            set[i] = new ComponentName(ai.packageName, ai.name);
+            if ((ai.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                if (ri.get(i).match >= thirdPartyMatch) {
+                    // Keep track of the best match we find of all third
+                    // party apps, for use later to determine if we actually
+                    // want to set a preferred app for this intent.
+                    if (PackageManagerService.DEBUG_PREFERRED) {
+                        Log.d(TAG, "Result " + ai.packageName + "/" + ai.name + ": non-system!");
                     }
-                } else if (cn.getPackageName().equals(ai.packageName)
-                        && cn.getClassName().equals(ai.name)) {
-                    if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
-                            + ai.packageName + "/" + ai.name + ": default!");
-                    haveAct = true;
-                    systemMatch = ri.get(i).match;
-                } else {
-                    if (PackageManagerService.DEBUG_PREFERRED) Log.d(TAG, "Result "
-                            + ai.packageName + "/" + ai.name + ": skipped");
+                    haveNonSys = set[i];
+                    break;
                 }
-            }
-            if (haveNonSys != null && thirdPartyMatch < systemMatch) {
-                // If we have a matching third party app, but its match is not as
-                // good as the built-in system app, then we don't want to actually
-                // consider it a match because presumably the built-in app is still
-                // the thing we want users to see by default.
-                haveNonSys = null;
-            }
-            if (haveAct && haveNonSys == null) {
-                IntentFilter filter = new IntentFilter();
-                if (intent.getAction() != null) {
-                    filter.addAction(intent.getAction());
+            } else if (cn.getPackageName().equals(ai.packageName)
+                    && cn.getClassName().equals(ai.name)) {
+                if (PackageManagerService.DEBUG_PREFERRED) {
+                    Log.d(TAG, "Result " + ai.packageName + "/" + ai.name + ": default!");
                 }
-                if (intent.getCategories() != null) {
-                    for (String cat : intent.getCategories()) {
-                        filter.addCategory(cat);
-                    }
-                }
-                if ((flags & MATCH_DEFAULT_ONLY) != 0) {
-                    filter.addCategory(Intent.CATEGORY_DEFAULT);
-                }
-                if (scheme != null) {
-                    filter.addDataScheme(scheme);
-                }
-                if (ssp != null) {
-                    filter.addDataSchemeSpecificPart(ssp.getPath(), ssp.getType());
-                }
-                if (auth != null) {
-                    filter.addDataAuthority(auth);
-                }
-                if (path != null) {
-                    filter.addDataPath(path);
-                }
-                if (intent.getType() != null) {
-                    try {
-                        filter.addDataType(intent.getType());
-                    } catch (IntentFilter.MalformedMimeTypeException ex) {
-                        Slog.w(TAG, "Malformed mimetype " + intent.getType() + " for " + cn);
-                    }
-                }
-                PreferredActivity pa = new PreferredActivity(filter, systemMatch, set, cn, true);
-                editPreferredActivitiesLPw(userId).addFilter(pa);
-            } else if (haveNonSys == null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("No component ");
-                sb.append(cn.flattenToShortString());
-                sb.append(" found setting preferred ");
-                sb.append(intent);
-                sb.append("; possible matches are ");
-                for (int i=0; i<set.length; i++) {
-                    if (i > 0) sb.append(", ");
-                    sb.append(set[i].flattenToShortString());
-                }
-                Slog.w(TAG, sb.toString());
+                haveAct = true;
+                systemMatch = ri.get(i).match;
             } else {
-                Slog.i(TAG, "Not setting preferred " + intent + "; found third party match "
-                        + haveNonSys.flattenToShortString());
+                if (PackageManagerService.DEBUG_PREFERRED) {
+                    Log.d(TAG, "Result " + ai.packageName + "/" + ai.name + ": skipped");
+                }
             }
+        }
+        if (haveNonSys != null && thirdPartyMatch < systemMatch) {
+            // If we have a matching third party app, but its match is not as
+            // good as the built-in system app, then we don't want to actually
+            // consider it a match because presumably the built-in app is still
+            // the thing we want users to see by default.
+            haveNonSys = null;
+        }
+        if (haveAct && haveNonSys == null) {
+            IntentFilter filter = new IntentFilter();
+            if (intent.getAction() != null) {
+                filter.addAction(intent.getAction());
+            }
+            if (intent.getCategories() != null) {
+                for (String cat : intent.getCategories()) {
+                    filter.addCategory(cat);
+                }
+            }
+            if ((flags & MATCH_DEFAULT_ONLY) != 0) {
+                filter.addCategory(Intent.CATEGORY_DEFAULT);
+            }
+            if (scheme != null) {
+                filter.addDataScheme(scheme);
+            }
+            if (ssp != null) {
+                filter.addDataSchemeSpecificPart(ssp.getPath(), ssp.getType());
+            }
+            if (auth != null) {
+                filter.addDataAuthority(auth);
+            }
+            if (path != null) {
+                filter.addDataPath(path);
+            }
+            if (intent.getType() != null) {
+                try {
+                    filter.addDataType(intent.getType());
+                } catch (IntentFilter.MalformedMimeTypeException ex) {
+                    Slog.w(TAG, "Malformed mimetype " + intent.getType() + " for " + cn);
+                }
+            }
+            PreferredActivity pa = new PreferredActivity(filter, systemMatch, set, cn, true);
+            editPreferredActivitiesLPw(userId).addFilter(pa);
+        } else if (haveNonSys == null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("No component ");
+            sb.append(cn.flattenToShortString());
+            sb.append(" found setting preferred ");
+            sb.append(intent);
+            sb.append("; possible matches are ");
+            for (int i = 0; i < set.length; i++) {
+                if (i > 0) sb.append(", ");
+                sb.append(set[i].flattenToShortString());
+            }
+            Slog.w(TAG, sb.toString());
         } else {
-            Slog.w(TAG, "No potential matches found for " + intent + " while setting preferred "
-                    + cn.flattenToShortString());
+            Slog.i(TAG, "Not setting preferred " + intent + "; found third party match "
+                    + haveNonSys.flattenToShortString());
         }
     }
 
-    private void readDefaultPreferredActivitiesLPw(PackageManagerService service,
-            XmlPullParser parser, int userId)
+    private void readDefaultPreferredActivitiesLPw(XmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
+        final PackageManagerInternal pmInternal =
+                LocalServices.getService(PackageManagerInternal.class);
         int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -3535,8 +3545,8 @@ public final class Settings {
             if (tagName.equals(TAG_ITEM)) {
                 PreferredActivity tmpPa = new PreferredActivity(parser);
                 if (tmpPa.mPref.getParseError() == null) {
-                    applyDefaultPreferredActivityLPw(service, tmpPa, tmpPa.mPref.mComponent,
-                            userId);
+                    applyDefaultPreferredActivityLPw(
+                            pmInternal, tmpPa, tmpPa.mPref.mComponent, userId);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Error in package manager settings: <preferred-activity> "
@@ -4151,7 +4161,7 @@ public final class Settings {
             }
         }
         synchronized (mPackages) {
-            applyDefaultPreferredAppsLPw(service, userHandle);
+            applyDefaultPreferredAppsLPw(userHandle);
         }
     }
 
