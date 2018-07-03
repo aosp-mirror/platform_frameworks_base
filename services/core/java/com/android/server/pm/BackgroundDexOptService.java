@@ -46,8 +46,10 @@ import com.android.server.pm.dex.DexoptOptions;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.lang.Runnable;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -335,6 +337,14 @@ public class BackgroundDexOptService extends JobService {
         return 0;
     }
 
+    private Semaphore mHandlerFlushCount = new Semaphore(0, true);
+    private Runnable mHandlerFlusher = new Runnable() {
+        @Override
+        public void run() {
+            mHandlerFlushCount.release();
+        }
+    };
+
     private int optimizePackages(PackageManagerService pm, ArraySet<String> pkgs,
             long lowStorageThreshold, boolean isForPrimaryDex) {
         ArraySet<String> updatedPackages = new ArraySet<>();
@@ -349,6 +359,20 @@ public class BackgroundDexOptService extends JobService {
         Log.d(TAG, "Should Downgrade " + shouldDowngrade);
         boolean dex_opt_performed = false;
         for (String pkg : pkgs) {
+            // Wait for the PackageManager handler to process all queued up
+            // items so that we don't constantly interrupt it and grab the
+            // install lock
+            pm.mHandler.post(mHandlerFlusher);
+            boolean interrupted;
+            do {
+                try {
+                    mHandlerFlushCount.acquire();
+                    interrupted = false;
+                } catch (InterruptedException e) {
+                    interrupted = true;
+                }
+            } while (interrupted);
+
             int abort_code = abortIdleOptimizations(lowStorageThreshold);
             if (abort_code == OPTIMIZE_ABORT_BY_JOB_SCHEDULER) {
                 return abort_code;
