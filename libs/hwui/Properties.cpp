@@ -60,6 +60,7 @@ bool Properties::forceDrawFrame = false;
 bool Properties::filterOutTestOverhead = false;
 bool Properties::disableVsync = false;
 bool Properties::skpCaptureEnabled = false;
+bool Properties::forceDarkMode = false;
 bool Properties::enableRTAnimations = true;
 
 bool Properties::runningInEmulator = false;
@@ -145,6 +146,8 @@ bool Properties::load() {
             property_get_bool(PROPERTY_SKIA_ATRACE_ENABLED, false));
 
     runningInEmulator = property_get_bool(PROPERTY_QEMU_KERNEL, false);
+
+    forceDarkMode = property_get_bool(PROPERTY_FORCE_DARK, false);
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw) ||
            (prevDebugStencilClip != debugStencilClip);

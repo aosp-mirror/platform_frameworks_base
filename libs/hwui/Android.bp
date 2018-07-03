@@ -198,6 +198,7 @@ cc_defaults {
         "AnimatorManager.cpp",
         "Caches.cpp",
         "CanvasState.cpp",
+        "CanvasTransform.cpp",
         "ClipArea.cpp",
         "DamageAccumulator.cpp",
         "DeferredLayerUpdater.cpp",

@@ -222,6 +222,11 @@ static jboolean android_view_RenderNode_setHasOverlappingRendering(jlong renderN
             RenderNode::GENERIC);
 }
 
+static void android_view_RenderNode_setUsageHint(jlong renderNodePtr, jint usageHint) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->setUsageHint(static_cast<UsageHint>(usageHint));
+}
+
 static jboolean android_view_RenderNode_setElevation(jlong renderNodePtr, float elevation) {
     return SET_AND_DIRTY(setElevation, elevation, RenderNode::Z);
 }
@@ -614,6 +619,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetAlpha",             "(JF)Z",  (void*) android_view_RenderNode_setAlpha },
     { "nSetHasOverlappingRendering", "(JZ)Z",
             (void*) android_view_RenderNode_setHasOverlappingRendering },
+    { "nSetUsageHint",    "(JI)V", (void*) android_view_RenderNode_setUsageHint },
     { "nSetElevation",         "(JF)Z",  (void*) android_view_RenderNode_setElevation },
     { "nSetTranslationX",      "(JF)Z",  (void*) android_view_RenderNode_setTranslationX },
     { "nSetTranslationY",      "(JF)Z",  (void*) android_view_RenderNode_setTranslationY },

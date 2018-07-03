@@ -17,6 +17,7 @@
 #include "SkiaRecordingCanvas.h"
 
 #include <SkImagePriv.h>
+#include "CanvasTransform.h"
 #include "Layer.h"
 #include "LayerDrawable.h"
 #include "NinePatchUtils.h"
@@ -44,13 +45,19 @@ void SkiaRecordingCanvas::initDisplayList(uirenderer::RenderNode* renderNode, in
     }
 
     mDisplayList->attachRecorder(&mRecorder, SkIRect::MakeWH(width, height));
-    SkiaCanvas::reset(&mRecorder);
+    SkCanvas* canvas = &mRecorder;
+    mWrappedCanvas = makeTransformCanvas(&mRecorder, renderNode->usageHint());
+    if (mWrappedCanvas) {
+        canvas = mWrappedCanvas.get();
+    }
+    SkiaCanvas::reset(canvas);
 }
 
 uirenderer::DisplayList* SkiaRecordingCanvas::finishRecording() {
     // close any existing chunks if necessary
     insertReorderBarrier(false);
     mRecorder.restoreToCount(1);
+    mWrappedCanvas = nullptr;
     return mDisplayList.release();
 }
 
