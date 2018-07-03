@@ -4153,8 +4153,11 @@ public class DevicePolicyManager {
      * Called by a device or profile owner, or delegated certificate installer, to generate a
      * new private/public key pair. If the device supports key generation via secure hardware,
      * this method is useful for creating a key in KeyChain that never left the secure hardware.
-     *
      * Access to the key is controlled the same way as in {@link #installKeyPair}.
+     *
+     * <p>Because this method might take several seconds to complete, it should only be called from
+     * a worker thread. This method returns {@code null} when called from the main thread.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if calling from a delegated certificate installer.
      * @param algorithm The key generation algorithm, see {@link java.security.KeyPairGenerator}.
