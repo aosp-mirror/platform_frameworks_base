@@ -730,7 +730,7 @@ public class Binder implements IBinder {
             }
             res = onTransact(code, data, reply, flags);
         } catch (RemoteException|RuntimeException e) {
-            binderCallsStats.callThrewException(callSession);
+            binderCallsStats.callThrewException(callSession, e);
             if (LOG_RUNTIME_EXCEPTION) {
                 Log.w(TAG, "Caught a RuntimeException from the binder stub implementation.", e);
             }
