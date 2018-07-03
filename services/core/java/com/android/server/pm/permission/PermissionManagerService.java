@@ -1189,7 +1189,7 @@ public class PermissionManagerService {
                 // is granted only if it had been defined by the original application.
                 if (pkg.isUpdatedSystemApp()) {
                     final PackageParser.Package disabledPkg =
-                            mPackageManagerInt.getDisabledPackage(pkg.packageName);
+                            mPackageManagerInt.getDisabledSystemPackage(pkg.packageName);
                     final PackageSetting disabledPs =
                             (disabledPkg != null) ? (PackageSetting) disabledPkg.mExtras : null;
                     if (disabledPs != null
@@ -1221,7 +1221,7 @@ public class PermissionManagerService {
                         // packages can also get the permission.
                         if (pkg.parentPackage != null) {
                             final PackageParser.Package disabledParentPkg = mPackageManagerInt
-                                    .getDisabledPackage(pkg.parentPackage.packageName);
+                                    .getDisabledSystemPackage(pkg.parentPackage.packageName);
                             final PackageSetting disabledParentPs = (disabledParentPkg != null)
                                     ? (PackageSetting) disabledParentPkg.mExtras : null;
                             if (disabledParentPkg != null
@@ -1372,7 +1372,7 @@ public class PermissionManagerService {
             return;
         }
         final PackageParser.Package disabledPkg =
-                mPackageManagerInt.getDisabledPackage(pkg.parentPackage.packageName);
+                mPackageManagerInt.getDisabledSystemPackage(pkg.parentPackage.packageName);
         if (disabledPkg == null || disabledPkg.mExtras == null) {
             return;
         }
