@@ -16,6 +16,8 @@
 
 package android.hardware.display;
 
+import android.hardware.display.Time;
+
 /** @hide */
 interface IColorDisplayManager {
     boolean isDeviceColorManaged();
@@ -24,4 +26,16 @@ interface IColorDisplayManager {
     boolean setAppSaturationLevel(String packageName, int saturationLevel);
 
     int getTransformCapabilities();
+
+    boolean isNightDisplayActivated();
+    boolean setNightDisplayActivated(boolean activated);
+    int getNightDisplayColorTemperature();
+    boolean setNightDisplayColorTemperature(int temperature);
+    int getNightDisplayAutoMode();
+    int getNightDisplayAutoModeRaw();
+    boolean setNightDisplayAutoMode(int autoMode);
+    Time getNightDisplayCustomStartTime();
+    boolean setNightDisplayCustomStartTime(in Time time);
+    Time getNightDisplayCustomEndTime();
+    boolean setNightDisplayCustomEndTime(in Time time);
 }

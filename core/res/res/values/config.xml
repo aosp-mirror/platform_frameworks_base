@@ -954,7 +954,7 @@
     <!-- Default mode to control how Night display is automatically activated.
          One of the following values (see ColorDisplayController.java):
              0 - AUTO_MODE_DISABLED
-             1 - AUTO_MODE_CUSTOM
+             1 - AUTO_MODE_CUSTOM_TIME
              2 - AUTO_MODE_TWILIGHT
     -->
     <integer name="config_defaultNightDisplayAutoMode">0</integer>

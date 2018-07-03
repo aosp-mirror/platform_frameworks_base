@@ -25,6 +25,7 @@ import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.hardware.display.ColorDisplayManager;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -45,7 +46,9 @@ import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -67,15 +70,22 @@ public class ColorDisplayServiceTest {
 
     private MockTwilightManager mTwilightManager;
 
-    private ColorDisplayController mColorDisplayController;
     private ColorDisplayService mColorDisplayService;
+    private ColorDisplayController mColorDisplayController;
+    private ColorDisplayService.BinderService mBinderService;
+
+    @BeforeClass
+    public static void setDtm() {
+        final DisplayTransformManager dtm = Mockito.mock(DisplayTransformManager.class);
+        LocalServices.addService(DisplayTransformManager.class, dtm);
+    }
 
     @Before
     public void setUp() {
         mContext = Mockito.spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
-        mUserId = ActivityManager.getCurrentUser();
-
         doReturn(mContext).when(mContext).getApplicationContext();
+
+        mUserId = ActivityManager.getCurrentUser();
 
         final MockContentResolver cr = new MockContentResolver(mContext);
         cr.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
@@ -84,28 +94,29 @@ public class ColorDisplayServiceTest {
         final AlarmManager am = Mockito.mock(AlarmManager.class);
         doReturn(am).when(mContext).getSystemService(Context.ALARM_SERVICE);
 
-        final DisplayTransformManager dtm = Mockito.mock(DisplayTransformManager.class);
-        LocalServices.addService(DisplayTransformManager.class, dtm);
-
         mTwilightManager = new MockTwilightManager();
         LocalServices.addService(TwilightManager.class, mTwilightManager);
 
         mColorDisplayController = new ColorDisplayController(mContext, mUserId);
         mColorDisplayService = new ColorDisplayService(mContext);
+        mBinderService = mColorDisplayService.new BinderService();
     }
 
     @After
     public void tearDown() {
-        LocalServices.removeServiceForTest(DisplayTransformManager.class);
         LocalServices.removeServiceForTest(TwilightManager.class);
 
         mColorDisplayService = null;
-        mColorDisplayController = null;
 
         mTwilightManager = null;
 
         mUserId = UserHandle.USER_NULL;
         mContext = null;
+    }
+
+    @AfterClass
+    public static void removeDtm() {
+        LocalServices.removeServiceForTest(DisplayTransformManager.class);
     }
 
     @Test
@@ -981,7 +992,7 @@ public class ColorDisplayServiceTest {
      * @param endTimeOffset the offset relative to now to deactivate Night display (in minutes)
      */
     private void setAutoModeCustom(int startTimeOffset, int endTimeOffset) {
-        mColorDisplayController.setAutoMode(ColorDisplayController.AUTO_MODE_CUSTOM);
+        mColorDisplayController.setAutoMode(ColorDisplayManager.AUTO_MODE_CUSTOM_TIME);
         mColorDisplayController.setCustomStartTime(getLocalTimeRelativeToNow(startTimeOffset));
         mColorDisplayController.setCustomEndTime(getLocalTimeRelativeToNow(endTimeOffset));
     }
@@ -993,7 +1004,7 @@ public class ColorDisplayServiceTest {
      * @param sunriseOffset the offset relative to now for sunrise (in minutes)
      */
     private void setAutoModeTwilight(int sunsetOffset, int sunriseOffset) {
-        mColorDisplayController.setAutoMode(ColorDisplayController.AUTO_MODE_TWILIGHT);
+        mColorDisplayController.setAutoMode(ColorDisplayManager.AUTO_MODE_TWILIGHT);
         mTwilightManager.setTwilightState(
                 getTwilightStateRelativeToNow(sunsetOffset, sunriseOffset));
     }
@@ -1006,7 +1017,7 @@ public class ColorDisplayServiceTest {
      * activated (in minutes)
      */
     private void setActivated(boolean activated, int lastActivatedTimeOffset) {
-        mColorDisplayController.setActivated(activated);
+        mBinderService.setNightDisplayActivated(activated);
         Secure.putStringForUser(mContext.getContentResolver(),
                 Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
                 LocalDateTime.now().plusMinutes(lastActivatedTimeOffset).toString(),
@@ -1036,10 +1047,10 @@ public class ColorDisplayServiceTest {
     /**
      * Configures color mode via ColorDisplayController.
      *
-     * @param mode the color mode to set
+     * @param colorMode the color mode to set
      */
-    private void setColorMode(int mode) {
-        mColorDisplayController.setColorMode(mode);
+    private void setColorMode(int colorMode) {
+        mColorDisplayController.setColorMode(colorMode);
     }
 
     /**
@@ -1081,8 +1092,8 @@ public class ColorDisplayServiceTest {
      * @param activated the expected activated state of Night display
      */
     private void assertActivated(boolean activated) {
-        assertWithMessage("Invalid Night display activated state")
-                .that(mColorDisplayController.isActivated())
+        assertWithMessage("Incorrect Night display activated state")
+                .that(mBinderService.isNightDisplayActivated())
                 .isEqualTo(activated);
     }
 

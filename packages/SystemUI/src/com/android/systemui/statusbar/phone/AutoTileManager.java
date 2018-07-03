@@ -168,8 +168,8 @@ public class AutoTileManager {
 
         @Override
         public void onAutoModeChanged(int autoMode) {
-            if (autoMode == ColorDisplayController.AUTO_MODE_CUSTOM
-                    || autoMode == ColorDisplayController.AUTO_MODE_TWILIGHT) {
+            if (autoMode == ColorDisplayManager.AUTO_MODE_CUSTOM_TIME
+                    || autoMode == ColorDisplayManager.AUTO_MODE_TWILIGHT) {
                 addNightTile();
             }
         }
