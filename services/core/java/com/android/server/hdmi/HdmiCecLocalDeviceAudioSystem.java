@@ -15,10 +15,17 @@
  */
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.Constants.ADDR_TV;
+import static com.android.server.hdmi.Constants.ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
+import static com.android.server.hdmi.Constants.PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
+import static com.android.server.hdmi.Constants.USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
+
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.AudioManager;
 import android.os.SystemProperties;
+import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
 /**
@@ -51,11 +58,15 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected void onStandby(boolean initiatedByCec, int standbyAction) {
         assertRunOnServiceThread();
+        // Record the last state of System Audio Control before going to standby
+        synchronized (mLock) {
+            SystemProperties.set(Constants.PROPERTY_LAST_SYSTEM_AUDIO_CONTROL,
+                mSystemAudioActivated ? "true" : "false");
+        }
         if (setSystemAudioMode(false)) {
-          mService.sendCecCommand(
-              HdmiCecMessageBuilder.buildSetSystemAudioMode(
-                  mAddress, Constants.ADDR_BROADCAST, false)
-          );
+            mService.sendCecCommand(
+                HdmiCecMessageBuilder.buildSetSystemAudioMode(
+                    mAddress, Constants.ADDR_BROADCAST, false));
         }
     }
 
@@ -67,9 +78,24 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
                 mAddress, mService.getPhysicalAddress(), mDeviceType));
         mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, mService.getVendorId()));
-        // TODO(amyjojo): check PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON to decide the action
-        addAndStartAction(new SystemAudioInitiationActionFromAvr(this));
+        int systemAudioControlOnPowerOnProp = SystemProperties.getInt(
+            PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON, ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON);
+        boolean lastSystemAudioControlStatus = SystemProperties.getBoolean(
+            Constants.PROPERTY_LAST_SYSTEM_AUDIO_CONTROL, true);
+        systemAudioControlOnPowerOn(systemAudioControlOnPowerOnProp, lastSystemAudioControlStatus);
         startQueuedActions();
+    }
+
+    @VisibleForTesting
+    protected void systemAudioControlOnPowerOn(
+        int systemAudioOnPowerOnProp, boolean lastSystemAudioControlStatus) {
+        if ((systemAudioOnPowerOnProp ==
+                ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON) ||
+            ((systemAudioOnPowerOnProp ==
+                USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON) &&
+                lastSystemAudioControlStatus)) {
+            addAndStartAction(new SystemAudioInitiationActionFromAvr(this));
+        }
     }
 
     @Override

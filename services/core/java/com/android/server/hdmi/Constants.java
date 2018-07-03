@@ -236,12 +236,22 @@ final class Constants {
     static final String PROPERTY_KEEP_AWAKE = "persist.sys.hdmi.keep_awake";
 
     // TODO(UI): Set this from UI to decide if turn on System Audio Mode when power on the device
-    /** Property to decide if turn on the system audio control when power on the device
+    /**
+     * Property to decide if turn on the system audio control when power on the device.
      * Default is always turn on.
      * State must be a valid {@link SystemAudioControlOnPowerOn} int.
      */
     static final String PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON =
         "persist.sys.hdmi.system_audio_control_on_power_on";
+
+    /**
+     * Property to record last state of system audio control before device powered off.
+     * When {@link #PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON} is set to
+     * {@link #USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON}, restoring this state on power on.
+     * State must be true or false. Default true.
+     */
+    static final String PROPERTY_LAST_SYSTEM_AUDIO_CONTROL =
+        "persist.sys.hdmi.last_system_audio_control";
 
     static final int RECORDING_TYPE_DIGITAL_RF = 1;
     static final int RECORDING_TYPE_ANALOGUE_RF = 2;
