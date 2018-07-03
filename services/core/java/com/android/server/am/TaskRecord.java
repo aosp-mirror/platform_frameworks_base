@@ -88,6 +88,7 @@ import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
+import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -1937,6 +1938,35 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         for (int i = getChildCount() - 1; i >= 0; i--) {
             getChildAt(i).clearOptionsLocked(false /* withAbort */);
         }
+    }
+
+    /**
+     * Fills in a {@link TaskInfo} with information from this task.
+     * @param info the {@link TaskInfo} to fill in
+     * @param reuseActivitiesReport a temporary activities report that we can reuse to fetch the
+     *                              running activities
+     */
+    void fillTaskInfo(TaskInfo info, TaskActivitiesReport reuseActivitiesReport) {
+        getNumRunningActivities(reuseActivitiesReport);
+        info.userId = userId;
+        info.stackId = getStackId();
+        info.taskId = taskId;
+        info.isRunning = getTopActivity() != null;
+        info.baseIntent = getBaseIntent();
+        info.baseActivity = reuseActivitiesReport.base != null
+                ? reuseActivitiesReport.base.intent.getComponent()
+                : null;
+        info.topActivity = reuseActivitiesReport.top != null
+                ? reuseActivitiesReport.top.intent.getComponent()
+                : null;
+        info.origActivity = origActivity;
+        info.realActivity = realActivity;
+        info.numActivities = reuseActivitiesReport.numActivities;
+        info.lastActiveTime = lastActiveTime;
+        info.taskDescription = new ActivityManager.TaskDescription(lastTaskDescription);
+        info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingMode();
+        info.resizeMode = mResizeMode;
+        info.configuration.setTo(getConfiguration());
     }
 
     void dump(PrintWriter pw, String prefix) {

@@ -111,13 +111,6 @@ Landroid/app/ActivityManager$MemoryInfo;->foregroundAppThreshold:J
 Landroid/app/ActivityManager$MemoryInfo;->hiddenAppThreshold:J
 Landroid/app/ActivityManager$MemoryInfo;->secondaryServerThreshold:J
 Landroid/app/ActivityManager$MemoryInfo;->visibleAppThreshold:J
-Landroid/app/ActivityManager$RecentTaskInfo;->affiliatedTaskColor:I
-Landroid/app/ActivityManager$RecentTaskInfo;->firstActiveTime:J
-Landroid/app/ActivityManager$RecentTaskInfo;->lastActiveTime:J
-Landroid/app/ActivityManager$RecentTaskInfo;->resizeMode:I
-Landroid/app/ActivityManager$RecentTaskInfo;->stackId:I
-Landroid/app/ActivityManager$RecentTaskInfo;->supportsSplitScreenMultiWindow:Z
-Landroid/app/ActivityManager$RecentTaskInfo;->userId:I
 Landroid/app/ActivityManager$RunningAppProcessInfo;->flags:I
 Landroid/app/ActivityManager$RunningAppProcessInfo;->FLAG_HAS_ACTIVITIES:I
 Landroid/app/ActivityManager$RunningAppProcessInfo;->FLAG_PERSISTENT:I
@@ -936,6 +929,11 @@ Landroid/app/StatusBarManager;->getService()Lcom/android/internal/statusbar/ISta
 Landroid/app/StatusBarManager;->mContext:Landroid/content/Context;
 Landroid/app/StatusBarManager;->mToken:Landroid/os/IBinder;
 Landroid/app/StatusBarManager;->setIconVisibility(Ljava/lang/String;Z)V
+Landroid/app/TaskInfo;->lastActiveTime:J
+Landroid/app/TaskInfo;->resizeMode:I
+Landroid/app/TaskInfo;->stackId:I
+Landroid/app/TaskInfo;->supportsSplitScreenMultiWindow:Z
+Landroid/app/TaskInfo;->userId:I
 Landroid/app/TaskStackListener;-><init>()V
 Landroid/app/TimePickerDialog;->mTimePicker:Landroid/widget/TimePicker;
 Landroid/app/trust/ITrustManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
