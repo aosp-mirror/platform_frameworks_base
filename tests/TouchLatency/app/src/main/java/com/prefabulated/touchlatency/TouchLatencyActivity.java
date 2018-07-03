@@ -30,6 +30,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.os.Trace;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,6 +43,7 @@ class TouchLatencyView extends View implements View.OnTouchListener {
 
     public TouchLatencyView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        Trace.beginSection("TouchLatencyView constructor");
         setOnTouchListener(this);
         setWillNotDraw(false);
         mBluePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -63,48 +65,56 @@ class TouchLatencyView extends View implements View.OnTouchListener {
         mBallY = 100.0f;
         mVelocityX = 7.0f;
         mVelocityY = 7.0f;
+        Trace.endSection();
     }
 
     @Override
     public boolean onTouch(View view, MotionEvent event) {
+        Trace.beginSection("TouchLatencyView onTouch");
         int action = event.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE) {
             mTouching = true;
             invalidate();
+
+            mTouchX = event.getX();
+            mTouchY = event.getY();
         } else if (action == MotionEvent.ACTION_UP) {
             mTouching = false;
             invalidate();
-            return true;
-        } else {
-            return true;
         }
-        mTouchX = event.getX();
-        mTouchY = event.getY();
+        Trace.endSection();
         return true;
     }
 
     private void drawTouch(Canvas canvas) {
-        if (!mTouching) {
-            Log.d(LOG_TAG, "Filling background");
+        Trace.beginSection("TouchLatencyView drawTouch");
+
+        try {
+            if (!mTouching) {
+                Log.d(LOG_TAG, "Filling background");
+                canvas.drawColor(BACKGROUND_COLOR);
+                return;
+            }
+
+            float deltaX = (mTouchX - mLastDrawnX);
+            float deltaY = (mTouchY - mLastDrawnY);
+            float scaleFactor = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY) * 1.5f;
+
+            mLastDrawnX = mTouchX;
+            mLastDrawnY = mTouchY;
+
             canvas.drawColor(BACKGROUND_COLOR);
-            return;
+            canvas.drawCircle(mTouchX, mTouchY, INNER_RADIUS + 3 * scaleFactor, mRedPaint);
+            canvas.drawCircle(mTouchX, mTouchY, INNER_RADIUS + 2 * scaleFactor, mYellowPaint);
+            canvas.drawCircle(mTouchX, mTouchY, INNER_RADIUS + scaleFactor, mGreenPaint);
+            canvas.drawCircle(mTouchX, mTouchY, INNER_RADIUS, mBluePaint);
+        } finally {
+            Trace.endSection();
         }
-
-        float deltaX = (mTouchX - mLastDrawnX);
-        float deltaY = (mTouchY - mLastDrawnY);
-        float scaleFactor = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY) * 1.5f;
-
-        mLastDrawnX = mTouchX;
-        mLastDrawnY = mTouchY;
-
-        canvas.drawColor(BACKGROUND_COLOR);
-        canvas.drawCircle(mTouchX, mTouchY, INNER_RADIUS + 3 * scaleFactor, mRedPaint);
-        canvas.drawCircle(mTouchX, mTouchY, INNER_RADIUS + 2 * scaleFactor, mYellowPaint);
-        canvas.drawCircle(mTouchX, mTouchY, INNER_RADIUS + scaleFactor, mGreenPaint);
-        canvas.drawCircle(mTouchX, mTouchY, INNER_RADIUS, mBluePaint);
     }
 
     private void drawBall(Canvas canvas) {
+        Trace.beginSection("TouchLatencyView drawBall");
         int width = canvas.getWidth();
         int height = canvas.getHeight();
 
@@ -141,25 +151,29 @@ class TouchLatencyView extends View implements View.OnTouchListener {
         canvas.drawColor(BACKGROUND_COLOR);
         canvas.drawOval(left, top, right, bottom, mYellowPaint);
         invalidate();
+        Trace.endSection();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
+        Trace.beginSection("TouchLatencyView onDraw");
         if (mMode == 0) {
             drawTouch(canvas);
         } else {
             drawBall(canvas);
         }
+        Trace.endSection();
     }
 
     public void changeMode(MenuItem item) {
+        Trace.beginSection("TouchLatencyView changeMode");
         final int NUM_MODES = 2;
         final String modes[] = {"Touch", "Ball"};
         mMode = (mMode + 1) % NUM_MODES;
         invalidate();
         item.setTitle(modes[mMode]);
+        Trace.endSection();
     }
 
     private Paint mBluePaint, mGreenPaint, mYellowPaint, mRedPaint;
@@ -178,21 +192,26 @@ public class TouchLatencyActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Trace.beginSection("TouchLatencyActivity onCreate");
         setContentView(R.layout.activity_touch_latency);
 
         mTouchView = findViewById(R.id.canvasView);
+        Trace.endSection();
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        Trace.beginSection("TouchLatencyActivity onCreateOptionsMenu");
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_touch_latency, menu);
+        Trace.endSection();
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Trace.beginSection("TouchLatencyActivity onOptionsItemSelected");
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
@@ -203,6 +222,7 @@ public class TouchLatencyActivity extends Activity {
             mTouchView.changeMode(item);
         }
 
+        Trace.endSection();
         return super.onOptionsItemSelected(item);
     }
 
