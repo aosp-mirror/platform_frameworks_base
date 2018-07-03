@@ -883,15 +883,6 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
     // This is a synchronous call.
     public abstract void clearPendingCommands();
 
-    /**
-     * Stops playback after playback has been started or paused.
-     *
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized.
-     * @hide
-     */
-    public void stop() { }
-
     //--------------------------------------------------------------------------
     // Explicit Routing
     //--------------------
@@ -1714,7 +1705,7 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
          * @param dsd the DataSourceDesc of this data source
          * @param timestamp the new media clock.
          */
-        public void onMediaTimeChanged(
+        public void onMediaTimeDiscontinuity(
                 MediaPlayer2 mp, DataSourceDesc dsd, MediaTimestamp timestamp) { }
 
         /**
@@ -1725,44 +1716,34 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
          *        {@link #notifyWhenCommandLabelReached(Object)}.
          */
         public void onCommandLabelReached(MediaPlayer2 mp, @NonNull Object label) { }
+
+        /**
+         * Called when when a player subtitle track has new subtitle data available.
+         * @param mp the player that reports the new subtitle data
+         * @param dsd the DataSourceDesc of this data source
+         * @param data the subtitle data
+         */
+        public void onSubtitleData(
+                MediaPlayer2 mp, DataSourceDesc dsd, @NonNull SubtitleData data) { }
     }
 
     /**
      * Sets the callback to be invoked when the media source is ready for playback.
      *
-     * @param eventCallback the callback that will be run
      * @param executor the executor through which the callback should be invoked
+     * @param eventCallback the callback that will be run
      */
     // This is a synchronous call.
-    public abstract void setEventCallback(@NonNull @CallbackExecutor Executor executor,
+    public abstract void registerEventCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull EventCallback eventCallback);
 
     /**
-     * Clears the {@link EventCallback}.
+     * Unregisters the {@link EventCallback}.
+     *
+     * @param eventCallback the callback to be unregistered
      */
     // This is a synchronous call.
-    public abstract void clearEventCallback();
-
-    /**
-     * Interface definition of a callback to be invoked when a
-     * track has data available.
-     *
-     * @hide
-     */
-    public interface OnSubtitleDataListener
-    {
-        public void onSubtitleData(MediaPlayer2 mp, SubtitleData data);
-    }
-
-    /**
-     * Register a callback to be invoked when a track has data available.
-     *
-     * @param listener the callback that will be run
-     *
-     * @hide
-     */
-    // This is a synchronous call.
-    public void setOnSubtitleDataListener(OnSubtitleDataListener listener) { }
+    public abstract void unregisterEventCallback(EventCallback eventCallback);
 
 
     /* Do not change these values without updating their counterparts
@@ -2055,11 +2036,6 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
      * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
     public static final int CALL_COMPLETED_SET_PLAYBACK_PARAMS = 24;
-
-    /** The player just completed a call {@link #setPlaybackSpeed}.
-     * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
-     */
-    public static final int CALL_COMPLETED_SET_PLAYBACK_SPEED = 25;
 
     /** The player just completed a call {@link #setPlayerVolume}.
      * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
