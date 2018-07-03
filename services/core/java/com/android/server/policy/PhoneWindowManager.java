@@ -290,6 +290,7 @@ import com.android.server.wm.AppTransition;
 import com.android.server.wm.DisplayFrames;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.AppTransitionListener;
+import com.android.server.wm.utils.InsetUtils;
 
 import java.io.File;
 import java.io.FileReader;
@@ -4536,16 +4537,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     // TODO: Should probably be moved into DisplayFrames.
-    public boolean getLayoutHintLw(WindowManager.LayoutParams attrs, Rect taskBounds,
-            DisplayFrames displayFrames, Rect outFrame, Rect outContentInsets, Rect outStableInsets,
+    public boolean getLayoutHintLw(LayoutParams attrs, Rect taskBounds,
+            DisplayFrames displayFrames, boolean floatingStack, Rect outFrame,
+            Rect outContentInsets, Rect outStableInsets,
             Rect outOutsets, DisplayCutout.ParcelableWrapper outDisplayCutout) {
         final int fl = PolicyControl.getWindowFlags(null, attrs);
         final int pfl = attrs.privateFlags;
         final int requestedSysUiVis = PolicyControl.getSystemUiVisibility(null, attrs);
         final int sysUiVis = requestedSysUiVis | getImpliedSysUiFlagsForLayout(attrs);
         final int displayRotation = displayFrames.mRotation;
-        final int displayWidth = displayFrames.mDisplayWidth;
-        final int displayHeight = displayFrames.mDisplayHeight;
 
         final boolean useOutsets = outOutsets != null && shouldUseOutsets(attrs, fl);
         if (useOutsets) {
@@ -4569,45 +4569,40 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean screenDecor = (pfl & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0;
 
         if (layoutInScreenAndInsetDecor && !screenDecor) {
-            int availRight, availBottom;
             if (canHideNavigationBar() &&
                     (sysUiVis & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0) {
                 outFrame.set(displayFrames.mUnrestricted);
-                availRight = displayFrames.mUnrestricted.right;
-                availBottom = displayFrames.mUnrestricted.bottom;
             } else {
                 outFrame.set(displayFrames.mRestricted);
-                availRight = displayFrames.mRestricted.right;
-                availBottom = displayFrames.mRestricted.bottom;
             }
-            outStableInsets.set(displayFrames.mStable.left, displayFrames.mStable.top,
-                    availRight - displayFrames.mStable.right,
-                    availBottom - displayFrames.mStable.bottom);
 
-            if ((sysUiVis & View.SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
+            final Rect sf;
+            if (floatingStack) {
+                sf = null;
+            } else {
+                sf = displayFrames.mStable;
+            }
+
+            final Rect cf;
+            if (floatingStack) {
+                cf = null;
+            } else if ((sysUiVis & View.SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
                 if ((fl & FLAG_FULLSCREEN) != 0) {
-                    outContentInsets.set(displayFrames.mStableFullscreen.left,
-                            displayFrames.mStableFullscreen.top,
-                            availRight - displayFrames.mStableFullscreen.right,
-                            availBottom - displayFrames.mStableFullscreen.bottom);
+                    cf = displayFrames.mStableFullscreen;
                 } else {
-                    outContentInsets.set(outStableInsets);
+                    cf = displayFrames.mStable;
                 }
             } else if ((fl & FLAG_FULLSCREEN) != 0 || (fl & FLAG_LAYOUT_IN_OVERSCAN) != 0) {
-                outContentInsets.setEmpty();
+                cf = displayFrames.mOverscan;
             } else {
-                outContentInsets.set(displayFrames.mCurrent.left, displayFrames.mCurrent.top,
-                        availRight - displayFrames.mCurrent.right,
-                        availBottom - displayFrames.mCurrent.bottom);
+                cf = displayFrames.mCurrent;
             }
 
             if (taskBounds != null) {
-                calculateRelevantTaskInsets(taskBounds, outContentInsets,
-                        displayWidth, displayHeight);
-                calculateRelevantTaskInsets(taskBounds, outStableInsets,
-                        displayWidth, displayHeight);
                 outFrame.intersect(taskBounds);
             }
+            InsetUtils.insetsBetweenFrames(outFrame, cf, outContentInsets);
+            InsetUtils.insetsBetweenFrames(outFrame, sf, outStableInsets);
             outDisplayCutout.set(displayFrames.mDisplayCutout.calculateRelativeTo(outFrame)
                     .getDisplayCutout());
             return mForceShowSystemBars;
@@ -4626,22 +4621,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             outDisplayCutout.set(DisplayCutout.NO_CUTOUT);
             return mForceShowSystemBars;
         }
-    }
-
-    /**
-     * For any given task bounds, the insets relevant for these bounds given the insets relevant
-     * for the entire display.
-     */
-    private void calculateRelevantTaskInsets(Rect taskBounds, Rect inOutInsets, int displayWidth,
-            int displayHeight) {
-        mTmpRect.set(0, 0, displayWidth, displayHeight);
-        mTmpRect.inset(inOutInsets);
-        mTmpRect.intersect(taskBounds);
-        int leftInset = mTmpRect.left - taskBounds.left;
-        int topInset = mTmpRect.top - taskBounds.top;
-        int rightInset = taskBounds.right - mTmpRect.right;
-        int bottomInset = taskBounds.bottom - mTmpRect.bottom;
-        inOutInsets.set(leftInset, topInset, rightInset, bottomInset);
     }
 
     private boolean shouldUseOutsets(WindowManager.LayoutParams attrs, int fl) {

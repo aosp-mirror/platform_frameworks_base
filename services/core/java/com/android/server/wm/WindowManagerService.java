@@ -1469,14 +1469,18 @@ public class WindowManagerService extends IWindowManager.Stub
             displayFrames.onDisplayInfoUpdated(displayInfo,
                     displayContent.calculateDisplayCutoutForRotation(displayInfo.rotation));
             final Rect taskBounds;
+            final boolean floatingStack;
             if (atoken != null && atoken.getTask() != null) {
                 taskBounds = mTmpRect;
                 atoken.getTask().getBounds(mTmpRect);
+                floatingStack = atoken.getTask().isFloating();
             } else {
                 taskBounds = null;
+                floatingStack = false;
             }
-            if (mPolicy.getLayoutHintLw(win.mAttrs, taskBounds, displayFrames, outFrame,
-                    outContentInsets, outStableInsets, outOutsets, outDisplayCutout)) {
+            if (mPolicy.getLayoutHintLw(win.mAttrs, taskBounds, displayFrames, floatingStack,
+                    outFrame, outContentInsets, outStableInsets, outOutsets,
+                    outDisplayCutout)) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_NAV_BAR;
             }
 

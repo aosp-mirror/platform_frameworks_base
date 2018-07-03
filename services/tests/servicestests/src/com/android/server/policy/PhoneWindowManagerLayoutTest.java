@@ -22,7 +22,6 @@ import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
@@ -309,8 +308,8 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         final Rect stable = new Rect();
         final Rect outsets = new Rect();
         final DisplayCutout.ParcelableWrapper cutout = new DisplayCutout.ParcelableWrapper();
-        mPolicy.getLayoutHintLw(mAppWindow.attrs, null /* taskBounds */, mFrames, frame, content,
-                stable, outsets, cutout);
+        mPolicy.getLayoutHintLw(mAppWindow.attrs, null /* taskBounds */, mFrames,
+                false /* floatingStack */, frame, content, stable, outsets, cutout);
 
         assertThat(frame, equalTo(mFrames.mUnrestricted));
         assertThat(content, equalTo(new Rect()));
@@ -331,8 +330,8 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         final DisplayCutout.ParcelableWrapper outDisplayCutout =
                 new DisplayCutout.ParcelableWrapper();
 
-        mPolicy.getLayoutHintLw(mAppWindow.attrs, null, mFrames, outFrame, outContentInsets,
-                outStableInsets, outOutsets, outDisplayCutout);
+        mPolicy.getLayoutHintLw(mAppWindow.attrs, null, mFrames, false /* floatingStack */,
+                outFrame, outContentInsets, outStableInsets, outOutsets, outDisplayCutout);
 
         assertThat(outFrame, is(mFrames.mUnrestricted));
         assertThat(outContentInsets, is(new Rect(0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT)));
@@ -355,8 +354,35 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         final DisplayCutout.ParcelableWrapper outDisplayCutout =
                 new DisplayCutout.ParcelableWrapper();
 
-        mPolicy.getLayoutHintLw(mAppWindow.attrs, taskBounds, mFrames, outFrame, outContentInsets,
-                outStableInsets, outOutsets, outDisplayCutout);
+        mPolicy.getLayoutHintLw(mAppWindow.attrs, taskBounds, mFrames, false /* floatingStack */,
+                outFrame, outContentInsets, outStableInsets, outOutsets, outDisplayCutout);
+
+        assertThat(outFrame, is(taskBounds));
+        assertThat(outContentInsets, is(new Rect()));
+        assertThat(outStableInsets, is(new Rect()));
+        assertThat(outOutsets, is(new Rect()));
+        assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));
+    }
+
+    @Test
+    public void layoutHint_appWindowInTask_outsideContentFrame() {
+        // Initialize DisplayFrames
+        mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+
+        // Task is in the nav bar area (usually does not happen, but this is similar enough to the
+        // possible overlap with the IME)
+        final Rect taskBounds = new Rect(100, mFrames.mContent.bottom + 1,
+                200, mFrames.mContent.bottom + 10);
+
+        final Rect outFrame = new Rect();
+        final Rect outContentInsets = new Rect();
+        final Rect outStableInsets = new Rect();
+        final Rect outOutsets = new Rect();
+        final DisplayCutout.ParcelableWrapper outDisplayCutout =
+                new DisplayCutout.ParcelableWrapper();
+
+        mPolicy.getLayoutHintLw(mAppWindow.attrs, taskBounds, mFrames, true /* floatingStack */,
+                outFrame, outContentInsets, outStableInsets, outOutsets, outDisplayCutout);
 
         assertThat(outFrame, is(taskBounds));
         assertThat(outContentInsets, is(new Rect()));
