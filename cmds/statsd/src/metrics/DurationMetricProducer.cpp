@@ -783,7 +783,7 @@ void DurationMetricProducer::onMatchedLogEventLocked(const size_t matcherIndex,
         if (whatIt != mCurrentSlicedDurationTrackerMap.end()) {
             for (const auto& condIt : whatIt->second) {
                 const bool cond = dimensionKeysInCondition.find(condIt.first) !=
-                        dimensionKeysInCondition.end();
+                        dimensionKeysInCondition.end() && condition;
                 handleStartEvent(MetricDimensionKey(dimensionInWhat, condIt.first),
                     conditionKey, cond, event);
                 dimensionKeysInCondition.erase(condIt.first);
