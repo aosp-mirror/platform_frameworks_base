@@ -54,6 +54,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
@@ -116,9 +117,12 @@ abstract public class ManagedServices {
     // contains connections to all connected services, including app services
     // and system services
     private final ArrayList<ManagedServiceInfo> mServices = new ArrayList<>();
-    // things that will be put into mServices as soon as they're ready
-    private final ArrayList<String> mServicesBinding = new ArrayList<>();
-    private final ArraySet<String> mServicesRebinding = new ArraySet<>();
+    /**
+     * The services that have been bound by us. If the service is also connected, it will also
+     * be in {@link #mServices}.
+     */
+    private final ArrayList<Pair<ComponentName, Integer>> mServicesBound = new ArrayList<>();
+    private final ArraySet<Pair<ComponentName, Integer>> mServicesRebinding = new ArraySet<>();
 
     // lists the component names of all enabled (and therefore potentially connected)
     // app services for current profiles.
@@ -917,13 +921,13 @@ abstract public class ManagedServices {
             final boolean isSystem) {
         if (DEBUG) Slog.v(TAG, "registerService: " + name + " u=" + userid);
 
-        final String servicesBindingTag = name.toString() + "/" + userid;
-        if (mServicesBinding.contains(servicesBindingTag)) {
-            Slog.v(TAG, "Not registering " + name + " as bind is already in progress");
+        final Pair<ComponentName, Integer> servicesBindingTag = Pair.create(name, userid);
+        if (mServicesBound.contains(servicesBindingTag)) {
+            Slog.v(TAG, "Not registering " + name + " is already bound");
             // stop registering this thing already! we're working on it
             return;
         }
-        mServicesBinding.add(servicesBindingTag);
+        mServicesBound.add(servicesBindingTag);
 
         final int N = mServices.size();
         for (int i = N - 1; i >= 0; i--) {
@@ -934,11 +938,7 @@ abstract public class ManagedServices {
                 Slog.v(TAG, "    disconnecting old " + getCaption() + ": " + info.service);
                 removeServiceLocked(i);
                 if (info.connection != null) {
-                    try {
-                        mContext.unbindService(info.connection);
-                    } catch (IllegalArgumentException e) {
-                        Slog.e(TAG, "failed to unbind " + name, e);
-                    }
+                    unbindService(info.connection, info.component, info.userid);
                 }
             }
         }
@@ -969,11 +969,11 @@ abstract public class ManagedServices {
 
                 @Override
                 public void onServiceConnected(ComponentName name, IBinder binder) {
+                    Slog.v(TAG, getCaption() + " service connected: " + name);
                     boolean added = false;
                     ManagedServiceInfo info = null;
                     synchronized (mMutex) {
                         mServicesRebinding.remove(servicesBindingTag);
-                        mServicesBinding.remove(servicesBindingTag);
                         try {
                             mService = asInterface(binder);
                             info = newServiceInfo(mService, name,
@@ -991,7 +991,6 @@ abstract public class ManagedServices {
 
                 @Override
                 public void onServiceDisconnected(ComponentName name) {
-                    mServicesBinding.remove(servicesBindingTag);
                     Slog.v(TAG, getCaption() + " connection lost: " + name);
                 }
 
@@ -999,12 +998,7 @@ abstract public class ManagedServices {
                 public void onBindingDied(ComponentName name) {
                     Slog.w(TAG, getCaption() + " binding died: " + name);
                     synchronized (mMutex) {
-                        mServicesBinding.remove(servicesBindingTag);
-                        try {
-                            mContext.unbindService(this);
-                        } catch (IllegalArgumentException e) {
-                            Slog.e(TAG, "failed to unbind " + name, e);
-                        }
+                        unbindService(this, name, userid);
                         if (!mServicesRebinding.contains(servicesBindingTag)) {
                             mServicesRebinding.add(servicesBindingTag);
                             mHandler.postDelayed(new Runnable() {
@@ -1024,12 +1018,12 @@ abstract public class ManagedServices {
                 serviceConnection,
                 BIND_AUTO_CREATE | BIND_FOREGROUND_SERVICE | BIND_ALLOW_WHITELIST_MANAGEMENT,
                 new UserHandle(userid))) {
-                mServicesBinding.remove(servicesBindingTag);
+                mServicesBound.remove(servicesBindingTag);
                 Slog.w(TAG, "Unable to bind " + getCaption() + " service: " + intent);
                 return;
             }
         } catch (SecurityException ex) {
-            mServicesBinding.remove(servicesBindingTag);
+            mServicesBound.remove(servicesBindingTag);
             Slog.e(TAG, "Unable to bind " + getCaption() + " service: " + intent, ex);
         }
     }
@@ -1050,13 +1044,7 @@ abstract public class ManagedServices {
             if (name.equals(info.component) && info.userid == userid) {
                 removeServiceLocked(i);
                 if (info.connection != null) {
-                    try {
-                        mContext.unbindService(info.connection);
-                    } catch (IllegalArgumentException ex) {
-                        // something happened to the service: we think we have a connection
-                        // but it's bogus.
-                        Slog.e(TAG, getCaption() + " " + name + " could not be unbound: " + ex);
-                    }
+                    unbindService(info.connection, info.component, info.userid);
                 }
             }
         }
@@ -1121,7 +1109,18 @@ abstract public class ManagedServices {
     private void unregisterServiceImpl(IInterface service, int userid) {
         ManagedServiceInfo info = removeServiceImpl(service, userid);
         if (info != null && info.connection != null && !info.isGuest(this)) {
-            mContext.unbindService(info.connection);
+            unbindService(info.connection, info.component, info.userid);
+        }
+    }
+
+    private void unbindService(ServiceConnection connection, ComponentName component, int userId) {
+        try {
+            mContext.unbindService(connection);
+        } catch (IllegalArgumentException e) {
+            Slog.e(TAG, getCaption() + " " + component + " could not be unbound", e);
+        }
+        synchronized (mMutex) {
+            mServicesBound.remove(Pair.create(component, userId));
         }
     }
 
