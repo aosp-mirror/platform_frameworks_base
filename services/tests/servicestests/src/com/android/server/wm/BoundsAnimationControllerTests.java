@@ -151,11 +151,13 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
         }
 
         @Override
-        public void onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate) {
+        public boolean onAnimationStart(boolean schedulePipModeChangedCallback,
+                boolean forceUpdate) {
             mAwaitingAnimationStart = false;
             mAnimationStarted = true;
             mSchedulePipModeChangedOnStart = schedulePipModeChangedCallback;
             mForcePipModeChangedCallback = forceUpdate;
+            return true;
         }
 
         @Override
