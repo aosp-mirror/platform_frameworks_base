@@ -1549,6 +1549,22 @@ public class LocationManagerService extends ILocationManager.Stub {
         return -1;
     }
 
+    private static String resolutionLevelToOpStr(int allowedResolutionLevel) {
+        switch(allowedResolutionLevel) {
+            case RESOLUTION_LEVEL_COARSE:
+                return AppOpsManager.OPSTR_COARSE_LOCATION;
+            case RESOLUTION_LEVEL_FINE:
+                return AppOpsManager.OPSTR_FINE_LOCATION;
+            case RESOLUTION_LEVEL_NONE:
+                // The client is not allowed to get any location, so both FINE and COARSE ops will
+                // be denied. Pick the most restrictive one to be safe.
+                return AppOpsManager.OPSTR_FINE_LOCATION;
+            default:
+                // Use the most restrictive ops if not sure.
+                return AppOpsManager.OPSTR_FINE_LOCATION;
+        }
+    }
+
     boolean reportLocationAccessNoThrow(
             int pid, int uid, String packageName, int allowedResolutionLevel) {
         int op = resolutionLevelToOp(allowedResolutionLevel);
@@ -2295,7 +2311,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
 
                 // Don't return stale location to apps with foreground-only location permission.
-                String op = getResolutionPermission(allowedResolutionLevel);
+                String op = resolutionLevelToOpStr(allowedResolutionLevel);
                 long locationAgeMs = SystemClock.elapsedRealtime() -
                         location.getElapsedRealtimeNanos() / NANOS_PER_MILLI;
                 if ((locationAgeMs > mLastLocationMaxAgeMs)
