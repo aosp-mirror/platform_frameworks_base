@@ -195,6 +195,11 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
                 true /* noisy */, false /* buzzy*/, false /* lights */);
     }
 
+    private NotificationRecord getInsistentBeepyOnceNotification() {
+        return getNotificationRecord(mId, true /* insistent */, true /* once */,
+                true /* noisy */, false /* buzzy*/, false /* lights */);
+    }
+
     private NotificationRecord getInsistentBeepyLeanbackNotification() {
         return getLeanbackNotificationRecord(mId, true /* insistent */, false /* once */,
                 true /* noisy */, false /* buzzy*/, false /* lights */);
@@ -525,6 +530,24 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verifyNeverStopAudio();
         assertTrue(r.isInterruptive());
         assertFalse(s.isInterruptive());
+    }
+
+    /**
+     * Tests the case where the user re-posts a {@link Notification} with looping sound where
+     * {@link Notification.Builder#setOnlyAlertOnce(true)} has been called.  This should silence
+     * the sound associated with the notification.
+     * @throws Exception
+     */
+    @Test
+    public void testNoisyOnceUpdateDoesCancelAudio() throws Exception {
+        NotificationRecord r = getInsistentBeepyNotification();
+        NotificationRecord s = getInsistentBeepyOnceNotification();
+        s.isUpdate = true;
+
+        mService.buzzBeepBlinkLocked(r);
+        mService.buzzBeepBlinkLocked(s);
+
+        verifyStopAudio();
     }
 
     @Test
