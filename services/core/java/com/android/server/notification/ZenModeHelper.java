@@ -1182,10 +1182,18 @@ public class ZenModeHelper {
     }
 
     private void showZenUpgradeNotification(int zen) {
+        final boolean isWatch = mContext.getPackageManager().hasSystemFeature(
+            PackageManager.FEATURE_WATCH);
         final boolean showNotification = mIsBootComplete
                 && zen != Global.ZEN_MODE_OFF
+                && !isWatch
                 && Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0;
+
+        if (isWatch) {
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
+        }
 
         if (showNotification) {
             mNotificationManager.notify(TAG, SystemMessage.NOTE_ZEN_UPGRADE,
