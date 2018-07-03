@@ -15,8 +15,10 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.hardware.display.ColorDisplayManager;
 import android.os.Handler;
 import android.provider.Settings.Secure;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ColorDisplayController;
 import com.android.systemui.Dependency;
@@ -80,7 +82,7 @@ public class AutoTileManager {
             Dependency.get(ManagedProfileController.class).addCallback(mProfileCallback);
         }
         if (!mAutoTracker.isAdded(NIGHT)
-            && ColorDisplayController.isAvailable(mContext)) {
+                && ColorDisplayManager.isNightDisplayAvailable(mContext)) {
             Dependency.get(ColorDisplayController.class).setListener(mColorDisplayCallback);
         }
     }
@@ -93,7 +95,9 @@ public class AutoTileManager {
         Dependency.get(HotspotController.class).removeCallback(mHotspotCallback);
         Dependency.get(DataSaverController.class).removeCallback(mDataSaverListener);
         Dependency.get(ManagedProfileController.class).removeCallback(mProfileCallback);
-        Dependency.get(ColorDisplayController.class).setListener(null);
+        if (ColorDisplayManager.isNightDisplayAvailable(mContext)) {
+            Dependency.get(ColorDisplayController.class).setListener(null);
+        }
     }
 
     public void unmarkTileAsAutoAdded(String tabSpec) {
