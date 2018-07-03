@@ -2075,6 +2075,25 @@ public class TextUtils {
         return (T) text.subSequence(0, size);
     }
 
+    /**
+     * Trims the {@code text} to the first {@code size} characters and adds an ellipsis if the
+     * resulting string is shorter than the input. This will result in an output string which is
+     * longer than {@code size} for most inputs.
+     *
+     * @param size length of the result, should be greater than 0
+     *
+     * @hide
+     */
+    @Nullable
+    public static <T extends CharSequence> T trimToLengthWithEllipsis(@Nullable T text,
+            @IntRange(from = 1) int size) {
+        T trimmed = trimToSize(text, size);
+        if (trimmed.length() < text.length()) {
+            trimmed = (T) (trimmed.toString() + "...");
+        }
+        return trimmed;
+    }
+
     private static Object sLock = new Object();
 
     private static char[] sTemp = null;
