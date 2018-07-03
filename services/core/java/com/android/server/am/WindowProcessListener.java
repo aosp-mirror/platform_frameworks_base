@@ -44,4 +44,7 @@ public interface WindowProcessListener {
 
     /** Set process package been removed from device. */
     void setRemoved(boolean removed);
+
+    /** Returns the total time (in milliseconds) spent executing in both user and system code. */
+    long getCpuTime();
 }

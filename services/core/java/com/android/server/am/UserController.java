@@ -259,11 +259,14 @@ class UserController implements Handler.Callback {
     }
 
     void finishUserSwitch(UserState uss) {
-        finishUserBoot(uss);
-        startProfiles();
-        synchronized (mLock) {
-            stopRunningUsersLU(mMaxRunningUsers);
-        }
+        // This call holds the AM lock so we post to the handler.
+        mHandler.post(() -> {
+            finishUserBoot(uss);
+            startProfiles();
+            synchronized (mLock) {
+                stopRunningUsersLU(mMaxRunningUsers);
+            }
+        });
     }
 
     List<Integer> getRunningUsersLU() {
@@ -1573,7 +1576,9 @@ class UserController implements Handler.Callback {
     }
 
     boolean hasStartedUserState(int userId) {
-        return mStartedUsers.get(userId) != null;
+        synchronized (mLock) {
+            return mStartedUsers.get(userId) != null;
+        }
     }
 
     private void updateStartedUserArrayLU() {
@@ -1749,7 +1754,7 @@ class UserController implements Handler.Callback {
         return ums != null ? ums.getUserIds() : new int[] { 0 };
     }
 
-    UserInfo getUserInfo(int userId) {
+    private UserInfo getUserInfo(int userId) {
         return mInjector.getUserManager().getUserInfo(userId);
     }
 
@@ -1775,7 +1780,7 @@ class UserController implements Handler.Callback {
         return mInjector.getUserManager().exists(userId);
     }
 
-    void enforceShellRestriction(String restriction, int userHandle) {
+    private void enforceShellRestriction(String restriction, int userHandle) {
         if (Binder.getCallingUid() == SHELL_UID) {
             if (userHandle < 0 || hasUserRestriction(restriction, userHandle)) {
                 throw new SecurityException("Shell does not have permission to access user "
@@ -1786,16 +1791,6 @@ class UserController implements Handler.Callback {
 
     boolean hasUserRestriction(String restriction, int userId) {
         return mInjector.getUserManager().hasUserRestriction(restriction, userId);
-    }
-
-    Set<Integer> getProfileIds(int userId) {
-        Set<Integer> userIds = new HashSet<>();
-        final List<UserInfo> profiles = mInjector.getUserManager().getProfiles(userId,
-                false /* enabledOnly */);
-        for (UserInfo user : profiles) {
-            userIds.add(user.id);
-        }
-        return userIds;
     }
 
     boolean isSameProfileGroup(int callingUserId, int targetUserId) {

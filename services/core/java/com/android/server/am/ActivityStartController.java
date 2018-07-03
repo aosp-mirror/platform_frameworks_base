@@ -240,7 +240,7 @@ public class ActivityStartController {
             return mService.handleIncomingUser(
                     realCallingPid, realCallingUid, targetUserId, reason);
         } else {
-            mService.mAm.mUserController.ensureNotSpecialUser(targetUserId);
+            mService.mAmInternal.ensureNotSpecialUser(targetUserId);
             return targetUserId;
         }
     }

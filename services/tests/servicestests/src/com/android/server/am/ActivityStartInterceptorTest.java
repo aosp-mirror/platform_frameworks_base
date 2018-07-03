@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManagerInternal;
 import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
@@ -94,11 +95,11 @@ public class ActivityStartInterceptorTest {
     @Mock
     private UserManager mUserManager;
     @Mock
-    private UserController mUserController;
-    @Mock
     private KeyguardManager mKeyguardManager;
     @Mock
     private PackageManagerService mPackageManager;
+    @Mock
+    private ActivityManagerInternal mAmInternal;
 
     private ActivityStartInterceptor mInterceptor;
     private ActivityInfo mAInfo = new ActivityInfo();
@@ -107,10 +108,14 @@ public class ActivityStartInterceptorTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mService.mAm = mAm;
-        mInterceptor = new ActivityStartInterceptor(mService, mSupervisor, mContext,
-                mUserController);
+        mService.mAmInternal = mAmInternal;
+        mInterceptor = new ActivityStartInterceptor(mService, mSupervisor, mContext);
         mInterceptor.setStates(TEST_USER_ID, TEST_REAL_CALLING_PID, TEST_REAL_CALLING_UID,
                 TEST_START_FLAGS, TEST_CALLING_PACKAGE);
+
+        // Mock ActivityManagerInternal
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        LocalServices.addService(ActivityManagerInternal.class, mAmInternal);
 
         // Mock DevicePolicyManagerInternal
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
@@ -193,7 +198,7 @@ public class ActivityStartInterceptorTest {
     @Test
     public void testWorkChallenge() {
         // GIVEN that the user the activity is starting as is currently locked
-        when(mUserController.shouldConfirmCredentials(TEST_USER_ID)).thenReturn(true);
+        when(mAmInternal.shouldConfirmCredentials(TEST_USER_ID)).thenReturn(true);
 
         // THEN calling intercept returns true
         mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null);

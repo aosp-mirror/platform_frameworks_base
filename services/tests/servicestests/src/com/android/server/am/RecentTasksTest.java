@@ -108,37 +108,6 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     private CallbacksRecorder mCallbacksRecorder;
 
-    class TestUserController extends UserController {
-        TestUserController(ActivityManagerService service) {
-            super(service);
-        }
-
-        @Override
-        int[] getCurrentProfileIds() {
-            return new int[] { TEST_USER_0_ID, TEST_QUIET_USER_ID };
-        }
-
-        @Override
-        Set<Integer> getProfileIds(int userId) {
-            Set<Integer> profileIds = new HashSet<>();
-            profileIds.add(TEST_USER_0_ID);
-            profileIds.add(TEST_QUIET_USER_ID);
-            return profileIds;
-        }
-
-        @Override
-        UserInfo getUserInfo(int userId) {
-            switch (userId) {
-                case TEST_USER_0_ID:
-                case TEST_USER_1_ID:
-                    return DEFAULT_USER_INFO;
-                case TEST_QUIET_USER_ID:
-                    return QUIET_USER_INFO;
-            }
-            return null;
-        }
-    }
-
     @Before
     @Override
     public void setUp() throws Exception {
@@ -829,7 +798,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         @Override
         protected RecentTasks createRecentTasks() {
-            return new TestRecentTasks(this, mTaskPersister, new TestUserController(mAm));
+            return new TestRecentTasks(this, mTaskPersister);
         }
 
         @Override
@@ -954,9 +923,33 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         boolean lastAllowed;
 
-        TestRecentTasks(ActivityTaskManagerService service, TaskPersister taskPersister,
-                UserController userController) {
-            super(service, taskPersister, userController);
+        TestRecentTasks(ActivityTaskManagerService service, TaskPersister taskPersister) {
+            super(service, taskPersister);
+        }
+
+        @Override
+        Set<Integer> getProfileIds(int userId) {
+            Set<Integer> profileIds = new HashSet<>();
+            profileIds.add(TEST_USER_0_ID);
+            profileIds.add(TEST_QUIET_USER_ID);
+            return profileIds;
+        }
+
+        @Override
+        UserInfo getUserInfo(int userId) {
+            switch (userId) {
+                case TEST_USER_0_ID:
+                case TEST_USER_1_ID:
+                    return DEFAULT_USER_INFO;
+                case TEST_QUIET_USER_ID:
+                    return QUIET_USER_INFO;
+            }
+            return null;
+        }
+
+        @Override
+        int[] getCurrentProfileIds() {
+            return new int[] { TEST_USER_0_ID, TEST_QUIET_USER_ID };
         }
 
         @Override

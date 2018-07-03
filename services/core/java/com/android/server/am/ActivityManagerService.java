@@ -22325,9 +22325,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public boolean isUserRunning(int userId, int flags) {
-            synchronized (ActivityManagerService.this) {
-                return mUserController.isUserRunning(userId, flags);
-            }
+            // Holding am lock isn't required to call into user controller.
+            return mUserController.isUserRunning(userId, flags);
         }
 
         @Override
@@ -22397,6 +22396,41 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void sendForegroundProfileChanged(int userId) {
             mUserController.sendForegroundProfileChanged(userId);
+        }
+
+        @Override
+        public boolean shouldConfirmCredentials(int userId) {
+            return mUserController.shouldConfirmCredentials(userId);
+        }
+
+        @Override
+        public int[] getCurrentProfileIds() {
+            return mUserController.getCurrentProfileIds();
+        }
+
+        @Override
+        public UserInfo getCurrentUser() {
+            return mUserController.getCurrentUser();
+        }
+
+        @Override
+        public void ensureNotSpecialUser(int userId) {
+            mUserController.ensureNotSpecialUser(userId);
+        }
+
+        @Override
+        public boolean isCurrentProfile(int userId) {
+            return mUserController.isCurrentProfile(userId);
+        }
+
+        @Override
+        public boolean hasStartedUserState(int userId) {
+            return mUserController.hasStartedUserState(userId);
+        }
+
+        @Override
+        public void finishUserSwitch(Object uss) {
+            mUserController.finishUserSwitch((UserState) uss);
         }
     }
 
