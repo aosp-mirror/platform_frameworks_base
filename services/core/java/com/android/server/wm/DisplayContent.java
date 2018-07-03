@@ -1249,11 +1249,21 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     cutout, mInitialDisplayWidth, mInitialDisplayHeight);
         }
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
-        final Path bounds = cutout.getBounds().getBoundaryPath();
+        final List<Rect> bounds = WmDisplayCutout.computeSafeInsets(
+                        cutout, mInitialDisplayWidth, mInitialDisplayHeight)
+                .getDisplayCutout().getBoundingRects();
         transformPhysicalToLogicalCoordinates(rotation, mInitialDisplayWidth, mInitialDisplayHeight,
                 mTmpMatrix);
-        bounds.transform(mTmpMatrix);
-        return WmDisplayCutout.computeSafeInsets(DisplayCutout.fromBounds(bounds),
+        final Region region = Region.obtain();
+        for (int i = 0; i < bounds.size(); i++) {
+            final Rect rect = bounds.get(i);
+            final RectF rectF = new RectF(bounds.get(i));
+            mTmpMatrix.mapRect(rectF);
+            rectF.round(rect);
+            region.op(rect, Op.UNION);
+        }
+
+        return WmDisplayCutout.computeSafeInsets(DisplayCutout.fromBounds(region),
                 rotated ? mInitialDisplayHeight : mInitialDisplayWidth,
                 rotated ? mInitialDisplayWidth : mInitialDisplayHeight);
     }

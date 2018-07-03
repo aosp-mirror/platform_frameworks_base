@@ -197,6 +197,9 @@ inline StringBuilder::operator bool() const {
   return error_.empty();
 }
 
+// Converts a UTF8 string into Modified UTF8
+std::string Utf8ToModifiedUtf8(const std::string& utf8);
+
 // Converts a UTF8 string to a UTF16 string.
 std::u16string Utf8ToUtf16(const android::StringPiece& utf8);
 std::string Utf16ToUtf8(const android::StringPiece16& utf16);

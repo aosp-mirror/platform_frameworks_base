@@ -157,7 +157,7 @@ public final class ProcessStats implements Parcelable {
     };
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 27;
+    private static final int PARCEL_VERSION = 31;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535454;
 
@@ -250,6 +250,7 @@ public final class ProcessStats implements Parcelable {
                     final PackageState otherState = versions.valueAt(iv);
                     final int NPROCS = otherState.mProcesses.size();
                     final int NSRVS = otherState.mServices.size();
+                    final int NASCS = otherState.mAssociations.size();
                     for (int iproc=0; iproc<NPROCS; iproc++) {
                         ProcessState otherProc = otherState.mProcesses.valueAt(iproc);
                         if (otherProc.getCommonProcess() != otherProc) {
@@ -276,6 +277,14 @@ public final class ProcessStats implements Parcelable {
                         ServiceState thisSvc = getServiceStateLocked(pkgName, uid, vers,
                                 otherSvc.getProcessName(), otherSvc.getName());
                         thisSvc.add(otherSvc);
+                    }
+                    for (int iasc=0; iasc<NASCS; iasc++) {
+                        AssociationState otherAsc = otherState.mAssociations.valueAt(iasc);
+                        if (DEBUG) Slog.d(TAG, "Adding pkg " + pkgName + " uid " + uid
+                                + " association " + otherAsc.getName());
+                        AssociationState thisAsc = getAssociationStateLocked(pkgName, uid, vers,
+                                otherAsc.getProcessName(), otherAsc.getName());
+                        thisAsc.add(otherAsc);
                     }
                 }
             }
@@ -478,7 +487,16 @@ public final class ProcessStats implements Parcelable {
                             pkgState.mServices.removeAt(isvc);
                         }
                     }
-                    if (pkgState.mProcesses.size() <= 0 && pkgState.mServices.size() <= 0) {
+                    for (int iasc=pkgState.mAssociations.size()-1; iasc>=0; iasc--) {
+                        final AssociationState as = pkgState.mAssociations.valueAt(iasc);
+                        if (as.isInUse()) {
+                            as.resetSafely(now);
+                        } else {
+                            pkgState.mAssociations.removeAt(iasc);
+                        }
+                    }
+                    if (pkgState.mProcesses.size() <= 0 && pkgState.mServices.size() <= 0
+                            && pkgState.mAssociations.size() <= 0) {
                         vpkgs.removeAt(iv);
                     }
                 }
@@ -708,7 +726,7 @@ public final class ProcessStats implements Parcelable {
         }
     }
 
-    private void writeCommonString(Parcel out, String name) {
+    void writeCommonString(Parcel out, String name) {
         Integer index = mCommonStringToIndex.get(name);
         if (index != null) {
             out.writeInt(index);
@@ -720,7 +738,7 @@ public final class ProcessStats implements Parcelable {
         out.writeString(name);
     }
 
-    private String readCommonString(Parcel in, int version) {
+    String readCommonString(Parcel in, int version) {
         if (version <= 9) {
             return in.readString();
         }
@@ -790,6 +808,10 @@ public final class ProcessStats implements Parcelable {
                     final int NSRVS = pkgState.mServices.size();
                     for (int isvc=0; isvc<NSRVS; isvc++) {
                         pkgState.mServices.valueAt(isvc).commitStateTime(now);
+                    }
+                    final int NASCS = pkgState.mAssociations.size();
+                    for (int iasc=0; iasc<NASCS; iasc++) {
+                        pkgState.mAssociations.valueAt(iasc).commitStateTime(now);
                     }
                 }
             }
@@ -873,6 +895,14 @@ public final class ProcessStats implements Parcelable {
                         final ServiceState svc = pkgState.mServices.valueAt(isvc);
                         writeCommonString(out, svc.getProcessName());
                         svc.writeToParcel(out, now);
+                    }
+                    final int NASCS = pkgState.mAssociations.size();
+                    out.writeInt(NASCS);
+                    for (int iasc=0; iasc<NASCS; iasc++) {
+                        writeCommonString(out, pkgState.mAssociations.keyAt(iasc));
+                        final AssociationState asc = pkgState.mAssociations.valueAt(iasc);
+                        writeCommonString(out, asc.getProcessName());
+                        asc.writeToParcel(this, out, now);
                     }
                 }
             }
@@ -1078,7 +1108,7 @@ public final class ProcessStats implements Parcelable {
                 while (NVERS > 0) {
                     NVERS--;
                     final long vers = in.readLong();
-                    PackageState pkgState = new PackageState(pkgName, uid);
+                    PackageState pkgState = new PackageState(this, pkgName, uid, vers);
                     LongSparseArray<PackageState> vpkg = mPackages.get(pkgName, uid);
                     if (vpkg == null) {
                         vpkg = new LongSparseArray<>();
@@ -1157,6 +1187,34 @@ public final class ProcessStats implements Parcelable {
                                 + serviceName + " " + uid + " " + serv);
                         pkgState.mServices.put(serviceName, serv);
                     }
+                    int NASCS = in.readInt();
+                    if (NASCS < 0) {
+                        mReadError = "bad package association count: " + NASCS;
+                        return;
+                    }
+                    while (NASCS > 0) {
+                        NASCS--;
+                        String associationName = readCommonString(in, version);
+                        if (associationName == null) {
+                            mReadError = "bad package association name";
+                            return;
+                        }
+                        String processName = readCommonString(in, version);
+                        AssociationState asc = hadData
+                                ? pkgState.mAssociations.get(associationName) : null;
+                        if (asc == null) {
+                            asc = new AssociationState(this, pkgName, associationName,
+                                    processName);
+                        }
+                        String errorMsg = asc.readFromParcel(this, in, version);
+                        if (errorMsg != null) {
+                            mReadError = errorMsg;
+                            return;
+                        }
+                        if (DEBUG_PARCEL) Slog.d(TAG, "Adding package " + pkgName + " association: "
+                                + associationName + " " + uid + " " + asc);
+                        pkgState.mAssociations.put(associationName, asc);
+                    }
                 }
             }
         }
@@ -1183,33 +1241,38 @@ public final class ProcessStats implements Parcelable {
     public PackageState getPackageStateLocked(String packageName, int uid, long vers) {
         LongSparseArray<PackageState> vpkg = mPackages.get(packageName, uid);
         if (vpkg == null) {
-            vpkg = new LongSparseArray<PackageState>();
+            vpkg = new LongSparseArray<>();
             mPackages.put(packageName, uid, vpkg);
         }
         PackageState as = vpkg.get(vers);
         if (as != null) {
             return as;
         }
-        as = new PackageState(packageName, uid);
+        as = new PackageState(this, packageName, uid, vers);
         vpkg.put(vers, as);
         return as;
     }
 
     public ProcessState getProcessStateLocked(String packageName, int uid, long vers,
             String processName) {
-        final PackageState pkgState = getPackageStateLocked(packageName, uid, vers);
+        return getProcessStateLocked(getPackageStateLocked(packageName, uid, vers), processName);
+    }
+
+    public ProcessState getProcessStateLocked(PackageState pkgState, String processName) {
         ProcessState ps = pkgState.mProcesses.get(processName);
         if (ps != null) {
             return ps;
         }
-        ProcessState commonProc = mProcesses.get(processName, uid);
+        ProcessState commonProc = mProcesses.get(processName, pkgState.mUid);
         if (commonProc == null) {
-            commonProc = new ProcessState(this, packageName, uid, vers, processName);
-            mProcesses.put(processName, uid, commonProc);
+            commonProc = new ProcessState(this, pkgState.mPackageName, pkgState.mUid,
+                    pkgState.mVersionCode, processName);
+            mProcesses.put(processName, pkgState.mUid, commonProc);
             if (DEBUG) Slog.d(TAG, "GETPROC created new common " + commonProc);
         }
         if (!commonProc.isMultiPackage()) {
-            if (packageName.equals(commonProc.getPackage()) && vers == commonProc.getVersion()) {
+            if (pkgState.mPackageName.equals(commonProc.getPackage())
+                    && pkgState.mVersionCode == commonProc.getVersion()) {
                 // This common process is not in use by multiple packages, and
                 // is for the calling package, so we can just use it directly.
                 ps = commonProc;
@@ -1228,7 +1291,7 @@ public final class ProcessStats implements Parcelable {
                 // First let's make a copy of the current process state and put
                 // that under the now unique state for its original package name.
                 final PackageState commonPkgState = getPackageStateLocked(commonProc.getPackage(),
-                        uid, commonProc.getVersion());
+                        pkgState.mUid, commonProc.getVersion());
                 if (commonPkgState != null) {
                     ProcessState cloned = commonProc.clone(now);
                     if (DEBUG) Slog.d(TAG, "GETPROC setting clone to pkg " + commonProc.getPackage()
@@ -1247,16 +1310,18 @@ public final class ProcessStats implements Parcelable {
                     }
                 } else {
                     Slog.w(TAG, "Cloning proc state: no package state " + commonProc.getPackage()
-                            + "/" + uid + " for proc " + commonProc.getName());
+                            + "/" + pkgState.mUid + " for proc " + commonProc.getName());
                 }
                 // And now make a fresh new process state for the new package name.
-                ps = new ProcessState(commonProc, packageName, uid, vers, processName, now);
+                ps = new ProcessState(commonProc, pkgState.mPackageName, pkgState.mUid,
+                        pkgState.mVersionCode, processName, now);
                 if (DEBUG) Slog.d(TAG, "GETPROC created new pkg " + ps);
             }
         } else {
             // The common process is for multiple packages, we need to create a
             // separate object for the per-package data.
-            ps = new ProcessState(commonProc, packageName, uid, vers, processName,
+            ps = new ProcessState(commonProc, pkgState.mPackageName, pkgState.mUid,
+                    pkgState.mVersionCode, processName,
                     SystemClock.uptimeMillis());
             if (DEBUG) Slog.d(TAG, "GETPROC created new pkg " + ps);
         }
@@ -1279,6 +1344,22 @@ public final class ProcessStats implements Parcelable {
         as.mServices.put(className, ss);
         if (DEBUG) Slog.d(TAG, "GETSVC: creating " + ss + " in " + ps);
         return ss;
+    }
+
+    public AssociationState getAssociationStateLocked(String packageName, int uid, long vers,
+            String processName, String className) {
+        final ProcessStats.PackageState pkgs = getPackageStateLocked(packageName, uid, vers);
+        AssociationState as = pkgs.mAssociations.get(className);
+        if (as != null) {
+            if (DEBUG) Slog.d(TAG, "GETASC: returning existing " + as);
+            return as;
+        }
+        final ProcessState procs = processName != null
+                ? getProcessStateLocked(packageName, uid, vers, processName) : null;
+        as = new AssociationState(this, packageName, className, processName);
+        pkgs.mAssociations.put(className, as);
+        if (DEBUG) Slog.d(TAG, "GETASC: creating " + as + " in " + procs);
+        return as;
     }
 
     public void dumpLocked(PrintWriter pw, String reqPackage, long now, boolean dumpSummary,
@@ -1304,6 +1385,7 @@ public final class ProcessStats implements Parcelable {
                     final PackageState pkgState = vpkgs.valueAt(iv);
                     final int NPROCS = pkgState.mProcesses.size();
                     final int NSRVS = pkgState.mServices.size();
+                    final int NASCS = pkgState.mAssociations.size();
                     final boolean pkgMatch = reqPackage == null || reqPackage.equals(pkgName);
                     if (!pkgMatch) {
                         boolean procMatch = false;
@@ -1318,7 +1400,7 @@ public final class ProcessStats implements Parcelable {
                             continue;
                         }
                     }
-                    if (NPROCS > 0 || NSRVS > 0) {
+                    if (NPROCS > 0 || NSRVS > 0 || NASCS > 0) {
                         if (!printedHeader) {
                             if (sepNeeded) pw.println();
                             pw.println("Per-Package Stats:");
@@ -1368,7 +1450,7 @@ public final class ProcessStats implements Parcelable {
                             }
                             procs.add(proc);
                         }
-                        DumpUtils.dumpProcessSummaryLocked(pw, "      ", procs,
+                        DumpUtils.dumpProcessSummaryLocked(pw, "      ", "Prc ", procs,
                                 ALL_SCREEN_ADJ, ALL_MEM_ADJ, NON_CACHED_PROC_STATES,
                                 now, totalTime);
                     }
@@ -1378,19 +1460,40 @@ public final class ProcessStats implements Parcelable {
                             continue;
                         }
                         if (activeOnly && !svc.isInUse()) {
-                            pw.print("      (Not active: ");
+                            pw.print("      (Not active service: ");
                                     pw.print(pkgState.mServices.keyAt(isvc)); pw.println(")");
                             continue;
                         }
                         if (dumpAll) {
                             pw.print("      Service ");
                         } else {
-                            pw.print("      * ");
+                            pw.print("      * Svc ");
                         }
                         pw.print(pkgState.mServices.keyAt(isvc));
                         pw.println(":");
                         pw.print("        Process: "); pw.println(svc.getProcessName());
                         svc.dumpStats(pw, "        ", "          ", "    ",
+                                now, totalTime, dumpSummary, dumpAll);
+                    }
+                    for (int iasc=0; iasc<NASCS; iasc++) {
+                        AssociationState asc = pkgState.mAssociations.valueAt(iasc);
+                        if (!pkgMatch && !reqPackage.equals(asc.getProcessName())) {
+                            continue;
+                        }
+                        if (activeOnly && !asc.isInUse()) {
+                            pw.print("      (Not active association: ");
+                            pw.print(pkgState.mAssociations.keyAt(iasc)); pw.println(")");
+                            continue;
+                        }
+                        if (dumpAll) {
+                            pw.print("      Association ");
+                        } else {
+                            pw.print("      * Asc ");
+                        }
+                        pw.print(pkgState.mAssociations.keyAt(iasc));
+                        pw.println(":");
+                        pw.print("        Process: "); pw.println(asc.getProcessName());
+                        asc.dumpStats(pw, "        ", "          ", "    ",
                                 now, totalTime, dumpSummary, dumpAll);
                     }
                 }
@@ -1450,7 +1553,7 @@ public final class ProcessStats implements Parcelable {
             pw.println();
         }
         if (dumpSummary) {
-            pw.println("Summary:");
+            pw.println("Process summary:");
             dumpSummaryLocked(pw, reqPackage, now, activeOnly);
         } else {
             dumpTotalsLocked(pw, now);
@@ -1466,13 +1569,15 @@ public final class ProcessStats implements Parcelable {
             pw.print("  mRunning="); pw.println(mRunning);
         }
 
-        dumpFragmentationLocked(pw);
+        if (reqPackage == null) {
+            dumpFragmentationLocked(pw);
+        }
     }
 
     public void dumpSummaryLocked(PrintWriter pw, String reqPackage, long now, boolean activeOnly) {
         long totalTime = DumpUtils.dumpSingleTime(null, null, mMemFactorDurations, mMemFactor,
                 mStartTime, now);
-        dumpFilteredSummaryLocked(pw, null, "  ", ALL_SCREEN_ADJ, ALL_MEM_ADJ,
+        dumpFilteredSummaryLocked(pw, null, "  ", null, ALL_SCREEN_ADJ, ALL_MEM_ADJ,
                 ALL_PROC_STATES, NON_CACHED_PROC_STATES, now, totalTime, reqPackage, activeOnly);
         pw.println();
         dumpTotalsLocked(pw, now);
@@ -1607,7 +1712,7 @@ public final class ProcessStats implements Parcelable {
         pw.println();
     }
 
-    void dumpFilteredSummaryLocked(PrintWriter pw, String header, String prefix,
+    void dumpFilteredSummaryLocked(PrintWriter pw, String header, String prefix, String prcLabel,
             int[] screenStates, int[] memStates, int[] procStates,
             int[] sortProcStates, long now, long totalTime, String reqPackage, boolean activeOnly) {
         ArrayList<ProcessState> procs = collectProcessesLocked(screenStates, memStates,
@@ -1617,7 +1722,7 @@ public final class ProcessStats implements Parcelable {
                 pw.println();
                 pw.println(header);
             }
-            DumpUtils.dumpProcessSummaryLocked(pw, prefix, procs, screenStates, memStates,
+            DumpUtils.dumpProcessSummaryLocked(pw, prefix, prcLabel, procs, screenStates, memStates,
                     sortProcStates, now, totalTime);
         }
     }
@@ -1708,6 +1813,7 @@ public final class ProcessStats implements Parcelable {
                     final PackageState pkgState = vpkgs.valueAt(iv);
                     final int NPROCS = pkgState.mProcesses.size();
                     final int NSRVS = pkgState.mServices.size();
+                    final int NASCS = pkgState.mAssociations.size();
                     for (int iproc=0; iproc<NPROCS; iproc++) {
                         ProcessState proc = pkgState.mProcesses.valueAt(iproc);
                         proc.dumpPackageProcCheckin(pw, pkgName, uid, vers,
@@ -1718,6 +1824,12 @@ public final class ProcessStats implements Parcelable {
                                 pkgState.mServices.keyAt(isvc));
                         final ServiceState svc = pkgState.mServices.valueAt(isvc);
                         svc.dumpTimesCheckin(pw, pkgName, uid, vers, serviceName, now);
+                    }
+                    for (int iasc=0; iasc<NASCS; iasc++) {
+                        final String associationName = DumpUtils.collapseString(pkgName,
+                                pkgState.mAssociations.keyAt(iasc));
+                        final AssociationState asc = pkgState.mAssociations.valueAt(iasc);
+                        asc.dumpTimesCheckin(pw, pkgName, uid, vers, associationName, now);
                     }
                 }
             }
@@ -1850,6 +1962,7 @@ public final class ProcessStats implements Parcelable {
     final public static class ProcessStateHolder {
         public final long appVersion;
         public ProcessState state;
+        public PackageState pkg;
 
         public ProcessStateHolder(long _appVersion) {
             appVersion = _appVersion;
@@ -1857,16 +1970,31 @@ public final class ProcessStats implements Parcelable {
     }
 
     public static final class PackageState {
-        public final ArrayMap<String, ProcessState> mProcesses
-                = new ArrayMap<String, ProcessState>();
-        public final ArrayMap<String, ServiceState> mServices
-                = new ArrayMap<String, ServiceState>();
+        public final ProcessStats mProcessStats;
+        public final ArrayMap<String, ProcessState> mProcesses = new ArrayMap<>();
+        public final ArrayMap<String, ServiceState> mServices = new ArrayMap<>();
+        public final ArrayMap<String, AssociationState> mAssociations = new ArrayMap<>();
         public final String mPackageName;
         public final int mUid;
+        public final long mVersionCode;
 
-        public PackageState(String packageName, int uid) {
+        public PackageState(ProcessStats procStats, String packageName, int uid, long versionCode) {
+            mProcessStats = procStats;
             mUid = uid;
             mPackageName = packageName;
+            mVersionCode = versionCode;
+        }
+
+        public AssociationState getAssociationStateLocked(String processName, String className) {
+            AssociationState as = mAssociations.get(className);
+            if (as != null) {
+                if (DEBUG) Slog.d(TAG, "GETASC: returning existing " + as);
+                return as;
+            }
+            as = new AssociationState(mProcessStats, mPackageName, className, processName);
+            mAssociations.put(className, as);
+            if (DEBUG) Slog.d(TAG, "GETASC: creating " + as + " in " + processName);
+            return as;
         }
     }
 

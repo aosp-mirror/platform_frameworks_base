@@ -17,6 +17,7 @@
 #include "Properties.h"
 #include "Debug.h"
 #include "DeviceInfo.h"
+#include "SkTraceEventCommon.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -139,6 +140,9 @@ bool Properties::load() {
     filterOutTestOverhead = property_get_bool(PROPERTY_FILTER_TEST_OVERHEAD, false);
 
     skpCaptureEnabled = debuggingEnabled && property_get_bool(PROPERTY_CAPTURE_SKP_ENABLED, false);
+
+    SkAndroidFrameworkTraceUtil::setEnableTracing(
+            property_get_bool(PROPERTY_SKIA_ATRACE_ENABLED, false));
 
     runningInEmulator = property_get_bool(PROPERTY_QEMU_KERNEL, false);
 

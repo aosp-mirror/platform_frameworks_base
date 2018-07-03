@@ -18,7 +18,13 @@ package com.android.server.am;
 
 import android.os.Binder;
 import android.os.SystemClock;
+import android.util.Slog;
 import android.util.TimeUtils;
+
+import com.android.internal.app.procstats.AssociationState;
+import com.android.internal.app.procstats.ProcessStats;
+
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
 /**
  * Represents a link between a content provider and client.
@@ -26,6 +32,7 @@ import android.util.TimeUtils;
 public final class ContentProviderConnection extends Binder {
     public final ContentProviderRecord provider;
     public final ProcessRecord client;
+    public AssociationState.SourceState association;
     public final long createTime;
     public int stableCount;
     public int unstableCount;
@@ -43,6 +50,31 @@ public final class ContentProviderConnection extends Binder {
         provider = _provider;
         client = _client;
         createTime = SystemClock.elapsedRealtime();
+    }
+
+    public void startAssociationIfNeeded() {
+        if (association == null) {
+            ProcessStats.ProcessStateHolder holder = provider.proc != null
+                    ? provider.proc.pkgList.get(provider.name.getPackageName()) : null;
+            if (holder == null) {
+                Slog.wtf(TAG_AM, "No package in referenced provider "
+                        + provider.name.toShortString() + ": proc=" + provider.proc);
+            } else if (holder.pkg == null) {
+                Slog.wtf(TAG_AM, "Inactive holder in referenced provider "
+                        + provider.name.toShortString() + ": proc=" + provider.proc);
+            } else {
+                association = holder.pkg.getAssociationStateLocked(provider.info.processName,
+                        provider.name.getClassName()).startSource(client.uid, client.processName);
+
+            }
+        }
+    }
+
+    public void stopAssociation() {
+        if (association != null) {
+            association.stop();
+            association = null;
+        }
     }
 
     public String toString() {

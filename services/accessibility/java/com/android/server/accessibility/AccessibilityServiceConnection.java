@@ -258,6 +258,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 return;
             }
             mWasConnectedAndDied = true;
+            mSystemSupport.getKeyEventDispatcher().flush(this);
             UserState userState = mUserStateWeakReference.get();
             if (userState != null) {
                 userState.serviceDisconnectedLocked(this);

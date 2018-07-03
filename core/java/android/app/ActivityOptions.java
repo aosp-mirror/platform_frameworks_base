@@ -302,7 +302,6 @@ public class ActivityOptions {
     private int mResultCode;
     private int mExitCoordinatorIndex;
     private PendingIntent mUsageTimeReport;
-    private boolean mLockTaskMode = false;
     private int mLaunchDisplayId = INVALID_DISPLAY;
     @WindowConfiguration.WindowingMode
     private int mLaunchWindowingMode = WINDOWING_MODE_UNDEFINED;
@@ -310,6 +309,7 @@ public class ActivityOptions {
     private int mLaunchActivityType = ACTIVITY_TYPE_UNDEFINED;
     private int mLaunchTaskId = -1;
     private int mSplitScreenCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
+    private boolean mLockTaskMode = false;
     private boolean mDisallowEnterPictureInPictureWhileLaunching;
     private boolean mTaskOverlay;
     private boolean mTaskOverlayCanResume;
@@ -946,7 +946,7 @@ public class ActivityOptions {
             mAnimationFinishedListener = IRemoteCallback.Stub.asInterface(
                     opts.getBinder(KEY_ANIMATION_FINISHED_LISTENER));
         }
-        mRotationAnimationHint = opts.getInt(KEY_ROTATION_ANIMATION_HINT);
+        mRotationAnimationHint = opts.getInt(KEY_ROTATION_ANIMATION_HINT, -1);
         mAppVerificationBundle = opts.getBundle(KEY_INSTANT_APP_VERIFICATION_BUNDLE);
         if (opts.containsKey(KEY_SPECS_FUTURE)) {
             mSpecsFuture = IAppTransitionAnimationSpecsFuture.Stub.asInterface(opts.getBinder(
@@ -1442,17 +1442,37 @@ public class ActivityOptions {
                 b.putInt(KEY_EXIT_COORDINATOR_INDEX, mExitCoordinatorIndex);
                 break;
         }
-        b.putBoolean(KEY_LOCK_TASK_MODE, mLockTaskMode);
-        b.putInt(KEY_LAUNCH_DISPLAY_ID, mLaunchDisplayId);
-        b.putInt(KEY_LAUNCH_WINDOWING_MODE, mLaunchWindowingMode);
-        b.putInt(KEY_LAUNCH_ACTIVITY_TYPE, mLaunchActivityType);
-        b.putInt(KEY_LAUNCH_TASK_ID, mLaunchTaskId);
-        b.putBoolean(KEY_TASK_OVERLAY, mTaskOverlay);
-        b.putBoolean(KEY_TASK_OVERLAY_CAN_RESUME, mTaskOverlayCanResume);
-        b.putBoolean(KEY_AVOID_MOVE_TO_FRONT, mAvoidMoveToFront);
-        b.putInt(KEY_SPLIT_SCREEN_CREATE_MODE, mSplitScreenCreateMode);
-        b.putBoolean(KEY_DISALLOW_ENTER_PICTURE_IN_PICTURE_WHILE_LAUNCHING,
-                mDisallowEnterPictureInPictureWhileLaunching);
+        if (mLockTaskMode) {
+            b.putBoolean(KEY_LOCK_TASK_MODE, mLockTaskMode);
+        }
+        if (mLaunchDisplayId != INVALID_DISPLAY) {
+            b.putInt(KEY_LAUNCH_DISPLAY_ID, mLaunchDisplayId);
+        }
+        if (mLaunchWindowingMode != WINDOWING_MODE_UNDEFINED) {
+            b.putInt(KEY_LAUNCH_WINDOWING_MODE, mLaunchWindowingMode);
+        }
+        if (mLaunchActivityType != ACTIVITY_TYPE_UNDEFINED) {
+            b.putInt(KEY_LAUNCH_ACTIVITY_TYPE, mLaunchActivityType);
+        }
+        if (mLaunchTaskId != -1) {
+            b.putInt(KEY_LAUNCH_TASK_ID, mLaunchTaskId);
+        }
+        if (mTaskOverlay) {
+            b.putBoolean(KEY_TASK_OVERLAY, mTaskOverlay);
+        }
+        if (mTaskOverlayCanResume) {
+            b.putBoolean(KEY_TASK_OVERLAY_CAN_RESUME, mTaskOverlayCanResume);
+        }
+        if (mAvoidMoveToFront) {
+            b.putBoolean(KEY_AVOID_MOVE_TO_FRONT, mAvoidMoveToFront);
+        }
+        if (mSplitScreenCreateMode != SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT) {
+            b.putInt(KEY_SPLIT_SCREEN_CREATE_MODE, mSplitScreenCreateMode);
+        }
+        if (mDisallowEnterPictureInPictureWhileLaunching) {
+            b.putBoolean(KEY_DISALLOW_ENTER_PICTURE_IN_PICTURE_WHILE_LAUNCHING,
+                    mDisallowEnterPictureInPictureWhileLaunching);
+        }
         if (mAnimSpecs != null) {
             b.putParcelableArray(KEY_ANIM_SPECS, mAnimSpecs);
         }
@@ -1462,7 +1482,9 @@ public class ActivityOptions {
         if (mSpecsFuture != null) {
             b.putBinder(KEY_SPECS_FUTURE, mSpecsFuture.asBinder());
         }
-        b.putInt(KEY_ROTATION_ANIMATION_HINT, mRotationAnimationHint);
+        if (mRotationAnimationHint != -1) {
+            b.putInt(KEY_ROTATION_ANIMATION_HINT, mRotationAnimationHint);
+        }
         if (mAppVerificationBundle != null) {
             b.putBundle(KEY_INSTANT_APP_VERIFICATION_BUNDLE, mAppVerificationBundle);
         }

@@ -16,14 +16,12 @@
 
 package com.android.server.am;
 
-import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.service.procstats.ProcessStatsProto;
 import android.service.procstats.ProcessStatsServiceDumpProto;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
@@ -34,6 +32,7 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.app.procstats.AssociationState;
 import com.android.internal.app.procstats.DumpUtils;
 import com.android.internal.app.procstats.IProcessStats;
 import com.android.internal.app.procstats.ProcessState;
@@ -120,11 +119,20 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         }
     }
 
+    @GuardedBy("mAm")
+    public void updateProcessStateHolderLocked(ProcessStats.ProcessStateHolder holder,
+            String packageName, int uid, long versionCode, String processName) {
+        holder.pkg = mProcessStats.getPackageStateLocked(packageName, uid, versionCode);
+        holder.state = mProcessStats.getProcessStateLocked(holder.pkg, processName);
+    }
+
+    @GuardedBy("mAm")
     public ProcessState getProcessStateLocked(String packageName,
             int uid, long versionCode, String processName) {
         return mProcessStats.getProcessStateLocked(packageName, uid, versionCode, processName);
     }
 
+    @GuardedBy("mAm")
     public ServiceState getServiceStateLocked(String packageName, int uid,
             long versionCode, String processName, String className) {
         return mProcessStats.getServiceStateLocked(packageName, uid, versionCode, processName,
@@ -174,15 +182,18 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return false;
     }
 
+    @GuardedBy("mAm")
     public int getMemFactorLocked() {
         return mProcessStats.mMemFactor != ProcessStats.STATE_NOTHING ? mProcessStats.mMemFactor : 0;
     }
 
+    @GuardedBy("mAm")
     public void addSysMemUsageLocked(long cachedMem, long freeMem, long zramMem, long kernelMem,
             long nativeMem) {
         mProcessStats.addSysMemUsage(cachedMem, freeMem, zramMem, kernelMem, nativeMem);
     }
 
+    @GuardedBy("mAm")
     public boolean shouldWriteNowLocked(long now) {
         if (now > (mLastWriteTime+WRITE_PERIOD)) {
             if (SystemClock.elapsedRealtime()
@@ -196,6 +207,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return false;
     }
 
+    @GuardedBy("mAm")
     public void shutdownLocked() {
         Slog.w(TAG, "Writing process stats before shutdown...");
         mProcessStats.mFlags |= ProcessStats.FLAG_SHUTDOWN;
@@ -203,14 +215,17 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         mShuttingDown = true;
     }
 
+    @GuardedBy("mAm")
     public void writeStateAsyncLocked() {
         writeStateLocked(false);
     }
 
+    @GuardedBy("mAm")
     public void writeStateSyncLocked() {
         writeStateLocked(true);
     }
 
+    @GuardedBy("mAm")
     private void writeStateLocked(boolean sync) {
         if (mShuttingDown) {
             return;
@@ -220,6 +235,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         writeStateLocked(sync, commitPending);
     }
 
+    @GuardedBy("mAm")
     public void writeStateLocked(boolean sync, final boolean commit) {
         final long totalTime;
         synchronized (mPendingWriteLock) {
@@ -298,6 +314,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         }
     }
 
+    @GuardedBy("mAm")
     boolean readLocked(ProcessStats stats, AtomicFile file) {
         try {
             FileInputStream stream = file.openRead();
@@ -342,6 +359,13 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                                             + ": " + pkgState.mServices.valueAt(isvc));
 
                                 }
+                                final int NASCS = pkgState.mAssociations.size();
+                                for (int iasc=0; iasc<NASCS; iasc++) {
+                                    Slog.w(TAG, "      Association "
+                                            + pkgState.mServices.keyAt(iasc)
+                                            + ": " + pkgState.mAssociations.valueAt(iasc));
+
+                                }
                             }
                         }
                     }
@@ -383,6 +407,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return filesArray;
     }
 
+    @GuardedBy("mAm")
     public void trimHistoricStatesWriteLocked() {
         ArrayList<String> filesArray = getCommittedFiles(MAX_HISTORIC_STATES, false, true);
         if (filesArray == null) {
@@ -395,6 +420,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         }
     }
 
+    @GuardedBy("mAm")
     boolean dumpFilteredProcessesCsvLocked(PrintWriter pw, String header,
             boolean sepScreenStates, int[] screenStates, boolean sepMemStates, int[] memStates,
             boolean sepProcStates, int[] procStates, long now, String reqPackage) {

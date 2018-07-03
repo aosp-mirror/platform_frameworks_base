@@ -580,7 +580,7 @@ public final class ProcessState {
         ProcessStateHolder holder = pkgList.valueAt(index);
         ProcessState proc = holder.state;
         if (mDead && proc.mCommonProcess != proc) {
-            // Somehow we are contining to use a process state that is dead, because
+            // Somehow we are continuing to use a process state that is dead, because
             // it was not being told it was active during the last commit.  We can recover
             // from this by generating a fresh new state, but this is bad because we
             // are losing whatever data we had in the old process state.
@@ -600,17 +600,17 @@ public final class ProcessState {
                         + pkgList.keyAt(index) + "/" + proc.mUid
                         + " for multi-proc " + proc.mName);
             }
-            PackageState pkg = vpkg.get(proc.mVersion);
-            if (pkg == null) {
+            PackageState expkg = vpkg.get(proc.mVersion);
+            if (expkg == null) {
                 throw new IllegalStateException("No existing package "
                         + pkgList.keyAt(index) + "/" + proc.mUid
                         + " for multi-proc " + proc.mName + " version " + proc.mVersion);
             }
             String savedName = proc.mName;
-            proc = pkg.mProcesses.get(proc.mName);
+            proc = expkg.mProcesses.get(proc.mName);
             if (proc == null) {
                 throw new IllegalStateException("Didn't create per-package process "
-                        + savedName + " in pkg " + pkg.mPackageName + "/" + pkg.mUid);
+                        + savedName + " in pkg " + expkg.mPackageName + "/" + expkg.mUid);
             }
             holder.state = proc;
         }
@@ -769,11 +769,14 @@ public final class ProcessState {
         return totalTime;
     }
 
-    public void dumpSummary(PrintWriter pw, String prefix,
+    public void dumpSummary(PrintWriter pw, String prefix, String header,
             int[] screenStates, int[] memStates, int[] procStates,
             long now, long totalTime) {
         pw.print(prefix);
         pw.print("* ");
+        if (header != null) {
+            pw.print(header);
+        }
         pw.print(mName);
         pw.print(" / ");
         UserHandle.formatUid(pw, mUid);
