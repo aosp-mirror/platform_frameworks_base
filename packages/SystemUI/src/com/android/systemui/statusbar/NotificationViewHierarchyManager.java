@@ -19,14 +19,17 @@ package com.android.systemui.statusbar;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Trace;
-import android.service.notification.NotificationListenerService;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 
 import java.util.ArrayList;

@@ -23,14 +23,14 @@
     android:clickable="true"
     >
 
-    <com.android.systemui.statusbar.NotificationBackgroundView android:id="@+id/backgroundNormal"
+    <com.android.systemui.statusbar.notification.row.NotificationBackgroundView
+        android:id="@+id/backgroundNormal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
-    <com.android.systemui.statusbar.NotificationBackgroundView android:id="@+id/backgroundDimmed"
+        android:layout_height="match_parent" />
+    <com.android.systemui.statusbar.notification.row.NotificationBackgroundView
+        android:id="@+id/backgroundDimmed"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent" />
     <com.android.systemui.statusbar.phone.NotificationIconContainer
         android:id="@+id/content"
         android:layout_width="match_parent"

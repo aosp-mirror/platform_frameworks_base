@@ -28,6 +28,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 
 /**

@@ -26,6 +26,8 @@ import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

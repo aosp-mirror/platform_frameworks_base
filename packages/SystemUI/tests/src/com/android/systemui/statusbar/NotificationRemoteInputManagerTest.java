@@ -19,6 +19,9 @@ import android.testing.TestableLooper;
 
 import com.android.systemui.SysuiTestCase;
 
+import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.google.android.collect.Sets;
 
 import org.junit.Before;

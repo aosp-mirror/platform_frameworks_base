@@ -26,7 +26,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.widget.FrameLayout;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationTestHelper;
 
 import org.junit.Assert;

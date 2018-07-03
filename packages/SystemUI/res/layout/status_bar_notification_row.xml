@@ -16,7 +16,7 @@
 -->
 
 <!-- extends FrameLayout -->
-<com.android.systemui.statusbar.ExpandableNotificationRow
+<com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -26,21 +26,23 @@
 
     <!-- Menu displayed behind notification added here programmatically -->
 
-    <com.android.systemui.statusbar.NotificationBackgroundView
+    <com.android.systemui.statusbar.notification.row.NotificationBackgroundView
         android:id="@+id/backgroundNormal"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.android.systemui.statusbar.NotificationBackgroundView
+    <com.android.systemui.statusbar.notification.row.NotificationBackgroundView
         android:id="@+id/backgroundDimmed"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.android.systemui.statusbar.NotificationContentView android:id="@+id/expanded"
+    <com.android.systemui.statusbar.notification.row.NotificationContentView
+        android:id="@+id/expanded"
        android:layout_width="match_parent"
        android:layout_height="wrap_content" />
 
-    <com.android.systemui.statusbar.NotificationContentView android:id="@+id/expandedPublic"
+    <com.android.systemui.statusbar.notification.row.NotificationContentView
+        android:id="@+id/expandedPublic"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
@@ -76,4 +78,4 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-</com.android.systemui.statusbar.ExpandableNotificationRow>
+</com.android.systemui.statusbar.notification.row.ExpandableNotificationRow>

@@ -21,13 +21,12 @@ import android.util.Pools;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.android.internal.widget.MessagingImageMessage;
-import com.android.internal.widget.MessagingMessage;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
-import com.android.systemui.statusbar.stack.StackStateAnimator;
+import com.android.systemui.statusbar.notification.row.HybridNotificationView;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 /**
  * A transform state of a image view.

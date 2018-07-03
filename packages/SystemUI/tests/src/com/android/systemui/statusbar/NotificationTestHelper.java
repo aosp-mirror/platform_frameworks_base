@@ -32,7 +32,9 @@ import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.NotificationInflaterTest;
+import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.row.NotificationInflaterTest;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -43,8 +45,11 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
  */
 public class NotificationTestHelper {
 
-    static final String PKG = "com.android.systemui";
-    static final int UID = 1000;
+    /** Package name for testing purposes. */
+    public static final String PKG = "com.android.systemui";
+    /** System UI id for testing purposes. */
+    public static final int UID = 1000;
+
     private static final String GROUP_KEY = "gruKey";
 
     private final Context mContext;
