@@ -2690,7 +2690,7 @@ class AlarmManagerService extends SystemService {
             errorMsg.append("[mNextNonWakeup=");
             TimeUtils.formatDuration(mNextNonWakeup - nowElapsed, errorMsg);
             errorMsg.append(" set at ");
-            TimeUtils.formatDuration(mNextNonWakeUpSetAt, errorMsg);
+            TimeUtils.formatDuration(mNextNonWakeUpSetAt - nowElapsed, errorMsg);
             errorMsg.append(", mLastWakeup=");
             TimeUtils.formatDuration(mLastWakeup - nowElapsed, errorMsg);
             errorMsg.append(", timerfd_gettime=" + getNextAlarm(mNativeData, ELAPSED_REALTIME));
@@ -2701,7 +2701,7 @@ class AlarmManagerService extends SystemService {
             errorMsg.append("[mNextWakeup=");
             TimeUtils.formatDuration(mNextWakeup - nowElapsed, errorMsg);
             errorMsg.append(" set at ");
-            TimeUtils.formatDuration(mNextWakeUpSetAt, errorMsg);
+            TimeUtils.formatDuration(mNextWakeUpSetAt - nowElapsed, errorMsg);
             errorMsg.append(", mLastWakeup=");
             TimeUtils.formatDuration(mLastWakeup - nowElapsed, errorMsg);
             errorMsg.append(", timerfd_gettime="
