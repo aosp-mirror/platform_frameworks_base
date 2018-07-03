@@ -344,6 +344,11 @@ public class KeyguardViewMediator extends SystemUI {
      */
     private WorkLockActivityController mWorkLockController;
 
+    /**
+     * @see #setPulsing(boolean)
+     */
+    private boolean mPulsing;
+
     private boolean mLockLater;
 
     private boolean mWakeAndUnlocking;
@@ -1798,10 +1803,12 @@ public class KeyguardViewMediator extends SystemUI {
 
                 int flags = 0;
                 if (mStatusBarKeyguardViewManager.shouldDisableWindowAnimationsForUnlock()
-                        || mWakeAndUnlocking) {
-                    flags |= WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
+                        || (mWakeAndUnlocking && !mPulsing)) {
+                    flags |= WindowManagerPolicyConstants
+                            .KEYGUARD_GOING_AWAY_FLAG_NO_WINDOW_ANIMATIONS;
                 }
-                if (mStatusBarKeyguardViewManager.isGoingToNotificationShade()) {
+                if (mStatusBarKeyguardViewManager.isGoingToNotificationShade()
+                        || (mWakeAndUnlocking && mPulsing)) {
                     flags |= WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
                 }
                 if (mStatusBarKeyguardViewManager.isUnlockWithWallpaper()) {
@@ -2102,6 +2109,13 @@ public class KeyguardViewMediator extends SystemUI {
 
     public void setAodShowing(boolean aodShowing) {
         setShowingLocked(mShowing, aodShowing);
+    }
+
+    /**
+     * @param pulsing true when device temporarily wakes up to display an incoming notification.
+     */
+    public void setPulsing(boolean pulsing) {
+        mPulsing = pulsing;
     }
 
     private static class StartKeyguardExitAnimParams {
