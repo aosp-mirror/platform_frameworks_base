@@ -888,6 +888,8 @@ public final class TvInputManager {
                     if (token != null) {
                         session = new Session(token, channel, mService, mUserId, seq,
                                 mSessionCallbackRecordMap);
+                    } else {
+                        mSessionCallbackRecordMap.delete(seq);
                     }
                     record.postSessionCreated(session);
                 }
@@ -2487,7 +2489,7 @@ public final class TvInputManager {
                 }
             }
             synchronized (mSessionCallbackRecordMap) {
-                mSessionCallbackRecordMap.remove(mSeq);
+                mSessionCallbackRecordMap.delete(mSeq);
             }
         }
 
