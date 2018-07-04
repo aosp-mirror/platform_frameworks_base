@@ -141,7 +141,7 @@
     <string name="launch_defaults_some" msgid="313159469856372621">"一部デフォルトで設定"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"デフォルトの設定なし"</string>
     <string name="tts_settings" msgid="8186971894801348327">"テキスト読み上げの設定"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"テキスト読み上げの出力"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"テキスト読み上げの設定"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"音声の速度"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"テキストの読み上げ速度"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"音の高さ"</string>

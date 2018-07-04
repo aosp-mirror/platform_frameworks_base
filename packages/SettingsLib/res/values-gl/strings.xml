@@ -110,7 +110,7 @@
     <string name="bluetooth_talkback_computer" msgid="4875089335641234463">"Ordenador"</string>
     <string name="bluetooth_talkback_headset" msgid="5140152177885220949">"Auriculares con micrófono"</string>
     <string name="bluetooth_talkback_phone" msgid="4260255181240622896">"Teléfono"</string>
-    <string name="bluetooth_talkback_imaging" msgid="551146170554589119">"Imaxes"</string>
+    <string name="bluetooth_talkback_imaging" msgid="551146170554589119">"Dispositivo de imaxe"</string>
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Auriculares"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Periférico de entrada"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
@@ -213,8 +213,8 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Aceleración de hardware para conexión compartida"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Mostrar dispositivos Bluetooth sen nomes"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desactivar volume absoluto"</string>
-    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versión AVRCP de Bluetooth"</string>
-    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Selecciona a versión AVRCP de Bluetooth"</string>
+    <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versión de Bluetooth AVRCP"</string>
+    <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Selecciona a versión de Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Códec de audio por Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Activar códec de audio por Bluetooth\nSelección"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Taxa de mostraxe de audio por Bluetooth"</string>
@@ -355,8 +355,8 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Converter..."</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Xa se encriptou o ficheiro"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Convertendo no encriptado baseado en ficheiros"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Converte a partición de datos nunha encriptación baseada en ficheiros.\n Advertencia: Esta acción borrará todos os datos.\n Esta función é alfa e quizais non funcione correctamente.\n Para continuar, toca Limpar e converter..."</string>
-    <string name="button_convert_fbe" msgid="5152671181309826405">"Limpar e converter..."</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Converte a partición de datos nunha encriptación baseada en ficheiros.\n Advertencia: Esta acción borrará todos os datos.\n Esta función é alfa e quizais non funcione correctamente.\n Para continuar, toca Borrar e converter..."</string>
+    <string name="button_convert_fbe" msgid="5152671181309826405">"Borrar e converter..."</string>
     <string name="picture_color_mode" msgid="4560755008730283695">"Modo de cor da imaxe"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Utiliza sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Desactivado"</string>
