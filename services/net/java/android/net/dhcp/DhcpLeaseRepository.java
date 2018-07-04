@@ -512,7 +512,7 @@ class DhcpLeaseRepository {
         // Loop until a free address is found, or there are no more addresses.
         // There is slightly less than this many usable addresses, but some extra looping is OK
         for (int i = 0; i < mNumAddresses; i++) {
-            final Inet4Address addr = (Inet4Address) intToInet4AddressHTH(intAddr);
+            final Inet4Address addr = intToInet4AddressHTH(intAddr);
             if (isAvailable(addr) && !mDeclinedAddrs.containsKey(addr)) {
                 return new DhcpLease(clientId, hwAddr, addr, expTime, hostname);
             }
