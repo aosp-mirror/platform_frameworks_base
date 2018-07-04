@@ -34,21 +34,21 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.shadows.ShadowApplication;
 
 import androidx.lifecycle.LifecycleOwner;
-import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-public class FooterPreferenceMixinTest {
+public class FooterPreferenceMixinCompatTest {
 
     @Mock
-    private PreferenceFragment mFragment;
+    private PreferenceFragmentCompat mFragment;
     @Mock
     private PreferenceScreen mScreen;
 
     private LifecycleOwner mLifecycleOwner;
     private Lifecycle mLifecycle;
-    private FooterPreferenceMixin mMixin;
+    private FooterPreferenceMixinCompat mMixin;
 
     @Before
     public void setUp() {
@@ -58,7 +58,7 @@ public class FooterPreferenceMixinTest {
         when(mFragment.getPreferenceManager()).thenReturn(mock(PreferenceManager.class));
         when(mFragment.getPreferenceManager().getContext())
                 .thenReturn(ShadowApplication.getInstance().getApplicationContext());
-        mMixin = new FooterPreferenceMixin(mFragment, mLifecycle);
+        mMixin = new FooterPreferenceMixinCompat(mFragment, mLifecycle);
     }
 
     @Test
