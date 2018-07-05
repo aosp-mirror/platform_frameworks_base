@@ -468,9 +468,9 @@
     <string name="quick_settings" msgid="10042998191725428">"Ezarpen bizkorrak"</string>
     <string name="status_bar" msgid="4877645476959324760">"Egoera-barra"</string>
     <string name="overview" msgid="4018602013895926956">"Ikuspegi orokorra"</string>
-    <string name="demo_mode" msgid="2389163018533514619">"Proba modua"</string>
-    <string name="enable_demo_mode" msgid="4844205668718636518">"Gaitu proba modua"</string>
-    <string name="show_demo_mode" msgid="2018336697782464029">"Erakutsi proba modua"</string>
+    <string name="demo_mode" msgid="2389163018533514619">"Demo modua"</string>
+    <string name="enable_demo_mode" msgid="4844205668718636518">"Gaitu demo modua"</string>
+    <string name="show_demo_mode" msgid="2018336697782464029">"Erakutsi demo modua"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="8536256753575881818">"Alarma"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Work profila"</string>

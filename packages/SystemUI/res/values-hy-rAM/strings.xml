@@ -67,14 +67,14 @@
     <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Սարքի վրա այս պահին մուտք գործած օգտատերը չի կարող միացնել USB վրիպազերծումը: Այս գործառույթից օգտվելու համար մուտք գործեք ադմինիստրատորի հաշվով:"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Խոշորացնել` էկրանը լցնելու համար"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Ձգել` էկրանը լցնելու համար"</string>
-    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Էկրանի պատկերը պահվում է…"</string>
-    <string name="screenshot_saving_title" msgid="8242282144535555697">"Էկրանի պատկերը պահվում է..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Էկրանի պատկերը պահվում է:"</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Էկրանի պատկերը լուսանկարվել է:"</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Հպեք՝ էկրանի պատկերը տեսնելու համար:"</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Չհաջողվեց լուսանկարել էկրանի պատկերը:"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Էկրանի պատկերը պահելիս խնդիր առաջացավ:"</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Չհաջողվեց պահել էկրանի պատկերը սահմանափակ հիշողության պատճառով:"</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Սքրինշոթը պահվում է…"</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Սքրինշոթը պահվում է..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Սքրինշոթը պահվում է:"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Սքրինշոթը լուսանկարվել է:"</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Հպեք՝ սքրինշոթը տեսնելու համար:"</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Չհաջողվեց լուսանկարել սքրինշոթը:"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Սքրինշոթը պահելիս խնդիր առաջացավ:"</string>
+    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Չհաջողվեց պահել սքրինշոթը սահմանափակ հիշողության պատճառով:"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7602391003979898374">"Այս հավելվածը կամ ձեր կազմակերպությունը չի թույլատրում Էկրանի պատկերի ստացումը:"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ֆայլերի փոխանցման ընտրանքներ"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Միացնել որպես մեդիա նվագարկիչ (MTP)"</string>
