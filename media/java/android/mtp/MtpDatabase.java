@@ -260,10 +260,12 @@ public class MtpDatabase implements AutoCloseable {
                 int newLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
                 if (newLevel != mBatteryLevel) {
                     mBatteryLevel = newLevel;
-                    if (mServer != null) {
-                        // send device property changed event
-                        mServer.sendDevicePropertyChanged(
-                                MtpConstants.DEVICE_PROPERTY_BATTERY_LEVEL);
+                    synchronized(MtpDatabase.this){
+                        if (mServer != null) {
+                            // send device property changed event
+                            mServer.sendDevicePropertyChanged(
+                                    MtpConstants.DEVICE_PROPERTY_BATTERY_LEVEL);
+                        }
                     }
                 }
             }
@@ -300,7 +302,7 @@ public class MtpDatabase implements AutoCloseable {
         mCloseGuard.open("close");
     }
 
-    public void setServer(MtpServer server) {
+    public synchronized void setServer(MtpServer server) {
         mServer = server;
         // always unregister before registering
         try {
