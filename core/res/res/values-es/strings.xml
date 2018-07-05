@@ -544,7 +544,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Inhabilitar cámaras"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Evitar el uso de las cámaras del dispositivo"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Inhabilitar algunas funciones del bloqueo de pantalla"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Evita el uso de algunas funciones del bloqueo de pantalla."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Evitar el uso de algunas funciones del bloqueo de pantalla"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Móvil"</item>

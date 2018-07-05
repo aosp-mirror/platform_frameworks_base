@@ -1277,7 +1277,7 @@
     <string name="gpsVerifYes" msgid="2346566072867213563">"Sim"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Não"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Limite de exclusão excedido"</string>
-    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"Há <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> itens excluídos para <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, conta <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. O que você deseja fazer?"</string>
+    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"Há <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> itens excluídos para <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, conta <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. O que você quer fazer?"</string>
     <string name="sync_really_delete" msgid="2572600103122596243">"Excluir os itens"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Desfazer as exclusões"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Não fazer nada por enquanto"</string>

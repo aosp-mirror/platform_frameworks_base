@@ -544,7 +544,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Désactiver les appareils photo"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Empêcher l\'utilisation de tous les appareils photos"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Désact. options du verr. écran"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Empêchez l\'utilisation de certaines fonctionnalités du verrouillage de l\'écran."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Empêcher l\'utilisation de certaines fonctionnalités du verrouillage de l\'écran."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domicile"</item>
     <item msgid="869923650527136615">"Mobile"</item>
