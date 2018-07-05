@@ -95,6 +95,19 @@ public abstract class InputEvent implements Parcelable {
     }
 
     /**
+     * Gets the display id of the event.
+     * @return The display id associated with the event.
+     * @hide
+     */
+    public abstract int getDisplayId();
+
+    /**
+     * Modifies the display id associated with the event
+     * @param displayId
+     * @hide
+     */
+    public abstract void setDisplayId(int displayId);
+    /**
      * Copies the event.
      *
      * @return A deep copy of the event.

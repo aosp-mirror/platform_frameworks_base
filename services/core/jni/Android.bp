@@ -2,6 +2,8 @@ cc_library_static {
     name: "libservices.core",
     defaults: ["libservices.core-libs"],
 
+    cpp_std: "c++17",
+
     cflags: [
         "-Wall",
         "-Werror",
