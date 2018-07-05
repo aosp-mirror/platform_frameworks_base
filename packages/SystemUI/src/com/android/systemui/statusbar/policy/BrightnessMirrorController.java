@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.policy;
 import android.annotation.NonNull;
 import android.content.res.Resources;
 import android.util.ArraySet;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -105,11 +104,9 @@ public class BrightnessMirrorController
     }
 
     private void reinflate() {
-        ContextThemeWrapper qsThemeContext =
-                new ContextThemeWrapper(mBrightnessMirror.getContext(), R.style.qs_theme);
         int index = mStatusBarWindow.indexOfChild(mBrightnessMirror);
         mStatusBarWindow.removeView(mBrightnessMirror);
-        mBrightnessMirror = LayoutInflater.from(qsThemeContext).inflate(
+        mBrightnessMirror = LayoutInflater.from(mBrightnessMirror.getContext()).inflate(
                 R.layout.brightness_mirror, mStatusBarWindow, false);
         mStatusBarWindow.addView(mBrightnessMirror, index);
 
@@ -127,6 +124,10 @@ public class BrightnessMirrorController
     @Override
     public void removeCallback(BrightnessMirrorListener listener) {
         mBrightnessMirrorListeners.remove(listener);
+    }
+
+    public void onUiModeChanged() {
+        reinflate();
     }
 
     public interface BrightnessMirrorListener {

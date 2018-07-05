@@ -7126,35 +7126,6 @@ public final class Settings {
         public static final String UI_NIGHT_MODE = "ui_night_mode";
 
         /**
-         * The current device UI theme mode effect SystemUI and Launcher.<br/>
-         * <b>Values:</b><br/>
-         * 0 - The mode that theme will controlled by wallpaper color.<br/>
-         * 1 - The mode that will always light theme.<br/>
-         * 2 - The mode that will always dark theme.<br/>
-         *
-         * @hide
-         */
-        public static final String THEME_MODE = "theme_mode";
-
-        /**
-         * THEME_MODE value for wallpaper mode.
-         * @hide
-         */
-        public static final int THEME_MODE_WALLPAPER = 0;
-
-        /**
-         * THEME_MODE value for light theme mode.
-         * @hide
-         */
-        public static final int THEME_MODE_LIGHT = 1;
-
-        /**
-         * THEME_MODE value for dark theme mode.
-         * @hide
-         */
-        public static final int THEME_MODE_DARK = 2;
-
-        /**
          * Whether screensavers are enabled.
          * @hide
          */

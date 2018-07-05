@@ -64,8 +64,9 @@ public class ConfigurationControllerImpl implements ConfigurationController,
         final float fontScale = newConfig.fontScale;
         final int density = newConfig.densityDpi;
         int uiMode = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        boolean uiModeChanged = uiMode != mUiMode;
         if (density != mDensity || fontScale != mFontScale
-                || (mInCarMode && uiMode != mUiMode)) {
+                || (mInCarMode && uiModeChanged)) {
             listeners.forEach(l -> {
                 if (mListeners.contains(l)) {
                     l.onDensityOrFontScaleChanged();
@@ -73,7 +74,6 @@ public class ConfigurationControllerImpl implements ConfigurationController,
             });
             mDensity = density;
             mFontScale = fontScale;
-            mUiMode = uiMode;
         }
 
         final LocaleList localeList = newConfig.getLocales();
@@ -82,6 +82,15 @@ public class ConfigurationControllerImpl implements ConfigurationController,
             listeners.forEach(l -> {
                 if (mListeners.contains(l)) {
                     l.onLocaleListChanged();
+                }
+            });
+        }
+
+        if (uiModeChanged) {
+            mUiMode = uiMode;
+            listeners.forEach(l -> {
+                if (mListeners.contains(l)) {
+                    l.onUiModeChanged();
                 }
             });
         }

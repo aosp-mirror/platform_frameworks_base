@@ -92,6 +92,11 @@ public class AutoReinflateContainer extends FrameLayout implements
     }
 
     @Override
+    public void onUiModeChanged() {
+        inflateLayout();
+    }
+
+    @Override
     public void onLocaleListChanged() {
         inflateLayout();
     }
