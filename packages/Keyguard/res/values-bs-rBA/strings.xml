@@ -133,5 +133,5 @@
       <item quantity="few">Uređaj nije bio otključan <xliff:g id="NUMBER_1">%d</xliff:g> sata. Potvrdite lozinku.</item>
       <item quantity="other">Uređaj nije bio otključan <xliff:g id="NUMBER_1">%d</xliff:g> sati. Potvrdite lozinku.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nije prepoznat"</string>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nije prepoznato"</string>
 </resources>
