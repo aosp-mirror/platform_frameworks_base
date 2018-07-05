@@ -1452,6 +1452,23 @@ public class AppStandbyController {
         TimeUtils.formatDuration(mAppIdleParoleDurationMillis, pw);
         pw.println();
 
+        pw.print("  mStrongUsageTimeoutMillis=");
+        TimeUtils.formatDuration(mStrongUsageTimeoutMillis, pw);
+        pw.println();
+        pw.print("  mNotificationSeenTimeoutMillis=");
+        TimeUtils.formatDuration(mNotificationSeenTimeoutMillis, pw);
+        pw.println();
+        pw.print("  mSyncAdapterTimeoutMillis=");
+        TimeUtils.formatDuration(mSyncAdapterTimeoutMillis, pw);
+        pw.println();
+        pw.print("  mSystemInteractionTimeoutMillis=");
+        TimeUtils.formatDuration(mSystemInteractionTimeoutMillis, pw);
+        pw.println();
+
+        pw.print("  mPredictionTimeoutMillis=");
+        TimeUtils.formatDuration(mPredictionTimeoutMillis, pw);
+        pw.println();
+
         pw.print("  mExemptedSyncScheduledNonDozeTimeoutMillis=");
         TimeUtils.formatDuration(mExemptedSyncScheduledNonDozeTimeoutMillis, pw);
         pw.println();
@@ -1460,6 +1477,14 @@ public class AppStandbyController {
         pw.println();
         pw.print("  mExemptedSyncStartTimeoutMillis=");
         TimeUtils.formatDuration(mExemptedSyncStartTimeoutMillis, pw);
+        pw.println();
+
+        pw.print("  mSystemUpdateUsageTimeoutMillis=");
+        TimeUtils.formatDuration(mSystemUpdateUsageTimeoutMillis, pw);
+        pw.println();
+
+        pw.print("  mStableChargingThresholdMillis=");
+        TimeUtils.formatDuration(mStableChargingThresholdMillis, pw);
         pw.println();
 
         pw.println();
@@ -1910,4 +1935,3 @@ public class AppStandbyController {
         }
     }
 }
-
