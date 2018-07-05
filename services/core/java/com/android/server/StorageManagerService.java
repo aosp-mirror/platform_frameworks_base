@@ -2773,6 +2773,24 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     /*
+     * Clear disk encryption key bound to the associated token / secret pair. Removing the user
+     * binding of the Disk encryption key is done in two phases: first, this call will retrieve
+     * the disk encryption key using the provided token / secret pair and store it by
+     * encrypting it with a keymaster key not bound to the user, then fixateNewestUserKeyAuth
+     * is called to delete all other bindings of the disk encryption key.
+     */
+    @Override
+    public void clearUserKeyAuth(int userId, int serialNumber, byte[] token, byte[] secret) {
+        enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
+
+        try {
+            mVold.clearUserKeyAuth(userId, serialNumber, encodeBytes(token), encodeBytes(secret));
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
+        }
+    }
+
+    /*
      * Delete all disk encryption token/secret pairs except the most recently added one
      */
     @Override

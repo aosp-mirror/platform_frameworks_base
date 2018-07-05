@@ -1640,6 +1640,18 @@ public class LockSettingsService extends ILockSettings.Stub {
         addUserKeyAuth(userId, null, null);
     }
 
+    private void clearUserKeyAuth(int userId, byte[] token, byte[] secret) throws RemoteException {
+        if (DEBUG) Slog.d(TAG, "clearUserKeyProtection user=" + userId);
+        final UserInfo userInfo = mUserManager.getUserInfo(userId);
+        final IStorageManager storageManager = mInjector.getStorageManager();
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            storageManager.clearUserKeyAuth(userId, userInfo.serialNumber, token, secret);
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
     private static byte[] secretFromCredential(byte[] credential) throws RemoteException {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-512");
@@ -2632,7 +2644,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             // during boot. Vold storage needs to be unlocked before manipulation of the keys can
             // succeed.
             unlockUserKey(userId, null, auth.deriveDiskEncryptionKey());
-            clearUserKeyProtection(userId);
+            clearUserKeyAuth(userId, null, auth.deriveDiskEncryptionKey());
             fixateNewestUserKeyAuth(userId);
             unlockKeystore(auth.deriveKeyStorePassword(), userId);
             setKeystorePassword(null, userId);
