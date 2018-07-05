@@ -123,8 +123,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         mMobileSignal = findViewById(R.id.mobile_signal);
         mMobileRoaming = findViewById(R.id.mobile_roaming);
         mCarrierText = findViewById(R.id.qs_carrier_text);
-        mCarrierText.setDisplayFlags(
-                CarrierText.FLAG_HIDE_AIRPLANE_MODE | CarrierText.FLAG_HIDE_MISSING_SIM);
 
         mMultiUserSwitch = findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
