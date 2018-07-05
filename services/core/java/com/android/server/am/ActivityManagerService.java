@@ -16023,6 +16023,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         updateCpuStatsNow();
         long[] memtrackTmp = new long[1];
+        long[] swaptrackTmp = new long[2];
         final List<ProcessCpuTracker.Stats> stats;
         // Get a list of Stats that have vsize > 0
         synchronized (mProcessCpuTracker) {
@@ -16033,12 +16034,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int statsCount = stats.size();
         for (int i = 0; i < statsCount; i++) {
             ProcessCpuTracker.Stats st = stats.get(i);
-            long pss = Debug.getPss(st.pid, null, memtrackTmp);
+            long pss = Debug.getPss(st.pid, swaptrackTmp, memtrackTmp);
             if (pss > 0) {
                 if (infoMap.indexOfKey(st.pid) < 0) {
                     ProcessMemInfo mi = new ProcessMemInfo(st.name, st.pid,
                             ProcessList.NATIVE_ADJ, -1, "native", null);
                     mi.pss = pss;
+                    mi.swapPss = swaptrackTmp[1];
                     mi.memtrack = memtrackTmp[0];
                     memInfos.add(mi);
                 }
@@ -16046,14 +16048,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         long totalPss = 0;
+        long totalSwapPss = 0;
         long totalMemtrack = 0;
         for (int i=0, N=memInfos.size(); i<N; i++) {
             ProcessMemInfo mi = memInfos.get(i);
             if (mi.pss == 0) {
-                mi.pss = Debug.getPss(mi.pid, null, memtrackTmp);
+                mi.pss = Debug.getPss(mi.pid, swaptrackTmp, memtrackTmp);
+                mi.swapPss = swaptrackTmp[1];
                 mi.memtrack = memtrackTmp[0];
             }
             totalPss += mi.pss;
+            totalSwapPss += mi.swapPss;
             totalMemtrack += mi.memtrack;
         }
         Collections.sort(memInfos, new Comparator<ProcessMemInfo>() {
@@ -16215,7 +16220,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         memInfoBuilder.append("\n");
         memInfoBuilder.append("  Lost RAM: ");
         memInfoBuilder.append(stringifyKBSize(memInfo.getTotalSizeKb()
-                - totalPss - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
+                - (totalPss - totalSwapPss) - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
                 - memInfo.getKernelUsedSizeKb() - memInfo.getZramTotalSizeKb()));
         memInfoBuilder.append("\n");
         Slog.i(TAG, "Low on memory:");
