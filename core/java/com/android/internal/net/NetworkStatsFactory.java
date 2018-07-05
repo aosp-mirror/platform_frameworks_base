@@ -192,7 +192,7 @@ public class NetworkStatsFactory {
                 reader.finishLine();
             }
         } catch (NullPointerException|NumberFormatException e) {
-            throw new ProtocolException("problem parsing stats", e);
+            throw protocolExceptionWithCause("problem parsing stats", e);
         } finally {
             IoUtils.closeQuietly(reader);
             StrictMode.setThreadPolicy(savedPolicy);
@@ -242,7 +242,7 @@ public class NetworkStatsFactory {
                 reader.finishLine();
             }
         } catch (NullPointerException|NumberFormatException e) {
-            throw new ProtocolException("problem parsing stats", e);
+            throw protocolExceptionWithCause("problem parsing stats", e);
         } finally {
             IoUtils.closeQuietly(reader);
             StrictMode.setThreadPolicy(savedPolicy);
@@ -339,7 +339,7 @@ public class NetworkStatsFactory {
                 reader.finishLine();
             }
         } catch (NullPointerException|NumberFormatException e) {
-            throw new ProtocolException("problem parsing idx " + idx, e);
+            throw protocolExceptionWithCause("problem parsing idx " + idx, e);
         } finally {
             IoUtils.closeQuietly(reader);
             StrictMode.setThreadPolicy(savedPolicy);
@@ -376,4 +376,10 @@ public class NetworkStatsFactory {
 
     @VisibleForTesting
     public static native int nativeReadNetworkStatsDev(NetworkStats stats);
+
+    private static ProtocolException protocolExceptionWithCause(String message, Throwable cause) {
+        ProtocolException pe = new ProtocolException(message);
+        pe.initCause(cause);
+        return pe;
+    }
 }
