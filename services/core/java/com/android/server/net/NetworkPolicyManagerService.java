@@ -430,6 +430,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private final CountDownLatch mAdminDataAvailableLatch = new CountDownLatch(1);
 
+    private volatile boolean mNetworkManagerReady;
+
     /** Defined network policies. */
     @GuardedBy("mNetworkPoliciesSecondLock")
     final ArrayMap<NetworkTemplate, NetworkPolicy> mNetworkPolicy = new ArrayMap<>();
@@ -872,6 +874,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     public CountDownLatch networkScoreAndNetworkManagementServiceReady() {
+        mNetworkManagerReady = true;
         final CountDownLatch initCompleteSignal = new CountDownLatch(1);
         mHandler.post(() -> initService(initCompleteSignal));
         return initCompleteSignal;
@@ -5024,6 +5027,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private void handleRestrictedPackagesChangeUL(Set<Integer> oldRestrictedUids,
             Set<Integer> newRestrictedUids) {
+        if (!mNetworkManagerReady) {
+            return;
+        }
         if (oldRestrictedUids == null) {
             for (int uid : newRestrictedUids) {
                 updateRulesForDataUsageRestrictionsUL(uid);
