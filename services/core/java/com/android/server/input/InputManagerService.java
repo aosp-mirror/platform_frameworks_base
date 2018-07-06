@@ -16,6 +16,9 @@
 
 package com.android.server.input;
 
+import static android.hardware.display.DisplayViewport.VIEWPORT_INTERNAL;
+import static android.hardware.display.DisplayViewport.VIEWPORT_EXTERNAL;
+
 import android.annotation.NonNull;
 import android.os.LocaleList;
 import android.os.ShellCallback;
@@ -292,11 +295,6 @@ public class InputManagerService extends IInputManager.Stub
     /** Switch code: Camera lens cover. When set the lens is covered. */
     public static final int SW_CAMERA_LENS_COVER = 0x09;
 
-    // Viewport constants defined in InputReader.h.
-    public static final int VIEWPORT_DEFAULT = 1;
-    public static final int VIEWPORT_EXTERNAL = 2;
-    public static final int VIEWPORT_VIRTUAL = 3;
-
     public static final int SW_LID_BIT = 1 << SW_LID;
     public static final int SW_TABLET_MODE_BIT = 1 << SW_TABLET_MODE;
     public static final int SW_KEYPAD_SLIDE_BIT = 1 << SW_KEYPAD_SLIDE;
@@ -362,7 +360,7 @@ public class InputManagerService extends IInputManager.Stub
         updateAccessibilityLargePointerFromSettings();
     }
 
-    // TODO(BT) Pass in paramter for bluetooth system
+    // TODO(BT) Pass in parameter for bluetooth system
     public void systemRunning() {
         if (DEBUG) {
             Slog.d(TAG, "System ready.");
@@ -417,7 +415,7 @@ public class InputManagerService extends IInputManager.Stub
             DisplayViewport externalTouchViewport,
             List<DisplayViewport> virtualTouchViewports) {
         if (defaultViewport.valid) {
-            setDisplayViewport(VIEWPORT_DEFAULT, defaultViewport);
+            setDisplayViewport(VIEWPORT_INTERNAL, defaultViewport);
         }
 
         if (externalTouchViewport.valid) {

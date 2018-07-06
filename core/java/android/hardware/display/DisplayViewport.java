@@ -30,6 +30,12 @@ import android.text.TextUtils;
  * @hide Only for use within the system server.
  */
 public final class DisplayViewport {
+
+    // Viewport constants defined in InputReader.h.
+    public static final int VIEWPORT_INTERNAL = 1;
+    public static final int VIEWPORT_EXTERNAL = 2;
+    public static final int VIEWPORT_VIRTUAL = 3;
+
     // True if this viewport is valid.
     public boolean valid;
 
