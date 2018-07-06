@@ -247,8 +247,10 @@ public abstract class BatteryStats implements Parcelable {
      *   - Deferred job metrics.
      * New in version 32:
      *   - Ambient display properly output in data dump.
+     * New in version 33:
+     *   - Fixed bug in min learned capacity updating process.
      */
-    static final int CHECKIN_VERSION = 32;
+    static final int CHECKIN_VERSION = 33;
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.
