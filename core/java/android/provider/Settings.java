@@ -13587,7 +13587,7 @@ public final class Settings {
          * Whether of not to send keycode sleep for ungaze when Home is the foreground activity on
          * watch type devices.
          * Type: int (0 for false, 1 for true)
-         * Default: 0
+         * Default: 1
          * @hide
          */
         @Readable
