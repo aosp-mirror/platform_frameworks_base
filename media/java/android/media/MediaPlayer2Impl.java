@@ -97,7 +97,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private long mNativeSurfaceTexture;  // accessed by native methods
     private int mListenerContext; // accessed by native methods
     private SurfaceHolder mSurfaceHolder;
-    private EventHandler mEventHandler;
     private PowerManager.WakeLock mWakeLock = null;
     private boolean mScreenOnWhilePlaying;
     private boolean mStayAwake;
@@ -135,7 +134,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     //--- guarded by |mDrmLock| end
 
     private HandlerThread mHandlerThread;
-    private final Handler mTaskHandler;
+    private final TaskHandler mTaskHandler;
     private final Object mTaskLock = new Object();
     @GuardedBy("mTaskLock")
     private final List<Task> mPendingTasks = new LinkedList<>();
@@ -149,19 +148,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * result in an exception.</p>
      */
     public MediaPlayer2Impl() {
-        Looper looper;
-        if ((looper = Looper.myLooper()) != null) {
-            mEventHandler = new EventHandler(this, looper);
-        } else if ((looper = Looper.getMainLooper()) != null) {
-            mEventHandler = new EventHandler(this, looper);
-        } else {
-            mEventHandler = null;
-        }
-
         mHandlerThread = new HandlerThread("MediaPlayer2TaskThread");
         mHandlerThread.start();
-        looper = mHandlerThread.getLooper();
-        mTaskHandler = new Handler(looper);
+        Looper looper = mHandlerThread.getLooper();
+        mTaskHandler = new TaskHandler(this, looper);
 
         mTimeProvider = new TimeProvider(this);
         mOpenSubtitleSources = new Vector<InputStream>();
@@ -934,13 +924,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             mNextSourceState = NEXT_SOURCE_STATE_PREPARING;
             handleDataSource(false /* isCurrent */, mNextDSDs.get(0), mNextSrcId);
         } catch (Exception e) {
-            Message msg2 = mEventHandler.obtainMessage(
+            Message msg2 = mTaskHandler.obtainMessage(
                     MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, MEDIA_ERROR_UNSUPPORTED, null);
             final long nextSrcId = mNextSrcId;
-            mEventHandler.post(new Runnable() {
+            mTaskHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mEventHandler.handleMessage(msg2, nextSrcId);
+                    mTaskHandler.handleMessage(msg2, nextSrcId);
                 }
             });
         }
@@ -967,12 +957,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             try {
                 nativePlayNextDataSource(srcId);
             } catch (Exception e) {
-                Message msg2 = mEventHandler.obtainMessage(
+                Message msg2 = mTaskHandler.obtainMessage(
                         MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, MEDIA_ERROR_UNSUPPORTED, null);
-                mEventHandler.post(new Runnable() {
+                mTaskHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mEventHandler.handleMessage(msg2, srcId);
+                        mTaskHandler.handleMessage(msg2, srcId);
                     }
                 });
             }
@@ -1095,7 +1085,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 enableNativeRoutingCallbacksLocked(true);
                 mRoutingChangeListeners.put(
                         listener, new NativeRoutingEventHandlerDelegate(this, listener,
-                                handler != null ? handler : mEventHandler));
+                                handler != null ? handler : mTaskHandler));
             }
         }
     }
@@ -1619,8 +1609,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         stayAwake(false);
         _reset();
         // make sure none of the listeners get called anymore
-        if (mEventHandler != null) {
-            mEventHandler.removeCallbacksAndMessages(null);
+        if (mTaskHandler != null) {
+            mTaskHandler.removeCallbacksAndMessages(null);
         }
 
         synchronized (mIndexTrackPairs) {
@@ -2091,7 +2081,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 selectOrDeselectInbandTrack(mSelectedSubtitleTrackIndex, true);
             } catch (IllegalStateException e) {
             }
-            final Executor executor = (runnable) -> mEventHandler.post(runnable);
+            final Executor executor = (runnable) -> mTaskHandler.post(runnable);
             registerEventCallback(executor, mSubtitleDataCallback);
         }
         // no need to select out-of-band tracks
@@ -2154,9 +2144,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
             public void run() {
                 int res = addTrack();
-                if (mEventHandler != null) {
-                    Message m = mEventHandler.obtainMessage(MEDIA_INFO, res, 0, null);
-                    mEventHandler.sendMessage(m);
+                if (mTaskHandler != null) {
+                    Message m = mTaskHandler.obtainMessage(MEDIA_INFO, res, 0, null);
+                    mTaskHandler.sendMessage(m);
                 }
                 thread.getLooper().quitSafely();
             }
@@ -2344,7 +2334,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         if (!mSubtitleController.hasRendererFor(fFormat)) {
             // test and add not atomic
             Context context = ActivityThread.currentApplication();
-            mSubtitleController.registerRenderer(new SRTRenderer(context, mEventHandler));
+            mSubtitleController.registerRenderer(new SRTRenderer(context, mTaskHandler));
         }
         final SubtitleTrack track = mSubtitleController.addTrack(fFormat);
         synchronized (mIndexTrackPairs) {
@@ -2397,9 +2387,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
             public void run() {
                 int res = addTrack();
-                if (mEventHandler != null) {
-                    Message m = mEventHandler.obtainMessage(MEDIA_INFO, res, 0, null);
-                    mEventHandler.sendMessage(m);
+                if (mTaskHandler != null) {
+                    Message m = mTaskHandler.obtainMessage(MEDIA_INFO, res, 0, null);
+                    mTaskHandler.sendMessage(m);
                 }
                 thread.getLooper().quitSafely();
             }
@@ -2661,10 +2651,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         return mTimeProvider;
     }
 
-    private class EventHandler extends Handler {
+    private class TaskHandler extends Handler {
         private MediaPlayer2Impl mMediaPlayer;
 
-        public EventHandler(MediaPlayer2Impl mp, Looper looper) {
+        public TaskHandler(MediaPlayer2Impl mp, Looper looper) {
             super(looper);
             mMediaPlayer = mp;
         }
@@ -3026,7 +3016,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     /*
      * Called from native code when an interesting event happens.  This method
-     * just uses the EventHandler system to post the event back to the main app thread.
+     * just uses the TaskHandler system to post the event back to the main app thread.
      * We use a weak reference to the original MediaPlayer2 object so that the native
      * code is safe from the object disappearing from underneath it.  (This is
      * the cookie passed to native_setup().)
@@ -3055,7 +3045,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
         case MEDIA_DRM_INFO:
             // We need to derive mDrmInfoImpl before prepare() returns so processing it here
-            // before the notification is sent to EventHandler below. EventHandler runs in the
+            // before the notification is sent to TaskHandler below. TaskHandler runs in the
             // notification looper so its handleMessage might process the event after prepare()
             // has returned.
             Log.v(TAG, "postEventFromNative MEDIA_DRM_INFO");
@@ -3082,13 +3072,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
         }
 
-        if (mp.mEventHandler != null) {
-            Message m = mp.mEventHandler.obtainMessage(what, arg1, arg2, obj);
+        if (mp.mTaskHandler != null) {
+            Message m = mp.mTaskHandler.obtainMessage(what, arg1, arg2, obj);
 
-            mp.mEventHandler.post(new Runnable() {
+            mp.mTaskHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mp.mEventHandler.handleMessage(m, srcId);
+                    mp.mTaskHandler.handleMessage(m, srcId);
                 }
             });
         }
