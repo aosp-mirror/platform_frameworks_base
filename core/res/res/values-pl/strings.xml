@@ -317,7 +317,7 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Pozwala aplikacji na włączanie trybu samochodowego."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"zamykanie innych aplikacji"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Pozwala aplikacji na kończenie procesów innych aplikacji działających w tle. Może to spowodować przerwanie działania innych aplikacji."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"rysowanie na innych aplikacjach"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"wyświetlanie nad innymi aplikacjami"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Zezwala aplikacji na wyświetlanie elementów interfejsu nad innymi aplikacjami lub elementami ich interfejsu. Może to powodować zakłócenia w korzystaniu z interfejsu innej aplikacji lub inne działanie aplikacji, niż wynikałoby to z widocznego interfejsu danej aplikacji."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"sprawianie, że aplikacja jest cały czas uruchomiona"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Pozwala aplikacji na trwałe zapisywanie swoich fragmentów w pamięci. Może to zmniejszyć ilość pamięci dostępnej dla innych aplikacji i spowolnić działanie tabletu."</string>
@@ -549,7 +549,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Wymaganie szyfrowania przechowywanych danych aplikacji"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Wyłącz aparaty"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zapobieganie używaniu wszystkich aparatów w urządzeniu"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Wył. niektórych funkcji bl. ekr."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Wył. funkcji blokady ekranu"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Zapobieganie użyciu niektórych funkcji blokady ekranu."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Dom"</item>
@@ -1338,7 +1338,7 @@
     <string name="add_account_button_label" msgid="3611982894853435874">"Dodaj konto"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Zwiększ"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Zmniejsz"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> dotknij i przytrzymaj."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> naciśnij i przytrzymaj."</string>
     <string name="number_picker_increment_scroll_action" msgid="9101473045891835490">"Przesuń w górę, by zwiększyć, i w dół, by zmniejszyć."</string>
     <string name="time_picker_increment_minute_button" msgid="8865885114028614321">"Zmień minutę na późniejszą"</string>
     <string name="time_picker_decrement_minute_button" msgid="6246834937080684791">"Zmień minutę na wcześniejszą"</string>
@@ -1365,7 +1365,7 @@
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Nie udało się uruchomić aplikacji <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Udostępnij przez:"</string>
     <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Udostępnij przez <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="content_description_sliding_handle" msgid="415975056159262248">"Uchwyt przesuwny. Dotknij i przytrzymaj."</string>
+    <string name="content_description_sliding_handle" msgid="415975056159262248">"Uchwyt przesuwny. Naciśnij i przytrzymaj."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Przesuń, aby odblokować."</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"Podłącz zestaw słuchawkowy, aby wysłuchać znaków hasła wypowiadanych na głos."</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"Kropka"</string>

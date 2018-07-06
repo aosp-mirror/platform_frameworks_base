@@ -526,7 +526,7 @@
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Skifte skærmlås"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Skifter skærmlås"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Låse skærmen"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollerer, hvordan og hvornår skærmen låses."</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Administrerer, hvordan og hvornår skærmen låses."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Slette alle data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Slet din tablets data uden varsel ved at gendanne fabriksindstillingerne."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Slet tv\'ets data uden varsel ved at nulstille til fabrinksindstillingerne."</string>
@@ -658,7 +658,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Hjem"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Arbejde"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Andet"</string>
-    <string name="quick_contacts_not_available" msgid="746098007828579688">"Der blev ikke fundet nogen applikation, som kan vise denne kontaktperson."</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"Der blev ikke fundet nogen applikation, som kan vise denne kontakt."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Angiv pinkode"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Angiv PUK- og pinkode"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-kode"</string>

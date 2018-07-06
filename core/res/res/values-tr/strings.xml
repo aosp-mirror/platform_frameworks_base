@@ -544,7 +544,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Kameraları devre dışı bırak"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Tüm cihaz kameralarının kullanımını engelleme."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Ekran kilidinin bazı özelliklerini devre dışı bırakma"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Ekran kilidinin bazı özelliklerinin kullanılmasını önleyin."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Ekran kilidinin bazı özelliklerinin kullanılmasını önleme."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Ev"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -1606,7 +1606,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Şu saate kadar: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (sonraki alarma) saatine kadar"</string>
-    <string name="zen_mode_forever" msgid="7420011936770086993">"Siz bunu kapatana kadar"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Siz kapatana kadar"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Rahatsız Etmeyin ayarını kapatana kadar"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Daralt"</string>
