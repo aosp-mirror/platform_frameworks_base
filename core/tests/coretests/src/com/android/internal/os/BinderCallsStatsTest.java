@@ -20,14 +20,19 @@ import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.ArrayMap;
 import android.util.SparseArray;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 
@@ -155,6 +160,42 @@ public class BinderCallsStatsTest {
     }
 
     @Test
+    public void testMaxCpu() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats(true);
+        Binder binder = new Binder();
+        BinderCallsStats.CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.time += 50;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        callSession = bcs.callStarted(binder, 1);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        List<BinderCallsStats.CallStat> callStatsList =
+                bcs.getUidEntries().get(TEST_UID).getCallStatsList();
+
+        assertEquals(50, callStatsList.get(0).maxCpuTimeMicros);
+    }
+
+    @Test
+    public void testMaxLatency() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats(true);
+        Binder binder = new Binder();
+        BinderCallsStats.CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.elapsedTime += 5;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        callSession = bcs.callStarted(binder, 1);
+        bcs.elapsedTime += 1;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        List<BinderCallsStats.CallStat> callStatsList =
+                bcs.getUidEntries().get(TEST_UID).getCallStatsList();
+
+        assertEquals(5, callStatsList.get(0).maxLatencyMicros);
+    }
+
+    @Test
     public void testGetHighestValues() {
         List<Integer> list = Arrays.asList(1, 2, 3, 4);
         List<Integer> highestValues = BinderCallsStats
@@ -162,9 +203,44 @@ public class BinderCallsStatsTest {
         assertEquals(Arrays.asList(4, 3, 2), highestValues);
     }
 
+    @Test
+    public void testExceptionCount() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats(true);
+        Binder binder = new Binder();
+        BinderCallsStats.CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.callThrewException(callSession, new IllegalStateException());
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        callSession = bcs.callStarted(binder, 1);
+        bcs.callThrewException(callSession, new IllegalStateException());
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        callSession = bcs.callStarted(binder, 1);
+        bcs.callThrewException(callSession, new RuntimeException());
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        ArrayMap<String, Integer> expected = new ArrayMap<>();
+        expected.put("java.lang.IllegalStateException", 2);
+        expected.put("java.lang.RuntimeException", 1);
+        assertEquals(expected, bcs.getExceptionCounts());
+    }
+
+    @Test
+    public void testDumpDoesNotThrowException() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats(true);
+        Binder binder = new Binder();
+        BinderCallsStats.CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.callThrewException(callSession, new IllegalStateException());
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        PrintWriter pw = new PrintWriter(new StringWriter());
+        bcs.dump(pw, new HashMap<>(), true);
+    }
+
     static class TestBinderCallsStats extends BinderCallsStats {
         int callingUid = TEST_UID;
         long time = 1234;
+        long elapsedTime = 0;
 
         TestBinderCallsStats(boolean detailedTracking) {
             super(detailedTracking);
@@ -173,6 +249,11 @@ public class BinderCallsStatsTest {
         @Override
         protected long getThreadTimeMicro() {
             return time;
+        }
+
+        @Override
+        protected long getElapsedRealtimeMicro() {
+            return elapsedTime;
         }
 
         @Override

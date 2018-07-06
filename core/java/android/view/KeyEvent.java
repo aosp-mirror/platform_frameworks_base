@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.Display.INVALID_DISPLAY;
+
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -1246,6 +1248,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
 
     private int mDeviceId;
     private int mSource;
+    private int mDisplayId;
     private int mMetaState;
     private int mAction;
     private int mKeyCode;
@@ -1473,6 +1476,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         mScanCode = scancode;
         mFlags = flags;
         mSource = source;
+        mDisplayId = INVALID_DISPLAY;
     }
 
     /**
@@ -1497,6 +1501,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         mDeviceId = deviceId;
         mFlags = flags;
         mSource = InputDevice.SOURCE_KEYBOARD;
+        mDisplayId = INVALID_DISPLAY;
     }
 
     /**
@@ -1511,6 +1516,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         mMetaState = origEvent.mMetaState;
         mDeviceId = origEvent.mDeviceId;
         mSource = origEvent.mSource;
+        mDisplayId = origEvent.mDisplayId;
         mScanCode = origEvent.mScanCode;
         mFlags = origEvent.mFlags;
         mCharacters = origEvent.mCharacters;
@@ -1537,6 +1543,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         mMetaState = origEvent.mMetaState;
         mDeviceId = origEvent.mDeviceId;
         mSource = origEvent.mSource;
+        mDisplayId = origEvent.mDisplayId;
         mScanCode = origEvent.mScanCode;
         mFlags = origEvent.mFlags;
         mCharacters = origEvent.mCharacters;
@@ -1564,7 +1571,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public static KeyEvent obtain(long downTime, long eventTime, int action,
             int code, int repeat, int metaState,
-            int deviceId, int scancode, int flags, int source, String characters) {
+            int deviceId, int scancode, int flags, int source, int displayId, String characters) {
         KeyEvent ev = obtain();
         ev.mDownTime = downTime;
         ev.mEventTime = eventTime;
@@ -1576,9 +1583,24 @@ public class KeyEvent extends InputEvent implements Parcelable {
         ev.mScanCode = scancode;
         ev.mFlags = flags;
         ev.mSource = source;
+        ev.mDisplayId = displayId;
         ev.mCharacters = characters;
         return ev;
     }
+
+    /**
+     * Obtains a (potentially recycled) key event.
+     *
+     * @hide
+     */
+    public static KeyEvent obtain(long downTime, long eventTime, int action,
+            int code, int repeat, int metaState,
+            int deviceId, int scancode, int flags, int source, String characters) {
+        return obtain(downTime, eventTime, action, code, repeat, metaState, deviceId, scancode,
+                flags, source, INVALID_DISPLAY, characters);
+    }
+
+    /**
 
     /**
      * Obtains a (potentially recycled) copy of another key event.
@@ -1597,6 +1619,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         ev.mScanCode = other.mScanCode;
         ev.mFlags = other.mFlags;
         ev.mSource = other.mSource;
+        ev.mDisplayId = other.mDisplayId;
         ev.mCharacters = other.mCharacters;
         return ev;
     }
@@ -1683,6 +1706,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         mMetaState = origEvent.mMetaState;
         mDeviceId = origEvent.mDeviceId;
         mSource = origEvent.mSource;
+        mDisplayId = origEvent.mDisplayId;
         mScanCode = origEvent.mScanCode;
         mFlags = origEvent.mFlags;
         // Don't copy mCharacters, since one way or the other we'll lose it
@@ -1915,6 +1939,18 @@ public class KeyEvent extends InputEvent implements Parcelable {
     @Override
     public final void setSource(int source) {
         mSource = source;
+    }
+
+    /** @hide */
+    @Override
+    public final int getDisplayId() {
+        return mDisplayId;
+    }
+
+    /** @hide */
+    @Override
+    public final void setDisplayId(int displayId) {
+        mDisplayId = displayId;
     }
 
     /**
@@ -2852,6 +2888,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         msg.append(", downTime=").append(mDownTime);
         msg.append(", deviceId=").append(mDeviceId);
         msg.append(", source=0x").append(Integer.toHexString(mSource));
+        msg.append(", displayId=").append(mDisplayId);
         msg.append(" }");
         return msg.toString();
     }
@@ -2983,6 +3020,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
     private KeyEvent(Parcel in) {
         mDeviceId = in.readInt();
         mSource = in.readInt();
+        mDisplayId = in.readInt();
         mAction = in.readInt();
         mKeyCode = in.readInt();
         mRepeatCount = in.readInt();
@@ -2999,6 +3037,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
 
         out.writeInt(mDeviceId);
         out.writeInt(mSource);
+        out.writeInt(mDisplayId);
         out.writeInt(mAction);
         out.writeInt(mKeyCode);
         out.writeInt(mRepeatCount);

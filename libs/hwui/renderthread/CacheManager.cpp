@@ -134,6 +134,7 @@ void CacheManager::configureContext(GrContextOptions* contextOptions) {
     }
 
     contextOptions->fPersistentCache = &skiapipeline::ShaderCache::get();
+    contextOptions->fGpuPathRenderers &= ~GpuPathRenderers::kCoverageCounting;
 }
 
 void CacheManager::trimMemory(TrimMemoryMode mode) {

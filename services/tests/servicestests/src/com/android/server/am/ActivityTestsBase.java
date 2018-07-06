@@ -106,13 +106,15 @@ public class ActivityTestsBase {
     }
 
     protected ActivityTaskManagerService createActivityTaskManagerService() {
-        final TestActivityTaskManagerService atm = spy(new TestActivityTaskManagerService(mContext));
+        final TestActivityTaskManagerService atm =
+                spy(new TestActivityTaskManagerService(mContext));
         setupActivityManagerService(atm);
         return atm;
     }
 
-    protected ActivityManagerService createActivityManagerService() {
-        final TestActivityTaskManagerService atm = spy(new TestActivityTaskManagerService(mContext));
+    ActivityManagerService createActivityManagerService() {
+        final TestActivityTaskManagerService atm =
+                spy(new TestActivityTaskManagerService(mContext));
         return setupActivityManagerService(atm);
     }
 

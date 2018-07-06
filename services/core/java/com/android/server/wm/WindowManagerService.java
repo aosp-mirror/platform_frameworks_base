@@ -2180,8 +2180,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             result |= mInTouchMode ? WindowManagerGlobal.RELAYOUT_RES_IN_TOUCH_MODE : 0;
 
-            mInputMonitor.updateInputWindowsLw(true /*force*/);
-
             if (DEBUG_LAYOUT) {
                 Slog.v(TAG_WM, "Relayout complete " + win + ": outFrame=" + outFrame.toShortString());
             }
@@ -5666,9 +5664,9 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean imWindowChanged = false;
             if (mInputMethodWindow != null) {
                 final WindowState prevTarget = mInputMethodTarget;
+
                 final WindowState newTarget =
                         displayContent.computeImeTarget(true /* updateImeTarget*/);
-
                 imWindowChanged = prevTarget != newTarget;
 
                 if (mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS

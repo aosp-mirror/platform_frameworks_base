@@ -4547,9 +4547,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mShowDialogs && !mSleeping && !mShuttingDown
                 && !mKeyguardController.isKeyguardOrAodShowing(DEFAULT_DISPLAY)
                 && !hasUserRestriction(UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
-                mAm.mUserController.getCurrentUserId())
+                mAmInternal.getCurrentUserId())
                 && !(UserManager.isDeviceInDemoMode(mContext)
-                && mAm.mUserController.getCurrentUser().isDemo());
+                && mAmInternal.getCurrentUser().isDemo());
     }
 
     /**

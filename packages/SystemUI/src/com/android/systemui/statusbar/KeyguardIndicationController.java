@@ -364,22 +364,41 @@ public class KeyguardIndicationController {
                 R.integer.wired_charging_keyguard_text_animation_duration_up);
         int animateDownDuration = mContext.getResources().getInteger(
                 R.integer.wired_charging_keyguard_text_animation_duration_down);
+        textView.animate().cancel();
+        float translation = textView.getTranslationY();
         textView.animate()
                 .translationYBy(yTranslation)
                 .setInterpolator(Interpolators.LINEAR)
                 .setDuration(animateUpDuration)
                 .setListener(new AnimatorListenerAdapter() {
+                    private boolean mCancelled;
+
                     @Override
                     public void onAnimationStart(Animator animation) {
                         textView.switchIndication(indication);
                     }
+
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+                        textView.setTranslationY(translation);
+                        mCancelled = true;
+                    }
+
                     @Override
                     public void onAnimationEnd(Animator animation) {
+                        if (mCancelled) {
+                            return;
+                        }
                         textView.animate()
                                 .setDuration(animateDownDuration)
                                 .setInterpolator(Interpolators.BOUNCE)
-                                .translationYBy(-1 * yTranslation)
-                                .setListener(null);
+                                .translationY(translation)
+                                .setListener(new AnimatorListenerAdapter() {
+                                    @Override
+                                    public void onAnimationCancel(Animator animation) {
+                                        textView.setTranslationY(translation);
+                                    }
+                                });
                     }
                 });
     }

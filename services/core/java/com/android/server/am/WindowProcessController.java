@@ -478,6 +478,11 @@ public class WindowProcessController {
         mAtm.mH.post(r);
     }
 
+    /** Returns the total time (in milliseconds) spent executing in both user and system code. */
+    public long getCpuTime() {
+        return (mListener != null) ? mListener.getCpuTime() : 0;
+    }
+
     void addRecentTask(TaskRecord task) {
         mRecentTasks.add(task);
     }

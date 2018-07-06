@@ -12709,7 +12709,7 @@ public class BatteryStatsImpl extends BatteryStats {
         if (mMinLearnedBatteryCapacity == -1) {
             mMinLearnedBatteryCapacity = chargeFullUAh;
         } else {
-            Math.min(mMinLearnedBatteryCapacity, chargeFullUAh);
+            mMinLearnedBatteryCapacity = Math.min(mMinLearnedBatteryCapacity, chargeFullUAh);
         }
         mMaxLearnedBatteryCapacity = Math.max(mMaxLearnedBatteryCapacity, chargeFullUAh);
     }

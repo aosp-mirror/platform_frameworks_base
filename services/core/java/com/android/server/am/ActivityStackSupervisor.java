@@ -2112,12 +2112,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // Complete user switch
             if (startingUsers != null) {
                 for (int i = 0; i < startingUsers.size(); i++) {
-                    mService.mAm.mUserController.finishUserSwitch(startingUsers.get(i));
+                    mService.mAmInternal.finishUserSwitch(startingUsers.get(i));
                 }
             }
         }
 
-        mService.mAm.trimApplications();
+        mService.mAmInternal.trimApplications();
         //dump();
         //mWindowManager.dump();
 
@@ -3837,7 +3837,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     /** Checks whether the userid is a profile of the current user. */
     boolean isCurrentProfileLocked(int userId) {
         if (userId == mCurrentUser) return true;
-        return mService.mAm.mUserController.isCurrentProfile(userId);
+        return mService.mAmInternal.isCurrentProfile(userId);
     }
 
     /**
@@ -4789,7 +4789,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             // If the user must confirm credentials (e.g. when first launching a work app and the
             // Work Challenge is present) let startActivityInPackage handle the intercepting.
-            if (!mService.mAm.mUserController.shouldConfirmCredentials(task.userId)
+            if (!mService.mAmInternal.shouldConfirmCredentials(task.userId)
                     && task.getRootActivity() != null) {
                 final ActivityRecord targetActivity = task.getTopActivity();
 

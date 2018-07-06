@@ -1877,7 +1877,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // TODO: To be more accurate, the mark should be before the onCreate,
         //       not after the onResume. But for subsequent starts, onResume is fine.
         if (hasProcess()) {
-            cpuTimeAtResume = service.mAm.mProcessCpuTracker.getCpuTimeForPid(app.getPid());
+            cpuTimeAtResume = app.getCpuTime();
         } else {
             cpuTimeAtResume = 0; // Couldn't get the cpu time of process
         }
@@ -2186,7 +2186,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         return (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0
                 || (mStackSupervisor.isCurrentProfileLocked(userId)
-                && service.mAm.mUserController.isUserRunning(userId, 0 /* flags */));
+                && service.mAmInternal.isUserRunning(userId, 0 /* flags */));
     }
 
     /**

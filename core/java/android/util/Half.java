@@ -20,8 +20,6 @@ import android.annotation.HalfFloat;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
-import sun.misc.FloatingDecimal;
-
 /**
  * <p>The {@code Half} class is a wrapper and a utility class to manipulate half-precision 16-bit
  * <a href="https://en.wikipedia.org/wiki/Half-precision_floating-point_format">IEEE 754</a>
@@ -1026,7 +1024,7 @@ public final class Half extends Number implements Comparable<Half> {
      *         half-precision float value
      */
     public static @HalfFloat short parseHalf(@NonNull String s) throws NumberFormatException {
-        return toHalf(FloatingDecimal.parseFloat(s));
+        return toHalf(Float.parseFloat(s));
     }
 
     /**

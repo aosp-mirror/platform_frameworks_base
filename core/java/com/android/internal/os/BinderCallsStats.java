@@ -21,6 +21,8 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
+import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -29,10 +31,12 @@ import com.android.internal.util.Preconditions;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.ToDoubleFunction;
 
@@ -41,13 +45,18 @@ import java.util.function.ToDoubleFunction;
  * per thread, uid or call description.
  */
 public class BinderCallsStats {
+    private static final String TAG = "BinderCallsStats";
     private static final int CALL_SESSIONS_POOL_SIZE = 100;
     private static final int PERIODIC_SAMPLING_INTERVAL = 10;
+    private static final int MAX_EXCEPTION_COUNT_SIZE = 50;
+    private static final String EXCEPTION_COUNT_OVERFLOW_NAME = "overflow";
     private static final BinderCallsStats sInstance = new BinderCallsStats();
 
     private volatile boolean mDetailedTracking = false;
     @GuardedBy("mLock")
     private final SparseArray<UidEntry> mUidEntries = new SparseArray<>();
+    @GuardedBy("mLock")
+    private final ArrayMap<String, Integer> mExceptionCounts = new ArrayMap<>();
     private final Queue<CallSession> mCallSessionsPool = new ConcurrentLinkedQueue<>();
     private final Object mLock = new Object();
     private long mStartTime = System.currentTimeMillis();
@@ -122,25 +131,25 @@ public class BinderCallsStats {
                 mUidEntries.put(callingUid, uidEntry);
             }
 
+            CallStat callStat;
             if (mDetailedTracking) {
                 // Find CallStat entry and update its total time
-                CallStat callStat = uidEntry.getOrCreate(s.callStat);
-                callStat.callCount++;
-                callStat.cpuTimeMicros += duration;
-                callStat.latencyMicros += latencyDuration;
+                callStat = uidEntry.getOrCreate(s.callStat);
                 callStat.exceptionCount += s.exceptionThrown ? 1 : 0;
-                callStat.maxLatencyMicros = Math.max(callStat.maxLatencyMicros, latencyDuration);
                 callStat.maxRequestSizeBytes =
                         Math.max(callStat.maxRequestSizeBytes, parcelRequestSize);
                 callStat.maxReplySizeBytes =
                         Math.max(callStat.maxReplySizeBytes, parcelReplySize);
             } else {
                 // update sampled timings in the beginning of each interval
-                if (s.cpuTimeStarted >= 0) {
-                    s.sampledCallStat.cpuTimeMicros += duration;
-                    s.sampledCallStat.latencyMicros += latencyDuration;
-                }
-                s.sampledCallStat.callCount++;
+                callStat = s.sampledCallStat;
+            }
+            callStat.callCount++;
+            if (s.cpuTimeStarted >= 0) {
+                callStat.cpuTimeMicros += duration;
+                callStat.maxCpuTimeMicros = Math.max(callStat.maxCpuTimeMicros, duration);
+                callStat.latencyMicros += latencyDuration;
+                callStat.maxLatencyMicros = Math.max(callStat.maxLatencyMicros, latencyDuration);
             }
 
             uidEntry.cpuTimeMicros += duration;
@@ -158,9 +167,22 @@ public class BinderCallsStats {
      * <li>Do not throw an exception in this method, it will swallow the original exception thrown
      * by the binder transaction.
      */
-    public void callThrewException(CallSession s) {
+    public void callThrewException(CallSession s, Exception exception) {
         Preconditions.checkNotNull(s);
         s.exceptionThrown = true;
+        try {
+            String className = exception.getClass().getName();
+            synchronized (mLock) {
+                if (mExceptionCounts.size() >= MAX_EXCEPTION_COUNT_SIZE) {
+                  className = EXCEPTION_COUNT_OVERFLOW_NAME;
+                }
+                Integer count = mExceptionCounts.get(className);
+                mExceptionCounts.put(className, count == null ? 1 : count + 1);
+            }
+        } catch (RuntimeException e) {
+          // Do not propagate the exception. We do not want to swallow original exception.
+          Log.wtf(TAG, "Unexpected exception while updating mExceptionCounts", e);
+        }
     }
 
     public void dump(PrintWriter pw, Map<Integer,String> appIdToPkgNameMap, boolean verbose) {
@@ -189,7 +211,7 @@ public class BinderCallsStats {
         StringBuilder sb = new StringBuilder();
         if (mDetailedTracking) {
             pw.println("Per-UID raw data " + datasetSizeDesc
-                    + "(uid, call_desc, cpu_time_micros, latency_time_micros, "
+                    + "(uid, call_desc, cpu_time_micros, max_cpu_time_micros, latency_time_micros, "
                     + "max_latency_time_micros, exception_count, max_request_size_bytes, "
                     + "max_reply_size_bytes, call_count):");
             List<UidEntry> topEntries = verbose ? entries
@@ -200,6 +222,7 @@ public class BinderCallsStats {
                     sb.append("    ")
                             .append(uidEntry.uid).append(",").append(e)
                             .append(',').append(e.cpuTimeMicros)
+                            .append(',').append(e.maxCpuTimeMicros)
                             .append(',').append(e.latencyMicros)
                             .append(',').append(e.maxLatencyMicros)
                             .append(',').append(e.exceptionCount)
@@ -243,6 +266,18 @@ public class BinderCallsStats {
         pw.println(String.format("  Summary: total_cpu_time=%d, "
                         + "calls_count=%d, avg_call_cpu_time=%.0f",
                 totalCpuTime, totalCallsCount, (double)totalCpuTime / totalCallsCount));
+        pw.println();
+
+        pw.println("Exceptions thrown (exception_count, class_name):");
+        List<Pair<String, Integer>> exceptionEntries = new ArrayList<>();
+        // We cannot use new ArrayList(Collection) constructor because MapCollections does not
+        // implement toArray method.
+        mExceptionCounts.entrySet().iterator().forEachRemaining(
+            (e) -> exceptionEntries.add(Pair.create(e.getKey(), e.getValue())));
+        exceptionEntries.sort((e1, e2) -> Integer.compare(e2.second, e1.second));
+        for (Pair<String, Integer> entry : exceptionEntries) {
+          pw.println(String.format("  %6d %s", entry.second, entry.first));
+        }
     }
 
     private static String uidToString(int uid, Map<Integer, String> pkgNameMap) {
@@ -260,7 +295,7 @@ public class BinderCallsStats {
         return Binder.getCallingUid();
     }
 
-    private long getElapsedRealtimeMicro() {
+    protected long getElapsedRealtimeMicro() {
         return SystemClock.elapsedRealtimeNanos() / 1000;
     }
 
@@ -278,6 +313,7 @@ public class BinderCallsStats {
     public void reset() {
         synchronized (mLock) {
             mUidEntries.clear();
+            mExceptionCounts.clear();
             mSampledEntries.mCallStats.clear();
             mStartTime = System.currentTimeMillis();
         }
@@ -288,11 +324,13 @@ public class BinderCallsStats {
         public String className;
         public int msg;
         public long cpuTimeMicros;
+        public long maxCpuTimeMicros;
         public long latencyMicros;
         public long maxLatencyMicros;
+        public long callCount;
+        // The following fields are only computed if mDetailedTracking is set.
         public long maxRequestSizeBytes;
         public long maxReplySizeBytes;
-        public long callCount;
         public long exceptionCount;
 
         CallStat() {
@@ -408,6 +446,11 @@ public class BinderCallsStats {
     @VisibleForTesting
     public UidEntry getSampledEntries() {
         return mSampledEntries;
+    }
+
+    @VisibleForTesting
+    public ArrayMap<String, Integer> getExceptionCounts() {
+        return mExceptionCounts;
     }
 
     @VisibleForTesting

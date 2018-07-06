@@ -167,6 +167,7 @@ import android.app.ActivityThread;
 import android.app.AlertDialog;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.AppOpsManagerInternal.CheckOpsDelegate;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationThreadConstants;
 import android.app.BroadcastOptions;
@@ -222,6 +223,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageManagerInternal.CheckPermissionDelegate;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PathPermission;
 import android.content.pm.PermissionInfo;
@@ -343,6 +345,8 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
@@ -423,6 +427,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiFunction;
 
 import dalvik.system.VMRuntime;
 import libcore.io.IoUtils;
@@ -581,8 +586,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Whether we should use SCHED_FIFO for UI and RenderThreads.
     private boolean mUseFifoUiScheduling = false;
 
-    private static final String SYSUI_COMPONENT_NAME = "com.android.systemui/.SystemUIService";
-
     BroadcastQueue mFgBroadcastQueue;
     BroadcastQueue mBgBroadcastQueue;
     // Convenient for easy iteration over the queues. Foreground is first
@@ -639,7 +642,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 boolean asProto) {
             if (asProto) return;
             doDump(fd, pw, new String[]{"activities"}, asProto);
-            doDump(fd, pw, new String[]{"service", SYSUI_COMPONENT_NAME}, asProto);
+            doDump(fd, pw, new String[]{"service", "all-platform-critical"}, asProto);
         }
 
         @Override
@@ -18506,6 +18509,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             // Can't call out of the system process with a lock held, so post a message.
             if (app.instr.mUiAutomationConnection != null) {
+                mAppOpsService.setAppOpsServiceDelegate(null);
+                getPackageManagerInternalLocked().setCheckPermissionDelegate(null);
                 mHandler.obtainMessage(SHUTDOWN_UI_AUTOMATION_CONNECTION_MSG,
                         app.instr.mUiAutomationConnection).sendToTarget();
             }
@@ -18751,6 +18756,129 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    private final ComputeOomAdjWindowCallback mTmpComputeOomAdjWindowCallback =
+            new ComputeOomAdjWindowCallback();
+
+    private final class ComputeOomAdjWindowCallback
+            implements WindowProcessController.ComputeOomAdjCallback {
+
+        ProcessRecord app;
+        int adj;
+        boolean foregroundActivities;
+        int procState;
+        int schedGroup;
+        int appUid;
+        int logUid;
+        int processStateCurTop;
+
+        void initialize(ProcessRecord app, int adj, boolean foregroundActivities,
+                int procState, int schedGroup, int appUid, int logUid, int processStateCurTop) {
+            this.app = app;
+            this.adj = adj;
+            this.foregroundActivities = foregroundActivities;
+            this.procState = procState;
+            this.schedGroup = schedGroup;
+            this.appUid = appUid;
+            this.logUid = logUid;
+            this.processStateCurTop = processStateCurTop;
+        }
+
+        @Override
+        public void onVisibleActivity() {
+            // App has a visible activity; only upgrade adjustment.
+            if (adj > ProcessList.VISIBLE_APP_ADJ) {
+                adj = ProcessList.VISIBLE_APP_ADJ;
+                app.adjType = "vis-activity";
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to vis-activity: " + app);
+                }
+            }
+            if (procState > processStateCurTop) {
+                procState = processStateCurTop;
+                app.adjType = "vis-activity";
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                            "Raise procstate to vis-activity (top): " + app);
+                }
+            }
+            if (schedGroup < ProcessList.SCHED_GROUP_DEFAULT) {
+                schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+            }
+            app.cached = false;
+            app.empty = false;
+            foregroundActivities = true;
+        }
+
+        @Override
+        public void onPausedActivity() {
+            if (adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
+                adj = ProcessList.PERCEPTIBLE_APP_ADJ;
+                app.adjType = "pause-activity";
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to pause-activity: "  + app);
+                }
+            }
+            if (procState > processStateCurTop) {
+                procState = processStateCurTop;
+                app.adjType = "pause-activity";
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                            "Raise procstate to pause-activity (top): "  + app);
+                }
+            }
+            if (schedGroup < ProcessList.SCHED_GROUP_DEFAULT) {
+                schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+            }
+            app.cached = false;
+            app.empty = false;
+            foregroundActivities = true;
+        }
+
+        @Override
+        public void onStoppingActivity(boolean finishing) {
+            if (adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
+                adj = ProcessList.PERCEPTIBLE_APP_ADJ;
+                app.adjType = "stop-activity";
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                            "Raise adj to stop-activity: "  + app);
+                }
+            }
+
+            // For the process state, we will at this point consider the process to be cached. It
+            // will be cached either as an activity or empty depending on whether the activity is
+            // finishing. We do this so that we can treat the process as cached for purposes of
+            // memory trimming (determining current memory level, trim command to send to process)
+            // since there can be an arbitrary number of stopping processes and they should soon all
+            // go into the cached state.
+            if (!finishing) {
+                if (procState > PROCESS_STATE_LAST_ACTIVITY) {
+                    procState = PROCESS_STATE_LAST_ACTIVITY;
+                    app.adjType = "stop-activity";
+                    if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                        reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                                "Raise procstate to stop-activity: " + app);
+                    }
+                }
+            }
+            app.cached = false;
+            app.empty = false;
+            foregroundActivities = true;
+        }
+
+        @Override
+        public void onOtherActivity() {
+            if (procState > PROCESS_STATE_CACHED_ACTIVITY) {
+                procState = PROCESS_STATE_CACHED_ACTIVITY;
+                app.adjType = "cch-act";
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                            "Raise procstate to cached activity: " + app);
+                }
+            }
+        }
+    }
+
     private final boolean computeOomAdjLocked(ProcessRecord app, int cachedAdj, ProcessRecord TOP_APP,
             boolean doingAll, long now) {
         if (mAdjSeq == app.adjSeq) {
@@ -18922,119 +19050,15 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // Examine all activities if not already foreground.
         if (!foregroundActivities && wpc.hasActivities()) {
-            final int[] adjHolder = new int[1];
-            adjHolder[0] = adj;
-            final boolean[] foregroundActivitiesHolder = new boolean[1];
-            foregroundActivitiesHolder[0] = foregroundActivities;
-            int[] procStateHolder = new int[1];
-            procStateHolder[0] = procState;
-            int[] schedGroupHolder = new int[1];
-            schedGroupHolder[0] = schedGroup;
+            mTmpComputeOomAdjWindowCallback.initialize(app, adj, foregroundActivities, procState,
+                    schedGroup, appUid, logUid, PROCESS_STATE_CUR_TOP);
+            final int minLayer = wpc.computeOomAdjFromActivities(
+                    ProcessList.VISIBLE_APP_LAYER_MAX, mTmpComputeOomAdjWindowCallback);
 
-            int minLayer = wpc.computeOomAdjFromActivities(ProcessList.VISIBLE_APP_LAYER_MAX,
-                    new WindowProcessController.ComputeOomAdjCallback() {
-                        @Override
-                        public void onVisibleActivity() {
-                            // App has a visible activity; only upgrade adjustment.
-                            if (adjHolder[0] > ProcessList.VISIBLE_APP_ADJ) {
-                                adjHolder[0] = ProcessList.VISIBLE_APP_ADJ;
-                                app.adjType = "vis-activity";
-                                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
-                                            "Raise adj to vis-activity: " + app);
-                                }
-                            }
-                            if (procStateHolder[0] > PROCESS_STATE_CUR_TOP) {
-                                procStateHolder[0] = PROCESS_STATE_CUR_TOP;
-                                app.adjType = "vis-activity";
-                                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
-                                            "Raise procstate to vis-activity (top): " + app);
-                                }
-                            }
-                            if (schedGroupHolder[0] < ProcessList.SCHED_GROUP_DEFAULT) {
-                                schedGroupHolder[0] = ProcessList.SCHED_GROUP_DEFAULT;
-                            }
-                            app.cached = false;
-                            app.empty = false;
-                            foregroundActivitiesHolder[0] = true;
-                        }
-
-                        @Override
-                        public void onPausedActivity() {
-                            if (adjHolder[0] > ProcessList.PERCEPTIBLE_APP_ADJ) {
-                                adjHolder[0] = ProcessList.PERCEPTIBLE_APP_ADJ;
-                                app.adjType = "pause-activity";
-                                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
-                                            "Raise adj to pause-activity: "  + app);
-                                }
-                            }
-                            if (procStateHolder[0] > PROCESS_STATE_CUR_TOP) {
-                                procStateHolder[0] = PROCESS_STATE_CUR_TOP;
-                                app.adjType = "pause-activity";
-                                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
-                                            "Raise procstate to pause-activity (top): "  + app);
-                                }
-                            }
-                            if (schedGroupHolder[0] < ProcessList.SCHED_GROUP_DEFAULT) {
-                                schedGroupHolder[0] = ProcessList.SCHED_GROUP_DEFAULT;
-                            }
-                            app.cached = false;
-                            app.empty = false;
-                            foregroundActivitiesHolder[0] = true;
-                        }
-
-                        @Override
-                        public void onStoppingActivity(boolean finishing) {
-                            if (adjHolder[0] > ProcessList.PERCEPTIBLE_APP_ADJ) {
-                                adjHolder[0] = ProcessList.PERCEPTIBLE_APP_ADJ;
-                                app.adjType = "stop-activity";
-                                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
-                                            "Raise adj to stop-activity: "  + app);
-                                }
-                            }
-                            // For the process state, we will at this point consider the process to
-                            // be cached. It will be cached either as an activity or empty depending
-                            // on whether the activity is finishing. We do this so that we can treat
-                            // the process as cached for purposes of memory trimming (determining
-                            // current memory level, trim command to send to process) since there
-                            // can be an arbitrary number of stopping processes and they should soon
-                            // all go into the cached state.
-                            if (!finishing) {
-                                if (procStateHolder[0] > PROCESS_STATE_LAST_ACTIVITY) {
-                                    procStateHolder[0] = PROCESS_STATE_LAST_ACTIVITY;
-                                    app.adjType = "stop-activity";
-                                    if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                                        reportOomAdjMessageLocked(TAG_OOM_ADJ,
-                                                "Raise procstate to stop-activity: " + app);
-                                    }
-                                }
-                            }
-                            app.cached = false;
-                            app.empty = false;
-                            foregroundActivitiesHolder[0] = true;
-                        }
-
-                        @Override
-                        public void onOtherActivity() {
-                            if (procStateHolder[0] > PROCESS_STATE_CACHED_ACTIVITY) {
-                                procStateHolder[0] = PROCESS_STATE_CACHED_ACTIVITY;
-                                app.adjType = "cch-act";
-                                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
-                                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
-                                            "Raise procstate to cached activity: " + app);
-                                }
-                            }
-                        }
-                    });
-
-            adj = adjHolder[0];
-            foregroundActivities = foregroundActivitiesHolder[0];
-            procState = procStateHolder[0];
-            schedGroup = schedGroupHolder[0];
+            adj = mTmpComputeOomAdjWindowCallback.adj;
+            foregroundActivities = mTmpComputeOomAdjWindowCallback.foregroundActivities;
+            procState = mTmpComputeOomAdjWindowCallback.procState;
+            schedGroup = mTmpComputeOomAdjWindowCallback.schedGroup;
 
             if (adj == ProcessList.VISIBLE_APP_ADJ) {
                 adj += minLayer;
@@ -22308,9 +22332,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public boolean isUserRunning(int userId, int flags) {
-            synchronized (ActivityManagerService.this) {
-                return mUserController.isUserRunning(userId, flags);
-            }
+            // Holding am lock isn't required to call into user controller.
+            return mUserController.isUserRunning(userId, flags);
         }
 
         @Override
@@ -22380,6 +22403,41 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void sendForegroundProfileChanged(int userId) {
             mUserController.sendForegroundProfileChanged(userId);
+        }
+
+        @Override
+        public boolean shouldConfirmCredentials(int userId) {
+            return mUserController.shouldConfirmCredentials(userId);
+        }
+
+        @Override
+        public int[] getCurrentProfileIds() {
+            return mUserController.getCurrentProfileIds();
+        }
+
+        @Override
+        public UserInfo getCurrentUser() {
+            return mUserController.getCurrentUser();
+        }
+
+        @Override
+        public void ensureNotSpecialUser(int userId) {
+            mUserController.ensureNotSpecialUser(userId);
+        }
+
+        @Override
+        public boolean isCurrentProfile(int userId) {
+            return mUserController.isCurrentProfile(userId);
+        }
+
+        @Override
+        public boolean hasStartedUserState(int userId) {
+            return mUserController.hasStartedUserState(userId);
+        }
+
+        @Override
+        public void finishUserSwitch(Object uss) {
+            mUserController.finishUserSwitch((UserState) uss);
         }
     }
 
@@ -22629,6 +22687,145 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mNmi = LocalServices.getService(NetworkManagementInternal.class);
             }
             return mNmi != null;
+        }
+    }
+
+    @Override
+    public void startDelegateShellPermissionIdentity(int delegateUid) {
+        if (UserHandle.getCallingAppId() != Process.SHELL_UID
+                && UserHandle.getCallingAppId() != Process.ROOT_UID) {
+            throw new SecurityException("Only the shell can delegate its permissions");
+        }
+
+        // We allow delegation only to one instrumentation started from the shell
+        synchronized (ActivityManagerService.this) {
+            // If there is a delegate it should be the same instance for app ops and permissions.
+            if (mAppOpsService.getAppOpsServiceDelegate()
+                    != getPackageManagerInternalLocked().getCheckPermissionDelegate()) {
+                throw new IllegalStateException("Bad shell delegate state");
+            }
+
+            // If the delegate is already set up for the target UID, nothing to do.
+            if (mAppOpsService.getAppOpsServiceDelegate() != null) {
+                if (!(mAppOpsService.getAppOpsServiceDelegate() instanceof ShellDelegate)) {
+                    throw new IllegalStateException("Bad shell delegate state");
+                }
+                if (((ShellDelegate) mAppOpsService.getAppOpsServiceDelegate())
+                        .getDelegateUid() != delegateUid) {
+                    throw new SecurityException("Shell can delegate permissions only "
+                            + "to one instrumentation at a time");
+                }
+                return;
+            }
+
+            final int instrCount = mActiveInstrumentation.size();
+            for (int i = 0; i < instrCount; i++) {
+                final ActiveInstrumentation instr = mActiveInstrumentation.get(i);
+                if (instr.mTargetInfo.uid != delegateUid) {
+                    continue;
+                }
+                // If instrumentation started from the shell the connection is not null
+                if (instr.mUiAutomationConnection == null) {
+                    throw new SecurityException("Shell can delegate its permissions" +
+                            " only to an instrumentation started from the shell");
+                }
+
+                // Hook them up...
+                final ShellDelegate shellDelegate = new ShellDelegate(
+                        instr.mTargetInfo.packageName, delegateUid);
+                mAppOpsService.setAppOpsServiceDelegate(shellDelegate);
+                getPackageManagerInternalLocked().setCheckPermissionDelegate(shellDelegate);
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void stopDelegateShellPermissionIdentity() {
+        if (UserHandle.getCallingAppId() != Process.SHELL_UID
+                && UserHandle.getCallingAppId() != Process.ROOT_UID) {
+            throw new SecurityException("Only the shell can delegate its permissions");
+        }
+        synchronized (ActivityManagerService.this) {
+            mAppOpsService.setAppOpsServiceDelegate(null);
+            getPackageManagerInternalLocked().setCheckPermissionDelegate(null);
+        }
+    }
+
+    private class ShellDelegate implements CheckOpsDelegate, CheckPermissionDelegate {
+        private final String mTargetPackageName;
+        private final int mTargetUid;
+
+        ShellDelegate(String targetPacakgeName, int targetUid) {
+            mTargetPackageName = targetPacakgeName;
+            mTargetUid = targetUid;
+        }
+
+        int getDelegateUid() {
+            return mTargetUid;
+        }
+
+        @Override
+        public int checkOperation(int code, int uid, String packageName,
+                TriFunction<Integer, Integer, String, Integer> superImpl) {
+            if (uid == mTargetUid) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(code, Process.SHELL_UID,
+                            "com.android.shell");
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(code, uid, packageName);
+        }
+
+        @Override
+        public int checkAudioOperation(int code, int usage, int uid, String packageName,
+                QuadFunction<Integer, Integer, Integer, String, Integer> superImpl) {
+            if (uid == mTargetUid) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return superImpl.apply(code, usage, Process.SHELL_UID,
+                            "com.android.shell");
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(code, usage, uid, packageName);
+        }
+
+        @Override
+        public int noteOperation(int code, int uid, String packageName,
+                TriFunction<Integer, Integer, String, Integer> superImpl) {
+            if (uid == mTargetUid) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    return mAppOpsService.noteProxyOperation(code, Process.SHELL_UID,
+                            "com.android.shell", uid, packageName);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+            return superImpl.apply(code, uid, packageName);
+        }
+
+        @Override
+        public int checkPermission(String permName, String pkgName, int userId,
+                TriFunction<String, String, Integer, Integer> superImpl) {
+            if (mTargetPackageName.equals(pkgName)) {
+                return superImpl.apply(permName, "com.android.shell", userId);
+            }
+            return superImpl.apply(permName, pkgName, userId);
+        }
+
+        @Override
+        public int checkUidPermission(String permName, int uid,
+                BiFunction<String, Integer, Integer> superImpl) {
+            if (uid == mTargetUid) {
+                return superImpl.apply(permName, Process.SHELL_UID);
+            }
+            return superImpl.apply(permName, uid);
         }
     }
 }

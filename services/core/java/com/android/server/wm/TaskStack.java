@@ -1645,9 +1645,14 @@ public class TaskStack extends WindowContainer<Task> implements
     }
 
     @Override  // AnimatesBounds
-    public void onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate) {
+    public boolean onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate) {
         // Hold the lock since this is called from the BoundsAnimator running on the UiThread
         synchronized (mService.mWindowMap) {
+            if (!isAttached()) {
+                // Don't run the animation if the stack is already detached
+                return false;
+            }
+
             mBoundsAnimatingRequested = false;
             mBoundsAnimating = true;
             mCancelCurrentBoundsAnimation = false;
@@ -1677,6 +1682,7 @@ public class TaskStack extends WindowContainer<Task> implements
                 controller.updatePictureInPictureModeForPinnedStackAnimation(null, forceUpdate);
             }
         }
+        return true;
     }
 
     @Override  // AnimatesBounds
@@ -1720,41 +1726,47 @@ public class TaskStack extends WindowContainer<Task> implements
 
     @Override
     public boolean isAttached() {
-        return mDisplayContent != null;
+        synchronized (mService.mWindowMap) {
+            return mDisplayContent != null;
+        }
     }
 
     /**
      * Called immediately prior to resizing the tasks at the end of the pinned stack animation.
      */
     public void onPipAnimationEndResize() {
-        mBoundsAnimating = false;
-        for (int i = 0; i < mChildren.size(); i++) {
-            final Task t = mChildren.get(i);
-            t.clearPreserveNonFloatingState();
+        synchronized (mService.mWindowMap) {
+            mBoundsAnimating = false;
+            for (int i = 0; i < mChildren.size(); i++) {
+                final Task t = mChildren.get(i);
+                t.clearPreserveNonFloatingState();
+            }
+            mService.requestTraversal();
         }
-        mService.requestTraversal();
     }
 
     @Override
     public boolean shouldDeferStartOnMoveToFullscreen() {
-        // Workaround for the recents animation -- normally we need to wait for the new activity to
-        // show before starting the PiP animation, but because we start and show the home activity
-        // early for the recents animation prior to the PiP animation starting, there is no
-        // subsequent all-drawn signal. In this case, we can skip the pause when the home stack is
-        // already visible and drawn.
-        final TaskStack homeStack = mDisplayContent.getHomeStack();
-        if (homeStack == null) {
-            return true;
+        synchronized (mService.mWindowMap) {
+            // Workaround for the recents animation -- normally we need to wait for the new activity
+            // to show before starting the PiP animation, but because we start and show the home
+            // activity early for the recents animation prior to the PiP animation starting, there
+            // is no subsequent all-drawn signal. In this case, we can skip the pause when the home
+            // stack is already visible and drawn.
+            final TaskStack homeStack = mDisplayContent.getHomeStack();
+            if (homeStack == null) {
+                return true;
+            }
+            final Task homeTask = homeStack.getTopChild();
+            if (homeTask == null) {
+                return true;
+            }
+            final AppWindowToken homeApp = homeTask.getTopVisibleAppToken();
+            if (!homeTask.isVisible() || homeApp == null) {
+                return true;
+            }
+            return !homeApp.allDrawn;
         }
-        final Task homeTask = homeStack.getTopChild();
-        if (homeTask == null) {
-            return true;
-        }
-        final AppWindowToken homeApp = homeTask.getTopVisibleAppToken();
-        if (!homeTask.isVisible() || homeApp == null) {
-            return true;
-        }
-        return !homeApp.allDrawn;
     }
 
     /**

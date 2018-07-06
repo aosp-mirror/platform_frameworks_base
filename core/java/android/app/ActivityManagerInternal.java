@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -216,4 +217,16 @@ public abstract class ActivityManagerInternal {
 
     public abstract void updateOomAdj();
     public abstract void sendForegroundProfileChanged(int userId);
+
+    /**
+     * Returns whether the given user requires credential entry at this time. This is used to
+     * intercept activity launches for work apps when the Work Challenge is present.
+     */
+    public abstract boolean shouldConfirmCredentials(int userId);
+    public abstract int[] getCurrentProfileIds();
+    public abstract UserInfo getCurrentUser();
+    public abstract void ensureNotSpecialUser(int userId);
+    public abstract boolean isCurrentProfile(int userId);
+    public abstract boolean hasStartedUserState(int userId);
+    public abstract void finishUserSwitch(Object uss);
 }

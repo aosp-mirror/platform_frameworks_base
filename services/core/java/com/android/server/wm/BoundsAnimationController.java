@@ -196,12 +196,6 @@ public class BoundsAnimationController {
 
         @Override
         public void onAnimationStart(Animator animation) {
-            if (!mTarget.isAttached()) {
-                // No point of trying to animate something that isn't attached to the hierarchy
-                // anymore.
-                cancel();
-            }
-
             if (DEBUG) Slog.d(TAG, "onAnimationStart: mTarget=" + mTarget
                     + " mPrevSchedulePipModeChangedState=" + mPrevSchedulePipModeChangedState
                     + " mSchedulePipModeChangedState=" + mSchedulePipModeChangedState);
@@ -216,13 +210,15 @@ public class BoundsAnimationController {
             // Ensure that we have prepared the target for animation before we trigger any size
             // changes, so it can swap surfaces in to appropriate modes, or do as it wishes
             // otherwise.
+            boolean continueAnimation;
             if (mPrevSchedulePipModeChangedState == NO_PIP_MODE_CHANGED_CALLBACKS) {
-                mTarget.onAnimationStart(mSchedulePipModeChangedState ==
+                continueAnimation = mTarget.onAnimationStart(mSchedulePipModeChangedState ==
                         SCHEDULE_PIP_MODE_CHANGED_ON_START, false /* forceUpdate */);
 
                 // When starting an animation from fullscreen, pause here and wait for the
                 // windows-drawn signal before we start the rest of the transition down into PiP.
-                if (mMoveFromFullscreen && mTarget.shouldDeferStartOnMoveToFullscreen()) {
+                if (continueAnimation && mMoveFromFullscreen
+                        && mTarget.shouldDeferStartOnMoveToFullscreen()) {
                     pause();
                 }
             } else if (mPrevSchedulePipModeChangedState == SCHEDULE_PIP_MODE_CHANGED_ON_END &&
@@ -231,8 +227,19 @@ public class BoundsAnimationController {
                 // client will not currently receive any picture-in-picture mode change callbacks.
                 // However, we still need to report to them that they are leaving PiP, so this will
                 // force an update via a mode changed callback.
-                mTarget.onAnimationStart(true /* schedulePipModeChangedCallback */,
-                        true /* forceUpdate */);
+                continueAnimation = mTarget.onAnimationStart(
+                        true /* schedulePipModeChangedCallback */, true /* forceUpdate */);
+            } else {
+                // The animation is already running, but we should check that the TaskStack is still
+                // valid before continuing with the animation
+                continueAnimation = mTarget.isAttached();
+            }
+
+            if (!continueAnimation) {
+                // No point of trying to animate something that isn't attached to the hierarchy
+                // anymore.
+                cancel();
+                return;
             }
 
             // Immediately update the task bounds if they have to become larger, but preserve
@@ -354,6 +361,9 @@ public class BoundsAnimationController {
             if (DEBUG) Slog.d(TAG, "cancel: mTarget=" + mTarget);
             mSkipAnimationEnd = true;
             super.cancel();
+
+            // Reset the thread priority of the animation thread if the bounds animation is canceled
+            updateBooster();
         }
 
         /**

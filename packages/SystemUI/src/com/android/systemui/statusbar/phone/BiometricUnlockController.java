@@ -216,15 +216,28 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
             // until the clock and the notifications are faded out.
             mStatusBarWindowManager.setForceDozeBrightness(true);
         }
-        if (!wasDeviceInteractive) {
-            if (DEBUG_BIO_WAKELOCK) {
-                Log.i(TAG, "bio wakelock: Authenticated, waking up...");
+        // During wake and unlock, we need to draw black before waking up to avoid abrupt
+        // brightness changes due to display state transitions.
+        boolean alwaysOnEnabled = DozeParameters.getInstance(mContext).getAlwaysOn();
+        boolean delayWakeUp = mode == MODE_WAKE_AND_UNLOCK && alwaysOnEnabled;
+        Runnable wakeUp = ()-> {
+            if (!wasDeviceInteractive) {
+                if (DEBUG_BIO_WAKELOCK) {
+                    Log.i(TAG, "bio wakelock: Authenticated, waking up...");
+                }
+                mPowerManager.wakeUp(SystemClock.uptimeMillis(), "android.policy:BIOMETRIC");
             }
-            mPowerManager.wakeUp(SystemClock.uptimeMillis(), "android.policy:BIOMETRIC");
+            if (delayWakeUp) {
+                mKeyguardViewMediator.onWakeAndUnlocking();
+            }
+            Trace.beginSection("release wake-and-unlock");
+            releaseBiometricWakeLock();
+            Trace.endSection();
+        };
+
+        if (!delayWakeUp) {
+            wakeUp.run();
         }
-        Trace.beginSection("release wake-and-unlock");
-        releaseBiometricWakeLock();
-        Trace.endSection();
         switch (mMode) {
             case MODE_DISMISS_BOUNCER:
                 Trace.beginSection("MODE_DISMISS");
@@ -257,7 +270,11 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback {
                     mUpdateMonitor.awakenFromDream();
                 }
                 mStatusBarWindowManager.setStatusBarFocusable(false);
-                mKeyguardViewMediator.onWakeAndUnlocking();
+                if (delayWakeUp) {
+                    mHandler.postDelayed(wakeUp, 50);
+                } else {
+                    mKeyguardViewMediator.onWakeAndUnlocking();
+                }
                 if (mStatusBar.getNavigationBarView() != null) {
                     mStatusBar.getNavigationBarView().setWakeAndUnlocking(true);
                 }

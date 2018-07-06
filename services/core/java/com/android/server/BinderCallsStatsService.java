@@ -106,7 +106,13 @@ public class BinderCallsStatsService extends Binder {
         }
         Map<Integer,String> map = new HashMap<>();
         for (PackageInfo pkg : packages) {
-            map.put(pkg.applicationInfo.uid, pkg.packageName);
+            String name = pkg.packageName;
+            int uid = pkg.applicationInfo.uid;
+            // Use sharedUserId string as package name if there are collisions
+            if (pkg.sharedUserId != null && map.containsKey(uid)) {
+                name = "shared:" + pkg.sharedUserId;
+            }
+            map.put(uid, name);
         }
         return map;
     }
