@@ -1230,6 +1230,33 @@ public class TelephonyManager {
     }
 
     /**
+     * Returns the Type Allocation Code from the IMEI. Return null if Type Allocation Code is not
+     * available.
+     */
+    public String getTypeAllocationCode() {
+        return getTypeAllocationCode(getSlotIndex());
+    }
+
+    /**
+     * Returns the Type Allocation Code from the IMEI. Return null if Type Allocation Code is not
+     * available.
+     *
+     * @param slotIndex of which Type Allocation Code is returned
+     */
+    public String getTypeAllocationCode(int slotIndex) {
+        ITelephony telephony = getITelephony();
+        if (telephony == null) return null;
+
+        try {
+            return telephony.getTypeAllocationCodeForSlot(slotIndex);
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            return null;
+        }
+    }
+
+    /**
      * Returns the MEID (Mobile Equipment Identifier). Return null if MEID is not available.
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
@@ -1257,6 +1284,33 @@ public class TelephonyManager {
 
         try {
             return telephony.getMeidForSlot(slotIndex, getOpPackageName());
+        } catch (RemoteException ex) {
+            return null;
+        } catch (NullPointerException ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the Manufacturer Code from the MEID. Return null if Manufacturer Code is not
+     * available.
+     */
+    public String getManufacturerCode() {
+        return getManufacturerCode(getSlotIndex());
+    }
+
+    /**
+     * Returns the Manufacturer Code from the MEID. Return null if Manufacturer Code is not
+     * available.
+     *
+     * @param slotIndex of which Type Allocation Code is returned
+     */
+    public String getManufacturerCode(int slotIndex) {
+        ITelephony telephony = getITelephony();
+        if (telephony == null) return null;
+
+        try {
+            return telephony.getManufacturerCodeForSlot(slotIndex);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
