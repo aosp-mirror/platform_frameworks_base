@@ -61,7 +61,7 @@ status_t android_hardware_display_DisplayViewport_toNative(JNIEnv* env, jobject 
     jstring uniqueId =
             jstring(env->GetObjectField(viewportObj, gDisplayViewportClassInfo.uniqueId));
     if (uniqueId != nullptr) {
-        viewport->uniqueId.setTo(ScopedUtfChars(env, uniqueId).c_str());
+        viewport->uniqueId = ScopedUtfChars(env, uniqueId).c_str();
     }
 
     jobject logicalFrameObj =

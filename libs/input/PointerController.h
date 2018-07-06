@@ -28,7 +28,6 @@
 #include <utils/BitSet.h>
 #include <utils/RefBase.h>
 #include <utils/Looper.h>
-#include <utils/String8.h>
 #include <gui/DisplayEventReceiver.h>
 
 namespace android {
