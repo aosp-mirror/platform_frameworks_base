@@ -1198,6 +1198,13 @@ interface ITelephony {
     String getImeiForSlot(int slotIndex, String callingPackage);
 
     /**
+     * Returns the Type Allocation Code from the IMEI for the given slot.
+     *
+     * @param slotIndex - Which slot to retrieve the Type Allocation Code from.
+     */
+    String getTypeAllocationCodeForSlot(int slotIndex);
+
+    /**
      * Returns the MEID for the given slot.
      *
      * @param slotIndex - device slot.
@@ -1206,6 +1213,13 @@ interface ITelephony {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     String getMeidForSlot(int slotIndex, String callingPackage);
+
+    /**
+     * Returns the Manufacturer Code from the MEID for the given slot.
+     *
+     * @param slotIndex - Which slot to retrieve the Manufacturer Code from.
+     */
+    String getManufacturerCodeForSlot(int slotIndex);
 
     /**
      * Returns the device software version.
