@@ -8,6 +8,7 @@ cc_library_static {
         "-Wall",
         "-Werror",
         "-Wno-unused-parameter",
+        "-Wthread-safety",
 
         "-DEGL_EGLEXT_PROTOTYPES",
         "-DGL_GLEXT_PROTOTYPES",

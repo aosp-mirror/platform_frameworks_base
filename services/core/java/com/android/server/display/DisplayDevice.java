@@ -19,7 +19,6 @@ package com.android.server.display;
 import android.graphics.Rect;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
-import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
@@ -224,6 +223,8 @@ abstract class DisplayDevice {
         DisplayDeviceInfo info = getDisplayDeviceInfoLocked();
         viewport.deviceWidth = isRotated ? info.height : info.width;
         viewport.deviceHeight = isRotated ? info.width : info.height;
+
+        viewport.uniqueId = info.uniqueId;
     }
 
     /**

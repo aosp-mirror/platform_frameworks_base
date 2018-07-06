@@ -17,15 +17,14 @@
 package com.android.server.display;
 
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
+import static android.hardware.display.DisplayManager
+        .VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
-import static android.hardware.display.DisplayManager
-        .VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
-
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.DumpUtils;
-import com.android.internal.util.IndentingPrintWriter;
+import static android.hardware.display.DisplayViewport.VIEWPORT_EXTERNAL;
+import static android.hardware.display.DisplayViewport.VIEWPORT_INTERNAL;
+import static android.hardware.display.DisplayViewport.VIEWPORT_VIRTUAL;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -45,8 +44,8 @@ import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.Curve;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
-import android.hardware.display.DisplayViewport;
 import android.hardware.display.DisplayManagerInternal.DisplayTransactionListener;
+import android.hardware.display.DisplayViewport;
 import android.hardware.display.IDisplayManager;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
@@ -83,14 +82,17 @@ import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
-import com.android.internal.util.Preconditions;
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.DumpUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.AnimationThread;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
-import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.SurfaceAnimationThread;
+import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -256,9 +258,8 @@ public final class DisplayManagerService extends SystemService {
 
     // Viewports of the default display and the display that should receive touch
     // input from an external source.  Used by the input system.
-    private final DisplayViewport mDefaultViewport = new DisplayViewport();
-    private final DisplayViewport mExternalTouchViewport = new DisplayViewport();
-    private final ArrayList<DisplayViewport> mVirtualTouchViewports = new ArrayList<>();
+    @GuardedBy("mSyncRoot")
+    private final ArrayList<DisplayViewport> mViewports = new ArrayList<>();
 
     // Persistent data store for all internal settings maintained by the display manager service.
     private final PersistentDataStore mPersistentDataStore = new PersistentDataStore();
@@ -272,9 +273,7 @@ public final class DisplayManagerService extends SystemService {
 
     // Temporary viewports, used when sending new viewport information to the
     // input system.  May be used outside of the lock but only on the handler thread.
-    private final DisplayViewport mTempDefaultViewport = new DisplayViewport();
-    private final DisplayViewport mTempExternalTouchViewport = new DisplayViewport();
-    private final ArrayList<DisplayViewport> mTempVirtualTouchViewports = new ArrayList<>();
+    private final ArrayList<DisplayViewport> mTempViewports = new ArrayList<>();
 
     // The default color mode for default displays. Overrides the usual
     // Display.Display.COLOR_MODE_DEFAULT for displays with the
@@ -1255,9 +1254,7 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void clearViewportsLocked() {
-        mDefaultViewport.valid = false;
-        mExternalTouchViewport.valid = false;
-        mVirtualTouchViewports.clear();
+        mViewports.clear();
     }
 
     private void configureDisplayLocked(SurfaceControl.Transaction t, DisplayDevice device) {
@@ -1287,40 +1284,89 @@ public final class DisplayManagerService extends SystemService {
         }
         display.configureDisplayLocked(t, device, info.state == Display.STATE_OFF);
 
-        // Update the viewports if needed.
-        if (!mDefaultViewport.valid
-                && (info.flags & DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY) != 0) {
-            setViewportLocked(mDefaultViewport, display, device);
+        // Update the corresponding viewport.
+        DisplayViewport internalViewport = getInternalViewportLocked();
+        if ((info.flags & DisplayDeviceInfo.FLAG_DEFAULT_DISPLAY) != 0) {
+            populateViewportLocked(internalViewport, display, device);
         }
-        if (!mExternalTouchViewport.valid
-                && info.touch == DisplayDeviceInfo.TOUCH_EXTERNAL) {
-            setViewportLocked(mExternalTouchViewport, display, device);
+        DisplayViewport externalViewport = getExternalViewportLocked();
+        if (info.touch == DisplayDeviceInfo.TOUCH_EXTERNAL) {
+            populateViewportLocked(externalViewport, display, device);
+        } else if (!externalViewport.valid) {
+            // TODO (b/116850516) move this logic into InputReader
+            externalViewport.copyFrom(internalViewport);
+            externalViewport.type = DisplayViewport.VIEWPORT_EXTERNAL;
         }
 
         if (info.touch == DisplayDeviceInfo.TOUCH_VIRTUAL && !TextUtils.isEmpty(info.uniqueId)) {
-            final DisplayViewport viewport = getVirtualTouchViewportLocked(info.uniqueId);
-            setViewportLocked(viewport, display, device);
+            final DisplayViewport viewport = getVirtualViewportLocked(info.uniqueId);
+            populateViewportLocked(viewport, display, device);
         }
     }
 
-    /** Gets the virtual device viewport or creates it if not yet created. */
-    private DisplayViewport getVirtualTouchViewportLocked(@NonNull String uniqueId) {
+    /** Get the virtual device viewport that has the specified uniqueId.
+     * If such viewport does not exist, create it. */
+    private DisplayViewport getVirtualViewportLocked(@NonNull String uniqueId) {
         DisplayViewport viewport;
-        final int count = mVirtualTouchViewports.size();
+        final int count = mViewports.size();
         for (int i = 0; i < count; i++) {
-            viewport = mVirtualTouchViewports.get(i);
+            viewport = mViewports.get(i);
             if (uniqueId.equals(viewport.uniqueId)) {
+                if (viewport.type != VIEWPORT_VIRTUAL) {
+                    Slog.wtf(TAG, "Found a viewport with uniqueId '"  + uniqueId
+                            + "' but it has type " + DisplayViewport.typeToString(viewport.type)
+                            + " (expected VIRTUAL)");
+                    continue;
+                }
                 return viewport;
             }
         }
 
         viewport = new DisplayViewport();
         viewport.uniqueId = uniqueId;
-        mVirtualTouchViewports.add(viewport);
+        viewport.type = VIEWPORT_VIRTUAL;
+        mViewports.add(viewport);
         return viewport;
     }
 
-    private static void setViewportLocked(DisplayViewport viewport,
+    private DisplayViewport getInternalViewportLocked() {
+        return getViewportByTypeLocked(VIEWPORT_INTERNAL);
+    }
+
+    private DisplayViewport getExternalViewportLocked() {
+        return getViewportByTypeLocked(VIEWPORT_EXTERNAL);
+    }
+
+    /**
+     * Get internal or external viewport. Create it if does not currently exist.
+     * @param viewportType - either INTERNAL or EXTERNAL
+     * @return the viewport with the requested type
+     */
+    private DisplayViewport getViewportByTypeLocked(int viewportType) {
+        // Only allow a single INTERNAL or EXTERNAL viewport, which makes this function possible.
+        // TODO (b/116824030) allow multiple EXTERNAL viewports and remove this function.
+        // Creates the viewport if none exists.
+        if (viewportType != VIEWPORT_INTERNAL && viewportType != VIEWPORT_EXTERNAL) {
+            Slog.wtf(TAG, "Cannot call getViewportByTypeLocked for type "
+                    + DisplayViewport.typeToString(viewportType));
+            return null;
+        }
+        DisplayViewport viewport;
+        final int count = mViewports.size();
+        for (int i = 0; i < count; i++) {
+            viewport = mViewports.get(i);
+            if (viewport.type == viewportType) {
+                return viewport;
+            }
+        }
+
+        viewport = new DisplayViewport();
+        viewport.type = viewportType;
+        mViewports.add(viewport);
+        return viewport;
+    }
+
+    private static void populateViewportLocked(DisplayViewport viewport,
             LogicalDisplay display, DisplayDevice device) {
         viewport.valid = true;
         viewport.displayId = display.getDisplayIdLocked();
@@ -1400,9 +1446,7 @@ public final class DisplayManagerService extends SystemService {
             pw.println("  mPendingTraversal=" + mPendingTraversal);
             pw.println("  mGlobalDisplayState=" + Display.stateToString(mGlobalDisplayState));
             pw.println("  mNextNonDefaultDisplayId=" + mNextNonDefaultDisplayId);
-            pw.println("  mDefaultViewport=" + mDefaultViewport);
-            pw.println("  mExternalTouchViewport=" + mExternalTouchViewport);
-            pw.println("  mVirtualTouchViewports=" + mVirtualTouchViewports);
+            pw.println("  mViewports=" + mViewports);
             pw.println("  mDefaultDisplayDefaultColorMode=" + mDefaultDisplayDefaultColorMode);
             pw.println("  mSingleDisplayDemoMode=" + mSingleDisplayDemoMode);
             pw.println("  mWifiDisplayScanRequestCount=" + mWifiDisplayScanRequestCount);
@@ -1522,18 +1566,19 @@ public final class DisplayManagerService extends SystemService {
                     break;
 
                 case MSG_UPDATE_VIEWPORT: {
+                    final boolean changed;
                     synchronized (mSyncRoot) {
-                        mTempDefaultViewport.copyFrom(mDefaultViewport);
-                        mTempExternalTouchViewport.copyFrom(mExternalTouchViewport);
-                        if (!mTempVirtualTouchViewports.equals(mVirtualTouchViewports)) {
-                          mTempVirtualTouchViewports.clear();
-                          for (DisplayViewport d : mVirtualTouchViewports) {
-                              mTempVirtualTouchViewports.add(d.makeCopy());
-                          }
+                        changed = !mTempViewports.equals(mViewports);
+                        if (changed) {
+                            mTempViewports.clear();
+                            for (DisplayViewport d : mViewports) {
+                                mTempViewports.add(d.makeCopy());
+                            }
                         }
                     }
-                    mInputManagerInternal.setDisplayViewports(mTempDefaultViewport,
-                            mTempExternalTouchViewport, mTempVirtualTouchViewports);
+                    if (changed) {
+                        mInputManagerInternal.setDisplayViewports(mTempViewports);
+                    }
                     break;
                 }
 
