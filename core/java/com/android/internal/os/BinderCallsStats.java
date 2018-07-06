@@ -211,16 +211,16 @@ public class BinderCallsStats {
         StringBuilder sb = new StringBuilder();
         if (mDetailedTracking) {
             pw.println("Per-UID raw data " + datasetSizeDesc
-                    + "(uid, call_desc, cpu_time_micros, max_cpu_time_micros, latency_time_micros, "
-                    + "max_latency_time_micros, exception_count, max_request_size_bytes, "
-                    + "max_reply_size_bytes, call_count):");
+                    + "(package/uid, call_desc, cpu_time_micros, max_cpu_time_micros, "
+                    + "latency_time_micros, max_latency_time_micros, exception_count, "
+                    + "max_request_size_bytes, max_reply_size_bytes, call_count):");
             List<UidEntry> topEntries = verbose ? entries
                     : getHighestValues(entries, value -> value.cpuTimeMicros, 0.9);
             for (UidEntry uidEntry : topEntries) {
                 for (CallStat e : uidEntry.getCallStatsList()) {
                     sb.setLength(0);
                     sb.append("    ")
-                            .append(uidEntry.uid).append(",").append(e)
+                            .append(uidToString(uidEntry.uid, appIdToPkgNameMap))
                             .append(',').append(e.cpuTimeMicros)
                             .append(',').append(e.maxCpuTimeMicros)
                             .append(',').append(e.latencyMicros)
