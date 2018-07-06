@@ -242,6 +242,7 @@ import android.net.ProxyInfo;
 import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.Binder;
+import android.os.BinderProxy;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
@@ -12427,8 +12428,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } else if ("binder-proxies".equals(cmd)) {
                 if (opti >= args.length) {
+                    dumpBinderProxyInterfaceCounts(pw,
+                            "Top proxy interface names held by SYSTEM");
                     dumpBinderProxiesCounts(pw, BinderInternal.nGetBinderProxyPerUidCounts(),
-                            "Counts of Binder Proxies held by SYSTEM");
+                            "Number of proxies per uid held by SYSTEM");
                 } else {
                     String uid = args[opti];
                     opti++;
@@ -12964,6 +12967,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             pw.print(": "); pw.println(uidRec);
         }
         return printed;
+    }
+
+    void dumpBinderProxyInterfaceCounts(PrintWriter pw, String header) {
+        final BinderProxy.InterfaceCount[] proxyCounts = BinderProxy.getSortedInterfaceCounts(50);
+
+        pw.println(header);
+        for (int i = 0; i < proxyCounts.length; i++) {
+            pw.println("    #" + (i + 1) + ": " + proxyCounts[i]);
+        }
     }
 
     boolean dumpBinderProxiesCounts(PrintWriter pw, SparseIntArray counts, String header) {

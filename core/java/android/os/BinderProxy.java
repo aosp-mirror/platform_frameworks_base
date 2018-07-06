@@ -225,10 +225,11 @@ public final class BinderProxy implements IBinder {
             }
         }
 
-        /**
-         * Dump a histogram to the logcat. Used to diagnose abnormally large proxy maps.
-         */
-        private void dumpProxyInterfaceCounts() {
+        private InterfaceCount[] getSortedInterfaceCounts(int maxToReturn) {
+            if (maxToReturn < 0) {
+                throw new IllegalArgumentException("negative interface count");
+            }
+
             Map<String, Integer> counts = new HashMap<>();
             for (ArrayList<WeakReference<BinderProxy>> a : mMainIndexValues) {
                 if (a != null) {
@@ -255,13 +256,30 @@ public final class BinderProxy implements IBinder {
             }
             Map.Entry<String, Integer>[] sorted = counts.entrySet().toArray(
                     new Map.Entry[counts.size()]);
+
             Arrays.sort(sorted, (Map.Entry<String, Integer> a, Map.Entry<String, Integer> b)
                     -> b.getValue().compareTo(a.getValue()));
-            Log.v(Binder.TAG, "BinderProxy descriptor histogram (top ten):");
-            int printLength = Math.min(10, sorted.length);
-            for (int i = 0; i < printLength; i++) {
-                Log.v(Binder.TAG, " #" + (i + 1) + ": " + sorted[i].getKey() + " x"
-                        + sorted[i].getValue());
+
+            int returnCount = Math.min(maxToReturn, sorted.length);
+            InterfaceCount[] ifaceCounts = new InterfaceCount[returnCount];
+            for (int i = 0; i < returnCount; i++) {
+                ifaceCounts[i] = new InterfaceCount(sorted[i].getKey(), sorted[i].getValue());
+            }
+            return ifaceCounts;
+        }
+
+        static final int MAX_NUM_INTERFACES_TO_DUMP = 10;
+
+        /**
+         * Dump a histogram to the logcat. Used to diagnose abnormally large proxy maps.
+         */
+        private void dumpProxyInterfaceCounts() {
+            final InterfaceCount[] sorted = getSortedInterfaceCounts(MAX_NUM_INTERFACES_TO_DUMP);
+
+            Log.v(Binder.TAG, "BinderProxy descriptor histogram "
+                    + "(top " + Integer.toString(MAX_NUM_INTERFACES_TO_DUMP) + "):");
+            for (int i = 0; i < sorted.length; i++) {
+                Log.v(Binder.TAG, " #" + (i + 1) + ": " + sorted[i]);
             }
         }
 
@@ -297,10 +315,42 @@ public final class BinderProxy implements IBinder {
     private static final ProxyMap sProxyMap = new ProxyMap();
 
     /**
-      * Dump proxy debug information.
-      *
-      * @hide
-      */
+     * Simple pair-value class to store number of binder proxy interfaces live in this process.
+     */
+    public static final class InterfaceCount {
+        private final String mInterfaceName;
+        private final int mCount;
+
+        InterfaceCount(String interfaceName, int count) {
+            mInterfaceName = interfaceName;
+            mCount = count;
+        }
+
+        @Override
+        public String toString() {
+            return mInterfaceName + " x" + Integer.toString(mCount);
+        }
+    }
+
+    /**
+     * Get a sorted array with entries mapping proxy interface names to the number
+     * of live proxies with those names.
+     *
+     * @param num maximum number of proxy interface counts to return. Use
+     *            Integer.MAX_VALUE to retrieve all
+     * @hide
+     */
+    public static InterfaceCount[] getSortedInterfaceCounts(int num) {
+        synchronized (sProxyMap) {
+            return sProxyMap.getSortedInterfaceCounts(num);
+        }
+    }
+
+    /**
+     * Dump proxy debug information.
+     *
+     * @hide
+     */
     private static void dumpProxyDebugInfo() {
         if (Build.IS_DEBUGGABLE) {
             synchronized (sProxyMap) {
