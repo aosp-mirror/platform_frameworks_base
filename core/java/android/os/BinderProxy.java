@@ -351,15 +351,12 @@ public final class BinderProxy implements IBinder {
      *
      * @hide
      */
-    private static void dumpProxyDebugInfo() {
+    public static void dumpProxyDebugInfo() {
         if (Build.IS_DEBUGGABLE) {
             synchronized (sProxyMap) {
                 sProxyMap.dumpProxyInterfaceCounts();
+                sProxyMap.dumpPerUidProxyCounts();
             }
-            // Note that we don't call dumpPerUidProxyCounts(); this is because this
-            // method may be called as part of the uid limit being hit, and calling
-            // back into the UID tracking code would cause us to try to acquire a mutex
-            // that is held during that callback.
         }
     }
 
