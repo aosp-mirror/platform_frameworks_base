@@ -373,7 +373,7 @@
     <string name="user_add_user" msgid="5110251524486079492">"उपयोगकर्ता जोड़ें"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"नया उपयोगकर्ता"</string>
     <string name="guest_nickname" msgid="8059989128963789678">"मेहमान"</string>
-    <string name="guest_new_guest" msgid="600537543078847803">"अतिथि जोड़ें"</string>
+    <string name="guest_new_guest" msgid="600537543078847803">"मेहमान जोड़ें"</string>
     <string name="guest_exit_guest" msgid="7187359342030096885">"अतिथि को निकालें"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"अतिथि को निकालें?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"इस सत्र के सभी ऐप्स और डेटा को हटा दिया जाएगा."</string>

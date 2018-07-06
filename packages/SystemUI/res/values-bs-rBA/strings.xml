@@ -293,7 +293,7 @@
     <string name="quick_settings_wifi_label" msgid="9135344704899546041">"WiFi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Nije povezano"</string>
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Nema mreže"</string>
-    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"WiFi isključen"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"WiFi je isključen"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"WiFi uključen"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nema dostupnih WiFi mreža"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Emitiranje"</string>
@@ -309,7 +309,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"Gotovo"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Povezano"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Povezivanje..."</string>
-    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Dijeljenje veze"</string>
+    <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Povezivanje putem mobitela"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Pristupna tačka"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Obavještenja"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Svjetiljka"</string>
