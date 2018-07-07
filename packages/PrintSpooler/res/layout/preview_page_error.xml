@@ -21,11 +21,14 @@
         android:gravity="center">
 
     <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dip"
-            android:src="@drawable/print_warning"
-            android:contentDescription="@null" />
+        android:layout_width="120dp"
+        android:layout_height="110dp"
+        android:layout_marginBottom="12dip"
+        android:src="@*android:drawable/ic_print_error"
+        android:scaleType="fitEnd"
+        android:alpha="0.1"
+        android:tint="@android:color/black"
+        android:importantForAccessibility="no" />
 
     <TextView
             android:layout_width="wrap_content"
