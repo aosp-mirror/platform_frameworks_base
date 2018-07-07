@@ -59,7 +59,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
     private void setupSurface(int width, int height, Rect contentInsets, int sysuiVis,
             int windowFlags, Rect taskBounds) {
         final GraphicBuffer buffer = GraphicBuffer.create(width, height, PixelFormat.RGBA_8888,
-                GraphicBuffer.USAGE_SW_READ_NEVER | GraphicBuffer.USAGE_SW_WRITE_NEVER);
+                GraphicBuffer.USAGE_SW_READ_RARELY | GraphicBuffer.USAGE_SW_WRITE_NEVER);
         final TaskSnapshot snapshot = new TaskSnapshot(buffer,
                 ORIENTATION_PORTRAIT, contentInsets, false, 1.0f, true /* isRealSnapshot */,
                 WINDOWING_MODE_FULLSCREEN, 0 /* systemUiVisibility */, false /* isTranslucent */);

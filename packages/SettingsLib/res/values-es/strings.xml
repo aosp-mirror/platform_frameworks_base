@@ -217,8 +217,8 @@
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Selecciona la versión AVRCP del Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Códec de audio de Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Activar el códec de audio por Bluetooth\nSelección"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Porcentaje de muestreo de audio por Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Activar el códec de audio por Bluetooth\nSelección: porcentaje de muestreo"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Frecuencia de muestreo de audio por Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Activar el códec de audio por Bluetooth\nSelección: frecuencia de muestreo"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bits por muestra del audio Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Activar el códec de audio por Bluetooth\nSelección: bits por muestra"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Modo de canal de audio por Bluetooth"</string>
@@ -238,7 +238,7 @@
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Ordenar las direcciones MAC de forma aleatoria al conectarse a redes Wi‑Fi"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"Medida"</string>
     <string name="wifi_unmetered_label" msgid="6124098729457992931">"No medida"</string>
-    <string name="select_logd_size_title" msgid="7433137108348553508">"Tamaños de búfer de registrador"</string>
+    <string name="select_logd_size_title" msgid="7433137108348553508">"Tamaños del búfer para registrar"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Elige el tamaño del Logger por búfer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"¿Borrar almacenamiento continuo del registrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="2256582531342994562">"Cuando ya no supervisamos la actividad con el registrador de forma continua, estamos obligados a borrar los datos del registrador almacenados en el dispositivo."</string>
