@@ -43,7 +43,7 @@
     <string name="wifi_status_no_internet" msgid="5784710974669608361">"Nema internetske veze"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Potrebna je prijava"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Pristupna tačka je privremeno puna"</string>
-    <string name="connected_via_carrier" msgid="7583780074526041912">"Povezana koristeći %1$s"</string>
+    <string name="connected_via_carrier" msgid="7583780074526041912">"Povezano koristeći %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Dostupna koristeći %1$s"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Veoma sporo"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Sporo"</string>
@@ -84,11 +84,11 @@
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"Povezano na slušni aparat"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"Povezano sa zvukom medija"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"Povezano na zvuk telefona"</string>
-    <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Povezan na server za prijenos podataka"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"Povezano sa serverom za prijenos podataka"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"Povezano na mapu"</string>
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Povezan na SAP"</string>
-    <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Nije povezan na server za prijenos podataka"</string>
-    <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Spojen na ulazni uređaj"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Nije povezano sa serverom za prijenos podataka"</string>
+    <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Povezano s ulaznim uređajem"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Povezano na uređaj za pristup internetu"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Dijeljenje lokalne internetske veze s uređajem"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Koristi za pristup internetu"</string>
@@ -102,10 +102,10 @@
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Upari"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"UPARI"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Otkaži"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Uparivanje odobrava pristup kontaktima i istoriji poziva kada je uspostavljeno."</string>
-    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Nije se moguće upariti s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Nije se moguće upariti s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> zbog pogrešnog PIN-a ili pristupnog koda."</string>
-    <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Ne može komunicirati sa uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Uparivanje odobrava pristup kontaktima i historiji poziva kada je uspostavljeno."</string>
+    <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Nije moguće upariti s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Nije moguće upariti s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> zbog pogrešnog PIN-a ili pristupnog koda."</string>
+    <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Nije moguće komunicirati s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"Uređaj <xliff:g id="DEVICE_NAME">%1$s</xliff:g> je odbio uparivanje."</string>
     <string name="bluetooth_talkback_computer" msgid="4875089335641234463">"Računar"</string>
     <string name="bluetooth_talkback_headset" msgid="5140152177885220949">"Slušalice s mikrofonom"</string>
@@ -118,12 +118,12 @@
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Uparivanje desnog slušnog aparata…"</string>
     <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Lijevi - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterije"</string>
     <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Desni - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterije"</string>
-    <string name="accessibility_wifi_off" msgid="1166761729660614716">"WiFi isključen."</string>
+    <string name="accessibility_wifi_off" msgid="1166761729660614716">"WiFi je isključen."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"WiFi nije povezan."</string>
-    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"WiFi jedna crtica."</string>
-    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"WiFi dvije crtice."</string>
-    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"WiFi tri crtice."</string>
-    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"WiFi puni signal."</string>
+    <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"WiFi signal ima jednu crtu."</string>
+    <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"WiFi signal ima dvije crte."</string>
+    <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"WiFi signal ima tri crte."</string>
+    <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"WiFi signal je pun."</string>
     <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"Otvorena mreža"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"Sigurna mreža"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
@@ -132,7 +132,7 @@
     <string name="tether_settings_title_usb" msgid="6688416425801386511">"Povezivanje mobitela USB-om"</string>
     <string name="tether_settings_title_wifi" msgid="3277144155960302049">"Prijenosna pristupna tačka"</string>
     <string name="tether_settings_title_bluetooth" msgid="355855408317564420">"Dijeljenje Bluetooth veze"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Dijeljenje veze"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="5355828977109785001">"Povezivanje putem mobitela"</string>
     <string name="tether_settings_title_all" msgid="8356136101061143841">"Povezivanje putem mobitela i prijenosna pristupna tačka"</string>
     <string name="managed_user_title" msgid="8109605045406748842">"Sve radne aplikacije"</string>
     <string name="user_guest" msgid="8475274842845401871">"Gost"</string>
@@ -145,7 +145,7 @@
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Brzina govora"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Brzina kojom se izgovara tekst"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Visina"</string>
-    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Utječe na ton sintetiziranog govora"</string>
+    <string name="tts_default_pitch_summary" msgid="1944885882882650009">"Utiče na ton sintetiziranog govora"</string>
     <string name="tts_default_lang_title" msgid="8018087612299820556">"Jezik"</string>
     <string name="tts_lang_use_system" msgid="2679252467416513208">"Korištenje sistemskog jezika"</string>
     <string name="tts_lang_not_selected" msgid="7395787019276734765">"Jezik nije izabran"</string>
@@ -187,7 +187,7 @@
     <string name="development_settings_summary" msgid="1815795401632854041">"Postavi opcije za razvoj aplikacija"</string>
     <string name="development_settings_not_available" msgid="4308569041701535607">"Opcije za programere nisu dostupne za ovog korisnika"</string>
     <string name="vpn_settings_not_available" msgid="956841430176985598">"VPN postavke nisu dostupne za ovog korisnika"</string>
-    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Postavke za privezivanje nisu dostupne za ovog korisnika"</string>
+    <string name="tethering_settings_not_available" msgid="6765770438438291012">"Postavke za povezivanje putem mobitela nisu dostupne za ovog korisnika"</string>
     <string name="apn_settings_not_available" msgid="7873729032165324000">"Postavke za ime pristupne tačke nisu dostupne za ovog korisnika"</string>
     <string name="enable_adb" msgid="7982306934419797485">"Otklanjanje grešaka putem uređaja spojenog na USB"</string>
     <string name="enable_adb_summary" msgid="4881186971746056635">"Način rada za uklanjanje grešaka kada je povezan USB"</string>
@@ -201,7 +201,7 @@
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM otključavanje"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Dozvoli otključavanje bootloadera"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Želite li dozvoliti OEM otključavanje?"</string>
-    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"UPOZORENJE: Funkcije zaštite ovog uređaja neće funkcionisati dok je ova postavka uključena."</string>
+    <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"UPOZORENJE: Funkcije zaštite ovog uređaja neće funkcionirati dok je ova postavka uključena."</string>
     <string name="mock_location_app" msgid="7966220972812881854">"Odaberite aplikaciju za lažne lokacije"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"Aplikacija za lažnu lokaciju nije postavljena"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"Aplikacija za lažne lokacije: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -210,7 +210,7 @@
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Omogući detaljniju evidenciju za WiFi"</string>
     <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Nasumični odabir MAC adrese pri povezivanju"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobilna mreža za prijenos podataka je uvijek aktivna"</string>
-    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardversko ubrzavanje dijeljenja veze"</string>
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardversko ubrzavanje za povezivanje putem mobitela"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Prikaži Bluetooth uređaje bez naziva"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Onemogući apsolutnu jačinu zvuka"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP verzija"</string>
@@ -220,7 +220,7 @@
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Brzina uzorkovanja za Bluetooth audio"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Aktivirajte Bluetooth Audio Codec\nOdabir: Brzina uzorkovanja"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth audio bitovi po uzorku"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Aktivirajte Bluetooth Audio Codec\nOdabir: Bitovi po semplu"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Aktivirajte Bluetooth Audio Codec\nOdabir: Bitovi po uzorku"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Način Bluetooth audio kanala"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Aktivirajte Bluetooth Audio Codec\nOdabir: Način rada po kanalima"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth Audio LDAC kodek: Kvalitet reprodukcije"</string>
@@ -249,7 +249,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Dozvoli lažne lokacije"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Dozvoli lažne lokacije"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Omogući pregled atributa prikaza"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Uvijek drži prijenos podataka na mobilnoj mreži aktivnim, čak i kada je WiFi je aktivan (za brzo prebacivanje između mreža)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Uvijek drži prijenos podataka na mobilnoj mreži aktivnim, čak i kada je WiFi aktivan (za brzo prebacivanje između mreža)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Koristi hardversko ubrzavanje dijeljenja veze, ako je dostupno"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Omogućiti otklanjanje grešaka putem uređaja spojenog na USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Otklanjanje grešaka putem uređaja spojenog na USB je namijenjeno samo u svrhe razvoja aplikacija. Koristite ga za kopiranje podataka između računara i uređaja, instaliranje aplikacija na uređaj bez obavještenja te čitanje podataka iz zapisnika."</string>
@@ -277,7 +277,7 @@
     <string name="debug_hw_drawing_category" msgid="6220174216912308658">"Prikaz s hardverskom akceleracijom"</string>
     <string name="media_category" msgid="4388305075496848353">"Mediji"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Praćenje"</string>
-    <string name="strict_mode" msgid="1938795874357830695">"Omogućen strogi režim"</string>
+    <string name="strict_mode" msgid="1938795874357830695">"Omogućen strogi način rada"</string>
     <string name="strict_mode_summary" msgid="142834318897332338">"Prikaži ekran uz treptanje kada aplikacije vrše duge operacije u glavnoj niti"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Lokacija pokazivača"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Trenutni podaci o dodirivanju prikazuju se u nadsloju preko ekrana"</string>
@@ -298,8 +298,8 @@
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Onemogući autom. usmjerav. na USB audio periferije"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Prikaži granice rasporeda"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Prikaži granice isječka, margine itd."</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Prisilno postavi raspored s desna u lijevo"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Prisilno postavi raspored ekrana s desna u lijevo za sve regije"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Prisilno postavi raspored s desna ulijevo"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Prisilno postavi raspored ekrana s desna ulijevo za sve regije"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Prisili GPU iscrtavanje"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Prisilno koristi GPU za 2d crtanje"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Prinudno primijeni 4x MSAA"</string>
@@ -323,19 +323,19 @@
     <string name="force_allow_on_external" msgid="3215759785081916381">"Nametni aplikacije na vanjskoj pohrani"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Omogućava upisivanje svih aplikacija u vanjsku pohranu, bez obzira na prikazane vrijednosti"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"Nametni aktivnostima mijenjanje veličina"</string>
-    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Omogući mijenjanje veličine svih aktivnosti za prikaz sa više prozora, bez obzira na prikazane vrijednosti."</string>
+    <string name="force_resizable_activities_summary" msgid="6667493494706124459">"Omogući mijenjanje veličine svih aktivnosti za prikaz s više prozora, bez obzira na prikazane vrijednosti."</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"Omogući prozore nepravilnih oblika"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"Omogući podršku za eksperimentalne prozore nepravilnih oblika."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"Lozinka za sigurnosnu kopiju radne površine"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"Potpune sigurnosne kopije za računare trenutno nisu zaštićene"</string>
-    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Dodirnite da promijenite ili uklonite lozinku za potpune rezervne kopije sa radne površine"</string>
-    <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nova lozinka za sigurnosnu kopiju postavljena"</string>
+    <string name="local_backup_password_summary_change" msgid="5376206246809190364">"Dodirnite da promijenite ili uklonite lozinku za potpune rezervne kopije s radne površine"</string>
+    <string name="local_backup_password_toast_success" msgid="582016086228434290">"Nova lozinka za sigurnosnu kopiju je postavljena"</string>
     <string name="local_backup_password_toast_confirmation_mismatch" msgid="7805892532752708288">"Nova lozinka i potvrda se ne podudaraju"</string>
     <string name="local_backup_password_toast_validation_failure" msgid="5646377234895626531">"Nije uspjelo postavljanje lozinke za sigurnosnu kopiju"</string>
   <string-array name="color_mode_names">
-    <item msgid="2425514299220523812">"Živopisan (zadano)"</item>
+    <item msgid="2425514299220523812">"Živopisno (zadano)"</item>
     <item msgid="8446070607501413455">"Prirodan"</item>
-    <item msgid="6553408765810699025">"Standardni"</item>
+    <item msgid="6553408765810699025">"Standardno"</item>
   </string-array>
   <string-array name="color_mode_descriptions">
     <item msgid="4979629397075120893">"Unaprijeđene boje"</item>
@@ -355,9 +355,9 @@
     <string name="convert_to_file_encryption_enabled" msgid="2861258671151428346">"Pretvaranje…"</string>
     <string name="convert_to_file_encryption_done" msgid="7859766358000523953">"Fajl je već šifriran"</string>
     <string name="title_convert_fbe" msgid="1263622876196444453">"Pretvaranje u šifrirane fajlove"</string>
-    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Pretvorite particiju sa podacima u particiju šifriranu sistemom fajlova.\n !! Upozorenje!! Ovo će izbrisati sve vaše podatke.\n Ova funkcija je u alfa fazi razvoja i možda neće ispravno raditi.\n Pritisnite \"Obriši i pretvori…\" da nastavite."</string>
+    <string name="convert_to_fbe_warning" msgid="6139067817148865527">"Pretvorite particiju s podacima u particiju šifriranu sistemom fajlova.\n !! Upozorenje!! Ovo će izbrisati sve vaše podatke.\n Ova funkcija je u alfa fazi razvoja i možda neće ispravno raditi.\n Pritisnite \"Obriši i pretvori…\" da nastavite."</string>
     <string name="button_convert_fbe" msgid="5152671181309826405">"Obriši i pretvori…"</string>
-    <string name="picture_color_mode" msgid="4560755008730283695">"Režim boja Slika"</string>
+    <string name="picture_color_mode" msgid="4560755008730283695">"Način rada boja slika"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"Koristi sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"Onemogućeno"</string>
     <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"Crno-bijelo"</string>
@@ -424,8 +424,8 @@
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Potrebna je lozinka"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Aktivne metode unosa"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Koristi jezik sistema"</string>
-    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Nije uspjelo otvaranje postavki za <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
-    <string name="ime_security_warning" msgid="4135828934735934248">"Ovaj način unosa može prikupiti sav tekst koji otkucate, uključujući lične podatke kao što su lozinke i brojevi kreditnih kartica. Način omogućava aplikacija <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Da li želite koristiti ovaj način unosa?"</string>
+    <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Otvaranje postavki za <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> nije uspjelo"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"Ovaj način unosa može prikupiti sav tekst koji upišete, uključujući lične podatke kao što su lozinke i brojevi kreditnih kartica. Način omogućava aplikacija <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Da li želite koristiti ovaj način unosa?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Napomena: Nakon ponovnog pokretanja, ova aplikacija se neće moći pokrenuti dok ne otključate telefon"</string>
     <string name="ims_reg_title" msgid="7609782759207241443">"Stanje IMS registracije"</string>
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Registrirano"</string>
