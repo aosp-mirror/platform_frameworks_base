@@ -1949,6 +1949,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     @Override
     public void setDisplayId(int displayId) {
         nativeSetDisplayId(mNativePtr, displayId);
