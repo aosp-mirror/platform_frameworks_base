@@ -17,15 +17,20 @@
 package com.android.server;
 
 import android.app.AppGlobals;
+import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.Settings;
+import android.util.KeyValueListParser;
 import android.util.Slog;
 
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderCallsStats;
 
 import java.io.FileDescriptor;
@@ -41,18 +46,90 @@ public class BinderCallsStatsService extends Binder {
     private static final String PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING
             = "persist.sys.binder_calls_detailed_tracking";
 
-    public static void start() {
-        BinderCallsStatsService service = new BinderCallsStatsService();
-        ServiceManager.addService("binder_calls_stats", service);
-        boolean detailedTrackingEnabled = SystemProperties.getBoolean(
-                PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING, false);
+    /** Listens for flag changes. */
+    private static class SettingsObserver extends ContentObserver {
+        private static final String SETTINGS_ENABLED_KEY = "enabled";
+        private static final String SETTINGS_DETAILED_TRACKING_KEY = "detailed_tracking";
+        private static final String SETTINGS_UPLOAD_DATA_KEY = "upload_data";
+        private static final String SETTINGS_SAMPLING_INTERVAL_KEY = "sampling_interval";
 
-        if (detailedTrackingEnabled) {
-            Slog.i(TAG, "Enabled CPU usage tracking for binder calls. Controlled by "
-                    + PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING
-                    + " or via dumpsys binder_calls_stats --enable-detailed-tracking");
-            BinderCallsStats.getInstance().setDetailedTracking(true);
+        private final Uri mUri = Settings.Global.getUriFor(Settings.Global.BINDER_CALLS_STATS);
+        private final Context mContext;
+        private final KeyValueListParser mParser = new KeyValueListParser(',');
+
+        public SettingsObserver(Context context) {
+            super(BackgroundThread.getHandler());
+            mContext = context;
+            context.getContentResolver().registerContentObserver(mUri, false, this,
+                    UserHandle.USER_SYSTEM);
+            // Always kick once to ensure that we match current state
+            onChange();
         }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri, int userId) {
+            if (mUri.equals(uri)) {
+                onChange();
+            }
+        }
+
+        public void onChange() {
+            // Do not overwrite the default set manually.
+            if (!SystemProperties.get(PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING).isEmpty()) {
+              return;
+            }
+
+            BinderCallsStats stats = BinderCallsStats.getInstance();
+            try {
+                    mParser.setString(Settings.Global.getString(mContext.getContentResolver(),
+                            Settings.Global.BINDER_CALLS_STATS));
+            } catch (IllegalArgumentException e) {
+                    Slog.e(TAG, "Bad binder call stats settings", e);
+            }
+            stats.setEnabled(
+                    mParser.getBoolean(SETTINGS_ENABLED_KEY, BinderCallsStats.ENABLED_DEFAULT));
+            stats.setDetailedTracking(mParser.getBoolean(
+                    SETTINGS_DETAILED_TRACKING_KEY, BinderCallsStats.DETAILED_TRACKING_DEFAULT));
+            stats.setSamplingInterval(mParser.getInt(
+                    SETTINGS_SAMPLING_INTERVAL_KEY,
+                    BinderCallsStats.PERIODIC_SAMPLING_INTERVAL_DEFAULT));
+        }
+    }
+
+    public static class LifeCycle extends SystemService {
+        private BinderCallsStatsService mService;
+
+        public LifeCycle(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onStart() {
+            mService = new BinderCallsStatsService();
+            publishBinderService("binder_calls_stats", mService);
+            boolean detailedTrackingEnabled = SystemProperties.getBoolean(
+                    PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING, false);
+
+            if (detailedTrackingEnabled) {
+                Slog.i(TAG, "Enabled CPU usage tracking for binder calls. Controlled by "
+                        + PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING
+                        + " or via dumpsys binder_calls_stats --enable-detailed-tracking");
+                BinderCallsStats.getInstance().setDetailedTracking(true);
+            }
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (SystemService.PHASE_SYSTEM_SERVICES_READY == phase) {
+                mService.systemReady(getContext());
+            }
+        }
+    }
+
+    private SettingsObserver mSettingsObserver;
+
+    public void systemReady(Context context) {
+        mSettingsObserver = new SettingsObserver(context);
     }
 
     public static void reset() {
