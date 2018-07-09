@@ -3648,6 +3648,7 @@ package android.media.audiopolicy {
     method @NonNull public android.media.AudioAttributes getAudioAttributesForProductStrategy(@NonNull android.media.audiopolicy.AudioProductStrategy);
     method @Nullable public android.media.audiopolicy.AudioProductStrategy getById(int);
     method public int getLegacyStreamTypeForAudioAttributes(@NonNull android.media.AudioAttributes);
+    method @Nullable public android.media.audiopolicy.AudioProductStrategy getProductStrategyForAudioAttributes(@NonNull android.media.AudioAttributes);
     method public java.util.Iterator<android.media.audiopolicy.AudioProductStrategy> iterator();
     method public int size();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
