@@ -137,8 +137,6 @@ static bool setBenchmarkFormat(const char* format) {
         gBenchmarkReporter.reset(new benchmark::ConsoleReporter());
     } else if (!strcmp(format, "json")) {
         gBenchmarkReporter.reset(new benchmark::JSONReporter());
-    } else if (!strcmp(format, "csv")) {
-        gBenchmarkReporter.reset(new benchmark::CSVReporter());
     } else {
         fprintf(stderr, "Unknown format '%s'", format);
         return false;
