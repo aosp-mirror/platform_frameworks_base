@@ -93,6 +93,26 @@ public class SystemAudioInitiationActionFromAvrTest {
                     public int setHdmiSystemAudioSupported(boolean on) {
                         return 0;
                     }
+
+                    @Override
+                    public int getStreamVolume(int streamType) {
+                        return 0;
+                    }
+
+                    @Override
+                    public boolean isStreamMute(int streamType) {
+                        return false;
+                    }
+
+                    @Override
+                    public int getStreamMaxVolume(int streamType) {
+                        return 100;
+                    }
+
+                    @Override
+                    public void adjustStreamVolume(int streamType, int direction, int flags) {
+
+                    }
                 };
             }
 
@@ -104,6 +124,11 @@ public class SystemAudioInitiationActionFromAvrTest {
             @Override
             boolean isAddressAllocated() {
                 return true;
+            }
+
+            @Override
+            void wakeUp() {
+
             }
         };
         mHdmiCecLocalDeviceAudioSystem =
