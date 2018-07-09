@@ -45,6 +45,7 @@ public final class CellInfoGsm extends CellInfo implements Parcelable {
         this.mCellSignalStrengthGsm = ci.mCellSignalStrengthGsm.copy();
     }
 
+    @Override
     public CellIdentityGsm getCellIdentity() {
         return mCellIdentityGsm;
     }
@@ -53,6 +54,7 @@ public final class CellInfoGsm extends CellInfo implements Parcelable {
         mCellIdentityGsm = cid;
     }
 
+    @Override
     public CellSignalStrengthGsm getCellSignalStrength() {
         return mCellSignalStrengthGsm;
     }

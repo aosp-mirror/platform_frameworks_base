@@ -48,6 +48,7 @@ public final class CellInfoTdscdma extends CellInfo implements Parcelable {
         this.mCellSignalStrengthTdscdma = ci.mCellSignalStrengthTdscdma.copy();
     }
 
+    @Override
     public CellIdentityTdscdma getCellIdentity() {
         return mCellIdentityTdscdma;
     }
@@ -56,6 +57,7 @@ public final class CellInfoTdscdma extends CellInfo implements Parcelable {
         mCellIdentityTdscdma = cid;
     }
 
+    @Override
     public CellSignalStrengthTdscdma getCellSignalStrength() {
         return mCellSignalStrengthTdscdma;
     }

@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -123,6 +124,14 @@ public abstract class CellInfo implements Parcelable {
     public void setTimeStamp(long timeStamp) {
         mTimeStamp = timeStamp;
     }
+
+    /** @hide */
+    @NonNull
+    public abstract CellIdentity getCellIdentity();
+
+    /** @hide */
+    @NonNull
+    public abstract CellSignalStrength getCellSignalStrength();
 
     /**
      * Gets the connection status of this cell.
