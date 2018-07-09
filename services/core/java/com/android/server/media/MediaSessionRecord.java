@@ -481,7 +481,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                         mAudioManagerInternal.adjustStreamVolumeForUid(stream, direction, flags,
                                 packageName, uid);
                     }
-                } catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException | SecurityException e) {
                     Log.e(TAG, "Cannot adjust volume: direction=" + direction + ", stream="
                             + stream + ", flags=" + flags + ", packageName=" + packageName
                             + ", uid=" + uid + ", useSuggested=" + useSuggested
