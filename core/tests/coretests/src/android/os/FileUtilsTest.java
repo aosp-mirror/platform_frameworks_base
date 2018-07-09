@@ -193,7 +193,7 @@ public class FileUtilsTest {
 
             try (MemoryPipe in = MemoryPipe.createSource(source);
                     FileOutputStream out = new FileOutputStream(dest)) {
-                FileUtils.copy(in.getFD(), out.getFD(), null, null, size);
+                FileUtils.copy(in.getFD(), out.getFD(), size, null, null, null);
             }
 
             actual = readFile(dest);
