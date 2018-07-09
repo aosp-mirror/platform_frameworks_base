@@ -223,6 +223,12 @@ public abstract class ActivityManagerInternal {
      * intercept activity launches for work apps when the Work Challenge is present.
      */
     public abstract boolean shouldConfirmCredentials(int userId);
+
+    /**
+     * @return The intent used to launch the home activity.
+     */
+    public abstract Intent getHomeIntent();
+
     public abstract int[] getCurrentProfileIds();
     public abstract UserInfo getCurrentUser();
     public abstract void ensureNotSpecialUser(int userId);

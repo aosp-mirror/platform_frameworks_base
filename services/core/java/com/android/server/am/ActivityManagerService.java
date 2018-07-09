@@ -22465,6 +22465,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void finishUserSwitch(Object uss) {
             mUserController.finishUserSwitch((UserState) uss);
         }
+
+        @Override
+        public Intent getHomeIntent() {
+            synchronized (ActivityManagerService.this) {
+                return ActivityManagerService.this.getHomeIntent();
+            }
+        }
     }
 
     /**
