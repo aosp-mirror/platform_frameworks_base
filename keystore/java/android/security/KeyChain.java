@@ -283,10 +283,16 @@ public final class KeyChain {
     public static final int KEY_GEN_NO_KEYSTORE_PROVIDER = 5;
 
     /**
+     * StrongBox unavailable when calling {@link #generateKeyPair}
+     * @hide
+     */
+    public static final int KEY_GEN_STRONGBOX_UNAVAILABLE = 6;
+
+    /**
      * General failure while calling {@link #generateKeyPair}
      * @hide
      */
-    public static final int KEY_GEN_FAILURE = 6;
+    public static final int KEY_GEN_FAILURE = 7;
 
     /**
      * Successful call to {@link #attestKey}
