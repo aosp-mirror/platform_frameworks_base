@@ -53,7 +53,10 @@ public final class ContentProviderConnection extends Binder {
     }
 
     public void startAssociationIfNeeded() {
-        if (association == null) {
+        // If we don't already have an active association, create one...  but only if this
+        // is an association between two different processes.
+        if (association == null && (provider.appInfo.uid != client.uid
+                || !provider.info.processName.equals(client.processName))) {
             ProcessStats.ProcessStateHolder holder = provider.proc != null
                     ? provider.proc.pkgList.get(provider.name.getPackageName()) : null;
             if (holder == null) {
@@ -63,10 +66,16 @@ public final class ContentProviderConnection extends Binder {
                 Slog.wtf(TAG_AM, "Inactive holder in referenced provider "
                         + provider.name.toShortString() + ": proc=" + provider.proc);
             } else {
-                association = holder.pkg.getAssociationStateLocked(provider.info.processName,
+                association = holder.pkg.getAssociationStateLocked(holder.state,
                         provider.name.getClassName()).startSource(client.uid, client.processName);
 
             }
+        }
+    }
+
+    public void trackProcState(int procState, int seq, long now) {
+        if (association != null) {
+            association.trackProcState(procState, seq, now);
         }
     }
 

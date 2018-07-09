@@ -86,7 +86,6 @@ import static android.os.Process.setThreadPriority;
 import static android.os.Process.setThreadScheduler;
 import static android.os.Process.startWebView;
 import static android.os.Process.zygoteProcess;
-import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
@@ -164,7 +163,6 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerProto;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
-import android.app.AlertDialog;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AppOpsManagerInternal.CheckOpsDelegate;
@@ -206,7 +204,6 @@ import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.IContentProvider;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -262,7 +259,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
-import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.Process;
@@ -285,7 +281,6 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.provider.Downloads;
 import android.provider.Settings;
-import android.service.voice.IVoiceInteractionSession;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.SuggestionSpan;
@@ -323,10 +318,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.DumpHeapActivity;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
-import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.SystemUserHomeActivity;
-import com.android.internal.app.procstats.AssociationState;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -364,21 +357,9 @@ import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
-import com.android.server.am.ActivityManagerServiceDumpActivitiesProto;
-import com.android.server.am.ActivityManagerServiceDumpBroadcastsProto;
-import com.android.server.am.ActivityManagerServiceDumpProcessesProto;
 import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
-import com.android.server.am.ActivityManagerServiceDumpServicesProto;
-import com.android.server.am.ActivityManagerServiceProto;
 import com.android.server.am.ActivityStack.ActivityState;
-import com.android.server.am.GrantUriProto;
-import com.android.server.am.ImportanceTokenProto;
-import com.android.server.am.MemInfoDumpProto;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
-import com.android.server.am.NeededUriGrantsProto;
-import com.android.server.am.ProcessOomProto;
-import com.android.server.am.ProcessToGcProto;
-import com.android.server.am.StickyBroadcastProto;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
@@ -387,7 +368,6 @@ import com.android.server.pm.dex.DexManager;
 import com.android.server.utils.PriorityDump;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
-import com.android.server.wm.ActivityTaskManagerInternal.SleepToken;
 import com.android.server.wm.WindowManagerService;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -9020,7 +9000,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     ContentProviderConnection incProviderCountLocked(ProcessRecord r,
-            final ContentProviderRecord cpr, IBinder externalProcessToken, boolean stable) {
+            final ContentProviderRecord cpr, IBinder externalProcessToken, int callingUid,
+            String callingTag, boolean stable) {
         if (r != null) {
             for (int i=0; i<r.conProviders.size(); i++) {
                 ContentProviderConnection conn = r.conProviders.get(i);
@@ -9055,7 +9036,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     cpr.uid, cpr.appInfo.longVersionCode, cpr.name, cpr.info.processName);
             return conn;
         }
-        cpr.addExternalProcessHandleLocked(externalProcessToken);
+        cpr.addExternalProcessHandleLocked(externalProcessToken, callingUid, callingTag);
         return null;
     }
 
@@ -9132,7 +9113,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private ContentProviderHolder getContentProviderImpl(IApplicationThread caller,
-            String name, IBinder token, boolean stable, int userId) {
+            String name, IBinder token, int callingUid, String callingTag, boolean stable,
+            int userId) {
         ContentProviderRecord cpr;
         ContentProviderConnection conn = null;
         ProviderInfo cpi = null;
@@ -9225,7 +9207,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // In this case the provider instance already exists, so we can
                 // return it right away.
-                conn = incProviderCountLocked(r, cpr, token, stable);
+                conn = incProviderCountLocked(r, cpr, token, callingUid, callingTag, stable);
                 if (conn != null && (conn.stableCount+conn.unstableCount) == 1) {
                     if (cpr.proc != null && r.setAdj <= ProcessList.PERCEPTIBLE_APP_ADJ) {
                         // If this is a perceptible app accessing the provider,
@@ -9469,7 +9451,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
 
                 mProviderMap.putProviderByName(name, cpr);
-                conn = incProviderCountLocked(r, cpr, token, stable);
+                conn = incProviderCountLocked(r, cpr, token, callingUid, callingTag, stable);
                 if (conn != null) {
                     conn.waiting = true;
                 }
@@ -9580,21 +9562,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         // The incoming user check is now handled in checkContentProviderPermissionLocked() to deal
         // with cross-user grant.
-        return getContentProviderImpl(caller, name, null, stable, userId);
+        return getContentProviderImpl(caller, name, null, Binder.getCallingUid(), null, stable,
+                userId);
     }
 
     public ContentProviderHolder getContentProviderExternal(
-            String name, int userId, IBinder token) {
+            String name, int userId, IBinder token, String tag) {
         enforceCallingPermission(android.Manifest.permission.ACCESS_CONTENT_PROVIDERS_EXTERNALLY,
             "Do not have permission in call getContentProviderExternal()");
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, ALLOW_FULL_ONLY, "getContentProvider", null);
-        return getContentProviderExternalUnchecked(name, token, userId);
+        return getContentProviderExternalUnchecked(name, token, Binder.getCallingUid(),
+                tag != null ? tag : "*external*", userId);
     }
 
     private ContentProviderHolder getContentProviderExternalUnchecked(String name,
-            IBinder token, int userId) {
-        return getContentProviderImpl(null, name, token, true, userId);
+            IBinder token, int callingUid, String callingTag, int userId) {
+        return getContentProviderImpl(null, name, token, callingUid, callingTag, true, userId);
     }
 
     /**
@@ -9986,7 +9970,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         ContentProviderHolder holder = null;
         try {
-            holder = getContentProviderExternalUnchecked(name, null, userId);
+            holder = getContentProviderExternalUnchecked(name, null, callingUid,
+                    "*getmimetype*", userId);
             if (holder != null) {
                 return holder.provider.getType(uri);
             }
@@ -10201,7 +10186,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int userId = UserHandle.getCallingUserId();
         final Uri uri = Uri.parse(uriString);
         String name = uri.getAuthority();
-        ContentProviderHolder cph = getContentProviderExternalUnchecked(name, null, userId);
+        ContentProviderHolder cph = getContentProviderExternalUnchecked(name, null,
+                Binder.getCallingUid(), "*opencontent*", userId);
         ParcelFileDescriptor pfd = null;
         if (cph != null) {
             // We record the binder invoker's uid in thread-local storage before
@@ -19281,10 +19267,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // all connected clients.
                     ConnectionRecord cr = clist.get(i);
                     if (cr.binding.client == app) {
-                        // Binding to ourself is not interesting.
+                        // Binding to oneself is not interesting.
                         continue;
                     }
 
+                    boolean trackedProcState = false;
                     if ((cr.flags&Context.BIND_WAIVE_PRIORITY) == 0) {
                         ProcessRecord client = cr.binding.client;
                         computeOomAdjLocked(client, cachedAdj, TOP_APP, doingAll, now);
@@ -19356,6 +19343,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                         newAdj = ProcessList.PERSISTENT_SERVICE_ADJ;
                                         schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
                                         procState = ActivityManager.PROCESS_STATE_PERSISTENT;
+                                        cr.trackProcState(procState, mAdjSeq, now);
+                                        trackedProcState = true;
                                     }
                                 } else if ((cr.flags&Context.BIND_NOT_VISIBLE) != 0
                                         && clientAdj < ProcessList.PERCEPTIBLE_APP_ADJ
@@ -19440,6 +19429,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 clientProcState =
                                         ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND;
                             }
+                        }
+                        if (!trackedProcState) {
+                            cr.trackProcState(clientProcState, mAdjSeq, now);
                         }
                         if (procState > clientProcState) {
                             procState = clientProcState;
@@ -19570,6 +19562,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }
                 }
+                conn.trackProcState(clientProcState, mAdjSeq, now);
                 if (procState > clientProcState) {
                     procState = clientProcState;
                 }
@@ -20839,6 +20832,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
+
         for (int i=N-1; i>=0; i--) {
             ProcessRecord app = mLruProcesses.get(i);
             if (!app.killedByAm && app.thread != null) {
@@ -20901,6 +20895,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
+
+        mProcessStats.updateTrackingAssociationsLocked(mAdjSeq, now);
 
         incrementProcStateSeqAndNotifyAppsLocked();
 
