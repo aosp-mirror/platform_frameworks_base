@@ -33,6 +33,7 @@ import android.media.IVolumeController;
 import android.media.PlayerBase;
 import android.media.VolumePolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
+import android.media.audiopolicy.AudioProductStrategies;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.media.projection.IMediaProjection;
 
@@ -81,6 +82,8 @@ interface IAudioService {
     int getStreamMaxVolume(int streamType);
 
     int getLastAudibleStreamVolume(int streamType);
+
+    AudioProductStrategies getAudioProductStrategies();
 
     void setMicrophoneMute(boolean on, String callingPackage, int userId);
 

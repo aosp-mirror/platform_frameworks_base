@@ -88,6 +88,7 @@ import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
+import android.media.audiopolicy.AudioProductStrategies;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionManager;
@@ -273,6 +274,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     private SettingsObserver mSettingsObserver;
+
+    /** @see AudioProductStrategies */
+    private static AudioProductStrategies sAudioProductStrategies;
 
     private int mMode = AudioSystem.MODE_NORMAL;
     // protects mRingerMode
@@ -623,6 +627,8 @@ public class AudioService extends IAudioService.Stub
 
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = mVibrator == null ? false : mVibrator.hasVibrator();
+
+        sAudioProductStrategies = new AudioProductStrategies();
 
         // Initialize volume
         int maxCallVolume = SystemProperties.getInt("ro.config.vc_call_vol_steps", -1);
@@ -986,6 +992,14 @@ public class AudioService extends IAudioService.Stub
                 }
             }
         }
+    }
+
+    /**
+     * @return the {@link android.media.audiopolicy.AudioProductStrategies} discovered from the
+     * platform configuration file.
+     */
+    public @NonNull AudioProductStrategies getAudioProductStrategies() {
+        return sAudioProductStrategies;
     }
 
     private void checkAllAliasStreamVolumes() {
