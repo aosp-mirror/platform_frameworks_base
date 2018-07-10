@@ -1193,6 +1193,24 @@ droiddoc {
           " -showAnnotation android.annotation.TestApi",
 }
 
+droiddoc {
+    name: "hiddenapi-mappings",
+    defaults: ["framework-docs-default"],
+    arg_files: [
+        "core/res/AndroidManifest.xml",
+        ":api-version-xml",
+        "core/java/overview.html",
+        ":current-support-api",
+    ],
+    dex_mapping_filename: "dex-mapping.txt",
+    args: framework_docs_args +
+          " -referenceonly" +
+          " -nodocs" +
+          " -showUnannotated" +
+          " -showAnnotation android.annotation.SystemApi" +
+          " -showAnnotation android.annotation.TestApi",
+}
+
 filegroup {
     name: "apache-http-stubs-sources",
     srcs: [
