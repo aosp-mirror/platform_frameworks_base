@@ -552,6 +552,20 @@ public class Binder implements IBinder {
     }
 
     /**
+     * Resolves a transaction code to a human readable name.
+     *
+     * <p>Default implementation is a stub that returns null.
+     * <p>AIDL generated code will return the original method name.
+     *
+     * @param transactionCode The code to resolve.
+     * @return A human readable name.
+     * @hide
+     */
+    public @Nullable String getTransactionName(int transactionCode) {
+        return null;
+    }
+
+    /**
      * Implemented to call the more convenient version
      * {@link #dump(FileDescriptor, PrintWriter, String[])}.
      */
