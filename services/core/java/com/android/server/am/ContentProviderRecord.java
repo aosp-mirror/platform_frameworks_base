@@ -16,6 +16,8 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+
 import android.app.ContentProviderHolder;
 import android.content.ComponentName;
 import android.content.IContentProvider;
@@ -26,11 +28,14 @@ import android.os.IBinder.DeathRecipient;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.Slog;
+
+import com.android.internal.app.procstats.AssociationState;
+import com.android.internal.app.procstats.ProcessStats;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 final class ContentProviderRecord implements ComponentName.WithComponentName {
     final ActivityManagerService service;
@@ -46,7 +51,7 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
             = new ArrayList<ContentProviderConnection>();
     //final HashSet<ProcessRecord> clients = new HashSet<ProcessRecord>();
     // Handles for non-framework processes supported by this provider
-    HashMap<IBinder, ExternalProcessHandle> externalProcessTokenToHandle;
+    ArrayMap<IBinder, ExternalProcessHandle> externalProcessTokenToHandle;
     // Count for external process for which we have no handles.
     int externalProcessNoHandleCount;
     ProcessRecord proc; // if non-null, hosting process.
@@ -93,6 +98,16 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
                 conn.stopAssociation();
             }
         }
+        if (externalProcessTokenToHandle != null) {
+            for (int iext = externalProcessTokenToHandle.size() - 1; iext >= 0; iext--) {
+                final ExternalProcessHandle handle = externalProcessTokenToHandle.valueAt(iext);
+                if (proc != null) {
+                    handle.startAssociationIfNeeded(this);
+                } else {
+                    handle.stopAssociation();
+                }
+            }
+        }
     }
 
     public boolean canRunHere(ProcessRecord app) {
@@ -100,17 +115,18 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
                 && uid == app.info.uid;
     }
 
-    public void addExternalProcessHandleLocked(IBinder token) {
+    public void addExternalProcessHandleLocked(IBinder token, int callingUid, String callingTag) {
         if (token == null) {
             externalProcessNoHandleCount++;
         } else {
             if (externalProcessTokenToHandle == null) {
-                externalProcessTokenToHandle = new HashMap<IBinder, ExternalProcessHandle>();
+                externalProcessTokenToHandle = new ArrayMap<>();
             }
             ExternalProcessHandle handle = externalProcessTokenToHandle.get(token);
             if (handle == null) {
-                handle = new ExternalProcessHandle(token);
+                handle = new ExternalProcessHandle(token, callingUid, callingTag);
                 externalProcessTokenToHandle.put(token, handle);
+                handle.startAssociationIfNeeded(this);
             }
             handle.mAcquisitionCount++;
         }
@@ -141,6 +157,7 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
     private void removeExternalProcessHandleInternalLocked(IBinder token) {
         ExternalProcessHandle handle = externalProcessTokenToHandle.get(token);
         handle.unlinkFromOwnDeathLocked();
+        handle.stopAssociation();
         externalProcessTokenToHandle.remove(token);
         if (externalProcessTokenToHandle.size() == 0) {
             externalProcessTokenToHandle = null;
@@ -246,11 +263,16 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
     private class ExternalProcessHandle implements DeathRecipient {
         private static final String LOG_TAG = "ExternalProcessHanldle";
 
-        private final IBinder mToken;
-        private int mAcquisitionCount;
+        final IBinder mToken;
+        final int mOwningUid;
+        final String mOwningProcessName;
+        int mAcquisitionCount;
+        AssociationState.SourceState mAssociation;
 
-        public ExternalProcessHandle(IBinder token) {
+        public ExternalProcessHandle(IBinder token, int owningUid, String owningProcessName) {
             mToken = token;
+            mOwningUid = owningUid;
+            mOwningProcessName = owningProcessName;
             try {
                 token.linkToDeath(this, 0);
             } catch (RemoteException re) {
@@ -260,6 +282,35 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
 
         public void unlinkFromOwnDeathLocked() {
             mToken.unlinkToDeath(this, 0);
+        }
+
+        public void startAssociationIfNeeded(ContentProviderRecord provider) {
+            // If we don't already have an active association, create one...  but only if this
+            // is an association between two different processes.
+            if (mAssociation == null && (provider.appInfo.uid != mOwningUid
+                    || !provider.info.processName.equals(mOwningProcessName))) {
+                ProcessStats.ProcessStateHolder holder = provider.proc != null
+                        ? provider.proc.pkgList.get(provider.name.getPackageName()) : null;
+                if (holder == null) {
+                    Slog.wtf(TAG_AM, "No package in referenced provider "
+                            + provider.name.toShortString() + ": proc=" + provider.proc);
+                } else if (holder.pkg == null) {
+                    Slog.wtf(TAG_AM, "Inactive holder in referenced provider "
+                            + provider.name.toShortString() + ": proc=" + provider.proc);
+                } else {
+                    mAssociation = holder.pkg.getAssociationStateLocked(holder.state,
+                            provider.name.getClassName()).startSource(mOwningUid,
+                            mOwningProcessName);
+
+                }
+            }
+        }
+
+        public void stopAssociation() {
+            if (mAssociation != null) {
+                mAssociation.stop();
+                mAssociation = null;
+            }
         }
 
         @Override

@@ -268,7 +268,7 @@ interface IActivityManager {
     void showBootMessage(in CharSequence msg, boolean always);
     void killAllBackgroundProcesses();
     ContentProviderHolder getContentProviderExternal(in String name, int userId,
-            in IBinder token);
+            in IBinder token, String tag);
     void removeContentProviderExternal(in String name, in IBinder token);
     // Get memory information about the calling process.
     void getMyMemoryState(out ActivityManager.RunningAppProcessInfo outInfo);
