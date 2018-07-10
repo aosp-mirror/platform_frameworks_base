@@ -22,7 +22,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:elevation="@dimen/preview_controls_elevation"
-    android:background="?android:attr/colorPrimary">
+    style="?android:actionBarStyle">
 
     <LinearLayout
         android:id="@+id/draggable_content"
