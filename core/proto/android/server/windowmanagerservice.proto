@@ -319,6 +319,8 @@ message WindowStateProto {
     optional bool removed = 36;
     optional bool is_on_screen = 37;
     optional bool is_visible = 38;
+    optional bool pending_forced_seamless_rotation = 39;
+    optional int64 finished_forced_seamless_rotation_frame = 40;
 }
 
 message IdentifierProto {

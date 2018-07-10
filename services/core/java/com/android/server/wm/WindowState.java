@@ -125,6 +125,7 @@ import static com.android.server.wm.WindowStateProto.DECOR_FRAME;
 import static com.android.server.wm.WindowStateProto.DESTROYING;
 import static com.android.server.wm.WindowStateProto.DISPLAY_FRAME;
 import static com.android.server.wm.WindowStateProto.DISPLAY_ID;
+import static com.android.server.wm.WindowStateProto.FINISHED_FORCED_SEAMLESS_ROTATION_FRAME;
 import static com.android.server.wm.WindowStateProto.FRAME;
 import static com.android.server.wm.WindowStateProto.GIVEN_CONTENT_INSETS;
 import static com.android.server.wm.WindowStateProto.HAS_SURFACE;
@@ -137,6 +138,7 @@ import static com.android.server.wm.WindowStateProto.OUTSET_FRAME;
 import static com.android.server.wm.WindowStateProto.OVERSCAN_FRAME;
 import static com.android.server.wm.WindowStateProto.OVERSCAN_INSETS;
 import static com.android.server.wm.WindowStateProto.PARENT_FRAME;
+import static com.android.server.wm.WindowStateProto.PENDING_FORCED_SEAMLESS_ROTATION;
 import static com.android.server.wm.WindowStateProto.REMOVED;
 import static com.android.server.wm.WindowStateProto.REMOVE_ON_EXIT;
 import static com.android.server.wm.WindowStateProto.REQUESTED_HEIGHT;
@@ -287,6 +289,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     final boolean mForceSeamlesslyRotate;
     ForcedSeamlessRotator mPendingForcedSeamlessRotate;
+    long mFinishForcedSeamlessRotateFrameNumber;
 
     private RemoteCallbackList<IWindowFocusObserver> mFocusCallbacks;
 
@@ -3305,6 +3308,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         proto.write(REMOVED, mRemoved);
         proto.write(IS_ON_SCREEN, isOnScreen());
         proto.write(IS_VISIBLE, isVisible());
+        if (mForceSeamlesslyRotate) {
+            proto.write(PENDING_FORCED_SEAMLESS_ROTATION, mPendingForcedSeamlessRotate != null);
+            proto.write(FINISHED_FORCED_SEAMLESS_ROTATION_FRAME,
+                    mFinishForcedSeamlessRotateFrameNumber);
+        }
         proto.end(token);
     }
 
@@ -3480,6 +3488,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mLastFreezeDuration != 0) {
             pw.print(prefix); pw.print("mLastFreezeDuration=");
                     TimeUtils.formatDuration(mLastFreezeDuration, pw); pw.println();
+        }
+        if (mForceSeamlesslyRotate) {
+            pw.print(prefix); pw.print("forceSeamlesslyRotate: pending=");
+            if (mPendingForcedSeamlessRotate != null) {
+                mPendingForcedSeamlessRotate.dump(pw);
+            } else {
+                pw.print("null");
+            }
+            pw.print(" finishedFrameNumber="); pw.print(mFinishForcedSeamlessRotateFrameNumber);
+            pw.println();
         }
         if (mHScale != 1 || mVScale != 1) {
             pw.print(prefix); pw.print("mHScale="); pw.print(mHScale);
