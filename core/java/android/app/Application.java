@@ -17,6 +17,8 @@
 package android.app;
 
 import android.annotation.CallSuper;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentCallbacks;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -58,13 +60,13 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
     public LoadedApk mLoadedApk;
 
     public interface ActivityLifecycleCallbacks {
-        void onActivityCreated(Activity activity, Bundle savedInstanceState);
-        void onActivityStarted(Activity activity);
-        void onActivityResumed(Activity activity);
-        void onActivityPaused(Activity activity);
-        void onActivityStopped(Activity activity);
-        void onActivitySaveInstanceState(Activity activity, Bundle outState);
-        void onActivityDestroyed(Activity activity);
+        void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState);
+        void onActivityStarted(@NonNull Activity activity);
+        void onActivityResumed(@NonNull Activity activity);
+        void onActivityPaused(@NonNull Activity activity);
+        void onActivityStopped(@NonNull Activity activity);
+        void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState);
+        void onActivityDestroyed(@NonNull Activity activity);
     }
 
     /**
@@ -213,7 +215,8 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         mLoadedApk = ContextImpl.getImpl(context).mPackageInfo;
     }
 
-    /* package */ void dispatchActivityCreated(Activity activity, Bundle savedInstanceState) {
+    /* package */ void dispatchActivityCreated(@NonNull Activity activity,
+            @Nullable Bundle savedInstanceState) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
             for (int i=0; i<callbacks.length; i++) {
@@ -223,7 +226,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    /* package */ void dispatchActivityStarted(Activity activity) {
+    /* package */ void dispatchActivityStarted(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
             for (int i=0; i<callbacks.length; i++) {
@@ -232,7 +235,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    /* package */ void dispatchActivityResumed(Activity activity) {
+    /* package */ void dispatchActivityResumed(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
             for (int i=0; i<callbacks.length; i++) {
@@ -241,7 +244,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    /* package */ void dispatchActivityPaused(Activity activity) {
+    /* package */ void dispatchActivityPaused(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
             for (int i=0; i<callbacks.length; i++) {
@@ -250,7 +253,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    /* package */ void dispatchActivityStopped(Activity activity) {
+    /* package */ void dispatchActivityStopped(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
             for (int i=0; i<callbacks.length; i++) {
@@ -259,7 +262,8 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    /* package */ void dispatchActivitySaveInstanceState(Activity activity, Bundle outState) {
+    /* package */ void dispatchActivitySaveInstanceState(@NonNull Activity activity,
+            @NonNull Bundle outState) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
             for (int i=0; i<callbacks.length; i++) {
@@ -269,7 +273,7 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
         }
     }
 
-    /* package */ void dispatchActivityDestroyed(Activity activity) {
+    /* package */ void dispatchActivityDestroyed(@NonNull Activity activity) {
         Object[] callbacks = collectActivityLifecycleCallbacks();
         if (callbacks != null) {
             for (int i=0; i<callbacks.length; i++) {
