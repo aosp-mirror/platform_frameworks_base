@@ -226,6 +226,26 @@ public class BinderCallsStatsTest {
     }
 
     @Test
+    public void testTransactionCodeResolved() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setDetailedTracking(true);
+        Binder binder = new Binder() {
+            @Override
+            public String getTransactionName(int code) {
+              return "resolved";
+            }
+        };
+        BinderCallsStats.CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        List<BinderCallsStats.CallStat> callStatsList =
+                bcs.getUidEntries().get(TEST_UID).getCallStatsList();
+        assertEquals(1, callStatsList.get(0).msg);
+        assertEquals("resolved", callStatsList.get(0).methodName);
+    }
+
+    @Test
     public void testParcelSize() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         bcs.setDetailedTracking(true);
