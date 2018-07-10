@@ -18,6 +18,7 @@
 // =====================================
 java_library {
     name: "android.test.runner",
+    installable: true,
 
     // Needs to be consistent with the repackaged version of this make target.
     java_version: "1.8",

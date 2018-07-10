@@ -21,6 +21,7 @@
 // Also contains the com.android.internal.util.Predicate[s] classes.
 java_library {
     name: "android.test.base",
+    installable: true,
 
     srcs: ["src/**/*.java"],
 
@@ -42,6 +43,7 @@ java_library {
 // Also contains the com.android.internal.util.Predicate[s] classes.
 java_library {
     name: "legacy-test",
+    installable: true,
 
     sdk_version: "current",
     static_libs: ["android.test.base"],
