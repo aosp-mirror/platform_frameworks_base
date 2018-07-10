@@ -78,6 +78,7 @@ public:
 private:
     SkLiteRecorder mRecorder;
     std::unique_ptr<SkiaDisplayList> mDisplayList;
+    std::unique_ptr<SkCanvas> mWrappedCanvas;
     StartReorderBarrierDrawable* mCurrentBarrier;
 
     /**

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Matrix;
@@ -28,6 +29,9 @@ import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.NativeAllocationRegistry;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * <p>A display list records a series of graphics related operations and can replay
@@ -447,6 +451,25 @@ public class RenderNode {
      */
     public boolean setHasOverlappingRendering(boolean hasOverlappingRendering) {
         return nSetHasOverlappingRendering(mNativeRenderNode, hasOverlappingRendering);
+    }
+
+    /** @hide */
+    @IntDef({USAGE_BACKGROUND})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UsageHint {}
+
+    /** The default usage hint */
+    public static final int USAGE_UNKNOWN = 0;
+
+    /** Usage is background content */
+    public static final int USAGE_BACKGROUND = 1;
+
+    /**
+     * Provides a hint on what this RenderNode's display list content contains. This hint is used
+     * for automatic content transforms to improve accessibility or similar.
+     */
+    public void setUsageHint(@UsageHint int usageHint) {
+        nSetUsageHint(mNativeRenderNode, usageHint);
     }
 
     /**
@@ -947,6 +970,8 @@ public class RenderNode {
     @CriticalNative
     private static native boolean nSetHasOverlappingRendering(long renderNode,
             boolean hasOverlappingRendering);
+    @CriticalNative
+    private static native void nSetUsageHint(long renderNode, int usageHint);
     @CriticalNative
     private static native boolean nSetElevation(long renderNode, float lift);
     @CriticalNative
