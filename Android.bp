@@ -27,6 +27,7 @@
 
 java_library {
     name: "framework",
+    installable: true,
 
     srcs: [
         // From build/make/core/pathmap.mk FRAMEWORK_BASE_SUBDIRS
@@ -672,6 +673,7 @@ gensrcs {
 // ============================================================
 java_library {
     name: "ext",
+    installable: true,
     no_framework_libs: true,
     static_libs: [
         "libphonenumber-platform",
