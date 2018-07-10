@@ -2137,11 +2137,19 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
      */
     public static final int CALL_STATUS_ERROR_IO = 4;
 
+    /** Status code represents that the call has been skipped. For example, a {@link #seekTo}
+     * request may be skipped if it is followed by another {@link #seekTo} request. Another
+     * example is that a call is made when the player is in {@link #PLAYER_STATE_ERROR} state.
+     * @see EventCallback#onCallCompleted
+     */
+    // TODO: skip commands such as prepare/play/pause/etc when in error state.
+    public static final int CALL_STATUS_SKIPPED = 5;
+
     /** Status code represents that DRM operation is called before preparing a DRM scheme through
      *  {@link #prepareDrm}.
      * @see android.media.MediaPlayer2.EventCallback#onCallCompleted
      */
-    public static final int CALL_STATUS_NO_DRM_SCHEME = 5;
+    public static final int CALL_STATUS_NO_DRM_SCHEME = 6;
 
     /**
      * @hide
