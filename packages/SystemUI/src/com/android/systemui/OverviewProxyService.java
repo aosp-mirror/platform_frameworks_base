@@ -30,6 +30,7 @@ import android.os.Looper;
 import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.SurfaceControl;
 
@@ -391,14 +392,22 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(TAG_OPS + " state:");
-        pw.print("  mConnectionBackoffAttempts="); pw.println(mConnectionBackoffAttempts);
+        pw.print("  recentsComponentName="); pw.println(mRecentsComponentName);
+        pw.print("  isConnected="); pw.println(mOverviewProxy != null);
         pw.print("  isCurrentUserSetup="); pw.println(mDeviceProvisionedController
                 .isCurrentUserSetup());
-        pw.print("  isConnected="); pw.println(mOverviewProxy != null);
-        pw.print("  mRecentsComponentName="); pw.println(mRecentsComponentName);
-        pw.print("  mIsEnabled="); pw.println(isEnabled());
-        pw.print("  mInteractionFlags="); pw.println(mInteractionFlags);
-        pw.print("  mQuickStepIntent="); pw.println(mQuickStepIntent);
+        pw.print("  connectionBackoffAttempts="); pw.println(mConnectionBackoffAttempts);
+        pw.print("  interactionFlags="); pw.println(mInteractionFlags);
+
+        pw.print("  quickStepIntent="); pw.println(mQuickStepIntent);
+        pw.print("  quickStepIntentResolved="); pw.println(isEnabled());
+
+        final int swipeUpDefaultValue = mContext.getResources()
+                .getBoolean(com.android.internal.R.bool.config_swipe_up_gesture_default) ? 1 : 0;
+        final int swipeUpEnabled = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.SWIPE_UP_TO_SWITCH_APPS_ENABLED, swipeUpDefaultValue);
+        pw.print("  swipeUpSetting="); pw.println(swipeUpEnabled != 0);
+        pw.print("  swipeUpSettingDefault="); pw.println(swipeUpDefaultValue != 0);
     }
 
     public interface OverviewProxyListener {

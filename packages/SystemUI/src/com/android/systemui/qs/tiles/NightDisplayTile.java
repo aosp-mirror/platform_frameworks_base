@@ -26,7 +26,6 @@ import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import androidx.annotation.StringRes;
 import android.text.TextUtils;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.widget.Switch;
 
@@ -37,8 +36,11 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
+import java.text.DateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 public class NightDisplayTile extends QSTileImpl<BooleanState>
         implements ColorDisplayController.Callback {
@@ -144,13 +146,17 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
                     toggleTimeStringRes = R.string.quick_settings_night_secondary_label_on_at;
                 }
 
-                // Choose between just showing the hour or also showing the minutes (based on the
-                // user-selected toggle time). This helps reduce how much space the label takes.
-                toggleTimeFormat = DateTimeFormatter.ofPattern(
-                        DateFormat.is24HourFormat(mContext) ? PATTERN_HOUR_NINUTE_24 :
-                        toggleTime.getMinute() == 0 ? PATTERN_HOUR : PATTERN_HOUR_MINUTE);
-
-                return mContext.getString(toggleTimeStringRes, toggleTime.format(toggleTimeFormat));
+                // TODO(b/111085930): Move this calendar snippet to a common code location that
+                // settings lib can also access.
+                final Calendar c = Calendar.getInstance();
+                DateFormat nightTileFormat = android.text.format.DateFormat.getTimeFormat(mContext);
+                nightTileFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                c.setTimeZone(nightTileFormat.getTimeZone());
+                c.set(Calendar.HOUR_OF_DAY, toggleTime.getHour());
+                c.set(Calendar.MINUTE, toggleTime.getMinute());
+                c.set(Calendar.SECOND, 0);
+                c.set(Calendar.MILLISECOND, 0);
+                return mContext.getString(toggleTimeStringRes, nightTileFormat.format(c.getTime()));
 
             default:
                 // No secondary label when auto mode is disabled.

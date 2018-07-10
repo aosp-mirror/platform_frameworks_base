@@ -28,6 +28,7 @@
 #include <androidfw/ResourceTypes.h>
 
 #include "AnimatorManager.h"
+#include "CanvasTransform.h"
 #include "Debug.h"
 #include "DisplayList.h"
 #include "Matrix.h"
@@ -208,6 +209,14 @@ public:
 
     void output(std::ostream& output, uint32_t level);
 
+    void setUsageHint(UsageHint usageHint) {
+        mUsageHint = usageHint;
+    }
+
+    UsageHint usageHint() const {
+        return mUsageHint;
+    }
+
 private:
     void computeOrderingImpl(RenderNodeOp* opState,
                              std::vector<RenderNodeOp*>* compositedChildrenOfProjectionSurface,
@@ -262,6 +271,8 @@ private:
     uint32_t mParentCount;
 
     sp<PositionListener> mPositionListener;
+
+    UsageHint mUsageHint = UsageHint::Unknown;
 
     // METHODS & FIELDS ONLY USED BY THE SKIA RENDERER
 public:

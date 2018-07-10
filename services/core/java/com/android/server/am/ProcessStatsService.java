@@ -32,7 +32,6 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.app.procstats.AssociationState;
 import com.android.internal.app.procstats.DumpUtils;
 import com.android.internal.app.procstats.IProcessStats;
 import com.android.internal.app.procstats.ProcessState;
@@ -191,6 +190,11 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     public void addSysMemUsageLocked(long cachedMem, long freeMem, long zramMem, long kernelMem,
             long nativeMem) {
         mProcessStats.addSysMemUsage(cachedMem, freeMem, zramMem, kernelMem, nativeMem);
+    }
+
+    @GuardedBy("mAm")
+    public void updateTrackingAssociationsLocked(int curSeq, long now) {
+        mProcessStats.updateTrackingAssociationsLocked(curSeq, now);
     }
 
     @GuardedBy("mAm")

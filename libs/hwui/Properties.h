@@ -190,6 +190,8 @@ enum DebugLevel {
  */
 #define PROPERTY_QEMU_KERNEL "ro.kernel.qemu"
 
+#define PROPERTY_FORCE_DARK "debug.hwui.force_dark"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -263,6 +265,7 @@ public:
     static bool disableVsync;
 
     static bool skpCaptureEnabled;
+    static bool forceDarkMode;
 
     // For experimentation b/68769804
     ANDROID_API static bool enableRTAnimations;

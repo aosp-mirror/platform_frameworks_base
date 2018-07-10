@@ -71,7 +71,7 @@ public final class ProcessState {
     private static final boolean DEBUG_PARCEL = false;
 
     // Map from process states to the states we track.
-    private static final int[] PROCESS_STATE_TO_STATE = new int[] {
+    static final int[] PROCESS_STATE_TO_STATE = new int[] {
         STATE_PERSISTENT,               // ActivityManager.PROCESS_STATE_PERSISTENT
         STATE_PERSISTENT,               // ActivityManager.PROCESS_STATE_PERSISTENT_UI
         STATE_TOP,                      // ActivityManager.PROCESS_STATE_TOP
@@ -376,6 +376,10 @@ public final class ProcessState {
             commitStateTime(now);
             mCurState = state;
         }
+    }
+
+    public int getState() {
+        return mCurState;
     }
 
     public void commitStateTime(long now) {

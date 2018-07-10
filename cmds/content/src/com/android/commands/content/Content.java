@@ -462,7 +462,7 @@ public class Content {
                 IBinder token = new Binder();
                 try {
                     ContentProviderHolder holder = activityManager.getContentProviderExternal(
-                            providerName, mUserId, token);
+                            providerName, mUserId, token, "*cmd*");
                     if (holder == null) {
                         throw new IllegalStateException("Could not find provider: " + providerName);
                     }

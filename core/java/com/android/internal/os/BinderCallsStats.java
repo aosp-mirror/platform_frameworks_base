@@ -45,14 +45,21 @@ import java.util.function.ToDoubleFunction;
  * per thread, uid or call description.
  */
 public class BinderCallsStats {
+    public static final boolean ENABLED_DEFAULT = true;
+    public static final boolean DETAILED_TRACKING_DEFAULT = true;
+    public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 10;
+
     private static final String TAG = "BinderCallsStats";
     private static final int CALL_SESSIONS_POOL_SIZE = 100;
     private static final int PERIODIC_SAMPLING_INTERVAL = 10;
     private static final int MAX_EXCEPTION_COUNT_SIZE = 50;
     private static final String EXCEPTION_COUNT_OVERFLOW_NAME = "overflow";
+    private static final CallSession NOT_ENABLED = new CallSession();
     private static final BinderCallsStats sInstance = new BinderCallsStats();
 
-    private volatile boolean mDetailedTracking = false;
+    private volatile boolean mEnabled = ENABLED_DEFAULT;
+    private volatile boolean mDetailedTracking = DETAILED_TRACKING_DEFAULT;
+    private volatile int mPeriodicSamplingInterval = PERIODIC_SAMPLING_INTERVAL_DEFAULT;
     @GuardedBy("mLock")
     private final SparseArray<UidEntry> mUidEntries = new SparseArray<>();
     @GuardedBy("mLock")
@@ -63,12 +70,8 @@ public class BinderCallsStats {
     @GuardedBy("mLock")
     private UidEntry mSampledEntries = new UidEntry(-1);
 
-    private BinderCallsStats() {
-    }
-
-    @VisibleForTesting
-    public BinderCallsStats(boolean detailedTracking) {
-        mDetailedTracking = detailedTracking;
+    @VisibleForTesting  // Use getInstance() instead.
+    public BinderCallsStats() {
     }
 
     public CallSession callStarted(Binder binder, int code) {
@@ -76,10 +79,15 @@ public class BinderCallsStats {
     }
 
     private CallSession callStarted(String className, int code) {
+        if (!mEnabled) {
+          return NOT_ENABLED;
+        }
+
         CallSession s = mCallSessionsPool.poll();
         if (s == null) {
             s = new CallSession();
         }
+
         s.callStat.className = className;
         s.callStat.msg = code;
         s.exceptionThrown = false;
@@ -92,7 +100,7 @@ public class BinderCallsStats {
                 s.timeStarted = getElapsedRealtimeMicro();
             } else {
                 s.sampledCallStat = mSampledEntries.getOrCreate(s.callStat);
-                if (s.sampledCallStat.callCount % PERIODIC_SAMPLING_INTERVAL == 0) {
+                if (s.sampledCallStat.callCount % mPeriodicSamplingInterval == 0) {
                     s.cpuTimeStarted = getThreadTimeMicro();
                     s.timeStarted = getElapsedRealtimeMicro();
                 }
@@ -103,7 +111,23 @@ public class BinderCallsStats {
 
     public void callEnded(CallSession s, int parcelRequestSize, int parcelReplySize) {
         Preconditions.checkNotNull(s);
+        if (s == NOT_ENABLED) {
+          return;
+        }
+
+        processCallEnded(s, parcelRequestSize, parcelReplySize);
+
+        if (mCallSessionsPool.size() < CALL_SESSIONS_POOL_SIZE) {
+            mCallSessionsPool.add(s);
+        }
+    }
+
+    private void processCallEnded(CallSession s, int parcelRequestSize, int parcelReplySize) {
         synchronized (mLock) {
+            if (!mEnabled) {
+              return;
+            }
+
             long duration;
             long latencyDuration;
             if (mDetailedTracking) {
@@ -117,7 +141,7 @@ public class BinderCallsStats {
                     latencyDuration = getElapsedRealtimeMicro() - s.timeStarted;
                 } else {
                     // callCount is always incremented, but time only once per sampling interval
-                    long samplesCount = cs.callCount / PERIODIC_SAMPLING_INTERVAL + 1;
+                    long samplesCount = cs.callCount / mPeriodicSamplingInterval + 1;
                     duration = cs.cpuTimeMicros / samplesCount;
                     latencyDuration = cs.latencyMicros / samplesCount;
                 }
@@ -155,9 +179,6 @@ public class BinderCallsStats {
             uidEntry.cpuTimeMicros += duration;
             uidEntry.callCount++;
         }
-        if (mCallSessionsPool.size() < CALL_SESSIONS_POOL_SIZE) {
-            mCallSessionsPool.add(s);
-        }
     }
 
     /**
@@ -169,6 +190,9 @@ public class BinderCallsStats {
      */
     public void callThrewException(CallSession s, Exception exception) {
         Preconditions.checkNotNull(s);
+        if (!mEnabled) {
+          return;
+        }
         s.exceptionThrown = true;
         try {
             String className = exception.getClass().getName();
@@ -192,6 +216,11 @@ public class BinderCallsStats {
     }
 
     private void dumpLocked(PrintWriter pw, Map<Integer,String> appIdToPkgNameMap, boolean verbose) {
+        if (!mEnabled) {
+          pw.println("Binder calls stats disabled.");
+          return;
+        }
+
         long totalCallsCount = 0;
         long totalCpuTime = 0;
         pw.print("Start time: ");
@@ -245,7 +274,7 @@ public class BinderCallsStats {
             for (CallStat e : sampledStatsList) {
                 sb.setLength(0);
                 sb.append("    ").append(e)
-                        .append(',').append(e.cpuTimeMicros * PERIODIC_SAMPLING_INTERVAL)
+                        .append(',').append(e.cpuTimeMicros * mPeriodicSamplingInterval)
                         .append(',').append(e.callCount)
                         .append(',').append(e.exceptionCount);
                 pw.println(sb);
@@ -304,9 +333,29 @@ public class BinderCallsStats {
     }
 
     public void setDetailedTracking(boolean enabled) {
-        if (enabled != mDetailedTracking) {
-            reset();
-            mDetailedTracking = enabled;
+        synchronized (mLock) {
+          if (enabled != mDetailedTracking) {
+              mDetailedTracking = enabled;
+              reset();
+          }
+        }
+    }
+
+    public void setEnabled(boolean enabled) {
+        synchronized (mLock) {
+            if (enabled != mEnabled) {
+                mEnabled = enabled;
+                reset();
+            }
+        }
+    }
+
+    public void setSamplingInterval(int samplingInterval) {
+        synchronized (mLock) {
+            if (samplingInterval != mPeriodicSamplingInterval) {
+                mPeriodicSamplingInterval = samplingInterval;
+                reset();
+            }
         }
     }
 

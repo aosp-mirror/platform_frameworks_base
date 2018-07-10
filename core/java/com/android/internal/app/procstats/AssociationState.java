@@ -21,37 +21,143 @@ import android.os.Parcel;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.Slog;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public final class AssociationState {
     private static final String TAG = "ProcessStats";
     private static final boolean DEBUG = false;
 
-    private final String mPackage;
+    private final ProcessStats mProcessStats;
+    private final ProcessStats.PackageState mPackageState;
     private final String mProcessName;
     private final String mName;
     private final DurationsTable mDurations;
 
     public final class SourceState {
-        public void stop() {
-            mNesting--;
-            if (mNesting == 0) {
-                mDuration += SystemClock.uptimeMillis() - mStartTime;
-                mNumActive--;
+        final SourceKey mKey;
+        int mProcStateSeq = -1;
+        int mProcState = ProcessStats.STATE_NOTHING;
+        boolean mInTrackingList;
+        int mNesting;
+        int mCount;
+        long mStartUptime;
+        long mDuration;
+        long mTrackingUptime;
+        int mActiveCount;
+        long mActiveStartUptime;
+        long mActiveDuration;
+
+        SourceState(SourceKey key) {
+            mKey = key;
+        }
+
+        public AssociationState getAssociationState() {
+            return AssociationState.this;
+        }
+
+        public String getProcessName() {
+            return mKey.mProcess;
+        }
+
+        public int getUid() {
+            return mKey.mUid;
+        }
+
+        public void trackProcState(int procState, int seq, long now) {
+            procState = ProcessState.PROCESS_STATE_TO_STATE[procState];
+            if (seq != mProcStateSeq) {
+                mProcStateSeq = seq;
+                mProcState = procState;
+            } else if (procState < mProcState) {
+                mProcState = procState;
+            }
+            if (procState < ProcessStats.STATE_HOME) {
+                if (!mInTrackingList) {
+                    mInTrackingList = true;
+                    mTrackingUptime = now;
+                    mProcessStats.mTrackingAssociations.add(this);
+                }
+            } else {
+                stopTracking(now);
             }
         }
 
-        int mNesting;
-        int mCount;
-        long mStartTime;
-        long mDuration;
+        public void stop() {
+            mNesting--;
+            if (mNesting == 0) {
+                mDuration += SystemClock.uptimeMillis() - mStartUptime;
+                mNumActive--;
+                stopTracking(SystemClock.uptimeMillis());
+            }
+        }
+
+        void startActive(long now) {
+            if (mInTrackingList) {
+                if (mActiveStartUptime == 0) {
+                    mActiveStartUptime = now;
+                    mActiveCount++;
+                }
+            } else {
+                Slog.wtf(TAG, "startActive while not tracking: " + this);
+            }
+        }
+
+        void stopActive(long now) {
+            if (mActiveStartUptime != 0) {
+                if (!mInTrackingList) {
+                    Slog.wtf(TAG, "stopActive while not tracking: " + this);
+                }
+                mActiveDuration += now - mActiveStartUptime;
+                mActiveStartUptime = 0;
+            }
+        }
+
+        void stopTracking(long now) {
+            stopActive(now);
+            if (mInTrackingList) {
+                mInTrackingList = false;
+                // Do a manual search for where to remove, since these objects will typically
+                // be towards the end of the array.
+                final ArrayList<SourceState> list = mProcessStats.mTrackingAssociations;
+                for (int i = list.size() - 1; i >= 0; i--) {
+                    if (list.get(i) == this) {
+                        list.remove(i);
+                        return;
+                    }
+                }
+                Slog.wtf(TAG, "Stop tracking didn't find in tracking list: " + this);
+            }
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(64);
+            sb.append("SourceState{").append(Integer.toHexString(System.identityHashCode(this)))
+                    .append(" ").append(mKey.mProcess).append("/").append(mKey.mUid);
+            if (mProcState != ProcessStats.STATE_NOTHING) {
+                sb.append(" ").append(DumpUtils.STATE_NAMES[mProcState]).append(" #")
+                        .append(mProcStateSeq);
+            }
+            sb.append("}");
+            return sb.toString();
+        }
     }
 
-    final static class SourceKey {
+    private final static class SourceKey {
+        /**
+         * UID, consider this final.  Not final just to avoid a temporary object during lookup.
+         */
         int mUid;
+
+        /**
+         * Process name, consider this final.  Not final just to avoid a temporary object during
+         * lookup.
+         */
         String mProcess;
 
         SourceKey(int uid, String process) {
@@ -82,7 +188,6 @@ public final class AssociationState {
             sb.append('}');
             return sb.toString();
         }
-
     }
 
     /**
@@ -92,18 +197,26 @@ public final class AssociationState {
 
     private final SourceKey mTmpSourceKey = new SourceKey(0, null);
 
+    private ProcessState mProc;
+
     private int mNumActive;
 
-    public AssociationState(ProcessStats processStats, String pkg, String name,
-            String processName) {
-        mPackage = pkg;
+    public AssociationState(ProcessStats processStats, ProcessStats.PackageState packageState,
+            String name, String processName, ProcessState proc) {
+        mProcessStats = processStats;
+        mPackageState = packageState;
         mName = name;
         mProcessName = processName;
         mDurations = new DurationsTable(processStats.mTableData);
+        mProc = proc;
+    }
+
+    public int getUid() {
+        return mPackageState.mUid;
     }
 
     public String getPackage() {
-        return mPackage;
+        return mPackageState.mPackageName;
     }
 
     public String getProcessName() {
@@ -114,18 +227,27 @@ public final class AssociationState {
         return mName;
     }
 
+    public ProcessState getProcess() {
+        return mProc;
+    }
+
+    public void setProcess(ProcessState proc) {
+        mProc = proc;
+    }
+
     public SourceState startSource(int uid, String processName) {
         mTmpSourceKey.mUid = uid;
         mTmpSourceKey.mProcess = processName;
         SourceState src = mSources.get(mTmpSourceKey);
         if (src == null) {
-            src = new SourceState();
-            mSources.put(new SourceKey(uid, processName), src);
+            SourceKey key = new SourceKey(uid, processName);
+            src = new SourceState(key);
+            mSources.put(key, src);
         }
         src.mNesting++;
         if (src.mNesting == 1) {
             src.mCount++;
-            src.mStartTime = SystemClock.uptimeMillis();
+            src.mStartUptime = SystemClock.uptimeMillis();
             mNumActive++;
         }
         return src;
@@ -138,11 +260,13 @@ public final class AssociationState {
             final SourceState otherSrc = other.mSources.valueAt(isrc);
             SourceState mySrc = mSources.get(key);
             if (mySrc == null) {
-                mySrc = new SourceState();
+                mySrc = new SourceState(key);
                 mSources.put(key, mySrc);
             }
             mySrc.mCount += otherSrc.mCount;
             mySrc.mDuration += otherSrc.mDuration;
+            mySrc.mActiveCount += otherSrc.mActiveCount;
+            mySrc.mActiveDuration += otherSrc.mActiveDuration;
         }
     }
 
@@ -160,8 +284,15 @@ public final class AssociationState {
                 SourceState src = mSources.valueAt(isrc);
                 if (src.mNesting > 0) {
                     src.mCount = 1;
-                    src.mStartTime = now;
+                    src.mStartUptime = now;
                     src.mDuration = 0;
+                    if (src.mActiveStartUptime > 0) {
+                        src.mActiveCount = 1;
+                        src.mActiveStartUptime = now;
+                    } else {
+                        src.mActiveCount = 0;
+                    }
+                    src.mActiveDuration = 0;
                 } else {
                     mSources.removeAt(isrc);
                 }
@@ -169,7 +300,7 @@ public final class AssociationState {
         }
     }
 
-    public void writeToParcel(ProcessStats stats, Parcel out, long now) {
+    public void writeToParcel(ProcessStats stats, Parcel out, long nowUptime) {
         mDurations.writeToParcel(out);
         final int NSRC = mSources.size();
         out.writeInt(NSRC);
@@ -180,9 +311,15 @@ public final class AssociationState {
             stats.writeCommonString(out, key.mProcess);
             out.writeInt(src.mCount);
             out.writeLong(src.mDuration);
+            out.writeInt(src.mActiveCount);
+            out.writeLong(src.mActiveDuration);
         }
     }
 
+    /**
+     * Returns non-null if all else fine, else a String that describes the error that
+     * caused it to fail.
+     */
     public String readFromParcel(ProcessStats stats, Parcel in, int parcelVersion) {
         if (!mDurations.readFromParcel(in)) {
             return "Duration table corrupt";
@@ -195,21 +332,27 @@ public final class AssociationState {
             final int uid = in.readInt();
             final String procName = stats.readCommonString(in, parcelVersion);
             final SourceKey key = new SourceKey(uid, procName);
-            final SourceState src = new SourceState();
+            final SourceState src = new SourceState(key);
             src.mCount = in.readInt();
             src.mDuration = in.readLong();
+            src.mActiveCount = in.readInt();
+            src.mActiveDuration = in.readLong();
             mSources.put(key, src);
         }
         return null;
     }
 
-    public void commitStateTime(long now) {
+    public void commitStateTime(long nowUptime) {
         if (isInUse()) {
             for (int isrc = mSources.size() - 1; isrc >= 0; isrc--) {
                 SourceState src = mSources.valueAt(isrc);
                 if (src.mNesting > 0) {
-                    src.mDuration += now - src.mStartTime;
-                    src.mStartTime = now;
+                    src.mDuration += nowUptime - src.mStartUptime;
+                    src.mStartUptime = nowUptime;
+                }
+                if (src.mActiveStartUptime > 0) {
+                    src.mActiveDuration += nowUptime - src.mActiveStartUptime;
+                    src.mActiveStartUptime = nowUptime;
                 }
             }
         }
@@ -237,7 +380,7 @@ public final class AssociationState {
             pw.print(src.mCount);
             long duration = src.mDuration;
             if (src.mNesting > 0) {
-                duration += now - src.mStartTime;
+                duration += now - src.mStartUptime;
             }
             if (dumpAll) {
                 pw.print(" / Duration ");
@@ -248,9 +391,37 @@ public final class AssociationState {
             }
             DumpUtils.printPercent(pw, (double)duration/(double)totalTime);
             if (src.mNesting > 0) {
-                pw.print(" (running)");
+                pw.print(" (running");
+                if (src.mProcState != ProcessStats.STATE_NOTHING) {
+                    pw.print(" / ");
+                    pw.print(DumpUtils.STATE_NAMES[src.mProcState]);
+                    pw.print(" #");
+                    pw.print(src.mProcStateSeq);
+                }
+                pw.print(")");
             }
             pw.println();
+            if (src.mActiveCount > 0) {
+                pw.print(prefixInner);
+                pw.print("   Active count ");
+                pw.print(src.mActiveCount);
+                duration = src.mActiveDuration;
+                if (src.mActiveStartUptime > 0) {
+                    duration += now - src.mActiveStartUptime;
+                }
+                if (dumpAll) {
+                    pw.print(" / Duration ");
+                    TimeUtils.formatDuration(duration, pw);
+                    pw.print(" / ");
+                } else {
+                    pw.print(" / time ");
+                }
+                DumpUtils.printPercent(pw, (double)duration/(double)totalTime);
+                if (src.mActiveStartUptime > 0) {
+                    pw.print(" (running)");
+                }
+                pw.println();
+            }
         }
     }
 
@@ -277,7 +448,15 @@ public final class AssociationState {
             pw.print(src.mCount);
             long duration = src.mDuration;
             if (src.mNesting > 0) {
-                duration += now - src.mStartTime;
+                duration += now - src.mStartUptime;
+            }
+            pw.print(",");
+            pw.print(duration);
+            pw.print(",");
+            pw.print(src.mActiveCount);
+            duration = src.mActiveDuration;
+            if (src.mActiveStartUptime > 0) {
+                duration += now - src.mActiveStartUptime;
             }
             pw.print(",");
             pw.print(duration);
@@ -287,7 +466,7 @@ public final class AssociationState {
 
     public String toString() {
         return "AssociationState{" + Integer.toHexString(System.identityHashCode(this))
-                + " " + mName + " pkg=" + mPackage + " proc="
-                + Integer.toHexString(System.identityHashCode(this)) + "}";
+                + " " + mName + " pkg=" + mPackageState.mPackageName + " proc="
+                + Integer.toHexString(System.identityHashCode(mProc)) + "}";
     }
 }

@@ -20442,6 +20442,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private RenderNode getDrawableRenderNode(Drawable drawable, RenderNode renderNode) {
         if (renderNode == null) {
             renderNode = RenderNode.create(drawable.getClass().getName(), this);
+            renderNode.setUsageHint(RenderNode.USAGE_BACKGROUND);
         }
 
         final Rect bounds = drawable.getBounds();

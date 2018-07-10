@@ -1007,6 +1007,24 @@ public class ZenModeConfig implements Parcelable {
         return true;
     }
 
+    /**
+     * Returns whether the conditionId is a valid ScheduleCondition.
+     * If allowNever is true, this will return true even if the ScheduleCondition never occurs.
+     */
+    public static boolean isValidScheduleConditionId(Uri conditionId, boolean allowNever) {
+        ScheduleInfo info;
+        try {
+            info = tryParseScheduleConditionId(conditionId);
+        } catch (NullPointerException | ArrayIndexOutOfBoundsException e) {
+            return false;
+        }
+
+        if (info == null || (!allowNever && (info.days == null || info.days.length == 0))) {
+            return false;
+        }
+        return true;
+    }
+
     public static ScheduleInfo tryParseScheduleConditionId(Uri conditionId) {
         final boolean isSchedule =  conditionId != null
                 && conditionId.getScheme().equals(Condition.SCHEME)

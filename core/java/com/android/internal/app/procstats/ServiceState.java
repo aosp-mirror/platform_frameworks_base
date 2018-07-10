@@ -554,6 +554,6 @@ public final class ServiceState {
     public String toString() {
         return "ServiceState{" + Integer.toHexString(System.identityHashCode(this))
                 + " " + mName + " pkg=" + mPackage + " proc="
-                + Integer.toHexString(System.identityHashCode(this)) + "}";
+                + Integer.toHexString(System.identityHashCode(mProc)) + "}";
     }
 }

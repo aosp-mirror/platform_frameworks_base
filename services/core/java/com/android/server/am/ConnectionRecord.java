@@ -106,7 +106,10 @@ final class ConnectionRecord {
     }
 
     public void startAssociationIfNeeded() {
-        if (association == null) {
+        // If we don't already have an active association, create one...  but only if this
+        // is an association between two different processes.
+        if (association == null && (binding.service.appInfo.uid != clientUid
+                || !binding.service.processName.equals(clientProcessName))) {
             ProcessStats.ProcessStateHolder holder = binding.service.app != null
                     ? binding.service.app.pkgList.get(binding.service.name.getPackageName()) : null;
             if (holder == null) {
@@ -116,11 +119,17 @@ final class ConnectionRecord {
                 Slog.wtf(TAG_AM, "Inactive holder in referenced service "
                         + binding.service.name.toShortString() + ": proc=" + binding.service.app);
             } else {
-                association = holder.pkg.getAssociationStateLocked(binding.service.processName,
+                association = holder.pkg.getAssociationStateLocked(holder.state,
                         binding.service.name.getClassName()).startSource(clientUid,
                         clientProcessName);
 
             }
+        }
+    }
+
+    public void trackProcState(int procState, int seq, long now) {
+        if (association != null) {
+            association.trackProcState(procState, seq, now);
         }
     }
 

@@ -16,6 +16,7 @@
 
 package com.android.internal.app.procstats;
 
+import android.content.ComponentName;
 import android.os.Debug;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -157,7 +158,7 @@ public final class ProcessStats implements Parcelable {
     };
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 31;
+    private static final int PARCEL_VERSION = 32;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535454;
 
@@ -167,6 +168,8 @@ public final class ProcessStats implements Parcelable {
 
     public final ProcessMap<LongSparseArray<PackageState>> mPackages = new ProcessMap<>();
     public final ProcessMap<ProcessState> mProcesses = new ProcessMap<>();
+
+    public final ArrayList<AssociationState.SourceState> mTrackingAssociations = new ArrayList<>();
 
     public final long[] mMemFactorDurations = new long[ADJ_COUNT];
     public int mMemFactor = STATE_NOTHING;
@@ -1203,8 +1206,8 @@ public final class ProcessStats implements Parcelable {
                         AssociationState asc = hadData
                                 ? pkgState.mAssociations.get(associationName) : null;
                         if (asc == null) {
-                            asc = new AssociationState(this, pkgName, associationName,
-                                    processName);
+                            asc = new AssociationState(this, pkgState, associationName,
+                                    processName, null);
                         }
                         String errorMsg = asc.readFromParcel(this, in, version);
                         if (errorMsg != null) {
@@ -1308,6 +1311,17 @@ public final class ProcessStats implements Parcelable {
                             Slog.d(TAG, "GETPROC leaving proc of " + ss);
                         }
                     }
+                    // Also update active associations.
+                    for (int i=commonPkgState.mAssociations.size()-1; i>=0; i--) {
+                        AssociationState as = commonPkgState.mAssociations.valueAt(i);
+                        if (as.getProcess() == commonProc) {
+                            if (DEBUG) Slog.d(TAG, "GETPROC switching association to cloned: "
+                                    + as);
+                            as.setProcess(cloned);
+                        } else if (DEBUG) {
+                            Slog.d(TAG, "GETPROC leaving proc of " + as);
+                        }
+                    }
                 } else {
                     Slog.w(TAG, "Cloning proc state: no package state " + commonProc.getPackage()
                             + "/" + pkgState.mUid + " for proc " + commonProc.getName());
@@ -1356,10 +1370,39 @@ public final class ProcessStats implements Parcelable {
         }
         final ProcessState procs = processName != null
                 ? getProcessStateLocked(packageName, uid, vers, processName) : null;
-        as = new AssociationState(this, packageName, className, processName);
+        as = new AssociationState(this, pkgs, className, processName, procs);
         pkgs.mAssociations.put(className, as);
         if (DEBUG) Slog.d(TAG, "GETASC: creating " + as + " in " + procs);
         return as;
+    }
+
+    public void updateTrackingAssociationsLocked(int curSeq, long now) {
+        final int NUM = mTrackingAssociations.size();
+        for (int i = NUM - 1; i >= 0; i--) {
+            final AssociationState.SourceState act = mTrackingAssociations.get(i);
+            if (act.mProcStateSeq != curSeq) {
+                act.mInTrackingList = false;
+                act.mProcState = STATE_NOTHING;
+                mTrackingAssociations.remove(i);
+            } else {
+                final ProcessState proc = act.getAssociationState().getProcess();
+                if (proc != null) {
+                    if (act.mProcState == proc.getState()) {
+                        act.startActive(now);
+                    } else {
+                        act.stopActive(now);
+                        if (act.mProcState < proc.getState()) {
+                            Slog.w(TAG, "Tracking association " + act + " whose proc state "
+                                    + act.mProcState + " is better than process " + proc
+                                    + " proc state " + proc.getState());
+                        }
+                    }
+                } else {
+                    Slog.wtf(TAG, "Tracking association without process: " + act
+                            + " in " + act.getAssociationState());
+                }
+            }
+        }
     }
 
     public void dumpLocked(PrintWriter pw, String reqPackage, long now, boolean dumpSummary,
@@ -1543,10 +1586,70 @@ public final class ProcessStats implements Parcelable {
                 proc.dumpInternalLocked(pw, "        ", dumpAll);
             }
         }
+
         if (dumpAll) {
-            pw.println();
+            if (sepNeeded) {
+                pw.println();
+            }
+            sepNeeded = true;
             pw.print("  Total procs: "); pw.print(numShownProcs);
                     pw.print(" shown of "); pw.print(numTotalProcs); pw.println(" total");
+            if (mTrackingAssociations.size() > 0) {
+                pw.println();
+                pw.println("Tracking associations:");
+                for (int i = 0; i < mTrackingAssociations.size(); i++) {
+                    final AssociationState.SourceState src = mTrackingAssociations.get(i);
+                    final AssociationState asc = src.getAssociationState();
+                    pw.print("  #");
+                    pw.print(i);
+                    pw.print(": ");
+                    pw.print(asc.getProcessName());
+                    pw.print("/");
+                    UserHandle.formatUid(pw, asc.getUid());
+                    pw.print(" <- ");
+                    pw.print(src.getProcessName());
+                    pw.print("/");
+                    UserHandle.formatUid(pw, src.getUid());
+                    pw.println(":");
+                    pw.print("    Tracking for: ");
+                    TimeUtils.formatDuration(now - src.mTrackingUptime, pw);
+                    pw.println();
+                    pw.print("    Component: ");
+                    pw.print(new ComponentName(asc.getPackage(), asc.getName())
+                            .flattenToShortString());
+                    pw.println();
+                    pw.print("    Proc state: ");
+                    if (src.mProcState != ProcessStats.STATE_NOTHING) {
+                        pw.print(DumpUtils.STATE_NAMES[src.mProcState]);
+                    } else {
+                        pw.print("--");
+                    }
+                    pw.print(" #");
+                    pw.println(src.mProcStateSeq);
+                    pw.print("    Process: ");
+                    pw.println(asc.getProcess());
+                    if (src.mActiveCount > 0) {
+                        pw.print("    Active count ");
+                        pw.print(src.mActiveCount);
+                        long duration = src.mActiveDuration;
+                        if (src.mActiveStartUptime > 0) {
+                            duration += now - src.mActiveStartUptime;
+                        }
+                        if (dumpAll) {
+                            pw.print(" / Duration ");
+                            TimeUtils.formatDuration(duration, pw);
+                            pw.print(" / ");
+                        } else {
+                            pw.print(" / time ");
+                        }
+                        DumpUtils.printPercent(pw, (double)duration/(double)totalTime);
+                        if (src.mActiveStartUptime > 0) {
+                            pw.print(" (running)");
+                        }
+                        pw.println();
+                    }
+                }
+            }
         }
 
         if (sepNeeded) {
@@ -1985,15 +2088,19 @@ public final class ProcessStats implements Parcelable {
             mVersionCode = versionCode;
         }
 
-        public AssociationState getAssociationStateLocked(String processName, String className) {
+        public AssociationState getAssociationStateLocked(ProcessState proc, String className) {
             AssociationState as = mAssociations.get(className);
             if (as != null) {
                 if (DEBUG) Slog.d(TAG, "GETASC: returning existing " + as);
+                if (proc != null) {
+                    as.setProcess(proc);
+                }
                 return as;
             }
-            as = new AssociationState(mProcessStats, mPackageName, className, processName);
+            as = new AssociationState(mProcessStats, this, className, proc.getName(),
+                    proc);
             mAssociations.put(className, as);
-            if (DEBUG) Slog.d(TAG, "GETASC: creating " + as + " in " + processName);
+            if (DEBUG) Slog.d(TAG, "GETASC: creating " + as + " in " + proc.getName());
             return as;
         }
     }
