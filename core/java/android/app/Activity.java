@@ -1086,7 +1086,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param savedInstanceState contains the saved state
      */
-    final void performRestoreInstanceState(Bundle savedInstanceState) {
+    final void performRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         onRestoreInstanceState(savedInstanceState);
         restoreManagedDialogs(savedInstanceState);
     }
@@ -1100,8 +1100,8 @@ public class Activity extends ContextThemeWrapper
      * @param savedInstanceState contains the saved state
      * @param persistentState contains the persistable saved state
      */
-    final void performRestoreInstanceState(Bundle savedInstanceState,
-            PersistableBundle persistentState) {
+    final void performRestoreInstanceState(@Nullable Bundle savedInstanceState,
+            @Nullable PersistableBundle persistentState) {
         onRestoreInstanceState(savedInstanceState, persistentState);
         if (savedInstanceState != null) {
             restoreManagedDialogs(savedInstanceState);
@@ -1128,7 +1128,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onResume
      * @see #onSaveInstanceState
      */
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         if (mWindow != null) {
             Bundle windowState = savedInstanceState.getBundle(WINDOW_HIERARCHY_TAG);
             if (windowState != null) {
@@ -1149,8 +1149,12 @@ public class Activity extends ContextThemeWrapper
      *
      * <p>If this method is called {@link #onRestoreInstanceState(Bundle)} will not be called.
      *
-     * @param savedInstanceState the data most recently supplied in {@link #onSaveInstanceState}.
-     * @param persistentState the data most recently supplied in {@link #onSaveInstanceState}.
+     * <p>At least one of {@code savedInstanceState} or {@code persistentState} will not be null.
+     *
+     * @param savedInstanceState the data most recently supplied in {@link #onSaveInstanceState}
+     *     or null.
+     * @param persistentState the data most recently supplied in {@link #onSaveInstanceState}
+     *     or null.
      *
      * @see #onRestoreInstanceState(Bundle)
      * @see #onCreate
@@ -1158,8 +1162,8 @@ public class Activity extends ContextThemeWrapper
      * @see #onResume
      * @see #onSaveInstanceState
      */
-    public void onRestoreInstanceState(Bundle savedInstanceState,
-            PersistableBundle persistentState) {
+    public void onRestoreInstanceState(@Nullable Bundle savedInstanceState,
+            @Nullable PersistableBundle persistentState) {
         if (savedInstanceState != null) {
             onRestoreInstanceState(savedInstanceState);
         }
@@ -1545,7 +1549,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param outState The bundle to save the state to.
      */
-    final void performSaveInstanceState(Bundle outState) {
+    final void performSaveInstanceState(@NonNull Bundle outState) {
         onSaveInstanceState(outState);
         saveManagedDialogs(outState);
         mActivityTransitionState.saveState(outState);
@@ -1562,7 +1566,8 @@ public class Activity extends ContextThemeWrapper
      * @param outState The bundle to save the state to.
      * @param outPersistentState The bundle to save persistent state to.
      */
-    final void performSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+    final void performSaveInstanceState(@NonNull Bundle outState,
+            @NonNull PersistableBundle outPersistentState) {
         onSaveInstanceState(outState, outPersistentState);
         saveManagedDialogs(outState);
         storeHasCurrentPermissionRequest(outState);
@@ -1618,7 +1623,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onRestoreInstanceState
      * @see #onPause
      */
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putBundle(WINDOW_HIERARCHY_TAG, mWindow.saveHierarchyState());
 
         outState.putInt(LAST_AUTOFILL_ID, mLastAutofillId);
@@ -1648,7 +1653,8 @@ public class Activity extends ContextThemeWrapper
      * @see #onRestoreInstanceState(Bundle, PersistableBundle)
      * @see #onPause
      */
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+    public void onSaveInstanceState(@NonNull Bundle outState,
+            @NonNull PersistableBundle outPersistentState) {
         onSaveInstanceState(outState);
     }
 
