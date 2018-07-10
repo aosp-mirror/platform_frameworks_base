@@ -16,11 +16,12 @@
 
 package android.net.wifi.hotspot2;
 
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 
 /**
  * Base class for provisioning callbacks. Should be extended by applications and set when calling
- * {@link WifiManager#startSubscriptionProvisiong(OsuProvider, ProvisioningCallback, Handler)}.
+ * {@link WifiManager#startSubscriptionProvisioning(OsuProvider, ProvisioningCallback, Handler)}.
  *
  * @hide
  */
@@ -28,84 +29,101 @@ public abstract class ProvisioningCallback {
 
     /**
      * The reason code for Provisioning Failure due to connection failure to OSU AP.
-     * @hide
      */
-    public static final int OSU_FAILURE_AP_CONNECTION      = 1;
+    public static final int OSU_FAILURE_AP_CONNECTION = 1;
 
     /**
-     * The reason code for Provisioning Failure due to connection failure to OSU AP.
-     * @hide
+     * The reason code for invalid server URL address.
      */
     public static final int OSU_FAILURE_SERVER_URL_INVALID = 2;
 
     /**
-     * The reason code for Provisioning Failure due to connection failure to OSU AP.
-     * @hide
+     * The reason code for provisioning failure due to connection failure to the server.
      */
-    public static final int OSU_FAILURE_SERVER_CONNECTION  = 3;
+    public static final int OSU_FAILURE_SERVER_CONNECTION = 3;
 
     /**
-     * The reason code for Provisioning Failure due to connection failure to OSU AP.
-     * @hide
+     * The reason code for provisioning failure due to invalid server certificate.
      */
-    public static final int OSU_FAILURE_SERVER_VALIDATION  = 4;
+    public static final int OSU_FAILURE_SERVER_VALIDATION = 4;
 
     /**
-     * The reason code for Provisioning Failure due to connection failure to OSU AP.
-     * @hide
+     * The reason code for provisioning failure due to invalid service provider.
      */
-    public static final int OSU_FAILURE_PROVIDER_VERIFICATION = 5;
+    public static final int OSU_FAILURE_SERVICE_PROVIDER_VERIFICATION = 5;
 
     /**
-     * The reason code for Provisioning Failure when a provisioning flow is aborted.
-     * @hide
+     * The reason code for provisioning failure when a provisioning flow is aborted.
      */
     public static final int OSU_FAILURE_PROVISIONING_ABORTED = 6;
 
     /**
-     * The reason code for Provisioning Failure when a provisioning flow is aborted.
-     * @hide
+     * The reason code for provisioning failure when a provisioning flow is not possible.
      */
     public static final int OSU_FAILURE_PROVISIONING_NOT_AVAILABLE = 7;
 
     /**
-     * The status code for Provisioning flow to indicate connecting to OSU AP
-     * @hide
+     * The reason code for provisioning failure due to invalid server url.
      */
-    public static final int OSU_STATUS_AP_CONNECTING       = 1;
+    public static final int OSU_FAILURE_INVALID_SERVER_URL = 8;
 
     /**
-     * The status code for Provisioning flow to indicate connected to OSU AP
-     * @hide
+     * The reason code for provisioning failure when a command received is not the expected command
+     * type.
      */
-    public static final int OSU_STATUS_AP_CONNECTED        = 2;
+    public static final int OSU_FAILURE_UNEXPECTED_COMMAND_TYPE = 9;
 
     /**
-     * The status code for Provisioning flow to indicate connecting to OSU AP
-     * @hide
+     * The reason code for provisioning failure when a SOAP message is not the expected message
+     * type.
      */
-    public static final int OSU_STATUS_SERVER_CONNECTED    = 3;
+    public static final int OSU_FAILURE_UNEXPECTED_SOAP_MESSAGE_TYPE = 10;
 
     /**
-     * The status code for Provisioning flow to indicate connecting to OSU AP
-     * @hide
+     * The reason code for provisioning failure when a SOAP message exchange fails.
      */
-    public static final int OSU_STATUS_SERVER_VALIDATED    = 4;
+    public static final int OSU_FAILURE_SOAP_MESSAGE_EXCHANGE = 11;
 
     /**
-     * The status code for Provisioning flow to indicate connecting to OSU AP
-     * @hide
+     * The status code for provisioning flow to indicate connecting to OSU AP
      */
-    public static final int OSU_STATUS_PROVIDER_VERIFIED   = 5;
+    public static final int OSU_STATUS_AP_CONNECTING = 1;
+
+    /**
+     * The status code for provisioning flow to indicate the OSU AP is connected.
+     */
+    public static final int OSU_STATUS_AP_CONNECTED = 2;
+
+    /**
+     * The status code for provisioning flow to indicate the server connection is completed.
+     */
+    public static final int OSU_STATUS_SERVER_CONNECTED = 3;
+
+    /**
+     * The status code for provisioning flow to indicate the server certificate is validated.
+     */
+    public static final int OSU_STATUS_SERVER_VALIDATED = 4;
+
+    /**
+     * The status code for provisioning flow to indicate the service provider is verified.
+     */
+    public static final int OSU_STATUS_SERVICE_PROVIDER_VERIFIED = 5;
+
+    /**
+     * The status code for provisioning flow to indicate starting the SOAP exchange.
+     */
+    public static final int OSU_STATUS_INIT_SOAP_EXCHANGE = 6;
 
     /**
      * Provisioning status for OSU failure
+     *
      * @param status indicates error condition
      */
     public abstract void onProvisioningFailure(int status);
 
     /**
      * Provisioning status when OSU is in progress
+     *
      * @param status indicates status of OSU flow
      */
     public abstract void onProvisioningStatus(int status);
