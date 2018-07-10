@@ -343,6 +343,42 @@ public class BinderCallsStatsTest {
         bcs.dump(pw, new HashMap<>(), true);
     }
 
+    @Test
+    public void testGetExportedStatsWhenDetailedTrackingDisabled() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setDetailedTracking(false);
+        Binder binder = new Binder();
+        BinderCallsStats.CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        assertEquals(0, bcs.getExportedCallStats().size());
+    }
+
+    @Test
+    public void testGetExportedStatsWhenDetailedTrackingEnabled() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setDetailedTracking(true);
+        Binder binder = new Binder();
+        BinderCallsStats.CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.time += 10;
+        bcs.elapsedTime += 20;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        assertEquals(1, bcs.getExportedCallStats().size());
+        BinderCallsStats.ExportedCallStat stat = bcs.getExportedCallStats().get(0);
+        assertEquals(TEST_UID, stat.uid);
+        assertEquals("android.os.Binder", stat.className);
+        assertEquals("1", stat.methodName);
+        assertEquals(10, stat.cpuTimeMicros);
+        assertEquals(10, stat.maxCpuTimeMicros);
+        assertEquals(20, stat.latencyMicros);
+        assertEquals(20, stat.maxLatencyMicros);
+        assertEquals(1, stat.callCount);
+        assertEquals(REQUEST_SIZE, stat.maxRequestSizeBytes);
+        assertEquals(REPLY_SIZE, stat.maxReplySizeBytes);
+        assertEquals(0, stat.exceptionCount);
+    }
+
     static class TestBinderCallsStats extends BinderCallsStats {
         int callingUid = TEST_UID;
         long time = 1234;

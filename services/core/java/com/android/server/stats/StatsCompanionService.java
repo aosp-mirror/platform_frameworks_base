@@ -57,11 +57,14 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.telephony.ModemActivityInfo;
 import android.telephony.TelephonyManager;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.NetworkStatsFactory;
+import com.android.internal.os.BinderCallsStats;
+import com.android.internal.os.BinderCallsStats.ExportedCallStat;
 import com.android.internal.os.KernelCpuSpeedReader;
 import com.android.internal.os.KernelUidCpuTimeReader;
 import com.android.internal.os.KernelUidCpuClusterTimeReader;
@@ -891,6 +894,26 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    private void pullBinderCallsStats(int tagId, List<StatsLogEventWrapper> pulledData) {
+        List<ExportedCallStat> callStats = BinderCallsStats.getInstance().getExportedCallStats();
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        for (ExportedCallStat callStat : callStats) {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 11 /* fields */);
+            e.writeInt(callStat.uid);
+            e.writeString(callStat.className);
+            e.writeString(callStat.methodName);
+            e.writeLong(callStat.callCount);
+            e.writeLong(callStat.exceptionCount);
+            e.writeLong(callStat.latencyMicros);
+            e.writeLong(callStat.maxLatencyMicros);
+            e.writeLong(callStat.cpuTimeMicros);
+            e.writeLong(callStat.maxCpuTimeMicros);
+            e.writeLong(callStat.maxReplySizeBytes);
+            e.writeLong(callStat.maxRequestSizeBytes);
+            pulledData.add(e);
+        }
+    }
+
     /**
      * Pulls various data.
      */
@@ -971,6 +994,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.PROCESS_MEMORY_STATE: {
                 pullProcessMemoryState(tagId, ret);
+                break;
+            }
+            case StatsLog.BINDER_CALLS: {
+                pullBinderCallsStats(tagId, ret);
                 break;
             }
             default:
