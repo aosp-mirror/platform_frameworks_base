@@ -17,6 +17,7 @@
 package com.android.server.backup.transport;
 
 import static com.android.server.backup.TransportManager.SERVICE_ACTION_TRANSPORT_HOST;
+import static com.android.server.backup.testing.TestUtils.assertEventLogged;
 import static com.android.server.backup.testing.TestUtils.assertLogcatAtLeast;
 import static com.android.server.backup.testing.TestUtils.assertLogcatAtMost;
 
@@ -70,15 +71,14 @@ import java.util.function.Supplier;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
 @Config(
-    manifest = Config.NONE,
-    sdk = 26,
-    shadows = {
-        ShadowEventLog.class,
-        ShadowCloseGuard.class,
-        ShadowSlog.class,
-        FrameworkShadowLooper.class
-    }
-)
+        manifest = Config.NONE,
+        sdk = 26,
+        shadows = {
+            ShadowEventLog.class,
+            ShadowCloseGuard.class,
+            ShadowSlog.class,
+            FrameworkShadowLooper.class
+        })
 @SystemLoaderPackages({"com.android.server.backup"})
 @Presubmit
 public class TransportClientTest {
@@ -279,7 +279,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testConnectAsync_beforeFrameworkCall_logsBoundTransition() {
+    public void testConnectAsync_beforeFrameworkCall_logsBoundTransitionEvent() {
         ShadowEventLog.setUp();
 
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
@@ -288,7 +288,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testConnectAsync_afterOnServiceConnected_logsBoundAndConnectedTransitions() {
+    public void testConnectAsync_afterOnServiceConnected_logsBoundAndConnectedTransitionEvents() {
         ShadowEventLog.setUp();
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
@@ -300,7 +300,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testConnectAsync_afterOnBindingDied_logsBoundAndUnboundTransitions() {
+    public void testConnectAsync_afterOnBindingDied_logsBoundAndUnboundTransitionEvents() {
         ShadowEventLog.setUp();
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
@@ -372,7 +372,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testUnbind_whenConnected_logsDisconnectedAndUnboundTransitions() {
+    public void testUnbind_whenConnected_logsDisconnectedAndUnboundTransitionEvents() {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
         connection.onServiceConnected(mTransportComponent, mTransportBinder);
@@ -385,7 +385,8 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testOnServiceDisconnected_whenConnected_logsDisconnectedAndUnboundTransitions() {
+    public void
+            testOnServiceDisconnected_whenConnected_logsDisconnectedAndUnboundTransitionEvents() {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
         connection.onServiceConnected(mTransportComponent, mTransportBinder);
@@ -398,7 +399,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testOnBindingDied_whenConnected_logsDisconnectedAndUnboundTransitions() {
+    public void testOnBindingDied_whenConnected_logsDisconnectedAndUnboundTransitionEvents() {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
         connection.onServiceConnected(mTransportComponent, mTransportBinder);
@@ -537,10 +538,6 @@ public class TransportClientTest {
         mShadowWorkerLooper.runToEndOfTasks();
         mShadowMainLooper.reset();
         return future.get();
-    }
-
-    private void assertEventLogged(int tag, Object... values) {
-        assertThat(ShadowEventLog.hasEvent(tag, values)).isTrue();
     }
 
     private ServiceConnection verifyBindServiceAsUserAndCaptureServiceConnection(Context context) {

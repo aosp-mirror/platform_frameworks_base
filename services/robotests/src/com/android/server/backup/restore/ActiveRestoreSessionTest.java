@@ -19,6 +19,9 @@ package com.android.server.backup.restore;
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.createBackupWakeLock;
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.setUpBackupManagerServiceBasics;
 import static com.android.server.backup.testing.BackupManagerServiceTestUtils.startBackupThreadAndGetLooper;
+
+import static com.android.server.backup.testing.TestUtils.assertEventLogged;
+import static com.android.server.backup.testing.TestUtils.assertEventNotLogged;
 import static com.android.server.backup.testing.TransportData.backupTransport;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -210,7 +213,7 @@ public class ActiveRestoreSessionTest {
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(0);
         verify(mObserver).restoreSetsAvailable(aryEq(new RestoreSet[0]));
-        assertThat(ShadowEventLog.hasEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE)).isFalse();
+        assertEventNotLogged(EventLogTags.RESTORE_TRANSPORT_FAILURE);
     }
 
     @Test
@@ -225,7 +228,7 @@ public class ActiveRestoreSessionTest {
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(result).isEqualTo(0);
         verify(mObserver).restoreSetsAvailable(isNull());
-        assertThat(ShadowEventLog.hasEvent(EventLogTags.RESTORE_TRANSPORT_FAILURE)).isTrue();
+        assertEventLogged(EventLogTags.RESTORE_TRANSPORT_FAILURE);
         verify(mTransportManager)
                 .disposeOfTransportClient(eq(transportMock.transportClient), any());
         assertThat(mWakeLock.isHeld()).isFalse();

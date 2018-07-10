@@ -33,6 +33,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.os.Process;
 import android.util.SparseArray;
 
 import com.android.server.backup.BackupAgentTimeoutParameters;
@@ -42,6 +43,8 @@ import com.android.server.backup.TransportManager;
 import com.android.server.backup.internal.Operation;
 
 import org.mockito.stubbing.Answer;
+import org.robolectric.shadows.ShadowApplication;
+import org.robolectric.shadows.ShadowBinder;
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowSystemClock;
@@ -52,14 +55,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /** Test utils for {@link BackupManagerService} and friends. */
 public class BackupManagerServiceTestUtils {
+    /**
+     * If the class-under-test is going to execute methods as the system, it's a good idea to also
+     * call {@link #setUpBinderCallerAndApplicationAsSystem(Application)} before this method.
+     */
     public static BackupManagerService createInitializedBackupManagerService(
             Context context, File baseStateDir, File dataDir, TransportManager transportManager) {
         return createInitializedBackupManagerService(
-                context,
-                startBackupThread(null),
-                baseStateDir,
-                dataDir,
-                transportManager);
+                context, startBackupThread(null), baseStateDir, dataDir, transportManager);
     }
 
     public static BackupManagerService createInitializedBackupManagerService(
@@ -87,11 +90,17 @@ public class BackupManagerServiceTestUtils {
         return backupManagerService;
     }
 
-    /** Sets up basic mocks for {@link BackupManagerService} mock. */
+    /**
+     * Sets up basic mocks for {@link BackupManagerService} mock. If {@code backupManagerService} is
+     * a spy, make sure you provide in the arguments the same objects that the original object uses.
+     *
+     * <p>If the class-under-test is going to execute methods as the system, it's a good idea to
+     * also call {@link #setUpBinderCallerAndApplicationAsSystem(Application)}.
+     */
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void setUpBackupManagerServiceBasics(
             BackupManagerService backupManagerService,
-            Context context,
+            Application application,
             TransportManager transportManager,
             PackageManager packageManager,
             Handler backupHandler,
@@ -99,7 +108,7 @@ public class BackupManagerServiceTestUtils {
             BackupAgentTimeoutParameters agentTimeoutParameters) {
         SparseArray<Operation> operations = new SparseArray<>();
 
-        when(backupManagerService.getContext()).thenReturn(context);
+        when(backupManagerService.getContext()).thenReturn(application);
         when(backupManagerService.getTransportManager()).thenReturn(transportManager);
         when(backupManagerService.getPackageManager()).thenReturn(packageManager);
         when(backupManagerService.getBackupHandler()).thenReturn(backupHandler);
@@ -133,6 +142,14 @@ public class BackupManagerServiceTestUtils {
                         })
                 .when(backupManagerService)
                 .removeOperation(anyInt());
+    }
+
+    public static void setUpBinderCallerAndApplicationAsSystem(Application application) {
+        ShadowBinder.setCallingUid(Process.SYSTEM_UID);
+        ShadowBinder.setCallingPid(1211);
+        ShadowApplication shadowApplication = shadowOf(application);
+        shadowApplication.grantPermissions("android.permission.BACKUP");
+        shadowApplication.grantPermissions("android.permission.CONFIRM_FULL_BACKUP");
     }
 
     /**
