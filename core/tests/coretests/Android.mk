@@ -19,7 +19,12 @@ LOCAL_SRC_FILES := \
 	$(call all-java-files-under, src) \
 	$(call all-Iaidl-files-under, src) \
 	$(call all-java-files-under, DisabledTestApp/src) \
-	$(call all-java-files-under, EnabledTestApp/src)
+	$(call all-java-files-under, EnabledTestApp/src) \
+	$(call all-java-files-under, BinderProxyCountingTestApp/src) \
+	$(call all-java-files-under, BinderProxyCountingTestService/src) \
+	$(call all-Iaidl-files-under, aidl)
+
+LOCAL_AIDL_INCLUDES := $(LOCAL_PATH)/aidl
 
 LOCAL_DX_FLAGS := --core-library
 LOCAL_JACK_FLAGS := --multi-dex native
