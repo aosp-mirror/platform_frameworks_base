@@ -1,0 +1,70 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsActivityManagerDeviceTestCases",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "android.support.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsActivityManagerDeviceSdk25TestCases",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "android.support.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsAppTestCases",
+      "options": [
+        {
+          "include-filter": "android.app.cts.TaskDescriptionTest"
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "android.support.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.am."
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "android.support.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsActivityManagerDeviceTestCases"
+    },
+    {
+      "name": "CtsActivityManagerDeviceSdk25TestCases"
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.am."
+        }
+      ]
+    }
+  ]
+}
