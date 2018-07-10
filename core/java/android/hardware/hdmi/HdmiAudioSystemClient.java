@@ -15,8 +15,12 @@
  */
 package android.hardware.hdmi;
 
+import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.RemoteException;
+
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.VisibleForTesting.Visibility;
 
 /**
  * HdmiAudioSystemClient represents HDMI-CEC logical device of type Audio System in the Android
@@ -28,12 +32,11 @@ import android.os.RemoteException;
  * @hide
  */
 public final class HdmiAudioSystemClient extends HdmiClient {
-    // TODO(b/110430593): add tests for this class
     private static final String TAG = "HdmiAudioSystemClient";
 
     private static final int REPORT_AUDIO_STATUS_INTERVAL_MS = 500;
 
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler;
     private boolean mCanSendAudioStatus = true;
     private boolean mPendingReportAudioStatus;
 
@@ -41,9 +44,15 @@ public final class HdmiAudioSystemClient extends HdmiClient {
     private int mLastMaxVolume;
     private boolean mLastIsMute;
 
+    @VisibleForTesting(visibility = Visibility.PACKAGE)
+    public HdmiAudioSystemClient(IHdmiControlService service) {
+        this(service, null);
+    }
 
-    /* package */ HdmiAudioSystemClient(IHdmiControlService service) {
+    @VisibleForTesting(visibility = Visibility.PACKAGE)
+    public HdmiAudioSystemClient(IHdmiControlService service, @Nullable Handler handler) {
         super(service);
+        mHandler = handler == null ? new Handler() : handler;
     }
 
     /** @hide */
