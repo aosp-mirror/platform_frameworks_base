@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-#include <dirent.h>
+#include "Compile.h"
 
+#include <dirent.h>
 #include <string>
 
 #include "android-base/errors.h"
@@ -27,7 +28,6 @@
 
 #include "ConfigDescription.h"
 #include "Diagnostics.h"
-#include "Flags.h"
 #include "ResourceParser.h"
 #include "ResourceTable.h"
 #include "cmd/Util.h"
@@ -120,17 +120,6 @@ static Maybe<ResourcePathData> ExtractResourcePathData(const std::string& path,
   return ResourcePathData{Source(path),          dir_str.to_string(),    name.to_string(),
                           extension.to_string(), config_str.to_string(), config};
 }
-
-struct CompileOptions {
-  std::string output_path;
-  Maybe<std::string> res_dir;
-  Maybe<std::string> generate_text_symbols_path;
-  Maybe<Visibility::Level> visibility;
-  bool pseudolocalize = false;
-  bool no_png_crunch = false;
-  bool legacy_mode = false;
-  bool verbose = false;
-};
 
 static std::string BuildIntermediateContainerFilename(const ResourcePathData& data) {
   std::stringstream name;
@@ -712,50 +701,21 @@ class CompileContext : public IAaptContext {
   bool verbose_ = false;
 };
 
-// Entry point for compilation phase. Parses arguments and dispatches to the correct steps.
-int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
-  CompileContext context(diagnostics);
-  CompileOptions options;
+int CompileCommand::Action(const std::vector<std::string>& args) {
+  CompileContext context(diagnostic_);
+  context.SetVerbose(options_.verbose);
 
-  bool verbose = false;
-  Maybe<std::string> visibility;
-  Flags flags =
-      Flags()
-          .RequiredFlag("-o", "Output path", &options.output_path)
-          .OptionalFlag("--dir", "Directory to scan for resources", &options.res_dir)
-          .OptionalFlag("--output-text-symbols",
-                        "Generates a text file containing the resource symbols in the\n"
-                        "specified file",
-                        &options.generate_text_symbols_path)
-          .OptionalSwitch("--pseudo-localize",
-                          "Generate resources for pseudo-locales "
-                          "(en-XA and ar-XB)",
-                          &options.pseudolocalize)
-          .OptionalSwitch("--no-crunch", "Disables PNG processing", &options.no_png_crunch)
-          .OptionalSwitch("--legacy", "Treat errors that used to be valid in AAPT as warnings",
-                          &options.legacy_mode)
-          .OptionalSwitch("-v", "Enables verbose logging", &verbose)
-          .OptionalFlag("--visibility",
-                        "Sets the visibility of the compiled resources to the specified\n"
-                        "level. Accepted levels: public, private, default",
-                        &visibility);
-  if (!flags.Parse("aapt2 compile", args, &std::cerr)) {
-    return 1;
-  }
-
-  context.SetVerbose(verbose);
-
-  if (visibility) {
-    if (visibility.value() == "public") {
-      options.visibility = Visibility::Level::kPublic;
-    } else if (visibility.value() == "private") {
-      options.visibility = Visibility::Level::kPrivate;
-    } else if (visibility.value() == "default") {
-      options.visibility = Visibility::Level::kUndefined;
+  if (visibility_) {
+    if (visibility_.value() == "public") {
+      options_.visibility = Visibility::Level::kPublic;
+    } else if (visibility_.value() == "private") {
+      options_.visibility = Visibility::Level::kPrivate;
+    } else if (visibility_.value() == "default") {
+      options_.visibility = Visibility::Level::kUndefined;
     } else {
       context.GetDiagnostics()->Error(
           DiagMessage() << "Unrecognized visibility level passes to --visibility: '"
-                        << visibility.value() << "'. Accepted levels: public, private, default");
+                        << visibility_.value() << "'. Accepted levels: public, private, default");
       return 1;
     }
   }
@@ -763,25 +723,25 @@ int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
   std::unique_ptr<IArchiveWriter> archive_writer;
 
   std::vector<ResourcePathData> input_data;
-  if (options.res_dir) {
-    if (!flags.GetArgs().empty()) {
+  if (options_.res_dir) {
+    if (!args.empty()) {
       // Can't have both files and a resource directory.
       context.GetDiagnostics()->Error(DiagMessage() << "files given but --dir specified");
-      flags.Usage("aapt2 compile", &std::cerr);
+      Usage(&std::cerr);
       return 1;
     }
 
-    if (!LoadInputFilesFromDir(&context, options, &input_data)) {
+    if (!LoadInputFilesFromDir(&context, options_, &input_data)) {
       return 1;
     }
 
-    archive_writer = CreateZipFileArchiveWriter(context.GetDiagnostics(), options.output_path);
+    archive_writer = CreateZipFileArchiveWriter(context.GetDiagnostics(), options_.output_path);
 
   } else {
-    input_data.reserve(flags.GetArgs().size());
+    input_data.reserve(args.size());
 
     // Collect data from the path for each input file.
-    for (const std::string& arg : flags.GetArgs()) {
+    for (const std::string& arg : args) {
       std::string error_str;
       if (Maybe<ResourcePathData> path_data = ExtractResourcePathData(arg, &error_str)) {
         input_data.push_back(std::move(path_data.value()));
@@ -791,7 +751,7 @@ int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
       }
     }
 
-    archive_writer = CreateDirectoryArchiveWriter(context.GetDiagnostics(), options.output_path);
+    archive_writer = CreateDirectoryArchiveWriter(context.GetDiagnostics(), options_.output_path);
   }
 
   if (!archive_writer) {
@@ -800,7 +760,7 @@ int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
 
   bool error = false;
   for (ResourcePathData& path_data : input_data) {
-    if (options.verbose) {
+    if (options_.verbose) {
       context.GetDiagnostics()->Note(DiagMessage(path_data.source) << "processing");
     }
 
@@ -821,21 +781,21 @@ int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
       if (*type != ResourceType::kRaw) {
         if (path_data.extension == "xml") {
           compile_func = &CompileXml;
-        } else if ((!options.no_png_crunch && path_data.extension == "png")
+        } else if ((!options_.no_png_crunch && path_data.extension == "png")
             || path_data.extension == "9.png") {
           compile_func = &CompilePng;
         }
       }
     } else {
       context.GetDiagnostics()->Error(DiagMessage()
-                                      << "invalid file path '" << path_data.source << "'");
+          << "invalid file path '" << path_data.source << "'");
       error = true;
       continue;
     }
 
     // Treat periods as a reserved character that should not be present in a file name
     // Legacy support for AAPT which did not reserve periods
-    if (compile_func != &CompileFile && !options.legacy_mode
+    if (compile_func != &CompileFile && !options_.legacy_mode
         && std::count(path_data.name.begin(), path_data.name.end(), '.') != 0) {
       error = true;
       context.GetDiagnostics()->Error(DiagMessage() << "resource file '" << path_data.source.path
@@ -846,7 +806,7 @@ int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
 
     // Compile the file.
     const std::string out_path = BuildIntermediateContainerFilename(path_data);
-    error |= !compile_func(&context, options, path_data, archive_writer.get(), out_path);
+    error |= !compile_func(&context, options_, path_data, archive_writer.get(), out_path);
   }
   return error ? 1 : 0;
 }
