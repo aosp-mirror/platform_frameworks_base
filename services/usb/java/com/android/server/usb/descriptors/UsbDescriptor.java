@@ -126,6 +126,9 @@ public abstract class UsbDescriptor implements Reporting {
     public static final int REQUEST_GET_CONFIGURATION  = 0x08;
     public static final int REQUEST_SET_CONFIGURATION  = 0x09;
 
+    // USB control transfer timeout
+    public static final int USB_CONTROL_TRANSFER_TIMEOUT_MS = 200;
+
     /**
      * @throws IllegalArgumentException
      */
@@ -224,7 +227,7 @@ public abstract class UsbDescriptor implements Reporting {
                         0,
                         sStringBuffer,
                         0xFF,
-                        0);
+                        USB_CONTROL_TRANSFER_TIMEOUT_MS);
                 if (rdo >= 0) {
                     usbStr = new String(sStringBuffer, 2, rdo - 2, "UTF-16LE");
                 } else {
