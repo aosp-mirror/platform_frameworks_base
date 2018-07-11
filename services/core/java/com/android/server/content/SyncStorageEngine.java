@@ -19,6 +19,7 @@ package com.android.server.content;
 import android.accounts.Account;
 import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
+import android.annotation.Nullable;
 import android.app.backup.BackupManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -1005,7 +1006,7 @@ public class SyncStorageEngine {
      * Called when the set of account has changed, given the new array of
      * active accounts.
      */
-    public void doDatabaseCleanup(Account[] accounts, int userId) {
+    public void removeStaleAccounts(@Nullable Account[] accounts, int userId) {
         synchronized (mAuthorities) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Slog.v(TAG, "Updating for new accounts...");
@@ -1014,8 +1015,9 @@ public class SyncStorageEngine {
             Iterator<AccountInfo> accIt = mAccounts.values().iterator();
             while (accIt.hasNext()) {
                 AccountInfo acc = accIt.next();
-                if (!ArrayUtils.contains(accounts, acc.accountAndUser.account)
-                        && acc.accountAndUser.userId == userId) {
+                if ((accounts == null) || (
+                        (acc.accountAndUser.userId == userId)
+                        && !ArrayUtils.contains(accounts, acc.accountAndUser.account))) {
                     // This account no longer exists...
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
                         Slog.v(TAG, "Account removed: " + acc.accountAndUser);

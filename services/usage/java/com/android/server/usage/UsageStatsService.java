@@ -974,7 +974,8 @@ public class UsageStatsService extends SystemService implements
             final long token = Binder.clearCallingIdentity();
             try {
                 final int packageUid = mPackageManagerInternal.getPackageUid(packageName,
-                        PackageManager.MATCH_ANY_USER, userId);
+                        PackageManager.MATCH_ANY_USER | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                        | PackageManager.MATCH_DIRECT_BOOT_AWARE, userId);
                 // Caller cannot set their own standby state
                 if (packageUid == callingUid) {
                     throw new IllegalArgumentException("Cannot set your own standby bucket");
