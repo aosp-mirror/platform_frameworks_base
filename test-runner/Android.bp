@@ -121,4 +121,5 @@ java_library_static {
         },
     },
     sdk_version: "current",
+    compile_dex: true,
 }
