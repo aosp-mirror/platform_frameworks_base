@@ -400,8 +400,8 @@
     <string name="enabled_by_admin" msgid="5302986023578399263">"Activada per l\'administrador"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"Desactivada per l\'administrador"</string>
     <string name="disabled" msgid="9206776641295849915">"Desactivat"</string>
-    <string name="external_source_trusted" msgid="2707996266575928037">"Permeses"</string>
-    <string name="external_source_untrusted" msgid="2677442511837596726">"No permeses"</string>
+    <string name="external_source_trusted" msgid="2707996266575928037">"Amb permís"</string>
+    <string name="external_source_untrusted" msgid="2677442511837596726">"Sense permís"</string>
     <string name="install_other_apps" msgid="6986686991775883017">"Instal·lar aplicacions desconegudes"</string>
     <string name="home" msgid="3256884684164448244">"Pàgina d\'inici de configuració"</string>
   <string-array name="battery_labels">
