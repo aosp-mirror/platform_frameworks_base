@@ -707,6 +707,7 @@ java_library {
 // specified on the build command line.
 java_library {
     name: "framework-oahl-backward-compatibility",
+    installable: true,
     srcs: [
         "core/java/android/content/pm/OrgApacheHttpLegacyUpdater.java",
     ],
