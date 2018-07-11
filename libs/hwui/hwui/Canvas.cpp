@@ -23,7 +23,7 @@
 #include "Typeface.h"
 #include "pipeline/skia/SkiaRecordingCanvas.h"
 
-#include <SkDrawFilter.h>
+#include "hwui/PaintFilter.h"
 
 namespace android {
 
@@ -40,10 +40,10 @@ static inline void drawStroke(SkScalar left, SkScalar right, SkScalar top, SkSca
 
 void Canvas::drawTextDecorations(float x, float y, float length, const SkPaint& paint) {
     uint32_t flags;
-    SkDrawFilter* drawFilter = getDrawFilter();
-    if (drawFilter) {
+    PaintFilter* paintFilter = getPaintFilter();
+    if (paintFilter) {
         SkPaint paintCopy(paint);
-        drawFilter->filter(&paintCopy, SkDrawFilter::kText_Type);
+        paintFilter->filter(&paintCopy);
         flags = paintCopy.getFlags();
     } else {
         flags = paint.getFlags();

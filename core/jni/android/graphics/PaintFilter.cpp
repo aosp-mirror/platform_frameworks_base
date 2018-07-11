@@ -15,36 +15,43 @@
 ** limitations under the License.
 */
 
-// This file was generated from the C++ include file: SkColorFilter.h
-// Any changes made to this file will be discarded by the build.
-// To change this file, either edit the include, or device/tools/gluemaker/main.cpp, 
-// or one of the auxilary file specifications in device/tools/gluemaker.
-
 #include "jni.h"
 #include "GraphicsJNI.h"
 #include <android_runtime/AndroidRuntime.h>
 
 #include "core_jni_helpers.h"
 
-#include "SkDrawFilter.h"
-#include "SkPaintFlagsDrawFilter.h"
+#include "hwui/PaintFilter.h"
 #include "SkPaint.h"
 
 namespace android {
 
-// Custom version of SkPaintFlagsDrawFilter that also calls setFilterQuality.
-class CompatFlagsDrawFilter : public SkPaintFlagsDrawFilter {
+class PaintFlagsFilter : public PaintFilter {
 public:
-    CompatFlagsDrawFilter(uint32_t clearFlags, uint32_t setFlags,
-            SkFilterQuality desiredQuality)
-    : SkPaintFlagsDrawFilter(clearFlags, setFlags)
+    PaintFlagsFilter(uint32_t clearFlags, uint32_t setFlags) {
+        fClearFlags = static_cast<uint16_t>(clearFlags & SkPaint::kAllFlags);
+        fSetFlags = static_cast<uint16_t>(setFlags & SkPaint::kAllFlags);
+    }
+    void filter(SkPaint* paint) override {
+        paint->setFlags((paint->getFlags() & ~fClearFlags) | fSetFlags);
+    }
+
+private:
+    uint16_t fClearFlags;
+    uint16_t fSetFlags;
+};
+
+// Custom version of PaintFlagsDrawFilter that also calls setFilterQuality.
+class CompatPaintFlagsFilter : public PaintFlagsFilter {
+public:
+    CompatPaintFlagsFilter(uint32_t clearFlags, uint32_t setFlags, SkFilterQuality desiredQuality)
+    : PaintFlagsFilter(clearFlags, setFlags)
     , fDesiredQuality(desiredQuality) {
     }
 
-    virtual bool filter(SkPaint* paint, Type type) {
-        SkPaintFlagsDrawFilter::filter(paint, type);
+    virtual void filter(SkPaint* paint) {
+        PaintFlagsFilter::filter(paint);
         paint->setFilterQuality(fDesiredQuality);
-        return true;
     }
 
 private:
@@ -61,16 +68,16 @@ static inline bool hadFiltering(jint& flags) {
     return result;
 }
 
-class SkDrawFilterGlue {
+class PaintFilterGlue {
 public:
 
     static void finalizer(JNIEnv* env, jobject clazz, jlong objHandle) {
-        SkDrawFilter* obj = reinterpret_cast<SkDrawFilter*>(objHandle);
+        PaintFilter* obj = reinterpret_cast<PaintFilter*>(objHandle);
         SkSafeUnref(obj);
     }
 
-    static jlong CreatePaintFlagsDF(JNIEnv* env, jobject clazz,
-                                    jint clearFlags, jint setFlags) {
+    static jlong CreatePaintFlagsFilter(JNIEnv* env, jobject clazz,
+                                        jint clearFlags, jint setFlags) {
         if (clearFlags | setFlags) {
             // Mask both groups of flags to remove FILTER_BITMAP_FLAG, which no
             // longer has a Skia equivalent flag (instead it corresponds to
@@ -79,16 +86,16 @@ public:
             const bool turnFilteringOn = hadFiltering(setFlags);
             const bool turnFilteringOff = hadFiltering(clearFlags);
 
-            SkDrawFilter* filter;
+            PaintFilter* filter;
             if (turnFilteringOn) {
                 // Turning filtering on overrides turning it off.
-                filter = new CompatFlagsDrawFilter(clearFlags, setFlags,
+                filter = new CompatPaintFlagsFilter(clearFlags, setFlags,
                         kLow_SkFilterQuality);
             } else if (turnFilteringOff) {
-                filter = new CompatFlagsDrawFilter(clearFlags, setFlags,
+                filter = new CompatPaintFlagsFilter(clearFlags, setFlags,
                         kNone_SkFilterQuality);
             } else {
-                filter = new SkPaintFlagsDrawFilter(clearFlags, setFlags);
+                filter = new PaintFlagsFilter(clearFlags, setFlags);
             }
             return reinterpret_cast<jlong>(filter);
         } else {
@@ -98,11 +105,11 @@ public:
 };
 
 static const JNINativeMethod drawfilter_methods[] = {
-    {"nativeDestructor", "(J)V", (void*) SkDrawFilterGlue::finalizer}
+    {"nativeDestructor", "(J)V", (void*) PaintFilterGlue::finalizer}
 };
 
 static const JNINativeMethod paintflags_methods[] = {
-    {"nativeConstructor","(II)J", (void*) SkDrawFilterGlue::CreatePaintFlagsDF}
+    {"nativeConstructor","(II)J", (void*) PaintFilterGlue::CreatePaintFlagsFilter}
 };
 
 int register_android_graphics_DrawFilter(JNIEnv* env) {
@@ -110,7 +117,7 @@ int register_android_graphics_DrawFilter(JNIEnv* env) {
                                       NELEM(drawfilter_methods));
     result |= RegisterMethodsOrDie(env, "android/graphics/PaintFlagsDrawFilter", paintflags_methods,
                                    NELEM(paintflags_methods));
-    
+
     return 0;
 }
 
