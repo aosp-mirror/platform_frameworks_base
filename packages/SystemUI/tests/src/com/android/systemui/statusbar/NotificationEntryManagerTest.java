@@ -37,7 +37,10 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.drawable.Icon;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -54,6 +57,8 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.notification.NotificationInflater;
+import com.android.systemui.statusbar.notification.RowInflaterTask;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -68,6 +73,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -99,6 +107,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private MetricsLogger mMetricsLogger;
     @Mock private SmartReplyController mSmartReplyController;
+    @Mock private RowInflaterTask mAsyncInflationTask;
 
     private NotificationData.Entry mEntry;
     private StatusBarNotification mSbn;
@@ -139,7 +148,26 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                     0,
                     NotificationManager.IMPORTANCE_DEFAULT,
                     null, null,
-                    null, null, null, true, sentiment, false);
+                    null, null, null, true, sentiment, false, null);
+            return true;
+        }).when(mRankingMap).getRanking(eq(key), any(NotificationListenerService.Ranking.class));
+    }
+
+    private void setSmartActions(String key, ArrayList<Notification.Action> smartActions) {
+        doAnswer(invocationOnMock -> {
+            NotificationListenerService.Ranking ranking = (NotificationListenerService.Ranking)
+                    invocationOnMock.getArguments()[1];
+            ranking.populate(
+                    key,
+                    0,
+                    false,
+                    0,
+                    0,
+                    NotificationManager.IMPORTANCE_DEFAULT,
+                    null, null,
+                    null, null, null, true,
+                    NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL, false,
+                    smartActions);
             return true;
         }).when(mRankingMap).getRanking(eq(key), any(NotificationListenerService.Ranking.class));
     }
@@ -426,5 +454,72 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 .getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false));
         Assert.assertTrue(newSbn.getNotification().extras
                 .getBoolean(Notification.EXTRA_HIDE_SMART_REPLIES, false));
+    }
+
+    @Test
+    public void testUpdateNotificationRanking() {
+        when(mPresenter.isDeviceProvisioned()).thenReturn(true);
+        when(mPresenter.isNotificationForCurrentProfiles(any())).thenReturn(true);
+
+        mEntry.row = mRow;
+        mEntry.setInflationTask(mAsyncInflationTask);
+        mEntryManager.getNotificationData().add(mEntry);
+        setSmartActions(mEntry.key, new ArrayList<>(Arrays.asList(createAction())));
+
+        mEntryManager.updateNotificationRanking(mRankingMap);
+        verify(mRow).updateNotification(eq(mEntry));
+        assertEquals(1, mEntry.smartActions.size());
+        assertEquals("action", mEntry.smartActions.get(0).title);
+    }
+
+    @Test
+    public void testUpdateNotificationRanking_noChange() {
+        when(mPresenter.isDeviceProvisioned()).thenReturn(true);
+        when(mPresenter.isNotificationForCurrentProfiles(any())).thenReturn(true);
+
+        mEntry.row = mRow;
+        mEntryManager.getNotificationData().add(mEntry);
+        setSmartActions(mEntry.key, null);
+
+        mEntryManager.updateNotificationRanking(mRankingMap);
+        verify(mRow, never()).updateNotification(eq(mEntry));
+        assertEquals(0, mEntry.smartActions.size());
+    }
+
+    @Test
+    public void testUpdateNotificationRanking_rowNotInflatedYet() {
+        when(mPresenter.isDeviceProvisioned()).thenReturn(true);
+        when(mPresenter.isNotificationForCurrentProfiles(any())).thenReturn(true);
+
+        mEntry.row = null;
+        mEntryManager.getNotificationData().add(mEntry);
+        setSmartActions(mEntry.key, new ArrayList<>(Arrays.asList(createAction())));
+
+        mEntryManager.updateNotificationRanking(mRankingMap);
+        verify(mRow, never()).updateNotification(eq(mEntry));
+        assertEquals(1, mEntry.smartActions.size());
+        assertEquals("action", mEntry.smartActions.get(0).title);
+    }
+
+    @Test
+    public void testUpdateNotificationRanking_pendingNotification() {
+        when(mPresenter.isDeviceProvisioned()).thenReturn(true);
+        when(mPresenter.isNotificationForCurrentProfiles(any())).thenReturn(true);
+
+        mEntry.row = null;
+        mEntryManager.mPendingNotifications.put(mEntry.key, mEntry);
+        setSmartActions(mEntry.key, new ArrayList<>(Arrays.asList(createAction())));
+
+        mEntryManager.updateNotificationRanking(mRankingMap);
+        verify(mRow, never()).updateNotification(eq(mEntry));
+        assertEquals(1, mEntry.smartActions.size());
+        assertEquals("action", mEntry.smartActions.get(0).title);
+    }
+
+    private Notification.Action createAction() {
+        return new Notification.Action.Builder(
+                Icon.createWithResource(getContext(), android.R.drawable.sym_def_app_icon),
+                "action",
+                PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"), 0)).build();
     }
 }

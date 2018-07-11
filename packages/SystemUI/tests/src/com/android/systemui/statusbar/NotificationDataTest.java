@@ -38,11 +38,16 @@ import static org.mockito.Mockito.when;
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Icon;
 import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationListenerService.Ranking;
+import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
@@ -72,6 +77,8 @@ public class NotificationDataTest extends SysuiTestCase {
     private static final int UID_ALLOW_DURING_SETUP = 456;
     private static final String TEST_HIDDEN_NOTIFICATION_KEY = "testHiddenNotificationKey";
     private static final String TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY = "exempt";
+    private static final NotificationChannel NOTIFICATION_CHANNEL =
+            new NotificationChannel("id", "name", NotificationChannel.USER_LOCKED_IMPORTANCE);
 
     private final StatusBarNotification mMockStatusBarNotification =
             mock(StatusBarNotification.class);
@@ -145,10 +152,8 @@ public class NotificationDataTest extends SysuiTestCase {
     @Test
     public void testChannelSetWhenAdded() {
         mNotificationData.add(mRow.getEntry());
-        Assert.assertTrue(mRow.getEntry().channel != null);
+        assertEquals(NOTIFICATION_CHANNEL, mRow.getEntry().channel);
     }
-
-
 
     @Test
     public void testAllRelevantNotisTaggedWithAppOps() throws Exception {
@@ -373,6 +378,32 @@ public class NotificationDataTest extends SysuiTestCase {
         assertFalse(mNotificationData.isExemptFromDndVisualSuppression(entry));
     }
 
+    @Test
+    public void testCreateNotificationDataEntry_RankingUpdate() {
+        Ranking ranking = mock(Ranking.class);
+
+        ArrayList<Notification.Action> smartActions = new ArrayList<>();
+        smartActions.add(createAction());
+        when(ranking.getSmartActions()).thenReturn(smartActions);
+
+        when(ranking.getChannel()).thenReturn(NOTIFICATION_CHANNEL);
+
+        when(ranking.getUserSentiment()).thenReturn(Ranking.USER_SENTIMENT_NEGATIVE);
+
+        SnoozeCriterion snoozeCriterion = new SnoozeCriterion("id", "explanation", "confirmation");
+        ArrayList<SnoozeCriterion> snoozeCriterions = new ArrayList<>();
+        snoozeCriterions.add(snoozeCriterion);
+        when(ranking.getSnoozeCriteria()).thenReturn(snoozeCriterions);
+
+        NotificationData.Entry entry =
+                new NotificationData.Entry(mMockStatusBarNotification, ranking);
+
+        assertEquals(smartActions, entry.smartActions);
+        assertEquals(NOTIFICATION_CHANNEL, entry.channel);
+        assertEquals(Ranking.USER_SENTIMENT_NEGATIVE, entry.userSentiment);
+        assertEquals(snoozeCriterions, entry.snoozeCriteria);
+    }
+
     private void initStatusBarNotification(boolean allowDuringSetup) {
         Bundle bundle = new Bundle();
         bundle.putBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, allowDuringSetup);
@@ -388,12 +419,7 @@ public class NotificationDataTest extends SysuiTestCase {
         }
 
         @Override
-        public NotificationChannel getChannel(String key) {
-            return new NotificationChannel(null, null, 0);
-        }
-
-        @Override
-        protected boolean getRanking(String key, NotificationListenerService.Ranking outRanking) {
+        protected boolean getRanking(String key, Ranking outRanking) {
             super.getRanking(key, outRanking);
             if (key.equals(TEST_HIDDEN_NOTIFICATION_KEY)) {
                 outRanking.populate(key, outRanking.getRank(),
@@ -401,23 +427,31 @@ public class NotificationDataTest extends SysuiTestCase {
                         outRanking.getVisibilityOverride(), outRanking.getSuppressedVisualEffects(),
                         outRanking.getImportance(), outRanking.getImportanceExplanation(),
                         outRanking.getOverrideGroupKey(), outRanking.getChannel(), null, null,
-                        outRanking.canShowBadge(), outRanking.getUserSentiment(), true);
+                        outRanking.canShowBadge(), outRanking.getUserSentiment(), true,
+                        null);
             } else if (key.equals(TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY)) {
                 outRanking.populate(key, outRanking.getRank(),
                         outRanking.matchesInterruptionFilter(),
                         outRanking.getVisibilityOverride(), 255,
                         outRanking.getImportance(), outRanking.getImportanceExplanation(),
                         outRanking.getOverrideGroupKey(), outRanking.getChannel(), null, null,
-                        outRanking.canShowBadge(), outRanking.getUserSentiment(), true);
+                        outRanking.canShowBadge(), outRanking.getUserSentiment(), true, null);
             } else {
                 outRanking.populate(key, outRanking.getRank(),
                         outRanking.matchesInterruptionFilter(),
                         outRanking.getVisibilityOverride(), outRanking.getSuppressedVisualEffects(),
                         outRanking.getImportance(), outRanking.getImportanceExplanation(),
-                        outRanking.getOverrideGroupKey(), outRanking.getChannel(), null, null,
-                        outRanking.canShowBadge(), outRanking.getUserSentiment(), false);
+                        outRanking.getOverrideGroupKey(), NOTIFICATION_CHANNEL, null, null,
+                        outRanking.canShowBadge(), outRanking.getUserSentiment(), false, null);
             }
             return true;
         }
+    }
+
+    private Notification.Action createAction() {
+        return new Notification.Action.Builder(
+                Icon.createWithResource(getContext(), android.R.drawable.sym_def_app_icon),
+                "action",
+                PendingIntent.getBroadcast(getContext(), 0, new Intent("Action"), 0)).build();
     }
 }

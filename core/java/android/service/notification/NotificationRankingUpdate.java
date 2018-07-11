@@ -37,12 +37,13 @@ public class NotificationRankingUpdate implements Parcelable {
     private final Bundle mShowBadge;
     private final Bundle mUserSentiment;
     private final Bundle mHidden;
+    private final Bundle mSmartActions;
 
     public NotificationRankingUpdate(String[] keys, String[] interceptedKeys,
             Bundle visibilityOverrides, Bundle suppressedVisualEffects,
             int[] importance, Bundle explanation, Bundle overrideGroupKeys,
             Bundle channels, Bundle overridePeople, Bundle snoozeCriteria,
-            Bundle showBadge, Bundle userSentiment, Bundle hidden) {
+            Bundle showBadge, Bundle userSentiment, Bundle hidden, Bundle smartActions) {
         mKeys = keys;
         mInterceptedKeys = interceptedKeys;
         mVisibilityOverrides = visibilityOverrides;
@@ -56,6 +57,7 @@ public class NotificationRankingUpdate implements Parcelable {
         mShowBadge = showBadge;
         mUserSentiment = userSentiment;
         mHidden = hidden;
+        mSmartActions = smartActions;
     }
 
     public NotificationRankingUpdate(Parcel in) {
@@ -73,6 +75,7 @@ public class NotificationRankingUpdate implements Parcelable {
         mShowBadge = in.readBundle();
         mUserSentiment = in.readBundle();
         mHidden = in.readBundle();
+        mSmartActions = in.readBundle();
     }
 
     @Override
@@ -95,6 +98,7 @@ public class NotificationRankingUpdate implements Parcelable {
         out.writeBundle(mShowBadge);
         out.writeBundle(mUserSentiment);
         out.writeBundle(mHidden);
+        out.writeBundle(mSmartActions);
     }
 
     public static final Parcelable.Creator<NotificationRankingUpdate> CREATOR
@@ -158,5 +162,9 @@ public class NotificationRankingUpdate implements Parcelable {
 
     public Bundle getHidden() {
         return mHidden;
+    }
+
+    public Bundle getSmartActions() {
+        return mSmartActions;
     }
 }

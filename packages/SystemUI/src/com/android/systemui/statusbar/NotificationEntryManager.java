@@ -19,6 +19,7 @@ import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENAB
 import static com.android.systemui.statusbar.NotificationRemoteInputManager
         .FORCE_REMOTE_INPUT_HISTORY;
 
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -37,6 +38,7 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
@@ -726,9 +728,9 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 && !mPresenter.isPresenterFullyCollapsed();
         row.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
         row.setUseIncreasedHeadsUpHeight(useIncreasedHeadsUp);
+        row.setSmartActions(entry.smartActions);
         row.updateNotification(entry);
     }
-
 
     protected void addNotificationViews(NotificationData.Entry entry) {
         if (entry == null) {
@@ -740,12 +742,13 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         updateNotifications();
     }
 
-    protected NotificationData.Entry createNotificationViews(StatusBarNotification sbn)
+    protected NotificationData.Entry createNotificationViews(
+            StatusBarNotification sbn, NotificationListenerService.Ranking ranking)
             throws InflationException {
         if (DEBUG) {
-            Log.d(TAG, "createNotificationViews(notification=" + sbn);
+            Log.d(TAG, "createNotificationViews(notification=" + sbn + " " + ranking);
         }
-        NotificationData.Entry entry = new NotificationData.Entry(sbn);
+        NotificationData.Entry entry = new NotificationData.Entry(sbn, ranking);
         Dependency.get(LeakDetector.class).trackInstance(entry);
         entry.createIcons(mContext, sbn);
         // Construct the expanded view.
@@ -754,12 +757,14 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     }
 
     private void addNotificationInternal(StatusBarNotification notification,
-            NotificationListenerService.RankingMap ranking) throws InflationException {
+            NotificationListenerService.RankingMap rankingMap) throws InflationException {
         String key = notification.getKey();
         if (DEBUG) Log.d(TAG, "addNotification key=" + key);
 
-        mNotificationData.updateRanking(ranking);
-        NotificationData.Entry shadeEntry = createNotificationViews(notification);
+        mNotificationData.updateRanking(rankingMap);
+        NotificationListenerService.Ranking ranking = new NotificationListenerService.Ranking();
+        rankingMap.getRanking(key, ranking);
+        NotificationData.Entry shadeEntry = createNotificationViews(notification, ranking);
         boolean isHeadsUped = shouldPeek(shadeEntry);
         if (!isHeadsUped && notification.getNotification().fullScreenIntent != null) {
             if (shouldSuppressFullScreenIntent(shadeEntry)) {
@@ -905,9 +910,55 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mPresenter.updateNotificationViews();
     }
 
-    public void updateNotificationRanking(NotificationListenerService.RankingMap ranking) {
-        mNotificationData.updateRanking(ranking);
+    public void updateNotificationRanking(NotificationListenerService.RankingMap rankingMap) {
+        List<NotificationData.Entry> entries = new ArrayList<>();
+        entries.addAll(mNotificationData.getActiveNotifications());
+        entries.addAll(mPendingNotifications.values());
+
+        // Has a copy of the current UI adjustments.
+        ArrayMap<String, NotificationUiAdjustment> oldAdjustments = new ArrayMap<>();
+        for (NotificationData.Entry entry : entries) {
+            NotificationUiAdjustment adjustment =
+                    NotificationUiAdjustment.extractFromNotificationEntry(entry);
+            oldAdjustments.put(entry.key, adjustment);
+        }
+
+        // Populate notification entries from the new rankings.
+        mNotificationData.updateRanking(rankingMap);
+        updateRankingOfPendingNotifications(rankingMap);
+
+        // By comparing the old and new UI adjustments, reinflate the view accordingly.
+        for (NotificationData.Entry entry : entries) {
+            NotificationUiAdjustment newAdjustment =
+                    NotificationUiAdjustment.extractFromNotificationEntry(entry);
+
+            if (NotificationUiAdjustment.needReinflate(
+                    oldAdjustments.get(entry.key), newAdjustment)) {
+                if (entry.row != null) {
+                    entry.reset();
+                    PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
+                            entry.notification.getUser().getIdentifier());
+                    updateNotification(entry, pmUser, entry.notification, entry.row);
+                } else {
+                    // Once the RowInflaterTask is done, it will pick up the updated entry, so
+                    // no-op here.
+                }
+            }
+        }
+
         updateNotifications();
+    }
+
+    private void updateRankingOfPendingNotifications(
+            @Nullable NotificationListenerService.RankingMap rankingMap) {
+        if (rankingMap == null) {
+            return;
+        }
+        NotificationListenerService.Ranking tmpRanking = new NotificationListenerService.Ranking();
+        for (NotificationData.Entry pendingNotification : mPendingNotifications.values()) {
+            rankingMap.getRanking(pendingNotification.key, tmpRanking);
+            pendingNotification.populateFromRanking(tmpRanking);
+        }
     }
 
     protected boolean shouldPeek(NotificationData.Entry entry) {

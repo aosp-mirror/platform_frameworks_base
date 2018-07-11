@@ -27,15 +27,17 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.R;
-import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.NotificationContentView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.Assert;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -67,6 +69,7 @@ public class NotificationInflater {
     private boolean mIsChildInGroup;
     private InflationCallback mCallback;
     private boolean mRedactAmbient;
+    private List<Notification.Action> mSmartActions;
 
     public NotificationInflater(ExpandableNotificationRow row) {
         mRow = row;
@@ -93,6 +96,10 @@ public class NotificationInflater {
 
     public void setUsesIncreasedHeight(boolean usesIncreasedHeight) {
         mUsesIncreasedHeight = usesIncreasedHeight;
+    }
+
+    public void setSmartActions(List<Notification.Action> smartActions) {
+        mSmartActions = smartActions;
     }
 
     public void setUsesIncreasedHeadsUpHeight(boolean usesIncreasedHeight) {
@@ -140,7 +147,7 @@ public class NotificationInflater {
         AsyncInflationTask task = new AsyncInflationTask(sbn, reInflateFlags, mRow,
                 mIsLowPriority,
                 mIsChildInGroup, mUsesIncreasedHeight, mUsesIncreasedHeadsUpHeight, mRedactAmbient,
-                mCallback, mRemoteViewClickHandler);
+                mCallback, mRemoteViewClickHandler, mSmartActions);
         if (mCallback != null && mCallback.doInflateSynchronous()) {
             task.onPostExecute(task.doInBackground());
         } else {
@@ -586,13 +593,15 @@ public class NotificationInflater {
         private Exception mError;
         private RemoteViews.OnClickHandler mRemoteViewClickHandler;
         private CancellationSignal mCancellationSignal;
+        private List<Notification.Action> mSmartActions;
 
         private AsyncInflationTask(StatusBarNotification notification,
                 int reInflateFlags, ExpandableNotificationRow row, boolean isLowPriority,
                 boolean isChildInGroup, boolean usesIncreasedHeight,
                 boolean usesIncreasedHeadsUpHeight, boolean redactAmbient,
                 InflationCallback callback,
-                RemoteViews.OnClickHandler remoteViewClickHandler) {
+                RemoteViews.OnClickHandler remoteViewClickHandler,
+                List<Notification.Action> smartActions) {
             mRow = row;
             mSbn = notification;
             mReInflateFlags = reInflateFlags;
@@ -604,6 +613,9 @@ public class NotificationInflater {
             mRedactAmbient = redactAmbient;
             mRemoteViewClickHandler = remoteViewClickHandler;
             mCallback = callback;
+            mSmartActions = smartActions == null
+                    ? Collections.emptyList()
+                    : new ArrayList<>(smartActions);
             NotificationData.Entry entry = row.getEntry();
             entry.setInflationTask(this);
         }
@@ -619,6 +631,9 @@ public class NotificationInflater {
                 final Notification.Builder recoveredBuilder
                         = Notification.Builder.recoverBuilder(mContext,
                         mSbn.getNotification());
+
+                applyChanges(recoveredBuilder);
+
                 Context packageContext = mSbn.getPackageContext(mContext);
                 Notification notification = mSbn.getNotification();
                 if (notification.isMediaNotification()) {
@@ -643,6 +658,18 @@ public class NotificationInflater {
                         mRemoteViewClickHandler, this);
             } else {
                 handleError(mError);
+            }
+        }
+
+        /**
+         * Apply changes to the given notification builder, like adding smart actions suggested by
+         * a {@link android.service.notification.NotificationAssistantService}.
+         */
+        private void applyChanges(Notification.Builder builder) {
+            if (mSmartActions != null) {
+                for (Notification.Action smartAction : mSmartActions) {
+                    builder.addAction(smartAction);
+                }
             }
         }
 

@@ -5260,6 +5260,7 @@ public class NotificationManagerService extends SystemService {
             ArrayList<ArrayList<SnoozeCriterion>> snoozeCriteriaBefore = new ArrayList<>(N);
             ArrayList<Integer> userSentimentBefore = new ArrayList<>(N);
             ArrayList<Integer> suppressVisuallyBefore = new ArrayList<>(N);
+            ArrayList<ArrayList<Notification.Action>> smartActionsBefore = new ArrayList<>(N);
             for (int i = 0; i < N; i++) {
                 final NotificationRecord r = mNotificationList.get(i);
                 orderBefore.add(r.getKey());
@@ -5271,6 +5272,7 @@ public class NotificationManagerService extends SystemService {
                 snoozeCriteriaBefore.add(r.getSnoozeCriteria());
                 userSentimentBefore.add(r.getUserSentiment());
                 suppressVisuallyBefore.add(r.getSuppressedVisualEffects());
+                smartActionsBefore.add(r.getSmartActions());
                 mRankingHelper.extractSignals(r);
             }
             mRankingHelper.sort(mNotificationList);
@@ -5285,7 +5287,8 @@ public class NotificationManagerService extends SystemService {
                         || !Objects.equals(snoozeCriteriaBefore.get(i), r.getSnoozeCriteria())
                         || !Objects.equals(userSentimentBefore.get(i), r.getUserSentiment())
                         || !Objects.equals(suppressVisuallyBefore.get(i),
-                        r.getSuppressedVisualEffects())) {
+                        r.getSuppressedVisualEffects())
+                        || !Objects.equals(smartActionsBefore.get(i), r.getSmartActions())) {
                     mHandler.scheduleSendRankingUpdate();
                     return;
                 }
@@ -6268,6 +6271,7 @@ public class NotificationManagerService extends SystemService {
         Bundle showBadge = new Bundle();
         Bundle userSentiment = new Bundle();
         Bundle hidden = new Bundle();
+        Bundle smartActions = new Bundle();
         for (int i = 0; i < N; i++) {
             NotificationRecord record = mNotificationList.get(i);
             if (!isVisibleToListener(record.sbn, info)) {
@@ -6295,6 +6299,7 @@ public class NotificationManagerService extends SystemService {
             showBadge.putBoolean(key, record.canShowBadge());
             userSentiment.putInt(key, record.getUserSentiment());
             hidden.putBoolean(key, record.isHidden());
+            smartActions.putParcelableArrayList(key, record.getSmartActions());
         }
         final int M = keys.size();
         String[] keysAr = keys.toArray(new String[M]);
@@ -6305,7 +6310,8 @@ public class NotificationManagerService extends SystemService {
         }
         return new NotificationRankingUpdate(keysAr, interceptedKeysAr, visibilityOverrides,
                 suppressedVisualEffects, importanceAr, explanation, overrideGroupKeys,
-                channels, overridePeople, snoozeCriteria, showBadge, userSentiment, hidden);
+                channels, overridePeople, snoozeCriteria, showBadge, userSentiment, hidden,
+                smartActions);
     }
 
     boolean hasCompanionDevice(ManagedServiceInfo info) {
