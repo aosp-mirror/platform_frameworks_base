@@ -442,10 +442,8 @@ public class HdmiCecMessageBuilder {
      * @return newly created {@link HdmiCecMessage}
      */
     static HdmiCecMessage buildReportAudioStatus(int src, int dest, int volume, boolean mute) {
-        byte[] params = new byte[] {
-            mute ? (byte) (1 & 0xFF) : (byte) (0 & 0xFF),
-            (byte) (volume & 0xFF)
-        };
+        byte status = (byte) ((byte) (mute ? 1 << 7 : 0) | ((byte) volume & 0x7F));
+        byte[] params = new byte[] { status };
         return buildCommand(src, dest, Constants.MESSAGE_REPORT_AUDIO_STATUS, params);
     }
 
