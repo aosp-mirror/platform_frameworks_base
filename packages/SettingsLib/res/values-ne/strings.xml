@@ -322,7 +322,7 @@
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"अनुप्रयोगले कुनै मान्य च्यानल बिना सूचना पोस्ट गर्दा स्क्रिनमा चेतावनी देखाउँछ"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"बाह्यमा बल प्रयोगको अनुमति प्राप्त अनुप्रयोगहरू"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"म्यानिफेेस्टका मानहरूको ख्याल नगरी कुनै पनि अनुप्रयोगलाई बाह्य भण्डारणमा लेख्न सकिने खाले बनाउँछ"</string>
-    <string name="force_resizable_activities" msgid="8615764378147824985">"गतिविधिहरू रिसाइज गर्नको लागि बाध्य गर्नुहोस्"</string>
+    <string name="force_resizable_activities" msgid="8615764378147824985">"आकार बदल्न योग्य हुने बनाउन गतिविधिहरूलाई बाध्यात्मक बनाउनुहोस्।"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"म्यानिफेेस्ट मानहरूको ख्याल नगरी, बहु-विन्डोको लागि सबै रिसाइज गर्न सकिने गतिविधिहरू बनाउनुहोस्।"</string>
     <string name="enable_freeform_support" msgid="1461893351278940416">"फ्रिफर्म विन्डोहरू सक्रिय गर्नुहोस्"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"प्रयोगात्मक फ्रिफर्म विन्डोहरूका लागि समर्थन सक्रिय गर्नुहोस्।"</string>

@@ -308,8 +308,8 @@
     <string name="track_frame_time" msgid="6146354853663863443">"சுயவிவர GPU ரெண்டரிங்"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU பிழைத்திருத்த லேயர்களை இயக்கு"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"பிழைத்திருத்த ஆப்ஸிற்கு, GPU பிழைத்திருத்த லேயர்களை ஏற்றுவதற்கு அனுமதி"</string>
-    <string name="window_animation_scale_title" msgid="6162587588166114700">"சாளர அனிமேஷன் அளவு"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"அனிமேஷன் மாற்றத்தின் அளவு"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"சாளர அனிமேஷன் வேகம்"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"அனிமேஷன் மாற்றத்தின் வேகம்"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"அனிமேட்டர் கால அளவு"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"இரண்டாம்நிலைக் காட்சிகளை உருவகப்படுத்து"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"ஆப்ஸ்"</string>
@@ -360,7 +360,7 @@
     <string name="picture_color_mode" msgid="4560755008730283695">"படத்தின் வண்ணப் பயன்முறை"</string>
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGBஐப் பயன்படுத்தும்"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"முடக்கப்பட்டது"</string>
-    <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"மோனோகுரோமசி"</string>
+    <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"ஒற்றை நிறத் தன்மை"</string>
     <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"நிறம் அடையாளங்காண முடியாமை (சிவப்பு-பச்சை)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"நிறம் அடையாளங்காண முடியாமை (சிவப்பு-பச்சை)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"நிறம் அடையாளங்காண முடியாமை (நீலம்-மஞ்சள்)"</string>
