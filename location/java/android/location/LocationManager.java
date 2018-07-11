@@ -22,7 +22,6 @@ import static android.Manifest.permission.LOCATION_HARDWARE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
 import android.Manifest;
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
@@ -42,16 +41,11 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
-import android.text.TextUtils;
-import android.util.ArraySet;
 import android.util.Log;
 import com.android.internal.location.ProviderProperties;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 /**
  * This class provides access to the system location services.  These
@@ -331,7 +325,7 @@ public class LocationManager {
             Message msg = Message.obtain();
             msg.what = TYPE_LOCATION_CHANGED;
             msg.obj = location;
-            mListenerHandler.sendMessage(msg);
+            sendCallbackMessage(msg);
         }
 
         @Override
@@ -345,7 +339,7 @@ public class LocationManager {
                 b.putBundle("extras", extras);
             }
             msg.obj = b;
-            mListenerHandler.sendMessage(msg);
+            sendCallbackMessage(msg);
         }
 
         @Override
@@ -353,7 +347,7 @@ public class LocationManager {
             Message msg = Message.obtain();
             msg.what = TYPE_PROVIDER_ENABLED;
             msg.obj = provider;
-            mListenerHandler.sendMessage(msg);
+            sendCallbackMessage(msg);
         }
 
         @Override
@@ -361,7 +355,13 @@ public class LocationManager {
             Message msg = Message.obtain();
             msg.what = TYPE_PROVIDER_DISABLED;
             msg.obj = provider;
-            mListenerHandler.sendMessage(msg);
+            sendCallbackMessage(msg);
+        }
+
+        private void sendCallbackMessage(Message msg) {
+            if (!mListenerHandler.sendMessage(msg)) {
+                locationCallbackFinished();
+            }
         }
 
         private void _handleMessage(Message msg) {
@@ -384,6 +384,10 @@ public class LocationManager {
                     mListener.onProviderDisabled((String) msg.obj);
                     break;
             }
+            locationCallbackFinished();
+        }
+
+        private void locationCallbackFinished() {
             try {
                 mService.locationCallbackFinished(this);
             } catch (RemoteException e) {
