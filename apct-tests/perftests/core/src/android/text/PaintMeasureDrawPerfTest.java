@@ -42,7 +42,7 @@ public class PaintMeasureDrawPerfTest {
 
     private static final boolean[] BOOLEANS = new boolean[]{false, true};
 
-    @Parameterized.Parameters(name = "cached={1},{0}chars")
+    @Parameterized.Parameters(name = "cached {1} {0}chars")
     public static Collection cases() {
         final List<Object[]> params = new ArrayList<>();
         for (int length : new int[]{128}) {
