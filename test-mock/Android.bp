@@ -18,6 +18,7 @@
 // ===================================
 java_library {
     name: "android.test.mock",
+    installable: true,
 
     java_version: "1.8",
     srcs: ["src/**/*.java"],
@@ -91,6 +92,7 @@ java_library_static {
             enabled: false,
         },
     },
+    compile_dex: true,
 }
 
 java_library_static {
@@ -104,4 +106,5 @@ java_library_static {
             enabled: false,
         },
     },
+    compile_dex: true,
 }

@@ -1313,7 +1313,8 @@ public class Instrumentation {
      * @param activity The activity being restored.
      * @param savedInstanceState The previously saved state being restored.
      */
-    public void callActivityOnRestoreInstanceState(Activity activity, Bundle savedInstanceState) {
+    public void callActivityOnRestoreInstanceState(@NonNull Activity activity,
+            @NonNull Bundle savedInstanceState) {
         activity.performRestoreInstanceState(savedInstanceState);
     }
 
@@ -1322,11 +1323,12 @@ public class Instrumentation {
      * method.  The default implementation simply calls through to that method.
      *
      * @param activity The activity being restored.
-     * @param savedInstanceState The previously saved state being restored.
+     * @param savedInstanceState The previously saved state being restored (or null).
      * @param persistentState The previously persisted state (or null)
      */
-    public void callActivityOnRestoreInstanceState(Activity activity, Bundle savedInstanceState,
-            PersistableBundle persistentState) {
+    public void callActivityOnRestoreInstanceState(@NonNull Activity activity,
+            @Nullable Bundle savedInstanceState,
+            @Nullable PersistableBundle persistentState) {
         activity.performRestoreInstanceState(savedInstanceState, persistentState);
     }
 
@@ -1335,11 +1337,12 @@ public class Instrumentation {
      * The default implementation simply calls through to that method.
      *
      * @param activity The activity being created.
-     * @param icicle The previously frozen state (or null) to pass through to
+     * @param savedInstanceState The previously saved state (or null) to pass through to
      *               onPostCreate().
      */
-    public void callActivityOnPostCreate(Activity activity, Bundle icicle) {
-        activity.onPostCreate(icicle);
+    public void callActivityOnPostCreate(@NonNull Activity activity,
+            @Nullable Bundle savedInstanceState) {
+        activity.onPostCreate(savedInstanceState);
     }
 
     /**
@@ -1347,12 +1350,14 @@ public class Instrumentation {
      * The default implementation simply calls through to that method.
      *
      * @param activity The activity being created.
-     * @param icicle The previously frozen state (or null) to pass through to
+     * @param savedInstanceState The previously frozen state (or null) to pass through to
      *               onPostCreate().
+     * @param persistentState The previously persisted state (or null)
      */
-    public void callActivityOnPostCreate(Activity activity, Bundle icicle,
-            PersistableBundle persistentState) {
-        activity.onPostCreate(icicle, persistentState);
+    public void callActivityOnPostCreate(@NonNull Activity activity,
+            @Nullable Bundle savedInstanceState,
+            @Nullable PersistableBundle persistentState) {
+        activity.onPostCreate(savedInstanceState, persistentState);
     }
 
     /**
@@ -1439,7 +1444,8 @@ public class Instrumentation {
      * @param activity The activity being saved.
      * @param outState The bundle to pass to the call.
      */
-    public void callActivityOnSaveInstanceState(Activity activity, Bundle outState) {
+    public void callActivityOnSaveInstanceState(@NonNull Activity activity,
+            @NonNull Bundle outState) {
         activity.performSaveInstanceState(outState);
     }
 
@@ -1450,8 +1456,8 @@ public class Instrumentation {
      * @param outState The bundle to pass to the call.
      * @param outPersistentState The persistent bundle to pass to the call.
      */
-    public void callActivityOnSaveInstanceState(Activity activity, Bundle outState,
-            PersistableBundle outPersistentState) {
+    public void callActivityOnSaveInstanceState(@NonNull Activity activity,
+            @NonNull Bundle outState, @NonNull PersistableBundle outPersistentState) {
         activity.performSaveInstanceState(outState, outPersistentState);
     }
 

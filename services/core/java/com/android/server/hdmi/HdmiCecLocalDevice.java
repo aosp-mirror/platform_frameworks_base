@@ -264,14 +264,28 @@ abstract class HdmiCecLocalDevice {
                 return handleRoutingChange(message);
             case Constants.MESSAGE_ROUTING_INFORMATION:
                 return handleRoutingInformation(message);
+            case Constants.MESSAGE_REQUEST_ARC_INITIATION:
+                return handleRequestArcInitiate(message);
+            case Constants.MESSAGE_REQUEST_ARC_TERMINATION:
+                return handleRequestArcTermination(message);
             case Constants.MESSAGE_INITIATE_ARC:
                 return handleInitiateArc(message);
             case Constants.MESSAGE_TERMINATE_ARC:
                 return handleTerminateArc(message);
+            case Constants.MESSAGE_REPORT_ARC_INITIATED:
+                return handleReportArcInitiate(message);
+            case Constants.MESSAGE_REPORT_ARC_TERMINATED:
+                return handleReportArcTermination(message);
+            case Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST:
+                return handleSystemAudioModeRequest(message);
             case Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE:
                 return handleSetSystemAudioMode(message);
             case Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS:
                 return handleSystemAudioModeStatus(message);
+            case Constants.MESSAGE_GIVE_SYSTEM_AUDIO_MODE_STATUS:
+                return handleGiveSystemAudioModeStatus(message);
+            case Constants.MESSAGE_GIVE_AUDIO_STATUS:
+                return handleGiveAudioStatus(message);
             case Constants.MESSAGE_REPORT_AUDIO_STATUS:
                 return handleReportAudioStatus(message);
             case Constants.MESSAGE_STANDBY:
@@ -419,7 +433,15 @@ abstract class HdmiCecLocalDevice {
         return false;
     }
 
+    protected boolean handleGiveSystemAudioModeStatus(HdmiCecMessage message) {
+        return false;
+    }
+
     protected boolean handleSetSystemAudioMode(HdmiCecMessage message) {
+        return false;
+    }
+
+    protected boolean handleSystemAudioModeRequest(HdmiCecMessage message) {
         return false;
     }
 
@@ -431,7 +453,27 @@ abstract class HdmiCecLocalDevice {
         return false;
     }
 
+    protected boolean handleRequestArcInitiate(HdmiCecMessage message) {
+        return false;
+    }
+
+    protected boolean handleRequestArcTermination(HdmiCecMessage message) {
+        return false;
+    }
+
+    protected boolean handleReportArcInitiate(HdmiCecMessage message) {
+        return false;
+    }
+
+    protected boolean handleReportArcTermination(HdmiCecMessage message) {
+        return false;
+    }
+
     protected boolean handleReportAudioStatus(HdmiCecMessage message) {
+        return false;
+    }
+
+    protected boolean handleGiveAudioStatus(HdmiCecMessage message) {
         return false;
     }
 

@@ -12113,7 +12113,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return imp;
     }
 
-    private void fillInProcMemInfoLocked(ProcessRecord app,
+    private void fillInProcMemInfo(ProcessRecord app,
             ActivityManager.RunningAppProcessInfo outInfo,
             int clientTargetSdk) {
         outInfo.pid = app.pid;
@@ -12133,8 +12133,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         outInfo.importance = procStateToImportance(procState, adj, outInfo, clientTargetSdk);
         outInfo.importanceReasonCode = app.adjTypeCode;
         outInfo.processState = app.curProcState;
-        outInfo.isFocused = (app == getTopAppLocked());
-        outInfo.lastActivityTime = app.lastActivityTime;
     }
 
     @Override
@@ -12165,7 +12163,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ActivityManager.RunningAppProcessInfo currApp =
                         new ActivityManager.RunningAppProcessInfo(app.processName,
                                 app.pid, app.getPackageList());
-                    fillInProcMemInfoLocked(app, currApp, clientTargetSdk);
+                    fillInProcMemInfo(app, currApp, clientTargetSdk);
                     if (app.adjSource instanceof ProcessRecord) {
                         currApp.importanceReasonPid = ((ProcessRecord)app.adjSource).pid;
                         currApp.importanceReasonImportance =
@@ -12234,7 +12232,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 proc = mPidsSelfLocked.get(Binder.getCallingPid());
             }
             if (proc != null) {
-                fillInProcMemInfoLocked(proc, outState, clientTargetSdk);
+                fillInProcMemInfo(proc, outState, clientTargetSdk);
             }
         }
     }
@@ -16017,6 +16015,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         updateCpuStatsNow();
         long[] memtrackTmp = new long[1];
+        long[] swaptrackTmp = new long[2];
         final List<ProcessCpuTracker.Stats> stats;
         // Get a list of Stats that have vsize > 0
         synchronized (mProcessCpuTracker) {
@@ -16027,12 +16026,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int statsCount = stats.size();
         for (int i = 0; i < statsCount; i++) {
             ProcessCpuTracker.Stats st = stats.get(i);
-            long pss = Debug.getPss(st.pid, null, memtrackTmp);
+            long pss = Debug.getPss(st.pid, swaptrackTmp, memtrackTmp);
             if (pss > 0) {
                 if (infoMap.indexOfKey(st.pid) < 0) {
                     ProcessMemInfo mi = new ProcessMemInfo(st.name, st.pid,
                             ProcessList.NATIVE_ADJ, -1, "native", null);
                     mi.pss = pss;
+                    mi.swapPss = swaptrackTmp[1];
                     mi.memtrack = memtrackTmp[0];
                     memInfos.add(mi);
                 }
@@ -16040,14 +16040,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         long totalPss = 0;
+        long totalSwapPss = 0;
         long totalMemtrack = 0;
         for (int i=0, N=memInfos.size(); i<N; i++) {
             ProcessMemInfo mi = memInfos.get(i);
             if (mi.pss == 0) {
-                mi.pss = Debug.getPss(mi.pid, null, memtrackTmp);
+                mi.pss = Debug.getPss(mi.pid, swaptrackTmp, memtrackTmp);
+                mi.swapPss = swaptrackTmp[1];
                 mi.memtrack = memtrackTmp[0];
             }
             totalPss += mi.pss;
+            totalSwapPss += mi.swapPss;
             totalMemtrack += mi.memtrack;
         }
         Collections.sort(memInfos, new Comparator<ProcessMemInfo>() {
@@ -16209,7 +16212,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         memInfoBuilder.append("\n");
         memInfoBuilder.append("  Lost RAM: ");
         memInfoBuilder.append(stringifyKBSize(memInfo.getTotalSizeKb()
-                - totalPss - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
+                - (totalPss - totalSwapPss) - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
                 - memInfo.getKernelUsedSizeKb() - memInfo.getZramTotalSizeKb()));
         memInfoBuilder.append("\n");
         Slog.i(TAG, "Low on memory:");
@@ -20661,22 +20664,20 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    ProcessRecord getTopAppLocked() {
-        final ActivityRecord TOP_ACT = resumedAppLocked();
-        if (TOP_ACT != null && TOP_ACT.hasProcess()) {
-            return (ProcessRecord) TOP_ACT.app.mOwner;
-        } else {
-            return null;
-        }
-    }
-
-    @GuardedBy("this")
     final void updateOomAdjLocked() {
-        final ProcessRecord TOP_APP = getTopAppLocked();
+        final ActivityRecord TOP_ACT = resumedAppLocked();
+        final ProcessRecord TOP_APP = TOP_ACT != null && TOP_ACT.hasProcess()
+                ? (ProcessRecord) TOP_ACT.app.mOwner : null;
         final long now = SystemClock.uptimeMillis();
         final long nowElapsed = SystemClock.elapsedRealtime();
         final long oldTime = now - ProcessList.MAX_EMPTY_TIME;
         final int N = mLruProcesses.size();
+
+        if (false) {
+            RuntimeException e = new RuntimeException();
+            e.fillInStackTrace();
+            Slog.i(TAG, "updateOomAdj: top=" + TOP_ACT, e);
+        }
 
         // Reset state in all uid records.
         for (int i=mActiveUids.size()-1; i>=0; i--) {

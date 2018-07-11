@@ -20,12 +20,12 @@
 
 #include "android_media_Media2DataSource.h"
 
-#include "android_runtime/AndroidRuntime.h"
-#include "android_runtime/Log.h"
+#include "log/log.h"
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 
 #include <drm/drm_framework_common.h>
+#include <mediaplayer2/JavaVMHelper.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <nativehelper/ScopedLocalRef.h>
 
@@ -56,7 +56,7 @@ JMedia2DataSource::JMedia2DataSource(JNIEnv* env, jobject source)
 }
 
 JMedia2DataSource::~JMedia2DataSource() {
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = JavaVMHelper::getJNIEnv();
     env->DeleteGlobalRef(mMedia2DataSourceObj);
     env->DeleteGlobalRef(mByteArrayObj);
 }
@@ -75,12 +75,12 @@ ssize_t JMedia2DataSource::readAt(off64_t offset, void *data, size_t size) {
         size = kBufferSize;
     }
 
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = JavaVMHelper::getJNIEnv();
     jint numread = env->CallIntMethod(mMedia2DataSourceObj, mReadAtMethod,
             (jlong)offset, mByteArrayObj, (jint)0, (jint)size);
     if (env->ExceptionCheck()) {
         ALOGW("An exception occurred in readAt()");
-        LOGW_EX(env);
+        jniLogException(env, ANDROID_LOG_WARN, LOG_TAG);
         env->ExceptionClear();
         mJavaObjStatus = UNKNOWN_ERROR;
         return -1;
@@ -117,11 +117,11 @@ status_t JMedia2DataSource::getSize(off64_t* size) {
         return OK;
     }
 
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = JavaVMHelper::getJNIEnv();
     *size = env->CallLongMethod(mMedia2DataSourceObj, mGetSizeMethod);
     if (env->ExceptionCheck()) {
         ALOGW("An exception occurred in getSize()");
-        LOGW_EX(env);
+        jniLogException(env, ANDROID_LOG_WARN, LOG_TAG);
         env->ExceptionClear();
         // After returning an error, size shouldn't be used by callers.
         *size = UNKNOWN_ERROR;
@@ -142,7 +142,7 @@ status_t JMedia2DataSource::getSize(off64_t* size) {
 void JMedia2DataSource::close() {
     Mutex::Autolock lock(mLock);
 
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    JNIEnv* env = JavaVMHelper::getJNIEnv();
     env->CallVoidMethod(mMedia2DataSourceObj, mCloseMethod);
     // The closed state is effectively the same as an error state.
     mJavaObjStatus = UNKNOWN_ERROR;

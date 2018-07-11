@@ -1173,9 +1173,7 @@ public class RankingHelper implements RankingConfig {
                 pw.println();
                 for (NotificationChannel channel : r.channels.values()) {
                     pw.print(prefix);
-                    pw.print("  ");
-                    pw.print("  ");
-                    pw.println(channel);
+                    channel.dump(pw, "    ", filter.redact);
                 }
                 for (NotificationChannelGroup group : r.groups.values()) {
                     pw.print(prefix);

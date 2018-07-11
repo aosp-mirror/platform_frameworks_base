@@ -166,7 +166,7 @@ final class NotificationController {
      */
     private Action createCancelAction(PrintJobInfo printJob) {
         return new Action.Builder(
-                Icon.createWithResource(mContext, R.drawable.stat_notify_cancelling),
+                Icon.createWithResource(mContext, R.drawable.ic_clear),
                 mContext.getString(R.string.cancel), createCancelIntent(printJob)).build();
     }
 
@@ -225,7 +225,7 @@ final class NotificationController {
 
     private void createFailedNotification(PrintJobInfo printJob) {
         Action.Builder restartActionBuilder = new Action.Builder(
-                Icon.createWithResource(mContext, R.drawable.ic_restart),
+                Icon.createWithResource(mContext, com.android.internal.R.drawable.ic_restart),
                 mContext.getString(R.string.restart), createRestartIntent(printJob.getId()));
 
         createNotification(printJob, createCancelAction(printJob), restartActionBuilder.build());
@@ -317,7 +317,7 @@ final class NotificationController {
                 if (!printJob.isCancelling()) {
                     return com.android.internal.R.drawable.ic_print;
                 } else {
-                    return R.drawable.stat_notify_cancelling;
+                    return R.drawable.ic_clear;
                 }
             }
         }

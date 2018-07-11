@@ -1923,7 +1923,7 @@ public final class AutofillManager {
                         mFillableIds.add(id);
                     }
                     if (sVerbose) {
-                        Log.v(TAG, "setTrackedViews(): fillableIds=" + fillableIds
+                        Log.v(TAG, "setTrackedViews(): fillableIds=" + Arrays.toString(fillableIds)
                                 + ", mFillableIds" + mFillableIds);
                     }
                 }

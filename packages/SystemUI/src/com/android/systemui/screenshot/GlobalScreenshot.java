@@ -301,11 +301,11 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
 
             // Create a share action for the notification
-            PendingIntent shareAction = PendingIntent.getBroadcast(context, 0,
+            PendingIntent shareAction = PendingIntent.getBroadcastAsUser(context, 0,
                     new Intent(context, GlobalScreenshot.ActionProxyReceiver.class)
                             .putExtra(EXTRA_ACTION_INTENT, sharingChooserIntent)
                             .putExtra(EXTRA_DISALLOW_ENTER_PIP, true),
-                    PendingIntent.FLAG_CANCEL_CURRENT);
+                    PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.SYSTEM);
             Notification.Action.Builder shareActionBuilder = new Notification.Action.Builder(
                     R.drawable.ic_screenshot_share,
                     r.getString(com.android.internal.R.string.share), shareAction);
@@ -324,11 +324,11 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             editIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
             // Create a edit action
-            PendingIntent editAction = PendingIntent.getBroadcast(context, 1,
+            PendingIntent editAction = PendingIntent.getBroadcastAsUser(context, 1,
                     new Intent(context, GlobalScreenshot.ActionProxyReceiver.class)
                             .putExtra(EXTRA_ACTION_INTENT, editIntent)
                             .putExtra(EXTRA_CANCEL_NOTIFICATION, editIntent.getComponent() != null),
-                    PendingIntent.FLAG_CANCEL_CURRENT);
+                    PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.SYSTEM);
             Notification.Action.Builder editActionBuilder = new Notification.Action.Builder(
                     R.drawable.ic_screenshot_edit,
                     r.getString(com.android.internal.R.string.screenshot_edit), editAction);
@@ -910,7 +910,7 @@ class GlobalScreenshot {
                 ActivityOptions opts = ActivityOptions.makeBasic();
                 opts.setDisallowEnterPictureInPictureWhileLaunching(
                         intent.getBooleanExtra(EXTRA_DISALLOW_ENTER_PIP, false));
-                context.startActivityAsUser(actionIntent, opts.toBundle(),UserHandle.CURRENT);
+                context.startActivityAsUser(actionIntent, opts.toBundle(), UserHandle.CURRENT);
             };
             StatusBar statusBar = SysUiServiceProvider.getComponent(context, StatusBar.class);
             statusBar.executeRunnableDismissingKeyguard(startActivityRunnable, null,

@@ -211,6 +211,28 @@ public class HdmiCecMessageBuilder {
     }
 
     /**
+     * Build &lt;Initiate Arc&gt;
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildInitiateArc(int src, int dest) {
+        return buildCommand(src, dest, Constants.MESSAGE_INITIATE_ARC);
+    }
+
+    /**
+     * Build &lt;Terminate Arc&gt;
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildTerminateArc(int src, int dest) {
+        return buildCommand(src, dest, Constants.MESSAGE_TERMINATE_ARC);
+    }
+
+    /**
      * Build &lt;Request Arc Termination&gt;
      *
      * @param src source address of command
@@ -372,6 +394,34 @@ public class HdmiCecMessageBuilder {
     }
 
     /**
+     * Build &lt;Set System Audio Mode&gt; command.
+     *
+     * @param src source address of command
+     * @param des destination address of command
+     * @param systemAudioStatus whether to set System Audio Mode on or off
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildSetSystemAudioMode(int src, int des, boolean systemAudioStatus) {
+        return buildCommandWithBooleanParam(src, des, Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE,
+            systemAudioStatus
+        );
+    }
+
+    /**
+     * Build &lt;Report System Audio Mode&gt; command.
+     *
+     * @param src source address of command
+     * @param des destination address of command
+     * @param systemAudioStatus whether System Audio Mode is on or off
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildReportSystemAudioMode(int src, int des, boolean systemAudioStatus) {
+        return buildCommandWithBooleanParam(src, des, Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS,
+            systemAudioStatus
+        );
+    }
+
+    /**
      * Build &lt;Give Audio Status&gt; command.
      *
      * @param src source address of command
@@ -380,6 +430,23 @@ public class HdmiCecMessageBuilder {
      */
     static HdmiCecMessage buildGiveAudioStatus(int src, int dest) {
         return buildCommand(src, dest, Constants.MESSAGE_GIVE_AUDIO_STATUS);
+    }
+
+    /**
+     * Build &lt;Report Audio Status&gt; command.
+     *
+     * @param src source address of command
+     * @param dest destination address of command
+     * @param volume volume level of current device in param
+     * @param mute mute status of current device in param
+     * @return newly created {@link HdmiCecMessage}
+     */
+    static HdmiCecMessage buildReportAudioStatus(int src, int dest, int volume, boolean mute) {
+        byte[] params = new byte[] {
+            mute ? (byte) (1 & 0xFF) : (byte) (0 & 0xFF),
+            (byte) (volume & 0xFF)
+        };
+        return buildCommand(src, dest, Constants.MESSAGE_REPORT_AUDIO_STATUS, params);
     }
 
     /**
@@ -590,6 +657,23 @@ public class HdmiCecMessageBuilder {
      */
     private static HdmiCecMessage buildCommand(int src, int dest, int opcode, byte[] params) {
         return new HdmiCecMessage(src, dest, opcode, params);
+    }
+
+    /**
+     * Build a {@link HdmiCecMessage} with a boolean param and other given values.
+     *
+     * @param src source address of command
+     * @param des destination address of command
+     * @param opcode opcode for a message
+     * @param param boolean param for building the command
+     * @return newly created {@link HdmiCecMessage}
+     */
+    private static HdmiCecMessage buildCommandWithBooleanParam(int src, int des,
+        int opcode, boolean param) {
+        byte[] params = new byte[]{
+            param ? (byte) 0b1 : 0b0
+        };
+        return buildCommand(src, des, opcode, params);
     }
 
     private static byte[] physicalAddressToParam(int physicalAddress) {

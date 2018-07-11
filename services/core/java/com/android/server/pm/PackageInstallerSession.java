@@ -930,6 +930,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private void commitLocked()
             throws PackageManagerException {
+        if (mRelinquished) {
+            Slog.d(TAG, "Ignoring commit after previous commit relinquished control");
+            return;
+        }
         if (mDestroyed) {
             throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR, "Session destroyed");
         }
