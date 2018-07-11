@@ -175,7 +175,10 @@ public abstract class CellIdentity implements Parcelable {
         }
 
         CellIdentity o = (CellIdentity) other;
-        return TextUtils.equals(mAlphaLong, o.mAlphaLong)
+        return mType == o.mType
+                && TextUtils.equals(mMccStr, o.mMccStr)
+                && TextUtils.equals(mMncStr, o.mMncStr)
+                && TextUtils.equals(mAlphaLong, o.mAlphaLong)
                 && TextUtils.equals(mAlphaShort, o.mAlphaShort);
     }
 
