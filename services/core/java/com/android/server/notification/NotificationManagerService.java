@@ -386,6 +386,7 @@ public class NotificationManagerService extends SystemService {
     private static final String ATTR_VERSION = "version";
 
     private RankingHelper mRankingHelper;
+    private PreferencesHelper mPreferencesHelper;
 
     private final UserProfiles mUserProfiles = new UserProfiles();
     private NotificationListeners mListeners;
@@ -525,8 +526,8 @@ public class NotificationManagerService extends SystemService {
         while (XmlUtils.nextElementWithin(parser, outerDepth)) {
             if (ZenModeConfig.ZEN_TAG.equals(parser.getName())) {
                 mZenModeHelper.readXml(parser, forRestore);
-            } else if (RankingHelper.TAG_RANKING.equals(parser.getName())){
-                mRankingHelper.readXml(parser, forRestore);
+            } else if (PreferencesHelper.TAG_RANKING.equals(parser.getName())){
+                mPreferencesHelper.readXml(parser, forRestore);
             }
             if (mListeners.getConfig().xmlTag.equals(parser.getName())) {
                 mListeners.readXml(parser, mAllowedManagedServicePackages);
@@ -608,7 +609,7 @@ public class NotificationManagerService extends SystemService {
         out.startTag(null, TAG_NOTIFICATION_POLICY);
         out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
         mZenModeHelper.writeXml(out, forBackup, null);
-        mRankingHelper.writeXml(out, forBackup);
+        mPreferencesHelper.writeXml(out, forBackup);
         mListeners.writeXml(out, forBackup);
         mAssistants.writeXml(out, forBackup);
         mConditionProviders.writeXml(out, forBackup);
@@ -949,7 +950,7 @@ public class NotificationManagerService extends SystemService {
                 // update system notification channels
                 SystemNotificationChannels.createAll(context);
                 mZenModeHelper.updateDefaultZenRules();
-                mRankingHelper.onLocaleChanged(context, ActivityManager.getCurrentUser());
+                mPreferencesHelper.onLocaleChanged(context, ActivityManager.getCurrentUser());
             }
         }
     };
@@ -1092,7 +1093,8 @@ public class NotificationManagerService extends SystemService {
                 mListeners.onPackagesChanged(removingPackage, pkgList, uidList);
                 mAssistants.onPackagesChanged(removingPackage, pkgList, uidList);
                 mConditionProviders.onPackagesChanged(removingPackage, pkgList, uidList);
-                mRankingHelper.onPackagesChanged(removingPackage, changeUserId, pkgList, uidList);
+                mPreferencesHelper.onPackagesChanged(
+                        removingPackage, changeUserId, pkgList, uidList);
                 savePolicyFile();
             }
         }
@@ -1152,7 +1154,7 @@ public class NotificationManagerService extends SystemService {
                 final int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 mUserProfiles.updateCache(context);
                 mZenModeHelper.onUserRemoved(user);
-                mRankingHelper.onUserRemoved(user);
+                mPreferencesHelper.onUserRemoved(user);
                 mListeners.onUserRemoved(user);
                 mConditionProviders.onUserRemoved(user);
                 mAssistants.onUserRemoved(user);
@@ -1210,7 +1212,7 @@ public class NotificationManagerService extends SystemService {
                             Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE, mMaxPackageEnqueueRate);
             }
             if (uri == null || NOTIFICATION_BADGING_URI.equals(uri)) {
-                mRankingHelper.updateBadgingEnabled();
+                mPreferencesHelper.updateBadgingEnabled();
             }
         }
     }
@@ -1332,6 +1334,9 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
+    void setPreferencesHelper(PreferencesHelper prefHelper) { mPreferencesHelper = prefHelper; }
+
+    @VisibleForTesting
     void setRankingHandler(RankingHandler rankingHandler) {
         mRankingHandler = rankingHandler;
     }
@@ -1419,9 +1424,13 @@ public class NotificationManagerService extends SystemService {
                 mRankingHandler.requestSort();
             }
         });
-        mRankingHelper = new RankingHelper(getContext(),
+        mPreferencesHelper = new PreferencesHelper(getContext(),
                 mPackageManagerClient,
                 mRankingHandler,
+                mZenModeHelper);
+        mRankingHelper = new RankingHelper(getContext(),
+                mRankingHandler,
+                mPreferencesHelper,
                 mZenModeHelper,
                 mUsageStats,
                 extractorNames);
@@ -1676,14 +1685,14 @@ public class NotificationManagerService extends SystemService {
             }
         }
         final NotificationChannel preUpdate =
-                mRankingHelper.getNotificationChannel(pkg, uid, channel.getId(), true);
+                mPreferencesHelper.getNotificationChannel(pkg, uid, channel.getId(), true);
 
-        mRankingHelper.updateNotificationChannel(pkg, uid, channel, true);
+        mPreferencesHelper.updateNotificationChannel(pkg, uid, channel, true);
         maybeNotifyChannelOwner(pkg, uid, preUpdate, channel);
 
         if (!fromListener) {
             final NotificationChannel modifiedChannel =
-                    mRankingHelper.getNotificationChannel(pkg, uid, channel.getId(), false);
+                    mPreferencesHelper.getNotificationChannel(pkg, uid, channel.getId(), false);
             mListeners.notifyNotificationChannelChanged(
                     pkg, UserHandle.getUserHandleForUid(uid),
                     modifiedChannel, NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
@@ -1720,8 +1729,8 @@ public class NotificationManagerService extends SystemService {
         Preconditions.checkNotNull(pkg);
 
         final NotificationChannelGroup preUpdate =
-                mRankingHelper.getNotificationChannelGroup(group.getId(), pkg, uid);
-        mRankingHelper.createNotificationChannelGroup(pkg, uid, group,
+                mPreferencesHelper.getNotificationChannelGroup(group.getId(), pkg, uid);
+        mPreferencesHelper.createNotificationChannelGroup(pkg, uid, group,
                 fromApp);
         if (!fromApp) {
             maybeNotifyChannelGroupOwner(pkg, uid, preUpdate, group);
@@ -2124,7 +2133,7 @@ public class NotificationManagerService extends SystemService {
         public void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled) {
             enforceSystemOrSystemUI("setNotificationsEnabledForPackage");
 
-            mRankingHelper.setEnabled(pkg, uid, enabled);
+            mPreferencesHelper.setEnabled(pkg, uid, enabled);
             // Now, cancel any outstanding notifications that are part of a just-disabled app
             if (!enabled) {
                 cancelAllNotificationsInt(MY_UID, MY_PID, pkg, null, 0, 0, true,
@@ -2162,7 +2171,7 @@ public class NotificationManagerService extends SystemService {
                 String pkg, int uid, boolean enabled) {
             setNotificationsEnabledForPackage(pkg, uid, enabled);
 
-            mRankingHelper.setAppImportanceLocked(pkg, uid);
+            mPreferencesHelper.setAppImportanceLocked(pkg, uid);
         }
 
         /**
@@ -2180,25 +2189,25 @@ public class NotificationManagerService extends SystemService {
         public boolean areNotificationsEnabledForPackage(String pkg, int uid) {
             checkCallerIsSystemOrSameApp(pkg);
 
-            return mRankingHelper.getImportance(pkg, uid) != IMPORTANCE_NONE;
+            return mPreferencesHelper.getImportance(pkg, uid) != IMPORTANCE_NONE;
         }
 
         @Override
         public int getPackageImportance(String pkg) {
             checkCallerIsSystemOrSameApp(pkg);
-            return mRankingHelper.getImportance(pkg, Binder.getCallingUid());
+            return mPreferencesHelper.getImportance(pkg, Binder.getCallingUid());
         }
 
         @Override
         public boolean canShowBadge(String pkg, int uid) {
             checkCallerIsSystem();
-            return mRankingHelper.canShowBadge(pkg, uid);
+            return mPreferencesHelper.canShowBadge(pkg, uid);
         }
 
         @Override
         public void setShowBadge(String pkg, int uid, boolean showBadge) {
             checkCallerIsSystem();
-            mRankingHelper.setShowBadge(pkg, uid, showBadge);
+            mPreferencesHelper.setShowBadge(pkg, uid, showBadge);
             savePolicyFile();
         }
 
@@ -2230,12 +2239,12 @@ public class NotificationManagerService extends SystemService {
             for (int i = 0; i < channelsSize; i++) {
                 final NotificationChannel channel = channels.get(i);
                 Preconditions.checkNotNull(channel, "channel in list is null");
-                mRankingHelper.createNotificationChannel(pkg, uid, channel,
+                mPreferencesHelper.createNotificationChannel(pkg, uid, channel,
                         true /* fromTargetApp */, mConditionProviders.isPackageOrComponentAllowed(
                                 pkg, UserHandle.getUserId(uid)));
                 mListeners.notifyNotificationChannelChanged(pkg,
                         UserHandle.getUserHandleForUid(uid),
-                        mRankingHelper.getNotificationChannel(pkg, uid, channel.getId(), false),
+                        mPreferencesHelper.getNotificationChannel(pkg, uid, channel.getId(), false),
                         NOTIFICATION_CHANNEL_OR_GROUP_ADDED);
             }
             savePolicyFile();
@@ -2258,7 +2267,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public NotificationChannel getNotificationChannel(String pkg, String channelId) {
             checkCallerIsSystemOrSameApp(pkg);
-            return mRankingHelper.getNotificationChannel(
+            return mPreferencesHelper.getNotificationChannel(
                     pkg, Binder.getCallingUid(), channelId, false /* includeDeleted */);
         }
 
@@ -2266,7 +2275,7 @@ public class NotificationManagerService extends SystemService {
         public NotificationChannel getNotificationChannelForPackage(String pkg, int uid,
                 String channelId, boolean includeDeleted) {
             checkCallerIsSystem();
-            return mRankingHelper.getNotificationChannel(pkg, uid, channelId, includeDeleted);
+            return mPreferencesHelper.getNotificationChannel(pkg, uid, channelId, includeDeleted);
         }
 
         @Override
@@ -2278,10 +2287,10 @@ public class NotificationManagerService extends SystemService {
             }
             cancelAllNotificationsInt(MY_UID, MY_PID, pkg, channelId, 0, 0, true,
                     UserHandle.getUserId(callingUid), REASON_CHANNEL_BANNED, null);
-            mRankingHelper.deleteNotificationChannel(pkg, callingUid, channelId);
+            mPreferencesHelper.deleteNotificationChannel(pkg, callingUid, channelId);
             mListeners.notifyNotificationChannelChanged(pkg,
                     UserHandle.getUserHandleForUid(callingUid),
-                    mRankingHelper.getNotificationChannel(pkg, callingUid, channelId, true),
+                    mPreferencesHelper.getNotificationChannel(pkg, callingUid, channelId, true),
                     NOTIFICATION_CHANNEL_OR_GROUP_DELETED);
             savePolicyFile();
         }
@@ -2289,7 +2298,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public NotificationChannelGroup getNotificationChannelGroup(String pkg, String groupId) {
             checkCallerIsSystemOrSameApp(pkg);
-            return mRankingHelper.getNotificationChannelGroupWithChannels(
+            return mPreferencesHelper.getNotificationChannelGroupWithChannels(
                     pkg, Binder.getCallingUid(), groupId, false);
         }
 
@@ -2297,7 +2306,7 @@ public class NotificationManagerService extends SystemService {
         public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(
                 String pkg) {
             checkCallerIsSystemOrSameApp(pkg);
-            return mRankingHelper.getNotificationChannelGroups(
+            return mPreferencesHelper.getNotificationChannelGroups(
                     pkg, Binder.getCallingUid(), false, false);
         }
 
@@ -2307,10 +2316,10 @@ public class NotificationManagerService extends SystemService {
 
             final int callingUid = Binder.getCallingUid();
             NotificationChannelGroup groupToDelete =
-                    mRankingHelper.getNotificationChannelGroup(groupId, pkg, callingUid);
+                    mPreferencesHelper.getNotificationChannelGroup(groupId, pkg, callingUid);
             if (groupToDelete != null) {
                 List<NotificationChannel> deletedChannels =
-                        mRankingHelper.deleteNotificationChannelGroup(pkg, callingUid, groupId);
+                        mPreferencesHelper.deleteNotificationChannelGroup(pkg, callingUid, groupId);
                 for (int i = 0; i < deletedChannels.size(); i++) {
                     final NotificationChannel deletedChannel = deletedChannels.get(i);
                     cancelAllNotificationsInt(MY_UID, MY_PID, pkg, deletedChannel.getId(), 0, 0,
@@ -2341,47 +2350,47 @@ public class NotificationManagerService extends SystemService {
         public ParceledListSlice<NotificationChannel> getNotificationChannelsForPackage(String pkg,
                 int uid, boolean includeDeleted) {
             enforceSystemOrSystemUI("getNotificationChannelsForPackage");
-            return mRankingHelper.getNotificationChannels(pkg, uid, includeDeleted);
+            return mPreferencesHelper.getNotificationChannels(pkg, uid, includeDeleted);
         }
 
         @Override
         public int getNumNotificationChannelsForPackage(String pkg, int uid,
                 boolean includeDeleted) {
             enforceSystemOrSystemUI("getNumNotificationChannelsForPackage");
-            return mRankingHelper.getNotificationChannels(pkg, uid, includeDeleted)
+            return mPreferencesHelper.getNotificationChannels(pkg, uid, includeDeleted)
                     .getList().size();
         }
 
         @Override
         public boolean onlyHasDefaultChannel(String pkg, int uid) {
             enforceSystemOrSystemUI("onlyHasDefaultChannel");
-            return mRankingHelper.onlyHasDefaultChannel(pkg, uid);
+            return mPreferencesHelper.onlyHasDefaultChannel(pkg, uid);
         }
 
         @Override
         public int getDeletedChannelCount(String pkg, int uid) {
             enforceSystemOrSystemUI("getDeletedChannelCount");
-            return mRankingHelper.getDeletedChannelCount(pkg, uid);
+            return mPreferencesHelper.getDeletedChannelCount(pkg, uid);
         }
 
         @Override
         public int getBlockedChannelCount(String pkg, int uid) {
             enforceSystemOrSystemUI("getBlockedChannelCount");
-            return mRankingHelper.getBlockedChannelCount(pkg, uid);
+            return mPreferencesHelper.getBlockedChannelCount(pkg, uid);
         }
 
         @Override
         public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroupsForPackage(
                 String pkg, int uid, boolean includeDeleted) {
             checkCallerIsSystem();
-            return mRankingHelper.getNotificationChannelGroups(pkg, uid, includeDeleted, true);
+            return mPreferencesHelper.getNotificationChannelGroups(pkg, uid, includeDeleted, true);
         }
 
         @Override
         public NotificationChannelGroup getPopulatedNotificationChannelGroupForPackage(
                 String pkg, int uid, String groupId, boolean includeDeleted) {
             enforceSystemOrSystemUI("getPopulatedNotificationChannelGroupForPackage");
-            return mRankingHelper.getNotificationChannelGroupWithChannels(
+            return mPreferencesHelper.getNotificationChannelGroupWithChannels(
                     pkg, uid, groupId, includeDeleted);
         }
 
@@ -2389,13 +2398,13 @@ public class NotificationManagerService extends SystemService {
         public NotificationChannelGroup getNotificationChannelGroupForPackage(
                 String groupId, String pkg, int uid) {
             enforceSystemOrSystemUI("getNotificationChannelGroupForPackage");
-            return mRankingHelper.getNotificationChannelGroup(groupId, pkg, uid);
+            return mPreferencesHelper.getNotificationChannelGroup(groupId, pkg, uid);
         }
 
         @Override
         public ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg) {
             checkCallerIsSystemOrSameApp(pkg);
-            return mRankingHelper.getNotificationChannels(
+            return mPreferencesHelper.getNotificationChannels(
                     pkg, Binder.getCallingUid(), false /* includeDeleted */);
         }
 
@@ -2412,12 +2421,12 @@ public class NotificationManagerService extends SystemService {
         @Override
         public int getBlockedAppCount(int userId) {
             checkCallerIsSystem();
-            return mRankingHelper.getBlockedAppCount(userId);
+            return mPreferencesHelper.getBlockedAppCount(userId);
         }
 
         @Override
         public boolean areChannelsBypassingDnd() {
-            return mRankingHelper.areChannelsBypassingDnd();
+            return mPreferencesHelper.areChannelsBypassingDnd();
         }
 
         @Override
@@ -2440,7 +2449,7 @@ public class NotificationManagerService extends SystemService {
 
             // Reset notification preferences
             if (!fromApp) {
-                mRankingHelper.onPackagesChanged(
+                mPreferencesHelper.onPackagesChanged(
                         true, UserHandle.getCallingUserId(), packages, uids);
             }
 
@@ -3512,7 +3521,7 @@ public class NotificationManagerService extends SystemService {
             Preconditions.checkNotNull(user);
             verifyPrivilegedListener(token, user);
 
-            return mRankingHelper.getNotificationChannels(pkg, getUidForPackageAndUser(pkg, user),
+            return mPreferencesHelper.getNotificationChannels(pkg, getUidForPackageAndUser(pkg, user),
                     false /* includeDeleted */);
         }
 
@@ -3525,7 +3534,7 @@ public class NotificationManagerService extends SystemService {
             verifyPrivilegedListener(token, user);
 
             List<NotificationChannelGroup> groups = new ArrayList<>();
-            groups.addAll(mRankingHelper.getNotificationChannelGroups(
+            groups.addAll(mPreferencesHelper.getNotificationChannelGroups(
                     pkg, getUidForPackageAndUser(pkg, user)));
             return new ParceledListSlice<>(groups);
         }
@@ -3706,10 +3715,10 @@ public class NotificationManagerService extends SystemService {
         JSONObject dump = new JSONObject();
         try {
             dump.put("service", "Notification Manager");
-            dump.put("bans", mRankingHelper.dumpBansJson(filter));
-            dump.put("ranking", mRankingHelper.dumpJson(filter));
+            dump.put("bans", mPreferencesHelper.dumpBansJson(filter));
+            dump.put("ranking", mPreferencesHelper.dumpJson(filter));
             dump.put("stats", mUsageStats.dumpJson(filter));
-            dump.put("channels", mRankingHelper.dumpChannelsJson(filter));
+            dump.put("channels", mPreferencesHelper.dumpChannelsJson(filter));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -3782,6 +3791,7 @@ public class NotificationManagerService extends SystemService {
 
             long rankingToken = proto.start(NotificationServiceDumpProto.RANKING_CONFIG);
             mRankingHelper.dump(proto, filter);
+            mPreferencesHelper.dump(proto, filter);
             proto.end(rankingToken);
         }
 
@@ -3890,6 +3900,9 @@ public class NotificationManagerService extends SystemService {
                 pw.println("\n  Ranking Config:");
                 mRankingHelper.dump(pw, "    ", filter);
 
+                pw.println("\n Notification Preferences:");
+                mPreferencesHelper.dump(pw, "    ", filter);
+
                 pw.println("\n  Notification listeners:");
                 mListeners.dump(pw, filter);
                 pw.print("    mListenerHints: "); pw.println(mListenerHints);
@@ -3953,7 +3966,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public NotificationChannel getNotificationChannel(String pkg, int uid, String
                 channelId) {
-            return mRankingHelper.getNotificationChannel(pkg, uid, channelId, false);
+            return mPreferencesHelper.getNotificationChannel(pkg, uid, channelId, false);
         }
 
         @Override
@@ -4049,7 +4062,7 @@ public class NotificationManagerService extends SystemService {
         if (mIsTelevision && (new Notification.TvExtender(notification)).getChannelId() != null) {
             channelId = (new Notification.TvExtender(notification)).getChannelId();
         }
-        final NotificationChannel channel = mRankingHelper.getNotificationChannel(pkg,
+        final NotificationChannel channel = mPreferencesHelper.getNotificationChannel(pkg,
                 notificationUid, channelId, false /* includeDeleted */);
         if (channel == null) {
             final String noChannelStr = "No Channel found for "
@@ -4064,7 +4077,7 @@ public class NotificationManagerService extends SystemService {
                     + ", notificationUid=" + notificationUid
                     + ", notification=" + notification;
             Log.e(TAG, noChannelStr);
-            boolean appNotificationsOff = mRankingHelper.getImportance(pkg, notificationUid)
+            boolean appNotificationsOff = mPreferencesHelper.getImportance(pkg, notificationUid)
                     == NotificationManager.IMPORTANCE_NONE;
 
             if (!appNotificationsOff) {
@@ -4079,7 +4092,7 @@ public class NotificationManagerService extends SystemService {
                 pkg, opPkg, id, tag, notificationUid, callingPid, notification,
                 user, null, System.currentTimeMillis());
         final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
-        r.setIsAppImportanceLocked(mRankingHelper.getIsAppImportanceLocked(pkg, callingUid));
+        r.setIsAppImportanceLocked(mPreferencesHelper.getIsAppImportanceLocked(pkg, callingUid));
 
         if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
             final boolean fgServiceShown = channel.isFgServiceShown();
@@ -4098,7 +4111,7 @@ public class NotificationManagerService extends SystemService {
                         channel.unlockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
                         channel.setFgServiceShown(true);
                     }
-                    mRankingHelper.updateNotificationChannel(pkg, notificationUid, channel, false);
+                    mPreferencesHelper.updateNotificationChannel(pkg, notificationUid, channel, false);
                     r.updateNotificationChannel(channel);
                 }
             } else if (!fgServiceShown && !TextUtils.isEmpty(channelId)
@@ -4273,8 +4286,8 @@ public class NotificationManagerService extends SystemService {
             return isPackageSuspended;
         }
         final boolean isBlocked =
-                mRankingHelper.isGroupBlocked(pkg, callingUid, r.getChannel().getGroup())
-                || mRankingHelper.getImportance(pkg, callingUid)
+                mPreferencesHelper.isGroupBlocked(pkg, callingUid, r.getChannel().getGroup())
+                || mPreferencesHelper.getImportance(pkg, callingUid)
                         == NotificationManager.IMPORTANCE_NONE
                 || r.getChannel().getImportance() == NotificationManager.IMPORTANCE_NONE;
         if (isBlocked) {
@@ -5247,6 +5260,7 @@ public class NotificationManagerService extends SystemService {
             ArrayList<ArrayList<SnoozeCriterion>> snoozeCriteriaBefore = new ArrayList<>(N);
             ArrayList<Integer> userSentimentBefore = new ArrayList<>(N);
             ArrayList<Integer> suppressVisuallyBefore = new ArrayList<>(N);
+            ArrayList<ArrayList<Notification.Action>> smartActionsBefore = new ArrayList<>(N);
             for (int i = 0; i < N; i++) {
                 final NotificationRecord r = mNotificationList.get(i);
                 orderBefore.add(r.getKey());
@@ -5258,6 +5272,7 @@ public class NotificationManagerService extends SystemService {
                 snoozeCriteriaBefore.add(r.getSnoozeCriteria());
                 userSentimentBefore.add(r.getUserSentiment());
                 suppressVisuallyBefore.add(r.getSuppressedVisualEffects());
+                smartActionsBefore.add(r.getSmartActions());
                 mRankingHelper.extractSignals(r);
             }
             mRankingHelper.sort(mNotificationList);
@@ -5272,7 +5287,8 @@ public class NotificationManagerService extends SystemService {
                         || !Objects.equals(snoozeCriteriaBefore.get(i), r.getSnoozeCriteria())
                         || !Objects.equals(userSentimentBefore.get(i), r.getUserSentiment())
                         || !Objects.equals(suppressVisuallyBefore.get(i),
-                        r.getSuppressedVisualEffects())) {
+                        r.getSuppressedVisualEffects())
+                        || !Objects.equals(smartActionsBefore.get(i), r.getSmartActions())) {
                     mHandler.scheduleSendRankingUpdate();
                     return;
                 }
@@ -6255,6 +6271,7 @@ public class NotificationManagerService extends SystemService {
         Bundle showBadge = new Bundle();
         Bundle userSentiment = new Bundle();
         Bundle hidden = new Bundle();
+        Bundle smartActions = new Bundle();
         for (int i = 0; i < N; i++) {
             NotificationRecord record = mNotificationList.get(i);
             if (!isVisibleToListener(record.sbn, info)) {
@@ -6282,6 +6299,7 @@ public class NotificationManagerService extends SystemService {
             showBadge.putBoolean(key, record.canShowBadge());
             userSentiment.putInt(key, record.getUserSentiment());
             hidden.putBoolean(key, record.isHidden());
+            smartActions.putParcelableArrayList(key, record.getSmartActions());
         }
         final int M = keys.size();
         String[] keysAr = keys.toArray(new String[M]);
@@ -6292,7 +6310,8 @@ public class NotificationManagerService extends SystemService {
         }
         return new NotificationRankingUpdate(keysAr, interceptedKeysAr, visibilityOverrides,
                 suppressedVisualEffects, importanceAr, explanation, overrideGroupKeys,
-                channels, overridePeople, snoozeCriteria, showBadge, userSentiment, hidden);
+                channels, overridePeople, snoozeCriteria, showBadge, userSentiment, hidden,
+                smartActions);
     }
 
     boolean hasCompanionDevice(ManagedServiceInfo info) {

@@ -157,12 +157,45 @@ void SkiaRecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
 // Recording Canvas draw operations: Bitmaps
 // ----------------------------------------------------------------------------
 
+SkiaCanvas::PaintCoW&& SkiaRecordingCanvas::filterBitmap(PaintCoW&& paint,
+                                                         sk_sp<SkColorFilter> colorSpaceFilter) {
+    bool fixBlending = false;
+    bool fixAA = false;
+    if (paint) {
+        // kClear blend mode is drawn as kDstOut on HW for compatibility with Android O and
+        // older.
+        fixBlending = sApiLevel <= 27 && paint->getBlendMode() == SkBlendMode::kClear;
+        fixAA = paint->isAntiAlias();
+    }
+
+    if (fixBlending || fixAA || colorSpaceFilter) {
+        SkPaint& tmpPaint = paint.writeable();
+
+        if (fixBlending) {
+            tmpPaint.setBlendMode(SkBlendMode::kDstOut);
+        }
+
+        if (colorSpaceFilter) {
+            if (tmpPaint.getColorFilter()) {
+                tmpPaint.setColorFilter(SkColorFilter::MakeComposeFilter(
+                       tmpPaint.refColorFilter(), std::move(colorSpaceFilter)));
+            } else {
+                tmpPaint.setColorFilter(std::move(colorSpaceFilter));
+            }
+            LOG_ALWAYS_FATAL_IF(!tmpPaint.getColorFilter());
+        }
+
+        // disabling AA on bitmap draws matches legacy HWUI behavior
+        tmpPaint.setAntiAlias(false);
+    }
+
+    return filterPaint(std::move(paint));
+}
 
 void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) {
-    SkPaint tmpPaint;
     sk_sp<SkColorFilter> colorFilter;
     sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
-    mRecorder.drawImage(image, left, top, bitmapPaint(paint, &tmpPaint, colorFilter));
+    mRecorder.drawImage(image, left, top, filterBitmap(paint, std::move(colorFilter)));
     // if image->unique() is true, then mRecorder.drawImage failed for some reason. It also means
     // it is not safe to store a raw SkImage pointer, because the image object will be destroyed
     // when this function ends.
@@ -175,10 +208,9 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, con
     SkAutoCanvasRestore acr(&mRecorder, true);
     concat(matrix);
 
-    SkPaint tmpPaint;
     sk_sp<SkColorFilter> colorFilter;
     sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
-    mRecorder.drawImage(image, 0, 0, bitmapPaint(paint, &tmpPaint, colorFilter));
+    mRecorder.drawImage(image, 0, 0, filterBitmap(paint, std::move(colorFilter)));
     if (!bitmap.isImmutable() && image.get() && !image->unique()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }
@@ -190,10 +222,9 @@ void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
 
-    SkPaint tmpPaint;
     sk_sp<SkColorFilter> colorFilter;
     sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
-    mRecorder.drawImageRect(image, srcRect, dstRect, bitmapPaint(paint, &tmpPaint, colorFilter),
+    mRecorder.drawImageRect(image, srcRect, dstRect, filterBitmap(paint, std::move(colorFilter)),
                             SkCanvas::kFast_SrcRectConstraint);
     if (!bitmap.isImmutable() && image.get() && !image->unique() && !srcRect.isEmpty() &&
         !dstRect.isEmpty()) {
@@ -225,23 +256,16 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
     lattice.fBounds = nullptr;
     SkRect dst = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
 
-    SkPaint tmpPaint;
-    sk_sp<SkColorFilter> colorFilter;
-    sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
-    const SkPaint* filteredPaint = bitmapPaint(paint, &tmpPaint, colorFilter);
+    PaintCoW filteredPaint(paint);
     // Besides kNone, the other three SkFilterQualities are treated the same. And Android's
     // Java API only supports kLow and kNone anyway.
     if (!filteredPaint || filteredPaint->getFilterQuality() == kNone_SkFilterQuality) {
-        if (filteredPaint != &tmpPaint) {
-            if (paint) {
-                tmpPaint = *paint;
-            }
-            filteredPaint = &tmpPaint;
-        }
-        tmpPaint.setFilterQuality(kLow_SkFilterQuality);
+        filteredPaint.writeable().setFilterQuality(kLow_SkFilterQuality);
     }
-
-    mRecorder.drawImageLattice(image.get(), lattice, dst, filteredPaint);
+    sk_sp<SkColorFilter> colorFilter;
+    sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
+    mRecorder.drawImageLattice(image.get(), lattice, dst,
+                               filterBitmap(std::move(filteredPaint), std::move(colorFilter)));
     if (!bitmap.isImmutable() && image.get() && !image->unique() && !dst.isEmpty()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }

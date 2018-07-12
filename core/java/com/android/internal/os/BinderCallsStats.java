@@ -24,6 +24,7 @@ import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -212,6 +213,39 @@ public class BinderCallsStats {
         }
     }
 
+    public ArrayList<ExportedCallStat> getExportedCallStats() {
+        // We do not collect all the data if detailed tracking is off.
+        if (!mDetailedTracking) {
+          return new ArrayList<ExportedCallStat>();
+        }
+
+        ArrayList<ExportedCallStat> resultCallStats = new ArrayList<>();
+        synchronized (mLock) {
+            int uidEntriesSize = mUidEntries.size();
+            for (int entryIdx = 0; entryIdx < uidEntriesSize; entryIdx++){
+                UidEntry entry = mUidEntries.valueAt(entryIdx);
+                for (CallStat stat : entry.getCallStatsList()) {
+                    ExportedCallStat exported = new ExportedCallStat();
+                    exported.uid = entry.uid;
+                    exported.className = stat.className;
+                    exported.methodName = stat.methodName == null
+                        ? String.valueOf(stat.msg) : stat.methodName;
+                    exported.cpuTimeMicros = stat.cpuTimeMicros;
+                    exported.maxCpuTimeMicros = stat.maxCpuTimeMicros;
+                    exported.latencyMicros = stat.latencyMicros;
+                    exported.maxLatencyMicros = stat.maxLatencyMicros;
+                    exported.callCount = stat.callCount;
+                    exported.maxRequestSizeBytes = stat.maxRequestSizeBytes;
+                    exported.maxReplySizeBytes = stat.maxReplySizeBytes;
+                    exported.exceptionCount = stat.exceptionCount;
+                    resultCallStats.add(exported);
+                }
+            }
+        }
+
+        return resultCallStats;
+    }
+
     public void dump(PrintWriter pw, Map<Integer,String> appIdToPkgNameMap, boolean verbose) {
         synchronized (mLock) {
             dumpLocked(pw, appIdToPkgNameMap, verbose);
@@ -370,6 +404,23 @@ public class BinderCallsStats {
             mSampledEntries.mCallStats.clear();
             mStartTime = System.currentTimeMillis();
         }
+    }
+
+    /**
+     * Aggregated data by uid/class/method to be sent through WestWorld.
+     */
+    public static class ExportedCallStat {
+        public int uid;
+        public String className;
+        public String methodName;
+        public long cpuTimeMicros;
+        public long maxCpuTimeMicros;
+        public long latencyMicros;
+        public long maxLatencyMicros;
+        public long callCount;
+        public long maxRequestSizeBytes;
+        public long maxReplySizeBytes;
+        public long exceptionCount;
     }
 
     @VisibleForTesting

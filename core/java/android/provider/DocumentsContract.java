@@ -100,7 +100,8 @@ public final class DocumentsContract {
     public static final String PROVIDER_INTERFACE = "android.content.action.DOCUMENTS_PROVIDER";
 
     /** {@hide} */
-    public static final String EXTRA_PACKAGE_NAME = "android.content.extra.PACKAGE_NAME";
+    @Deprecated
+    public static final String EXTRA_PACKAGE_NAME = Intent.EXTRA_PACKAGE_NAME;
 
     /** {@hide} */
     public static final String EXTRA_SHOW_ADVANCED = "android.content.extra.SHOW_ADVANCED";

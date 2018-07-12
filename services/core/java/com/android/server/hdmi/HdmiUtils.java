@@ -114,7 +114,7 @@ final class HdmiUtils {
      *
      * @param logicalAddress the logical address to verify
      * @param deviceType the device type to check
-     * @throw IllegalArgumentException
+     * @throws IllegalArgumentException
      */
     static void verifyAddressType(int logicalAddress, int deviceType) {
         int actualDeviceType = getTypeFromAddress(logicalAddress);

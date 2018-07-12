@@ -836,10 +836,8 @@ public class FaceManager implements BiometricFaceConstants {
          * {@link EnrollmentCallback#onEnrollmentError(int, CharSequence)}
          *
          * @param remaining The number of remaining steps
-         * @param vendorMsg Vendor feedback about the current enroll attempt. Use it to customize
-         *                  the GUI according to vendor's requirements.
          */
-        public void onEnrollmentProgress(int remaining, long vendorMsg) {
+        public void onEnrollmentProgress(int remaining) {
         }
     }
 
@@ -920,7 +918,7 @@ public class FaceManager implements BiometricFaceConstants {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
                 case MSG_ENROLL_RESULT:
-                    sendEnrollResult((EnrollResultMsg) msg.obj);
+                    sendEnrollResult((Face) msg.obj, msg.arg1 /* remaining */);
                     break;
                 case MSG_ACQUIRED:
                     sendAcquiredResult((Long) msg.obj /* deviceId */, msg.arg1 /* acquire info */,
@@ -951,8 +949,6 @@ public class FaceManager implements BiometricFaceConstants {
             Log.e(TAG, "Received MSG_REMOVED, but face is null");
             return;
         }
-
-
         mRemovalCallback.onRemovalSucceeded(face, remaining);
     }
 
@@ -972,11 +968,9 @@ public class FaceManager implements BiometricFaceConstants {
         }
     }
 
-    private void sendEnrollResult(EnrollResultMsg faceWrapper) {
+    private void sendEnrollResult(Face face, int remaining) {
         if (mEnrollmentCallback != null) {
-            int remaining = faceWrapper.getRemaining();
-            long vendorMsg = faceWrapper.getVendorMsg();
-            mEnrollmentCallback.onEnrollmentProgress(remaining, vendorMsg);
+            mEnrollmentCallback.onEnrollmentProgress(remaining);
         }
     }
 
@@ -1008,30 +1002,6 @@ public class FaceManager implements BiometricFaceConstants {
             mEnrollmentCallback.onEnrollmentHelp(clientInfo, msg);
         } else if (mAuthenticationCallback != null) {
             mAuthenticationCallback.onAuthenticationHelp(clientInfo, msg);
-        }
-    }
-
-    private class EnrollResultMsg {
-        private final Face mFace;
-        private final int mRemaining;
-        private final long mVendorMsg;
-
-        EnrollResultMsg(Face face, int remaining, long vendorMsg) {
-            mFace = face;
-            mRemaining = remaining;
-            mVendorMsg = vendorMsg;
-        }
-
-        Face getFace() {
-            return mFace;
-        }
-
-        long getVendorMsg() {
-            return mVendorMsg;
-        }
-
-        int getRemaining() {
-            return mRemaining;
         }
     }
 }

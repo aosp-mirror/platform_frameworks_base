@@ -351,23 +351,24 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * Sets the data source as described by a DataSourceDesc.
      *
      * @param dsd the descriptor of data source you want to play
-     * @throws IllegalStateException if it is called in an invalid state
-     * @throws NullPointerException if dsd is null
      */
     @Override
     public void setDataSource(@NonNull DataSourceDesc dsd) {
         addTask(new Task(CALL_COMPLETED_SET_DATA_SOURCE, false) {
             @Override
-            void process() {
+            void process() throws IOException {
                 Preconditions.checkNotNull(dsd, "the DataSourceDesc cannot be null");
-                // TODO: setDataSource could update exist data source
+                int state = getState();
+                if (state == PLAYER_STATE_ERROR) {
+                    throw new CommandSkippedException("skipped due to error state");
+                } else if (state != PLAYER_STATE_IDLE) {
+                    throw new IllegalStateException("called in wrong state " + state);
+                }
+
                 synchronized (mSrcLock) {
                     mCurrentDSD = dsd;
                     mCurrentSrcId = mSrcIdGenerator++;
-                    try {
-                        handleDataSource(true /* isCurrent */, dsd, mCurrentSrcId);
-                    } catch (IOException e) {
-                    }
+                    handleDataSource(true /* isCurrent */, dsd, mCurrentSrcId);
                 }
             }
         });
@@ -386,7 +387,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         addTask(new Task(CALL_COMPLETED_SET_NEXT_DATA_SOURCE, false) {
             @Override
             void process() {
-                Preconditions.checkNotNull(dsd, "the DataSourceDesc cannot be null");
+                Preconditions.checkArgument(dsd != null, "the DataSourceDesc cannot be null");
                 synchronized (mSrcLock) {
                     mNextDSDs = new ArrayList<DataSourceDesc>(1);
                     mNextDSDs.add(dsd);
@@ -4638,6 +4639,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 status = CALL_STATUS_ERROR_IO;
             } catch (NoDrmSchemeException e) {
                 status = CALL_STATUS_NO_DRM_SCHEME;
+            } catch (CommandSkippedException e) {
+                status = CALL_STATUS_SKIPPED;
             } catch (Exception e) {
                 status = CALL_STATUS_ERROR_UNKNOWN;
             }
@@ -4669,6 +4672,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                             MediaPlayer2Impl.this, mDSD, mMediaCallType, status));
                 }
             }
+        }
+    };
+
+    private final class CommandSkippedException extends RuntimeException {
+        public CommandSkippedException(String detailMessage) {
+            super(detailMessage);
         }
     };
 }

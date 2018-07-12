@@ -159,6 +159,7 @@ public final class NotificationRecord {
     private Light mLight;
     private String mGroupLogTag;
     private String mChannelIdLogTag;
+    private ArrayList<Notification.Action> mSmartActions;
 
     private final List<Adjustment> mAdjustments;
     private final NotificationStats mStats;
@@ -630,6 +631,9 @@ public final class NotificationRecord {
                                 Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEUTRAL));
                     }
                 }
+                if (signals.containsKey(Adjustment.KEY_SMART_ACTIONS)) {
+                    setSmartActions(signals.getParcelableArrayList(Adjustment.KEY_SMART_ACTIONS));
+                }
             }
         }
     }
@@ -1047,6 +1051,14 @@ public final class NotificationRecord {
 
     public void setSeenSmartReplies(boolean hasSeenSmartReplies) {
         mHasSeenSmartReplies = hasSeenSmartReplies;
+    }
+
+    public void setSmartActions(ArrayList<Notification.Action> smartActions) {
+        mSmartActions = smartActions;
+    }
+
+    public ArrayList<Notification.Action> getSmartActions() {
+        return mSmartActions;
     }
 
     /**
