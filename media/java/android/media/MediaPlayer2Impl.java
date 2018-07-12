@@ -203,8 +203,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * playback will continue from where it was paused. If playback had
      * been stopped, or never started before, playback will start at the
      * beginning.
-     *
-     * @throws IllegalStateException if it is called in an invalid state
      */
     @Override
     public void play() {
@@ -226,8 +224,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * call prepare(). For streams, you should call prepare(),
      * which returns immediately, rather than blocking until enough data has been
      * buffered.
-     *
-     * @throws IllegalStateException if it is called in an invalid state
      */
     @Override
     public void prepare() {
@@ -243,9 +239,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     /**
      * Pauses playback. Call play() to resume.
-     *
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized.
      */
     @Override
     public void pause() {
@@ -357,11 +350,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         addTask(new Task(CALL_COMPLETED_SET_DATA_SOURCE, false) {
             @Override
             void process() throws IOException {
-                Preconditions.checkNotNull(dsd, "the DataSourceDesc cannot be null");
+                Preconditions.checkArgument(dsd != null, "the DataSourceDesc cannot be null");
                 int state = getState();
-                if (state == PLAYER_STATE_ERROR) {
-                    throw new CommandSkippedException("skipped due to error state");
-                } else if (state != PLAYER_STATE_IDLE) {
+                if (state != PLAYER_STATE_ERROR && state != PLAYER_STATE_IDLE) {
                     throw new IllegalStateException("called in wrong state " + state);
                 }
 
@@ -1283,7 +1274,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         addTask(new Task(CALL_COMPLETED_SET_BUFFERING_PARAMS, false) {
             @Override
             void process() {
-                Preconditions.checkNotNull(params, "the BufferingParams cannot be null");
+                Preconditions.checkArgument(params != null, "the BufferingParams cannot be null");
                 _setBufferingParams(params);
             }
         });
@@ -1347,7 +1338,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         addTask(new Task(CALL_COMPLETED_SET_PLAYBACK_PARAMS, false) {
             @Override
             void process() {
-                Preconditions.checkNotNull(params, "the PlaybackParams cannot be null");
+                Preconditions.checkArgument(params != null, "the PlaybackParams cannot be null");
                 _setPlaybackParams(params);
             }
         });
@@ -1380,7 +1371,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         addTask(new Task(CALL_COMPLETED_SET_SYNC_PARAMS, false) {
             @Override
             void process() {
-                Preconditions.checkNotNull(params, "the SyncParams cannot be null");
+                Preconditions.checkArgument(params != null, "the SyncParams cannot be null");
                 _setSyncParams(params);
             }
         });
@@ -4628,7 +4619,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         public void run() {
             int status = CALL_STATUS_NO_ERROR;
             try {
-                process();
+                if (mMediaCallType != CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED
+                        && getState() == PLAYER_STATE_ERROR) {
+                    status = CALL_STATUS_INVALID_OPERATION;
+                } else {
+                    process();
+                }
             } catch (IllegalStateException e) {
                 status = CALL_STATUS_INVALID_OPERATION;
             } catch (IllegalArgumentException e) {
