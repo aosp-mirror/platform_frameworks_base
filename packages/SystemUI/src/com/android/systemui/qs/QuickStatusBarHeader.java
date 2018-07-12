@@ -33,6 +33,7 @@ import android.media.AudioManager;
 import android.os.Handler;
 import android.provider.AlarmClock;
 import android.service.notification.ZenModeConfig;
+import android.widget.FrameLayout;
 import androidx.annotation.VisibleForTesting;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
@@ -270,8 +271,22 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         updateResources();
     }
 
+    /**
+     * The height of QQS should always be the status bar height + 128dp. This is normally easy, but
+     * when there is a notch involved the status bar can remain a fixed pixel size.
+     */
+    private void updateMinimumHeight() {
+        int sbHeight = mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_height);
+        int qqsHeight = mContext.getResources().getDimensionPixelSize(
+                R.dimen.qs_quick_header_panel_height);
+
+        setMinimumHeight(sbHeight + qqsHeight);
+    }
+
     private void updateResources() {
         Resources resources = mContext.getResources();
+        updateMinimumHeight();
 
         // Update height for a few views, especially due to landscape mode restricting space.
         mHeaderTextContainerView.getLayoutParams().height =
@@ -282,10 +297,17 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                 com.android.internal.R.dimen.quick_qs_offset_height);
         mSystemIconsView.setLayoutParams(mSystemIconsView.getLayoutParams());
 
-        getLayoutParams().height = resources.getDimensionPixelSize(mQsDisabled
-                ? com.android.internal.R.dimen.quick_qs_offset_height
-                : com.android.internal.R.dimen.quick_qs_total_height);
-        setLayoutParams(getLayoutParams());
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
+        if (mQsDisabled) {
+            lp.height = resources.getDimensionPixelSize(
+                    com.android.internal.R.dimen.quick_qs_offset_height);
+        } else {
+            lp.height = Math.max(getMinimumHeight(),
+                    resources.getDimensionPixelSize(
+                            com.android.internal.R.dimen.quick_qs_offset_height));
+        }
+
+        setLayoutParams(lp);
 
         updateStatusIconAlphaAnimator();
         updateHeaderTextContainerAlphaAnimator();
