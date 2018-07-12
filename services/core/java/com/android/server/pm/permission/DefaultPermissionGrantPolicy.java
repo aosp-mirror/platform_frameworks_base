@@ -1193,10 +1193,25 @@ public final class DefaultPermissionGrantPolicy {
         }
     }
 
-    private void grantRuntimePermissions(PackageParser.Package pkg, Set<String> permissions,
-            boolean systemFixed, boolean ignoreSystemPackage, int userId) {
+    private void grantRuntimePermissions(PackageParser.Package pkg,
+            Set<String> permissionsWithoutSplits, boolean systemFixed, boolean ignoreSystemPackage,
+            int userId) {
         if (pkg.requestedPermissions.isEmpty()) {
             return;
+        }
+
+        final ArraySet<String> permissions = new ArraySet<>(permissionsWithoutSplits);
+
+        // Automatically attempt to grant split permissions to older APKs
+        final int numSplitPerms = PackageParser.SPLIT_PERMISSIONS.length;
+        for (int splitPermNum = 0; splitPermNum < numSplitPerms; splitPermNum++) {
+            final PackageParser.SplitPermissionInfo splitPerm =
+                    PackageParser.SPLIT_PERMISSIONS[splitPermNum];
+
+            if (pkg.applicationInfo.targetSdkVersion < splitPerm.targetSdk
+                    && permissionsWithoutSplits.contains(splitPerm.rootPerm)) {
+                Collections.addAll(permissions, splitPerm.newPerms);
+            }
         }
 
         List<String> requestedPermissions = pkg.requestedPermissions;
