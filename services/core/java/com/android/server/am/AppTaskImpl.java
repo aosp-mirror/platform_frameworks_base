@@ -98,7 +98,7 @@ class AppTaskImpl extends IAppTask.Stub {
         final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
-            synchronized (this) {
+            synchronized (mService) {
                 mService.mStackSupervisor.startActivityFromRecents(callingPid, callingUid, mTaskId,
                         null);
             }
