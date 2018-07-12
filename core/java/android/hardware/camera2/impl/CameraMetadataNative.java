@@ -747,6 +747,9 @@ public class CameraMetadataNative implements Parcelable {
         if (faceDetectMode == null) {
             Log.w(TAG, "Face detect mode metadata is null, assuming the mode is SIMPLE");
             faceDetectMode = CaptureResult.STATISTICS_FACE_DETECT_MODE_SIMPLE;
+        } else if (faceDetectMode > CaptureResult.STATISTICS_FACE_DETECT_MODE_FULL) {
+            // Face detect mode is larger than FULL, assuming the mode is FULL
+            faceDetectMode = CaptureResult.STATISTICS_FACE_DETECT_MODE_FULL;
         } else {
             if (faceDetectMode == CaptureResult.STATISTICS_FACE_DETECT_MODE_OFF) {
                 return new Face[0];
