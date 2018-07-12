@@ -113,6 +113,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DozeParameters mDozeParameters;
     private final AlarmTimeout mTimeTicker;
+    private final KeyguardVisibilityCallback mKeyguardVisibilityCallback;
 
     private final SysuiColorExtractor mColorExtractor;
     private GradientColors mLockColors;
@@ -171,6 +172,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         mUnlockMethodCache = UnlockMethodCache.getInstance(mContext);
         mDarkenWhileDragging = !mUnlockMethodCache.canSkipBouncer();
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mKeyguardVisibilityCallback = new KeyguardVisibilityCallback();
+        mKeyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
         mScrimBehindAlphaResValue = mContext.getResources().getFloat(R.dimen.scrim_behind_alpha);
         mTimeTicker = new AlarmTimeout(alarmManager, this::onHideWallpaperTimeout,
                 "hide_aod_wallpaper", new Handler());
@@ -918,6 +921,18 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         default void onFinished() {
         }
         default void onCancelled() {
+        }
+    }
+
+    /**
+     * Simple keyguard callback that updates scrims when keyguard visibility changes.
+     */
+    private class KeyguardVisibilityCallback extends KeyguardUpdateMonitorCallback {
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean showing) {
+            mNeedsDrawableColorUpdate = true;
+            scheduleUpdate();
         }
     }
 }
