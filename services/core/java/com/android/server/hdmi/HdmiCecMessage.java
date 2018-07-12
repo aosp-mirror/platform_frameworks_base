@@ -16,9 +16,11 @@
 
 package com.android.server.hdmi;
 
+import android.annotation.Nullable;
 import libcore.util.EmptyArray;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A class to encapsulate HDMI-CEC message used for the devices connected via
@@ -42,6 +44,27 @@ public final class HdmiCecMessage {
         mDestination = destination;
         mOpcode = opcode & 0xFF;
         mParams = Arrays.copyOf(params, params.length);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object message) {
+        if (message instanceof HdmiCecMessage) {
+            HdmiCecMessage that = (HdmiCecMessage) message;
+            return this.mSource == that.getSource() &&
+                this.mDestination == that.getDestination() &&
+                this.mOpcode == that.getOpcode() &&
+                Arrays.equals(this.mParams, that.getParams());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+            mSource,
+            mDestination,
+            mOpcode,
+            Arrays.hashCode(mParams));
     }
 
     /**
