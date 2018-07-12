@@ -601,21 +601,13 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_CHECKED = 0x00000002;
 
-    private static final int BOOLEAN_PROPERTY_FOCUSABLE = 0x00000004;
-
     private static final int BOOLEAN_PROPERTY_FOCUSED = 0x00000008;
 
     private static final int BOOLEAN_PROPERTY_SELECTED = 0x00000010;
 
-    private static final int BOOLEAN_PROPERTY_CLICKABLE = 0x00000020;
-
-    private static final int BOOLEAN_PROPERTY_LONG_CLICKABLE = 0x00000040;
-
     private static final int BOOLEAN_PROPERTY_ENABLED = 0x00000080;
 
     private static final int BOOLEAN_PROPERTY_PASSWORD = 0x00000100;
-
-    private static final int BOOLEAN_PROPERTY_SCROLLABLE = 0x00000200;
 
     private static final int BOOLEAN_PROPERTY_ACCESSIBILITY_FOCUSED = 0x00000400;
 
@@ -630,8 +622,6 @@ public class AccessibilityNodeInfo implements Parcelable {
     private static final int BOOLEAN_PROPERTY_MULTI_LINE = 0x00008000;
 
     private static final int BOOLEAN_PROPERTY_CONTENT_INVALID = 0x00010000;
-
-    private static final int BOOLEAN_PROPERTY_CONTEXT_CLICKABLE = 0x00020000;
 
     private static final int BOOLEAN_PROPERTY_IMPORTANCE = 0x0040000;
 
@@ -1166,6 +1156,10 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         mActions.remove(action);
         mActions.add(action);
+    }
+
+    private boolean hasActionWithId(int actionId) {
+        return getActionList().stream().anyMatch(action -> action.getId() == actionId);
     }
 
     /**
@@ -1767,7 +1761,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is focusable.
      */
     public boolean isFocusable() {
-        return getBooleanProperty(BOOLEAN_PROPERTY_FOCUSABLE);
+        return hasActionWithId(ACTION_FOCUS);
     }
 
     /**
@@ -1781,10 +1775,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param focusable True if the node is focusable.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
+     * @deprecated Use {@link #addAction(AccessibilityAction)}
+     * with {@link AccessibilityAction#ACTION_FOCUS}
      */
-    public void setFocusable(boolean focusable) {
-        setBooleanProperty(BOOLEAN_PROPERTY_FOCUSABLE, focusable);
-    }
+    @Deprecated
+    public void setFocusable(boolean focusable) { }
 
     /**
      * Gets whether this node is focused.
@@ -1892,7 +1887,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is clickable.
      */
     public boolean isClickable() {
-        return getBooleanProperty(BOOLEAN_PROPERTY_CLICKABLE);
+        return hasActionWithId(ACTION_CLICK);
     }
 
     /**
@@ -1906,10 +1901,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param clickable True if the node is clickable.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
+     * @deprecated Use {@link #addAction(AccessibilityAction)}
+     * with {@link AccessibilityAction#ACTION_CLICK}
      */
-    public void setClickable(boolean clickable) {
-        setBooleanProperty(BOOLEAN_PROPERTY_CLICKABLE, clickable);
-    }
+    @Deprecated
+    public void setClickable(boolean clickable) { }
 
     /**
      * Gets whether this node is long clickable.
@@ -1917,7 +1913,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is long clickable.
      */
     public boolean isLongClickable() {
-        return getBooleanProperty(BOOLEAN_PROPERTY_LONG_CLICKABLE);
+        return hasActionWithId(ACTION_LONG_CLICK);
     }
 
     /**
@@ -1931,10 +1927,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param longClickable True if the node is long clickable.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
+     * @deprecated Use {@link #addAction(AccessibilityAction)}
+     * with {@link AccessibilityAction#ACTION_LONG_CLICK}
      */
-    public void setLongClickable(boolean longClickable) {
-        setBooleanProperty(BOOLEAN_PROPERTY_LONG_CLICKABLE, longClickable);
-    }
+    @Deprecated
+    public void setLongClickable(boolean longClickable) { }
 
     /**
      * Gets whether this node is enabled.
@@ -1992,7 +1989,13 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is scrollable, false otherwise.
      */
     public boolean isScrollable() {
-        return getBooleanProperty(BOOLEAN_PROPERTY_SCROLLABLE);
+        return hasActionWithId(ACTION_SCROLL_BACKWARD)
+                || hasActionWithId(ACTION_SCROLL_FORWARD)
+                || hasActionWithId(R.id.accessibilityActionScrollToPosition)
+                || hasActionWithId(R.id.accessibilityActionScrollUp)
+                || hasActionWithId(R.id.accessibilityActionScrollDown)
+                || hasActionWithId(R.id.accessibilityActionScrollLeft)
+                || hasActionWithId(R.id.accessibilityActionScrollRight);
     }
 
     /**
@@ -2006,9 +2009,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param scrollable True if the node is scrollable, false otherwise.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
+     * @deprecated Use {@link #addAction(AccessibilityAction)}
      */
+    @Deprecated
+
     public void setScrollable(boolean scrollable) {
-        setBooleanProperty(BOOLEAN_PROPERTY_SCROLLABLE, scrollable);
     }
 
     /**
@@ -2199,7 +2204,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return True if the node is context clickable.
      */
     public boolean isContextClickable() {
-        return getBooleanProperty(BOOLEAN_PROPERTY_CONTEXT_CLICKABLE);
+        return hasActionWithId(R.id.accessibilityActionContextClick);
     }
 
     /**
@@ -2212,10 +2217,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @param contextClickable True if the node is context clickable.
      * @throws IllegalStateException If called from an AccessibilityService.
+     * @deprecated Use {@link #addAction(AccessibilityAction)}
+     * with {@link AccessibilityAction#ACTION_CONTEXT_CLICK}
      */
-    public void setContextClickable(boolean contextClickable) {
-        setBooleanProperty(BOOLEAN_PROPERTY_CONTEXT_CLICKABLE, contextClickable);
-    }
+    @Deprecated
+    public void setContextClickable(boolean contextClickable) { }
 
     /**
      * Gets the node's live region mode.
@@ -2309,7 +2315,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return If the node can be dismissed.
      */
     public boolean isDismissable() {
-        return getBooleanProperty(BOOLEAN_PROPERTY_DISMISSABLE);
+        return hasActionWithId(ACTION_DISMISS);
     }
 
     /**
@@ -2321,10 +2327,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      * </p>
      *
      * @param dismissable If the node can be dismissed.
+     * @deprecated Use {@link #addAction(AccessibilityAction)}
+     * with {@link AccessibilityAction#ACTION_DISMISS}
      */
-    public void setDismissable(boolean dismissable) {
-        setBooleanProperty(BOOLEAN_PROPERTY_DISMISSABLE, dismissable);
-    }
+    @Deprecated
+    public void setDismissable(boolean dismissable) { }
 
     /**
      * Returns whether the node originates from a view considered important for accessibility.
