@@ -236,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Hegaldi modua"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Hegaldi modua AKTIBATUTA dago"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Hegaldi modua DESAKTIBATUTA dago"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Bateria-aurrezlea"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"DESAKTIBATUTA dago bateria-aurrezlea"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"AKTIBATUTA dago bateria-aurrezlea"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Ezarpenak"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Lagundu"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Ahots-laguntza"</string>
@@ -525,7 +522,7 @@
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"erabili aurpegi bidez autentifikatzeko hardwarea"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Aurpegi bidez autentifikatzeko hardwarea erabiltzea baimentzen dio aplikazioari"</string>
     <string name="face_acquired_insufficient" msgid="5901287247766106330">"Ezin izan da prozesatu aurpegia. Saiatu berriro."</string>
-    <string name="face_acquired_too_bright" msgid="610606792381297174">"Aurpegiak distira gehiegi du. Jarri argi gutxiago."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"Aurpegiak distira gehiegi du. Murriztu argitasuna."</string>
     <string name="face_acquired_too_dark" msgid="7229162716976778371">"Aurpegia ilunegi dago. Estalgabetu argi-iturburua."</string>
     <string name="face_acquired_too_close" msgid="1980310037427755293">"Urrundu sentsorea aurpegitik."</string>
     <string name="face_acquired_too_far" msgid="4494571381828850007">"Hurbildu sentsorea aurpegira."</string>
@@ -533,17 +530,17 @@
     <string name="face_acquired_too_low" msgid="4539774649296349109">"Eraman sentsorea behera."</string>
     <string name="face_acquired_too_right" msgid="1650292067226118760">"Eraman sentsorea eskuinera."</string>
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Eraman sentsorea ezkerrera."</string>
-    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Begiratu sentsorea."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Begiratu sentsoreari."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Ez dugu hauteman aurpegirik."</string>
     <string name="face_acquired_not_steady" msgid="3722829465011040042">"Egon geldi, aurpegia gailuaren aurrean jarrita."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
-    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Aurpegiaren hardwarea ez dago erabilgarri."</string>
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"Aurpegia hautemateko hardwarea ez dago erabilgarri."</string>
     <string name="face_error_timeout" msgid="4014326147867150054">"Gainditu da aurpegiak prozesatzeko denbora-muga. Saiatu berriro."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Ezin da gorde aurpegia."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Utzi da aurpegiaren bidezko eragiketa."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Saiakera gehiegi egin dituzu. Saiatu berriro geroago."</string>
-    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Saiakera gehiegi egin dituzu. Desgaitu da aurpegiaren autentifikazioa."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Saiakera gehiegi egin dituzu. Desgaitu egin da autentifikazioa."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Saiatu berriro."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"Ez dago aurpegirik erregistratuta."</string>
     <string name="face_error_hw_not_present" msgid="4737289254517095671">"Gailu honek ez du aurpegia autentifikatzeko sentsorerik"</string>
@@ -1211,8 +1208,8 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Ezin da konektatu Internetera Wi-Fi bidez"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Sakatu aukerak ikusteko"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Aldaketak sare publiko eramangarriaren ezarpenetan"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Aldatu da sare eramangarriaren banda."</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Aldaketak egin dira sare publikoaren ezarpenetan"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Aldatu da sare publikoaren banda."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Gailuak ez du onartzen 5 GHz-ko banda soilik erabiltzeko hobespena. Horren ordez, erabilgarri dagoen bakoitzean erabiliko da 5 GHz-ko banda."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> erabiltzen ari zara orain"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> Internetera konektatzeko gauza ez denean, <xliff:g id="NEW_NETWORK">%1$s</xliff:g> erabiltzen du gailuak. Agian kostuak ordaindu beharko dituzu."</string>

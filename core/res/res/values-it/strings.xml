@@ -236,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modalità aereo"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Modalità aereo attiva"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Modalità aereo non attiva"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Risparmio energetico"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"Risparmio energetico disattivato"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"Risparmio energetico attivo"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Impostazioni"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Assistenza"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Voice Assist"</string>
@@ -527,13 +524,13 @@
     <string name="face_acquired_insufficient" msgid="5901287247766106330">"Impossibile elaborare il volto. Riprova."</string>
     <string name="face_acquired_too_bright" msgid="610606792381297174">"Volto troppo luminoso. Prova dove c\'è meno luce."</string>
     <string name="face_acquired_too_dark" msgid="7229162716976778371">"Volto troppo scuro. Non coprire la fonte di luce."</string>
-    <string name="face_acquired_too_close" msgid="1980310037427755293">"Allontana i sensori dal volto."</string>
-    <string name="face_acquired_too_far" msgid="4494571381828850007">"Avvicina i sensori al volto."</string>
-    <string name="face_acquired_too_high" msgid="228411096134808372">"Sposta i sensori verso l\'alto."</string>
-    <string name="face_acquired_too_low" msgid="4539774649296349109">"Sposta i sensori verso il basso."</string>
-    <string name="face_acquired_too_right" msgid="1650292067226118760">"Sposta i sensori verso destra."</string>
-    <string name="face_acquired_too_left" msgid="2712489669456176505">"Sposta i sensori verso sinistra."</string>
-    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Guarda i sensori."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"Allontana il sensore dal volto."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"Avvicina il sensore al volto."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"Sposta il sensore verso l\'alto."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"Sposta il sensore verso il basso."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"Sposta il sensore verso destra."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"Sposta il sensore verso sinistra."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Guarda il sensore."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Nessun volto rilevato."</string>
     <string name="face_acquired_not_steady" msgid="3722829465011040042">"Tieni il volto fermo davanti al dispositivo."</string>
   <string-array name="face_acquired_vendor">

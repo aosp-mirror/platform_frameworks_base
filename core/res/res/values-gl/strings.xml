@@ -236,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modo avión"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"O modo avión está activado"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"O modo avión está desactivado"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Aforro de batería"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"A función Aforro de batería está DESACTIVADA"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"A función Aforro de batería está ACTIVADA"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Configuración"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Asistencia"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Asistente voz"</string>
@@ -525,8 +522,8 @@
     <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"usar hardware de autenticación facial"</string>
     <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"Permite que a aplicación utilice hardware facial para a autenticación"</string>
     <string name="face_acquired_insufficient" msgid="5901287247766106330">"Non se puido procesar a cara. Téntao de novo."</string>
-    <string name="face_acquired_too_bright" msgid="610606792381297174">"A cara brilla moito. Proba con menos luz."</string>
-    <string name="face_acquired_too_dark" msgid="7229162716976778371">"A cara está moi escura. Proba con máis luz."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"A cara vese demasiado brillante. Proba con menos luz."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"A cara vese demasiado escura. Proba con máis luz."</string>
     <string name="face_acquired_too_close" msgid="1980310037427755293">"Afasta o sensor da cara."</string>
     <string name="face_acquired_too_far" msgid="4494571381828850007">"Achega o sensor á cara."</string>
     <string name="face_acquired_too_high" msgid="228411096134808372">"Sube máis o sensor."</string>

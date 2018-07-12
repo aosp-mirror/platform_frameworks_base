@@ -239,9 +239,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Režim rada u avionu"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Režim rada u avionu je UKLJUČEN"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Režim rada u avionu je ISKLJUČEN"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Ušteda baterije"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"Ušteda baterije je ISKLJUČENA"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"Ušteda baterije je UKLJUČENA"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Podešavanja"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Pomoć"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Glasovna pomoć"</string>
