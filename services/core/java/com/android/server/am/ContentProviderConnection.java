@@ -55,10 +55,12 @@ public final class ContentProviderConnection extends Binder {
     public void startAssociationIfNeeded() {
         // If we don't already have an active association, create one...  but only if this
         // is an association between two different processes.
-        if (association == null && (provider.appInfo.uid != client.uid
-                || !provider.info.processName.equals(client.processName))) {
-            ProcessStats.ProcessStateHolder holder = provider.proc != null
-                    ? provider.proc.pkgList.get(provider.name.getPackageName()) : null;
+        if (ActivityManagerService.TRACK_PROCSTATS_ASSOCIATIONS
+                && association == null && provider.proc != null
+                && (provider.appInfo.uid != client.uid
+                        || !provider.info.processName.equals(client.processName))) {
+            ProcessStats.ProcessStateHolder holder = provider.proc.pkgList.get(
+                    provider.name.getPackageName());
             if (holder == null) {
                 Slog.wtf(TAG_AM, "No package in referenced provider "
                         + provider.name.toShortString() + ": proc=" + provider.proc);
