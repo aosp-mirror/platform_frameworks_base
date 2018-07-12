@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~
+  ~ Copyright 2018, The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<resources>
+    <string name="config_statusBarComponent" translatable="false">com.android.systemui.statusbar.car.CarStatusBar</string>
+    <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.CarSystemUIFactory</string>
+    <bool name="config_enableFullscreenUserSwitcher">true</bool>
+
+    <!-- Notifications on the car should not show the gear icon. Swiping should only dismiss the
+         cards. -->
+    <bool name="config_showNotificationGear">false</bool>
+
+    <!-- No need to draw a background around a notification because there is no gear icon. -->
+    <bool name="config_drawNotificationBackground">false</bool>
+
+    <!-- The notification shade should only be shown on a facet click and not by dragging. -->
+    <bool name="config_enableNotificationShadeDrag">false</bool>
+
+    <!-- There should not be the ability to clear all notifications with a button. -->
+    <bool name="config_enableNotificationsClearAll">false</bool>
+
+    <!-- Hide the notification shelf so that the cards in the notification center scroll smoothly
+         off-screen. -->
+    <bool name="config_showNotificationShelf">false</bool>
+
+    <!-- The notifications should always fade when being dismissed. -->
+    <bool name="config_fadeNotificationsOnDismiss">true</bool>
+
+    <!-- The entire notification row should be translated because the cards are smaller than the
+         width of the screen. If the row is not translated, then they will be clipped. -->
+    <bool name="config_translateNotificationContentsOnSwipe">false</bool>
+
+    <!-- The notifications should fade as they are being swiped off screen. -->
+    <bool name="config_fadeDependingOnAmountSwiped">true</bool>
+
+     <!-- The expand icon should be displayed at the top right corner of the notifications. -->
+    <bool name="config_showNotificationExpandButtonAtEnd">true</bool>
+
+    <!-- A notification card that has been scrolled off screen should not be clipped in height. This
+         maintains the illusion that the cards are being scrolled underneath the status bar
+         shelf. -->
+    <bool name="config_clipNotificationScrollToTop">false</bool>
+
+    <!-- The auto notification have rounded corners. Ensure that any content is clipped to these
+         corners. -->
+    <bool name="config_clipNotificationsToOutline">true</bool>
+
+    <!-- Notifications should always be in their expanded state so that the actions are visible.
+         This will make it easier for an auto user to interact with them. -->
+    <bool name="config_alwaysExpandNonGroupedNotifications">true</bool>
+
+    <!-- Auto does not allow notifications to be toggled to and from their expanded states to
+         reduce driver distraction. -->
+    <bool name="config_enableNonGroupedNotificationExpand">false</bool>
+
+    <!-- There should always be a dividing line between notifications. -->
+    <bool name="config_showDividersWhenGroupNotificationExpanded">true</bool>
+
+    <!--- Hide the dividing lines when the notification group is expanding. -->
+    <bool name="config_hideDividersDuringTransition">true</bool>
+
+    <!-- Child notifications are displayed with no dividing space between them in auto, so disable
+         the shadow. -->
+    <bool name="config_enableShadowOnChildNotifications">false</bool>
+
+    <!-- Keep the notification background when the container has been expanded. The children will
+         expand inline within the container, so it can keep its original background. -->
+    <bool name="config_showGroupNotificationBgWhenExpanded">true</bool>
+</resources>
