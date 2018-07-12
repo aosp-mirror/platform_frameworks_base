@@ -685,13 +685,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 // inserted above to hold the session active.
                 try {
                     final Int64Ref last = new Int64Ref(0);
-                    FileUtils.copy(incomingFd.getFileDescriptor(), targetFd, (long progress) -> {
-                        if (params.sizeBytes > 0) {
-                            final long delta = progress - last.value;
-                            last.value = progress;
-                            addClientProgress((float) delta / (float) params.sizeBytes);
-                        }
-                    }, null, lengthBytes);
+                    FileUtils.copy(incomingFd.getFileDescriptor(), targetFd, lengthBytes, null,
+                            Runnable::run, (long progress) -> {
+                                if (params.sizeBytes > 0) {
+                                    final long delta = progress - last.value;
+                                    last.value = progress;
+                                    addClientProgress((float) delta / (float) params.sizeBytes);
+                                }
+                            });
                 } finally {
                     IoUtils.closeQuietly(targetFd);
                     IoUtils.closeQuietly(incomingFd);

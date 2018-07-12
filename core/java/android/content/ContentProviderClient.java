@@ -39,6 +39,8 @@ import com.android.internal.util.Preconditions;
 
 import dalvik.system.CloseGuard;
 
+import libcore.io.IoUtils;
+
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -560,14 +562,17 @@ public class ContentProviderClient implements AutoCloseable {
         return ContentProvider.coerceToLocalContentProvider(mContentProvider);
     }
 
+    /**
+     * Closes the given object quietly, ignoring any checked exceptions. Does
+     * nothing if the given object is {@code null}.
+     */
+    public static void closeQuietly(ContentProviderClient client) {
+        IoUtils.closeQuietly(client);
+    }
+
     /** {@hide} */
     public static void releaseQuietly(ContentProviderClient client) {
-        if (client != null) {
-            try {
-                client.release();
-            } catch (Exception ignored) {
-            }
-        }
+        IoUtils.closeQuietly(client);
     }
 
     private class NotRespondingRunnable implements Runnable {
