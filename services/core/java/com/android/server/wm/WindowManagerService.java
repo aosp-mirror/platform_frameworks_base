@@ -1593,7 +1593,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         // We use the visible frame, because we want the animation to morph the window from what
         // was visible to the user to the final destination of the new window.
-        Rect frame = replacedWindow.mVisibleFrame;
+        Rect frame = replacedWindow.getVisibleFrameLw();
         // We treat this as if this activity was opening, so we can trigger the app transition
         // animation and piggy-back on existing transition animation infrastructure.
         mOpeningApps.add(atoken);
@@ -1829,7 +1829,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 outDisplayFrame.setEmpty();
                 return;
             }
-            outDisplayFrame.set(win.mDisplayFrame);
+            outDisplayFrame.set(win.getDisplayFrameLw());
         }
     }
 

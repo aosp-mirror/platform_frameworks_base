@@ -409,7 +409,7 @@ class Task extends WindowContainer<AppWindowToken> {
      * @param out Rect containing the max visible bounds.
      * @return true if the task has some visible app windows; false otherwise.
      */
-    boolean getMaxVisibleBounds(Rect out) {
+    private boolean getMaxVisibleBounds(Rect out) {
         boolean foundTop = false;
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final AppWindowToken token = mChildren.get(i);
@@ -422,22 +422,11 @@ class Task extends WindowContainer<AppWindowToken> {
                 continue;
             }
             if (!foundTop) {
-                out.set(win.mVisibleFrame);
                 foundTop = true;
-                continue;
+                out.setEmpty();
             }
-            if (win.mVisibleFrame.left < out.left) {
-                out.left = win.mVisibleFrame.left;
-            }
-            if (win.mVisibleFrame.top < out.top) {
-                out.top = win.mVisibleFrame.top;
-            }
-            if (win.mVisibleFrame.right > out.right) {
-                out.right = win.mVisibleFrame.right;
-            }
-            if (win.mVisibleFrame.bottom > out.bottom) {
-                out.bottom = win.mVisibleFrame.bottom;
-            }
+
+            win.getMaxVisibleBounds(out);
         }
         return foundTop;
     }

@@ -1816,7 +1816,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 // animation target (which will be different than the task bounds)
                 frame.set(getTask().getParent().getBounds());
             } else {
-                frame.set(win.mContainingFrame);
+                frame.set(win.getContainingFrame());
             }
             surfaceInsets = win.getAttrs().surfaceInsets;
             // XXX(b/72757033): These are insets relative to the window frame, but we're really
