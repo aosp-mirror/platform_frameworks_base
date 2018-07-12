@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi мрежата няма достъп до интернет"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Докоснете за опции"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Промени в настройките ви за точка за достъп"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Честотната лента на точката ви за достъп е променена."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Това устройство не поддържа предпочитанието ви за използване само на честотната лента от 5 ГХц. Вместо това то ще я ползва, когато е възможно."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Превключи се към <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Устройството използва <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, когато <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> няма достъп до интернет. Възможно е да бъдете таксувани."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Превключи се от <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> към <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

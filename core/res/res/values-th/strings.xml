@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi เชื่อมต่ออินเทอร์เน็ตไม่ได้"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"แตะเพื่อดูตัวเลือก"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"มีการเปลี่ยนแปลงการตั้งค่าฮอตสปอต"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"ย่านความถี่ฮอตสปอตมีการเปลี่ยนแปลง"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"อุปกรณ์นี้ไม่รองรับค่ากำหนดของคุณเฉพาะสำหรับ 5 GHz เท่านั้น และจะใช้ย่านความถี่ 5 GHz แทน เมื่อใช้ได้"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"เปลี่ยนเป็น <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"อุปกรณ์จะใช้ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> เมื่อ <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> เข้าถึงอินเทอร์เน็ตไม่ได้ โดยอาจมีค่าบริการ"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"เปลี่ยนจาก <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> เป็น <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
@@ -1252,7 +1255,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"แตะเพื่อดูตัวเลือกเพิ่มเติม"</string>
     <string name="usb_power_notification_message" msgid="4647527153291917218">"กำลังชาร์จอุปกรณ์ที่เชื่อมต่อ แตะเพื่อดูตัวเลือกเพิ่มเติม"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"ตรวจพบอุปกรณ์เสริมสำหรับเสียงแบบแอนะล็อก"</string>
-    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"อุปกรณ์ที่พ่วงไม่สามารถใช้งานร่วมกับโทรศัพท์นี้ แตะเพื่อเรียนรู้เพิ่มเติม"</string>
+    <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"อุปกรณ์ที่พ่วงไม่สามารถใช้งานร่วมกับโทรศัพท์นี้ แตะเพื่อดูข้อมูลเพิ่มเติม"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"เชื่อมต่อการแก้ไขข้อบกพร่องผ่าน USB แล้ว"</string>
     <string name="adb_active_notification_message" msgid="7463062450474107752">"แตะเพื่อปิดการแก้ไขข้อบกพร่อง USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"เลือกเพื่อปิดใช้งานการแก้ไขข้อบกพร่อง USB"</string>

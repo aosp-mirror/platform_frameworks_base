@@ -1219,6 +1219,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"„Wi‑Fi“ tinkle nėra interneto ryšio"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Palieskite, kad būtų rodomos parinktys."</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Viešosios interneto prieigos taško nustatymų pakeitimai"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Viešosios prieigos taško dažnio juosta pasikeitė."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Šiame įrenginyje nepalaikoma tik 5 GHz nuostata. Vietoj to šiame įrenginyje bus naudojama 5 GHz dažnio juosta, kai bus pasiekiama."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Perjungta į tinklą <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Įrenginyje naudojamas kitas tinklas (<xliff:g id="NEW_NETWORK">%1$s</xliff:g>), kai dabartiniame tinkle (<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>) nėra interneto ryšio. Gali būti taikomi mokesčiai."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Perjungta iš tinklo <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> į tinklą <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

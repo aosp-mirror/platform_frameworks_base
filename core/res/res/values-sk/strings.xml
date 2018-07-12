@@ -1219,6 +1219,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Sieť Wi‑Fi nemá prístup k internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Klepnutím získate možnosti"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Zmeny nastavení hotspotu"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Pásmo vášho hotspotu sa zmenilo."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Toto zariadenie nepodporuje vašu predvoľbu používať iba 5 GHz. Namiesto toho bude pásmo 5 GHz používať vtedy, keď bude k dispozícii."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Prepnuté na sieť: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Keď <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nemá prístup k internetu, zariadenie používa <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Môžu sa účtovať poplatky."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Prepnuté zo siete <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na sieť <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

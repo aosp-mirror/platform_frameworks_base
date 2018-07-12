@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi 並未連接互聯網"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"輕按即可查看選項"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"您的熱點設定變更"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"您的熱點頻段已變更。"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"此裝置不支援只限 5 GHz 的偏好設定，但會在 5 GHz 頻段可用時採用。"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"已切換至<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"裝置會在 <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> 無法連線至互聯網時使用<xliff:g id="NEW_NETWORK">%1$s</xliff:g> (可能需要支付相關費用)。"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"已從<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>切換至<xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

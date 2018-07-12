@@ -585,13 +585,13 @@
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Monitorizar o número de palavras-passe incorretas introduzidas ao desbloquear o ecrã e bloquear a TV ou apagar todos os dados deste utilizador se forem introduzidas demasiadas palavras-passe incorretas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Monitorizar o número de palavras-passe incorretas introduzidas ao desbloquear o ecrã e bloquear o telemóvel ou apagar todos os dados deste utilizador se forem introduzidas demasiadas palavras-passe incorretas."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Alterar o bloqueio de ecrã"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Alterar o bloqueio de ecrã."</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Altera o bloqueio de ecrã."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bloquear o ecrã"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Controlar como e quando ocorre o bloqueio do ecrã."</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Controla como e quando ocorre o bloqueio do ecrã."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Apagar todos os dados"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Apagar os dados do tablet sem avisar através de uma reposição de dados de fábrica."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Apagar os dados da TV sem aviso prévio ao executar uma reposição de dados de fábrica."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Apagar os dados do telemóvel sem avisar através de uma reposição de dados de fábrica."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Apaga os dados do telemóvel sem avisar ao efetuar uma reposição de dados de fábrica."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Apagar os dados do utilizador"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Apagar os dados deste utilizador neste tablet sem aviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Apagar os dados deste utilizador nesta TV sem aviso."</string>
@@ -605,7 +605,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Desativar câmaras"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Evitar a utilização de todas as câmaras do dispositivo."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Desat. funcionalid. bloq. ecrã"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Impeça a utilização de algumas funcionalidades de bloqueio de ecrã."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Impede a utilização de algumas funcionalidades de bloqueio de ecrã."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Móvel"</item>
@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"O Wi-Fi não tem acesso à Internet."</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Toque para obter mais opções"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Alterações às definições de zona Wi-Fi"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"A banda da sua zona Wi-Fi foi alterada."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Este dispositivo não suporta a sua preferência apenas para 5 GHz. Em alternativa, este dispositivo vai utilizar a banda de 5 GHz quando estiver disponível."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Mudou para <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"O dispositivo utiliza <xliff:g id="NEW_NETWORK">%1$s</xliff:g> quando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> não tem acesso à Internet. Podem aplicar-se custos."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Mudou de <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> para <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
