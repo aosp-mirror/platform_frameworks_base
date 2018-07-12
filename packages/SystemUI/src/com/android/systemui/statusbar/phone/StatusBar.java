@@ -2155,6 +2155,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
+    public boolean isHeadsUpShouldBeVisible() {
+        return mHeadsUpAppearanceController.shouldBeVisible();
+    }
+
     /**
      * All changes to the status bar and notifications funnel through here and are batched.
      */
