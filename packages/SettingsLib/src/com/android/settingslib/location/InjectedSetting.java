@@ -178,8 +178,8 @@ public class InjectedSetting {
         public InjectedSetting build() {
             if (mPackageName == null || mClassName == null || TextUtils.isEmpty(mTitle)
                     || TextUtils.isEmpty(mSettingsActivity)) {
-                if (Log.isLoggable(BaseSettingsInjector.TAG, Log.WARN)) {
-                    Log.w(BaseSettingsInjector.TAG, "Illegal setting specification: package="
+                if (Log.isLoggable(SettingsInjector.TAG, Log.WARN)) {
+                    Log.w(SettingsInjector.TAG, "Illegal setting specification: package="
                             + mPackageName + ", class=" + mClassName
                             + ", title=" + mTitle + ", settingsActivity=" + mSettingsActivity);
                 }
