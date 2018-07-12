@@ -16,7 +16,6 @@
 
 package android.telephony;
 
-import android.annotation.Nullable;
 import android.os.Parcel;
 
 import java.util.Objects;
@@ -133,28 +132,6 @@ public final class CellIdentityTdscdma extends CellIdentity {
     @Override
     public int getChannelNumber() {
         return mUarfcn;
-    }
-
-    /**
-     * @return The long alpha tag associated with the current scan result (may be the operator
-     * name string or extended operator name string). May be null if unknown.
-     *
-     * @hide
-     */
-    @Nullable
-    public CharSequence getOperatorAlphaLong() {
-        return mAlphaLong;
-    }
-
-    /**
-     * @return The short alpha tag associated with the current scan result (may be the operator
-     * name string or extended operator name string).  May be null if unknown.
-     *
-     * @hide
-     */
-    @Nullable
-    public CharSequence getOperatorAlphaShort() {
-        return mAlphaShort;
     }
 
     @Override
