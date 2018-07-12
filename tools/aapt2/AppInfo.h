@@ -31,8 +31,11 @@ struct AppInfo {
   // The app's minimum SDK version, if it is defined.
   Maybe<int> min_sdk_version;
 
-  // The app's version code, if it is defined.
+  // The app's version code (the lower 32 bits of the long version code), if it is defined.
   Maybe<uint32_t> version_code;
+
+  // The app's version code major (the upper 32 bits of the long version code), if it is defined.
+  Maybe<uint32_t> version_code_major;
 
   // The app's revision code, if it is defined.
   Maybe<uint32_t> revision_code;

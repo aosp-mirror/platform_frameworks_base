@@ -67,6 +67,11 @@ Maybe<AppInfo> ExtractAppInfoFromBinaryManifest(const xml::XmlResource& xml_res,
 // checks this at runtime.
 std::string MakePackageSafeName(const std::string &name);
 
+// Sets the versionCode and versionCodeMajor attributes to the version code. Attempts to encode the
+// version code using the versionCode attribute only, and encodes using both versionCode and
+// versionCodeMajor if the version code requires more than 32 bits.
+void SetLongVersionCode(xml::Element* manifest, uint64_t version_code);
+
 }  // namespace aapt
 
 #endif /* AAPT_SPLIT_UTIL_H */
