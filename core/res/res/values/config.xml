@@ -672,6 +672,10 @@
     <!-- Boolean indicating whether framework needs to set the tx power limit for meeting SAR requirements -->
     <bool translatable="false" name="config_wifi_framework_enable_sar_tx_power_limit">false</bool>
 
+    <!-- Boolean indicating whether framework should use detection of softAP mode to set the tx
+         power limit for meeting SAR requirements -->
+    <bool translatable="false" name="config_wifi_framework_enable_soft_ap_sar_tx_power_limit">false</bool>
+
     <!-- Boolean indicating whether framework needs to use body proximity to set the tx power limit
          for meeting SAR requirements -->
     <bool translatable="false" name="config_wifi_framework_enable_body_proximity_sar_tx_power_limit">false</bool>
