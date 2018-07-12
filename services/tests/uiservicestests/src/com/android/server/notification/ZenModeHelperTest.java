@@ -648,7 +648,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         String xml = "<zen version=\"6\" user=\"0\">\n"
                 + "<allow calls=\"false\" repeatCallers=\"false\" messages=\"true\" "
                 + "reminders=\"false\" events=\"false\" callsFrom=\"1\" messagesFrom=\"2\" "
-                + "visualScreenOff=\"false\" alarms=\"true\" "
+                + "visualScreenOff=\"true\" alarms=\"true\" "
                 + "media=\"true\" system=\"false\" />\n"
                 + "<disallow visualEffects=\"511\" />"
                 + "</zen>";
@@ -664,7 +664,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         xml = "<zen version=\"6\" user=\"0\">\n"
                 + "<allow calls=\"false\" repeatCallers=\"false\" messages=\"true\" "
                 + "reminders=\"false\" events=\"false\" callsFrom=\"1\" messagesFrom=\"2\" "
-                + "visualScreenOn=\"false\" alarms=\"true\" "
+                + "visualScreenOn=\"true\" alarms=\"true\" "
                 + "media=\"true\" system=\"false\" />\n"
                 + "<disallow visualEffects=\"511\" />"
                 + "</zen>";
@@ -683,7 +683,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         String xml = "<zen version=\"6\" user=\"0\">\n"
                 + "<allow calls=\"false\" repeatCallers=\"false\" messages=\"true\" "
                 + "reminders=\"false\" events=\"false\" callsFrom=\"1\" messagesFrom=\"2\" "
-                + "visualScreenOff=\"false\" visualScreenOn=\"false\" alarms=\"true\" "
+                + "visualScreenOff=\"true\" visualScreenOn=\"true\" alarms=\"true\" "
                 + "media=\"true\" system=\"false\" />\n"
                 + "<disallow visualEffects=\"511\" />"
                 + "</zen>";
@@ -702,7 +702,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         String xml = "<zen version=\"6\" user=\"0\">\n"
                 + "<allow calls=\"false\" repeatCallers=\"false\" messages=\"true\" "
                 + "reminders=\"false\" events=\"false\" callsFrom=\"1\" messagesFrom=\"2\" "
-                + "visualScreenOff=\"true\" visualScreenOn=\"true\" alarms=\"true\" "
+                + "visualScreenOff=\"false\" visualScreenOn=\"false\" alarms=\"true\" "
                 + "media=\"true\" system=\"false\" />\n"
                 + "<disallow visualEffects=\"511\" />"
                 + "</zen>";
@@ -721,7 +721,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         xml = "<zen version=\"6\" user=\"0\">\n"
                 + "<allow calls=\"false\" repeatCallers=\"false\" messages=\"true\" "
                 + "reminders=\"false\" events=\"false\" callsFrom=\"1\" messagesFrom=\"2\" "
-                + "visualScreenOff=\"false\" visualScreenOn=\"true\" alarms=\"true\" "
+                + "visualScreenOff=\"true\" visualScreenOn=\"false\" alarms=\"true\" "
                 + "media=\"true\" system=\"false\" />\n"
                 + "<disallow visualEffects=\"511\" />"
                 + "</zen>";
@@ -737,7 +737,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         xml = "<zen version=\"6\" user=\"0\">\n"
                 + "<allow calls=\"false\" repeatCallers=\"false\" messages=\"true\" "
                 + "reminders=\"false\" events=\"false\" callsFrom=\"1\" messagesFrom=\"2\" "
-                + "visualScreenOff=\"true\" visualScreenOn=\"false\" alarms=\"true\" "
+                + "visualScreenOff=\"false\" visualScreenOn=\"true\" alarms=\"true\" "
                 + "media=\"true\" system=\"false\" />\n"
                 + "<disallow visualEffects=\"511\" />"
                 + "</zen>";
