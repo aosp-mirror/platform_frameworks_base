@@ -2294,7 +2294,8 @@
     <permission android:name="android.permission.ASEC_RENAME"
         android:protectionLevel="signature" />
 
-    <!-- @SystemApi Allows applications to write the apn settings.
+    <!-- @SystemApi Allows applications to write the apn settings and read sensitive fields of
+         an existing apn settings like user and password.
     <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.WRITE_APN_SETTINGS"
         android:protectionLevel="signature|privileged" />
