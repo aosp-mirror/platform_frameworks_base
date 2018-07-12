@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.telephony.NetworkService.NetworkServiceProvider;
 
@@ -32,6 +33,7 @@ import java.lang.ref.WeakReference;
  *
  * @hide
  */
+@SystemApi
 public class NetworkServiceCallback {
 
     private static final String mTag = NetworkServiceCallback.class.getSimpleName();
