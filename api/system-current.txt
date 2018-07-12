@@ -4274,8 +4274,8 @@ package android.telephony {
     method public int[] getAvailableServices();
     method public android.telephony.CellIdentity getCellIdentity();
     method public int getDomain();
+    method public int getReasonForDenial();
     method public int getRegState();
-    method public int getRejectCause();
     method public int getTransportType();
     method public boolean isEmergencyEnabled();
     method public void writeToParcel(android.os.Parcel, int);
