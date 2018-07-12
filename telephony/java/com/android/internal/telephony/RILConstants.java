@@ -16,15 +16,6 @@
 
 package com.android.internal.telephony;
 
-/**
- * TODO: This should probably not be an interface see
- * http://www.javaworld.com/javaworld/javaqa/2001-06/01-qa-0608-constants.html and google with
- * http://www.google.com/search?q=interface+constants&ie=utf-8&oe=utf-8&aq=t&rls=com.ubuntu:en-US:unofficial&client=firefox-a
- *
- * Also they should all probably be static final.
- */
-
-import android.os.SystemProperties;
 import android.telephony.TelephonyManager;
 
 /**
@@ -231,13 +222,6 @@ public interface RILConstants {
     int LCE_STOPPED = 0;
     int LCE_ACTIVE = 1;
 
-/*
-cat include/telephony/ril.h | \
-   egrep '^#define' | \
-   sed -re 's/^#define +([^ ]+)* +([^ ]+)/    int \1 = \2;/' \
-   >>java/android/com.android.internal.telephony/gsm/RILConstants.java
-*/
-
     /**
      * No restriction at all including voice/SMS/USSD/SS/AV64
      * and packet data.
@@ -272,6 +256,18 @@ cat include/telephony/ril.h | \
     public static final int DATA_PROFILE_OEM_BASE  = 1000;
     public static final int DATA_PROFILE_INVALID   = 0xFFFFFFFF;
 
+    /**
+     * The request/response/unsol message IDs below match RIL.h through Android O-MR1.
+     *
+     * RIL.h is at hardware/ril/include/telephony.ril.h; RIL support is deprecated and may
+     * be removed in the future.
+     *
+     * Messages defined after O-MR1 have no corresponding definition in RIL.h.
+     * P-and-later messages start at RIL_REQUEST_HAL_NON_RIL_BASE and
+     * RIL_UNSOL_HAL_NON_RIL_BASE.
+     */
+
+    /* Requests begin */
     int RIL_REQUEST_GET_SIM_STATUS = 1;
     int RIL_REQUEST_ENTER_SIM_PIN = 2;
     int RIL_REQUEST_ENTER_SIM_PUK = 3;
@@ -415,15 +411,20 @@ cat include/telephony/ril.h | \
     int RIL_REQUEST_SET_CARRIER_INFO_IMSI_ENCRYPTION = 141;
     int RIL_REQUEST_START_NETWORK_SCAN = 142;
     int RIL_REQUEST_STOP_NETWORK_SCAN = 143;
-    int RIL_REQUEST_GET_SLOT_STATUS = 144;
-    int RIL_REQUEST_SET_LOGICAL_TO_PHYSICAL_SLOT_MAPPING = 145;
-    int RIL_REQUEST_START_KEEPALIVE = 146;
-    int RIL_REQUEST_STOP_KEEPALIVE = 147;
-    int RIL_REQUEST_SET_SIGNAL_STRENGTH_REPORTING_CRITERIA = 148;
-    int RIL_REQUEST_SET_LINK_CAPACITY_REPORTING_CRITERIA = 149;
+    int RIL_REQUEST_START_KEEPALIVE = 144;
+    int RIL_REQUEST_STOP_KEEPALIVE = 145;
 
+    /* The following requests are not defined in RIL.h */
+    int RIL_REQUEST_HAL_NON_RIL_BASE = 200;
+    int RIL_REQUEST_GET_SLOT_STATUS = 200;
+    int RIL_REQUEST_SET_LOGICAL_TO_PHYSICAL_SLOT_MAPPING = 201;
+    int RIL_REQUEST_SET_SIGNAL_STRENGTH_REPORTING_CRITERIA = 202;
+    int RIL_REQUEST_SET_LINK_CAPACITY_REPORTING_CRITERIA = 203;
+
+    /* Responses begin */
     int RIL_RESPONSE_ACKNOWLEDGEMENT = 800;
 
+    /* Unsols begin */
     int RIL_UNSOL_RESPONSE_BASE = 1000;
     int RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED = 1000;
     int RIL_UNSOL_RESPONSE_CALL_STATE_CHANGED = 1001;
@@ -475,7 +476,10 @@ cat include/telephony/ril.h | \
     int RIL_UNSOL_MODEM_RESTART = 1047;
     int RIL_UNSOL_CARRIER_INFO_IMSI_ENCRYPTION = 1048;
     int RIL_UNSOL_NETWORK_SCAN_RESULT = 1049;
-    int RIL_UNSOL_ICC_SLOT_STATUS = 1050;
-    int RIL_UNSOL_KEEPALIVE_STATUS = 1051;
-    int RIL_UNSOL_PHYSICAL_CHANNEL_CONFIG = 1052;
+    int RIL_UNSOL_KEEPALIVE_STATUS = 1050;
+
+    /* The following unsols are not defined in RIL.h */
+    int RIL_UNSOL_HAL_NON_RIL_BASE = 1100;
+    int RIL_UNSOL_ICC_SLOT_STATUS = 1100;
+    int RIL_UNSOL_PHYSICAL_CHANNEL_CONFIG = 1101;
 }
