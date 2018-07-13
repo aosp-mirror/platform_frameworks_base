@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi tiada akses Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Ketik untuk mendapatkan pilihan"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Perubahan kepada tetapan tempat liputan anda"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Jalur tempat liputan anda telah berubah."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Peranti ini tidak menyokong pilihan anda untuk 5GHz sahaja. Sebaliknya, peranti ini akan menggunakan jalur 5GHz apabila tersedia."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Beralih kepada <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Peranti menggunakan <xliff:g id="NEW_NETWORK">%1$s</xliff:g> apabila <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> tiada akses Internet. Bayaran mungkin dikenakan."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Beralih daripada <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> kepada <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

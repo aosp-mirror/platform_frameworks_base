@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi‑Fi はインターネットに接続していません"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"タップしてその他のオプションを表示"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"アクセス ポイントの設定の変更"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"アクセス ポイントの帯域幅が変更されました。"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"この端末は 5 GHz のみという設定に対応していません。ただし、5 GHz 周波数帯が利用できるときには利用します。"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"「<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>」に切り替えました"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"端末で「<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>」によるインターネット接続ができない場合に「<xliff:g id="NEW_NETWORK">%1$s</xliff:g>」を使用します。通信料が発生することがあります。"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"「<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>」から「<xliff:g id="NEW_NETWORK">%2$s</xliff:g>」に切り替えました"</string>

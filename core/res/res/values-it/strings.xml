@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"La rete Wi-Fi non ha accesso a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tocca per le opzioni"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Modifiche alle tue impostazioni dell\'hotspot"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"La tua banda di hotspot è cambiata."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Questo dispositivo non supporta la tua preferenza esclusiva per 5 GHz. Utilizzerà invece la banda a 5 GHz solo quando è disponibile."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Passato a <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Il dispositivo utilizza <xliff:g id="NEW_NETWORK">%1$s</xliff:g> quando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> non ha accesso a Internet. Potrebbero essere applicati costi."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Passato da <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> a <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

@@ -587,7 +587,7 @@
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Skifte skærmlås"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Skifter skærmlås"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Låse skærmen"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollerer, hvordan og hvornår skærmen låses."</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Administrerer, hvordan og hvornår skærmen låses."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Slette alle data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Slet din tablets data uden varsel ved at gendanne fabriksindstillingerne."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Slet tv\'ets data uden varsel ved at nulstille til fabrinksindstillingerne."</string>
@@ -719,7 +719,7 @@
     <string name="sipAddressTypeHome" msgid="6093598181069359295">"Hjem"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Arbejde"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Andet"</string>
-    <string name="quick_contacts_not_available" msgid="746098007828579688">"Der blev ikke fundet nogen applikation, som kan vise denne kontaktperson."</string>
+    <string name="quick_contacts_not_available" msgid="746098007828579688">"Der blev ikke fundet nogen applikation, som kan vise denne kontakt."</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Angiv pinkode"</string>
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"Angiv PUK- og pinkode"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK-kode"</string>
@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi-netværket har ikke internetadgang"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tryk for at se valgmuligheder"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Ændringer af dine indstillinger for hotspot"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Dit hotspotbånd er ændret."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Denne enhed understøtter ikke din præference om kun 5 GHz. Denne enhed vil i stedet bruge 5 GHz-båndet, når det er muligt."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Der blev skiftet til <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Enheden benytter <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, når der ikke er internetadgang via <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>. Der opkræves muligvis betaling."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Der blev skiftet fra <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> til <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

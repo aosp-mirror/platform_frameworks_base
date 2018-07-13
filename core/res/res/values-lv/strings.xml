@@ -1197,6 +1197,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi tīklā nav piekļuves internetam."</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Pieskarieties, lai skatītu iespējas."</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Izmaiņas tīklāja iestatījumos"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Ir mainīts tīklāja joslas platums."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Šajā ierīcē netiek atbalstīta jūsu preference par tikai 5 GHz joslu. 5 GHz josla ierīcē tiks izmantota, kad tā būs pieejama."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Pārslēdzās uz tīklu <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Kad vienā tīklā (<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>) nav piekļuves internetam, ierīcē tiek izmantots cits tīkls (<xliff:g id="NEW_NETWORK">%1$s</xliff:g>). Var tikt piemērota maksa."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Pārslēdzās no tīkla <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> uz tīklu <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

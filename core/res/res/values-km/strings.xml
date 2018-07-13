@@ -1177,6 +1177,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi មិនមាន​ការតភ្ជាប់​អ៊ីនធឺណិតទេ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ប៉ះសម្រាប់ជម្រើស"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"ប្ដូរ​ទៅ​ការ​កំណត់​ហតស្ប៉ត​របស់អ្នក"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"រលកសញ្ញាហតស្ប៉តរបស់​អ្នកបាន​ផ្លាស់ប្ដូរ។"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ឧបករណ៍​នេះ​មិន​អាច​ប្រើចំណូល​ចិត្ត​របស់អ្នកសម្រាប់តែ 5GHz ទេ។ ផ្ទុយ​មកវិញ ឧបករណ៍​នេះ​នឹង​ប្រើរលកសញ្ញា​ 5GHz នៅពេល​ដែលអាច​ប្រើបាន។"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"បានប្តូរទៅ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"ឧបករណ៍​ប្រើ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> នៅ​ពេល​ដែល <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> មិនមាន​ការ​តភ្ជាប់​អ៊ីនធឺណិត។ អាច​គិតថ្លៃ​លើការ​ប្រើប្រាស់​ទិន្នន័យ។"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"បានប្តូរពី <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ទៅ <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

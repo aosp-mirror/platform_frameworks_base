@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi‑Fi ქსელს ინტერნეტზე წვდომა არ აქვს"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"შეეხეთ ვარიანტების სანახავად"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"თქვენი უსადენო ქსელის პარამეტრების ცვლილება"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"თქვენი უსადენო ქსელის დიაპაზონი შეიცვალა."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ამ მოწყობილობას არ შეუძლია მხოლოდ 5 გჰც სიხშირეზე მუშაობა. აღნიშნული სიხშირის გამოყენება მოხდება მაშინ, როცა ეს შესაძლებელია."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"ახლა გამოიყენება <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"თუ <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ინტერნეტთან კავშირს დაკარგავს, მოწყობილობის მიერ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> იქნება გამოყენებული, რამაც შეიძლება დამატებითი ხარჯები გამოიწვიოს."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"ახლა გამოიყენება <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> (გამოიყენებოდა <xliff:g id="NEW_NETWORK">%2$s</xliff:g>)"</string>

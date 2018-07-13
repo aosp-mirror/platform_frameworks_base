@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"此 WLAN 网络无法访问互联网"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"点按即可查看相关选项"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"您的热点设置已变更"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"您的热点频段已变更。"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"此设备不支持您的偏好设置（仅限 5GHz），而且会在 5GHz 频段可用时使用该频段。"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"已切换至<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"设备会在<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>无法访问互联网时使用<xliff:g id="NEW_NETWORK">%1$s</xliff:g>（可能需要支付相应的费用）。"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"已从<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>切换至<xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"વાઇ-ફાઇને કોઈ ઇન્ટરનેટ ઍક્સેસ નથી"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"વિકલ્પો માટે ટૅપ કરો"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"તમારી હૉટસ્પૉટ સેટિંગને બદલે છે"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"તમારું હૉટસ્પૉટ બેન્ડ બદલાયેલ છે."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"આ ઉપકરણ તમારી ફક્ત 5GHz માટેની પસંદગીને સમર્થન આપતું નથી. તેના બદલે, જ્યારે આ ઉપકરણ જ્યારે 5GHz બેન્ડ ઉપલબ્ધ હશે ત્યારે તેનો ઉપયોગ કરશે."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> પર સ્વિચ કર્યું"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"જ્યારે <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> પાસે કોઈ ઇન્ટરનેટ ઍક્સેસ ન હોય ત્યારે ઉપકરણ <xliff:g id="NEW_NETWORK">%1$s</xliff:g>નો ઉપયોગ કરે છે. શુલ્ક લાગુ થઈ શકે છે."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> પરથી <xliff:g id="NEW_NETWORK">%2$s</xliff:g> પર સ્વિચ કર્યું"</string>

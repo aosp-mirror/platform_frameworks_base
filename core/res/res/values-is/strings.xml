@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi er ekki með tengingu við internetið"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Ýttu til að sjá valkosti"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Breytingar á stillingum heits reits"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Tíðnisvið heita reitsins hefur breyst."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Þetta tæki styður ekki val þitt fyrir aðeins 5 GHz. Í staðinn mun þetta tæki nota 5 GHz tíðnisvið þegar það er í boði."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Skipt yfir á <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Tækið notar <xliff:g id="NEW_NETWORK">%1$s</xliff:g> þegar <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> er ekki með internetaðgang. Gjöld kunna að eiga við."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Skipt úr <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> yfir í <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi không có quyền truy cập Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Nhấn để biết tùy chọn"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Những thay đổi trong mục cài đặt điểm phát sóng của bạn"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Bằng tần của điểm phát sóng đã thay đổi."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Thiết bị này không hỗ trợ tùy chọn chỉ sử dụng băng tần 5 GHz. Thay vào đó, thiết bị này sẽ sử dụng băng tần 5 GHz khi có thể."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Đã chuyển sang <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Thiết bị sử dụng <xliff:g id="NEW_NETWORK">%1$s</xliff:g> khi <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> không có quyền truy cập Internet. Bạn có thể phải trả phí."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Đã chuyển từ <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> sang <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"WiFi-võrgul pole juurdepääsu Internetile"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Puudutage valikute nägemiseks"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Muudatused teie leviala seadetes"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Teie leviala riba on muutunud."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"See seade ei toeta teie eelistatud ainult 5 GHz riba. Seade kasutab 5 GHz riba ainult siis, kui see on saadaval."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Lülitati võrgule <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Seade kasutab võrku <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, kui võrgul <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> puudub juurdepääs Internetile. Rakenduda võivad tasud."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Lülitati võrgult <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> võrgule <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
