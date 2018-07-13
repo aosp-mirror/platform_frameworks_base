@@ -23,6 +23,7 @@ import android.app.RemoteInput;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.os.Process;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -88,6 +89,9 @@ public class SmartActionsHelper {
     private boolean isEligibleForActionAdjustment(@NonNull StatusBarNotification sbn) {
         Notification notification = sbn.getNotification();
         String pkg = sbn.getPackageName();
+        if (!Process.myUserHandle().equals(sbn.getUser())) {
+            return false;
+        }
         if (notification.actions != null
                 && notification.actions.length >= Notification.MAX_ACTION_BUTTONS) {
             return false;
