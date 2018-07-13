@@ -76,6 +76,11 @@ public class DhcpServingParams {
     public final int linkMtu;
 
     /**
+     * Indicates whether the DHCP server should send the ANDROID_METERED vendor-specific option.
+     */
+    public final boolean metered;
+
+    /**
      * Checked exception thrown when some parameters used to build {@link DhcpServingParams} are
      * missing or invalid.
      */
@@ -88,13 +93,14 @@ public class DhcpServingParams {
     private DhcpServingParams(@NonNull LinkAddress serverAddr,
             @NonNull Set<Inet4Address> defaultRouters,
             @NonNull Set<Inet4Address> dnsServers, @NonNull Set<Inet4Address> excludedAddrs,
-            long dhcpLeaseTimeSecs, int linkMtu) {
+            long dhcpLeaseTimeSecs, int linkMtu, boolean metered) {
         this.serverAddr = serverAddr;
         this.defaultRouters = defaultRouters;
         this.dnsServers = dnsServers;
         this.excludedAddrs = excludedAddrs;
         this.dhcpLeaseTimeSecs = dhcpLeaseTimeSecs;
         this.linkMtu = linkMtu;
+        this.metered = metered;
     }
 
     @NonNull
@@ -134,6 +140,7 @@ public class DhcpServingParams {
         private Set<Inet4Address> excludedAddrs;
         private long dhcpLeaseTimeSecs;
         private int linkMtu = MTU_UNSET;
+        private boolean metered;
 
         /**
          * Set the server address and served prefix for the DHCP server.
@@ -248,6 +255,16 @@ public class DhcpServingParams {
         }
 
         /**
+         * Set whether the DHCP server should send the ANDROID_METERED vendor-specific option.
+         *
+         * <p>If not set, the default value is false.
+         */
+        public Builder setMetered(boolean metered) {
+            this.metered = metered;
+            return this;
+        }
+
+        /**
          * Create a new {@link DhcpServingParams} instance based on parameters set in the builder.
          *
          * <p>This method has no side-effects. If it does not throw, a valid
@@ -301,7 +318,7 @@ public class DhcpServingParams {
                     Collections.unmodifiableSet(new HashSet<>(defaultRouters)),
                     Collections.unmodifiableSet(new HashSet<>(dnsServers)),
                     Collections.unmodifiableSet(excl),
-                    dhcpLeaseTimeSecs, linkMtu);
+                    dhcpLeaseTimeSecs, linkMtu, metered);
         }
     }
 

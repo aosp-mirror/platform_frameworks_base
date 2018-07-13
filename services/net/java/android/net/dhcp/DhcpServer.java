@@ -354,7 +354,7 @@ public class DhcpServer {
                 request.mRelayIp, lease.getNetAddr(), request.mClientMac, timeout, prefixMask,
                 broadcastAddr, new ArrayList<>(mServingParams.defaultRouters),
                 new ArrayList<>(mServingParams.dnsServers),
-                mServingParams.getServerInet4Addr(), null /* domainName */);
+                mServingParams.getServerInet4Addr(), null /* domainName */, mServingParams.metered);
 
         return transmitOfferOrAckPacket(offerPacket, request, lease, clientMac, broadcastFlag);
     }
@@ -371,7 +371,7 @@ public class DhcpServer {
                 mServingParams.getPrefixMaskAsAddress(), mServingParams.getBroadcastAddress(),
                 new ArrayList<>(mServingParams.defaultRouters),
                 new ArrayList<>(mServingParams.dnsServers),
-                mServingParams.getServerInet4Addr(), null /* domainName */);
+                mServingParams.getServerInet4Addr(), null /* domainName */, mServingParams.metered);
 
         return transmitOfferOrAckPacket(ackPacket, request, lease, clientMac, broadcastFlag);
     }

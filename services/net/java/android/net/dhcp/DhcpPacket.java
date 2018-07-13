@@ -184,6 +184,11 @@ public abstract class DhcpPacket {
     protected String mVendorInfo;
 
     /**
+     * Value of the vendor specific option used to indicate that the network is metered
+     */
+    public static final String VENDOR_INFO_ANDROID_METERED = "ANDROID_METERED";
+
+    /**
      * DHCP Optional Type: DHCP Requested IP Address
      */
     protected static final byte DHCP_REQUESTED_IP = 50;
@@ -675,6 +680,23 @@ public abstract class DhcpPacket {
         addTlv(buf, DHCP_VENDOR_CLASS_ID, getVendorId());
         final String hn = getHostname();
         if (!TextUtils.isEmpty(hn)) addTlv(buf, DHCP_HOST_NAME, hn);
+    }
+
+    protected void addCommonServerTlvs(ByteBuffer buf) {
+        addTlv(buf, DHCP_LEASE_TIME, mLeaseTime);
+        if (mLeaseTime != null && mLeaseTime != INFINITE_LEASE) {
+            // The client should renew at 1/2 the lease-expiry interval
+            addTlv(buf, DHCP_RENEWAL_TIME, (int) (Integer.toUnsignedLong(mLeaseTime) / 2));
+            // Default rebinding time is set as below by RFC2131
+            addTlv(buf, DHCP_REBINDING_TIME,
+                    (int) (Integer.toUnsignedLong(mLeaseTime) * 875L / 1000L));
+        }
+        addTlv(buf, DHCP_SUBNET_MASK, mSubnetMask);
+        addTlv(buf, DHCP_BROADCAST_ADDRESS, mBroadcastAddress);
+        addTlv(buf, DHCP_ROUTER, mGateways);
+        addTlv(buf, DHCP_DNS_SERVER, mDnsServers);
+        addTlv(buf, DHCP_DOMAIN_NAME, mDomainName);
+        addTlv(buf, DHCP_VENDOR_INFO, mVendorInfo);
     }
 
     /**
@@ -1237,7 +1259,7 @@ public abstract class DhcpPacket {
         boolean broadcast, Inet4Address serverIpAddr, Inet4Address relayIp,
         Inet4Address yourIp, byte[] mac, Integer timeout, Inet4Address netMask,
         Inet4Address bcAddr, List<Inet4Address> gateways, List<Inet4Address> dnsServers,
-        Inet4Address dhcpServerIdentifier, String domainName) {
+        Inet4Address dhcpServerIdentifier, String domainName, boolean metered) {
         DhcpPacket pkt = new DhcpOfferPacket(
                 transactionId, (short) 0, broadcast, serverIpAddr, relayIp,
                 INADDR_ANY /* clientIp */, yourIp, mac);
@@ -1248,6 +1270,9 @@ public abstract class DhcpPacket {
         pkt.mServerIdentifier = dhcpServerIdentifier;
         pkt.mSubnetMask = netMask;
         pkt.mBroadcastAddress = bcAddr;
+        if (metered) {
+            pkt.mVendorInfo = VENDOR_INFO_ANDROID_METERED;
+        }
         return pkt.buildPacket(encap, DHCP_CLIENT, DHCP_SERVER);
     }
 
@@ -1258,7 +1283,7 @@ public abstract class DhcpPacket {
         boolean broadcast, Inet4Address serverIpAddr, Inet4Address relayIp, Inet4Address yourIp,
         byte[] mac, Integer timeout, Inet4Address netMask, Inet4Address bcAddr,
         List<Inet4Address> gateways, List<Inet4Address> dnsServers,
-        Inet4Address dhcpServerIdentifier, String domainName) {
+        Inet4Address dhcpServerIdentifier, String domainName, boolean metered) {
         DhcpPacket pkt = new DhcpAckPacket(
                 transactionId, (short) 0, broadcast, serverIpAddr, relayIp,
                 INADDR_ANY /* clientIp */, yourIp, mac);
@@ -1269,6 +1294,9 @@ public abstract class DhcpPacket {
         pkt.mSubnetMask = netMask;
         pkt.mServerIdentifier = dhcpServerIdentifier;
         pkt.mBroadcastAddress = bcAddr;
+        if (metered) {
+            pkt.mVendorInfo = VENDOR_INFO_ANDROID_METERED;
+        }
         return pkt.buildPacket(encap, DHCP_CLIENT, DHCP_SERVER);
     }
 
