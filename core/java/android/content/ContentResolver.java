@@ -260,6 +260,13 @@ public abstract class ContentResolver {
      */
     public static final String QUERY_ARG_SQL_SORT_ORDER = "android:query-arg-sql-sort-order";
 
+    /** {@hide} */
+    public static final String QUERY_ARG_SQL_GROUP_BY = "android:query-arg-sql-group-by";
+    /** {@hide} */
+    public static final String QUERY_ARG_SQL_HAVING = "android:query-arg-sql-having";
+    /** {@hide} */
+    public static final String QUERY_ARG_SQL_LIMIT = "android:query-arg-sql-limit";
+
     /**
      * Specifies the list of columns against which to sort results. When first column values
      * are identical, records are then sorted based on second column values, and so on.

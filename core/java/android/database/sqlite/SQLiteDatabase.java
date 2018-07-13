@@ -189,7 +189,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
      */
     public static final int CONFLICT_NONE = 0;
 
-    private static final String[] CONFLICT_VALUES = new String[]
+    /** {@hide} */
+    public static final String[] CONFLICT_VALUES = new String[]
             {"", " OR ROLLBACK ", " OR ABORT ", " OR FAIL ", " OR IGNORE ", " OR REPLACE "};
 
     /**
@@ -1748,7 +1749,8 @@ public final class SQLiteDatabase extends SQLiteClosable {
         executeSql(sql, bindArgs);
     }
 
-    private int executeSql(String sql, Object[] bindArgs) throws SQLException {
+    /** {@hide} */
+    public int executeSql(String sql, Object[] bindArgs) throws SQLException {
         acquireReference();
         try {
             final int statementType = DatabaseUtils.getSqlStatementType(sql);
