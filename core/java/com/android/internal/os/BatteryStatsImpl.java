@@ -13260,7 +13260,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public static final String KEY_BATTERY_LEVEL_COLLECTION_DELAY_MS
                 = "battery_level_collection_delay_ms";
 
-        private static final boolean DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE = true;
+        private static final boolean DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE = false;
         private static final boolean DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME = true;
         private static final long DEFAULT_PROC_STATE_CPU_TIMES_READ_DELAY_MS = 5_000;
         private static final long DEFAULT_KERNEL_UID_READERS_THROTTLE_TIME = 10_000;
