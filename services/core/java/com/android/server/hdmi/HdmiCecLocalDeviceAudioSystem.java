@@ -119,6 +119,38 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         return true;
     }
 
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleRequestArcInitiate(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        // TODO(b/80296911): Check if ARC supported.
+
+        // TODO(b/80296911): Check if port is ready to accept.
+
+        // TODO(b/80296911): if both true, activate ARC functinality and
+        mService.sendCecCommand(HdmiCecMessageBuilder
+            .buildInitiateArc(mAddress, message.getSource()));
+        // TODO(b/80296911): else, send <Feature Abort>["Unrecongnized opcode"]
+
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleRequestArcTermination(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        // TODO(b/80297105): Check if ARC supported.
+
+        // TODO(b/80297105): Check is currently in arc.
+
+        // TODO(b/80297105): If both true, deactivate ARC functionality and
+        mService.sendCecCommand(HdmiCecMessageBuilder
+            .buildTerminateArc(mAddress, message.getSource()));
+        // TODO(b/80297105): else, send <Feature Abort>["Unrecongnized opcode"]
+
+        return true;
+    }
+
     private void reportAudioStatus(HdmiCecMessage message) {
         assertRunOnServiceThread();
 
