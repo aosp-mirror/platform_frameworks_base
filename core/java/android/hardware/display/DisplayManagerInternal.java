@@ -23,6 +23,7 @@ import android.util.IntArray;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.Surface;
 import android.view.SurfaceControl;
 
 /**
@@ -60,6 +61,15 @@ public abstract class DisplayManagerInternal {
      * Returns true if the proximity sensor screen-off function is available.
      */
     public abstract boolean isProximitySensorAvailable();
+
+    /**
+     * Take a screenshot of the specified display into the provided {@link Surface}.
+     *
+     * @param displayId The display id to take the screenshot of.
+     * @param outSurface The {@link Surface} to take the screenshot into.
+     * @return True if the screenshot is taken.
+     */
+    public abstract boolean screenshot(int displayId, Surface outSurface);
 
     /**
      * Returns information about the specified logical display.

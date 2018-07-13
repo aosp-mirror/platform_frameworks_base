@@ -583,7 +583,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     ArrayList<RotationWatcher> mRotationWatchers = new ArrayList<>();
-    int mDeferredRotationPauseCount;
     final WallpaperVisibilityListeners mWallpaperVisibilityListeners =
             new WallpaperVisibilityListeners();
 
@@ -3820,37 +3819,6 @@ public class WindowManagerService extends IWindowManager.Stub
         updateRotationUnchecked(alwaysSendConfiguration, forceRelayout);
     }
 
-    /**
-     * Temporarily pauses rotation changes until resumed.
-     *
-     * This can be used to prevent rotation changes from occurring while the user is
-     * performing certain operations, such as drag and drop.
-     *
-     * This call nests and must be matched by an equal number of calls to
-     * {@link #resumeRotationLocked}.
-     */
-    void pauseRotationLocked() {
-        mDeferredRotationPauseCount += 1;
-    }
-
-    /**
-     * Resumes normal rotation changes after being paused.
-     */
-    void resumeRotationLocked() {
-        if (mDeferredRotationPauseCount > 0) {
-            mDeferredRotationPauseCount -= 1;
-            if (mDeferredRotationPauseCount == 0) {
-                // TODO(multi-display): Update rotation for different displays separately.
-                final DisplayContent displayContent = getDefaultDisplayContentLocked();
-                final boolean changed = displayContent.updateRotationUnchecked();
-                if (changed) {
-                    mH.obtainMessage(H.SEND_NEW_CONFIGURATION, displayContent.getDisplayId())
-                            .sendToTarget();
-                }
-            }
-        }
-    }
-
     private void updateRotationUnchecked(boolean alwaysSendConfiguration, boolean forceRelayout) {
         if(DEBUG_ORIENTATION) Slog.v(TAG_WM, "updateRotationUnchecked:"
                 + " alwaysSendConfiguration=" + alwaysSendConfiguration
@@ -3904,6 +3872,15 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public int watchRotation(IRotationWatcher watcher, int displayId) {
+        final DisplayContent displayContent;
+        synchronized (mWindowMap) {
+            displayContent = mRoot.getDisplayContent(displayId);
+        }
+        if (displayContent == null) {
+            throw new IllegalArgumentException("Trying to register rotation event "
+                    + "for invalid display: " + displayId);
+        }
+
         final IBinder watcherBinder = watcher.asBinder();
         IBinder.DeathRecipient dr = new IBinder.DeathRecipient() {
             @Override
@@ -3931,7 +3908,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Client died, no cleanup needed.
             }
 
-            return getDefaultDisplayRotation();
+            return displayContent.getRotation();
         }
     }
 
@@ -4716,9 +4693,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 } break;
 
                 case WINDOW_FREEZE_TIMEOUT: {
-                    // TODO(multidisplay): Can non-default displays rotate?
+                    final DisplayContent displayContent = (DisplayContent) msg.obj;
                     synchronized (mWindowMap) {
-                        getDefaultDisplayContentLocked().onWindowFreezeTimeout();
+                        displayContent.onWindowFreezeTimeout();
                     }
                     break;
                 }
@@ -5031,11 +5008,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 break;
                 case SEAMLESS_ROTATION_TIMEOUT: {
-                    // Rotation only supported on primary display.
-                    // TODO(multi-display)
-                    synchronized(mWindowMap) {
-                        final DisplayContent dc = getDefaultDisplayContentLocked();
-                        dc.onSeamlessRotationTimeout();
+                    final DisplayContent displayContent = (DisplayContent) msg.obj;
+                    synchronized (mWindowMap) {
+                        displayContent.onSeamlessRotationTimeout();
                     }
                 }
                 break;
@@ -5074,6 +5049,12 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_WINDOW_TRACE) {
                 Slog.v(TAG_WM, "handleMessage: exit");
             }
+        }
+
+        /** Remove the previous messages with the same 'what' and 'obj' then send the new one. */
+        void sendNewMessageDelayed(int what, Object obj, long delayMillis) {
+            removeMessages(what, obj);
+            sendMessageDelayed(obtainMessage(what, obj), delayMillis);
         }
     }
 
@@ -5538,8 +5519,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_ACTIVE;
                 // XXX should probably keep timeout from
                 // when we first froze the display.
-                mH.removeMessages(H.WINDOW_FREEZE_TIMEOUT);
-                mH.sendEmptyMessageDelayed(H.WINDOW_FREEZE_TIMEOUT,
+                mH.sendNewMessageDelayed(H.WINDOW_FREEZE_TIMEOUT, w.getDisplayContent(),
                         WINDOW_FREEZE_TIMEOUT_DURATION);
             }
         }
@@ -5786,8 +5766,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         mLatencyTracker.onActionStart(ACTION_ROTATE_SCREEN);
-        // TODO(multidisplay): rotation on non-default displays
-        if (CUSTOM_SCREEN_ROTATION && displayContent.isDefaultDisplay) {
+        if (CUSTOM_SCREEN_ROTATION) {
             mExitAnimId = exitAnim;
             mEnterAnimId = enterAnim;
             ScreenRotationAnimation screenRotationAnimation =
@@ -6472,7 +6451,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(defaultDisplayContent.getLastWindowForcedOrientation());
                     pw.print(" mLastOrientation=");
                             pw.println(defaultDisplayContent.getLastOrientation());
-            pw.print("  mDeferredRotationPauseCount="); pw.println(mDeferredRotationPauseCount);
             pw.print("  Animation settings: disabled="); pw.print(mAnimationsDisabled);
                     pw.print(" window="); pw.print(mWindowAnimationScaleSetting);
                     pw.print(" transition="); pw.print(mTransitionAnimationScaleSetting);

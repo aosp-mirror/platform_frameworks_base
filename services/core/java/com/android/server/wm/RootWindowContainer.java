@@ -746,22 +746,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
         if (mUpdateRotation) {
             if (DEBUG_ORIENTATION) Slog.d(TAG, "Performing post-rotate rotation");
-            // TODO(multi-display): Update rotation for different displays separately.
-            final int displayId = defaultDisplay.getDisplayId();
-            if (defaultDisplay.updateRotationUnchecked()) {
-                mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
-            } else {
-                mUpdateRotation = false;
-            }
-            // Update rotation of VR virtual display separately. Currently this is the only kind of
-            // secondary display that can be rotated because of the single-display limitations in
-            // PhoneWindowManager.
-            final DisplayContent vrDisplay = mService.mVr2dDisplayId != INVALID_DISPLAY
-                    ? getDisplayContent(mService.mVr2dDisplayId) : null;
-            if (vrDisplay != null && vrDisplay.updateRotationUnchecked()) {
-                mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, mService.mVr2dDisplayId)
-                        .sendToTarget();
-            }
+            mUpdateRotation = updateRotationUnchecked();
         }
 
         if (mService.mWaitingForDrawnCallback != null ||
@@ -956,6 +941,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         }
 
         return displayHasContent;
+    }
+
+    boolean updateRotationUnchecked() {
+        boolean changed = false;
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final DisplayContent displayContent = mChildren.get(i);
+            if (displayContent.updateRotationUnchecked()) {
+                changed = true;
+                mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayContent.getDisplayId())
+                        .sendToTarget();
+            }
+        }
+        return changed;
     }
 
     boolean copyAnimToLayoutParams() {
