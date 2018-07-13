@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import android.annotation.SystemApi;
+
 /**
  * Contains access network related constants.
  */
@@ -37,6 +39,7 @@ public final class AccessNetworkConstants {
      * Wireless transportation type
      * @hide
      */
+    @SystemApi
     public static final class TransportType {
         /** Wireless Wide Area Networks (i.e. Cellular) */
         public static final int WWAN = 1;

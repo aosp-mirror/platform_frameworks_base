@@ -17,6 +17,7 @@
 package android.telephony.data;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.net.LinkProperties;
 import android.os.RemoteException;
 import android.telephony.Rlog;
@@ -34,6 +35,7 @@ import java.util.List;
  *
  * @hide
  */
+@SystemApi
 public class DataServiceCallback {
 
     private static final String TAG = DataServiceCallback.class.getSimpleName();
@@ -123,6 +125,7 @@ public class DataServiceCallback {
      *
      * @param result The result code. Must be one of the {@link ResultCode}.
      */
+    @SystemApi
     public void onSetDataProfileComplete(@ResultCode int result) {
         IDataServiceCallback callback = mCallback.get();
         if (callback != null) {

@@ -16,6 +16,7 @@
 
 package android.telephony.data;
 
+import android.annotation.SystemApi;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,6 +30,7 @@ import com.android.internal.telephony.RILConstants;
  *
  * @hide
  */
+@SystemApi
 public final class DataProfile implements Parcelable {
 
     // The types indicating the data profile is used on GSM (3GPP) or CDMA (3GPP2) network.
