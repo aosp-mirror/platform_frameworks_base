@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.AudioManager;
 import android.os.SystemProperties;
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
 /**
@@ -27,6 +28,11 @@ import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
 
     private static final String TAG = "HdmiCecLocalDeviceAudioSystem";
+
+    // Whether System audio mode is activated or not.
+    // This becomes true only when all system audio sequences are finished.
+    @GuardedBy("mLock")
+    private boolean mSystemAudioActivated;
 
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
@@ -101,6 +107,15 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
 
         reportAudioStatus(message);
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleGiveSystemAudioModeStatus(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        mService.sendCecCommand(HdmiCecMessageBuilder
+            .buildReportSystemAudioMode(mAddress, message.getSource(), mSystemAudioActivated));
         return true;
     }
 
