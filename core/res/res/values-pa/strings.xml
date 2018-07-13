@@ -236,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"ਏਅਰਪਲੇਨ ਮੋਡ"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"ਏਅਰਪਲੇਨ ਮੋਡ ਚਾਲੂ ਹੈ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"ਏਅਰਪਲੇਨ ਮੋਡ ਬੰਦ ਹੈ"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"ਬੈਟਰੀ ਸੇਵਰ"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"ਬੈਟਰੀ ਸੇਵਰ ਬੰਦ ਹੈ"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਹੈ"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"ਸਹਾਇਤਾ ਕਰੋ"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"ਅਵਾਜ਼ੀ ਸਹਾਇਕ"</string>
@@ -520,64 +517,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"ਫਿੰਗਰਪ੍ਰਿੰਟ ਪ੍ਰਤੀਕ"</string>
-    <!-- no translation found for permlab_manageFace (2137540986007309781) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFace (8919637120670185330) -->
-    <skip />
-    <!-- no translation found for permlab_useFaceAuthentication (8996134460546804535) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (5011118722951833089) -->
-    <skip />
-    <!-- no translation found for face_acquired_insufficient (5901287247766106330) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_bright (610606792381297174) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_dark (7229162716976778371) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_close (1980310037427755293) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_far (4494571381828850007) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_high (228411096134808372) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_low (4539774649296349109) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_right (1650292067226118760) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_left (2712489669456176505) -->
-    <skip />
-    <!-- no translation found for face_acquired_poor_gaze (8344973502980415859) -->
-    <skip />
-    <!-- no translation found for face_acquired_not_detected (5707782294589511391) -->
-    <skip />
-    <!-- no translation found for face_acquired_not_steady (3722829465011040042) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="2137540986007309781">"ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਹਾਰਡਵੇਅਰ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"ਐਪ ਨੂੰ ਵਰਤਣ ਲਈ ਚਿਹਰਾ ਟੈਮਪਲੇਟ ਸ਼ਾਮਲ ਕਰਨ ਜਾਂ ਮਿਟਾਉਣ ਦੀਆਂ ਵਿਧੀਆਂ ਦੀ ਬੇਨਤੀ ਕਰਨ ਦਿੰਦੀ ਹੈ।"</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਹਾਰਡਵੇਅਰ ਵਰਤੋ"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"ਐਪ ਨੂੰ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਹਾਰਡਵੇਅਰ ਵਰਤਣ ਦਿੰਦੀ ਹੈ"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"ਚਿਹਰੇ ਦੀ ਪਛਾਣ ਨਹੀਂ ਹੋਈ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"ਚਿਹਰਾ ਬਹੁਤ ਚਮਕਦਾਰ ਹੈ। ਘੱਟ ਰੋਸ਼ਨੀ ਵਿੱਚ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"ਚਿਹਰਾ ਹਨੇਰੇ ਵਿੱਚ ਹੈ। ਚਾਨਣ ਕਰੋ।"</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"ਚਿਹਰੇ ਨੂੰ ਸੈਂਸਰ ਤੋਂ ਦੂਰ ਲਿਜਾਓ।"</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"ਚਿਹਰੇ ਨੂੰ ਸੈਂਸਰ ਦੇ ਨੇੜੇ ਲਿਆਓ।"</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"ਸੈਂਸਰ ਨੂੰ ਉੱਪਰ ਕਰੋ।"</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"ਸੈਂਸਰ ਨੂੰ ਥੱਲੇ ਕਰੋ।"</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"ਸੈਂਸਰ ਨੂੰ ਸੱਜੇ ਪਾਸੇ ਲਿਜਾਓ।"</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"ਸੈਂਸਰ ਨੂੰ ਖੱਬੇ ਪਾਸੇ ਲਿਜਾਓ।"</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"ਕਿਰਪਾ ਕਰਕੇ ਸੈਂਸਰ ਵੱਲ ਦੇਖੋ।"</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"ਕੋਈ ਚਿਹਰਾ ਨਹੀਂ ਦਿਸਿਆ।"</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"ਚਿਹਰੇ ਨੂੰ ਡੀਵਾਈਸ ਦੇ ਸਾਹਮਣੇ ਸਥਿਰ ਰੱਖੋ।"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
-    <!-- no translation found for face_error_hw_not_available (6255891785768984615) -->
-    <skip />
-    <!-- no translation found for face_error_timeout (4014326147867150054) -->
-    <skip />
-    <!-- no translation found for face_error_no_space (8224993703466381314) -->
-    <skip />
-    <!-- no translation found for face_error_canceled (283945501061931023) -->
-    <skip />
-    <!-- no translation found for face_error_lockout (3407426963155388504) -->
-    <skip />
-    <!-- no translation found for face_error_lockout_permanent (8198354656746088890) -->
-    <skip />
-    <!-- no translation found for face_error_unable_to_process (238761109287767270) -->
-    <skip />
-    <!-- no translation found for face_error_not_enrolled (9166792142679691323) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (4737289254517095671) -->
-    <skip />
-    <!-- no translation found for face_name_template (7004562145809595384) -->
-    <skip />
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"ਚਿਹਰਾ ਹਾਰਡਵੇਅਰ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"ਚਿਹਰਾ ਪਛਾਣਨ ਦਾ ਸਮਾਂ ਸਮਾਪਤ ਹੋਇਆ। ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"ਚਿਹਰੇ ਦੀ ਜਾਣਕਾਰੀ ਨੂੰ ਸਟੋਰ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ।"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"ਚਿਹਰਾ ਪਛਾਣਨ ਦੀ ਪ੍ਰਕਿਰਿਆ ਰੱਦ ਕੀਤੀ ਗਈ।"</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"ਹੱਦੋਂ ਵੱਧ ਕੋਸ਼ਿਸ਼ਾਂ। ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"ਹੱਦੋਂ ਵੱਧ ਕੋਸ਼ਿਸ਼ਾਂ। ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਬੰਦ ਹੈ।"</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"ਕੋਈ ਚਿਹਰਾ ਜਾਣਕਾਰੀ ਦਰਜ ਨਹੀਂ ਕੀਤੀ ਗਈ।"</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"ਇਸ ਡੀਵਾਈਸ ਵਿੱਚ ਕੋਈ ਚਿਹਰਾ ਪ੍ਰਮਾਣੀਕਰਨ ਸੈਂਸਰ ਨਹੀਂ ਹੈ"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"ਚਿਹਰਾ <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_icon_content_description (4024817159806482191) -->
-    <skip />
+    <string name="face_icon_content_description" msgid="4024817159806482191">"ਚਿਹਰਾ ਪ੍ਰਤੀਕ"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ਸਿੰਕ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ਐਪ ਨੂੰ ਕਿਸੇ ਖਾਤੇ ਲਈ ਸਮਕਾਲੀਕਰਨ ਸੈਟਿੰਗਾਂ ਪੜ੍ਹਨ ਦੇ ਯੋਗ ਬਣਾਉਂਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਹ ਪਤਾ ਕਰ ਸਕਦਾ ਹੈ ਕਿ People ਐਪ ਦਾ ਕਿਸੇ ਖਾਤੇ ਨਾਲ ਸਮਕਾਲੀਕਿਰਤ ਕੀਤਾ ਗਿਆ ਹੈ ਜਾਂ ਨਹੀਂ।"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ਸਮਕਾਲੀਕਰਨ ਚਾਲੂ ਅਤੇ ਬੰਦ ਨੂੰ ਟੌਗਲ ਕਰੋ"</string>
@@ -1238,12 +1208,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"ਵਾਈ-ਫਾਈ ਦੀ ਕੋਈ ਇੰਟਰਨੈੱਟ ਪਹੁੰਚ ਨਹੀਂ ਹੈ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ਵਿਕਲਪਾਂ ਲਈ ਟੈਪ ਕਰੋ"</string>
-    <!-- no translation found for wifi_softap_config_change (8475911871165857607) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7601233252456548891) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (8022936822860678033) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"ਤੁਹਾਡੀਆਂ ਹੌਟਸਪੌਟ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲਾਅ"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"ਤੁਹਾਡਾ ਹੌਟਸਪੌਟ ਬੈਂਡ ਬਦਲ ਗਿਆ ਹੈ।"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ਇਹ ਡੀਵਾਈਸ ਸਿਰਫ਼ 5GHz ਦੀ ਤੁਹਾਡੀ ਤਰਜੀਹ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦਾ ਹੈ। ਇਸਦੀ ਬਜਾਏ, ਇਹ ਡੀਵਾਈਸ ਉਪਲਬਧ ਹੋਣ \'ਤੇ 5GHz ਬੈਂਡ ਵਰਤੇਗਾ।"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"ਬਦਲਕੇ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ਲਿਆਂਦਾ ਗਿਆ"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ਦੀ ਇੰਟਰਨੈੱਟ \'ਤੇ ਪਹੁੰਚ ਨਾ ਹੋਣ \'ਤੇ ਡੀਵਾਈਸ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ। ਖਰਚੇ ਲਾਗੂ ਹੋ ਸਕਦੇ ਹਨ।"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ਤੋਂ ਬਦਲਕੇ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> \'ਤੇ ਕੀਤਾ ਗਿਆ"</string>

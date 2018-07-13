@@ -236,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Mode Avion"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Le mode Avion est activé."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Le mode Avion est désactivé."</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Économie d\'énergie"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"La fonction Économie d\'énergie est désactivée"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"La fonction Économie d\'énergie est activée"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Paramètres"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Assistance"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Assist. vocale"</string>
@@ -1213,7 +1210,7 @@
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Touchez pour afficher les options"</string>
     <string name="wifi_softap_config_change" msgid="8475911871165857607">"Modifications apportées à vos paramètres de point d\'accès"</string>
     <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"La bande de votre point d\'accès a changé."</string>
-    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Cet appareil ne prend pas en charge votre préférence pour le 5 GHz seulement. Au lieu de cela, cet appareil utilisera la bande de 5 GHz lorsqu\'elle sera disponible."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Cet appareil ne prend pas en charge votre préférence pour la bande de 5 GHz seulement. Au lieu de cela, cet appareil utilisera la bande de 5 GHz lorsqu\'elle sera disponible."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Passé au réseau <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"L\'appareil utilise <xliff:g id="NEW_NETWORK">%1$s</xliff:g> quand <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> n\'a pas d\'accès à Internet. Des frais peuvent s\'appliquer."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Passé du réseau <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> au <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

@@ -242,9 +242,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Režim v lietadle"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Režim v lietadle je ZAPNUTÝ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Režim v lietadle je VYPNUTÝ"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Šetrič batérie"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"Šetrič batérie je VYPNUTÝ"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"Šetrič batérie je ZAPNUTÝ"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Nastavenia"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Pomôcť"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Hlasový asistent"</string>

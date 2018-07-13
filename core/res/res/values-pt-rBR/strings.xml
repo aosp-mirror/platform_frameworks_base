@@ -236,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modo avião"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Modo avião ATIVADO"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Modo avião DESATIVADO"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Economia de bateria"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"A Economia de bateria está DESATIVADA"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"A Economia de bateria está ATIVADA"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Configurações"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Assistência"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Ajuda de voz"</string>
@@ -1434,7 +1431,7 @@
     <string name="gpsVerifYes" msgid="2346566072867213563">"Sim"</string>
     <string name="gpsVerifNo" msgid="1146564937346454865">"Não"</string>
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"Limite de exclusão excedido"</string>
-    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"Há <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> itens excluídos para <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, conta <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. O que você deseja fazer?"</string>
+    <string name="sync_too_many_deletes_desc" msgid="496551671008694245">"Há <xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> itens excluídos para <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>, conta <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g>. O que você quer fazer?"</string>
     <string name="sync_really_delete" msgid="2572600103122596243">"Excluir os itens"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Desfazer as exclusões"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Não fazer nada por enquanto"</string>

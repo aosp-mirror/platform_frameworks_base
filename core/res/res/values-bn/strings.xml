@@ -236,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"বিমান মোড"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"বিমান মোড চালু করা আছে"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"বিমান মোড বন্ধ করা আছে"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"ব্যাটারি সেভার"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"ব্যাটারি সেভার বন্ধ আছে"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"ব্যাটারি সেভার চালু আছে"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"সেটিংস"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"সহযোগিতা"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"ভয়েস সহায়তা"</string>
@@ -520,64 +517,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"আঙ্গুলের ছাপ আইকন"</string>
-    <!-- no translation found for permlab_manageFace (2137540986007309781) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFace (8919637120670185330) -->
-    <skip />
-    <!-- no translation found for permlab_useFaceAuthentication (8996134460546804535) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (5011118722951833089) -->
-    <skip />
-    <!-- no translation found for face_acquired_insufficient (5901287247766106330) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_bright (610606792381297174) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_dark (7229162716976778371) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_close (1980310037427755293) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_far (4494571381828850007) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_high (228411096134808372) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_low (4539774649296349109) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_right (1650292067226118760) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_left (2712489669456176505) -->
-    <skip />
-    <!-- no translation found for face_acquired_poor_gaze (8344973502980415859) -->
-    <skip />
-    <!-- no translation found for face_acquired_not_detected (5707782294589511391) -->
-    <skip />
-    <!-- no translation found for face_acquired_not_steady (3722829465011040042) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="2137540986007309781">"ফেস যাচাইকরণ হার্ডওয়্যার পরিচালনা করুন"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"ব্যবহার করার জন্য ফেস টেম্পলেট যোগ করা এবং মোছার পদ্ধতি গ্রহণ করতে অ্যাপটিকে অনুমতি দেয়৷"</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"ফেস যাচাইকরণ হার্ডওয়্যার ব্যবহার করুন"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"প্রমাণীকরণের জন্য ফেস যাচাইকরণ হার্ডওয়্যার ব্যবহার করার অনুমতি অ্যাপটিকে দেয়"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"ফেস প্রক্রিয়া করা যায়নি৷ আবার চেষ্টা করুন৷"</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"ফেসটি খুব উজ্জ্বল লাগছে। কম আলোতে চেষ্টা করুন।"</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"ফেসটি খুব অন্ধকার লাগছে। বেশি আলোতে চেষ্টা করুন।"</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"অনুগ্রহ করে ফেস থেকে সেন্সরটি দূরে সরান।"</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"অনুগ্রহ করে ফেসের কাছাকাছি সেন্সরটি আনুন।"</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"অনুগ্রহ করে সেন্সরটি উঁচুতে নিয়ে যান।"</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"অনুগ্রহ করে সেন্সরটি নিচে নিয়ে যান।"</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"অনুগ্রহ করে সেন্সরটি ডান দিকে নিয়ে যান।"</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"অনুগ্রহ করে সেন্সরটি বাঁ দিকে নিয়ে যান।"</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"অনুগ্রহ করে সেন্সরের দিকে তাকান।"</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"কোনও ফেস শনাক্ত করা যায়নি।"</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"ডিভাইসের সামনে ফেসটি স্থির রাখুন।"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
-    <!-- no translation found for face_error_hw_not_available (6255891785768984615) -->
-    <skip />
-    <!-- no translation found for face_error_timeout (4014326147867150054) -->
-    <skip />
-    <!-- no translation found for face_error_no_space (8224993703466381314) -->
-    <skip />
-    <!-- no translation found for face_error_canceled (283945501061931023) -->
-    <skip />
-    <!-- no translation found for face_error_lockout (3407426963155388504) -->
-    <skip />
-    <!-- no translation found for face_error_lockout_permanent (8198354656746088890) -->
-    <skip />
-    <!-- no translation found for face_error_unable_to_process (238761109287767270) -->
-    <skip />
-    <!-- no translation found for face_error_not_enrolled (9166792142679691323) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (4737289254517095671) -->
-    <skip />
-    <!-- no translation found for face_name_template (7004562145809595384) -->
-    <skip />
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"ফেসের হার্ডওয়্যার উপলভ্য নয়৷"</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"ফেসের ছাপ নেওয়ার সময়সীমা শেষ৷ আবার চেষ্টা করুন৷"</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"ফেস স্টোর করা যাবে না।"</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"ফেস অপারেশন বাতিল করা হয়েছে৷"</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"অনেকবার চেষ্টা করা হয়েছে। পরে আবার চেষ্টা করুন।"</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"অনেকবার চেষ্টা করা হয়েছে৷ ফেস যাচাইকরণ বন্ধ আছে।"</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"আবার চেষ্টা করুন।"</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"কোনও ফেস নথিভুক্ত করা হয়নি।"</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"এই ডিভাইসে ফেস যাচাইকরণ সেন্সর নেই"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"<xliff:g id="FACEID">%d</xliff:g> ফেস"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_icon_content_description (4024817159806482191) -->
-    <skip />
+    <string name="face_icon_content_description" msgid="4024817159806482191">"ফেস আইকন"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"সিঙ্ক সেটিংস পড়ে"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"অ্যাপ্লিকেশানটিকে একটি অ্যাকাউন্টের জন্য সিঙ্ক সেটিংস পড়ার অনুমতি দেয়৷ উদাহরণস্বরূপ, \'পিপল\' অ্যাপ্লিকেশানটি কোনো অ্যাকাউন্টের সাথে সিঙ্ক করা আছে কিনা তা নির্ধারণ করতে পারে৷"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"সমন্বয় চালু এবং বন্ধ করা টগল করুন"</string>
@@ -1238,12 +1208,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"ওয়াই-ফাই এ ইন্টারনেট অ্যাক্সেস নেই"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"বিকল্পগুলির জন্য আলতো চাপুন"</string>
-    <!-- no translation found for wifi_softap_config_change (8475911871165857607) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7601233252456548891) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (8022936822860678033) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"আপনার হটস্পট সেটিংসে পরিবর্তনগুলি"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"আপনার হটস্পট ব্যান্ড পরিবর্তন করা হয়েছে।"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"এই ডিভাইসটি শুধুমাত্র 5GHz এর জন্য আপনার পছন্দ সমর্থন করে না। পরিবর্তে, এই ডিভাইসটি 5GHz ব্যান্ড ব্যবহার করবে।"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> এ পাল্টানো হয়েছে"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> এ ইন্টারনেট অ্যাক্সেস না থাকলে <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ব্যবহার করা হয়৷ ডেটা চার্জ প্রযোজ্য৷"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> থেকে <xliff:g id="NEW_NETWORK">%2$s</xliff:g> এ পাল্টানো হয়েছে"</string>
