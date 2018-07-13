@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.AudioManager;
 import android.os.SystemProperties;
+import android.provider.Settings.Global;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
@@ -34,8 +35,16 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     @GuardedBy("mLock")
     private boolean mSystemAudioActivated;
 
+    // Whether the System Audio Control feature is enabled or not. True by default.
+    @GuardedBy("mLock")
+    private boolean mSystemAudioControlFeatureEnabled;
+
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mSystemAudioControlFeatureEnabled = true;
+        // TODO(amyjojo) make System Audio Control controllable by users
+        /*mSystemAudioControlFeatureEnabled =
+            mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED, true);*/
     }
 
     @Override
@@ -151,6 +160,55 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         return true;
     }
 
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleSystemAudioModeRequest(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        boolean systemAudioStatusOn = message.getParams().length != 0;
+        if (!setSystemAudioMode(systemAudioStatusOn)) {
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
+            return true;
+        }
+
+        if (systemAudioStatusOn) {
+            // TODO(amyjojo): Bring up device when it's on standby mode
+
+            // TODO(amyjojo): Switch to the corresponding input
+
+        }
+        // Mute device when feature is turned off and unmute device when feature is turned on
+        boolean currentMuteStatus =
+            mService.getAudioManager().isStreamMute(AudioManager.STREAM_MUSIC);
+        if (currentMuteStatus == systemAudioStatusOn) {
+            mService.getAudioManager().adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                systemAudioStatusOn ? AudioManager.ADJUST_UNMUTE : AudioManager.ADJUST_MUTE, 0);
+        }
+
+        mService.sendCecCommand(HdmiCecMessageBuilder
+            .buildSetSystemAudioMode(mAddress, Constants.ADDR_BROADCAST, systemAudioStatusOn));
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleSetSystemAudioMode(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        if (!setSystemAudioMode(HdmiUtils.parseCommandParamSystemAudioStatus(message))) {
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
+        }
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleSystemAudioModeStatus(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        if (!setSystemAudioMode(HdmiUtils.parseCommandParamSystemAudioStatus(message))) {
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
+        }
+        return true;
+    }
+
     private void reportAudioStatus(HdmiCecMessage message) {
         assertRunOnServiceThread();
 
@@ -161,5 +219,35 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
 
         mService.sendCecCommand(HdmiCecMessageBuilder
             .buildReportAudioStatus(mAddress, message.getSource(), scaledVolume, mute));
+    }
+
+    protected boolean setSystemAudioMode(boolean newSystemAudioMode) {
+        if (!isSystemAudioControlFeatureEnabled()) {
+            HdmiLogger.debug("Cannot turn " +
+                (newSystemAudioMode ? "on" : "off") + "system audio mode " +
+                "because the System Audio Control feature is disabled.");
+            return false;
+        }
+        HdmiLogger.debug("System Audio Mode change[old:%b new:%b]",
+            mSystemAudioActivated, newSystemAudioMode);
+        updateAudioManagerForSystemAudio(newSystemAudioMode);
+        synchronized (mLock) {
+            if (mSystemAudioActivated != newSystemAudioMode) {
+                mSystemAudioActivated = newSystemAudioMode;
+                mService.announceSystemAudioModeChange(newSystemAudioMode);
+            }
+        }
+        return true;
+    }
+
+    private void updateAudioManagerForSystemAudio(boolean on) {
+        int device = mService.getAudioManager().setHdmiSystemAudioSupported(on);
+        HdmiLogger.debug("[A]UpdateSystemAudio mode[on=%b] output=[%X]", on, device);
+    }
+
+    protected boolean isSystemAudioControlFeatureEnabled() {
+        synchronized (mLock) {
+            return mSystemAudioControlFeatureEnabled;
+        }
     }
 }
