@@ -47,6 +47,7 @@ import android.os.Parcelable;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.ArrayMap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,6 +57,7 @@ import org.mockito.InOrder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /** Test {@link TransactionExecutor} logic. */
@@ -229,6 +231,44 @@ public class TransactionExecutorTests {
         inOrder.verify(callback1, times(1)).execute(eq(mTransactionHandler), eq(token), any());
         inOrder.verify(callback2, times(1)).execute(eq(mTransactionHandler), eq(token), any());
         inOrder.verify(stateRequest, times(1)).execute(eq(mTransactionHandler), eq(token), any());
+    }
+
+    @Test
+    public void testDoNotLaunchDestroyedActivity() {
+        final Map<IBinder, ClientTransactionItem> activitiesToBeDestroyed = new ArrayMap<>();
+        when(mTransactionHandler.getActivitiesToBeDestroyed()).thenReturn(activitiesToBeDestroyed);
+        // Assume launch transaction is still in queue, so there is no client record.
+        when(mTransactionHandler.getActivityClient(any())).thenReturn(null);
+
+        // An incoming destroy transaction enters binder thread (preExecute).
+        final IBinder token = mock(IBinder.class);
+        final ClientTransaction destroyTransaction = ClientTransaction.obtain(null /* client */,
+                token /* activityToken */);
+        destroyTransaction.setLifecycleStateRequest(
+                DestroyActivityItem.obtain(false /* finished */, 0 /* configChanges */));
+        destroyTransaction.preExecute(mTransactionHandler);
+        // The activity should be added to to-be-destroyed container.
+        assertEquals(1, mTransactionHandler.getActivitiesToBeDestroyed().size());
+
+        // A previous queued launch transaction runs on main thread (execute).
+        final ClientTransaction launchTransaction = ClientTransaction.obtain(null /* client */,
+                token /* activityToken */);
+        final LaunchActivityItem launchItem = spy(LaunchActivityItem.obtain(
+                null /* intent */, 0 /* ident */, null /* info */, null /* curConfig */,
+                null, /* overrideConfig */ null /* compatInfo */, null /* referrer */ ,
+                null /* voiceInteractor */, 0 /* procState */, null /* state */,
+                null /* persistentState */, null /* pendingResults */,
+                null /* pendingNewIntents */, false /* isForward */, null /* profilerInfo */));
+        launchTransaction.addCallback(launchItem);
+        mExecutor.execute(launchTransaction);
+
+        // The launch transaction should not be executed because its token is in the
+        // to-be-destroyed container.
+        verify(launchItem, times(0)).execute(any(), any(), any());
+
+        // After the destroy transaction has been executed, the token should be removed.
+        mExecutor.execute(destroyTransaction);
+        assertEquals(0, mTransactionHandler.getActivitiesToBeDestroyed().size());
     }
 
     @Test
