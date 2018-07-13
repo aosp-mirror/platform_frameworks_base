@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "Dump.h"
+
 #include <cinttypes>
 #include <vector>
 
@@ -22,7 +24,6 @@
 
 #include "Debug.h"
 #include "Diagnostics.h"
-#include "Flags.h"
 #include "format/Container.h"
 #include "format/binary/BinaryResourceParser.h"
 #include "format/proto/ProtoDeserialize.h"
@@ -37,13 +38,6 @@ using ::android::StringPiece;
 using ::android::base::StringPrintf;
 
 namespace aapt {
-
-struct DumpOptions {
-  DebugPrintTableOptions print_options;
-
-  // The path to a file within an APK to dump.
-  Maybe<std::string> file_to_dump_path;
-};
 
 static const char* ResourceFileTypeToString(const ResourceFile::Type& type) {
   switch (type) {
@@ -309,29 +303,13 @@ class DumpContext : public IAaptContext {
 
 }  // namespace
 
-// Entry point for dump command.
-int Dump(const std::vector<StringPiece>& args) {
-  bool verbose = false;
-  bool no_values = false;
-  DumpOptions options;
-  Flags flags = Flags()
-                    .OptionalSwitch("--no-values",
-                                    "Suppresses output of values when displaying resource tables.",
-                                    &no_values)
-                    .OptionalFlag("--file", "Dumps the specified file from the APK passed as arg.",
-                                  &options.file_to_dump_path)
-                    .OptionalSwitch("-v", "increase verbosity of output", &verbose);
-  if (!flags.Parse("aapt2 dump", args, &std::cerr)) {
-    return 1;
-  }
-
+int DumpCommand::Action(const std::vector<std::string>& args) {
   DumpContext context;
-  context.SetVerbose(verbose);
-
-  options.print_options.show_sources = true;
-  options.print_options.show_values = !no_values;
-  for (const std::string& arg : flags.GetArgs()) {
-    if (!TryDumpFile(&context, arg, options)) {
+  context.SetVerbose(verbose_);
+  options_.print_options.show_sources = true;
+  options_.print_options.show_values = !no_values_;
+  for (const std::string& arg : args) {
+    if (!TryDumpFile(&context, arg, options_)) {
       return 1;
     }
   }

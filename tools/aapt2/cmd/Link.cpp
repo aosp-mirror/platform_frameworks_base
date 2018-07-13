@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "Link.h"
+
 #include <sys/stat.h>
 #include <cinttypes>
 
@@ -29,7 +31,6 @@
 
 #include "AppInfo.h"
 #include "Debug.h"
-#include "Flags.h"
 #include "LoadedApk.h"
 #include "Locale.h"
 #include "NameMangler.h"
@@ -73,74 +74,6 @@ using ::android::StringPiece;
 using ::android::base::StringPrintf;
 
 namespace aapt {
-
-enum class OutputFormat {
-  kApk,
-  kProto,
-};
-
-struct LinkOptions {
-  std::string output_path;
-  std::string manifest_path;
-  std::vector<std::string> include_paths;
-  std::vector<std::string> overlay_files;
-  std::vector<std::string> assets_dirs;
-  bool output_to_directory = false;
-  bool auto_add_overlay = false;
-  OutputFormat output_format = OutputFormat::kApk;
-
-  // Java/Proguard options.
-  Maybe<std::string> generate_java_class_path;
-  Maybe<std::string> custom_java_package;
-  std::set<std::string> extra_java_packages;
-  Maybe<std::string> generate_text_symbols_path;
-  Maybe<std::string> generate_proguard_rules_path;
-  Maybe<std::string> generate_main_dex_proguard_rules_path;
-  bool generate_conditional_proguard_rules = false;
-  bool generate_non_final_ids = false;
-  std::vector<std::string> javadoc_annotations;
-  Maybe<std::string> private_symbols;
-
-  // Optimizations/features.
-  bool no_auto_version = false;
-  bool no_version_vectors = false;
-  bool no_version_transitions = false;
-  bool no_resource_deduping = false;
-  bool no_xml_namespaces = false;
-  bool do_not_compress_anything = false;
-  std::unordered_set<std::string> extensions_to_not_compress;
-
-  // Static lib options.
-  bool no_static_lib_packages = false;
-  bool auto_namespace_static_lib = false;
-
-  // AndroidManifest.xml massaging options.
-  ManifestFixerOptions manifest_fixer_options;
-
-  // Products to use/filter on.
-  std::unordered_set<std::string> products;
-
-  // Flattening options.
-  TableFlattenerOptions table_flattener_options;
-
-  // Split APK options.
-  TableSplitterOptions table_splitter_options;
-  std::vector<SplitConstraints> split_constraints;
-  std::vector<std::string> split_paths;
-
-  // Stable ID options.
-  std::unordered_map<ResourceName, ResourceId> stable_id_map;
-  Maybe<std::string> resource_id_map_path;
-
-  // When 'true', allow reserved package IDs to be used for applications. Pre-O, the platform
-  // treats negative resource IDs [those with a package ID of 0x80 or higher] as invalid.
-  // In order to work around this limitation, we allow the use of traditionally reserved
-  // resource IDs [those between 0x02 and 0x7E].
-  bool allow_reserved_package_id = false;
-
-  // Whether we should fail on definitions of a resource with conflicting visibility.
-  bool strict_visibility = false;
-};
 
 class LinkContext : public IAaptContext {
  public:
@@ -785,9 +718,9 @@ static int32_t FindFrameworkAssetManagerCookie(const android::AssetManager& asse
   return table.getTableCookie(idx);
 }
 
-class LinkCommand {
+class Linker {
  public:
-  LinkCommand(LinkContext* context, const LinkOptions& options)
+  Linker(LinkContext* context, const LinkOptions& options)
       : options_(options),
         context_(context),
         final_table_(),
@@ -2040,197 +1973,12 @@ class LinkCommand {
   Maybe<std::string> included_feature_base_;
 };
 
-int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
-  LinkContext context(diagnostics);
-  LinkOptions options;
-  std::vector<std::string> overlay_arg_list;
-  std::vector<std::string> extra_java_packages;
-  Maybe<std::string> package_id;
-  std::vector<std::string> configs;
-  Maybe<std::string> preferred_density;
-  Maybe<std::string> product_list;
-  bool legacy_x_flag = false;
-  bool require_localization = false;
-  bool verbose = false;
-  bool shared_lib = false;
-  bool static_lib = false;
-  bool proto_format = false;
-  Maybe<std::string> stable_id_file_path;
-  std::vector<std::string> split_args;
-  Flags flags =
-      Flags()
-          .RequiredFlag("-o", "Output path.", &options.output_path)
-          .RequiredFlag("--manifest", "Path to the Android manifest to build.",
-                        &options.manifest_path)
-          .OptionalFlagList("-I", "Adds an Android APK to link against.", &options.include_paths)
-          .OptionalFlagList("-A",
-                            "An assets directory to include in the APK. These are unprocessed.",
-                            &options.assets_dirs)
-          .OptionalFlagList("-R",
-                            "Compilation unit to link, using `overlay` semantics.\n"
-                            "The last conflicting resource given takes precedence.",
-                            &overlay_arg_list)
-          .OptionalFlag("--package-id",
-                        "Specify the package ID to use for this app. Must be greater or equal to\n"
-                        "0x7f and can't be used with --static-lib or --shared-lib.",
-                        &package_id)
-          .OptionalFlag("--java", "Directory in which to generate R.java.",
-                        &options.generate_java_class_path)
-          .OptionalFlag("--proguard", "Output file for generated Proguard rules.",
-                        &options.generate_proguard_rules_path)
-          .OptionalFlag("--proguard-main-dex",
-                        "Output file for generated Proguard rules for the main dex.",
-                        &options.generate_main_dex_proguard_rules_path)
-          .OptionalSwitch("--proguard-conditional-keep-rules",
-                          "Generate conditional Proguard keep rules.",
-                          &options.generate_conditional_proguard_rules)
-          .OptionalSwitch("--no-auto-version",
-                          "Disables automatic style and layout SDK versioning.",
-                          &options.no_auto_version)
-          .OptionalSwitch("--no-version-vectors",
-                          "Disables automatic versioning of vector drawables. Use this only\n"
-                          "when building with vector drawable support library.",
-                          &options.no_version_vectors)
-          .OptionalSwitch("--no-version-transitions",
-                          "Disables automatic versioning of transition resources. Use this only\n"
-                          "when building with transition support library.",
-                          &options.no_version_transitions)
-          .OptionalSwitch("--no-resource-deduping",
-                          "Disables automatic deduping of resources with\n"
-                          "identical values across compatible configurations.",
-                          &options.no_resource_deduping)
-          .OptionalSwitch("--enable-sparse-encoding",
-                          "Enables encoding sparse entries using a binary search tree.\n"
-                          "This decreases APK size at the cost of resource retrieval performance.",
-                          &options.table_flattener_options.use_sparse_entries)
-          .OptionalSwitch("-x", "Legacy flag that specifies to use the package identifier 0x01.",
-                          &legacy_x_flag)
-          .OptionalSwitch("-z", "Require localization of strings marked 'suggested'.",
-                          &require_localization)
-          .OptionalFlagList("-c",
-                            "Comma separated list of configurations to include. The default\n"
-                            "is all configurations.",
-                            &configs)
-          .OptionalFlag("--preferred-density",
-                        "Selects the closest matching density and strips out all others.",
-                        &preferred_density)
-          .OptionalFlag("--product", "Comma separated list of product names to keep", &product_list)
-          .OptionalSwitch("--output-to-dir",
-                          "Outputs the APK contents to a directory specified by -o.",
-                          &options.output_to_directory)
-          .OptionalSwitch("--no-xml-namespaces",
-                          "Removes XML namespace prefix and URI information from\n"
-                          "AndroidManifest.xml and XML binaries in res/*.",
-                          &options.no_xml_namespaces)
-          .OptionalFlag("--min-sdk-version",
-                        "Default minimum SDK version to use for AndroidManifest.xml.",
-                        &options.manifest_fixer_options.min_sdk_version_default)
-          .OptionalFlag("--target-sdk-version",
-                        "Default target SDK version to use for AndroidManifest.xml.",
-                        &options.manifest_fixer_options.target_sdk_version_default)
-          .OptionalFlag("--version-code",
-                        "Version code (integer) to inject into the AndroidManifest.xml if none is\n"
-                        "present.",
-                        &options.manifest_fixer_options.version_code_default)
-          .OptionalFlag("--version-name",
-                        "Version name to inject into the AndroidManifest.xml if none is present.",
-                        &options.manifest_fixer_options.version_name_default)
-          .OptionalSwitch("--replace-version",
-                         "If --version-code and/or --version-name are specified, these\n"
-                         "values will replace any value already in the manifest. By\n"
-                         "default, nothing is changed if the manifest already defines\n"
-                         "these attributes.",
-                         &options.manifest_fixer_options.replace_version)
-          .OptionalFlag("--compile-sdk-version-code",
-                        "Version code (integer) to inject into the AndroidManifest.xml if none is\n"
-                        "present.",
-                        &options.manifest_fixer_options.compile_sdk_version)
-          .OptionalFlag("--compile-sdk-version-name",
-                        "Version name to inject into the AndroidManifest.xml if none is present.",
-                        &options.manifest_fixer_options.compile_sdk_version_codename)
-          .OptionalSwitch("--shared-lib", "Generates a shared Android runtime library.",
-                          &shared_lib)
-          .OptionalSwitch("--static-lib", "Generate a static Android library.", &static_lib)
-          .OptionalSwitch("--proto-format",
-                          "Generates compiled resources in Protobuf format.\n"
-                          "Suitable as input to the bundle tool for generating an App Bundle.",
-                          &proto_format)
-          .OptionalSwitch("--no-static-lib-packages",
-                          "Merge all library resources under the app's package.",
-                          &options.no_static_lib_packages)
-          .OptionalSwitch("--auto-namespace-static-lib",
-                          "Automatically namespace resource references when building a static\n"
-                          "library.",
-                          &options.auto_namespace_static_lib)
-          .OptionalSwitch("--non-final-ids",
-                          "Generates R.java without the final modifier. This is implied when\n"
-                          "--static-lib is specified.",
-                          &options.generate_non_final_ids)
-          .OptionalFlag("--stable-ids", "File containing a list of name to ID mapping.",
-                        &stable_id_file_path)
-          .OptionalFlag("--emit-ids",
-                        "Emit a file at the given path with a list of name to ID mappings,\n"
-                        "suitable for use with --stable-ids.",
-                        &options.resource_id_map_path)
-          .OptionalFlag("--private-symbols",
-                        "Package name to use when generating R.java for private symbols.\n"
-                        "If not specified, public and private symbols will use the application's\n"
-                        "package name.",
-                        &options.private_symbols)
-          .OptionalFlag("--custom-package", "Custom Java package under which to generate R.java.",
-                        &options.custom_java_package)
-          .OptionalFlagList("--extra-packages",
-                            "Generate the same R.java but with different package names.",
-                            &extra_java_packages)
-          .OptionalFlagList("--add-javadoc-annotation",
-                            "Adds a JavaDoc annotation to all generated Java classes.",
-                            &options.javadoc_annotations)
-          .OptionalFlag("--output-text-symbols",
-                        "Generates a text file containing the resource symbols of the R class in\n"
-                        "the specified folder.",
-                        &options.generate_text_symbols_path)
-          .OptionalSwitch("--allow-reserved-package-id",
-                          "Allows the use of a reserved package ID. This should on be used for\n"
-                          "packages with a pre-O min-sdk\n",
-                          &options.allow_reserved_package_id)
-          .OptionalSwitch("--auto-add-overlay",
-                          "Allows the addition of new resources in overlays without\n"
-                          "<add-resource> tags.",
-                          &options.auto_add_overlay)
-          .OptionalFlag("--rename-manifest-package", "Renames the package in AndroidManifest.xml.",
-                        &options.manifest_fixer_options.rename_manifest_package)
-          .OptionalFlag("--rename-instrumentation-target-package",
-                        "Changes the name of the target package for instrumentation. Most useful\n"
-                        "when used in conjunction with --rename-manifest-package.",
-                        &options.manifest_fixer_options.rename_instrumentation_target_package)
-          .OptionalFlagList("-0", "File extensions not to compress.",
-                            &options.extensions_to_not_compress)
-          .OptionalSwitch("--no-compress", "Do not compress any resources.",
-                          &options.do_not_compress_anything)
-          .OptionalSwitch("--warn-manifest-validation",
-                          "Treat manifest validation errors as warnings.",
-                          &options.manifest_fixer_options.warn_validation)
-          .OptionalFlagList("--split",
-                            "Split resources matching a set of configs out to a Split APK.\n"
-                            "Syntax: path/to/output.apk:<config>[,<config>[...]].\n"
-                            "On Windows, use a semicolon ';' separator instead.",
-                            &split_args)
-          .OptionalSwitch("-v", "Enables verbose logging.", &verbose)
-          .OptionalSwitch("--debug-mode",
-                          "Inserts android:debuggable=\"true\" in to the application node of the\n"
-                          "manifest, making the application debuggable even on production devices.",
-                          &options.manifest_fixer_options.debug_mode)
-          .OptionalSwitch("--strict-visibility",
-                          "Do not allow overlays with different visibility levels.",
-                          &options.strict_visibility);
-
-  if (!flags.Parse("aapt2 link", args, &std::cerr)) {
-    return 1;
-  }
+int LinkCommand::Action(const std::vector<std::string>& args) {
+  LinkContext context(diag_);
 
   // Expand all argument-files passed into the command line. These start with '@'.
   std::vector<std::string> arg_list;
-  for (const std::string& arg : flags.GetArgs()) {
+  for (const std::string& arg : args) {
     if (util::StartsWith(arg, "@")) {
       const std::string path = arg.substr(1, arg.size() - 1);
       std::string error;
@@ -2244,27 +1992,27 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
   }
 
   // Expand all argument-files passed to -R.
-  for (const std::string& arg : overlay_arg_list) {
+  for (const std::string& arg : overlay_arg_list_) {
     if (util::StartsWith(arg, "@")) {
       const std::string path = arg.substr(1, arg.size() - 1);
       std::string error;
-      if (!file::AppendArgsFromFile(path, &options.overlay_files, &error)) {
+      if (!file::AppendArgsFromFile(path, &options_.overlay_files, &error)) {
         context.GetDiagnostics()->Error(DiagMessage(path) << error);
         return 1;
       }
     } else {
-      options.overlay_files.push_back(arg);
+      options_.overlay_files.push_back(arg);
     }
   }
 
-  if (verbose) {
-    context.SetVerbose(verbose);
+  if (verbose_) {
+    context.SetVerbose(verbose_);
   }
 
-  if (int{shared_lib} + int{static_lib} + int{proto_format} > 1) {
+  if (int{shared_lib_} + int{static_lib_} + int{proto_format_} > 1) {
     context.GetDiagnostics()->Error(
         DiagMessage()
-        << "only one of --shared-lib, --static-lib, or --proto_format can be defined");
+            << "only one of --shared-lib, --static-lib, or --proto_format can be defined");
     return 1;
   }
 
@@ -2272,18 +2020,18 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
   context.SetPackageType(PackageType::kApp);
   context.SetPackageId(kAppPackageId);
 
-  if (shared_lib) {
+  if (shared_lib_) {
     context.SetPackageType(PackageType::kSharedLib);
     context.SetPackageId(0x00);
-  } else if (static_lib) {
+  } else if (static_lib_) {
     context.SetPackageType(PackageType::kStaticLib);
-    options.output_format = OutputFormat::kProto;
-  } else if (proto_format) {
-    options.output_format = OutputFormat::kProto;
+    options_.output_format = OutputFormat::kProto;
+  } else if (proto_format_) {
+    options_.output_format = OutputFormat::kProto;
   }
 
-  if (options.auto_namespace_static_lib) {
-    if (!static_lib) {
+  if (options_.auto_namespace_static_lib) {
+    if (!static_lib_) {
       context.GetDiagnostics()->Error(
           DiagMessage() << "--auto-namespace-static-lib can only be used with --static-lib");
       return 1;
@@ -2291,16 +2039,16 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
     context.SetAutoNamespace(true);
   }
 
-  if (package_id) {
+  if (package_id_) {
     if (context.GetPackageType() != PackageType::kApp) {
       context.GetDiagnostics()->Error(
           DiagMessage() << "can't specify --package-id when not building a regular app");
       return 1;
     }
 
-    const Maybe<uint32_t> maybe_package_id_int = ResourceUtils::ParseInt(package_id.value());
+    const Maybe<uint32_t> maybe_package_id_int = ResourceUtils::ParseInt(package_id_.value());
     if (!maybe_package_id_int) {
-      context.GetDiagnostics()->Error(DiagMessage() << "package ID '" << package_id.value()
+      context.GetDiagnostics()->Error(DiagMessage() << "package ID '" << package_id_.value()
                                                     << "' is not a valid integer");
       return 1;
     }
@@ -2308,7 +2056,7 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
     const uint32_t package_id_int = maybe_package_id_int.value();
     if (package_id_int > std::numeric_limits<uint8_t>::max()
         || package_id_int == kFrameworkPackageId
-        || (!options.allow_reserved_package_id && package_id_int < kAppPackageId)) {
+        || (!options_.allow_reserved_package_id && package_id_int < kAppPackageId)) {
       context.GetDiagnostics()->Error(
           DiagMessage() << StringPrintf(
               "invalid package ID 0x%02x. Must be in the range 0x7f-0xff.", package_id_int));
@@ -2318,71 +2066,71 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
   }
 
   // Populate the set of extra packages for which to generate R.java.
-  for (std::string& extra_package : extra_java_packages) {
+  for (std::string& extra_package : extra_java_packages_) {
     // A given package can actually be a colon separated list of packages.
     for (StringPiece package : util::Split(extra_package, ':')) {
-      options.extra_java_packages.insert(package.to_string());
+      options_.extra_java_packages.insert(package.to_string());
     }
   }
 
-  if (product_list) {
-    for (StringPiece product : util::Tokenize(product_list.value(), ',')) {
+  if (product_list_) {
+    for (StringPiece product : util::Tokenize(product_list_.value(), ',')) {
       if (product != "" && product != "default") {
-        options.products.insert(product.to_string());
+        options_.products.insert(product.to_string());
       }
     }
   }
 
   std::unique_ptr<IConfigFilter> filter;
-  if (!configs.empty()) {
-    filter = ParseConfigFilterParameters(configs, context.GetDiagnostics());
+  if (!configs_.empty()) {
+    filter = ParseConfigFilterParameters(configs_, context.GetDiagnostics());
     if (filter == nullptr) {
       return 1;
     }
-    options.table_splitter_options.config_filter = filter.get();
+    options_.table_splitter_options.config_filter = filter.get();
   }
 
-  if (preferred_density) {
+  if (preferred_density_) {
     Maybe<uint16_t> density =
-        ParseTargetDensityParameter(preferred_density.value(), context.GetDiagnostics());
+        ParseTargetDensityParameter(preferred_density_.value(), context.GetDiagnostics());
     if (!density) {
       return 1;
     }
-    options.table_splitter_options.preferred_densities.push_back(density.value());
+    options_.table_splitter_options.preferred_densities.push_back(density.value());
   }
 
   // Parse the split parameters.
-  for (const std::string& split_arg : split_args) {
-    options.split_paths.push_back({});
-    options.split_constraints.push_back({});
-    if (!ParseSplitParameter(split_arg, context.GetDiagnostics(), &options.split_paths.back(),
-                             &options.split_constraints.back())) {
+  for (const std::string& split_arg : split_args_) {
+    options_.split_paths.push_back({});
+    options_.split_constraints.push_back({});
+    if (!ParseSplitParameter(split_arg, context.GetDiagnostics(), &options_.split_paths.back(),
+        &options_.split_constraints.back())) {
       return 1;
     }
   }
 
-  if (context.GetPackageType() != PackageType::kStaticLib && stable_id_file_path) {
-    if (!LoadStableIdMap(context.GetDiagnostics(), stable_id_file_path.value(),
-                         &options.stable_id_map)) {
+  if (context.GetPackageType() != PackageType::kStaticLib && stable_id_file_path_) {
+    if (!LoadStableIdMap(context.GetDiagnostics(), stable_id_file_path_.value(),
+        &options_.stable_id_map)) {
       return 1;
     }
   }
 
   // Populate some default no-compress extensions that are already compressed.
-  options.extensions_to_not_compress.insert(
+  options_.extensions_to_not_compress.insert(
       {".jpg",   ".jpeg", ".png",  ".gif", ".wav",  ".mp2",  ".mp3",  ".ogg",
-       ".aac",   ".mpg",  ".mpeg", ".mid", ".midi", ".smf",  ".jet",  ".rtttl",
-       ".imy",   ".xmf",  ".mp4",  ".m4a", ".m4v",  ".3gp",  ".3gpp", ".3g2",
-       ".3gpp2", ".amr",  ".awb",  ".wma", ".wmv",  ".webm", ".mkv"});
+          ".aac",   ".mpg",  ".mpeg", ".mid", ".midi", ".smf",  ".jet",  ".rtttl",
+          ".imy",   ".xmf",  ".mp4",  ".m4a", ".m4v",  ".3gp",  ".3gpp", ".3g2",
+          ".3gpp2", ".amr",  ".awb",  ".wma", ".wmv",  ".webm", ".mkv"});
 
   // Turn off auto versioning for static-libs.
   if (context.GetPackageType() == PackageType::kStaticLib) {
-    options.no_auto_version = true;
-    options.no_version_vectors = true;
-    options.no_version_transitions = true;
+    options_.no_auto_version = true;
+    options_.no_version_vectors = true;
+    options_.no_version_transitions = true;
   }
 
-  LinkCommand cmd(&context, options);
+  Linker cmd(&context, options_);
   return cmd.Run(arg_list);
 }
 

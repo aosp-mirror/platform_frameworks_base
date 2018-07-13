@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "Optimize.h"
+
 #include <memory>
 #include <vector>
 
@@ -24,7 +26,6 @@
 #include "androidfw/StringPiece.h"
 
 #include "Diagnostics.h"
-#include "Flags.h"
 #include "LoadedApk.h"
 #include "ResourceUtils.h"
 #include "SdkConstants.h"
@@ -53,36 +54,6 @@ using ::android::base::StringAppendF;
 using ::android::base::StringPrintf;
 
 namespace aapt {
-
-struct OptimizeOptions {
-  // Path to the output APK.
-  Maybe<std::string> output_path;
-  // Path to the output APK directory for splits.
-  Maybe<std::string> output_dir;
-
-  // Details of the app extracted from the AndroidManifest.xml
-  AppInfo app_info;
-
-  // Blacklist of unused resources that should be removed from the apk.
-  std::unordered_set<ResourceName> resources_blacklist;
-
-  // Split APK options.
-  TableSplitterOptions table_splitter_options;
-
-  // List of output split paths. These are in the same order as `split_constraints`.
-  std::vector<std::string> split_paths;
-
-  // List of SplitConstraints governing what resources go into each split. Ordered by `split_paths`.
-  std::vector<SplitConstraints> split_constraints;
-
-  TableFlattenerOptions table_flattener_options;
-
-  Maybe<std::vector<OutputArtifact>> apk_artifacts;
-
-  // Set of artifacts to keep when generating multi-APK splits. If the list is empty, all artifacts
-  // are kept and will be written as output.
-  std::unordered_set<std::string> kept_artifacts;
-};
 
 class OptimizeContext : public IAaptContext {
  public:
@@ -145,9 +116,9 @@ class OptimizeContext : public IAaptContext {
   int sdk_version_ = 0;
 };
 
-class OptimizeCommand {
+class Optimizer {
  public:
-  OptimizeCommand(OptimizeContext* context, const OptimizeOptions& options)
+  Optimizer(OptimizeContext* context, const OptimizeOptions& options)
       : options_(options), context_(context) {
   }
 
@@ -378,82 +349,24 @@ bool ExtractAppDataFromManifest(OptimizeContext* context, const LoadedApk* apk,
   return true;
 }
 
-int Optimize(const std::vector<StringPiece>& args) {
-  OptimizeContext context;
-  OptimizeOptions options;
-  Maybe<std::string> config_path;
-  Maybe<std::string> whitelist_path;
-  Maybe<std::string> resources_config_path;
-  Maybe<std::string> target_densities;
-  std::vector<std::string> configs;
-  std::vector<std::string> split_args;
-  std::unordered_set<std::string> kept_artifacts;
-  bool verbose = false;
-  bool print_only = false;
-  Flags flags =
-      Flags()
-          .OptionalFlag("-o", "Path to the output APK.", &options.output_path)
-          .OptionalFlag("-d", "Path to the output directory (for splits).", &options.output_dir)
-          .OptionalFlag("-x", "Path to XML configuration file.", &config_path)
-          .OptionalSwitch("-p", "Print the multi APK artifacts and exit.", &print_only)
-          .OptionalFlag(
-              "--target-densities",
-              "Comma separated list of the screen densities that the APK will be optimized for.\n"
-              "All the resources that would be unused on devices of the given densities will be \n"
-              "removed from the APK.",
-              &target_densities)
-          .OptionalFlag("--whitelist-path",
-                        "Path to the whitelist.cfg file containing whitelisted resources \n"
-                        "whose names should not be altered in final resource tables.",
-                        &whitelist_path)
-          .OptionalFlag("--resources-config-path",
-                        "Path to the resources.cfg file containing the list of resources and \n"
-                        "directives to each resource. \n"
-                        "Format: type/resource_name#[directive][,directive]",
-                        &resources_config_path)
-          .OptionalFlagList("-c",
-                            "Comma separated list of configurations to include. The default\n"
-                            "is all configurations.",
-                            &configs)
-          .OptionalFlagList("--split",
-                            "Split resources matching a set of configs out to a "
-                            "Split APK.\nSyntax: path/to/output.apk;<config>[,<config>[...]].\n"
-                            "On Windows, use a semicolon ';' separator instead.",
-                            &split_args)
-          .OptionalFlagList("--keep-artifacts",
-                            "Comma separated list of artifacts to keep. If none are specified,\n"
-                            "all artifacts will be kept.",
-                            &kept_artifacts)
-          .OptionalSwitch("--enable-sparse-encoding",
-                          "Enables encoding sparse entries using a binary search tree.\n"
-                          "This decreases APK size at the cost of resource retrieval performance.",
-                          &options.table_flattener_options.use_sparse_entries)
-          .OptionalSwitch("--enable-resource-obfuscation",
-                          "Enables obfuscation of key string pool to single value",
-                          &options.table_flattener_options.collapse_key_stringpool)
-          .OptionalSwitch("-v", "Enables verbose logging", &verbose);
-
-  if (!flags.Parse("aapt2 optimize", args, &std::cerr)) {
-    return 1;
-  }
-
-  if (flags.GetArgs().size() != 1u) {
+int OptimizeCommand::Action(const std::vector<std::string>& args) {
+  if (args.size() != 1u) {
     std::cerr << "must have one APK as argument.\n\n";
-    flags.Usage("aapt2 optimize", &std::cerr);
+    Usage(&std::cerr);
     return 1;
   }
 
-  const std::string& apk_path = flags.GetArgs()[0];
-
-  context.SetVerbose(verbose);
+  const std::string& apk_path = args[0];
+  OptimizeContext context;
+  context.SetVerbose(verbose_);
   IDiagnostics* diag = context.GetDiagnostics();
 
-  if (config_path) {
-    std::string& path = config_path.value();
+  if (config_path_) {
+    std::string& path = config_path_.value();
     Maybe<ConfigurationParser> for_path = ConfigurationParser::ForPath(path);
     if (for_path) {
-      options.apk_artifacts = for_path.value().WithDiagnostics(diag).Parse(apk_path);
-      if (!options.apk_artifacts) {
+      options_.apk_artifacts = for_path.value().WithDiagnostics(diag).Parse(apk_path);
+      if (!options_.apk_artifacts) {
         diag->Error(DiagMessage() << "Failed to parse the output artifact list");
         return 1;
       }
@@ -463,28 +376,28 @@ int Optimize(const std::vector<StringPiece>& args) {
       return 1;
     }
 
-    if (print_only) {
-      for (const OutputArtifact& artifact : options.apk_artifacts.value()) {
+    if (print_only_) {
+      for (const OutputArtifact& artifact : options_.apk_artifacts.value()) {
         std::cout << artifact.name << std::endl;
       }
       return 0;
     }
 
-    if (!kept_artifacts.empty()) {
-      for (const std::string& artifact_str : kept_artifacts) {
+    if (!kept_artifacts_.empty()) {
+      for (const std::string& artifact_str : kept_artifacts_) {
         for (const StringPiece& artifact : util::Tokenize(artifact_str, ',')) {
-          options.kept_artifacts.insert(artifact.to_string());
+          options_.kept_artifacts.insert(artifact.to_string());
         }
       }
     }
 
     // Since we know that we are going to process the APK (not just print targets), make sure we
     // have somewhere to write them to.
-    if (!options.output_dir) {
+    if (!options_.output_dir) {
       diag->Error(DiagMessage() << "Output directory is required when using a configuration file");
       return 1;
     }
-  } else if (print_only) {
+  } else if (print_only_) {
     diag->Error(DiagMessage() << "Asked to print artifacts without providing a configurations");
     return 1;
   }
@@ -494,57 +407,57 @@ int Optimize(const std::vector<StringPiece>& args) {
     return 1;
   }
 
-  if (target_densities) {
+  if (target_densities_) {
     // Parse the target screen densities.
-    for (const StringPiece& config_str : util::Tokenize(target_densities.value(), ',')) {
+    for (const StringPiece& config_str : util::Tokenize(target_densities_.value(), ',')) {
       Maybe<uint16_t> target_density = ParseTargetDensityParameter(config_str, diag);
       if (!target_density) {
         return 1;
       }
-      options.table_splitter_options.preferred_densities.push_back(target_density.value());
+      options_.table_splitter_options.preferred_densities.push_back(target_density.value());
     }
   }
 
   std::unique_ptr<IConfigFilter> filter;
-  if (!configs.empty()) {
-    filter = ParseConfigFilterParameters(configs, diag);
+  if (!configs_.empty()) {
+    filter = ParseConfigFilterParameters(configs_, diag);
     if (filter == nullptr) {
       return 1;
     }
-    options.table_splitter_options.config_filter = filter.get();
+    options_.table_splitter_options.config_filter = filter.get();
   }
 
   // Parse the split parameters.
-  for (const std::string& split_arg : split_args) {
-    options.split_paths.emplace_back();
-    options.split_constraints.emplace_back();
-    if (!ParseSplitParameter(split_arg, diag, &options.split_paths.back(),
-                             &options.split_constraints.back())) {
+  for (const std::string& split_arg : split_args_) {
+    options_.split_paths.emplace_back();
+    options_.split_constraints.emplace_back();
+    if (!ParseSplitParameter(split_arg, diag, &options_.split_paths.back(),
+        &options_.split_constraints.back())) {
       return 1;
     }
   }
 
-  if (options.table_flattener_options.collapse_key_stringpool) {
-    if (whitelist_path) {
-      std::string& path = whitelist_path.value();
-      if (!ExtractObfuscationWhitelistFromConfig(path, &context, &options)) {
+  if (options_.table_flattener_options.collapse_key_stringpool) {
+    if (whitelist_path_) {
+      std::string& path = whitelist_path_.value();
+      if (!ExtractObfuscationWhitelistFromConfig(path, &context, &options_)) {
         return 1;
       }
     }
   }
 
-  if (resources_config_path) {
-    std::string& path = resources_config_path.value();
-    if (!ExtractConfig(path, &context, &options)) {
+  if (resources_config_path_) {
+    std::string& path = resources_config_path_.value();
+    if (!ExtractConfig(path, &context, &options_)) {
       return 1;
     }
   }
 
-  if (!ExtractAppDataFromManifest(&context, apk.get(), &options)) {
+  if (!ExtractAppDataFromManifest(&context, apk.get(), &options_)) {
     return 1;
   }
 
-  OptimizeCommand cmd(&context, options);
+  Optimizer cmd(&context, options_);
   return cmd.Run(std::move(apk));
 }
 

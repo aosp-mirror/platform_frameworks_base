@@ -15,6 +15,7 @@
 //
 
 toolSources = [
+    "cmd/Command.cpp",
     "cmd/Compile.cpp",
     "cmd/Convert.cpp",
     "cmd/Diff.cpp",
@@ -124,7 +125,6 @@ cc_library_host_static {
         "ConfigDescription.cpp",
         "Debug.cpp",
         "DominatorTree.cpp",
-        "Flags.cpp",
         "java/AnnotationProcessor.cpp",
         "java/ClassDefinition.cpp",
         "java/JavaClassGenerator.cpp",
