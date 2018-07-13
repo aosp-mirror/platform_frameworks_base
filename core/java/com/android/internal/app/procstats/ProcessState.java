@@ -129,7 +129,7 @@ public final class ProcessState {
     private final PssTable mPssTable;
 
     private ProcessState mCommonProcess;
-    private int mCurState = STATE_NOTHING;
+    private int mCurCombinedState = STATE_NOTHING;
     private long mStartTime;
 
     private int mLastPssState = STATE_NOTHING;
@@ -180,7 +180,7 @@ public final class ProcessState {
         mPackage = pkg;
         mUid = uid;
         mVersion = vers;
-        mCurState = commonProcess.mCurState;
+        mCurCombinedState = commonProcess.mCurCombinedState;
         mStartTime = now;
         mDurations = new DurationsTable(commonProcess.mStats.mTableData);
         mPssTable = new PssTable(commonProcess.mStats.mTableData);
@@ -324,7 +324,7 @@ public final class ProcessState {
 
     public boolean isInUse() {
         return mActive || mNumActiveServices > 0 || mNumStartedServices > 0
-                || mCurState != STATE_NOTHING;
+                || mCurCombinedState != STATE_NOTHING;
     }
 
     public boolean isActive() {
@@ -333,7 +333,7 @@ public final class ProcessState {
 
     public boolean hasAnyData() {
         return !(mDurations.getKeyCount() == 0
-                && mCurState == STATE_NOTHING
+                && mCurCombinedState == STATE_NOTHING
                 && mPssTable.getKeyCount() == 0);
     }
 
@@ -355,7 +355,7 @@ public final class ProcessState {
         }
 
         // First update the common process.
-        mCommonProcess.setState(state, now);
+        mCommonProcess.setCombinedState(state, now);
 
         // If the common process is not multi-package, there is nothing else to do.
         if (!mCommonProcess.mMultiPackage) {
@@ -364,29 +364,29 @@ public final class ProcessState {
 
         if (pkgList != null) {
             for (int ip=pkgList.size()-1; ip>=0; ip--) {
-                pullFixedProc(pkgList, ip).setState(state, now);
+                pullFixedProc(pkgList, ip).setCombinedState(state, now);
             }
         }
     }
 
-    public void setState(int state, long now) {
+    public void setCombinedState(int state, long now) {
         ensureNotDead();
-        if (!mDead && (mCurState != state)) {
+        if (!mDead && (mCurCombinedState != state)) {
             //Slog.i(TAG, "Setting state in " + mName + "/" + mPackage + ": " + state);
             commitStateTime(now);
-            mCurState = state;
+            mCurCombinedState = state;
         }
     }
 
-    public int getState() {
-        return mCurState;
+    public int getCombinedState() {
+        return mCurCombinedState;
     }
 
     public void commitStateTime(long now) {
-        if (mCurState != STATE_NOTHING) {
+        if (mCurCombinedState != STATE_NOTHING) {
             long dur = now - mStartTime;
             if (dur > 0) {
-                mDurations.addDuration(mCurState, dur);
+                mDurations.addDuration(mCurCombinedState, dur);
             }
         }
         mStartTime = now;
@@ -434,8 +434,8 @@ public final class ProcessState {
             mCommonProcess.incStartedServices(memFactor, now, serviceName);
         }
         mNumStartedServices++;
-        if (mNumStartedServices == 1 && mCurState == STATE_NOTHING) {
-            setState(STATE_SERVICE_RESTARTING + (memFactor*STATE_COUNT), now);
+        if (mNumStartedServices == 1 && mCurCombinedState == STATE_NOTHING) {
+            setCombinedState(STATE_SERVICE_RESTARTING + (memFactor*STATE_COUNT), now);
         }
     }
 
@@ -450,8 +450,8 @@ public final class ProcessState {
             mCommonProcess.decStartedServices(memFactor, now, serviceName);
         }
         mNumStartedServices--;
-        if (mNumStartedServices == 0 && (mCurState%STATE_COUNT) == STATE_SERVICE_RESTARTING) {
-            setState(STATE_NOTHING, now);
+        if (mNumStartedServices == 0 && (mCurCombinedState %STATE_COUNT) == STATE_SERVICE_RESTARTING) {
+            setCombinedState(STATE_NOTHING, now);
         } else if (mNumStartedServices < 0) {
             Slog.wtfStack(TAG, "Proc started services underrun: pkg="
                     + mPackage + " uid=" + mUid + " name=" + mName);
@@ -485,16 +485,16 @@ public final class ProcessState {
                 break;
         }
         if (!always) {
-            if (mLastPssState == mCurState && SystemClock.uptimeMillis()
+            if (mLastPssState == mCurCombinedState && SystemClock.uptimeMillis()
                     < (mLastPssTime+(30*1000))) {
                 return;
             }
         }
-        mLastPssState = mCurState;
+        mLastPssState = mCurCombinedState;
         mLastPssTime = SystemClock.uptimeMillis();
-        if (mCurState != STATE_NOTHING) {
+        if (mCurCombinedState != STATE_NOTHING) {
             // First update the common process.
-            mCommonProcess.mPssTable.mergeStats(mCurState, 1, pss, pss, pss, uss, uss, uss,
+            mCommonProcess.mPssTable.mergeStats(mCurCombinedState, 1, pss, pss, pss, uss, uss, uss,
                     rss, rss, rss);
 
             // If the common process is not multi-package, there is nothing else to do.
@@ -504,7 +504,7 @@ public final class ProcessState {
 
             if (pkgList != null) {
                 for (int ip=pkgList.size()-1; ip>=0; ip--) {
-                    pullFixedProc(pkgList, ip).mPssTable.mergeStats(mCurState, 1,
+                    pullFixedProc(pkgList, ip).mPssTable.mergeStats(mCurCombinedState, 1,
                             pss, pss, pss, uss, uss, uss, rss, rss, rss);
                 }
             }
@@ -623,7 +623,7 @@ public final class ProcessState {
 
     public long getDuration(int state, long now) {
         long time = mDurations.getValueForId((byte)state);
-        if (mCurState == state) {
+        if (mCurCombinedState == state) {
             time += now - mStartTime;
         }
         return time;
@@ -728,7 +728,7 @@ public final class ProcessState {
             final int key = mDurations.getKeyAt(i);
             final int type = SparseMappingTable.getIdFromKey(key);
             long time = mDurations.getValue(key);
-            if (mCurState == type) {
+            if (mCurCombinedState == type) {
                 time += now - mStartTime;
             }
             final int procState = type % STATE_COUNT;
@@ -831,7 +831,7 @@ public final class ProcessState {
                     final int bucket = ((iscreen + imem) * STATE_COUNT) + procStates[ip];
                     long time = mDurations.getValueForId((byte)bucket);
                     String running = "";
-                    if (mCurState == bucket) {
+                    if (mCurCombinedState == bucket) {
                         running = " (running)";
                     }
                     if (time != 0) {
@@ -1181,14 +1181,14 @@ public final class ProcessState {
             final int key = mDurations.getKeyAt(i);
             final int type = SparseMappingTable.getIdFromKey(key);
             long time = mDurations.getValue(key);
-            if (mCurState == type) {
+            if (mCurCombinedState == type) {
                 didCurState = true;
                 time += now - mStartTime;
             }
             DumpUtils.printProcStateTagAndValue(pw, type, time);
         }
-        if (!didCurState && mCurState != STATE_NOTHING) {
-            DumpUtils.printProcStateTagAndValue(pw, mCurState, now - mStartTime);
+        if (!didCurState && mCurCombinedState != STATE_NOTHING) {
+            DumpUtils.printProcStateTagAndValue(pw, mCurCombinedState, now - mStartTime);
         }
     }
 
@@ -1255,14 +1255,14 @@ public final class ProcessState {
             final int key = mDurations.getKeyAt(i);
             final int type = SparseMappingTable.getIdFromKey(key);
             long time = mDurations.getValue(key);
-            if (mCurState == type) {
+            if (mCurCombinedState == type) {
                 didCurState = true;
                 time += now - mStartTime;
             }
             durationByState.put(type, time);
         }
-        if (!didCurState && mCurState != STATE_NOTHING) {
-            durationByState.put(mCurState, now - mStartTime);
+        if (!didCurState && mCurCombinedState != STATE_NOTHING) {
+            durationByState.put(mCurCombinedState, now - mStartTime);
         }
 
         for (int i=0; i<mPssTable.getKeyCount(); i++) {

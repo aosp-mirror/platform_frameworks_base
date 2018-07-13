@@ -520,6 +520,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Used to indicate that an app transition should be animated.
     static final boolean ANIMATE = true;
 
+    // If set, we will push process association information in to procstats.
+    static final boolean TRACK_PROCSTATS_ASSOCIATIONS = true;
+
     /**
      * Default value for {@link Settings.Global#NETWORK_ACCESS_TIMEOUT_MS}.
      */

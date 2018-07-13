@@ -1387,14 +1387,15 @@ public final class ProcessStats implements Parcelable {
             } else {
                 final ProcessState proc = act.getAssociationState().getProcess();
                 if (proc != null) {
-                    if (act.mProcState == proc.getState()) {
+                    final int procState = proc.getCombinedState() % STATE_COUNT;
+                    if (act.mProcState == procState) {
                         act.startActive(now);
                     } else {
                         act.stopActive(now);
-                        if (act.mProcState < proc.getState()) {
+                        if (act.mProcState < procState) {
                             Slog.w(TAG, "Tracking association " + act + " whose proc state "
                                     + act.mProcState + " is better than process " + proc
-                                    + " proc state " + proc.getState());
+                                    + " proc state " + procState);
                         }
                     }
                 } else {
