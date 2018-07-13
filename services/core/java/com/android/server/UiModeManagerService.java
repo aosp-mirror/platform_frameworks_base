@@ -82,6 +82,7 @@ final class UiModeManagerService extends SystemService {
 
     private boolean mCarModeEnabled = false;
     private boolean mCharging = false;
+    private boolean mPowerSave = false;
     private int mDefaultUiModeType;
     private boolean mCarModeKeepsScreenOn;
     private boolean mDeskModeKeepsScreenOn;
@@ -160,7 +161,14 @@ final class UiModeManagerService extends SystemService {
     private final BroadcastReceiver mBatteryReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mCharging = (intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0);
+            switch (intent.getAction()) {
+                case Intent.ACTION_BATTERY_CHANGED:
+                    mCharging = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
+                    break;
+                case PowerManager.ACTION_POWER_SAVE_MODE_CHANGING:
+                    mPowerSave = intent.getBooleanExtra(PowerManager.EXTRA_POWER_SAVE_MODE, false);
+                    break;
+            }
             synchronized (mLock) {
                 if (mSystemReady) {
                     updateLocked(0, 0);
@@ -203,8 +211,9 @@ final class UiModeManagerService extends SystemService {
 
         context.registerReceiver(mDockModeReceiver,
                 new IntentFilter(Intent.ACTION_DOCK_EVENT));
-        context.registerReceiver(mBatteryReceiver,
-                new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        IntentFilter batteryFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        batteryFilter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING);
+        context.registerReceiver(mBatteryReceiver, batteryFilter);
 
         mConfiguration.setToDefaults();
 
@@ -455,6 +464,11 @@ final class UiModeManagerService extends SystemService {
                 mTwilightManager.unregisterListener(mTwilightListener);
             }
             uiMode |= mNightMode << 4;
+        }
+
+        if (mPowerSave && !mNightModeLocked) {
+            uiMode &= ~Configuration.UI_MODE_NIGHT_NO;
+            uiMode |= Configuration.UI_MODE_NIGHT_YES;
         }
 
         if (LOG) {
