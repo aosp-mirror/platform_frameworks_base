@@ -284,7 +284,11 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         // Wake up device if System Audio Control is turned on but device is still on standby
         if (newSystemAudioMode && mService.isPowerStandbyOrTransient()) {
             mService.wakeUp();
-            // TODO(amyjojo): Switch to the corresponding input
+        }
+        int targetPhysicalAddress = getActiveSource().physicalAddress;
+        if (newSystemAudioMode &&
+            !isPhysicalAddressMeOrBelow(targetPhysicalAddress)) {
+            switchToAudioInput();
         }
         // Mute device when feature is turned off and unmute device when feature is turned on
         boolean currentMuteStatus =
@@ -306,6 +310,32 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
             }
         }
         return true;
+    }
+
+    /**
+     * Method to check if the target device belongs to the subtree of the current device or not.
+     * <p>Return true if it does or if the two devices share the same physical address.
+     *
+     * <p>This check assumes both device physical address and target address are valid.
+     * @param targetPhysicalAddress is the physical address of the target device
+     */
+    protected boolean isPhysicalAddressMeOrBelow(int targetPhysicalAddress) {
+        int myPhysicalAddress = mService.getPhysicalAddress();
+        int xor = targetPhysicalAddress ^ myPhysicalAddress;
+        // Return true if two addresses are the same
+        // or if they only differs for one byte, but not the first byte,
+        // and myPhysicalAddress is 0 after that byte
+        if (xor == 0
+            || ((xor & 0x0f00) == xor && (myPhysicalAddress & 0x0fff) == 0)
+            || ((xor & 0x00f0) == xor && (myPhysicalAddress & 0x00ff) == 0)
+            || ((xor & 0x000f) == xor && (myPhysicalAddress & 0x000f) == 0)) {
+            return true;
+        }
+        return false;
+    }
+
+    protected void switchToAudioInput() {
+        // TODO(b/111396634): switch input according to PROPERTY_SYSTEM_AUDIO_MODE_AUDIO_PORT
     }
 
     private void updateAudioManagerForSystemAudio(boolean on) {
