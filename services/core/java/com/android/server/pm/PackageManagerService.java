@@ -15834,7 +15834,7 @@ public class PackageManagerService extends IPackageManager.Stub
          * Rename package into final resting place. All paths on the given
          * scanned package should be updated to reflect the rename.
          */
-        abstract boolean doRename(int status, PackageParser.Package pkg, String oldCodePath);
+        abstract boolean doRename(int status, PackageParser.Package pkg);
         abstract int doPostInstall(int status, int uid);
 
         /** @see PackageSettingBase#codePathString */
@@ -16010,7 +16010,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return status;
         }
 
-        boolean doRename(int status, PackageParser.Package pkg, String oldCodePath) {
+        boolean doRename(int status, PackageParser.Package pkg) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 cleanUp();
                 return false;
@@ -16169,7 +16169,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return status;
         }
 
-        boolean doRename(int status, PackageParser.Package pkg, String oldCodePath) {
+        boolean doRename(int status, PackageParser.Package pkg) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 cleanUp(move.toUuid);
                 return false;
@@ -17232,7 +17232,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Get rid of all references to package scan path via parser.
         pp = null;
-        String oldCodePath = null;
         boolean systemApp = false;
         synchronized (mPackages) {
             // Check if installing already existing package
@@ -17344,7 +17343,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
 
-                oldCodePath = mSettings.mPackages.get(pkgName).codePathString;
                 if (ps.pkg != null && ps.pkg.applicationInfo != null) {
                     systemApp = (ps.pkg.applicationInfo.flags &
                             ApplicationInfo.FLAG_SYSTEM) != 0;
@@ -17494,7 +17492,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        if (!args.doRename(res.returnCode, pkg, oldCodePath)) {
+        if (!args.doRename(res.returnCode, pkg)) {
             res.setError(INSTALL_FAILED_INSUFFICIENT_STORAGE, "Failed rename");
             return;
         }
