@@ -1792,7 +1792,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // considers the resumed activity, as normal means will bring the activity from STOPPED
         // to RESUMED. Adding PAUSING in this scenario will lead to double lifecycles.
         if (!isState(STOPPED, STOPPING) || getStack().mTranslucentActivityWaiting != null
-                || mStackSupervisor.getResumedActivityLocked() == this) {
+                || isResumedActivityOnDisplay()) {
             return false;
         }
 
@@ -3001,6 +3001,15 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     boolean isTopRunningActivity() {
         return mStackSupervisor.topRunningActivityLocked() == this;
+    }
+
+    /**
+     * @return {@code true} if this is the resumed activity on its current display, {@code false}
+     * otherwise.
+     */
+    boolean isResumedActivityOnDisplay() {
+        final ActivityDisplay display = getDisplay();
+        return display != null && this == display.getResumedActivity();
     }
 
     void registerRemoteAnimations(RemoteAnimationDefinition definition) {

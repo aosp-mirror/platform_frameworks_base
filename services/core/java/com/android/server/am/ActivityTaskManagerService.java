@@ -1371,7 +1371,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             r.immersive = immersive;
 
             // update associated state if we're frontmost
-            if (r == mStackSupervisor.getResumedActivityLocked()) {
+            if (r.isResumedActivityOnDisplay()) {
                 if (DEBUG_IMMERSIVE) Slog.d(TAG_IMMERSIVE, "Frontmost changed immersion: "+ r);
                 applyUpdateLockStateLocked(r);
             }
@@ -3703,7 +3703,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 r.requestedVrComponent = (enabled) ? packageName : null;
 
                 // Update associated state if this activity is currently focused
-                if (r == mStackSupervisor.getResumedActivityLocked()) {
+                if (r.isResumedActivityOnDisplay()) {
                     applyUpdateVrModeLocked(r);
                 }
                 return 0;
@@ -4720,8 +4720,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mH.post(mAmInternal::updateOomAdj);
     }
 
+    // TODO(b/111541062): Update app time tracking to make it aware of multiple resumed activities
     private void startTimeTrackingFocusedActivityLocked() {
-        final ActivityRecord resumedActivity = mStackSupervisor.getResumedActivityLocked();
+        final ActivityRecord resumedActivity = mStackSupervisor.getTopResumedActivity();
         if (!mSleeping && mCurAppTimeTracker != null && resumedActivity != null) {
             mCurAppTimeTracker.start(resumedActivity.packageName);
         }

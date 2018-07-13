@@ -381,7 +381,7 @@ class KeyguardController {
                 return;
             }
             mStackSupervisor.moveTasksToFullscreenStackLocked(stack,
-                    mStackSupervisor.mFocusedStack == stack);
+                    stack.isFocusedStackOnDisplay());
         }
     }
 

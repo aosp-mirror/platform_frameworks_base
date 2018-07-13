@@ -91,6 +91,7 @@ import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
@@ -12825,8 +12826,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean needSep = printedAnything;
 
         boolean printed = ActivityStackSupervisor.printThisActivity(pw,
-                mStackSupervisor.getResumedActivityLocked(),
-                dumpPackage, needSep, "  ResumedActivity: ");
+                mStackSupervisor.getTopResumedActivity(),  dumpPackage, needSep,
+                "  ResumedActivity: ");
         if (printed) {
             printedAnything = true;
             needSep = false;
@@ -20642,9 +20643,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private final ActivityRecord resumedAppLocked() {
-        final ActivityRecord act =
-                mStackSupervisor != null ? mStackSupervisor.getResumedActivityLocked() : null;
+    // TODO(b/111541062): This method is only used for updating OOM adjustments. We need to update
+    // the logic there and in mBatteryStatsService to make them aware of multiple resumed activities
+    private ActivityRecord resumedAppLocked() {
+        final ActivityRecord act = mStackSupervisor.getTopResumedActivity();
         String pkg;
         int uid;
         if (act != null) {
