@@ -196,7 +196,6 @@ interface IActivityTaskManager {
     void startInPlaceAnimationOnFrontMostApplication(in Bundle opts);
     void registerTaskStackListener(in ITaskStackListener listener);
     void unregisterTaskStackListener(in ITaskStackListener listener);
-    int createStackOnDisplay(int displayId);
     void setTaskResizeable(int taskId, int resizeableMode);
     void exitFreeformMode(in IBinder token);
     void resizeTask(int taskId, in Rect bounds, int resizeMode);

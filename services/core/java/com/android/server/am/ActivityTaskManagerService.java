@@ -2772,23 +2772,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public int createStackOnDisplay(int displayId) {
-        mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "createStackOnDisplay()");
-        synchronized (mGlobalLock) {
-            final ActivityDisplay display =
-                    mStackSupervisor.getActivityDisplayOrCreateLocked(displayId);
-            if (display == null) {
-                return INVALID_STACK_ID;
-            }
-            // TODO(multi-display): Have the caller pass in the windowing mode and activity type.
-            final ActivityStack stack = display.createStack(
-                    WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD,
-                    ON_TOP);
-            return (stack != null) ? stack.mStackId : INVALID_STACK_ID;
-        }
-    }
-
-    @Override
     public void exitFreeformMode(IBinder token) {
         synchronized (mGlobalLock) {
             long ident = Binder.clearCallingIdentity();
