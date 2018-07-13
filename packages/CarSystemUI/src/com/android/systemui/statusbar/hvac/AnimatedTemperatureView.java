@@ -251,7 +251,7 @@ public class AnimatedTemperatureView extends FrameLayout implements TemperatureV
     }
 
     /**
-     * @return propertiyId  Example: CarHvacManager.ID_ZONED_TEMP_SETPOINT (16385)
+     * @return propertiyId  Example: CarHvacManager.ID_ZONED_TEMP_SETPOINT (358614275)
      */
     @Override
     public int getPropertyId() {

@@ -351,11 +351,11 @@ public class CarVolumeDialogImpl implements VolumeDialog {
     listItem.setOnSeekBarChangeListener(
         new CarVolumeDialogImpl.VolumeSeekBarChangeListener(volumeGroupId, mCarAudioManager));
     Drawable primaryIcon = mContext.getResources().getDrawable(volumeItem.icon);
-    primaryIcon.setTint(color);
+    primaryIcon.mutate().setTint(color);
     listItem.setPrimaryActionIcon(primaryIcon);
     if (supplementalIconId != 0) {
       Drawable supplementalIcon = mContext.getResources().getDrawable(supplementalIconId);
-      supplementalIcon.setTint(color);
+      supplementalIcon.mutate().setTint(color);
       listItem.setSupplementalIcon(supplementalIcon, true,
           supplementalIconOnClickListener);
     } else {

@@ -14,18 +14,17 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<resources>
-    <string name="config_statusBarComponent" translatable="false">
-        com.android.systemui.statusbar.car.CarStatusBar
-    </string>
-    <string name="config_systemUIFactoryComponent" translatable="false">
-        com.android.systemui.CarSystemUIFactory
-    </string>
-    <bool name="config_enableFullscreenUserSwitcher">true</bool>
-
-    <!-- configure which system ui bars should be displayed -->
-    <bool name="config_enableLeftNavigationBar">false</bool>
-    <bool name="config_enableRightNavigationBar">false</bool>
-    <bool name="config_enableBottomNavigationBar">true</bool>
-
-</resources>
+<androidx.car.widget.PagedListView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/volume_list"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/black"
+    android:minWidth="@dimen/volume_dialog_panel_width"
+    android:theme="@style/Theme.Car.DialogListView"
+    app:dividerEndMargin="@dimen/car_keyline_1"
+    app:dividerStartMargin="@dimen/car_keyline_1"
+    app:gutter="none"
+    app:scrollBarEnabled="false"
+    app:showPagedListViewDivider="true"/>
