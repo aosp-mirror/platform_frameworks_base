@@ -243,20 +243,6 @@ public class SubscriptionManager {
     public static final int SIM_PROVISIONED = 0;
 
     /**
-     * TelephonyProvider column name for the MCC associated with a SIM, stored as a string.
-     * <P>Type: TEXT (String)</P>
-     * @hide
-     */
-    public static final String MCC_STRING = "mcc_string";
-
-    /**
-     * TelephonyProvider column name for the MNC associated with a SIM, stored as a string.
-     * <P>Type: TEXT (String)</P>
-     * @hide
-     */
-    public static final String MNC_STRING = "mnc_string";
-
-    /**
      * TelephonyProvider column name for the MCC associated with a SIM.
      * <P>Type: INTEGER (int)</P>
      * @hide
