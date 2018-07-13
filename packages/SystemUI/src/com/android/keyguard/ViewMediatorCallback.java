@@ -105,4 +105,9 @@ public interface ViewMediatorCallback {
      * @return Message that should be displayed above the challenge.
      */
     CharSequence consumeCustomMessage();
+
+    /**
+     * Call when cancel button is pressed in bouncer.
+     */
+    void onCancelClicked();
 }

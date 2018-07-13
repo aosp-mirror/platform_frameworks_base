@@ -68,6 +68,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
          */
         public void finish(boolean strongAuth, int targetUserId);
         public void reset();
+        public void onCancelClicked();
     }
 
     public KeyguardSecurityContainer(Context context, AttributeSet attrs) {
@@ -446,6 +447,10 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
         public void reset() {
             mSecurityCallback.reset();
+        }
+
+        public void onCancelClicked() {
+            mSecurityCallback.onCancelClicked();
         }
     };
 

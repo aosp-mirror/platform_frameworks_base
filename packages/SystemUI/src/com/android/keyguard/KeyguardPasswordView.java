@@ -201,6 +201,7 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
         if (cancelBtn != null) {
             cancelBtn.setOnClickListener(view -> {
                 mCallback.reset();
+                mCallback.onCancelClicked();
             });
         }
 

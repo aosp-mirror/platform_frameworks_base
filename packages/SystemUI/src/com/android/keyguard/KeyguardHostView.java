@@ -242,6 +242,11 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         mViewMediatorCallback.resetKeyguard();
     }
 
+    @Override
+    public void onCancelClicked() {
+        mViewMediatorCallback.onCancelClicked();
+    }
+
     public void resetSecurityContainer() {
         mSecurityContainer.reset();
     }

@@ -112,6 +112,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         if (cancelBtn != null) {
             cancelBtn.setOnClickListener(view -> {
                 mCallback.reset();
+                mCallback.onCancelClicked();
             });
         }
     }

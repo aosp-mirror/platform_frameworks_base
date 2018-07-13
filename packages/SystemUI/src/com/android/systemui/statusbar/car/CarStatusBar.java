@@ -29,6 +29,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.settingslib.users.UserManagerHelper;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
@@ -483,6 +484,13 @@ public class CarStatusBar extends StatusBar implements
     @Override
     public void updateKeyguardState(boolean goingToFullShade, boolean fromShadeLocked) {
         super.updateKeyguardState(goingToFullShade, fromShadeLocked);
+        UserManagerHelper helper = new UserManagerHelper(mContext);
+        if (!helper.isHeadlessSystemUser()) {
+            showUserSwitcher();
+        }
+    }
+
+    public void showUserSwitcher() {
         if (mFullscreenUserSwitcher != null) {
             if (mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
                 mFullscreenUserSwitcher.show();
