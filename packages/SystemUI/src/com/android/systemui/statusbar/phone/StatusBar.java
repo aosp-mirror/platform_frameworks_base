@@ -1198,6 +1198,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onUiModeChanged();
         }
+        if (mStackScroller != null) {
+            mStackScroller.onUiModeChanged();
+        }
     }
 
     private void inflateEmptyShadeView() {

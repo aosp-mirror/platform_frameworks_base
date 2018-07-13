@@ -4476,9 +4476,9 @@ public class Notification implements Parcelable
                 mTextColorsAreForBackground = backgroundColor;
                 if (!hasForegroundColor() || !isColorized()) {
                     mPrimaryTextColor = ContrastColorUtil.resolvePrimaryColor(mContext,
-                            backgroundColor);
+                            backgroundColor, mInNightMode);
                     mSecondaryTextColor = ContrastColorUtil.resolveSecondaryColor(mContext,
-                            backgroundColor);
+                            backgroundColor, mInNightMode);
                     if (backgroundColor != COLOR_DEFAULT && isColorized()) {
                         mPrimaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
                                 mPrimaryTextColor, backgroundColor, 4.5);
@@ -5263,7 +5263,7 @@ public class Notification implements Parcelable
                     // background color
                     background = outResultColor[0].getDefaultColor();
                     int textColor = ContrastColorUtil.resolvePrimaryColor(mContext,
-                            background);
+                            background, mInNightMode);
                     button.setTextColor(R.id.action0, textColor);
                     rippleColor = textColor;
                 } else if (mN.color != COLOR_DEFAULT && !isColorized() && mTintActionButtons) {
@@ -5443,7 +5443,7 @@ public class Notification implements Parcelable
                     com.android.internal.R.color.notification_material_background_color);
             if (mN.color == COLOR_DEFAULT) {
                 ensureColors();
-                color = ContrastColorUtil.resolveDefaultColor(mContext, background);
+                color = ContrastColorUtil.resolveDefaultColor(mContext, background, mInNightMode);
             } else {
                 color = ContrastColorUtil.resolveContrastColor(mContext, mN.color,
                         background, mInNightMode);
@@ -5462,7 +5462,8 @@ public class Notification implements Parcelable
             }
             int background = mContext.getColor(
                     com.android.internal.R.color.notification_material_background_color);
-            mNeutralColor = ContrastColorUtil.resolveDefaultColor(mContext, background);
+            mNeutralColor = ContrastColorUtil.resolveDefaultColor(mContext, background,
+                    mInNightMode);
             if (Color.alpha(mNeutralColor) < 255) {
                 // alpha doesn't go well for color filters, so let's blend it manually
                 mNeutralColor = ContrastColorUtil.compositeColors(mNeutralColor, background);
@@ -7833,10 +7834,13 @@ public class Notification implements Parcelable
 
             // If the action buttons should not be tinted, then just use the default
             // notification color. Otherwise, just use the passed-in color.
+            Configuration currentConfig = mBuilder.mContext.getResources().getConfiguration();
+            boolean inNightMode = (currentConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                    == Configuration.UI_MODE_NIGHT_YES;
             int tintColor = mBuilder.shouldTintActionButtons() || mBuilder.isColorized()
                     ? color
                     : ContrastColorUtil.resolveColor(mBuilder.mContext,
-                            Notification.COLOR_DEFAULT);
+                            Notification.COLOR_DEFAULT, inNightMode);
 
             button.setDrawableTint(R.id.action0, false, tintColor,
                     PorterDuff.Mode.SRC_ATOP);
