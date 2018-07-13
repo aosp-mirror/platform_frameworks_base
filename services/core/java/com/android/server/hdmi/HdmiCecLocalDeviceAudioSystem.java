@@ -102,6 +102,18 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         }
     }
 
+    @ServiceThreadOnly
+    protected boolean handleActiveSource(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int logicalAddress = message.getSource();
+        int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
+        ActiveSource activeSource = ActiveSource.of(logicalAddress, physicalAddress);
+        if (!mActiveSource.equals(activeSource)) {
+            setActiveSource(activeSource);
+        }
+        return true;
+    }
+
     @Override
     @ServiceThreadOnly
     protected int getPreferredAddress() {
