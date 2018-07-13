@@ -29,7 +29,8 @@ void setDriverPath(JNIEnv* env, jobject clazz, jstring path) {
 }
 
 void setLayerPaths_native(JNIEnv* env, jobject clazz, jobject classLoader, jstring layerPaths) {
-    android_namespace_t* appNamespace = android::FindNamespaceByClassLoader(env, classLoader);
+    android::NativeLoaderNamespace* appNamespace = android::FindNativeLoaderNamespaceByClassLoader(
+        env, classLoader);
     ScopedUtfChars layerPathsChars(env, layerPaths);
     android::GraphicsEnv::getInstance().setLayerPaths(appNamespace, layerPathsChars.c_str());
 }
