@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.RemoteAction;
+import android.app.RemoteInput;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -99,7 +100,27 @@ public class SmartActionsHelper {
         }
         // For now, we are only interested in messages.
         return Notification.CATEGORY_MESSAGE.equals(notification.category)
-                || Notification.MessagingStyle.class.equals(notification.getNotificationStyle());
+                || Notification.MessagingStyle.class.equals(notification.getNotificationStyle())
+                || hasInlineReply(notification);
+    }
+
+    private boolean hasInlineReply(Notification notification) {
+        Notification.Action[] actions = notification.actions;
+        if (actions == null) {
+            return false;
+        }
+        for (Notification.Action action : actions) {
+            RemoteInput[] remoteInputs = action.getRemoteInputs();
+            if (remoteInputs == null) {
+                continue;
+            }
+            for (RemoteInput remoteInput : remoteInputs) {
+                if (remoteInput.getAllowFreeFormInput()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /** Returns the text most salient for action extraction in a notification. */
