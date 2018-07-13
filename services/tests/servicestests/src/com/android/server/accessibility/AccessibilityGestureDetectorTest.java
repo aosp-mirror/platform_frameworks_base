@@ -195,7 +195,7 @@ public class AccessibilityGestureDetectorTest {
                     point.x, point.y, 0);
 
             // Send event.
-            mDetector.onMotionEvent(event, policyFlags);
+            mDetector.onMotionEvent(event, event, policyFlags);
             eventTimeMs += PATH_STEP_MILLISEC;
         }
 
