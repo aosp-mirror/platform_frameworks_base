@@ -20642,16 +20642,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Has the UID or resumed package name changed?
         if (uid != mCurResumedUid || (pkg != mCurResumedPackage
                 && (pkg == null || !pkg.equals(mCurResumedPackage)))) {
-            if (mCurResumedPackage != null) {
-                mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_TOP_FINISH,
-                        mCurResumedPackage, mCurResumedUid);
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (mCurResumedPackage != null) {
+                    mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_TOP_FINISH,
+                            mCurResumedPackage, mCurResumedUid);
+                }
+                mCurResumedPackage = pkg;
+                mCurResumedUid = uid;
+                if (mCurResumedPackage != null) {
+                    mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_TOP_START,
+                            mCurResumedPackage, mCurResumedUid);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
-            mCurResumedPackage = pkg;
-            mCurResumedUid = uid;
-            if (mCurResumedPackage != null) {
-                mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_TOP_START,
-                        mCurResumedPackage, mCurResumedUid);
-            }
+
         }
         return act;
     }
