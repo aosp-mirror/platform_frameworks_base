@@ -908,6 +908,18 @@ class Linker {
       app_info.version_code = maybe_code.value();
     }
 
+    if (xml::Attribute* version_code_major_attr =
+        manifest_el->FindAttribute(xml::kSchemaAndroid, "versionCodeMajor")) {
+      Maybe<uint32_t> maybe_code = ResourceUtils::ParseInt(version_code_major_attr->value);
+      if (!maybe_code) {
+        diag->Error(DiagMessage(xml_res->file.source.WithLine(manifest_el->line_number))
+                        << "invalid android:versionCodeMajor '"
+                        << version_code_major_attr->value << "'");
+        return {};
+      }
+      app_info.version_code_major = maybe_code.value();
+    }
+
     if (xml::Attribute* revision_code_attr =
             manifest_el->FindAttribute(xml::kSchemaAndroid, "revisionCode")) {
       Maybe<uint32_t> maybe_code = ResourceUtils::ParseInt(revision_code_attr->value);
