@@ -29,6 +29,7 @@ import "frameworks/base/core/proto/android/server/enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
+import "frameworks/base/proto/src/metrics_constants.proto";
 
 /**
  * The master atom class. This message defines all of the available
@@ -121,8 +122,7 @@ message Atom {
         ANROccurred anr_occurred = 79;
         WTFOccurred wtf_occurred = 80;
         LowMemReported low_mem_reported = 81;
-
-
+        GenericAtom generic_atom = 82;
     }
 
     // Pulled events will start at field 10000.
@@ -2011,4 +2011,15 @@ message BinderCalls {
    optional int64 max_reply_size_bytes = 10;
    // Maximum parcel request size of one API call.
    optional int64 max_request_size_bytes = 11;
+}
+
+/**
+ * An atom for generic metrics logging. Available from Android Q.
+ * One has to add an enum to frameworks/base/proto/src/metrics_constants.proto
+ * to extend another metric.
+ */
+message GenericAtom {
+  // Type of event. Previously it only indicated visual elements but now it
+  // is expanded to describe any type of event.
+  optional com_android_internal_logging.MetricsEvent.View view = 1;
 }
