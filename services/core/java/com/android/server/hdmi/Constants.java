@@ -16,6 +16,7 @@
 
 package com.android.server.hdmi;
 
+import android.annotation.IntDef;
 import android.hardware.hdmi.HdmiDeviceInfo;
 
 /**
@@ -200,6 +201,19 @@ final class Constants {
 
     static final int UNKNOWN_VOLUME = -1;
 
+    // States of property PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON
+    // to decide if turn on the system audio control when power on the device
+    @IntDef({
+        ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON,
+        USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON,
+        NEVER_SYSTEM_AUDIO_CONTROL_ON_POWER_ON
+    })
+    @interface SystemAudioControlOnPowerOn {}
+    static final int ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON = 0;
+    static final int USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON = 1;
+    static final int NEVER_SYSTEM_AUDIO_CONTROL_ON_POWER_ON = 2;
+
+
     static final String PROPERTY_PREFERRED_ADDRESS_AUDIO_SYSTEM =
             "persist.sys.hdmi.addr.audiosystem";
     static final String PROPERTY_PREFERRED_ADDRESS_PLAYBACK = "persist.sys.hdmi.addr.playback";
@@ -220,6 +234,14 @@ final class Constants {
     // Set to false to allow playback device to go to suspend mode even
     // when it's an active source. True by default.
     static final String PROPERTY_KEEP_AWAKE = "persist.sys.hdmi.keep_awake";
+
+    // TODO(UI): Set this from UI to decide if turn on System Audio Mode when power on the device
+    /** Property to decide if turn on the system audio control when power on the device
+     * Default is always turn on.
+     * State must be a valid {@link SystemAudioControlOnPowerOn} int.
+     */
+    static final String PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON =
+        "persist.sys.hdmi.system_audio_control_on_power_on";
 
     static final int RECORDING_TYPE_DIGITAL_RF = 1;
     static final int RECORDING_TYPE_ANALOGUE_RF = 2;
