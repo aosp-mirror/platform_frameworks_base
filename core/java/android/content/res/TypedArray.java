@@ -1013,6 +1013,34 @@ public class TypedArray {
     }
 
     /**
+     * Retrieve the TypedArray for the attribute at <var>index</var>.
+     * This gets the resource ID of the selected attribute, and uses
+     * {@link Resources#obtainTypedArray Resources.obtainTypedArray} of the owning
+     * Resources object to retrieve its TypedArray. This also allows the usage of
+     * multi-dimensional TypedArrays.
+     * <p>
+     * This method will throw an exception if the attribute is defined but is
+     * not a text array resource.
+     *
+     * @param index Index of attribute to retrieve.
+     *
+     * @return TypedArray for the attribute, or {@code null} if not
+     *         defined.
+     * @throws RuntimeException if the TypedArray has already been recycled.
+     */
+    public TypedArray getTypedArray(@StyleableRes int index) {
+        if (mRecycled) {
+            throw new RuntimeException("Cannot make calls to a recycled instance!");
+        }
+
+        final TypedValue value = mValue;
+        if (getValueAt(index*AssetManager.STYLE_NUM_ENTRIES, value)) {
+            return mResources.obtainTypedArray(value.resourceId);
+        }
+        return null;
+    }
+
+    /**
      * Retrieve the raw TypedValue for the attribute at <var>index</var>.
      *
      * @param index Index of attribute to retrieve.
