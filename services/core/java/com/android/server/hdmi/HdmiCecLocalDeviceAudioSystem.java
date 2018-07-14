@@ -15,7 +15,6 @@
  */
 package com.android.server.hdmi;
 
-import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.Constants.ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
 import static com.android.server.hdmi.Constants.PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
 import static com.android.server.hdmi.Constants.USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
@@ -23,7 +22,6 @@ import static com.android.server.hdmi.Constants.USE_LAST_STATE_SYSTEM_AUDIO_CONT
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.AudioManager;
 import android.os.SystemProperties;
-import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
@@ -46,6 +44,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     private boolean mSystemAudioControlFeatureEnabled;
     protected Integer mSystemAudioSource;
 
+    private boolean mTvSystemAudioModeSupport;
+
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mSystemAudioControlFeatureEnabled = true;
@@ -58,6 +58,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected void onStandby(boolean initiatedByCec, int standbyAction) {
         assertRunOnServiceThread();
+        mTvSystemAudioModeSupport = false;
         // Record the last state of System Audio Control before going to standby
         synchronized (mLock) {
             SystemProperties.set(Constants.PROPERTY_LAST_SYSTEM_AUDIO_CONTROL,
@@ -312,7 +313,14 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
      * its physical address.
      */
     void queryTvSystemAudioModeSupport(TvSystemAudioModeSupportedCallback callback) {
-        // TODO(b/80297382): implement detect TV for system audio mode support.
-        callback.onResult(true);
+        if (!mTvSystemAudioModeSupport) {
+            addAndStartAction(new DetectTvSystemAudioModeSupportAction(this, callback));
+        } else {
+            callback.onResult(true);
+        }
+    }
+
+    void setTvSystemAudioModeSupport(boolean supported) {
+        mTvSystemAudioModeSupport = supported;
     }
 }
