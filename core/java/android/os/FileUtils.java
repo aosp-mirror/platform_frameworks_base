@@ -93,7 +93,8 @@ public class FileUtils {
 
     private static final File[] EMPTY = new File[0];
 
-    private static final boolean ENABLE_COPY_OPTIMIZATIONS = true;
+    // non-final so it can be toggled by Robolectric's ShadowFileUtils
+    private static boolean sEnableCopyOptimizations = true;
 
     private static final long COPY_CHECKPOINT_BYTES = 524288;
 
@@ -338,7 +339,7 @@ public class FileUtils {
     public static long copy(@NonNull InputStream in, @NonNull OutputStream out,
             @Nullable CancellationSignal signal, @Nullable Executor executor,
             @Nullable ProgressListener listener) throws IOException {
-        if (ENABLE_COPY_OPTIMIZATIONS) {
+        if (sEnableCopyOptimizations) {
             if (in instanceof FileInputStream && out instanceof FileOutputStream) {
                 return copy(((FileInputStream) in).getFD(), ((FileOutputStream) out).getFD(),
                         signal, executor, listener);
@@ -395,7 +396,7 @@ public class FileUtils {
     public static long copy(@NonNull FileDescriptor in, @NonNull FileDescriptor out, long count,
             @Nullable CancellationSignal signal, @Nullable Executor executor,
             @Nullable ProgressListener listener) throws IOException {
-        if (ENABLE_COPY_OPTIMIZATIONS) {
+        if (sEnableCopyOptimizations) {
             try {
                 final StructStat st_in = Os.fstat(in);
                 final StructStat st_out = Os.fstat(out);
