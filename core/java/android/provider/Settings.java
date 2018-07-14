@@ -10963,6 +10963,8 @@ public final class Settings {
          * proc_state_cpu_times_read_delay_ms (long)
          * external_stats_collection_rate_limit_ms (long)
          * battery_level_collection_delay_ms (long)
+         * max_history_files (int)
+         * max_history_buffer_kb (int)
          * </pre>
          *
          * <p>
