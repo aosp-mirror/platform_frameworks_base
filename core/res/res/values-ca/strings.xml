@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"La Wi-Fi no té accés a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Toca per veure les opcions"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Canvis en la configuració del punt d\'accés Wi-Fi"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Ha canviat la teva banda del punt d\'accés Wi-Fi."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Aquest dispositiu no admet utilitzar exclusivament una banda de 5 GHz. El dispositiu utilitzarà una banda de 5 GHz quan estigui disponible."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Actualment en ús: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"El dispositiu utilitza <xliff:g id="NEW_NETWORK">%1$s</xliff:g> en cas que <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> no tingui accés a Internet. És possible que s\'hi apliquin càrrecs."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Abans es feia servir la xarxa <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>; ara s\'utilitza <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

@@ -584,14 +584,14 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci tablet atau menghapus semua data pengguna ini jika terlalu banyak sandi salah diketikkan."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci TV atau menghapus semua data pengguna ini jika terlalu banyak sandi salah diketikkan."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci ponsel atau menghapus semua data pengguna ini jika terlalu banyak sandi salah diketikkan."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Ubah kunci layar"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Mengubah kunci layar"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Mengubah kunci layar."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Kunci layar"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrol cara dan kapan layar mengunci."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Hapus semua data"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Mengunci layar"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Mengontrol cara dan kapan layar mengunci."</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Menghapus semua data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Hapus data tablet tanpa peringatan dengan menyetel ulang data pabrik."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Menghapus data TV tanpa peringatan dengan mengembalikan ke setelan pabrik."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Hapus data ponsel tanpa peringatan dengan menyetel ulang data pabrik."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Menghapus data ponsel tanpa peringatan dengan melakukan reset ke setelan pabrik."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Menghapus data pengguna"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Menghapus data pengguna ini di tablet ini tanpa peringatan."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Menghapus data pengguna ini di TV ini tanpa peringatan."</string>
@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi tidak memiliki akses internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tap untuk melihat opsi"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Perubahan pada setelan hotspot Anda"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Pita hotspot Anda telah berubah."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Perangkat ini tidak mendukung preferensi Anda, yaitu hanya 5GHz. Sebagai gantinya, perangkat ini akan menggunakan pita frekuensi 5GHz jika tersedia."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Dialihkan ke <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Perangkat menggunakan <xliff:g id="NEW_NETWORK">%1$s</xliff:g> jika <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> tidak memiliki akses internet. Tarif mungkin berlaku."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Dialihkan dari <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ke <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

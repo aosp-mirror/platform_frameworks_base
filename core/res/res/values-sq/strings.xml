@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi nuk ka qasje në internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Trokit për opsionet"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Ndryshimet në cilësimet e zonës së qasjes për internet"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Brezi yt i zonës së qasjes për internet ka ndryshuar."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Kjo pajisje nuk e mbështet preferencën për vetëm 5 GHz. Përkundrazi, pajisja do të përdorë brezin 5 GHz nëse ka."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Kaloi te <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Pajisja përdor <xliff:g id="NEW_NETWORK">%1$s</xliff:g> kur <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nuk ka qasje në internet. Mund të zbatohen tarifa."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Kaloi nga <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> te <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

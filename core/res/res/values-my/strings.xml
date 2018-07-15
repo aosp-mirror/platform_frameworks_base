@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi တွင် အင်တာနက်ချိတ်ဆက်မှု မရှိပါ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"အခြားရွေးချယ်စရာများကိုကြည့်ရန် တို့ပါ"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"သင်၏ဟော့စပေါ့ ဆက်တင်များ ပြောင်းလဲမှု"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"သင်၏ ဟော့စပေါ့လိုင်း ပြောင်းသွားပါပြီ။"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"ဤစက်ပစ္စည်းသည် သင်၏ 5GHz သီးသန့်ရွေးချယ်မှုအတွက် ပံ့ပိုးမထားပါ။ ၎င်းအစား ဤစက်ပစ္စည်းသည် ရနိုင်သည့်အခါ 5GHz လိုင်းကို သုံးသွားပါမည်။"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> သို့ ပြောင်းလိုက်ပြီ"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ဖြင့် အင်တာနက် အသုံးမပြုနိုင်သည့်အချိန်တွင် စက်ပစ္စည်းသည် <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ကို သုံးပါသည်။ ဒေတာသုံးစွဲခ ကျသင့်နိုင်ပါသည်။"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> မှ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> သို့ ပြောင်းလိုက်ပြီ"</string>

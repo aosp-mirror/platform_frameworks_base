@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Το Wi-Fi δεν έχει πρόσβαση στο διαδίκτυο"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Πατήστε για να δείτε τις επιλογές"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Αλλαγές στις ρυθμίσεις σημείου πρόσβασης Wi-Fi"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Το εύρος σημείου πρόσβασης Wi-Fi άλλαξε."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Αυτή η συσκευή δεν υποστηρίζει την προτίμησή σας για τη ζώνη 5 GHz μόνο. Αντ\' αυτού, αυτή η συσκευή θα χρησιμοποιεί τη ζώνη 5 GHz όταν είναι διαθέσιμη."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Μετάβαση σε δίκτυο <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Η συσκευή χρησιμοποιεί το δίκτυο <xliff:g id="NEW_NETWORK">%1$s</xliff:g> όταν το δίκτυο <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> δεν έχει πρόσβαση στο διαδίκτυο. Μπορεί να ισχύουν χρεώσεις."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Μετάβαση από το δίκτυο <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> στο δίκτυο <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

@@ -584,14 +584,14 @@
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser nettbrettet eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser TV-en eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Overvåker antallet feil passord som er skrevet inn når skjermen låses opp, og låser telefonen eller sletter denne brukerens data når for mange feil passord er skrevet inn."</string>
-    <string name="policylab_resetPassword" msgid="4934707632423915395">"Endre skjermlåsen"</string>
-    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Endre skjermlåsen."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Lås skjermen"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontrollér hvordan og når skjermen låses."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Slett alle data"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Endring av skjermlåsen"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Kan endre skjermlåsen."</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Låsing av skjermen"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"Kan kontrollere hvordan og når skjermen låses."</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Sletting av alle data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Tilbakestill nettbrettets data uten advarsel ved å tilbakestille til fabrikkstandard."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Slett TV-ens data uten advarsel ved å tilbakestille til fabrikkstandard."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Tilbakestill telefonens data uten advarsel, ved å tilbakestille til fabrikkstandard."</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Telefonens data kan slettes uten advarsel ved å tilbakestille til fabrikkstandard."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Slett brukerdataene"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Sletter denne brukerens data på dette nettbrettet uten advarsel."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Sletter denne brukerens data på denne TV-en uten advarsel."</string>
@@ -604,7 +604,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Krev at lagrede appdata krypteres."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Deaktiver kameraer"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Hindre bruk av alle kameraer på enheten."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Deaktiver enkelte skjermlåsfunksjoner"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Deaktivering av skjermlåsfunksjoner"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Forhindrer bruk av enkelte skjermlåsfunksjoner."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hjemmenummer"</item>
@@ -1175,6 +1175,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi har ikke Internett-tilgang"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Trykk for å få alternativer"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Endres til innstillingene dine for Wi-Fi-soner"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Båndet ditt for Wi-Fi-sone er endret."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Denne enheten støtter ikke innstillingen din for bare 5 GHz. I stedet bruker enheten 5 GHz-båndet når det er tilgjengelig."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Byttet til <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Enheten bruker <xliff:g id="NEW_NETWORK">%1$s</xliff:g> når <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ikke har Internett-tilgang. Avgifter kan påløpe."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Byttet fra <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> til <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
