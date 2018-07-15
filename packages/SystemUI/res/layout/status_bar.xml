@@ -122,6 +122,24 @@
         </com.android.keyguard.AlphaOptimizedLinearLayout>
     </LinearLayout>
 
+    <com.android.keyguard.AlphaOptimizedLinearLayout
+        android:id="@+id/center_clock_layout"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+        <com.android.systemui.statusbar.policy.Clock
+            android:id="@+id/clock_center"
+            android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:singleLine="true"
+            android:gravity="center"
+            android:visibility="gone"
+        />
+    </com.android.keyguard.AlphaOptimizedLinearLayout>
+
     <ViewStub
         android:id="@+id/emergency_cryptkeeper_text"
         android:layout_width="wrap_content"
