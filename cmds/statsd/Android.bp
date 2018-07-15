@@ -25,6 +25,7 @@ cc_library_host_shared {
     ],
 
     shared_libs: [
+        "libmetricprotos",
         "libplatformprotos",
     ],
 
@@ -37,6 +38,7 @@ cc_library_host_shared {
     },
 
     export_shared_lib_headers: [
+        "libmetricprotos",
         "libplatformprotos",
     ]
 

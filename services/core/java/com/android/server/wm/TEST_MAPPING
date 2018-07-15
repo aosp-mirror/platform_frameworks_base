@@ -1,0 +1,42 @@
+{
+  "presubmit": [
+    {
+      "name": "CtsWindowManagerDeviceTestCases",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "android.support.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.wm."
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "android.support.test.filters.FlakyTest"
+        }
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsWindowManagerDeviceTestCases"
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.wm."
+        }
+      ]
+    }
+  ]
+}

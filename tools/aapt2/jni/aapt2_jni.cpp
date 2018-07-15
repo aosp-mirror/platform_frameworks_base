@@ -25,14 +25,11 @@
 #include "ScopedUtfChars.h"
 
 #include "Diagnostics.h"
+#include "cmd/Compile.h"
+#include "cmd/Link.h"
 #include "util/Util.h"
 
 using android::StringPiece;
-
-namespace aapt {
-extern int Compile(const std::vector<StringPiece>& args, IDiagnostics* iDiagnostics);
-extern int Link(const std::vector<StringPiece>& args, IDiagnostics* iDiagnostics);
-}
 
 /*
  * Converts a java List<String> into C++ vector<ScopedUtfChars>.
@@ -126,7 +123,7 @@ JNIEXPORT jint JNICALL Java_com_android_tools_aapt2_Aapt2Jni_nativeCompile(
       list_to_utfchars(env, arguments_obj);
   std::vector<StringPiece> compile_args = extract_pieces(compile_args_jni);
   JniDiagnostics diagnostics(env, diagnostics_obj);
-  return aapt::Compile(compile_args, &diagnostics);
+  return aapt::CompileCommand(&diagnostics).Execute(compile_args, &std::cerr);
 }
 
 JNIEXPORT jint JNICALL Java_com_android_tools_aapt2_Aapt2Jni_nativeLink(JNIEnv* env,
@@ -137,7 +134,7 @@ JNIEXPORT jint JNICALL Java_com_android_tools_aapt2_Aapt2Jni_nativeLink(JNIEnv* 
       list_to_utfchars(env, arguments_obj);
   std::vector<StringPiece> link_args = extract_pieces(link_args_jni);
   JniDiagnostics diagnostics(env, diagnostics_obj);
-  return aapt::Link(link_args, &diagnostics);
+  return aapt::LinkCommand(&diagnostics).Execute(link_args, &std::cerr);
 }
 
 JNIEXPORT void JNICALL Java_com_android_tools_aapt2_Aapt2Jni_ping(

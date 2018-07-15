@@ -262,6 +262,9 @@ message ValueMetric {
 
   enum AggregationType {
     SUM = 1;
+    MIN = 2;
+    MAX = 3;
+    AVG = 4;
   }
   optional AggregationType aggregation_type = 8 [default = SUM];
 

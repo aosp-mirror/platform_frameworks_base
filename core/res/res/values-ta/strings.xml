@@ -236,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"விமானப் பயன்முறை"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"விமானப் பயன்முறை இயக்கத்தில் உள்ளது"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"விமானப் பயன்முறை முடக்கத்தில் உள்ளது"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"பேட்டரி சேமிப்பான்"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"பேட்டரி சேமிப்பான் ஆஃப் செய்யப்பட்டுள்ளது"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"பேட்டரி சேமிப்பான் ஆன் செய்யப்பட்டுள்ளது"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"அமைப்பு"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"உதவி"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"குரல் உதவி"</string>
@@ -520,64 +517,37 @@
   <string-array name="fingerprint_error_vendor">
   </string-array>
     <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"கைரேகை ஐகான்"</string>
-    <!-- no translation found for permlab_manageFace (2137540986007309781) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFace (8919637120670185330) -->
-    <skip />
-    <!-- no translation found for permlab_useFaceAuthentication (8996134460546804535) -->
-    <skip />
-    <!-- no translation found for permdesc_useFaceAuthentication (5011118722951833089) -->
-    <skip />
-    <!-- no translation found for face_acquired_insufficient (5901287247766106330) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_bright (610606792381297174) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_dark (7229162716976778371) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_close (1980310037427755293) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_far (4494571381828850007) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_high (228411096134808372) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_low (4539774649296349109) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_right (1650292067226118760) -->
-    <skip />
-    <!-- no translation found for face_acquired_too_left (2712489669456176505) -->
-    <skip />
-    <!-- no translation found for face_acquired_poor_gaze (8344973502980415859) -->
-    <skip />
-    <!-- no translation found for face_acquired_not_detected (5707782294589511391) -->
-    <skip />
-    <!-- no translation found for face_acquired_not_steady (3722829465011040042) -->
-    <skip />
+    <string name="permlab_manageFace" msgid="2137540986007309781">"முக அங்கீகாரத்திற்கான வன்பொருளை நிர்வகித்தல்"</string>
+    <string name="permdesc_manageFace" msgid="8919637120670185330">"உபயோகிப்பதற்காக முக டெம்ப்ளேட்டுகளை சேர்க்கும்/நீக்கும் முறைகளை இயக்க, ஆப்ஸை அனுமதிக்கும்."</string>
+    <string name="permlab_useFaceAuthentication" msgid="8996134460546804535">"முக அங்கீகாரத்திற்கான வன்பொருளைப் பயன்படுத்துதல்"</string>
+    <string name="permdesc_useFaceAuthentication" msgid="5011118722951833089">"அடையாளம் காண்பதற்கு, முக அங்கீகார வன்பொருளைப் பயன்படுத்த ஆப்ஸை அனுமதிக்கிறது"</string>
+    <string name="face_acquired_insufficient" msgid="5901287247766106330">"அடையாளம் காண முடியவில்லை. மீண்டும் முயலவும்."</string>
+    <string name="face_acquired_too_bright" msgid="610606792381297174">"முகம் பிரகாசமாக உள்ளது. குறைந்த ஒளியில் முயலவும்."</string>
+    <string name="face_acquired_too_dark" msgid="7229162716976778371">"முகம் தெரியவில்லை, வெளிச்சமான இடத்தில் முயலவும்."</string>
+    <string name="face_acquired_too_close" msgid="1980310037427755293">"சென்சாரை முகத்திலிருந்து சற்று தொலைவில் நகர்த்துக."</string>
+    <string name="face_acquired_too_far" msgid="4494571381828850007">"சென்சாரை முகத்திற்கு அருகில் கொண்டு வரவும்."</string>
+    <string name="face_acquired_too_high" msgid="228411096134808372">"சென்சாரை மேலே உயர்த்தவும்."</string>
+    <string name="face_acquired_too_low" msgid="4539774649296349109">"சென்சாரைக் கீழே நகர்த்தவும்."</string>
+    <string name="face_acquired_too_right" msgid="1650292067226118760">"சென்சாரை வலது புறமாக நகர்த்தவும்."</string>
+    <string name="face_acquired_too_left" msgid="2712489669456176505">"சென்சாரை இடது புறமாக நகர்த்தவும்."</string>
+    <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"சென்சாரைப் பார்க்கவும்."</string>
+    <string name="face_acquired_not_detected" msgid="5707782294589511391">"முகம் தெரியவில்லை."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"சாதனத்தின் முன், முகத்தை அசையாமல் காண்பிக்கவும்."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
-    <!-- no translation found for face_error_hw_not_available (6255891785768984615) -->
-    <skip />
-    <!-- no translation found for face_error_timeout (4014326147867150054) -->
-    <skip />
-    <!-- no translation found for face_error_no_space (8224993703466381314) -->
-    <skip />
-    <!-- no translation found for face_error_canceled (283945501061931023) -->
-    <skip />
-    <!-- no translation found for face_error_lockout (3407426963155388504) -->
-    <skip />
-    <!-- no translation found for face_error_lockout_permanent (8198354656746088890) -->
-    <skip />
-    <!-- no translation found for face_error_unable_to_process (238761109287767270) -->
-    <skip />
-    <!-- no translation found for face_error_not_enrolled (9166792142679691323) -->
-    <skip />
-    <!-- no translation found for face_error_hw_not_present (4737289254517095671) -->
-    <skip />
-    <!-- no translation found for face_name_template (7004562145809595384) -->
-    <skip />
+    <string name="face_error_hw_not_available" msgid="6255891785768984615">"முக அங்கீகாரத்திற்கான வன்பொருள் இல்லை."</string>
+    <string name="face_error_timeout" msgid="4014326147867150054">"முகப் பதிவிற்கான நேரம் முடிந்தது. மீண்டும் முயல்க."</string>
+    <string name="face_error_no_space" msgid="8224993703466381314">"முகத்தைச் சேமிக்க இயலாது."</string>
+    <string name="face_error_canceled" msgid="283945501061931023">"முக அங்கீகாரச் செயல்பாடு ரத்துசெய்யப்பட்டது."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"பலமுறை முயன்றுவிட்டீர்கள். பிறகு முயலவும்."</string>
+    <string name="face_error_lockout_permanent" msgid="8198354656746088890">"பலமுறை தோல்வி. முக அங்கீகாரம் முடக்கப்பட்டது."</string>
+    <string name="face_error_unable_to_process" msgid="238761109287767270">"மீண்டும் முயலவும்."</string>
+    <string name="face_error_not_enrolled" msgid="9166792142679691323">"முகம் எதுவும் பதிவு செய்யப்படவில்லை."</string>
+    <string name="face_error_hw_not_present" msgid="4737289254517095671">"இந்தச் சாதனத்தில், முக அங்கீகாரத்திற்கான சென்சார் இல்லை"</string>
+    <string name="face_name_template" msgid="7004562145809595384">"முகம் <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <!-- no translation found for face_icon_content_description (4024817159806482191) -->
-    <skip />
+    <string name="face_icon_content_description" msgid="4024817159806482191">"முக ஐகான்"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ஒத்திசைவு அமைப்புகளைப் படித்தல்"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"கணக்கிற்கான ஒத்திசைவு அமைப்புகளைப் படிக்க பயன்பாட்டை அனுமதிக்கிறது. எடுத்துக்காட்டாக, பீப்பிள் பயன்பாடு கணக்குடன் ஒத்திசைக்கப்பட்டுள்ளதா என்பதை இது தீர்மானிக்கலாம்."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ஒத்திசைவை இயக்குவதையும், முடக்குவதையும் மாற்றுதல்"</string>
@@ -1238,12 +1208,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"வைஃபையில் இண்டர்நெட் அணுகல் இல்லை"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"விருப்பங்களுக்கு, தட்டவும்"</string>
-    <!-- no translation found for wifi_softap_config_change (8475911871165857607) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_summary (7601233252456548891) -->
-    <skip />
-    <!-- no translation found for wifi_softap_config_change_detailed (8022936822860678033) -->
-    <skip />
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"உங்கள் ஹாட்ஸ்பாட் அமைப்புகளில் செய்யப்பட்டுள்ள மாற்றங்கள்"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"உங்கள் ஹாட்ஸ்பாட்டின் அலைவரிசை மாறிவிட்டது."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"இந்தச் சாதனத்தில், ’5GHz மட்டும்’ எனும் முன்னுரிமைத் தேர்வு ஆதரிக்கப்படவில்லை. எனினும் 5GHz அலைவரிசை கிடைக்கும்போது, சாதனம் அதைப் பயன்படுத்திக்கொள்ளும்."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>க்கு மாற்றப்பட்டது"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> நெட்வொர்க்கில் இண்டர்நெட் அணுகல் இல்லாததால், சாதனமானது <xliff:g id="NEW_NETWORK">%1$s</xliff:g> நெட்வொர்க்கைப் பயன்படுத்துகிறது. கட்டணங்கள் விதிக்கப்படலாம்."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> இலிருந்து <xliff:g id="NEW_NETWORK">%2$s</xliff:g>க்கு மாற்றப்பட்டது"</string>

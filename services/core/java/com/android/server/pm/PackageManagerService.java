@@ -2568,6 +2568,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
             mIsPreNMR1Upgrade = mIsUpgrade && ver.sdkVersion < Build.VERSION_CODES.N_MR1;
 
+            int preUpgradeSdkVersion = ver.sdkVersion;
+
             // save off the names of pre-existing system packages prior to scanning; we don't
             // want to automatically grant runtime permissions for new system apps
             if (mPromoteSystemApps) {
@@ -3160,6 +3162,58 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             checkDefaultBrowser();
+
+            // If a granted permission is split, all new permissions should be granted too
+            if (mIsUpgrade) {
+                final int callingUid = getCallingUid();
+
+                final int numSplitPerms = PackageParser.SPLIT_PERMISSIONS.length;
+                for (int splitPermNum = 0; splitPermNum < numSplitPerms; splitPermNum++) {
+                    final PackageParser.SplitPermissionInfo splitPerm =
+                            PackageParser.SPLIT_PERMISSIONS[splitPermNum];
+                    final String rootPerm = splitPerm.rootPerm;
+
+                    if (preUpgradeSdkVersion >= splitPerm.targetSdk) {
+                        continue;
+                    }
+
+                    final int numPackages = mPackages.size();
+                    for (int packageNum = 0; packageNum < numPackages; packageNum++) {
+                        final PackageParser.Package pkg = mPackages.valueAt(packageNum);
+
+                        if (pkg.applicationInfo.targetSdkVersion >= splitPerm.targetSdk
+                                || !pkg.requestedPermissions.contains(rootPerm)) {
+                            continue;
+                        }
+
+                        final int userId = UserHandle.getUserId(pkg.applicationInfo.uid);
+                        final String pkgName = pkg.packageName;
+
+                        if (checkPermission(rootPerm, pkgName, userId) == PERMISSION_DENIED) {
+                            continue;
+                        }
+
+                        final String[] newPerms = splitPerm.newPerms;
+
+                        final int numNewPerms = newPerms.length;
+                        for (int newPermNum = 0; newPermNum < numNewPerms; newPermNum++) {
+                            final String newPerm = newPerms[newPermNum];
+                            if (checkPermission(newPerm, pkgName, userId) == PERMISSION_GRANTED) {
+                                continue;
+                            }
+
+                            if (DEBUG_PERMISSIONS) {
+                                Slog.v(TAG, "Granting " + newPerm + " to " + pkgName
+                                        + " as the root permission " + rootPerm
+                                        + " is already granted");
+                            }
+
+                            mPermissionManager.grantRuntimePermission(newPerm, pkgName, true,
+                                    callingUid, userId, null);
+                        }
+                    }
+                }
+            }
 
             // clear only after permissions and other defaults have been updated
             mExistingSystemPackages.clear();
@@ -15780,7 +15834,7 @@ public class PackageManagerService extends IPackageManager.Stub
          * Rename package into final resting place. All paths on the given
          * scanned package should be updated to reflect the rename.
          */
-        abstract boolean doRename(int status, PackageParser.Package pkg, String oldCodePath);
+        abstract boolean doRename(int status, PackageParser.Package pkg);
         abstract int doPostInstall(int status, int uid);
 
         /** @see PackageSettingBase#codePathString */
@@ -15956,7 +16010,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return status;
         }
 
-        boolean doRename(int status, PackageParser.Package pkg, String oldCodePath) {
+        boolean doRename(int status, PackageParser.Package pkg) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 cleanUp();
                 return false;
@@ -16115,7 +16169,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return status;
         }
 
-        boolean doRename(int status, PackageParser.Package pkg, String oldCodePath) {
+        boolean doRename(int status, PackageParser.Package pkg) {
             if (status != PackageManager.INSTALL_SUCCEEDED) {
                 cleanUp(move.toUuid);
                 return false;
@@ -17178,7 +17232,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Get rid of all references to package scan path via parser.
         pp = null;
-        String oldCodePath = null;
         boolean systemApp = false;
         synchronized (mPackages) {
             // Check if installing already existing package
@@ -17290,7 +17343,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
 
-                oldCodePath = mSettings.mPackages.get(pkgName).codePathString;
                 if (ps.pkg != null && ps.pkg.applicationInfo != null) {
                     systemApp = (ps.pkg.applicationInfo.flags &
                             ApplicationInfo.FLAG_SYSTEM) != 0;
@@ -17440,7 +17492,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        if (!args.doRename(res.returnCode, pkg, oldCodePath)) {
+        if (!args.doRename(res.returnCode, pkg)) {
             res.setError(INSTALL_FAILED_INSUFFICIENT_STORAGE, "Failed rename");
             return;
         }

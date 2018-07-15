@@ -308,6 +308,23 @@ public class ArrayUtils {
         return array;
     }
 
+    @SuppressWarnings("unchecked")
+    public static @NonNull <T> T[] concat(Class<T> kind, @Nullable T[] a, @Nullable T[] b) {
+        final int an = (a != null) ? a.length : 0;
+        final int bn = (b != null) ? b.length : 0;
+        if (an == 0 && bn == 0) {
+            if (kind == String.class) {
+                return (T[]) EmptyArray.STRING;
+            } else if (kind == Object.class) {
+                return (T[]) EmptyArray.OBJECT;
+            }
+        }
+        final T[] res = (T[]) Array.newInstance(kind, an + bn);
+        if (an > 0) System.arraycopy(a, 0, res, 0, an);
+        if (bn > 0) System.arraycopy(b, 0, res, an, bn);
+        return res;
+    }
+
     /**
      * Adds value to given array if not already present, providing set-like
      * behavior.

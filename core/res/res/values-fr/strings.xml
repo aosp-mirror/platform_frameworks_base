@@ -236,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Mode Avion"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Le mode Avion est activé."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Le mode Avion est désactivé."</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Économiseur de batterie"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"Économiseur de batterie DÉSACTIVÉ"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"Économiseur de batterie ACTIVÉ"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Paramètres"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Assistance"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Assistance vocale"</string>
@@ -641,7 +638,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Désactiver les appareils photo"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Empêcher l\'utilisation de tous les appareils photos"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Désact. options du verr. écran"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Empêchez l\'utilisation de certaines fonctionnalités du verrouillage de l\'écran."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Empêcher l\'utilisation de certaines fonctionnalités du verrouillage de l\'écran."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domicile"</item>
     <item msgid="869923650527136615">"Mobile"</item>

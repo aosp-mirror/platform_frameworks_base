@@ -236,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Flygplansläge"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Flygplansläge är AKTIVERAT"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Flygplansläge är INAKTIVERAT"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Batterisparläge"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"Batterisparläget har inaktiverats"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"Batterisparläget har aktiverats"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Inställningar"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Hjälp"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Voice Assist"</string>

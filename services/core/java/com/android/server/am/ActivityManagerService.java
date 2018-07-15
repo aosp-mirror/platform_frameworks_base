@@ -520,6 +520,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Used to indicate that an app transition should be animated.
     static final boolean ANIMATE = true;
 
+    // If set, we will push process association information in to procstats.
+    static final boolean TRACK_PROCSTATS_ASSOCIATIONS = true;
+
     /**
      * Default value for {@link Settings.Global#NETWORK_ACCESS_TIMEOUT_MS}.
      */
@@ -562,6 +565,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ArrayList<ActiveInstrumentation> mActiveInstrumentation = new ArrayList<>();
 
     public final IntentFirewall mIntentFirewall;
+
+    public OomAdjProfiler mOomAdjProfiler = new OomAdjProfiler();
 
     // Whether we should use SCHED_FIFO for UI and RenderThreads.
     private boolean mUseFifoUiScheduling = false;
@@ -2628,6 +2633,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mOnBattery = DEBUG_POWER ? true
                 : mBatteryStatsService.getActiveStatistics().getIsOnBattery();
         mBatteryStatsService.getActiveStatistics().setCallback(this);
+        mOomAdjProfiler.batteryPowerChanged(mOnBattery);
 
         mProcessStats = new ProcessStatsService(this, new File(systemDir, "procstats"));
 
@@ -2916,12 +2922,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized(mPidsSelfLocked) {
                 mOnBattery = DEBUG_POWER ? true : onBattery;
             }
+            mOomAdjProfiler.batteryPowerChanged(onBattery);
         }
     }
 
     @Override
     public void batteryStatsReset() {
         BinderCallsStatsService.reset();
+        mOomAdjProfiler.reset();
     }
 
     @Override
@@ -10243,6 +10251,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mServices.updateScreenStateLocked(isAwake);
                 reportCurWakefulnessUsageEventLocked();
                 mActivityTaskManager.onScreenAwakeChanged(isAwake);
+                mOomAdjProfiler.onWakefulnessChanged(wakefulness);
             }
             updateOomAdjLocked();
         }
@@ -12730,6 +12739,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.println("-------------------------------------------------------------------------------");
                 }
                 dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage, dumpAppId);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                mOomAdjProfiler.dump(pw);
             }
         }
         Binder.restoreCallingIdentity(origId);
@@ -20628,16 +20642,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Has the UID or resumed package name changed?
         if (uid != mCurResumedUid || (pkg != mCurResumedPackage
                 && (pkg == null || !pkg.equals(mCurResumedPackage)))) {
-            if (mCurResumedPackage != null) {
-                mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_TOP_FINISH,
-                        mCurResumedPackage, mCurResumedUid);
+
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                if (mCurResumedPackage != null) {
+                    mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_TOP_FINISH,
+                            mCurResumedPackage, mCurResumedUid);
+                }
+                mCurResumedPackage = pkg;
+                mCurResumedUid = uid;
+                if (mCurResumedPackage != null) {
+                    mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_TOP_START,
+                            mCurResumedPackage, mCurResumedUid);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
             }
-            mCurResumedPackage = pkg;
-            mCurResumedUid = uid;
-            if (mCurResumedPackage != null) {
-                mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_TOP_START,
-                        mCurResumedPackage, mCurResumedUid);
-            }
+
         }
         return act;
     }
@@ -20677,6 +20698,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @GuardedBy("this")
     final void updateOomAdjLocked() {
+        mOomAdjProfiler.oomAdjStarted();
         final ActivityRecord TOP_ACT = resumedAppLocked();
         final ProcessRecord TOP_APP = TOP_ACT != null && TOP_ACT.hasProcess()
                 ? (ProcessRecord) TOP_ACT.app.mOwner : null;
@@ -21188,6 +21210,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.d(TAG_OOM_ADJ, "Did OOM ADJ in " + duration + "ms");
             }
         }
+        mOomAdjProfiler.oomAdjEnded();
     }
 
     @Override
@@ -22448,6 +22471,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void finishUserSwitch(Object uss) {
             mUserController.finishUserSwitch((UserState) uss);
+        }
+
+        @Override
+        public Intent getHomeIntent() {
+            synchronized (ActivityManagerService.this) {
+                return ActivityManagerService.this.getHomeIntent();
+            }
         }
     }
 

@@ -7604,7 +7604,6 @@ Lcom/android/internal/os/BatteryStatsImpl$Uid;->getWakelockStats()Landroid/util/
 Lcom/android/internal/os/BatteryStatsImpl$Uid;->getWifiRunningTime(JI)J
 Lcom/android/internal/os/BatteryStatsImpl$Uid;->getWifiScanTime(JI)J
 Lcom/android/internal/os/BatteryStatsImpl;-><init>(Landroid/os/Parcel;)V
-Lcom/android/internal/os/BatteryStatsImpl;->commitPendingDataToDisk()V
 Lcom/android/internal/os/BatteryStatsImpl;->computeBatteryRealtime(JI)J
 Lcom/android/internal/os/BatteryStatsImpl;->computeBatteryTimeRemaining(J)J
 Lcom/android/internal/os/BatteryStatsImpl;->computeBatteryUptime(JI)J
@@ -8357,11 +8356,6 @@ Lcom/android/internal/util/AsyncChannel;->sendMessageSynchronously(III)Landroid/
 Lcom/android/internal/util/AsyncChannel;->sendMessageSynchronously(Landroid/os/Message;)Landroid/os/Message;
 Lcom/android/internal/util/AsyncChannel;->STATUS_SUCCESSFUL:I
 Lcom/android/internal/util/FastPrintWriter;-><init>(Ljava/io/OutputStream;)V
-Lcom/android/internal/util/JournaledFile;-><init>(Ljava/io/File;Ljava/io/File;)V
-Lcom/android/internal/util/JournaledFile;->chooseForRead()Ljava/io/File;
-Lcom/android/internal/util/JournaledFile;->chooseForWrite()Ljava/io/File;
-Lcom/android/internal/util/JournaledFile;->commit()V
-Lcom/android/internal/util/JournaledFile;->rollback()V
 Lcom/android/internal/util/XmlUtils;->convertValueToBoolean(Ljava/lang/CharSequence;Z)Z
 Lcom/android/internal/util/XmlUtils;->convertValueToInt(Ljava/lang/CharSequence;I)I
 Lcom/android/internal/util/XmlUtils;->readMapXml(Ljava/io/InputStream;)Ljava/util/HashMap;

@@ -1054,6 +1054,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         super.onDensityOrFontScaleChanged();
         initDimens();
         initBackground();
+        reInflateViews();
+    }
+
+    private void reInflateViews() {
         // Let's update our childrencontainer. This is intentionally not guarded with
         // mIsSummaryWithChildren since we might have had children but not anymore.
         if (mChildrenContainer != null) {
@@ -1080,7 +1084,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             l.initView();
             l.reInflateViews();
         }
-        mNotificationInflater.onDensityOrFontScaleChanged();
+        mNotificationInflater.clearCachesAndReInflate();
         onNotificationUpdated();
     }
 
@@ -1088,6 +1092,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     public void onConfigurationChanged(Configuration newConfig) {
         if (mMenuRow.getMenuView() != null) {
             mMenuRow.onConfigurationChanged();
+        }
+    }
+
+    @Override
+    public void onUiModeChanged() {
+        super.onUiModeChanged();
+        reInflateViews();
+        if (mChildrenContainer != null) {
+            for (ExpandableNotificationRow child : mChildrenContainer.getNotificationChildren()) {
+                child.onUiModeChanged();
+            }
         }
     }
 

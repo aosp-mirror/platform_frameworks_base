@@ -242,9 +242,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Tryb samolotowy"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Tryb samolotowy jest włączony"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Tryb samolotowy jest wyłączony"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Oszczędzanie baterii"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"Oszczędzanie baterii WYŁ."</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"Oszczędzanie baterii WŁ."</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Ustawienia"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Pomoc"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Asystent głosowy"</string>
@@ -646,7 +643,7 @@
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Wymaganie szyfrowania przechowywanych danych aplikacji"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Wyłącz aparaty"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zapobieganie używaniu wszystkich aparatów w urządzeniu"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Wył. niektórych funkcji bl. ekr."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Wył. funkcji blokady ekranu"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Zapobieganie użyciu niektórych funkcji blokady ekranu."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Dom"</item>

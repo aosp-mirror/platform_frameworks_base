@@ -24,19 +24,20 @@ import static androidx.lifecycle.Lifecycle.Event.ON_START;
 import static androidx.lifecycle.Lifecycle.Event.ON_STOP;
 
 import android.annotation.CallSuper;
-import android.app.Fragment;
-import androidx.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LifecycleOwner;
+
 public class ObservableFragment extends Fragment implements LifecycleOwner {
 
     private final Lifecycle mLifecycle = new Lifecycle(this);
 
-    public Lifecycle getLifecycle() {
+    public Lifecycle getSettingsLifecycle() {
         return mLifecycle;
     }
 

@@ -194,7 +194,9 @@ int AlarmImpl::waitForAlarm()
         uint32_t alarm_idx = events[i].data.u32;
         uint64_t unused;
         ssize_t err = read(fds[alarm_idx], &unused, sizeof(unused));
-        if (err < 0) {
+        // Worth evaluating even if read fails with EAGAIN, since epoll_wait
+        // returned. (see b/78560047#comment34)
+        if (err < 0 && errno != EAGAIN) {
             if (alarm_idx == ANDROID_ALARM_TYPE_COUNT && errno == ECANCELED) {
                 result |= ANDROID_ALARM_TIME_CHANGE_MASK;
             } else {
@@ -348,7 +350,7 @@ static jlong android_server_AlarmManagerService_init(JNIEnv*, jobject)
     }
 
     for (size_t i = 0; i < fds.size(); i++) {
-        fds[i] = timerfd_create(android_alarm_to_clockid[i], 0);
+        fds[i] = timerfd_create(android_alarm_to_clockid[i], TFD_NONBLOCK);
         if (fds[i] < 0) {
             log_timerfd_create_error(android_alarm_to_clockid[i]);
             close(epollfd);

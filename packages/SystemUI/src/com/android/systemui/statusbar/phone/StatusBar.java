@@ -1198,6 +1198,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onUiModeChanged();
         }
+        if (mStackScroller != null) {
+            mStackScroller.onUiModeChanged();
+        }
     }
 
     private void inflateEmptyShadeView() {
@@ -2153,6 +2156,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (!isCollapsing()) {
             onClosingFinished();
         }
+    }
+
+    public boolean isHeadsUpShouldBeVisible() {
+        return mHeadsUpAppearanceController.shouldBeVisible();
     }
 
     /**

@@ -3518,9 +3518,13 @@ class AlarmManagerService extends SystemService {
 
     private class AlarmThread extends Thread
     {
+        private int mFalseWakeups;
+        private int mWtfThreshold;
         public AlarmThread()
         {
             super("AlarmManager");
+            mFalseWakeups = 0;
+            mWtfThreshold = 10;
         }
 
         public void run()
@@ -3632,6 +3636,17 @@ class AlarmManagerService extends SystemService {
                                     mMaxDelayTime = thisDelayTime;
                                 }
                                 mPendingNonWakeupAlarms.clear();
+                            }
+                            if (mLastTimeChangeRealtime != nowELAPSED && triggerList.isEmpty()) {
+                                if (++mFalseWakeups >= mWtfThreshold) {
+                                    Slog.wtf(TAG, "Too many (" + mFalseWakeups
+                                            + ") false wakeups, nowElapsed=" + nowELAPSED);
+                                    if (mWtfThreshold < 100_000) {
+                                        mWtfThreshold *= 10;
+                                    } else {
+                                        mFalseWakeups = 0;
+                                    }
+                                }
                             }
                             final ArraySet<Pair<String, Integer>> triggerPackages =
                                     new ArraySet<>();

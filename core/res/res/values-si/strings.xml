@@ -236,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"අහස්යානා ආකාරය"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"අහස්යානා ආකාරය සක්‍රීයයි."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"අහස්යානා අකාරය අක්‍රියයි"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"බැටරි සුරැකුම"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"බැටරි සුරැකුම ක්‍රියාවිරහිතයි"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"බැටරි සුරැකුම ක්‍රියාත්මකයි"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"සැකසීම්"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"සහාය දීම"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"හඬ සහායක"</string>
@@ -542,7 +539,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"මුහුණු කාල නිමාව ළඟා විය. නැවත උත්සාහ කරන්න."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"මුහුණ ගබඩා කළ නොහැක."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"මුහුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
-    <string name="face_error_lockout" msgid="3407426963155388504">"උත්සාහයන් ඉතා වැඩි ගණනකි. කරුණාකර පසුව නැවත උත්සාහ කරන්න."</string>
+    <string name="face_error_lockout" msgid="3407426963155388504">"උත්සාහයන් ඉතා වැඩි ගණනකි. පසුව නැවත උත්සාහ කරන්න."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"උත්සාහයන් ඉතා වැඩි ගණනකි. මුහුණු සත්‍යාපනය අබල කරන ලදී."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"නැවත උත්සාහ කරන්න."</string>
     <string name="face_error_not_enrolled" msgid="9166792142679691323">"මුහුණක් ඇතුළත් කර නොමැත."</string>

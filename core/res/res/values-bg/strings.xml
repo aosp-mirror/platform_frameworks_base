@@ -236,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Самолетен режим"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Самолетният режим е ВКЛЮЧЕН"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Самолетният режим е ИЗКЛЮЧЕН"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Режим за запазване на батерията"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"Режимът за запазване на батерията е ИЗКЛЮЧЕН"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"Режимът за запазване на батерията е ВКЛЮЧЕН"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Настройки"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Помощ"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Гласова помощ"</string>

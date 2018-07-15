@@ -236,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍ ଅନ୍ ଅଛି"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"ଏରୋପ୍ଲେନ୍‍ ମୋଡ୍ ଅଫ୍ ଅଛି"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"ବ୍ୟାଟେରୀ ସେଭର୍"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅଫ୍ ଅଛି"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅନ୍‌ ଅଛି"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"ସେଟିଙ୍ଗ"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"ସହାୟକ"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"ଭଏସ୍‌ ସହାୟକ"</string>

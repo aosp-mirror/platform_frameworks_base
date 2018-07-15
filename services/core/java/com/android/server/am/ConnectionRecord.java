@@ -108,10 +108,12 @@ final class ConnectionRecord {
     public void startAssociationIfNeeded() {
         // If we don't already have an active association, create one...  but only if this
         // is an association between two different processes.
-        if (association == null && (binding.service.appInfo.uid != clientUid
-                || !binding.service.processName.equals(clientProcessName))) {
-            ProcessStats.ProcessStateHolder holder = binding.service.app != null
-                    ? binding.service.app.pkgList.get(binding.service.name.getPackageName()) : null;
+        if (ActivityManagerService.TRACK_PROCSTATS_ASSOCIATIONS
+                && association == null && binding.service.app != null
+                && (binding.service.appInfo.uid != clientUid
+                        || !binding.service.processName.equals(clientProcessName))) {
+            ProcessStats.ProcessStateHolder holder = binding.service.app.pkgList.get(
+                    binding.service.name.getPackageName());
             if (holder == null) {
                 Slog.wtf(TAG_AM, "No package in referenced service "
                         + binding.service.name.toShortString() + ": proc=" + binding.service.app);

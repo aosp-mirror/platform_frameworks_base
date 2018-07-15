@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+#include "Convert.h"
+
 #include <vector>
 
 #include "android-base/macros.h"
 #include "androidfw/StringPiece.h"
 
-#include "Flags.h"
 #include "LoadedApk.h"
 #include "ValueVisitor.h"
 #include "cmd/Util.h"
@@ -325,37 +326,18 @@ class Context : public IAaptContext {
   StdErrDiagnostics diag_;
 };
 
-int Convert(const vector<StringPiece>& args) {
+const char* ConvertCommand::kOutputFormatProto = "proto";
+const char* ConvertCommand::kOutputFormatBinary = "binary";
 
-  static const char* kOutputFormatProto = "proto";
-  static const char* kOutputFormatBinary = "binary";
+int ConvertCommand::Action(const std::vector<std::string>& args) {
+  if (args.size() != 1) {
+    std::cerr << "must supply a single proto APK\n";
+    Usage(&std::cerr);
+    return 1;
+  }
 
   Context context;
-  std::string output_path;
-  Maybe<std::string> output_format;
-  TableFlattenerOptions options;
-  Flags flags =
-      Flags()
-          .RequiredFlag("-o", "Output path", &output_path)
-          .OptionalFlag("--output-format", StringPrintf("Format of the output. Accepted values are "
-                        "'%s' and '%s'. When not set, defaults to '%s'.", kOutputFormatProto,
-                        kOutputFormatBinary, kOutputFormatBinary), &output_format)
-          .OptionalSwitch("--enable-sparse-encoding",
-                          "Enables encoding sparse entries using a binary search tree.\n"
-                          "This decreases APK size at the cost of resource retrieval performance.",
-                          &options.use_sparse_entries)
-          .OptionalSwitch("-v", "Enables verbose logging", &context.verbose_);
-  if (!flags.Parse("aapt2 convert", args, &std::cerr)) {
-    return 1;
-  }
-
-  if (flags.GetArgs().size() != 1) {
-    std::cerr << "must supply a single proto APK\n";
-    flags.Usage("aapt2 convert", &std::cerr);
-    return 1;
-  }
-
-  const StringPiece& path = flags.GetArgs()[0];
+  const StringPiece& path = args[0];
   unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(path, context.GetDiagnostics());
   if (apk == nullptr) {
     context.GetDiagnostics()->Error(DiagMessage(path) << "failed to load APK");
@@ -371,23 +353,23 @@ int Convert(const vector<StringPiece>& args) {
   context.package_ = app_info.value().package;
 
   unique_ptr<IArchiveWriter> writer =
-      CreateZipFileArchiveWriter(context.GetDiagnostics(), output_path);
+      CreateZipFileArchiveWriter(context.GetDiagnostics(), output_path_);
   if (writer == nullptr) {
     return 1;
   }
 
   unique_ptr<IApkSerializer> serializer;
-  if (!output_format || output_format.value() == kOutputFormatBinary) {
-    serializer.reset(new BinaryApkSerializer(&context, apk->GetSource(), options));
-  } else if (output_format.value() == kOutputFormatProto) {
+  if (!output_format_ || output_format_.value() == ConvertCommand::kOutputFormatBinary) {
+
+    serializer.reset(new BinaryApkSerializer(&context, apk->GetSource(), options_));
+  } else if (output_format_.value() == ConvertCommand::kOutputFormatProto) {
     serializer.reset(new ProtoApkSerializer(&context, apk->GetSource()));
   } else {
     context.GetDiagnostics()->Error(DiagMessage(path)
-                                    << "Invalid value for flag --output-format: "
-                                    << output_format.value());
+        << "Invalid value for flag --output-format: "
+        << output_format_.value());
     return 1;
   }
-
 
   return ConvertApk(&context, std::move(apk), serializer.get(), writer.get()) ? 0 : 1;
 }

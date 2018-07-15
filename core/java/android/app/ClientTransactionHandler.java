@@ -16,6 +16,7 @@
 package android.app;
 
 import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.PendingTransactionActions;
 import android.app.servertransaction.TransactionExecutor;
 import android.content.Intent;
@@ -29,6 +30,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Defines operations that a {@link android.app.servertransaction.ClientTransaction} or its items
@@ -77,6 +79,9 @@ public abstract class ClientTransactionHandler {
 
     // Execute phase related logic and handlers. Methods here execute actual lifecycle transactions
     // and deliver callbacks.
+
+    /** Get activity and its corresponding transaction item which are going to destroy. */
+    public abstract Map<IBinder, ClientTransactionItem> getActivitiesToBeDestroyed();
 
     /** Destroy the activity. */
     public abstract void handleDestroyActivity(IBinder token, boolean finishing, int configChanges,

@@ -89,9 +89,7 @@ public:
 
     SkBlendMode xferMode() const { return mMode; }
 
-    bool setColorFilter(SkColorFilter* filter);
-
-    SkColorFilter* colorFilter() const { return mColorFilter; }
+    SkColorFilter* getColorFilter() const { return mColorFilter.get(); }
 
     // Sets alpha, xfermode, and colorfilter from an SkPaint
     // paint may be NULL, in which case defaults will be set
@@ -105,6 +103,7 @@ private:
     LayerProperties();
     ~LayerProperties();
     void reset();
+    bool setColorFilter(SkColorFilter* filter);
 
     // Private since external users should go through properties().effectiveLayerType()
     LayerType type() const { return mType; }
@@ -116,7 +115,7 @@ private:
     bool mOpaque;
     uint8_t mAlpha;
     SkBlendMode mMode;
-    SkColorFilter* mColorFilter = nullptr;
+    sk_sp<SkColorFilter> mColorFilter;
 };
 
 /*

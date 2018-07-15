@@ -47,13 +47,19 @@ import java.util.List;
  * before the telecom service will bind to its {@code InCallService} implementation.
  * <p>
  * Below is an example manifest registration for an {@code InCallService}. The meta-data
- * ({@link TelecomManager#METADATA_IN_CALL_SERVICE_UI}) indicates that this particular
+ * {@link TelecomManager#METADATA_IN_CALL_SERVICE_UI} indicates that this particular
  * {@code InCallService} implementation intends to replace the built-in in-call UI.
+ * The meta-data {@link TelecomManager#METADATA_IN_CALL_SERVICE_RINGING} indicates that this
+ * {@link InCallService} will play the ringtone for incoming calls.  See
+ * <a href="#incomingCallNotification">below</a> for more information on showing the incoming call
+ * UI and playing the ringtone in your app.
  * <pre>
  * {@code
  * <service android:name="your.package.YourInCallServiceImplementation"
  *          android:permission="android.permission.BIND_INCALL_SERVICE">
  *      <meta-data android:name="android.telecom.IN_CALL_SERVICE_UI" android:value="true" />
+ *      <meta-data android:name="android.telecom.IN_CALL_SERVICE_RINGING"
+ *          android:value="true" />
  *      <intent-filter>
  *          <action android:name="android.telecom.InCallService"/>
  *      </intent-filter>
@@ -80,6 +86,72 @@ import java.util.List;
  * to see if they would like your application to be the new default phone app.  See the
  * {@link TelecomManager#ACTION_CHANGE_DEFAULT_DIALER} intent documentation for more information on
  * how to do this.
+ * <p id="incomingCallNotification">
+ * <h2>Showing the Incoming Call Notification</h2>
+ * When your app receives a new incoming call via {@link InCallService#onCallAdded(Call)}, it is
+ * responsible for displaying an incoming call UI for the incoming call.  It should do this using
+ * {@link android.app.NotificationManager} APIs to post a new incoming call notification.
+ * <p>
+ * Where your app declares the meta-data {@link TelecomManager#METADATA_IN_CALL_SERVICE_RINGING}, it
+ * is responsible for playing the ringtone for incoming calls.  Your app should create a
+ * {@link android.app.NotificationChannel} which specifies the desired ringtone.  For example:
+ * <pre><code>
+ * NotificationChannel channel = new NotificationChannel(YOUR_CHANNEL_ID, "Incoming Calls",
+ *          NotificationManager.IMPORTANCE_MAX);
+ * // other channel setup stuff goes here.
+ *
+ * // We'll use the default system ringtone for our incoming call notification channel.  You can
+ * // use your own audio resource here.
+ * Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+ * channel.setSound(ringtoneUri, new AudioAttributes.Builder()
+ *          // Setting the AudioAttributes is important as it identifies the purpose of your
+ *          // notification sound.
+ *          .setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+ *          .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+ *      .build());
+ *
+ * NotificationManager mgr = getSystemService(NotificationManager.class);
+ * mgr.createNotificationChannel(channel);
+ * </code></pre>
+ * <p>
+ * When your app receives a new incoming call, it creates a {@link android.app.Notification} for the
+ * incoming call and associates it with your incoming call notification channel. You can specify a
+ * {@link android.app.PendingIntent} on the notification which will launch your full screen
+ * incoming call UI.  The notification manager framework will display your notification as a
+ * heads-up notification if the user is actively using the phone.  When the user is not using the
+ * phone, your full-screen incoming call UI is used instead.
+ * For example:
+ * <pre><code>
+ * // Create an intent which triggers your fullscreen incoming call user interface.
+ * Intent intent = new Intent(Intent.ACTION_MAIN, null);
+ * intent.setFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION | Intent.FLAG_ACTIVITY_NEW_TASK);
+ * intent.setClass(context, YourIncomingCallActivity.class);
+ * PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, 0);
+ *
+ * // Build the notification as an ongoing high priority item; this ensures it will show as
+ * // a heads up notification which slides down over top of the current content.
+ * final Notification.Builder builder = new Notification.Builder(context);
+ * builder.setOngoing(true);
+ * builder.setPriority(Notification.PRIORITY_HIGH);
+ *
+ * // Set notification content intent to take user to the fullscreen UI if user taps on the
+ * // notification body.
+ * builder.setContentIntent(pendingIntent);
+ * // Set full screen intent to trigger display of the fullscreen UI when the notification
+ * // manager deems it appropriate.
+ * builder.setFullScreenIntent(pendingIntent, true);
+ *
+ * // Setup notification content.
+ * builder.setSmallIcon( yourIconResourceId );
+ * builder.setContentTitle("Your notification title");
+ * builder.setContentText("Your notification content.");
+ *
+ * // Use builder.addAction(..) to add buttons to answer or reject the call.
+ *
+ * NotificationManager notificationManager = mContext.getSystemService(
+ *     NotificationManager.class);
+ * notificationManager.notify(YOUR_CHANNEL_ID, YOUR_TAG, YOUR_ID, builder.build());
+ * </code></pre>
  */
 public abstract class InCallService extends Service {
 

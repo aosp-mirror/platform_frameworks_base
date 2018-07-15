@@ -90,21 +90,23 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
 
     public void setProcess(ProcessRecord proc) {
         this.proc = proc;
-        for (int iconn = connections.size() - 1; iconn >= 0; iconn--) {
-            final ContentProviderConnection conn = connections.get(iconn);
-            if (proc != null) {
-                conn.startAssociationIfNeeded();
-            } else {
-                conn.stopAssociation();
-            }
-        }
-        if (externalProcessTokenToHandle != null) {
-            for (int iext = externalProcessTokenToHandle.size() - 1; iext >= 0; iext--) {
-                final ExternalProcessHandle handle = externalProcessTokenToHandle.valueAt(iext);
+        if (ActivityManagerService.TRACK_PROCSTATS_ASSOCIATIONS) {
+            for (int iconn = connections.size() - 1; iconn >= 0; iconn--) {
+                final ContentProviderConnection conn = connections.get(iconn);
                 if (proc != null) {
-                    handle.startAssociationIfNeeded(this);
+                    conn.startAssociationIfNeeded();
                 } else {
-                    handle.stopAssociation();
+                    conn.stopAssociation();
+                }
+            }
+            if (externalProcessTokenToHandle != null) {
+                for (int iext = externalProcessTokenToHandle.size() - 1; iext >= 0; iext--) {
+                    final ExternalProcessHandle handle = externalProcessTokenToHandle.valueAt(iext);
+                    if (proc != null) {
+                        handle.startAssociationIfNeeded(this);
+                    } else {
+                        handle.stopAssociation();
+                    }
                 }
             }
         }
@@ -287,10 +289,12 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
         public void startAssociationIfNeeded(ContentProviderRecord provider) {
             // If we don't already have an active association, create one...  but only if this
             // is an association between two different processes.
-            if (mAssociation == null && (provider.appInfo.uid != mOwningUid
-                    || !provider.info.processName.equals(mOwningProcessName))) {
-                ProcessStats.ProcessStateHolder holder = provider.proc != null
-                        ? provider.proc.pkgList.get(provider.name.getPackageName()) : null;
+            if (ActivityManagerService.TRACK_PROCSTATS_ASSOCIATIONS
+                    && mAssociation == null && provider.proc != null
+                    && (provider.appInfo.uid != mOwningUid
+                            || !provider.info.processName.equals(mOwningProcessName))) {
+                ProcessStats.ProcessStateHolder holder = provider.proc.pkgList.get(
+                        provider.name.getPackageName());
                 if (holder == null) {
                     Slog.wtf(TAG_AM, "No package in referenced provider "
                             + provider.name.toShortString() + ": proc=" + provider.proc);

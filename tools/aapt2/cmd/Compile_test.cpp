@@ -23,7 +23,8 @@
 
 namespace aapt {
 
-int TestCompile(std::string path, std::string outDir, bool legacy, StdErrDiagnostics& diag) {
+int TestCompile(const std::string& path, const std::string& outDir, bool legacy,
+    StdErrDiagnostics& diag) {
   std::vector<android::StringPiece> args;
   args.push_back(path);
   args.push_back("-o");
@@ -32,7 +33,7 @@ int TestCompile(std::string path, std::string outDir, bool legacy, StdErrDiagnos
   if (legacy) {
     args.push_back("--legacy");
   }
-  return aapt::Compile(args, &diag);
+  return CompileCommand(&diag).Execute(args, &std::cerr);
 }
 
 TEST(CompilerTest, MultiplePeriods) {

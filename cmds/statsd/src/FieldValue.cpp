@@ -141,6 +141,9 @@ Value::Value(const Value& from) {
         case FLOAT:
             float_value = from.float_value;
             break;
+        case DOUBLE:
+            double_value = from.double_value;
+            break;
         case STRING:
             str_value = from.str_value;
             break;
@@ -157,6 +160,8 @@ std::string Value::toString() const {
             return std::to_string(long_value) + "[L]";
         case FLOAT:
             return std::to_string(float_value) + "[F]";
+        case DOUBLE:
+            return std::to_string(double_value) + "[D]";
         case STRING:
             return str_value + "[S]";
         default:
@@ -174,6 +179,8 @@ bool Value::operator==(const Value& that) const {
             return long_value == that.long_value;
         case FLOAT:
             return float_value == that.float_value;
+        case DOUBLE:
+            return double_value == that.double_value;
         case STRING:
             return str_value == that.str_value;
         default:
@@ -190,6 +197,8 @@ bool Value::operator!=(const Value& that) const {
             return long_value != that.long_value;
         case FLOAT:
             return float_value != that.float_value;
+        case DOUBLE:
+            return double_value != that.double_value;
         case STRING:
             return str_value != that.str_value;
         default:
@@ -207,10 +216,148 @@ bool Value::operator<(const Value& that) const {
             return long_value < that.long_value;
         case FLOAT:
             return float_value < that.float_value;
+        case DOUBLE:
+            return double_value < that.double_value;
         case STRING:
             return str_value < that.str_value;
         default:
             return false;
+    }
+}
+
+bool Value::operator>(const Value& that) const {
+    if (type != that.getType()) return type > that.getType();
+
+    switch (type) {
+        case INT:
+            return int_value > that.int_value;
+        case LONG:
+            return long_value > that.long_value;
+        case FLOAT:
+            return float_value > that.float_value;
+        case DOUBLE:
+            return double_value > that.double_value;
+        case STRING:
+            return str_value > that.str_value;
+        default:
+            return false;
+    }
+}
+
+bool Value::operator>=(const Value& that) const {
+    if (type != that.getType()) return type >= that.getType();
+
+    switch (type) {
+        case INT:
+            return int_value >= that.int_value;
+        case LONG:
+            return long_value >= that.long_value;
+        case FLOAT:
+            return float_value >= that.float_value;
+        case DOUBLE:
+            return double_value >= that.double_value;
+        case STRING:
+            return str_value >= that.str_value;
+        default:
+            return false;
+    }
+}
+
+Value Value::operator-(const Value& that) const {
+    Value v;
+    if (type != that.type) {
+        ALOGE("Can't operate on different value types, %d, %d", type, that.type);
+        return v;
+    }
+    if (type == STRING) {
+        ALOGE("Can't operate on string value type");
+        return v;
+    }
+
+    switch (type) {
+        case INT:
+            v.setInt(int_value - that.int_value);
+            break;
+        case LONG:
+            v.setLong(long_value - that.long_value);
+            break;
+        case FLOAT:
+            v.setFloat(float_value - that.float_value);
+            break;
+        case DOUBLE:
+            v.setDouble(double_value - that.double_value);
+            break;
+        default:
+            break;
+    }
+    return v;
+}
+
+Value& Value::operator=(const Value& that) {
+    type = that.type;
+    switch (type) {
+        case INT:
+            int_value = that.int_value;
+            break;
+        case LONG:
+            long_value = that.long_value;
+            break;
+        case FLOAT:
+            float_value = that.float_value;
+            break;
+        case DOUBLE:
+            double_value = that.double_value;
+            break;
+        case STRING:
+            str_value = that.str_value;
+            break;
+        default:
+            break;
+    }
+    return *this;
+}
+
+Value& Value::operator+=(const Value& that) {
+    if (type != that.type) {
+        ALOGE("Can't operate on different value types, %d, %d", type, that.type);
+        return *this;
+    }
+    if (type == STRING) {
+        ALOGE("Can't operate on string value type");
+        return *this;
+    }
+
+    switch (type) {
+        case INT:
+            int_value += that.int_value;
+            break;
+        case LONG:
+            long_value += that.long_value;
+            break;
+        case FLOAT:
+            float_value += that.float_value;
+            break;
+        case DOUBLE:
+            double_value += that.double_value;
+            break;
+        default:
+            break;
+    }
+    return *this;
+}
+
+double Value::getDouble() const {
+    switch (type) {
+        case INT:
+            return int_value;
+        case LONG:
+            return long_value;
+        case FLOAT:
+            return float_value;
+        case DOUBLE:
+            return double_value;
+        default:
+            return 0;
     }
 }
 

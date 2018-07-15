@@ -24,20 +24,22 @@ import static androidx.lifecycle.Lifecycle.Event.ON_STOP;
 
 import android.annotation.Nullable;
 import android.app.Activity;
-import androidx.lifecycle.LifecycleOwner;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.LifecycleOwner;
+
 /**
  * {@link Activity} that has hooks to observe activity lifecycle events.
  */
-public class ObservableActivity extends Activity implements LifecycleOwner {
+public class ObservableActivity extends FragmentActivity implements LifecycleOwner {
 
     private final Lifecycle mLifecycle = new Lifecycle(this);
 
-    public Lifecycle getLifecycle() {
+    public Lifecycle getSettingsLifecycle() {
         return mLifecycle;
     }
 

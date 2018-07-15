@@ -16,7 +16,6 @@
 
 #define LOG_TAG "StaticLayout"
 
-#include "ScopedIcuLocale.h"
 #include "unicode/locid.h"
 #include "unicode/brkiter.h"
 #include "utils/misc.h"

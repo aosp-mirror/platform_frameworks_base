@@ -17,7 +17,6 @@
 #define LOG_TAG "MeasuredParagraph"
 
 #include "GraphicsJNI.h"
-#include "ScopedIcuLocale.h"
 #include "unicode/locid.h"
 #include "unicode/brkiter.h"
 #include "utils/misc.h"

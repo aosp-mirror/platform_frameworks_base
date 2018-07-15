@@ -16,27 +16,27 @@
 
 package android.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import org.apache.harmony.xml.ExpatReader;
-import org.kxml2.io.KXmlParser;
+import libcore.util.XmlObjectFactory;
+
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 
 /**
  * XML utility methods.
  */
 public class Xml {
-    /** @hide */ public Xml() {}
+    private Xml() {}
 
     /**
      * {@link org.xmlpull.v1.XmlPullParser} "relaxed" feature name.
@@ -52,7 +52,7 @@ public class Xml {
     public static void parse(String xml, ContentHandler contentHandler)
             throws SAXException {
         try {
-            XMLReader reader = new ExpatReader();
+            XMLReader reader = XmlObjectFactory.newXMLReader();
             reader.setContentHandler(contentHandler);
             reader.parse(new InputSource(new StringReader(xml)));
         } catch (IOException e) {
@@ -66,7 +66,7 @@ public class Xml {
      */
     public static void parse(Reader in, ContentHandler contentHandler)
             throws IOException, SAXException {
-        XMLReader reader = new ExpatReader();
+        XMLReader reader = XmlObjectFactory.newXMLReader();
         reader.setContentHandler(contentHandler);
         reader.parse(new InputSource(in));
     }
@@ -77,7 +77,7 @@ public class Xml {
      */
     public static void parse(InputStream in, Encoding encoding,
             ContentHandler contentHandler) throws IOException, SAXException {
-        XMLReader reader = new ExpatReader();
+        XMLReader reader = XmlObjectFactory.newXMLReader();
         reader.setContentHandler(contentHandler);
         InputSource source = new InputSource(in);
         source.setEncoding(encoding.expatName);
@@ -89,7 +89,7 @@ public class Xml {
      */
     public static XmlPullParser newPullParser() {
         try {
-            KXmlParser parser = new KXmlParser();
+            XmlPullParser parser = XmlObjectFactory.newXmlPullParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_DOCDECL, true);
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
             return parser;
@@ -102,25 +102,7 @@ public class Xml {
      * Creates a new xml serializer.
      */
     public static XmlSerializer newSerializer() {
-        try {
-            return XmlSerializerFactory.instance.newSerializer();
-        } catch (XmlPullParserException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    /** Factory for xml serializers. Initialized on demand. */
-    static class XmlSerializerFactory {
-        static final String TYPE
-                = "org.kxml2.io.KXmlParser,org.kxml2.io.KXmlSerializer";
-        static final XmlPullParserFactory instance;
-        static {
-            try {
-                instance = XmlPullParserFactory.newInstance(TYPE, null);
-            } catch (XmlPullParserException e) {
-                throw new AssertionError(e);
-            }
-        }
+        return XmlObjectFactory.newXmlSerializer();
     }
 
     /**

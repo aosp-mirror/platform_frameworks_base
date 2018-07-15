@@ -59,6 +59,7 @@ import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.RpmStats;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.ParseUtils;
 import com.android.server.LocalServices;
 
 import java.io.File;
@@ -395,6 +396,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mStats.writeToParcel(out, 0);
         }
         byte[] data = out.marshall();
+        if (DBG) Slog.d(TAG, "getStatisticsStream parcel size is:" + data.length);
         out.recycle();
         try {
             return ParcelFileDescriptor.fromData(data, "battery-stats");
@@ -1222,6 +1224,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         pw.println("  --proto: write the current aggregate stats (without history) in proto format.");
         pw.println("  --history: show only history data.");
         pw.println("  --history-start <num>: show only history data starting at given time offset.");
+        pw.println("  --history-create-events <num>: create <num> of battery history events.");
         pw.println("  --charged: only output data since last charged.");
         pw.println("  --daily: only output full daily data.");
         pw.println("  --reset: reset the stats, clearing all current data.");
@@ -1310,8 +1313,21 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         dumpHelp(pw);
                         return;
                     }
-                    historyStart = Long.parseLong(args[i]);
+                    historyStart = ParseUtils.parseLong(args[i], 0);
                     writeData = true;
+                } else if ("--history-create-events".equals(arg)) {
+                    i++;
+                    if (i >= args.length) {
+                        pw.println("Missing events argument for --history-create-events");
+                        dumpHelp(pw);
+                        return;
+                    }
+                    final long events = ParseUtils.parseLong(args[i], 0);
+                    synchronized (mStats) {
+                        mStats.createFakeHistoryEvents(events);
+                        pw.println("Battery history create events started.");
+                        noOutput = true;
+                    }
                 } else if ("-c".equals(arg)) {
                     useCheckinFormat = true;
                     flags |= BatteryStats.DUMP_INCLUDE_HISTORY;

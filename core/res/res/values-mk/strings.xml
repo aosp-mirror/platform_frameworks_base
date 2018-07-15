@@ -236,9 +236,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Режим на работа во авион"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Режимот на работа во авион е вклучен"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Режимот на работа во авион е исклучен"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Штедач на батерија"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"Штедачот на батерија е ИСКЛУЧЕН"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"Штедачот на батерија е ВКЛУЧЕН"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Поставки"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Асистенција"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Гласовна помош"</string>
@@ -550,7 +547,7 @@
     <string name="face_name_template" msgid="7004562145809595384">"Лице <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <string name="face_icon_content_description" msgid="4024817159806482191">"Икона за лице"</string>
+    <string name="face_icon_content_description" msgid="4024817159806482191">"Икона"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"чита поставки за синхронизација"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Овозможува апликацијата да ги чита поставките за синхронизирање на сметка. На пример, така може да се утврди дали апликацијата „Луѓе“ е синхронизирана со сметка."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"вклучи и исклучи синхронизација"</string>

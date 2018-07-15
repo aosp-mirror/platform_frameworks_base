@@ -7547,7 +7547,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void onPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         if ((event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED)
-                && !TextUtils.isEmpty(getAccessibilityPaneTitle())) {
+                && isAccessibilityPane()) {
             event.getText().add(getAccessibilityPaneTitle());
         }
     }
@@ -12963,7 +12963,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
             }
         }
-        if (!TextUtils.isEmpty(getAccessibilityPaneTitle())) {
+        if (isAccessibilityPane()) {
             if (isVisible != oldVisible) {
                 notifyViewAccessibilityStateChangedIfNeeded(isVisible
                         ? AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_APPEARED

@@ -35,6 +35,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Class that manages transaction execution in the correct order.
@@ -63,6 +64,24 @@ public class TransactionExecutor {
      */
     public void execute(ClientTransaction transaction) {
         final IBinder token = transaction.getActivityToken();
+        if (token != null) {
+            final Map<IBinder, ClientTransactionItem> activitiesToBeDestroyed =
+                    mTransactionHandler.getActivitiesToBeDestroyed();
+            final ClientTransactionItem destroyItem = activitiesToBeDestroyed.get(token);
+            if (destroyItem != null) {
+                if (transaction.getLifecycleStateRequest() == destroyItem) {
+                    // It is going to execute the transaction that will destroy activity with the
+                    // token, so the corresponding to-be-destroyed record can be removed.
+                    activitiesToBeDestroyed.remove(token);
+                }
+                if (mTransactionHandler.getActivityClient(token) == null) {
+                    // The activity has not been created but has been requested to destroy, so all
+                    // transactions for the token are just like being cancelled.
+                    Slog.w(TAG, "Skip pre-destroyed " + transaction);
+                    return;
+                }
+            }
+        }
         log("Start resolving transaction for client: " + mTransactionHandler + ", token: " + token);
 
         executeCallbacks(transaction);
@@ -76,7 +95,7 @@ public class TransactionExecutor {
     @VisibleForTesting
     public void executeCallbacks(ClientTransaction transaction) {
         final List<ClientTransactionItem> callbacks = transaction.getCallbacks();
-        if (callbacks == null) {
+        if (callbacks == null || callbacks.isEmpty()) {
             // No callbacks to execute, return early.
             return;
         }

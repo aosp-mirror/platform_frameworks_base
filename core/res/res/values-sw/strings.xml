@@ -234,9 +234,6 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Hali ya ndegeni"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Hali ya ndegeni IMEWASHWA"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Hali ya ndegeni IMEZIMWA"</string>
-    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Kiokoa betri"</string>
-    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"Kiokoa betri KIMEZIMWA"</string>
-    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"Kiokoa betri KIMEWASHWA"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Mipangilio"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Mapendekezo"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Usaidizi wa Sauti"</string>
@@ -533,7 +530,7 @@
     <string name="face_acquired_too_left" msgid="2712489669456176505">"Tafadhali sogeza kitambuzi kushoto."</string>
     <string name="face_acquired_poor_gaze" msgid="8344973502980415859">"Tafadhali angalia kitambuzi."</string>
     <string name="face_acquired_not_detected" msgid="5707782294589511391">"Haikutambua uso wowote"</string>
-    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Weka uso vizuri mbele ya kifaa."</string>
+    <string name="face_acquired_not_steady" msgid="3722829465011040042">"Weka uso wima mbele ya kifaa."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="6255891785768984615">"Maunzi ya uso hayapatikani."</string>
@@ -1209,8 +1206,8 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi haina muunganisho wa intaneti"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Gusa ili upate chaguo"</string>
-    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Mabadiliko kwenye mipangilio ya mtandao-hewa"</string>
-    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Bendi ya mtandao-hewa wako imebadilika."</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Mabadiliko kwenye mipangilio ya mtandao pepe"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Bendi ya mtandao pepe wako imebadilika."</string>
     <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Kifaa hiki hakitumii mapendeleo yako ya GHz 5 pekee. Badala yake, kifaa hiki kitatumia bendi ya GHz 5 itakapopatikana."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Sasa inatumia <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Kifaa hutumia <xliff:g id="NEW_NETWORK">%1$s</xliff:g> wakati <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> haina intaneti. Huenda ukalipishwa."</string>

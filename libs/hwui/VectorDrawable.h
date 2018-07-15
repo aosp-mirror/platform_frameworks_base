@@ -59,12 +59,6 @@ namespace VectorDrawable {
         onPropertyChanged();                                          \
         retVal;                                                       \
     })
-#define UPDATE_SKPROP(field, value)                                    \
-    ({                                                                 \
-        bool retVal = ((field) != (value));                            \
-        if ((field) != (value)) SkRefCnt_SafeAssign((field), (value)); \
-        retVal;                                                        \
-    })
 
 /* A VectorDrawable is composed of a tree of nodes.
  * Each node can be a group node, or a path.
@@ -223,29 +217,28 @@ public:
             int fillType = 0; /* non-zero or kWinding_FillType in Skia */
         };
         explicit FullPathProperties(Node* mNode) : Properties(mNode), mTrimDirty(false) {}
-        ~FullPathProperties() {
-            SkSafeUnref(fillGradient);
-            SkSafeUnref(strokeGradient);
-        }
+        ~FullPathProperties() {}
         void syncProperties(const FullPathProperties& prop) {
             mPrimitiveFields = prop.mPrimitiveFields;
             mTrimDirty = true;
-            UPDATE_SKPROP(fillGradient, prop.fillGradient);
-            UPDATE_SKPROP(strokeGradient, prop.strokeGradient);
+            fillGradient = prop.fillGradient;
+            strokeGradient = prop.strokeGradient;
             onPropertyChanged();
         }
         void setFillGradient(SkShader* gradient) {
-            if (UPDATE_SKPROP(fillGradient, gradient)) {
+            if (fillGradient.get() != gradient) {
+                fillGradient = sk_ref_sp(gradient);
                 onPropertyChanged();
             }
         }
         void setStrokeGradient(SkShader* gradient) {
-            if (UPDATE_SKPROP(strokeGradient, gradient)) {
+            if (strokeGradient.get() != gradient) {
+                strokeGradient = sk_ref_sp(gradient);
                 onPropertyChanged();
             }
         }
-        SkShader* getFillGradient() const { return fillGradient; }
-        SkShader* getStrokeGradient() const { return strokeGradient; }
+        SkShader* getFillGradient() const { return fillGradient.get(); }
+        SkShader* getStrokeGradient() const { return strokeGradient.get(); }
         float getStrokeWidth() const { return mPrimitiveFields.strokeWidth; }
         void setStrokeWidth(float strokeWidth) {
             VD_SET_PRIMITIVE_FIELD_AND_NOTIFY(strokeWidth, strokeWidth);
@@ -325,8 +318,8 @@ public:
             count,
         };
         PrimitiveFields mPrimitiveFields;
-        SkShader* fillGradient = nullptr;
-        SkShader* strokeGradient = nullptr;
+        sk_sp<SkShader> fillGradient;
+        sk_sp<SkShader> strokeGradient;
     };
 
     // Called from UI thread
@@ -550,8 +543,7 @@ public:
             SkRect bounds;
             int scaledWidth = 0;
             int scaledHeight = 0;
-            SkColorFilter* colorFilter = nullptr;
-            ~NonAnimatableProperties() { SkSafeUnref(colorFilter); }
+            sk_sp<SkColorFilter> colorFilter;
         } mNonAnimatableProperties;
         bool mNonAnimatablePropertiesDirty = true;
 
@@ -561,8 +553,7 @@ public:
         void syncNonAnimatableProperties(const TreeProperties& prop) {
             // Copy over the data that can only be changed in UI thread
             if (mNonAnimatableProperties.colorFilter != prop.mNonAnimatableProperties.colorFilter) {
-                SkRefCnt_SafeAssign(mNonAnimatableProperties.colorFilter,
-                                    prop.mNonAnimatableProperties.colorFilter);
+                mNonAnimatableProperties.colorFilter = prop.mNonAnimatableProperties.colorFilter;
             }
             mNonAnimatableProperties = prop.mNonAnimatableProperties;
         }
@@ -599,12 +590,13 @@ public:
             }
         }
         void setColorFilter(SkColorFilter* filter) {
-            if (UPDATE_SKPROP(mNonAnimatableProperties.colorFilter, filter)) {
+            if (mNonAnimatableProperties.colorFilter.get() != filter) {
+                mNonAnimatableProperties.colorFilter = sk_ref_sp(filter);
                 mNonAnimatablePropertiesDirty = true;
                 mTree->onPropertyChanged(this);
             }
         }
-        SkColorFilter* getColorFilter() const { return mNonAnimatableProperties.colorFilter; }
+        SkColorFilter* getColorFilter() const { return mNonAnimatableProperties.colorFilter.get(); }
 
         float getViewportWidth() const { return mNonAnimatableProperties.viewportWidth; }
         float getViewportHeight() const { return mNonAnimatableProperties.viewportHeight; }

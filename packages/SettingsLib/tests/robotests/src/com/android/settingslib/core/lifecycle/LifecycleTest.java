@@ -18,11 +18,12 @@ package com.android.settingslib.core.lifecycle;
 import static androidx.lifecycle.Lifecycle.Event.ON_START;
 import static com.google.common.truth.Truth.assertThat;
 
-import androidx.lifecycle.LifecycleOwner;
 import android.content.Context;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.core.lifecycle.events.OnAttach;
@@ -34,13 +35,15 @@ import com.android.settingslib.core.lifecycle.events.OnPrepareOptionsMenu;
 import com.android.settingslib.core.lifecycle.events.OnResume;
 import com.android.settingslib.core.lifecycle.events.OnStart;
 import com.android.settingslib.core.lifecycle.events.OnStop;
+import com.android.settingslib.testutils.FragmentTestUtils;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.android.controller.FragmentController;
+
+import androidx.lifecycle.LifecycleOwner;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 public class LifecycleTest {
@@ -64,7 +67,7 @@ public class LifecycleTest {
 
         public TestFragment() {
             mFragObserver = new TestObserver();
-            getLifecycle().addObserver(mFragObserver);
+            getSettingsLifecycle().addObserver(mFragObserver);
         }
     }
 
@@ -74,9 +77,17 @@ public class LifecycleTest {
 
         public TestActivity() {
             mActObserver = new TestObserver();
-            getLifecycle().addObserver(mActObserver);
+            getSettingsLifecycle().addObserver(mActObserver);
         }
 
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            LinearLayout view = new LinearLayout(this);
+            view.setId(1);
+
+            setContentView(view);
+        }
     }
 
     public static class TestObserver implements LifecycleObserver, OnAttach, OnStart, OnResume,
@@ -151,11 +162,9 @@ public class LifecycleTest {
     @Test
     public void runThroughActivityLifecycles_shouldObserveEverything() {
         ActivityController<TestActivity> ac = Robolectric.buildActivity(TestActivity.class);
-        TestActivity activity = ac.get();
+        TestActivity activity = ac.setup().get();
 
-        ac.start();
         assertThat(activity.mActObserver.mOnStartObserved).isTrue();
-        ac.resume();
         assertThat(activity.mActObserver.mOnResumeObserved).isTrue();
         activity.onCreateOptionsMenu(null);
         assertThat(activity.mActObserver.mOnCreateOptionsMenuObserved).isTrue();
@@ -173,50 +182,50 @@ public class LifecycleTest {
 
     @Test
     public void runThroughDialogFragmentLifecycles_shouldObserveEverything() {
-        FragmentController<TestDialogFragment> fragmentController =
-                Robolectric.buildFragment(TestDialogFragment.class);
-        TestDialogFragment fragment = fragmentController.get();
+        final TestDialogFragment fragment = new TestDialogFragment();
+        FragmentTestUtils.startFragment(fragment);
 
-        fragmentController.create().start().resume();
         fragment.onCreateOptionsMenu(null, null);
         fragment.onPrepareOptionsMenu(null);
         fragment.onOptionsItemSelected(null);
-        fragmentController.pause().stop().destroy();
+        assertThat(fragment.mFragObserver.mOnCreateOptionsMenuObserved).isTrue();
+        assertThat(fragment.mFragObserver.mOnPrepareOptionsMenuObserved).isTrue();
+        assertThat(fragment.mFragObserver.mOnOptionsItemSelectedObserved).isTrue();
 
         assertThat(fragment.mFragObserver.mOnAttachObserved).isTrue();
         assertThat(fragment.mFragObserver.mOnAttachHasContext).isTrue();
         assertThat(fragment.mFragObserver.mOnStartObserved).isTrue();
         assertThat(fragment.mFragObserver.mOnResumeObserved).isTrue();
+        fragment.onPause();
         assertThat(fragment.mFragObserver.mOnPauseObserved).isTrue();
+        fragment.onStop();
         assertThat(fragment.mFragObserver.mOnStopObserved).isTrue();
+        fragment.onDestroy();
         assertThat(fragment.mFragObserver.mOnDestroyObserved).isTrue();
-        assertThat(fragment.mFragObserver.mOnCreateOptionsMenuObserved).isTrue();
-        assertThat(fragment.mFragObserver.mOnPrepareOptionsMenuObserved).isTrue();
-        assertThat(fragment.mFragObserver.mOnOptionsItemSelectedObserved).isTrue();
     }
 
     @Test
     public void runThroughFragmentLifecycles_shouldObserveEverything() {
-        FragmentController<TestFragment> fragmentController =
-                Robolectric.buildFragment(TestFragment.class);
-        TestFragment fragment = fragmentController.get();
+        final TestFragment fragment = new TestFragment();
+        FragmentTestUtils.startFragment(fragment);
 
-        fragmentController.create().start().resume();
         fragment.onCreateOptionsMenu(null, null);
         fragment.onPrepareOptionsMenu(null);
         fragment.onOptionsItemSelected(null);
-        fragmentController.pause().stop().destroy();
+        assertThat(fragment.mFragObserver.mOnCreateOptionsMenuObserved).isTrue();
+        assertThat(fragment.mFragObserver.mOnPrepareOptionsMenuObserved).isTrue();
+        assertThat(fragment.mFragObserver.mOnOptionsItemSelectedObserved).isTrue();
 
         assertThat(fragment.mFragObserver.mOnAttachObserved).isTrue();
         assertThat(fragment.mFragObserver.mOnAttachHasContext).isTrue();
         assertThat(fragment.mFragObserver.mOnStartObserved).isTrue();
         assertThat(fragment.mFragObserver.mOnResumeObserved).isTrue();
+        fragment.onPause();
         assertThat(fragment.mFragObserver.mOnPauseObserved).isTrue();
+        fragment.onStop();
         assertThat(fragment.mFragObserver.mOnStopObserved).isTrue();
+        fragment.onDestroy();
         assertThat(fragment.mFragObserver.mOnDestroyObserved).isTrue();
-        assertThat(fragment.mFragObserver.mOnCreateOptionsMenuObserved).isTrue();
-        assertThat(fragment.mFragObserver.mOnPrepareOptionsMenuObserved).isTrue();
-        assertThat(fragment.mFragObserver.mOnOptionsItemSelectedObserved).isTrue();
     }
 
     @Test
@@ -237,17 +246,16 @@ public class LifecycleTest {
 
     @Test
     public void onOptionItemSelectedShortCircuitsIfAnObserverHandlesTheMenuItem() {
-        FragmentController<TestFragment> fragmentController =
-                Robolectric.buildFragment(TestFragment.class);
-        TestFragment fragment = fragmentController.get();
-        OptionItemAccepter accepter = new OptionItemAccepter();
+        final TestFragment fragment = new TestFragment();
+        FragmentTestUtils.startFragment(fragment);
+
+        final OptionItemAccepter accepter = new OptionItemAccepter();
         fragment.getLifecycle().addObserver(accepter);
 
-        fragmentController.create().start().resume();
+
         fragment.onCreateOptionsMenu(null, null);
         fragment.onPrepareOptionsMenu(null);
         fragment.onOptionsItemSelected(null);
-        fragmentController.pause().stop().destroy();
 
         assertThat(accepter.wasCalled).isFalse();
     }

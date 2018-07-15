@@ -22,13 +22,14 @@ import static androidx.lifecycle.Lifecycle.Event.ON_RESUME;
 import static androidx.lifecycle.Lifecycle.Event.ON_START;
 import static androidx.lifecycle.Lifecycle.Event.ON_STOP;
 
-import android.app.DialogFragment;
-import androidx.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
+import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.LifecycleOwner;
 
 /**
  * {@link DialogFragment} that has hooks to observe fragment lifecycle events.
@@ -36,6 +37,10 @@ import android.view.MenuItem;
 public class ObservableDialogFragment extends DialogFragment implements LifecycleOwner {
 
     protected final Lifecycle mLifecycle = new Lifecycle(this);
+
+    public Lifecycle getSettingsLifecycle() {
+        return mLifecycle;
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -99,10 +104,5 @@ public class ObservableDialogFragment extends DialogFragment implements Lifecycl
             return super.onOptionsItemSelected(menuItem);
         }
         return lifecycleHandled;
-    }
-
-    @Override
-    public Lifecycle getLifecycle() {
-        return mLifecycle;
     }
 }

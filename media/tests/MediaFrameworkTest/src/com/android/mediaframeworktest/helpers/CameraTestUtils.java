@@ -43,6 +43,8 @@ import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.MeteringRectangle;
+import android.hardware.camera2.params.OutputConfiguration;
+import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.location.Location;
 import android.location.LocationManager;
@@ -75,6 +77,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -691,6 +694,38 @@ public class CameraTestUtils extends Assert {
             throws CameraAccessException,
             BlockingOpenException {
         return openCamera(manager, cameraId, /*listener*/null, handler);
+    }
+
+    /**
+     * Configure a new camera session with output surfaces and initial session parameters.
+     *
+     * @param camera The CameraDevice to be configured.
+     * @param outputSurfaces The surface list that used for camera output.
+     * @param listener The callback CameraDevice will notify when session is available.
+     * @param handler The handler used to notify callbacks.
+     * @param initialRequest Initial request settings to use as session parameters.
+     */
+    public static CameraCaptureSession configureCameraSessionWithParameters(CameraDevice camera,
+            List<Surface> outputSurfaces, BlockingSessionCallback listener,
+            Handler handler, CaptureRequest initialRequest) throws CameraAccessException {
+        List<OutputConfiguration> outConfigurations = new ArrayList<>(outputSurfaces.size());
+        for (Surface surface : outputSurfaces) {
+            outConfigurations.add(new OutputConfiguration(surface));
+        }
+        SessionConfiguration sessionConfig = new SessionConfiguration(
+                SessionConfiguration.SESSION_REGULAR, outConfigurations,
+                new HandlerExecutor(handler), listener);
+        sessionConfig.setSessionParameters(initialRequest);
+        camera.createCaptureSession(sessionConfig);
+
+        CameraCaptureSession session = listener.waitAndGetSession(SESSION_CONFIGURE_TIMEOUT_MS);
+        assertFalse("Camera session should not be a reprocessable session",
+                session.isReprocessable());
+        assertFalse("Capture session type must be regular",
+                CameraConstrainedHighSpeedCaptureSession.class.isAssignableFrom(
+                        session.getClass()));
+
+        return session;
     }
 
     /**
@@ -1331,6 +1366,20 @@ public class CameraTestUtils extends Assert {
             default:
                 throw new UnsupportedOperationException("Unsupported format for validation: "
                         + format);
+        }
+    }
+
+    public static class HandlerExecutor implements Executor {
+        private final Handler mHandler;
+
+        public HandlerExecutor(Handler handler) {
+            assertNotNull("handler must be valid", handler);
+            mHandler = handler;
+        }
+
+        @Override
+        public void execute(Runnable runCmd) {
+            mHandler.post(runCmd);
         }
     }
 
