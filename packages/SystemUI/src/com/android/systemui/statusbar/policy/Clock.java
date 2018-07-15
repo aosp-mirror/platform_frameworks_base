@@ -28,6 +28,7 @@ import android.os.Handler;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
@@ -66,6 +67,8 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
         DarkReceiver, ConfigurationListener {
 
     public static final String CLOCK_SECONDS = "clock_seconds";
+    public static final String CLOCK_STYLE = "system:" + Settings.System.STATUS_BAR_AM_PM;
+
     private static final String CLOCK_SUPER_PARCELABLE = "clock_super_parcelable";
     private static final String CURRENT_USER_ID = "current_user_id";
     private static final String VISIBLE_BY_POLICY = "visible_by_policy";
@@ -90,7 +93,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     private static final int AM_PM_STYLE_SMALL   = 1;
     private static final int AM_PM_STYLE_GONE    = 2;
 
-    private final int mAmPmStyle;
+    private int mAmPmStyle = AM_PM_STYLE_GONE;
     private final boolean mShowDark;
     private boolean mShowSeconds;
     private Handler mSecondsHandler;
@@ -121,7 +124,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
                 R.styleable.Clock,
                 0, 0);
         try {
-            mAmPmStyle = a.getInt(R.styleable.Clock_amPmStyle, AM_PM_STYLE_GONE);
+            mAmPmStyle = a.getInt(R.styleable.Clock_amPmStyle, mAmPmStyle);
             mShowDark = a.getBoolean(R.styleable.Clock_showDark, true);
             mNonAdaptedColor = getCurrentTextColor();
         } finally {
@@ -185,7 +188,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
 
             getContext().registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter,
                     null, Dependency.get(Dependency.TIME_TICK_HANDLER));
-            Dependency.get(TunerService.class).addTunable(this, CLOCK_SECONDS);
+            Dependency.get(TunerService.class).addTunable(this, CLOCK_SECONDS, CLOCK_STYLE);
             SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallback(this);
             if (mShowDark) {
                 Dependency.get(DarkIconDispatcher.class).addDarkReceiver(this);
@@ -277,7 +280,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
     }
 
     final void updateClock() {
-        if (mDemoMode) return;
+        if (mDemoMode || mCalendar == null) return;
         mCalendar.setTimeInMillis(System.currentTimeMillis());
         setText(getSmallTime());
         setContentDescription(mContentDescriptionFormat.format(mCalendar.getTime()));
@@ -288,6 +291,10 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
         if (CLOCK_SECONDS.equals(key)) {
             mShowSeconds = TunerService.parseIntegerSwitch(newValue, false);
             updateShowSeconds();
+        } else if (CLOCK_STYLE.equals(key)) {
+            mAmPmStyle = newValue == null ? AM_PM_STYLE_GONE : Integer.valueOf(newValue);
+            mClockFormatString = ""; // force refresh
+            updateClock();
         }
     }
 
