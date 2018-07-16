@@ -16,6 +16,12 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN;
+import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_INOUT;
+import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_NONE;
+import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -55,7 +61,6 @@ import com.android.systemui.R;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 
-import com.android.systemui.statusbar.policy.MobileSignalController.MobileState;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -64,8 +69,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-
-import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 
 /** Platform implementation of the network controller. **/
 public class NetworkControllerImpl extends BroadcastReceiver
@@ -849,20 +852,20 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 if (activity != null) {
                     switch (activity) {
                         case "inout":
-                            mWifiSignalController.setActivity(WifiManager.DATA_ACTIVITY_INOUT);
+                            mWifiSignalController.setActivity(DATA_ACTIVITY_INOUT);
                             break;
                         case "in":
-                            mWifiSignalController.setActivity(WifiManager.DATA_ACTIVITY_IN);
+                            mWifiSignalController.setActivity(DATA_ACTIVITY_IN);
                             break;
                         case "out":
-                            mWifiSignalController.setActivity(WifiManager.DATA_ACTIVITY_OUT);
+                            mWifiSignalController.setActivity(DATA_ACTIVITY_OUT);
                             break;
                         default:
-                            mWifiSignalController.setActivity(WifiManager.DATA_ACTIVITY_NONE);
+                            mWifiSignalController.setActivity(DATA_ACTIVITY_NONE);
                             break;
                     }
                 } else {
-                    mWifiSignalController.setActivity(WifiManager.DATA_ACTIVITY_NONE);
+                    mWifiSignalController.setActivity(DATA_ACTIVITY_NONE);
                 }
                 String ssid = args.getString("ssid");
                 if (ssid != null) {

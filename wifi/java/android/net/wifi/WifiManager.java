@@ -21,7 +21,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
-import android.annotation.SuppressLint;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -32,9 +31,9 @@ import android.net.DhcpInfo;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.wifi.hotspot2.IProvisioningCallback;
 import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
-import android.net.wifi.hotspot2.IProvisioningCallback;
 import android.net.wifi.hotspot2.ProvisioningCallback;
 import android.os.Binder;
 import android.os.Build;
@@ -919,22 +918,6 @@ public class WifiManager {
      * @hide
      */
     public static final int WIFI_FREQUENCY_BAND_2GHZ = 2;
-
-    /** List of asyncronous notifications
-     * @hide
-     */
-    public static final int DATA_ACTIVITY_NOTIFICATION = 1;
-
-    //Lowest bit indicates data reception and the second lowest
-    //bit indicates data transmitted
-    /** @hide */
-    public static final int DATA_ACTIVITY_NONE         = 0x00;
-    /** @hide */
-    public static final int DATA_ACTIVITY_IN           = 0x01;
-    /** @hide */
-    public static final int DATA_ACTIVITY_OUT          = 0x02;
-    /** @hide */
-    public static final int DATA_ACTIVITY_INOUT        = 0x03;
 
     /** @hide */
     public static final boolean DEFAULT_POOR_NETWORK_AVOIDANCE_ENABLED = false;
@@ -2460,7 +2443,7 @@ public class WifiManager {
         }
 
         @Override
-        public void onStateChanged(int state, int failureReason) throws RemoteException {
+        public void onStateChanged(int state, int failureReason) {
             Log.v(TAG, "SoftApCallbackProxy: onStateChanged: state=" + state + ", failureReason=" +
                     failureReason);
             mHandler.post(() -> {
@@ -2469,7 +2452,7 @@ public class WifiManager {
         }
 
         @Override
-        public void onNumClientsChanged(int numClients) throws RemoteException {
+        public void onNumClientsChanged(int numClients) {
             Log.v(TAG, "SoftApCallbackProxy: onNumClientsChanged: numClients=" + numClients);
             mHandler.post(() -> {
                 mCallback.onNumClientsChanged(numClients);
@@ -3102,9 +3085,8 @@ public class WifiManager {
      * an AsyncChannel communication with WifiService
      *
      * @return Messenger pointing to the WifiService handler
-     * @hide
      */
-    public Messenger getWifiServiceMessenger() {
+    private Messenger getWifiServiceMessenger() {
         try {
             return mService.getWifiServiceMessenger(mContext.getOpPackageName());
         } catch (RemoteException e) {
@@ -3716,6 +3698,109 @@ public class WifiManager {
             mHandler.post(() -> {
                 mCallback.onProvisioningFailure(status);
             });
+        }
+    }
+
+    /**
+     * Base class for Traffic state callback. Should be extended by applications and set when
+     * calling {@link WifiManager#registerTrafficStateCallback(TrafficStateCallback, Handler)}.
+     * @hide
+     */
+    public interface TrafficStateCallback {
+        /**
+         * Lowest bit indicates data reception and the second lowest
+         * bit indicates data transmitted
+         */
+        /** @hide */
+        int DATA_ACTIVITY_NONE         = 0x00;
+        /** @hide */
+        int DATA_ACTIVITY_IN           = 0x01;
+        /** @hide */
+        int DATA_ACTIVITY_OUT          = 0x02;
+        /** @hide */
+        int DATA_ACTIVITY_INOUT        = 0x03;
+
+        /**
+         * Callback invoked to inform clients about the current traffic state.
+         *
+         * @param state One of the values: {@link #DATA_ACTIVITY_NONE}, {@link #DATA_ACTIVITY_IN},
+         * {@link #DATA_ACTIVITY_OUT} & {@link #DATA_ACTIVITY_INOUT}.
+         * @hide
+         */
+        void onStateChanged(int state);
+    }
+
+    /**
+     * Callback proxy for TrafficStateCallback objects.
+     *
+     * @hide
+     */
+    private static class TrafficStateCallbackProxy extends ITrafficStateCallback.Stub {
+        private final Handler mHandler;
+        private final TrafficStateCallback mCallback;
+
+        TrafficStateCallbackProxy(Looper looper, TrafficStateCallback callback) {
+            mHandler = new Handler(looper);
+            mCallback = callback;
+        }
+
+        @Override
+        public void onStateChanged(int state) {
+            Log.v(TAG, "TrafficStateCallbackProxy: onStateChanged state=" + state);
+            mHandler.post(() -> {
+                mCallback.onStateChanged(state);
+            });
+        }
+    }
+
+    /**
+     * Registers a callback for monitoring traffic state. See {@link TrafficStateCallback}. These
+     * callbacks will be invoked periodically by platform to inform clients about the current
+     * traffic state. Caller can unregister a previously registered callback using
+     * {@link #unregisterTrafficStateCallback(TrafficStateCallback)}
+     * <p>
+     * Applications should have the
+     * {@link android.Manifest.permission#NETWORK_SETTINGS NETWORK_SETTINGS} permission. Callers
+     * without the permission will trigger a {@link java.lang.SecurityException}.
+     * <p>
+     *
+     * @param callback Callback for traffic state events
+     * @param handler  The Handler on whose thread to execute the callbacks of the {@code callback}
+     *                 object. If null, then the application's main thread will be used.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void registerTrafficStateCallback(@NonNull TrafficStateCallback callback,
+                                             @Nullable Handler handler) {
+        if (callback == null) throw new IllegalArgumentException("callback cannot be null");
+        Log.v(TAG, "registerTrafficStateCallback: callback=" + callback + ", handler=" + handler);
+
+        Looper looper = (handler == null) ? mContext.getMainLooper() : handler.getLooper();
+        Binder binder = new Binder();
+        try {
+            mService.registerTrafficStateCallback(
+                    binder, new TrafficStateCallbackProxy(looper, callback), callback.hashCode());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Allow callers to unregister a previously registered callback. After calling this method,
+     * applications will no longer receive traffic state notifications.
+     *
+     * @param callback Callback to unregister for traffic state events
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void unregisterTrafficStateCallback(@NonNull TrafficStateCallback callback) {
+        if (callback == null) throw new IllegalArgumentException("callback cannot be null");
+        Log.v(TAG, "unregisterTrafficStateCallback: callback=" + callback);
+
+        try {
+            mService.unregisterTrafficStateCallback(callback.hashCode());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }
