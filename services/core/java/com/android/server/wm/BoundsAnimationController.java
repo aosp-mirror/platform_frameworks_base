@@ -31,11 +31,13 @@ import android.os.IBinder;
 import android.os.Debug;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.view.Choreographer;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -112,6 +114,7 @@ public class BoundsAnimationController {
     private final Interpolator mFastOutSlowInInterpolator;
     private boolean mFinishAnimationAfterTransition = false;
     private final AnimationHandler mAnimationHandler;
+    private Choreographer mChoreographer;
 
     private static final int WAIT_FOR_DRAW_TIMEOUT_MS = 3000;
 
@@ -123,6 +126,12 @@ public class BoundsAnimationController {
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.fast_out_slow_in);
         mAnimationHandler = animationHandler;
+        if (animationHandler != null) {
+            // If an animation handler is provided, then ensure that it runs on the sf vsync tick
+            handler.runWithScissors(() -> mChoreographer = Choreographer.getSfInstance(),
+                    0 /* timeout */);
+            animationHandler.setProvider(new SfVsyncFrameCallbackProvider(mChoreographer));
+        }
     }
 
     @VisibleForTesting

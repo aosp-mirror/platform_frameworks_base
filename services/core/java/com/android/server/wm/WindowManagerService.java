@@ -1011,7 +1011,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mAppTransition.registerListenerLocked(mActivityManagerAppTransitionNotifier);
 
         final AnimationHandler animationHandler = new AnimationHandler();
-        animationHandler.setProvider(new SfVsyncFrameCallbackProvider());
         mBoundsAnimationController = new BoundsAnimationController(context, mAppTransition,
                 AnimationThread.getHandler(), animationHandler);
 
