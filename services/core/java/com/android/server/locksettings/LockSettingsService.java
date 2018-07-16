@@ -2012,7 +2012,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         enforceShell();
         final long origId = Binder.clearCallingIdentity();
         try {
-            (new LockSettingsShellCommand(mContext, new LockPatternUtils(mContext))).exec(
+            (new LockSettingsShellCommand(new LockPatternUtils(mContext))).exec(
                     this, in, out, err, args, callback, resultReceiver);
         } finally {
             Binder.restoreCallingIdentity(origId);
