@@ -37,6 +37,14 @@ public final class ShellHelper {
     @NonNull
     public static String runShellCommand(@NonNull String template, Object...args) {
         String command = String.format(template, args);
+        return runShellCommandRaw(command);
+    }
+
+    /**
+     * Runs a Shell command, returning a trimmed response.
+     */
+    @NonNull
+    public static String runShellCommandRaw(@NonNull String command) {
         UiAutomation automan = InstrumentationRegistry.getInstrumentation()
                 .getUiAutomation();
         ParcelFileDescriptor pfd = automan.executeShellCommand(command);
