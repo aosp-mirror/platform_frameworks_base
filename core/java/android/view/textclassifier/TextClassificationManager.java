@@ -27,6 +27,7 @@ import android.service.textclassifier.TextClassifierService;
 import android.view.textclassifier.TextClassifier.TextClassifierType;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
 import java.lang.ref.WeakReference;
@@ -244,6 +245,13 @@ public final class TextClassificationManager {
         return mContext.getApplicationContext() != null
                 ? mContext.getApplicationContext()
                 : mContext;
+    }
+
+    /** @hide **/
+    public void dump(IndentingPrintWriter pw) {
+        getLocalTextClassifier().dump(pw);
+        getSystemTextClassifier().dump(pw);
+        getSettings().dump(pw);
     }
 
     /** @hide */
