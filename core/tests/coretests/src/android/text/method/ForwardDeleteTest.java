@@ -20,6 +20,7 @@ import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.test.suitebuilder.annotation.Suppress;
 import android.text.InputType;
 import android.util.KeyUtils;
 import android.view.KeyEvent;
@@ -238,6 +239,7 @@ public class ForwardDeleteTest {
     }
 
     @Test
+    @Suppress
     public void testEmojiModifier() {
         EditorState state = new EditorState();
 
@@ -267,6 +269,7 @@ public class ForwardDeleteTest {
     }
 
     @Test
+    @Suppress
     public void testMixedEdgeCases() {
         EditorState state = new EditorState();
 
