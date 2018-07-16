@@ -549,8 +549,8 @@ public class SQLiteQueryBuilder {
             // "expr" inside that need to be validated
             final String sql = buildQuery(projection,
                     wrap(queryArgs.getString(QUERY_ARG_SQL_SELECTION)),
-                    wrap(queryArgs.getString(QUERY_ARG_SQL_GROUP_BY)),
-                    wrap(queryArgs.getString(QUERY_ARG_SQL_HAVING)),
+                    queryArgs.getString(QUERY_ARG_SQL_GROUP_BY),
+                    queryArgs.getString(QUERY_ARG_SQL_HAVING),
                     queryArgs.getString(QUERY_ARG_SQL_SORT_ORDER),
                     queryArgs.getString(QUERY_ARG_SQL_LIMIT));
             db.validateSql(sql, cancellationSignal); // will throw if query is invalid
