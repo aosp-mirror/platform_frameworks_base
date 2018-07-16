@@ -153,6 +153,45 @@ public class SQLiteQueryBuilder {
     }
 
     /**
+     * Append a standalone expression to the {@code WHERE} clause of this query.
+     * <p>
+     * This method differs from {@link #appendWhere(CharSequence)} in that it
+     * automatically appends {@code AND} to any existing {@code WHERE} clause
+     * already under construction before appending the given standalone
+     * expression.
+     *
+     * @param inWhere the standalone expression to append to the {@code WHERE}
+     *            clause. It will be wrapped in parentheses when it's appended.
+     */
+    public void appendWhereExpression(@NonNull CharSequence inWhere) {
+        appendWhereExpression(inWhere, EmptyArray.STRING);
+    }
+
+    /**
+     * Append a standalone expression to the {@code WHERE} clause of this query.
+     * <p>
+     * This method differs from {@link #appendWhere(CharSequence)} in that it
+     * automatically appends {@code AND} to any existing {@code WHERE} clause
+     * already under construction before appending the given standalone
+     * expression.
+     *
+     * @param inWhere the standalone expression to append to the {@code WHERE}
+     *            clause. It will be wrapped in parentheses when it's appended.
+     * @param inWhereArgs list of arguments to be bound to any '?' occurrences
+     *            in the standalone expression.
+     */
+    public void appendWhereExpression(@NonNull CharSequence inWhere, String... inWhereArgs) {
+        if (mWhereClause == null) {
+            mWhereClause = new StringBuilder(inWhere.length() + 16);
+        }
+        if (mWhereClause.length() > 0) {
+            mWhereClause.append(" AND ");
+        }
+        mWhereClause.append('(').append(inWhere).append(')');
+        mWhereArgs = ArrayUtils.concat(String.class, mWhereArgs, inWhereArgs);
+    }
+
+    /**
      * Append a chunk to the {@code WHERE} clause of the query. All chunks
      * appended are surrounded by parenthesis and {@code AND}ed with the
      * selection passed to {@link #query}. The final {@code WHERE} clause looks
@@ -611,7 +650,8 @@ public class SQLiteQueryBuilder {
         final ArrayMap<String, Object> rawValues = values.getValues();
         final String[] updateArgs = new String[rawValues.size()];
         for (int i = 0; i < updateArgs.length; i++) {
-            updateArgs[i] = String.valueOf(rawValues.valueAt(i));
+            final Object arg = rawValues.valueAt(i);
+            updateArgs[i] = (arg != null) ? arg.toString() : null;
         }
 
         final String sql = buildUpdate(values, selection);
