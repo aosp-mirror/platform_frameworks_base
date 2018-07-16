@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
@@ -48,6 +49,7 @@ public class BinderCallsStatsTest {
     public void testDetailedOff() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         bcs.setDetailedTracking(false);
+        bcs.setSamplingInterval(5);
 
         Binder binder = new Binder();
         BinderCallsStats.CallSession callSession = bcs.callStarted(binder, 1);
@@ -58,44 +60,31 @@ public class BinderCallsStatsTest {
         assertEquals(1, uidEntries.size());
         BinderCallsStats.UidEntry uidEntry = uidEntries.get(TEST_UID);
         Assert.assertNotNull(uidEntry);
+        List<BinderCallsStats.CallStat> callStatsList = uidEntry.getCallStatsList();
         assertEquals(1, uidEntry.callCount);
+        assertEquals(1, uidEntry.recordedCallCount);
         assertEquals(10, uidEntry.cpuTimeMicros);
-        assertEquals("Detailed tracking off - no entries should be returned",
-                0, uidEntry.getCallStatsList().size());
+        assertEquals(binder.getClass().getName(), callStatsList.get(0).className);
+        assertEquals(1, callStatsList.get(0).msg);
 
-        BinderCallsStats.UidEntry sampledEntries = bcs.getSampledEntries();
-        List<BinderCallsStats.CallStat> sampledCallStatsList = sampledEntries.getCallStatsList();
-        assertEquals(1, sampledCallStatsList.size());
-
-
-        assertEquals(1, sampledCallStatsList.get(0).callCount);
-        assertEquals(10, sampledCallStatsList.get(0).cpuTimeMicros);
-        assertEquals(binder.getClass().getName(), sampledCallStatsList.get(0).className);
-        assertEquals(1, sampledCallStatsList.get(0).msg);
-
+        // CPU usage is sampled, should not be tracked here.
         callSession = bcs.callStarted(binder, 1);
         bcs.time += 20;
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
-
-        uidEntry = bcs.getUidEntries().get(TEST_UID);
         assertEquals(2, uidEntry.callCount);
-        // When sampling is enabled, cpu time is only measured for the first transaction in the
-        // sampling interval, for others an average duration of previous transactions is used as
-        // approximation
-        assertEquals(20, uidEntry.cpuTimeMicros);
-        sampledCallStatsList = sampledEntries.getCallStatsList();
-        assertEquals(1, sampledCallStatsList.size());
+        assertEquals(1, uidEntry.recordedCallCount);
+        assertEquals(10, uidEntry.cpuTimeMicros);
+        assertEquals(1, callStatsList.size());
 
         callSession = bcs.callStarted(binder, 2);
         bcs.time += 50;
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
         uidEntry = bcs.getUidEntries().get(TEST_UID);
         assertEquals(3, uidEntry.callCount);
-
-        // This is the first transaction of a new type, so the real CPU time will be measured
-        assertEquals(70, uidEntry.cpuTimeMicros);
-        sampledCallStatsList = sampledEntries.getCallStatsList();
-        assertEquals(2, sampledCallStatsList.size());
+        assertEquals(1, uidEntry.recordedCallCount);
+        // Still sampled even for another API.
+        callStatsList = uidEntry.getCallStatsList();
+        assertEquals(2, callStatsList.size());
     }
 
     @Test
@@ -115,10 +104,6 @@ public class BinderCallsStatsTest {
         assertEquals(1, uidEntry.callCount);
         assertEquals(10, uidEntry.cpuTimeMicros);
         assertEquals(1, uidEntry.getCallStatsList().size());
-
-        BinderCallsStats.UidEntry sampledEntries = bcs.getSampledEntries();
-        assertEquals("Sampling is not used when detailed tracking on",
-                0, bcs.getSampledEntries().getCallStatsList().size());
 
         List<BinderCallsStats.CallStat> callStatsList = uidEntry.getCallStatsList();
         assertEquals(1, callStatsList.get(0).callCount);
@@ -216,13 +201,57 @@ public class BinderCallsStatsTest {
         BinderCallsStats.UidEntry uidEntry = uidEntries.get(TEST_UID);
         Assert.assertNotNull(uidEntry);
         assertEquals(3, uidEntry.callCount);
-        assertEquals(70, uidEntry.cpuTimeMicros);
-        assertEquals("Detailed tracking off - no entries should be returned",
-                0, uidEntry.getCallStatsList().size());
+        assertEquals(60 /* 10 + 50 */, uidEntry.cpuTimeMicros);
 
-        BinderCallsStats.UidEntry sampledEntries = bcs.getSampledEntries();
-        List<BinderCallsStats.CallStat> sampledCallStatsList = sampledEntries.getCallStatsList();
-        assertEquals(1, sampledCallStatsList.size());
+        List<BinderCallsStats.CallStat> callStatsList = uidEntry.getCallStatsList();
+        assertEquals(1, callStatsList.size());
+        BinderCallsStats.CallStat callStats = callStatsList.get(0);
+        assertEquals(3, callStats.callCount);
+        assertEquals(2, callStats.recordedCallCount);
+        assertEquals(60, callStats.cpuTimeMicros);
+        assertEquals(50, callStats.maxCpuTimeMicros);
+        assertEquals(0, callStats.maxRequestSizeBytes);
+        assertEquals(0, callStats.maxReplySizeBytes);
+    }
+
+    @Test
+    public void testSamplingWithDifferentApis() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setDetailedTracking(false);
+        bcs.setSamplingInterval(2);
+
+        Binder binder = new Binder();
+        BinderCallsStats.CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        callSession = bcs.callStarted(binder, 2 /* another method */);
+        bcs.time += 1000;  // shoud be ignored.
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+
+        SparseArray<BinderCallsStats.UidEntry> uidEntries = bcs.getUidEntries();
+        assertEquals(1, uidEntries.size());
+        BinderCallsStats.UidEntry uidEntry = uidEntries.get(TEST_UID);
+        assertEquals(2, uidEntry.callCount);
+        assertEquals(1, uidEntry.recordedCallCount);
+        assertEquals(10, uidEntry.cpuTimeMicros);
+
+        List<BinderCallsStats.CallStat> callStatsList = uidEntry.getCallStatsList();
+        assertEquals(2, callStatsList.size());
+
+        BinderCallsStats.CallStat callStats = callStatsList.get(0);
+        assertEquals(1, callStats.callCount);
+        assertEquals(1, callStats.recordedCallCount);
+        assertEquals(10, callStats.cpuTimeMicros);
+        assertEquals(10, callStats.maxCpuTimeMicros);
+
+        // Only call count should is tracked, rest is sampled.
+        callStats = callStatsList.get(1);
+        assertEquals(1, callStats.callCount);
+        assertEquals(0, callStats.recordedCallCount);
+        assertEquals(0, callStats.cpuTimeMicros);
+        assertEquals(0, callStats.maxCpuTimeMicros);
     }
 
     @Test
@@ -374,6 +403,7 @@ public class BinderCallsStatsTest {
         assertEquals(20, stat.latencyMicros);
         assertEquals(20, stat.maxLatencyMicros);
         assertEquals(1, stat.callCount);
+        assertEquals(1, stat.recordedCallCount);
         assertEquals(REQUEST_SIZE, stat.maxRequestSizeBytes);
         assertEquals(REPLY_SIZE, stat.maxReplySizeBytes);
         assertEquals(0, stat.exceptionCount);
@@ -385,6 +415,14 @@ public class BinderCallsStatsTest {
         long elapsedTime = 0;
 
         TestBinderCallsStats() {
+          // Make random generator not random.
+          super(new Random() {
+            int mCallCount = 0;
+
+            public int nextInt() {
+              return mCallCount++;
+            }
+          });
         }
 
         @Override
