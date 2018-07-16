@@ -180,15 +180,17 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -hidePackage com.android.server
 
 # Convert an sdk level to a "since" argument.
-since-arg = -since $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/$(1)/public/api/android.*) $(1)
+since-arg = -since $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/$(1)/public/api/android.$(2)) $(1)
 
-finalized_sdks := $(patsubst $(HISTORICAL_SDK_VERSIONS_ROOT)/%/public/api/android.xml,%,\
-    $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/*/public/api/android.xml))
-finalized_sdks += $(patsubst $(HISTORICAL_SDK_VERSIONS_ROOT)/%/public/api/android.txt,%,\
-    $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/*/public/api/android.txt))
-finalized_sdks := $(call numerically_sort,$(finalized_sdks))
+finalized_xml_sdks := $(call numerically_sort,\
+    $(patsubst $(HISTORICAL_SDK_VERSIONS_ROOT)/%/public/api/android.xml,%,\
+    $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/*/public/api/android.xml)))
+finalized_txt_sdks := $(call numerically_sort,\
+     $(patsubst $(HISTORICAL_SDK_VERSIONS_ROOT)/%/public/api/android.txt,%,\
+    $(wildcard $(HISTORICAL_SDK_VERSIONS_ROOT)/*/public/api/android.txt)))
 
-framework_docs_LOCAL_DROIDDOC_OPTIONS += $(foreach sdk,$(finalized_sdks),$(call since-arg,$(sdk)))
+framework_docs_LOCAL_DROIDDOC_OPTIONS += $(foreach sdk,$(finalized_xml_sdks),$(call since-arg,$(sdk),xml))
+framework_docs_LOCAL_DROIDDOC_OPTIONS += $(foreach sdk,$(finalized_txt_sdks),$(call since-arg,$(sdk),txt))
 ifneq ($(PLATFORM_VERSION_CODENAME),REL)
   framework_docs_LOCAL_DROIDDOC_OPTIONS += \
       -since ./frameworks/base/api/current.txt $(PLATFORM_VERSION_CODENAME)
