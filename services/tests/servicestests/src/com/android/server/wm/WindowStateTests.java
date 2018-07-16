@@ -364,15 +364,15 @@ public class WindowStateTests extends WindowTestsBase {
         app.mSurfaceControl = mock(SurfaceControl.class);
         app.mWinAnimator.mSurfaceController = mock(WindowSurfaceController.class);
         try {
-            app.mFrame.set(10, 20, 60, 80);
+            app.getFrameLw().set(10, 20, 60, 80);
 
             app.seamlesslyRotate(t, ROTATION_0, ROTATION_90);
 
             assertTrue(app.mSeamlesslyRotated);
             assertEquals(new Rect(20, mDisplayInfo.logicalWidth - 60,
-                    80, mDisplayInfo.logicalWidth - 10), app.mFrame);
+                    80, mDisplayInfo.logicalWidth - 10), app.getFrameLw());
 
-            verify(t).setPosition(app.mSurfaceControl, app.mFrame.left, app.mFrame.top);
+            verify(t).setPosition(app.mSurfaceControl, app.getFrameLw().left, app.getFrameLw().top);
             verify(app.mWinAnimator.mSurfaceController).setPosition(t, 0, 50, false);
             verify(app.mWinAnimator.mSurfaceController).setMatrix(t, 0, -1, 1, 0, false);
         } finally {

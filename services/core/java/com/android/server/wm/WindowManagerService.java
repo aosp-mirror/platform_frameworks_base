@@ -2166,7 +2166,7 @@ public class WindowManagerService extends IWindowManager.Stub
             outStableInsets.set(win.mStableInsets);
             outCutout.set(win.mDisplayCutout.getDisplayCutout());
             outOutsets.set(win.mOutsets);
-            outBackdropFrame.set(win.getBackdropFrame(win.mFrame));
+            outBackdropFrame.set(win.getBackdropFrame(win.getFrameLw()));
             if (localLOGV) Slog.v(
                 TAG_WM, "Relayout given client " + client.asBinder()
                 + ", requestedWidth=" + requestedWidth
@@ -7271,7 +7271,7 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mWindowMap) {
                 WindowState windowState = mWindowMap.get(token);
                 if (windowState != null) {
-                    outBounds.set(windowState.mFrame);
+                    outBounds.set(windowState.getFrameLw());
                 } else {
                     outBounds.setEmpty();
                 }

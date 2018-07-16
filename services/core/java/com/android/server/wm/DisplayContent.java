@@ -578,7 +578,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     w.mAppToken.layoutLetterbox(w);
                 }
 
-                if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame=" + w.mFrame
+                if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame=" + w.getFrameLw()
                         + " mContainingFrame=" + w.getContainingFrame()
                         + " mDisplayFrame=" + w.getDisplayFrameLw());
             }
@@ -606,7 +606,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 w.prelayout();
                 mService.mPolicy.layoutWindowLw(w, w.getParentWindow(), mDisplayFrames);
                 w.mLayoutSeq = mLayoutSeq;
-                if (DEBUG_LAYOUT) Slog.v(TAG, " LAYOUT: mFrame=" + w.mFrame
+                if (DEBUG_LAYOUT) Slog.v(TAG, " LAYOUT: mFrame=" + w.getFrameLw()
                         + " mContainingFrame=" + w.getContainingFrame()
                         + " mDisplayFrame=" + w.getDisplayFrameLw());
             }

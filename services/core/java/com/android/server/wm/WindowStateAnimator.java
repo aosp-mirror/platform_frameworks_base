@@ -540,13 +540,13 @@ class WindowStateAnimator {
         }
 
         if (WindowManagerService.localLOGV) Slog.v(TAG, "Got surface: " + mSurfaceController
-                + ", set left=" + w.mFrame.left + " top=" + w.mFrame.top
+                + ", set left=" + w.getFrameLw().left + " top=" + w.getFrameLw().top
                 + ", animLayer=" + mAnimLayer);
 
         if (SHOW_LIGHT_TRANSACTIONS) {
             Slog.i(TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
             WindowManagerService.logSurface(w, "CREATE pos=("
-                    + w.mFrame.left + "," + w.mFrame.top + ") ("
+                    + w.getFrameLw().left + "," + w.getFrameLw().top + ") ("
                     + width + "x" + height + "), layer=" + mAnimLayer + " HIDE", false);
         }
 
@@ -691,7 +691,7 @@ class WindowStateAnimator {
 
         if (screenAnimation) {
             // cache often used attributes locally
-            final Rect frame = mWin.mFrame;
+            final Rect frame = mWin.getFrameLw();
             final float tmpFloats[] = mService.mTmpFloats;
             final Matrix tmpMatrix = mWin.mTmpMatrix;
 
@@ -1504,8 +1504,8 @@ class WindowStateAnimator {
         // We rotated the screen, but have not received a new buffer with the correct size yet. In
         // the mean time, we rotate the buffer we have to the new orientation.
         final Matrix transform = mService.mTmpTransform;
-        transformToRotation(oldRotation, newRotation, w.mFrame.width(), w.mFrame.height(),
-                transform);
+        transformToRotation(oldRotation, newRotation, w.getFrameLw().width(),
+                w.getFrameLw().height(), transform);
         transform.getValues(mService.mTmpFloats);
 
         float DsDx = mService.mTmpFloats[Matrix.MSCALE_X];

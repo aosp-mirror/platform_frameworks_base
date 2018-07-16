@@ -549,7 +549,8 @@ final class AccessibilityController {
                     touchableRegion.getBounds(touchableFrame);
                     RectF windowFrame = mTempRectF;
                     windowFrame.set(touchableFrame);
-                    windowFrame.offset(-windowState.mFrame.left, -windowState.mFrame.top);
+                    windowFrame.offset(-windowState.getFrameLw().left,
+                            -windowState.getFrameLw().top);
                     matrix.mapRect(windowFrame);
                     Region windowBounds = mTempRegion2;
                     windowBounds.set((int) windowFrame.left, (int) windowFrame.top,
@@ -1222,7 +1223,7 @@ final class AccessibilityController {
             // Move to origin as all transforms are captured by the matrix.
             RectF windowFrame = mTempRectF;
             windowFrame.set(touchableFrame);
-            windowFrame.offset(-windowState.mFrame.left, -windowState.mFrame.top);
+            windowFrame.offset(-windowState.getFrameLw().left, -windowState.getFrameLw().top);
 
             // Map the frame to get what appears on the screen.
             Matrix matrix = mTempMatrix;
