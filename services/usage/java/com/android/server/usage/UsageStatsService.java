@@ -924,8 +924,7 @@ public class UsageStatsService extends SystemService implements
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
-            final int packageUid = mPackageManagerInternal.getPackageUid(packageName,
-                    PackageManager.MATCH_ANY_USER, userId);
+            final int packageUid = mPackageManagerInternal.getPackageUid(packageName, 0, userId);
             // If the calling app is asking about itself, continue, else check for permission.
             if (packageUid != callingUid) {
                 if (!hasPermission(callingPackage)) {
