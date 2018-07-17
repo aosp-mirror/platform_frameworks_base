@@ -554,18 +554,6 @@ static void android_os_Parcel_closeFileDescriptor(JNIEnv* env, jclass clazz, job
     }
 }
 
-static void android_os_Parcel_clearFileDescriptor(JNIEnv* env, jclass clazz, jobject object)
-{
-    if (object == NULL) {
-        jniThrowNullPointerException(env, NULL);
-        return;
-    }
-    int fd = jniGetFDFromFileDescriptor(env, object);
-    if (fd >= 0) {
-        jniSetFileDescriptorOfFD(env, object, -1);
-    }
-}
-
 static jlong android_os_Parcel_create(JNIEnv* env, jclass clazz)
 {
     Parcel* parcel = new Parcel();
@@ -811,7 +799,6 @@ static const JNINativeMethod gParcelMethods[] = {
     {"openFileDescriptor",        "(Ljava/lang/String;I)Ljava/io/FileDescriptor;", (void*)android_os_Parcel_openFileDescriptor},
     {"dupFileDescriptor",         "(Ljava/io/FileDescriptor;)Ljava/io/FileDescriptor;", (void*)android_os_Parcel_dupFileDescriptor},
     {"closeFileDescriptor",       "(Ljava/io/FileDescriptor;)V", (void*)android_os_Parcel_closeFileDescriptor},
-    {"clearFileDescriptor",       "(Ljava/io/FileDescriptor;)V", (void*)android_os_Parcel_clearFileDescriptor},
 
     {"nativeCreate",              "()J", (void*)android_os_Parcel_create},
     {"nativeFreeBuffer",          "(J)J", (void*)android_os_Parcel_freeBuffer},

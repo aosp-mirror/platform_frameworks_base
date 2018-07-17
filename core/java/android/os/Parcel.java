@@ -2149,8 +2149,6 @@ public final class Parcel {
     @Deprecated
     static native void closeFileDescriptor(FileDescriptor desc) throws IOException;
 
-    static native void clearFileDescriptor(FileDescriptor desc);
-
     /**
      * Read a byte value from the parcel at the current dataPosition().
      */

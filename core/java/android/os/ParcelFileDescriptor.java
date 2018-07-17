@@ -683,7 +683,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
                 throw new IllegalStateException("Already closed");
             }
             final int fd = getFd();
-            Parcel.clearFileDescriptor(mFd);
+            mFd.setInt$(-1);
             writeCommStatusAndClose(Status.DETACHED, null);
             mClosed = true;
             mGuard.close();
