@@ -27,6 +27,7 @@
 
 #include <zlib.h>
 
+#include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
@@ -567,7 +568,14 @@ com_android_internal_content_NativeLibraryHelper_openApkFd(JNIEnv *env, jclass,
         return 0;
     }
 
-    ZipFileRO* zipFile = ZipFileRO::openFd(fd, debugFilePath.c_str());
+    int dupedFd = dup(fd);
+    if (dupedFd == -1) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                             "Failed to dup FileDescriptor: %s", strerror(errno));
+        return 0;
+    }
+
+    ZipFileRO* zipFile = ZipFileRO::openFd(dupedFd, debugFilePath.c_str());
 
     return reinterpret_cast<jlong>(zipFile);
 }
