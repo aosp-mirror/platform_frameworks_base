@@ -23,6 +23,7 @@ import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ParseUtils;
 
 import java.io.File;
@@ -52,7 +53,8 @@ import java.util.Set;
  * All interfaces in BatteryStatsHistory should only be called by BatteryStatsImpl and protected by
  * locks on BatteryStatsImpl object.
  */
-class BatteryStatsHistory {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+public class BatteryStatsHistory {
     private static final boolean DEBUG = false;
     private static final String TAG = "BatteryStatsHistory";
     public static final String HISTORY_DIR = "battery-history";
