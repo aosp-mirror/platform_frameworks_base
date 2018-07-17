@@ -69,11 +69,18 @@ class Field():
         self.raw = raw.strip(" {;")
         self.blame = blame
 
+        # drop generics for now; may need multiple passes
+        raw = re.sub("<[^<]+?>", "", raw)
+        raw = re.sub("<[^<]+?>", "", raw)
+
         raw = raw.split()
         self.split = list(raw)
 
         for r in ["field", "volatile", "transient", "public", "protected", "static", "final", "deprecated"]:
             while r in raw: raw.remove(r)
+
+        # ignore annotations for now
+        raw = [ r for r in raw if not r.startswith("@") ]
 
         self.typ = raw[0]
         self.name = raw[1].strip(";")
@@ -97,25 +104,39 @@ class Method():
         self.raw = raw.strip(" {;")
         self.blame = blame
 
-        # drop generics for now
-        raw = re.sub("<.+?>", "", raw)
+        # drop generics for now; may need multiple passes
+        raw = re.sub("<[^<]+?>", "", raw)
+        raw = re.sub("<[^<]+?>", "", raw)
 
-        raw = re.split("[\s(),;]+", raw)
+        # handle each clause differently
+        raw_prefix, raw_args, _, raw_throws = re.match(r"(.*?)\((.*?)\)( throws )?(.*?);$", raw).groups()
+
+        # parse prefixes
+        raw = re.split("[\s]+", raw_prefix)
         for r in ["", ";"]:
             while r in raw: raw.remove(r)
         self.split = list(raw)
 
-        for r in ["method", "public", "protected", "static", "final", "deprecated", "abstract", "default"]:
+        for r in ["method", "public", "protected", "static", "final", "deprecated", "abstract", "default", "operator"]:
             while r in raw: raw.remove(r)
 
         self.typ = raw[0]
         self.name = raw[1]
+
+        # parse args
         self.args = []
+        for arg in re.split(",\s*", raw_args):
+            arg = re.split("\s", arg)
+            # ignore annotations for now
+            arg = [ a for a in arg if not a.startswith("@") ]
+            if len(arg[0]) > 0:
+                self.args.append(arg[0])
+
+        # parse throws
         self.throws = []
-        target = self.args
-        for r in raw[2:]:
-            if r == "throws": target = self.throws
-            else: target.append(r)
+        for throw in re.split(",\s*", raw_throws):
+            self.throws.append(throw)
+
         self.ident = ident(self.raw)
 
     def __hash__(self):
@@ -135,12 +156,18 @@ class Class():
         self.fields = []
         self.methods = []
 
+        # drop generics for now; may need multiple passes
+        raw = re.sub("<[^<]+?>", "", raw)
+        raw = re.sub("<[^<]+?>", "", raw)
+
         raw = raw.split()
         self.split = list(raw)
         if "class" in raw:
             self.fullname = raw[raw.index("class")+1]
         elif "interface" in raw:
             self.fullname = raw[raw.index("interface")+1]
+        elif "@interface" in raw:
+            self.fullname = raw[raw.index("@interface")+1]
         else:
             raise ValueError("Funky class type %s" % (self.raw))
 
