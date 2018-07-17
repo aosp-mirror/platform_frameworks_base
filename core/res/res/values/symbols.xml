@@ -3404,4 +3404,7 @@
 
   <java-symbol type="integer" name="config_defaultHapticFeedbackIntensity" />
   <java-symbol type="integer" name="config_defaultNotificationVibrationIntensity" />
+
+  <java-symbol type="array" name="config_disableApksUnlessMatchedSku_apk_list" />
+  <java-symbol type="array" name="config_disableApkUnlessMatchedSku_skus_list" />
 </resources>
