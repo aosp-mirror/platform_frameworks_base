@@ -84,12 +84,12 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
     }
 
     /**
-     * This test ensures that we do not try to restore a task based off an invalid task id. The
-     * stack supervisor is a test version so there will be no tasks present. We should expect
-     * {@code null} to be returned in this case.
+     * This test ensures that we do not try to restore a task based off an invalid task id. We
+     * should expect {@code null} to be returned in this case.
      */
     @Test
     public void testRestoringInvalidTask() throws Exception {
+        ((TestActivityDisplay) mSupervisor.getDefaultDisplay()).removeAllTasks();
         TaskRecord task = mSupervisor.anyTaskForIdLocked(0 /*taskId*/,
                 MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE, null, false /* onTop */);
         assertNull(task);
@@ -109,7 +109,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
                 .setStack(mFullscreenStack).build();
         final TaskRecord secondTask = secondActivity.getTask();
 
-        mSupervisor.setFocusStackUnchecked("testReplacingTaskInPinnedStack", mFullscreenStack);
+        mFullscreenStack.moveToFront("testReplacingTaskInPinnedStack");
 
         // Ensure full screen stack has both tasks.
         ensureStackPlacement(mFullscreenStack, firstTask, secondTask);
@@ -239,7 +239,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         doReturn(displaySleeping).when(display).isSleeping();
         doReturn(keyguardShowing).when(keyguard).isKeyguardOrAodShowing(anyInt());
 
-        mSupervisor.mFocusedStack = isFocusedStack ? stack : null;
+        doReturn(isFocusedStack ? stack : null).when(display).getFocusedStack();
         mSupervisor.applySleepTokensLocked(true);
         verify(stack, times(expectWakeFromSleep ? 1 : 0)).awakeFromSleepingLocked();
         verify(stack, times(expectResumeTopActivity ? 1 : 0)).resumeTopActivityUncheckedLocked(
@@ -253,11 +253,10 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
 
         doAnswer((InvocationOnMock invocationOnMock) -> {
             final SparseIntArray displayIds = invocationOnMock.<SparseIntArray>getArgument(0);
-            displayIds.put(0, unknownDisplayId);
+            displayIds.put(0, 0);
+            displayIds.put(1, unknownDisplayId);
             return null;
         }).when(mSupervisor.mWindowManager).getDisplaysInFocusOrder(any());
-
-        mSupervisor.mFocusedStack = mock(ActivityStack.class);
 
         // Supervisor should skip over the non-existent display.
         assertEquals(null, mSupervisor.topRunningActivityLocked());
@@ -330,8 +329,9 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
     @Test
     public void testTopRunningActivity() throws Exception {
         // Create stack to hold focus
-        final ActivityStack emptyStack = mService.mStackSupervisor.getDefaultDisplay()
-                .createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final ActivityDisplay display = mService.mStackSupervisor.getDefaultDisplay();
+        final ActivityStack emptyStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         final KeyguardController keyguard = mSupervisor.getKeyguardController();
         final ActivityStack stack = mService.mStackSupervisor.getDefaultDisplay().createStack(
@@ -339,11 +339,9 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mService).setCreateTask(true)
                 .setStack(stack).build();
 
-        mSupervisor.mFocusedStack = emptyStack;
-
         doAnswer((InvocationOnMock invocationOnMock) -> {
             final SparseIntArray displayIds = invocationOnMock.<SparseIntArray>getArgument(0);
-            displayIds.put(0, mSupervisor.getDefaultDisplay().mDisplayId);
+            displayIds.put(0, display.mDisplayId);
             return null;
         }).when(mSupervisor.mWindowManager).getDisplaysInFocusOrder(any());
 
@@ -359,7 +357,8 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
                 true /* considerKeyguardState */));
 
         // Change focus to stack with activity.
-        mSupervisor.mFocusedStack = stack;
+        stack.moveToFront("focusChangeToTestStack");
+        assertEquals(stack, display.getFocusedStack());
         assertEquals(activity, mService.mStackSupervisor.topRunningActivityLocked());
         assertEquals(null, mService.mStackSupervisor.topRunningActivityLocked(
                 true /* considerKeyguardState */));
@@ -377,10 +376,12 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
                 true /* considerKeyguardState */));
 
         // Change focus back to empty stack
-        mSupervisor.mFocusedStack = emptyStack;
-        // Ensure the show when locked activity is returned when not the focused stack
-        assertEquals(showWhenLockedActivity, mService.mStackSupervisor.topRunningActivityLocked());
-        assertEquals(showWhenLockedActivity, mService.mStackSupervisor.topRunningActivityLocked(
+        emptyStack.moveToFront("focusChangeToEmptyStack");
+        assertEquals(emptyStack, display.getFocusedStack());
+        // Looking for running activity only in top and focused stack, so nothing should be returned
+        // from empty stack.
+        assertEquals(null, mService.mStackSupervisor.topRunningActivityLocked());
+        assertEquals(null, mService.mStackSupervisor.topRunningActivityLocked(
                 true /* considerKeyguardState */));
     }
 

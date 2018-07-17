@@ -43,6 +43,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -136,7 +137,8 @@ public class ActivityRecordTests extends ActivityTestsBase {
         assertFalse(pauseFound.value);
 
         // Clear focused stack
-        mActivity.mStackSupervisor.mFocusedStack = null;
+        final ActivityDisplay display = mActivity.mStackSupervisor.getDefaultDisplay();
+        when(display.getFocusedStack()).thenReturn(null);
 
         // In the unfocused stack, the activity should move to paused.
         mActivity.makeVisibleIfNeeded(null /* starting */, true /* reportToClient */);

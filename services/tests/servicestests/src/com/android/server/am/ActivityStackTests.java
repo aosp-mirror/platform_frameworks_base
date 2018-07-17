@@ -167,7 +167,7 @@ public class ActivityStackTests extends ActivityTestsBase {
     public void testStopActivityWhenActivityDestroyed() throws Exception {
         final ActivityRecord r = new ActivityBuilder(mService).setTask(mTask).build();
         r.info.flags |= ActivityInfo.FLAG_NO_HISTORY;
-        mSupervisor.setFocusStackUnchecked("testStopActivityWithDestroy", mStack);
+        mStack.moveToFront("testStopActivityWithDestroy");
         mStack.stopActivityLocked(r);
         // Mostly testing to make sure there is a crash in the call part, so if we get here we are
         // good-to-go!
@@ -546,9 +546,20 @@ public class ActivityStackTests extends ActivityTestsBase {
 
     private <T extends ActivityStack> T createStackForShouldBeVisibleTest(
             ActivityDisplay display, int windowingMode, int activityType, boolean onTop) {
-        final T stack = display.createStack(windowingMode, activityType, onTop);
-        final ActivityRecord r = new ActivityBuilder(mService).setUid(0).setStack(stack)
-                .setCreateTask(true).build();
+        final T stack;
+        if (activityType == ACTIVITY_TYPE_HOME) {
+            // Home stack and activity are created in ActivityTestsBase#setupActivityManagerService
+            stack = mDefaultDisplay.getStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
+            if (onTop) {
+                mDefaultDisplay.positionChildAtTop(stack);
+            } else {
+                mDefaultDisplay.positionChildAtBottom(stack);
+            }
+        } else {
+            stack = display.createStack(windowingMode, activityType, onTop);
+            final ActivityRecord r = new ActivityBuilder(mService).setUid(0).setStack(stack)
+                    .setCreateTask(true).build();
+        }
         return stack;
     }
 
@@ -654,14 +665,13 @@ public class ActivityStackTests extends ActivityTestsBase {
 
     private void verifyShouldSleepActivities(boolean focusedStack,
             boolean keyguardGoingAway, boolean displaySleeping, boolean expected) {
-        mSupervisor.mFocusedStack = focusedStack ? mStack : null;
-
         final ActivityDisplay display = mock(ActivityDisplay.class);
         final KeyguardController keyguardController = mSupervisor.getKeyguardController();
 
         doReturn(display).when(mSupervisor).getActivityDisplay(anyInt());
         doReturn(keyguardGoingAway).when(keyguardController).isKeyguardGoingAway();
         doReturn(displaySleeping).when(display).isSleeping();
+        doReturn(focusedStack ? mStack : null).when(mSupervisor).getTopDisplayFocusedStack();
 
         assertEquals(expected, mStack.shouldSleepActivities());
     }
