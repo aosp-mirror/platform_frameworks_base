@@ -44,7 +44,11 @@ public class TaskPersisterTest extends AndroidTestCase {
         super.setUp();
         mUserManager = UserManager.get(getContext());
         mTaskPersister = new TaskPersister(getContext().getFilesDir());
-        testUserId = createUser(TEST_USER_NAME, 0);
+        // In ARC, the maximum number of supported users is one, which is different from the ones of
+        // most phones (more than 4). This prevents TaskPersisterTest from creating another user for
+        // test. However, since guest users can be added as much as possible, we create guest user
+        // in the test.
+        testUserId = createUser(TEST_USER_NAME, UserInfo.FLAG_GUEST);
     }
 
     @Override

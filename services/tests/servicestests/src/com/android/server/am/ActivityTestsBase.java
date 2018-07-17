@@ -248,7 +248,8 @@ public class ActivityTestsBase {
         private ComponentName mComponent;
         private String mPackage;
         private int mFlags = 0;
-        private int mTaskId = 0;
+        // Task id 0 is reserved in ARC for the home app.
+        private int mTaskId = 1;
         private int mUserId = 0;
         private IVoiceInteractionSession mVoiceSession;
         private boolean mCreateStack = true;
