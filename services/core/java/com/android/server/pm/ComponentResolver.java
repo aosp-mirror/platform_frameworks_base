@@ -1048,11 +1048,14 @@ public class ComponentResolver {
                         final String otherPackageName =
                                 (other != null && other.getComponentName() != null)
                                         ? other.getComponentName().getPackageName() : "?";
-                        throw new PackageManagerException(
-                                INSTALL_FAILED_CONFLICTING_PROVIDER,
-                                "Can't install because provider name " + names[j]
-                                        + " (in package " + pkg.applicationInfo.packageName
-                                        + ") is already used by " + otherPackageName);
+                        // if we're installing over the same already-installed package, this is ok
+                        if (otherPackageName != pkg.packageName) {
+                            throw new PackageManagerException(
+                                    INSTALL_FAILED_CONFLICTING_PROVIDER,
+                                    "Can't install because provider name " + names[j]
+                                            + " (in package " + pkg.applicationInfo.packageName
+                                            + ") is already used by " + otherPackageName);
+                        }
                     }
                 }
             }
