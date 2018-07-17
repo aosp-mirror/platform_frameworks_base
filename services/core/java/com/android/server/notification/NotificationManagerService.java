@@ -4844,6 +4844,8 @@ public class NotificationManagerService extends SystemService {
 
                         buzz = playVibration(record, vibration, hasValidSound);
                     }
+                } else if ((record.getFlags() & Notification.FLAG_INSISTENT) != 0) {
+                    hasValidSound = false;
                 }
             }
         }
