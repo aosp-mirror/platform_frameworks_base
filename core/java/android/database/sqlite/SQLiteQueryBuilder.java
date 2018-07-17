@@ -153,6 +153,45 @@ public class SQLiteQueryBuilder {
     }
 
     /**
+     * Append a standalone expression to the {@code WHERE} clause of this query.
+     * <p>
+     * This method differs from {@link #appendWhere(CharSequence)} in that it
+     * automatically appends {@code AND} to any existing {@code WHERE} clause
+     * already under construction before appending the given standalone
+     * expression.
+     *
+     * @param inWhere the standalone expression to append to the {@code WHERE}
+     *            clause. It will be wrapped in parentheses when it's appended.
+     */
+    public void appendWhereExpression(@NonNull CharSequence inWhere) {
+        appendWhereExpression(inWhere, EmptyArray.STRING);
+    }
+
+    /**
+     * Append a standalone expression to the {@code WHERE} clause of this query.
+     * <p>
+     * This method differs from {@link #appendWhere(CharSequence)} in that it
+     * automatically appends {@code AND} to any existing {@code WHERE} clause
+     * already under construction before appending the given standalone
+     * expression.
+     *
+     * @param inWhere the standalone expression to append to the {@code WHERE}
+     *            clause. It will be wrapped in parentheses when it's appended.
+     * @param inWhereArgs list of arguments to be bound to any '?' occurrences
+     *            in the standalone expression.
+     */
+    public void appendWhereExpression(@NonNull CharSequence inWhere, String... inWhereArgs) {
+        if (mWhereClause == null) {
+            mWhereClause = new StringBuilder(inWhere.length() + 16);
+        }
+        if (mWhereClause.length() > 0) {
+            mWhereClause.append(" AND ");
+        }
+        mWhereClause.append('(').append(inWhere).append(')');
+        mWhereArgs = ArrayUtils.concat(String.class, mWhereArgs, inWhereArgs);
+    }
+
+    /**
      * Append a chunk to the {@code WHERE} clause of the query. All chunks
      * appended are surrounded by parenthesis and {@code AND}ed with the
      * selection passed to {@link #query}. The final {@code WHERE} clause looks
@@ -536,6 +575,16 @@ public class SQLiteQueryBuilder {
             queryArgs = Bundle.EMPTY;
         }
 
+        // Final SQL that we will execute
+        final String sql;
+
+        final String unwrappedSql = buildQuery(projection,
+                queryArgs.getString(QUERY_ARG_SQL_SELECTION),
+                queryArgs.getString(QUERY_ARG_SQL_GROUP_BY),
+                queryArgs.getString(QUERY_ARG_SQL_HAVING),
+                queryArgs.getString(QUERY_ARG_SQL_SORT_ORDER),
+                queryArgs.getString(QUERY_ARG_SQL_LIMIT));
+
         if (mStrict) {
             // Validate the user-supplied selection to detect syntactic anomalies
             // in the selection string that could indicate a SQL injection attempt.
@@ -545,23 +594,29 @@ public class SQLiteQueryBuilder {
             // would escape the SQL expression while maintaining balanced parentheses
             // in both the wrapped and original forms.
 
+            // NOTE: The ordering of the below operations is important; we must
+            // execute the wrapped query to ensure the untrusted clause has been
+            // fully isolated.
+
             // TODO: decode SORT ORDER and LIMIT clauses, since they can contain
             // "expr" inside that need to be validated
-            final String sql = buildQuery(projection,
+
+            final String wrappedSql = buildQuery(projection,
                     wrap(queryArgs.getString(QUERY_ARG_SQL_SELECTION)),
                     queryArgs.getString(QUERY_ARG_SQL_GROUP_BY),
                     queryArgs.getString(QUERY_ARG_SQL_HAVING),
                     queryArgs.getString(QUERY_ARG_SQL_SORT_ORDER),
                     queryArgs.getString(QUERY_ARG_SQL_LIMIT));
-            db.validateSql(sql, cancellationSignal); // will throw if query is invalid
-        }
 
-        final String sql = buildQuery(projection,
-                queryArgs.getString(QUERY_ARG_SQL_SELECTION),
-                queryArgs.getString(QUERY_ARG_SQL_GROUP_BY),
-                queryArgs.getString(QUERY_ARG_SQL_HAVING),
-                queryArgs.getString(QUERY_ARG_SQL_SORT_ORDER),
-                queryArgs.getString(QUERY_ARG_SQL_LIMIT));
+            // Validate the unwrapped query
+            db.validateSql(unwrappedSql, cancellationSignal);
+
+            // Execute wrapped query for extra protection
+            sql = wrappedSql;
+        } else {
+            // Execute unwrapped query
+            sql = unwrappedSql;
+        }
 
         final String[] sqlArgs = ArrayUtils.concat(String.class,
                 queryArgs.getStringArray(QUERY_ARG_SQL_SELECTION_ARGS), mWhereArgs);
@@ -611,7 +666,8 @@ public class SQLiteQueryBuilder {
         final ArrayMap<String, Object> rawValues = values.getValues();
         final String[] updateArgs = new String[rawValues.size()];
         for (int i = 0; i < updateArgs.length; i++) {
-            updateArgs[i] = String.valueOf(rawValues.valueAt(i));
+            final Object arg = rawValues.valueAt(i);
+            updateArgs[i] = (arg != null) ? arg.toString() : null;
         }
 
         final String sql = buildUpdate(values, selection);
