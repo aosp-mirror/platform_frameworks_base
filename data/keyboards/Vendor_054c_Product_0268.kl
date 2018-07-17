@@ -35,7 +35,7 @@ key 0x121    BUTTON_THUMBL
 key 0x122    BUTTON_THUMBR
 
 # PS key
-key 0x2d0    HOME
+key 0x2d0    BUTTON_MODE
 
 # Left Analog Stick
 axis 0x00    X
