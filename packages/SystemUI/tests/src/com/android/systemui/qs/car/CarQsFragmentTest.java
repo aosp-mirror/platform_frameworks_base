@@ -42,7 +42,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
-@Ignore("Flaky")
+@Ignore
 public class CarQsFragmentTest extends SysuiBaseFragmentTest {
     public CarQsFragmentTest() {
         super(CarQSFragment.class);
@@ -64,6 +64,7 @@ public class CarQsFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    @Ignore("Flaky")
     public void testLayoutInflation() {
         CarQSFragment fragment = (CarQSFragment) mFragment;
         mFragments.dispatchResume();
@@ -73,6 +74,7 @@ public class CarQsFragmentTest extends SysuiBaseFragmentTest {
     }
 
     @Test
+    @Ignore("Flaky")
     public void testListening() {
         CarQSFragment qs = (CarQSFragment) mFragment;
         mFragments.dispatchResume();

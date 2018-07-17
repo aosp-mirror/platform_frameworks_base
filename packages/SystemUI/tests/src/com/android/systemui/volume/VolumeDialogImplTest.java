@@ -56,10 +56,10 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.function.Predicate;
 
-@Ignore
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
+@Ignore
 public class VolumeDialogImplTest extends SysuiTestCase {
 
     VolumeDialogImpl mDialog;
