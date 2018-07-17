@@ -3080,16 +3080,32 @@ public class ActivityManager {
          */
         public int processState;
 
+        /**
+         * Whether the app is focused in multi-window environment.
+         * @hide
+         */
+        public boolean isFocused;
+
+        /**
+         * Copy of {@link com.android.server.am.ProcessRecord#lastActivityTime} of the process.
+         * @hide
+         */
+        public long lastActivityTime;
+
         public RunningAppProcessInfo() {
             importance = IMPORTANCE_FOREGROUND;
             importanceReasonCode = REASON_UNKNOWN;
             processState = PROCESS_STATE_IMPORTANT_FOREGROUND;
+            isFocused = false;
+            lastActivityTime = 0;
         }
 
         public RunningAppProcessInfo(String pProcessName, int pPid, String pArr[]) {
             processName = pProcessName;
             pid = pPid;
             pkgList = pArr;
+            isFocused = false;
+            lastActivityTime = 0;
         }
 
         public int describeContents() {
@@ -3110,6 +3126,8 @@ public class ActivityManager {
             ComponentName.writeToParcel(importanceReasonComponent, dest);
             dest.writeInt(importanceReasonImportance);
             dest.writeInt(processState);
+            dest.writeInt(isFocused ? 1 : 0);
+            dest.writeLong(lastActivityTime);
         }
 
         public void readFromParcel(Parcel source) {
@@ -3126,6 +3144,8 @@ public class ActivityManager {
             importanceReasonComponent = ComponentName.readFromParcel(source);
             importanceReasonImportance = source.readInt();
             processState = source.readInt();
+            isFocused = source.readInt() != 0;
+            lastActivityTime = source.readLong();
         }
 
         public static final Creator<RunningAppProcessInfo> CREATOR =

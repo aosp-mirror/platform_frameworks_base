@@ -94,18 +94,27 @@ class ChunkIterator {
 
   Chunk Next();
   inline bool HasNext() const { return !HadError() && len_ != 0; };
+  // Returns whether there was an error and processing should stop
   inline bool HadError() const { return last_error_ != nullptr; }
   inline std::string GetLastError() const { return last_error_; }
+  // Returns whether there was an error and processing should stop. For legacy purposes,
+  // some errors are considered "non fatal". Fatal errors stop processing new chunks and
+  // throw away any chunks already processed. Non fatal errors also stop processing new
+  // chunks, but, will retain and use any valid chunks already processed.
+  inline bool HadFatalError() const { return HadError() && last_error_was_fatal_; }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ChunkIterator);
 
   // Returns false if there was an error.
   bool VerifyNextChunk();
+  // Returns false if there was an error. For legacy purposes.
+  bool VerifyNextChunkNonFatal();
 
   const ResChunk_header* next_chunk_;
   size_t len_;
   const char* last_error_;
+  bool last_error_was_fatal_ = true;
 };
 
 }  // namespace android

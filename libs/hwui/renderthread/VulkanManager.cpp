@@ -327,8 +327,6 @@ void VulkanManager::initialize() {
         }
         return vkGetInstanceProcAddr(instance, proc_name);
     };
-    auto interface =
-        sk_make_sp<GrVkInterface>(getProc, mInstance, mDevice, extensionFlags);
 
     GrVkBackendContext backendContext;
     backendContext.fInstance = mInstance;
@@ -339,7 +337,7 @@ void VulkanManager::initialize() {
     backendContext.fMinAPIVersion = VK_MAKE_VERSION(1, 0, 0);
     backendContext.fExtensions = extensionFlags;
     backendContext.fFeatures = featureFlags;
-    backendContext.fInterface = std::move(interface);
+    backendContext.fGetProc = std::move(getProc);
     backendContext.fOwnsInstanceAndDevice = false;
 
     // create the command pool for the command buffers

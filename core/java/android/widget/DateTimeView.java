@@ -30,7 +30,6 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
-import android.icu.util.Calendar;
 import android.os.Handler;
 import android.text.format.Time;
 import android.util.AttributeSet;
@@ -41,6 +40,7 @@ import com.android.internal.R;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -301,7 +301,7 @@ public class DateTimeView extends TextView {
      */
     private long computeNextMidnight(TimeZone timeZone) {
         Calendar c = Calendar.getInstance();
-        c.setTimeZone(libcore.icu.DateUtilsBridge.icuTimeZone(timeZone));
+        c.setTimeZone(timeZone);
         c.add(Calendar.DAY_OF_MONTH, 1);
         c.set(Calendar.HOUR_OF_DAY, 0);
         c.set(Calendar.MINUTE, 0);
