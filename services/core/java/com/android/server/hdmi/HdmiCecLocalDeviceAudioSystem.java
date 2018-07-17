@@ -201,6 +201,15 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         return true;
     }
 
+    @ServiceThreadOnly
+    protected boolean handleRequestShortAudioDescriptor(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        // TODO(b/80297701): implement request short audio descriptor
+        HdmiLogger.debug(TAG + "Stub handleRequestShortAudioDescriptor");
+        mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
+        return true;
+    }
+
     @Override
     @ServiceThreadOnly
     protected boolean handleSystemAudioModeRequest(HdmiCecMessage message) {
