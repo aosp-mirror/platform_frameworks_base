@@ -53,8 +53,6 @@ public class KernelSingleUidTimeReader {
     private int mReadErrorCounter;
     @GuardedBy("this")
     private boolean mSingleUidCpuTimesAvailable = true;
-    @GuardedBy("this")
-    private boolean mHasStaleData;
     // We use the freq count obtained from /proc/uid_time_in_state to decide how many longs
     // to read from each /proc/uid/<uid>/time_in_state. On the first read, verify if this is
     // correct and if not, set {@link #mSingleUidCpuTimesAvailable} to false. This flag will
@@ -194,18 +192,6 @@ public class KernelSingleUidTimeReader {
             }
         }
         return deltaTimesMs;
-    }
-
-    public void markDataAsStale(boolean hasStaleData) {
-        synchronized (this) {
-            mHasStaleData = hasStaleData;
-        }
-    }
-
-    public boolean hasStaleData() {
-        synchronized (this) {
-            return mHasStaleData;
-        }
     }
 
     public void setAllUidsCpuTimesMs(SparseArray<long[]> allUidsCpuTimesMs) {
