@@ -21,8 +21,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -51,7 +53,8 @@ public class PowerWhitelistBackendTest {
 
     @Mock
     private IDeviceIdleController mDeviceIdleService;
-
+    @Mock
+    private DevicePolicyManager mDevicePolicyManager;
     private PowerWhitelistBackend mPowerWhitelistBackend;
     private ShadowPackageManager mPackageManager;
     private Context mContext;
@@ -59,7 +62,9 @@ public class PowerWhitelistBackendTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mContext = RuntimeEnvironment.application;
+        mContext = spy(RuntimeEnvironment.application);
+        doReturn(mContext).when(mContext).getApplicationContext();
+        doReturn(mDevicePolicyManager).when(mContext).getSystemService(DevicePolicyManager.class);
         doReturn(new String[] {}).when(mDeviceIdleService).getFullPowerWhitelist();
         doReturn(new String[] {}).when(mDeviceIdleService).getSystemPowerWhitelist();
         doReturn(new String[] {}).when(mDeviceIdleService).getSystemPowerWhitelistExceptIdle();
@@ -67,6 +72,7 @@ public class PowerWhitelistBackendTest {
         doNothing().when(mDeviceIdleService).removePowerSaveWhitelistApp(anyString());
         mPackageManager = Shadow.extract(mContext.getPackageManager());
         mPackageManager.setSystemFeature(PackageManager.FEATURE_TELEPHONY, true);
+
 
         mPowerWhitelistBackend = new PowerWhitelistBackend(mContext, mDeviceIdleService);
     }
@@ -120,6 +126,13 @@ public class PowerWhitelistBackendTest {
         ShadowDefaultDialerManager.setDefaultDialerApplication(testDialer);
 
         assertThat(mPowerWhitelistBackend.isWhitelisted(testDialer)).isTrue();
+    }
+
+    @Test
+    public void isWhitelisted_shouldWhitelistActiveDeviceAdminApp() {
+        doReturn(true).when(mDevicePolicyManager).packageHasActiveAdmins(PACKAGE_ONE);
+
+        assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isTrue();
     }
 
     @Test

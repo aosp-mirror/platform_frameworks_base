@@ -16,6 +16,7 @@
 
 package com.android.settingslib.fuelgauge;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -89,6 +90,13 @@ public class PowerWhitelistBackend {
         if (TextUtils.equals(pkg, defaultDialer)) {
             return true;
         }
+
+        final DevicePolicyManager devicePolicyManager = mAppContext.getSystemService(
+                DevicePolicyManager.class);
+        if (devicePolicyManager.packageHasActiveAdmins(pkg)) {
+            return true;
+        }
+
         return false;
     }
 
