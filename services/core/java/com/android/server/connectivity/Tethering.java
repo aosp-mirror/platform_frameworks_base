@@ -115,7 +115,6 @@ import com.android.server.LocalServices;
 import com.android.server.connectivity.tethering.IControlsTethering;
 import com.android.server.connectivity.tethering.IPv6TetheringCoordinator;
 import com.android.server.connectivity.tethering.OffloadController;
-import com.android.server.connectivity.tethering.SimChangeListener;
 import com.android.server.connectivity.tethering.TetherInterfaceStateMachine;
 import com.android.server.connectivity.tethering.TetheringConfiguration;
 import com.android.server.connectivity.tethering.TetheringDependencies;
@@ -201,8 +200,6 @@ public class Tethering extends BaseNetworkObserver {
     // into a single coherent structure.
     private final HashSet<TetherInterfaceStateMachine> mForwardedDownstreams;
     private final VersionedBroadcastListener mCarrierConfigChange;
-    // TODO: Delete SimChangeListener; it's obsolete.
-    private final SimChangeListener mSimChange;
     private final TetheringDependencies mDeps;
 
     private volatile TetheringConfiguration mConfig;
@@ -251,14 +248,6 @@ public class Tethering extends BaseNetworkObserver {
                     mLog.log("OBSERVED carrier config change");
                     updateConfiguration();
                     reevaluateSimCardProvisioning();
-                });
-        // TODO: Remove SimChangeListener altogether. For now, we retain it
-        // for logging purposes in case we need to debug something that might
-        // be related to changing signals from ACTION_SIM_STATE_CHANGED to
-        // ACTION_CARRIER_CONFIG_CHANGED.
-        mSimChange = new SimChangeListener(
-                mContext, smHandler, () -> {
-                    mLog.log("OBSERVED SIM card change");
                 });
 
         mStateReceiver = new StateReceiver();
@@ -1530,7 +1519,6 @@ public class Tethering extends BaseNetworkObserver {
                     return;
                 }
 
-                mSimChange.startListening();
                 mUpstreamNetworkMonitor.start(mDeps.getDefaultNetworkRequest());
 
                 // TODO: De-duplicate with updateUpstreamWanted() below.
@@ -1546,7 +1534,6 @@ public class Tethering extends BaseNetworkObserver {
             public void exit() {
                 mOffload.stop();
                 mUpstreamNetworkMonitor.stop();
-                mSimChange.stopListening();
                 notifyDownstreamsOfNewUpstreamIface(null);
                 handleNewUpstreamNetworkState(null);
             }
