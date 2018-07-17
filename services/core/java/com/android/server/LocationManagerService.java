@@ -795,6 +795,7 @@ public class LocationManagerService extends ILocationManager.Stub {
      * location updates.
      */
     private final class Receiver implements IBinder.DeathRecipient, PendingIntent.OnFinished {
+        private static final long WAKELOCK_TIMEOUT_MILLIS = 60 * 1000;
         final Identity mIdentity;
         final int mAllowedResolutionLevel;  // resolution level allowed to receiver
 
@@ -838,6 +839,10 @@ public class LocationManagerService extends ILocationManager.Stub {
                 workSource = new WorkSource(mIdentity.mUid, mIdentity.mPackageName);
             }
             mWakeLock.setWorkSource(workSource);
+
+            // For a non-reference counted wakelock, each acquire will reset the timeout, and we
+            // only need to release it once.
+            mWakeLock.setReferenceCounted(false);
         }
 
         @Override
@@ -1099,9 +1104,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         // this must be called while synchronized by caller in a synchronized block
         // containing the sending of the broadcaset
         private void incrementPendingBroadcastsLocked() {
-            if (mPendingBroadcasts++ == 0) {
-                mWakeLock.acquire();
-            }
+            mPendingBroadcasts++;
+            mWakeLock.acquire(WAKELOCK_TIMEOUT_MILLIS);
         }
 
         private void decrementPendingBroadcastsLocked() {
