@@ -13231,7 +13231,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (dumpAll) {
             if (dumpPackage == null) {
-                pw.println("  mConfigWillChange: " + mActivityTaskManager.getFocusedStack().mConfigWillChange);
+                pw.println("  mConfigWillChange: "
+                        + mActivityTaskManager.getTopDisplayFocusedStack().mConfigWillChange);
             }
             if (mCompatModePackages.getPackages().size() > 0) {
                 boolean printed = false;
@@ -13602,7 +13603,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (dumpPackage == null) {
             mUserController.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.USER_CONTROLLER);
             getGlobalConfiguration().writeToProto(proto, ActivityManagerServiceDumpProcessesProto.GLOBAL_CONFIGURATION);
-            proto.write(ActivityManagerServiceDumpProcessesProto.CONFIG_WILL_CHANGE, mActivityTaskManager.getFocusedStack().mConfigWillChange);
+            proto.write(ActivityManagerServiceDumpProcessesProto.CONFIG_WILL_CHANGE, mActivityTaskManager.getTopDisplayFocusedStack().mConfigWillChange);
         }
 
         if (mActivityTaskManager.mHomeProcess != null && (dumpPackage == null

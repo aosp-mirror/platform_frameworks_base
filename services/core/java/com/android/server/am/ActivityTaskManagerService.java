@@ -766,7 +766,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             // If this is coming from the currently resumed activity, it is
             // effectively saying that app switches are allowed at this point.
-            final ActivityStack stack = getFocusedStack();
+            final ActivityStack stack = getTopDisplayFocusedStack();
             if (stack.mResumedActivity != null &&
                     stack.mResumedActivity.info.applicationInfo.uid == Binder.getCallingUid()) {
                 mAppSwitchesAllowedTime = 0;
@@ -1412,7 +1412,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public boolean isTopActivityImmersive() {
         enforceNotIsolatedCaller("isTopActivityImmersive");
         synchronized (mGlobalLock) {
-            final ActivityRecord r = getFocusedStack().topRunningActivityLocked();
+            final ActivityRecord r = getTopDisplayFocusedStack().topRunningActivityLocked();
             return (r != null) ? r.immersive : false;
         }
     }
@@ -1443,7 +1443,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         enforceNotIsolatedCaller("getFrontActivityScreenCompatMode");
         ApplicationInfo ai;
         synchronized (mGlobalLock) {
-            final ActivityRecord r = getFocusedStack().topRunningActivityLocked();
+            final ActivityRecord r = getTopDisplayFocusedStack().topRunningActivityLocked();
             if (r == null) {
                 return ActivityManager.COMPAT_MODE_UNKNOWN;
             }
@@ -1459,7 +1459,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 "setFrontActivityScreenCompatMode");
         ApplicationInfo ai;
         synchronized (mGlobalLock) {
-            final ActivityRecord r = getFocusedStack().topRunningActivityLocked();
+            final ActivityRecord r = getTopDisplayFocusedStack().topRunningActivityLocked();
             if (r == null) {
                 Slog.w(TAG, "setFrontActivityScreenCompatMode failed: no top activity");
                 return;
@@ -1583,7 +1583,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                ActivityStack focusedStack = getFocusedStack();
+                ActivityStack focusedStack = getTopDisplayFocusedStack();
                 if (focusedStack != null) {
                     return mStackSupervisor.getStackInfo(focusedStack.mStackId);
                 }
@@ -1828,7 +1828,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long origId = Binder.clearCallingIdentity();
             try {
-                getFocusedStack().unhandledBackLocked();
+                getTopDisplayFocusedStack().unhandledBackLocked();
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -2280,7 +2280,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return;
         }
 
-        final ActivityStack stack = mStackSupervisor.getFocusedStack();
+        final ActivityStack stack = mStackSupervisor.getTopDisplayFocusedStack();
         if (stack == null || task != stack.topTask()) {
             throw new IllegalArgumentException("Invalid task, not in foreground");
         }
@@ -2948,7 +2948,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 "enqueueAssistContext()");
 
         synchronized (mGlobalLock) {
-            ActivityRecord activity = getFocusedStack().getTopActivity();
+            ActivityRecord activity = getTopDisplayFocusedStack().getTopActivity();
             if (activity == null) {
                 Slog.w(TAG, "getAssistContextExtras failed: no top activity");
                 return null;
@@ -3076,7 +3076,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public boolean isAssistDataAllowedOnCurrentActivity() {
         int userId;
         synchronized (mGlobalLock) {
-            final ActivityStack focusedStack = getFocusedStack();
+            final ActivityStack focusedStack = getTopDisplayFocusedStack();
             if (focusedStack == null || focusedStack.isActivityTypeAssistant()) {
                 return false;
             }
@@ -3096,7 +3096,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             synchronized (mGlobalLock) {
                 ActivityRecord caller = ActivityRecord.forTokenLocked(token);
-                ActivityRecord top = getFocusedStack().getTopActivity();
+                ActivityRecord top = getTopDisplayFocusedStack().getTopActivity();
                 if (top != caller) {
                     Slog.w(TAG, "showAssistFromActivity failed: caller " + caller
                             + " is not current top " + top);
@@ -3314,7 +3314,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     // Caller wants the current split-screen primary stack to be the top stack after
                     // it goes fullscreen, so move it to the front.
                     stack.moveToFront("dismissSplitScreenMode");
-                } else if (mStackSupervisor.isFocusedStack(stack)) {
+                } else if (mStackSupervisor.isTopDisplayFocusedStack(stack)) {
                     // In this case the current split-screen primary stack shouldn't be the top
                     // stack after it goes fullscreen, but it current has focus, so we move the
                     // focus to the top-most split-screen secondary stack next to it.
@@ -3717,7 +3717,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void startLocalVoiceInteraction(IBinder callingActivity, Bundle options) {
         Slog.i(TAG, "Activity tried to startLocalVoiceInteraction");
         synchronized (mGlobalLock) {
-            ActivityRecord activity = getFocusedStack().getTopActivity();
+            ActivityRecord activity = getTopDisplayFocusedStack().getTopActivity();
             if (ActivityRecord.forTokenLocked(callingActivity) != activity) {
                 throw new SecurityException("Only focused activity can call startVoiceInteraction");
             }
@@ -4130,8 +4130,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         });
     }
 
-    ActivityStack getFocusedStack() {
-        return mStackSupervisor.getFocusedStack();
+    ActivityStack getTopDisplayFocusedStack() {
+        return mStackSupervisor.getTopDisplayFocusedStack();
     }
 
     /** Pokes the task persister. */
@@ -4769,7 +4769,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** Applies latest configuration and/or visibility updates if needed. */
     private boolean ensureConfigAndVisibilityAfterUpdate(ActivityRecord starting, int changes) {
         boolean kept = true;
-        final ActivityStack mainStack = mStackSupervisor.getFocusedStack();
+        final ActivityStack mainStack = mStackSupervisor.getTopDisplayFocusedStack();
         // mainStack is null during startup.
         if (mainStack != null) {
             if (changes != 0 && starting == null) {

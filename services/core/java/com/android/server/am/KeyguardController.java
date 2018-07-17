@@ -272,7 +272,7 @@ class KeyguardController {
                 // Only the top activity of the focused stack on the default display may control
                 // occluded state.
                 if (display.mDisplayId == DEFAULT_DISPLAY
-                        && mStackSupervisor.isFocusedStack(stack)) {
+                        && mStackSupervisor.isTopDisplayFocusedStack(stack)) {
 
                     // A dismissing activity occludes Keyguard in the insecure case for legacy
                     // reasons.

@@ -469,7 +469,7 @@ public class ActivityTestsBase {
         @Override
         ActivityStack getNextFocusableStackLocked(ActivityStack currentFocus,
                 boolean ignoreCurrent) {
-            return getFocusedStack();
+            return getTopDisplayFocusedStack();
         }
     }
 

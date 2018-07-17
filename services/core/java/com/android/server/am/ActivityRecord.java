@@ -2162,7 +2162,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         // another activity to start or has stopped, then the key dispatching
         // timeout should not be caused by this.
         if (mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(this) || stopped) {
-            final ActivityStack stack = mStackSupervisor.getFocusedStack();
+            final ActivityStack stack = mStackSupervisor.getTopDisplayFocusedStack();
             // Try to use the one which is closest to top.
             ActivityRecord r = stack.getResumedActivity();
             if (r == null) {
