@@ -5465,7 +5465,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (generationResult != KeyChain.KEY_GEN_SUCCESS) {
                     Log.e(LOG_TAG, String.format(
                             "KeyChain failed to generate a keypair, error %d.", generationResult));
-                    return false;
+                    switch (generationResult) {
+                        case KeyChain.KEY_GEN_STRONGBOX_UNAVAILABLE:
+                            throw new ServiceSpecificException(
+                                    DevicePolicyManager.KEY_GEN_STRONGBOX_UNAVAILABLE,
+                                    String.format("KeyChain error: %d", generationResult));
+                        default:
+                            return false;
+                    }
                 }
 
                 // Set a grant for the caller here so that when the client calls
