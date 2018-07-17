@@ -167,8 +167,14 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         mStacks.remove(stack);
         final int insertPosition = getTopInsertPosition(stack, position);
         mStacks.add(insertPosition, stack);
-        mWindowContainerController.positionChildAt(stack.getWindowContainerController(),
-                insertPosition);
+        // Since positionChildAt() is called during the creation process of pinned stacks,
+        // ActivityStack#getWindowContainerController() can be null. In this special case,
+        // since DisplayContest#positionStackAt() is called in TaskStack#onConfigurationChanged(),
+        // we don't have to call WindowContainerController#positionChildAt() here.
+        if (stack.getWindowContainerController() != null) {
+            mWindowContainerController.positionChildAt(stack.getWindowContainerController(),
+                    insertPosition);
+        }
         onStackOrderChanged();
     }
 

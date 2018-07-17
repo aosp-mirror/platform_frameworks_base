@@ -507,6 +507,15 @@ public class ActivityStackTests extends ActivityTestsBase {
         // Ensure, when always on top is turned off for a stack, the stack is put just below all
         // other always on top stacks.
         assertTrue(mDefaultDisplay.getStackAbove(alwaysOnTopStack2) == alwaysOnTopStack);
+        alwaysOnTopStack2.setAlwaysOnTop(true);
+
+        // Ensure always on top state changes properly when windowing mode changes.
+        alwaysOnTopStack2.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        assertFalse(alwaysOnTopStack2.isAlwaysOnTop());
+        assertTrue(mDefaultDisplay.getStackAbove(alwaysOnTopStack2) == alwaysOnTopStack);
+        alwaysOnTopStack2.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertTrue(alwaysOnTopStack2.isAlwaysOnTop());
+        assertTrue(mDefaultDisplay.getStackAbove(alwaysOnTopStack2) == pinnedStack);
     }
 
     @Test
