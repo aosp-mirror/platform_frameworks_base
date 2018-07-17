@@ -390,6 +390,7 @@ public final class StrictJarFile {
     public static class ZipInflaterInputStream extends InflaterInputStream {
         private final ZipEntry entry;
         private long bytesRead = 0;
+        private boolean closed;
 
         public ZipInflaterInputStream(InputStream is, Inflater inf, int bsize, ZipEntry entry) {
             super(is, inf, bsize);
@@ -423,6 +424,12 @@ public final class StrictJarFile {
                 return 0;
             }
             return super.available() == 0 ? 0 : (int) (entry.getSize() - bytesRead);
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            closed = true;
         }
     }
 
