@@ -2920,6 +2920,9 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * such as "KEYCODE_A", "KEYCODE_DPAD_UP", or an equivalent numeric constant
      * such as "1001" if unknown.
      *
+     * This function is intended to be used mostly for debugging, logging, and testing. It is not
+     * locale-specific and is not intended to be used in a user-facing manner.
+     *
      * @param keyCode The key code.
      * @return The symbolic name of the specified keycode.
      *
