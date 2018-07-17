@@ -16,7 +16,7 @@
 
 package com.android.server.backup;
 
-import static com.android.server.backup.testing.BackupManagerServiceTestUtils.startBackupThread;
+import static com.android.server.backup.testing.BackupManagerServiceTestUtils.startSilentBackupThread;
 import static com.android.server.backup.testing.TransportData.backupTransport;
 import static com.android.server.backup.testing.TransportData.d2dTransport;
 import static com.android.server.backup.testing.TransportData.localTransport;
@@ -46,6 +46,7 @@ import android.os.PowerSaveState;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import com.android.server.backup.internal.BackupRequest;
+import com.android.server.backup.testing.BackupManagerServiceTestUtils;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.transport.TransportNotRegisteredException;
@@ -68,7 +69,6 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowContextWrapper;
-import org.robolectric.shadows.ShadowLog;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowPackageManager;
 import org.robolectric.shadows.ShadowSettings;
@@ -104,7 +104,10 @@ public class BackupManagerServiceTest {
         mTransport = backupTransport();
         mTransportName = mTransport.transportName;
 
-        mBackupThread = startBackupThread(this::uncaughtException);
+        // Unrelated exceptions are thrown in the backup thread. Until we mock everything properly
+        // we should not fail tests because of this. This is not flakiness, the exceptions thrown
+        // don't interfere with the tests.
+        mBackupThread = startSilentBackupThread(TAG);
         mShadowBackupLooper = shadowOf(mBackupThread.getLooper());
 
         ContextWrapper context = RuntimeEnvironment.application;
@@ -113,8 +116,10 @@ public class BackupManagerServiceTest {
         mShadowContext = shadowOf(context);
 
         File cacheDir = mContext.getCacheDir();
-        mBaseStateDir = new File(cacheDir, "base_state_dir");
-        mDataDir = new File(cacheDir, "data_dir");
+        // Corresponds to /data/backup
+        mBaseStateDir = new File(cacheDir, "base_state");
+        // Corresponds to /cache/backup_stage
+        mDataDir = new File(cacheDir, "data");
 
         ShadowBackupPolicyEnforcer.setMandatoryBackupTransport(null);
     }
@@ -124,13 +129,6 @@ public class BackupManagerServiceTest {
         mBackupThread.quit();
         ShadowAppBackupUtils.reset();
         ShadowBackupPolicyEnforcer.setMandatoryBackupTransport(null);
-    }
-
-    private void uncaughtException(Thread thread, Throwable e) {
-        // Unrelated exceptions are thrown in the backup thread. Until we mock everything properly
-        // we should not fail tests because of this. This is not flakiness, the exceptions thrown
-        // don't interfere with the tests.
-        ShadowLog.e(TAG, "Uncaught exception in test thread " + thread.getName(), e);
     }
 
     /* Tests for destination string */
@@ -864,22 +862,8 @@ public class BackupManagerServiceTest {
     }
 
     private BackupManagerService createInitializedBackupManagerService() {
-        BackupManagerService backupManagerService =
-                new BackupManagerService(
-                        mContext,
-                        new Trampoline(mContext),
-                        mBackupThread,
-                        mBaseStateDir,
-                        mDataDir,
-                        mTransportManager);
-        mShadowBackupLooper.runToEndOfTasks();
-        // Handler instances have their own clock, so advancing looper (with runToEndOfTasks())
-        // above does NOT advance the handlers' clock, hence whenever a handler post messages with
-        // specific time to the looper the time of those messages will be before the looper's time.
-        // To fix this we advance SystemClock as well since that is from where the handlers read
-        // time.
-        ShadowSystemClock.setCurrentTimeMillis(mShadowBackupLooper.getScheduler().getCurrentTime());
-        return backupManagerService;
+        return BackupManagerServiceTestUtils.createInitializedBackupManagerService(
+                mContext, mBackupThread, mBaseStateDir, mDataDir, mTransportManager);
     }
 
     private void setUpPowerManager(BackupManagerService backupManagerService) {

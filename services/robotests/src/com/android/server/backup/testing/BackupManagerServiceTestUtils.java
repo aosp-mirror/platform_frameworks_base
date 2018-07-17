@@ -16,13 +16,20 @@
 
 package com.android.server.backup.testing;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 
+import android.annotation.Nullable;
 import android.app.Application;
 import android.app.IActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -30,32 +37,118 @@ import android.util.SparseArray;
 
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupManagerService;
+import com.android.server.backup.Trampoline;
 import com.android.server.backup.TransportManager;
-import com.android.server.backup.internal.BackupHandler;
+import com.android.server.backup.internal.Operation;
 
+import org.mockito.stubbing.Answer;
+import org.robolectric.shadows.ShadowLog;
+import org.robolectric.shadows.ShadowLooper;
+import org.robolectric.shadows.ShadowSystemClock;
+
+import java.io.File;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.concurrent.atomic.AtomicReference;
 
 /** Test utils for {@link BackupManagerService} and friends. */
 public class BackupManagerServiceTestUtils {
-    /** Sets up basic mocks for {@link BackupManagerService}. */
+    public static BackupManagerService createInitializedBackupManagerService(
+            Context context, File baseStateDir, File dataDir, TransportManager transportManager) {
+        return createInitializedBackupManagerService(
+                context,
+                startBackupThread(null),
+                baseStateDir,
+                dataDir,
+                transportManager);
+    }
+
+    public static BackupManagerService createInitializedBackupManagerService(
+            Context context,
+            HandlerThread backupThread,
+            File baseStateDir,
+            File dataDir,
+            TransportManager transportManager) {
+        BackupManagerService backupManagerService =
+                new BackupManagerService(
+                        context,
+                        new Trampoline(context),
+                        backupThread,
+                        baseStateDir,
+                        dataDir,
+                        transportManager);
+        ShadowLooper shadowBackupLooper = shadowOf(backupThread.getLooper());
+        shadowBackupLooper.runToEndOfTasks();
+        // Handler instances have their own clock, so advancing looper (with runToEndOfTasks())
+        // above does NOT advance the handlers' clock, hence whenever a handler post messages with
+        // specific time to the looper the time of those messages will be before the looper's time.
+        // To fix this we advance SystemClock as well since that is from where the handlers read
+        // time.
+        ShadowSystemClock.setCurrentTimeMillis(shadowBackupLooper.getScheduler().getCurrentTime());
+        return backupManagerService;
+    }
+
+    /** Sets up basic mocks for {@link BackupManagerService} mock. */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void setUpBackupManagerServiceBasics(
             BackupManagerService backupManagerService,
             Context context,
             TransportManager transportManager,
             PackageManager packageManager,
-            BackupHandler backupHandler,
+            Handler backupHandler,
             PowerManager.WakeLock wakeLock,
             BackupAgentTimeoutParameters agentTimeoutParameters) {
+        SparseArray<Operation> operations = new SparseArray<>();
+
         when(backupManagerService.getContext()).thenReturn(context);
         when(backupManagerService.getTransportManager()).thenReturn(transportManager);
         when(backupManagerService.getPackageManager()).thenReturn(packageManager);
         when(backupManagerService.getBackupHandler()).thenReturn(backupHandler);
         when(backupManagerService.getCurrentOpLock()).thenReturn(new Object());
         when(backupManagerService.getQueueLock()).thenReturn(new Object());
-        when(backupManagerService.getCurrentOperations()).thenReturn(new SparseArray<>());
+        when(backupManagerService.getCurrentOperations()).thenReturn(operations);
         when(backupManagerService.getActivityManager()).thenReturn(mock(IActivityManager.class));
         when(backupManagerService.getWakelock()).thenReturn(wakeLock);
         when(backupManagerService.getAgentTimeoutParameters()).thenReturn(agentTimeoutParameters);
+
+        AccessorMock backupEnabled = mockAccessor(false);
+        doAnswer(backupEnabled.getter).when(backupManagerService).isBackupEnabled();
+        doAnswer(backupEnabled.setter).when(backupManagerService).setBackupEnabled(anyBoolean());
+
+        AccessorMock backupRunning = mockAccessor(false);
+        doAnswer(backupEnabled.getter).when(backupManagerService).isBackupRunning();
+        doAnswer(backupRunning.setter).when(backupManagerService).setBackupRunning(anyBoolean());
+
+        doAnswer(
+                        invocation -> {
+                            operations.put(invocation.getArgument(0), invocation.getArgument(1));
+                            return null;
+                        })
+                .when(backupManagerService)
+                .putOperation(anyInt(), any());
+        doAnswer(
+                        invocation -> {
+                            int token = invocation.getArgument(0);
+                            operations.remove(token);
+                            return null;
+                        })
+                .when(backupManagerService)
+                .removeOperation(anyInt());
+    }
+
+    /**
+     * Returns one getter {@link Answer<T>} and one setter {@link Answer<T>} to be easily passed to
+     * Mockito mocking facilities.
+     *
+     * @param defaultValue Value returned by the getter if there was no setter call until then.
+     */
+    public static <T> AccessorMock<T> mockAccessor(T defaultValue) {
+        AtomicReference<T> holder = new AtomicReference<>(defaultValue);
+        return new AccessorMock<>(
+                invocation -> holder.get(),
+                invocation -> {
+                    holder.set(invocation.getArgument(0));
+                    return null;
+                });
     }
 
     public static PowerManager.WakeLock createBackupWakeLock(Application application) {
@@ -88,12 +181,38 @@ public class BackupManagerServiceTestUtils {
      * @return The backup thread.
      * @see #startBackupThreadAndGetLooper()
      */
-    public static HandlerThread startBackupThread(UncaughtExceptionHandler exceptionHandler) {
+    public static HandlerThread startBackupThread(
+            @Nullable UncaughtExceptionHandler exceptionHandler) {
         HandlerThread backupThread = new HandlerThread("backup");
         backupThread.setUncaughtExceptionHandler(exceptionHandler);
         backupThread.start();
         return backupThread;
     }
 
+    /**
+     * Similar to {@link #startBackupThread(UncaughtExceptionHandler)} but logging uncaught
+     * exceptions to logcat.
+     *
+     * @param tag Tag used for logging exceptions.
+     * @return The backup thread.
+     * @see #startBackupThread(UncaughtExceptionHandler)
+     */
+    public static HandlerThread startSilentBackupThread(String tag) {
+        return startBackupThread(
+                (thread, e) ->
+                        ShadowLog.e(
+                                tag, "Uncaught exception in test thread " + thread.getName(), e));
+    }
+
     private BackupManagerServiceTestUtils() {}
+
+    public static class AccessorMock<T> {
+        public Answer<T> getter;
+        public Answer<T> setter;
+
+        private AccessorMock(Answer<T> getter, Answer<T> setter) {
+            this.getter = getter;
+            this.setter = setter;
+        }
+    }
 }
