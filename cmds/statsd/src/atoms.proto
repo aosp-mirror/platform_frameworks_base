@@ -49,7 +49,7 @@ message Atom {
     oneof pushed {
         // For StatsLog reasons, 1 is illegal and will not work. Must start at 2.
         BleScanStateChanged ble_scan_state_changed = 2;
-        // 3 is available for use
+        ProcessStateChanged process_state_changed = 3;
         BleScanResultReceived ble_scan_result_received = 4;
         SensorStateChanged sensor_state_changed = 5;
         GpsScanStateChanged gps_scan_state_changed = 6;
@@ -60,7 +60,12 @@ message Atom {
         LongPartialWakelockStateChanged long_partial_wakelock_state_changed = 11;
         MobileRadioPowerStateChanged mobile_radio_power_state_changed = 12;
         WifiRadioPowerStateChanged wifi_radio_power_state_changed = 13;
-        // 14 - 19 are available
+        ActivityManagerSleepStateChanged activity_manager_sleep_state_changed = 14;
+        MemoryFactorStateChanged memory_factor_state_changed = 15;
+        ExcessiveCpuUsageReported excessive_cpu_usage_reported = 16;
+        CachedKillReported cached_kill_reported = 17;
+        ProcessMemoryStatReported process_memory_stat_reported = 18;
+        // 19 is available
         BatterySaverModeStateChanged battery_saver_mode_state_changed = 20;
         DeviceIdleModeStateChanged device_idle_mode_state_changed = 21;
         DeviceIdlingModeStateChanged device_idling_mode_state_changed = 22;
@@ -210,7 +215,8 @@ message ScreenStateChanged {
 }
 
 /**
- * Logs that the state of a process state, as per the activity manager, has changed.
+ * Logs that the process state of the uid, as determined by ActivityManager
+ * (i.e. the highest process state of that uid's processes) has changed.
  *
  * Logged from:
  *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
@@ -220,6 +226,112 @@ message UidProcessStateChanged {
 
     // The state, from frameworks/base/core/proto/android/app/enums.proto.
     optional android.app.ProcessStateEnum state = 2 [(stateFieldOption).option = EXCLUSIVE];
+}
+
+/**
+ * Logs process state change of a process, as per the activity manager.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/ProcessRecord.java
+ */
+message ProcessStateChanged {
+    optional int32 uid = 1;
+    optional string process_name = 2;
+    optional string package_name = 3;
+    // TODO: remove this when validation is done
+    optional int64 version = 5;
+    // The state, from frameworks/base/core/proto/android/app/enums.proto.
+    optional android.app.ProcessStateEnum state = 4;
+}
+
+/**
+ * Logs when ActivityManagerService sleep state is changed.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/ActivityTaskManagerService.java
+ */
+message ActivityManagerSleepStateChanged {
+    // TODO: import frameworks proto
+    enum State {
+        UNKNOWN = 0;
+        ASLEEP = 1;
+        AWAKE = 2;
+    }
+    optional State state = 1 [(stateFieldOption).option = EXCLUSIVE];
+}
+
+/**
+ * Logs when system memory state changes.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message MemoryFactorStateChanged {
+    // TODO: import frameworks proto
+    enum State {
+        MEMORY_UNKNOWN = 0;
+        NORMAL = 1;     // normal.
+        MODERATE = 2;   // moderate memory pressure.
+        LOW = 3;        // low memory.
+        CRITICAL = 4;   // critical memory.
+
+    }
+    optional State factor = 1 [(stateFieldOption).option = EXCLUSIVE];
+}
+
+/**
+ * Logs when app is using too much cpu, according to ActivityManagerService.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message ExcessiveCpuUsageReported {
+    optional int32 uid = 1;
+    optional string process_name = 2;
+    optional string package_name = 3;
+    // package version. TODO: remove this when validation is done
+    optional int64 version = 4;
+}
+
+/**
+ * Logs when a cached process is killed, along with its pss.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message CachedKillReported {
+    optional int32 uid = 1;
+    optional string process_name = 2;
+    optional string package_name = 3;
+    // TODO: remove this when validation is done
+    optional int64 version = 5;
+    optional int64 pss = 4;
+}
+
+/**
+ * Logs when memory stats of a process is reported.
+ *
+ * Logged from:
+ *   frameworks/base/services/core/java/com/android/server/am/ProcessRecord.java
+ */
+message ProcessMemoryStatReported {
+    optional int32 uid = 1;
+    optional string process_name = 2;
+    optional string package_name = 3;
+    //TODO: remove this when validation is done
+    optional int64 version = 9;
+    optional int64 pss = 4;
+    optional int64 uss = 5;
+    optional int64 rss = 6;
+    enum Type {
+        ADD_PSS_INTERNAL_SINGLE = 0;
+        ADD_PSS_INTERNAL_ALL_MEM = 1;
+        ADD_PSS_INTERNAL_ALL_POLL = 2;
+        ADD_PSS_EXTERNAL = 3;
+        ADD_PSS_EXTERNAL_SLOW = 4;
+    }
+    optional Type type = 7;
+    optional int64 duration = 8;
 }
 
 /**

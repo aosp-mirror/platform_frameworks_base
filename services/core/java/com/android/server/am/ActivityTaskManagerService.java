@@ -4676,6 +4676,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // will wake up stacks or put them to sleep as appropriate.
             if (wasSleeping) {
                 mSleeping = false;
+                StatsLog.write(StatsLog.ACTIVITY_MANAGER_SLEEP_STATE_CHANGED,
+                        StatsLog.ACTIVITY_MANAGER_SLEEP_STATE_CHANGED__STATE__AWAKE);
                 startTimeTrackingFocusedActivityLocked();
                 mTopProcessState = ActivityManager.PROCESS_STATE_TOP;
                 mStackSupervisor.comeOutOfSleepIfNeededLocked();
@@ -4686,6 +4688,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         } else if (!mSleeping && shouldSleep) {
             mSleeping = true;
+            StatsLog.write(StatsLog.ACTIVITY_MANAGER_SLEEP_STATE_CHANGED,
+                    StatsLog.ACTIVITY_MANAGER_SLEEP_STATE_CHANGED__STATE__ASLEEP);
             if (mCurAppTimeTracker != null) {
                 mCurAppTimeTracker.stop();
             }
