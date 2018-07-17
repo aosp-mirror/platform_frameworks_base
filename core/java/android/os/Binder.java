@@ -391,9 +391,28 @@ public class Binder implements IBinder {
     public static final native void blockUntilThreadAvailable();
 
     /**
-     * Default constructor initializes the object.
+     * Default constructor just initializes the object.
+     *
+     * If you're creating a Binder token (a Binder object without an attached interface),
+     * you should use {@link #Binder(String)} instead.
      */
     public Binder() {
+        this(null);
+    }
+
+    /**
+     * Constructor for creating a raw Binder object (token) along with a descriptor.
+     *
+     * The descriptor of binder objects usually specifies the interface they are implementing.
+     * In case of binder tokens, no interface is implemented, and the descriptor can be used
+     * as a sort of tag to help identify the binder token. This will help identify remote
+     * references to these objects more easily when debugging.
+     *
+     * @param descriptor Used to identify the creator of this token, for example the class name.
+     * Instead of creating multiple tokens with the same descriptor, consider adding a suffix to
+     * help identify them.
+     */
+    public Binder(@Nullable String descriptor)  {
         mObject = getNativeBBinderHolder();
         NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mObject);
 
@@ -405,6 +424,7 @@ public class Binder implements IBinder {
                     klass.getCanonicalName());
             }
         }
+        mDescriptor = descriptor;
     }
 
     /**
