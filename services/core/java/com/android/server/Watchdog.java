@@ -21,6 +21,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.RemoteException;
 import android.system.ErrnoException;
+import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructRlimit;
 import com.android.internal.os.ZygoteConnectionConstants;
@@ -47,6 +48,10 @@ import android.util.Slog;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -621,23 +626,38 @@ public class Watchdog extends Thread {
             mFdHighWaterMark = fdThreshold;
         }
 
+        /**
+         * Dumps open file descriptors and their full paths to a temporary file in {@code mDumpDir}.
+         */
         private void dumpOpenDescriptors() {
+            // We cannot exec lsof to get more info about open file descriptors because a newly
+            // forked process will not have the permissions to readlink. Instead list all open
+            // descriptors from /proc/pid/fd and resolve them.
+            List<String> dumpInfo = new ArrayList<>();
+            String fdDirPath = String.format("/proc/%d/fd/", Process.myPid());
+            File[] fds = new File(fdDirPath).listFiles();
+            if (fds == null) {
+                dumpInfo.add("Unable to list " + fdDirPath);
+            } else {
+                for (File f : fds) {
+                    String fdSymLink = f.getAbsolutePath();
+                    String resolvedPath = "";
+                    try {
+                        resolvedPath = Os.readlink(fdSymLink);
+                    } catch (ErrnoException ex) {
+                        resolvedPath = ex.getMessage();
+                    }
+                    dumpInfo.add(fdSymLink + "\t" + resolvedPath);
+                }
+            }
+
+            // Dump the fds & paths to a temp file.
             try {
                 File dumpFile = File.createTempFile("anr_fd_", "", mDumpDir);
-                java.lang.Process proc = new ProcessBuilder()
-                    .command("/system/bin/lsof", "-p", String.valueOf(Process.myPid()))
-                    .redirectErrorStream(true)
-                    .redirectOutput(dumpFile)
-                    .start();
-
-                int returnCode = proc.waitFor();
-                if (returnCode != 0) {
-                    Slog.w(TAG, "Unable to dump open descriptors, lsof return code: "
-                        + returnCode);
-                    dumpFile.delete();
-                }
-            } catch (IOException | InterruptedException ex) {
-                Slog.w(TAG, "Unable to dump open descriptors: " + ex);
+                Path out = Paths.get(dumpFile.getAbsolutePath());
+                Files.write(out, dumpInfo, StandardCharsets.UTF_8);
+            } catch (IOException ex) {
+                Slog.w(TAG, "Unable to write open descriptors to file: " + ex);
             }
         }
 
