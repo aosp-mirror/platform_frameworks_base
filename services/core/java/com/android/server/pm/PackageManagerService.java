@@ -21161,6 +21161,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         CarrierAppUtils.disableCarrierAppsUntilPrivileged(mContext.getOpPackageName(), this,
                 mContext.getContentResolver(), UserHandle.USER_SYSTEM);
 
+        disableSkuSpecificApps();
+
         // Read the compatibilty setting when the system is ready.
         boolean compatibilityModeEnabled = android.provider.Settings.Global.getInt(
                 mContext.getContentResolver(),
@@ -21945,6 +21947,28 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             // the given package is involved with.
             if (dumpState.onTitlePrinted()) pw.println();
             mInstallerService.dump(new IndentingPrintWriter(pw, "  ", 120));
+        }
+    }
+
+    //TODO: b/111402650
+    private void disableSkuSpecificApps() {
+        if (!mIsUpgrade && !mFirstBoot) {
+            return;
+        }
+        String apkList[] = mContext.getResources().getStringArray(
+                R.array.config_disableApksUnlessMatchedSku_apk_list);
+        String skuArray[] = mContext.getResources().getStringArray(
+                R.array.config_disableApkUnlessMatchedSku_skus_list);
+        if (ArrayUtils.isEmpty(apkList)) {
+           return;
+        }
+        String sku = SystemProperties.get("ro.boot.hardware.sku");
+        if (!TextUtils.isEmpty(sku) && ArrayUtils.contains(skuArray, sku)) {
+            return;
+        }
+        for (String packageName : apkList) {
+            setSystemAppHiddenUntilInstalled(packageName, true);
+            setSystemAppInstallState(packageName, false, ActivityManager.getCurrentUser());
         }
     }
 
