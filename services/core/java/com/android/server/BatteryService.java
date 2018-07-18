@@ -41,7 +41,6 @@ import android.os.DropBoxManager;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.IBatteryPropertiesListener;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
 import android.os.OsProtoEnums;
@@ -1159,12 +1158,7 @@ public final class BatteryService extends SystemService {
     // Reduced IBatteryPropertiesRegistrar that only implements getProperty for usage
     // in BatteryManager.
     private final class BatteryPropertiesRegistrar extends IBatteryPropertiesRegistrar.Stub {
-        public void registerListener(IBatteryPropertiesListener listener) {
-            Slog.e(TAG, "health: must not call registerListener on battery properties");
-        }
-        public void unregisterListener(IBatteryPropertiesListener listener) {
-            Slog.e(TAG, "health: must not call unregisterListener on battery properties");
-        }
+        @Override
         public int getProperty(int id, final BatteryProperty prop) throws RemoteException {
             traceBegin("HealthGetProperty");
             try {
@@ -1214,6 +1208,7 @@ public final class BatteryService extends SystemService {
                 traceEnd();
             }
         }
+        @Override
         public void scheduleUpdate() throws RemoteException {
             traceBegin("HealthScheduleUpdate");
             try {
