@@ -2101,7 +2101,7 @@ public final class ViewRootImpl implements ViewParent,
                                         & View.PFLAG_REQUEST_TRANSPARENT_REGIONS) == 0) {
                                     // Don't pre-allocate if transparent regions
                                     // are requested as they may not be needed
-                                    mSurface.allocateBuffers();
+                                    mAttachInfo.mThreadedRenderer.allocateBuffers(mSurface);
                                 }
                             } catch (OutOfResourcesException e) {
                                 handleOutOfResourcesException(e);

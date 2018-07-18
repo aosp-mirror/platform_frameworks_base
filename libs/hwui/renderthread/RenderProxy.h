@@ -70,6 +70,7 @@ public:
     ANDROID_API void setName(const char* name);
 
     ANDROID_API void initialize(const sp<Surface>& surface);
+    ANDROID_API void allocateBuffers(const sp<Surface>& surface);
     ANDROID_API void updateSurface(const sp<Surface>& surface);
     ANDROID_API bool pauseSurface(const sp<Surface>& surface);
     ANDROID_API void setStopped(bool stopped);
