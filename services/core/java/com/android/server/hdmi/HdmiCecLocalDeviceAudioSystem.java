@@ -332,6 +332,37 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         }
     }
 
+    protected void terminateSystemAudioMode() {
+        // remove pending initiation actions
+        removeAction(SystemAudioInitiationActionFromAvr.class);
+
+        synchronized (mLock) {
+            if (!mSystemAudioActivated) {
+                return;
+            }
+        }
+
+        // send <Set System Audio Mode> [“Off”]
+        mService.sendCecCommand(
+                HdmiCecMessageBuilder.buildSetSystemAudioMode(
+                        mAddress, Constants.ADDR_BROADCAST, false));
+
+        // mute speaker
+        if (!mService.getAudioManager().isStreamMute(AudioManager.STREAM_MUSIC)) {
+            mService.getAudioManager()
+                    .adjustStreamVolume(
+                            AudioManager.STREAM_MUSIC,
+                            AudioManager.ADJUST_MUTE,
+                            0);
+        }
+
+        mSystemAudioSource = null;
+        synchronized (mLock) {
+            mSystemAudioActivated = false;
+            mService.announceSystemAudioModeChange(false);
+        }
+    }
+
     /** Reports if System Audio Mode is supported by the connected TV */
     interface TvSystemAudioModeSupportedCallback {
 
