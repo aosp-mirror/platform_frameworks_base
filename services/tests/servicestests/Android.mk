@@ -41,6 +41,7 @@ LOCAL_SRC_FILES += $(call all-java-files-under, test-apps/SuspendTestApp/src)
 
 LOCAL_JAVA_LIBRARIES := \
     android.hidl.manager-V1.0-java \
+    android.hardware.tv.cec-V1.0-java \
     android.test.mock \
     android.test.base android.test.runner \
 
