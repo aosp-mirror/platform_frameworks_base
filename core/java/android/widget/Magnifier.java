@@ -17,8 +17,10 @@
 package android.widget;
 
 import android.annotation.FloatRange;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Px;
 import android.annotation.TestApi;
 import android.annotation.UiThread;
 import android.content.Context;
@@ -74,7 +76,7 @@ public final class Magnifier {
     private final int mWindowWidth;
     // The height of the window containing the magnifier.
     private final int mWindowHeight;
-    // The zoom applied to the view region copied to the magnifier window.
+    // The zoom applied to the view region copied to the magnifier view.
     private final float mZoom;
     // The width of the content that will be copied to the magnifier.
     private final int mSourceWidth;
@@ -84,6 +86,10 @@ public final class Magnifier {
     private final float mWindowElevation;
     // The corner radius of the window containing the magnifier.
     private final float mWindowCornerRadius;
+    // The horizontal offset between the source and window coords when #show(float, float) is used.
+    private final int mDefaultHorizontalSourceToMagnifierOffset;
+    // The vertical offset between the source and window coords when #show(float, float) is used.
+    private final int mDefaultVerticalSourceToMagnifierOffset;
     // The parent surface for the magnifier surface.
     private SurfaceInfo mParentSurface;
     // The surface where the content will be copied from.
@@ -110,38 +116,33 @@ public final class Magnifier {
      * Initializes a magnifier.
      *
      * @param view the view for which this magnifier is attached
+     *
+     * @see Builder
      */
     public Magnifier(@NonNull View view) {
-        mView = Preconditions.checkNotNull(view);
-        final Context context = mView.getContext();
-        mWindowWidth = context.getResources().getDimensionPixelSize(R.dimen.magnifier_width);
-        mWindowHeight = context.getResources().getDimensionPixelSize(R.dimen.magnifier_height);
-        mWindowElevation = context.getResources().getDimension(R.dimen.magnifier_elevation);
-        mWindowCornerRadius = getDeviceDefaultDialogCornerRadius();
-        mZoom = context.getResources().getFloat(R.dimen.magnifier_zoom_scale);
+        this(new Builder(view));
+    }
+
+    private Magnifier(@NonNull Builder params) {
+        // Copy params from builder.
+        mView = params.mView;
+        mWindowWidth = params.mWidth;
+        mWindowHeight = params.mHeight;
+        mZoom = params.mZoom;
         mSourceWidth = Math.round(mWindowWidth / mZoom);
         mSourceHeight = Math.round(mWindowHeight / mZoom);
+        mWindowElevation = params.mElevation;
+        mWindowCornerRadius = params.mCornerRadius;
+        mDefaultHorizontalSourceToMagnifierOffset =
+                params.mHorizontalDefaultSourceToMagnifierOffset;
+        mDefaultVerticalSourceToMagnifierOffset =
+                params.mVerticalDefaultSourceToMagnifierOffset;
         // The view's surface coordinates will not be updated until the magnifier is first shown.
         mViewCoordinatesInSurface = new int[2];
     }
 
     static {
         sPixelCopyHandlerThread.start();
-    }
-
-    /**
-     * Returns the device default theme dialog corner radius attribute.
-     * We retrieve this from the device default theme to avoid
-     * using the values set in the custom application themes.
-     */
-    private float getDeviceDefaultDialogCornerRadius() {
-        final Context deviceDefaultContext =
-                new ContextThemeWrapper(mView.getContext(), R.style.Theme_DeviceDefault);
-        final TypedArray ta = deviceDefaultContext.obtainStyledAttributes(
-                new int[]{android.R.attr.dialogCornerRadius});
-        final float dialogCornerRadius = ta.getDimension(0, 0);
-        ta.recycle();
-        return dialogCornerRadius;
     }
 
     /**
@@ -156,9 +157,9 @@ public final class Magnifier {
      */
     public void show(@FloatRange(from = 0) float sourceCenterX,
             @FloatRange(from = 0) float sourceCenterY) {
-        final int verticalOffset = mView.getContext().getResources()
-                .getDimensionPixelSize(R.dimen.magnifier_offset);
-        show(sourceCenterX, sourceCenterY, sourceCenterX, sourceCenterY - verticalOffset);
+        show(sourceCenterX, sourceCenterY,
+                sourceCenterX + mDefaultHorizontalSourceToMagnifierOffset,
+                sourceCenterY + mDefaultVerticalSourceToMagnifierOffset);
     }
 
     /**
@@ -253,23 +254,24 @@ public final class Magnifier {
     }
 
     /**
-     * @return The width of the magnifier window, in pixels.
+     * @return the width of the magnifier window, in pixels
      */
     public int getWidth() {
         return mWindowWidth;
     }
 
     /**
-     * @return The height of the magnifier window, in pixels.
+     * @return the height of the magnifier window, in pixels
      */
     public int getHeight() {
         return mWindowHeight;
     }
 
     /**
-     * @return The zoom applied to the magnified view region copied to the magnifier window.
+     * Returns the zoom to be applied to the magnified view region copied to the magnifier.
      * If the zoom is x and the magnifier window size is (width, height), the original size
-     * of the content copied in the magnifier will be (width / x, height / x).
+     * of the content being magnified will be (width / x, height / x).
+     * @return the zoom applied to the content
      */
     public float getZoom() {
         return mZoom;
@@ -278,7 +280,7 @@ public final class Magnifier {
     /**
      * @hide
      *
-     * @return The top left coordinates of the magnifier, relative to the parent window.
+     * @return the top left coordinates of the magnifier, relative to the parent window
      */
     @Nullable
     public Point getWindowCoords() {
@@ -747,6 +749,134 @@ public final class Magnifier {
             if (mCallback != null) {
                 mCallback.onOperationComplete();
             }
+        }
+    }
+
+    /**
+     * Builder class for {@link Magnifier} objects.
+     */
+    public static class Builder {
+        private @NonNull View mView;
+        private @Px @IntRange(from = 0) int mWidth;
+        private @Px @IntRange(from = 0) int mHeight;
+        private float mZoom;
+        private @FloatRange(from = 0f) float mElevation;
+        private @FloatRange(from = 0f) float mCornerRadius;
+        private int mHorizontalDefaultSourceToMagnifierOffset;
+        private int mVerticalDefaultSourceToMagnifierOffset;
+
+        /**
+         * Construct a new builder for {@link Magnifier} objects.
+         * @param view the view this magnifier is attached to
+         */
+        public Builder(@NonNull View view) {
+            mView = Preconditions.checkNotNull(view);
+            applyDefaults();
+        }
+
+        private void applyDefaults() {
+            final Context context = mView.getContext();
+            final TypedArray a = context.obtainStyledAttributes(null, R.styleable.Magnifier,
+                    R.attr.magnifierStyle, 0);
+            mWidth = a.getDimensionPixelSize(R.styleable.Magnifier_magnifierWidth, 0);
+            mHeight = a.getDimensionPixelSize(R.styleable.Magnifier_magnifierHeight, 0);
+            mElevation = a.getDimension(R.styleable.Magnifier_magnifierElevation, 0);
+            mCornerRadius = getDeviceDefaultDialogCornerRadius();
+            mZoom = a.getFloat(R.styleable.Magnifier_magnifierZoom, 0);
+            mHorizontalDefaultSourceToMagnifierOffset =
+                    a.getDimensionPixelSize(R.styleable.Magnifier_magnifierHorizontalOffset, 0);
+            mVerticalDefaultSourceToMagnifierOffset =
+                    a.getDimensionPixelSize(R.styleable.Magnifier_magnifierVerticalOffset, 0);
+            a.recycle();
+        }
+
+        /**
+         * Returns the device default theme dialog corner radius attribute.
+         * We retrieve this from the device default theme to avoid
+         * using the values set in the custom application themes.
+         */
+        private float getDeviceDefaultDialogCornerRadius() {
+            final Context deviceDefaultContext =
+                    new ContextThemeWrapper(mView.getContext(), R.style.Theme_DeviceDefault);
+            final TypedArray ta = deviceDefaultContext.obtainStyledAttributes(
+                    new int[]{android.R.attr.dialogCornerRadius});
+            final float dialogCornerRadius = ta.getDimension(0, 0);
+            ta.recycle();
+            return dialogCornerRadius;
+        }
+
+        /**
+         * Sets the size of the magnifier window, in pixels. Defaults to (100dp, 48dp).
+         * Note that the size of the content being magnified and copied to the magnifier
+         * will be computed as (window width / zoom, window height / zoom).
+         * @param width the window width to be set
+         * @param height the window height to be set
+         */
+        public Builder setSize(@Px @IntRange(from = 0) int width,
+                @Px @IntRange(from = 0) int height) {
+            Preconditions.checkArgumentPositive(width, "Width should be positive");
+            Preconditions.checkArgumentPositive(height, "Height should be positive");
+            mWidth = width;
+            mHeight = height;
+            return this;
+        }
+
+        /**
+         * Sets the zoom to be applied to the chosen content before being copied to the magnifier.
+         * A content of size (content_width, content_height) will be magnified to
+         * (content_width * zoom, content_height * zoom), which will coincide with the size
+         * of the magnifier. A zoom of 1 will translate to no magnification (the content will
+         * be just copied to the magnifier with no scaling). The zoom defaults to 1.25.
+         * @param zoom the zoom to be set
+         */
+        public Builder setZoom(@FloatRange(from = 0f) float zoom) {
+            Preconditions.checkArgumentPositive(zoom, "Zoom should be positive");
+            mZoom = zoom;
+            return this;
+        }
+
+        /**
+         * Sets the elevation of the magnifier window, in pixels. Defaults to 4dp.
+         * @param elevation the elevation to be set
+         */
+        public Builder setElevation(@Px @FloatRange(from = 0) float elevation) {
+            Preconditions.checkArgumentNonNegative(elevation, "Elevation should be non-negative");
+            mElevation = elevation;
+            return this;
+        }
+
+        /**
+         * Sets the corner radius of the magnifier window, in pixels.
+         * Defaults to the corner radius defined in the device default theme.
+         * @param cornerRadius the corner radius to be set
+         */
+        public Builder setCornerRadius(@Px @FloatRange(from = 0) float cornerRadius) {
+            Preconditions.checkArgumentNonNegative(cornerRadius,
+                    "Corner radius should be non-negative");
+            mCornerRadius = cornerRadius;
+            return this;
+        }
+
+        /**
+         * Sets an offset, in pixels, that should be added to the content source center to obtain
+         * the position of the magnifier window, when the {@link #show(float, float)}
+         * method is called. The offset is ignored when {@link #show(float, float, float, float)}
+         * is used. The offset can be negative, and it defaults to (0dp, -42dp).
+         * @param horizontalOffset the horizontal component of the offset
+         * @param verticalOffset the vertical component of the offset
+         */
+        public Builder setDefaultSourceToMagnifierOffset(@Px int horizontalOffset,
+                @Px int verticalOffset) {
+            mHorizontalDefaultSourceToMagnifierOffset = horizontalOffset;
+            mVerticalDefaultSourceToMagnifierOffset = verticalOffset;
+            return this;
+        }
+
+        /**
+         * Builds a {@link Magnifier} instance based on the configuration of this {@link Builder}.
+         */
+        public @NonNull Magnifier build() {
+            return new Magnifier(this);
         }
     }
 
