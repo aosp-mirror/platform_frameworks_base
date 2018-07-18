@@ -106,6 +106,7 @@ cc_library_shared {
         "libandroid_runtime",  // ???
         "libaudioclient",  // for use of AudioTrack, AudioSystem. to be removed
         "liblog",  // NDK
+        "libbinder",
         "libdrmframework",  // for FileSource, MediaHTTP
         "libgui",  // for VideoFrameScheduler
         "libhidlallocatorutils",
@@ -122,7 +123,6 @@ cc_library_shared {
     static_libs: [
         "libbacktrace",
         "libbase",
-        "libbinder",
         "libc_malloc_debug_backtrace",
         "libcrypto",
         "libcutils",
