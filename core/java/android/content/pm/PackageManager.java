@@ -3269,12 +3269,19 @@ public abstract class PackageManager {
             @PermissionInfoFlags int flags) throws NameNotFoundException;
 
     /**
-     * Returns true if Permission Review Mode is enabled, false otherwise.
+     * Returns true if some permissions are individually controlled
      *
      * @hide
      */
     @TestApi
-    public abstract boolean isPermissionReviewModeEnabled();
+    public abstract boolean arePermissionsIndividuallyControlled();
+
+    /**
+     * Returns true if wireless consent mode is enabled
+     *
+     * @hide
+     */
+    public abstract boolean isWirelessConsentModeEnabled();
 
     /**
      * Retrieve all of the information we know about a particular group of

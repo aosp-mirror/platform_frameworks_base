@@ -1489,9 +1489,9 @@
         android:protectionLevel="signature|privileged" />
 
     <!-- @hide Allows internal management of Wi-Fi connectivity state when on
-         permission review mode.
+         wireless consent mode.
          <p>Not for use by third-party applications. -->
-    <permission android:name="android.permission.MANAGE_WIFI_WHEN_PERMISSION_REVIEW_REQUIRED"
+    <permission android:name="android.permission.MANAGE_WIFI_WHEN_WIRELESS_CONSENT_REQUIRED"
         android:protectionLevel="signature" />
 
     <!-- #SystemApi @hide Allows an app to bypass Private DNS.
@@ -1590,9 +1590,9 @@
     <permission android:name="android.permission.NFC_HANDOVER_STATUS"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @hide Allows internal management of Bluetooth state when on permission review mode.
+    <!-- @hide Allows internal management of Bluetooth state when on wireless consent mode.
          <p>Not for use by third-party applications. -->
-    <permission android:name="android.permission.MANAGE_BLUETOOTH_WHEN_PERMISSION_REVIEW_REQUIRED"
+    <permission android:name="android.permission.MANAGE_BLUETOOTH_WHEN_WIRELESS_CONSENT_REQUIRED"
         android:protectionLevel="signature" />
 
     <!-- ================================== -->

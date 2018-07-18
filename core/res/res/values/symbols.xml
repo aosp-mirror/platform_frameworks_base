@@ -3006,7 +3006,8 @@
   <!-- Default first user restrictions -->
   <java-symbol type="array" name="config_defaultFirstUserRestrictions" />
 
-  <java-symbol type="bool" name="config_permissionReviewRequired" />
+  <java-symbol type="bool" name="config_permissionsIndividuallyControlled" />
+  <java-symbol type="bool" name="config_wirelessConsentRequired" />
 
   <!-- Global actions icons -->
   <java-symbol type="drawable" name="ic_restart" />

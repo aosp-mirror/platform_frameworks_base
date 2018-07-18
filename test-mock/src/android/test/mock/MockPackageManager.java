@@ -159,7 +159,13 @@ public class MockPackageManager extends PackageManager {
 
     /** @hide */
     @Override
-    public boolean isPermissionReviewModeEnabled() {
+    public boolean arePermissionsIndividuallyControlled() {
+        return false;
+    }
+
+    /** @hide */
+    @Override
+    public boolean isWirelessConsentModeEnabled() {
         return false;
     }
 
