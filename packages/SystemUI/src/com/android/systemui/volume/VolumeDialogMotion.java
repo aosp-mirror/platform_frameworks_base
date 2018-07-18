@@ -238,6 +238,7 @@ public class VolumeDialogMotion {
                         mHandler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
+                                if (mShowing) return;
                                 if (D.BUG) Log.d(TAG, "mDialog.dismiss()");
                                 mDialog.dismiss();
                                 onComplete.run();
