@@ -55,6 +55,7 @@ import android.view.accessibility.IAccessibilityManager;
 
 import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.wm.DisplayFrames;
+import com.android.server.wm.TestDisplayContent;
 import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Before;
@@ -246,11 +247,7 @@ public class PhoneWindowManagerTestBase {
                         mock(IAccessibilityManager.class), UserHandle.USER_CURRENT);
                 policy[0].mSystemGestures = mock(SystemGesturesPointerEventListener.class);
                 policy[0].mNavigationBarCanMove = true;
-                policy[0].mPortraitRotation = ROTATION_0;
-                policy[0].mLandscapeRotation = ROTATION_90;
-                policy[0].mUpsideDownRotation = ROTATION_180;
-                policy[0].mSeascapeRotation = ROTATION_270;
-                policy[0].onConfigurationChanged();
+                policy[0].onConfigurationChanged(TestDisplayContent.create(policy[0], context));
             });
             return policy[0];
         }

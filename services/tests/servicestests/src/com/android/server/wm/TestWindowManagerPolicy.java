@@ -31,7 +31,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.proto.ProtoOutputStream;
-import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.IWindow;
 import android.view.IWindowManager;
@@ -79,7 +78,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void setInitialDisplaySize(Display display, int width, int height, int density) {
+    public void setInitialDisplaySize(DisplayRotation displayRotation, int width, int height,
+            int density) {
 
     }
 
@@ -390,18 +390,9 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public int rotationForOrientationLw(int orientation, int lastRotation, boolean defaultDisplay) {
+    public int rotationForOrientationLw(DisplayRotation displayRotation, int orientation,
+            int lastRotation) {
         return rotationToReport;
-    }
-
-    @Override
-    public boolean rotationHasCompatibleMetricsLw(int orientation, int rotation) {
-        return true;
-    }
-
-    @Override
-    public void setRotationLw(int rotation) {
-
     }
 
     @Override
@@ -436,11 +427,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void enableScreenAfterBoot() {
-
-    }
-
-    @Override
-    public void setCurrentOrientationLw(int newOrientation) {
 
     }
 
@@ -562,12 +548,13 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void onConfigurationChanged() {
+    public void onConfigurationChanged(DisplayContentInfo displayContentInfo) {
 
     }
 
     @Override
-    public boolean shouldRotateSeamlessly(int oldRotation, int newRotation) {
+    public boolean shouldRotateSeamlessly(DisplayRotation displayRotation, int oldRotation,
+            int newRotation) {
         return false;
     }
 
@@ -605,5 +592,14 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public boolean setAodShowing(boolean aodShowing) {
         return false;
+    }
+
+    @Override
+    public void updateOrientationListener() {
+    }
+
+    @Override
+    public RotationSource getRotationSource(int displayId) {
+        return null;
     }
 }

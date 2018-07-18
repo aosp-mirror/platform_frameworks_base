@@ -2480,37 +2480,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 dc.setLastOrientation(req);
                 //send a message to Policy indicating orientation change to take
                 //action like disabling/enabling sensors etc.,
-                // TODO(multi-display): Implement policy for secondary displays.
-                if (dc.isDefaultDisplay) {
-                    mPolicy.setCurrentOrientationLw(req);
-                }
+                dc.mDisplayRotation.setCurrentOrientation(req);
                 return dc.updateRotationUnchecked(forceUpdate);
             }
             return false;
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-    }
-
-    // If this is true we have updated our desired orientation, but not yet
-    // changed the real orientation our applied our screen rotation animation.
-    // For example, because a previous screen rotation was in progress.
-    boolean rotationNeedsUpdateLocked() {
-        // TODO(multi-display): Check for updates on all displays. Need to have per-display policy
-        // to implement WindowManagerPolicy#rotationForOrientationLw() correctly.
-        final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
-        final int lastOrientation = defaultDisplayContent.getLastOrientation();
-        final int oldRotation = defaultDisplayContent.getRotation();
-        final boolean oldAltOrientation = defaultDisplayContent.getAltOrientation();
-
-        final int rotation = mPolicy.rotationForOrientationLw(lastOrientation, oldRotation,
-                true /* defaultDisplay */);
-        boolean altOrientation = !mPolicy.rotationHasCompatibleMetricsLw(
-                lastOrientation, rotation);
-        if (oldRotation == rotation && oldAltOrientation == altOrientation) {
-            return false;
-        }
-        return true;
     }
 
     @Override
@@ -3867,6 +3843,13 @@ public class WindowManagerService extends IWindowManager.Stub
         } finally {
             Binder.restoreCallingIdentity(origId);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    @Override
+    public WindowManagerPolicy.DisplayContentInfo getDefaultDisplayContentInfo() {
+        synchronized (mWindowMap) {
+            return getDefaultDisplayContentLocked();
         }
     }
 
@@ -6761,8 +6744,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void onOverlayChanged() {
         synchronized (mWindowMap) {
-            mPolicy.onOverlayChangedLw();
-            getDefaultDisplayContentLocked().updateDisplayInfo();
+            mRoot.forAllDisplays(displayContent -> {
+                mPolicy.onOverlayChangedLw(displayContent);
+                displayContent.updateDisplayInfo();
+            });
             requestTraversal();
         }
     }

@@ -288,6 +288,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal.SleepToken;
 import com.android.server.wm.AppTransition;
 import com.android.server.wm.DisplayFrames;
+import com.android.server.wm.DisplayRotation;
 import com.android.server.wm.WindowFrames;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.AppTransitionListener;
@@ -619,8 +620,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     ScreenOnListener mScreenOnListener;
     boolean mKeyguardDrawComplete;
     boolean mWindowManagerDrawComplete;
-    boolean mOrientationSensorEnabled = false;
-    int mCurrentAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean mHasSoftInput = false;
     boolean mTranslucentDecorEnabled = true;
     boolean mUseTvRouting;
@@ -735,12 +734,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Whether system navigation keys are enabled
     boolean mSystemNavigationKeysEnabled;
 
-    Display mDisplay;
-
-    int mLandscapeRotation = 0;  // default landscape rotation
-    int mSeascapeRotation = 0;   // "other" landscape rotation, 180 degrees from mLandscapeRotation
-    int mPortraitRotation = 0;   // default portrait rotation
-    int mUpsideDownRotation = 0; // "other" portrait rotation
+    // TODO(multi-display): Remove default when the dependencies are multi-display ready.
+    Display mDefaultDisplay;
+    DisplayRotation mDefaultDisplayRotation;
+    MyOrientationListener mDefaultOrientationListener;
 
     // What we do when the user long presses on home
     private int mLongPressOnHomeBehavior;
@@ -1043,9 +1040,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    class MyOrientationListener extends WindowOrientationListener {
+    class MyOrientationListener extends WindowOrientationListener
+            implements WindowManagerPolicy.RotationSource {
 
         private SparseArray<Runnable> mRunnableCache;
+        private boolean mEnabled;
 
         MyOrientationListener(Context context, Handler handler) {
             super(context, handler);
@@ -1062,9 +1061,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             public void run() {
                 // send interaction hint to improve redraw performance
                 mPowerManagerInternal.powerHint(PowerHint.INTERACTION, 0);
-                if (isRotationChoicePossible(mCurrentAppOrientation)) {
-                    final boolean isValid = isValidRotationChoice(mCurrentAppOrientation,
-                            mRotation);
+                if (isRotationChoicePossible(mDefaultDisplayRotation.getCurrentAppOrientation())) {
+                    final boolean isValid = mDefaultDisplayRotation
+                            .isValidRotationChoice(mRotation);
                     sendProposedRotationChangeToStatusBarInternal(mRotation, isValid);
                 } else {
                     updateRotation(false);
@@ -1082,8 +1081,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             mHandler.post(r);
         }
+
+        @Override
+        public void enable(boolean clearCurrentRotation) {
+            super.enable(clearCurrentRotation);
+            mEnabled = true;
+            if(localLOGV) Slog.v(TAG, "Enabling listeners");
+        }
+
+        @Override
+        public void disable() {
+            super.disable();
+            mEnabled = false;
+            if(localLOGV) Slog.v(TAG, "Disabling listeners");
+        }
     }
-    MyOrientationListener mOrientationListener;
 
     final IPersistentVrStateCallbacks mPersistentVrModeListener =
             new IPersistentVrStateCallbacks.Stub() {
@@ -1178,10 +1190,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      */
     boolean needSensorRunningLp() {
         if (mSupportAutoRotation) {
-            if (mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR
-                    || mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
-                    || mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
-                    || mCurrentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE) {
+            final int currentAppOrientation = mDefaultDisplayRotation.getCurrentAppOrientation();
+            if (currentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR
+                    || currentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
+                    || currentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                    || currentAppOrientation == ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE) {
                 // If the application has explicitly requested to follow the
                 // orientation, then we need to turn the sensor on.
                 return true;
@@ -1213,6 +1226,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return mSupportAutoRotation;
     }
 
+    @Override
+    public void updateOrientationListener() {
+        synchronized (mLock) {
+            updateOrientationListenerLp();
+        }
+    }
+
     /*
      * Various use cases for invoking this function
      * screen turning off, should always disable listeners if already enabled
@@ -1224,15 +1244,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * screen turning on and current app has nosensor based orientation, do nothing
      */
     void updateOrientationListenerLp() {
-        if (!mOrientationListener.canDetectOrientation()) {
+        if (!mDefaultOrientationListener.canDetectOrientation()) {
             // If sensor is turned off or nonexistent for some reason
             return;
         }
         // Could have been invoked due to screen turning on or off or
         // change of the currently visible window's orientation.
         if (localLOGV) Slog.v(TAG, "mScreenOnEarly=" + mScreenOnEarly
-                + ", mAwake=" + mAwake + ", mCurrentAppOrientation=" + mCurrentAppOrientation
-                + ", mOrientationSensorEnabled=" + mOrientationSensorEnabled
+                + ", mAwake=" + mAwake + ", mCurrentAppOrientation="
+                + mDefaultDisplayRotation.getCurrentAppOrientation()
+                + ", mOrientationSensorEnabled=" + mDefaultOrientationListener.mEnabled
                 + ", mKeyguardDrawComplete=" + mKeyguardDrawComplete
                 + ", mWindowManagerDrawComplete=" + mWindowManagerDrawComplete);
 
@@ -1244,24 +1265,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (needSensorRunningLp()) {
                 disable = false;
                 //enable listener if not already enabled
-                if (!mOrientationSensorEnabled) {
+                if (!mDefaultOrientationListener.mEnabled) {
                     // Don't clear the current sensor orientation if the keyguard is going away in
                     // dismiss mode. This allows window manager to use the last sensor reading to
                     // determine the orientation vs. falling back to the last known orientation if
                     // the sensor reading was cleared which can cause it to relaunch the app that
                     // will show in the wrong orientation first before correcting leading to app
                     // launch delays.
-                    mOrientationListener.enable(true /* clearCurrentRotation */);
-                    if(localLOGV) Slog.v(TAG, "Enabling listeners");
-                    mOrientationSensorEnabled = true;
+                    mDefaultOrientationListener.enable(true /* clearCurrentRotation */);
                 }
             }
         }
         //check if sensors need to be disabled
-        if (disable && mOrientationSensorEnabled) {
-            mOrientationListener.disable();
-            if(localLOGV) Slog.v(TAG, "Disabling listeners");
-            mOrientationSensorEnabled = false;
+        if (disable && mDefaultOrientationListener.mEnabled) {
+            mDefaultOrientationListener.disable();
         }
     }
 
@@ -2046,9 +2063,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mHandler = new PolicyHandler();
         mWakeGestureListener = new MyWakeGestureListener(mContext, mHandler);
-        mOrientationListener = new MyOrientationListener(mContext, mHandler);
+        final DisplayContentInfo displayContentInfo =
+                windowManagerFuncs.getDefaultDisplayContentInfo();
+        mDefaultDisplay = displayContentInfo.getDisplay();
+        mDefaultDisplayRotation = displayContentInfo.getDisplayRotation();
+        mDefaultOrientationListener = new MyOrientationListener(mContext, mHandler);
         try {
-            mOrientationListener.setCurrentRotation(windowManager.getDefaultDisplayRotation());
+            mDefaultOrientationListener.setCurrentRotation(
+                    windowManager.getDefaultDisplayRotation());
         } catch (RemoteException ex) { }
         mSettingsObserver = new SettingsObserver(mHandler);
         mSettingsObserver.observe();
@@ -2222,11 +2244,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                     @Override
                     public void onDown() {
-                        mOrientationListener.onTouchStart();
+                        mDefaultOrientationListener.onTouchStart();
                     }
                     @Override
                     public void onUpOrCancel() {
-                        mOrientationListener.onTouchEnd();
+                        mDefaultOrientationListener.onTouchEnd();
                     }
                     @Override
                     public void onMouseHoverAtTop() {
@@ -2334,50 +2356,33 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void setInitialDisplaySize(Display display, int width, int height, int density) {
+    public void setInitialDisplaySize(DisplayRotation displayRotation, int width, int height,
+            int density) {
         // This method might be called before the policy has been fully initialized
         // or for other displays we don't care about.
         // TODO(multi-display): Define policy for secondary displays.
-        if (mContext == null || display.getDisplayId() != DEFAULT_DISPLAY) {
+        if (mContext == null || !displayRotation.isDefaultDisplay()) {
             return;
         }
-        mDisplay = display;
 
-        final Resources res = mContext.getResources();
-        int shortSize, longSize;
+        final int shortSize;
+        final int longSize;
         if (width > height) {
             shortSize = height;
             longSize = width;
-            mLandscapeRotation = Surface.ROTATION_0;
-            mSeascapeRotation = Surface.ROTATION_180;
-            if (res.getBoolean(com.android.internal.R.bool.config_reverseDefaultRotation)) {
-                mPortraitRotation = Surface.ROTATION_90;
-                mUpsideDownRotation = Surface.ROTATION_270;
-            } else {
-                mPortraitRotation = Surface.ROTATION_270;
-                mUpsideDownRotation = Surface.ROTATION_90;
-            }
         } else {
             shortSize = width;
             longSize = height;
-            mPortraitRotation = Surface.ROTATION_0;
-            mUpsideDownRotation = Surface.ROTATION_180;
-            if (res.getBoolean(com.android.internal.R.bool.config_reverseDefaultRotation)) {
-                mLandscapeRotation = Surface.ROTATION_270;
-                mSeascapeRotation = Surface.ROTATION_90;
-            } else {
-                mLandscapeRotation = Surface.ROTATION_90;
-                mSeascapeRotation = Surface.ROTATION_270;
-            }
         }
 
         // SystemUI (status bar) layout policy
-        int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / density;
-        int longSizeDp = longSize * DisplayMetrics.DENSITY_DEFAULT / density;
+        final int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / density;
+        final int longSizeDp = longSize * DisplayMetrics.DENSITY_DEFAULT / density;
 
         // Allow the navigation bar to move on non-square small devices (phones).
         mNavigationBarCanMove = width != height && shortSizeDp < 600;
 
+        final Resources res = mContext.getResources();
         mHasNavigationBar = res.getBoolean(com.android.internal.R.bool.config_showNavigationBar);
 
         // Allow a system property to override this. Used by the emulator.
@@ -2392,18 +2397,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // For demo purposes, allow the rotation of the HDMI display to be controlled.
         // By default, HDMI locks rotation to landscape.
         if ("portrait".equals(SystemProperties.get("persist.demo.hdmirotation"))) {
-            mDemoHdmiRotation = mPortraitRotation;
+            mDemoHdmiRotation = displayRotation.getPortraitRotation();
         } else {
-            mDemoHdmiRotation = mLandscapeRotation;
+            mDemoHdmiRotation = displayRotation.getLandscapeRotation();
         }
         mDemoHdmiRotationLock = SystemProperties.getBoolean("persist.demo.hdmirotationlock", false);
 
         // For demo purposes, allow the rotation of the remote display to be controlled.
         // By default, remote display locks rotation to landscape.
         if ("portrait".equals(SystemProperties.get("persist.demo.remoterotation"))) {
-            mDemoRotation = mPortraitRotation;
+            mDemoRotation = displayRotation.getPortraitRotation();
         } else {
-            mDemoRotation = mLandscapeRotation;
+            mDemoRotation = displayRotation.getLandscapeRotation();
         }
         mDemoRotationLock = SystemProperties.getBoolean(
                 "persist.demo.rotationlock", false);
@@ -2873,53 +2878,62 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void onOverlayChangedLw() {
-        onConfigurationChanged();
+    public void onOverlayChangedLw(DisplayContentInfo displayContentInfo) {
+        onConfigurationChanged(displayContentInfo);
     }
 
     @Override
-    public void onConfigurationChanged() {
+    public void onConfigurationChanged(DisplayContentInfo displayContentInfo) {
+        final DisplayRotation displayRotation = displayContentInfo.getDisplayRotation();
         // TODO(multi-display): Define policy for secondary displays.
-        Context uiContext = getSystemUiContext();
-        final Resources res = uiContext.getResources();
+        if (!displayRotation.isDefaultDisplay()) {
+            return;
+        }
 
-        mStatusBarHeightForRotation[mPortraitRotation] =
-                mStatusBarHeightForRotation[mUpsideDownRotation] = res.getDimensionPixelSize(
+        final Context uiContext = getSystemUiContext();
+        final Resources res = uiContext.getResources();
+        final int portraitRotation = displayRotation.getPortraitRotation();
+        final int upsideDownRotation = displayRotation.getUpsideDownRotation();
+        final int landscapeRotation = displayRotation.getLandscapeRotation();
+        final int seascapeRotation = displayRotation.getSeascapeRotation();
+
+        mStatusBarHeightForRotation[portraitRotation] =
+                mStatusBarHeightForRotation[upsideDownRotation] = res.getDimensionPixelSize(
                                 com.android.internal.R.dimen.status_bar_height_portrait);
-        mStatusBarHeightForRotation[mLandscapeRotation] =
-                mStatusBarHeightForRotation[mSeascapeRotation] = res.getDimensionPixelSize(
+        mStatusBarHeightForRotation[landscapeRotation] =
+                mStatusBarHeightForRotation[seascapeRotation] = res.getDimensionPixelSize(
                         com.android.internal.R.dimen.status_bar_height_landscape);
 
         // Height of the navigation bar when presented horizontally at bottom
-        mNavigationBarHeightForRotationDefault[mPortraitRotation] =
-        mNavigationBarHeightForRotationDefault[mUpsideDownRotation] =
+        mNavigationBarHeightForRotationDefault[portraitRotation] =
+        mNavigationBarHeightForRotationDefault[upsideDownRotation] =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);
-        mNavigationBarHeightForRotationDefault[mLandscapeRotation] =
-        mNavigationBarHeightForRotationDefault[mSeascapeRotation] = res.getDimensionPixelSize(
+        mNavigationBarHeightForRotationDefault[landscapeRotation] =
+        mNavigationBarHeightForRotationDefault[seascapeRotation] = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.navigation_bar_height_landscape);
 
         // Width of the navigation bar when presented vertically along one side
-        mNavigationBarWidthForRotationDefault[mPortraitRotation] =
-        mNavigationBarWidthForRotationDefault[mUpsideDownRotation] =
-        mNavigationBarWidthForRotationDefault[mLandscapeRotation] =
-        mNavigationBarWidthForRotationDefault[mSeascapeRotation] =
+        mNavigationBarWidthForRotationDefault[portraitRotation] =
+        mNavigationBarWidthForRotationDefault[upsideDownRotation] =
+        mNavigationBarWidthForRotationDefault[landscapeRotation] =
+        mNavigationBarWidthForRotationDefault[seascapeRotation] =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width);
 
         if (ALTERNATE_CAR_MODE_NAV_SIZE) {
             // Height of the navigation bar when presented horizontally at bottom
-            mNavigationBarHeightForRotationInCarMode[mPortraitRotation] =
-            mNavigationBarHeightForRotationInCarMode[mUpsideDownRotation] =
+            mNavigationBarHeightForRotationInCarMode[portraitRotation] =
+            mNavigationBarHeightForRotationInCarMode[upsideDownRotation] =
                     res.getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_height_car_mode);
-            mNavigationBarHeightForRotationInCarMode[mLandscapeRotation] =
-            mNavigationBarHeightForRotationInCarMode[mSeascapeRotation] = res.getDimensionPixelSize(
+            mNavigationBarHeightForRotationInCarMode[landscapeRotation] =
+            mNavigationBarHeightForRotationInCarMode[seascapeRotation] = res.getDimensionPixelSize(
                     com.android.internal.R.dimen.navigation_bar_height_landscape_car_mode);
 
             // Width of the navigation bar when presented vertically along one side
-            mNavigationBarWidthForRotationInCarMode[mPortraitRotation] =
-            mNavigationBarWidthForRotationInCarMode[mUpsideDownRotation] =
-            mNavigationBarWidthForRotationInCarMode[mLandscapeRotation] =
-            mNavigationBarWidthForRotationInCarMode[mSeascapeRotation] =
+            mNavigationBarWidthForRotationInCarMode[portraitRotation] =
+            mNavigationBarWidthForRotationInCarMode[upsideDownRotation] =
+            mNavigationBarWidthForRotationInCarMode[landscapeRotation] =
+            mNavigationBarWidthForRotationInCarMode[seascapeRotation] =
                     res.getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_width_car_mode);
         }
@@ -6500,7 +6514,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private boolean shouldDispatchInputWhenNonInteractive(KeyEvent event) {
-        final boolean displayOff = (mDisplay == null || mDisplay.getState() == STATE_OFF);
+        final boolean displayOff = (mDefaultDisplay == null
+                || mDefaultDisplay.getState() == STATE_OFF);
 
         if (displayOff && !mHasFeatureWatch) {
             return false;
@@ -7202,7 +7217,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public int rotationForOrientationLw(int orientation, int lastRotation, boolean defaultDisplay) {
+    public int rotationForOrientationLw(DisplayRotation displayRotation, int orientation,
+            int lastRotation) {
         if (false) {
             Slog.v(TAG, "rotationForOrientationLw(orient="
                         + orientation + ", last=" + lastRotation
@@ -7217,13 +7233,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         synchronized (mLock) {
-            int sensorRotation = mOrientationListener.getProposedRotation(); // may be -1
+            int sensorRotation = displayRotation.getSensorRotation(); // may be -1
             if (sensorRotation < 0) {
                 sensorRotation = lastRotation;
             }
 
             final int preferredRotation;
-            if (!defaultDisplay) {
+            if (!displayRotation.isDefaultDisplay()) {
                 // For secondary displays we ignore things like displays sensors, docking mode and
                 // rotation lock, and always prefer a default rotation.
                 preferredRotation = Surface.ROTATION_0;
@@ -7266,7 +7282,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // any apps that explicitly set landscape, but does cause sensors be ignored,
                 // and ignored any orientation lock that the user has set (this conditional
                 // should remain above the ORIENTATION_LOCKED conditional below).
-                preferredRotation = mPortraitRotation;
+                preferredRotation = displayRotation.getPortraitRotation();
             } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED) {
                 // Application just wants to remain locked in the last rotation.
                 preferredRotation = lastRotation;
@@ -7314,89 +7330,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 preferredRotation = -1;
             }
 
-            switch (orientation) {
-                case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
-                    // Return portrait unless overridden.
-                    if (isAnyPortrait(preferredRotation)) {
-                        return preferredRotation;
-                    }
-                    return mPortraitRotation;
-
-                case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
-                    // Return landscape unless overridden.
-                    if (isLandscapeOrSeascape(preferredRotation)) {
-                        return preferredRotation;
-                    }
-                    return mLandscapeRotation;
-
-                case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
-                    // Return reverse portrait unless overridden.
-                    if (isAnyPortrait(preferredRotation)) {
-                        return preferredRotation;
-                    }
-                    return mUpsideDownRotation;
-
-                case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
-                    // Return seascape unless overridden.
-                    if (isLandscapeOrSeascape(preferredRotation)) {
-                        return preferredRotation;
-                    }
-                    return mSeascapeRotation;
-
-                case ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE:
-                case ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE:
-                    // Return either landscape rotation.
-                    if (isLandscapeOrSeascape(preferredRotation)) {
-                        return preferredRotation;
-                    }
-                    if (isLandscapeOrSeascape(lastRotation)) {
-                        return lastRotation;
-                    }
-                    return mLandscapeRotation;
-
-                case ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT:
-                case ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT:
-                    // Return either portrait rotation.
-                    if (isAnyPortrait(preferredRotation)) {
-                        return preferredRotation;
-                    }
-                    if (isAnyPortrait(lastRotation)) {
-                        return lastRotation;
-                    }
-                    return mPortraitRotation;
-
-                default:
-                    // For USER, UNSPECIFIED, NOSENSOR, SENSOR and FULL_SENSOR,
-                    // just return the preferred orientation we already calculated.
-                    if (preferredRotation >= 0) {
-                        return preferredRotation;
-                    }
-                    return Surface.ROTATION_0;
-            }
+            return displayRotation.rotationForOrientation(orientation, lastRotation,
+                    preferredRotation);
         }
     }
 
     @Override
-    public boolean rotationHasCompatibleMetricsLw(int orientation, int rotation) {
-        switch (orientation) {
-            case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
-            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
-            case ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT:
-                return isAnyPortrait(rotation);
-
-            case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
-            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
-            case ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE:
-                return isLandscapeOrSeascape(rotation);
-
-            default:
-                return true;
-        }
-    }
-
-    @Override
-    public void setRotationLw(int rotation) {
-        mOrientationListener.setCurrentRotation(rotation);
+    public WindowManagerPolicy.RotationSource getRotationSource(int displayId) {
+        // TODO(multi-display): Distinguish sensor for different displays.
+        return displayId == DEFAULT_DISPLAY ? mDefaultOrientationListener : null;
     }
 
     public boolean isRotationChoicePossible(int orientation) {
@@ -7452,40 +7394,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Rotation is forced, should be controlled by system
         return false;
-    }
-
-    public boolean isValidRotationChoice(int orientation, final int preferredRotation) {
-        // Determine if the given app orientation is compatible with the provided rotation choice
-        switch (orientation) {
-            case ActivityInfo.SCREEN_ORIENTATION_FULL_USER:
-                // Works with any of the 4 rotations
-                return preferredRotation >= 0;
-
-            case ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT:
-                // It's possible for the user pref to be set at 180 because of FULL_USER. This would
-                // make switching to USER_PORTRAIT appear at 180. Provide choice to back to portrait
-                // but never to go to 180.
-                return preferredRotation == mPortraitRotation;
-
-            case ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE:
-                // Works landscape or seascape
-                return isLandscapeOrSeascape(preferredRotation);
-
-            case ActivityInfo.SCREEN_ORIENTATION_USER:
-            case ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED:
-                // Works with any rotation except upside down
-                return (preferredRotation >= 0) && (preferredRotation != mUpsideDownRotation);
-        }
-
-        return false;
-    }
-
-    private boolean isLandscapeOrSeascape(int rotation) {
-        return rotation == mLandscapeRotation || rotation == mSeascapeRotation;
-    }
-
-    private boolean isAnyPortrait(int rotation) {
-        return rotation == mPortraitRotation || rotation == mUpsideDownRotation;
     }
 
     @Override
@@ -7985,16 +7893,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         return true;
-    }
-
-    @Override
-    public void setCurrentOrientationLw(int newOrientation) {
-        synchronized (mLock) {
-            if (newOrientation != mCurrentAppOrientation) {
-                mCurrentAppOrientation = newOrientation;
-                updateOrientationListenerLp();
-            }
-        }
     }
 
     private boolean isTheaterModeEnabled() {
@@ -8511,13 +8409,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public boolean shouldRotateSeamlessly(int oldRotation, int newRotation) {
+    public boolean shouldRotateSeamlessly(DisplayRotation displayRotation, int oldRotation,
+            int newRotation) {
         // For the upside down rotation we don't rotate seamlessly as the navigation
         // bar moves position.
         // Note most apps (using orientation:sensor or user as opposed to fullSensor)
         // will not enter the reverse portrait orientation, so actually the
         // orientation won't change at all.
-        if (oldRotation == mUpsideDownRotation || newRotation == mUpsideDownRotation) {
+        if (oldRotation == displayRotation.getUpsideDownRotation()
+                || newRotation == displayRotation.getUpsideDownRotation()) {
             return false;
         }
         // If the navigation bar can't change sides, then it will
@@ -8559,7 +8459,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         proto.write(LAST_SYSTEM_UI_FLAGS, mLastSystemUiFlags);
         proto.write(ROTATION_MODE, mUserRotationMode);
         proto.write(ROTATION, mUserRotation);
-        proto.write(ORIENTATION, mCurrentAppOrientation);
+        proto.write(ORIENTATION, mDefaultDisplayRotation.getCurrentAppOrientation());
         proto.write(SCREEN_ON_FULLY, mScreenOnFully);
         proto.write(KEYGUARD_DRAW_COMPLETE, mKeyguardDrawComplete);
         proto.write(WINDOW_MANAGER_DRAW_COMPLETE, mWindowManagerDrawComplete);
@@ -8584,8 +8484,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         proto.write(FORCE_STATUS_BAR_FROM_KEYGUARD, mForceStatusBarFromKeyguard);
         mStatusBarController.writeToProto(proto, STATUS_BAR);
         mNavigationBarController.writeToProto(proto, NAVIGATION_BAR);
-        if (mOrientationListener != null) {
-            mOrientationListener.writeToProto(proto, ORIENTATION_LISTENER);
+        if (mDefaultOrientationListener != null) {
+            mDefaultOrientationListener.writeToProto(proto, ORIENTATION_LISTENER);
         }
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.writeToProto(proto, KEYGUARD_DELEGATE);
@@ -8623,7 +8523,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         pw.print(prefix);
                 pw.print("mSupportAutoRotation="); pw.print(mSupportAutoRotation);
-                pw.print(" mOrientationSensorEnabled="); pw.println(mOrientationSensorEnabled);
+                pw.print(" mOrientationSensorEnabled=");
+                pw.println(mDefaultOrientationListener.mEnabled);
         pw.print(prefix); pw.print("mUiMode="); pw.print(Configuration.uiModeToString(mUiMode));
                 pw.print(" mDockMode="); pw.println(Intent.dockStateToString(mDockMode));
         pw.print(prefix); pw.print("mEnableCarDockHomeCapture=");
@@ -8637,8 +8538,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print(" mUserRotation="); pw.print(Surface.rotationToString(mUserRotation));
                 pw.print(" mAllowAllRotations=");
                 pw.println(allowAllRotationsToString(mAllowAllRotations));
-        pw.print(prefix); pw.print("mCurrentAppOrientation=");
-                pw.println(ActivityInfo.screenOrientationToString(mCurrentAppOrientation));
         pw.print(prefix); pw.print("mCarDockEnablesAccelerometer=");
                 pw.print(mCarDockEnablesAccelerometer);
                 pw.print(" mDeskDockEnablesAccelerometer=");
@@ -8752,14 +8651,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix); pw.print("mAllowLockscreenWhenOn="); pw.print(mAllowLockscreenWhenOn);
                 pw.print(" mLockScreenTimeout="); pw.print(mLockScreenTimeout);
                 pw.print(" mLockScreenTimerActive="); pw.println(mLockScreenTimerActive);
-        pw.print(prefix); pw.print("mLandscapeRotation=");
-                pw.print(Surface.rotationToString(mLandscapeRotation));
-                pw.print(" mSeascapeRotation=");
-                pw.println(Surface.rotationToString(mSeascapeRotation));
-        pw.print(prefix); pw.print("mPortraitRotation=");
-                pw.print(Surface.rotationToString(mPortraitRotation));
-                pw.print(" mUpsideDownRotation=");
-                pw.println(Surface.rotationToString(mUpsideDownRotation));
         pw.print(prefix); pw.print("mDemoHdmiRotation=");
                 pw.print(Surface.rotationToString(mDemoHdmiRotation));
                 pw.print(" mDemoHdmiRotationLock="); pw.println(mDemoHdmiRotationLock);
@@ -8782,8 +8673,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mWakeGestureListener != null) {
             mWakeGestureListener.dump(pw, prefix);
         }
-        if (mOrientationListener != null) {
-            mOrientationListener.dump(pw, prefix);
+        if (mDefaultOrientationListener != null) {
+            mDefaultOrientationListener.dump(pw, prefix);
         }
         if (mBurnInProtectionHelper != null) {
             mBurnInProtectionHelper.dump(prefix, pw);

@@ -134,6 +134,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     // transaction from the global transaction.
     private final SurfaceControl.Transaction mDisplayTransaction = new SurfaceControl.Transaction();
 
+    private final Consumer<DisplayContent> mDisplayContentConfigChangesConsumer =
+            mService.mPolicy::onConfigurationChanged;
+
     private final Consumer<WindowState> mCloseSystemDialogsConsumer = w -> {
         if (w.mHasSurface) {
             try {
@@ -379,7 +382,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         prepareFreezingTaskBounds();
         super.onConfigurationChanged(newParentConfig);
 
-        mService.mPolicy.onConfigurationChanged();
+        forAllDisplays(mDisplayContentConfigChangesConsumer);
     }
 
     /**
