@@ -34,6 +34,7 @@ import android.text.util.Linkify.LinkifyMask;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -388,6 +389,11 @@ public interface TextClassifier {
      */
     default boolean isDestroyed() {
         return false;
+    }
+
+    /** @hide **/
+    default void dump(@NonNull IndentingPrintWriter printWriter) {
+
     }
 
     /**

@@ -30,6 +30,7 @@ import android.service.textclassifier.ITextSelectionCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
 import java.util.concurrent.CountDownLatch;
@@ -160,6 +161,17 @@ public final class SystemTextClassifier implements TextClassifier {
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Error destroying classification session.", e);
         }
+    }
+
+    @Override
+    public void dump(@NonNull IndentingPrintWriter printWriter) {
+        printWriter.println("SystemTextClassifier:");
+        printWriter.increaseIndent();
+        printWriter.printPair("mFallback", mFallback);
+        printWriter.printPair("mPackageName", mPackageName);
+        printWriter.printPair("mSessionId", mSessionId);
+        printWriter.decreaseIndent();
+        printWriter.println();
     }
 
     /**

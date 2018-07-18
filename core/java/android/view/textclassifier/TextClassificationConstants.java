@@ -20,6 +20,8 @@ import android.annotation.Nullable;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
+import com.android.internal.util.IndentingPrintWriter;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -240,5 +242,26 @@ public final class TextClassificationConstants {
 
     private static List<String> parseEntityList(String listStr) {
         return Collections.unmodifiableList(Arrays.asList(listStr.split(ENTITY_LIST_DELIMITER)));
+    }
+
+    void dump(IndentingPrintWriter pw) {
+        pw.println("TextClassificationConstants:");
+        pw.increaseIndent();
+        pw.printPair("isLocalTextClassifierEnabled", mLocalTextClassifierEnabled);
+        pw.printPair("isSystemTextClassifierEnabled", mSystemTextClassifierEnabled);
+        pw.printPair("isModelDarkLaunchEnabled", mModelDarkLaunchEnabled);
+        pw.printPair("isSmartSelectionEnabled", mSmartSelectionEnabled);
+        pw.printPair("isSmartTextShareEnabled", mSmartTextShareEnabled);
+        pw.printPair("isSmartLinkifyEnabled", mSmartLinkifyEnabled);
+        pw.printPair("isSmartSelectionAnimationEnabled", mSmartSelectionAnimationEnabled);
+        pw.printPair("getSuggestSelectionMaxRangeLength", mSuggestSelectionMaxRangeLength);
+        pw.printPair("getClassifyTextMaxRangeLength", mClassifyTextMaxRangeLength);
+        pw.printPair("getGenerateLinksMaxTextLength", mGenerateLinksMaxTextLength);
+        pw.printPair("getGenerateLinksLogSampleRate", mGenerateLinksLogSampleRate);
+        pw.printPair("getEntityListDefault", mEntityListDefault);
+        pw.printPair("getEntityListNotEditable", mEntityListNotEditable);
+        pw.printPair("getEntityListEditable", mEntityListEditable);
+        pw.decreaseIndent();
+        pw.println();
     }
 }
