@@ -2480,7 +2480,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 dc.setLastOrientation(req);
                 //send a message to Policy indicating orientation change to take
                 //action like disabling/enabling sensors etc.,
-                dc.mDisplayRotation.setCurrentOrientation(req);
+                dc.getDisplayRotation().setCurrentOrientation(req);
                 return dc.updateRotationUnchecked(forceUpdate);
             }
             return false;
@@ -3817,28 +3817,31 @@ public class WindowManagerService extends IWindowManager.Stub
         long origId = Binder.clearCallingIdentity();
 
         try {
-            // TODO(multi-display): Update rotation for different displays separately.
-            final boolean rotationChanged;
-            final int displayId;
             synchronized (mWindowMap) {
-                final DisplayContent displayContent = getDefaultDisplayContentLocked();
-                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "updateRotation: display");
-                rotationChanged = displayContent.updateRotationUnchecked();
-                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                if (!rotationChanged || forceRelayout) {
-                    displayContent.setLayoutNeeded();
+                boolean layoutNeeded = false;
+                final int displayCount = mRoot.mChildren.size();
+                for (int i = 0; i < displayCount; ++i) {
+                    final DisplayContent displayContent = mRoot.mChildren.get(i);
+                    Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "updateRotation: display");
+                    final boolean rotationChanged = displayContent.updateRotationUnchecked();
+                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+
+                    if (!rotationChanged || forceRelayout) {
+                        displayContent.setLayoutNeeded();
+                        layoutNeeded = true;
+                    }
+                    if (rotationChanged || alwaysSendConfiguration) {
+                        mH.obtainMessage(H.SEND_NEW_CONFIGURATION, displayContent.getDisplayId())
+                                .sendToTarget();
+                    }
+                }
+
+                if (layoutNeeded) {
                     Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                             "updateRotation: performSurfacePlacement");
                     mWindowPlacerLocked.performSurfacePlacement();
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 }
-                displayId = displayContent.getDisplayId();
-            }
-
-            if (rotationChanged || alwaysSendConfiguration) {
-                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "updateRotation: sendNewConfiguration");
-                sendNewConfiguration(displayId);
-                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -5775,7 +5778,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             displayContent.updateDisplayInfo();
             screenRotationAnimation = new ScreenRotationAnimation(mContext, displayContent,
-                    mPolicy.isDefaultOrientationForced(), isSecure,
+                    displayContent.getDisplayRotation().isDefaultOrientationForced(), isSecure,
                     this);
             mAnimator.setScreenRotationAnimationLocked(mFrozenDisplayId,
                     screenRotationAnimation);
@@ -7126,11 +7129,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             finishSeamlessRotation();
 
-            final DisplayContent displayContent = w.getDisplayContent();
-            if (displayContent.updateRotationUnchecked()) {
-                mH.obtainMessage(H.SEND_NEW_CONFIGURATION, displayContent.getDisplayId())
-                        .sendToTarget();
-            }
+            w.getDisplayContent().updateRotationAndSendNewConfigIfNeeded();
         }
     }
 

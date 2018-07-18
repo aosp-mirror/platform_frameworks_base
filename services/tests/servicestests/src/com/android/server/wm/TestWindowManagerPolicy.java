@@ -72,15 +72,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     }
 
-    @Override
-    public boolean isDefaultOrientationForced() {
-        return false;
-    }
-
-    @Override
-    public void setInitialDisplaySize(DisplayRotation displayRotation, int width, int height,
-            int density) {
-
+    public void setDefaultDisplay(DisplayContentInfo displayContentInfo) {
     }
 
     @Override
@@ -389,13 +381,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     public void onKeyguardOccludedChangedLw(boolean occluded) {
     }
 
-    @Override
-    public int rotationForOrientationLw(DisplayRotation displayRotation, int orientation,
-            int lastRotation) {
-        return rotationToReport;
-    }
-
-    @Override
     public void setSafeMode(boolean safeMode) {
 
     }
@@ -592,14 +577,5 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public boolean setAodShowing(boolean aodShowing) {
         return false;
-    }
-
-    @Override
-    public void updateOrientationListener() {
-    }
-
-    @Override
-    public RotationSource getRotationSource(int displayId) {
-        return null;
     }
 }

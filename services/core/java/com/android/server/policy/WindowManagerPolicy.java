@@ -691,24 +691,17 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     public final int USER_ROTATION_LOCKED = 1;
 
     /**
+     * Set the default display content to provide basic functions for the policy.
+     */
+    public void setDefaultDisplay(DisplayContentInfo displayContentInfo);
+
+    /**
      * Perform initialization of the policy.
      *
      * @param context The system context we are running in.
      */
     public void init(Context context, IWindowManager windowManager,
             WindowManagerFuncs windowManagerFuncs);
-
-    /**
-     * @return true if com.android.internal.R.bool#config_forceDefaultOrientation is true.
-     */
-    public boolean isDefaultOrientationForced();
-
-    /**
-     * Called by window manager once it has the initial, default native
-     * display dimensions.
-     */
-    public void setInitialDisplaySize(DisplayRotation displayRotation, int width, int height,
-            int density);
 
     /**
      * Check permissions when adding a window.
@@ -1431,28 +1424,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     public boolean isKeyguardDrawnLw();
 
     public boolean isShowingDreamLw();
-
-    /**
-     * Given an orientation constant, returns the appropriate surface rotation,
-     * taking into account sensors, docking mode, rotation lock, and other factors.
-     *
-     * @param orientation An orientation constant, such as
-     * {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_LANDSCAPE}.
-     * @param lastRotation The most recently used rotation.
-     * @param defaultDisplay Flag indicating whether the rotation is computed for the default
-     *                       display. Currently for all non-default displays sensors, docking mode,
-     *                       rotation lock and other factors are ignored.
-     * @return The surface rotation to use.
-     */
-    public int rotationForOrientationLw(DisplayRotation displayRotation,
-            @ActivityInfo.ScreenOrientation int orientation, int lastRotation);
-
-    public void updateOrientationListener();
-
-    /**
-     * Get rotation source for the given display id.
-     */
-    public RotationSource getRotationSource(int displayId);
 
     /**
      * Called when the system is mostly done booting to set whether

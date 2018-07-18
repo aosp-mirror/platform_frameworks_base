@@ -235,7 +235,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
     private final Display mDisplay;
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
-    final DisplayRotation mDisplayRotation;
+    private final DisplayPolicy mDisplayPolicy;
+    private DisplayRotation mDisplayRotation;
     DisplayFrames mDisplayFrames;
 
     /**
@@ -306,8 +307,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private boolean mLayoutNeeded;
     int pendingLayoutChanges;
     int mDeferredRotationPauseCount;
+
     // TODO(multi-display): remove some of the usages.
+    @VisibleForTesting
     boolean isDefaultDisplay;
+
     /**
      * Flag indicating whether WindowManager should override info for this display in
      * DisplayManager.
@@ -764,7 +768,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDisplayFrames = new DisplayFrames(mDisplayId, mDisplayInfo,
                 calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
         initializeDisplayBaseInfo();
-        mDisplayRotation = new DisplayRotation(this, mService.mPolicy, mService.mContext);
+        mDisplayPolicy = new DisplayPolicy(service);
+        mDisplayRotation = new DisplayRotation(service, this);
+        if (isDefaultDisplay) {
+            // The policy may be invoked right after here, so it requires the necessary default
+            // fields of this display content.
+            mService.mPolicy.setDefaultDisplay(this);
+        }
         mDividerControllerLocked = new DockedStackDividerController(service, this);
         mPinnedStackControllerLocked = new PinnedStackController(service, this);
 
@@ -921,9 +931,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mDisplayMetrics;
     }
 
+    DisplayPolicy getDisplayPolicy() {
+        return mDisplayPolicy;
+    }
+
     @Override
     public DisplayRotation getDisplayRotation() {
         return mDisplayRotation;
+    }
+
+    @VisibleForTesting
+    void setDisplayRotation(DisplayRotation displayRotation) {
+        mDisplayRotation = displayRotation;
     }
 
     int getRotation() {
@@ -979,10 +998,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         mDeferredRotationPauseCount--;
         if (mDeferredRotationPauseCount == 0) {
-            final boolean changed = updateRotationUnchecked();
-            if (changed) {
-                mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, mDisplayId).sendToTarget();
-            }
+            updateRotationAndSendNewConfigIfNeeded();
         }
     }
 
@@ -998,14 +1014,26 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int oldRotation = getRotation();
         final boolean oldAltOrientation = getAltOrientation();
 
-        final int rotation = mService.mPolicy.rotationForOrientationLw(
-                mDisplayRotation, lastOrientation, oldRotation);
+        final int rotation = mDisplayRotation.rotationForOrientation(lastOrientation, oldRotation);
         final boolean altOrientation = !mDisplayRotation.rotationHasCompatibleMetrics(
                 lastOrientation, rotation);
         if (oldRotation == rotation && oldAltOrientation == altOrientation) {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Update rotation of the display and send configuration if the rotation is changed.
+     *
+     * @return {@code true} if the rotation has been changed and the new config is sent.
+     */
+    boolean updateRotationAndSendNewConfigIfNeeded() {
+        final boolean changed = updateRotationUnchecked(false /* forceUpdate */);
+        if (changed) {
+            mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, mDisplayId).sendToTarget();
+        }
+        return changed;
     }
 
     /**
@@ -1066,8 +1094,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int oldRotation = mRotation;
         final int lastOrientation = mLastOrientation;
         final boolean oldAltOrientation = mAltOrientation;
-        final int rotation = mService.mPolicy.rotationForOrientationLw(mDisplayRotation,
-                lastOrientation, oldRotation);
+        final int rotation = mDisplayRotation.rotationForOrientation(lastOrientation, oldRotation);
         if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Computed rotation=" + rotation + " for display id="
                 + mDisplayId + " based on lastOrientation=" + lastOrientation
                 + " and oldRotation=" + oldRotation);
@@ -1220,7 +1247,24 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void configureDisplayPolicy() {
-        mDisplayRotation.configure();
+        final int width = mBaseDisplayWidth;
+        final int height = mBaseDisplayHeight;
+        final int shortSize;
+        final int longSize;
+        if (width > height) {
+            shortSize = height;
+            longSize = width;
+        } else {
+            shortSize = width;
+            longSize = height;
+        }
+
+        final int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / mBaseDisplayDensity;
+        final int longSizeDp = longSize * DisplayMetrics.DENSITY_DEFAULT / mBaseDisplayDensity;
+
+        mDisplayRotation.configure(width, height, shortSizeDp, longSizeDp);
+        mDisplayPolicy.configure(width, height, shortSizeDp);
+
         mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo,
                 calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
     }
@@ -2393,6 +2437,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         pw.println();
         mDisplayFrames.dump(prefix, pw);
+        pw.println();
+        mDisplayPolicy.dump(prefix, pw);
         pw.println();
         mDisplayRotation.dump(prefix, pw);
         pw.println();
