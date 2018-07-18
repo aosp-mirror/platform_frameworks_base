@@ -4475,9 +4475,19 @@ public class PackageManagerService extends IPackageManager.Stub
         if ((flags & PackageManager.MATCH_ANY_USER) != 0) {
             // require the permission to be held; the calling uid and given user id referring
             // to the same user is not sufficient
-            enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, true,
-                    "MATCH_ANY_USER flag requires INTERACT_ACROSS_USERS permission at "
-                    + Debug.getCallers(5));
+            try {
+                enforceCrossUserPermission(Binder.getCallingUid(), userId, false, false, true,
+                        "MATCH_ANY_USER flag requires INTERACT_ACROSS_USERS permission at "
+                        + Debug.getCallers(5));
+            } catch (SecurityException se) {
+                // For compatibility reasons, we can't throw a security exception here if we're
+                // looking for applications in our own user id. Instead, unset the MATCH_ANY_USER
+                // flag and move on.
+                if (userId != UserHandle.getCallingUserId()) {
+                    throw se;
+                }
+                flags &= ~PackageManager.MATCH_ANY_USER;
+            }
         } else if ((flags & PackageManager.MATCH_UNINSTALLED_PACKAGES) != 0 && isCallerSystemUser
                 && sUserManager.hasManagedProfile(UserHandle.USER_SYSTEM)) {
             // If the caller wants all packages and has a restricted profile associated with it,
