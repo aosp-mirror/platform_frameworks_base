@@ -928,6 +928,7 @@ public class WifiScanner {
      *                 scans should also not share this object.
      * {@hide}
      */
+    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     public void startDisconnectedPnoScan(ScanSettings scanSettings, PnoSettings pnoSettings,
             PnoScanListener listener) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
@@ -942,9 +943,9 @@ public class WifiScanner {
      * Stop an ongoing wifi PNO scan
      * @param listener specifies which scan to cancel; must be same object as passed in {@link
      *  #startPnoScan}
-     * TODO(rpius): Check if we can remove pnoSettings param in stop.
      * {@hide}
      */
+    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     public void stopPnoScan(ScanListener listener) {
         Preconditions.checkNotNull(listener, "listener cannot be null");
         int key = removeListener(listener);
