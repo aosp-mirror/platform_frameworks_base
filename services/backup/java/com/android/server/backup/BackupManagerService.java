@@ -38,6 +38,7 @@ import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IBackupAgent;
 import android.app.PendingIntent;
+import android.app.backup.BackupAgent;
 import android.app.backup.BackupManager;
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.FullBackup;
@@ -704,7 +705,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
      * process-local non-lifecycle agent instance, so we manually set up the context
      * topology for it.
      */
-    public PackageManagerBackupAgent makeMetadataAgent() {
+    public BackupAgent makeMetadataAgent() {
         PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(mPackageManager);
         pmAgent.attach(mContext);
         pmAgent.onCreate();
@@ -784,7 +785,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     @VisibleForTesting
-    BackupManagerService(
+    public BackupManagerService(
             Context context,
             Trampoline parent,
             HandlerThread backupThread,
@@ -1746,6 +1747,16 @@ public class BackupManagerService implements BackupManagerServiceInterface {
                 Slog.wtf(TAG, "getMessageIdForOperationType called on invalid operation type: " +
                         operationType);
                 return -1;
+        }
+    }
+
+    public void putOperation(int token, Operation operation) {
+        if (MORE_DEBUG) {
+            Slog.d(TAG, "Adding operation token=" + Integer.toHexString(token) + ", operation type="
+                    + operation.type);
+        }
+        synchronized (mCurrentOpLock) {
+            mCurrentOperations.put(token, operation);
         }
     }
 

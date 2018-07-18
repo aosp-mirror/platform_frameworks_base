@@ -72,6 +72,7 @@ import android.security.keystore.AttestationUtils;
 import android.security.keystore.KeyAttestationException;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
+import android.security.keystore.StrongBoxUnavailableException;
 import android.service.restrictions.RestrictionsReceiver;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
@@ -1772,6 +1773,13 @@ public class DevicePolicyManager {
      * @see #generateKeyPair
      */
     public static final int ID_TYPE_MEID = 8;
+
+    /**
+     * Service-specific error code for {@link #generateKeyPair}:
+     * Indicates the call has failed due to StrongBox unavailability.
+     * @hide
+     */
+    public static final int KEY_GEN_STRONGBOX_UNAVAILABLE = 1;
 
     /**
      * Specifies that the calling app should be granted access to the installed credentials
@@ -4190,6 +4198,8 @@ public class DevicePolicyManager {
      *         {@code keySpec} does not contain an attestation challenge.
      * @throws UnsupportedOperationException if Device ID attestation was requested but the
      *         underlying hardware does not support it.
+     * @throws StrongBoxUnavailableException if the use of StrongBox for key generation was
+     *         specified in {@code keySpec} but the device does not have one.
      * @see KeyGenParameterSpec.Builder#setAttestationChallenge(byte[])
      */
     public AttestedKeyPair generateKeyPair(@Nullable ComponentName admin,
@@ -4230,6 +4240,15 @@ public class DevicePolicyManager {
         } catch (InterruptedException e) {
             Log.w(TAG, "Interrupted while generating key", e);
             Thread.currentThread().interrupt();
+        } catch (ServiceSpecificException e) {
+            Log.w(TAG, String.format("Key Generation failure: %d", e.errorCode));
+            switch (e.errorCode) {
+                case KEY_GEN_STRONGBOX_UNAVAILABLE:
+                    throw new StrongBoxUnavailableException("No StrongBox for key generation.");
+                default:
+                    throw new RuntimeException(
+                            String.format("Unknown error while generating key: %d", e.errorCode));
+            }
         }
         return null;
     }

@@ -26,13 +26,13 @@ import static org.mockito.Mockito.when;
 
 import static java.util.stream.Collectors.toList;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.RemoteException;
-import android.support.annotation.IntDef;
 
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.backup.TransportManager;
@@ -42,6 +42,8 @@ import com.android.server.backup.transport.TransportNotRegisteredException;
 
 import org.robolectric.shadows.ShadowPackageManager;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -209,6 +211,7 @@ public class TransportTestUtils {
         TransportStatus.REGISTERED_UNAVAILABLE,
         TransportStatus.UNREGISTERED
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface TransportStatus {
         int REGISTERED_AVAILABLE = 0;
         int REGISTERED_UNAVAILABLE = 1;

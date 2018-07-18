@@ -30,6 +30,7 @@ import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERA
 
 
 import android.app.IBackupAgent;
+import android.app.backup.BackupAgent;
 import android.app.backup.IFullBackupRestoreObserver;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.Signature;
@@ -76,7 +77,7 @@ public class PerformAdbRestoreTask implements Runnable {
     private final String mCurrentPassword;
     private final String mDecryptPassword;
     private final AtomicBoolean mLatchObject;
-    private final PackageManagerBackupAgent mPackageManagerBackupAgent;
+    private final BackupAgent mPackageManagerBackupAgent;
     private final RestoreDeleteObserver mDeleteObserver = new RestoreDeleteObserver();
 
     private IFullBackupRestoreObserver mObserver;

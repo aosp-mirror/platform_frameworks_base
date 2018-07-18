@@ -20,6 +20,7 @@
              android:layout_width="@dimen/navigation_key_width"
              android:layout_height="match_parent"
              android:importantForAccessibility="no"
+             android:focusable="false"
              android:clipChildren="false"
              android:clipToPadding="false"
              >

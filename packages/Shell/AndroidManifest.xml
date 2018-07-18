@@ -152,6 +152,7 @@
     <uses-permission android:name="android.permission.WATCH_APPOPS" />
 
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD" />
+    <uses-permission android:name="android.permission.SUSPEND_APPS" />
 
     <application android:label="@string/app_label"
                  android:defaultToDeviceProtectedStorage="true"

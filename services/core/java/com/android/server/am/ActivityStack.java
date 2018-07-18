@@ -503,10 +503,20 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         final int prevWindowingMode = getWindowingMode();
+        final boolean prevIsAlwaysOnTop = isAlwaysOnTop();
         super.onConfigurationChanged(newParentConfig);
         final ActivityDisplay display = getDisplay();
-        if (display != null && prevWindowingMode != getWindowingMode()) {
+        if (display == null) {
+          return;
+        }
+        if (prevWindowingMode != getWindowingMode()) {
             display.onStackWindowingModeChanged(this);
+        }
+        if (prevIsAlwaysOnTop != isAlwaysOnTop()) {
+            // Since always on top is only on when the stack is freeform or pinned, the state
+            // can be toggled when the windowing mode changes. We must make sure the stack is
+            // placed properly when always on top state changes.
+            display.positionChildAtTop(this);
         }
     }
 

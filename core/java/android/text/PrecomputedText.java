@@ -437,7 +437,6 @@ public class PrecomputedText implements Spannable {
     public boolean canUseMeasuredResult(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
             @NonNull TextDirectionHeuristic textDir, @NonNull TextPaint paint,
             @Layout.BreakStrategy int strategy, @Layout.HyphenationFrequency int frequency) {
-        final TextPaint mtPaint = mParams.getTextPaint();
         return mStart == start
             && mEnd == end
             && mParams.isSameTextMetricsInternal(paint, textDir, strategy, frequency);

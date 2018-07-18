@@ -288,6 +288,19 @@ public final class Trace {
     }
 
     /**
+     * Checks whether or not tracing is currently enabled. This is useful to avoid intermediate
+     * string creation for trace sections that require formatting. It is not necessary
+     * to guard all Trace method calls as they internally already check this. However it is
+     * recommended to use this to prevent creating any temporary objects that would then be
+     * passed to those methods to reduce runtime cost when tracing isn't enabled.
+     *
+     * @return true if tracing is currently enabled, false otherwise
+     */
+    public static boolean isEnabled() {
+        return isTagEnabled(TRACE_TAG_APP);
+    }
+
+    /**
      * Writes a trace message to indicate that a given section of code has begun. This call must
      * be followed by a corresponding call to {@link #endSection()} on the same thread.
      *
@@ -317,6 +330,44 @@ public final class Trace {
     public static void endSection() {
         if (isTagEnabled(TRACE_TAG_APP)) {
             nativeTraceEnd(TRACE_TAG_APP);
+        }
+    }
+
+    /**
+     * Writes a trace message to indicate that a given section of code has
+     * begun. Must be followed by a call to {@link #endAsyncSection(String, int)} with the same
+     * methodName and cookie. Unlike {@link #beginSection(String)} and {@link #endSection()},
+     * asynchronous events do not need to be nested. The name and cookie used to
+     * begin an event must be used to end it.
+     *
+     * @param methodName The method name to appear in the trace.
+     * @param cookie Unique identifier for distinguishing simultaneous events
+     */
+    public static void beginAsyncSection(String methodName, int cookie) {
+        asyncTraceBegin(TRACE_TAG_APP, methodName, cookie);
+    }
+
+    /**
+     * Writes a trace message to indicate that the current method has ended.
+     * Must be called exactly once for each call to {@link #beginAsyncSection(String, int)}
+     * using the same name and cookie.
+     *
+     * @param methodName The method name to appear in the trace.
+     * @param cookie Unique identifier for distinguishing simultaneous events
+     */
+    public static void endAsyncSection(String methodName, int cookie) {
+        asyncTraceEnd(TRACE_TAG_APP, methodName, cookie);
+    }
+
+    /**
+     * Writes trace message to indicate the value of a given counter.
+     *
+     * @param counterName The counter name to appear in the trace.
+     * @param counterValue The counter value.
+     */
+    public static void setCounter(String counterName, int counterValue) {
+        if (isTagEnabled(TRACE_TAG_APP)) {
+            nativeTraceCounter(TRACE_TAG_APP, counterName, counterValue);
         }
     }
 }
