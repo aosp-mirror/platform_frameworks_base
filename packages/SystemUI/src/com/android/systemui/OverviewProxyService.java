@@ -81,11 +81,15 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private int mConnectionBackoffAttempts;
     private @InteractionType int mInteractionFlags;
     private boolean mIsEnabled;
+    private int mCurrentBoundedUserId = -1;
 
     private ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
 
         public GraphicBufferCompat screenshot(Rect sourceCrop, int width, int height, int minLayer,
                 int maxLayer, boolean useIdentityTransform, int rotation) {
+            if (!verifyCaller("screenshot")) {
+                return null;
+            }
             long token = Binder.clearCallingIdentity();
             try {
                 return new GraphicBufferCompat(SurfaceControl.screenshotToBuffer(sourceCrop, width,
@@ -96,6 +100,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         public void startScreenPinning(int taskId) {
+            if (!verifyCaller("startScreenPinning")) {
+                return;
+            }
             long token = Binder.clearCallingIdentity();
             try {
                 mHandler.post(() -> {
@@ -111,6 +118,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         public void onSplitScreenInvoked() {
+            if (!verifyCaller("onSplitScreenInvoked")) {
+                return;
+            }
             long token = Binder.clearCallingIdentity();
             try {
                 EventBus.getDefault().post(new DockedFirstAnimationFrameEvent());
@@ -120,6 +130,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         public void onOverviewShown(boolean fromHome) {
+            if (!verifyCaller("onOverviewShown")) {
+                return;
+            }
             long token = Binder.clearCallingIdentity();
             try {
                 mHandler.post(() -> {
@@ -133,6 +146,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         public void setInteractionState(@InteractionType int flags) {
+            if (!verifyCaller("setInteractionState")) {
+                return;
+            }
             long token = Binder.clearCallingIdentity();
             try {
                 if (mInteractionFlags != flags) {
@@ -150,6 +166,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         public Rect getNonMinimizedSplitScreenSecondaryBounds() {
+            if (!verifyCaller("getNonMinimizedSplitScreenSecondaryBounds")) {
+                return null;
+            }
             long token = Binder.clearCallingIdentity();
             try {
                 Divider divider = SysUiServiceProvider.getComponent(mContext, Divider.class);
@@ -163,6 +182,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         public void setBackButtonAlpha(float alpha, boolean animate) {
+            if (!verifyCaller("setBackButtonAlpha")) {
+                return;
+            }
             long token = Binder.clearCallingIdentity();
             try {
                 mHandler.post(() -> {
@@ -171,6 +193,16 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+
+        private boolean verifyCaller(String reason) {
+            final int callerId = Binder.getCallingUserHandle().getIdentifier();
+            if (callerId != mCurrentBoundedUserId) {
+                Log.w(TAG_OPS, "Launcher called sysui with invalid user: " + callerId + ", reason: "
+                        + reason);
+                return false;
+            }
+            return true;
         }
     };
 
@@ -210,7 +242,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
             try {
                 mOverviewProxy.onBind(mSysUiProxy);
+                mCurrentBoundedUserId = mDeviceProvisionedController.getCurrentUser();
             } catch (RemoteException e) {
+                mCurrentBoundedUserId = -1;
                 Log.e(TAG_OPS, "Failed to call onBind()", e);
             }
             notifyConnectionChanged();
@@ -219,18 +253,21 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void onNullBinding(ComponentName name) {
             Log.w(TAG_OPS, "Null binding of '" + name + "', try reconnecting");
+            mCurrentBoundedUserId = -1;
             internalConnectToCurrentUser();
         }
 
         @Override
         public void onBindingDied(ComponentName name) {
             Log.w(TAG_OPS, "Binding died of '" + name + "', try reconnecting");
+            mCurrentBoundedUserId = -1;
             internalConnectToCurrentUser();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             // Do nothing
+            mCurrentBoundedUserId = -1;
         }
     };
 
