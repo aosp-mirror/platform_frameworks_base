@@ -389,11 +389,16 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         final int windowingMode = stack.getWindowingMode();
 
         if (activityType == ACTIVITY_TYPE_HOME) {
+            // TODO(b/111363427) Rollback to throws exceptions once we figure out how to properly
+            // deal with home type stack when external display removed
             if (mHomeStack != null && mHomeStack != stack) {
-                throw new IllegalArgumentException("addStackReferenceIfNeeded: home stack="
+                // throw new IllegalArgumentException("addStackReferenceIfNeeded: home stack="
+                //         + mHomeStack + " already exist on display=" + this + " stack=" + stack);
+                Slog.e(TAG, "addStackReferenceIfNeeded: home stack="
                         + mHomeStack + " already exist on display=" + this + " stack=" + stack);
+            } else {
+                mHomeStack = stack;
             }
-            mHomeStack = stack;
         } else if (activityType == ACTIVITY_TYPE_RECENTS) {
             if (mRecentsStack != null && mRecentsStack != stack) {
                 throw new IllegalArgumentException("addStackReferenceIfNeeded: recents stack="
