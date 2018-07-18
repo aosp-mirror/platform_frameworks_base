@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.proto.ProtoOutputStream;
@@ -37,7 +38,7 @@ public class Point implements Parcelable {
         this.y = y;
     }
 
-    public Point(Point src) {
+    public Point(@NonNull Point src) {
         this.x = src.x;
         this.y = src.y;
     }
@@ -99,7 +100,7 @@ public class Point implements Parcelable {
     }
 
     /** @hide */
-    public void printShortString(PrintWriter pw) {
+    public void printShortString(@NonNull PrintWriter pw) {
         pw.print("["); pw.print(x); pw.print(","); pw.print(y); pw.print("]");
     }
 
@@ -130,7 +131,7 @@ public class Point implements Parcelable {
      * @param fieldId           Field Id of the Rect as defined in the parent message
      * @hide
      */
-    public void writeToProto(ProtoOutputStream protoOutputStream, long fieldId) {
+    public void writeToProto(@NonNull ProtoOutputStream protoOutputStream, long fieldId) {
         final long token = protoOutputStream.start(fieldId);
         protoOutputStream.write(PointProto.X, x);
         protoOutputStream.write(PointProto.Y, y);
@@ -141,6 +142,7 @@ public class Point implements Parcelable {
         /**
          * Return a new point from the data in the specified parcel.
          */
+        @Override
         public Point createFromParcel(Parcel in) {
             Point r = new Point();
             r.readFromParcel(in);
@@ -150,6 +152,7 @@ public class Point implements Parcelable {
         /**
          * Return an array of rectangles of the specified size.
          */
+        @Override
         public Point[] newArray(int size) {
             return new Point[size];
         }
@@ -161,7 +164,7 @@ public class Point implements Parcelable {
      *
      * @param in The parcel to read the point's coordinates from
      */
-    public void readFromParcel(Parcel in) {
+    public void readFromParcel(@NonNull Parcel in) {
         x = in.readInt();
         y = in.readInt();
     }
