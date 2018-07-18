@@ -46,7 +46,7 @@ import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.power.PowerNotificationWarnings;
 import com.android.systemui.power.PowerUI;
-import com.android.systemui.statusbar.AppOpsListener;
+import com.android.systemui.statusbar.notification.AppOpsListener;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.DarkIconDispatcherImpl;

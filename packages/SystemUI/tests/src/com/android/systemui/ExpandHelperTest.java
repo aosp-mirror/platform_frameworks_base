@@ -25,7 +25,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
-import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationTestHelper;
 
 import org.junit.Before;

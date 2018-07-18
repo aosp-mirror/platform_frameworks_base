@@ -33,15 +33,13 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.shared.system.SurfaceControlCompat;
 import com.android.systemui.shared.system.SyncRtSurfaceTransactionApplier;
 import com.android.systemui.shared.system.SyncRtSurfaceTransactionApplier.SurfaceParams;
-import com.android.systemui.statusbar.ExpandableNotificationRow;
-import com.android.systemui.statusbar.NotificationListContainer;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
-
-import java.util.ArrayList;
 
 /**
  * A class that allows activities to be launched in a seamless way where the notification

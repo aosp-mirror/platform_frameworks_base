@@ -24,7 +24,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.widget.TextView;
@@ -32,6 +31,7 @@ import android.widget.TextView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 
 import java.util.List;
@@ -214,7 +214,7 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
     }
 
     /** In order to do UI alignment, this view will be notified by
-     * {@link com.android.systemui.statusbar.stack.NotificationStackScrollLayout}.
+     * {@link com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout}.
      * After scroller laid out, the scroller will tell this view about scroller's getX()
      * @param translationX how to translate the horizontal position
      */

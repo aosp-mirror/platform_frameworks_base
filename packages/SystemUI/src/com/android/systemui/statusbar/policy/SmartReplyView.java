@@ -31,7 +31,7 @@ import com.android.internal.util.ContrastColorUtil;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;

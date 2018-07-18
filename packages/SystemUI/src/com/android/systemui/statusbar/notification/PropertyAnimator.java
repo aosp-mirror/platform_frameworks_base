@@ -24,11 +24,10 @@ import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
 
-import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.Interpolators;
-import com.android.systemui.statusbar.stack.AnimationFilter;
-import com.android.systemui.statusbar.stack.AnimationProperties;
-import com.android.systemui.statusbar.stack.ViewState;
+import com.android.systemui.statusbar.notification.stack.AnimationFilter;
+import com.android.systemui.statusbar.notification.stack.AnimationProperties;
+import com.android.systemui.statusbar.notification.stack.ViewState;
 
 /**
  * An animator to animate properties

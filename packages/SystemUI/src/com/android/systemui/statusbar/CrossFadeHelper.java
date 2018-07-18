@@ -19,7 +19,7 @@ package com.android.systemui.statusbar;
 import android.view.View;
 
 import com.android.systemui.Interpolators;
-import com.android.systemui.statusbar.stack.StackStateAnimator;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 /**
  * A helper to fade views in and out.

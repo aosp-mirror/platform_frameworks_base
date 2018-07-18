@@ -27,6 +27,11 @@ import android.testing.TestableLooper;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.row.NotificationInfo;
+import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;

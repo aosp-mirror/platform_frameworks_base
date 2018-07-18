@@ -33,8 +33,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.IdRes;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.ActivityTaskManager;
 import android.app.Fragment;
 import android.app.IActivityManager;
@@ -98,7 +96,7 @@ import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 import com.android.systemui.statusbar.policy.RotationLockController;
-import com.android.systemui.statusbar.stack.StackStateAnimator;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

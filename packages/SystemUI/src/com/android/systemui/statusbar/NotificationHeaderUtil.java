@@ -27,6 +27,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.util.ContrastColorUtil;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotificationContentView;
 
 import java.util.ArrayList;
 import java.util.HashSet;

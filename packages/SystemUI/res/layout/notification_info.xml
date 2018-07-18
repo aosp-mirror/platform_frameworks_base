@@ -15,7 +15,7 @@
     limitations under the License.
 -->
 
-<com.android.systemui.statusbar.NotificationInfo
+<com.android.systemui.statusbar.notification.row.NotificationInfo
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/notification_guts"
     android:layout_width="match_parent"
@@ -161,7 +161,7 @@
                 style="@style/TextAppearance.NotificationInfo.Button"/>
         </LinearLayout>
     </LinearLayout>
-    <com.android.systemui.statusbar.NotificationUndoLayout
+    <com.android.systemui.statusbar.notification.row.NotificationUndoLayout
         android:id="@+id/confirmation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -187,5 +187,5 @@
             android:layout_gravity="end|center_vertical"
             android:text="@string/inline_undo"
             style="@style/TextAppearance.NotificationInfo.Button"/>
-    </com.android.systemui.statusbar.NotificationUndoLayout>
-</com.android.systemui.statusbar.NotificationInfo>
+    </com.android.systemui.statusbar.notification.row.NotificationUndoLayout>
+</com.android.systemui.statusbar.notification.row.NotificationInfo>
