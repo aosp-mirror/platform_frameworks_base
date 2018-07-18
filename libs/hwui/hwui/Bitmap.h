@@ -34,6 +34,12 @@ enum class PixelStorageType {
     Hardware,
 };
 
+enum class BitmapPalette {
+    Unknown,
+    Light,
+    Dark,
+};
+
 namespace uirenderer {
 namespace renderthread {
 class RenderThread;
@@ -63,7 +69,7 @@ public:
     Bitmap(void* address, void* context, FreeFunc freeFunc, const SkImageInfo& info,
            size_t rowBytes);
     Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes);
-    Bitmap(GraphicBuffer* buffer, const SkImageInfo& info);
+    Bitmap(GraphicBuffer* buffer, const SkImageInfo& info, BitmapPalette palette = BitmapPalette::Unknown);
 
     int rowBytesAsPixels() const { return rowBytes() >> mInfo.shiftPerPixel(); }
 
@@ -103,6 +109,20 @@ public:
      */
     sk_sp<SkImage> makeImage(sk_sp<SkColorFilter>* outputColorFilter);
 
+    static BitmapPalette computePalette(const SkImageInfo& info, const void* addr, size_t rowBytes);
+
+    static BitmapPalette computePalette(const SkBitmap& bitmap) {
+        return computePalette(bitmap.info(), bitmap.getPixels(), bitmap.rowBytes());
+    }
+
+    BitmapPalette palette() {
+        if (!isHardware() && mPaletteGenerationId != getGenerationID()) {
+            mPalette = computePalette(info(), pixels(), rowBytes());
+            mPaletteGenerationId = getGenerationID();
+        }
+        return mPalette;
+    }
+
 private:
     virtual ~Bitmap();
     void* getStorage() const;
@@ -110,6 +130,9 @@ private:
     SkImageInfo mInfo;
 
     const PixelStorageType mPixelStorageType;
+
+    BitmapPalette mPalette = BitmapPalette::Unknown;
+    uint32_t mPaletteGenerationId = -1;
 
     bool mHasHardwareMipMap = false;
 

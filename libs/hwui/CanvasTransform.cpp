@@ -15,32 +15,38 @@
  */
 
 #include "CanvasTransform.h"
+#include "utils/Color.h"
 #include "Properties.h"
 
+#include <ui/ColorSpace.h>
 #include <SkColorFilter.h>
 #include <SkPaint.h>
-#include <log/log.h>
+
+#include <algorithm>
+#include <cmath>
 
 namespace android::uirenderer {
 
 static SkColor makeLight(SkColor color) {
-    SkScalar hsv[3];
-    SkColorToHSV(color, hsv);
-    if (hsv[1] > .2f) return color;
-    // hsv[1] *= .85f;
-    // hsv[2] = std::min(1.0f, std::max(hsv[2], 1 - hsv[2]) * 1.3f);
-    hsv[2] = std::max(hsv[2], 1.1f - hsv[2]);
-    return SkHSVToColor(SkColorGetA(color), hsv);
+    Lab lab = sRGBToLab(color);
+    float invertedL = std::min(110 - lab.L, 100.0f);
+    if (invertedL > lab.L) {
+        lab.L = invertedL;
+        return LabToSRGB(lab, SkColorGetA(color));
+    } else {
+        return color;
+    }
 }
 
 static SkColor makeDark(SkColor color) {
-    SkScalar hsv[3];
-    SkColorToHSV(color, hsv);
-    if (hsv[1] > .2f) return color;
-    // hsv[1] *= .85f;
-    // hsv[2] = std::max(0.0f, std::min(hsv[2], 1 - hsv[2]) * .7f);
-    hsv[2] = std::min(hsv[2], 1.1f - hsv[2]);
-    return SkHSVToColor(SkColorGetA(color), hsv);
+    Lab lab = sRGBToLab(color);
+    float invertedL = std::min(110 - lab.L, 100.0f);
+    if (invertedL < lab.L) {
+        lab.L = invertedL;
+        return LabToSRGB(lab, SkColorGetA(color));
+    } else {
+        return color;
+    }
 }
 
 static SkColor transformColor(ColorTransform transform, SkColor color) {

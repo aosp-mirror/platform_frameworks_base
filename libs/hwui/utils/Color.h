@@ -114,6 +114,16 @@ static constexpr float EOCF(float srgb) {
 bool transferFunctionCloseToSRGB(const SkColorSpace* colorSpace);
 
 sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace);
+
+struct Lab {
+    float L;
+    float a;
+    float b;
+};
+
+Lab sRGBToLab(SkColor color);
+SkColor LabToSRGB(const Lab& lab, SkAlpha alpha);
+
 } /* namespace uirenderer */
 } /* namespace android */
 
