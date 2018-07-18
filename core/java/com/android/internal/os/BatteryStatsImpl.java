@@ -64,6 +64,7 @@ import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.KeyValueListParser;
 import android.util.Log;
@@ -1062,7 +1063,34 @@ public class BatteryStatsImpl extends BatteryStats {
 
     // methods are protected not private to be VisibleForTesting
     public static class TimeBase {
-        protected final ArrayList<WeakReference<TimeBaseObs>> mObservers = new ArrayList<>();
+        private static class ObsWeakReference extends WeakReference<TimeBaseObs> {
+            public ObsWeakReference(TimeBaseObs referent) {
+                super(referent);
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (this == obj) {
+                    return true;
+                }
+                if (!(obj instanceof ObsWeakReference)) {
+                    return false;
+                }
+                return this.get() == ((ObsWeakReference)obj).get();
+            }
+
+            @Override
+            public int hashCode() {
+                TimeBaseObs obs = get();
+                if (obs != null) {
+                    return obs.hashCode();
+                } else {
+                    return 0;
+                }
+            }
+        }
+
+        protected final ArraySet<ObsWeakReference> mObservers = new ArraySet<>();
 
         protected long mUptime;
         protected long mRealtime;
@@ -1106,24 +1134,17 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         public void add(TimeBaseObs observer) {
-            mObservers.add(new WeakReference<TimeBaseObs>(observer));
+            mObservers.add(new ObsWeakReference(observer));
         }
 
         public void remove(TimeBaseObs observer) {
-           if (!mObservers.removeIf(ref -> ref.get() == observer)) {
-             Slog.wtf(TAG, "Removed unknown observer: " + observer);
-           }
+            if (!mObservers.remove(new ObsWeakReference(observer))) {
+                Slog.wtf(TAG, "Removed unknown observer: " + observer);
+            }
         }
 
         public boolean hasObserver(TimeBaseObs observer) {
-            Iterator<WeakReference<TimeBaseObs>> i = mObservers.iterator();
-            while (i.hasNext()) {
-                TimeBaseObs obs = i.next().get();
-                if (obs == observer) {
-                    return true;
-                }
-            }
-            return false;
+            return mObservers.contains(new ObsWeakReference(observer));
         }
 
         public void init(long uptime, long realtime) {
@@ -1205,6 +1226,8 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         public boolean setRunning(boolean running, long uptime, long realtime) {
+            int total = mObservers.size();
+            int removed = 0;
             if (mRunning != running) {
                 mRunning = running;
                 if (running) {
@@ -1212,26 +1235,34 @@ public class BatteryStatsImpl extends BatteryStats {
                     mRealtimeStart = realtime;
                     long batteryUptime = mUnpluggedUptime = getUptime(uptime);
                     long batteryRealtime = mUnpluggedRealtime = getRealtime(realtime);
-                    for (WeakReference<TimeBaseObs> ref : mObservers) {
-                        TimeBaseObs obs = ref.get();
+                    for(int i = mObservers.size() - 1; i >= 0; i--) {
+                        final TimeBaseObs obs = mObservers.valueAt(i).get();
                         if (obs != null) {
                             obs.onTimeStarted(realtime, batteryUptime, batteryRealtime);
+                        } else {
+                            mObservers.removeAt(i);
+                            removed++;
                         }
                     }
                 } else {
                     mPastUptime += uptime - mUptimeStart;
                     mPastRealtime += realtime - mRealtimeStart;
-
                     long batteryUptime = getUptime(uptime);
                     long batteryRealtime = getRealtime(realtime);
-                    for (WeakReference<TimeBaseObs> ref : mObservers) {
-                        TimeBaseObs obs = ref.get();
+                    for(int i = mObservers.size() - 1; i >= 0; i--) {
+                        final TimeBaseObs obs = mObservers.valueAt(i).get();
                         if (obs != null) {
                             obs.onTimeStopped(realtime, batteryUptime, batteryRealtime);
+                        } else {
+                            mObservers.removeAt(i);
+                            removed++;
                         }
                     }
                 }
-                mObservers.removeIf(ref -> ref.get() == null);
+                if (DEBUG && removed != 0) {
+                    Slog.d(TAG,
+                            "TimeBase observer removed:" + removed + " from total:" + total);
+                }
                 return true;
             }
             return false;
