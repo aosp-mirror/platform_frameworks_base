@@ -2493,8 +2493,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return getWindowConfiguration().keepVisibleDeadAppWindowOnScreen();
     }
 
-    /** @return true if this window desires key events. */
-    boolean canReceiveKeys() {
+    @Override
+    public boolean canReceiveKeys() {
         return isVisibleOrAdding()
                 && (mViewVisibility == View.VISIBLE) && !mRemoveOnExit
                 && ((mAttrs.flags & WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) == 0)

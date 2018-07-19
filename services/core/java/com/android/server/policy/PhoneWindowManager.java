@@ -631,8 +631,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     int mPointerLocationMode = 0; // guarded by mLock
 
-    // The last window we were told about in focusChanged.
+    // The windows we were told about in focusChanged.
     WindowState mFocusedWindow;
+    WindowState mLastFocusedWindow;
+
     IApplicationToken mFocusedApp;
 
     PointerLocationView mPointerLocationView;
@@ -3334,6 +3336,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mNavigationBar = null;
             mNavigationBarController.setWindow(null);
         }
+        if (mLastFocusedWindow == win) {
+            mLastFocusedWindow = null;
+        }
         mScreenDecorWindows.remove(win);
     }
 
@@ -5879,7 +5884,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public int focusChangedLw(WindowState lastFocus, WindowState newFocus) {
         mFocusedWindow = newFocus;
-        if ((updateSystemUiVisibilityLw()&SYSTEM_UI_CHANGING_LAYOUT) != 0) {
+        mLastFocusedWindow = lastFocus;
+        if ((updateSystemUiVisibilityLw() & SYSTEM_UI_CHANGING_LAYOUT) != 0) {
             // If the navigation bar has been hidden or shown, we need to do another
             // layout pass to update that window.
             return FINISH_LAYOUT_REDO_LAYOUT;
@@ -8105,10 +8111,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (winCandidate == null) {
             return 0;
         }
+
+        // The immersive mode confirmation should never affect the system bar visibility, otherwise
+        // it will unhide the navigation bar and hide itself.
         if (winCandidate.getAttrs().token == mImmersiveModeConfirmation.getWindowToken()) {
-            // The immersive mode confirmation should never affect the system bar visibility,
-            // otherwise it will unhide the navigation bar and hide itself.
-            winCandidate = isStatusBarKeyguard() ? mStatusBar : mTopFullscreenOpaqueWindowState;
+
+            // The immersive mode confirmation took the focus from mLastFocusedWindow which was
+            // controlling the system ui visibility. So if mLastFocusedWindow can still receive
+            // keys, we let it keep controlling the visibility.
+            final boolean lastFocusCanReceiveKeys =
+                    (mLastFocusedWindow != null && mLastFocusedWindow.canReceiveKeys());
+            winCandidate = isStatusBarKeyguard() ? mStatusBar
+                    : lastFocusCanReceiveKeys ? mLastFocusedWindow
+                    : mTopFullscreenOpaqueWindowState;
             if (winCandidate == null) {
                 return 0;
             }

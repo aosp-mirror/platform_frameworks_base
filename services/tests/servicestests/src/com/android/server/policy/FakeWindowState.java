@@ -255,6 +255,9 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
     }
 
     @Override
+    public boolean canReceiveKeys() { return false; }
+
+    @Override
     public void writeIdentifierToProto(ProtoOutputStream proto, long fieldId){
         throw new UnsupportedOperationException("not implemented");
     }

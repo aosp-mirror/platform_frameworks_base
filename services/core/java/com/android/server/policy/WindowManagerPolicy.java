@@ -491,6 +491,9 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          */
         boolean canAcquireSleepToken();
 
+        /** @return true if this window desires key events. */
+        boolean canReceiveKeys();
+
         /**
          * Writes {@link com.android.server.wm.IdentifierProto} to stream.
          */
