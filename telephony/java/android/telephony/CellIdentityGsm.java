@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.annotation.Nullable;
 import android.os.Parcel;
+import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 
 import java.util.Objects;
@@ -192,6 +193,17 @@ public final class CellIdentityGsm extends CellIdentity {
     @Deprecated
     public int getPsc() {
         return Integer.MAX_VALUE;
+    }
+
+    /** @hide */
+    @Override
+    public GsmCellLocation asCellLocation() {
+        GsmCellLocation cl = new GsmCellLocation();
+        int lac = mLac != Integer.MAX_VALUE ? mLac : -1;
+        int cid = mCid != Integer.MAX_VALUE ? mCid : -1;
+        cl.setLacAndCid(lac, cid);
+        cl.setPsc(-1);
+        return cl;
     }
 
     @Override
