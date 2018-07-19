@@ -315,7 +315,8 @@ message WindowStateProto {
     optional .android.graphics.RectProto visible_insets = 30;
     optional .android.graphics.RectProto stable_insets = 31;
     optional .android.graphics.RectProto outsets = 32;
-    optional .android.view.DisplayCutoutProto cutout = 33;
+    reserved 33;
+//    optional .android.view.DisplayCutoutProto cutout = 33;
     optional bool remove_on_exit = 34;
     optional bool destroying = 35;
     optional bool removed = 36;
@@ -399,4 +400,5 @@ message WindowFramesProto {
     optional .android.graphics.RectProto overscan_frame = 7;
     optional .android.graphics.RectProto parent_frame = 8;
     optional .android.graphics.RectProto visible_frame = 9;
+    optional .android.view.DisplayCutoutProto cutout = 10;
 }

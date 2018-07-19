@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static com.android.server.wm.WindowFramesProto.CONTAINING_FRAME;
 import static com.android.server.wm.WindowFramesProto.CONTENT_FRAME;
+import static com.android.server.wm.WindowFramesProto.CUTOUT;
 import static com.android.server.wm.WindowFramesProto.DECOR_FRAME;
 import static com.android.server.wm.WindowFramesProto.DISPLAY_FRAME;
 import static com.android.server.wm.WindowFramesProto.FRAME;
@@ -31,6 +32,9 @@ import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
+import android.view.DisplayCutout;
+
+import com.android.server.wm.utils.WmDisplayCutout;
 
 /**
  * Container class for all the window frames that affect how windows are laid out.
@@ -113,6 +117,21 @@ public class WindowFrames {
      */
     final Rect mLastFrame = new Rect();
 
+    /**
+     * Whether the parent frame would have been different if there was no display cutout.
+     */
+    private boolean mParentFrameWasClippedByDisplayCutout;
+
+    /**
+     * Part of the display that has been cut away. See {@link DisplayCutout}.
+     */
+    WmDisplayCutout mDisplayCutout = WmDisplayCutout.NO_CUTOUT;
+
+    /**
+     * The last cutout that has been reported to the client.
+     */
+    WmDisplayCutout mLastDisplayCutout = WmDisplayCutout.NO_CUTOUT;
+
     public WindowFrames() {
     }
 
@@ -135,6 +154,33 @@ public class WindowFrames {
         mOutsetFrame.set(outsetFrame);
     }
 
+    public void setParentFrameWasClippedByDisplayCutout(
+            boolean parentFrameWasClippedByDisplayCutout) {
+        mParentFrameWasClippedByDisplayCutout = parentFrameWasClippedByDisplayCutout;
+    }
+
+    boolean parentFrameWasClippedByDisplayCutout() {
+        return mParentFrameWasClippedByDisplayCutout;
+    }
+
+    public void setDisplayCutout(WmDisplayCutout displayCutout) {
+        mDisplayCutout = displayCutout;
+    }
+
+    /**
+     * @return true if the width or height has changed since last reported to the client.
+     */
+    boolean didFrameSizeChange() {
+        return (mLastFrame.width() != mFrame.width()) || (mLastFrame.height() != mFrame.height());
+    }
+
+    /**
+     * @return true if the display cutout has changed since last reported to the client.
+     */
+    boolean didDisplayCutoutChange() {
+        return !mLastDisplayCutout.equals(mDisplayCutout);
+    }
+
     public void writeToProto(@NonNull ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         mParentFrame.writeToProto(proto, PARENT_FRAME);
@@ -146,6 +192,7 @@ public class WindowFrames {
         mOutsetFrame.writeToProto(proto, OUTSET_FRAME);
         mContainingFrame.writeToProto(proto, CONTAINING_FRAME);
         mFrame.writeToProto(proto, FRAME);
+        mDisplayCutout.getDisplayCutout().writeToProto(proto, CUTOUT);
         proto.end(token);
     }
 
@@ -171,6 +218,8 @@ public class WindowFrames {
         pw.print(prefix); pw.print("mFrame="); mFrame.printShortString(pw);
                 pw.print(" last="); mLastFrame.printShortString(pw);
                 pw.println();
+        pw.print(prefix); pw.print(" cutout=" + mDisplayCutout.getDisplayCutout());
+                pw.print(" last=" + mLastDisplayCutout.getDisplayCutout());
+                pw.println();
     }
-
 }

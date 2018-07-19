@@ -2164,7 +2164,7 @@ public class WindowManagerService extends IWindowManager.Stub
             win.mLastRelayoutContentInsets.set(win.mContentInsets);
             outVisibleInsets.set(win.mVisibleInsets);
             outStableInsets.set(win.mStableInsets);
-            outCutout.set(win.mDisplayCutout.getDisplayCutout());
+            outCutout.set(win.getWmDisplayCutout().getDisplayCutout());
             outOutsets.set(win.mOutsets);
             outBackdropFrame.set(win.getBackdropFrame(win.getFrameLw()));
             if (localLOGV) Slog.v(

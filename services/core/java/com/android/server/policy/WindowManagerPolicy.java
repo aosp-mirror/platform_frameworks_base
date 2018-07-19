@@ -201,12 +201,8 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          *
          * @param windowFrames Container for all the window frames that affect how the window is
          *                     laid out.
-         * @param displayCutout the display cutout
-         * @param parentFrameWasClippedByDisplayCutout true if the parent frame would have been
-         * different if there was no display cutout.
          */
-        public void computeFrameLw(WindowFrames windowFrames, WmDisplayCutout displayCutout,
-                boolean parentFrameWasClippedByDisplayCutout);
+        public void computeFrameLw(WindowFrames windowFrames);
 
         /**
          * Retrieve the current frame of the window that has been assigned by
