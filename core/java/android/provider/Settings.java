@@ -7510,6 +7510,15 @@ public final class Settings {
         public static final String FLASHLIGHT_ENABLED = "flashlight_enabled";
 
         /**
+         * Whether or not face unlock is allowed on Keyguard.
+         * @hide
+         */
+        public static final String FACE_UNLOCK_KEYGUARD_ENABLED = "face_unlock_keyguard_enabled";
+
+        private static final Validator FACE_UNLOCK_KEYGUARD_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * Whether the assist gesture should be enabled.
          *
          * @hide
@@ -8005,6 +8014,7 @@ public final class Settings {
             DOZE_PULSE_ON_DOUBLE_TAP,
             NFC_PAYMENT_DEFAULT_COMPONENT,
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
+            FACE_UNLOCK_KEYGUARD_ENABLED,
             ASSIST_GESTURE_ENABLED,
             ASSIST_GESTURE_SILENCE_ALERTS_ENABLED,
             ASSIST_GESTURE_WAKE_ENABLED,
@@ -8141,6 +8151,7 @@ public final class Settings {
             VALIDATORS.put(NFC_PAYMENT_DEFAULT_COMPONENT, NFC_PAYMENT_DEFAULT_COMPONENT_VALIDATOR);
             VALIDATORS.put(AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
                     AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN_VALIDATOR);
+            VALIDATORS.put(FACE_UNLOCK_KEYGUARD_ENABLED, FACE_UNLOCK_KEYGUARD_ENABLED_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_ENABLED, ASSIST_GESTURE_ENABLED_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_SILENCE_ALERTS_ENABLED,
                     ASSIST_GESTURE_SILENCE_ALERTS_ENABLED_VALIDATOR);
