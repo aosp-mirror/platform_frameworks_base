@@ -580,8 +580,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
 
                 if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame=" + w.mFrame
-                        + " mContainingFrame=" + w.mContainingFrame
-                        + " mDisplayFrame=" + w.mDisplayFrame);
+                        + " mContainingFrame=" + w.getContainingFrame()
+                        + " mDisplayFrame=" + w.getDisplayFrameLw());
             }
         }
     };
@@ -608,8 +608,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 mService.mPolicy.layoutWindowLw(w, w.getParentWindow(), mDisplayFrames);
                 w.mLayoutSeq = mLayoutSeq;
                 if (DEBUG_LAYOUT) Slog.v(TAG, " LAYOUT: mFrame=" + w.mFrame
-                        + " mContainingFrame=" + w.mContainingFrame
-                        + " mDisplayFrame=" + w.mDisplayFrame);
+                        + " mContainingFrame=" + w.getContainingFrame()
+                        + " mDisplayFrame=" + w.getDisplayFrameLw());
             }
         } else if (w.mAttrs.type == TYPE_DREAM) {
             // Don't layout windows behind a dream, so that if it does stuff like hide the

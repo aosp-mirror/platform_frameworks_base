@@ -25,19 +25,12 @@ import android.view.DisplayCutout;
 import android.view.IApplicationToken;
 import android.view.WindowManager;
 
+import com.android.server.wm.WindowFrames;
 import com.android.server.wm.utils.WmDisplayCutout;
 
 public class FakeWindowState implements WindowManagerPolicy.WindowState {
 
-    public final Rect parentFrame = new Rect();
-    public final Rect displayFrame = new Rect();
-    public final Rect overscanFrame = new Rect();
-    public final Rect contentFrame = new Rect();
-    public final Rect visibleFrame = new Rect();
-    public final Rect decorFrame = new Rect();
-    public final Rect stableFrame = new Rect();
-    public Rect outsetFrame = new Rect();
-
+    public WindowFrames windowFrames;
     public WmDisplayCutout displayCutout;
 
     public WindowManager.LayoutParams attrs;
@@ -61,44 +54,43 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
     }
 
     @Override
-    public void computeFrameLw(Rect parentFrame, Rect displayFrame, Rect overlayFrame,
-            Rect contentFrame, Rect visibleFrame, Rect decorFrame, Rect stableFrame,
-            @Nullable Rect outsetFrame, WmDisplayCutout displayCutout,
+    public void computeFrameLw(WindowFrames windowFrames, WmDisplayCutout displayCutout,
             boolean parentFrameWasClippedByDisplayCutout) {
-        this.parentFrame.set(parentFrame);
-        this.displayFrame.set(displayFrame);
-        this.overscanFrame.set(overlayFrame);
-        this.contentFrame.set(contentFrame);
-        this.visibleFrame.set(visibleFrame);
-        this.decorFrame.set(decorFrame);
-        this.stableFrame.set(stableFrame);
-        this.outsetFrame = outsetFrame == null ? null : new Rect(outsetFrame);
+        this.windowFrames = windowFrames;
         this.displayCutout = displayCutout;
     }
 
     @Override
     public Rect getFrameLw() {
-        return parentFrame;
+        return windowFrames.mParentFrame;
     }
 
     @Override
     public Rect getDisplayFrameLw() {
-        return displayFrame;
+        return windowFrames.mDisplayFrame;
     }
 
     @Override
     public Rect getOverscanFrameLw() {
-        return overscanFrame;
+        return windowFrames.mOverscanFrame;
     }
 
     @Override
     public Rect getContentFrameLw() {
-        return contentFrame;
+        return windowFrames.mContentFrame;
     }
 
     @Override
     public Rect getVisibleFrameLw() {
-        return visibleFrame;
+        return windowFrames.mVisibleFrame;
+    }
+
+    public Rect getStableFrame() {
+        return windowFrames.mStableFrame;
+    }
+
+    public Rect getDecorFrame() {
+        return windowFrames.mDecorFrame;
     }
 
     @Override

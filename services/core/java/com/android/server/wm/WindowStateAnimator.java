@@ -811,7 +811,7 @@ class WindowStateAnimator {
         w.calculatePolicyCrop(mSystemDecorRect);
 
         if (DEBUG_WINDOW_CROP) Slog.d(TAG, "Applying decor to crop win=" + w + " mDecorFrame="
-                + w.mDecorFrame + " mSystemDecorRect=" + mSystemDecorRect);
+                + w.getDecorFrame() + " mSystemDecorRect=" + mSystemDecorRect);
 
         final Task task = w.getTask();
         final boolean fullscreen = w.fillsDisplay() || (task != null && task.isFullscreen());
@@ -931,9 +931,9 @@ class WindowStateAnimator {
 
             // Make sure that what we're animating to and from is actually the right size in case
             // the window cannot take up the full screen.
-            mTmpStackBounds.intersectUnchecked(w.mParentFrame);
-            mTmpSourceBounds.intersectUnchecked(w.mParentFrame);
-            mTmpAnimatingBounds.intersectUnchecked(w.mParentFrame);
+            mTmpStackBounds.intersectUnchecked(w.getParentFrame());
+            mTmpSourceBounds.intersectUnchecked(w.getParentFrame());
+            mTmpAnimatingBounds.intersectUnchecked(w.getParentFrame());
 
             if (!mTmpSourceBounds.isEmpty()) {
                 // Get the final target stack bounds, if we are not animating, this is just the
