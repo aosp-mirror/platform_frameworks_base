@@ -55,8 +55,10 @@ public class WifiSavedConfigUtils {
         try {
             List<PasspointConfiguration> savedPasspointConfigs =
                     wifiManager.getPasspointConfigurations();
-            for (PasspointConfiguration config : savedPasspointConfigs) {
-                savedConfigs.add(new AccessPoint(context, config));
+            if (savedPasspointConfigs != null) {
+                for (PasspointConfiguration config : savedPasspointConfigs) {
+                    savedConfigs.add(new AccessPoint(context, config));
+                }
             }
         } catch (UnsupportedOperationException e) {
             // Passpoint not supported.
