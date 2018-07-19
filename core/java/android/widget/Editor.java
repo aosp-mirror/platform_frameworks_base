@@ -4888,23 +4888,23 @@ public class Editor {
                     : controller.mEndHandle;
         }
 
-        private final Magnifier.Callback mHandlesVisibilityCallback = new Magnifier.Callback() {
-            @Override
-            public void onOperationComplete() {
-                final Point magnifierTopLeft = mMagnifierAnimator.mMagnifier.getWindowCoords();
-                if (magnifierTopLeft == null) {
-                    return;
-                }
-                final Rect magnifierRect = new Rect(magnifierTopLeft.x, magnifierTopLeft.y,
-                        magnifierTopLeft.x + mMagnifierAnimator.mMagnifier.getWidth(),
-                        magnifierTopLeft.y + mMagnifierAnimator.mMagnifier.getHeight());
-                setVisible(!handleOverlapsMagnifier(HandleView.this, magnifierRect));
-                final HandleView otherHandle = getOtherSelectionHandle();
-                if (otherHandle != null) {
-                    otherHandle.setVisible(!handleOverlapsMagnifier(otherHandle, magnifierRect));
-                }
+        private void updateHandlesVisibility() {
+            final Point magnifierTopLeft = mMagnifierAnimator.mMagnifier.getPosition();
+            if (magnifierTopLeft == null) {
+                return;
             }
-        };
+            final Rect surfaceInsets =
+                    mTextView.getViewRootImpl().mWindowAttributes.surfaceInsets;
+            magnifierTopLeft.offset(-surfaceInsets.left, -surfaceInsets.top);
+            final Rect magnifierRect = new Rect(magnifierTopLeft.x, magnifierTopLeft.y,
+                    magnifierTopLeft.x + mMagnifierAnimator.mMagnifier.getWidth(),
+                    magnifierTopLeft.y + mMagnifierAnimator.mMagnifier.getHeight());
+            setVisible(!handleOverlapsMagnifier(HandleView.this, magnifierRect));
+            final HandleView otherHandle = getOtherSelectionHandle();
+            if (otherHandle != null) {
+                otherHandle.setVisible(!handleOverlapsMagnifier(otherHandle, magnifierRect));
+            }
+        }
 
         protected final void updateMagnifier(@NonNull final MotionEvent event) {
             if (mMagnifierAnimator == null) {
@@ -4919,10 +4919,9 @@ public class Editor {
                 mRenderCursorRegardlessTiming = true;
                 mTextView.invalidateCursorPath();
                 suspendBlink();
-                mMagnifierAnimator.mMagnifier
-                        .setOnOperationCompleteCallback(mHandlesVisibilityCallback);
 
                 mMagnifierAnimator.show(showPosInView.x, showPosInView.y);
+                updateHandlesVisibility();
             } else {
                 dismissMagnifier();
             }
@@ -4930,7 +4929,6 @@ public class Editor {
 
         protected final void dismissMagnifier() {
             if (mMagnifierAnimator != null) {
-                mMagnifierAnimator.mMagnifier.setOnOperationCompleteCallback(null);
                 mMagnifierAnimator.dismiss();
                 mRenderCursorRegardlessTiming = false;
                 resumeBlink();

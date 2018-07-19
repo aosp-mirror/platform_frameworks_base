@@ -146,14 +146,22 @@ public final class Magnifier {
     }
 
     /**
-     * Shows the magnifier on the screen.
+     * Shows the magnifier on the screen. The method takes the coordinates of the center
+     * of the content source going to be magnified and copied to the magnifier. The coordinates
+     * are relative to the top left corner of the magnified view. The magnifier will be
+     * positioned such that its center will be at the default offset from the center of the source.
+     * The default offset can be specified using the method
+     * {@link Builder#setDefaultSourceToMagnifierOffset(int, int)}. If the offset should
+     * be different across calls to this method, you should consider to use method
+     * {@link #show(float, float, float, float)} instead.
      *
-     * @param sourceCenterX horizontal coordinate of the center point of the source rectangle that
-     *        will be magnified and copied to the magnifier, relative to the view.
-     *        The parameter is clamped such that the copy rectangle fits inside [0, view width].
-     * @param sourceCenterY vertical coordinate of the center point of the source rectangle that
-     *        will be magnified and copied to the magnifier, relative to the view.
-     *        The parameter is clamped such that the copy rectangle fits inside [0, view height].
+     * @param sourceCenterX horizontal coordinate of the source center, relative to the view
+     * @param sourceCenterY vertical coordinate of the source center, relative to the view
+     *
+     * @see Builder#setDefaultSourceToMagnifierOffset(int, int)
+     * @see Builder#getDefaultHorizontalSourceToMagnifierOffset()
+     * @see Builder#getDefaultVerticalSourceToMagnifierOffset()
+     * @see #show(float, float, float, float)
      */
     public void show(@FloatRange(from = 0) float sourceCenterX,
             @FloatRange(from = 0) float sourceCenterY) {
@@ -163,21 +171,18 @@ public final class Magnifier {
     }
 
     /**
-     * Shows the magnifier on the screen at a position
-     * that is independent from its content position.
+     * Shows the magnifier on the screen at a position that is independent from its content
+     * position. The first two arguments represent the coordinates of the center of the
+     * content source going to be magnified and copied to the magnifier. The last two arguments
+     * represent the coordinates of the center of the magnifier itself. All four coordinates
+     * are relative to the top left corner of the magnified view. If you consider using this
+     * method such that the offset between the source center and the magnifier center coordinates
+     * remains constant, you should consider using method {@link #show(float, float)} instead.
      *
-     * @param sourceCenterX horizontal coordinate of the center point of the source rectangle that
-     *        will be magnified and copied to the magnifier, relative to the view.
-     *        The parameter is clamped such that the copy rectangle fits inside [0, view width].
-     * @param sourceCenterY vertical coordinate of the center point of the source rectangle that
-     *        will be magnified and copied to the magnifier, relative to the view.
-     *        The parameter is clamped such that the copy rectangle fits inside [0, view height].
-     * @param magnifierCenterX horizontal coordinate of the center point of the magnifier window
-     *        relative to the view. As the magnifier can be arbitrarily positioned, this can be
-     *        negative or larger than the view width.
-     * @param magnifierCenterY vertical coordinate of the center point of the magnifier window
-     *        relative to the view. As the magnifier can be arbitrarily positioned, this can be
-     *        negative or larger than the view height.
+     * @param sourceCenterX horizontal coordinate of the source center relative to the view
+     * @param sourceCenterY vertical coordinate of the source center, relative to the view
+     * @param magnifierCenterX horizontal coordinate of the magnifier center, relative to the view
+     * @param magnifierCenterY vertical coordinate of the magnifier center, relative to the view
      */
     public void show(@FloatRange(from = 0) float sourceCenterX,
             @FloatRange(from = 0) float sourceCenterY,
@@ -241,8 +246,9 @@ public final class Magnifier {
     }
 
     /**
-     * Forces the magnifier to update its content. It uses the previous coordinates passed to
-     * {@link #show(float, float)}. This only happens if the magnifier is currently showing.
+     * Asks the magnifier to update its content. It uses the previous coordinates passed to
+     * {@link #show(float, float)} or {@link #show(float, float, float, float)}. The
+     * method only has effect if the magnifier is currently showing.
      */
     public void update() {
         if (mWindow != null) {
@@ -255,16 +261,40 @@ public final class Magnifier {
 
     /**
      * @return the width of the magnifier window, in pixels
+     * @see Magnifier.Builder#setSize(int, int)
      */
+    @Px
     public int getWidth() {
         return mWindowWidth;
     }
 
     /**
      * @return the height of the magnifier window, in pixels
+     * @see Magnifier.Builder#setSize(int, int)
      */
+    @Px
     public int getHeight() {
         return mWindowHeight;
+    }
+
+    /**
+     * @return the initial width of the content magnified and copied to the magnifier, in pixels
+     * @see Magnifier.Builder#setSize(int, int)
+     * @see Magnifier.Builder#setZoom(float)
+     */
+    @Px
+    public int getSourceWidth() {
+        return mSourceWidth;
+    }
+
+    /**
+     * @return the initial height of the content magnified and copied to the magnifier, in pixels
+     * @see Magnifier.Builder#setSize(int, int)
+     * @see Magnifier.Builder#setZoom(float)
+     */
+    @Px
+    public int getSourceHeight() {
+        return mSourceHeight;
     }
 
     /**
@@ -272,24 +302,96 @@ public final class Magnifier {
      * If the zoom is x and the magnifier window size is (width, height), the original size
      * of the content being magnified will be (width / x, height / x).
      * @return the zoom applied to the content
+     * @see Magnifier.Builder#setZoom(float)
      */
     public float getZoom() {
         return mZoom;
     }
 
     /**
-     * @hide
+     * @return the elevation set for the magnifier window, in pixels
+     * @see Magnifier.Builder#setElevation(float)
+     */
+    @Px
+    public float getElevation() {
+        return mWindowElevation;
+    }
+
+    /**
+     * @return the corner radius of the magnifier window, in pixels
+     * @see Magnifier.Builder#setCornerRadius(float)
+     */
+    @Px
+    public float getCornerRadius() {
+        return mWindowCornerRadius;
+    }
+
+    /**
+     * Returns the horizontal offset, in pixels, to be applied to the source center position
+     * to obtain the magnifier center position when {@link #show(float, float)} is called.
+     * The value is ignored when {@link #show(float, float, float, float)} is used instead.
      *
-     * @return the top left coordinates of the magnifier, relative to the parent window
+     * @return the default horizontal offset between the source center and the magnifier
+     * @see Magnifier.Builder#setDefaultSourceToMagnifierOffset(int, int)
+     * @see Magnifier#show(float, float)
+     */
+    @Px
+    public int getDefaultHorizontalSourceToMagnifierOffset() {
+        return mDefaultHorizontalSourceToMagnifierOffset;
+    }
+
+    /**
+     * Returns the vertical offset, in pixels, to be applied to the source center position
+     * to obtain the magnifier center position when {@link #show(float, float)} is called.
+     * The value is ignored when {@link #show(float, float, float, float)} is used instead.
+     *
+     * @return the default vertical offset between the source center and the magnifier
+     * @see Magnifier.Builder#setDefaultSourceToMagnifierOffset(int, int)
+     * @see Magnifier#show(float, float)
+     */
+    @Px
+    public int getDefaultVerticalSourceToMagnifierOffset() {
+        return mDefaultVerticalSourceToMagnifierOffset;
+    }
+
+    /**
+     * Returns the top left coordinates of the magnifier, relative to the surface of the
+     * main application window. They will be determined by the coordinates of the last
+     * {@link #show(float, float)} or {@link #show(float, float, float, float)} call, adjusted
+     * to take into account any potential clamping behavior. The method can be used immediately
+     * after a #show call to find out where the magnifier will be positioned. However, the
+     * position of the magnifier will not be updated in the same frame due to the async
+     * copying of the content copying and of the magnifier rendering.
+     * The method will return {@code null} if #show has not yet been called, or if the last
+     * operation performed was a #dismiss.
+     *
+     * @return the top left coordinates of the magnifier
      */
     @Nullable
-    public Point getWindowCoords() {
+    public Point getPosition() {
         if (mWindow == null) {
             return null;
         }
-        final Rect surfaceInsets = mView.getViewRootImpl().mWindowAttributes.surfaceInsets;
-        return new Point(mWindow.mLastDrawContentPositionX - surfaceInsets.left,
-                mWindow.mLastDrawContentPositionY - surfaceInsets.top);
+        return new Point(getCurrentClampedWindowCoordinates());
+    }
+
+    /**
+     * Returns the top left coordinates of the magnifier source (i.e. the view region going to
+     * be magnified and copied to the magnifier), relative to the surface the content is copied
+     * from. The content will be copied:
+     * - if the magnified view is a {@link SurfaceView}, from the surface backing it
+     * - otherwise, from the surface of the main application window
+     * The method will return {@code null} if #show has not yet been called, or if the last
+     * operation performed was a #dismiss.
+     *
+     * @return the top left coordinates of the magnifier source
+     */
+    @Nullable
+    public Point getSourcePosition() {
+        if (mWindow == null) {
+            return null;
+        }
+        return new Point(mPixelCopyRequestRect.left, mPixelCopyRequestRect.top);
     }
 
     /**
@@ -915,23 +1017,6 @@ public final class Magnifier {
         synchronized (mWindow.mLock) {
             return Bitmap.createScaledBitmap(mWindow.mBitmap, mWindowWidth, mWindowHeight, true);
         }
-    }
-
-    /**
-     * @return the position of the magnifier window relative to the screen
-     *
-     * @hide
-     */
-    @TestApi
-    public Rect getWindowPositionOnScreen() {
-        final int[] viewLocationOnScreen = new int[2];
-        mView.getLocationOnScreen(viewLocationOnScreen);
-        final int[] viewLocationInSurface = new int[2];
-        mView.getLocationInSurface(viewLocationInSurface);
-
-        final int left = mWindowCoords.x + viewLocationOnScreen[0] - viewLocationInSurface[0];
-        final int top = mWindowCoords.y + viewLocationOnScreen[1] - viewLocationInSurface[1];
-        return new Rect(left, top, left + mWindowWidth, top + mWindowHeight);
     }
 
     /**
