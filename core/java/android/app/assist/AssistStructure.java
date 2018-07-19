@@ -2167,13 +2167,13 @@ public class AssistStructure implements Parcelable {
         if (autofillId == null) {
             Log.i(TAG, prefix + " NO autofill ID");
         } else {
-            Log.i(TAG, prefix + "Autofill info: id= " + autofillId
+            Log.i(TAG, prefix + "  Autofill info: id= " + autofillId
                     + ", type=" + node.getAutofillType()
                     + ", options=" + Arrays.toString(node.getAutofillOptions())
                     + ", hints=" + Arrays.toString(node.getAutofillHints())
                     + ", value=" + node.getAutofillValue()
                     + ", sanitized=" + node.isSanitized()
-                    + ", importantFor=" + node.getImportantForAutofill());
+                    + ", important=" + node.getImportantForAutofill());
         }
 
         final int NCHILDREN = node.getChildCount();
