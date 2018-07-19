@@ -125,7 +125,7 @@ public class CategoryManager {
             }
             mCategoryByKeyMap.clear();
             mCategories = TileUtils.getCategories(context, mTileByComponentCache,
-                    false /* categoryDefinedInManifest */, mExtraAction, settingPkg);
+                    mExtraAction, settingPkg);
             for (DashboardCategory category : mCategories) {
                 mCategoryByKeyMap.put(category.key, category);
             }

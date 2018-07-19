@@ -35,7 +35,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
-import androidx.annotation.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -198,36 +197,12 @@ public class TileUtils {
     public static final String META_DATA_KEY_PROFILE = "com.android.settings.profile";
 
     /**
-     * Build a list of DashboardCategory. Each category must be defined in manifest.
-     * eg: .Settings$DeviceSettings
-     * @deprecated
-     */
-    @Deprecated
-    public static List<DashboardCategory> getCategories(Context context,
-            Map<Pair<String, String>, Tile> cache) {
-        return getCategories(context, cache, true /*categoryDefinedInManifest*/);
-    }
-
-    /**
      * Build a list of DashboardCategory.
-     * @param categoryDefinedInManifest If true, an dummy activity must exists in manifest to
-     * represent this category (eg: .Settings$DeviceSettings)
-     */
-    public static List<DashboardCategory> getCategories(Context context,
-            Map<Pair<String, String>, Tile> cache, boolean categoryDefinedInManifest) {
-        return getCategories(context, cache, categoryDefinedInManifest, null, SETTING_PKG);
-    }
-
-    /**
-     * Build a list of DashboardCategory.
-     * @param categoryDefinedInManifest If true, an dummy activity must exists in manifest to
-     * represent this category (eg: .Settings$DeviceSettings)
      * @param extraAction additional intent filter action to be usetileutild to build the dashboard
      * categories
      */
     public static List<DashboardCategory> getCategories(Context context,
-            Map<Pair<String, String>, Tile> cache, boolean categoryDefinedInManifest,
-            String extraAction, String settingPkg) {
+            Map<Pair<String, String>, Tile> cache, String extraAction, String settingPkg) {
         final long startTime = System.currentTimeMillis();
         boolean setup = Global.getInt(context.getContentResolver(), Global.DEVICE_PROVISIONED, 0)
                 != 0;
@@ -247,14 +222,12 @@ public class TileUtils {
             if (setup) {
                 getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false,
                         settingPkg);
-                if (!categoryDefinedInManifest) {
                     getTilesForAction(context, user, IA_SETTINGS_ACTION, cache, null, tiles, false,
                             settingPkg);
                     if (extraAction != null) {
                         getTilesForAction(context, user, extraAction, cache, null, tiles, false,
                                 settingPkg);
                     }
-                }
             }
         }
 
@@ -262,7 +235,9 @@ public class TileUtils {
         for (Tile tile : tiles) {
             DashboardCategory category = categoryMap.get(tile.category);
             if (category == null) {
-                category = createCategory(context, tile.category, categoryDefinedInManifest);
+                category = new DashboardCategory();
+                category.key = tile.category;
+
                 if (category == null) {
                     Log.w(LOG_TAG, "Couldn't find category " + tile.category);
                     continue;
@@ -279,40 +254,6 @@ public class TileUtils {
         if (DEBUG_TIMING) Log.d(LOG_TAG, "getCategories took "
                 + (System.currentTimeMillis() - startTime) + " ms");
         return categories;
-    }
-
-    /**
-     * Create a new DashboardCategory from key.
-     *
-     * @param context Context to query intent
-     * @param categoryKey The category key
-     * @param categoryDefinedInManifest If true, an dummy activity must exists in manifest to
-     * represent this category (eg: .Settings$DeviceSettings)
-     */
-    private static DashboardCategory createCategory(Context context, String categoryKey,
-            boolean categoryDefinedInManifest) {
-        DashboardCategory category = new DashboardCategory();
-        category.key = categoryKey;
-        if (!categoryDefinedInManifest) {
-            return category;
-        }
-        PackageManager pm = context.getPackageManager();
-        List<ResolveInfo> results = pm.queryIntentActivities(new Intent(categoryKey), 0);
-        if (results.size() == 0) {
-            return null;
-        }
-        for (ResolveInfo resolved : results) {
-            if (!resolved.system) {
-                // Do not allow any app to add to settings, only system ones.
-                continue;
-            }
-            category.title = resolved.activityInfo.loadLabel(pm);
-            category.priority = SETTING_PKG.equals(
-                    resolved.activityInfo.applicationInfo.packageName) ? resolved.priority : 0;
-            if (DEBUG) Log.d(LOG_TAG, "Adding category " + category.title);
-        }
-
-        return category;
     }
 
     private static void getTilesForAction(Context context,
