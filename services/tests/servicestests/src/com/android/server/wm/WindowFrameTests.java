@@ -163,7 +163,7 @@ public class WindowFrameTests extends WindowTestsBase {
         // and stable frames work the same way.
         final WindowFrames windowFrames = new WindowFrames(pf, df, of, cf, vf, dcf, sf, mEmptyRect);
         w.computeFrameLw(windowFrames, WmDisplayCutout.NO_CUTOUT, false);
-        assertRect(w.mFrame,0, 0, 1000, 1000);
+        assertRect(w.getFrameLw(),0, 0, 1000, 1000);
         assertRect(w.mContentInsets, 0, topContentInset, 0, bottomContentInset);
         assertRect(w.mVisibleInsets, 0, topVisibleInset, 0, bottomVisibleInset);
         assertRect(w.mStableInsets, leftStableInset, 0, rightStableInset, 0);
@@ -171,19 +171,19 @@ public class WindowFrameTests extends WindowTestsBase {
         assertTrue(cf.equals(w.getContentFrameLw()));
         assertTrue(vf.equals(w.getVisibleFrameLw()));
         assertTrue(sf.equals(w.getStableFrameLw()));
-        // On the other hand mFrame doesn't extend past cf we won't get any insets
+        // On the other hand getFrame() doesn't extend past cf we won't get any insets
         w.mAttrs.x = 100;
         w.mAttrs.y = 100;
         w.mAttrs.width = 100; w.mAttrs.height = 100; //have to clear MATCH_PARENT
         w.mRequestedWidth = 100;
         w.mRequestedHeight = 100;
         w.computeFrameLw(windowFrames, WmDisplayCutout.NO_CUTOUT, false);
-        assertRect(w.mFrame, 100, 100, 200, 200);
+        assertRect(w.getFrameLw(), 100, 100, 200, 200);
         assertRect(w.mContentInsets, 0, 0, 0, 0);
         // In this case the frames are shrunk to the window frame.
-        assertTrue(w.mFrame.equals(w.getContentFrameLw()));
-        assertTrue(w.mFrame.equals(w.getVisibleFrameLw()));
-        assertTrue(w.mFrame.equals(w.getStableFrameLw()));
+        assertTrue(w.getFrameLw().equals(w.getContentFrameLw()));
+        assertTrue(w.getFrameLw().equals(w.getVisibleFrameLw()));
+        assertTrue(w.getFrameLw().equals(w.getStableFrameLw()));
     }
 
     @Test
@@ -200,7 +200,7 @@ public class WindowFrameTests extends WindowTestsBase {
         // so we expect it to fill the entire available frame.
         final WindowFrames windowFrames = new WindowFrames(pf, pf, pf, pf, pf, pf, pf, pf);
         w.computeFrameLw(windowFrames, WmDisplayCutout.NO_CUTOUT, false);
-        assertRect(w.mFrame, 0, 0, 1000, 1000);
+        assertRect(w.getFrameLw(), 0, 0, 1000, 1000);
 
         // It can select various widths and heights within the bounds.
         // Strangely the window attribute width is ignored for normal windows
@@ -210,14 +210,14 @@ public class WindowFrameTests extends WindowTestsBase {
         w.computeFrameLw(windowFrames, WmDisplayCutout.NO_CUTOUT, false);
         // Explicit width and height without requested width/height
         // gets us nothing.
-        assertRect(w.mFrame, 0, 0, 0, 0);
+        assertRect(w.getFrameLw(), 0, 0, 0, 0);
 
         w.mRequestedWidth = 300;
         w.mRequestedHeight = 300;
         w.computeFrameLw(windowFrames, WmDisplayCutout.NO_CUTOUT, false);
         // With requestedWidth/Height we can freely choose our size within the
         // parent bounds.
-        assertRect(w.mFrame, 0, 0, 300, 300);
+        assertRect(w.getFrameLw(), 0, 0, 300, 300);
 
         // With FLAG_SCALED though, requestedWidth/height is used to control
         // the unscaled surface size, and mAttrs.width/height becomes the
@@ -228,14 +228,14 @@ public class WindowFrameTests extends WindowTestsBase {
         w.mAttrs.width = 100;
         w.mAttrs.height = 100;
         w.computeFrameLw(windowFrames, WmDisplayCutout.NO_CUTOUT, false);
-        assertRect(w.mFrame, 0, 0, 100, 100);
+        assertRect(w.getFrameLw(), 0, 0, 100, 100);
         w.mAttrs.flags = 0;
 
         // But sizes too large will be clipped to the containing frame
         w.mRequestedWidth = 1200;
         w.mRequestedHeight = 1200;
         w.computeFrameLw(windowFrames, WmDisplayCutout.NO_CUTOUT, false);
-        assertRect(w.mFrame, 0, 0, 1000, 1000);
+        assertRect(w.getFrameLw(), 0, 0, 1000, 1000);
 
         // Before they are clipped though windows will be shifted
         w.mAttrs.x = 300;
@@ -243,7 +243,7 @@ public class WindowFrameTests extends WindowTestsBase {
         w.mRequestedWidth = 1000;
         w.mRequestedHeight = 1000;
         w.computeFrameLw(windowFrames, WmDisplayCutout.NO_CUTOUT, false);
-        assertRect(w.mFrame, 0, 0, 1000, 1000);
+        assertRect(w.getFrameLw(), 0, 0, 1000, 1000);
 
         // If there is room to move around in the parent frame the window will be shifted according
         // to gravity.
@@ -253,16 +253,16 @@ public class WindowFrameTests extends WindowTestsBase {
         w.mRequestedHeight = 300;
         w.mAttrs.gravity = Gravity.RIGHT | Gravity.TOP;
         w.computeFrameLw(windowFrames,  WmDisplayCutout.NO_CUTOUT, false);
-        assertRect(w.mFrame, 700, 0, 1000, 300);
+        assertRect(w.getFrameLw(), 700, 0, 1000, 300);
         w.mAttrs.gravity = Gravity.RIGHT | Gravity.BOTTOM;
         w.computeFrameLw(windowFrames, WmDisplayCutout.NO_CUTOUT, false);
-        assertRect(w.mFrame, 700, 700, 1000, 1000);
+        assertRect(w.getFrameLw(), 700, 700, 1000, 1000);
         // Window specified  x and y are interpreted as offsets in the opposite
         // direction of gravity
         w.mAttrs.x = 100;
         w.mAttrs.y = 100;
         w.computeFrameLw(windowFrames, WmDisplayCutout.NO_CUTOUT, false);
-        assertRect(w.mFrame, 600, 600, 900, 900);
+        assertRect(w.getFrameLw(), 600, 600, 900, 900);
     }
 
     @Test
@@ -286,7 +286,7 @@ public class WindowFrameTests extends WindowTestsBase {
         w.computeFrameLw(windowFrames, WmDisplayCutout.NO_CUTOUT, false);
         // For non fullscreen tasks the containing frame is based off the
         // task bounds not the parent frame.
-        assertRect(w.mFrame, taskLeft, taskTop, taskRight, taskBottom);
+        assertRect(w.getFrameLw(), taskLeft, taskTop, taskRight, taskBottom);
         assertRect(w.getContentFrameLw(), taskLeft, taskTop, taskRight, taskBottom);
         assertRect(w.mContentInsets, 0, 0, 0, 0);
 
@@ -298,7 +298,7 @@ public class WindowFrameTests extends WindowTestsBase {
 
         windowFrames.setFrames(pf, pf, pf, cf, cf, pf, cf, mEmptyRect);
         w.computeFrameLw(windowFrames, WmDisplayCutout.NO_CUTOUT, false);
-        assertRect(w.mFrame, taskLeft, taskTop, taskRight, taskBottom);
+        assertRect(w.getFrameLw(), taskLeft, taskTop, taskRight, taskBottom);
         int contentInsetRight = taskRight - cfRight;
         int contentInsetBottom = taskBottom - cfBottom;
         assertRect(w.mContentInsets, 0, 0, contentInsetRight, contentInsetBottom);
@@ -317,7 +317,7 @@ public class WindowFrameTests extends WindowTestsBase {
 
         windowFrames.setFrames(pf, pf, pf, cf, cf, pf, cf, mEmptyRect);
         w.computeFrameLw(windowFrames, WmDisplayCutout.NO_CUTOUT, false);
-        assertRect(w.mFrame, taskLeft, taskTop, taskRight, taskBottom);
+        assertRect(w.getFrameLw(), taskLeft, taskTop, taskRight, taskBottom);
         contentInsetRight = insetRight - cfRight;
         contentInsetBottom = insetBottom - cfBottom;
         assertRect(w.mContentInsets, 0, 0, contentInsetRight, contentInsetBottom);
@@ -409,7 +409,7 @@ public class WindowFrameTests extends WindowTestsBase {
         w.computeFrameLw(windowFrames, WmDisplayCutout.NO_CUTOUT, false);
         // For non fullscreen tasks the containing frame is based off the
         // task bounds not the parent frame.
-        assertRect(w.mFrame, taskLeft, taskTop, taskRight, taskBottom);
+        assertRect(w.getFrameLw(), taskLeft, taskTop, taskRight, taskBottom);
         assertRect(w.getContentFrameLw(), taskLeft, taskTop, taskRight, taskBottom);
         assertRect(w.mContentInsets, 0, 0, 0, 0);
 
@@ -425,7 +425,7 @@ public class WindowFrameTests extends WindowTestsBase {
 
         windowFrames.setFrames(pf, pf, pf, cf, cf, pf, cf, mEmptyRect);
         w.computeFrameLw(windowFrames, WmDisplayCutout.NO_CUTOUT, false);
-        assertEquals(cf, w.mFrame);
+        assertEquals(cf, w.getFrameLw());
         assertEquals(cf, w.getContentFrameLw());
         assertRect(w.mContentInsets, 0, 0, 0, 0);
     }

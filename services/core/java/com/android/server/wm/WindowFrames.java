@@ -20,6 +20,7 @@ import static com.android.server.wm.WindowFramesProto.CONTAINING_FRAME;
 import static com.android.server.wm.WindowFramesProto.CONTENT_FRAME;
 import static com.android.server.wm.WindowFramesProto.DECOR_FRAME;
 import static com.android.server.wm.WindowFramesProto.DISPLAY_FRAME;
+import static com.android.server.wm.WindowFramesProto.FRAME;
 import static com.android.server.wm.WindowFramesProto.OUTSET_FRAME;
 import static com.android.server.wm.WindowFramesProto.OVERSCAN_FRAME;
 import static com.android.server.wm.WindowFramesProto.PARENT_FRAME;
@@ -102,6 +103,16 @@ public class WindowFrames {
      */
     final Rect mContainingFrame = new Rect();
 
+    /**
+     * "Real" frame that the application sees, in display coordinate space.
+     */
+    final Rect mFrame = new Rect();
+
+    /**
+     * The last real frame that was reported to the client.
+     */
+    final Rect mLastFrame = new Rect();
+
     public WindowFrames() {
     }
 
@@ -134,6 +145,7 @@ public class WindowFrames {
         mDecorFrame.writeToProto(proto, DECOR_FRAME);
         mOutsetFrame.writeToProto(proto, OUTSET_FRAME);
         mContainingFrame.writeToProto(proto, CONTAINING_FRAME);
+        mFrame.writeToProto(proto, FRAME);
         proto.end(token);
     }
 
@@ -155,6 +167,9 @@ public class WindowFrames {
                 pw.println();
         pw.print(prefix); pw.print("    outset=");
                 mOutsetFrame.printShortString(pw);
+                pw.println();
+        pw.print(prefix); pw.print("mFrame="); mFrame.printShortString(pw);
+                pw.print(" last="); mLastFrame.printShortString(pw);
                 pw.println();
     }
 

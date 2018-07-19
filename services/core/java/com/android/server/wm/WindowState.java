@@ -123,7 +123,6 @@ import static com.android.server.wm.WindowStateProto.CONTENT_INSETS;
 import static com.android.server.wm.WindowStateProto.CUTOUT;
 import static com.android.server.wm.WindowStateProto.DESTROYING;
 import static com.android.server.wm.WindowStateProto.DISPLAY_ID;
-import static com.android.server.wm.WindowStateProto.FRAME;
 import static com.android.server.wm.WindowStateProto.GIVEN_CONTENT_INSETS;
 import static com.android.server.wm.WindowStateProto.HAS_SURFACE;
 import static com.android.server.wm.WindowStateProto.IDENTIFIER;
@@ -394,9 +393,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     float mLastHScale=1, mLastVScale=1;
     final Matrix mTmpMatrix = new Matrix();
 
-    // "Real" frame that the application sees, in display coordinate space.
-    final Rect mFrame = new Rect();
-    final Rect mLastFrame = new Rect();
     private boolean mFrameSizeChanged = false;
     // Frame that is scaled to the application's coordinate space when in
     // screen size compatibility mode.
@@ -953,8 +949,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mWindowFrames.mOutsetFrame.set(windowFrames.mOutsetFrame);
         }
 
-        final int fw = mFrame.width();
-        final int fh = mFrame.height();
+        final int fw = mWindowFrames.mFrame.width();
+        final int fh = mWindowFrames.mFrame.height();
 
         applyGravityAndUpdateFrame(layoutContainingFrame, layoutDisplayFrame);
 
@@ -973,51 +969,54 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         // Make sure the content and visible frames are inside of the
         // final window frame.
-        if (windowsAreFloating && !mFrame.isEmpty()) {
+        if (windowsAreFloating && !mWindowFrames.mFrame.isEmpty()) {
             // For pinned workspace the frame isn't limited in any particular
             // way since SystemUI controls the bounds. For freeform however
             // we want to keep things inside the content frame.
-            final Rect limitFrame =
-                    task.inPinnedWindowingMode() ? mFrame : mWindowFrames.mContentFrame;
+            final Rect limitFrame = task.inPinnedWindowingMode() ? mWindowFrames.mFrame
+                    : mWindowFrames.mContentFrame;
             // Keep the frame out of the blocked system area, limit it in size to the content area
             // and make sure that there is always a minimum visible so that the user can drag it
             // into a usable area..
-            final int height = Math.min(mFrame.height(), limitFrame.height());
-            final int width = Math.min(limitFrame.width(), mFrame.width());
+            final int height = Math.min(mWindowFrames.mFrame.height(), limitFrame.height());
+            final int width = Math.min(limitFrame.width(), mWindowFrames.mFrame.width());
             final DisplayMetrics displayMetrics = getDisplayContent().getDisplayMetrics();
             final int minVisibleHeight = Math.min(height, WindowManagerService.dipToPixel(
                     MINIMUM_VISIBLE_HEIGHT_IN_DP, displayMetrics));
             final int minVisibleWidth = Math.min(width, WindowManagerService.dipToPixel(
                     MINIMUM_VISIBLE_WIDTH_IN_DP, displayMetrics));
             final int top = Math.max(limitFrame.top,
-                    Math.min( mFrame.top, limitFrame.bottom - minVisibleHeight));
+                    Math.min( mWindowFrames.mFrame.top, limitFrame.bottom - minVisibleHeight));
             final int left = Math.max(limitFrame.left + minVisibleWidth - width,
-                    Math.min( mFrame.left, limitFrame.right - minVisibleWidth));
-            mFrame.set(left, top, left + width, top + height);
-            mWindowFrames.mContentFrame.set( mFrame);
+                    Math.min( mWindowFrames.mFrame.left, limitFrame.right - minVisibleWidth));
+            mWindowFrames.mFrame.set(left, top, left + width, top + height);
+            mWindowFrames.mContentFrame.set( mWindowFrames.mFrame);
             mWindowFrames.mVisibleFrame.set(mWindowFrames.mContentFrame);
             mWindowFrames.mStableFrame.set(mWindowFrames.mContentFrame);
         } else if (mAttrs.type == TYPE_DOCK_DIVIDER) {
-            dc.getDockedDividerController().positionDockedStackedDivider(mFrame);
-            mWindowFrames.mContentFrame.set(mFrame);
-            if (!mFrame.equals(mLastFrame)) {
+            dc.getDockedDividerController().positionDockedStackedDivider(mWindowFrames.mFrame);
+            mWindowFrames.mContentFrame.set(mWindowFrames.mFrame);
+            if (!mWindowFrames.mFrame.equals(mWindowFrames.mLastFrame)) {
                 mMovedByResize = true;
             }
         } else {
-            mWindowFrames.mContentFrame.set(Math.max(mWindowFrames.mContentFrame.left, mFrame.left),
-                    Math.max(mWindowFrames.mContentFrame.top, mFrame.top),
-                    Math.min(mWindowFrames.mContentFrame.right, mFrame.right),
-                    Math.min(mWindowFrames.mContentFrame.bottom, mFrame.bottom));
+            mWindowFrames.mContentFrame.set(
+                    Math.max(mWindowFrames.mContentFrame.left, mWindowFrames.mFrame.left),
+                    Math.max(mWindowFrames.mContentFrame.top, mWindowFrames.mFrame.top),
+                    Math.min(mWindowFrames.mContentFrame.right, mWindowFrames.mFrame.right),
+                    Math.min(mWindowFrames.mContentFrame.bottom, mWindowFrames.mFrame.bottom));
 
-            mWindowFrames.mVisibleFrame.set(Math.max(mWindowFrames.mVisibleFrame.left, mFrame.left),
-                    Math.max(mWindowFrames.mVisibleFrame.top, mFrame.top),
-                    Math.min(mWindowFrames.mVisibleFrame.right, mFrame.right),
-                    Math.min(mWindowFrames.mVisibleFrame.bottom, mFrame.bottom));
+            mWindowFrames.mVisibleFrame.set(
+                    Math.max(mWindowFrames.mVisibleFrame.left, mWindowFrames.mFrame.left),
+                    Math.max(mWindowFrames.mVisibleFrame.top, mWindowFrames.mFrame.top),
+                    Math.min(mWindowFrames.mVisibleFrame.right, mWindowFrames.mFrame.right),
+                    Math.min(mWindowFrames.mVisibleFrame.bottom, mWindowFrames.mFrame.bottom));
 
-            mWindowFrames.mStableFrame.set(Math.max(mWindowFrames.mStableFrame.left, mFrame.left),
-                    Math.max(mWindowFrames.mStableFrame.top, mFrame.top),
-                    Math.min(mWindowFrames.mStableFrame.right, mFrame.right),
-                    Math.min(mWindowFrames.mStableFrame.bottom, mFrame.bottom));
+            mWindowFrames.mStableFrame.set(
+                    Math.max(mWindowFrames.mStableFrame.left, mWindowFrames.mFrame.left),
+                    Math.max(mWindowFrames.mStableFrame.top, mWindowFrames.mFrame.top),
+                    Math.min(mWindowFrames.mStableFrame.right, mWindowFrames.mFrame.right),
+                    Math.min(mWindowFrames.mStableFrame.bottom, mWindowFrames.mFrame.bottom));
         }
 
         if (inFullscreenContainer && !windowsAreFloating) {
@@ -1055,42 +1054,44 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Override right and/or bottom insets in case if the frame doesn't fit the screen in
             // non-fullscreen mode.
             boolean overrideRightInset = !windowsAreFloating && !inFullscreenContainer
-                    && mFrame.right > mTmpRect.right;
+                    && mWindowFrames.mFrame.right > mTmpRect.right;
             boolean overrideBottomInset = !windowsAreFloating && !inFullscreenContainer
-                    && mFrame.bottom > mTmpRect.bottom;
-            mContentInsets.set(mWindowFrames.mContentFrame.left - mFrame.left,
-                    mWindowFrames.mContentFrame.top - mFrame.top,
+                    && mWindowFrames.mFrame.bottom > mTmpRect.bottom;
+            mContentInsets.set(mWindowFrames.mContentFrame.left - mWindowFrames.mFrame.left,
+                    mWindowFrames.mContentFrame.top - mWindowFrames.mFrame.top,
                     overrideRightInset ? mTmpRect.right - mWindowFrames.mContentFrame.right
-                            : mFrame.right - mWindowFrames.mContentFrame.right,
+                            : mWindowFrames.mFrame.right - mWindowFrames.mContentFrame.right,
                     overrideBottomInset ? mTmpRect.bottom - mWindowFrames.mContentFrame.bottom
-                            : mFrame.bottom - mWindowFrames.mContentFrame.bottom);
+                            : mWindowFrames.mFrame.bottom - mWindowFrames.mContentFrame.bottom);
 
-            mVisibleInsets.set(mWindowFrames.mVisibleFrame.left - mFrame.left,
-                    mWindowFrames.mVisibleFrame.top - mFrame.top,
+            mVisibleInsets.set(mWindowFrames.mVisibleFrame.left - mWindowFrames.mFrame.left,
+                    mWindowFrames.mVisibleFrame.top - mWindowFrames.mFrame.top,
                     overrideRightInset ? mTmpRect.right - mWindowFrames.mVisibleFrame.right
-                            : mFrame.right - mWindowFrames.mVisibleFrame.right,
+                            : mWindowFrames.mFrame.right - mWindowFrames.mVisibleFrame.right,
                     overrideBottomInset ? mTmpRect.bottom - mWindowFrames.mVisibleFrame.bottom
-                            : mFrame.bottom - mWindowFrames.mVisibleFrame.bottom);
+                            : mWindowFrames.mFrame.bottom - mWindowFrames.mVisibleFrame.bottom);
 
-            mStableInsets.set(Math.max(mWindowFrames.mStableFrame.left - mFrame.left, 0),
-                    Math.max(mWindowFrames.mStableFrame.top - mFrame.top, 0),
+            mStableInsets.set(
+                    Math.max(mWindowFrames.mStableFrame.left - mWindowFrames.mFrame.left, 0),
+                    Math.max(mWindowFrames.mStableFrame.top - mWindowFrames.mFrame.top, 0),
                     overrideRightInset ? Math.max(mTmpRect.right - mWindowFrames.mStableFrame.right,
-                            0) : Math.max(mFrame.right - mWindowFrames.mStableFrame.right, 0),
+                            0) : Math.max(
+                            mWindowFrames.mFrame.right - mWindowFrames.mStableFrame.right, 0),
                     overrideBottomInset ? Math.max(
-                            mTmpRect.bottom - mWindowFrames.mStableFrame.bottom, 0)
-                            : Math.max(mFrame.bottom - mWindowFrames.mStableFrame.bottom, 0));
+                            mTmpRect.bottom - mWindowFrames.mStableFrame.bottom, 0) : Math.max(
+                            mWindowFrames.mFrame.bottom - mWindowFrames.mStableFrame.bottom, 0));
         }
 
-        mDisplayCutout = displayCutout.calculateRelativeTo(mFrame);
+        mDisplayCutout = displayCutout.calculateRelativeTo(mWindowFrames.mFrame);
 
         // Offset the actual frame by the amount layout frame is off.
-        mFrame.offset(-layoutXDiff, -layoutYDiff);
+        mWindowFrames.mFrame.offset(-layoutXDiff, -layoutYDiff);
         mCompatFrame.offset(-layoutXDiff, -layoutYDiff);
         mWindowFrames.mContentFrame.offset(-layoutXDiff, -layoutYDiff);
         mWindowFrames.mVisibleFrame.offset(-layoutXDiff, -layoutYDiff);
         mWindowFrames.mStableFrame.offset(-layoutXDiff, -layoutYDiff);
 
-        mCompatFrame.set(mFrame);
+        mCompatFrame.set(mWindowFrames.mFrame);
         if (mEnforceSizeCompat) {
             // If there is a size compatibility scale being applied to the
             // window, we need to apply this to its insets so that they are
@@ -1106,7 +1107,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mCompatFrame.scale(mInvGlobalScale);
         }
 
-        if (mIsWallpaper && (fw != mFrame.width() || fh != mFrame.height())) {
+        if (mIsWallpaper && (fw != mWindowFrames.mFrame.width()
+                || fh != mWindowFrames.mFrame.height())) {
             final DisplayContent displayContent = getDisplayContent();
             if (displayContent != null) {
                 final DisplayInfo displayInfo = displayContent.getDisplayInfo();
@@ -1119,7 +1121,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 "Resolving (mRequestedWidth="
                 + mRequestedWidth + ", mRequestedheight="
                 + mRequestedHeight + ") to" + " (pw=" + pw + ", ph=" + ph
-                + "): frame=" + mFrame.toShortString()
+                + "): frame=" + mWindowFrames.mFrame.toShortString()
                 + " ci=" + mContentInsets.toShortString()
                 + " vi=" + mVisibleInsets.toShortString()
                 + " si=" + mStableInsets.toShortString()
@@ -1140,7 +1142,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public Rect getFrameLw() {
-        return mFrame;
+        return mWindowFrames.mFrame;
     }
 
     @Override
@@ -1235,8 +1237,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mVisibleInsetsChanged |= !mLastVisibleInsets.equals(mVisibleInsets);
         mStableInsetsChanged |= !mLastStableInsets.equals(mStableInsets);
         mOutsetsChanged |= !mLastOutsets.equals(mOutsets);
-        mFrameSizeChanged |= (mLastFrame.width() != mFrame.width()) ||
-                (mLastFrame.height() != mFrame.height());
+        mFrameSizeChanged |= (mWindowFrames.mLastFrame.width() != mWindowFrames.mFrame.width()) ||
+                (mWindowFrames.mLastFrame.height() != mWindowFrames.mFrame.height());
         mDisplayCutoutChanged |= !mLastDisplayCutout.equals(mDisplayCutout);
         return mOverscanInsetsChanged || mContentInsetsChanged || mVisibleInsetsChanged
                 || mOutsetsChanged || mFrameSizeChanged || mDisplayCutoutChanged;
@@ -1272,12 +1274,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && !isDragResizingChangeReported();
 
         if (localLOGV) Slog.v(TAG_WM, "Resizing " + this + ": configChanged=" + configChanged
-                + " dragResizingChanged=" + dragResizingChanged + " last=" + mLastFrame
-                + " frame=" + mFrame);
+                + " dragResizingChanged=" + dragResizingChanged
+                + " last=" + mWindowFrames.mLastFrame + " frame=" + mWindowFrames.mFrame);
 
         // We update mLastFrame always rather than in the conditional with the last inset
         // variables, because mFrameSizeChanged only tracks the width and height changing.
-        mLastFrame.set(mFrame);
+        mWindowFrames.mLastFrame.set(mWindowFrames.mFrame);
 
         if (mContentInsetsChanged
                 || mVisibleInsetsChanged
@@ -1438,7 +1440,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         if (bounds.isEmpty()) {
-            bounds.set(mFrame);
+            bounds.set(mWindowFrames.mFrame);
             if (intersectWithStackBounds) {
                 bounds.intersect(mTmpRect);
             }
@@ -1795,8 +1797,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         // Frame has moved, containing content frame has also moved, and we're not currently
         // animating... let's do something.
-        final int left = mFrame.left;
-        final int top = mFrame.top;
+        final int left = mWindowFrames.mFrame.left;
+        final int top = mWindowFrames.mFrame.top;
         final Task task = getTask();
         final boolean adjustedForMinimizedDockOrIme = task != null
                 && (task.mStack.isAdjustedForMinimizedDockedStack()
@@ -1830,7 +1832,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean hasMoved() {
         return mHasSurface && (mContentChanged || mMovedByResize)
                 && !mAnimatingExit
-                && (mFrame.top != mLastFrame.top || mFrame.left != mLastFrame.left)
+                && (mWindowFrames.mFrame.top != mWindowFrames.mLastFrame.top
+                    || mWindowFrames.mFrame.left != mWindowFrames.mLastFrame.left)
                 && (!mIsChildWindow || !getParentWindow().hasMoved());
     }
 
@@ -1844,8 +1847,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     boolean fillsDisplay() {
         final DisplayInfo displayInfo = getDisplayInfo();
-        return mFrame.left <= 0 && mFrame.top <= 0
-                && mFrame.right >= displayInfo.appWidth && mFrame.bottom >= displayInfo.appHeight;
+        return mWindowFrames.mFrame.left <= 0 && mWindowFrames.mFrame.top <= 0
+                && mWindowFrames.mFrame.right >= displayInfo.appWidth
+                && mWindowFrames.mFrame.bottom >= displayInfo.appHeight;
     }
 
     /** Returns true if last applied config was not yet requested by client. */
@@ -2879,10 +2883,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // All window frames that are fullscreen extend above status bar, but some don't extend
             // below navigation bar. Thus, check for display frame for top/left and stable frame for
             // bottom right.
-            if (win.mFrame.left <= win.getDisplayFrameLw().left
-                    && win.mFrame.top <= win.getDisplayFrameLw().top
-                    && win.mFrame.right >= win.getStableFrameLw().right
-                    && win.mFrame.bottom >= win.getStableFrameLw().bottom) {
+            if (win.getFrameLw().left <= win.getDisplayFrameLw().left
+                    && win.getFrameLw().top <= win.getDisplayFrameLw().top
+                    && win.getFrameLw().right >= win.getStableFrameLw().right
+                    && win.getFrameLw().bottom >= win.getStableFrameLw().bottom) {
                 // Is a fullscreen window, like the clock alarm. Show to everyone.
                 return false;
             }
@@ -2899,7 +2903,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void getTouchableRegion(Region outRegion) {
-        final Rect frame = mFrame;
+        final Rect frame = mWindowFrames.mFrame;
         switch (mTouchableInsets) {
             default:
             case TOUCHABLE_INSETS_FRAME:
@@ -2984,7 +2988,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (DEBUG_ORIENTATION && mWinAnimator.mDrawState == DRAW_PENDING)
                 Slog.i(TAG, "Resizing " + this + " WITH DRAW PENDING");
 
-            final Rect frame = mFrame;
+            final Rect frame = mWindowFrames.mFrame;
             final Rect overscanInsets = mLastOverscanInsets;
             final Rect contentInsets = mLastContentInsets;
             final Rect visibleInsets = mLastVisibleInsets;
@@ -3149,7 +3153,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private boolean frameCoversEntireAppTokenBounds() {
         mTmpRect.set(mAppToken.getBounds());
-        mTmpRect.intersectUnchecked(mFrame);
+        mTmpRect.intersectUnchecked(mWindowFrames.mFrame);
         return mAppToken.getBounds().equals(mTmpRect);
     }
 
@@ -3251,7 +3255,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         proto.write(STACK_ID, getStackId());
         mAttrs.writeToProto(proto, ATTRIBUTES);
         mGivenContentInsets.writeToProto(proto, GIVEN_CONTENT_INSETS);
-        mFrame.writeToProto(proto, FRAME);
         mWindowFrames.writeToProto(proto, WINDOW_FRAMES);
         mContentInsets.writeToProto(proto, CONTENT_INSETS);
         mAttrs.surfaceInsets.writeToProto(proto, SURFACE_INSETS);
@@ -3388,11 +3391,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         pw.print(prefix); pw.print("mHasSurface="); pw.print(mHasSurface);
                 pw.print(" isReadyForDisplay()="); pw.print(isReadyForDisplay());
                 pw.print(" mWindowRemovalAllowed="); pw.println(mWindowRemovalAllowed);
-        if (dumpAll) {
-            pw.print(prefix); pw.print("mFrame="); mFrame.printShortString(pw);
-                    pw.print(" last="); mLastFrame.printShortString(pw);
-                    pw.println();
-        }
         if (mEnforceSizeCompat) {
             pw.print(prefix); pw.print("mCompatFrame="); mCompatFrame.printShortString(pw);
                     pw.println();
@@ -3579,16 +3577,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Set mFrame
         Gravity.apply(mAttrs.gravity, w, h, containingFrame,
                 (int) (x + mAttrs.horizontalMargin * pw),
-                (int) (y + mAttrs.verticalMargin * ph), mFrame);
+                (int) (y + mAttrs.verticalMargin * ph), mWindowFrames.mFrame);
 
         // Now make sure the window fits in the overall display frame.
         if (fitToDisplay) {
-            Gravity.applyDisplay(mAttrs.gravity, displayFrame, mFrame);
+            Gravity.applyDisplay(mAttrs.gravity, displayFrame, mWindowFrames.mFrame);
         }
 
         // We need to make sure we update the CompatFrame as it is used for
         // cropping decisions, etc, on systems where we lack a decor layer.
-        mCompatFrame.set(mFrame);
+        mCompatFrame.set(mWindowFrames.mFrame);
         if (mEnforceSizeCompat) {
             // See comparable block in computeFrameLw.
             mCompatFrame.scale(mInvGlobalScale);
@@ -3701,7 +3699,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     float translateToWindowX(float x) {
-        float winX = x - mFrame.left;
+        float winX = x - mWindowFrames.mFrame.left;
         if (mEnforceSizeCompat) {
             winX *= mGlobalScale;
         }
@@ -3709,7 +3707,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     float translateToWindowY(float y) {
-        float winY = y - mFrame.top;
+        float winY = y - mWindowFrames.mFrame.top;
         if (mEnforceSizeCompat) {
             winY *= mGlobalScale;
         }
@@ -4319,11 +4317,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private void calculateSystemDecorRect(Rect systemDecorRect) {
         final Rect decorRect = mWindowFrames.mDecorFrame;
-        final int width = mFrame.width();
-        final int height = mFrame.height();
+        final int width = mWindowFrames.mFrame.width();
+        final int height = mWindowFrames.mFrame.height();
 
-        final int left = mFrame.left;
-        final int top = mFrame.top;
+        final int left = mWindowFrames.mFrame.left;
+        final int top = mWindowFrames.mFrame.top;
 
         // Initialize the decor rect to the entire frame.
         if (isDockedResizing()) {
@@ -4474,7 +4472,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void startAnimation(Animation anim) {
         final DisplayInfo displayInfo = getDisplayContent().getDisplayInfo();
-        anim.initialize(mFrame.width(), mFrame.height(),
+        anim.initialize(mWindowFrames.mFrame.width(), mWindowFrames.mFrame.height(),
                 displayInfo.appWidth, displayInfo.appHeight);
         anim.restrictDuration(MAX_ANIMATION_DURATION);
         anim.scaleCurrentDuration(mService.getWindowAnimationScaleLocked());
@@ -4489,7 +4487,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (DEBUG_ANIM) Slog.v(TAG, "Setting move animation on " + this);
         final Point oldPosition = new Point();
         final Point newPosition = new Point();
-        transformFrameToSurfacePosition(mLastFrame.left, mLastFrame.top, oldPosition);
+        transformFrameToSurfacePosition(mWindowFrames.mLastFrame.left, mWindowFrames.mLastFrame.top,
+                oldPosition);
         transformFrameToSurfacePosition(left, top, newPosition);
         final AnimationAdapter adapter = new LocalAnimationAdapter(
                 new MoveAnimationSpec(oldPosition.x, oldPosition.y, newPosition.x, newPosition.y),
@@ -4524,8 +4523,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final WindowContainer parent = getParent();
         if (isChildWindow()) {
             final WindowState parentWindow = getParentWindow();
-            x += parentWindow.mFrame.left - parentWindow.mAttrs.surfaceInsets.left;
-            y += parentWindow.mFrame.top - parentWindow.mAttrs.surfaceInsets.top;
+            x += parentWindow.mWindowFrames.mFrame.left - parentWindow.mAttrs.surfaceInsets.left;
+            y += parentWindow.mWindowFrames.mFrame.top - parentWindow.mAttrs.surfaceInsets.top;
         } else if (parent != null) {
             final Rect parentBounds = parent.getBounds();
             x += parentBounds.left;
@@ -4678,7 +4677,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        transformFrameToSurfacePosition(mFrame.left, mFrame.top, mSurfacePosition);
+        transformFrameToSurfacePosition(mWindowFrames.mFrame.left, mWindowFrames.mFrame.top,
+                mSurfacePosition);
 
         if (!mSurfaceAnimator.hasLeash() && !mLastSurfacePosition.equals(mSurfacePosition)) {
             t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);
@@ -4704,8 +4704,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Since the parent was outset by its surface insets, we need to undo the outsetting
             // with insetting by the same amount.
             final WindowState parent = getParentWindow();
-            outPoint.offset(-parent.mFrame.left + parent.mAttrs.surfaceInsets.left,
-                    -parent.mFrame.top + parent.mAttrs.surfaceInsets.top);
+            outPoint.offset(-parent.mWindowFrames.mFrame.left + parent.mAttrs.surfaceInsets.left,
+                    -parent.mWindowFrames.mFrame.top + parent.mAttrs.surfaceInsets.top);
         } else if (parentWindowContainer != null) {
             final Rect parentBounds = parentWindowContainer.getBounds();
             outPoint.offset(-parentBounds.left, -parentBounds.top);
@@ -4846,7 +4846,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // we recompute the coordinates of mFrame in the new orientation, so the surface can be
         // properly placed.
         transformToRotation(oldRotation, newRotation, getDisplayInfo(), transform);
-        transformRect(transform, mFrame, null /* tmpRectF */);
+        transformRect(transform, mWindowFrames.mFrame, null /* tmpRectF */);
 
         updateSurfacePosition(t);
         mWinAnimator.seamlesslyRotate(t, oldRotation, newRotation);

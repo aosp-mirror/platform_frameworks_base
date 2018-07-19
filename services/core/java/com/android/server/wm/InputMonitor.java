@@ -326,7 +326,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         inputWindowHandle.ownerUid = child.mSession.mUid;
         inputWindowHandle.inputFeatures = child.mAttrs.inputFeatures;
 
-        final Rect frame = child.mFrame;
+        final Rect frame = child.getFrameLw();
         inputWindowHandle.frameLeft = frame.left;
         inputWindowHandle.frameTop = frame.top;
         inputWindowHandle.frameRight = frame.right;

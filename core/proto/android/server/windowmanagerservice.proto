@@ -288,8 +288,8 @@ message WindowStateProto {
     optional int32 stack_id = 4;
     optional .android.view.WindowLayoutParamsProto attributes = 5;
     optional .android.graphics.RectProto given_content_insets = 6;
-    optional .android.graphics.RectProto frame = 7;
-    reserved 8 to 10;
+    reserved 7 to 10;
+//    optional .android.graphics.RectProto frame = 7;
 //    optional .android.graphics.RectProto containing_frame = 8;
 //    optional .android.graphics.RectProto parent_frame = 9;
 //    optional .android.graphics.RectProto content_frame = 10;
@@ -394,8 +394,9 @@ message WindowFramesProto {
     optional .android.graphics.RectProto content_frame = 2;
     optional .android.graphics.RectProto decor_frame = 3;
     optional .android.graphics.RectProto display_frame = 4;
-    optional .android.graphics.RectProto outset_frame = 5;
-    optional .android.graphics.RectProto overscan_frame = 6;
-    optional .android.graphics.RectProto parent_frame = 7;
-    optional .android.graphics.RectProto visible_frame = 8;
+    optional .android.graphics.RectProto frame = 5;
+    optional .android.graphics.RectProto outset_frame = 6;
+    optional .android.graphics.RectProto overscan_frame = 7;
+    optional .android.graphics.RectProto parent_frame = 8;
+    optional .android.graphics.RectProto visible_frame = 9;
 }
