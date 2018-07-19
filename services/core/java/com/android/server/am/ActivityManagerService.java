@@ -12271,6 +12271,112 @@ public class ActivityManagerService extends IActivityManager.Stub
         PriorityDump.dump(mPriorityDumper, fd, pw, args);
     }
 
+    private void dumpEverything(FileDescriptor fd, PrintWriter pw, String[] args, int opti,
+            boolean dumpAll, String dumpPackage, boolean dumpClient, boolean dumpNormalPriority,
+            int dumpAppId) {
+
+        ActiveServices.ServiceDumper sdumper;
+
+        synchronized(this) {
+            mConstants.dump(pw);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+
+            }
+            dumpPendingIntentsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpBroadcastsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            if (dumpAll || dumpPackage != null) {
+                dumpBroadcastStatsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+            }
+            dumpProvidersLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpPermissionsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+            pw.println();
+            sdumper = mServices.newServiceDumperLocked(fd, pw, args, opti, dumpAll, dumpPackage);
+            if (!dumpClient) {
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                sdumper.dumpLocked();
+            }
+        }
+        // We drop the lock here because we can't call dumpWithClient() with the lock held;
+        // if the caller wants a consistent state for the !dumpClient case, it can call this
+        // method with the lock held.
+        if (dumpClient) {
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            sdumper.dumpWithClient();
+        }
+        synchronized(this) {
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            if (mActivityTaskManager.getRecentTasks() != null) {
+                mActivityTaskManager.getRecentTasks().dump(pw, dumpAll, dumpPackage);
+            }
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpLastANRLocked(pw);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpActivityStarterLocked(pw, dumpPackage);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpActivityContainersLocked(pw);
+            // Activities section is dumped as part of the Critical priority dump. Exclude the
+            // section if priority is Normal.
+            if (!dumpNormalPriority) {
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
+            }
+            if (mAssociations.size() > 0) {
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                dumpAssociationsLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
+            }
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage, dumpAppId);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            mOomAdjProfiler.dump(pw);
+        }
+    }
+
     /**
      * Wrapper function to print out debug data filtered by specified arguments.
     */
@@ -12585,171 +12691,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         // No piece of data specified, dump everything.
         if (dumpCheckinFormat) {
             dumpBroadcastStatsCheckinLocked(fd, pw, args, opti, dumpCheckin, dumpPackage);
-        } else if (dumpClient) {
-            ActiveServices.ServiceDumper sdumper;
-            synchronized (this) {
-                mConstants.dump(pw);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                dumpPendingIntentsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                dumpBroadcastsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                if (dumpAll || dumpPackage != null) {
-                    dumpBroadcastStatsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
-                    pw.println();
-                    if (dumpAll) {
-                        pw.println("-------------------------------------------------------------------------------");
-                    }
-                }
-                dumpProvidersLocked(fd, pw, args, opti, dumpAll, dumpPackage);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                dumpPermissionsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                sdumper = mServices.newServiceDumperLocked(fd, pw, args, opti, dumpAll,
-                        dumpPackage);
-            }
-            sdumper.dumpWithClient();
-            pw.println();
-            synchronized (this) {
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                if (mActivityTaskManager.getRecentTasks() != null) {
-                    mActivityTaskManager.getRecentTasks().dump(pw, dumpAll, dumpPackage);
-                }
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                dumpLastANRLocked(pw);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                dumpActivityStarterLocked(pw, dumpPackage);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                dumpActivityContainersLocked(pw);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
-                if (mAssociations.size() > 0) {
-                    pw.println();
-                    if (dumpAll) {
-                        pw.println("-------------------------------------------------------------------------------");
-                    }
-                    dumpAssociationsLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
-                }
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage, dumpAppId);
-            }
-
         } else {
-            synchronized (this) {
-                mConstants.dump(pw);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
+            if (dumpClient) {
+                // dumpEverything() will take the lock when needed, and momentarily drop
+                // it for dumping client state.
+                dumpEverything(fd, pw, args, opti, dumpAll, dumpPackage, dumpClient,
+                        dumpNormalPriority, dumpAppId);
+            } else {
+                // Take the lock here, so we get a consistent state for the entire dump;
+                // dumpEverything() will take the lock as well, but that is fine.
+                synchronized(this) {
+                    dumpEverything(fd, pw, args, opti, dumpAll, dumpPackage, dumpClient,
+                            dumpNormalPriority, dumpAppId);
                 }
-                dumpPendingIntentsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                dumpBroadcastsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                if (dumpAll || dumpPackage != null) {
-                    dumpBroadcastStatsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
-                    pw.println();
-                    if (dumpAll) {
-                        pw.println("-------------------------------------------------------------------------------");
-                    }
-                }
-                dumpProvidersLocked(fd, pw, args, opti, dumpAll, dumpPackage);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                dumpPermissionsLocked(fd, pw, args, opti, dumpAll, dumpPackage);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                mServices.newServiceDumperLocked(fd, pw, args, opti, dumpAll, dumpPackage)
-                        .dumpLocked();
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                if (mActivityTaskManager.getRecentTasks() != null) {
-                    mActivityTaskManager.getRecentTasks().dump(pw, dumpAll, dumpPackage);
-                }
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                dumpLastANRLocked(pw);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                dumpActivityStarterLocked(pw, dumpPackage);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                dumpActivityContainersLocked(pw);
-                // Activities section is dumped as part of the Critical priority dump. Exclude the
-                // section if priority is Normal.
-                if (!dumpNormalPriority){
-                    pw.println();
-                    if (dumpAll) {
-                        pw.println("-------------------------------------------------------------------------------");
-                    }
-                    dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
-                }
-                if (mAssociations.size() > 0) {
-                    pw.println();
-                    if (dumpAll) {
-                        pw.println("-------------------------------------------------------------------------------");
-                    }
-                    dumpAssociationsLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
-                }
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                dumpProcessesLocked(fd, pw, args, opti, dumpAll, dumpPackage, dumpAppId);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
-                }
-                mOomAdjProfiler.dump(pw);
             }
         }
         Binder.restoreCallingIdentity(origId);
