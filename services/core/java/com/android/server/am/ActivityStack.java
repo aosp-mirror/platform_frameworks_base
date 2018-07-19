@@ -847,7 +847,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
     }
 
-    private ActivityRecord topRunningActivityLocked(boolean focusableOnly) {
+    ActivityRecord topRunningActivityLocked(boolean focusableOnly) {
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             ActivityRecord r = mTaskHistory.get(taskNdx).topRunningActivityLocked();
             if (r != null && (!focusableOnly || r.isFocusable())) {
@@ -1052,12 +1052,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (!isActivityTypeHome() && returnsToHomeStack()) {
             // Make sure the home stack is behind this stack since that is where we should return to
             // when this stack is no longer visible.
+            // TODO(b/111541062): Move home stack on the current display
             mStackSupervisor.moveHomeStackToFront(reason + " returnToHome");
         }
 
         display.positionChildAtTop(this);
         mStackSupervisor.setFocusStackUnchecked(reason, this);
         if (task != null) {
+            // This also moves the entire hierarchy branch to top, including parents
             insertTaskAtTop(task, null);
             return;
         }
@@ -1083,6 +1085,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         getDisplay().positionChildAtBottom(this);
         mStackSupervisor.setFocusStackUnchecked(reason, getDisplay().getTopStack());
         if (task != null) {
+            // TODO(b/111541062): We probably don't want to change display z-order to bottom just
+            // because one of its stacks moved to bottom.
             insertTaskAtBottom(task);
             return;
         }
@@ -1611,7 +1615,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
 
         if (resumeNext) {
-            final ActivityStack topStack = mStackSupervisor.getFocusedStack();
+            final ActivityStack topStack = mStackSupervisor.getTopDisplayFocusedStack();
             if (!topStack.shouldSleepOrShutDownActivities()) {
                 mStackSupervisor.resumeFocusedStackTopActivityLocked(topStack, prev, null);
             } else {
@@ -1734,7 +1738,17 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     boolean isTopStackOnDisplay() {
-        return getDisplay().isTopStack(this);
+        final ActivityDisplay display = getDisplay();
+        return display != null && display.isTopStack(this);
+    }
+
+    /**
+     * @return {@code true} if this is the focused stack on its current display, {@code false}
+     * otherwise.
+     */
+    boolean isFocusedStackOnDisplay() {
+        final ActivityDisplay display = getDisplay();
+        return display != null && this == display.getFocusedStack();
     }
 
     boolean isTopActivityVisible() {
@@ -1750,9 +1764,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     boolean shouldBeVisible(ActivityRecord starting) {
         if (!isAttached() || mForceHidden) {
             return false;
-        }
-        if (mStackSupervisor.isFocusedStack(this)) {
-            return true;
         }
 
         final ActivityRecord top = topRunningActivityLocked();
@@ -1883,7 +1894,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             boolean aboveTop = top != null;
             final boolean stackShouldBeVisible = shouldBeVisible(starting);
             boolean behindFullscreenActivity = !stackShouldBeVisible;
-            boolean resumeNextActivity = mStackSupervisor.isFocusedStack(this)
+            boolean resumeNextActivity = mStackSupervisor.isTopDisplayFocusedStack(this)
                     && (isInStackLocked(starting) == null);
             final boolean isTopNotPinnedStack =
                     isAttached() && getDisplay().isTopNotPinnedStack(this);
@@ -2435,7 +2446,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         boolean lastResumedCanPip = false;
         ActivityRecord lastResumed = null;
-        final ActivityStack lastFocusedStack = mStackSupervisor.getLastStack();
+        final ActivityStack lastFocusedStack = mStackSupervisor.getTopDisplayLastFocusedStack();
         if (lastFocusedStack != null && lastFocusedStack != this) {
             // So, why aren't we using prev here??? See the param comment on the method. prev doesn't
             // represent the last resumed activity. However, the last focus stack does if it isn't null.
@@ -2596,7 +2607,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         mStackSupervisor.mNoAnimActivities.clear();
 
-        ActivityStack lastStack = mStackSupervisor.getLastStack();
+        ActivityStack lastStack = mStackSupervisor.getTopDisplayLastFocusedStack();
         if (next.attachedToProcess()) {
             if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resume running: " + next
                     + " stopped=" + next.stopped + " visible=" + next.visible);
@@ -2646,7 +2657,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 // the screen based on the new activity order.
                 boolean notUpdated = true;
 
-                if (mStackSupervisor.isFocusedStack(this)) {
+                if (mStackSupervisor.isTopDisplayFocusedStack(this)) {
                     // We have special rotation behavior when here is some active activity that
                     // requests specific orientation or Keyguard is locked. Make sure all activity
                     // visibilities are set correctly as well as the transition is updated if needed
@@ -2784,7 +2795,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // stack is not covering the entire screen or is on a secondary display (with no home
             // stack).
             return mStackSupervisor.resumeFocusedStackTopActivityLocked(
-                    mStackSupervisor.getFocusedStack(), prev, null);
+                    mStackSupervisor.getTopDisplayFocusedStack(), prev, null);
         }
 
         // Let's just start up the Launcher...
@@ -3397,7 +3408,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     private void adjustFocusedActivityStack(ActivityRecord r, String reason) {
-        if (!mStackSupervisor.isFocusedStack(this) ||
+        if (!mStackSupervisor.isTopDisplayFocusedStack(this) ||
                 ((mResumedActivity != r) && (mResumedActivity != null))) {
             return;
         }
@@ -3845,7 +3856,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         r.setState(FINISHING, "finishCurrentActivityLocked");
         final boolean finishingActivityInNonFocusedStack
-                = r.getStack() != mStackSupervisor.getFocusedStack()
+                = r.getStack() != mStackSupervisor.getTopDisplayFocusedStack()
                 && prevState == PAUSED && mode == FINISH_AFTER_VISIBLE;
 
         if (mode == FINISH_IMMEDIATELY
@@ -4954,7 +4965,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      */
     void getRunningTasks(List<TaskRecord> tasksOut, @ActivityType int ignoreActivityType,
             @WindowingMode int ignoreWindowingMode, int callingUid, boolean allowed) {
-        boolean focusedStack = mStackSupervisor.getFocusedStack() == this;
+        boolean focusedStack = mStackSupervisor.getTopDisplayFocusedStack() == this;
         boolean topTask = true;
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
@@ -5161,7 +5172,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // We only need to adjust focused stack if this stack is in focus and we are not in the
             // process of moving the task to the top of the stack that will be focused.
             if (isOnHomeDisplay() && mode != REMOVE_TASK_MODE_MOVING_TO_TOP
-                    && mStackSupervisor.isFocusedStack(this)) {
+                    && mStackSupervisor.isTopDisplayFocusedStack(this)) {
                 String myReason = reason + " leftTaskHistoryEmpty";
                 if (!inMultiWindowMode() || !adjustFocusToNextFocusableStack(myReason)) {
                     mStackSupervisor.moveHomeStackToFront(myReason);
@@ -5365,7 +5376,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         // Do not sleep activities in this stack if we're marked as focused and the keyguard
         // is in the process of going away.
-        if (mStackSupervisor.getFocusedStack() == this
+        if (mStackSupervisor.getTopDisplayFocusedStack() == this
                 && mStackSupervisor.getKeyguardController().isKeyguardGoingAway()) {
             return false;
         }

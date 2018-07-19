@@ -16,11 +16,16 @@
 
 package com.android.server.am;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.Display.DEFAULT_DISPLAY;
+
+import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
+import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -55,6 +60,7 @@ import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.support.test.InstrumentationRegistry;
 import android.testing.DexmakerShareClassLoaderRule;
+import android.util.SparseIntArray;
 
 
 import com.android.internal.app.IVoiceInteractor;
@@ -69,6 +75,8 @@ import com.android.server.wm.WindowTestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.MockitoAnnotations;
+
+import java.util.List;
 
 
 /**
@@ -119,9 +127,9 @@ public class ActivityTestsBase {
     }
 
     ActivityManagerService setupActivityManagerService(TestActivityTaskManagerService atm) {
+        AttributeCache.init(mContext);
         final ActivityManagerService am = spy(new TestActivityManagerService(mContext, atm));
         setupActivityManagerService(am, atm);
-        AttributeCache.init(mContext);
         return am;
     }
 
@@ -135,6 +143,15 @@ public class ActivityTestsBase {
         doNothing().when(am).grantEphemeralAccessLocked(anyInt(), any(), anyInt(), anyInt());
         am.mWindowManager = prepareMockWindowManager();
         atm.setWindowManager(am.mWindowManager);
+
+        // Put a home stack on the default display, so that we'll always have something focusable.
+        final TestActivityStackSupervisor supervisor =
+                (TestActivityStackSupervisor) atm.mStackSupervisor;
+        supervisor.mHomeStack = supervisor.mDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_HOME, ON_TOP);
+        final TaskRecord task = new TaskBuilder(atm.mStackSupervisor)
+                .setStack(supervisor.mHomeStack).build();
+        new ActivityBuilder(atm).setTask(task).build();
     }
 
     /**
@@ -327,7 +344,7 @@ public class ActivityTestsBase {
             task.userId = mUserId;
 
             if (mStack != null) {
-                mSupervisor.setFocusStackUnchecked("test", mStack);
+                mStack.moveToFront("test");
                 mStack.addTask(task, true, "creating test task");
                 task.setStack(mStack);
                 task.setWindowContainerController();
@@ -464,13 +481,6 @@ public class ActivityTestsBase {
         ActivityDisplay getDefaultDisplay() {
             return mDisplay;
         }
-
-        // Just return the current front task. This is called internally so we cannot use spy to mock this out.
-        @Override
-        ActivityStack getNextFocusableStackLocked(ActivityStack currentFocus,
-                boolean ignoreCurrent) {
-            return mFocusedStack;
-        }
     }
 
     protected static class TestActivityDisplay extends ActivityDisplay {
@@ -507,6 +517,15 @@ public class ActivityTestsBase {
         protected DisplayWindowController createWindowContainerController() {
             return mock(DisplayWindowController.class);
         }
+
+        void removeAllTasks() {
+            for (int i = 0; i < getChildCount(); i++) {
+                final ActivityStack stack = getChildAt(i);
+                for (TaskRecord task : (List<TaskRecord>) stack.getAllTasks()) {
+                    stack.removeTask(task, "removeAllTasks", REMOVE_TASK_MODE_DESTROYING);
+                }
+            }
+        }
     }
 
     private static WindowManagerService prepareMockWindowManager() {
@@ -519,6 +538,12 @@ public class ActivityTestsBase {
             }
             return null;
         }).when(service).inSurfaceTransaction(any());
+
+        doAnswer((InvocationOnMock invocationOnMock) -> {
+            final SparseIntArray displayIds = invocationOnMock.<SparseIntArray>getArgument(0);
+            displayIds.put(0, 0);
+            return null;
+        }).when(service).getDisplaysInFocusOrder(any());
 
         return service;
     }

@@ -119,7 +119,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         setupActivityManagerService(am, mService);
         mRecentTasks = (TestRecentTasks) mService.getRecentTasks();
         mRecentTasks.loadParametersFromResources(mContext.getResources());
-        mHomeStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
+        mHomeStack = mService.mStackSupervisor.getDefaultDisplay().getOrCreateStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, true /* onTop */);
         mStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
