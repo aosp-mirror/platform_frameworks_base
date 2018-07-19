@@ -56,6 +56,7 @@ public class BlackFrame {
                     .setParent(null) // TODO: Work-around for b/69259549
                     .build();
 
+            transaction.setLayerStack(surface, dc.getDisplayId());
             transaction.setAlpha(surface, 1);
             transaction.setLayer(surface, layer);
             transaction.show(surface);

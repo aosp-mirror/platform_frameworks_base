@@ -97,7 +97,7 @@ class TaskPositioner {
     private final WindowManagerService mService;
     private final IActivityTaskManager mActivityManager;
     private WindowPositionerEventReceiver mInputEventReceiver;
-    private Display mDisplay;
+    private DisplayContent mDisplayContent;
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
     private Rect mTmpRect = new Rect();
     private int mSideMargin;
@@ -250,8 +250,8 @@ class TaskPositioner {
             return;
         }
 
-        mDisplay = display;
-        mDisplay.getMetrics(mDisplayMetrics);
+        mDisplayContent = displayContent;
+        display.getMetrics(mDisplayMetrics);
         final InputChannel[] channels = InputChannel.openInputChannelPair(TAG);
         mServerChannel = channels[0];
         mClientChannel = channels[1];
@@ -267,7 +267,7 @@ class TaskPositioner {
                 WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
 
         mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null, null,
-                mDisplay.getDisplayId());
+                display.getDisplayId());
         mDragWindowHandle.name = TAG;
         mDragWindowHandle.inputChannel = mServerChannel;
         mDragWindowHandle.layer = mService.getDragLayerLocked();
@@ -292,7 +292,7 @@ class TaskPositioner {
         mDragWindowHandle.frameLeft = 0;
         mDragWindowHandle.frameTop = 0;
         final Point p = new Point();
-        mDisplay.getRealSize(p);
+        display.getRealSize(p);
         mDragWindowHandle.frameRight = p.x;
         mDragWindowHandle.frameBottom = p.y;
 
@@ -300,12 +300,12 @@ class TaskPositioner {
         if (DEBUG_ORIENTATION) {
             Slog.d(TAG, "Pausing rotation during re-position");
         }
-        mService.pauseRotationLocked();
+        mDisplayContent.pauseRotationLocked();
 
         mSideMargin = dipToPixel(SIDE_MARGIN_DIP, mDisplayMetrics);
         mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, mDisplayMetrics);
         mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, mDisplayMetrics);
-        mDisplay.getRealSize(mMaxVisibleSize);
+        display.getRealSize(mMaxVisibleSize);
 
         mDragEnded = false;
     }
@@ -331,14 +331,14 @@ class TaskPositioner {
 
         mDragWindowHandle = null;
         mDragApplicationHandle = null;
-        mDisplay = null;
         mDragEnded = true;
 
         // Resume rotations after a drag.
         if (DEBUG_ORIENTATION) {
             Slog.d(TAG, "Resuming rotation after re-position");
         }
-        mService.resumeRotationLocked();
+        mDisplayContent.resumeRotationLocked();
+        mDisplayContent = null;
     }
 
     void startDrag(WindowState win, boolean resize, boolean preserveOrientation, float startX,
