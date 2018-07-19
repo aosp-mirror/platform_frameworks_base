@@ -77,11 +77,13 @@ public final class Magnifier {
     // The height of the window containing the magnifier.
     private final int mWindowHeight;
     // The zoom applied to the view region copied to the magnifier view.
-    private final float mZoom;
+    private float mZoom;
     // The width of the content that will be copied to the magnifier.
-    private final int mSourceWidth;
+    private int mSourceWidth;
     // The height of the content that will be copied to the magnifier.
-    private final int mSourceHeight;
+    private int mSourceHeight;
+    // Whether the zoom of the magnifier has changed since last content copy.
+    private boolean mDirtyZoom;
     // The elevation of the window containing the magnifier.
     private final float mWindowElevation;
     // The corner radius of the window containing the magnifier.
@@ -196,7 +198,8 @@ public final class Magnifier {
 
         final int startX = mClampedCenterZoomCoords.x - mSourceWidth / 2;
         final int startY = mClampedCenterZoomCoords.y - mSourceHeight / 2;
-        if (sourceCenterX != mPrevShowSourceCoords.x || sourceCenterY != mPrevShowSourceCoords.y) {
+        if (sourceCenterX != mPrevShowSourceCoords.x || sourceCenterY != mPrevShowSourceCoords.y
+                || mDirtyZoom) {
             if (mWindow == null) {
                 synchronized (mLock) {
                     mWindow = new InternalPopupWindow(mView.getContext(), mView.getDisplay(),
@@ -253,9 +256,16 @@ public final class Magnifier {
     public void update() {
         if (mWindow != null) {
             obtainSurfaces();
-            // Update the content shown in the magnifier.
-            performPixelCopy(mPrevStartCoordsInSurface.x, mPrevStartCoordsInSurface.y,
-                    false /* update window position */);
+            if (!mDirtyZoom) {
+                // Update the content shown in the magnifier.
+                performPixelCopy(mPrevStartCoordsInSurface.x, mPrevStartCoordsInSurface.y,
+                        false /* update window position */);
+            } else {
+                // If the zoom has changed, we cannot use the same top left coordinates
+                // as before, so just #show again to have them recomputed.
+                show(mPrevShowSourceCoords.x, mPrevShowSourceCoords.y,
+                        mPrevShowWindowCoords.x, mPrevShowWindowCoords.y);
+            }
         }
     }
 
@@ -295,6 +305,18 @@ public final class Magnifier {
     @Px
     public int getSourceHeight() {
         return mSourceHeight;
+    }
+
+    /**
+     * Sets the zoom to be applied to the chosen content before being copied to the magnifier popup.
+     * @param zoom the zoom to be set
+     */
+    public void setZoom(@FloatRange(from = 0f) float zoom) {
+        Preconditions.checkArgumentPositive(zoom, "Zoom should be positive");
+        mZoom = zoom;
+        mSourceWidth = Math.round(mWindowWidth / mZoom);
+        mSourceHeight = Math.round(mWindowHeight / mZoom);
+        mDirtyZoom = true;
     }
 
     /**
@@ -534,6 +556,7 @@ public final class Magnifier {
                 sPixelCopyHandlerThread.getThreadHandler());
         mPrevStartCoordsInSurface.x = startXInSurface;
         mPrevStartCoordsInSurface.y = startYInSurface;
+        mDirtyZoom = false;
     }
 
     /**
@@ -1016,6 +1039,21 @@ public final class Magnifier {
         }
         synchronized (mWindow.mLock) {
             return Bitmap.createScaledBitmap(mWindow.mBitmap, mWindowWidth, mWindowHeight, true);
+        }
+    }
+
+    /**
+     * @return the content to be magnified, as bitmap
+     *
+     * @hide
+     */
+    @TestApi
+    public @Nullable Bitmap getOriginalContent() {
+        if (mWindow == null) {
+            return null;
+        }
+        synchronized (mWindow.mLock) {
+            return Bitmap.createBitmap(mWindow.mBitmap);
         }
     }
 
