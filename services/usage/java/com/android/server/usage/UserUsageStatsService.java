@@ -314,7 +314,7 @@ class UserUsageStatsService {
 
             // STOPSHIP: Temporary logging for b/110930764.
             if (intervalType == UsageStatsManager.INTERVAL_DAILY
-                    && mLastEvent.mTimeStamp >= beginTime) {
+                    && mLastEvent != null && mLastEvent.mTimeStamp >= beginTime) {
                 final IntervalStats diskStats = mDatabase.getLatestUsageStats(
                         UsageStatsManager.INTERVAL_DAILY);
                 StringBuilder sb = new StringBuilder(256);
