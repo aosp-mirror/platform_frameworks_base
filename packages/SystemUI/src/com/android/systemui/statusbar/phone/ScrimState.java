@@ -20,7 +20,6 @@ import android.graphics.Color;
 import android.os.Trace;
 import android.util.MathUtils;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
@@ -106,8 +105,7 @@ public enum ScrimState {
         public void prepare(ScrimState previousState) {
             final boolean alwaysOnEnabled = mDozeParameters.getAlwaysOn();
             mBlankScreen = mDisplayRequiresBlanking;
-            mCurrentBehindAlpha = mWallpaperSupportsAmbientMode
-                    && !mKeyguardUpdateMonitor.hasLockscreenWallpaper() ? 0f : 1f;
+            mCurrentBehindAlpha = mWallpaperSupportsAmbientMode && !mHasBackdrop ? 0f : 1f;
             mCurrentInFrontAlpha = alwaysOnEnabled ? mAodFrontScrimAlpha : 1f;
             mCurrentInFrontTint = Color.BLACK;
             mCurrentBehindTint = Color.BLACK;
@@ -131,8 +129,7 @@ public enum ScrimState {
         public void prepare(ScrimState previousState) {
             mCurrentInFrontAlpha = 0;
             mCurrentInFrontTint = Color.BLACK;
-            mCurrentBehindAlpha = mWallpaperSupportsAmbientMode
-                    && !mKeyguardUpdateMonitor.hasLockscreenWallpaper() ? 0f : 1f;
+            mCurrentBehindAlpha = mWallpaperSupportsAmbientMode && !mHasBackdrop ? 0f : 1f;
             mCurrentBehindTint = Color.BLACK;
             mBlankScreen = mDisplayRequiresBlanking;
         }
@@ -147,8 +144,9 @@ public enum ScrimState {
             mCurrentBehindAlpha = 0;
             mCurrentInFrontAlpha = 0;
             mAnimationDuration = StatusBar.FADE_KEYGUARD_DURATION;
+            mAnimateChange = !mLaunchingAffordanceWithPreview;
 
-            if (previousState == ScrimState.AOD || previousState == ScrimState.PULSING) {
+            if (previousState == ScrimState.AOD) {
                 // Fade from black to transparent when coming directly from AOD
                 updateScrimColor(mScrimInFront, 1, Color.BLACK);
                 updateScrimColor(mScrimBehind, 1, Color.BLACK);
@@ -178,8 +176,9 @@ public enum ScrimState {
     DozeParameters mDozeParameters;
     boolean mDisplayRequiresBlanking;
     boolean mWallpaperSupportsAmbientMode;
-    KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     int mIndex;
+    boolean mHasBackdrop;
+    boolean mLaunchingAffordanceWithPreview;
 
     ScrimState(int index) {
         mIndex = index;
@@ -190,7 +189,6 @@ public enum ScrimState {
         mScrimBehind = scrimBehind;
         mDozeParameters = dozeParameters;
         mDisplayRequiresBlanking = dozeParameters.getDisplayNeedsBlanking();
-        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(scrimInFront.getContext());
     }
 
     public void prepare(ScrimState previousState) {
@@ -253,7 +251,15 @@ public enum ScrimState {
         mWallpaperSupportsAmbientMode = wallpaperSupportsAmbientMode;
     }
 
+    public void setLaunchingAffordanceWithPreview(boolean launchingAffordanceWithPreview) {
+        mLaunchingAffordanceWithPreview = launchingAffordanceWithPreview;
+    }
+
     public boolean isLowPowerState() {
         return false;
+    }
+
+    public void setHasBackdrop(boolean hasBackdrop) {
+        mHasBackdrop = hasBackdrop;
     }
 }

@@ -1060,6 +1060,13 @@ static void android_view_ThreadedRenderer_setContextPriority(JNIEnv*, jclass,
     Properties::contextPriority = contextPriority;
 }
 
+static void android_view_ThreadedRenderer_allocateBuffers(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jobject jsurface) {
+    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
+    sp<Surface> surface = android_view_Surface_getSurface(env, jsurface);
+    proxy->allocateBuffers(surface);
+}
+
 // ----------------------------------------------------------------------------
 // FrameMetricsObserver
 // ----------------------------------------------------------------------------
@@ -1173,6 +1180,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetDebuggingEnabled", "(Z)V", (void*)android_view_ThreadedRenderer_setDebuggingEnabled },
     { "nSetIsolatedProcess", "(Z)V", (void*)android_view_ThreadedRenderer_setIsolatedProcess },
     { "nSetContextPriority", "(I)V", (void*)android_view_ThreadedRenderer_setContextPriority },
+    { "nAllocateBuffers", "(JLandroid/view/Surface;)V", (void*)android_view_ThreadedRenderer_allocateBuffers },
 };
 
 static JavaVM* mJvm = nullptr;

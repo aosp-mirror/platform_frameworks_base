@@ -31,6 +31,13 @@ import com.android.systemui.statusbar.stack.HeadsUpAppearInterpolator;
  */
 public class Interpolators {
     public static final Interpolator FAST_OUT_SLOW_IN = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
+
+    /**
+     * Like {@link #FAST_OUT_SLOW_IN}, but used in case the animation is played in reverse (i.e. t
+     * goes from 1 to 0 instead of 0 to 1).
+     */
+    public static final Interpolator FAST_OUT_SLOW_IN_REVERSE =
+            new PathInterpolator(0.8f, 0f, 0.6f, 1f);
     public static final Interpolator FAST_OUT_LINEAR_IN = new PathInterpolator(0.4f, 0f, 1f, 1f);
     public static final Interpolator LINEAR_OUT_SLOW_IN = new PathInterpolator(0f, 0f, 0.2f, 1f);
     public static final Interpolator ALPHA_IN = new PathInterpolator(0.4f, 0f, 1f, 1f);
@@ -51,4 +58,11 @@ public class Interpolators {
      */
     public static final Interpolator TOUCH_RESPONSE =
             new PathInterpolator(0.3f, 0f, 0.1f, 1f);
+
+    /**
+     * Like {@link #TOUCH_RESPONSE}, but used in case the animation is played in reverse (i.e. t
+     * goes from 1 to 0 instead of 0 to 1).
+     */
+    public static final Interpolator TOUCH_RESPONSE_REVERSE =
+            new PathInterpolator(0.9f, 0f, 0.7f, 1f);
 }

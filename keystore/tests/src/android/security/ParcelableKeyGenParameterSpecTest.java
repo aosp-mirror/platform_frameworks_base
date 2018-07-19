@@ -77,6 +77,9 @@ public final class ParcelableKeyGenParameterSpecTest {
                 .setUniqueIdIncluded(true)
                 .setUserAuthenticationValidWhileOnBody(true)
                 .setInvalidatedByBiometricEnrollment(true)
+                .setIsStrongBoxBacked(true)
+                .setUserConfirmationRequired(true)
+                .setUnlockedDeviceRequired(true)
                 .build();
     }
 
@@ -105,6 +108,9 @@ public final class ParcelableKeyGenParameterSpecTest {
         assertThat(spec.isUniqueIdIncluded(), is(true));
         assertThat(spec.isUserAuthenticationValidWhileOnBody(), is(true));
         assertThat(spec.isInvalidatedByBiometricEnrollment(), is(true));
+        assertThat(spec.isStrongBoxBacked(), is(true));
+        assertThat(spec.isUserConfirmationRequired(), is(true));
+        assertThat(spec.isUnlockedDeviceRequired(), is(true));
     }
 
     private Parcel parcelForReading(ParcelableKeyGenParameterSpec spec) {
