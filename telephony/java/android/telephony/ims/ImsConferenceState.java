@@ -16,17 +16,18 @@
 
 package android.telephony.ims;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telecom.Call;
 import android.telecom.Connection;
+import android.telecom.Log;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * Provides the conference information (defined in RFC 4575) for IMS conference call.
@@ -189,7 +190,7 @@ public final class ImsConferenceState implements Parcelable {
                 sb.append("<");
                 while (iterator.hasNext()) {
                     Entry<String, Bundle> entry = iterator.next();
-                    sb.append(entry.getKey());
+                    sb.append(Log.pii(entry.getKey()));
                     sb.append(": ");
                     Bundle participantData = entry.getValue();
 
@@ -197,7 +198,7 @@ public final class ImsConferenceState implements Parcelable {
                         sb.append(key);
                         sb.append("=");
                         if (ENDPOINT.equals(key) || USER.equals(key)) {
-                            sb.append(android.telecom.Log.pii(participantData.get(key)));
+                            sb.append(Log.pii(participantData.get(key)));
                         } else {
                             sb.append(participantData.get(key));
                         }
