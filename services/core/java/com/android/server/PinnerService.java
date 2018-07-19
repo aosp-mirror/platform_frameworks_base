@@ -34,6 +34,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -43,6 +44,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -166,7 +168,9 @@ public final class PinnerService extends SystemService {
         filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         filter.addDataScheme("package");
         mContext.registerReceiver(mBroadcastReceiver, filter);
+
         registerUidListener();
+        registerUserSetupCompleteListener();
     }
 
     @Override
@@ -236,6 +240,26 @@ public final class PinnerService extends SystemService {
                 mPinnedFiles.add(pf);
             }
         }
+    }
+
+    /**
+     * Registers a listener to repin the home app when user setup is complete, as the home intent
+     * initially resolves to setup wizard, but once setup is complete, it will resolve to the
+     * regular home app.
+     */
+    private void registerUserSetupCompleteListener() {
+        Uri userSetupCompleteUri = Settings.Secure.getUriFor(
+                Settings.Secure.USER_SETUP_COMPLETE);
+        mContext.getContentResolver().registerContentObserver(userSetupCompleteUri,
+                false, new ContentObserver(null) {
+                    @Override
+                    public void onChange(boolean selfChange, Uri uri) {
+                        if (userSetupCompleteUri.equals(uri)) {
+                            sendPinAppMessage(KEY_HOME, ActivityManager.getCurrentUser(),
+                                    true /* force */);
+                        }
+                    }
+                }, UserHandle.USER_ALL);
     }
 
     private void registerUidListener() {
