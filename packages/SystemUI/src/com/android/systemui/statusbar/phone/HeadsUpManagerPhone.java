@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import androidx.collection.ArraySet;
-import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.util.Log;
@@ -31,14 +30,13 @@ import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.ViewTreeObserver.InternalInsetsInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.ScreenDecorations;
-import com.android.systemui.statusbar.ExpandableNotificationRow;
-import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -48,7 +46,6 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Stack;
 
 /**

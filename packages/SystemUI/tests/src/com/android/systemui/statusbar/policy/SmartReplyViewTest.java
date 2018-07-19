@@ -44,7 +44,7 @@ import android.widget.LinearLayout;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 

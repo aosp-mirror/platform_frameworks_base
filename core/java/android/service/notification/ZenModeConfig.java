@@ -498,7 +498,7 @@ public class ZenModeConfig implements Parcelable {
                     Boolean allowWhenScreenOff = unsafeBoolean(parser, ALLOW_ATT_SCREEN_OFF);
                     if (allowWhenScreenOff != null) {
                         readSuppressedEffects = true;
-                        if (allowWhenScreenOff) {
+                        if (!allowWhenScreenOff) {
                             rt.suppressedVisualEffects |= SUPPRESSED_EFFECT_LIGHTS
                                     | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
                         }
@@ -506,7 +506,7 @@ public class ZenModeConfig implements Parcelable {
                     Boolean allowWhenScreenOn = unsafeBoolean(parser, ALLOW_ATT_SCREEN_ON);
                     if (allowWhenScreenOn != null) {
                         readSuppressedEffects = true;
-                        if (allowWhenScreenOn) {
+                        if (!allowWhenScreenOn) {
                             rt.suppressedVisualEffects |= SUPPRESSED_EFFECT_PEEK;
                         }
                     }

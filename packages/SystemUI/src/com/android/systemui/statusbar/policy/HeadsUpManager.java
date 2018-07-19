@@ -31,8 +31,8 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.ExpandableNotificationRow;
-import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.NotificationData;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

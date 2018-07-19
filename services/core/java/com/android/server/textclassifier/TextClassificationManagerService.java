@@ -28,6 +28,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.textclassifier.ITextClassificationCallback;
 import android.service.textclassifier.ITextClassifierService;
 import android.service.textclassifier.ITextLinksCallback;
@@ -38,16 +39,22 @@ import android.util.SparseArray;
 import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationContext;
+import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassificationSessionId;
+import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
@@ -257,6 +264,14 @@ public final class TextClassificationManagerService extends ITextClassifierServi
 
     UserState peekUserStateLocked(int userId) {
         return mUserStates.get(userId);
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+        if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, fout)) return;
+        IndentingPrintWriter pw = new IndentingPrintWriter(fout, "  ");
+        TextClassificationManager tcm = mContext.getSystemService(TextClassificationManager.class);
+        tcm.dump(pw);
     }
 
     private static final class PendingRequest implements IBinder.DeathRecipient {

@@ -15,7 +15,7 @@
     limitations under the License.
 -->
 
-<com.android.systemui.statusbar.NotificationSnooze
+<com.android.systemui.statusbar.notification.row.NotificationSnooze
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -72,4 +72,4 @@
         android:paddingBottom="8dp"
         android:orientation="vertical" />
 
-</com.android.systemui.statusbar.NotificationSnooze>
+</com.android.systemui.statusbar.notification.row.NotificationSnooze>

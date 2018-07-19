@@ -21,7 +21,7 @@ import android.os.Trace;
 import android.util.MathUtils;
 
 import com.android.systemui.statusbar.ScrimView;
-import com.android.systemui.statusbar.stack.StackStateAnimator;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 /**
  * Possible states of the ScrimController state machine.

@@ -44,69 +44,6 @@ import org.junit.runners.JUnit4;
  */
 public class HdmiCecLocalDeviceTest {
 
-    private static final class NativeWrapperImpl implements NativeWrapper {
-
-        @Override
-        public long nativeInit(HdmiCecController handler, MessageQueue messageQueue) {
-            return 1L;
-        }
-
-        @Override
-        public int nativeSendCecCommand(long controllerPtr, int srcAddress, int dstAddress,
-            byte[] body) {
-            return SendCecCommandFactory(srcAddress, dstAddress, body);
-        }
-
-        @Override
-        public int nativeAddLogicalAddress(long controllerPtr, int logicalAddress) {
-            return 0;
-        }
-
-        @Override
-        public void nativeClearLogicalAddress(long controllerPtr) {
-
-        }
-
-        @Override
-        public int nativeGetPhysicalAddress(long controllerPtr) {
-            return mPhysicalAddr;
-        }
-
-        @Override
-        public int nativeGetVersion(long controllerPtr) {
-            return 0;
-        }
-
-        @Override
-        public int nativeGetVendorId(long controllerPtr) {
-            return 0;
-        }
-
-        @Override
-        public HdmiPortInfo[] nativeGetPortInfos(long controllerPtr) {
-            return new HdmiPortInfo[0];
-        }
-
-        @Override
-        public void nativeSetOption(long controllerPtr, int flag, boolean enabled) {
-
-        }
-
-        @Override
-        public void nativeSetLanguage(long controllerPtr, String language) {
-
-        }
-
-        @Override
-        public void nativeEnableAudioReturnChannel(long controllerPtr, int port, boolean flag) {
-
-        }
-
-        @Override
-        public boolean nativeIsConnected(long controllerPtr, int port) {
-            return false;
-        }
-    }
 
     private static int SendCecCommandFactory(int srcAddress, int dstAddress, byte[] body) {
         switch(body[0] & 0xFF) {
@@ -160,7 +97,7 @@ public class HdmiCecLocalDeviceTest {
         mHdmiControlService = new HdmiControlService(null);
         mHdmiControlService.setIoLooper(mTestLooper.getLooper());
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
-            mHdmiControlService, new NativeWrapperImpl());
+            mHdmiControlService, new FakeNativeWrapper());
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiLocalDevice = new MyHdmiCecLocalDevice(
             mHdmiControlService, DEVICE_TV);

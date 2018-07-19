@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
-import com.android.systemui.statusbar.ExpandableNotificationRow;
-import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.NotificationData;
 
 /**
  * A listener to heads up changes

@@ -41,6 +41,7 @@ import android.provider.CalendarContract;
 import android.provider.ContactsContract;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
 import java.io.File;
@@ -437,6 +438,24 @@ public final class TextClassifierImpl implements TextClassifier {
         }
 
         return builder.setId(createId(text, start, end)).build();
+    }
+
+    @Override
+    public void dump(@NonNull IndentingPrintWriter printWriter) {
+        synchronized (mLock) {
+            listAllModelsLocked();
+            printWriter.println("TextClassifierImpl:");
+            printWriter.increaseIndent();
+            printWriter.println("Model file(s):");
+            printWriter.increaseIndent();
+            for (ModelFile modelFile : mAllModelFiles) {
+                printWriter.println(modelFile.toString());
+            }
+            printWriter.decreaseIndent();
+            printWriter.printPair("mFallback", mFallback);
+            printWriter.decreaseIndent();
+            printWriter.println();
+        }
     }
 
     /**

@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification;
 
-import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 /**
  * An object that can determine the visibility of a Notification.

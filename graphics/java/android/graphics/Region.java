@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Pools.SynchronizedPool;
@@ -59,14 +60,14 @@ public class Region implements Parcelable {
 
     /** Return a copy of the specified region
     */
-    public Region(Region region) {
+    public Region(@NonNull Region region) {
         this(nativeConstructor());
         nativeSetRegion(mNativeRegion, region.mNativeRegion);
     }
 
     /** Return a region set to the specified rectangle
     */
-    public Region(Rect r) {
+    public Region(@NonNull Rect r) {
         mNativeRegion = nativeConstructor();
         nativeSetRect(mNativeRegion, r.left, r.top, r.right, r.bottom);
     }
@@ -86,14 +87,14 @@ public class Region implements Parcelable {
 
     /** Set the region to the specified region.
     */
-    public boolean set(Region region) {
+    public boolean set(@NonNull Region region) {
         nativeSetRegion(mNativeRegion, region.mNativeRegion);
         return true;
     }
 
     /** Set the region to the specified rectangle
     */
-    public boolean set(Rect r) {
+    public boolean set(@NonNull Rect r) {
         return nativeSetRect(mNativeRegion, r.left, r.top, r.right, r.bottom);
     }
     
@@ -109,7 +110,7 @@ public class Region implements Parcelable {
      * that is identical to the pixels that would be drawn by the path
      * (with no antialiasing).
      */
-    public boolean setPath(Path path, Region clip) {
+    public boolean setPath(@NonNull Path path, @NonNull Region clip) {
         return nativeSetPath(mNativeRegion, path.readOnlyNI(), clip.mNativeRegion);
     }
 
@@ -132,6 +133,7 @@ public class Region implements Parcelable {
      * Return a new Rect set to the bounds of the region. If the region is
      * empty, the Rect will be set to [0, 0, 0, 0]
      */
+    @NonNull
     public Rect getBounds() {
         Rect r = new Rect();
         nativeGetBounds(mNativeRegion, r);
@@ -142,7 +144,7 @@ public class Region implements Parcelable {
      * Set the Rect to the bounds of the region. If the region is empty, the
      * Rect will be set to [0, 0, 0, 0]
      */
-    public boolean getBounds(Rect r) {
+    public boolean getBounds(@NonNull Rect r) {
         if (r == null) {
             throw new NullPointerException();
         }
@@ -153,6 +155,7 @@ public class Region implements Parcelable {
      * Return the boundary of the region as a new Path. If the region is empty,
      * the path will also be empty.
      */
+    @NonNull
     public Path getBoundaryPath() {
         Path path = new Path();
         nativeGetBoundaryPath(mNativeRegion, path.mutateNI());
@@ -163,7 +166,7 @@ public class Region implements Parcelable {
      * Set the path to the boundary of the region. If the region is empty, the
      * path will also be empty.
      */
-    public boolean getBoundaryPath(Path path) {
+    public boolean getBoundaryPath(@NonNull Path path) {
         return nativeGetBoundaryPath(mNativeRegion, path.mutateNI());
     }
         
@@ -178,7 +181,7 @@ public class Region implements Parcelable {
      * that the rectangle is not contained by this region, but return true is a
      * guarantee that the rectangle is contained by this region.
      */
-    public boolean quickContains(Rect r) {
+    public boolean quickContains(@NonNull Rect r) {
         return quickContains(r.left, r.top, r.right, r.bottom);
     }
 
@@ -196,7 +199,7 @@ public class Region implements Parcelable {
      * not intersect the region. Returning false is not a guarantee that they
      * intersect, but returning true is a guarantee that they do not.
      */
-    public boolean quickReject(Rect r) {
+    public boolean quickReject(@NonNull Rect r) {
         return quickReject(r.left, r.top, r.right, r.bottom);
     }
 
@@ -247,7 +250,7 @@ public class Region implements Parcelable {
      */
     public native void scale(float scale, Region dst);
 
-    public final boolean union(Rect r) {
+    public final boolean union(@NonNull Rect r) {
         return op(r, Op.UNION);
     }
 
@@ -255,7 +258,7 @@ public class Region implements Parcelable {
      * Perform the specified Op on this region and the specified rect. Return
      * true if the result of the op is not empty.
      */
-    public boolean op(Rect r, Op op) {
+    public boolean op(@NonNull Rect r, @NonNull Op op) {
         return nativeOp(mNativeRegion, r.left, r.top, r.right, r.bottom,
                         op.nativeInt);
     }
@@ -264,7 +267,7 @@ public class Region implements Parcelable {
      * Perform the specified Op on this region and the specified rect. Return
      * true if the result of the op is not empty.
      */
-    public boolean op(int left, int top, int right, int bottom, Op op) {
+    public boolean op(int left, int top, int right, int bottom, @NonNull Op op) {
         return nativeOp(mNativeRegion, left, top, right, bottom,
                         op.nativeInt);
     }
@@ -273,7 +276,7 @@ public class Region implements Parcelable {
      * Perform the specified Op on this region and the specified region. Return
      * true if the result of the op is not empty.
      */
-    public boolean op(Region region, Op op) {
+    public boolean op(@NonNull Region region, @NonNull Op op) {
         return op(this, region, op);
     }
 
@@ -281,7 +284,7 @@ public class Region implements Parcelable {
      * Set this region to the result of performing the Op on the specified rect
      * and region. Return true if the result is not empty.
      */
-    public boolean op(Rect rect, Region region, Op op) {
+    public boolean op(@NonNull Rect rect, @NonNull Region region, @NonNull Op op) {
         return nativeOp(mNativeRegion, rect, region.mNativeRegion,
                         op.nativeInt);
     }
@@ -290,11 +293,12 @@ public class Region implements Parcelable {
      * Set this region to the result of performing the Op on the specified
      * regions. Return true if the result is not empty.
      */
-    public boolean op(Region region1, Region region2, Op op) {
+    public boolean op(@NonNull Region region1, @NonNull Region region2, @NonNull Op op) {
         return nativeOp(mNativeRegion, region1.mNativeRegion,
                         region2.mNativeRegion, op.nativeInt);
     }
 
+    @Override
     public String toString() {
         return nativeToString(mNativeRegion);
     }
@@ -304,6 +308,7 @@ public class Region implements Parcelable {
      *
      * @hide
      */
+    @NonNull
     public static Region obtain() {
         Region region = sPool.acquire();
         return (region != null) ? region : new Region();
@@ -316,7 +321,8 @@ public class Region implements Parcelable {
      *
      * @hide
      */
-    public static Region obtain(Region other) {
+    @NonNull
+    public static Region obtain(@NonNull Region other) {
         Region region = obtain();
         region.set(other);
         return region;
@@ -341,6 +347,7 @@ public class Region implements Parcelable {
              * @param p    Parcel object to read the region from
              * @return a new region created from the data in the parcel
              */
+            @Override
             public Region createFromParcel(Parcel p) {
                 long ni = nativeCreateFromParcel(p);
                 if (ni == 0) {
@@ -348,11 +355,13 @@ public class Region implements Parcelable {
                 }
                 return new Region(ni);
             }
+            @Override
             public Region[] newArray(int size) {
                 return new Region[size];
             }
     };
     
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -362,6 +371,7 @@ public class Region implements Parcelable {
      * rebuilt from the parcel by calling CREATOR.createFromParcel().
      * @param p    Parcel object to write the region data into
      */
+    @Override
     public void writeToParcel(Parcel p, int flags) {
         if (!nativeWriteToParcel(mNativeRegion, p)) {
             throw new RuntimeException();
@@ -377,6 +387,7 @@ public class Region implements Parcelable {
         return nativeEquals(mNativeRegion, peer.mNativeRegion);
     }
 
+    @Override
     protected void finalize() throws Throwable {
         try {
             nativeDestructor(mNativeRegion);

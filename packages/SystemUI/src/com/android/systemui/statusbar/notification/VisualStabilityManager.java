@@ -19,8 +19,7 @@ package com.android.systemui.statusbar.notification;
 import androidx.collection.ArraySet;
 import android.view.View;
 
-import com.android.systemui.statusbar.ExpandableNotificationRow;
-import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
 import java.util.ArrayList;

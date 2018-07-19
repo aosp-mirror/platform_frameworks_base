@@ -19,6 +19,11 @@ import android.content.Intent;
 import android.os.Handler;
 import android.view.View;
 
+import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+
 /**
  * An abstraction of something that presents notifications, e.g. StatusBar. Contains methods
  * for both querying the state of the system (some modularised piece of functionality may

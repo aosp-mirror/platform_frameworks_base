@@ -18,9 +18,9 @@ package com.android.systemui.car;
 import android.content.Context;
 import android.service.notification.StatusBarNotification;
 
-import com.android.systemui.statusbar.ExpandableNotificationRow;
-import com.android.systemui.statusbar.NotificationData;
-import com.android.systemui.statusbar.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 
 public class CarNotificationEntryManager extends NotificationEntryManager {
     public CarNotificationEntryManager(Context context) {
@@ -29,7 +29,7 @@ public class CarNotificationEntryManager extends NotificationEntryManager {
 
     /**
      * Returns the
-     * {@link com.android.systemui.statusbar.ExpandableNotificationRow.LongPressListener} that will
+     * {@link ExpandableNotificationRow.LongPressListener} that will
      * be triggered when a notification card is long-pressed.
      */
     @Override
