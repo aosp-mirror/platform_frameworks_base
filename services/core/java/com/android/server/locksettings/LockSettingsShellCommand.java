@@ -228,6 +228,9 @@ class LockSettingsShellCommand extends ShellCommand {
                         mLockPatternUtils.reportFailedPasswordAttempt(mCurrentUserId);
                     }
                     getOutPrintWriter().println("Old password '" + mOld + "' didn't match");
+                } else {
+                    // Resets the counter for failed password attempts to 0.
+                    mLockPatternUtils.reportSuccessfulPasswordAttempt(mCurrentUserId);
                 }
                 return result;
             } catch (RequestThrottledException e) {
