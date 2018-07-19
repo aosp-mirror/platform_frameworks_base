@@ -109,6 +109,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
+import com.android.server.SystemService;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -260,6 +261,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return getUserStateLocked(mCurrentUserId);
     }
 
+    public static final class Lifecycle extends SystemService {
+        private final AccessibilityManagerService mService;
+
+        public Lifecycle(Context context) {
+            super(context);
+            mService = new AccessibilityManagerService(context);
+        }
+
+        @Override
+        public void onStart() {
+            publishBinderService(Context.ACCESSIBILITY_SERVICE, mService);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            mService.onBootPhase(phase);
+        }
+    }
+
     /**
      * Creates a new instance.
      *
@@ -294,6 +314,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @Nullable
     public FingerprintGestureDispatcher getFingerprintGestureDispatcher() {
         return mFingerprintGestureDispatcher;
+    }
+
+    private void onBootPhase(int phase) {
+        if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_APP_WIDGETS)) {
+                mAppWidgetService = LocalServices.getService(AppWidgetManagerInternal.class);
+            }
+        }
     }
 
     private UserState getUserState(int userId) {
@@ -2684,16 +2712,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    private AppWidgetManagerInternal getAppWidgetManager() {
-        synchronized (mLock) {
-            if (mAppWidgetService == null
-                    && mPackageManager.hasSystemFeature(PackageManager.FEATURE_APP_WIDGETS)) {
-                mAppWidgetService = LocalServices.getService(AppWidgetManagerInternal.class);
-            }
-            return mAppWidgetService;
-        }
-    }
-
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
@@ -3022,8 +3040,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 return packageName.toString();
             }
             // Appwidget hosts get to pass packages for widgets they host
-            final AppWidgetManagerInternal appWidgetManager = getAppWidgetManager();
-            if (appWidgetManager != null && ArrayUtils.contains(appWidgetManager
+            if (mAppWidgetService != null && ArrayUtils.contains(mAppWidgetService
                             .getHostedWidgetPackages(resolvedUid), packageNameStr)) {
                 return packageName.toString();
             }
@@ -3051,9 +3068,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // IMPORTANT: The target package is already vetted to be in the target UID
             String[] uidPackages = new String[]{targetPackage};
             // Appwidget hosts get to pass packages for widgets they host
-            final AppWidgetManagerInternal appWidgetManager = getAppWidgetManager();
-            if (appWidgetManager != null) {
-                final ArraySet<String> widgetPackages = appWidgetManager
+            if (mAppWidgetService != null) {
+                final ArraySet<String> widgetPackages = mAppWidgetService
                         .getHostedWidgetPackages(targetUid);
                 if (widgetPackages != null && !widgetPackages.isEmpty()) {
                     final String[] validPackages = new String[uidPackages.length
