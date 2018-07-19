@@ -66,11 +66,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
                     Constants.PROPERTY_LAST_SYSTEM_AUDIO_CONTROL,
                     mSystemAudioActivated ? "true" : "false");
         }
-        if (setSystemAudioMode(false)) {
-            mService.sendCecCommand(
-                    HdmiCecMessageBuilder.buildSetSystemAudioMode(
-                            mAddress, Constants.ADDR_BROADCAST, false));
-        }
+        terminateSystemAudioMode();
     }
 
     @Override
@@ -335,31 +331,15 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     protected void terminateSystemAudioMode() {
         // remove pending initiation actions
         removeAction(SystemAudioInitiationActionFromAvr.class);
-
-        synchronized (mLock) {
-            if (!mSystemAudioActivated) {
-                return;
-            }
+        if (!isSystemAudioActivated()) {
+            return;
         }
 
-        // send <Set System Audio Mode> [“Off”]
-        mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildSetSystemAudioMode(
-                        mAddress, Constants.ADDR_BROADCAST, false));
-
-        // mute speaker
-        if (!mService.getAudioManager().isStreamMute(AudioManager.STREAM_MUSIC)) {
-            mService.getAudioManager()
-                    .adjustStreamVolume(
-                            AudioManager.STREAM_MUSIC,
-                            AudioManager.ADJUST_MUTE,
-                            0);
-        }
-
-        mSystemAudioSource = null;
-        synchronized (mLock) {
-            mSystemAudioActivated = false;
-            mService.announceSystemAudioModeChange(false);
+        if (setSystemAudioMode(false)) {
+            // send <Set System Audio Mode> [“Off”]
+            mService.sendCecCommand(
+                    HdmiCecMessageBuilder.buildSetSystemAudioMode(
+                            mAddress, Constants.ADDR_BROADCAST, false));
         }
     }
 
