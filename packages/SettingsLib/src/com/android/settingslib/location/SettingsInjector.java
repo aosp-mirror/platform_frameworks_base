@@ -20,12 +20,14 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.graphics.drawable.Drawable;
 import android.location.SettingInjectorService;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +38,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
+import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.Xml;
 
@@ -62,7 +65,7 @@ import java.util.Set;
  * android.content.pm.RegisteredServicesCache#parseServiceAttributes(android.content.res.Resources,
  * String, android.util.AttributeSet)} into an interface, which didn't seem worth it.
  */
-public class BaseSettingsInjector {
+public class SettingsInjector {
     static final String TAG = "SettingsInjector";
 
     /**
@@ -96,7 +99,7 @@ public class BaseSettingsInjector {
 
     private final Handler mHandler;
 
-    public BaseSettingsInjector(Context context) {
+    public SettingsInjector(Context context) {
         mContext = context;
         mSettings = new HashSet<Setting>();
         mHandler = new StatusLoadingHandler();
@@ -142,6 +145,65 @@ public class BaseSettingsInjector {
         }
 
         return settings;
+    }
+
+    /**
+     * Adds the InjectedSetting information to a Preference object
+     */
+    private void populatePreference(Preference preference, InjectedSetting setting) {
+        final PackageManager pm = mContext.getPackageManager();
+        Drawable appIcon = null;
+        try {
+            final PackageItemInfo itemInfo = new PackageItemInfo();
+            itemInfo.icon = setting.iconId;
+            itemInfo.packageName = setting.packageName;
+            final ApplicationInfo appInfo = pm.getApplicationInfo(setting.packageName,
+                    PackageManager.GET_META_DATA);
+            appIcon = IconDrawableFactory.newInstance(mContext)
+                    .getBadgedIcon(itemInfo, appInfo, setting.mUserHandle.getIdentifier());
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Can't get ApplicationInfo for " + setting.packageName, e);
+        }
+        preference.setTitle(setting.title);
+        preference.setSummary(null);
+        preference.setIcon(appIcon);
+        preference.setOnPreferenceClickListener(new ServiceSettingClickedListener(setting));
+    }
+
+    /**
+     * Gets a list of preferences that other apps have injected.
+     *
+     * @param profileId Identifier of the user/profile to obtain the injected settings for or
+     *                  UserHandle.USER_CURRENT for all profiles associated with current user.
+     */
+    public List<Preference> getInjectedSettings(Context prefContext, final int profileId) {
+        final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        final List<UserHandle> profiles = um.getUserProfiles();
+        ArrayList<Preference> prefs = new ArrayList<>();
+        for (UserHandle userHandle : profiles) {
+            if (profileId == UserHandle.USER_CURRENT || profileId == userHandle.getIdentifier()) {
+                Iterable<InjectedSetting> settings = getSettings(userHandle);
+                for (InjectedSetting setting : settings) {
+                    Preference preference = createPreference(prefContext, setting);
+                    populatePreference(preference, setting);
+                    prefs.add(preference);
+                    mSettings.add(new Setting(setting, preference));
+                }
+            }
+        }
+
+        reloadStatusMessages();
+
+        return prefs;
+    }
+
+    /**
+     * Creates an injected Preference
+     *
+     * @return the created Preference
+     */
+    protected Preference createPreference(Context prefContext, InjectedSetting setting) {
+        return new Preference(prefContext);
     }
 
     /**
