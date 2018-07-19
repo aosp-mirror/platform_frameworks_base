@@ -2079,6 +2079,11 @@ public class HdmiControlService extends SystemService {
         return mWakeUpMessageReceived;
     }
 
+    @VisibleForTesting
+    boolean isStandbyMessageReceived() {
+        return mStandbyMessageReceived;
+    }
+
     @ServiceThreadOnly
     private void onWakeUp() {
         assertRunOnServiceThread();
@@ -2098,17 +2103,23 @@ public class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    private void onStandby(final int standbyAction) {
+    @VisibleForTesting
+    protected void onStandby(final int standbyAction) {
         assertRunOnServiceThread();
         mPowerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY;
         invokeVendorCommandListenersOnControlStateChanged(false,
                 HdmiControlManager.CONTROL_STATE_CHANGED_REASON_STANDBY);
-        if (!canGoToStandby()) {
+
+        final List<HdmiCecLocalDevice> devices = getAllLocalDevices();
+
+        if (!isStandbyMessageReceived() && !canGoToStandby()) {
             mPowerStatus = HdmiControlManager.POWER_STATUS_STANDBY;
+            for (HdmiCecLocalDevice device : devices) {
+                device.onStandby(mStandbyMessageReceived, standbyAction);
+            }
             return;
         }
 
-        final List<HdmiCecLocalDevice> devices = getAllLocalDevices();
         disableDevices(new PendingActionClearedCallback() {
             @Override
             public void onCleared(HdmiCecLocalDevice device) {
