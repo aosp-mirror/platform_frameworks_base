@@ -95,6 +95,7 @@ import static com.android.server.am.ActivityStackSupervisorProto.DISPLAYS;
 import static com.android.server.am.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
 import static com.android.server.am.ActivityStackSupervisorProto.IS_HOME_RECENTS_COMPONENT;
 import static com.android.server.am.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
+import static com.android.server.am.ActivityStackSupervisorProto.PENDING_ACTIVITIES;
 import static com.android.server.am.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
@@ -3993,6 +3994,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
         proto.write(IS_HOME_RECENTS_COMPONENT,
                 mRecentTasks.isRecentsComponentHomeActivity(mCurrentUser));
+        mService.getActivityStartController().writeToProto(proto, PENDING_ACTIVITIES);
         proto.end(token);
     }
 
