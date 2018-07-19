@@ -119,6 +119,10 @@ public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceCon
         return false;
     }
 
+    public int getSoftKeyboardShowMode() {
+        return 0;
+    }
+
     public void setSoftKeyboardCallbackEnabled(boolean enabled) {}
 
     public boolean isAccessibilityButtonAvailable() {

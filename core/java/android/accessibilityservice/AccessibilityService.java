@@ -31,7 +31,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -398,12 +397,48 @@ public abstract class AccessibilityService extends Service {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "SHOW_MODE_" }, value = {
             SHOW_MODE_AUTO,
-            SHOW_MODE_HIDDEN
+            SHOW_MODE_HIDDEN,
+            SHOW_MODE_WITH_HARD_KEYBOARD
     })
     public @interface SoftKeyboardShowMode {}
 
+    /**
+     * Allow the system to control when the soft keyboard is shown.
+     * @see SoftKeyboardController
+     */
     public static final int SHOW_MODE_AUTO = 0;
+
+    /**
+     * Never show the soft keyboard.
+     * @see SoftKeyboardController
+     */
     public static final int SHOW_MODE_HIDDEN = 1;
+
+    /**
+     * Allow the soft keyboard to be shown, even if a hard keyboard is connected
+     * @see SoftKeyboardController
+     */
+    public static final int SHOW_MODE_WITH_HARD_KEYBOARD = 2;
+
+    /**
+     * Mask used to cover the show modes supported in public API
+     * @hide
+     */
+    public static final int SHOW_MODE_MASK = 0x03;
+
+    /**
+     * Bit used to hold the old value of the hard IME setting to restore when a service is shut
+     * down.
+     * @hide
+     */
+    public static final int SHOW_MODE_HARD_KEYBOARD_ORIGINAL_VALUE = 0x20000000;
+
+    /**
+     * Bit for show mode setting to indicate that the user has overridden the hard keyboard
+     * behavior.
+     * @hide
+     */
+    public static final int SHOW_MODE_HARD_KEYBOARD_OVERRIDDEN = 0x40000000;
 
     private int mConnectionId = AccessibilityInteractionClient.NO_ID;
 
@@ -1147,7 +1182,27 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
-     * Used to control and query the soft keyboard show mode.
+     * Used to control, query, and listen for changes to the soft keyboard show mode.
+     * <p>
+     * Accessibility services may request to override the decisions normally made about whether or
+     * not the soft keyboard is shown.
+     * <p>
+     * If multiple services make conflicting requests, the last request is honored. A service may
+     * register a listener to find out if the mode has changed under it.
+     * <p>
+     * If the user takes action to override the behavior behavior requested by an accessibility
+     * service, the user's request takes precendence, the show mode will be reset to
+     * {@link AccessibilityService#SHOW_MODE_AUTO}, and services will no longer be able to control
+     * that aspect of the soft keyboard's behavior.
+     * <p>
+     * Note: Because soft keyboards are independent apps, the framework does not have total control
+     * over their behavior. They may choose to show themselves, or not, without regard to requests
+     * made here. So the framework will make a best effort to deliver the behavior requested, but
+     * cannot guarantee success.
+     *
+     * @see AccessibilityService#SHOW_MODE_AUTO
+     * @see AccessibilityService#SHOW_MODE_HIDDEN
+     * @see AccessibilityService#SHOW_MODE_WITH_HARD_KEYBOARD
      */
     public static final class SoftKeyboardController {
         private final AccessibilityService mService;
@@ -1217,7 +1272,8 @@ public abstract class AccessibilityService extends Service {
          * @param listener the listener to remove, must be non-null
          * @return {@code true} if the listener was removed, {@code false} otherwise
          */
-        public boolean removeOnShowModeChangedListener(@NonNull OnShowModeChangedListener listener) {
+        public boolean removeOnShowModeChangedListener(
+                @NonNull OnShowModeChangedListener listener) {
             if (mListeners == null) {
                 return false;
             }
@@ -1289,32 +1345,32 @@ public abstract class AccessibilityService extends Service {
         }
 
         /**
-         * Returns the show mode of the soft keyboard. The default show mode is
-         * {@code SHOW_MODE_AUTO}, where the soft keyboard is shown when a text input field is
-         * focused. An AccessibilityService can also request the show mode
-         * {@code SHOW_MODE_HIDDEN}, where the soft keyboard is never shown.
+         * Returns the show mode of the soft keyboard.
          *
          * @return the current soft keyboard show mode
+         *
+         * @see AccessibilityService#SHOW_MODE_AUTO
+         * @see AccessibilityService#SHOW_MODE_HIDDEN
+         * @see AccessibilityService#SHOW_MODE_WITH_HARD_KEYBOARD
          */
         @SoftKeyboardShowMode
         public int getShowMode() {
-           try {
-               return Settings.Secure.getInt(mService.getContentResolver(),
-                       Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE);
-           } catch (Settings.SettingNotFoundException e) {
-               Log.v(LOG_TAG, "Failed to obtain the soft keyboard mode", e);
-               // The settings hasn't been changed yet, so it's value is null. Return the default.
-               return 0;
-           }
+            final IAccessibilityServiceConnection connection =
+                    AccessibilityInteractionClient.getInstance().getConnection(
+                            mService.mConnectionId);
+            if (connection != null) {
+                try {
+                    return connection.getSoftKeyboardShowMode();
+                } catch (RemoteException re) {
+                    Log.w(LOG_TAG, "Failed to set soft keyboard behavior", re);
+                    re.rethrowFromSystemServer();
+                }
+            }
+            return SHOW_MODE_AUTO;
         }
 
         /**
-         * Sets the soft keyboard show mode. The default show mode is
-         * {@code SHOW_MODE_AUTO}, where the soft keyboard is shown when a text input field is
-         * focused. An AccessibilityService can also request the show mode
-         * {@code SHOW_MODE_HIDDEN}, where the soft keyboard is never shown. The
-         * The lastto this method will be honored, regardless of any previous calls (including those
-         * made by other AccessibilityServices).
+         * Sets the soft keyboard show mode.
          * <p>
          * <strong>Note:</strong> If the service is not yet connected (e.g.
          * {@link AccessibilityService#onServiceConnected()} has not yet been called) or the
@@ -1322,6 +1378,10 @@ public abstract class AccessibilityService extends Service {
          *
          * @param showMode the new show mode for the soft keyboard
          * @return {@code true} on success
+         *
+         * @see AccessibilityService#SHOW_MODE_AUTO
+         * @see AccessibilityService#SHOW_MODE_HIDDEN
+         * @see AccessibilityService#SHOW_MODE_WITH_HARD_KEYBOARD
          */
         public boolean setShowMode(@SoftKeyboardShowMode int showMode) {
            final IAccessibilityServiceConnection connection =
