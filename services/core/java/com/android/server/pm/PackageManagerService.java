@@ -3440,6 +3440,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return dstCodePath;
     }
 
+    @GuardedBy("mPackages")
     private void updateInstantAppInstallerLocked(String modifiedPackage) {
         // we're only interested in updating the installer appliction when 1) it's not
         // already set or 2) the modified package is the installer
@@ -3694,6 +3695,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return null;
     }
 
+    @GuardedBy("mPackages")
     private @Nullable ActivityInfo getInstantAppInstallerLPr() {
         String[] orderedActions = Build.IS_ENG
                 ? new String[]{
@@ -3760,6 +3762,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return matches.get(0).getComponentInfo().getComponentName();
     }
 
+    @GuardedBy("mPackages")
     private void primeDomainVerificationsLPw(int userId) {
         if (DEBUG_DOMAIN_VERIFICATION) {
             Slog.d(TAG, "Priming domain verifications in user " + userId);
@@ -3813,6 +3816,7 @@ public class PackageManagerService extends IPackageManager.Stub
         scheduleWriteSettingsLocked();
     }
 
+    @GuardedBy("mPackages")
     private void applyFactoryDefaultBrowserLPw(int userId) {
         // The default browser app's package name is stored in a string resource,
         // with a product-specific overlay used for vendor customization.
@@ -3836,6 +3840,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void calculateDefaultBrowserLPw(int userId) {
         List<String> allBrowsers = resolveAllBrowserApps(userId);
         final String browserPkg = (allBrowsers.size() == 1) ? allBrowsers.get(0) : null;
@@ -4196,6 +4201,7 @@ public class PackageManagerService extends IPackageManager.Stub
      *
      * @see #canViewInstantApps(int, int)
      */
+    @GuardedBy("mPackages")
     private boolean filterAppAccessLPr(@Nullable PackageSetting ps, int callingUid,
             @Nullable ComponentName component, @ComponentType int componentType, int userId) {
         // if we're in an isolated process, get the real calling UID
@@ -4253,10 +4259,12 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * @see #filterAppAccessLPr(PackageSetting, int, ComponentName, int, int)
      */
+    @GuardedBy("mPackages")
     private boolean filterAppAccessLPr(@Nullable PackageSetting ps, int callingUid, int userId) {
         return filterAppAccessLPr(ps, callingUid, null, TYPE_UNKNOWN, userId);
     }
 
+    @GuardedBy("mPackages")
     private boolean filterSharedLibPackageLPr(@Nullable PackageSetting ps, int uid, int userId,
             int flags) {
         // Callers can access only the libs they depend on, otherwise they need to explicitly
@@ -4455,6 +4463,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 ? ParceledListSlice.emptyList() : new ParceledListSlice<>(permissionList);
     }
 
+    @GuardedBy("mPackages")
     private ApplicationInfo generateApplicationInfoFromSettingsLPw(String packageName, int flags,
             int filterCallingUid, int userId) {
         if (!sUserManager.exists(userId)) return null;
@@ -4540,6 +4549,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return null;
     }
 
+    @GuardedBy("mPackages")
     private String normalizePackageNameLPr(String packageName) {
         String normalizedPackageName = mSettings.getRenamedPackageLPr(packageName);
         return normalizedPackageName != null ? normalizedPackageName : packageName;
@@ -5078,6 +5088,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private List<VersionedPackage> getPackagesUsingSharedLibraryLPr(
             SharedLibraryInfo libInfo, int flags, int userId) {
         List<VersionedPackage> versionedPackages = null;
@@ -5233,6 +5244,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void updateSequenceNumberLP(PackageSetting pkgSetting, int[] userList) {
         for (int i = userList.length - 1; i >= 0; --i) {
             final int userId = userList[i];
@@ -6266,6 +6278,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return true;
     }
 
+    @GuardedBy("mPackages")
     private ResolveInfo findPersistentPreferredActivityLP(Intent intent, String resolvedType,
             int flags, List<ResolveInfo> query, boolean debug, int userId) {
         final int N = query.size();
@@ -8594,6 +8607,7 @@ public class PackageManagerService extends IPackageManager.Stub
      *  Traces a package scan.
      *  @see #scanPackageLI(File, int, int, long, UserHandle)
      */
+    @GuardedBy("mInstallLock")
     private PackageParser.Package scanPackageTracedLI(File scanFile, final int parseFlags,
             int scanFlags, long currentTime, UserHandle user) throws PackageManagerException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage [" + scanFile.toString() + "]");
@@ -8608,6 +8622,7 @@ public class PackageManagerService extends IPackageManager.Stub
      *  Scans a package and returns the newly parsed package.
      *  Returns {@code null} in case of errors and the error code is stored in mLastScanError
      */
+    @GuardedBy({"mInstallLock", "mPackages"})
     private PackageParser.Package scanPackageLI(File scanFile, int parseFlags, int scanFlags,
             long currentTime, UserHandle user) throws PackageManagerException {
         if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanFile);
@@ -8639,6 +8654,7 @@ public class PackageManagerService extends IPackageManager.Stub
      *  Scans a package and returns the newly parsed package.
      *  @throws PackageManagerException on a parse error.
      */
+    @GuardedBy({"mInstallLock", "mPackages"})
     private PackageParser.Package scanPackageChildLI(PackageParser.Package pkg,
             final @ParseFlags int parseFlags, @ScanFlags int scanFlags, long currentTime,
             @Nullable UserHandle user)
@@ -8731,6 +8747,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * structures and the package is made available to the rest of the system.
      * <p>NOTE: The return value should be removed. It's the passed in package object.
      */
+    @GuardedBy({"mInstallLock", "mPackages"})
     private PackageParser.Package addForInitLI(PackageParser.Package pkg,
             @ParseFlags int parseFlags, @ScanFlags int scanFlags, long currentTime,
             @Nullable UserHandle user)
@@ -9616,6 +9633,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private boolean verifyPackageUpdateLPr(PackageSetting oldPkg, PackageParser.Package newPkg) {
         if ((oldPkg.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0) {
             Slog.w(TAG, "Unable to update from " + oldPkg.name
@@ -9631,6 +9649,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return true;
     }
 
+    @GuardedBy("mInstallLock")
     void removeCodePathLI(File codePath) {
         if (codePath.isDirectory()) {
             try {
@@ -9758,6 +9777,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void addSharedLibraryLPr(Set<String> usesLibraryFiles,
             SharedLibraryEntry file,
             PackageParser.Package changingLib) {
@@ -9783,6 +9803,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void updateSharedLibrariesLPr(PackageParser.Package pkg,
             PackageParser.Package changingLib) throws PackageManagerException {
         if (pkg == null) {
@@ -9815,6 +9836,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private Set<String> addSharedLibrariesLPw(@NonNull List<String> requestedLibraries,
             @Nullable long[] requiredVersions, @Nullable String[][] requiredCertDigests,
             @NonNull String packageName, @Nullable PackageParser.Package changingLib,
@@ -9926,6 +9948,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return false;
     }
 
+    @GuardedBy("mPackages")
     private ArrayList<PackageParser.Package> updateAllSharedLibrariesLPw(
             PackageParser.Package changingPkg) {
         ArrayList<PackageParser.Package> res = null;
@@ -9961,6 +9984,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return res;
     }
 
+    @GuardedBy({"mInstallLock", "mPackages"})
     private PackageParser.Package scanPackageTracedLI(PackageParser.Package pkg,
             final @ParseFlags int parseFlags, @ScanFlags int scanFlags, long currentTime,
             @Nullable UserHandle user) throws PackageManagerException {
@@ -10156,7 +10180,7 @@ public class PackageManagerService extends IPackageManager.Stub
     // the results / removing app data needs to be moved up a level to the callers of this
     // method. Also, we need to solve the problem of potentially creating a new shared user
     // setting. That can probably be done later and patch things up after the fact.
-    @GuardedBy("mInstallLock")
+    @GuardedBy({"mInstallLock", "mPackages"})
     private PackageParser.Package scanPackageNewLI(@NonNull PackageParser.Package pkg,
             final @ParseFlags int parseFlags, @ScanFlags int scanFlags, long currentTime,
             @Nullable UserHandle user) throws PackageManagerException {
@@ -10224,7 +10248,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * This needs to be fixed so, once we get to this point, no errors are
      * possible and the system is not left in an inconsistent state.
      */
-    @GuardedBy("mPackages")
+    @GuardedBy({"mPackages", "mInstallLock"})
     private void commitScanResultsLocked(@NonNull ScanRequest request, @NonNull ScanResult result)
             throws PackageManagerException {
         final PackageParser.Package pkg = request.pkg;
@@ -16904,6 +16928,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void enableSystemPackageLPw(PackageParser.Package pkg) {
         // Enable the parent package
         mSettings.enableSystemPackageLPw(pkg.packageName);
@@ -16915,6 +16940,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private boolean disableSystemPackageLPw(PackageParser.Package oldPkg,
             PackageParser.Package newPkg) {
         // Disable the parent package (parent always replaced)
@@ -16929,6 +16955,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return disabled;
     }
 
+    @GuardedBy("mPackages")
     private void setInstallerPackageNameLPw(PackageParser.Package pkg,
             String installerPackageName) {
         // Enable the parent package
@@ -17057,6 +17084,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy({"mInstallLock", "mPackages"})
     private void installPackageTracedLI(InstallArgs args, PackageInstalledInfo res) {
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackage");
@@ -17103,7 +17131,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return true;
     }
 
-    @GuardedBy("mInstallLock")
+    @GuardedBy({"mInstallLock", "mPackages", "PackageManagerService.mPackages"})
     private void installPackagesLI(List<InstallRequest> requests) {
         Map<String, ScanResult> scans = new ArrayMap<>(requests.size());
         for (InstallRequest request : requests) {
@@ -17829,6 +17857,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private boolean needsNetworkVerificationLPr(ActivityIntentInfo filter) {
         final ComponentName cn  = filter.activity.getComponentName();
         final String packageName = cn.getPackageName();
@@ -18063,6 +18092,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return pkg.packageName;
     }
 
+    @GuardedBy("mPackages")
     private String resolveInternalPackageNameLPr(String packageName, long versionCode) {
         // Handle renamed packages
         String normalizedPackageName = mSettings.getRenamedPackageLPr(packageName);
@@ -19129,6 +19159,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return ret;
     }
 
+    @GuardedBy("mPackages")
     private void markPackageUninstalledForUserLPw(PackageSetting ps, UserHandle user) {
         final int[] userIds = (user == null || user.getIdentifier() == UserHandle.USER_ALL)
                 ? sUserManager.getUserIds() : new int[] {user.getIdentifier()};
@@ -19403,6 +19434,7 @@ public class PackageManagerService extends IPackageManager.Stub
      *
      * @param userId The device user for which to do a reset.
      */
+    @GuardedBy("mPackages")
     private void resetUserChangesToRuntimePermissionsAndFlagsLPw(int userId) {
         final int packageCount = mPackages.size();
         for (int i = 0; i < packageCount; i++) {
@@ -19422,6 +19454,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * @param ps The package for which to reset.
      * @param userId The device user for which to do a reset.
      */
+    @GuardedBy("mPackages")
     private void resetUserChangesToRuntimePermissionsAndFlagsLPw(
             final PackageSetting ps, final int userId) {
         if (ps.pkg == null) {
@@ -19630,6 +19663,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 "Shame on you for calling the hidden API getPackageSizeInfo(). Shame!");
     }
 
+    @GuardedBy("mInstallLock")
     private boolean getPackageSizeInfoLI(String packageName, int userId, PackageStats stats) {
         final PackageSetting ps;
         synchronized (mPackages) {
@@ -19664,6 +19698,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return true;
     }
 
+    @GuardedBy("mPackages")
     private int getUidTargetSdkVersionLockedLPr(int uid) {
         Object obj = mSettings.getUserIdLPr(uid);
         if (obj instanceof SharedUserSetting) {
@@ -19687,6 +19722,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return Build.VERSION_CODES.CUR_DEVELOPMENT;
     }
 
+    @GuardedBy("mPackages")
     private int getPackageTargetSdkVersionLockedLPr(String packageName) {
         final PackageParser.Package p = mPackages.get(packageName);
         if (p != null) {
@@ -19882,6 +19918,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
+    @GuardedBy("mPackages")
     boolean clearPackagePreferredActivitiesLPw(String packageName, int userId) {
         ArrayList<PreferredActivity> removed = null;
         boolean changed = false;
@@ -19920,6 +19957,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
+    @GuardedBy("mPackages")
     private void clearIntentFilterVerificationsLPw(int userId) {
         final int packageCount = mPackages.size();
         for (int i = 0; i < packageCount; i++) {
@@ -19929,6 +19967,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
+    @GuardedBy("mPackages")
     void clearIntentFilterVerificationsLPw(String packageName, int userId) {
         if (userId == UserHandle.USER_ALL) {
             if (mSettings.removeIntentFilterVerificationLPw(packageName,
@@ -20339,6 +20378,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void serializeRuntimePermissionGrantsLPr(XmlSerializer serializer, final int userId)
             throws IOException {
         serializer.startTag(null, TAG_ALL_GRANTS);
@@ -20398,6 +20438,7 @@ public class PackageManagerService extends IPackageManager.Stub
         serializer.endTag(null, TAG_ALL_GRANTS);
     }
 
+    @GuardedBy("mPackages")
     private void processRestoredPermissionGrantsLPr(XmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
         String pkgName = null;
@@ -22067,6 +22108,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void dumpDexoptStateLPr(PrintWriter pw, String packageName) {
         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         ipw.println();
@@ -22094,6 +22136,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void dumpCompilerStatsLPr(PrintWriter pw, String packageName) {
         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         ipw.println();
@@ -22471,6 +22514,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mInstallLock")
     private void reconcileAppsDataLI(String volumeUuid, int userId, int flags,
             boolean migrateAppData) {
         reconcileAppsDataLI(volumeUuid, userId, flags, migrateAppData, false /* onlyCoreApps */);
@@ -22486,6 +22530,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * correct for all installed apps.
      * @return list of skipped non-core packages (if {@code onlyCoreApps} is true)
      */
+    @GuardedBy("mInstallLock")
     private List<String> reconcileAppsDataLI(String volumeUuid, int userId, int flags,
             boolean migrateAppData, boolean onlyCoreApps) {
         Slog.v(TAG, "reconcileAppsData for " + volumeUuid + " u" + userId + " 0x"
@@ -23233,6 +23278,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * that are no longer in use by any other user.
      * @param userHandle the user being removed
      */
+    @GuardedBy("mPackages")
     private void removeUnusedPackagesLPw(UserManagerService userManager, final int userHandle) {
         final boolean DEBUG_CLEAN_APKS = false;
         int [] users = userManager.getUserIds();
@@ -23511,6 +23557,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void deletePackageIfUnusedLPr(final String packageName) {
         PackageSetting ps = mSettings.mPackages.get(packageName);
         if (ps == null) {
