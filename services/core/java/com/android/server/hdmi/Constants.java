@@ -18,6 +18,8 @@ package com.android.server.hdmi;
 
 import android.annotation.IntDef;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Defines constants related to HDMI-CEC protocol internal implementation. If a constant will be
@@ -178,6 +180,46 @@ final class Constants {
     // [Menu State]
     static final int MENU_STATE_ACTIVATED = 0;
     static final int MENU_STATE_DEACTIVATED = 1;
+
+    // Audio Format Codes
+    // Refer to CEA Standard (CEA-861-D), Table 37 Audio Format Codes.
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        AUDIO_CODEC_NONE,
+        AUDIO_CODEC_LPCM,
+        AUDIO_CODEC_DD,
+        AUDIO_CODEC_MPEG1,
+        AUDIO_CODEC_MP3,
+        AUDIO_CODEC_MPEG2,
+        AUDIO_CODEC_AAC,
+        AUDIO_CODEC_DTS,
+        AUDIO_CODEC_ATRAC,
+        AUDIO_CODEC_ONEBITAUDIO,
+        AUDIO_CODEC_DDP,
+        AUDIO_CODEC_DTSHD,
+        AUDIO_CODEC_TRUEHD,
+        AUDIO_CODEC_DST,
+        AUDIO_CODEC_WMAPRO,
+        AUDIO_CODEC_MAX,
+    })
+    public @interface AudioCodec {}
+
+    static final int AUDIO_CODEC_NONE = 0x0;
+    static final int AUDIO_CODEC_LPCM = 0x1; // Support LPCMs
+    static final int AUDIO_CODEC_DD = 0x2; // Support DD
+    static final int AUDIO_CODEC_MPEG1 = 0x3; // Support MPEG1
+    static final int AUDIO_CODEC_MP3 = 0x4; // Support MP3
+    static final int AUDIO_CODEC_MPEG2 = 0x5; // Support MPEG2
+    static final int AUDIO_CODEC_AAC = 0x6; // Support AAC
+    static final int AUDIO_CODEC_DTS = 0x7; // Support DTS
+    static final int AUDIO_CODEC_ATRAC = 0x8; // Support ATRAC
+    static final int AUDIO_CODEC_ONEBITAUDIO = 0x9; // Support One-Bit Audio
+    static final int AUDIO_CODEC_DDP = 0xA; // Support DDP
+    static final int AUDIO_CODEC_DTSHD = 0xB; // Support DTSHD
+    static final int AUDIO_CODEC_TRUEHD = 0xC; // Support MLP/TRUE-HD
+    static final int AUDIO_CODEC_DST = 0xD; // Support DST
+    static final int AUDIO_CODEC_WMAPRO = 0xE; // Support WMA-Pro
+    static final int AUDIO_CODEC_MAX = 0xF;
 
     // Bit mask used to get the routing path of the top level device.
     // When &'d with the path 1.2.2.0 (0x1220), for instance, gives 1.0.0.0.
