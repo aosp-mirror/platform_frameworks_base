@@ -477,7 +477,7 @@ public class NotificationManagerService extends SystemService {
 
         String defaultDndAccess = getContext().getResources().getString(
                 com.android.internal.R.string.config_defaultDndAccessPackages);
-        if (defaultListenerAccess != null) {
+        if (defaultDndAccess != null) {
             for (String whitelisted :
                     defaultDndAccess.split(ManagedServices.ENABLED_SERVICES_SEPARATOR)) {
                 try {
