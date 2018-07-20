@@ -308,8 +308,8 @@
     <string name="track_frame_time" msgid="6146354853663863443">"GPU-rendering van profiel"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU-foutopsporingslagen inschakelen"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Laden van GPU-foutopsporingslagen toestaan voor foutopsporingsapps"</string>
-    <string name="window_animation_scale_title" msgid="6162587588166114700">"Vensteranimatieschaal"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"Overgangsanimatieschaal"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"Venster­animatieschaal"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Overgangs­animatieschaal"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Duur van animatieschaal"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Secundaire displays simuleren"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Apps"</string>
