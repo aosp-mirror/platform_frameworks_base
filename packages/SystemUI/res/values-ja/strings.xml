@@ -524,7 +524,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>を非表示にしますか？"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"次回、設定でONにすると再表示されます。"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"非表示"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"仕事用プロファイルを使用しています"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"発信"</string>
     <string name="stream_system" msgid="7493299064422163147">"システム"</string>
     <string name="stream_ring" msgid="8213049469184048338">"着信音"</string>
@@ -538,7 +537,7 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"着信音"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"バイブレーション"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"ミュート"</string>
-    <string name="qs_status_phone_vibrate" msgid="204362991135761679">"スマートフォンをバイブレーションに設定"</string>
+    <string name="qs_status_phone_vibrate" msgid="204362991135761679">"スマートフォンのバイブレーションは ON です"</string>
     <string name="qs_status_phone_muted" msgid="5437668875879171548">"スマートフォンをミュートに設定"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s。タップしてミュートを解除します。"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s。タップしてバイブレーションに設定します。ユーザー補助機能サービスがミュートされる場合があります。"</string>
@@ -606,7 +605,7 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"通知"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"今後、この通知は表示されません"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"通知を最小化します"</string>
-    <string name="inline_blocking_helper" msgid="3055064577771478591">"通常、この通知は非表示にしています。\n引き続き、表示しますか？"</string>
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"通常、この通知はスワイプして非表示にしています。\n今後も表示しますか？"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"この通知を今後も表示しますか？"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"通知を表示しない"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"今後も表示する"</string>
