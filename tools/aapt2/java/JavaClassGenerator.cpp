@@ -256,9 +256,20 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
     styleable_attr.field_name =
         TransformNestedAttr(attr.name.value(), array_field_name, package_name_to_generate);
 
+    Reference ref = attr;
+    if (attr.name.value().package.empty()) {
+
+      // If the resource does not have a package name, set the package to the unmangled package name
+      // of the styleable declaration because attributes without package names would have been
+      // declared in the same package as the styleable.
+      ref.name = ResourceName(package_name_to_generate, ref.name.value().type,
+                              ref.name.value().entry);
+    }
+
     // Look up the symbol so that we can write out in the comments what are possible legal values
     // for this attribute.
-    const SymbolTable::Symbol* symbol = context_->GetExternalSymbols()->FindByReference(attr);
+    const SymbolTable::Symbol* symbol = context_->GetExternalSymbols()->FindByReference(ref);
+
     if (symbol && symbol->attribute) {
       // Copy the symbol data structure because the returned instance can be destroyed.
       styleable_attr.symbol = *symbol;
@@ -303,7 +314,7 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
       const ResourceName& attr_name = entry.attr_ref->name.value();
       styleable_comment << "<tr><td><code>{@link #" << entry.field_name << " "
                         << (!attr_name.package.empty() ? attr_name.package
-                                                       : context_->GetCompilationPackage())
+                                                       : package_name_to_generate)
                         << ":" << attr_name.entry << "}</code></td>";
 
       // Only use the comment up until the first '.'. This is to stay compatible with
@@ -374,7 +385,7 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
 
       StringPiece package_name = attr_name.package;
       if (package_name.empty()) {
-        package_name = context_->GetCompilationPackage();
+        package_name = package_name_to_generate;
       }
 
       std::unique_ptr<IntMember> index_member =
