@@ -166,8 +166,6 @@ public class TileUtils {
     public static final String META_DATA_PREFERENCE_SUMMARY_URI =
             "com.android.settings.summary_uri";
 
-    public static final String SETTING_PKG = "com.android.settings";
-
     /**
      * Value for {@link #META_DATA_KEY_PROFILE}. When the device has a managed profile,
      * the app will always be run in the primary profile.
@@ -280,15 +278,6 @@ public class TileUtils {
             Context context, UserHandle user, Intent intent,
             Map<Pair<String, String>, Tile> addedCache, String defaultCategory, List<Tile> outTiles,
             boolean usePriority, boolean checkCategory, boolean forceTintExternalIcon) {
-        getTilesForIntent(context, user, intent, addedCache, defaultCategory, outTiles,
-                usePriority, checkCategory, forceTintExternalIcon, false /* shouldUpdateTiles */);
-    }
-
-    public static void getTilesForIntent(
-            Context context, UserHandle user, Intent intent,
-            Map<Pair<String, String>, Tile> addedCache, String defaultCategory, List<Tile> outTiles,
-            boolean usePriority, boolean checkCategory, boolean forceTintExternalIcon,
-            boolean shouldUpdateTiles) {
         PackageManager pm = context.getPackageManager();
         List<ResolveInfo> results = pm.queryIntentActivitiesAsUser(intent,
                 PackageManager.GET_META_DATA, user.getIdentifier());
@@ -313,8 +302,7 @@ public class TileUtils {
                 categoryKey = metaData.getString(EXTRA_CATEGORY_KEY);
             }
 
-            Pair<String, String> key = new Pair<String, String>(activityInfo.packageName,
-                    activityInfo.name);
+            Pair<String, String> key = new Pair<>(activityInfo.packageName, activityInfo.name);
             Tile tile = addedCache.get(key);
             if (tile == null) {
                 tile = new Tile();
@@ -327,8 +315,6 @@ public class TileUtils {
                         pm, providerMap, forceTintExternalIcon);
                 if (DEBUG) Log.d(LOG_TAG, "Adding tile " + tile.title);
                 addedCache.put(key, tile);
-            } else if (shouldUpdateTiles) {
-                updateSummaryAndTitle(context, providerMap, tile);
             }
 
             if (!tile.userHandle.contains(user)) {
@@ -433,26 +419,6 @@ public class TileUtils {
         }
 
         return false;
-    }
-
-    private static void updateSummaryAndTitle(
-            Context context, Map<String, IContentProvider> providerMap, Tile tile) {
-        if (tile == null || tile.metaData == null
-                || !tile.metaData.containsKey(META_DATA_PREFERENCE_SUMMARY_URI)) {
-            return;
-        }
-
-        String uriString = tile.metaData.getString(META_DATA_PREFERENCE_SUMMARY_URI);
-        Bundle bundle = getBundleFromUri(context, uriString, providerMap);
-        String overrideSummary = getString(bundle, META_DATA_PREFERENCE_SUMMARY);
-        String overrideTitle = getString(bundle, META_DATA_PREFERENCE_TITLE);
-        if (overrideSummary != null) {
-            tile.remoteViews.setTextViewText(android.R.id.summary, overrideSummary);
-        }
-
-        if (overrideTitle != null) {
-            tile.remoteViews.setTextViewText(android.R.id.title, overrideTitle);
-        }
     }
 
     /**
