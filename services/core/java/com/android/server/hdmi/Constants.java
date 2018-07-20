@@ -213,7 +213,6 @@ final class Constants {
     static final int USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON = 1;
     static final int NEVER_SYSTEM_AUDIO_CONTROL_ON_POWER_ON = 2;
 
-
     static final String PROPERTY_PREFERRED_ADDRESS_AUDIO_SYSTEM =
             "persist.sys.hdmi.addr.audiosystem";
     static final String PROPERTY_PREFERRED_ADDRESS_PLAYBACK = "persist.sys.hdmi.addr.playback";
@@ -246,12 +245,29 @@ final class Constants {
 
     /**
      * Property to record last state of system audio control before device powered off.
-     * When {@link #PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON} is set to
+     * <p>When {@link #PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON} is set to
      * {@link #USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON}, restoring this state on power on.
-     * State must be true or false. Default true.
+     * <p>State must be true or false. Default true.
      */
     static final String PROPERTY_LAST_SYSTEM_AUDIO_CONTROL =
         "persist.sys.hdmi.last_system_audio_control";
+
+    /**
+     * Property to save the audio port to switch to when system audio control is on.
+     * <P>Audio system should switch to this port when cec active source is not its child in the tree
+     * or is not itself.
+     *
+     * <p>Default is ARC port.
+     */
+    static final String PROPERTY_SYSTEM_AUDIO_MODE_AUDIO_PORT =
+        "persist.sys.hdmi.property_sytem_audio_mode_audio_port";
+
+    /**
+     * Property to save the ARC port id on system audio device.
+     * <p>When ARC is initiated, this port will be used to turn on ARC.
+     */
+    static final String PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT =
+        "persist.sys.hdmi.property_sytem_audio_device_arc_port";
 
     static final int RECORDING_TYPE_DIGITAL_RF = 1;
     static final int RECORDING_TYPE_ANALOGUE_RF = 2;
