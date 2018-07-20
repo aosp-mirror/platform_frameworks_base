@@ -154,6 +154,7 @@ cc_library_shared {
         "android/graphics/Typeface.cpp",
         "android/graphics/Utils.cpp",
         "android/graphics/YuvToJpegEncoder.cpp",
+        "android/graphics/fonts/Font.cpp",
         "android/graphics/pdf/PdfDocument.cpp",
         "android/graphics/pdf/PdfEditor.cpp",
         "android/graphics/pdf/PdfRenderer.cpp",
