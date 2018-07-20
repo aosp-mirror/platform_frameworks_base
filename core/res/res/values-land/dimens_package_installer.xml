@@ -17,6 +17,8 @@
 
 <!-- Landscape dimensions for the permission grant dialog. -->
 <resources>
-    <!-- 37:20 == 65% width -->
-    <dimen name="permissionGrantDialogWidth">37</dimen>
+    <!-- Assuming the dimension of a sailfish, this yields 95% width in splitscreen and 65% in
+         landscape -->
+    <dimen name="permissionGrantDialogWeight">8.6</dimen>
+    <dimen name="permissionGrantDialogWidth">334dp</dimen>
 </resources>

@@ -20,8 +20,8 @@
     <style name="PermissionGrantDialog">
         <item name="background">?attr/windowBackground</item>
         <item name="elevation">?attr/windowElevation</item>
-        <item name="layout_weight">@dimen/permissionGrantDialogWidth</item>
-        <item name="layout_width">320dp</item>
+        <item name="layout_weight">@dimen/permissionGrantDialogWeight</item>
+        <item name="layout_width">@dimen/permissionGrantDialogWidth</item>
     </style>
 
     <style name="PermissionGrantTitleIcon">

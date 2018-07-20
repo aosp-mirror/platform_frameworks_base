@@ -17,6 +17,7 @@
 
 <!-- portrait dimensions for the permission grant dialog. -->
 <resources>
-    <!-- 380:20 == 95% width -->
-    <dimen name="permissionGrantDialogWidth">380</dimen>
+    <!-- This yields 95% width -->
+    <dimen name="permissionGrantDialogWeight">380</dimen>
+    <dimen name="permissionGrantDialogWidth">0dp</dimen>
 </resources>
