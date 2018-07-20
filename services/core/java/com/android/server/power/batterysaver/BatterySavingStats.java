@@ -484,6 +484,7 @@ public class BatterySavingStats {
                 (BatterySaverState.MASK << BatterySaverState.SHIFT) |
                 (InteractiveState.MASK << InteractiveState.SHIFT);
 
+        @GuardedBy("BatterySavingStats.this.mLock")
         public void transitionStateLocked(
                 int newState, long now, int batteryLevel, int batteryPercent) {
             final boolean stateChanging =
@@ -503,6 +504,7 @@ public class BatterySavingStats {
             mLastState = newState;
         }
 
+        @GuardedBy("BatterySavingStats.this.mLock")
         void reportLocked(int state, long deltaTimeMs,
                 int startBatteryLevelUa, int startBatteryLevelPercent,
                 int endBatteryLevelUa, int endBatteryLevelPercent) {
