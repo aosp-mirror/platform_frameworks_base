@@ -452,7 +452,6 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int SCAN_NEW_INSTALL = 1<<2;
     static final int SCAN_UPDATE_TIME = 1<<3;
     static final int SCAN_BOOTING = 1<<4;
-    static final int SCAN_DELETE_DATA_ON_FAILURES = 1<<6;
     static final int SCAN_REQUIRE_KNOWN = 1<<7;
     static final int SCAN_MOVE = 1<<8;
     static final int SCAN_INITIAL = 1<<9;
@@ -475,7 +474,6 @@ public class PackageManagerService extends IPackageManager.Stub
             SCAN_NEW_INSTALL,
             SCAN_UPDATE_TIME,
             SCAN_BOOTING,
-            SCAN_DELETE_DATA_ON_FAILURES,
             SCAN_REQUIRE_KNOWN,
             SCAN_MOVE,
             SCAN_INITIAL,
@@ -8951,15 +8949,20 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        final PackageParser.Package scannedPkg = scanPackageNewLI(pkg, parseFlags, scanFlags
+        final ScanResult scanResult = scanPackageNewLI(pkg, parseFlags, scanFlags
                 | SCAN_UPDATE_SIGNATURE, currentTime, user);
+        if (scanResult.success) {
+            synchronized (mPackages) {
+                commitScanResultLocked(scanResult);
+            }
+        }
 
         if (shouldHideSystemApp) {
             synchronized (mPackages) {
                 mSettings.disableSystemPackageLPw(pkg.packageName, true);
             }
         }
-        return scannedPkg;
+        return scanResult.pkgSetting.pkg;
     }
 
     private static void renameStaticSharedLibraryPackage(PackageParser.Package pkg) {
@@ -9985,7 +9988,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @GuardedBy({"mInstallLock", "mPackages"})
-    private PackageParser.Package scanPackageTracedLI(PackageParser.Package pkg,
+    private List<ScanResult> scanPackageTracedLI(PackageParser.Package pkg,
             final @ParseFlags int parseFlags, @ScanFlags int scanFlags, long currentTime,
             @Nullable UserHandle user) throws PackageManagerException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage");
@@ -10002,16 +10005,16 @@ public class PackageManagerService extends IPackageManager.Stub
             scanFlags &= ~SCAN_CHECK_ONLY;
         }
 
-        final PackageParser.Package scannedPkg;
+        final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
+        final List<ScanResult> scanResults = new ArrayList<>(1 + childCount);
         try {
             // Scan the parent
-            scannedPkg = scanPackageNewLI(pkg, parseFlags, scanFlags, currentTime, user);
+            scanResults.add(scanPackageNewLI(pkg, parseFlags, scanFlags, currentTime, user));
             // Scan the children
-            final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
             for (int i = 0; i < childCount; i++) {
                 PackageParser.Package childPkg = pkg.childPackages.get(i);
-                scanPackageNewLI(childPkg, parseFlags,
-                        scanFlags, currentTime, user);
+                scanResults.add(scanPackageNewLI(childPkg, parseFlags,
+                        scanFlags, currentTime, user));
             }
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -10021,11 +10024,13 @@ public class PackageManagerService extends IPackageManager.Stub
             return scanPackageTracedLI(pkg, parseFlags, scanFlags, currentTime, user);
         }
 
-        return scannedPkg;
+        return scanResults;
     }
 
     /** The result of a package scan. */
     private static class ScanResult {
+        /** The request that initiated the scan that produced this result. */
+        public final ScanRequest request;
         /** Whether or not the package scan was successful */
         public final boolean success;
         /**
@@ -10036,9 +10041,10 @@ public class PackageManagerService extends IPackageManager.Stub
         /** ABI code paths that have changed in the package scan */
         @Nullable public final List<String> changedAbiCodePath;
         public ScanResult(
-                boolean success,
+                ScanRequest request, boolean success,
                 @Nullable PackageSetting pkgSetting,
                 @Nullable List<String> changedAbiCodePath) {
+            this.request = request;
             this.success = success;
             this.pkgSetting = pkgSetting;
             this.changedAbiCodePath = changedAbiCodePath;
@@ -10181,7 +10187,7 @@ public class PackageManagerService extends IPackageManager.Stub
     // method. Also, we need to solve the problem of potentially creating a new shared user
     // setting. That can probably be done later and patch things up after the fact.
     @GuardedBy({"mInstallLock", "mPackages"})
-    private PackageParser.Package scanPackageNewLI(@NonNull PackageParser.Package pkg,
+    private ScanResult scanPackageNewLI(@NonNull PackageParser.Package pkg,
             final @ParseFlags int parseFlags, @ScanFlags int scanFlags, long currentTime,
             @Nullable UserHandle user) throws PackageManagerException {
 
@@ -10217,28 +10223,30 @@ public class PackageManagerService extends IPackageManager.Stub
                                 + " packages=" + sharedUserSetting.packages);
                 }
             }
+            final ScanRequest request = new ScanRequest(pkg, sharedUserSetting,
+                    pkgSetting == null ? null : pkgSetting.pkg, pkgSetting, disabledPkgSetting,
+                    originalPkgSetting, realPkgName, parseFlags, scanFlags,
+                    (pkg == mPlatformPackage), user);
+            return scanPackageOnlyLI(request, mFactoryTest, currentTime);
+        }
+    }
 
-            boolean scanSucceeded = false;
-            try {
-                final ScanRequest request = new ScanRequest(pkg, sharedUserSetting,
-                        pkgSetting == null ? null : pkgSetting.pkg, pkgSetting, disabledPkgSetting,
-                        originalPkgSetting, realPkgName, parseFlags, scanFlags,
-                        (pkg == mPlatformPackage), user);
-                final ScanResult result = scanPackageOnlyLI(request, mFactoryTest, currentTime);
-                if (result.success) {
-                    commitScanResultsLocked(request, result);
+
+    private void commitSuccessfulScanResults(@NonNull List<ScanResult> results)
+            throws PackageManagerException {
+        synchronized(mPackages) {
+            for (ScanResult result : results) {
+                // failures should have been caught earlier, but in case it wasn't,
+                // let's double check
+                if (!result.success) {
+                    throw new PackageManagerException(
+                            "Scan failed for " + result.request.pkg.packageName);
                 }
-                scanSucceeded = true;
-            } finally {
-                  if (!scanSucceeded && (scanFlags & SCAN_DELETE_DATA_ON_FAILURES) != 0) {
-                      // DELETE_DATA_ON_FAILURES is only used by frozen paths
-                      destroyAppDataLIF(pkg, UserHandle.USER_ALL,
-                              StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
-                      destroyAppProfilesLIF(pkg, UserHandle.USER_ALL);
-                  }
+            }
+            for (ScanResult result : results) {
+                commitScanResultLocked(result);
             }
         }
-        return pkg;
     }
 
     /**
@@ -10249,8 +10257,8 @@ public class PackageManagerService extends IPackageManager.Stub
      * possible and the system is not left in an inconsistent state.
      */
     @GuardedBy({"mPackages", "mInstallLock"})
-    private void commitScanResultsLocked(@NonNull ScanRequest request, @NonNull ScanResult result)
-            throws PackageManagerException {
+    private void commitScanResultLocked(@NonNull ScanResult result) throws PackageManagerException {
+        final ScanRequest request = result.request;
         final PackageParser.Package pkg = request.pkg;
         final PackageParser.Package oldPkg = request.oldPkg;
         final @ParseFlags int parseFlags = request.parseFlags;
@@ -10831,7 +10839,7 @@ public class PackageManagerService extends IPackageManager.Stub
             pkgSetting.volumeUuid = volumeUuid;
         }
 
-        return new ScanResult(true, pkgSetting, changedAbiCodePath);
+        return new ScanResult(request, true, pkgSetting, changedAbiCodePath);
     }
 
     /**
@@ -16384,14 +16392,18 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         try {
-            PackageParser.Package newPackage = scanPackageTracedLI(pkg, parseFlags, scanFlags,
+            final PackageParser.Package newPackage;
+            List<ScanResult> scanResults = scanPackageTracedLI(pkg, parseFlags, scanFlags,
                     System.currentTimeMillis(), user);
-
+            commitSuccessfulScanResults(scanResults);
+            // TODO(b/109941548): Child packages may return >1 result with the first being the base;
+            // we need to treat child packages as an atomic install and remove this hack
+            final ScanResult basePackageScanResult = scanResults.get(0);
+            newPackage = basePackageScanResult.pkgSetting.pkg;
             updateSettingsLI(newPackage, installerPackageName, null, res, user, installReason);
 
             if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
                 prepareAppDataAfterInstallLIF(newPackage);
-
             } else {
                 // Remove package from internal structures, but keep around any
                 // data that might have already existed
@@ -16399,6 +16411,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         PackageManager.DELETE_KEEP_DATA, res.removedInfo, true, null);
             }
         } catch (PackageManagerException e) {
+            destroyAppDataLIF(pkg, UserHandle.USER_ALL,
+                    StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
+            destroyAppProfilesLIF(pkg, UserHandle.USER_ALL);
             res.setError("Package couldn't be installed in " + pkg.codePath, e);
         }
 
@@ -16655,8 +16670,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     | StorageManager.FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
 
             try {
-                final PackageParser.Package newPackage = scanPackageTracedLI(pkg, parseFlags,
+                final List<ScanResult> scanResults = scanPackageTracedLI(pkg, parseFlags,
                         scanFlags | SCAN_UPDATE_TIME, System.currentTimeMillis(), user);
+                commitSuccessfulScanResults(scanResults);
+                final PackageParser.Package newPackage = scanResults.get(0).pkgSetting.pkg;
                 updateSettingsLI(newPackage, installerPackageName, allUsers, res, user,
                         installReason);
 
@@ -16794,8 +16811,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         PackageParser.Package newPackage = null;
         try {
+            final List<ScanResult> scanResults =
+                    scanPackageTracedLI(pkg, parseFlags, scanFlags, 0, user);
             // Add the package to the internal data structures
-            newPackage = scanPackageTracedLI(pkg, parseFlags, scanFlags, 0, user);
+            commitSuccessfulScanResults(scanResults);
+            newPackage = scanResults.get(0).pkgSetting.pkg;
 
             // Set the update and install times
             PackageSetting deletedPkgSetting = (PackageSetting) deletedPackage.mExtras;
@@ -16852,7 +16872,9 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             // Add back the old system package
             try {
-                scanPackageTracedLI(deletedPackage, parseFlags, SCAN_UPDATE_SIGNATURE, 0, user);
+                final List<ScanResult> scanResults = scanPackageTracedLI(
+                        deletedPackage, parseFlags, SCAN_UPDATE_SIGNATURE, 0, user);
+                commitSuccessfulScanResults(scanResults);
             } catch (PackageManagerException e) {
                 Slog.e(TAG, "Failed to restore original package: " + e.getMessage());
             }
@@ -17663,7 +17685,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 replacePackageLIF(pkg, parseFlags, scanFlags, args.user,
                         installerPackageName, res, args.installReason);
             } else {
-                installNewPackageLIF(pkg, parseFlags, scanFlags | SCAN_DELETE_DATA_ON_FAILURES,
+                installNewPackageLIF(pkg, parseFlags, scanFlags,
                         args.user, installerPackageName, volumeUuid, res, args.installReason);
             }
         }
