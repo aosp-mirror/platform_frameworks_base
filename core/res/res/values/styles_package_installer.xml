@@ -21,6 +21,7 @@
         <item name="background">?attr/windowBackground</item>
         <item name="elevation">?attr/windowElevation</item>
         <item name="layout_weight">@dimen/permissionGrantDialogWidth</item>
+        <item name="layout_width">320dp</item>
     </style>
 
     <style name="PermissionGrantTitleIcon">
