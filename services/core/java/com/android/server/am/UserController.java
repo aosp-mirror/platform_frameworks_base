@@ -269,6 +269,7 @@ class UserController implements Handler.Callback {
         });
     }
 
+    @GuardedBy("mLock")
     List<Integer> getRunningUsersLU() {
         ArrayList<Integer> runningUsers = new ArrayList<>();
         for (Integer userId : mUserLru) {
@@ -293,6 +294,7 @@ class UserController implements Handler.Callback {
         return runningUsers;
     }
 
+    @GuardedBy("mLock")
     void stopRunningUsersLU(int maxRunningUsers) {
         List<Integer> currentlyRunning = getRunningUsersLU();
         Iterator<Integer> iterator = currentlyRunning.iterator();
@@ -595,6 +597,7 @@ class UserController implements Handler.Callback {
      * Stops the user along with its related users. The method calls
      * {@link #getUsersToStopLU(int)} to determine the list of users that should be stopped.
      */
+    @GuardedBy("mLock")
     private int stopUsersLU(final int userId, boolean force, final IStopUserCallback callback) {
         if (userId == UserHandle.USER_SYSTEM) {
             return USER_OP_ERROR_IS_SYSTEM;
@@ -626,6 +629,7 @@ class UserController implements Handler.Callback {
         return USER_OP_SUCCESS;
     }
 
+    @GuardedBy("mLock")
     private void stopSingleUserLU(final int userId, final IStopUserCallback callback) {
         if (DEBUG_MU) Slog.i(TAG, "stopSingleUserLocked userId=" + userId);
         final UserState uss = mStartedUsers.get(userId);
@@ -783,6 +787,7 @@ class UserController implements Handler.Callback {
      * Determines the list of users that should be stopped together with the specified
      * {@code userId}. The returned list includes {@code userId}.
      */
+    @GuardedBy("mLock")
     private @NonNull int[] getUsersToStopLU(int userId) {
         int startedUsersSize = mStartedUsers.size();
         IntArray userIds = new IntArray();
@@ -1368,6 +1373,7 @@ class UserController implements Handler.Callback {
         mUserSwitchObservers.finishBroadcast();
     }
 
+    @GuardedBy("mLock")
     void sendContinueUserSwitchLU(UserState uss, int oldUserId, int newUserId) {
         mCurWaitingUserSwitchCallbacks = null;
         mHandler.removeMessages(USER_SWITCH_TIMEOUT_MSG);
@@ -1581,6 +1587,7 @@ class UserController implements Handler.Callback {
         }
     }
 
+    @GuardedBy("mLock")
     private void updateStartedUserArrayLU() {
         int num = 0;
         for (int i = 0; i < mStartedUsers.size(); i++) {
@@ -1719,6 +1726,7 @@ class UserController implements Handler.Callback {
         }
     }
 
+    @GuardedBy("mLock")
     UserInfo getCurrentUserLU() {
         int userId = mTargetUserId != UserHandle.USER_NULL ? mTargetUserId : mCurrentUserId;
         return getUserInfo(userId);
@@ -1730,11 +1738,13 @@ class UserController implements Handler.Callback {
         }
     }
 
+    @GuardedBy("mLock")
     int getCurrentOrTargetUserIdLU() {
         return mTargetUserId != UserHandle.USER_NULL ? mTargetUserId : mCurrentUserId;
     }
 
 
+    @GuardedBy("mLock")
     int getCurrentUserIdLU() {
         return mCurrentUserId;
     }
@@ -1745,6 +1755,7 @@ class UserController implements Handler.Callback {
         }
     }
 
+    @GuardedBy("mLock")
     private boolean isCurrentUserLU(int userId) {
         return userId == getCurrentOrTargetUserIdLU();
     }
