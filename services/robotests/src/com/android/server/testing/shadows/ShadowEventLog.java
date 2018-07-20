@@ -24,10 +24,12 @@ import org.robolectric.annotation.Implements;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
+/** Don't forget to call {@link ShadowEventLog#setUp()} before every test. */
 @Implements(EventLog.class)
 public class ShadowEventLog {
-    private final static LinkedHashSet<Entry> ENTRIES = new LinkedHashSet<>();
+    private static final LinkedHashSet<Entry> ENTRIES = new LinkedHashSet<>();
 
     @Implementation
     public static int writeEvent(int tag, Object... values) {
@@ -36,11 +38,16 @@ public class ShadowEventLog {
         return 0;
     }
 
-    public static boolean hasEvent(int tag, Object... values) {
-        return ENTRIES.contains(new Entry(tag, Arrays.asList(values)));
+    @Implementation
+    public static int writeEvent(int tag, String string) {
+        return writeEvent(tag, (Object) string);
     }
 
-    /** Clears the entries */
+    public static Set<Entry> getEntries() {
+        return new LinkedHashSet<>(ENTRIES);
+    }
+
+    /** Clears the entries. */
     public static void setUp() {
         ENTRIES.clear();
     }
@@ -67,6 +74,11 @@ public class ShadowEventLog {
             int result = tag;
             result = 31 * result + values.hashCode();
             return result;
+        }
+
+        @Override
+        public String toString() {
+            return "Entry{" + "tag=" + tag + ", values=" + values + '}';
         }
     }
 }

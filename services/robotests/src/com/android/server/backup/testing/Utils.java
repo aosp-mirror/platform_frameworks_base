@@ -14,11 +14,12 @@
  * limitations under the License
  */
 
-package com.android.server.backup;
+package com.android.server.backup.testing;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Iterator;
 
 public class Utils {
     public static final int BUFFER_SIZE = 8192;
@@ -34,6 +35,10 @@ public class Utils {
         while ((read = in.read(buffer)) != -1) {
             out.write(buffer, 0, read);
         }
+    }
+
+    public static <T> Iterable<T> oneTimeIterable(Iterator<T> iterator) {
+        return () -> iterator;
     }
 
     private Utils() {}

@@ -54,6 +54,7 @@ import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
@@ -112,6 +113,11 @@ import java.util.concurrent.CountDownLatch;
  */
 public class PerformBackupTask implements BackupRestoreTask {
     private static final String TAG = "PerformBackupTask";
+    private static final String BLANK_STATE_FILE_NAME = "blank_state";
+    @VisibleForTesting
+    public static final String STAGING_FILE_SUFFIX = ".data";
+    @VisibleForTesting
+    public static final String NEW_STATE_FILE_SUFFIX = ".new";
 
     private BackupManagerService backupManagerService;
     private final Object mCancelLock = new Object();
@@ -651,10 +657,11 @@ public class PerformBackupTask implements BackupRestoreTask {
         }
         backupManagerService.addBackupTrace("invoking " + packageName);
 
-        File blankStateName = new File(mStateDir, "blank_state");
+        File blankStateName = new File(mStateDir, BLANK_STATE_FILE_NAME);
         mSavedStateName = new File(mStateDir, packageName);
-        mBackupDataName = new File(backupManagerService.getDataDir(), packageName + ".data");
-        mNewStateName = new File(mStateDir, packageName + ".new");
+        mBackupDataName =
+                new File(backupManagerService.getDataDir(), packageName + STAGING_FILE_SUFFIX);
+        mNewStateName = new File(mStateDir, packageName + NEW_STATE_FILE_SUFFIX);
         if (MORE_DEBUG) Slog.d(TAG, "data file: " + mBackupDataName);
 
         mSavedState = null;

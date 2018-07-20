@@ -20,6 +20,8 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Intent;
 
+import com.android.server.backup.testing.TransportTestUtils.TransportStatus;
+
 public class TransportData {
     // No constants since new Intent() can't be called in static context because of Robolectric
     public static TransportData backupTransport() {
@@ -66,19 +68,17 @@ public class TransportData {
                 "dataManagementLabel");
     }
 
-    @TransportTestUtils.TransportStatus
-    public int transportStatus;
+    @TransportStatus public int transportStatus;
     public final String transportName;
     private final String transportComponentShort;
-    @Nullable
-    public String transportDirName;
+    @Nullable public String transportDirName;
     @Nullable public Intent configurationIntent;
     @Nullable public String currentDestinationString;
     @Nullable public Intent dataManagementIntent;
     @Nullable public String dataManagementLabel;
 
     private TransportData(
-            @TransportTestUtils.TransportStatus int transportStatus,
+            @TransportStatus int transportStatus,
             String transportName,
             String transportComponentShort,
             String transportDirName,
@@ -105,7 +105,7 @@ public class TransportData {
             Intent dataManagementIntent,
             String dataManagementLabel) {
         this(
-                TransportTestUtils.TransportStatus.REGISTERED_AVAILABLE,
+                TransportStatus.REGISTERED_AVAILABLE,
                 transportName,
                 transportComponentShort,
                 transportDirName,
@@ -125,7 +125,7 @@ public class TransportData {
 
     public TransportData unavailable() {
         return new TransportData(
-                TransportTestUtils.TransportStatus.REGISTERED_UNAVAILABLE,
+                TransportStatus.REGISTERED_UNAVAILABLE,
                 transportName,
                 transportComponentShort,
                 transportDirName,
@@ -137,7 +137,7 @@ public class TransportData {
 
     public TransportData unregistered() {
         return new TransportData(
-                TransportTestUtils.TransportStatus.UNREGISTERED,
+                TransportStatus.UNREGISTERED,
                 transportName,
                 transportComponentShort,
                 transportDirName,
