@@ -20,9 +20,8 @@ import android.annotation.IntDef;
 import android.hardware.hdmi.HdmiDeviceInfo;
 
 /**
- * Defines constants related to HDMI-CEC protocol internal implementation.
- * If a constant will be used in the public api, it should be located in
- * {@link android.hardware.hdmi.HdmiControlManager}.
+ * Defines constants related to HDMI-CEC protocol internal implementation. If a constant will be
+ * used in the public api, it should be located in {@link android.hardware.hdmi.HdmiControlManager}.
  */
 final class Constants {
 
@@ -191,11 +190,11 @@ final class Constants {
 
     // Strategy for device polling.
     // Should use "OR(|) operation of POLL_STRATEGY_XXX and POLL_ITERATION_XXX.
-    static final int POLL_STRATEGY_MASK = 0x3;  // first and second bit.
+    static final int POLL_STRATEGY_MASK = 0x3; // first and second bit.
     static final int POLL_STRATEGY_REMOTES_DEVICES = 0x1;
     static final int POLL_STRATEGY_SYSTEM_AUDIO = 0x2;
 
-    static final int POLL_ITERATION_STRATEGY_MASK = 0x30000;  // first and second bit.
+    static final int POLL_ITERATION_STRATEGY_MASK = 0x30000; // first and second bit.
     static final int POLL_ITERATION_IN_ORDER = 0x10000;
     static final int POLL_ITERATION_REVERSE_ORDER = 0x20000;
 
@@ -209,6 +208,7 @@ final class Constants {
         NEVER_SYSTEM_AUDIO_CONTROL_ON_POWER_ON
     })
     @interface SystemAudioControlOnPowerOn {}
+
     static final int ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON = 0;
     static final int USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON = 1;
     static final int NEVER_SYSTEM_AUDIO_CONTROL_ON_POWER_ON = 2;
@@ -237,11 +237,11 @@ final class Constants {
     // TODO(UI): Set this from UI to decide if turn on System Audio Mode when power on the device
     /**
      * Property to decide if turn on the system audio control when power on the device.
-     * Default is always turn on.
-     * State must be a valid {@link SystemAudioControlOnPowerOn} int.
+     *
+     * <p>Default is always turn on. State must be a valid {@link SystemAudioControlOnPowerOn} int.
      */
     static final String PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON =
-        "persist.sys.hdmi.system_audio_control_on_power_on";
+            "persist.sys.hdmi.system_audio_control_on_power_on";
 
     /**
      * Property to record last state of system audio control before device powered off.
@@ -250,7 +250,7 @@ final class Constants {
      * <p>State must be true or false. Default true.
      */
     static final String PROPERTY_LAST_SYSTEM_AUDIO_CONTROL =
-        "persist.sys.hdmi.last_system_audio_control";
+            "persist.sys.hdmi.last_system_audio_control";
 
     /**
      * Property to save the audio port to switch to when system audio control is on.
@@ -293,5 +293,7 @@ final class Constants {
     static final int DISABLED = 0;
     static final int ENABLED = 1;
 
-    private Constants() { /* cannot be instantiated */ }
+    private Constants() {
+        /* cannot be instantiated */
+    }
 }
