@@ -1817,7 +1817,7 @@
     <string name="app_category_social" msgid="5842783057834965912">"Սոցցանցեր և հաղորդակցություն"</string>
     <string name="app_category_news" msgid="7496506240743986873">"Նորություններ և ամսագրեր"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"Քարտեզներ և նավարկում"</string>
-    <string name="app_category_productivity" msgid="3742083261781538852">"Աշխատանք"</string>
+    <string name="app_category_productivity" msgid="3742083261781538852">"Արդյունավետություն"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"Սարքի հիշողություն"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB վրիպազերծում"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"ժամ"</string>

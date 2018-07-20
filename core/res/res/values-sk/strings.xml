@@ -425,7 +425,7 @@
     <string name="permlab_vibrate" msgid="7696427026057705834">"ovládať vibrovanie"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Umožňuje aplikácii ovládať vibrácie."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"priamo volať na telefónne čísla"</string>
-    <string name="permdesc_callPhone" msgid="3740797576113760827">"Umožňuje aplikácii volať telefónne čísla bez vášho zásahu. V dôsledku toho sa môžu účtovať neočakávané poplatky alebo sa môžu uskutočniť neočakávané hovory. Toto povolenie neumožňuje aplikácii volať na čísla tiesňového volania."</string>
+    <string name="permdesc_callPhone" msgid="3740797576113760827">"Umožňuje aplikácii volať telefónne čísla bez vášho zásahu. V dôsledku toho sa môžu účtovať neočakávané poplatky alebo sa môžu uskutočniť neočakávané hovory. Toto povolenie neumožňuje aplikácii volať na tiesňovú linku."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"prístup k službe volania IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Umožňuje aplikácii používať službu okamžitých správ (IMS) na volanie bez intervencie používateľa."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"čítať stav a identitu telefónu"</string>
@@ -735,7 +735,7 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Zadajte kód PIN na odomknutie"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Nesprávny kód PIN."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Ak chcete telefón odomknúť, stlačte Menu a následne 0."</string>
-    <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Číslo tiesňovej linky"</string>
+    <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Tiesňová linka"</string>
     <string name="lockscreen_carrier_default" msgid="6169005837238288522">"Žiadny signál"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Obrazovka je uzamknutá."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Ak chcete odomknúť telefón alebo uskutočniť tiesňové volanie, stlačte Menu."</string>

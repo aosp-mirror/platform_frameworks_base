@@ -1930,7 +1930,7 @@
     <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> адсутнічае"</string>
     <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"Дзеянні з SIM <xliff:g id="SIMNUMBER">%d</xliff:g> не дазволены"</string>
     <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"Дзеянні з SIM <xliff:g id="SIMNUMBER">%d</xliff:g> не дазволены"</string>
-    <string name="popup_window_default_title" msgid="4874318849712115433">"Выплыўное акно"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"Усплывальнае акно"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Ярлык адносіцца да старэйшай версіі праграмы або несумяшчальны з ёю"</string>
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Не атрымалася аднавіць ярлык, бо праграма не падтрымлівае рэзервовае капіраванне і аднаўленне"</string>

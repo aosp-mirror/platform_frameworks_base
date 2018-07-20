@@ -757,7 +757,7 @@
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"Токтотуу"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Артка түрүү"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Алдыга түрүү"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Шашылыш чалуу гана"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Өзгөчө кырдаалда гана чалууга болот"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Тармак кулпуланган"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-карта PUK-бөгөттө."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Колдонуучунун нускамасын караңыз же Кардарларды тейлөө борборуна кайрылыңыз."</string>
