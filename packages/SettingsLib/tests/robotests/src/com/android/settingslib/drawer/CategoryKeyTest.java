@@ -20,13 +20,15 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.util.ArraySet;
 
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.Set;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class CategoryKeyTest {
 
     @Test

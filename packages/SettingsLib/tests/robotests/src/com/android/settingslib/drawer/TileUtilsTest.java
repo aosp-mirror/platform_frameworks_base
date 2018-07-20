@@ -178,7 +178,7 @@ public class TileUtilsTest {
                 .thenReturn(info);
 
         List<DashboardCategory> categoryList = TileUtils.getCategories(
-                mContext, cache, testAction, TileUtils.SETTING_PKG);
+                mContext, cache, testAction, CategoryManager.SETTING_PKG);
         assertThat(categoryList.get(0).getTile(0).category).isEqualTo(testCategory);
     }
 
@@ -193,12 +193,12 @@ public class TileUtilsTest {
         userHandleList.add(new UserHandle(ActivityManager.getCurrentUser()));
         when(mUserManager.getUserProfiles()).thenReturn(userHandleList);
 
-        TileUtils.getCategories(mContext, cache, null /* action */, TileUtils.SETTING_PKG);
+        TileUtils.getCategories(mContext, cache, null /* action */, CategoryManager.SETTING_PKG);
         verify(mPackageManager, atLeastOnce()).queryIntentActivitiesAsUser(
                 intentCaptor.capture(), anyInt(), anyInt());
 
         assertThat(intentCaptor.getAllValues().get(0).getPackage())
-                .isEqualTo(TileUtils.SETTING_PKG);
+                .isEqualTo(CategoryManager.SETTING_PKG);
     }
 
     @Test
