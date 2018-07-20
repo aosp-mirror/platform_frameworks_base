@@ -1913,6 +1913,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return startInputInnerLocked();
     }
 
+    @GuardedBy("mMethodMap")
     InputBindResult startInputInnerLocked() {
         if (mCurMethodId == null) {
             return InputBindResult.NO_IME;
@@ -2549,6 +2550,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @GuardedBy("mMethodMap")
     boolean showCurrentInputLocked(int flags, ResultReceiver resultReceiver) {
         mShowRequested = true;
         if (mAccessibilityRequestingNoSoftKeyboard) {
