@@ -648,7 +648,7 @@ public class AppWindowContainerController
     public void pauseKeyDispatching() {
         synchronized (mWindowMap) {
             if (mContainer != null) {
-                mService.mInputMonitor.pauseDispatchingLw(mContainer);
+                mContainer.getDisplayContent().getInputMonitor().pauseDispatchingLw(mContainer);
             }
         }
     }
@@ -656,7 +656,7 @@ public class AppWindowContainerController
     public void resumeKeyDispatching() {
         synchronized (mWindowMap) {
             if (mContainer != null) {
-                mService.mInputMonitor.resumeDispatchingLw(mContainer);
+                mContainer.getDisplayContent().getInputMonitor().resumeDispatchingLw(mContainer);
             }
         }
     }

@@ -53,6 +53,7 @@ import com.google.android.collect.Sets;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
+import com.android.server.input.InputWindowHandle;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.utils.InsetUtils;
 
@@ -201,7 +202,9 @@ public class RecentsAnimationController implements DeathRecipient {
                     }
 
                     mInputConsumerEnabled = enabled;
-                    mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
+                    final InputMonitor inputMonitor =
+                            mService.mRoot.getDisplayContent(mDisplayId).getInputMonitor();
+                    inputMonitor.updateInputWindowsLw(true /*force*/);
                     mService.scheduleAnimationLocked();
                 }
             } finally {
@@ -438,8 +441,10 @@ public class RecentsAnimationController implements DeathRecipient {
         mCanceled = true;
 
         // Clear associated input consumers
-        mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
-        mService.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
+        final InputMonitor inputMonitor =
+                mService.mRoot.getDisplayContent(mDisplayId).getInputMonitor();
+        inputMonitor.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
+        inputMonitor.updateInputWindowsLw(true /*force*/);
 
         // We have deferred all notifications to the target app as a part of the recents animation,
         // so if we are actually transitioning there, notify again here
@@ -497,7 +502,7 @@ public class RecentsAnimationController implements DeathRecipient {
         return mInputConsumerEnabled && isAnimatingApp(appToken);
     }
 
-    boolean updateInputConsumerForApp(InputConsumerImpl recentsAnimationInputConsumer,
+    boolean updateInputConsumerForApp(InputWindowHandle inputWindowHandle,
             boolean hasFocus) {
         // Update the input consumer touchable region to match the target app main window
         final WindowState targetAppMainWindow = mTargetAppToken != null
@@ -505,8 +510,8 @@ public class RecentsAnimationController implements DeathRecipient {
                 : null;
         if (targetAppMainWindow != null) {
             targetAppMainWindow.getBounds(mTmpRect);
-            recentsAnimationInputConsumer.mWindowHandle.hasFocus = hasFocus;
-            recentsAnimationInputConsumer.mWindowHandle.touchableRegion.set(mTmpRect);
+            inputWindowHandle.hasFocus = hasFocus;
+            inputWindowHandle.touchableRegion.set(mTmpRect);
             return true;
         }
         return false;

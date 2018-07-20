@@ -401,6 +401,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private MagnificationSpec mMagnificationSpec;
 
+    private InputMonitor mInputMonitor;
+
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final AppWindowToken atoken = w.mAppToken;
@@ -798,6 +800,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // TODO(b/62541591): evaluate whether this is the best spot to declare the
         // {@link DisplayContent} ready for use.
         mDisplayReady = true;
+
+        mInputMonitor = new InputMonitor(service, mDisplayId);
     }
 
     boolean isReady() {
@@ -2362,6 +2366,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         pw.println();
         mDisplayFrames.dump(prefix, pw);
+        pw.println();
+        mInputMonitor.dump(pw, "  ");
     }
 
     @Override
@@ -2472,9 +2478,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             assignWindowLayers(false /* setLayoutNeeded */);
         }
 
-        mService.mInputMonitor.setUpdateInputWindowsNeededLw();
+        mInputMonitor.setUpdateInputWindowsNeededLw();
         mService.mWindowPlacerLocked.performSurfacePlacement();
-        mService.mInputMonitor.updateInputWindowsLw(false /*force*/);
+        mInputMonitor.updateInputWindowsLw(false /*force*/);
     }
 
     /** Returns true if a leaked surface was destroyed */
@@ -3057,10 +3063,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         forAllWindows(mPerformLayoutAttached, true /* traverseTopToBottom */);
 
         // Window frames may have changed. Tell the input dispatcher about it.
-        mService.mInputMonitor.layoutInputConsumers(dw, dh);
-        mService.mInputMonitor.setUpdateInputWindowsNeededLw();
+        mInputMonitor.layoutInputConsumers(dw, dh);
+        mInputMonitor.setUpdateInputWindowsNeededLw();
         if (updateInputWindows) {
-            mService.mInputMonitor.updateInputWindowsLw(false /*force*/);
+            mInputMonitor.updateInputWindowsLw(false /*force*/);
         }
 
         mService.mH.sendEmptyMessage(UPDATE_DOCKED_STACK_DIVIDER);
@@ -4106,5 +4112,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     private boolean canUpdateImeTarget() {
         return mDeferUpdateImeTargetCount == 0;
+    }
+
+    InputMonitor getInputMonitor() {
+        return mInputMonitor;
     }
 }

@@ -2025,7 +2025,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     // Set up a replacement input channel since the app is now dead.
                     // We need to catch tapping on the dead window to restart the app.
                     openInputChannel(null);
-                    mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
+                    getDisplayContent().getInputMonitor().updateInputWindowsLw(true /*force*/);
                     return;
                 }
 
@@ -2092,7 +2092,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 UPDATE_FOCUS_WILL_PLACE_SURFACES, false /*updateInputWindows*/);
         mService.mWindowPlacerLocked.performSurfacePlacement();
         if (focusChanged) {
-            mService.mInputMonitor.updateInputWindowsLw(false /*force*/);
+            getDisplayContent().getInputMonitor().updateInputWindowsLw(false /*force*/);
         }
     }
 

@@ -38,7 +38,6 @@ import com.android.server.input.InputWindowHandle;
 class TaskPositioningController {
     private final WindowManagerService mService;
     private final InputManagerService mInputManager;
-    private final InputMonitor mInputMonitor;
     private final IActivityTaskManager mActivityManager;
     private final Handler mHandler;
 
@@ -54,9 +53,8 @@ class TaskPositioningController {
     }
 
     TaskPositioningController(WindowManagerService service, InputManagerService inputManager,
-            InputMonitor inputMonitor, IActivityTaskManager activityManager, Looper looper) {
+            IActivityTaskManager activityManager, Looper looper) {
         mService = service;
-        mInputMonitor = inputMonitor;
         mInputManager = inputManager;
         mActivityManager = activityManager;
         mHandler = new Handler(looper);
@@ -129,7 +127,7 @@ class TaskPositioningController {
         Display display = displayContent.getDisplay();
         mTaskPositioner = TaskPositioner.create(mService);
         mTaskPositioner.register(displayContent);
-        mInputMonitor.updateInputWindowsLw(true /*force*/);
+        displayContent.getInputMonitor().updateInputWindowsLw(true /*force*/);
 
         // We need to grab the touch focus so that the touch events during the
         // resizing/scrolling are not sent to the app. 'win' is the main window
@@ -145,7 +143,7 @@ class TaskPositioningController {
             Slog.e(TAG_WM, "startPositioningLocked: Unable to transfer touch focus");
             mTaskPositioner.unregister();
             mTaskPositioner = null;
-            mInputMonitor.updateInputWindowsLw(true /*force*/);
+            displayContent.getInputMonitor().updateInputWindowsLw(true /*force*/);
             return false;
         }
 
@@ -161,7 +159,6 @@ class TaskPositioningController {
                 if (mTaskPositioner != null) {
                     mTaskPositioner.unregister();
                     mTaskPositioner = null;
-                    mInputMonitor.updateInputWindowsLw(true /*force*/);
                 }
             }
         });
