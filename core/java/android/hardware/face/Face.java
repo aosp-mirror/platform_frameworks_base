@@ -26,47 +26,13 @@ import android.os.Parcelable;
  * @hide
  */
 public final class Face extends BiometricAuthenticator.Identifier {
-    private CharSequence mName;
-    private int mFaceId;
-    private long mDeviceId; // physical device this face is associated with
 
     public Face(CharSequence name, int faceId, long deviceId) {
-        mName = name;
-        mFaceId = faceId;
-        mDeviceId = deviceId;
+        super(name, faceId, deviceId);
     }
 
     private Face(Parcel in) {
-        mName = in.readString();
-        mFaceId = in.readInt();
-        mDeviceId = in.readLong();
-    }
-
-    /**
-     * Gets the human-readable name for the given fingerprint.
-     * @return name given to finger
-     */
-    public CharSequence getName() {
-        return mName;
-    }
-
-    /**
-     * Gets the device-specific finger id.  Used by Settings to map a name to a specific
-     * fingerprint template.
-     * @return device-specific id for this finger
-     * @hide
-     */
-    public int getFaceId() {
-        return mFaceId;
-    }
-
-    /**
-     * Device this face belongs to.
-     *
-     * @hide
-     */
-    public long getDeviceId() {
-        return mDeviceId;
+        super(in.readString(), in.readInt(), in.readLong());
     }
 
     /**
@@ -83,9 +49,9 @@ public final class Face extends BiometricAuthenticator.Identifier {
      * @param flags Additional flags about how the object should be written.
      */
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(mName.toString());
-        out.writeInt(mFaceId);
-        out.writeLong(mDeviceId);
+        out.writeString(getName().toString());
+        out.writeInt(getBiometricId());
+        out.writeLong(getDeviceId());
     }
 
     public static final Parcelable.Creator<Face> CREATOR = new Parcelable.Creator<Face>() {

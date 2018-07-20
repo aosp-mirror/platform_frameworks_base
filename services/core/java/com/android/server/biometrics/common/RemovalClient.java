@@ -110,7 +110,8 @@ public abstract class RemovalClient extends ClientMonitor {
     }
 
     @Override
-    public boolean onAuthenticated(int biometricId, int groupId) {
+    public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
+            boolean authenticated) {
         if (DEBUG) Slog.w(getLogTag(), "onAuthenticated() called for remove!");
         return true; // Invalid for Remove.
     }
