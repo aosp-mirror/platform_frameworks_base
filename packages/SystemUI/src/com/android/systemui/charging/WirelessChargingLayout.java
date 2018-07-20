@@ -20,10 +20,12 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Color;
+import android.graphics.drawable.Animatable;
 import android.util.AttributeSet;
+import android.view.ContextThemeWrapper;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.systemui.Interpolators;
@@ -58,18 +60,21 @@ public class WirelessChargingLayout extends FrameLayout {
 
     private void init(Context context, AttributeSet attrs, int batteryLevel, boolean isDozing) {
         final int mBatteryLevel = batteryLevel;
-        inflate(context, R.layout.wireless_charging_layout, this);
+
+        // set style based on background
+        int style = R.style.ChargingAnim_WallpaperBackground;
+        if (isDozing) {
+            style = R.style.ChargingAnim_DarkBackground;
+        }
+
+        inflate(new ContextThemeWrapper(context, style), R.layout.wireless_charging_layout, this);
 
         // where the circle animation occurs:
-        final WirelessChargingView mChargingView = findViewById(R.id.wireless_charging_view);
+        final ImageView chargingView = findViewById(R.id.wireless_charging_view);
+        final Animatable chargingAnimation = (Animatable) chargingView.getDrawable();
 
         // amount of battery:
         final TextView mPercentage = findViewById(R.id.wireless_charging_percentage);
-
-        if (isDozing) {
-            mChargingView.setPaintColor(Color.WHITE);
-            mPercentage.setTextColor(Color.WHITE);
-        }
 
         if (batteryLevel != UNKNOWN_BATTERY_LEVEL) {
             mPercentage.setText(NumberFormat.getPercentInstance().format(mBatteryLevel / 100f));
@@ -106,17 +111,10 @@ public class WirelessChargingLayout extends FrameLayout {
         textFadeAnimator.setInterpolator(Interpolators.LINEAR);
         textFadeAnimator.setStartDelay(chargingAnimationFadeStartOffset);
 
-        // Animation Opacity: wireless charging circle animation fades from 1 to 0 opacity
-        ValueAnimator circleFadeAnimator = ObjectAnimator.ofFloat(mChargingView, "alpha",
-                1, 0);
-        circleFadeAnimator.setDuration(chargingAnimationFadeDuration);
-        circleFadeAnimator.setInterpolator(Interpolators.LINEAR);
-        circleFadeAnimator.setStartDelay(chargingAnimationFadeStartOffset);
-
         // play all animations together
         AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.playTogether(textSizeAnimator, textOpacityAnimator, textFadeAnimator,
-                circleFadeAnimator);
+        animatorSet.playTogether(textSizeAnimator, textOpacityAnimator, textFadeAnimator);
+        chargingAnimation.start();
         animatorSet.start();
     }
 }
