@@ -22,6 +22,7 @@ import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_FOTA;
 import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
 import static android.net.ConnectivityManager.TYPE_NONE;
+import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.NetworkCapabilities.*;
@@ -102,6 +103,7 @@ import com.android.server.connectivity.MockableSystemProperties;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
 import com.android.server.connectivity.NetworkMonitor.CaptivePortalProbeResult;
+import com.android.server.connectivity.Vpn;
 import com.android.server.net.NetworkPinner;
 import com.android.server.net.NetworkPolicyManagerInternal;
 
@@ -332,6 +334,9 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                     break;
                 case TRANSPORT_WIFI_AWARE:
                     mScore = 20;
+                    break;
+                case TRANSPORT_VPN:
+                    mScore = 0;
                     break;
                 default:
                     throw new UnsupportedOperationException("unimplemented network type");
@@ -868,6 +873,8 @@ public class ConnectivityServiceTest extends AndroidTestCase {
                 return TYPE_WIFI;
             case TRANSPORT_CELLULAR:
                 return TYPE_MOBILE;
+            case TRANSPORT_VPN:
+                return TYPE_VPN;
             default:
                 return TYPE_NONE;
         }
@@ -3446,5 +3453,85 @@ public class ConnectivityServiceTest extends AndroidTestCase {
             }
             return;
         }
+    }
+
+    @SmallTest
+    public void testVpnNetworkMetered() {
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        mCm.registerDefaultNetworkCallback(callback);
+
+        final NetworkRequest cellRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_CELLULAR).build();
+        final TestNetworkCallback cellCallback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(cellRequest, cellCallback);
+
+        // Setup cellular
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.connect(true);
+        callback.expectAvailableAndValidatedCallbacks(mCellNetworkAgent);
+        cellCallback.expectAvailableAndValidatedCallbacks(mCellNetworkAgent);
+        verifyActiveNetwork(TRANSPORT_CELLULAR);
+
+        // Verify meteredness of cellular
+        assertTrue(mCm.isActiveNetworkMetered());
+
+        // Setup Wifi
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(true);
+        callback.expectAvailableAndValidatedCallbacks(mWiFiNetworkAgent);
+        cellCallback.expectCallback(CallbackState.LOSING, mCellNetworkAgent);
+        verifyActiveNetwork(TRANSPORT_WIFI);
+
+        // Verify meteredness of WiFi
+        assertTrue(mCm.isActiveNetworkMetered());
+
+        // Verify that setting unmetered on Wifi changes ActiveNetworkMetered
+        mWiFiNetworkAgent.addCapability(NET_CAPABILITY_NOT_METERED);
+        callback.expectCapabilitiesWith(NET_CAPABILITY_NOT_METERED, mWiFiNetworkAgent);
+        assertFalse(mCm.isActiveNetworkMetered());
+
+        // Setup VPN
+        final MockNetworkAgent vpnNetworkAgent = new MockNetworkAgent(TRANSPORT_VPN);
+        vpnNetworkAgent.connect(true);
+
+        Vpn mockVpn = mock(Vpn.class);
+        when(mockVpn.appliesToUid(anyInt())).thenReturn(true);
+        when(mockVpn.getNetId()).thenReturn(vpnNetworkAgent.getNetwork().netId);
+
+        Vpn oldVpn = mService.getVpn(UserHandle.myUserId());
+        mService.setVpn(UserHandle.myUserId(), mockVpn);
+        assertEquals(vpnNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+
+        // Verify meteredness of VPN on default network
+        when(mockVpn.getUnderlyingNetworks()).thenReturn(null);
+        assertFalse(mCm.isActiveNetworkMetered());
+        assertFalse(mCm.isActiveNetworkMeteredForUid(Process.myUid()));
+
+        // Verify meteredness of VPN on unmetered wifi
+        when(mockVpn.getUnderlyingNetworks())
+                .thenReturn(new Network[] {mWiFiNetworkAgent.getNetwork()});
+        assertFalse(mCm.isActiveNetworkMetered());
+        assertFalse(mCm.isActiveNetworkMeteredForUid(Process.myUid()));
+
+        // Set WiFi as metered, then check to see that it has been updated on the VPN
+        mWiFiNetworkAgent.removeCapability(NET_CAPABILITY_NOT_METERED);
+        callback.expectCapabilitiesWithout(NET_CAPABILITY_NOT_METERED, mWiFiNetworkAgent);
+        assertTrue(mCm.isActiveNetworkMetered());
+        assertTrue(mCm.isActiveNetworkMeteredForUid(Process.myUid()));
+
+        // Switch to cellular
+        when(mockVpn.getUnderlyingNetworks())
+                .thenReturn(new Network[] {mCellNetworkAgent.getNetwork()});
+        assertTrue(mCm.isActiveNetworkMetered());
+        assertTrue(mCm.isActiveNetworkMeteredForUid(Process.myUid()));
+
+        // Test unmetered cellular
+        mCellNetworkAgent.addCapability(NET_CAPABILITY_NOT_METERED);
+        cellCallback.expectCapabilitiesWith(NET_CAPABILITY_NOT_METERED, mCellNetworkAgent);
+        assertFalse(mCm.isActiveNetworkMetered());
+        assertFalse(mCm.isActiveNetworkMeteredForUid(Process.myUid()));
+
+        mService.setVpn(UserHandle.myUserId(), oldVpn);
+        mCm.unregisterNetworkCallback(callback);
     }
 }
