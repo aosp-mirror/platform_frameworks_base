@@ -2271,6 +2271,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         return ruleName;
     }
 
+    @GuardedBy("mRulesLock")
     private @NonNull SparseIntArray getUidFirewallRulesLR(int chain) {
         switch (chain) {
             case FIREWALL_CHAIN_STANDBY:
