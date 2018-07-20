@@ -21,7 +21,10 @@ import static android.net.CaptivePortal.APP_RETURN_UNWANTED;
 import static android.net.CaptivePortal.APP_RETURN_WANTED_AS_IS;
 import static android.net.ConnectivityManager.EXTRA_CAPTIVE_PORTAL_PROBE_SPEC;
 import static android.net.ConnectivityManager.EXTRA_CAPTIVE_PORTAL_URL;
+import static android.net.metrics.ValidationProbeEvent.DNS_FAILURE;
+import static android.net.metrics.ValidationProbeEvent.DNS_SUCCESS;
 import static android.net.metrics.ValidationProbeEvent.PROBE_FALLBACK;
+import static android.net.metrics.ValidationProbeEvent.PROBE_PRIVDNS;
 
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -799,8 +802,10 @@ public class NetworkMonitor extends StateMachine {
                 final InetAddress[] ips = ResolvUtil.blockingResolveAllLocally(
                         mNetwork, mPrivateDnsProviderHostname, 0 /* aiFlags */);
                 mPrivateDnsConfig = new PrivateDnsConfig(mPrivateDnsProviderHostname, ips);
+                validationLog("Strict mode hostname resolved: " + mPrivateDnsConfig);
             } catch (UnknownHostException uhe) {
                 mPrivateDnsConfig = null;
+                validationLog("Strict mode hostname resolution failed: " + uhe.getMessage());
             }
         }
 
@@ -829,10 +834,21 @@ public class NetworkMonitor extends StateMachine {
             final String ONE_TIME_HOSTNAME_SUFFIX = "-dnsotls-ds.metric.gstatic.com";
             final String host = UUID.randomUUID().toString().substring(0, 8) +
                     ONE_TIME_HOSTNAME_SUFFIX;
+            final Stopwatch watch = new Stopwatch().start();
             try {
                 final InetAddress[] ips = mNetworkAgentInfo.network().getAllByName(host);
-                return (ips != null && ips.length > 0);
-            } catch (UnknownHostException uhe) {}
+                final long time = watch.stop();
+                final String strIps = Arrays.toString(ips);
+                final boolean success = (ips != null && ips.length > 0);
+                validationLog(PROBE_PRIVDNS, host, String.format("%dms: %s", time, strIps));
+                logValidationProbe(time, PROBE_PRIVDNS, success ? DNS_SUCCESS : DNS_FAILURE);
+                return success;
+            } catch (UnknownHostException uhe) {
+                final long time = watch.stop();
+                validationLog(PROBE_PRIVDNS, host,
+                        String.format("%dms - Error: %s", time, uhe.getMessage()));
+                logValidationProbe(time, PROBE_PRIVDNS, DNS_FAILURE);
+            }
             return false;
         }
     }
