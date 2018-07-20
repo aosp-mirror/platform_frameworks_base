@@ -629,6 +629,11 @@ public class KeyguardViewMediator extends SystemUI {
         }
 
         @Override
+        public void onCancelClicked() {
+            mStatusBarKeyguardViewManager.onCancelClicked();
+        }
+
+        @Override
         public void onBouncerVisiblityChanged(boolean shown) {
             synchronized (KeyguardViewMediator.this) {
                 adjustStatusBarLocked(shown);

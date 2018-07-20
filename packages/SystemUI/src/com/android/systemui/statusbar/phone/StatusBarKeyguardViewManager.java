@@ -693,6 +693,14 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 false /* delayed */, speedUpFactor);
     }
 
+
+    /**
+     * Called when cancel button in bouncer is pressed.
+     */
+    public void onCancelClicked() {
+        // No-op
+    }
+
     /**
      * Notifies that the user has authenticated by other means than using the bouncer, for example,
      * fingerprint.

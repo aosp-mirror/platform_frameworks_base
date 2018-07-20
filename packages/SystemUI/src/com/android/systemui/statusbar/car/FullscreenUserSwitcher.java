@@ -62,10 +62,8 @@ public class FullscreenUserSwitcher {
     }
 
     public void show() {
-        // On a switch from the system user, don't show the user switcher
-        if (mUserManagerHelper.isHeadlessSystemUser() && mUserManagerHelper
-            .userIsSystemUser(mUserManagerHelper.getForegroundUserInfo())) {
-            return;
+        if (mUserManagerHelper.isHeadlessSystemUser()) {
+            showUserGrid();
         }
         if (mShowing) {
             return;
@@ -99,11 +97,23 @@ public class FullscreenUserSwitcher {
     }
 
     private void onUserSelected(UserGridRecyclerView.UserRecord record) {
+        if (mUserManagerHelper.isHeadlessSystemUser()) {
+            hideUserGrid();
+        }
+
         if (record.mIsForeground) {
             dismissKeyguard();
             return;
         }
         toggleSwitchInProgress(true);
+    }
+
+    private void showUserGrid() {
+        mUserGridView.setVisibility(View.VISIBLE);
+    }
+
+    private void hideUserGrid() {
+        mUserGridView.setVisibility(View.INVISIBLE);
     }
 
     // Dismisses the keyguard and shows bouncer if authentication is necessary.

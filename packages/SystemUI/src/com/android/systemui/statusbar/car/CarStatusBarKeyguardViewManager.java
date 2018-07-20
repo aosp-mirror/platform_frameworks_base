@@ -39,4 +39,13 @@ public class CarStatusBarKeyguardViewManager extends StatusBarKeyguardViewManage
     protected boolean shouldDestroyViewOnReset() {
         return true;
     }
+
+    /**
+     * Called when cancel button in bouncer is pressed.
+     */
+    @Override
+    public void onCancelClicked() {
+        CarStatusBar statusBar = (CarStatusBar) mStatusBar;
+        statusBar.showUserSwitcher();
+    }
 }
