@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> লুকাবেন?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"আপনি পরের বার সেটিংস-এ এটি চালু করলে এটি উপস্থিত হবে"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"লুকান"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"আপনি আপনার কাজের প্রোফাইল ব্যবহার করছেন"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"কল"</string>
     <string name="stream_system" msgid="7493299064422163147">"সিস্টেম"</string>
     <string name="stream_ring" msgid="8213049469184048338">"রিং"</string>
