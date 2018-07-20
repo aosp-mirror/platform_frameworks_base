@@ -268,10 +268,7 @@ class TouchExplorer extends BaseEventStreamTransformation
 
         mReceivedPointerTracker.onMotionEvent(rawEvent);
 
-        // The motion detector is interested in the movements in physical space,
-        // so it uses the rawEvent to ignore magnification and other
-        // transformations.
-        if (mGestureDetector.onMotionEvent(rawEvent, policyFlags)) {
+        if (mGestureDetector.onMotionEvent(event, rawEvent, policyFlags)) {
             // Event was handled by the gesture detector.
             return;
         }
