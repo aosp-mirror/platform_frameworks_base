@@ -1717,6 +1717,38 @@ public class HdmiControlService extends SystemService {
         }
 
         @Override
+        public void reportAudioStatus(final int deviceType, final int volume, final int maxVolume,
+                final boolean isMute) {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiCecLocalDevice device = mCecController.getLocalDevice(deviceType);
+                    if (device == null) {
+                        Slog.w(TAG, "Local device not available");
+                        return;
+                    }
+                    if (audioSystem() == null) {
+                        Slog.w(TAG, "audio system is not available");
+                        return;
+                    }
+                    if (audioSystem().mSystemAudioSource == null) {
+                        Slog.w(TAG, "audio system is not in system audio mode");
+                        return;
+                    }
+                    int scaledVolume = VolumeControlAction.scaleToCecVolume(volume, maxVolume);
+
+                    sendCecCommand(HdmiCecMessageBuilder
+                            .buildReportAudioStatus(
+                                    device.getDeviceInfo().getLogicalAddress(),
+                                    audioSystem().mSystemAudioSource,
+                                    scaledVolume,
+                                    isMute));
+                }
+            });
+        }
+
+        @Override
         protected void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, writer)) return;
             final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
@@ -2009,6 +2041,10 @@ public class HdmiControlService extends SystemService {
         return mLocalDevices.contains(HdmiDeviceInfo.DEVICE_TV);
     }
 
+    boolean isAudioSystemDevice() {
+        return mLocalDevices.contains(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+    }
+
     boolean isTvDeviceEnabled() {
         return isTvDevice() && tv() != null;
     }
@@ -2016,6 +2052,11 @@ public class HdmiControlService extends SystemService {
     private HdmiCecLocalDevicePlayback playback() {
         return (HdmiCecLocalDevicePlayback)
                 mCecController.getLocalDevice(HdmiDeviceInfo.DEVICE_PLAYBACK);
+    }
+
+    public HdmiCecLocalDeviceAudioSystem audioSystem() {
+        return (HdmiCecLocalDeviceAudioSystem) mCecController.getLocalDevice(
+                HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
     }
 
     AudioManager getAudioManager() {
@@ -2192,8 +2233,10 @@ public class HdmiControlService extends SystemService {
             device.onStandby(mStandbyMessageReceived, standbyAction);
         }
         mStandbyMessageReceived = false;
-        mCecController.setOption(OptionKey.SYSTEM_CEC_CONTROL, false);
-        mMhlController.setOption(OPTION_MHL_SERVICE_CONTROL, DISABLED);
+        if (!isAudioSystemDevice()) {
+            mCecController.setOption(OptionKey.SYSTEM_CEC_CONTROL, false);
+            mMhlController.setOption(OPTION_MHL_SERVICE_CONTROL, DISABLED);
+        }
     }
 
     private void addVendorCommandListener(IHdmiVendorCommandListener listener, int deviceType) {

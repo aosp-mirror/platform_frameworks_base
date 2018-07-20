@@ -16,6 +16,7 @@
 package com.android.server.hdmi;
 
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
+import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.Constants.ADDR_UNREGISTERED;
@@ -25,7 +26,9 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
+import android.os.PowerManager;
 import android.os.test.TestLooper;
 import android.support.test.filters.SmallTest;
 import android.os.MessageQueue;
@@ -91,10 +94,29 @@ public class HdmiCecLocalDeviceTest {
     private int callbackResult;
     private HdmiCecMessageValidator mMessageValidator;
     private static byte[] param;
+    private boolean mStandbyMessageReceived;
+    private boolean isControlEnabled;
+    private int mPowerStatus;
 
     @Before
     public void SetUp() {
-        mHdmiControlService = new HdmiControlService(null);
+        mHdmiControlService = new HdmiControlService(null) {
+            @Override
+            boolean isControlEnabled() {
+                return isControlEnabled;
+            }
+
+            @Override
+            boolean isPowerOnOrTransient() {
+                return mPowerStatus == HdmiControlManager.POWER_STATUS_ON
+                    || mPowerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON;
+            }
+
+            @Override
+            void standby() {
+                mStandbyMessageReceived = true;
+            }
+        };
         mHdmiControlService.setIoLooper(mTestLooper.getLooper());
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
             mHdmiControlService, new FakeNativeWrapper());
@@ -154,5 +176,15 @@ public class HdmiCecLocalDeviceTest {
             (int finalResult) -> callbackResult = finalResult);
         mTestLooper.dispatchAll();
         assertEquals(0, callbackResult);
+    }
+
+    @Test
+    public void handleStandby_isPowerOn() {
+        mPowerStatus = HdmiControlManager.POWER_STATUS_ON;
+        isControlEnabled = true;
+        assertFalse(mStandbyMessageReceived);
+        mHdmiLocalDevice.handleStandby(
+            HdmiCecMessageBuilder.buildStandby(ADDR_TV, ADDR_AUDIO_SYSTEM));
+        assertTrue(mStandbyMessageReceived);
     }
 }

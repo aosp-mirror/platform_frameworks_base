@@ -15,11 +15,15 @@
  */
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.Constants.ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
+import static com.android.server.hdmi.Constants.PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
+import static com.android.server.hdmi.Constants.USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
+
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.AudioManager;
 import android.os.SystemProperties;
-import android.provider.Settings.Global;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
 /**
@@ -38,6 +42,9 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     // Whether the System Audio Control feature is enabled or not. True by default.
     @GuardedBy("mLock")
     private boolean mSystemAudioControlFeatureEnabled;
+    protected Integer mSystemAudioSource;
+
+    private boolean mTvSystemAudioModeSupport;
 
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
@@ -49,13 +56,47 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
 
     @Override
     @ServiceThreadOnly
+    protected void onStandby(boolean initiatedByCec, int standbyAction) {
+        assertRunOnServiceThread();
+        mTvSystemAudioModeSupport = false;
+        // Record the last state of System Audio Control before going to standby
+        synchronized (mLock) {
+            SystemProperties.set(Constants.PROPERTY_LAST_SYSTEM_AUDIO_CONTROL,
+                mSystemAudioActivated ? "true" : "false");
+        }
+        if (setSystemAudioMode(false)) {
+            mService.sendCecCommand(
+                HdmiCecMessageBuilder.buildSetSystemAudioMode(
+                    mAddress, Constants.ADDR_BROADCAST, false));
+        }
+    }
+
+    @Override
+    @ServiceThreadOnly
     protected void onAddressAllocated(int logicalAddress, int reason) {
         assertRunOnServiceThread();
         mService.sendCecCommand(HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
                 mAddress, mService.getPhysicalAddress(), mDeviceType));
         mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, mService.getVendorId()));
+        int systemAudioControlOnPowerOnProp = SystemProperties.getInt(
+            PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON, ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON);
+        boolean lastSystemAudioControlStatus = SystemProperties.getBoolean(
+            Constants.PROPERTY_LAST_SYSTEM_AUDIO_CONTROL, true);
+        systemAudioControlOnPowerOn(systemAudioControlOnPowerOnProp, lastSystemAudioControlStatus);
         startQueuedActions();
+    }
+
+    @VisibleForTesting
+    protected void systemAudioControlOnPowerOn(
+        int systemAudioOnPowerOnProp, boolean lastSystemAudioControlStatus) {
+        if ((systemAudioOnPowerOnProp ==
+                ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON) ||
+            ((systemAudioOnPowerOnProp ==
+                USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON) &&
+                lastSystemAudioControlStatus)) {
+            addAndStartAction(new SystemAudioInitiationActionFromAvr(this));
+        }
     }
 
     @Override
@@ -170,20 +211,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
             return true;
         }
 
-        if (systemAudioStatusOn) {
-            // TODO(amyjojo): Bring up device when it's on standby mode
-
-            // TODO(amyjojo): Switch to the corresponding input
-
-        }
-        // Mute device when feature is turned off and unmute device when feature is turned on
-        boolean currentMuteStatus =
-            mService.getAudioManager().isStreamMute(AudioManager.STREAM_MUSIC);
-        if (currentMuteStatus == systemAudioStatusOn) {
-            mService.getAudioManager().adjustStreamVolume(AudioManager.STREAM_MUSIC,
-                systemAudioStatusOn ? AudioManager.ADJUST_UNMUTE : AudioManager.ADJUST_MUTE, 0);
-        }
-
         mService.sendCecCommand(HdmiCecMessageBuilder
             .buildSetSystemAudioMode(mAddress, Constants.ADDR_BROADCAST, systemAudioStatusOn));
         return true;
@@ -230,6 +257,18 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         }
         HdmiLogger.debug("System Audio Mode change[old:%b new:%b]",
             mSystemAudioActivated, newSystemAudioMode);
+        // Wake up device if System Audio Control is turned on but device is still on standby
+        if (newSystemAudioMode && mService.isPowerStandbyOrTransient()) {
+            mService.wakeUp();
+            // TODO(amyjojo): Switch to the corresponding input
+        }
+        // Mute device when feature is turned off and unmute device when feature is turned on
+        boolean currentMuteStatus =
+            mService.getAudioManager().isStreamMute(AudioManager.STREAM_MUSIC);
+        if (currentMuteStatus == newSystemAudioMode) {
+            mService.getAudioManager().adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                newSystemAudioMode ? AudioManager.ADJUST_UNMUTE : AudioManager.ADJUST_MUTE, 0);
+        }
         updateAudioManagerForSystemAudio(newSystemAudioMode);
         synchronized (mLock) {
             if (mSystemAudioActivated != newSystemAudioMode) {
@@ -251,6 +290,12 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         }
     }
 
+    protected boolean isSystemAudioActivated() {
+        synchronized (mLock) {
+            return mSystemAudioActivated;
+        }
+    }
+
     /** Reports if System Audio Mode is supported by the connected TV */
     interface TvSystemAudioModeSupportedCallback {
 
@@ -268,7 +313,14 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
      * its physical address.
      */
     void queryTvSystemAudioModeSupport(TvSystemAudioModeSupportedCallback callback) {
-        // TODO(b/80297382): implement detect TV for system audio mode support.
-        callback.onResult(true);
+        if (!mTvSystemAudioModeSupport) {
+            addAndStartAction(new DetectTvSystemAudioModeSupportAction(this, callback));
+        } else {
+            callback.onResult(true);
+        }
+    }
+
+    void setTvSystemAudioModeSupport(boolean supported) {
+        mTvSystemAudioModeSupport = supported;
     }
 }
