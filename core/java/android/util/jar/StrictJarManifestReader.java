@@ -58,7 +58,7 @@ class StrictJarManifestReader {
     public void readEntries(Map<String, Attributes> entries, Map<String, StrictJarManifest.Chunk> chunks) throws IOException {
         int mark = pos;
         while (readHeader()) {
-            if (!Attributes.Name.NAME.equals(name)) {
+            if (!StrictJarManifest.ATTRIBUTE_NAME_NAME.equals(name)) {
                 throw new IOException("Entry is not named");
             }
             String entryNameValue = value;
