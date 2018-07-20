@@ -30,8 +30,7 @@ import com.android.server.wm.utils.WmDisplayCutout;
 
 public class FakeWindowState implements WindowManagerPolicy.WindowState {
 
-    public WindowFrames windowFrames;
-    public WmDisplayCutout displayCutout;
+    private WindowFrames windowFrames;
 
     public WindowManager.LayoutParams attrs;
     public int displayId;
@@ -54,10 +53,8 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
     }
 
     @Override
-    public void computeFrameLw(WindowFrames windowFrames, WmDisplayCutout displayCutout,
-            boolean parentFrameWasClippedByDisplayCutout) {
+    public void computeFrameLw(WindowFrames windowFrames) {
         this.windowFrames = windowFrames;
-        this.displayCutout = displayCutout;
     }
 
     @Override

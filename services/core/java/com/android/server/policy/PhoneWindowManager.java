@@ -4636,6 +4636,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDockLayer = 0x10000000;
         mStatusBarLayer = -1;
 
+        mWindowFrames.setDisplayCutout(displayFrames.mDisplayCutout);
+        mWindowFrames.setParentFrameWasClippedByDisplayCutout(false);
+
         if (displayFrames.mDisplayId == DEFAULT_DISPLAY) {
             // For purposes of putting out fake window up to steal focus, we will
             // drive nav being hidden only by whether it is requested.
@@ -4719,8 +4722,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 continue;
             }
 
-            w.computeFrameLw(mWindowFrames, displayFrames.mDisplayCutout,
-                    false /* parentFrameWasClippedByDisplayCutout */);
+            w.computeFrameLw(mWindowFrames);
             final Rect frame = w.getFrameLw();
 
             if (frame.left <= 0 && frame.top <= 0) {
@@ -4782,8 +4784,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mStatusBarLayer = mStatusBar.getSurfaceLayer();
 
         // Let the status bar determine its size.
-        mStatusBar.computeFrameLw(mWindowFrames, displayFrames.mDisplayCutout,
-                false /* parentFrameWasClippedByDisplayCutout */);
+        mStatusBar.computeFrameLw(mWindowFrames);
 
         // For layout, the status bar is always at the top with our fixed height.
         displayFrames.mStable.top = displayFrames.mUnrestricted.top
@@ -4938,8 +4939,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 navigationFrame /* stableFrame */,
                 displayFrames.mDisplayCutoutSafe /* outsetFrame */);
 
-        mNavigationBar.computeFrameLw(mWindowFrames, displayFrames.mDisplayCutout,
-                false /* parentFrameWasClippedByDisplayCutout */);
+        mNavigationBar.computeFrameLw(mWindowFrames);
         mNavigationBarController.setContentFrame(mNavigationBar.getContentFrameLw());
 
         if (DEBUG_LAYOUT) Slog.i(TAG, "mNavigationBar frame: " + navigationFrame);
@@ -5079,6 +5079,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final Rect sf = mWindowFrames.mStableFrame;
         dcf.setEmpty();
         mWindowFrames.mOutsetFrame.setEmpty();
+        mWindowFrames.setParentFrameWasClippedByDisplayCutout(false);
+        mWindowFrames.setDisplayCutout(displayFrames.mDisplayCutout);
 
         final boolean hasNavBar = (isDefaultDisplay && mHasNavigationBar
                 && mNavigationBar != null && mNavigationBar.isVisibleLw());
@@ -5398,7 +5400,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        boolean parentFrameWasClippedByDisplayCutout = false;
         final int cutoutMode = attrs.layoutInDisplayCutoutMode;
         final boolean attachedInParent = attached != null && !layoutInScreen;
         final boolean requestedHideNavigation =
@@ -5449,7 +5450,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (!attachedInParent && !floatingInScreenWindow) {
                 mTmpRect.set(pf);
                 pf.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
-                parentFrameWasClippedByDisplayCutout |= !mTmpRect.equals(pf);
+                mWindowFrames.setParentFrameWasClippedByDisplayCutout(!mTmpRect.equals(pf));
             }
             // Make sure that NO_LIMITS windows clipped to the display don't extend under the
             // cutout.
@@ -5507,8 +5508,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + " sf=" + sf.toShortString()
                 + " osf=" + mWindowFrames.mOutsetFrame.toShortString());
 
-        win.computeFrameLw(mWindowFrames, displayFrames.mDisplayCutout,
-                parentFrameWasClippedByDisplayCutout);
+        win.computeFrameLw(mWindowFrames);
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.
         if (type == TYPE_INPUT_METHOD && win.isVisibleLw()

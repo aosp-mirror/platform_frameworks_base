@@ -120,7 +120,6 @@ import static com.android.server.wm.WindowStateProto.ANIMATOR;
 import static com.android.server.wm.WindowStateProto.ATTRIBUTES;
 import static com.android.server.wm.WindowStateProto.CHILD_WINDOWS;
 import static com.android.server.wm.WindowStateProto.CONTENT_INSETS;
-import static com.android.server.wm.WindowStateProto.CUTOUT;
 import static com.android.server.wm.WindowStateProto.DESTROYING;
 import static com.android.server.wm.WindowStateProto.DISPLAY_ID;
 import static com.android.server.wm.WindowStateProto.GIVEN_CONTENT_INSETS;
@@ -358,9 +357,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private final Rect mLastOutsets = new Rect();
     private boolean mOutsetsChanged = false;
 
-    /** Part of the display that has been cut away. See {@link DisplayCutout}. */
-    WmDisplayCutout mDisplayCutout = WmDisplayCutout.NO_CUTOUT;
-    private WmDisplayCutout mLastDisplayCutout = WmDisplayCutout.NO_CUTOUT;
     private boolean mDisplayCutoutChanged;
 
     /**
@@ -405,9 +401,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // Frame that is scaled to the application's coordinate space when in
     // screen size compatibility mode.
     final Rect mCompatFrame = new Rect();
-
-    /** Whether the parent frame would have been different if there was no display cutout. */
-    private boolean mParentFrameWasClippedByDisplayCutout;
 
     private final WindowFrames mWindowFrames = new WindowFrames();
 
@@ -824,8 +817,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    public void computeFrameLw(WindowFrames windowFrames, WmDisplayCutout displayCutout,
-            boolean parentFrameWasClippedByDisplayCutout) {
+    public void computeFrameLw(WindowFrames windowFrames) {
         if (mWillReplaceWindow && (mAnimatingExit || !mReplacingRemoveRequested)) {
             // This window is being replaced and either already got information that it's being
             // removed or we are still waiting for some information. Because of this we don't
@@ -834,7 +826,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
         mHaveFrame = true;
-        mParentFrameWasClippedByDisplayCutout = parentFrameWasClippedByDisplayCutout;
+        mWindowFrames.setParentFrameWasClippedByDisplayCutout(
+                windowFrames.parentFrameWasClippedByDisplayCutout());
 
         final Task task = getTask();
         final boolean inFullscreenContainer = inFullscreenContainer();
@@ -1050,7 +1043,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mAttrs.type == TYPE_DOCK_DIVIDER) {
             // For the docked divider, we calculate the stable insets like a full-screen window
             // so it can use it to calculate the snap positions.
-            final WmDisplayCutout c = displayCutout.calculateRelativeTo(
+            final WmDisplayCutout c = windowFrames.mDisplayCutout.calculateRelativeTo(
                     mWindowFrames.mDisplayFrame);
             mTmpRect.set(mWindowFrames.mDisplayFrame);
             mTmpRect.inset(c.getDisplayCutout().getSafeInsets());
@@ -1065,7 +1058,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // trigger a relayout when moving it.
             mContentInsets.setEmpty();
             mVisibleInsets.setEmpty();
-            displayCutout = WmDisplayCutout.NO_CUTOUT;
+            windowFrames.setDisplayCutout(WmDisplayCutout.NO_CUTOUT);
         } else {
             getDisplayContent().getBounds(mTmpRect);
             // Override right and/or bottom insets in case if the frame doesn't fit the screen in
@@ -1099,7 +1092,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             mWindowFrames.mFrame.bottom - mWindowFrames.mStableFrame.bottom, 0));
         }
 
-        mDisplayCutout = displayCutout.calculateRelativeTo(mWindowFrames.mFrame);
+
+        mWindowFrames.setDisplayCutout(
+                windowFrames.mDisplayCutout.calculateRelativeTo(windowFrames.mFrame));
 
         // Offset the actual frame by the amount layout frame is off.
         mWindowFrames.mFrame.offset(-layoutXDiff, -layoutYDiff);
@@ -1198,6 +1193,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mWindowFrames.mContainingFrame;
     }
 
+    WmDisplayCutout getWmDisplayCutout() {
+        return mWindowFrames.mDisplayCutout;
+    }
+
     @Override
     public boolean getGivenInsetsPendingLw() {
         return mGivenInsetsPending;
@@ -1254,9 +1253,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mVisibleInsetsChanged |= !mLastVisibleInsets.equals(mVisibleInsets);
         mStableInsetsChanged |= !mLastStableInsets.equals(mStableInsets);
         mOutsetsChanged |= !mLastOutsets.equals(mOutsets);
-        mFrameSizeChanged |= (mWindowFrames.mLastFrame.width() != mWindowFrames.mFrame.width()) ||
-                (mWindowFrames.mLastFrame.height() != mWindowFrames.mFrame.height());
-        mDisplayCutoutChanged |= !mLastDisplayCutout.equals(mDisplayCutout);
+        mFrameSizeChanged |= mWindowFrames.didFrameSizeChange();
+        mDisplayCutoutChanged |= mWindowFrames.didDisplayCutoutChange();
         return mOverscanInsetsChanged || mContentInsetsChanged || mVisibleInsetsChanged
                 || mOutsetsChanged || mFrameSizeChanged || mDisplayCutoutChanged;
     }
@@ -3014,7 +3012,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final boolean reportDraw = mWinAnimator.mDrawState == DRAW_PENDING;
             final boolean reportOrientation = mReportOrientationChanged;
             final int displayId = getDisplayId();
-            final DisplayCutout displayCutout = mDisplayCutout.getDisplayCutout();
+            final DisplayCutout displayCutout = getWmDisplayCutout().getDisplayCutout();
             if (mAttrs.type != WindowManager.LayoutParams.TYPE_APPLICATION_STARTING
                     && mClient instanceof IWindow.Stub) {
                 // To prevent deadlock simulate one-way call if win.mClient is a local object.
@@ -3147,7 +3145,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Only windows with an AppWindowToken are letterboxed.
             return false;
         }
-        if (!mParentFrameWasClippedByDisplayCutout) {
+        if (!mWindowFrames.parentFrameWasClippedByDisplayCutout()) {
             // Cutout didn't make a difference, no letterbox
             return false;
         }
@@ -3291,7 +3289,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mVisibleInsets.writeToProto(proto, VISIBLE_INSETS);
         mStableInsets.writeToProto(proto, STABLE_INSETS);
         mOutsets.writeToProto(proto, OUTSETS);
-        mDisplayCutout.getDisplayCutout().writeToProto(proto, CUTOUT);
         proto.write(REMOVE_ON_EXIT, mRemoveOnExit);
         proto.write(DESTROYING, mDestroying);
         proto.write(REMOVED, mRemoved);
@@ -3421,8 +3418,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     pw.print(" stable="); mStableInsets.printShortString(pw);
                     pw.print(" surface="); mAttrs.surfaceInsets.printShortString(pw);
                     pw.print(" outsets="); mOutsets.printShortString(pw);
-            pw.print(" cutout=" + mDisplayCutout.getDisplayCutout());
-                    pw.println();
             pw.print(prefix); pw.print("Lst insets: overscan=");
                     mLastOverscanInsets.printShortString(pw);
                     pw.print(" content="); mLastContentInsets.printShortString(pw);
@@ -3430,7 +3425,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     pw.print(" stable="); mLastStableInsets.printShortString(pw);
                     pw.print(" physical="); mLastOutsets.printShortString(pw);
                     pw.print(" outset="); mLastOutsets.printShortString(pw);
-                    pw.print(" cutout=" + mLastDisplayCutout);
                     pw.println();
         }
         super.dump(pw, prefix, dumpAll);
@@ -4484,7 +4478,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mLastVisibleInsets.set(mVisibleInsets);
         mLastStableInsets.set(mStableInsets);
         mLastOutsets.set(mOutsets);
-        mLastDisplayCutout = mDisplayCutout;
+        mWindowFrames.mLastDisplayCutout = mWindowFrames.mDisplayCutout;
     }
 
     void startAnimation(Animation anim) {
