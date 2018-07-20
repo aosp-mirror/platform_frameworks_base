@@ -60,7 +60,6 @@ statsd_common_src := \
     src/metrics/MetricsManager.cpp \
     src/metrics/metrics_manager_util.cpp \
     src/packages/UidMap.cpp \
-    src/perfetto/perfetto_config.proto \
     src/storage/StorageManager.cpp \
     src/StatsLogProcessor.cpp \
     src/StatsService.cpp \
@@ -73,8 +72,7 @@ statsd_common_src := \
 
 # TODO(b/110563449): Once statsd is using a blueprint file, migrate to the proper filegroups.
 statsd_common_src += \
-    ../../../../system/extras/perfprofd/binder_interface/aidl/android/os/IPerfProfd.aidl \
-    src/perfprofd/perfprofd_config.proto
+    ../../../../system/extras/perfprofd/binder_interface/aidl/android/os/IPerfProfd.aidl
 
 statsd_common_c_includes := \
     $(LOCAL_PATH)/src \
@@ -258,8 +256,6 @@ LOCAL_SRC_FILES := \
     src/metrics_constants/metrics_constants.proto \
     src/stats_log.proto \
     src/statsd_config.proto \
-    src/perfetto/perfetto_config.proto \
-    src/perfprofd/perfprofd_config.proto \
     src/atoms.proto
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := lite

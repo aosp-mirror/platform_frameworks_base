@@ -55,17 +55,8 @@ bool CollectPerfprofdTraceAndUploadToDropbox(const PerfprofdDetails& config,
       return false;
     }
 
-    // Add protobufs can't be described in AIDL, we need to re-serialize
-    // the config proto to send it.
-    std::vector<uint8_t> proto_serialized;
-    {
-      const auto& config_proto = config.perfprofd_config();
-      int size = config_proto.ByteSize();
-      proto_serialized.resize(size);
-      ::google::protobuf::uint8* target_ptr =
-          reinterpret_cast<::google::protobuf::uint8*>(proto_serialized.data());
-      config_proto.SerializeWithCachedSizesToArray(target_ptr);
-    }
+    auto* data = reinterpret_cast<const uint8_t*>(config.perfprofd_config().data());
+    std::vector<uint8_t> proto_serialized(data, data + config.perfprofd_config().size());
 
     // TODO: alert-id etc?
 

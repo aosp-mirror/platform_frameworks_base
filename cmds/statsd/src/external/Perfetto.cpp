@@ -113,7 +113,7 @@ bool CollectPerfettoTraceAndUploadToDropbox(const PerfettoDetails& config,
         return false;
     }
 
-    std::string cfgProto = config.trace_config().SerializeAsString();
+    const std::string& cfgProto = config.trace_config();
     size_t bytesWritten = fwrite(cfgProto.data(), 1, cfgProto.size(), writePipeStream);
     fclose(writePipeStream);
     if (bytesWritten != cfgProto.size() || cfgProto.size() == 0) {
