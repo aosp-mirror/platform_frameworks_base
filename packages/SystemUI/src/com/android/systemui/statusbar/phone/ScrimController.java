@@ -29,9 +29,7 @@ import android.os.Handler;
 import android.os.Trace;
 import android.util.Log;
 import android.util.MathUtils;
-import android.view.Choreographer;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
@@ -43,12 +41,11 @@ import com.android.internal.colorextraction.ColorExtractor.OnColorsChangedListen
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.function.TriConsumer;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.statusbar.ExpandableNotificationRow;
-import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.stack.ViewState;
 import com.android.systemui.util.AlarmTimeout;
@@ -482,21 +479,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         // Make sure we have the right gradients and their opacities will satisfy GAR.
         if (mNeedsDrawableColorUpdate) {
             mNeedsDrawableColorUpdate = false;
-            final GradientColors currentScrimColors;
-            if (mState == ScrimState.KEYGUARD || mState == ScrimState.BOUNCER_SCRIMMED
-                    || mState == ScrimState.BOUNCER) {
-                // Always animate color changes if we're seeing the keyguard
-                mScrimInFront.setColors(mLockColors, true /* animated */);
-                mScrimBehind.setColors(mLockColors, true /* animated */);
-                currentScrimColors = mLockColors;
-            } else {
-                // Only animate scrim color if the scrim view is actually visible
-                boolean animateScrimInFront = mScrimInFront.getViewAlpha() != 0;
-                boolean animateScrimBehind = mScrimBehind.getViewAlpha() != 0;
-                mScrimInFront.setColors(mSystemColors, animateScrimInFront);
-                mScrimBehind.setColors(mSystemColors, animateScrimBehind);
-                currentScrimColors = mSystemColors;
-            }
+            boolean isKeyguard = mKeyguardUpdateMonitor.isKeyguardVisible() && !mKeyguardOccluded;
+            GradientColors currentScrimColors = isKeyguard ? mLockColors : mSystemColors;
+            // Only animate scrim color if the scrim view is actually visible
+            boolean animateScrimInFront = mScrimInFront.getViewAlpha() != 0 && !mBlankScreen;
+            boolean animateScrimBehind = mScrimBehind.getViewAlpha() != 0 && !mBlankScreen;
+            mScrimInFront.setColors(currentScrimColors, animateScrimInFront);
+            mScrimBehind.setColors(currentScrimColors, animateScrimBehind);
 
             // Calculate minimum scrim opacity for white or black text.
             int textColor = currentScrimColors.supportsDarkText() ? Color.BLACK : Color.WHITE;
@@ -897,6 +886,18 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     public void setKeyguardOccluded(boolean keyguardOccluded) {
         mKeyguardOccluded = keyguardOccluded;
         updateScrims();
+    }
+
+    public void setHasBackdrop(boolean hasBackdrop) {
+        for (ScrimState state : ScrimState.values()) {
+            state.setHasBackdrop(hasBackdrop);
+        }
+    }
+
+    public void setLaunchingAffordanceWithPreview(boolean launchingAffordanceWithPreview) {
+        for (ScrimState state : ScrimState.values()) {
+            state.setLaunchingAffordanceWithPreview(launchingAffordanceWithPreview);
+        }
     }
 
     public interface Callback {

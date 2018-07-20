@@ -82,9 +82,9 @@ import java.util.List;
  *
  * </ul>
  *
- * <p> As of {@link android.os.Build.VERSION_CODES#P Android P}, all formats can be used for
- * sharing, subject to device support. On prior API levels, only {@link ImageFormat#PRIVATE}
- * format may be used.</p>
+ * <p> As of {@link android.os.Build.VERSION_CODES#P Android P}, all formats except
+ * {@link ImageFormat#JPEG} and {@link ImageFormat#RAW_PRIVATE} can be used for sharing, subject to
+ * device support. On prior API levels, only {@link ImageFormat#PRIVATE} format may be used.</p>
  *
  * @see CameraDevice#createCaptureSessionByOutputConfigurations
  *

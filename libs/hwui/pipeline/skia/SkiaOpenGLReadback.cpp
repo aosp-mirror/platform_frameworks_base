@@ -26,6 +26,7 @@
 #include "DeviceInfo.h"
 #include "Matrix.h"
 #include "Properties.h"
+#include "utils/MathUtils.h"
 
 using namespace android::uirenderer::renderthread;
 
@@ -116,9 +117,9 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
             paint.setBlendMode(SkBlendMode::kSrc);
             // Apply a filter, which is matching OpenGL pipeline readback behaviour. Filter usage
             // is codified by tests using golden images like DecodeAccuracyTest.
-            if (skiaSrcRect.width() != bitmap->width() ||
-                skiaSrcRect.height() != bitmap->height()) {
-                // TODO: apply filter always, but check if tests will be fine
+            bool disableFilter = MathUtils::areEqual(skiaSrcRect.width(), skiaDestRect.width())
+                    && MathUtils::areEqual(skiaSrcRect.height(), skiaDestRect.height());
+            if (!disableFilter) {
                 paint.setFilterQuality(kLow_SkFilterQuality);
             }
             scaledSurface->getCanvas()->concat(textureMatrix);

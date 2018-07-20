@@ -95,6 +95,7 @@ public final class NotificationRecord {
     static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
     private static final int MAX_LOGTAG_LENGTH = 35;
     final StatusBarNotification sbn;
+    IActivityManager mAm;
     final int mTargetSdkVersion;
     final int mOriginalFlags;
     private final Context mContext;
@@ -126,6 +127,11 @@ public final class NotificationRecord {
 
     // The most recent update time, or the creation time if no updates.
     private long mUpdateTimeMs;
+
+    // The most recent interruption time, or the creation time if no updates. Differs from the
+    // above value because updates are filtered based on whether they actually interrupted the
+    // user
+    private long mInterruptionTimeMs;
 
     // Is this record an update of an old record?
     public boolean isUpdate;
@@ -174,10 +180,12 @@ public final class NotificationRecord {
         this.sbn = sbn;
         mTargetSdkVersion = LocalServices.getService(PackageManagerInternal.class)
                 .getPackageTargetSdkVersion(sbn.getPackageName());
+        mAm = ActivityManager.getService();
         mOriginalFlags = sbn.getNotification().flags;
         mRankingTimeMs = calculateRankingTimeMs(0L);
         mCreationTimeMs = sbn.getPostTime();
         mUpdateTimeMs = mCreationTimeMs;
+        mInterruptionTimeMs = mCreationTimeMs;
         mContext = context;
         stats = new NotificationUsageStats.SingleNotificationStats();
         mChannel = channel;
@@ -523,6 +531,7 @@ public final class NotificationRecord {
         pw.println(prefix + "mCreationTimeMs=" + mCreationTimeMs);
         pw.println(prefix + "mVisibleSinceMs=" + mVisibleSinceMs);
         pw.println(prefix + "mUpdateTimeMs=" + mUpdateTimeMs);
+        pw.println(prefix + "mInterruptionTimeMs=" + mInterruptionTimeMs);
         pw.println(prefix + "mSuppressedVisualEffects= " + mSuppressedVisualEffects);
         if (mPreChannelsNotification) {
             pw.println(prefix + String.format("defaults=0x%08x flags=0x%08x",
@@ -784,6 +793,10 @@ public final class NotificationRecord {
         return mVisibleSinceMs == 0 ? 0 : (int) (now - mVisibleSinceMs);
     }
 
+    public int getInterruptionMs(long now) {
+        return (int) (now - mInterruptionTimeMs);
+    }
+
     /**
      * Set the visibility of the notification.
      */
@@ -842,7 +855,7 @@ public final class NotificationRecord {
     public void setSeen() {
         mStats.setSeen();
         if (mTextChanged) {
-            mIsInterruptive = true;
+            setInterruptive(true);
         }
     }
 
@@ -938,6 +951,17 @@ public final class NotificationRecord {
 
     public void setInterruptive(boolean interruptive) {
         mIsInterruptive = interruptive;
+        final long now = System.currentTimeMillis();
+        mInterruptionTimeMs = interruptive ? now : mInterruptionTimeMs;
+
+        if (interruptive) {
+            MetricsLogger.action(getLogMaker()
+                    .setCategory(MetricsEvent.NOTIFICATION_INTERRUPTION)
+                    .setType(MetricsEvent.TYPE_OPEN)
+                    .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_INTERRUPTION_MILLIS,
+                            getInterruptionMs(now)));
+            MetricsLogger.histogram(mContext, "note_interruptive", getInterruptionMs(now));
+        }
     }
 
     public void setTextChanged(boolean textChanged) {
@@ -1036,16 +1060,17 @@ public final class NotificationRecord {
      * Collect all {@link Uri} that should have permission granted to whoever
      * will be rendering it.
      */
-    private void calculateGrantableUris() {
+    protected void calculateGrantableUris() {
         final Notification notification = getNotification();
         notification.visitUris((uri) -> {
-            visitGrantableUri(uri);
+            visitGrantableUri(uri, false);
         });
 
         if (notification.getChannelId() != null) {
             NotificationChannel channel = getChannel();
             if (channel != null) {
-                visitGrantableUri(channel.getSound());
+                visitGrantableUri(channel.getSound(), (channel.getUserLockedFields()
+                        & NotificationChannel.USER_LOCKED_SOUND) != 0);
             }
         }
     }
@@ -1058,18 +1083,17 @@ public final class NotificationRecord {
      * {@link #mGrantableUris}. Otherwise, this will either log or throw
      * {@link SecurityException} depending on target SDK of enqueuing app.
      */
-    private void visitGrantableUri(Uri uri) {
+    private void visitGrantableUri(Uri uri, boolean userOverriddenUri) {
         if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
 
         // We can't grant Uri permissions from system
         final int sourceUid = sbn.getUid();
         if (sourceUid == android.os.Process.SYSTEM_UID) return;
 
-        final IActivityManager am = ActivityManager.getService();
         final long ident = Binder.clearCallingIdentity();
         try {
             // This will throw SecurityException if caller can't grant
-            am.checkGrantUriPermission(sourceUid, null,
+            mAm.checkGrantUriPermission(sourceUid, null,
                     ContentProvider.getUriWithoutUserId(uri),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION,
                     ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)));
@@ -1081,10 +1105,12 @@ public final class NotificationRecord {
         } catch (RemoteException ignored) {
             // Ignored because we're in same process
         } catch (SecurityException e) {
-            if (mTargetSdkVersion >= Build.VERSION_CODES.P) {
-                throw e;
-            } else {
-                Log.w(TAG, "Ignoring " + uri + " from " + sourceUid + ": " + e.getMessage());
+            if (!userOverriddenUri) {
+                if (mTargetSdkVersion >= Build.VERSION_CODES.P) {
+                    throw e;
+                } else {
+                    Log.w(TAG, "Ignoring " + uri + " from " + sourceUid + ": " + e.getMessage());
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -1112,7 +1138,9 @@ public final class NotificationRecord {
                         sbn.getNotification().isGroupSummary() ? 1 : 0)
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_CREATE_MILLIS, getLifespanMs(now))
                 .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_UPDATE_MILLIS, getFreshnessMs(now))
-                .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_VISIBLE_MILLIS, getExposureMs(now));
+                .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_VISIBLE_MILLIS, getExposureMs(now))
+                .addTaggedData(MetricsEvent.NOTIFICATION_SINCE_INTERRUPTION_MILLIS,
+                        getInterruptionMs(now));
     }
 
     public LogMaker getLogMaker() {
