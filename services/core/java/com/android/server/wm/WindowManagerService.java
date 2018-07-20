@@ -67,12 +67,10 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static com.android.internal.util.LatencyTracker.ACTION_ROTATE_SCREEN;
 import static com.android.server.LockGuard.INDEX_WINDOW;
 import static com.android.server.LockGuard.installLock;
-import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.KeyguardDisableHandler.KEYGUARD_POLICY_CHANGED;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
@@ -86,7 +84,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
@@ -96,7 +93,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_VERBOSE_TRANSA
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerServiceDumpProto.APP_TRANSITION;
 import static com.android.server.wm.WindowManagerServiceDumpProto.DISPLAY_FROZEN;
 import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_APP;
 import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_WINDOW;
@@ -108,7 +104,6 @@ import static com.android.server.wm.WindowManagerServiceDumpProto.ROTATION;
 
 import android.Manifest;
 import android.Manifest.permission;
-import android.animation.AnimationHandler;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -134,7 +129,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
-import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -188,7 +182,6 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
-import android.view.AppTransitionAnimationSpec;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
@@ -221,7 +214,6 @@ import android.view.View;
 import android.view.WindowContentFrameStats;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
-import android.view.WindowManager.TransitionFlags;
 import android.view.WindowManager.TransitionType;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
@@ -266,7 +258,6 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
@@ -612,14 +603,6 @@ public class WindowManagerService extends IWindowManager.Stub
     // changes the orientation.
     private final PowerManager.WakeLock mScreenFrozenLock;
 
-    final AppTransition mAppTransition;
-    boolean mSkipAppTransitionAnimation = false;
-
-    final ArraySet<AppWindowToken> mOpeningApps = new ArraySet<>();
-    final ArraySet<AppWindowToken> mClosingApps = new ArraySet<>();
-
-    final UnknownAppVisibilityController mUnknownAppVisibilityController =
-            new UnknownAppVisibilityController(this);
     final TaskSnapshotController mTaskSnapshotController;
 
     boolean mIsTouchDevice;
@@ -751,7 +734,6 @@ public class WindowManagerService extends IWindowManager.Stub
      * up when the animation finishes.
      */
     final ArrayMap<AnimationAdapter, SurfaceAnimator> mAnimationTransferMap = new ArrayMap<>();
-    final BoundsAnimationController mBoundsAnimationController;
 
     private WindowContentFrameStats mTempWindowRenderStats;
 
@@ -778,10 +760,6 @@ public class WindowManagerService extends IWindowManager.Stub
     // is in a special boot mode, such as being encrypted or waiting for a decryption password.
     // For example, when this flag is true, there will be no wallpaper service.
     final boolean mOnlyCore;
-
-    // List of clients without a transtiton animation that we notify once we are done transitioning
-    // since they won't be notified through the app window animator.
-    final List<IBinder> mNoAnimationNotifyOnTransitionFinished = new ArrayList<>();
 
     static WindowManagerThreadPriorityBooster sThreadPriorityBooster =
             new WindowManagerThreadPriorityBooster();
@@ -974,13 +952,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mScreenFrozenLock = mPowerManager.newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, "SCREEN_FROZEN");
         mScreenFrozenLock.setReferenceCounted(false);
-
-        mAppTransition = new AppTransition(context, this);
-        mAppTransition.registerListenerLocked(mActivityManagerAppTransitionNotifier);
-
-        final AnimationHandler animationHandler = new AnimationHandler();
-        mBoundsAnimationController = new BoundsAnimationController(context, mAppTransition,
-                AnimationThread.getHandler(), animationHandler);
 
         mActivityManager = ActivityManager.getService();
         mActivityTaskManager = ActivityTaskManager.getService();
@@ -1577,11 +1548,13 @@ public class WindowManagerService extends IWindowManager.Stub
         Rect frame = replacedWindow.getVisibleFrameLw();
         // We treat this as if this activity was opening, so we can trigger the app transition
         // animation and piggy-back on existing transition animation infrastructure.
-        mOpeningApps.add(atoken);
-        prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_RELAUNCH, ALWAYS_KEEP_CURRENT);
-        mAppTransition.overridePendingAppTransitionClipReveal(frame.left, frame.top,
+        final DisplayContent dc = atoken.getDisplayContent();
+        dc.mOpeningApps.add(atoken);
+        dc.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_RELAUNCH, ALWAYS_KEEP_CURRENT,
+                0 /* flags */, false /* forceOverride */);
+        dc.mAppTransition.overridePendingAppTransitionClipReveal(frame.left, frame.top,
                 frame.width(), frame.height());
-        executeAppTransition();
+        dc.executeAppTransition();
         return true;
     }
 
@@ -1590,10 +1563,12 @@ public class WindowManagerService extends IWindowManager.Stub
         // unfreeze wait for the apps to be drawn.
         // Note that if the display unfroze already because app unfreeze timed out,
         // we don't set up the transition anymore and just let it go.
-        if (mDisplayFrozen && !mOpeningApps.contains(atoken) && atoken.isRelaunching()) {
-            mOpeningApps.add(atoken);
-            prepareAppTransition(WindowManager.TRANSIT_NONE, !ALWAYS_KEEP_CURRENT);
-            executeAppTransition();
+        final DisplayContent dc = atoken.getDisplayContent();
+        if (mDisplayFrozen && !dc.mOpeningApps.contains(atoken) && atoken.isRelaunching()) {
+            dc.mOpeningApps.add(atoken);
+            dc.prepareAppTransition(WindowManager.TRANSIT_NONE, !ALWAYS_KEEP_CURRENT, 0 /* flags */,
+                    false /* forceOverride */);
+            dc.executeAppTransition();
         }
     }
 
@@ -2087,7 +2062,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (win.mAppToken != null) {
-                mUnknownAppVisibilityController.notifyRelayouted(win.mAppToken);
+                dc.mUnknownAppVisibilityController.notifyRelayouted(win.mAppToken);
             }
 
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
@@ -2445,6 +2420,9 @@ public class WindowManagerService extends IWindowManager.Stub
         long ident = Binder.clearCallingIdentity();
         try {
             final DisplayContent dc = mRoot.getDisplayContent(displayId);
+            if (dc == null) {
+                return false;
+            }
             final int req = dc.getOrientation();
             if (req != dc.getLastOrientation() || forceUpdate) {
                 dc.setLastOrientation(req);
@@ -2475,109 +2453,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    // TODO(multi-display): remove when no default display use case.
+    // (i.e. KeyguardController / RecentsAnimation)
     @Override
     public void prepareAppTransition(@TransitionType int transit, boolean alwaysKeepCurrent) {
-        prepareAppTransition(transit, alwaysKeepCurrent, 0 /* flags */, false /* forceOverride */);
-    }
-
-    /**
-     * @param transit What kind of transition is happening. Use one of the constants
-     *                AppTransition.TRANSIT_*.
-     * @param alwaysKeepCurrent If true and a transition is already set, new transition will NOT
-     *                          be set.
-     * @param flags Additional flags for the app transition, Use a combination of the constants
-     *              AppTransition.TRANSIT_FLAG_*.
-     * @param forceOverride Always override the transit, not matter what was set previously.
-     */
-    public void prepareAppTransition(@TransitionType int transit, boolean alwaysKeepCurrent,
-            @TransitionFlags int flags, boolean forceOverride) {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "prepareAppTransition()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
-        synchronized(mWindowMap) {
-            boolean prepared = mAppTransition.prepareAppTransitionLocked(transit, alwaysKeepCurrent,
-                    flags, forceOverride);
-            // TODO (multidisplay): associate app transitions with displays
-            final DisplayContent dc = mRoot.getDisplayContent(DEFAULT_DISPLAY);
-            if (prepared && dc != null && dc.okToAnimate()) {
-                mSkipAppTransitionAnimation = false;
-            }
-        }
-    }
-
-    @Override
-    public @TransitionType int getPendingAppTransition() {
-        return mAppTransition.getAppTransition();
-    }
-
-    @Override
-    public void overridePendingAppTransition(String packageName,
-            int enterAnim, int exitAnim, IRemoteCallback startedCallback) {
-        synchronized(mWindowMap) {
-            mAppTransition.overridePendingAppTransition(packageName, enterAnim, exitAnim,
-                    startedCallback);
-        }
-    }
-
-    @Override
-    public void overridePendingAppTransitionScaleUp(int startX, int startY, int startWidth,
-            int startHeight) {
-        synchronized(mWindowMap) {
-            mAppTransition.overridePendingAppTransitionScaleUp(startX, startY, startWidth,
-                    startHeight);
-        }
-    }
-
-    @Override
-    public void overridePendingAppTransitionClipReveal(int startX, int startY,
-            int startWidth, int startHeight) {
-        synchronized(mWindowMap) {
-            mAppTransition.overridePendingAppTransitionClipReveal(startX, startY, startWidth,
-                    startHeight);
-        }
-    }
-
-    @Override
-    public void overridePendingAppTransitionThumb(GraphicBuffer srcThumb, int startX,
-            int startY, IRemoteCallback startedCallback, boolean scaleUp) {
-        synchronized(mWindowMap) {
-            mAppTransition.overridePendingAppTransitionThumb(srcThumb, startX, startY,
-                    startedCallback, scaleUp);
-        }
-    }
-
-    @Override
-    public void overridePendingAppTransitionAspectScaledThumb(GraphicBuffer srcThumb, int startX,
-            int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
-            boolean scaleUp) {
-        synchronized(mWindowMap) {
-            mAppTransition.overridePendingAppTransitionAspectScaledThumb(srcThumb, startX, startY,
-                    targetWidth, targetHeight, startedCallback, scaleUp);
-        }
-    }
-
-    @Override
-    public void overridePendingAppTransitionMultiThumb(AppTransitionAnimationSpec[] specs,
-            IRemoteCallback onAnimationStartedCallback, IRemoteCallback onAnimationFinishedCallback,
-            boolean scaleUp) {
-        synchronized (mWindowMap) {
-            mAppTransition.overridePendingAppTransitionMultiThumb(specs, onAnimationStartedCallback,
-                    onAnimationFinishedCallback, scaleUp);
-
-        }
-    }
-
-    public void overridePendingAppTransitionStartCrossProfileApps() {
-        synchronized (mWindowMap) {
-            mAppTransition.overridePendingAppTransitionStartCrossProfileApps();
-        }
-    }
-
-    @Override
-    public void overridePendingAppTransitionInPlace(String packageName, int anim) {
-        synchronized(mWindowMap) {
-            mAppTransition.overrideInPlaceAppTransition(packageName, anim);
-        }
+        getDefaultDisplayContentLocked().prepareAppTransition(transit,
+                alwaysKeepCurrent, 0 /* flags */, false /* forceOverride */);
     }
 
     @Override
@@ -2585,8 +2469,10 @@ public class WindowManagerService extends IWindowManager.Stub
             IAppTransitionAnimationSpecsFuture specsFuture, IRemoteCallback callback,
             boolean scaleUp) {
         synchronized(mWindowMap) {
-            mAppTransition.overridePendingAppTransitionMultiThumbFuture(specsFuture, callback,
-                    scaleUp);
+            // TODO(multi-display): sysui using this api only support default display.
+            mRoot.getDisplayContent(DEFAULT_DISPLAY)
+                    .mAppTransition.overridePendingAppTransitionMultiThumbFuture(specsFuture,
+                    callback, scaleUp);
         }
     }
 
@@ -2598,7 +2484,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     "Requires CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS permission");
         }
         synchronized (mWindowMap) {
-            mAppTransition.overridePendingAppTransitionRemote(remoteAnimationAdapter);
+            // TODO(multi-display): sysui using this api only support default display.
+            mRoot.getDisplayContent(DEFAULT_DISPLAY)
+                    .mAppTransition.overridePendingAppTransitionRemote(remoteAnimationAdapter);
         }
     }
 
@@ -2607,20 +2495,14 @@ public class WindowManagerService extends IWindowManager.Stub
         // TODO: Remove once clients are updated.
     }
 
+    // TODO(multi-display): remove when no default display use case.
+    // (i.e. KeyguardController / RecentsAnimation)
     @Override
     public void executeAppTransition() {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "executeAppTransition()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
-
-        synchronized(mWindowMap) {
-            if (DEBUG_APP_TRANSITIONS) Slog.w(TAG_WM, "Execute app transition: " + mAppTransition
-                    + " Callers=" + Debug.getCallers(5));
-            if (mAppTransition.isTransitionSet()) {
-                mAppTransition.setReady();
-                mWindowPlacerLocked.requestTraversal();
-            }
-        }
+        getDefaultDisplayContentLocked().executeAppTransition();
     }
 
     public void initializeRecentsAnimation(int targetActivityType,
@@ -2630,7 +2512,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             mRecentsAnimationController = new RecentsAnimationController(this,
                     recentsAnimationRunner, callbacks, displayId);
-            mAppTransition.updateBooster();
+            mRoot.getDisplayContent(displayId).mAppTransition.updateBooster();
             mRecentsAnimationController.initialize(targetActivityType, recentTaskIds);
         }
     }
@@ -2650,7 +2532,8 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     public boolean canStartRecentsAnimation() {
         synchronized (mWindowMap) {
-            if (mAppTransition.isTransitionSet()) {
+            // TODO(multi-display): currently only default display support recent activity
+            if (getDefaultDisplayContentLocked().mAppTransition.isTransitionSet()) {
                 return false;
             }
             return true;
@@ -2677,7 +2560,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 final RecentsAnimationController controller = mRecentsAnimationController;
                 mRecentsAnimationController = null;
                 controller.cleanupAnimation(reorderMode);
-                mAppTransition.updateBooster();
+                // TODO(mult-display): currently only default display support recents animation.
+                getDefaultDisplayContentLocked().mAppTransition.updateBooster();
             }
         }
     }
@@ -2747,7 +2631,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void notifyShowingDreamChanged() {
-        notifyKeyguardFlagsChanged(null /* callback */);
+        // TODO(multi-display): support show dream in multi-display.
+        notifyKeyguardFlagsChanged(null /* callback */, DEFAULT_DISPLAY);
     }
 
     @Override
@@ -2822,11 +2707,12 @@ public class WindowManagerService extends IWindowManager.Stub
      * reevaluate the visibilities of the activities.
      * @param callback Runnable to be called when activity manager is done reevaluating visibilities
      */
-    void notifyKeyguardFlagsChanged(@Nullable Runnable callback) {
+    void notifyKeyguardFlagsChanged(@Nullable Runnable callback, int displayId) {
         final Runnable wrappedCallback = callback != null
                 ? () -> { synchronized (mWindowMap) { callback.run(); } }
                 : null;
-        mH.obtainMessage(H.NOTIFY_KEYGUARD_FLAGS_CHANGED, wrappedCallback).sendToTarget();
+        mH.obtainMessage(H.NOTIFY_KEYGUARD_FLAGS_CHANGED, displayId, 0,
+                wrappedCallback).sendToTarget();
     }
 
     public boolean isKeyguardTrusted() {
@@ -3215,7 +3101,6 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             mCurrentUserId = newUserId;
             mCurrentProfileIds = currentProfileIds;
-            mAppTransition.setCurrentUser(newUserId);
             mPolicy.setCurrentUserLw(newUserId);
 
             // If keyguard was disabled, re-enable it
@@ -3233,6 +3118,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     displayContent.getSplitScreenPrimaryStackIgnoringVisibility();
             displayContent.mDividerControllerLocked.notifyDockedStackExistsChanged(
                     stack != null && stack.hasTaskForUser(newUserId));
+
+            mRoot.forAllDisplays(dc -> dc.mAppTransition.setCurrentUser(newUserId));
 
             // If the display is already prepared, update the density.
             // Otherwise, we'll update it when it's prepared.
@@ -4895,7 +4782,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 break;
                 case NOTIFY_KEYGUARD_FLAGS_CHANGED: {
-                    mAtmInternal.notifyKeyguardFlagsChanged((Runnable) msg.obj);
+                    mAtmInternal.notifyKeyguardFlagsChanged((Runnable) msg.obj, msg.arg1);
                 }
                 break;
                 case NOTIFY_KEYGUARD_TRUSTED_CHANGED: {
@@ -5314,39 +5201,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /**
-     * @return bitmap indicating if another pass through layout must be made.
-     */
-    int handleAnimatingStoppedAndTransitionLocked() {
-        int changes = 0;
-
-        mAppTransition.setIdle();
-
-        for (int i = mNoAnimationNotifyOnTransitionFinished.size() - 1; i >= 0; i--) {
-            final IBinder token = mNoAnimationNotifyOnTransitionFinished.get(i);
-            mAppTransition.notifyAppTransitionFinishedLocked(token);
-        }
-        mNoAnimationNotifyOnTransitionFinished.clear();
-
-        // TODO: multi-display.
-        final DisplayContent dc = getDefaultDisplayContentLocked();
-
-        dc.mWallpaperController.hideDeferredWallpapersIfNeeded();
-
-        dc.onAppTransitionDone();
-
-        changes |= FINISH_LAYOUT_REDO_LAYOUT;
-        if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG_WM,
-                "Wallpaper layer changed: assigning layers + relayout");
-        dc.computeImeTarget(true /* updateImeTarget */);
-        mRoot.mWallpaperMayChange = true;
-        // Since the window list has been rebuilt, focus might have to be recomputed since the
-        // actual order of windows might have changed again.
-        mFocusMayChange = true;
-
-        return changes;
-    }
-
     void checkDrawnWindowsLocked() {
         if (mWaitingForDrawn.isEmpty() || mWaitingForDrawnCallback == null) {
             return;
@@ -5459,8 +5313,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mInputManagerCallback.freezeInputDispatchingLw();
 
-        if (mAppTransition.isTransitionSet()) {
-            mAppTransition.freeze();
+        if (displayContent.mAppTransition.isTransitionSet()) {
+            displayContent.mAppTransition.freeze();
         }
 
         if (PROFILE_ORIENTATION) {
@@ -5495,15 +5349,16 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
+        final DisplayContent dc = mRoot.getDisplayContent(mFrozenDisplayId);
         if (mWaitingForConfig || mAppsFreezingScreen > 0
                 || mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_ACTIVE
-                || mClientFreezingScreen || !mOpeningApps.isEmpty()) {
+                || mClientFreezingScreen || (dc != null && !dc.mOpeningApps.isEmpty())) {
             if (DEBUG_ORIENTATION) Slog.d(TAG_WM,
                 "stopFreezingDisplayLocked: Returning mWaitingForConfig=" + mWaitingForConfig
                 + ", mAppsFreezingScreen=" + mAppsFreezingScreen
                 + ", mWindowsFreezingScreen=" + mWindowsFreezingScreen
                 + ", mClientFreezingScreen=" + mClientFreezingScreen
-                + ", mOpeningApps.size()=" + mOpeningApps.size());
+                + ", mOpeningApps.size()=" + (dc != null ? dc.mOpeningApps.size() : 0));
             return;
         }
 
@@ -5583,7 +5438,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mScreenFrozenLock.release();
 
-        if (updateRotation) {
+        if (updateRotation && displayContent != null && updateRotation) {
             if (DEBUG_ORIENTATION) Slog.d(TAG_WM, "Performing post-rotate rotation");
             configChanged |= displayContent.updateRotationUnchecked();
         }
@@ -5909,7 +5764,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             final AppWindowToken appWindow = mRoot.getAppWindowToken(token);
             if (appWindow != null) {
-                mUnknownAppVisibilityController.notifyAppResumedFinished(appWindow);
+                appWindow.getDisplayContent().mUnknownAppVisibilityController
+                        .notifyAppResumedFinished(appWindow);
             }
         }
     }
@@ -5955,15 +5811,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private void dumpTokensLocked(PrintWriter pw, boolean dumpAll) {
         pw.println("WINDOW MANAGER TOKENS (dumpsys window tokens)");
         mRoot.dumpTokens(pw, dumpAll);
-        if (!mOpeningApps.isEmpty() || !mClosingApps.isEmpty()) {
-            pw.println();
-            if (mOpeningApps.size() > 0) {
-                pw.print("  mOpeningApps="); pw.println(mOpeningApps);
-            }
-            if (mClosingApps.size() > 0) {
-                pw.print("  mClosingApps="); pw.println(mClosingApps);
-            }
-        }
     }
 
     private void dumpSessionsLocked(PrintWriter pw, boolean dumpAll) {
@@ -6000,7 +5847,6 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
         proto.write(ROTATION, defaultDisplayContent.getRotation());
         proto.write(LAST_ORIENTATION, defaultDisplayContent.getLastOrientation());
-        mAppTransition.writeToProto(proto, APP_TRANSITION);
     }
 
     void traceStateLocked(String where) {
@@ -6133,7 +5979,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println();
 
         mInputManagerCallback.dump(pw, "  ");
-        mUnknownAppVisibilityController.dump(pw, "  ");
         mTaskSnapshotController.dump(pw, "  ");
 
         if (dumpAll) {
@@ -6172,9 +6017,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" window="); pw.print(mWindowAnimationScaleSetting);
                     pw.print(" transition="); pw.print(mTransitionAnimationScaleSetting);
                     pw.print(" animator="); pw.println(mAnimatorDurationScaleSetting);
-            pw.print("  mSkipAppTransitionAnimation=");pw.println(mSkipAppTransitionAnimation);
-            pw.println("  mLayoutToAnim:");
-            mAppTransition.dump(pw, "    ");
             if (mRecentsAnimationController != null) {
                 pw.print("  mRecentsAnimationController="); pw.println(mRecentsAnimationController);
                 mRecentsAnimationController.dump(pw, "    ");
@@ -7024,10 +6866,12 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
+        // TODO(multi-display): currently only used by PWM to notify keyguard transitions as well
+        // forwarding it to SystemUI for synchronizing status and navigation bar animations.
         @Override
         public void registerAppTransitionListener(AppTransitionListener listener) {
             synchronized (mWindowMap) {
-                mAppTransition.registerListenerLocked(listener);
+                getDefaultDisplayContentLocked().mAppTransition.registerListenerLocked(listener);
             }
         }
 

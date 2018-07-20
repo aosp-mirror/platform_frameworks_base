@@ -88,29 +88,6 @@ interface IWindowManager
     void addWindowToken(IBinder token, int type, int displayId);
     void removeWindowToken(IBinder token, int displayId);
     void prepareAppTransition(int transit, boolean alwaysKeepCurrent);
-    int getPendingAppTransition();
-    void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim,
-            IRemoteCallback startedCallback);
-    void overridePendingAppTransitionScaleUp(int startX, int startY, int startWidth,
-            int startHeight);
-    void overridePendingAppTransitionClipReveal(int startX, int startY,
-            int startWidth, int startHeight);
-    void overridePendingAppTransitionThumb(in GraphicBuffer srcThumb, int startX, int startY,
-            IRemoteCallback startedCallback, boolean scaleUp);
-    void overridePendingAppTransitionAspectScaledThumb(in GraphicBuffer srcThumb, int startX,
-            int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
-            boolean scaleUp);
-    /**
-     * Overrides animation for app transition that exits from an application to a multi-window
-     * environment and allows specifying transition animation parameters for each window.
-     *
-     * @param specs Array of transition animation descriptions for entering windows.
-     *
-     * @hide
-     */
-    void overridePendingAppTransitionMultiThumb(in AppTransitionAnimationSpec[] specs,
-            IRemoteCallback startedCallback, IRemoteCallback finishedCallback, boolean scaleUp);
-    void overridePendingAppTransitionInPlace(String packageName, int anim);
 
     /**
      * Like overridePendingAppTransitionMultiThumb, but uses a future to supply the specs. This is

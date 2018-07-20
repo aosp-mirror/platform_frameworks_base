@@ -65,6 +65,7 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_C
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.DisplayContentProto.ABOVE_APP_WINDOWS;
+import static com.android.server.wm.DisplayContentProto.APP_TRANSITION;
 import static com.android.server.wm.DisplayContentProto.BELOW_APP_WINDOWS;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_FRAMES;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_INFO;
@@ -80,6 +81,7 @@ import static com.android.server.wm.DisplayContentProto.STACKS;
 import static com.android.server.wm.DisplayContentProto.SURFACE_SIZE;
 import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
@@ -119,6 +121,7 @@ import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 
+import android.animation.AnimationHandler;
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -155,6 +158,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
@@ -227,6 +231,21 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private boolean mUpdateImeTarget;
     private boolean mTmpInitial;
     private int mMaxUiWidth;
+
+    final AppTransition mAppTransition;
+    final AppTransitionController mAppTransitionController;
+    boolean mSkipAppTransitionAnimation = false;
+
+    final ArraySet<AppWindowToken> mOpeningApps = new ArraySet<>();
+    final ArraySet<AppWindowToken> mClosingApps = new ArraySet<>();
+    final UnknownAppVisibilityController mUnknownAppVisibilityController;
+    BoundsAnimationController mBoundsAnimationController;
+
+    /**
+     * List of clients without a transtiton animation that we notify once we are done
+     * transitioning since they won't be notified through the app window animator.
+     */
+    final List<IBinder> mNoAnimationNotifyOnTransitionFinished = new ArrayList<>();
 
     // Mapping from a token IBinder to a WindowToken object on this display.
     private final HashMap<IBinder, WindowToken> mTokenMap = new HashMap();
@@ -820,6 +839,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         mDividerControllerLocked = new DockedStackDividerController(service, this);
         mPinnedStackControllerLocked = new PinnedStackController(service, this);
+
+        mAppTransition = new AppTransition(service.mContext, service, this);
+        mAppTransition.registerListenerLocked(service.mActivityManagerAppTransitionNotifier);
+        mAppTransitionController = new AppTransitionController(service, this);
+        mUnknownAppVisibilityController = new UnknownAppVisibilityController(service, this);
+
+        AnimationHandler animationHandler = new AnimationHandler();
+        mBoundsAnimationController = new BoundsAnimationController(service.mContext,
+                mAppTransition, SurfaceAnimationThread.getHandler(), animationHandler);
 
         // We use this as our arbitrary surface size for buffer-less parents
         // that don't impose cropping on their children. It may need to be larger
@@ -2135,6 +2163,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     + " to its current displayId=" + mDisplayId);
         }
 
+        // Clean up all pending transitions when stack reparent to another display.
+        stack.forAllAppWindows(AppWindowToken::removeFromPendingTransition);
+
         prevDc.mTaskStackContainers.removeChild(stack);
         mTaskStackContainers.addStackToDisplay(stack, onTop);
     }
@@ -2294,6 +2325,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     void removeImmediately() {
         mRemovingDisplay = true;
         try {
+            // Clear all transitions & screen frozen states when removing display.
+            mOpeningApps.clear();
+            mClosingApps.clear();
+            mUnknownAppVisibilityController.clear();
+            mAppTransition.removeAppTransitionTimeoutCallbacks();
+            handleAnimatingStoppedAndTransition();
+            mService.stopFreezingDisplayLocked();
             super.removeImmediately();
             if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
             if (mPointerEventDispatcher != null && mTapDetector != null) {
@@ -2514,6 +2552,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             screenRotationAnimation.writeToProto(proto, SCREEN_ROTATION_ANIMATION);
         }
         mDisplayFrames.writeToProto(proto, DISPLAY_FRAMES);
+        mAppTransition.writeToProto(proto, APP_TRANSITION);
         proto.write(SURFACE_SIZE, mSurfaceSize);
         if (mFocusedApp != null) {
             mFocusedApp.writeNameToProto(proto, FOCUSED_APP);
@@ -2998,11 +3037,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
 
                 if (highestTarget != null) {
-                    final AppTransition appTransition = mService.mAppTransition;
-                    if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, appTransition + " " + highestTarget
+                    if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, mAppTransition + " " + highestTarget
                             + " animating=" + highestTarget.isAnimating());
 
-                    if (appTransition.isTransitionSet()) {
+                    if (mAppTransition.isTransitionSet()) {
                         // If we are currently setting up for an animation, hold everything until we
                         // can find out what will happen.
                         setInputMethodTarget(highestTarget, true);
@@ -3093,6 +3131,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 pw.println();
             }
         }
+
+        if (!mOpeningApps.isEmpty() || !mClosingApps.isEmpty()) {
+            pw.println();
+            if (mOpeningApps.size() > 0) {
+                pw.print("  mOpeningApps="); pw.println(mOpeningApps);
+            }
+            if (mClosingApps.size() > 0) {
+                pw.print("  mClosingApps="); pw.println(mClosingApps);
+            }
+        }
+
+        mUnknownAppVisibilityController.dump(pw, "  ");
     }
 
     void dumpWindowAnimators(PrintWriter pw, String subPrefix) {
@@ -3989,7 +4039,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 final AppTokenList appTokens = mChildren.get(i).mExitingAppTokens;
                 for (int j = appTokens.size() - 1; j >= 0; --j) {
                     final AppWindowToken token = appTokens.get(j);
-                    if (!token.hasVisible && !mService.mClosingApps.contains(token)
+                    if (!token.hasVisible && !mClosingApps.contains(token)
                             && (!token.mIsExiting || token.isEmpty())) {
                         // Make sure there is no animation running on this token, so any windows
                         // associated with it will be removed as soon as their animations are
@@ -4287,8 +4337,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // Only allow force setting the orientation when all unknown visibilities have been
             // resolved, as otherwise we just may be starting another occluding activity.
             final boolean isUnoccluding =
-                    mService.mAppTransition.getAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE
-                            && mService.mUnknownAppVisibilityController.allResolved();
+                    mAppTransition.getAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE
+                            && mUnknownAppVisibilityController.allResolved();
             if (policy.isKeyguardShowingAndNotOccluded() || isUnoccluding) {
                 return mLastKeyguardForcedOrientation;
             }
@@ -4527,5 +4577,57 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (mPointerEventDispatcher != null) {
             mPointerEventDispatcher.unregisterInputEventListener(listener);
         }
+    }
+
+    void prepareAppTransition(@WindowManager.TransitionType int transit,
+            boolean alwaysKeepCurrent, @WindowManager.TransitionFlags int flags,
+            boolean forceOverride) {
+        final boolean prepared = mAppTransition.prepareAppTransitionLocked(
+                transit, alwaysKeepCurrent, flags, forceOverride);
+        if (prepared && okToAnimate()) {
+            mSkipAppTransitionAnimation = false;
+        }
+    }
+
+    void executeAppTransition() {
+        if (mAppTransition.isTransitionSet()) {
+            if (DEBUG_APP_TRANSITIONS) {
+                Slog.w(TAG_WM, "Execute app transition: " + mAppTransition + ", displayId: "
+                        + mDisplayId + " Callers=" + Debug.getCallers(5));
+            }
+            mAppTransition.setReady();
+            mService.mWindowPlacerLocked.requestTraversal();
+        }
+    }
+
+    /**
+     * Update pendingLayoutChanges after app transition has finished.
+     */
+    void handleAnimatingStoppedAndTransition() {
+        int changes = 0;
+
+        mAppTransition.setIdle();
+
+        for (int i = mNoAnimationNotifyOnTransitionFinished.size() - 1; i >= 0; i--) {
+            final IBinder token = mNoAnimationNotifyOnTransitionFinished.get(i);
+            mAppTransition.notifyAppTransitionFinishedLocked(token);
+        }
+        mNoAnimationNotifyOnTransitionFinished.clear();
+
+        mWallpaperController.hideDeferredWallpapersIfNeeded();
+
+        onAppTransitionDone();
+
+        changes |= FINISH_LAYOUT_REDO_LAYOUT;
+        if (DEBUG_WALLPAPER_LIGHT) {
+            Slog.v(TAG_WM, "Wallpaper layer changed: assigning layers + relayout");
+        }
+        computeImeTarget(true /* updateImeTarget */);
+        mService.mRoot.mWallpaperMayChange = true;
+        // Since the window list has been rebuilt, focus might have to be recomputed since the
+        // actual order of windows might have changed again.
+        mService.mFocusMayChange = true;
+
+        pendingLayoutChanges |= changes;
     }
 }

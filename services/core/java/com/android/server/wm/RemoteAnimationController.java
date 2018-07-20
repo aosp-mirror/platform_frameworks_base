@@ -317,7 +317,7 @@ class RemoteAnimationController implements DeathRecipient {
         }
 
         private int getMode() {
-            if (mService.mOpeningApps.contains(mAppWindowToken)) {
+            if (mAppWindowToken.getDisplayContent().mOpeningApps.contains(mAppWindowToken)) {
                 return RemoteAnimationTarget.MODE_OPENING;
             } else {
                 return RemoteAnimationTarget.MODE_CLOSING;

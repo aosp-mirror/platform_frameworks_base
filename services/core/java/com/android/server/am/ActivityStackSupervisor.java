@@ -1072,6 +1072,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return foundResumed;
     }
 
+    private void executeAppTransitionForAllDisplay() {
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
+            display.getWindowContainerController().executeAppTransition();
+        }
+    }
+
     /**
      * Pause all activities in either all of the stacks or just the back stacks.
      * @param userLeaving Passed to pauseActivity() to indicate whether to call onUserLeaving().
@@ -1421,6 +1428,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // Create activity launch transaction.
                 final ClientTransaction clientTransaction = ClientTransaction.obtain(
                         proc.getThread(), r.appToken);
+
+                final DisplayWindowController dwc = r.getDisplay().getWindowContainerController();
                 clientTransaction.addCallback(LaunchActivityItem.obtain(new Intent(r.intent),
                         System.identityHashCode(r), r.info,
                         // TODO: Have this take the merged configuration instead of separate global
@@ -1429,12 +1438,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         mergedConfiguration.getOverrideConfiguration(), r.compat,
                         r.launchedFromPackage, task.voiceInteractor, proc.getReportedProcState(),
                         r.icicle, r.persistentState, results, newIntents,
-                        mService.isNextTransitionForward(), profilerInfo));
+                        dwc.isNextTransitionForward(), profilerInfo));
 
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
                 if (andResume) {
-                    lifecycleItem = ResumeActivityItem.obtain(mService.isNextTransitionForward());
+                    lifecycleItem = ResumeActivityItem.obtain(dwc.isNextTransitionForward());
                 } else {
                     lifecycleItem = PauseActivityItem.obtain();
                 }
@@ -3520,7 +3529,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
         if (stack.getDisplay().allResumedActivitiesComplete()) {
             ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-            mWindowManager.executeAppTransition();
+            // Make sure activity & window visibility should be identical
+            // for all displays in this stage.
+            executeAppTransitionForAllDisplay();
             return true;
         }
         return false;
@@ -4618,6 +4629,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // not run into issues where we still need to draw the task in recents but the
                 // docked stack is already created.
                 deferUpdateRecentsHomeStackBounds();
+                // TODO(multi-display): currently recents animation only support default display.
                 mWindowManager.prepareAppTransition(TRANSIT_DOCK_TASK_FROM_RECENTS, false);
             }
 

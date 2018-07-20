@@ -16,16 +16,14 @@
 
 package com.android.server.wm;
 
-import com.android.internal.util.ToBooleanFunction;
-
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
@@ -49,6 +47,8 @@ import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.animation.Animation;
+
+import com.android.internal.util.ToBooleanFunction;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -263,7 +263,8 @@ class WallpaperController {
                 && (mWallpaperTarget != winGoingAway || mPrevWallpaperTarget != null)) {
             return;
         }
-        if (mService.mAppTransition.isRunning()) {
+        if (mWallpaperTarget != null
+                && mWallpaperTarget.getDisplayContent().mAppTransition.isRunning()) {
             // Defer hiding the wallpaper when app transition is running until the animations
             // are done.
             mDeferredHideWallpaper = winGoingAway;
@@ -549,9 +550,9 @@ class WallpaperController {
             // is not. If they're both hidden, still use the new target.
             mWallpaperTarget = prevWallpaperTarget;
         } else if (newTargetHidden == oldTargetHidden
-                && !mService.mOpeningApps.contains(wallpaperTarget.mAppToken)
-                && (mService.mOpeningApps.contains(prevWallpaperTarget.mAppToken)
-                || mService.mClosingApps.contains(prevWallpaperTarget.mAppToken))) {
+                && !dc.mOpeningApps.contains(wallpaperTarget.mAppToken)
+                && (dc.mOpeningApps.contains(prevWallpaperTarget.mAppToken)
+                || dc.mClosingApps.contains(prevWallpaperTarget.mAppToken))) {
             // If they're both hidden (or both not hidden), prefer the one that's currently in
             // opening or closing app list, this allows transition selection logic to better
             // determine the wallpaper status of opening/closing apps.

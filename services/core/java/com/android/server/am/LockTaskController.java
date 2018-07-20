@@ -580,7 +580,10 @@ public class LockTaskController {
             mSupervisor.findTaskToMoveToFront(task, 0, null, reason,
                     lockTaskModeState != LOCK_TASK_MODE_NONE);
             mSupervisor.resumeFocusedStacksTopActivitiesLocked();
-            mWindowManager.executeAppTransition();
+            final ActivityStack stack = task.getStack();
+            if (stack != null) {
+                stack.getDisplay().getWindowContainerController().executeAppTransition();
+            }
         } else if (lockTaskModeState != LOCK_TASK_MODE_NONE) {
             mSupervisor.handleNonResizableTaskIfNeeded(task, WINDOWING_MODE_UNDEFINED,
                     DEFAULT_DISPLAY, task.getStack(), true /* forceNonResizable */);
