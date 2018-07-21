@@ -1781,12 +1781,15 @@ public class AudioService extends IAudioService.Stub
                     }
 
                     if (mHdmiAudioSystemClient != null &&
+                            mHdmiSystemAudioSupported &&
                             streamTypeAlias == AudioSystem.STREAM_MUSIC &&
                             (oldIndex != newIndex || isMuteAdjust)) {
+                        final long identity = Binder.clearCallingIdentity();
                         mHdmiAudioSystemClient.sendReportAudioStatusCecCommand(
                                 isMuteAdjust, getStreamVolume(AudioSystem.STREAM_MUSIC),
                                 getStreamMaxVolume(AudioSystem.STREAM_MUSIC),
                                 isStreamMute(AudioSystem.STREAM_MUSIC));
+                        Binder.restoreCallingIdentity(identity);
                     }
                 }
             }
@@ -2044,12 +2047,15 @@ public class AudioService extends IAudioService.Stub
         synchronized (mHdmiClientLock) {
             if (mHdmiManager != null &&
                     mHdmiAudioSystemClient != null &&
+                    mHdmiSystemAudioSupported &&
                     streamTypeAlias == AudioSystem.STREAM_MUSIC &&
                     (oldIndex != index)) {
+                final long identity = Binder.clearCallingIdentity();
                 mHdmiAudioSystemClient.sendReportAudioStatusCecCommand(
                         false, getStreamVolume(AudioSystem.STREAM_MUSIC),
                         getStreamMaxVolume(AudioSystem.STREAM_MUSIC),
                         isStreamMute(AudioSystem.STREAM_MUSIC));
+                Binder.restoreCallingIdentity(identity);
             }
         }
         sendVolumeUpdate(streamType, oldIndex, index, flags);
@@ -7104,11 +7110,11 @@ public class AudioService extends IAudioService.Stub
         int device = AudioSystem.DEVICE_NONE;
         synchronized (mHdmiClientLock) {
             if (mHdmiManager != null) {
-                if (mHdmiTvClient == null) {
-                    Log.w(TAG, "Only Hdmi-Cec enabled TV device supports system audio mode.");
+                if (mHdmiTvClient == null && mHdmiAudioSystemClient == null) {
+                    Log.w(TAG, "Only Hdmi-Cec enabled TV or audio system device supports"
+                            + "system audio mode.");
                     return device;
                 }
-
                 if (mHdmiSystemAudioSupported != on) {
                     mHdmiSystemAudioSupported = on;
                     final int config = on ? AudioSystem.FORCE_HDMI_SYSTEM_AUDIO_ENFORCED :
