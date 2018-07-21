@@ -24,6 +24,7 @@
 #include <sstream>
 #include <string>
 
+#include <android/fdsan.h>
 #include <fcntl.h>
 #include <grp.h>
 #include <inttypes.h>
@@ -789,6 +790,8 @@ static pid_t ForkCommon(JNIEnv* env, jstring java_se_name, bool is_system_server
     fail_fn(error_msg);
   }
 
+  android_fdsan_error_level fdsan_error_level = android_fdsan_get_error_level();
+
   pid_t pid = fork();
 
   if (pid == 0) {
@@ -805,6 +808,9 @@ static pid_t ForkCommon(JNIEnv* env, jstring java_se_name, bool is_system_server
     if (!gOpenFdTable->ReopenOrDetach(&error_msg)) {
       fail_fn(error_msg);
     }
+
+    // Turn fdsan back on.
+    android_fdsan_set_error_level(fdsan_error_level);
   }
 
   // We blocked SIGCHLD prior to a fork, we unblock it here.
