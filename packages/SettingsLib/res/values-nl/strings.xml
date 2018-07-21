@@ -102,7 +102,7 @@
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Koppelen"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"KOPPELEN"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Annuleren"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Koppelen verleent toegang tot je contacten en oproepgeschiedenis wanneer de apparaten zijn verbonden."</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Koppelen verleent toegang tot je contacten en gespreksgeschiedenis wanneer de apparaten zijn verbonden."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Kan niet koppelen aan <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Kan niet koppelen aan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> vanwege een onjuiste pincode of toegangscode."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Kan niet communiceren met <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
@@ -306,8 +306,8 @@
     <string name="track_frame_time" msgid="6094365083096851167">"HWUI-weergave van profiel"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU-foutopsporingslagen inschakelen"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Laden van GPU-foutopsporingslagen toestaan voor foutopsporingsapps"</string>
-    <string name="window_animation_scale_title" msgid="6162587588166114700">"Vensteranimatieschaal"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"Overgangsanimatieschaal"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"Venster­animatieschaal"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Overgangs­animatieschaal"</string>
     <string name="animator_duration_scale_title" msgid="3406722410819934083">"Duur van animatieschaal"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Secundaire displays simuleren"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Apps"</string>
