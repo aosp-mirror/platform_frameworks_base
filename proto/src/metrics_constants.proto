@@ -6167,7 +6167,15 @@ message MetricsEvent {
     FACE_ENROLL_SIDECAR = 1509;
 
     // OPEN: Settings > Add face > Error dialog
+    // OS: Q
     DIALOG_FACE_ERROR = 1510;
+
+    // OPEN: Settings > Security > Face
+    // CATEGORY: SETTINGS
+    // OS: Q
+    FACE = 1511;
+
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.
