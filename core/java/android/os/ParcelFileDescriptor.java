@@ -188,7 +188,13 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         }
         mWrapped = null;
         mFd = fd;
+        IoUtils.setFdOwner(mFd, this);
+
         mCommFd = commChannel;
+        if (mCommFd != null) {
+            IoUtils.setFdOwner(mCommFd, this);
+        }
+
         mGuard.open("close");
     }
 
@@ -682,8 +688,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
             if (mClosed) {
                 throw new IllegalStateException("Already closed");
             }
-            final int fd = getFd();
-            mFd.setInt$(-1);
+            int fd = IoUtils.acquireRawFd(mFd);
             writeCommStatusAndClose(Status.DETACHED, null);
             mClosed = true;
             mGuard.close();

@@ -38,7 +38,6 @@ import libcore.util.SneakyThrow;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -2073,19 +2072,6 @@ public final class Parcel {
             throw new RuntimeException("bad array lengths");
         }
     }
-
-    /** @deprecated use {@link android.system.Os#open(String, int, int)} */
-    @Deprecated
-    static native FileDescriptor openFileDescriptor(String file, int mode)
-            throws FileNotFoundException;
-
-    /** @deprecated use {@link android.system.Os#dup(FileDescriptor)} */
-    @Deprecated
-    static native FileDescriptor dupFileDescriptor(FileDescriptor orig) throws IOException;
-
-    /** @deprecated use {@link android.system.Os#close(FileDescriptor)} */
-    @Deprecated
-    static native void closeFileDescriptor(FileDescriptor desc) throws IOException;
 
     /**
      * Read a byte value from the parcel at the current dataPosition().
