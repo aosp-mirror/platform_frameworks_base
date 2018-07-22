@@ -29,11 +29,11 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Wpisz hasło, aby odblokować"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Wpisz kod PIN, aby odblokować"</string>
     <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Wpisz kod PIN"</string>
-    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"Narysuj wzór"</string>
-    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"Wpisz hasło"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Narysuj wzór"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Wpisz hasło"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Nieprawidłowy kod PIN."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Nieprawidłowa karta."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Naładowana"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"Bateria w pełni naładowana"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ładowanie"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Szybkie ładowanie"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Wolne ładowanie"</string>
@@ -61,8 +61,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"Nie można wyłączyć karty eSIM z powodu błędu."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Nie pamiętam wzoru"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Nieprawidłowy wzór"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"Nieprawidłowe hasło"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Nieprawidłowy wzór"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Nieprawidłowe hasło"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Nieprawidłowy kod PIN"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="few">Spróbuj ponownie za <xliff:g id="NUMBER">%d</xliff:g> sekundy.</item>

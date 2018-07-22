@@ -29,11 +29,11 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"ಅನ್‌ಲಾಕ್‌ ಮಾಡಲು ಪಾಸ್‌ವರ್ಡ್‌ ಟೈಪ್‌ ಮಾಡಿ"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"ಅನ್‌ಲಾಕ್‌ ಮಾಡಲು ಪಿನ್‌ ಟೈಪ್‌ ಮಾಡಿ"</string>
     <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"ನಿಮ್ಮ ಪಿನ್ ನಮೂದಿಸಿ"</string>
-    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"ನಿಮ್ಮ ಪ್ಯಾಟರ್ನ್ ನಮೂದಿಸಿ"</string>
-    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"ನಿಮ್ಮ ಪ್ಯಾಟರ್ನ್ ನಮೂದಿಸಿ"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ನಮೂದಿಸಿ"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ತಪ್ಪಾದ ಪಿನ್‌ ಕೋಡ್."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ಅಮಾನ್ಯ ಕಾರ್ಡ್."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"ಚಾರ್ಜ್ ಆಗಿದೆ"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"ಪೂರ್ಣವಾಗಿ ಚಾರ್ಜ್ ಆಗಿದೆ"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ಚಾರ್ಜ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ವೇಗವಾಗಿ ಚಾರ್ಜ್‌ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ನಿಧಾನವಾಗಿ ಚಾರ್ಜ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
@@ -61,8 +61,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"ದೋಷದ ಕಾರಣದಿಂದಾಗಿ eSIM ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"ನಮೂದಿಸಿ"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"ಪ್ಯಾಟರ್ನ್ ಮರೆತಿದ್ದೀರಿ"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"ಪ್ಯಾಟರ್ನ್ ತಪ್ಪಾಗಿದೆ"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"ಪಾಸ್‌ವರ್ಡ್ ತಪ್ಪಾಗಿದೆ"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"ಪ್ಯಾಟರ್ನ್ ತಪ್ಪಾಗಿದೆ"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"ತಪ್ಪು ಪಾಸ್‌ವರ್ಡ್"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"ಪಿನ್‌ ತಪ್ಪಾಗಿದೆ"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="one"><xliff:g id="NUMBER">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</item>
@@ -140,10 +140,8 @@
       <item quantity="one">ಸಾಧನವನ್ನು <xliff:g id="NUMBER_1">%d</xliff:g> ಗಂಟೆಗಳವರೆಗೆ ಅನ್‌ಲಾಕ್‌ ಮಾಡಿರಲಿಲ್ಲ. ಪಾಸ್‌ವರ್ಡ್‌ ಖಚಿತಪಡಿಸಿ.</item>
       <item quantity="other">ಸಾಧನವನ್ನು <xliff:g id="NUMBER_1">%d</xliff:g> ಗಂಟೆಗಳವರೆಗೆ ಅನ್‌ಲಾಕ್‌ ಮಾಡಿರಲಿಲ್ಲ. ಪಾಸ್‌ವರ್ಡ್‌ ಖಚಿತಪಡಿಸಿ.</item>
     </plurals>
-    <!-- no translation found for kg_fingerprint_not_recognized (7854413849848459418) -->
-    <skip />
-    <!-- no translation found for kg_face_not_recognized (6382535088345875294) -->
-    <skip />
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">ಸಿಮ್ ಪಿನ್ ನಮೂದಿಸಿ. ನಿಮ್ಮಲ್ಲಿ <xliff:g id="NUMBER_1">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ.</item>
       <item quantity="other">ಸಿಮ್ ಪಿನ್ ನಮೂದಿಸಿ. ನಿಮ್ಮಲ್ಲಿ <xliff:g id="NUMBER_1">%d</xliff:g> ಪ್ರಯತ್ನಗಳು ಬಾಕಿ ಉಳಿದಿವೆ.</item>

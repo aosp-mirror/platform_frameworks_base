@@ -29,11 +29,11 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Inserisci password per sbloccare"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Inserisci PIN per sbloccare"</string>
     <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Inserisci il PIN"</string>
-    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"Inserisci la sequenza"</string>
-    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"Inserisci la password"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Inserisci la sequenza"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Inserisci la password"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Codice PIN errato."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Scheda non valida."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Carico"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"Completamente carica"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • In carica"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ricarica veloce"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ricarica lenta"</string>
@@ -61,8 +61,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"Impossibile disattivare la eSIM a causa di un errore."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Invio"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Sequenza dimenticata"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Sequenza sbagliata"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"Password sbagliata"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Sequenza errata"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Password errata"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"PIN errato"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="other">Riprova fra <xliff:g id="NUMBER">%d</xliff:g> secondi.</item>
@@ -140,8 +140,8 @@
       <item quantity="other">Il dispositivo non viene sbloccato da <xliff:g id="NUMBER_1">%d</xliff:g> ore. Conferma la password.</item>
       <item quantity="one">Il dispositivo non viene sbloccato da <xliff:g id="NUMBER_0">%d</xliff:g> ora. Conferma la password.</item>
     </plurals>
-    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Non riconosciuta"</string>
-    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Non riconosciuta"</string>
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"Non riconosciuto"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"Non riconosciuto"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">Inserisci il codice PIN della SIM. Hai ancora <xliff:g id="NUMBER_1">%d</xliff:g> tentativi a disposizione.</item>
       <item quantity="one">Inserisci il codice PIN della SIM. Hai ancora <xliff:g id="NUMBER_0">%d</xliff:g> tentativo a disposizione, dopodiché dovrai contattare l\'operatore per sbloccare il dispositivo.</item>
