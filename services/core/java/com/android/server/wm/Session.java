@@ -189,28 +189,12 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public int add(IWindow window, int seq, WindowManager.LayoutParams attrs,
-            int viewVisibility, Rect outContentInsets, Rect outStableInsets,
-            InputChannel outInputChannel) {
-        return addToDisplay(window, seq, attrs, viewVisibility, Display.DEFAULT_DISPLAY,
-                new Rect() /* outFrame */, outContentInsets, outStableInsets, null /* outOutsets */,
-                new DisplayCutout.ParcelableWrapper()  /* cutout */, outInputChannel);
-    }
-
-    @Override
     public int addToDisplay(IWindow window, int seq, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, Rect outFrame, Rect outContentInsets,
             Rect outStableInsets, Rect outOutsets,
             DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel) {
         return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId, outFrame,
                 outContentInsets, outStableInsets, outOutsets, outDisplayCutout, outInputChannel);
-    }
-
-    @Override
-    public int addWithoutInputChannel(IWindow window, int seq, WindowManager.LayoutParams attrs,
-            int viewVisibility, Rect outContentInsets, Rect outStableInsets) {
-        return addToDisplayWithoutInputChannel(window, seq, attrs, viewVisibility,
-                Display.DEFAULT_DISPLAY, outContentInsets, outStableInsets);
     }
 
     @Override

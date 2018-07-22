@@ -802,10 +802,10 @@ class ActivityStarter {
                         null /*profilerInfo*/);
 
                 if (DEBUG_PERMISSIONS_REVIEW) {
+                    final ActivityStack focusedStack = mSupervisor.getTopDisplayFocusedStack();
                     Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true,
                             true, false) + "} from uid " + callingUid + " on display "
-                            + (mSupervisor.mFocusedStack == null
-                            ? DEFAULT_DISPLAY : mSupervisor.mFocusedStack.mDisplayId));
+                            + (focusedStack == null ? DEFAULT_DISPLAY : focusedStack.mDisplayId));
                 }
             }
         }
@@ -839,7 +839,7 @@ class ActivityStarter {
             r.appTimeTracker = sourceRecord.appTimeTracker;
         }
 
-        final ActivityStack stack = mSupervisor.mFocusedStack;
+        final ActivityStack stack = mSupervisor.getTopDisplayFocusedStack();
 
         // If we are starting an activity that is not from the same uid as the currently resumed
         // one, check whether app switches are allowed.
@@ -1013,7 +1013,7 @@ class ActivityStarter {
         ActivityInfo aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, profilerInfo);
 
         synchronized (mService.mGlobalLock) {
-            final ActivityStack stack = mSupervisor.mFocusedStack;
+            final ActivityStack stack = mSupervisor.getTopDisplayFocusedStack();
             stack.mConfigWillChange = globalConfig != null
                     && mService.getGlobalConfiguration().diff(globalConfig) != 0;
             if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
@@ -1354,7 +1354,7 @@ class ActivityStarter {
 
         // If the activity being launched is the same as the one currently at the top, then
         // we need to check if it should only be launched once.
-        final ActivityStack topStack = mSupervisor.mFocusedStack;
+        final ActivityStack topStack = mSupervisor.getTopDisplayFocusedStack();
         final ActivityRecord topFocused = topStack.getTopActivity();
         final ActivityRecord top = topStack.topRunningNonDelayedActivityLocked(mNotTop);
         final boolean dontStart = top != null && mStartActivity.resultTo == null
@@ -1447,7 +1447,8 @@ class ActivityStarter {
                 // will not update the focused stack.  If starting the new activity now allows the
                 // task stack to be focusable, then ensure that we now update the focused stack
                 // accordingly.
-                if (mTargetStack.isFocusable() && !mSupervisor.isFocusedStack(mTargetStack)) {
+                if (mTargetStack.isFocusable()
+                        && !mSupervisor.isTopDisplayFocusedStack(mTargetStack)) {
                     mTargetStack.moveToFront("startActivityUnchecked");
                 }
                 mSupervisor.resumeFocusedStackTopActivityLocked(mTargetStack, mStartActivity,
@@ -1609,8 +1610,8 @@ class ActivityStarter {
         if ((startFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
             ActivityRecord checkedCaller = sourceRecord;
             if (checkedCaller == null) {
-                checkedCaller = mSupervisor.mFocusedStack.topRunningNonDelayedActivityLocked(
-                        mNotTop);
+                checkedCaller = mSupervisor.getTopDisplayFocusedStack()
+                        .topRunningNonDelayedActivityLocked(mNotTop);
             }
             if (!checkedCaller.realActivity.equals(r.realActivity)) {
                 // Caller is not the same as launcher, so always needed.
@@ -1843,7 +1844,7 @@ class ActivityStarter {
         // except...  well, with SINGLE_TASK_LAUNCH it's not entirely clear. We'd like to have
         // the same behavior as if a new instance was being started, which means not bringing it
         // to the front if the caller is not itself in the front.
-        final ActivityStack focusStack = mSupervisor.getFocusedStack();
+        final ActivityStack focusStack = mSupervisor.getTopDisplayFocusedStack();
         ActivityRecord curTop = (focusStack == null)
                 ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
 
@@ -2304,23 +2305,23 @@ class ActivityStarter {
         }
 
         final ActivityStack currentStack = task != null ? task.getStack() : null;
+        final ActivityStack focusedStack = mSupervisor.getTopDisplayFocusedStack();
         if (currentStack != null) {
-            if (mSupervisor.mFocusedStack != currentStack) {
+            if (focusedStack != currentStack) {
                 if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
                         "computeStackFocus: Setting " + "focused stack to r=" + r
                                 + " task=" + task);
             } else {
                 if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
-                        "computeStackFocus: Focused stack already="
-                                + mSupervisor.mFocusedStack);
+                        "computeStackFocus: Focused stack already=" + focusedStack);
             }
             return currentStack;
         }
 
         if (canLaunchIntoFocusedStack(r, newTask)) {
             if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG_FOCUS,
-                    "computeStackFocus: Have a focused stack=" + mSupervisor.mFocusedStack);
-            return mSupervisor.mFocusedStack;
+                    "computeStackFocus: Have a focused stack=" + focusedStack);
+            return focusedStack;
         }
 
         if (mPreferredDisplayId != DEFAULT_DISPLAY) {
@@ -2356,7 +2357,7 @@ class ActivityStarter {
     /** Check if provided activity record can launch in currently focused stack. */
     // TODO: This method can probably be consolidated into getLaunchStack() below.
     private boolean canLaunchIntoFocusedStack(ActivityRecord r, boolean newTask) {
-        final ActivityStack focusedStack = mSupervisor.mFocusedStack;
+        final ActivityStack focusedStack = mSupervisor.getTopDisplayFocusedStack();
         final boolean canUseFocusedStack;
         if (focusedStack.isActivityTypeAssistant()) {
             canUseFocusedStack = r.isActivityTypeAssistant();
@@ -2406,18 +2407,19 @@ class ActivityStarter {
         }
         // Otherwise handle adjacent launch.
 
+        final ActivityStack focusedStack = mSupervisor.getTopDisplayFocusedStack();
         // The parent activity doesn't want to launch the activity on top of itself, but
         // instead tries to put it onto other side in side-by-side mode.
-        final ActivityStack parentStack = task != null ? task.getStack(): mSupervisor.mFocusedStack;
+        final ActivityStack parentStack = task != null ? task.getStack(): focusedStack;
 
-        if (parentStack != mSupervisor.mFocusedStack) {
+        if (parentStack != focusedStack) {
             // If task's parent stack is not focused - use it during adjacent launch.
             return parentStack;
         } else {
-            if (mSupervisor.mFocusedStack != null && task == mSupervisor.mFocusedStack.topTask()) {
+            if (focusedStack != null && task == focusedStack.topTask()) {
                 // If task is already on top of focused stack - use it. We don't want to move the
                 // existing focused task to adjacent stack, just deliver new intent in this case.
-                return mSupervisor.mFocusedStack;
+                return focusedStack;
             }
 
             if (parentStack != null && parentStack.inSplitScreenPrimaryWindowingMode()) {

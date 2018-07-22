@@ -39,7 +39,11 @@ class BaseVisitor : public xml::Visitor {
  public:
   using xml::Visitor::Visit;
 
-  BaseVisitor(const ResourceFile& file, KeepSet* keep_set) : file_(file), keep_set_(keep_set) {
+  BaseVisitor(const ResourceFile& file, KeepSet* keep_set) : BaseVisitor(file, keep_set, "...") {
+  }
+
+  BaseVisitor(const ResourceFile& file, KeepSet* keep_set, const std::string& ctor_signature)
+      : file_(file), keep_set_(keep_set), ctor_signature_(ctor_signature) {
   }
 
   void Visit(xml::Element* node) override {
@@ -50,11 +54,11 @@ class BaseVisitor : public xml::Visitor {
         // This is a custom view, let's figure out the class name from this.
         std::string package = maybe_package.value().package + "." + node->name;
         if (util::IsJavaClassName(package)) {
-          AddClass(node->line_number, package);
+          AddClass(node->line_number, package, ctor_signature_);
         }
       }
     } else if (util::IsJavaClassName(node->name)) {
-      AddClass(node->line_number, node->name);
+      AddClass(node->line_number, node->name, ctor_signature_);
     }
 
     for (const auto& child : node->children) {
@@ -74,9 +78,12 @@ class BaseVisitor : public xml::Visitor {
  protected:
   ResourceFile file_;
   KeepSet* keep_set_;
+  std::string ctor_signature_;
 
-  virtual void AddClass(size_t line_number, const std::string& class_name) {
-    keep_set_->AddConditionalClass({file_.name, file_.source.WithLine(line_number)}, class_name);
+  virtual void AddClass(size_t line_number, const std::string& class_name,
+                        const std::string& ctor_signature) {
+    keep_set_->AddConditionalClass({file_.name, file_.source.WithLine(line_number)},
+        {class_name, ctor_signature});
   }
 
   void AddMethod(size_t line_number, const std::string& method_name,
@@ -102,31 +109,38 @@ class BaseVisitor : public xml::Visitor {
 
 class LayoutVisitor : public BaseVisitor {
  public:
-  LayoutVisitor(const ResourceFile& file, KeepSet* keep_set) : BaseVisitor(file, keep_set) {
+  LayoutVisitor(const ResourceFile& file, KeepSet* keep_set)
+      : BaseVisitor(file, keep_set, "android.content.Context, android.util.AttributeSet") {
   }
 
   void Visit(xml::Element* node) override {
-    bool check_class = false;
-    bool check_name = false;
+    bool is_view = false;
+    bool is_fragment = false;
     if (node->namespace_uri.empty()) {
       if (node->name == "view") {
-        check_class = true;
+        is_view = true;
       } else if (node->name == "fragment") {
-        check_class = check_name = true;
+        is_fragment = true;
       }
     } else if (node->namespace_uri == xml::kSchemaAndroid) {
-      check_name = node->name == "fragment";
+      is_fragment = node->name == "fragment";
     }
 
     for (const auto& attr : node->attributes) {
-      if (check_class && attr.namespace_uri.empty() && attr.name == "class" &&
-          util::IsJavaClassName(attr.value)) {
-        AddClass(node->line_number, attr.value);
-      } else if (check_name && attr.namespace_uri == xml::kSchemaAndroid &&
-                 attr.name == "name" && util::IsJavaClassName(attr.value)) {
-        AddClass(node->line_number, attr.value);
-      } else if (attr.namespace_uri == xml::kSchemaAndroid &&
-                 attr.name == "onClick") {
+      if (attr.namespace_uri.empty() && attr.name == "class") {
+        if (util::IsJavaClassName(attr.value)) {
+          if (is_view) {
+            AddClass(node->line_number, attr.value,
+                "android.content.Context, android.util.AttributeSet");
+          } else if (is_fragment) {
+            AddClass(node->line_number, attr.value, "");
+          }
+        }
+      } else if (attr.namespace_uri == xml::kSchemaAndroid && attr.name == "name") {
+        if (is_fragment && util::IsJavaClassName(attr.value)) {
+          AddClass(node->line_number, attr.value, "");
+        }
+      } else if (attr.namespace_uri == xml::kSchemaAndroid && attr.name == "onClick") {
         AddMethod(node->line_number, attr.value, "android.view.View");
       }
     }
@@ -149,7 +163,7 @@ class MenuVisitor : public BaseVisitor {
         if (attr.namespace_uri == xml::kSchemaAndroid) {
           if ((attr.name == "actionViewClass" || attr.name == "actionProviderClass") &&
               util::IsJavaClassName(attr.value)) {
-            AddClass(node->line_number, attr.value);
+            AddClass(node->line_number, attr.value, "android.content.Context");
           } else if (attr.name == "onClick") {
             AddMethod(node->line_number, attr.value, "android.view.MenuItem");
           }
@@ -180,7 +194,7 @@ class XmlResourceVisitor : public BaseVisitor {
       xml::Attribute* attr =
           node->FindAttribute(xml::kSchemaAndroid, "fragment");
       if (attr && util::IsJavaClassName(attr->value)) {
-        AddClass(node->line_number, attr->value);
+        AddClass(node->line_number, attr->value, "");
       }
     }
 
@@ -202,7 +216,7 @@ class NavigationVisitor : public BaseVisitor {
     if (attr != nullptr && !attr->value.empty()) {
       std::string name = (attr->value[0] == '.') ? package_ + attr->value : attr->value;
       if (util::IsJavaClassName(name)) {
-        AddClass(node->line_number, name);
+        AddClass(node->line_number, name, "...");
       }
     }
 
@@ -225,7 +239,8 @@ class TransitionVisitor : public BaseVisitor {
     if (check_class) {
       xml::Attribute* attr = node->FindAttribute({}, "class");
       if (attr && util::IsJavaClassName(attr->value)) {
-        AddClass(node->line_number, attr->value);
+        AddClass(node->line_number, attr->value,
+            "android.content.Context, android.util.AttributeSet");
       }
     }
 
@@ -256,7 +271,14 @@ class ManifestVisitor : public BaseVisitor {
         if (attr) {
           Maybe<std::string> result = util::GetFullyQualifiedClassName(package_, attr->value);
           if (result) {
-            AddClass(node->line_number, result.value());
+            AddClass(node->line_number, result.value(), "");
+          }
+        }
+        attr = node->FindAttribute(xml::kSchemaAndroid, "appComponentFactory");
+        if (attr) {
+          Maybe<std::string> result = util::GetFullyQualifiedClassName(package_, attr->value);
+          if (result) {
+            AddClass(node->line_number, result.value(), "");
           }
         }
         if (main_dex_only_) {
@@ -287,7 +309,7 @@ class ManifestVisitor : public BaseVisitor {
         if (get_name) {
           Maybe<std::string> result = util::GetFullyQualifiedClassName(package_, attr->value);
           if (result) {
-            AddClass(node->line_number, result.value());
+            AddClass(node->line_number, result.value(), "");
           }
         }
       }
@@ -295,7 +317,8 @@ class ManifestVisitor : public BaseVisitor {
     BaseVisitor::Visit(node);
   }
 
-  virtual void AddClass(size_t line_number, const std::string& class_name) override {
+  virtual void AddClass(size_t line_number, const std::string& class_name,
+                        const std::string& ctor_signature) override {
     keep_set_->AddManifestClass({file_.name, file_.source.WithLine(line_number)}, class_name);
   }
 
@@ -383,13 +406,15 @@ void WriteKeepSet(const KeepSet& keep_set, OutputStream* out) {
         printer.Print("-if class **.R$layout { int ")
             .Print(JavaClassGenerator::TransformToFieldName(location.name.entry))
             .Println("; }");
-        printer.Print("-keep class ").Print(entry.first).Println(" { <init>(...); }");
+        printer.Print("-keep class ").Print(entry.first.name).Print(" { <init>(")
+            .Print(entry.first.signature).Println("); }");
       }
     } else {
       for (const UsageLocation& location : entry.second) {
         printer.Print("# Referenced at ").Println(location.source.to_string());
       }
-      printer.Print("-keep class ").Print(entry.first).Println(" { <init>(...); }");
+      printer.Print("-keep class ").Print(entry.first.name).Print(" { <init>(")
+          .Print(entry.first.signature).Println("); }");
     }
     printer.Println();
   }

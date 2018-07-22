@@ -339,6 +339,38 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                         this, stackId, mSupervisor, windowingMode, activityType, onTop);
     }
 
+    ActivityStack getFocusedStack() {
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            final ActivityStack stack = mStacks.get(i);
+            if (stack.isFocusable() && stack.shouldBeVisible(null /* starting */)) {
+                return stack;
+            }
+        }
+
+        return null;
+    }
+
+    ActivityRecord getResumedActivity() {
+        final ActivityStack focusedStack = getFocusedStack();
+        if (focusedStack == null) {
+            return null;
+        }
+        // TODO(b/111541062): Move this into ActivityStack#getResumedActivity()
+        // Check if the focused stack has the resumed activity
+        ActivityRecord resumedActivity = focusedStack.getResumedActivity();
+        if (resumedActivity == null || resumedActivity.app == null) {
+            // If there is no registered resumed activity in the stack or it is not running -
+            // try to use previously resumed one.
+            resumedActivity = focusedStack.mPausingActivity;
+            if (resumedActivity == null || resumedActivity.app == null) {
+                // If previously resumed activity doesn't work either - find the topmost running
+                // activity that can be focused.
+                resumedActivity = focusedStack.topRunningActivityLocked(true /* focusableOnly */);
+            }
+        }
+        return resumedActivity;
+    }
+
     /**
      * Removes stacks in the input windowing modes from the system if they are of activity type
      * ACTIVITY_TYPE_STANDARD or ACTIVITY_TYPE_UNDEFINED
@@ -585,7 +617,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
 
     /**
      * Get the topmost stack on the display. It may be different from focused stack, because
-     * focus may be on another display.
+     * some stacks are not focusable (e.g. PiP).
      */
     ActivityStack getTopStack() {
         return mStacks.isEmpty() ? null : mStacks.get(mStacks.size() - 1);

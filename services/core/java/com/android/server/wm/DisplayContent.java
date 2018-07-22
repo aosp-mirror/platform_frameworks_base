@@ -303,6 +303,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     // Accessed directly by all users.
     private boolean mLayoutNeeded;
     int pendingLayoutChanges;
+    int mDeferredRotationPauseCount;
     // TODO(multi-display): remove some of the usages.
     boolean isDefaultDisplay;
     /**
@@ -578,9 +579,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     w.mAppToken.layoutLetterbox(w);
                 }
 
-                if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame=" + w.mFrame
-                        + " mContainingFrame=" + w.mContainingFrame
-                        + " mDisplayFrame=" + w.mDisplayFrame);
+                if (DEBUG_LAYOUT) Slog.v(TAG, "  LAYOUT: mFrame=" + w.getFrameLw()
+                        + " mContainingFrame=" + w.getContainingFrame()
+                        + " mDisplayFrame=" + w.getDisplayFrameLw());
             }
         }
     };
@@ -606,9 +607,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 w.prelayout();
                 mService.mPolicy.layoutWindowLw(w, w.getParentWindow(), mDisplayFrames);
                 w.mLayoutSeq = mLayoutSeq;
-                if (DEBUG_LAYOUT) Slog.v(TAG, " LAYOUT: mFrame=" + w.mFrame
-                        + " mContainingFrame=" + w.mContainingFrame
-                        + " mDisplayFrame=" + w.mDisplayFrame);
+                if (DEBUG_LAYOUT) Slog.v(TAG, " LAYOUT: mFrame=" + w.getFrameLw()
+                        + " mContainingFrame=" + w.getContainingFrame()
+                        + " mDisplayFrame=" + w.getDisplayFrameLw());
             }
         } else if (w.mAttrs.type == TYPE_DREAM) {
             // Don't layout windows behind a dream, so that if it does stuff like hide the
@@ -942,6 +943,36 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     /**
+     * Temporarily pauses rotation changes until resumed.
+     *
+     * This can be used to prevent rotation changes from occurring while the user is
+     * performing certain operations, such as drag and drop.
+     *
+     * This call nests and must be matched by an equal number of calls to
+     * {@link #resumeRotationLocked}.
+     */
+    void pauseRotationLocked() {
+        mDeferredRotationPauseCount++;
+    }
+
+    /**
+     * Resumes normal rotation changes after being paused.
+     */
+    void resumeRotationLocked() {
+        if (mDeferredRotationPauseCount <= 0) {
+            return;
+        }
+
+        mDeferredRotationPauseCount--;
+        if (mDeferredRotationPauseCount == 0) {
+            final boolean changed = updateRotationUnchecked();
+            if (changed) {
+                mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, mDisplayId).sendToTarget();
+            }
+        }
+    }
+
+    /**
      * Update rotation of the display.
      *
      * @return {@code true} if the rotation has been changed.  In this case YOU MUST CALL
@@ -964,7 +995,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     boolean updateRotationUnchecked(boolean forceUpdate) {
         ScreenRotationAnimation screenRotationAnimation;
         if (!forceUpdate) {
-            if (mService.mDeferredRotationPauseCount > 0) {
+            if (mDeferredRotationPauseCount > 0) {
                 // Rotation updates have been paused temporarily.  Defer the update until
                 // updates have been resumed.
                 if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Deferring rotation, rotation is paused.");
@@ -1065,9 +1096,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         mService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_ACTIVE;
-        mService.mH.removeMessages(WindowManagerService.H.WINDOW_FREEZE_TIMEOUT);
-        mService.mH.sendEmptyMessageDelayed(WindowManagerService.H.WINDOW_FREEZE_TIMEOUT,
-                WINDOW_FREEZE_TIMEOUT_DURATION);
+        mService.mH.sendNewMessageDelayed(WindowManagerService.H.WINDOW_FREEZE_TIMEOUT,
+                this, WINDOW_FREEZE_TIMEOUT_DURATION);
 
         setLayoutNeeded();
         final int[] anim = new int[2];
@@ -1106,6 +1136,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
+        forAllWindows(w -> {
+            w.forceSeamlesslyRotateIfAllowed(oldRotation, rotation);
+        }, true /* traverseTopToBottom */);
+
+        // TODO(b/111504081): Consolidate seamless rotation logic.
         if (rotateSeamlessly) {
             seamlesslyRotate(getPendingTransaction(), oldRotation, rotation);
         }
@@ -1124,9 +1159,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }, true /* traverseTopToBottom */);
 
         if (rotateSeamlessly) {
-            mService.mH.removeMessages(WindowManagerService.H.SEAMLESS_ROTATION_TIMEOUT);
-            mService.mH.sendEmptyMessageDelayed(WindowManagerService.H.SEAMLESS_ROTATION_TIMEOUT,
-                    SEAMLESS_ROTATION_TIMEOUT_DURATION);
+            mService.mH.sendNewMessageDelayed(WindowManagerService.H.SEAMLESS_ROTATION_TIMEOUT,
+                    this, SEAMLESS_ROTATION_TIMEOUT_DURATION);
         }
 
         for (int i = mService.mRotationWatchers.size() - 1; i >= 0; i--) {
@@ -2282,6 +2316,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         pw.println();
         pw.print(prefix); pw.print("mLayoutSeq="); pw.println(mLayoutSeq);
+        pw.print(prefix);
+        pw.print("mDeferredRotationPauseCount="); pw.println(mDeferredRotationPauseCount);
 
         pw.println();
         pw.println(prefix + "Application tokens in top down Z order:");
@@ -2876,7 +2912,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 mWallpaperController.adjustWallpaperWindows(this);
             }
 
-            if (isDefaultDisplay && (pendingLayoutChanges & FINISH_LAYOUT_REDO_CONFIG) != 0) {
+            if ((pendingLayoutChanges & FINISH_LAYOUT_REDO_CONFIG) != 0) {
                 if (DEBUG_LAYOUT) Slog.v(TAG, "Computing new config from layout");
                 if (mService.updateOrientationFromAppTokensLocked(mDisplayId)) {
                     setLayoutNeeded();
@@ -3736,6 +3772,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         @Override
+        SurfaceControl.Builder makeChildSurface(WindowContainer child) {
+            final SurfaceControl.Builder builder = super.makeChildSurface(child);
+            if (child instanceof WindowToken && ((WindowToken) child).mRoundedCornerOverlay) {
+                // To draw above the ColorFade layer during the screen off transition, the
+                // rounded corner overlays need to be at the root of the surface hierarchy.
+                // TODO: move the ColorLayer into the display overlay layer such that this is not
+                // necessary anymore.
+                builder.setParent(null);
+            }
+            return builder;
+        }
+
+        @Override
         void assignChildLayers(SurfaceControl.Transaction t) {
             assignChildLayers(t, null /* imeContainer */);
         }
@@ -3749,6 +3798,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // See {@link mSplitScreenDividerAnchor}
                 if (wt.windowType == TYPE_DOCK_DIVIDER) {
                     wt.assignRelativeLayer(t, mTaskStackContainers.getSplitScreenDividerAnchor(), 1);
+                    continue;
+                }
+                if (wt.mRoundedCornerOverlay) {
+                    wt.assignLayer(t, WindowManagerPolicy.COLOR_FADE_LAYER + 1);
                     continue;
                 }
                 wt.assignLayer(t, j);

@@ -56,8 +56,9 @@ class KeepSet {
     manifest_class_set_[class_name].insert(file);
   }
 
-  inline void AddConditionalClass(const UsageLocation& file, const std::string& class_name) {
-    conditional_class_set_[class_name].insert(file);
+  inline void AddConditionalClass(const UsageLocation& file,
+                                  const NameAndSignature& class_and_signature) {
+    conditional_class_set_[class_and_signature].insert(file);
   }
 
   inline void AddMethod(const UsageLocation& file, const NameAndSignature& name_and_signature) {
@@ -77,7 +78,7 @@ class KeepSet {
   bool conditional_keep_rules_ = false;
   std::map<std::string, std::set<UsageLocation>> manifest_class_set_;
   std::map<NameAndSignature, std::set<UsageLocation>> method_set_;
-  std::map<std::string, std::set<UsageLocation>> conditional_class_set_;
+  std::map<NameAndSignature, std::set<UsageLocation>> conditional_class_set_;
   std::map<ResourceName, std::set<UsageLocation>> reference_set_;
 };
 

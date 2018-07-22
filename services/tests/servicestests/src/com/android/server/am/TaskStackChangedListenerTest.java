@@ -181,6 +181,7 @@ public class TaskStackChangedListenerTest {
 
         final ActivityTaskChangeCallbacks activity =
                 (ActivityTaskChangeCallbacks) startTestActivity(ActivityTaskChangeCallbacks.class);
+        activity.setDetachedFromWindowLatch(onDetachedFromWindowLatch);
         final int id = activity.getTaskId();
 
         // Test for onTaskCreated.
@@ -207,6 +208,7 @@ public class TaskStackChangedListenerTest {
         assertEquals(1, taskRemovedLatch.getCount());
         waitForCallback(taskRemovedLatch);
         assertEquals(id, params[0]);
+        waitForCallback(onDetachedFromWindowLatch);
         assertTrue(activity.onDetachedFromWindowCalled);
     }
 
@@ -288,11 +290,17 @@ public class TaskStackChangedListenerTest {
     }
 
     public static class ActivityTaskChangeCallbacks extends Activity {
-        public boolean onDetachedFromWindowCalled = false;;
+        boolean onDetachedFromWindowCalled = false;
+        CountDownLatch onDetachedFromWindowCountDownLatch;
 
         @Override
         public void onDetachedFromWindow() {
             onDetachedFromWindowCalled = true;
+            onDetachedFromWindowCountDownLatch.countDown();
+        }
+
+        void setDetachedFromWindowLatch(CountDownLatch countDownLatch) {
+            onDetachedFromWindowCountDownLatch = countDownLatch;
         }
     }
 }

@@ -268,24 +268,18 @@ class ScreenRotationAnimation {
                     .setSecure(isSecure)
                     .build();
 
-            // capture a screenshot into the surface we just created
-            // TODO(multidisplay): we should use the proper display
-            final int displayId = SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN;
-            final IBinder displayHandle = SurfaceControl.getBuiltInDisplay(displayId);
-            // This null check below is to guard a race condition where WMS didn't have a chance to
-            // respond to display disconnection before handling rotation , that surfaceflinger may
-            // return a null handle here because it doesn't think that display is valid anymore.
-            if (displayHandle != null) {
-                Surface sur = new Surface();
-                sur.copyFrom(mSurfaceControl);
-                SurfaceControl.screenshot(displayHandle, sur);
+            // Capture a screenshot into the surface we just created.
+            final int displayId = display.getDisplayId();
+            final Surface surface = new Surface();
+            surface.copyFrom(mSurfaceControl);
+            if (mService.mDisplayManagerInternal.screenshot(displayId, surface)) {
                 t.setLayer(mSurfaceControl, SCREEN_FREEZE_LAYER_SCREENSHOT);
                 t.setAlpha(mSurfaceControl, 0);
                 t.show(mSurfaceControl);
-                sur.destroy();
             } else {
-                Slog.w(TAG, "Built-in display " + displayId + " is null.");
+                Slog.w(TAG, "Unable to take screenshot of display " + displayId);
             }
+            surface.destroy();
         } catch (OutOfResourcesException e) {
             Slog.w(TAG, "Unable to allocate freeze surface", e);
         }

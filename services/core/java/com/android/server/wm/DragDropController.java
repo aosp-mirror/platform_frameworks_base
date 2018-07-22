@@ -151,6 +151,7 @@ class DragDropController {
                     mDragState.mUid = callerUid;
                     mDragState.mOriginalAlpha = alpha;
                     mDragState.mToken = dragToken;
+                    mDragState.mDisplayContent = displayContent;
 
                     final Display display = displayContent.getDisplay();
                     if (!mCallback.get().registerInputChannel(
@@ -160,7 +161,6 @@ class DragDropController {
                         return null;
                     }
 
-                    mDragState.mDisplayContent = displayContent;
                     mDragState.mData = data;
                     mDragState.broadcastDragStartedLocked(touchX, touchY);
                     mDragState.overridePointerIconLocked(touchSource);

@@ -95,11 +95,6 @@ public class Tile implements Parcelable {
      */
     public String key;
 
-    /**
-     * Optional remote view which will be displayed instead of the regular title-summary item.
-     */
-    public RemoteViews remoteViews;
-
     public Tile() {
         // Empty
     }
@@ -135,7 +130,6 @@ public class Tile implements Parcelable {
         dest.writeInt(priority);
         dest.writeBundle(metaData);
         dest.writeString(key);
-        dest.writeParcelable(remoteViews, flags);
         dest.writeBoolean(isIconTintable);
     }
 
@@ -157,7 +151,6 @@ public class Tile implements Parcelable {
         priority = in.readInt();
         metaData = in.readBundle();
         key = in.readString();
-        remoteViews = in.readParcelable(RemoteViews.class.getClassLoader());
         isIconTintable = in.readBoolean();
     }
 

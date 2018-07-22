@@ -235,6 +235,8 @@ public final class SystemServer {
             "com.android.server.timedetector.TimeDetectorService$Lifecycle";
     private static final String TIME_ZONE_DETECTOR_SERVICE_CLASS =
             "com.android.server.timezonedetector.TimeZoneDetectorService$Lifecycle";
+    private static final String ACCESSIBILITY_MANAGER_SERVICE_CLASS =
+            "com.android.server.accessibility.AccessibilityManagerService$Lifecycle";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -957,8 +959,7 @@ public final class SystemServer {
 
             traceBeginAndSlog("StartAccessibilityManagerService");
             try {
-                ServiceManager.addService(Context.ACCESSIBILITY_SERVICE,
-                        new AccessibilityManagerService(context));
+                mSystemServiceManager.startService(ACCESSIBILITY_MANAGER_SERVICE_CLASS);
             } catch (Throwable e) {
                 reportWtf("starting Accessibility Manager", e);
             }

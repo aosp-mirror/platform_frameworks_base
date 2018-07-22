@@ -2165,6 +2165,24 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
+        public boolean screenshot(int displayId, Surface outSurface) {
+            synchronized (mSyncRoot) {
+                final LogicalDisplay display = mLogicalDisplays.get(displayId);
+                if (display != null) {
+                    final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
+                    if (device != null) {
+                        final IBinder token = device.getDisplayTokenLocked();
+                        if (token != null) {
+                            SurfaceControl.screenshot(token, outSurface);
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        @Override
         public DisplayInfo getDisplayInfo(int displayId) {
             return getDisplayInfoInternal(displayId, Process.myUid());
         }

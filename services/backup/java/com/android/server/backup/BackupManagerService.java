@@ -497,6 +497,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         mDataDir = dataDir;
     }
 
+    @Nullable
     public DataChangedJournal getJournal() {
         return mJournal;
     }

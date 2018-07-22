@@ -18,26 +18,45 @@ package com.android.server.backup.testing;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.android.server.testing.shadows.ShadowEventLog;
+
 import org.robolectric.shadows.ShadowLog;
 
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 
 public class TestUtils {
-    /** Reset logcat with {@link ShadowLog#reset()} before the test case */
+    /** Reset logcat with {@link ShadowLog#reset()} before the test case. */
     public static void assertLogcatAtMost(String tag, int level) {
         assertThat(ShadowLog.getLogsForTag(tag).stream().allMatch(logItem -> logItem.type <= level))
+                .named("All logs <= " + level)
                 .isTrue();
     }
 
-    /** Reset logcat with {@link ShadowLog#reset()} before the test case */
+    /** Reset logcat with {@link ShadowLog#reset()} before the test case. */
     public static void assertLogcatAtLeast(String tag, int level) {
         assertThat(ShadowLog.getLogsForTag(tag).stream().anyMatch(logItem -> logItem.type >= level))
+                .named("Any log >= " + level)
                 .isTrue();
     }
 
     public static void assertLogcatContains(String tag, Predicate<ShadowLog.LogItem> predicate) {
         assertThat(ShadowLog.getLogsForTag(tag).stream().anyMatch(predicate)).isTrue();
+    }
+
+    /** Declare shadow {@link ShadowEventLog} to use this. */
+    public static void assertEventLogged(int tag, Object... values) {
+        assertThat(ShadowEventLog.getEntries())
+                .named("Event logs")
+                .contains(new ShadowEventLog.Entry(tag, Arrays.asList(values)));
+    }
+
+    /** Declare shadow {@link ShadowEventLog} to use this. */
+    public static void assertEventNotLogged(int tag, Object... values) {
+        assertThat(ShadowEventLog.getEntries())
+                .named("Event logs")
+                .doesNotContain(new ShadowEventLog.Entry(tag, Arrays.asList(values)));
     }
 
     /**

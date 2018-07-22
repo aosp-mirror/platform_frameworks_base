@@ -7,12 +7,15 @@ import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
 
 import android.os.Bundle;
+
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
+
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.junit.Test;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class TileTest {
 
     private Tile mTile;

@@ -540,13 +540,13 @@ class WindowStateAnimator {
         }
 
         if (WindowManagerService.localLOGV) Slog.v(TAG, "Got surface: " + mSurfaceController
-                + ", set left=" + w.mFrame.left + " top=" + w.mFrame.top
+                + ", set left=" + w.getFrameLw().left + " top=" + w.getFrameLw().top
                 + ", animLayer=" + mAnimLayer);
 
         if (SHOW_LIGHT_TRANSACTIONS) {
             Slog.i(TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
             WindowManagerService.logSurface(w, "CREATE pos=("
-                    + w.mFrame.left + "," + w.mFrame.top + ") ("
+                    + w.getFrameLw().left + "," + w.getFrameLw().top + ") ("
                     + width + "x" + height + "), layer=" + mAnimLayer + " HIDE", false);
         }
 
@@ -686,12 +686,16 @@ class WindowStateAnimator {
         final int displayId = mWin.getDisplayId();
         final ScreenRotationAnimation screenRotationAnimation =
                 mAnimator.getScreenRotationAnimationLocked(displayId);
-        final boolean screenAnimation =
-                screenRotationAnimation != null && screenRotationAnimation.isAnimating();
+        // TODO(b/111504081): Consolidate seamless rotation logic.
+        final boolean windowParticipatesInScreenRotationAnimation =
+                !mWin.mForceSeamlesslyRotate;
+        final boolean screenAnimation = screenRotationAnimation != null
+                && screenRotationAnimation.isAnimating()
+                && windowParticipatesInScreenRotationAnimation;
 
         if (screenAnimation) {
             // cache often used attributes locally
-            final Rect frame = mWin.mFrame;
+            final Rect frame = mWin.getFrameLw();
             final float tmpFloats[] = mService.mTmpFloats;
             final Matrix tmpMatrix = mWin.mTmpMatrix;
 
@@ -799,6 +803,13 @@ class WindowStateAnimator {
             return false;
         }
 
+        // During forced seamless rotation, the surface bounds get updated with the crop in the
+        // new rotation, which is not compatible with showing the surface in the old rotation.
+        // To work around that we disable cropping for such windows, as it is not necessary anyways.
+        if (w.mForceSeamlesslyRotate) {
+            return false;
+        }
+
         // If we're animating, the wallpaper should only
         // be updated at the end of the animation.
         if (w.mAttrs.type == TYPE_WALLPAPER) {
@@ -811,7 +822,7 @@ class WindowStateAnimator {
         w.calculatePolicyCrop(mSystemDecorRect);
 
         if (DEBUG_WINDOW_CROP) Slog.d(TAG, "Applying decor to crop win=" + w + " mDecorFrame="
-                + w.mDecorFrame + " mSystemDecorRect=" + mSystemDecorRect);
+                + w.getDecorFrame() + " mSystemDecorRect=" + mSystemDecorRect);
 
         final Task task = w.getTask();
         final boolean fullscreen = w.fillsDisplay() || (task != null && task.isFullscreen());
@@ -931,9 +942,9 @@ class WindowStateAnimator {
 
             // Make sure that what we're animating to and from is actually the right size in case
             // the window cannot take up the full screen.
-            mTmpStackBounds.intersectUnchecked(w.mParentFrame);
-            mTmpSourceBounds.intersectUnchecked(w.mParentFrame);
-            mTmpAnimatingBounds.intersectUnchecked(w.mParentFrame);
+            mTmpStackBounds.intersectUnchecked(w.getParentFrame());
+            mTmpSourceBounds.intersectUnchecked(w.getParentFrame());
+            mTmpAnimatingBounds.intersectUnchecked(w.getParentFrame());
 
             if (!mTmpSourceBounds.isEmpty()) {
                 // Get the final target stack bounds, if we are not animating, this is just the
@@ -1498,14 +1509,16 @@ class WindowStateAnimator {
         }
     }
 
+    // TODO(b/111504081): Consolidate seamless rotation logic.
+    @Deprecated
     void seamlesslyRotate(SurfaceControl.Transaction t, int oldRotation, int newRotation) {
         final WindowState w = mWin;
 
         // We rotated the screen, but have not received a new buffer with the correct size yet. In
         // the mean time, we rotate the buffer we have to the new orientation.
         final Matrix transform = mService.mTmpTransform;
-        transformToRotation(oldRotation, newRotation, w.mFrame.width(), w.mFrame.height(),
-                transform);
+        transformToRotation(oldRotation, newRotation, w.getFrameLw().width(),
+                w.getFrameLw().height(), transform);
         transform.getValues(mService.mTmpFloats);
 
         float DsDx = mService.mTmpFloats[Matrix.MSCALE_X];

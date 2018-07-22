@@ -156,9 +156,9 @@ public class TaskRecordTests extends ActivityTestsBase {
 
     private TaskRecord createTaskRecord(int taskId) {
         return new TaskRecord(mService.mActivityTaskManager, taskId, new Intent(), null, null, null,
-                null, null, false,
-                false, false, 0, 10050, null, new ArrayList<>(), 0, false, null, 0, 0, 0, 0, 0,
-                null, 0, false, false, false, 0, 0);
+                ActivityBuilder.getDefaultComponent(), null, false, false, false, 0, 10050, null,
+                new ArrayList<>(), 0, false, null, 0, 0, 0, 0, 0, null, 0, false, false, false, 0, 0
+        );
     }
 
     private static class TestTaskRecordFactory extends TaskRecordFactory {

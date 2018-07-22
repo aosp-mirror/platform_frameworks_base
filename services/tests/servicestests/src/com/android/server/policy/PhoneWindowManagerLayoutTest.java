@@ -75,11 +75,11 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
 
-        assertInsetByTopBottom(mAppWindow.parentFrame, 0, 0);
-        assertInsetByTopBottom(mAppWindow.stableFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.contentFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.decorFrame, 0, 0);
-        assertInsetBy(mAppWindow.displayFrame, 0, 0, 0, 0);
+        assertInsetByTopBottom(mAppWindow.getFrameLw(), 0, 0);
+        assertInsetByTopBottom(mAppWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getDecorFrame(), 0, 0);
+        assertInsetBy(mAppWindow.getDisplayFrameLw(), 0, 0, 0, 0);
     }
 
     @Test
@@ -90,11 +90,11 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
 
-        assertInsetByTopBottom(mAppWindow.parentFrame, 0, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.stableFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.contentFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.decorFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.displayFrame, 0, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getFrameLw(), 0, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getDecorFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getDisplayFrameLw(), 0, NAV_BAR_HEIGHT);
     }
 
     @Test
@@ -106,11 +106,11 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
 
-        assertInsetByTopBottom(mAppWindow.parentFrame, 0, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.stableFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.contentFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.decorFrame, 0, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.displayFrame, 0, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getFrameLw(), 0, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getDecorFrame(), 0, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getDisplayFrameLw(), 0, NAV_BAR_HEIGHT);
     }
 
     @Test
@@ -131,11 +131,11 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
 
-        assertInsetByTopBottom(mAppWindow.parentFrame, 0, 0);
-        assertInsetByTopBottom(mAppWindow.stableFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.contentFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.decorFrame, 0, 0);
-        assertInsetByTopBottom(mAppWindow.displayFrame, 0, 0);
+        assertInsetByTopBottom(mAppWindow.getFrameLw(), 0, 0);
+        assertInsetByTopBottom(mAppWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getDecorFrame(), 0, 0);
+        assertInsetByTopBottom(mAppWindow.getDisplayFrameLw(), 0, 0);
     }
 
     @Test
@@ -148,11 +148,11 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
 
-        assertInsetByTopBottom(mAppWindow.parentFrame, STATUS_BAR_HEIGHT, 0);
-        assertInsetByTopBottom(mAppWindow.stableFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.contentFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.decorFrame, 0, 0);
-        assertInsetByTopBottom(mAppWindow.displayFrame, STATUS_BAR_HEIGHT, 0);
+        assertInsetByTopBottom(mAppWindow.getFrameLw(), STATUS_BAR_HEIGHT, 0);
+        assertInsetByTopBottom(mAppWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getDecorFrame(), 0, 0);
+        assertInsetByTopBottom(mAppWindow.getDisplayFrameLw(), STATUS_BAR_HEIGHT, 0);
     }
 
     @Test
@@ -165,11 +165,11 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
 
-        assertInsetByTopBottom(mAppWindow.parentFrame, 0, 0);
-        assertInsetByTopBottom(mAppWindow.stableFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.contentFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.decorFrame, 0, 0);
-        assertInsetBy(mAppWindow.displayFrame, 0, 0, 0, 0);
+        assertInsetByTopBottom(mAppWindow.getFrameLw(), 0, 0);
+        assertInsetByTopBottom(mAppWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getDecorFrame(), 0, 0);
+        assertInsetBy(mAppWindow.getDisplayFrameLw(), 0, 0, 0, 0);
     }
 
     @Test
@@ -182,11 +182,11 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
 
-        assertInsetByTopBottom(mAppWindow.parentFrame, STATUS_BAR_HEIGHT, 0);
-        assertInsetByTopBottom(mAppWindow.stableFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.contentFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.decorFrame, 0, 0);
-        assertInsetByTopBottom(mAppWindow.displayFrame, STATUS_BAR_HEIGHT, 0);
+        assertInsetByTopBottom(mAppWindow.getFrameLw(), STATUS_BAR_HEIGHT, 0);
+        assertInsetByTopBottom(mAppWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getDecorFrame(), 0, 0);
+        assertInsetByTopBottom(mAppWindow.getDisplayFrameLw(), STATUS_BAR_HEIGHT, 0);
     }
 
     @Test
@@ -200,11 +200,11 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
 
-        assertInsetByTopBottom(mAppWindow.parentFrame, 0, 0);
-        assertInsetByTopBottom(mAppWindow.stableFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.contentFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.decorFrame, 0, 0);
-        assertInsetByTopBottom(mAppWindow.displayFrame, 0, 0);
+        assertInsetByTopBottom(mAppWindow.getFrameLw(), 0, 0);
+        assertInsetByTopBottom(mAppWindow.getStableFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getContentFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getDecorFrame(), 0, 0);
+        assertInsetByTopBottom(mAppWindow.getDisplayFrameLw(), 0, 0);
     }
 
 
@@ -217,12 +217,12 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
 
-        assertInsetBy(mAppWindow.parentFrame, DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
-        assertInsetBy(mAppWindow.stableFrame, 0, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
-        assertInsetBy(mAppWindow.contentFrame,
+        assertInsetBy(mAppWindow.getFrameLw(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
+        assertInsetBy(mAppWindow.getStableFrame(), 0, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
+        assertInsetBy(mAppWindow.getContentFrameLw(),
                 DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
-        assertInsetBy(mAppWindow.decorFrame, 0, 0, 0, 0);
-        assertInsetBy(mAppWindow.displayFrame, DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
+        assertInsetBy(mAppWindow.getDecorFrame(), 0, 0, 0, 0);
+        assertInsetBy(mAppWindow.getDisplayFrameLw(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
     }
 
     @Test
@@ -234,12 +234,12 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
 
-        assertInsetBy(mAppWindow.parentFrame, 0, 0, DISPLAY_CUTOUT_HEIGHT, 0);
-        assertInsetBy(mAppWindow.stableFrame, NAV_BAR_HEIGHT, STATUS_BAR_HEIGHT, 0, 0);
-        assertInsetBy(mAppWindow.contentFrame,
+        assertInsetBy(mAppWindow.getFrameLw(), 0, 0, DISPLAY_CUTOUT_HEIGHT, 0);
+        assertInsetBy(mAppWindow.getStableFrame(), NAV_BAR_HEIGHT, STATUS_BAR_HEIGHT, 0, 0);
+        assertInsetBy(mAppWindow.getContentFrameLw(),
                 NAV_BAR_HEIGHT, STATUS_BAR_HEIGHT, DISPLAY_CUTOUT_HEIGHT, 0);
-        assertInsetBy(mAppWindow.decorFrame, 0, 0, 0, 0);
-        assertInsetBy(mAppWindow.displayFrame, 0, 0, DISPLAY_CUTOUT_HEIGHT, 0);
+        assertInsetBy(mAppWindow.getDecorFrame(), 0, 0, 0, 0);
+        assertInsetBy(mAppWindow.getDisplayFrameLw(), 0, 0, DISPLAY_CUTOUT_HEIGHT, 0);
     }
 
     @Test
@@ -253,11 +253,11 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
 
-        assertInsetBy(mAppWindow.parentFrame, DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
-        assertInsetBy(mAppWindow.stableFrame, 0, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
-        assertInsetBy(mAppWindow.contentFrame,
+        assertInsetBy(mAppWindow.getFrameLw(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
+        assertInsetBy(mAppWindow.getStableFrame(), 0, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
+        assertInsetBy(mAppWindow.getContentFrameLw(),
                 DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
-        assertInsetBy(mAppWindow.decorFrame, 0, 0, 0, 0);
+        assertInsetBy(mAppWindow.getDecorFrame(), 0, 0, 0, 0);
     }
 
     @Test
@@ -273,8 +273,8 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
 
-        assertInsetByTopBottom(mAppWindow.parentFrame, 0, NAV_BAR_HEIGHT);
-        assertInsetByTopBottom(mAppWindow.displayFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getFrameLw(), 0, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.getDisplayFrameLw(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
     }
 
     @Test
@@ -289,11 +289,11 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
 
-        assertInsetBy(mAppWindow.parentFrame, 0, 0, 0, 0);
-        assertInsetBy(mAppWindow.stableFrame, 0, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
-        assertInsetBy(mAppWindow.contentFrame,
+        assertInsetBy(mAppWindow.getFrameLw(), 0, 0, 0, 0);
+        assertInsetBy(mAppWindow.getStableFrame(), 0, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
+        assertInsetBy(mAppWindow.getContentFrameLw(),
                 DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
-        assertInsetBy(mAppWindow.decorFrame, 0, 0, 0, 0);
+        assertInsetBy(mAppWindow.getDecorFrame(), 0, 0, 0, 0);
     }
 
     @Test

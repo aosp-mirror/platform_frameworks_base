@@ -17,6 +17,7 @@
 package com.android.settingslib.drawer;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -51,13 +52,14 @@ import android.util.ArrayMap;
 import android.util.Pair;
 import android.widget.RemoteViews;
 
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -66,7 +68,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 @Config(shadows = TileUtilsTest.TileUtilsShadowRemoteViews.class)
 public class TileUtilsTest {
 
@@ -176,13 +178,12 @@ public class TileUtilsTest {
                 .thenReturn(info);
 
         List<DashboardCategory> categoryList = TileUtils.getCategories(
-                mContext, cache, false /* categoryDefinedInManifest */, testAction,
-                TileUtils.SETTING_PKG);
+                mContext, cache, testAction, CategoryManager.SETTING_PKG);
         assertThat(categoryList.get(0).getTile(0).category).isEqualTo(testCategory);
     }
 
     @Test
-    public void getCategories_withPackageName() throws Exception {
+    public void getCategories_withPackageName() {
         ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         Map<Pair<String, String>, Tile> cache = new ArrayMap<>();
         Global.putInt(mContext.getContentResolver(), Global.DEVICE_PROVISIONED, 1);
@@ -192,18 +193,16 @@ public class TileUtilsTest {
         userHandleList.add(new UserHandle(ActivityManager.getCurrentUser()));
         when(mUserManager.getUserProfiles()).thenReturn(userHandleList);
 
-        TileUtils.getCategories(
-                mContext, cache, false /* categoryDefinedInManifest */, null /* action */,
-                TileUtils.SETTING_PKG);
+        TileUtils.getCategories(mContext, cache, null /* action */, CategoryManager.SETTING_PKG);
         verify(mPackageManager, atLeastOnce()).queryIntentActivitiesAsUser(
                 intentCaptor.capture(), anyInt(), anyInt());
 
         assertThat(intentCaptor.getAllValues().get(0).getPackage())
-                .isEqualTo(TileUtils.SETTING_PKG);
+                .isEqualTo(CategoryManager.SETTING_PKG);
     }
 
     @Test
-    public void getTilesForIntent_shouldReadMetadataTitleAsString() throws RemoteException {
+    public void getTilesForIntent_shouldReadMetadataTitleAsString() {
         Intent intent = new Intent();
         Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
         List<Tile> outTiles = new ArrayList<>();
@@ -224,7 +223,7 @@ public class TileUtilsTest {
     }
 
     @Test
-    public void getTilesForIntent_shouldReadMetadataTitleFromResource() throws RemoteException {
+    public void getTilesForIntent_shouldReadMetadataTitleFromResource() {
         Intent intent = new Intent();
         Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
         List<Tile> outTiles = new ArrayList<>();
@@ -339,7 +338,7 @@ public class TileUtilsTest {
     }
 
     @Test
-    public void getTilesForIntent_shouldProcessUriContentForSystemApp() throws RemoteException {
+    public void getTilesForIntent_shouldProcessUriContentForSystemApp() {
         Intent intent = new Intent();
         Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
         List<Tile> outTiles = new ArrayList<>();

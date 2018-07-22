@@ -270,12 +270,6 @@ class WindowToken extends WindowContainer<WindowState> {
         dc.reParentWindowToken(this);
         mDisplayContent = dc;
 
-        // The rounded corner overlay should not be rotated. We ensure that by moving it outside
-        // the windowing layer.
-        if (mRoundedCornerOverlay) {
-            mDisplayContent.reparentToOverlay(mPendingTransaction, mSurfaceControl);
-        }
-
         // TODO(b/36740756): One day this should perhaps be hooked
         // up with goodToGo, so we don't move a window
         // to another display before the window behind

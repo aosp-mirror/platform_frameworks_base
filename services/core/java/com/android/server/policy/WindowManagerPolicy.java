@@ -93,6 +93,7 @@ import android.view.animation.Animation;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 import com.android.server.wm.DisplayFrames;
+import com.android.server.wm.WindowFrames;
 import com.android.server.wm.utils.WmDisplayCutout;
 
 import java.io.PrintWriter;
@@ -156,6 +157,8 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     int FINISH_LAYOUT_REDO_WALLPAPER = 0x0004;
     /** Need to recompute animations */
     int FINISH_LAYOUT_REDO_ANIM = 0x0008;
+    /** Layer for the screen off animation */
+    int COLOR_FADE_LAYER = 0x40000001;
 
     /**
      * Register shortcuts for window manager to dispatch.
@@ -197,35 +200,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * getFrame() if so desired.  Must be called with the window manager
          * lock held.
          *
-         * @param parentFrame The frame of the parent container this window
-         * is in, used for computing its basic position.
-         * @param displayFrame The frame of the overall display in which this
-         * window can appear, used for constraining the overall dimensions
-         * of the window.
-         * @param overlayFrame The frame within the display that is inside
-         * of the overlay region.
-         * @param contentFrame The frame within the display in which we would
-         * like active content to appear.  This will cause windows behind to
-         * be resized to match the given content frame.
-         * @param visibleFrame The frame within the display that the window
-         * is actually visible, used for computing its visible insets to be
-         * given to windows behind.
-         * This can be used as a hint for scrolling (avoiding resizing)
-         * the window to make certain that parts of its content
-         * are visible.
-         * @param decorFrame The decor frame specified by policy specific to this window,
-         * to use for proper cropping during animation.
-         * @param stableFrame The frame around which stable system decoration is positioned.
-         * @param outsetFrame The frame that includes areas that aren't part of the surface but we
-         * want to treat them as such.
-         * @param displayCutout the display cutout
-         * @param parentFrameWasClippedByDisplayCutout true if the parent frame would have been
-         * different if there was no display cutout.
+         * @param windowFrames Container for all the window frames that affect how the window is
+         *                     laid out.
          */
-        public void computeFrameLw(Rect parentFrame, Rect displayFrame,
-                Rect overlayFrame, Rect contentFrame, Rect visibleFrame, Rect decorFrame,
-                Rect stableFrame, @Nullable Rect outsetFrame, WmDisplayCutout displayCutout,
-                boolean parentFrameWasClippedByDisplayCutout);
+        public void computeFrameLw(WindowFrames windowFrames);
 
         /**
          * Retrieve the current frame of the window that has been assigned by
@@ -490,6 +468,9 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * visible. That is, they have the permission {@link Manifest.permission#DEVICE_POWER}.
          */
         boolean canAcquireSleepToken();
+
+        /** @return true if this window desires key events. */
+        boolean canReceiveKeys();
 
         /**
          * Writes {@link com.android.server.wm.IdentifierProto} to stream.

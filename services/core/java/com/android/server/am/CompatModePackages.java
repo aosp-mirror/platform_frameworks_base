@@ -317,7 +317,7 @@ public final class CompatModePackages {
 
             scheduleWrite();
 
-            final ActivityStack stack = mService.mActivityTaskManager.getFocusedStack();
+            final ActivityStack stack = mService.mActivityTaskManager.getTopDisplayFocusedStack();
             ActivityRecord starting = stack.restartPackage(packageName);
 
             // Tell all processes that loaded this package about the change.

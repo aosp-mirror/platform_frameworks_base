@@ -1523,7 +1523,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             if (mLetterbox == null) {
                 mLetterbox = new Letterbox(() -> makeChildSurface(null));
             }
-            mLetterbox.layout(getParent().getBounds(), w.mFrame);
+            mLetterbox.layout(getParent().getBounds(), w.getFrameLw());
         } else if (mLetterbox != null) {
             mLetterbox.hide();
         }
@@ -1808,7 +1808,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             // won't exactly match the final freeform window frame (e.g. when overlapping with
             // the status bar). In that case we need to use the final frame.
             if (freeform) {
-                frame.set(win.mFrame);
+                frame.set(win.getFrameLw());
             } else if (win.isLetterboxedAppWindow()) {
                 frame.set(getTask().getBounds());
             } else if (win.isDockedResizing()) {
@@ -1816,7 +1816,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 // animation target (which will be different than the task bounds)
                 frame.set(getTask().getParent().getBounds());
             } else {
-                frame.set(win.mContainingFrame);
+                frame.set(win.getContainingFrame());
             }
             surfaceInsets = win.getAttrs().surfaceInsets;
             // XXX(b/72757033): These are insets relative to the window frame, but we're really
@@ -2022,7 +2022,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (win == null) {
             return;
         }
-        final Rect frame = win.mFrame;
+        final Rect frame = win.getFrameLw();
         final int thumbnailDrawableRes = getTask().mUserId == mService.mCurrentUserId
                 ? R.drawable.ic_account_circle
                 : R.drawable.ic_corp_badge;
@@ -2034,7 +2034,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         mThumbnail = new AppWindowThumbnail(getPendingTransaction(), this, thumbnail);
         final Animation animation =
-                mService.mAppTransition.createCrossProfileAppsThumbnailAnimationLocked(win.mFrame);
+                mService.mAppTransition.createCrossProfileAppsThumbnailAnimationLocked(
+                        win.getFrameLw());
         mThumbnail.startAnimation(getPendingTransaction(), animation, new Point(frame.left,
                 frame.top));
     }

@@ -657,7 +657,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         boolean kept = true;
         try {
             final ActivityRecord r = topRunningActivityLocked();
-            final boolean wasFocused = r != null && supervisor.isFocusedStack(sourceStack)
+            final boolean wasFocused = r != null && supervisor.isTopDisplayFocusedStack(sourceStack)
                     && (topRunningActivityLocked() == r);
             final boolean wasResumed = r != null && sourceStack.getResumedActivity() == r;
             final boolean wasPaused = r != null && sourceStack.mPausingActivity == r;

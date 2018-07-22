@@ -55,6 +55,7 @@ import org.junit.Test;
 
 import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
 import static com.android.server.am.ActivityManagerService.ANIMATE;
+import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -77,6 +78,7 @@ import com.android.server.am.LaunchParamsController.LaunchParamsModifier;
 import com.android.server.am.TaskRecord.TaskRecordFactory;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tests for the {@link ActivityStarter} class.
@@ -312,9 +314,6 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 .setCreateStack(false)
                 .build();
 
-        // supervisor needs a focused stack.
-        mService.mStackSupervisor.mFocusedStack = stack;
-
         // use factory that only returns spy task.
         final TaskRecordFactory factory = mock(TaskRecordFactory.class);
         TaskRecord.setTaskRecordFactory(factory);
@@ -404,8 +403,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
         reusableActivity.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
 
         // Set focus back to primary.
-        mService.mStackSupervisor.setFocusStackUnchecked("testSplitScreenDeliverToTop",
-                focusActivity.getStack());
+        final ActivityStack focusStack = focusActivity.getStack();
+        focusStack.moveToFront("testSplitScreenDeliverToTop");
 
         doReturn(reusableActivity).when(mService.mStackSupervisor).findTaskLocked(any(), anyInt());
 
@@ -453,6 +452,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
     @Test
     public void testTaskModeViolation() {
         final ActivityDisplay display = mService.mStackSupervisor.getDefaultDisplay();
+        ((TestActivityDisplay) display).removeAllTasks();
         assertNoTasks(display);
 
         final ActivityStarter starter = prepareStarter(0);

@@ -1401,6 +1401,14 @@
         <service android:name="android.content.CrossUserContentService"
                 android:exported="true" />
 
+        <activity android:name="android.app.assist.EmptyLayoutActivity"
+                  android:label="My Title">
+           <intent-filter>
+               <action android:name="android.intent.action.MAIN" />
+               <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+           </intent-filter>
+       </activity>
+
     </application>
 
     <instrumentation android:name="android.support.test.runner.AndroidJUnitRunner"

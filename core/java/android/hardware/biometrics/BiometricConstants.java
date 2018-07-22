@@ -19,6 +19,10 @@ package android.hardware.biometrics;
 
 /**
  * Interface containing all of the biometric modality agnostic constants.
+ *
+ * NOTE: The error messages must be consistent between BiometricConstants, Biometric*Constants,
+ *       and the frameworks/support/biometric/.../BiometricConstants files.
+ *
  * @hide
  */
 public interface BiometricConstants {
@@ -104,6 +108,13 @@ public interface BiometricConstants {
      * The device does not have a biometric sensor.
      */
     int BIOMETRIC_ERROR_HW_NOT_PRESENT = 12;
+
+    /**
+     * The user pressed the negative button. This is a placeholder that is currently only used
+     * by the support library.
+     * @hide
+     */
+    int BIOMETRIC_ERROR_NEGATIVE_BUTTON = 13;
 
     /**
      * @hide

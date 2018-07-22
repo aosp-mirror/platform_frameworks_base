@@ -57,6 +57,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
+import android.hardware.hdmi.HdmiAudioSystemClient;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiTvClient;
@@ -926,14 +927,15 @@ public class AudioService extends IAudioService.Stub
         }
 
         if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_HDMI_CEC)) {
-            mHdmiManager = mContext.getSystemService(HdmiControlManager.class);
-            synchronized (mHdmiManager) {
+            synchronized (mHdmiClientLock) {
+                mHdmiManager = mContext.getSystemService(HdmiControlManager.class);
                 mHdmiTvClient = mHdmiManager.getTvClient();
                 if (mHdmiTvClient != null) {
                     mFixedVolumeDevices &= ~AudioSystem.DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER;
                 }
                 mHdmiPlaybackClient = mHdmiManager.getPlaybackClient();
                 mHdmiCecSink = false;
+                mHdmiAudioSystemClient = mHdmiManager.getAudioSystemClient();
             }
         }
 
@@ -1054,11 +1056,9 @@ public class AudioService extends IAudioService.Stub
             sendEncodedSurroundMode(mContentResolver, "onAudioServerDied");
             sendEnabledSurroundFormats(mContentResolver, true);
         }
-        if (mHdmiManager != null) {
-            synchronized (mHdmiManager) {
-                if (mHdmiTvClient != null) {
-                    setHdmiSystemAudioSupported(mHdmiSystemAudioSupported);
-                }
+        synchronized (mHdmiClientLock) {
+            if (mHdmiManager != null && mHdmiTvClient != null) {
+                setHdmiSystemAudioSupported(mHdmiSystemAudioSupported);
             }
         }
 
@@ -1763,23 +1763,33 @@ public class AudioService extends IAudioService.Stub
             if (streamTypeAlias == AudioSystem.STREAM_MUSIC) {
                 setSystemAudioVolume(oldIndex, newIndex, getStreamMaxVolume(streamType), flags);
             }
-            if (mHdmiManager != null) {
-                synchronized (mHdmiManager) {
+            synchronized (mHdmiClientLock) {
+                if (mHdmiManager != null) {
                     // mHdmiCecSink true => mHdmiPlaybackClient != null
                     if (mHdmiCecSink &&
                             streamTypeAlias == AudioSystem.STREAM_MUSIC &&
                             oldIndex != newIndex) {
-                        synchronized (mHdmiPlaybackClient) {
-                            int keyCode = (direction == -1) ? KeyEvent.KEYCODE_VOLUME_DOWN :
-                                    KeyEvent.KEYCODE_VOLUME_UP;
-                            final long ident = Binder.clearCallingIdentity();
-                            try {
-                                mHdmiPlaybackClient.sendKeyEvent(keyCode, true);
-                                mHdmiPlaybackClient.sendKeyEvent(keyCode, false);
-                            } finally {
-                                Binder.restoreCallingIdentity(ident);
-                            }
+                        int keyCode = (direction == -1) ? KeyEvent.KEYCODE_VOLUME_DOWN :
+                                KeyEvent.KEYCODE_VOLUME_UP;
+                        final long ident = Binder.clearCallingIdentity();
+                        try {
+                            mHdmiPlaybackClient.sendKeyEvent(keyCode, true);
+                            mHdmiPlaybackClient.sendKeyEvent(keyCode, false);
+                        } finally {
+                            Binder.restoreCallingIdentity(ident);
                         }
+                    }
+
+                    if (mHdmiAudioSystemClient != null &&
+                            mHdmiSystemAudioSupported &&
+                            streamTypeAlias == AudioSystem.STREAM_MUSIC &&
+                            (oldIndex != newIndex || isMuteAdjust)) {
+                        final long identity = Binder.clearCallingIdentity();
+                        mHdmiAudioSystemClient.sendReportAudioStatusCecCommand(
+                                isMuteAdjust, getStreamVolume(AudioSystem.STREAM_MUSIC),
+                                getStreamMaxVolume(AudioSystem.STREAM_MUSIC),
+                                isStreamMute(AudioSystem.STREAM_MUSIC));
+                        Binder.restoreCallingIdentity(identity);
                     }
                 }
             }
@@ -1799,22 +1809,19 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void setSystemAudioVolume(int oldVolume, int newVolume, int maxVolume, int flags) {
-        if (mHdmiManager == null
-                || mHdmiTvClient == null
-                || oldVolume == newVolume
-                || (flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) != 0) return;
-
         // Sets the audio volume of AVR when we are in system audio mode. The new volume info
         // is tranformed to HDMI-CEC commands and passed through CEC bus.
-        synchronized (mHdmiManager) {
-            if (!mHdmiSystemAudioSupported) return;
-            synchronized (mHdmiTvClient) {
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    mHdmiTvClient.setSystemAudioVolume(oldVolume, newVolume, maxVolume);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
+        synchronized (mHdmiClientLock) {
+            if (mHdmiManager == null
+                    || mHdmiTvClient == null
+                    || oldVolume == newVolume
+                    || (flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) != 0
+                    || !mHdmiSystemAudioSupported) return;
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mHdmiTvClient.setSystemAudioVolume(oldVolume, newVolume, maxVolume);
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
     }
@@ -2037,6 +2044,20 @@ public class AudioService extends IAudioService.Stub
                 index = mStreamStates[streamType].getIndex(device);
             }
         }
+        synchronized (mHdmiClientLock) {
+            if (mHdmiManager != null &&
+                    mHdmiAudioSystemClient != null &&
+                    mHdmiSystemAudioSupported &&
+                    streamTypeAlias == AudioSystem.STREAM_MUSIC &&
+                    (oldIndex != index)) {
+                final long identity = Binder.clearCallingIdentity();
+                mHdmiAudioSystemClient.sendReportAudioStatusCecCommand(
+                        false, getStreamVolume(AudioSystem.STREAM_MUSIC),
+                        getStreamMaxVolume(AudioSystem.STREAM_MUSIC),
+                        isStreamMute(AudioSystem.STREAM_MUSIC));
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
         sendVolumeUpdate(streamType, oldIndex, index, flags);
     }
 
@@ -2177,8 +2198,8 @@ public class AudioService extends IAudioService.Stub
     // If Hdmi-CEC system audio mode is on, we show volume bar only when TV
     // receives volume notification from Audio Receiver.
     private int updateFlagsForSystemAudio(int flags) {
-        if (mHdmiTvClient != null) {
-            synchronized (mHdmiTvClient) {
+        synchronized (mHdmiClientLock) {
+            if (mHdmiTvClient != null) {
                 if (mHdmiSystemAudioSupported &&
                         ((flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) == 0)) {
                     flags &= ~AudioManager.FLAG_SHOW_UI;
@@ -2233,16 +2254,13 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void setSystemAudioMute(boolean state) {
-        if (mHdmiManager == null || mHdmiTvClient == null) return;
-        synchronized (mHdmiManager) {
-            if (!mHdmiSystemAudioSupported) return;
-            synchronized (mHdmiTvClient) {
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    mHdmiTvClient.setSystemAudioMute(state);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
+        synchronized (mHdmiClientLock) {
+            if (mHdmiManager == null || mHdmiTvClient == null || !mHdmiSystemAudioSupported) return;
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mHdmiTvClient.setSystemAudioMute(state);
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
     }
@@ -6370,12 +6388,10 @@ public class AudioService extends IAudioService.Stub
                 if (isPlatformTelevision() && ((device & AudioSystem.DEVICE_OUT_HDMI) != 0)) {
                     mFixedVolumeDevices |= AudioSystem.DEVICE_OUT_HDMI;
                     checkAllFixedVolumeDevices();
-                    if (mHdmiManager != null) {
-                        synchronized (mHdmiManager) {
-                            if (mHdmiPlaybackClient != null) {
-                                mHdmiCecSink = false;
-                                mHdmiPlaybackClient.queryDisplayStatus(mHdmiDisplayStatusCallback);
-                            }
+                    synchronized (mHdmiClientLock) {
+                        if (mHdmiManager != null && mHdmiPlaybackClient != null) {
+                            mHdmiCecSink = false;
+                            mHdmiPlaybackClient.queryDisplayStatus(mHdmiDisplayStatusCallback);
                         }
                     }
                 }
@@ -6384,8 +6400,8 @@ public class AudioService extends IAudioService.Stub
                 }
             } else {
                 if (isPlatformTelevision() && ((device & AudioSystem.DEVICE_OUT_HDMI) != 0)) {
-                    if (mHdmiManager != null) {
-                        synchronized (mHdmiManager) {
+                    synchronized (mHdmiClientLock) {
+                        if (mHdmiManager != null) {
                             mHdmiCecSink = false;
                         }
                     }
@@ -7054,8 +7070,8 @@ public class AudioService extends IAudioService.Stub
 
     private class MyDisplayStatusCallback implements HdmiPlaybackClient.DisplayStatusCallback {
         public void onComplete(int status) {
-            if (mHdmiManager != null) {
-                synchronized (mHdmiManager) {
+            synchronized (mHdmiClientLock) {
+                if (mHdmiManager != null) {
                     mHdmiCecSink = (status != HdmiControlManager.POWER_STATUS_UNKNOWN);
                     // Television devices without CEC service apply software volume on HDMI output
                     if (isPlatformTelevision() && !mHdmiCecSink) {
@@ -7065,43 +7081,49 @@ public class AudioService extends IAudioService.Stub
                 }
             }
         }
-    };
+    }
+
+    private final Object mHdmiClientLock = new Object();
 
     // If HDMI-CEC system audio is supported
     private boolean mHdmiSystemAudioSupported = false;
     // Set only when device is tv.
+    @GuardedBy("mHdmiClientLock")
     private HdmiTvClient mHdmiTvClient;
     // true if the device has system feature PackageManager.FEATURE_LEANBACK.
     // cached HdmiControlManager interface
+    @GuardedBy("mHdmiClientLock")
     private HdmiControlManager mHdmiManager;
     // Set only when device is a set-top box.
+    @GuardedBy("mHdmiClientLock")
     private HdmiPlaybackClient mHdmiPlaybackClient;
     // true if we are a set-top box, an HDMI sink is connected and it supports CEC.
     private boolean mHdmiCecSink;
+    // Set only when device is an audio system.
+    @GuardedBy("mHdmiClientLock")
+    private HdmiAudioSystemClient mHdmiAudioSystemClient;
 
     private MyDisplayStatusCallback mHdmiDisplayStatusCallback = new MyDisplayStatusCallback();
 
     @Override
     public int setHdmiSystemAudioSupported(boolean on) {
         int device = AudioSystem.DEVICE_NONE;
-        if (mHdmiManager != null) {
-            synchronized (mHdmiManager) {
-                if (mHdmiTvClient == null) {
-                    Log.w(TAG, "Only Hdmi-Cec enabled TV device supports system audio mode.");
+        synchronized (mHdmiClientLock) {
+            if (mHdmiManager != null) {
+                if (mHdmiTvClient == null && mHdmiAudioSystemClient == null) {
+                    Log.w(TAG, "Only Hdmi-Cec enabled TV or audio system device supports"
+                            + "system audio mode.");
                     return device;
                 }
-
-                synchronized (mHdmiTvClient) {
-                    if (mHdmiSystemAudioSupported != on) {
-                        mHdmiSystemAudioSupported = on;
-                        final int config = on ? AudioSystem.FORCE_HDMI_SYSTEM_AUDIO_ENFORCED :
-                            AudioSystem.FORCE_NONE;
-                        mForceUseLogger.log(new ForceUseEvent(AudioSystem.FOR_HDMI_SYSTEM_AUDIO,
-                                config, "setHdmiSystemAudioSupported"));
-                        AudioSystem.setForceUse(AudioSystem.FOR_HDMI_SYSTEM_AUDIO, config);
-                    }
-                    device = getDevicesForStream(AudioSystem.STREAM_MUSIC);
+                if (mHdmiSystemAudioSupported != on) {
+                    mHdmiSystemAudioSupported = on;
+                    final int config = on ? AudioSystem.FORCE_HDMI_SYSTEM_AUDIO_ENFORCED :
+                        AudioSystem.FORCE_NONE;
+                    mForceUseLogger.log(new ForceUseEvent(AudioSystem.FOR_HDMI_SYSTEM_AUDIO,
+                            config, "setHdmiSystemAudioSupported"));
+                    AudioSystem.setForceUse(AudioSystem.FOR_HDMI_SYSTEM_AUDIO, config);
                 }
+                device = getDevicesForStream(AudioSystem.STREAM_MUSIC);
             }
         }
         return device;
