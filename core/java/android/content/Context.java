@@ -3340,6 +3340,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.app.UriGrantsManager} for interacting with the global system state.
+     *
+     * @see #getSystemService(String)
+     * @see android.app.UriGrantsManager
+     * @hide
+     */
+    public static final String URI_GRANTS_SERVICE = "uri_grants";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.app.AlarmManager} for receiving intents at a
      * time of your choosing.
      *

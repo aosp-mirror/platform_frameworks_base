@@ -1409,7 +1409,7 @@ class ActivityStarter {
             return result;
         }
 
-        mService.mAm.grantUriPermissionFromIntentLocked(mCallingUid, mStartActivity.packageName,
+        mService.mUgmInternal.grantUriPermissionFromIntent(mCallingUid, mStartActivity.packageName,
                 mIntent, mStartActivity.getUriPermissionsLocked(), mStartActivity.userId);
         mService.mAm.grantEphemeralAccessLocked(mStartActivity.userId, mIntent,
                 mStartActivity.appInfo.uid, UserHandle.getAppId(mCallingUid));

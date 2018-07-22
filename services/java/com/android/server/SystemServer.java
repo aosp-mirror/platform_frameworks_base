@@ -118,6 +118,7 @@ import com.android.server.trust.TrustManagerService;
 import com.android.server.tv.TvInputManagerService;
 import com.android.server.tv.TvRemoteService;
 import com.android.server.twilight.TwilightService;
+import com.android.server.uri.UriGrantsManagerService;
 import com.android.server.usage.UsageStatsService;
 import com.android.server.vr.VrManagerService;
 import com.android.server.webkit.WebViewUpdateService;
@@ -560,6 +561,11 @@ public final class SystemServer {
         // therefore register the device identifier policy before the activity manager.
         traceBeginAndSlog("DeviceIdentifiersPolicyService");
         mSystemServiceManager.startService(DeviceIdentifiersPolicyService.class);
+        traceEnd();
+
+        // Uri Grants Manager.
+        traceBeginAndSlog("UriGrantsManagerService");
+        mSystemServiceManager.startService(UriGrantsManagerService.Lifecycle.class);
         traceEnd();
 
         // Activity manager runs the show.

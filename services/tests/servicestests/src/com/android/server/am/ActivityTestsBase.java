@@ -36,8 +36,8 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
+import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.DisplayWindowController;
 
 import org.junit.Rule;
@@ -103,6 +103,7 @@ public class ActivityTestsBase {
         if (!sOneTimeSetupDone) {
             sOneTimeSetupDone = true;
             MockitoAnnotations.initMocks(this);
+            AttributeCache.init(mContext);
         }
         mHandlerThread = new HandlerThread("ActivityTestsBaseThread");
         mHandlerThread.start();
@@ -127,7 +128,6 @@ public class ActivityTestsBase {
     }
 
     ActivityManagerService setupActivityManagerService(TestActivityTaskManagerService atm) {
-        AttributeCache.init(mContext);
         final ActivityManagerService am = spy(new TestActivityManagerService(mContext, atm));
         setupActivityManagerService(am, atm);
         return am;
@@ -137,6 +137,8 @@ public class ActivityTestsBase {
         atm.setActivityManagerService(am);
         atm.mAmInternal = am.new LocalService();
         am.mAtmInternal = atm.new LocalService();
+        am.mUgmInternal = mock(UriGrantsManagerInternal.class);
+        atm.mUgmInternal = mock(UriGrantsManagerInternal.class);
         // Makes sure the supervisor is using with the spy object.
         atm.mStackSupervisor.setService(atm);
         doReturn(mock(IPackageManager.class)).when(am).getPackageManager();

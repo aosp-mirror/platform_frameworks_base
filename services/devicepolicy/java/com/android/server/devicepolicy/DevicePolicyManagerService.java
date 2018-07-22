@@ -233,6 +233,7 @@ import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.UserRestrictionsUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
+import com.android.server.uri.UriGrantsManagerInternal;
 import com.google.android.collect.Sets;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -6973,7 +6974,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 intent.putExtra(DeviceAdminReceiver.EXTRA_BUGREPORT_HASH, bugreportHash);
                 intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-                LocalServices.getService(ActivityManagerInternal.class)
+                LocalServices.getService(UriGrantsManagerInternal.class)
                         .grantUriPermissionFromIntent(Process.SHELL_UID,
                                 mOwners.getDeviceOwnerComponent().getPackageName(),
                                 intent, mOwners.getDeviceOwnerUserId());

@@ -226,6 +226,14 @@ final class SystemServiceRegistry {
                         ctx.getOuterContext(), ctx.mMainThread.getHandler());
             }});
 
+        registerService(Context.URI_GRANTS_SERVICE, UriGrantsManager.class,
+                new CachedServiceFetcher<UriGrantsManager>() {
+            @Override
+            public UriGrantsManager createService(ContextImpl ctx) {
+                return new UriGrantsManager(
+                        ctx.getOuterContext(), ctx.mMainThread.getHandler());
+            }});
+
         registerService(Context.ALARM_SERVICE, AlarmManager.class,
                 new CachedServiceFetcher<AlarmManager>() {
             @Override

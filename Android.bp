@@ -85,6 +85,7 @@ java_library {
         "core/java/android/app/IUidObserver.aidl",
         "core/java/android/app/IUiAutomationConnection.aidl",
         "core/java/android/app/IUiModeManager.aidl",
+        "core/java/android/app/IUriGrantsManager.aidl",
         "core/java/android/app/IUserSwitchObserver.aidl",
         "core/java/android/app/IWallpaperManager.aidl",
         "core/java/android/app/IWallpaperManagerCallback.aidl",

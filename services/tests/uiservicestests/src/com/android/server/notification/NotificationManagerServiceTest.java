@@ -69,6 +69,7 @@ import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
+import android.app.IUriGrantsManager;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.UsageStatsManagerInternal;
@@ -112,11 +113,13 @@ import android.util.AtomicFile;
 
 import com.android.internal.R;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.server.LocalServices;
 import com.android.server.UiServiceTestCase;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
@@ -187,6 +190,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     IBinder mPermOwner;
     @Mock
     IActivityManager mAm;
+    @Mock
+    IUriGrantsManager mUgm;
+    @Mock
+    UriGrantsManagerInternal mUgmInternal;
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
@@ -233,6 +240,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 Secure.NOTIFICATION_BADGING, 1,
                 UserHandle.getUserHandleForUid(mUid).getIdentifier());
 
+        LocalServices.removeServiceForTest(UriGrantsManagerInternal.class);
+        LocalServices.addService(UriGrantsManagerInternal.class, mUgmInternal);
+
         mService = new TestableNotificationManagerService(mContext);
 
         // Use this testable looper.
@@ -251,7 +261,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mockLightsManager.getLight(anyInt())).thenReturn(mock(Light.class));
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
         when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(false);
-        when(mAm.newUriPermissionOwner(anyString())).thenReturn(mPermOwner);
+        when(mUgmInternal.newUriPermissionOwner(anyString())).thenReturn(mPermOwner);
 
         // write to a test file; the system file isn't readable from tests
         mFile = new File(mContext.getCacheDir(), "test.xml");
@@ -283,7 +293,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     mListeners, mAssistants, mConditionProviders,
                     mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
                     mGroupHelper, mAm, mAppUsageStats,
-                    mock(DevicePolicyManagerInternal.class));
+                    mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal);
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;
@@ -2578,13 +2588,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 PKG, PKG, 0, "tag", mUid, 0, nbA.build(), new UserHandle(mUid), null, 0), c);
 
         // First post means we grant access to both
-        reset(mAm);
-        when(mAm.newUriPermissionOwner(any())).thenReturn(new Binder());
+        reset(mUgm);
+        reset(mUgmInternal);
+        when(mUgmInternal.newUriPermissionOwner(any())).thenReturn(new Binder());
         mService.updateUriPermissions(recordA, null, mContext.getPackageName(),
                 UserHandle.USER_SYSTEM);
-        verify(mAm, times(1)).grantUriPermissionFromOwner(any(), anyInt(), any(),
+        verify(mUgm, times(1)).grantUriPermissionFromOwner(any(), anyInt(), any(),
                 eq(message1.getDataUri()), anyInt(), anyInt(), anyInt());
-        verify(mAm, times(1)).grantUriPermissionFromOwner(any(), anyInt(), any(),
+        verify(mUgm, times(1)).grantUriPermissionFromOwner(any(), anyInt(), any(),
                 eq(message2.getDataUri()), anyInt(), anyInt(), anyInt());
 
         Notification.Builder nbB = new Notification.Builder(mContext, c.getId())
@@ -2595,24 +2606,24 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 PKG, 0, "tag", mUid, 0, nbB.build(), new UserHandle(mUid), null, 0), c);
 
         // Update means we drop access to first
-        reset(mAm);
+        reset(mUgmInternal);
         mService.updateUriPermissions(recordB, recordA, mContext.getPackageName(),
                 UserHandle.USER_SYSTEM);
-        verify(mAm, times(1)).revokeUriPermissionFromOwner(any(), eq(message1.getDataUri()),
-                anyInt(), anyInt());
+        verify(mUgmInternal, times(1)).revokeUriPermissionFromOwner(any(),
+                eq(message1.getDataUri()), anyInt(), anyInt());
 
         // Update back means we grant access to first again
-        reset(mAm);
+        reset(mUgm);
         mService.updateUriPermissions(recordA, recordB, mContext.getPackageName(),
                 UserHandle.USER_SYSTEM);
-        verify(mAm, times(1)).grantUriPermissionFromOwner(any(), anyInt(), any(),
+        verify(mUgm, times(1)).grantUriPermissionFromOwner(any(), anyInt(), any(),
                 eq(message1.getDataUri()), anyInt(), anyInt(), anyInt());
 
         // And update to empty means we drop everything
-        reset(mAm);
+        reset(mUgmInternal);
         mService.updateUriPermissions(null, recordB, mContext.getPackageName(),
                 UserHandle.USER_SYSTEM);
-        verify(mAm, times(1)).revokeUriPermissionFromOwner(any(), eq(null),
+        verify(mUgmInternal, times(1)).revokeUriPermissionFromOwner(any(), eq(null),
                 anyInt(), anyInt());
     }
 
