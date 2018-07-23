@@ -593,10 +593,6 @@
     <integer translatable="false" name="config_wifi_framework_wifi_score_entry_rssi_threshold_24GHz">-80</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_low_rssi_threshold_24GHz">-73</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_rssi_threshold_24GHz">-60</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_link_speed_24">6</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_bad_link_speed_5">12</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_good_link_speed_24">24</integer>
-    <integer translatable="false" name="config_wifi_framework_wifi_score_good_link_speed_5">36</integer>
 
     <!-- Integer delay in milliseconds before shutting down soft AP when there
          are no connected devices. Framework will enforce a minimum limit on
