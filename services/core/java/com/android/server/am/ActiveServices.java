@@ -3658,7 +3658,7 @@ public final class ActiveServices {
             }
 
             app = r.app;
-            if (app != null && app.debugging) {
+            if (app != null && app.isDebugging()) {
                 // The app's being debugged; let it ride
                 return;
             }

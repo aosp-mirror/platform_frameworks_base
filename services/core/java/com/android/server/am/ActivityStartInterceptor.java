@@ -237,7 +237,7 @@ class ActivityStartInterceptor {
                 (mAInfo.applicationInfo.flags & FLAG_SUSPENDED) == 0) {
             return false;
         }
-        final PackageManagerInternal pmi = mService.mAm.getPackageManagerInternalLocked();
+        final PackageManagerInternal pmi = mService.getPackageManagerInternalLocked();
         if (pmi == null) {
             return false;
         }
@@ -318,7 +318,7 @@ class ActivityStartInterceptor {
     private boolean interceptHarmfulAppIfNeeded() {
         CharSequence harmfulAppWarning;
         try {
-            harmfulAppWarning = mService.mAm.getPackageManager()
+            harmfulAppWarning = mService.getPackageManager()
                     .getHarmfulAppWarning(mAInfo.packageName, mUserId);
         } catch (RemoteException ex) {
             return false;

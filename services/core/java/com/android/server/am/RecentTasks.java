@@ -288,7 +288,7 @@ class RecentTasks {
      * @return whether the home app is also the active handler of recent tasks.
      */
     boolean isRecentsComponentHomeActivity(int userId) {
-        final ComponentName defaultHomeActivity = mService.mAm.getPackageManagerInternalLocked()
+        final ComponentName defaultHomeActivity = mService.getPackageManagerInternalLocked()
                 .getDefaultHomeActivity(userId);
         return defaultHomeActivity != null && mRecentsComponent != null &&
                 defaultHomeActivity.getPackageName().equals(mRecentsComponent.getPackageName());

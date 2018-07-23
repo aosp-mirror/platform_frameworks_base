@@ -1400,7 +1400,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // (e.g. AMS.startActivityAsUser).
                 final long token = Binder.clearCallingIdentity();
                 try {
-                    return mService.mAm.getPackageManagerInternalLocked().resolveIntent(
+                    return mService.getPackageManagerInternalLocked().resolveIntent(
                             intent, resolvedType, modifiedFlags, userId, true, filterCallingUid);
                 } finally {
                     Binder.restoreCallingIdentity(token);
@@ -2109,7 +2109,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         if (allResumedActivitiesIdle()) {
             if (r != null) {
-                mService.mAm.scheduleAppGcsLocked();
+                mService.scheduleAppGcsLocked();
             }
 
             if (mLaunchingActivity.isHeld()) {
