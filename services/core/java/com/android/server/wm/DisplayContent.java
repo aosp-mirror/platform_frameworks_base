@@ -3503,7 +3503,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             } else {
                 // Other stacks need to be below the always-on-top stacks.
                 maxPosition = belowAlwaysOnTopPosition !=
-                        POSITION_BOTTOM ? belowAlwaysOnTopPosition : topChildPosition;
+                        POSITION_BOTTOM ? belowAlwaysOnTopPosition : 0;
             }
 
             int targetPosition = requestedPosition;
