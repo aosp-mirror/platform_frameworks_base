@@ -1,4 +1,5 @@
-/* Copyright (C) 2018 The Android Open Source Project
+/*
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,17 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package com.android.internal.telephony;
 
 import android.app.PendingIntent;
 import android.net.Uri;
-import java.lang.UnsupportedOperationException;
+
 import java.util.List;
 
-public class ISmsBaseImpl extends ISms.Stub {
+/**
+ * Base class for ISms that facilitates forward compatibility with new features.
+ */
+public class ISmsImplBase extends ISms.Stub {
 
     @Override
     public List<SmsRawData> getAllMessagesFromIccEfForSubscriber(int subId, String callingPkg) {
@@ -29,45 +32,42 @@ public class ISmsBaseImpl extends ISms.Stub {
     }
 
     @Override
-    public boolean updateMessageOnIccEfForSubscriber(int subId, String callingPkg,
-             int messageIndex, int newStatus, byte[] pdu) throws UnsupportedOperationException {
+    public boolean updateMessageOnIccEfForSubscriber(int subId, String callingPkg, int messageIndex,
+            int newStatus, byte[] pdu) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean copyMessageToIccEfForSubscriber(int subId, String callingPkg, int status,
-            byte[] pdu, byte[] smsc) throws UnsupportedOperationException {
+            byte[] pdu, byte[] smsc) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void sendDataForSubscriber(int subId, String callingPkg, String destAddr,
             String scAddr, int destPort, byte[] data, PendingIntent sentIntent,
-            PendingIntent deliveryIntent) throws UnsupportedOperationException {
+            PendingIntent deliveryIntent) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void sendDataForSubscriberWithSelfPermissions(int subId, String callingPkg,
-            String destAddr, String scAddr, int destPort, byte[] data,
-            PendingIntent sentIntent, PendingIntent deliveryIntent)
-            throws UnsupportedOperationException {
+            String destAddr, String scAddr, int destPort, byte[] data, PendingIntent sentIntent,
+            PendingIntent deliveryIntent) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void sendTextForSubscriber(int subId, String callingPkg, String destAddr,
             String scAddr, String text, PendingIntent sentIntent,
-            PendingIntent deliveryIntent, boolean persistMessageForNonDefaultSmsApp)
-            throws UnsupportedOperationException {
+            PendingIntent deliveryIntent, boolean persistMessageForNonDefaultSmsApp) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void sendTextForSubscriberWithSelfPermissions(int subId, String callingPkg,
             String destAddr, String scAddr, String text, PendingIntent sentIntent,
-            PendingIntent deliveryIntent, boolean persistMessage)
-            throws UnsupportedOperationException {
+            PendingIntent deliveryIntent, boolean persistMessage) {
         throw new UnsupportedOperationException();
     }
 
@@ -75,15 +75,13 @@ public class ISmsBaseImpl extends ISms.Stub {
     public void sendTextForSubscriberWithOptions(int subId, String callingPkg, String destAddr,
             String scAddr, String text, PendingIntent sentIntent,
             PendingIntent deliveryIntent, boolean persistMessageForNonDefaultSmsApp,
-            int priority, boolean expectMore, int validityPeriod)
-            throws UnsupportedOperationException {
+            int priority, boolean expectMore, int validityPeriod) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void injectSmsPduForSubscriber(
-            int subId, byte[] pdu, String format, PendingIntent receivedIntent)
-            throws UnsupportedOperationException {
+            int subId, byte[] pdu, String format, PendingIntent receivedIntent) {
         throw new UnsupportedOperationException();
     }
 
@@ -91,8 +89,7 @@ public class ISmsBaseImpl extends ISms.Stub {
     public void sendMultipartTextForSubscriber(int subId, String callingPkg,
             String destinationAddress, String scAddress,
             List<String> parts, List<PendingIntent> sentIntents,
-            List<PendingIntent> deliveryIntents, boolean persistMessageForNonDefaultSmsApp)
-            throws UnsupportedOperationException {
+            List<PendingIntent> deliveryIntents, boolean persistMessageForNonDefaultSmsApp) {
         throw new UnsupportedOperationException();
     }
 
@@ -101,99 +98,94 @@ public class ISmsBaseImpl extends ISms.Stub {
             String destinationAddress, String scAddress,
             List<String> parts, List<PendingIntent> sentIntents,
             List<PendingIntent> deliveryIntents, boolean persistMessageForNonDefaultSmsApp,
-            int priority, boolean expectMore, int validityPeriod)
-            throws UnsupportedOperationException {
+            int priority, boolean expectMore, int validityPeriod) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean enableCellBroadcastForSubscriber(int subId, int messageIdentifier, int ranType)
-            throws UnsupportedOperationException {
+    public boolean enableCellBroadcastForSubscriber(int subId, int messageIdentifier, int ranType) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean disableCellBroadcastForSubscriber(int subId, int messageIdentifier, int ranType)
-            throws UnsupportedOperationException {
+    public boolean disableCellBroadcastForSubscriber(int subId, int messageIdentifier,
+            int ranType) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean enableCellBroadcastRangeForSubscriber(int subId, int startMessageId,
-            int endMessageId, int ranType) throws UnsupportedOperationException {
+            int endMessageId, int ranType) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean disableCellBroadcastRangeForSubscriber(int subId, int startMessageId,
-            int endMessageId, int ranType) throws UnsupportedOperationException {
+            int endMessageId, int ranType) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int getPremiumSmsPermission(String packageName) throws UnsupportedOperationException {
+    public int getPremiumSmsPermission(String packageName) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int getPremiumSmsPermissionForSubscriber(int subId, String packageName)
-            throws UnsupportedOperationException {
+    public int getPremiumSmsPermissionForSubscriber(int subId, String packageName) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void setPremiumSmsPermission(String packageName, int permission) throws UnsupportedOperationException {
+    public void setPremiumSmsPermission(String packageName, int permission) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void setPremiumSmsPermissionForSubscriber(int subId, String packageName,
-            int permission) throws UnsupportedOperationException {
+            int permission) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean isImsSmsSupportedForSubscriber(int subId) throws UnsupportedOperationException {
+    public boolean isImsSmsSupportedForSubscriber(int subId) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean isSmsSimPickActivityNeeded(int subId) throws UnsupportedOperationException {
+    public boolean isSmsSimPickActivityNeeded(int subId) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int getPreferredSmsSubscription() throws UnsupportedOperationException {
+    public int getPreferredSmsSubscription() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String getImsSmsFormatForSubscriber(int subId) throws UnsupportedOperationException {
+    public String getImsSmsFormatForSubscriber(int subId) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean isSMSPromptEnabled() throws UnsupportedOperationException {
+    public boolean isSMSPromptEnabled() {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void sendStoredText(int subId, String callingPkg, Uri messageUri, String scAddress,
-            PendingIntent sentIntent, PendingIntent deliveryIntent)
-            throws UnsupportedOperationException {
+            PendingIntent sentIntent, PendingIntent deliveryIntent) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void sendStoredMultipartText(int subId, String callingPkg, Uri messageUri,
-                String scAddress, List<PendingIntent> sentIntents,
-                List<PendingIntent> deliveryIntents) throws UnsupportedOperationException {
+            String scAddress, List<PendingIntent> sentIntents,
+            List<PendingIntent> deliveryIntents) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public String createAppSpecificSmsToken(int subId, String callingPkg, PendingIntent intent)
-            throws UnsupportedOperationException {
+    public String createAppSpecificSmsToken(int subId, String callingPkg, PendingIntent intent) {
         throw new UnsupportedOperationException();
     }
 }
