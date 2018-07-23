@@ -97,8 +97,8 @@ class XmlVisitor : public xml::PackageAwareVisitor {
         attr_ref.private_reference = maybe_package.value().private_namespace;
 
         std::string err_str;
-        attr.compiled_attribute = ReferenceLinker::CompileXmlAttribute(
-            attr_ref, callsite_, symbols_, context_->IsAutoNamespace(), &err_str);
+        attr.compiled_attribute =
+            ReferenceLinker::CompileXmlAttribute(attr_ref, callsite_, symbols_, &err_str);
 
         if (!attr.compiled_attribute) {
           DiagMessage error_msg(source);
