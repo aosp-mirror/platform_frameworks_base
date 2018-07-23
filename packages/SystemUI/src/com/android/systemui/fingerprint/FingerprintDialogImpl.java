@@ -35,21 +35,20 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
     private static final String TAG = "FingerprintDialogImpl";
     private static final boolean DEBUG = true;
 
-    protected static final int MSG_SHOW_DIALOG = 1;
-    protected static final int MSG_FINGERPRINT_AUTHENTICATED = 2;
-    protected static final int MSG_FINGERPRINT_HELP = 3;
-    protected static final int MSG_FINGERPRINT_ERROR = 4;
-    protected static final int MSG_HIDE_DIALOG = 5;
-    protected static final int MSG_BUTTON_NEGATIVE = 6;
-    protected static final int MSG_USER_CANCELED = 7;
-    protected static final int MSG_BUTTON_POSITIVE = 8;
-    protected static final int MSG_CLEAR_MESSAGE = 9;
-
+    private static final int MSG_SHOW_DIALOG = 1;
+    private static final int MSG_FINGERPRINT_AUTHENTICATED = 2;
+    private static final int MSG_FINGERPRINT_HELP = 3;
+    private static final int MSG_FINGERPRINT_ERROR = 4;
+    private static final int MSG_FINGERPRINT_DIALOG = 5;
+    private static final int MSG_BUTTON_NEGATIVE = 6;
+    private static final int MSG_USER_CANCELED = 7;
+    private static final int MSG_BUTTON_POSITIVE = 8;
 
     private FingerprintDialogView mDialogView;
     private WindowManager mWindowManager;
     private IBiometricPromptReceiver mReceiver;
     private boolean mDialogShowing;
+    private Callback mCallback = new Callback();
 
     private Handler mHandler = new Handler() {
         @Override
@@ -79,12 +78,32 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
                 case MSG_BUTTON_POSITIVE:
                     handleButtonPositive();
                     break;
-                case MSG_CLEAR_MESSAGE:
-                    handleClearMessage();
-                    break;
             }
         }
     };
+
+    private class Callback implements DialogViewCallback {
+        @Override
+        public void onUserCanceled() {
+            mHandler.obtainMessage(FingerprintDialogImpl.MSG_USER_CANCELED).sendToTarget();
+        }
+
+        @Override
+        public void onErrorShown() {
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_HIDE_DIALOG,
+                    false /* userCanceled */), BiometricPrompt.HIDE_DIALOG_DELAY);
+        }
+
+        @Override
+        public void onNegativePressed() {
+            mHandler.obtainMessage(FingerprintDialogImpl.MSG_BUTTON_NEGATIVE).sendToTarget();
+        }
+
+        @Override
+        public void onPositivePressed() {
+            mHandler.obtainMessage(FingerprintDialogImpl.MSG_BUTTON_POSITIVE).sendToTarget();
+        }
+    }
 
     @Override
     public void start() {
@@ -93,7 +112,7 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
         }
         getComponent(CommandQueue.class).addCallbacks(this);
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        mDialogView = new FingerprintDialogView(mContext, mHandler);
+        mDialogView = new FingerprintDialogView(mContext, mCallback);
     }
 
     @Override
@@ -214,10 +233,6 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
             Log.e(TAG, "Remote exception when handling positive button", e);
         }
         handleHideDialog(false /* userCanceled */);
-    }
-
-    private void handleClearMessage() {
-        mDialogView.resetMessage();
     }
 
     private void handleUserCanceled() {
