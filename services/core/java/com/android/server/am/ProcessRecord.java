@@ -58,7 +58,6 @@ final class ProcessRecord implements WindowProcessListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessRecord" : TAG_AM;
 
     private final ActivityManagerService mService; // where we came from
-    private final BatteryStatsImpl mBatteryStats; // where to collect runtime statistics
     final ApplicationInfo info; // all about the first app in the process
     final boolean isolated;     // true if this is a special isolated process
     final int uid;              // uid of process; may be different from 'info' if isolated
@@ -506,10 +505,9 @@ final class ProcessRecord implements WindowProcessListener {
         }
     }
 
-    ProcessRecord(ActivityManagerService _service, BatteryStatsImpl _batteryStats,
-            ApplicationInfo _info, String _processName, int _uid) {
+    ProcessRecord(ActivityManagerService _service, ApplicationInfo _info, String _processName,
+            int _uid) {
         mService = _service;
-        mBatteryStats = _batteryStats;
         info = _info;
         isolated = _info.uid != _uid;
         uid = _uid;

@@ -10029,7 +10029,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ProcessRecord newProcessRecordLocked(ApplicationInfo info, String customProcess,
             boolean isolated, int isolatedUid) {
         String proc = customProcess != null ? customProcess : info.processName;
-        BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         final int userId = UserHandle.getUserId(info.uid);
         int uid = info.uid;
         if (isolated) {
@@ -10068,7 +10067,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             StatsLog.write(StatsLog.ISOLATED_UID_CHANGED, info.uid, uid,
                     StatsLog.ISOLATED_UID_CHANGED__EVENT__CREATED);
         }
-        final ProcessRecord r = new ProcessRecord(this, stats, info, proc, uid);
+        final ProcessRecord r = new ProcessRecord(this, info, proc, uid);
         if (!mBooted && !mBooting
                 && userId == UserHandle.USER_SYSTEM
                 && (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK) {
