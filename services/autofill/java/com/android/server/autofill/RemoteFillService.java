@@ -123,8 +123,7 @@ final class RemoteFillService implements DeathRecipient {
     }
 
     public void destroy() {
-        mHandler.sendMessage(obtainMessage(
-                RemoteFillService::handleDestroy, this));
+        mHandler.sendMessage(obtainMessage(RemoteFillService::handleDestroy, this));
     }
 
     private void handleDestroy() {
