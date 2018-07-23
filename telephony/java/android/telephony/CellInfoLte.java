@@ -45,6 +45,7 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
         this.mCellSignalStrengthLte = ci.mCellSignalStrengthLte.copy();
     }
 
+    @Override
     public CellIdentityLte getCellIdentity() {
         if (DBG) log("getCellIdentity: " + mCellIdentityLte);
         return mCellIdentityLte;
@@ -55,6 +56,7 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
         mCellIdentityLte = cid;
     }
 
+    @Override
     public CellSignalStrengthLte getCellSignalStrength() {
         if (DBG) log("getCellSignalStrength: " + mCellSignalStrengthLte);
         return mCellSignalStrengthLte;
