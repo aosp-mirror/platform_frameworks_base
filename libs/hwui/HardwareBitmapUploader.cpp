@@ -286,7 +286,7 @@ sk_sp<Bitmap> HardwareBitmapUploader::allocateHardwareBitmap(const SkBitmap& sou
         eglDestroySyncKHR(display, fence);
     }
 
-    return sk_sp<Bitmap>(new Bitmap(buffer.get(), bitmap.info()));
+    return sk_sp<Bitmap>(new Bitmap(buffer.get(), bitmap.info(), Bitmap::computePalette(bitmap)));
 }
 
 };  // namespace android::uirenderer
