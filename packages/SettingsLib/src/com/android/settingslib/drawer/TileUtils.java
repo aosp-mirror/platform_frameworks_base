@@ -24,7 +24,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
-import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -303,7 +302,7 @@ public class TileUtils {
             Pair<String, String> key = new Pair<>(activityInfo.packageName, activityInfo.name);
             Tile tile = addedCache.get(key);
             if (tile == null) {
-                tile = new Tile();
+                tile = new Tile(activityInfo);
                 tile.intent = new Intent().setClassName(
                         activityInfo.packageName, activityInfo.name);
                 tile.category = categoryKey;
@@ -329,7 +328,6 @@ public class TileUtils {
             boolean forceTintExternalIcon) {
         if (applicationInfo.isSystemApp()) {
             boolean forceTintIcon = false;
-            int icon = 0;
             CharSequence title = null;
             String summary = null;
             String keyHint = null;
@@ -347,9 +345,6 @@ public class TileUtils {
                 }
 
                 if (res != null && metaData != null) {
-                    if (metaData.containsKey(META_DATA_PREFERENCE_ICON)) {
-                        icon = metaData.getInt(META_DATA_PREFERENCE_ICON);
-                    }
                     if (metaData.containsKey(META_DATA_PREFERENCE_ICON_TINTABLE)) {
                         if (forceTintIcon) {
                             Log.w(LOG_TAG, "Ignoring icon tintable for " + activityInfo);
@@ -388,18 +383,6 @@ public class TileUtils {
             // meta-data is found
             if (TextUtils.isEmpty(title)) {
                 title = activityInfo.loadLabel(pm).toString();
-            }
-
-            // Set the icon
-            if (icon == 0) {
-                // Only fallback to activityinfo.icon if metadata does not contain ICON_URI.
-                // ICON_URI should be loaded in app UI when need the icon object.
-                if (!tile.metaData.containsKey(META_DATA_PREFERENCE_ICON_URI)) {
-                    icon = activityInfo.icon;
-                }
-            }
-            if (icon != 0) {
-                tile.icon = Icon.createWithResource(activityInfo.packageName, icon);
             }
 
             // Set title and summary for the preference

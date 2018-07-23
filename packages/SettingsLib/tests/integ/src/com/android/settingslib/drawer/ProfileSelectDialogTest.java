@@ -16,8 +16,16 @@
 
 package com.android.settingslib.drawer;
 
+import static junit.framework.Assert.assertEquals;
+
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -29,12 +37,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import static junit.framework.Assert.assertEquals;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -58,7 +60,7 @@ public class ProfileSelectDialogTest {
 
     @Test
     public void testUpdateUserHandlesIfNeeded_Normal() {
-        final Tile tile = new Tile();
+        final Tile tile = new Tile(new ActivityInfo());
         tile.intent = new Intent();
         tile.userHandle.add(NORMAL_USER);
 
@@ -71,7 +73,7 @@ public class ProfileSelectDialogTest {
 
     @Test
     public void testUpdateUserHandlesIfNeeded_Remove() {
-        final Tile tile = new Tile();
+        final Tile tile = new Tile(new ActivityInfo());
         tile.intent = new Intent();
         tile.userHandle.add(REMOVED_USER);
         tile.userHandle.add(NORMAL_USER);
