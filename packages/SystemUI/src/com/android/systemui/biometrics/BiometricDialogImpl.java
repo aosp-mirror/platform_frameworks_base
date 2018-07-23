@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.systemui.fingerprint;
+package com.android.systemui.biometrics;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -31,15 +31,19 @@ import com.android.internal.os.SomeArgs;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.CommandQueue;
 
-public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Callbacks {
+/**
+ * Receives messages sent from AuthenticationClient and shows the appropriate biometric UI (e.g.
+ * FingerprintDialogView).
+ */
+public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callbacks {
     private static final String TAG = "FingerprintDialogImpl";
     private static final boolean DEBUG = true;
 
     private static final int MSG_SHOW_DIALOG = 1;
-    private static final int MSG_FINGERPRINT_AUTHENTICATED = 2;
-    private static final int MSG_FINGERPRINT_HELP = 3;
-    private static final int MSG_FINGERPRINT_ERROR = 4;
-    private static final int MSG_FINGERPRINT_DIALOG = 5;
+    private static final int MSG_BIOMETRIC_AUTHENTICATED = 2;
+    private static final int MSG_BIOMETRIC_HELP = 3;
+    private static final int MSG_BIOMETRIC_ERROR = 4;
+    private static final int MSG_HIDE_DIALOG = 5;
     private static final int MSG_BUTTON_NEGATIVE = 6;
     private static final int MSG_USER_CANCELED = 7;
     private static final int MSG_BUTTON_POSITIVE = 8;
@@ -57,14 +61,14 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
                 case MSG_SHOW_DIALOG:
                     handleShowDialog((SomeArgs) msg.obj);
                     break;
-                case MSG_FINGERPRINT_AUTHENTICATED:
-                    handleFingerprintAuthenticated();
+                case MSG_BIOMETRIC_AUTHENTICATED:
+                    handleBiometricAuthenticated();
                     break;
-                case MSG_FINGERPRINT_HELP:
-                    handleFingerprintHelp((String) msg.obj);
+                case MSG_BIOMETRIC_HELP:
+                    handleBiometricHelp((String) msg.obj);
                     break;
-                case MSG_FINGERPRINT_ERROR:
-                    handleFingerprintError((String) msg.obj);
+                case MSG_BIOMETRIC_ERROR:
+                    handleBiometricError((String) msg.obj);
                     break;
                 case MSG_HIDE_DIALOG:
                     handleHideDialog((Boolean) msg.obj);
@@ -85,7 +89,7 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
     private class Callback implements DialogViewCallback {
         @Override
         public void onUserCanceled() {
-            mHandler.obtainMessage(FingerprintDialogImpl.MSG_USER_CANCELED).sendToTarget();
+            mHandler.obtainMessage(BiometricDialogImpl.MSG_USER_CANCELED).sendToTarget();
         }
 
         @Override
@@ -96,12 +100,12 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
 
         @Override
         public void onNegativePressed() {
-            mHandler.obtainMessage(FingerprintDialogImpl.MSG_BUTTON_NEGATIVE).sendToTarget();
+            mHandler.obtainMessage(BiometricDialogImpl.MSG_BUTTON_NEGATIVE).sendToTarget();
         }
 
         @Override
         public void onPositivePressed() {
-            mHandler.obtainMessage(FingerprintDialogImpl.MSG_BUTTON_POSITIVE).sendToTarget();
+            mHandler.obtainMessage(BiometricDialogImpl.MSG_BUTTON_POSITIVE).sendToTarget();
         }
     }
 
@@ -116,12 +120,12 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
     }
 
     @Override
-    public void showFingerprintDialog(Bundle bundle, IBiometricPromptReceiver receiver) {
-        if (DEBUG) Log.d(TAG, "showFingerprintDialog");
+    public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver) {
+        if (DEBUG) Log.d(TAG, "showBiometricDialog");
         // Remove these messages as they are part of the previous client
-        mHandler.removeMessages(MSG_FINGERPRINT_ERROR);
-        mHandler.removeMessages(MSG_FINGERPRINT_HELP);
-        mHandler.removeMessages(MSG_FINGERPRINT_AUTHENTICATED);
+        mHandler.removeMessages(MSG_BIOMETRIC_ERROR);
+        mHandler.removeMessages(MSG_BIOMETRIC_HELP);
+        mHandler.removeMessages(MSG_BIOMETRIC_AUTHENTICATED);
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = bundle;
         args.arg2 = receiver;
@@ -129,26 +133,26 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
     }
 
     @Override
-    public void onFingerprintAuthenticated() {
-        if (DEBUG) Log.d(TAG, "onFingerprintAuthenticated");
-        mHandler.obtainMessage(MSG_FINGERPRINT_AUTHENTICATED).sendToTarget();
+    public void onBiometricAuthenticated() {
+        if (DEBUG) Log.d(TAG, "onBiometricAuthenticated");
+        mHandler.obtainMessage(MSG_BIOMETRIC_AUTHENTICATED).sendToTarget();
     }
 
     @Override
-    public void onFingerprintHelp(String message) {
-        if (DEBUG) Log.d(TAG, "onFingerprintHelp: " + message);
-        mHandler.obtainMessage(MSG_FINGERPRINT_HELP, message).sendToTarget();
+    public void onBiometricHelp(String message) {
+        if (DEBUG) Log.d(TAG, "onBiometricHelp: " + message);
+        mHandler.obtainMessage(MSG_BIOMETRIC_HELP, message).sendToTarget();
     }
 
     @Override
-    public void onFingerprintError(String error) {
-        if (DEBUG) Log.d(TAG, "onFingerprintError: " + error);
-        mHandler.obtainMessage(MSG_FINGERPRINT_ERROR, error).sendToTarget();
+    public void onBiometricError(String error) {
+        if (DEBUG) Log.d(TAG, "onBiometricError: " + error);
+        mHandler.obtainMessage(MSG_BIOMETRIC_ERROR, error).sendToTarget();
     }
 
     @Override
-    public void hideFingerprintDialog() {
-        if (DEBUG) Log.d(TAG, "hideFingerprintDialog");
+    public void hideBiometricDialog() {
+        if (DEBUG) Log.d(TAG, "hideBiometricDialog");
         mHandler.obtainMessage(MSG_HIDE_DIALOG, false /* userCanceled */).sendToTarget();
     }
 
@@ -167,21 +171,23 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
         mDialogShowing = true;
     }
 
-    private void handleFingerprintAuthenticated() {
-        if (DEBUG) Log.d(TAG, "handleFingerprintAuthenticated");
+    private void handleBiometricAuthenticated() {
+        if (DEBUG) Log.d(TAG, "handleBiometricAuthenticated");
+
+        // TODO: announce correct string depending on modality
         mDialogView.announceForAccessibility(
                 mContext.getResources().getText(
                         com.android.internal.R.string.fingerprint_authenticated));
         handleHideDialog(false /* userCanceled */);
     }
 
-    private void handleFingerprintHelp(String message) {
-        if (DEBUG) Log.d(TAG, "handleFingerprintHelp: " + message);
+    private void handleBiometricHelp(String message) {
+        if (DEBUG) Log.d(TAG, "handleBiometricHelp: " + message);
         mDialogView.showHelpMessage(message);
     }
 
-    private void handleFingerprintError(String error) {
-        if (DEBUG) Log.d(TAG, "handleFingerprintError: " + error);
+    private void handleBiometricError(String error) {
+        if (DEBUG) Log.d(TAG, "handleBiometricError: " + error);
         if (!mDialogShowing) {
             if (DEBUG) Log.d(TAG, "Dialog already dismissed");
             return;

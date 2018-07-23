@@ -85,11 +85,11 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_SHOW_SHUTDOWN_UI              = 36 << MSG_SHIFT;
     private static final int MSG_SET_TOP_APP_HIDES_STATUS_BAR  = 37 << MSG_SHIFT;
     private static final int MSG_ROTATION_PROPOSAL             = 38 << MSG_SHIFT;
-    private static final int MSG_FINGERPRINT_SHOW              = 39 << MSG_SHIFT;
-    private static final int MSG_FINGERPRINT_AUTHENTICATED     = 40 << MSG_SHIFT;
-    private static final int MSG_FINGERPRINT_HELP              = 41 << MSG_SHIFT;
-    private static final int MSG_FINGERPRINT_ERROR             = 42 << MSG_SHIFT;
-    private static final int MSG_FINGERPRINT_HIDE              = 43 << MSG_SHIFT;
+    private static final int MSG_BIOMETRIC_SHOW                = 39 << MSG_SHIFT;
+    private static final int MSG_BIOMETRIC_AUTHENTICATED       = 40 << MSG_SHIFT;
+    private static final int MSG_BIOMETRIC_HELP                = 41 << MSG_SHIFT;
+    private static final int MSG_BIOMETRIC_ERROR               = 42 << MSG_SHIFT;
+    private static final int MSG_BIOMETRIC_HIDE                = 43 << MSG_SHIFT;
     private static final int MSG_SHOW_CHARGING_ANIMATION       = 44 << MSG_SHIFT;
     private static final int MSG_SHOW_PINNING_TOAST_ENTER_EXIT = 45 << MSG_SHIFT;
     private static final int MSG_SHOW_PINNING_TOAST_ESCAPE     = 46 << MSG_SHIFT;
@@ -160,11 +160,11 @@ public class CommandQueue extends IStatusBar.Stub {
 
         default void onRotationProposal(int rotation, boolean isValid) { }
 
-        default void showFingerprintDialog(Bundle bundle, IBiometricPromptReceiver receiver) { }
-        default void onFingerprintAuthenticated() { }
-        default void onFingerprintHelp(String message) { }
-        default void onFingerprintError(String error) { }
-        default void hideFingerprintDialog() { }
+        default void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver) { }
+        default void onBiometricAuthenticated() { }
+        default void onBiometricHelp(String message) { }
+        default void onBiometricError(String error) { }
+        default void hideBiometricDialog() { }
     }
 
     @VisibleForTesting
@@ -513,41 +513,41 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @Override
-    public void showFingerprintDialog(Bundle bundle, IBiometricPromptReceiver receiver) {
+    public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = bundle;
             args.arg2 = receiver;
-            mHandler.obtainMessage(MSG_FINGERPRINT_SHOW, args)
+            mHandler.obtainMessage(MSG_BIOMETRIC_SHOW, args)
                     .sendToTarget();
         }
     }
 
     @Override
-    public void onFingerprintAuthenticated() {
+    public void onBiometricAuthenticated() {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_FINGERPRINT_AUTHENTICATED).sendToTarget();
+            mHandler.obtainMessage(MSG_BIOMETRIC_AUTHENTICATED).sendToTarget();
         }
     }
 
     @Override
-    public void onFingerprintHelp(String message) {
+    public void onBiometricHelp(String message) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_FINGERPRINT_HELP, message).sendToTarget();
+            mHandler.obtainMessage(MSG_BIOMETRIC_HELP, message).sendToTarget();
         }
     }
 
     @Override
-    public void onFingerprintError(String error) {
+    public void onBiometricError(String error) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_FINGERPRINT_ERROR, error).sendToTarget();
+            mHandler.obtainMessage(MSG_BIOMETRIC_ERROR, error).sendToTarget();
         }
     }
 
     @Override
-    public void hideFingerprintDialog() {
+    public void hideBiometricDialog() {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_FINGERPRINT_HIDE).sendToTarget();
+            mHandler.obtainMessage(MSG_BIOMETRIC_HIDE).sendToTarget();
         }
     }
 
@@ -752,34 +752,34 @@ public class CommandQueue extends IStatusBar.Stub {
                         mCallbacks.get(i).onRotationProposal(msg.arg1, msg.arg2 != 0);
                     }
                     break;
-                case MSG_FINGERPRINT_SHOW:
-                    mHandler.removeMessages(MSG_FINGERPRINT_ERROR);
-                    mHandler.removeMessages(MSG_FINGERPRINT_HELP);
-                    mHandler.removeMessages(MSG_FINGERPRINT_AUTHENTICATED);
+                case MSG_BIOMETRIC_SHOW:
+                    mHandler.removeMessages(MSG_BIOMETRIC_ERROR);
+                    mHandler.removeMessages(MSG_BIOMETRIC_HELP);
+                    mHandler.removeMessages(MSG_BIOMETRIC_AUTHENTICATED);
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).showFingerprintDialog(
+                        mCallbacks.get(i).showBiometricDialog(
                                 (Bundle)((SomeArgs)msg.obj).arg1,
                                 (IBiometricPromptReceiver)((SomeArgs)msg.obj).arg2);
                     }
                     break;
-                case MSG_FINGERPRINT_AUTHENTICATED:
+                case MSG_BIOMETRIC_AUTHENTICATED:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).onFingerprintAuthenticated();
+                        mCallbacks.get(i).onBiometricAuthenticated();
                     }
                     break;
-                case MSG_FINGERPRINT_HELP:
+                case MSG_BIOMETRIC_HELP:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).onFingerprintHelp((String) msg.obj);
+                        mCallbacks.get(i).onBiometricHelp((String) msg.obj);
                     }
                     break;
-                case MSG_FINGERPRINT_ERROR:
+                case MSG_BIOMETRIC_ERROR:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).onFingerprintError((String) msg.obj);
+                        mCallbacks.get(i).onBiometricError((String) msg.obj);
                     }
                     break;
-                case MSG_FINGERPRINT_HIDE:
+                case MSG_BIOMETRIC_HIDE:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).hideFingerprintDialog();
+                        mCallbacks.get(i).hideBiometricDialog();
                     }
                     break;
                 case MSG_SHOW_CHARGING_ANIMATION:

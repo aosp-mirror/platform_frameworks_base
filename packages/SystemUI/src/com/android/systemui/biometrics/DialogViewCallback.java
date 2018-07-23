@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.systemui.fingerprint;
+package com.android.systemui.biometrics;
 
 /**
  * Callback interface for dialog views. These should be implemented by the controller (e.g.

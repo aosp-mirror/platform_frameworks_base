@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.systemui.fingerprint;
+package com.android.systemui.biometrics;
 
 import android.content.Context;
 import android.graphics.Color;
