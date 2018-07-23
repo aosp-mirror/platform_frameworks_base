@@ -937,7 +937,10 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
       }
 
       // Assign system_server to the correct memory cgroup.
-      if (!WriteStringToFile(StringPrintf("%d", pid), "/dev/memcg/system/tasks")) {
+      // Not all devices mount /dev/memcg so check for the file first
+      // to avoid unnecessarily printing errors and denials in the logs.
+      if (!access("/dev/memcg/system/tasks", F_OK) &&
+                !WriteStringToFile(StringPrintf("%d", pid), "/dev/memcg/system/tasks")) {
         ALOGE("couldn't write %d to /dev/memcg/system/tasks", pid);
       }
   }
