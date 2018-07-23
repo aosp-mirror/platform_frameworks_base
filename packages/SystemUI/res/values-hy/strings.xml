@@ -77,7 +77,7 @@
     <string name="screenshot_failed_title" msgid="7612509838919089748">"Չհաջողվեց պահել սքրինշոթը"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Փորձեք նորից"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Չհաջողվեց պահել սքրինշոթը անբավարար հիշողության պատճառով"</string>
-    <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Հավելվածը կամ ձեր կազմակերպությունը չի թույլատրում էկրանի պատկերի ստացումը"</string>
+    <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Հավելվածը կամ ձեր կազմակերպությունը չի թույլատրում սքրինշոթի ստացումը"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ֆայլերի փոխանցման ընտրանքներ"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Միացնել որպես մեդիա նվագարկիչ (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Միացնել որպես ֆոտոխցիկ (PTP)"</string>

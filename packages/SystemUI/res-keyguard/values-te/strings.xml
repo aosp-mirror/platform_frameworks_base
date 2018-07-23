@@ -29,11 +29,11 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"అన్‌లాక్ చేయడానికి పాస్‌వర్డ్‌ను టైప్ చేయండి"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"అన్‌లాక్ చేయడానికి పిన్ టైప్ చేయండి"</string>
     <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"మీ పిన్‌ని నమోదు చేయండి"</string>
-    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"మీ ఆకృతిని నమోదు చేయండి"</string>
-    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"మీ పాస్‌వర్డ్‌ను నమోదు చేయండి"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"మీ నమూనాను నమోదు చేయండి"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"మీ పాస్‌వర్డ్‌ను నమోదు చేయండి"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"పిన్ కోడ్ తప్పు."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"చెల్లని కార్డ్."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"ఛార్జ్ చేయబడింది"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"పూర్తిగా ఛార్జ్ చేయబడింది"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ఛార్జ్ అవుతోంది"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • వేగంగా ఛార్జ్ అవుతోంది"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • నెమ్మదిగా ఛార్జ్ అవుతోంది"</string>
@@ -61,8 +61,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"ఎర్రర్ కారణంగా eSIMని నిలపడం సాధ్యపడదు."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"నమూనాను మర్చిపోయాను"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"ఆకృతి తప్పు"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"పాస్‌వర్డ్ తప్పు"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"నమూనా తప్పు"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"పాస్‌వర్డ్ తప్పు"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"పిన్ తప్పు"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి.</item>
@@ -140,10 +140,8 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> గంటల పాటు పరికరాన్ని అన్‌లాక్ చేయలేదు. పాస్‌వర్డ్‌ని నమోదు చేయండి.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> గంట పాటు పరికరాన్ని అన్‌లాక్ చేయలేదు. పాస్‌వర్డ్‌ని నమోదు చేయండి.</item>
     </plurals>
-    <!-- no translation found for kg_fingerprint_not_recognized (7854413849848459418) -->
-    <skip />
-    <!-- no translation found for kg_face_not_recognized (6382535088345875294) -->
-    <skip />
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"గుర్తించలేదు"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"గుర్తించలేదు"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="other">SIM పిన్‌ని నమోదు చేయండి. మీకు <xliff:g id="NUMBER_1">%d</xliff:g> ప్రయత్నలు మిగిలి ఉన్నాయి.</item>
       <item quantity="one">SIM పిన్‌ని నమోదు చేయండి, మీరు మీ పరికరాన్ని అన్‌లాక్ చేయడానికి తప్పనిసరిగా మీ క్యారియర్‌ను సంప్రదించడానికి ముందు మీకు <xliff:g id="NUMBER_0">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది.</item>

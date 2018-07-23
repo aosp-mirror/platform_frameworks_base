@@ -29,11 +29,13 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Qulfni ochish uchun parolni kiriting"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Qulfni ochish uchun PIN kodni kiriting"</string>
     <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"PIN kodni kiriting"</string>
-    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"Grafik kalitni chizing"</string>
-    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"Parolni kiriting"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Grafik kalitni chizing"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Parolni kiriting"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN kodi xato."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"SIM karta yaroqsiz."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Batareya quvvati to‘ldi"</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for keyguard_charged (3316115607283493413) -->
+    <skip />
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Quvvat olmoqda"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Tezkor quvvat olmoqda"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Sekin quvvat olmoqda"</string>
@@ -61,8 +63,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"Xatolik tufayli eSIM faolsizlantirilmadi."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter tugmasi"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Grafik kalit esimdan chiqdi"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Grafik kalit xato"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"Parol xato"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Grafik kalit xato"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Parol xato"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"PIN kod xato"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> soniyadan keyin qaytadan urining.</item>
