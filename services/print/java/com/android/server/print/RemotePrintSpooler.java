@@ -708,8 +708,10 @@ final class RemotePrintSpooler {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             synchronized (mLock) {
-                clearClientLocked();
-                mRemoteInstance = null;
+                if (mRemoteInstance != null) {
+                    clearClientLocked();
+                    mRemoteInstance = null;
+                }
             }
         }
     }
