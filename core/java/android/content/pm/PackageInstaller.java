@@ -121,8 +121,7 @@ public class PackageInstaller {
             "android.content.pm.action.SESSION_COMMITTED";
 
     /** {@hide} */
-    public static final String
-            ACTION_CONFIRM_PERMISSIONS = "android.content.pm.action.CONFIRM_PERMISSIONS";
+    public static final String ACTION_CONFIRM_INSTALL = "android.content.pm.action.CONFIRM_INSTALL";
 
     /**
      * An integer session ID that an operation is working with.
