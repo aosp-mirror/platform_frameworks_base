@@ -3332,6 +3332,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Turn this condition on to cause killing to happen regularly, for testing.
             if (proc.baseProcessTracker != null) {
                 proc.baseProcessTracker.reportCachedKill(proc.pkgList.mPkgList, proc.lastCachedPss);
+                for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                    ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
+                    StatsLog.write(StatsLog.CACHED_KILL_REPORTED,
+                            proc.info.uid,
+                            holder.state.getName(),
+                            holder.state.getPackage(),
+                            proc.lastCachedPss, holder.appVersion);
+                }
             }
             proc.kill(Long.toString(proc.lastCachedPss) + "k from cached", true);
         } else if (proc != null && !keepIfLarge
@@ -3341,6 +3349,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (proc.lastCachedPss >= mProcessList.getCachedRestoreThresholdKb()) {
                 if (proc.baseProcessTracker != null) {
                     proc.baseProcessTracker.reportCachedKill(proc.pkgList.mPkgList, proc.lastCachedPss);
+                    for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                        ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
+                        StatsLog.write(StatsLog.CACHED_KILL_REPORTED,
+                                proc.info.uid,
+                                holder.state.getName(),
+                                holder.state.getPackage(),
+                                proc.lastCachedPss, holder.appVersion);
+                    }
                 }
                 proc.kill(Long.toString(proc.lastCachedPss) + "k from cached", true);
             }
@@ -5365,6 +5381,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 infos[i].getTotalUss(), infos[i].getTotalRss(), false,
                                 ProcessStats.ADD_PSS_EXTERNAL_SLOW, endTime-startTime,
                                 proc.pkgList.mPkgList);
+                        for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                            ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
+                            StatsLog.write(StatsLog.PROCESS_MEMORY_STAT_REPORTED,
+                                    proc.info.uid,
+                                    holder.state.getName(),
+                                    holder.state.getPackage(),
+                                    infos[i].getTotalPss(),
+                                    infos[i].getTotalUss(),
+                                    infos[i].getTotalRss(),
+                                    ProcessStats.ADD_PSS_EXTERNAL_SLOW,
+                                    endTime-startTime,
+                                    holder.appVersion);
+                        }
                     }
                 }
             }
@@ -5395,6 +5424,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                         // Record this for posterity if the process has been stable.
                         proc.baseProcessTracker.addPss(pss[i], tmpUss[0], tmpUss[2], false,
                                 ProcessStats.ADD_PSS_EXTERNAL, endTime-startTime, proc.pkgList.mPkgList);
+                        for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                            ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
+                            StatsLog.write(StatsLog.PROCESS_MEMORY_STAT_REPORTED,
+                                    proc.info.uid,
+                                    holder.state.getName(),
+                                    holder.state.getPackage(),
+                                    pss[i], tmpUss[0], tmpUss[2],
+                                    ProcessStats.ADD_PSS_EXTERNAL, endTime-startTime,
+                                    holder.appVersion);
+                        }
                     }
                 }
             }
@@ -15233,6 +15272,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                         // Record this for posterity if the process has been stable.
                         r.baseProcessTracker.addPss(myTotalPss, myTotalUss, myTotalRss, true,
                                 reportType, endTime-startTime, r.pkgList.mPkgList);
+                        for (int ipkg = r.pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                            ProcessStats.ProcessStateHolder holder = r.pkgList.valueAt(ipkg);
+                            StatsLog.write(StatsLog.PROCESS_MEMORY_STAT_REPORTED,
+                                    r.info.uid,
+                                    holder.state.getName(),
+                                    holder.state.getPackage(),
+                                    myTotalPss, myTotalUss, myTotalRss, reportType,
+                                    endTime-startTime,
+                                    holder.appVersion);
+                        }
                     }
                 }
 
@@ -15731,6 +15780,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // Record this for posterity if the process has been stable.
                     r.baseProcessTracker.addPss(myTotalPss, myTotalUss, myTotalRss, true,
                             reportType, endTime-startTime, r.pkgList.mPkgList);
+                    for (int ipkg = r.pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                        ProcessStats.ProcessStateHolder holder = r.pkgList.valueAt(ipkg);
+                        StatsLog.write(StatsLog.PROCESS_MEMORY_STAT_REPORTED,
+                                r.info.uid,
+                                holder.state.getName(),
+                                holder.state.getPackage(),
+                                myTotalPss, myTotalUss, myTotalRss, reportType, endTime-startTime,
+                                holder.appVersion);
+                    }
                 }
             }
 
@@ -19760,6 +19818,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         proc.lastPssTime = now;
         proc.baseProcessTracker.addPss(
                 pss, uss, rss, true, statType, pssDuration, proc.pkgList.mPkgList);
+        for (int ipkg = proc.pkgList.mPkgList.size() - 1; ipkg >= 0; ipkg--) {
+            ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
+            StatsLog.write(StatsLog.PROCESS_MEMORY_STAT_REPORTED,
+                    proc.info.uid,
+                    holder.state.getName(),
+                    holder.state.getPackage(),
+                    pss, uss, rss, statType, pssDuration,
+                    holder.appVersion);
+        }
         if (DEBUG_PSS) Slog.d(TAG_PSS,
                 "pss of " + proc.toShortString() + ": " + pss + " lastPss=" + proc.lastPss
                 + " state=" + ProcessList.makeProcStateString(procState));
@@ -20111,6 +20178,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.kill("excessive cpu " + cputimeUsed + " during " + uptimeSince
                                 + " dur=" + checkDur + " limit=" + cpuLimit, true);
                         app.baseProcessTracker.reportExcessiveCpu(app.pkgList.mPkgList);
+                        for (int ipkg = app.pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                            ProcessStats.ProcessStateHolder holder = app.pkgList.valueAt(ipkg);
+                            StatsLog.write(StatsLog.EXCESSIVE_CPU_USAGE_REPORTED,
+                                    app.info.uid,
+                                    holder.state.getName(),
+                                    holder.state.getPackage(),
+                                    holder.appVersion);
+                        }
                     }
                 }
                 app.lastCpuTime = app.curCpuTime;
@@ -20946,6 +21021,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (memFactor != mLastMemoryLevel) {
             EventLogTags.writeAmMemFactor(memFactor, mLastMemoryLevel);
+            StatsLog.write(StatsLog.MEMORY_FACTOR_STATE_CHANGED, memFactor);
         }
         mLastMemoryLevel = memFactor;
         mLastNumProcesses = mLruProcesses.size();

@@ -403,7 +403,7 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "\n              *Note: If both UID and NAME are omitted then all configs will\n");
     fprintf(out, "\n                     be removed from memory and disk!\n");
     fprintf(out, "\n");
-    fprintf(out, "usage: adb shell cmd stats dump-report [UID] NAME [--proto]\n");
+    fprintf(out, "usage: adb shell cmd stats dump-report [UID] NAME [--include_current_bucket] [--proto]\n");
     fprintf(out, "  Dump all metric data for a configuration.\n");
     fprintf(out, "  UID           The uid of the configuration. It is only possible to pass\n");
     fprintf(out, "                the UID parameter on eng builds. If UID is omitted the\n");
@@ -567,10 +567,15 @@ status_t StatsService::cmd_dump_report(FILE* out, FILE* err, const Vector<String
         int argCount = args.size();
         bool good = false;
         bool proto = false;
+        bool includeCurrentBucket = false;
         int uid;
         string name;
         if (!std::strcmp("--proto", args[argCount-1].c_str())) {
             proto = true;
+            argCount -= 1;
+        }
+        if (!std::strcmp("--include_current_bucket", args[argCount-1].c_str())) {
+            includeCurrentBucket = true;
             argCount -= 1;
         }
         if (argCount == 2) {
@@ -600,7 +605,7 @@ status_t StatsService::cmd_dump_report(FILE* out, FILE* err, const Vector<String
         if (good) {
             vector<uint8_t> data;
             mProcessor->onDumpReport(ConfigKey(uid, StrToInt64(name)), getElapsedRealtimeNs(),
-                                     false /* include_current_bucket*/, ADB_DUMP, &data);
+                                     includeCurrentBucket, ADB_DUMP, &data);
             if (proto) {
                 for (size_t i = 0; i < data.size(); i ++) {
                     fprintf(out, "%c", data[i]);
