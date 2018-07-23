@@ -92,6 +92,8 @@ public class TextViewSetTextMeasurePerfTest {
         Canvas.freeTextLayoutCaches();
         final CharSequence text = createRandomText(mLength);
         final TextView textView = new TextView(InstrumentationRegistry.getTargetContext());
+        textView.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE);
+
         textView.setText(text);
         state.resumeTiming();
 
@@ -119,6 +121,7 @@ public class TextViewSetTextMeasurePerfTest {
         final RenderNode node = RenderNode.create("benchmark", null);
         final CharSequence text = createRandomText(mLength);
         final TextView textView = new TextView(InstrumentationRegistry.getTargetContext());
+        textView.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE);
         textView.setText(text);
         state.resumeTiming();
 

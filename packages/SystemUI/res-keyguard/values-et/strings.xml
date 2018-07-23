@@ -29,11 +29,11 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Avamiseks sisestage parool"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Avamiseks sisestage PIN-kood"</string>
     <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Sisestage PIN-kood"</string>
-    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"Sisestage muster"</string>
-    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"Sisestage parool"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"Sisestage muster"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"Sisestage parool"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Vale PIN-kood."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Kehtetu kaart."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"Laetud"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"Täielikult laetud"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Laadimine"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kiirlaadimine"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Aeglane laadimine"</string>
@@ -61,8 +61,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"Vea tõttu ei saa eSIM-kaarte keelata."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Sisesta"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Unustasin mustri"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"Vale muster"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"Vale parool"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"Vale muster"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"Vale parool"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"Vale PIN-kood"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="other">Proovige uuesti <xliff:g id="NUMBER">%d</xliff:g> sekundi pärast.</item>

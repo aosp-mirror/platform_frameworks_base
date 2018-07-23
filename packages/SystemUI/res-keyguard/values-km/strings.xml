@@ -29,11 +29,11 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"វាយ​បញ្ចូល​ពាក្យ​សម្ងាត់​ ដើម្បី​ដោះ​សោ"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"វាយ​បញ្ចូល​កូដ PIN ដើម្បី​ដោះ​សោ"</string>
     <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"បញ្ចូល​កូដ PIN របស់​អ្នក"</string>
-    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"បញ្ចូល​លំនាំ​របស់អ្នក"</string>
-    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"បញ្ចូល​ពាក្យ​សម្ងាត់​របស់​អ្នក"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"បញ្ចូល​លំនាំ​របស់​អ្នក"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"បញ្ចូល​ពាក្យ​សម្ងាត់​របស់អ្នក"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"កូដ PIN មិន​ត្រឹមត្រូវ​ទេ។"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"បណ្ណមិនត្រឹមត្រូវទេ។"</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"បាន​សាក​ថ្ម"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"បានសាក​ថ្មពេញ"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្ម"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយ៉ាង​ឆាប់រហ័ស"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • កំពុង​សាកថ្មយឺត"</string>
@@ -61,8 +61,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"មិនអាច​បិទ eSIM បានទេ ដោយសារ​មាន​បញ្ហា។"</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"ភ្លេច​​លំនាំ"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"លំនាំ​មិន​ត្រឹមត្រូវ​ទេ"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"ពាក្យ​សម្ងាត់​មិន​ត្រឹមត្រូវ​ទេ"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"លំនាំមិនត្រឹមត្រូវ"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"ពាក្យសម្ងាត់មិនត្រឹមត្រូវ"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"កូដ PIN មិន​ត្រឹមត្រូវ​ទេ"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="other">ព្យាយាមម្តងទៀតក្នុងរយៈពេល <xliff:g id="NUMBER">%d</xliff:g> វិនាទី។</item>

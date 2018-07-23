@@ -29,11 +29,11 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"अनलॉक करने के लिए पासवर्ड लिखें"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"अनलॉक करने के लिए पिन लिखें"</string>
     <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"अपना पिन डालें"</string>
-    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"अपना पैटर्न डालें"</string>
-    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"अपना पासवर्ड डालें"</string>
+    <string name="keyguard_enter_your_pattern" msgid="4297890206109830353">"अपना पैटर्न डालें"</string>
+    <string name="keyguard_enter_your_password" msgid="5397328359341314506">"अपना पासवर्ड डालें"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"गलत पिन कोड."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"गलत कार्ड."</string>
-    <string name="keyguard_charged" msgid="2222329688813033109">"चार्ज हो गई है"</string>
+    <string name="keyguard_charged" msgid="3316115607283493413">"पूरी तरह चार्ज हो गया"</string>
     <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज हो रहा है"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • तेज़ चार्ज हो रहा है"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • धीरे चार्ज हो रहा है"</string>
@@ -61,8 +61,8 @@
     <string name="error_disable_esim_msg" msgid="676694908770135639">"किसी गड़बड़ी की वजह से ई-सिम बंद नहीं किया जा सकता."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"पैटर्न भूल गए हैं"</string>
-    <string name="kg_wrong_pattern" msgid="7620081431514773802">"गलत पैटर्न"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"गलत पासवर्ड"</string>
+    <string name="kg_wrong_pattern" msgid="2873443744087746812">"डाला गया पैटर्न गलत है"</string>
+    <string name="kg_wrong_password" msgid="8060364776224836597">"डाला गया पासवर्ड गलत है"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"गलत पिन"</string>
     <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="4368805541257003755">
       <item quantity="one"><xliff:g id="NUMBER">%d</xliff:g> सेकंड में फिर से कोशिश करें.</item>
@@ -140,10 +140,8 @@
       <item quantity="one">डिवाइस को <xliff:g id="NUMBER_1">%d</xliff:g> घंटों से अनलॉक नहीं किया गया है. पासवर्ड की पुष्टि करें.</item>
       <item quantity="other">डिवाइस को <xliff:g id="NUMBER_1">%d</xliff:g> घंटों से अनलॉक नहीं किया गया है. पासवर्ड की पुष्टि करें.</item>
     </plurals>
-    <!-- no translation found for kg_fingerprint_not_recognized (7854413849848459418) -->
-    <skip />
-    <!-- no translation found for kg_face_not_recognized (6382535088345875294) -->
-    <skip />
+    <string name="kg_fingerprint_not_recognized" msgid="7854413849848459418">"पहचान नहीं हो पाई"</string>
+    <string name="kg_face_not_recognized" msgid="6382535088345875294">"पहचान नहीं हो पाई"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="3739658416797652781">
       <item quantity="one">सिम का पिन डालें. आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> मौके बचे हैं.</item>
       <item quantity="other">सिम का पिन डालें. आपके पास <xliff:g id="NUMBER_1">%d</xliff:g> मौके बचे हैं.</item>
