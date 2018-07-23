@@ -81,19 +81,17 @@ public class ApkSignatureVerifier {
             Certificate[][] signerCerts = new Certificate[][] { vSigner.certs };
             Signature[] signerSigs = convertToSignatures(signerCerts);
             Signature[] pastSignerSigs = null;
-            int[] pastSignerSigsFlags = null;
             if (vSigner.por != null) {
                 // populate proof-of-rotation information
                 pastSignerSigs = new Signature[vSigner.por.certs.size()];
-                pastSignerSigsFlags = new int[vSigner.por.flagsList.size()];
                 for (int i = 0; i < pastSignerSigs.length; i++) {
                     pastSignerSigs[i] = new Signature(vSigner.por.certs.get(i).getEncoded());
-                    pastSignerSigsFlags[i] = vSigner.por.flagsList.get(i);
+                    pastSignerSigs[i].setFlags(vSigner.por.flagsList.get(i));
                 }
             }
             return new PackageParser.SigningDetails(
                     signerSigs, SignatureSchemeVersion.SIGNING_BLOCK_V3,
-                    pastSignerSigs, pastSignerSigsFlags);
+                    pastSignerSigs);
         } catch (SignatureNotFoundException e) {
             // not signed with v3, try older if allowed
             if (minSignatureSchemeVersion >= SignatureSchemeVersion.SIGNING_BLOCK_V3) {
@@ -323,19 +321,17 @@ public class ApkSignatureVerifier {
             Certificate[][] signerCerts = new Certificate[][] { vSigner.certs };
             Signature[] signerSigs = convertToSignatures(signerCerts);
             Signature[] pastSignerSigs = null;
-            int[] pastSignerSigsFlags = null;
             if (vSigner.por != null) {
                 // populate proof-of-rotation information
                 pastSignerSigs = new Signature[vSigner.por.certs.size()];
-                pastSignerSigsFlags = new int[vSigner.por.flagsList.size()];
                 for (int i = 0; i < pastSignerSigs.length; i++) {
                     pastSignerSigs[i] = new Signature(vSigner.por.certs.get(i).getEncoded());
-                    pastSignerSigsFlags[i] = vSigner.por.flagsList.get(i);
+                    pastSignerSigs[i].setFlags(vSigner.por.flagsList.get(i));
                 }
             }
             return new PackageParser.SigningDetails(
                     signerSigs, SignatureSchemeVersion.SIGNING_BLOCK_V3,
-                    pastSignerSigs, pastSignerSigsFlags);
+                    pastSignerSigs);
         } catch (SignatureNotFoundException e) {
             // not signed with v3, try older if allowed
             if (minSignatureSchemeVersion >= SignatureSchemeVersion.SIGNING_BLOCK_V3) {

@@ -5785,52 +5785,32 @@ public class PackageParser {
             int AUTH = 16;
         }
 
-        /**
-         * APK Signature Scheme v3 includes support for adding a proof-of-rotation record that
-         * contains two pieces of information:
-         *   1) the past signing certificates
-         *   2) the flags that APK wants to assign to each of the past signing certificates.
-         *
-         * These flags, which have a one-to-one relationship for the {@code pastSigningCertificates}
-         * collection, represent the second piece of information and are viewed as capabilities.
-         * They are an APK's way of telling the platform: "this is how I want to trust my old certs,
-         * please enforce that." This is useful for situation where this app itself is using its
-         * signing certificate as an authorization mechanism, like whether or not to allow another
-         * app to have its SIGNATURE permission.  An app could specify whether to allow other apps
-         * signed by its old cert 'X' to still get a signature permission it defines, for example.
-         */
-        @Nullable
-        public final int[] pastSigningCertificatesFlags;
-
         /** A representation of unknown signing details. Use instead of null. */
         public static final SigningDetails UNKNOWN =
-                new SigningDetails(null, SignatureSchemeVersion.UNKNOWN, null, null, null);
+                new SigningDetails(null, SignatureSchemeVersion.UNKNOWN, null, null);
 
         @VisibleForTesting
         public SigningDetails(Signature[] signatures,
                 @SignatureSchemeVersion int signatureSchemeVersion,
-                ArraySet<PublicKey> keys, Signature[] pastSigningCertificates,
-                int[] pastSigningCertificatesFlags) {
+                ArraySet<PublicKey> keys, Signature[] pastSigningCertificates) {
             this.signatures = signatures;
             this.signatureSchemeVersion = signatureSchemeVersion;
             this.publicKeys = keys;
             this.pastSigningCertificates = pastSigningCertificates;
-            this.pastSigningCertificatesFlags = pastSigningCertificatesFlags;
         }
 
         public SigningDetails(Signature[] signatures,
                 @SignatureSchemeVersion int signatureSchemeVersion,
-                Signature[] pastSigningCertificates, int[] pastSigningCertificatesFlags)
+                Signature[] pastSigningCertificates)
                 throws CertificateException {
             this(signatures, signatureSchemeVersion, toSigningKeys(signatures),
-                    pastSigningCertificates, pastSigningCertificatesFlags);
+                    pastSigningCertificates);
         }
 
         public SigningDetails(Signature[] signatures,
                 @SignatureSchemeVersion int signatureSchemeVersion)
                 throws CertificateException {
-            this(signatures, signatureSchemeVersion,
-                    null, null);
+            this(signatures, signatureSchemeVersion, null);
         }
 
         public SigningDetails(SigningDetails orig) {
@@ -5844,17 +5824,14 @@ public class PackageParser {
                 this.publicKeys = new ArraySet<>(orig.publicKeys);
                 if (orig.pastSigningCertificates != null) {
                     this.pastSigningCertificates = orig.pastSigningCertificates.clone();
-                    this.pastSigningCertificatesFlags = orig.pastSigningCertificatesFlags.clone();
                 } else {
                     this.pastSigningCertificates = null;
-                    this.pastSigningCertificatesFlags = null;
                 }
             } else {
                 this.signatures = null;
                 this.signatureSchemeVersion = SignatureSchemeVersion.UNKNOWN;
                 this.publicKeys = null;
                 this.pastSigningCertificates = null;
-                this.pastSigningCertificatesFlags = null;
             }
         }
 
@@ -5956,7 +5933,7 @@ public class PackageParser {
                     if (Signature.areEffectiveMatch(
                             oldDetails.signatures[0],
                             pastSigningCertificates[i])
-                            && pastSigningCertificatesFlags[i] == flags) {
+                            && pastSigningCertificates[i].getFlags() == flags) {
                         return true;
                     }
                 }
@@ -6006,7 +5983,7 @@ public class PackageParser {
                 for (int i = 0; i < pastSigningCertificates.length - 1; i++) {
                     if (pastSigningCertificates[i].equals(signature)) {
                         if (flags == PAST_CERT_EXISTS
-                                || (flags & pastSigningCertificatesFlags[i]) == flags) {
+                                || (flags & pastSigningCertificates[i].getFlags()) == flags) {
                             return true;
                         }
                     }
@@ -6090,7 +6067,7 @@ public class PackageParser {
                             pastSigningCertificates[i].toByteArray());
                     if (Arrays.equals(sha256Certificate, digest)) {
                         if (flags == PAST_CERT_EXISTS
-                                || (flags & pastSigningCertificatesFlags[i]) == flags) {
+                                || (flags & pastSigningCertificates[i].getFlags()) == flags) {
                             return true;
                         }
                     }
@@ -6127,7 +6104,6 @@ public class PackageParser {
             dest.writeInt(this.signatureSchemeVersion);
             dest.writeArraySet(this.publicKeys);
             dest.writeTypedArray(this.pastSigningCertificates, flags);
-            dest.writeIntArray(this.pastSigningCertificatesFlags);
         }
 
         protected SigningDetails(Parcel in) {
@@ -6136,7 +6112,6 @@ public class PackageParser {
             this.signatureSchemeVersion = in.readInt();
             this.publicKeys = (ArraySet<PublicKey>) in.readArraySet(boot);
             this.pastSigningCertificates = in.createTypedArray(Signature.CREATOR);
-            this.pastSigningCertificatesFlags = in.createIntArray();
         }
 
         public static final Creator<SigningDetails> CREATOR = new Creator<SigningDetails>() {
@@ -6175,9 +6150,6 @@ public class PackageParser {
             if (!Arrays.equals(pastSigningCertificates, that.pastSigningCertificates)) {
                 return false;
             }
-            if (!Arrays.equals(pastSigningCertificatesFlags, that.pastSigningCertificatesFlags)) {
-                return false;
-            }
 
             return true;
         }
@@ -6188,7 +6160,6 @@ public class PackageParser {
             result = 31 * result + signatureSchemeVersion;
             result = 31 * result + (publicKeys != null ? publicKeys.hashCode() : 0);
             result = 31 * result + Arrays.hashCode(pastSigningCertificates);
-            result = 31 * result + Arrays.hashCode(pastSigningCertificatesFlags);
             return result;
         }
 
@@ -6199,7 +6170,6 @@ public class PackageParser {
             private Signature[] mSignatures;
             private int mSignatureSchemeVersion = SignatureSchemeVersion.UNKNOWN;
             private Signature[] mPastSigningCertificates;
-            private int[] mPastSigningCertificatesFlags;
 
             @UnsupportedAppUsage
             public Builder() {
@@ -6226,33 +6196,11 @@ public class PackageParser {
                 return this;
             }
 
-            /** set the flags for the {@code pastSigningCertificates} */
-            @UnsupportedAppUsage
-            public Builder setPastSigningCertificatesFlags(int[] pastSigningCertificatesFlags) {
-                mPastSigningCertificatesFlags = pastSigningCertificatesFlags;
-                return this;
-            }
-
             private void checkInvariants() {
                 // must have signatures and scheme version set
                 if (mSignatures == null) {
                     throw new IllegalStateException("SigningDetails requires the current signing"
                             + " certificates.");
-                }
-
-                // pastSigningCerts and flags must match up
-                boolean pastMismatch = false;
-                if (mPastSigningCertificates != null && mPastSigningCertificatesFlags != null) {
-                    if (mPastSigningCertificates.length != mPastSigningCertificatesFlags.length) {
-                        pastMismatch = true;
-                    }
-                } else if (!(mPastSigningCertificates == null
-                        && mPastSigningCertificatesFlags == null)) {
-                    pastMismatch = true;
-                }
-                if (pastMismatch) {
-                    throw new IllegalStateException("SigningDetails must have a one to one mapping "
-                            + "between pastSigningCertificates and pastSigningCertificatesFlags");
                 }
             }
             /** build a {@code SigningDetails} object */
@@ -6261,7 +6209,7 @@ public class PackageParser {
                     throws CertificateException {
                 checkInvariants();
                 return new SigningDetails(mSignatures, mSignatureSchemeVersion,
-                        mPastSigningCertificates, mPastSigningCertificatesFlags);
+                        mPastSigningCertificates);
             }
         }
     }

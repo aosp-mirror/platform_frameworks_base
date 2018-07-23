@@ -436,7 +436,6 @@ public class AppBackupUtilsTest {
                         new Signature[] {SIGNATURE_1},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
@@ -455,7 +454,6 @@ public class AppBackupUtilsTest {
                 new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
-                        null,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -537,7 +535,6 @@ public class AppBackupUtilsTest {
                         new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
@@ -559,7 +556,6 @@ public class AppBackupUtilsTest {
                 new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
-                        null,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -583,7 +579,6 @@ public class AppBackupUtilsTest {
                         new Signature[] {signature1Copy, signature2Copy},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
@@ -606,7 +601,6 @@ public class AppBackupUtilsTest {
                         new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
@@ -628,7 +622,6 @@ public class AppBackupUtilsTest {
                 new PackageParser.SigningDetails(
                         new Signature[] {SIGNATURE_1},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
-                        null,
                         null,
                         null));
         packageInfo.applicationInfo = new ApplicationInfo();
@@ -654,8 +647,7 @@ public class AppBackupUtilsTest {
                         new Signature[] {SIGNATURE_2},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        new Signature[] {SIGNATURE_1, SIGNATURE_2},
-                        new int[] {0, 0}));
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2}));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         // we know signature1Copy is in history, and we want to assume it has
@@ -682,8 +674,7 @@ public class AppBackupUtilsTest {
                         new Signature[] {SIGNATURE_2},
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        new Signature[] {SIGNATURE_1, SIGNATURE_2},
-                        new int[] {0, 0}));
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2}));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         // we know signature1Copy is in history, but we want to assume it does not have
