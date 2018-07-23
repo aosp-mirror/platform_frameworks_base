@@ -3210,6 +3210,7 @@ Landroid/media/tv/TvContract$ProgramColumns;->COLUMN_REVIEW_RATING_STYLE:Ljava/l
 Landroid/media/tv/TvContract$ProgramColumns;->COLUMN_SEARCHABLE:Ljava/lang/String;
 Landroid/media/tv/TvContract$ProgramColumns;->COLUMN_SEASON_DISPLAY_NUMBER:Ljava/lang/String;
 Landroid/media/tv/TvContract$ProgramColumns;->COLUMN_SEASON_TITLE:Ljava/lang/String;
+Landroid/media/tv/TvContract$ProgramColumns;->COLUMN_SERIES_ID:Ljava/lang/String;
 Landroid/media/tv/TvContract$ProgramColumns;->COLUMN_SHORT_DESCRIPTION:Ljava/lang/String;
 Landroid/media/tv/TvContract$ProgramColumns;->COLUMN_THUMBNAIL_URI:Ljava/lang/String;
 Landroid/media/tv/TvContract$ProgramColumns;->COLUMN_TITLE:Ljava/lang/String;
