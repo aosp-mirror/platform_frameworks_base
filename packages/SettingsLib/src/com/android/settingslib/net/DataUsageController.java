@@ -38,13 +38,14 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.util.Log;
-import android.util.Pair;
+import android.util.Range;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Locale;
 
 public class DataUsageController {
@@ -136,11 +137,12 @@ public class DataUsageController {
             final NetworkStatsHistory history = session.getHistoryForNetwork(template, FIELDS);
             final long now = System.currentTimeMillis();
             final long start, end;
-            if (policy != null) {
-                final Pair<ZonedDateTime, ZonedDateTime> cycle = NetworkPolicyManager
-                        .cycleIterator(policy).next();
-                start = cycle.first.toInstant().toEpochMilli();
-                end = cycle.second.toInstant().toEpochMilli();
+            final Iterator<Range<ZonedDateTime>> it =
+                    (policy != null) ? policy.cycleIterator() : null;
+            if (it != null && it.hasNext()) {
+                final Range<ZonedDateTime> cycle = it.next();
+                start = cycle.getLower().toInstant().toEpochMilli();
+                end = cycle.getUpper().toInstant().toEpochMilli();
             } else {
                 // period = last 4 wks
                 end = now;
