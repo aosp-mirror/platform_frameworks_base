@@ -2012,6 +2012,15 @@ public class CarrierConfigManager {
     public static final String KEY_UNDELIVERED_SMS_MESSAGE_EXPIRATION_TIME =
             "undelivered_sms_message_expiration_time";
 
+    /**
+     * Specifies a carrier-defined {@link CallRedirectionService} which Telecom will bind
+     * to for outgoing calls.  An empty string indicates that no carrier-defined
+     * {@link CallRedirectionService} is specified.
+     * @hide
+     */
+    public static final String KEY_CALL_REDIRECTION_SERVICE_COMPONENT_NAME_STRING =
+            "call_redirection_service_component_name_string";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
