@@ -60,8 +60,8 @@
 #include <nativehelper/ScopedUtfChars.h>
 
 #include "com_android_server_power_PowerManagerService.h"
-#include "com_android_server_input_InputApplicationHandle.h"
-#include "com_android_server_input_InputWindowHandle.h"
+#include "android_hardware_input_InputApplicationHandle.h"
+#include "android_hardware_input_InputWindowHandle.h"
 #include "android_hardware_display_DisplayViewport.h"
 
 #define INDENT "  "

@@ -209,6 +209,8 @@ cc_library_shared {
         "com_android_internal_view_animation_NativeInterpolatorFactoryHelper.cpp",
         "hwbinder/EphemeralStorage.cpp",
         "fd_utils.cpp",
+        "android_hardware_input_InputWindowHandle.cpp",
+        "android_hardware_input_InputApplicationHandle.cpp",
     ],
 
     include_dirs: [

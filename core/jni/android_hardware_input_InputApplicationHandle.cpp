@@ -21,7 +21,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/threads.h>
 
-#include "com_android_server_input_InputApplicationHandle.h"
+#include "android_hardware_input_InputApplicationHandle.h"
 
 namespace android {
 
