@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -293,6 +294,7 @@ public final class BluetoothClass implements Parcelable {
      *
      * @hide
      */
+    @TestApi
     public int getClassOfDevice() {
         return mClass;
     }
