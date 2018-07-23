@@ -15,6 +15,8 @@
  */
 package com.android.server.pm;
 
+import static org.junit.Assert.*;
+
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
@@ -28,9 +30,18 @@ import android.content.pm.Signature;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.MediumTest;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+import android.util.ArrayMap;
+import android.util.ArraySet;
+
+import androidx.test.filters.MediumTest;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import libcore.io.IoUtils;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -41,16 +52,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static org.junit.Assert.*;
-
-import android.util.ArrayMap;
-import android.util.ArraySet;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import libcore.io.IoUtils;
 
 @RunWith(AndroidJUnit4.class)
 @MediumTest

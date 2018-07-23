@@ -16,15 +16,22 @@
 
 package com.android.server.pm;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.FileUtils;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,19 +46,13 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /**
  * <p>Run with:<pre>
  * m FrameworksServicesTests &&
  * adb install \
  * -r out/target/product/hammerhead/data/app/FrameworksServicesTests/FrameworksServicesTests.apk &&
  * adb shell am instrument -e class com.android.server.pm.UserDataPreparerTest \
- * -w com.android.frameworks.servicestests/android.support.test.runner.AndroidJUnitRunner
+ * -w com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  * </pre>
  */
 @RunWith(AndroidJUnit4.class)

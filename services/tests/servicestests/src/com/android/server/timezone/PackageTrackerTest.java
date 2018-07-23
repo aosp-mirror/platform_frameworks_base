@@ -16,27 +16,6 @@
 
 package com.android.server.timezone;
 
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import android.app.timezone.RulesUpdaterContract;
-import android.content.Context;
-import android.content.Intent;
-import android.provider.TimeZoneRulesDataContract;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-
-import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -47,6 +26,28 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
+
+import android.app.timezone.RulesUpdaterContract;
+import android.content.Context;
+import android.content.Intent;
+import android.provider.TimeZoneRulesDataContract;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 
 /**
  * White box interaction / unit testing of the {@link PackageTracker}.

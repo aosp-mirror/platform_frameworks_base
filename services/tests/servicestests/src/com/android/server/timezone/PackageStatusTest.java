@@ -16,12 +16,12 @@
 
 package com.android.server.timezone;
 
-import org.junit.Test;
-
-import android.support.test.filters.SmallTest;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+
+import androidx.test.filters.SmallTest;
+
+import org.junit.Test;
 
 @SmallTest
 public class PackageStatusTest {

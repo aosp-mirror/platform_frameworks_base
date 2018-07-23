@@ -35,11 +35,12 @@ import static org.mockito.Mockito.verify;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Message;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.DebugUtils;
 import android.view.InputDevice;
 import android.view.MotionEvent;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.testutils.TestHandler;
@@ -49,7 +50,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.function.IntConsumer;
-
 
 /**
  * Tests the state transitions of {@link MagnificationGestureHandler}

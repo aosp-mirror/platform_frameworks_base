@@ -31,14 +31,15 @@ import static org.mockito.Mockito.when;
 import android.app.timedetector.TimeSignal;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.TimestampedValue;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.timedetector.TimeDetectorStrategy.Callback;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.android.server.timedetector.TimeDetectorStrategy.Callback;
 
 import java.io.PrintWriter;
 

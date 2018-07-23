@@ -24,9 +24,10 @@ import static org.junit.Assert.assertThat;
 
 import android.content.pm.PackageUserState;
 import android.os.PersistableBundle;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.ArraySet;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

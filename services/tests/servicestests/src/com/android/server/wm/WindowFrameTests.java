@@ -16,28 +16,30 @@
 
 package com.android.server.wm;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static android.view.DisplayCutout.fromBoundingRect;
+import static android.view.WindowManager.LayoutParams.FILL_PARENT;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.app.ActivityManager.TaskDescription;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IWindow;
 import android.view.WindowManager;
 
-import static android.view.DisplayCutout.fromBoundingRect;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.FILL_PARENT;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.wm.utils.WmDisplayCutout;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for the {@link WindowState#computeFrameLw} method and other window frame machinery.

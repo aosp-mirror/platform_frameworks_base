@@ -24,19 +24,20 @@ import android.content.pm.UserInfo;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.MediumTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.util.IconDrawableFactory;
 
-import com.android.server.LocalServices;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
 
-import java.util.List;
+import com.android.server.LocalServices;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.List;
 
 /**
  * <p>Run with:<pre>
