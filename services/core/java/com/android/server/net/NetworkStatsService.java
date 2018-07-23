@@ -940,7 +940,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public long getIfaceStats(String iface, int type) {
-        return nativeGetIfaceStat(iface, type, checkBpfStatsEnable());
+        // eBPF code doesn't provide per-interface TCP counters. Use xt_qtaguid for now.
+        // TODO: delete getMobileTcp(Rx|Tx)Packets entirely. See b/110443385 .
+        if (type == TYPE_TCP_TX_PACKETS || type == TYPE_TCP_RX_PACKETS) {
+            return nativeGetIfaceStat(iface, type, false);
+        } else {
+            return nativeGetIfaceStat(iface, type, checkBpfStatsEnable());
+        }
     }
 
     @Override
