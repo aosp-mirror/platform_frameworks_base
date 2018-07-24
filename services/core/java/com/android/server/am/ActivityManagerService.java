@@ -345,7 +345,6 @@ import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
-import com.android.server.BinderCallsStatsService;
 import com.android.server.DeviceIdleController;
 import com.android.server.IntentResolver;
 import com.android.server.IoThread;
@@ -2924,7 +2923,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void batteryStatsReset() {
-        BinderCallsStatsService.reset();
         mOomAdjProfiler.reset();
     }
 

@@ -17,6 +17,7 @@
 package com.android.internal.os;
 
 import android.annotation.NonNull;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -33,7 +34,7 @@ import java.util.ArrayList;
 
 /**
  * Private and debugging Binder APIs.
- * 
+ *
  * @see IBinder
  */
 public class BinderInternal {
@@ -70,18 +71,64 @@ public class BinderInternal {
     }
 
     /**
+     * A session used by {@link Observer} in order to keep track of some data.
+     */
+    public static class CallSession {
+        // Binder interface descriptor.
+        public String className;
+        // Binder transaction code.
+        public int transactionCode;
+        // Binder transaction method name.
+        public String methodName;
+        // CPU time at the beginning of the call.
+        long cpuTimeStarted;
+        // System time at the beginning of the call.
+        long timeStarted;
+        // Should be set to one when an exception is thrown.
+        boolean exceptionThrown;
+    }
+
+    /**
+     * Allows to track various steps of an API call.
+     */
+    public interface Observer {
+        /**
+         * Called when a binder call starts.
+         *
+         * @return a CallSession to pass to the callEnded method.
+         */
+        CallSession callStarted(Binder binder, int code);
+
+        /**
+         * Called when a binder call stops.
+         *
+         * <li>This method will be called even when an exception is thrown.
+         */
+        void callEnded(CallSession s, int parcelRequestSize, int parcelReplySize);
+
+        /**
+         * Called if an exception is thrown while executing the binder transaction.
+         *
+         * <li>BinderCallsStats#callEnded will be called afterwards.
+         * <li>Do not throw an exception in this method, it will swallow the original exception
+         * thrown by the binder transaction.
+         */
+        public void callThrewException(CallSession s, Exception exception);
+    }
+
+    /**
      * Add the calling thread to the IPC thread pool.  This function does
      * not return until the current process is exiting.
      */
     public static final native void joinThreadPool();
-    
+
     /**
      * Return the system time (as reported by {@link SystemClock#uptimeMillis
      * SystemClock.uptimeMillis()}) that the last garbage collection occurred
      * in this process.  This is not for general application use, and the
      * meaning of "when a garbage collection occurred" will change as the
      * garbage collector evolves.
-     * 
+     *
      * @return Returns the time as per {@link SystemClock#uptimeMillis
      * SystemClock.uptimeMillis()} of the last garbage collection.
      */
@@ -95,7 +142,7 @@ public class BinderInternal {
      * other services.
      */
     public static final native IBinder getContextObject();
-    
+
     /**
      * Special for system process to not allow incoming calls to run at
      * background scheduling priority.
@@ -104,14 +151,14 @@ public class BinderInternal {
     public static final native void disableBackgroundScheduling(boolean disable);
 
     public static final native void setMaxThreads(int numThreads);
-    
+
     static native final void handleGc();
-    
+
     public static void forceGc(String reason) {
         EventLog.writeEvent(2741, reason);
         VMRuntime.getRuntime().requestConcurrentGC();
     }
-    
+
     static void forceBinderGc() {
         forceGc("Binder");
     }

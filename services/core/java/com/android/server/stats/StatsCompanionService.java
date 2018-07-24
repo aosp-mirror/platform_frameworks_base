@@ -63,7 +63,6 @@ import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.NetworkStatsFactory;
-import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
 import com.android.internal.os.KernelCpuSpeedReader;
 import com.android.internal.os.KernelUidCpuTimeReader;
@@ -74,6 +73,7 @@ import com.android.internal.os.KernelWakelockReader;
 import com.android.internal.os.KernelWakelockStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.util.DumpUtils;
+import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
@@ -895,7 +895,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     }
 
     private void pullBinderCallsStats(int tagId, List<StatsLogEventWrapper> pulledData) {
-        List<ExportedCallStat> callStats = BinderCallsStats.getInstance().getExportedCallStats();
+        BinderCallsStatsService.Internal binderStats =
+                LocalServices.getService(BinderCallsStatsService.Internal.class);
+        List<ExportedCallStat> callStats = binderStats.getExportedCallStats();
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         for (ExportedCallStat callStat : callStats) {
             StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 11 /* fields */);

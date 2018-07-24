@@ -29,6 +29,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BinderInternal.CallSession;
 import com.android.internal.util.Preconditions;
 
 import java.io.PrintWriter;
@@ -47,7 +48,7 @@ import java.util.function.ToDoubleFunction;
  * Collects statistics about CPU time spent per binder call across multiple dimensions, e.g.
  * per thread, uid or call description.
  */
-public class BinderCallsStats {
+public class BinderCallsStats implements BinderInternal.Observer {
     public static final boolean ENABLED_DEFAULT = true;
     public static final boolean DETAILED_TRACKING_DEFAULT = true;
     public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 10;
@@ -57,12 +58,9 @@ public class BinderCallsStats {
     private static final int PERIODIC_SAMPLING_INTERVAL = 10;
     private static final int MAX_EXCEPTION_COUNT_SIZE = 50;
     private static final String EXCEPTION_COUNT_OVERFLOW_NAME = "overflow";
-    private static final CallSession NOT_ENABLED = new CallSession();
-    private static final BinderCallsStats sInstance = new BinderCallsStats(new Random());
 
-    private volatile boolean mEnabled = ENABLED_DEFAULT;
-    private volatile boolean mDetailedTracking = DETAILED_TRACKING_DEFAULT;
-    private volatile int mPeriodicSamplingInterval = PERIODIC_SAMPLING_INTERVAL_DEFAULT;
+    private boolean mDetailedTracking = DETAILED_TRACKING_DEFAULT;
+    private int mPeriodicSamplingInterval = PERIODIC_SAMPLING_INTERVAL_DEFAULT;
     @GuardedBy("mLock")
     private final SparseArray<UidEntry> mUidEntries = new SparseArray<>();
     @GuardedBy("mLock")
@@ -72,28 +70,24 @@ public class BinderCallsStats {
     private final Random mRandom;
     private long mStartTime = System.currentTimeMillis();
 
-    @VisibleForTesting  // Use getInstance() instead.
     public BinderCallsStats(Random random) {
         this.mRandom = random;
     }
 
+    @Override
     public CallSession callStarted(Binder binder, int code) {
         return callStarted(binder.getClass().getName(), code, binder.getTransactionName(code));
     }
 
     private CallSession callStarted(String className, int code, @Nullable String methodName) {
-        if (!mEnabled) {
-            return NOT_ENABLED;
-        }
-
         CallSession s = mCallSessionsPool.poll();
         if (s == null) {
             s = new CallSession();
         }
 
-        s.callStat.className = className;
-        s.callStat.msg = code;
-        s.callStat.methodName = methodName;
+        s.className = className;
+        s.transactionCode = code;
+        s.methodName = methodName;
         s.exceptionThrown = false;
         s.cpuTimeStarted = -1;
         s.timeStarted = -1;
@@ -109,9 +103,9 @@ public class BinderCallsStats {
         return s;
     }
 
-    public void callEnded(CallSession s, int parcelRequestSize, int parcelReplySize) {
-        Preconditions.checkNotNull(s);
-        if (s == NOT_ENABLED) {
+    @Override
+    public void callEnded(@Nullable CallSession s, int parcelRequestSize, int parcelReplySize) {
+        if (s == null) {
             return;
         }
 
@@ -124,10 +118,6 @@ public class BinderCallsStats {
 
     private void processCallEnded(CallSession s, int parcelRequestSize, int parcelReplySize) {
         synchronized (mLock) {
-            if (!mEnabled) {
-                return;
-            }
-
             final int callingUid = getCallingUid();
             UidEntry uidEntry = mUidEntries.get(callingUid);
             if (uidEntry == null) {
@@ -135,7 +125,7 @@ public class BinderCallsStats {
                 mUidEntries.put(callingUid, uidEntry);
             }
             uidEntry.callCount++;
-            CallStat callStat = uidEntry.getOrCreate(s.callStat);
+            CallStat callStat = uidEntry.getOrCreate(s.className, s.transactionCode);
             callStat.callCount++;
 
             // Non-negative time signals we need to record data for this call.
@@ -147,7 +137,7 @@ public class BinderCallsStats {
                 uidEntry.recordedCallCount++;
 
                 callStat.recordedCallCount++;
-                callStat.methodName = s.callStat.methodName;
+                callStat.methodName = s.methodName;
                 callStat.cpuTimeMicros += duration;
                 callStat.maxCpuTimeMicros = Math.max(callStat.maxCpuTimeMicros, duration);
                 callStat.latencyMicros += latencyDuration;
@@ -164,16 +154,9 @@ public class BinderCallsStats {
         }
     }
 
-    /**
-     * Called if an exception is thrown while executing the binder transaction.
-     *
-     * <li>BinderCallsStats#callEnded will be called afterwards.
-     * <li>Do not throw an exception in this method, it will swallow the original exception thrown
-     * by the binder transaction.
-     */
-    public void callThrewException(CallSession s, Exception exception) {
-        Preconditions.checkNotNull(s);
-        if (!mEnabled) {
+    @Override
+    public void callThrewException(@Nullable CallSession s, Exception exception) {
+        if (s == null) {
             return;
         }
         s.exceptionThrown = true;
@@ -208,7 +191,7 @@ public class BinderCallsStats {
                     exported.uid = entry.uid;
                     exported.className = stat.className;
                     exported.methodName = stat.methodName == null
-                            ? String.valueOf(stat.msg) : stat.methodName;
+                            ? String.valueOf(stat.transactionCode) : stat.methodName;
                     exported.cpuTimeMicros = stat.cpuTimeMicros;
                     exported.maxCpuTimeMicros = stat.maxCpuTimeMicros;
                     exported.latencyMicros = stat.latencyMicros;
@@ -233,11 +216,6 @@ public class BinderCallsStats {
     }
 
     private void dumpLocked(PrintWriter pw, Map<Integer,String> appIdToPkgNameMap, boolean verbose) {
-        if (!mEnabled) {
-            pw.println("Binder calls stats disabled.");
-            return;
-        }
-
         long totalCallsCount = 0;
         long totalRecordedCallsCount = 0;
         long totalCpuTime = 0;
@@ -340,23 +318,10 @@ public class BinderCallsStats {
         return mRandom.nextInt() % mPeriodicSamplingInterval == 0;
     }
 
-    public static BinderCallsStats getInstance() {
-        return sInstance;
-    }
-
     public void setDetailedTracking(boolean enabled) {
         synchronized (mLock) {
             if (enabled != mDetailedTracking) {
                 mDetailedTracking = enabled;
-                reset();
-            }
-        }
-    }
-
-    public void setEnabled(boolean enabled) {
-        synchronized (mLock) {
-            if (enabled != mEnabled) {
-                mEnabled = enabled;
                 reset();
             }
         }
@@ -400,7 +365,7 @@ public class BinderCallsStats {
     @VisibleForTesting
     public static class CallStat {
         public String className;
-        public int msg;
+        public int transactionCode;
         // Method name might be null when we cannot resolve the transaction code. For instance, if
         // the binder was not generated by AIDL.
         public @Nullable String methodName;
@@ -427,10 +392,21 @@ public class BinderCallsStats {
         CallStat() {
         }
 
-        CallStat(String className, int msg) {
+        CallStat(String className, int transactionCode) {
             this.className = className;
-            this.msg = msg;
+            this.transactionCode = transactionCode;
         }
+
+        @Override
+        public String toString() {
+            return className + "#" + (methodName == null ? transactionCode : methodName);
+        }
+    }
+
+    /** Key used to store CallStat object in a Map. */
+    public static class CallStatKey {
+        public String className;
+        public int transactionCode;
 
         @Override
         public boolean equals(Object o) {
@@ -438,29 +414,19 @@ public class BinderCallsStats {
                 return true;
             }
 
-            CallStat callStat = (CallStat) o;
-            return msg == callStat.msg && (className.equals(callStat.className));
+            CallStatKey key = (CallStatKey) o;
+            return transactionCode == key.transactionCode
+                    && (className.equals(key.className));
         }
 
         @Override
         public int hashCode() {
             int result = className.hashCode();
-            result = 31 * result + msg;
+            result = 31 * result + transactionCode;
             return result;
         }
-
-        @Override
-        public String toString() {
-            return className + "#" + (methodName == null ? msg : methodName);
-        }
     }
 
-    public static class CallSession {
-        long cpuTimeStarted;
-        long timeStarted;
-        boolean exceptionThrown;
-        final CallStat callStat = new CallStat();
-    }
 
     @VisibleForTesting
     public static class UidEntry {
@@ -480,14 +446,21 @@ public class BinderCallsStats {
         }
 
         // Aggregate time spent per each call name: call_desc -> cpu_time_micros
-        Map<CallStat, CallStat> mCallStats = new ArrayMap<>();
+        private Map<CallStatKey, CallStat> mCallStats = new ArrayMap<>();
+        private CallStatKey mTempKey = new CallStatKey();
 
-        CallStat getOrCreate(CallStat callStat) {
-            CallStat mapCallStat = mCallStats.get(callStat);
+        CallStat getOrCreate(String className, int transactionCode) {
+            // Use a global temporary key to avoid creating new objects for every lookup.
+            mTempKey.className = className;
+            mTempKey.transactionCode = transactionCode;
+            CallStat mapCallStat = mCallStats.get(mTempKey);
             // Only create CallStat if it's a new entry, otherwise update existing instance
             if (mapCallStat == null) {
-                mapCallStat = new CallStat(callStat.className, callStat.msg);
-                mCallStats.put(mapCallStat, mapCallStat);
+                mapCallStat = new CallStat(className, transactionCode);
+                CallStatKey key = new CallStatKey();
+                key.className = className;
+                key.transactionCode = transactionCode;
+                mCallStats.put(key, mapCallStat);
             }
             return mapCallStat;
         }
@@ -496,7 +469,7 @@ public class BinderCallsStats {
          * Returns list of calls sorted by CPU time
          */
         public List<CallStat> getCallStatsList() {
-            List<CallStat> callStats = new ArrayList<>(mCallStats.keySet());
+            List<CallStat> callStats = new ArrayList<>(mCallStats.values());
             callStats.sort((o1, o2) -> {
                 if (o1.cpuTimeMicros < o2.cpuTimeMicros) {
                     return 1;
