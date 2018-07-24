@@ -116,7 +116,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.writeXml(serializer, forBackup, version);
         serializer.endDocument();
         serializer.flush();
-        mZenModeHelperSpy.setConfig(new ZenModeConfig(), "writing xml");
+        mZenModeHelperSpy.setConfig(new ZenModeConfig(), null, "writing xml");
         return baos;
     }
 
