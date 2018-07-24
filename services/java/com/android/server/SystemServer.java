@@ -1552,13 +1552,15 @@ public final class SystemServer {
             }
             traceEnd();
 
-            traceBeginAndSlog("StartPruneInstantAppsJobService");
-            try {
-                PruneInstantAppsJobService.schedule(context);
-            } catch (Throwable e) {
-                reportWtf("StartPruneInstantAppsJobService", e);
+            if (!isWatch) {
+                traceBeginAndSlog("StartPruneInstantAppsJobService");
+                try {
+                    PruneInstantAppsJobService.schedule(context);
+                } catch (Throwable e) {
+                    reportWtf("StartPruneInstantAppsJobService", e);
+                }
+                traceEnd();
             }
-            traceEnd();
 
             // LauncherAppsService uses ShortcutService.
             traceBeginAndSlog("StartShortcutServiceLifecycle");
