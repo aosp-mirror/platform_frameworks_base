@@ -28,6 +28,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.WindowManager;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -43,28 +44,32 @@ public final class Helper {
 
     /**
      * Defines a logging flag that can be dynamically changed at runtime using
-     * {@code cmd autofill set log_level debug}.
+     * {@code cmd autofill set log_level debug} or through
+     * {@link android.provider.Settings.Global#AUTOFILL_LOGGING_LEVEL}.
      */
     public static boolean sDebug = false;
 
     /**
      * Defines a logging flag that can be dynamically changed at runtime using
-     * {@code cmd autofill set log_level verbose}.
+     * {@code cmd autofill set log_level verbose} or through
+     * {@link android.provider.Settings.Global#AUTOFILL_LOGGING_LEVEL}.
      */
     public static boolean sVerbose = false;
 
     /**
      * Maximum number of partitions that can be allowed in a session.
      *
-     * <p>Can be modified using {@code cmd autofill set max_partitions}.
+     * <p>Can be modified using {@code cmd autofill set max_partitions} or through
+     * {@link android.provider.Settings.Global#AUTOFILL_MAX_PARTITIONS_SIZE}.
      */
-    static int sPartitionMaxCount = 10;
+    static int sPartitionMaxCount = AutofillManager.DEFAULT_MAX_PARTITIONS_SIZE;
 
     /**
      * Maximum number of visible datasets in the dataset picker UI, or {@code 0} to use default
      * value from resources.
      *
-     * <p>Can be modified using {@code cmd autofill set max_visible_datasets}.
+     * <p>Can be modified using {@code cmd autofill set max_visible_datasets} or through
+     * {@link android.provider.Settings.Global#AUTOFILL_MAX_VISIBLE_DATASETS}.
      */
     public static int sVisibleDatasetsMaxCount = 0;
 

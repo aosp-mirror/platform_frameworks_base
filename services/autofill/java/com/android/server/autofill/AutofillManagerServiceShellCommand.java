@@ -185,7 +185,7 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 mService.setLogLevel(AutofillManager.FLAG_ADD_CLIENT_DEBUG);
                 return 0;
             case "off":
-                mService.setLogLevel(0);
+                mService.setLogLevel(AutofillManager.NO_LOGGING);
                 return 0;
             default:
                 pw.println("Invalid level: " + logLevel);

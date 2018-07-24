@@ -186,9 +186,21 @@ class SettingsProtoDumpUtil {
                 GlobalSettingsProto.Auto.TIME_ZONE);
         p.end(autoToken);
 
+        final long autofillToken = p.start(GlobalSettingsProto.AUTOFILL);
         dumpSetting(s, p,
                 Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
-                GlobalSettingsProto.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES);
+                GlobalSettingsProto.Autofill.COMPAT_MODE_ALLOWED_PACKAGES);
+        dumpSetting(s, p,
+                Settings.Global.AUTOFILL_LOGGING_LEVEL,
+                GlobalSettingsProto.Autofill.LOGGING_LEVEL);
+        dumpSetting(s, p,
+                Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE,
+                GlobalSettingsProto.Autofill.MAX_PARTITIONS_SIZE);
+        dumpSetting(s, p,
+                Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
+                GlobalSettingsProto.Autofill.MAX_VISIBLE_DATASETS);
+        p.end(autofillToken);
+
         dumpSetting(s, p,
                 Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS,
                 GlobalSettingsProto.BACKUP_AGENT_TIMEOUT_PARAMETERS);
