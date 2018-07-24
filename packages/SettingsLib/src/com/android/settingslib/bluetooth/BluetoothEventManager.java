@@ -109,9 +109,6 @@ public class BluetoothEventManager {
         addHandler(BluetoothDevice.ACTION_UUID, new UuidChangedHandler());
         addHandler(BluetoothDevice.ACTION_BATTERY_LEVEL_CHANGED, new BatteryLevelChangedHandler());
 
-        // Dock event broadcasts
-        addHandler(Intent.ACTION_DOCK_EVENT, new DockEventHandler());
-
         // Active device broadcasts
         addHandler(BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED,
                    new ActiveDeviceChangedHandler());
@@ -394,22 +391,6 @@ public class BluetoothEventManager {
         public void onReceive(Context context, Intent intent,
                 BluetoothDevice device) {
             mDeviceManager.onUuidChanged(device);
-        }
-    }
-
-    private class DockEventHandler implements Handler {
-        public void onReceive(Context context, Intent intent, BluetoothDevice device) {
-            // Remove if unpair device upon undocking
-            int anythingButUnDocked = Intent.EXTRA_DOCK_STATE_UNDOCKED + 1;
-            int state = intent.getIntExtra(Intent.EXTRA_DOCK_STATE, anythingButUnDocked);
-            if (state == Intent.EXTRA_DOCK_STATE_UNDOCKED) {
-                if (device != null && device.getBondState() == BluetoothDevice.BOND_NONE) {
-                    CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
-                    if (cachedDevice != null) {
-                        cachedDevice.setJustDiscovered(false);
-                    }
-                }
-            }
         }
     }
 
