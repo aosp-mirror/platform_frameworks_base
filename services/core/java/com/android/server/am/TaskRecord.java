@@ -16,9 +16,9 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
-import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -63,6 +63,7 @@ import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.TaskRecordProto.ACTIVITIES;
+import static com.android.server.am.TaskRecordProto.ACTIVITY_TYPE;
 import static com.android.server.am.TaskRecordProto.BOUNDS;
 import static com.android.server.am.TaskRecordProto.CONFIGURATION_CONTAINER;
 import static com.android.server.am.TaskRecordProto.FULLSCREEN;
@@ -74,7 +75,6 @@ import static com.android.server.am.TaskRecordProto.ORIG_ACTIVITY;
 import static com.android.server.am.TaskRecordProto.REAL_ACTIVITY;
 import static com.android.server.am.TaskRecordProto.RESIZE_MODE;
 import static com.android.server.am.TaskRecordProto.STACK_ID;
-import static com.android.server.am.TaskRecordProto.ACTIVITY_TYPE;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -87,7 +87,6 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
-import android.app.IActivityManager;
 import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -478,7 +477,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         mResizeMode = resizeMode;
         mWindowContainerController.setResizeable(resizeMode);
         mService.mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-        mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
+        mService.mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
     }
 
     void setTaskDockedResizing(boolean resizing) {
@@ -552,7 +551,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                     mService.mStackSupervisor.ensureActivitiesVisibleLocked(r, 0,
                             preserveWindow);
                     if (!kept) {
-                        mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                        mService.mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
                     }
                 }
             }
@@ -752,7 +751,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             // The task might have already been running and its visibility needs to be synchronized
             // with the visibility of the stack / windows.
             supervisor.ensureActivitiesVisibleLocked(null, 0, !mightReplaceWindow);
-            supervisor.resumeFocusedStackTopActivityLocked();
+            supervisor.resumeFocusedStacksTopActivitiesLocked();
         }
 
         // TODO: Handle incorrect request to move before the actual move, not after.

@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -31,13 +32,18 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Display.REMOVE_MODE_DESTROY_CONTENT;
 import static com.android.server.am.ActivityDisplayProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.ActivityDisplayProto.FOCUSED_STACK_ID;
 import static com.android.server.am.ActivityDisplayProto.ID;
+import static com.android.server.am.ActivityDisplayProto.RESUMED_ACTIVITY;
 import static com.android.server.am.ActivityDisplayProto.STACKS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STATES;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityStackSupervisor.TAG_STATES;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
@@ -350,6 +356,45 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         return null;
     }
 
+    ActivityStack getNextFocusableStack() {
+        return getNextFocusableStack(null /* currentFocus */, false /* ignoreCurrent */);
+    }
+
+    ActivityStack getNextFocusableStack(ActivityStack currentFocus, boolean ignoreCurrent) {
+        final int currentWindowingMode = currentFocus != null
+                ? currentFocus.getWindowingMode() : WINDOWING_MODE_UNDEFINED;
+
+        ActivityStack candidate = null;
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            final ActivityStack stack = mStacks.get(i);
+            if (ignoreCurrent && stack == currentFocus) {
+                continue;
+            }
+            if (!stack.isFocusable() || !stack.shouldBeVisible(null)) {
+                continue;
+            }
+
+            if (currentWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
+                    && candidate == null && stack.inSplitScreenPrimaryWindowingMode()) {
+                // If the currently focused stack is in split-screen secondary we save off the
+                // top primary split-screen stack as a candidate for focus because we might
+                // prefer focus to move to an other stack to avoid primary split-screen stack
+                // overlapping with a fullscreen stack when a fullscreen stack is higher in z
+                // than the next split-screen stack. Assistant stack, I am looking at you...
+                // We only move the focus to the primary-split screen stack if there isn't a
+                // better alternative.
+                candidate = stack;
+                continue;
+            }
+            if (candidate != null && stack.inSplitScreenSecondaryWindowingMode()) {
+                // Use the candidate stack since we are now at the secondary split-screen.
+                return candidate;
+            }
+            return stack;
+        }
+        return candidate;
+    }
+
     ActivityRecord getResumedActivity() {
         final ActivityStack focusedStack = getFocusedStack();
         if (focusedStack == null) {
@@ -369,6 +414,30 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             }
         }
         return resumedActivity;
+    }
+
+    /**
+     * Pause all activities in either all of the stacks or just the back stacks.
+     * @param userLeaving Passed to pauseActivity() to indicate whether to call onUserLeaving().
+     * @param resuming The resuming activity.
+     * @param dontWait The resuming activity isn't going to wait for all activities to be paused
+     *                 before resuming.
+     * @return true if any activity was paused as a result of this call.
+     */
+    boolean pauseBackStacks(boolean userLeaving, ActivityRecord resuming, boolean dontWait) {
+        boolean someActivityPaused = false;
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = mStacks.get(stackNdx);
+            // TODO(b/111541062): Check if resumed activity on this display instead
+            if (!mSupervisor.isTopDisplayFocusedStack(stack)
+                    && stack.getResumedActivity() != null) {
+                if (DEBUG_STATES) Slog.d(TAG_STATES, "pauseBackStacks: stack=" + stack +
+                        " mResumedActivity=" + stack.getResumedActivity());
+                someActivityPaused |= stack.startPausingLocked(userLeaving, false, resuming,
+                        dontWait);
+            }
+        }
+        return someActivityPaused;
     }
 
     /**
@@ -898,6 +967,16 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         final long token = proto.start(fieldId);
         super.writeToProto(proto, CONFIGURATION_CONTAINER, false /* trim */);
         proto.write(ID, mDisplayId);
+        final ActivityStack focusedStack = getFocusedStack();
+        if (focusedStack != null) {
+            proto.write(FOCUSED_STACK_ID, focusedStack.mStackId);
+            final ActivityRecord focusedActivity = focusedStack.getDisplay().getResumedActivity();
+            if (focusedActivity != null) {
+                focusedActivity.writeIdentifierToProto(proto, RESUMED_ACTIVITY);
+            }
+        } else {
+            proto.write(FOCUSED_STACK_ID, INVALID_STACK_ID);
+        }
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
             stack.writeToProto(proto, STACKS);

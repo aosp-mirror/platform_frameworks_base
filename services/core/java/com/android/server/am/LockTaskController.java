@@ -446,7 +446,7 @@ public class LockTaskController {
             return;
         }
         task.performClearTaskLocked();
-        mSupervisor.resumeFocusedStackTopActivityLocked();
+        mSupervisor.resumeFocusedStacksTopActivitiesLocked();
     }
 
     /**
@@ -578,7 +578,7 @@ public class LockTaskController {
         if (andResume) {
             mSupervisor.findTaskToMoveToFront(task, 0, null, reason,
                     lockTaskModeState != LOCK_TASK_MODE_NONE);
-            mSupervisor.resumeFocusedStackTopActivityLocked();
+            mSupervisor.resumeFocusedStacksTopActivitiesLocked();
             mWindowManager.executeAppTransition();
         } else if (lockTaskModeState != LOCK_TASK_MODE_NONE) {
             mSupervisor.handleNonResizableTaskIfNeeded(task, WINDOWING_MODE_UNDEFINED,
@@ -653,7 +653,7 @@ public class LockTaskController {
         }
 
         if (taskChanged) {
-            mSupervisor.resumeFocusedStackTopActivityLocked();
+            mSupervisor.resumeFocusedStacksTopActivitiesLocked();
         }
     }
 

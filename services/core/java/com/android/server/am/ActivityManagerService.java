@@ -4380,7 +4380,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mWindowManager.deferSurfaceLayout();
         try {
             if (!restarting && hasVisibleActivities
-                    && !mStackSupervisor.resumeFocusedStackTopActivityLocked()) {
+                    && !mStackSupervisor.resumeFocusedStacksTopActivitiesLocked()) {
                 // If there was nothing to resume, and we are not already restarting this process, but
                 // there is a visible activity that is hosted by the process...  then make sure all
                 // visible activities are running, taking care of restarting this process.
@@ -5468,7 +5468,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Clean-up disabled activities.
         if (mStackSupervisor.finishDisabledPackageActivitiesLocked(
                 packageName, disabledClasses, true, false, userId) && mBooted) {
-            mStackSupervisor.resumeFocusedStackTopActivityLocked();
+            mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
             mStackSupervisor.scheduleIdleLocked();
         }
 
@@ -5642,7 +5642,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             if (mBooted) {
-                mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
                 mStackSupervisor.scheduleIdleLocked();
             }
         }
@@ -10198,7 +10198,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
-            mStackSupervisor.resumeFocusedStackTopActivityLocked();
+            mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
             mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
 
             BinderInternal.nSetBinderProxyCountWatermarks(6000,5500);

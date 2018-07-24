@@ -163,7 +163,7 @@ class KeyguardController {
             updateKeyguardSleepToken();
 
             // Some stack visibility might change (e.g. docked stack)
-            mStackSupervisor.resumeFocusedStackTopActivityLocked();
+            mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
             mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
             mStackSupervisor.addStartingWindowsForVisibleActivities(true /* taskSwitch */);
             mWindowManager.executeAppTransition();

@@ -1367,7 +1367,7 @@ class ActivityStarter {
             // For paranoia, make sure we have correctly resumed the top activity.
             topStack.mLastPausedActivity = null;
             if (mDoResume) {
-                mSupervisor.resumeFocusedStackTopActivityLocked();
+                mSupervisor.resumeFocusedStacksTopActivitiesLocked();
             }
             ActivityOptions.abort(mOptions);
             if ((mStartFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
@@ -1451,7 +1451,7 @@ class ActivityStarter {
                         && !mSupervisor.isTopDisplayFocusedStack(mTargetStack)) {
                     mTargetStack.moveToFront("startActivityUnchecked");
                 }
-                mSupervisor.resumeFocusedStackTopActivityLocked(mTargetStack, mStartActivity,
+                mSupervisor.resumeFocusedStacksTopActivitiesLocked(mTargetStack, mStartActivity,
                         mOptions);
             }
         } else if (mStartActivity != null) {
@@ -2023,7 +2023,7 @@ class ActivityStarter {
 
     private void resumeTargetStackIfNeeded() {
         if (mDoResume) {
-            mSupervisor.resumeFocusedStackTopActivityLocked(mTargetStack, null, mOptions);
+            mSupervisor.resumeFocusedStacksTopActivitiesLocked(mTargetStack, null, mOptions);
         } else {
             ActivityOptions.abort(mOptions);
         }
@@ -2139,7 +2139,7 @@ class ActivityStarter {
                 // For paranoia, make sure we have correctly resumed the top activity.
                 mTargetStack.mLastPausedActivity = null;
                 if (mDoResume) {
-                    mSupervisor.resumeFocusedStackTopActivityLocked();
+                    mSupervisor.resumeFocusedStacksTopActivitiesLocked();
                 }
                 ActivityOptions.abort(mOptions);
                 return START_DELIVERED_TO_TOP;
@@ -2157,7 +2157,7 @@ class ActivityStarter {
                 deliverNewIntent(top);
                 mTargetStack.mLastPausedActivity = null;
                 if (mDoResume) {
-                    mSupervisor.resumeFocusedStackTopActivityLocked();
+                    mSupervisor.resumeFocusedStacksTopActivitiesLocked();
                 }
                 return START_DELIVERED_TO_TOP;
             }
