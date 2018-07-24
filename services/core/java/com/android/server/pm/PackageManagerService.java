@@ -1388,6 +1388,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mRequiredVerifierPackage;
     final @NonNull String mRequiredInstallerPackage;
     final @NonNull String mRequiredUninstallerPackage;
+    final String mRequiredPermissionControllerPackage;
     final @Nullable String mSetupWizardPackage;
     final @Nullable String mStorageManagerPackage;
     final @Nullable String mSystemTextClassifierPackage;
@@ -3240,6 +3241,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSharedSystemSharedLibraryPackageName = getRequiredSharedLibraryLPr(
                         PackageManager.SYSTEM_SHARED_LIBRARY_SHARED,
                         SharedLibraryInfo.VERSION_UNDEFINED);
+                mRequiredPermissionControllerPackage = getRequiredPermissionsControllerLPr();
             } else {
                 mRequiredVerifierPackage = null;
                 mRequiredInstallerPackage = null;
@@ -3248,6 +3250,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mIntentFilterVerifier = null;
                 mServicesSystemSharedLibraryPackageName = null;
                 mSharedSystemSharedLibraryPackageName = null;
+                mRequiredPermissionControllerPackage = null;
             }
 
             mInstallerService = new PackageInstallerService(context, this);
@@ -3593,6 +3596,25 @@ public class PackageManagerService extends IPackageManager.Stub
                     + resolveInfo);
         }
         return resolveInfo.getComponentInfo().packageName;
+    }
+
+    private @NonNull String getRequiredPermissionsControllerLPr() {
+        final Intent intent = new Intent(Intent.ACTION_MANAGE_PERMISSIONS);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+
+        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null,
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                UserHandle.USER_SYSTEM);
+        if (matches.size() == 1) {
+            ResolveInfo resolveInfo = matches.get(0);
+            if (!resolveInfo.activityInfo.applicationInfo.isPrivilegedApp()) {
+                throw new RuntimeException("The permissions manager must be a privileged app");
+            }
+            return matches.get(0).getComponentInfo().packageName;
+        } else {
+            throw new RuntimeException("There must be exactly one permissions manager; found "
+                    + matches);
+        }
     }
 
     private @NonNull ComponentName getIntentFilterVerifierComponentNameLPr() {
@@ -5400,6 +5422,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getPermissionControllerPackageName() {
+        synchronized (mPackages) {
+            return mRequiredPermissionControllerPackage;
+        }
+    }
+
+    String getPackageInstallerPackageName() {
         synchronized (mPackages) {
             return mRequiredInstallerPackage;
         }
@@ -14510,6 +14538,12 @@ public class PackageManagerService extends IPackageManager.Stub
         if (packageName.equals(getDefaultDialerPackageName(userId))) {
             Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": is the default dialer");
+            return false;
+        }
+
+        if (packageName.equals(mRequiredPermissionControllerPackage)) {
+            Slog.w(TAG, "Cannot suspend package \"" + packageName
+                    + "\": required for permissions management");
             return false;
         }
 
