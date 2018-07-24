@@ -15,6 +15,8 @@
  */
 package com.android.server.am;
 
+import static android.net.wifi.WifiManager.WIFI_FEATURE_LINK_LAYER_STATS;
+
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothAdapter;
@@ -410,8 +412,11 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
             if (mWifiManager != null) {
                 try {
-                    wifiReceiver = new SynchronousResultReceiver("wifi");
-                    mWifiManager.requestActivityInfo(wifiReceiver);
+                    // Only fetch WiFi power data if it is supported.
+                    if ((mWifiManager.getSupportedFeatures() & WIFI_FEATURE_LINK_LAYER_STATS) != 0) {
+                        wifiReceiver = new SynchronousResultReceiver("wifi");
+                        mWifiManager.requestActivityInfo(wifiReceiver);
+                    }
                 } catch (RemoteException e) {
                     // Oh well.
                 }
