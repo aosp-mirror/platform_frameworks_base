@@ -72,8 +72,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 
-import com.android.internal.os.BatteryStatsImpl;
-import com.android.server.am.ActivityStarter.Factory;
 import com.android.server.am.LaunchParamsController.LaunchParamsModifier;
 import com.android.server.am.TaskRecord.TaskRecordFactory;
 
@@ -202,8 +200,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // If no caller app, return {@code null} {@link ProcessRecord}.
         final ProcessRecord record = containsConditions(preconditions, PRECONDITION_NO_CALLER_APP)
-                ? null : new ProcessRecord(service.mAm, mock(BatteryStatsImpl.class),
-                mock(ApplicationInfo.class), null, 0);
+                ? null : new ProcessRecord(service.mAm, mock(ApplicationInfo.class), null, 0);
 
         doReturn(record).when(service.mAm).getRecordForAppLocked(anyObject());
 
