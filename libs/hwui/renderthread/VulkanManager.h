@@ -17,10 +17,13 @@
 #ifndef VULKANMANAGER_H
 #define VULKANMANAGER_H
 
+#if !defined(VK_USE_PLATFORM_ANDROID_KHR)
+#  define VK_USE_PLATFORM_ANDROID_KHR
+#endif
+#include <vulkan/vulkan.h>
+
 #include <SkSurface.h>
 #include <vk/GrVkBackendContext.h>
-
-#include <vulkan/vulkan.h>
 
 namespace android {
 namespace uirenderer {
