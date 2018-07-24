@@ -35,6 +35,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
+import androidx.annotation.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -48,6 +50,8 @@ public class TileUtils {
     private static final boolean DEBUG_TIMING = false;
 
     private static final String LOG_TAG = "TileUtils";
+    @VisibleForTesting
+    static final String SETTING_PKG = "com.android.settings";
 
     /**
      * Settings will search for system activities of this action and add them as a top level
@@ -200,7 +204,7 @@ public class TileUtils {
      * categories
      */
     public static List<DashboardCategory> getCategories(Context context,
-            Map<Pair<String, String>, Tile> cache, String extraAction, String settingPkg) {
+            Map<Pair<String, String>, Tile> cache, String extraAction) {
         final long startTime = System.currentTimeMillis();
         boolean setup = Global.getInt(context.getContentResolver(), Global.DEVICE_PROVISIONED, 0)
                 != 0;
@@ -210,22 +214,18 @@ public class TileUtils {
             // TODO: Needs much optimization, too many PM queries going on here.
             if (user.getIdentifier() == ActivityManager.getCurrentUser()) {
                 // Only add Settings for this user.
-                getTilesForAction(context, user, SETTINGS_ACTION, cache, null, tiles, true,
-                        settingPkg);
+                getTilesForAction(context, user, SETTINGS_ACTION, cache, null, tiles, true);
                 getTilesForAction(context, user, OPERATOR_SETTINGS, cache,
-                        OPERATOR_DEFAULT_CATEGORY, tiles, false, true, settingPkg);
+                        OPERATOR_DEFAULT_CATEGORY, tiles, false, true);
                 getTilesForAction(context, user, MANUFACTURER_SETTINGS, cache,
-                        MANUFACTURER_DEFAULT_CATEGORY, tiles, false, true, settingPkg);
+                        MANUFACTURER_DEFAULT_CATEGORY, tiles, false, true);
             }
             if (setup) {
-                getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false,
-                        settingPkg);
-                    getTilesForAction(context, user, IA_SETTINGS_ACTION, cache, null, tiles, false,
-                            settingPkg);
-                    if (extraAction != null) {
-                        getTilesForAction(context, user, extraAction, cache, null, tiles, false,
-                                settingPkg);
-                    }
+                getTilesForAction(context, user, EXTRA_SETTINGS_ACTION, cache, null, tiles, false);
+                getTilesForAction(context, user, IA_SETTINGS_ACTION, cache, null, tiles, false);
+                if (extraAction != null) {
+                    getTilesForAction(context, user, extraAction, cache, null, tiles, false);
+                }
             }
         }
 
@@ -256,19 +256,18 @@ public class TileUtils {
 
     private static void getTilesForAction(Context context,
             UserHandle user, String action, Map<Pair<String, String>, Tile> addedCache,
-            String defaultCategory, ArrayList<Tile> outTiles, boolean requireSettings,
-            String settingPkg) {
+            String defaultCategory, ArrayList<Tile> outTiles, boolean requireSettings) {
         getTilesForAction(context, user, action, addedCache, defaultCategory, outTiles,
-                requireSettings, requireSettings, settingPkg);
+                requireSettings, requireSettings);
     }
 
     private static void getTilesForAction(Context context,
             UserHandle user, String action, Map<Pair<String, String>, Tile> addedCache,
             String defaultCategory, ArrayList<Tile> outTiles, boolean requireSettings,
-            boolean usePriority, String settingPkg) {
+            boolean usePriority) {
         Intent intent = new Intent(action);
         if (requireSettings) {
-            intent.setPackage(settingPkg);
+            intent.setPackage(SETTING_PKG);
         }
         getTilesForIntent(context, user, intent, addedCache, defaultCategory, outTiles,
                 usePriority, true, true);
@@ -281,7 +280,6 @@ public class TileUtils {
         PackageManager pm = context.getPackageManager();
         List<ResolveInfo> results = pm.queryIntentActivitiesAsUser(intent,
                 PackageManager.GET_META_DATA, user.getIdentifier());
-        Map<String, IContentProvider> providerMap = new HashMap<>();
         for (ResolveInfo resolved : results) {
             if (!resolved.system) {
                 // Do not allow any app to add to settings, only system ones.
@@ -312,7 +310,7 @@ public class TileUtils {
                 tile.priority = usePriority ? resolved.priority : 0;
                 tile.metaData = activityInfo.metaData;
                 updateTileData(context, tile, activityInfo, activityInfo.applicationInfo,
-                        pm, providerMap, forceTintExternalIcon);
+                        pm, forceTintExternalIcon);
                 if (DEBUG) Log.d(LOG_TAG, "Adding tile " + tile.title);
                 addedCache.put(key, tile);
             }
@@ -328,11 +326,10 @@ public class TileUtils {
 
     private static boolean updateTileData(Context context, Tile tile,
             ActivityInfo activityInfo, ApplicationInfo applicationInfo, PackageManager pm,
-            Map<String, IContentProvider> providerMap, boolean forceTintExternalIcon) {
+            boolean forceTintExternalIcon) {
         if (applicationInfo.isSystemApp()) {
             boolean forceTintIcon = false;
             int icon = 0;
-            Pair<String, Integer> iconFromUri = null;
             CharSequence title = null;
             String summary = null;
             String keyHint = null;
