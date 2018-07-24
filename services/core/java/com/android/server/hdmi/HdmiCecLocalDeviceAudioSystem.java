@@ -189,15 +189,14 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleRequestArcInitiate(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        // TODO(b/80296911): Check if ARC supported.
-
-        // TODO(b/80296911): Check if port is ready to accept.
-
-        // TODO(b/80296911): if both true, activate ARC functinality and
-        mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildInitiateArc(mAddress, message.getSource()));
-        // TODO(b/80296911): else, send <Feature Abort>["Unrecongnized opcode"]
-
+        if (!SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)) {
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_UNRECOGNIZED_OPCODE);
+        } else if (!isDirectConnectToTv()) {
+            HdmiLogger.debug("AVR device is not directly connected with TV");
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_NOT_IN_CORRECT_MODE);
+        } else {
+            addAndStartAction(new ArcInitiationActionFromAvr(this));
+        }
         return true;
     }
 
@@ -205,15 +204,14 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleRequestArcTermination(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        // TODO(b/80297105): Check if ARC supported.
-
-        // TODO(b/80297105): Check is currently in arc.
-
-        // TODO(b/80297105): If both true, deactivate ARC functionality and
-        mService.sendCecCommand(
-                HdmiCecMessageBuilder.buildTerminateArc(mAddress, message.getSource()));
-        // TODO(b/80297105): else, send <Feature Abort>["Unrecongnized opcode"]
-
+        if (!SystemProperties.getBoolean(Constants.PROPERTY_ARC_SUPPORT, true)) {
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_UNRECOGNIZED_OPCODE);
+        } else if (!isArcEnabled()) {
+            HdmiLogger.debug("ARC is not established between TV and AVR device");
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_NOT_IN_CORRECT_MODE);
+        } else {
+            addAndStartAction(new ArcTerminationActionFromAvr(this));
+        }
         return true;
     }
 
@@ -377,6 +375,11 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         // TODO(b/111396634): switch input according to PROPERTY_SYSTEM_AUDIO_MODE_AUDIO_PORT
     }
 
+    protected boolean isDirectConnectToTv() {
+        int myPhysicalAddress = mService.getPhysicalAddress();
+        return (myPhysicalAddress & Constants.ROUTING_PATH_TOP_MASK) == myPhysicalAddress;
+    }
+
     private void updateAudioManagerForSystemAudio(boolean on) {
         int device = mService.getAudioManager().setHdmiSystemAudioSupported(on);
         HdmiLogger.debug("[A]UpdateSystemAudio mode[on=%b] output=[%X]", on, device);
@@ -434,5 +437,12 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
 
     void setTvSystemAudioModeSupport(boolean supported) {
         mTvSystemAudioModeSupport = supported;
+    }
+
+    @VisibleForTesting
+    protected boolean isArcEnabled() {
+        synchronized (mLock) {
+            return mArcEstablished;
+        }
     }
 }
