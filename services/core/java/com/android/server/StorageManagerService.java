@@ -2624,8 +2624,8 @@ class StorageManagerService extends IStorageManager.Stub
         mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
             "no permission to access the crypt keeper");
 
-        if (StorageManager.isFileEncryptedNativeOnly()) {
-            // Not supported on FBE devices
+        if (!StorageManager.isBlockEncrypted()) {
+            // Only supported on FDE devices
             return;
         }
 
@@ -2648,8 +2648,8 @@ class StorageManagerService extends IStorageManager.Stub
         mContext.enforceCallingOrSelfPermission(Manifest.permission.CRYPT_KEEPER,
             "no permission to access the crypt keeper");
 
-        if (StorageManager.isFileEncryptedNativeOnly()) {
-            // Not supported on FBE devices
+        if (!StorageManager.isBlockEncrypted()) {
+            // Only supported on FDE devices
             return null;
         }
 
