@@ -1179,6 +1179,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    @GuardedBy("StatsCompanionService.sStatsdLock")
     private void forgetEverythingLocked() {
         sStatsd = null;
         mContext.unregisterReceiver(mAppUpdateReceiver);

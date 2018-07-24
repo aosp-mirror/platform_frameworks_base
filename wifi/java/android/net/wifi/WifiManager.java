@@ -1585,13 +1585,12 @@ public class WifiManager {
      * Return the record of {@link WifiActivityEnergyInfo} object that
      * has the activity and energy info. This can be used to ascertain what
      * the controller has been up to, since the last sample.
-     * @param updateType Type of info, cached vs refreshed.
      *
      * @return a record with {@link WifiActivityEnergyInfo} or null if
      * report is unavailable or unsupported
      * @hide
      */
-    public WifiActivityEnergyInfo getControllerActivityEnergyInfo(int updateType) {
+    public WifiActivityEnergyInfo getControllerActivityEnergyInfo() {
         if (mService == null) return null;
         try {
             synchronized(this) {

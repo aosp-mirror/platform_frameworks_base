@@ -17,6 +17,7 @@
 
 #include "Caches.h"
 #include "HardwareBitmapUploader.h"
+#include "Properties.h"
 #include "renderthread/RenderProxy.h"
 #include "utils/Color.h"
 
@@ -34,6 +35,7 @@
 #include <SkToSRGBColorFilter.h>
 
 #include <limits>
+#include <SkHighContrastFilter.h>
 
 namespace android {
 
@@ -195,11 +197,13 @@ Bitmap::Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info
     mPixelStorage.ashmem.size = mappedSize;
 }
 
-Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info)
+Bitmap::Bitmap(GraphicBuffer* buffer, const SkImageInfo& info, BitmapPalette palette)
         : SkPixelRef(info.width(), info.height(), nullptr,
                      bytesPerPixel(buffer->getPixelFormat()) * buffer->getStride())
         , mInfo(validateAlpha(info))
-        , mPixelStorageType(PixelStorageType::Hardware) {
+        , mPixelStorageType(PixelStorageType::Hardware)
+        , mPalette(palette)
+        , mPaletteGenerationId(getGenerationID()) {
     mPixelStorage.hardware.buffer = buffer;
     buffer->incStrong(buffer);
     setImmutable();  // HW bitmaps are always immutable
@@ -326,7 +330,106 @@ sk_sp<SkImage> Bitmap::makeImage(sk_sp<SkColorFilter>* outputColorFilter) {
     if (image->colorSpace() != nullptr && !image->colorSpace()->isSRGB()) {
         *outputColorFilter = SkToSRGBColorFilter::Make(image->refColorSpace());
     }
+
+    // TODO: Move this to the canvas (or other?) layer where we have the target lightness
+    // mode and can selectively do the right thing.
+    if (palette() != BitmapPalette::Unknown && uirenderer::Properties::forceDarkMode) {
+        SkHighContrastConfig config;
+        config.fInvertStyle = SkHighContrastConfig::InvertStyle::kInvertLightness;
+        *outputColorFilter = SkHighContrastFilter::Make(config)->makeComposed(*outputColorFilter);
+    }
     return image;
+}
+
+class MinMaxAverage {
+public:
+
+    void add(float sample) {
+        if (mCount == 0) {
+            mMin = sample;
+            mMax = sample;
+        } else {
+            mMin = std::min(mMin, sample);
+            mMax = std::max(mMax, sample);
+        }
+        mTotal += sample;
+        mCount++;
+    }
+
+    float average() {
+        return mTotal / mCount;
+    }
+
+    float min() {
+        return mMin;
+    }
+
+    float max() {
+        return mMax;
+    }
+
+    float delta() {
+        return mMax - mMin;
+    }
+
+private:
+    float mMin = 0.0f;
+    float mMax = 0.0f;
+    float mTotal = 0.0f;
+    int mCount = 0;
+};
+
+BitmapPalette Bitmap::computePalette(const SkImageInfo& info, const void* addr, size_t rowBytes) {
+    ATRACE_CALL();
+
+    SkPixmap pixmap{info, addr, rowBytes};
+
+    // TODO: This calculation of converting to HSV & tracking min/max is probably overkill
+    // Experiment with something simpler since we just want to figure out if it's "color-ful"
+    // and then the average perceptual lightness.
+
+    MinMaxAverage hue, saturation, value;
+    int sampledCount = 0;
+
+    // Sample a grid of 100 pixels to get an overall estimation of the colors in play
+    const int x_step = std::max(1, pixmap.width() / 10);
+    const int y_step = std::max(1, pixmap.height() / 10);
+    for (int x = 0; x < pixmap.width(); x += x_step) {
+        for (int y = 0; y < pixmap.height(); y += y_step) {
+            SkColor color = pixmap.getColor(x, y);
+            if (!info.isOpaque() && SkColorGetA(color) < 75) {
+                continue;
+            }
+
+            sampledCount++;
+            float hsv[3];
+            SkColorToHSV(color, hsv);
+            hue.add(hsv[0]);
+            saturation.add(hsv[1]);
+            value.add(hsv[2]);
+        }
+    }
+
+    // TODO: Tune the coverage threshold
+    if (sampledCount < 5) {
+        ALOGV("Not enough samples, only found %d for image sized %dx%d, format = %d, alpha = %d",
+              sampledCount, info.width(), info.height(), (int) info.colorType(), (int) info.alphaType());
+        return BitmapPalette::Unknown;
+    }
+
+    ALOGV("samples = %d, hue [min = %f, max = %f, avg = %f]; saturation [min = %f, max = %f, avg = %f]",
+          sampledCount,
+          hue.min(), hue.max(), hue.average(),
+          saturation.min(), saturation.max(), saturation.average());
+
+    if (hue.delta() <= 20 && saturation.delta() <= .1f) {
+        if (value.average() >= .5f) {
+            return BitmapPalette::Light;
+        } else {
+            return BitmapPalette::Dark;
+        }
+    }
+    return BitmapPalette::Unknown;
 }
 
 }  // namespace android

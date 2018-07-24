@@ -23,6 +23,7 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.biometrics.common.BiometricUserState;
 
 import libcore.io.IoUtils;
@@ -133,6 +134,7 @@ public class FaceUserState extends BiometricUserState {
         }
     }
 
+    @GuardedBy("this")
     @Override
     protected void parseBiometricsLocked(XmlPullParser parser)
             throws IOException, XmlPullParserException {

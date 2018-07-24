@@ -839,7 +839,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     // FillServiceCallbacks
     @Override
     public void onServiceDied(RemoteFillService service) {
-        // TODO(b/337565347): implement
+        Slog.w(TAG, "removing session because service died");
+        forceRemoveSelfLocked();
     }
 
     // AutoFillUiCallback

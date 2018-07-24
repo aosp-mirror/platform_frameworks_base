@@ -43,6 +43,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -540,6 +541,12 @@ final class ProcessRecord implements WindowProcessListener {
             if (origBase != null) {
                 origBase.setState(ProcessStats.STATE_NOTHING,
                         tracker.getMemFactorLocked(), SystemClock.uptimeMillis(), pkgList.mPkgList);
+                for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                    StatsLog.write(StatsLog.PROCESS_STATE_CHANGED,
+                            uid, processName, pkgList.keyAt(ipkg),
+                            ActivityManager.processStateAmToProto(ProcessStats.STATE_NOTHING),
+                            pkgList.valueAt(ipkg).appVersion);
+                }
                 origBase.makeInactive();
             }
             baseProcessTracker = tracker.getProcessStateLocked(info.packageName, uid,
@@ -569,6 +576,12 @@ final class ProcessRecord implements WindowProcessListener {
             if (origBase != null) {
                 origBase.setState(ProcessStats.STATE_NOTHING,
                         tracker.getMemFactorLocked(), SystemClock.uptimeMillis(), pkgList.mPkgList);
+                for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                    StatsLog.write(StatsLog.PROCESS_STATE_CHANGED,
+                            uid, processName, pkgList.keyAt(ipkg),
+                            ActivityManager.processStateAmToProto(ProcessStats.STATE_NOTHING),
+                            pkgList.valueAt(ipkg).appVersion);
+                }
                 origBase.makeInactive();
             }
             baseProcessTracker = null;
@@ -831,6 +844,12 @@ final class ProcessRecord implements WindowProcessListener {
     public void forceProcessStateUpTo(int newState) {
         if (mRepProcState > newState) {
             curProcState = mRepProcState = newState;
+            for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                StatsLog.write(StatsLog.PROCESS_STATE_CHANGED,
+                        uid, processName, pkgList.keyAt(ipkg),
+                        ActivityManager.processStateAmToProto(mRepProcState),
+                        pkgList.valueAt(ipkg).appVersion);
+            }
         }
     }
 
@@ -843,6 +862,12 @@ final class ProcessRecord implements WindowProcessListener {
             long now = SystemClock.uptimeMillis();
             baseProcessTracker.setState(ProcessStats.STATE_NOTHING,
                     tracker.getMemFactorLocked(), now, pkgList.mPkgList);
+            for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
+                StatsLog.write(StatsLog.PROCESS_STATE_CHANGED,
+                        uid, processName, pkgList.keyAt(ipkg),
+                        ActivityManager.processStateAmToProto(ProcessStats.STATE_NOTHING),
+                        pkgList.valueAt(ipkg).appVersion);
+            }
             if (N != 1) {
                 for (int i=0; i<N; i++) {
                     ProcessStats.ProcessStateHolder holder = pkgList.valueAt(i);
@@ -894,6 +919,12 @@ final class ProcessRecord implements WindowProcessListener {
 
     void setReportedProcState(int repProcState) {
         mRepProcState = repProcState;
+        for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
+            StatsLog.write(StatsLog.PROCESS_STATE_CHANGED,
+                    uid, processName, pkgList.keyAt(ipkg),
+                    ActivityManager.processStateAmToProto(mRepProcState),
+                    pkgList.valueAt(ipkg).appVersion);
+        }
         mWindowProcessController.setReportedProcState(repProcState);
     }
 

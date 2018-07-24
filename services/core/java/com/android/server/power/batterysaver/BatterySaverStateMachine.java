@@ -196,6 +196,7 @@ public class BatterySaverStateMachine {
         h.postDelayed(r, delayMillis);
     }
 
+    @GuardedBy("mLock")
     void refreshSettingsLocked() {
         final boolean lowPowerModeEnabled = getGlobalSetting(
                 Settings.Global.LOW_POWER_MODE, 0) != 0;
@@ -214,6 +215,7 @@ public class BatterySaverStateMachine {
      *
      * Note this will be called before {@link #onBootCompleted} too.
      */
+    @GuardedBy("mLock")
     @VisibleForTesting
     void setSettingsLocked(boolean batterySaverEnabled, boolean batterySaverEnabledSticky,
             int batterySaverTriggerThreshold) {
@@ -288,6 +290,7 @@ public class BatterySaverStateMachine {
     /**
      * Decide whether to auto-start / stop battery saver.
      */
+    @GuardedBy("mLock")
     private void doAutoBatterySaverLocked() {
         if (DEBUG) {
             Slog.d(TAG, "doAutoBatterySaverLocked: mBootCompleted=" + mBootCompleted
@@ -351,6 +354,7 @@ public class BatterySaverStateMachine {
      * Actually enable / disable battery saver. Write the new state to the global settings
      * and propagate it to {@link #mBatterySaverController}.
      */
+    @GuardedBy("mLock")
     private void enableBatterySaverLocked(boolean enable, boolean manual, int intReason,
             String strReason) {
         if (DEBUG) {
@@ -402,6 +406,7 @@ public class BatterySaverStateMachine {
         }
     }
 
+    @GuardedBy("mLock")
     private void updateSnoozingLocked(boolean snoozing, String reason) {
         if (mBatterySaverSnoozing == snoozing) {
             return;

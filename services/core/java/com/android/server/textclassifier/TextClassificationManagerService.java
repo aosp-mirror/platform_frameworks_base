@@ -249,10 +249,12 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         }
     }
 
+    @GuardedBy("mLock")
     private UserState getCallingUserStateLocked() {
         return getUserStateLocked(UserHandle.getCallingUserId());
     }
 
+    @GuardedBy("mLock")
     private UserState getUserStateLocked(int userId) {
         UserState result = mUserStates.get(userId);
         if (result == null) {
@@ -262,6 +264,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         return result;
     }
 
+    @GuardedBy("mLock")
     UserState peekUserStateLocked(int userId) {
         return mUserStates.get(userId);
     }
@@ -389,6 +392,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             }
         }
 
+        @GuardedBy("mLock")
         private boolean bindIfHasPendingRequestsLocked() {
             return !mPendingRequests.isEmpty() && bindLocked();
         }
@@ -397,6 +401,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
          * @return true if the service is bound or in the process of being bound.
          *      Returns false otherwise.
          */
+        @GuardedBy("mLock")
         private boolean bindLocked() {
             if (isBoundLocked() || mBinding) {
                 return true;

@@ -23,6 +23,8 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BinderCallsStats;
 
+import java.util.Random;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -45,7 +47,7 @@ public class BinderCallsStatsPerfTest {
 
     @Before
     public void setUp() {
-        mBinderCallsStats = new BinderCallsStats();
+        mBinderCallsStats = new BinderCallsStats(new Random());
     }
 
     @After

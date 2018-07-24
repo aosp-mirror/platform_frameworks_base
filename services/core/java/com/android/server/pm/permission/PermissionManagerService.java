@@ -2059,6 +2059,7 @@ public class PermissionManagerService {
         }
     }
 
+    @GuardedBy({"mSettings.mLock", "mLock"})
     private int calculateCurrentPermissionFootprintLocked(BasePermission tree) {
         int size = 0;
         for (BasePermission perm : mSettings.mPermissions.values()) {
@@ -2067,6 +2068,7 @@ public class PermissionManagerService {
         return size;
     }
 
+    @GuardedBy({"mSettings.mLock", "mLock"})
     private void enforcePermissionCapLocked(PermissionInfo info, BasePermission tree) {
         // We calculate the max size of permissions defined by this uid and throw
         // if that plus the size of 'info' would exceed our stated maximum.

@@ -30,6 +30,7 @@ import android.os.Looper;
 import android.os.test.TestLooper;
 import android.support.test.filters.SmallTest;
 
+import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
 import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
@@ -295,5 +296,16 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
         assertThat(mHdmiCecLocalDeviceAudioSystem
             .getActions(SystemAudioInitiationActionFromAvr.class)).isNotEmpty();
+    }
+
+    @Test
+    public void handleActiveSource_updateActiveSource() {
+        HdmiCecMessage message = HdmiCecMessageBuilder
+            .buildActiveSource(ADDR_TV, 0x0000);
+        ActiveSource expectedActiveSource = new ActiveSource(ADDR_TV, 0x0000);
+
+        assertTrue(mHdmiCecLocalDeviceAudioSystem.handleActiveSource(message));
+        mTestLooper.dispatchAll();
+        assertTrue(mHdmiCecLocalDeviceAudioSystem.getActiveSource().equals(expectedActiveSource));
     }
 }

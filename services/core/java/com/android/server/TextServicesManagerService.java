@@ -342,6 +342,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         mMonitor.register(context, null, UserHandle.ALL, true);
     }
 
+    @GuardedBy("mLock")
     private void initializeInternalStateLocked(@UserIdInt int userId) {
         // When DISABLE_PER_PROFILE_SPELL_CHECKER is true, we make sure here that work profile users
         // will never have non-null TextServicesData for their user ID.
@@ -756,6 +757,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
      * @return {@link TextServicesData} for the given user.  {@code null} if spell checker is not
      *         temporarily / permanently available for the specified user
      */
+    @GuardedBy("mLock")
     @Nullable
     private TextServicesData getDataFromCallingUserIdLocked(@UserIdInt int callingUserId) {
         final int spellCheckerOwnerUserId = mSpellCheckerOwnerUserIdMap.get(callingUserId);

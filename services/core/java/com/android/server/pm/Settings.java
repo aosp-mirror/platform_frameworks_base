@@ -5172,10 +5172,12 @@ public final class Settings {
             mPersistenceLock = persistenceLock;
         }
 
+        @GuardedBy("Settings.this.mLock")
         public boolean areDefaultRuntimPermissionsGrantedLPr(int userId) {
             return mDefaultPermissionsGranted.get(userId);
         }
 
+        @GuardedBy("Settings.this.mLock")
         public void onDefaultRuntimePermissionsGrantedLPr(int userId) {
             mFingerprints.put(userId, Build.FINGERPRINT);
             writePermissionsForUserAsyncLPr(userId);
@@ -5186,6 +5188,7 @@ public final class Settings {
             writePermissionsSync(userId);
         }
 
+        @GuardedBy("Settings.this.mLock")
         public void writePermissionsForUserAsyncLPr(int userId) {
             final long currentTimeMillis = SystemClock.uptimeMillis();
 
@@ -5354,6 +5357,7 @@ public final class Settings {
             }
         }
 
+        @GuardedBy("Settings.this.mLock")
         private void onUserRemovedLPw(int userId) {
             // Make sure we do not
             mHandler.removeMessages(userId);
@@ -5387,6 +5391,7 @@ public final class Settings {
             getUserRuntimePermissionsFile(userId).delete();
         }
 
+        @GuardedBy("Settings.this.mLock")
         public void readStateForUserSyncLPr(int userId) {
             File permissionsFile = getUserRuntimePermissionsFile(userId);
             if (!permissionsFile.exists()) {
@@ -5439,6 +5444,7 @@ public final class Settings {
 
         // Private internals
 
+        @GuardedBy("Settings.this.mLock")
         private void parseRuntimePermissionsLPr(XmlPullParser parser, int userId)
                 throws IOException, XmlPullParserException {
             final int outerDepth = parser.getDepth();

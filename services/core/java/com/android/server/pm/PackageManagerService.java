@@ -452,7 +452,6 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int SCAN_NEW_INSTALL = 1<<2;
     static final int SCAN_UPDATE_TIME = 1<<3;
     static final int SCAN_BOOTING = 1<<4;
-    static final int SCAN_DELETE_DATA_ON_FAILURES = 1<<6;
     static final int SCAN_REQUIRE_KNOWN = 1<<7;
     static final int SCAN_MOVE = 1<<8;
     static final int SCAN_INITIAL = 1<<9;
@@ -475,7 +474,6 @@ public class PackageManagerService extends IPackageManager.Stub
             SCAN_NEW_INSTALL,
             SCAN_UPDATE_TIME,
             SCAN_BOOTING,
-            SCAN_DELETE_DATA_ON_FAILURES,
             SCAN_REQUIRE_KNOWN,
             SCAN_MOVE,
             SCAN_INITIAL,
@@ -3440,6 +3438,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return dstCodePath;
     }
 
+    @GuardedBy("mPackages")
     private void updateInstantAppInstallerLocked(String modifiedPackage) {
         // we're only interested in updating the installer appliction when 1) it's not
         // already set or 2) the modified package is the installer
@@ -3694,6 +3693,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return null;
     }
 
+    @GuardedBy("mPackages")
     private @Nullable ActivityInfo getInstantAppInstallerLPr() {
         String[] orderedActions = Build.IS_ENG
                 ? new String[]{
@@ -3760,6 +3760,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return matches.get(0).getComponentInfo().getComponentName();
     }
 
+    @GuardedBy("mPackages")
     private void primeDomainVerificationsLPw(int userId) {
         if (DEBUG_DOMAIN_VERIFICATION) {
             Slog.d(TAG, "Priming domain verifications in user " + userId);
@@ -3813,6 +3814,7 @@ public class PackageManagerService extends IPackageManager.Stub
         scheduleWriteSettingsLocked();
     }
 
+    @GuardedBy("mPackages")
     private void applyFactoryDefaultBrowserLPw(int userId) {
         // The default browser app's package name is stored in a string resource,
         // with a product-specific overlay used for vendor customization.
@@ -3836,6 +3838,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void calculateDefaultBrowserLPw(int userId) {
         List<String> allBrowsers = resolveAllBrowserApps(userId);
         final String browserPkg = (allBrowsers.size() == 1) ? allBrowsers.get(0) : null;
@@ -4196,6 +4199,7 @@ public class PackageManagerService extends IPackageManager.Stub
      *
      * @see #canViewInstantApps(int, int)
      */
+    @GuardedBy("mPackages")
     private boolean filterAppAccessLPr(@Nullable PackageSetting ps, int callingUid,
             @Nullable ComponentName component, @ComponentType int componentType, int userId) {
         // if we're in an isolated process, get the real calling UID
@@ -4253,10 +4257,12 @@ public class PackageManagerService extends IPackageManager.Stub
     /**
      * @see #filterAppAccessLPr(PackageSetting, int, ComponentName, int, int)
      */
+    @GuardedBy("mPackages")
     private boolean filterAppAccessLPr(@Nullable PackageSetting ps, int callingUid, int userId) {
         return filterAppAccessLPr(ps, callingUid, null, TYPE_UNKNOWN, userId);
     }
 
+    @GuardedBy("mPackages")
     private boolean filterSharedLibPackageLPr(@Nullable PackageSetting ps, int uid, int userId,
             int flags) {
         // Callers can access only the libs they depend on, otherwise they need to explicitly
@@ -4455,6 +4461,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 ? ParceledListSlice.emptyList() : new ParceledListSlice<>(permissionList);
     }
 
+    @GuardedBy("mPackages")
     private ApplicationInfo generateApplicationInfoFromSettingsLPw(String packageName, int flags,
             int filterCallingUid, int userId) {
         if (!sUserManager.exists(userId)) return null;
@@ -4540,6 +4547,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return null;
     }
 
+    @GuardedBy("mPackages")
     private String normalizePackageNameLPr(String packageName) {
         String normalizedPackageName = mSettings.getRenamedPackageLPr(packageName);
         return normalizedPackageName != null ? normalizedPackageName : packageName;
@@ -5078,6 +5086,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private List<VersionedPackage> getPackagesUsingSharedLibraryLPr(
             SharedLibraryInfo libInfo, int flags, int userId) {
         List<VersionedPackage> versionedPackages = null;
@@ -5233,6 +5242,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void updateSequenceNumberLP(PackageSetting pkgSetting, int[] userList) {
         for (int i = userList.length - 1; i >= 0; --i) {
             final int userId = userList[i];
@@ -6266,6 +6276,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return true;
     }
 
+    @GuardedBy("mPackages")
     private ResolveInfo findPersistentPreferredActivityLP(Intent intent, String resolvedType,
             int flags, List<ResolveInfo> query, boolean debug, int userId) {
         final int N = query.size();
@@ -8594,6 +8605,7 @@ public class PackageManagerService extends IPackageManager.Stub
      *  Traces a package scan.
      *  @see #scanPackageLI(File, int, int, long, UserHandle)
      */
+    @GuardedBy("mInstallLock")
     private PackageParser.Package scanPackageTracedLI(File scanFile, final int parseFlags,
             int scanFlags, long currentTime, UserHandle user) throws PackageManagerException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage [" + scanFile.toString() + "]");
@@ -8608,6 +8620,7 @@ public class PackageManagerService extends IPackageManager.Stub
      *  Scans a package and returns the newly parsed package.
      *  Returns {@code null} in case of errors and the error code is stored in mLastScanError
      */
+    @GuardedBy({"mInstallLock", "mPackages"})
     private PackageParser.Package scanPackageLI(File scanFile, int parseFlags, int scanFlags,
             long currentTime, UserHandle user) throws PackageManagerException {
         if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanFile);
@@ -8639,6 +8652,7 @@ public class PackageManagerService extends IPackageManager.Stub
      *  Scans a package and returns the newly parsed package.
      *  @throws PackageManagerException on a parse error.
      */
+    @GuardedBy({"mInstallLock", "mPackages"})
     private PackageParser.Package scanPackageChildLI(PackageParser.Package pkg,
             final @ParseFlags int parseFlags, @ScanFlags int scanFlags, long currentTime,
             @Nullable UserHandle user)
@@ -8731,6 +8745,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * structures and the package is made available to the rest of the system.
      * <p>NOTE: The return value should be removed. It's the passed in package object.
      */
+    @GuardedBy({"mInstallLock", "mPackages"})
     private PackageParser.Package addForInitLI(PackageParser.Package pkg,
             @ParseFlags int parseFlags, @ScanFlags int scanFlags, long currentTime,
             @Nullable UserHandle user)
@@ -8934,15 +8949,20 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        final PackageParser.Package scannedPkg = scanPackageNewLI(pkg, parseFlags, scanFlags
+        final ScanResult scanResult = scanPackageNewLI(pkg, parseFlags, scanFlags
                 | SCAN_UPDATE_SIGNATURE, currentTime, user);
+        if (scanResult.success) {
+            synchronized (mPackages) {
+                commitScanResultLocked(scanResult);
+            }
+        }
 
         if (shouldHideSystemApp) {
             synchronized (mPackages) {
                 mSettings.disableSystemPackageLPw(pkg.packageName, true);
             }
         }
-        return scannedPkg;
+        return scanResult.pkgSetting.pkg;
     }
 
     private static void renameStaticSharedLibraryPackage(PackageParser.Package pkg) {
@@ -9616,6 +9636,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private boolean verifyPackageUpdateLPr(PackageSetting oldPkg, PackageParser.Package newPkg) {
         if ((oldPkg.pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0) {
             Slog.w(TAG, "Unable to update from " + oldPkg.name
@@ -9631,6 +9652,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return true;
     }
 
+    @GuardedBy("mInstallLock")
     void removeCodePathLI(File codePath) {
         if (codePath.isDirectory()) {
             try {
@@ -9758,6 +9780,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void addSharedLibraryLPr(Set<String> usesLibraryFiles,
             SharedLibraryEntry file,
             PackageParser.Package changingLib) {
@@ -9783,6 +9806,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void updateSharedLibrariesLPr(PackageParser.Package pkg,
             PackageParser.Package changingLib) throws PackageManagerException {
         if (pkg == null) {
@@ -9815,6 +9839,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private Set<String> addSharedLibrariesLPw(@NonNull List<String> requestedLibraries,
             @Nullable long[] requiredVersions, @Nullable String[][] requiredCertDigests,
             @NonNull String packageName, @Nullable PackageParser.Package changingLib,
@@ -9926,6 +9951,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return false;
     }
 
+    @GuardedBy("mPackages")
     private ArrayList<PackageParser.Package> updateAllSharedLibrariesLPw(
             PackageParser.Package changingPkg) {
         ArrayList<PackageParser.Package> res = null;
@@ -9961,7 +9987,8 @@ public class PackageManagerService extends IPackageManager.Stub
         return res;
     }
 
-    private PackageParser.Package scanPackageTracedLI(PackageParser.Package pkg,
+    @GuardedBy({"mInstallLock", "mPackages"})
+    private List<ScanResult> scanPackageTracedLI(PackageParser.Package pkg,
             final @ParseFlags int parseFlags, @ScanFlags int scanFlags, long currentTime,
             @Nullable UserHandle user) throws PackageManagerException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage");
@@ -9978,16 +10005,16 @@ public class PackageManagerService extends IPackageManager.Stub
             scanFlags &= ~SCAN_CHECK_ONLY;
         }
 
-        final PackageParser.Package scannedPkg;
+        final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
+        final List<ScanResult> scanResults = new ArrayList<>(1 + childCount);
         try {
             // Scan the parent
-            scannedPkg = scanPackageNewLI(pkg, parseFlags, scanFlags, currentTime, user);
+            scanResults.add(scanPackageNewLI(pkg, parseFlags, scanFlags, currentTime, user));
             // Scan the children
-            final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
             for (int i = 0; i < childCount; i++) {
                 PackageParser.Package childPkg = pkg.childPackages.get(i);
-                scanPackageNewLI(childPkg, parseFlags,
-                        scanFlags, currentTime, user);
+                scanResults.add(scanPackageNewLI(childPkg, parseFlags,
+                        scanFlags, currentTime, user));
             }
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
@@ -9997,11 +10024,13 @@ public class PackageManagerService extends IPackageManager.Stub
             return scanPackageTracedLI(pkg, parseFlags, scanFlags, currentTime, user);
         }
 
-        return scannedPkg;
+        return scanResults;
     }
 
     /** The result of a package scan. */
     private static class ScanResult {
+        /** The request that initiated the scan that produced this result. */
+        public final ScanRequest request;
         /** Whether or not the package scan was successful */
         public final boolean success;
         /**
@@ -10012,9 +10041,10 @@ public class PackageManagerService extends IPackageManager.Stub
         /** ABI code paths that have changed in the package scan */
         @Nullable public final List<String> changedAbiCodePath;
         public ScanResult(
-                boolean success,
+                ScanRequest request, boolean success,
                 @Nullable PackageSetting pkgSetting,
                 @Nullable List<String> changedAbiCodePath) {
+            this.request = request;
             this.success = success;
             this.pkgSetting = pkgSetting;
             this.changedAbiCodePath = changedAbiCodePath;
@@ -10156,8 +10186,8 @@ public class PackageManagerService extends IPackageManager.Stub
     // the results / removing app data needs to be moved up a level to the callers of this
     // method. Also, we need to solve the problem of potentially creating a new shared user
     // setting. That can probably be done later and patch things up after the fact.
-    @GuardedBy("mInstallLock")
-    private PackageParser.Package scanPackageNewLI(@NonNull PackageParser.Package pkg,
+    @GuardedBy({"mInstallLock", "mPackages"})
+    private ScanResult scanPackageNewLI(@NonNull PackageParser.Package pkg,
             final @ParseFlags int parseFlags, @ScanFlags int scanFlags, long currentTime,
             @Nullable UserHandle user) throws PackageManagerException {
 
@@ -10193,28 +10223,30 @@ public class PackageManagerService extends IPackageManager.Stub
                                 + " packages=" + sharedUserSetting.packages);
                 }
             }
+            final ScanRequest request = new ScanRequest(pkg, sharedUserSetting,
+                    pkgSetting == null ? null : pkgSetting.pkg, pkgSetting, disabledPkgSetting,
+                    originalPkgSetting, realPkgName, parseFlags, scanFlags,
+                    (pkg == mPlatformPackage), user);
+            return scanPackageOnlyLI(request, mFactoryTest, currentTime);
+        }
+    }
 
-            boolean scanSucceeded = false;
-            try {
-                final ScanRequest request = new ScanRequest(pkg, sharedUserSetting,
-                        pkgSetting == null ? null : pkgSetting.pkg, pkgSetting, disabledPkgSetting,
-                        originalPkgSetting, realPkgName, parseFlags, scanFlags,
-                        (pkg == mPlatformPackage), user);
-                final ScanResult result = scanPackageOnlyLI(request, mFactoryTest, currentTime);
-                if (result.success) {
-                    commitScanResultsLocked(request, result);
+
+    private void commitSuccessfulScanResults(@NonNull List<ScanResult> results)
+            throws PackageManagerException {
+        synchronized(mPackages) {
+            for (ScanResult result : results) {
+                // failures should have been caught earlier, but in case it wasn't,
+                // let's double check
+                if (!result.success) {
+                    throw new PackageManagerException(
+                            "Scan failed for " + result.request.pkg.packageName);
                 }
-                scanSucceeded = true;
-            } finally {
-                  if (!scanSucceeded && (scanFlags & SCAN_DELETE_DATA_ON_FAILURES) != 0) {
-                      // DELETE_DATA_ON_FAILURES is only used by frozen paths
-                      destroyAppDataLIF(pkg, UserHandle.USER_ALL,
-                              StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
-                      destroyAppProfilesLIF(pkg, UserHandle.USER_ALL);
-                  }
+            }
+            for (ScanResult result : results) {
+                commitScanResultLocked(result);
             }
         }
-        return pkg;
     }
 
     /**
@@ -10224,9 +10256,9 @@ public class PackageManagerService extends IPackageManager.Stub
      * This needs to be fixed so, once we get to this point, no errors are
      * possible and the system is not left in an inconsistent state.
      */
-    @GuardedBy("mPackages")
-    private void commitScanResultsLocked(@NonNull ScanRequest request, @NonNull ScanResult result)
-            throws PackageManagerException {
+    @GuardedBy({"mPackages", "mInstallLock"})
+    private void commitScanResultLocked(@NonNull ScanResult result) throws PackageManagerException {
+        final ScanRequest request = result.request;
         final PackageParser.Package pkg = request.pkg;
         final PackageParser.Package oldPkg = request.oldPkg;
         final @ParseFlags int parseFlags = request.parseFlags;
@@ -10807,7 +10839,7 @@ public class PackageManagerService extends IPackageManager.Stub
             pkgSetting.volumeUuid = volumeUuid;
         }
 
-        return new ScanResult(true, pkgSetting, changedAbiCodePath);
+        return new ScanResult(request, true, pkgSetting, changedAbiCodePath);
     }
 
     /**
@@ -16360,14 +16392,18 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         try {
-            PackageParser.Package newPackage = scanPackageTracedLI(pkg, parseFlags, scanFlags,
+            final PackageParser.Package newPackage;
+            List<ScanResult> scanResults = scanPackageTracedLI(pkg, parseFlags, scanFlags,
                     System.currentTimeMillis(), user);
-
+            commitSuccessfulScanResults(scanResults);
+            // TODO(b/109941548): Child packages may return >1 result with the first being the base;
+            // we need to treat child packages as an atomic install and remove this hack
+            final ScanResult basePackageScanResult = scanResults.get(0);
+            newPackage = basePackageScanResult.pkgSetting.pkg;
             updateSettingsLI(newPackage, installerPackageName, null, res, user, installReason);
 
             if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
                 prepareAppDataAfterInstallLIF(newPackage);
-
             } else {
                 // Remove package from internal structures, but keep around any
                 // data that might have already existed
@@ -16375,6 +16411,9 @@ public class PackageManagerService extends IPackageManager.Stub
                         PackageManager.DELETE_KEEP_DATA, res.removedInfo, true, null);
             }
         } catch (PackageManagerException e) {
+            destroyAppDataLIF(pkg, UserHandle.USER_ALL,
+                    StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
+            destroyAppProfilesLIF(pkg, UserHandle.USER_ALL);
             res.setError("Package couldn't be installed in " + pkg.codePath, e);
         }
 
@@ -16631,8 +16670,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     | StorageManager.FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
 
             try {
-                final PackageParser.Package newPackage = scanPackageTracedLI(pkg, parseFlags,
+                final List<ScanResult> scanResults = scanPackageTracedLI(pkg, parseFlags,
                         scanFlags | SCAN_UPDATE_TIME, System.currentTimeMillis(), user);
+                commitSuccessfulScanResults(scanResults);
+                final PackageParser.Package newPackage = scanResults.get(0).pkgSetting.pkg;
                 updateSettingsLI(newPackage, installerPackageName, allUsers, res, user,
                         installReason);
 
@@ -16770,8 +16811,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         PackageParser.Package newPackage = null;
         try {
+            final List<ScanResult> scanResults =
+                    scanPackageTracedLI(pkg, parseFlags, scanFlags, 0, user);
             // Add the package to the internal data structures
-            newPackage = scanPackageTracedLI(pkg, parseFlags, scanFlags, 0, user);
+            commitSuccessfulScanResults(scanResults);
+            newPackage = scanResults.get(0).pkgSetting.pkg;
 
             // Set the update and install times
             PackageSetting deletedPkgSetting = (PackageSetting) deletedPackage.mExtras;
@@ -16828,7 +16872,9 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             // Add back the old system package
             try {
-                scanPackageTracedLI(deletedPackage, parseFlags, SCAN_UPDATE_SIGNATURE, 0, user);
+                final List<ScanResult> scanResults = scanPackageTracedLI(
+                        deletedPackage, parseFlags, SCAN_UPDATE_SIGNATURE, 0, user);
+                commitSuccessfulScanResults(scanResults);
             } catch (PackageManagerException e) {
                 Slog.e(TAG, "Failed to restore original package: " + e.getMessage());
             }
@@ -16904,6 +16950,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void enableSystemPackageLPw(PackageParser.Package pkg) {
         // Enable the parent package
         mSettings.enableSystemPackageLPw(pkg.packageName);
@@ -16915,6 +16962,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private boolean disableSystemPackageLPw(PackageParser.Package oldPkg,
             PackageParser.Package newPkg) {
         // Disable the parent package (parent always replaced)
@@ -16929,6 +16977,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return disabled;
     }
 
+    @GuardedBy("mPackages")
     private void setInstallerPackageNameLPw(PackageParser.Package pkg,
             String installerPackageName) {
         // Enable the parent package
@@ -17057,6 +17106,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy({"mInstallLock", "mPackages"})
     private void installPackageTracedLI(InstallArgs args, PackageInstalledInfo res) {
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackage");
@@ -17103,7 +17153,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return true;
     }
 
-    @GuardedBy("mInstallLock")
+    @GuardedBy({"mInstallLock", "mPackages", "PackageManagerService.mPackages"})
     private void installPackagesLI(List<InstallRequest> requests) {
         Map<String, ScanResult> scans = new ArrayMap<>(requests.size());
         for (InstallRequest request : requests) {
@@ -17635,7 +17685,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 replacePackageLIF(pkg, parseFlags, scanFlags, args.user,
                         installerPackageName, res, args.installReason);
             } else {
-                installNewPackageLIF(pkg, parseFlags, scanFlags | SCAN_DELETE_DATA_ON_FAILURES,
+                installNewPackageLIF(pkg, parseFlags, scanFlags,
                         args.user, installerPackageName, volumeUuid, res, args.installReason);
             }
         }
@@ -17829,6 +17879,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private boolean needsNetworkVerificationLPr(ActivityIntentInfo filter) {
         final ComponentName cn  = filter.activity.getComponentName();
         final String packageName = cn.getPackageName();
@@ -18063,6 +18114,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return pkg.packageName;
     }
 
+    @GuardedBy("mPackages")
     private String resolveInternalPackageNameLPr(String packageName, long versionCode) {
         // Handle renamed packages
         String normalizedPackageName = mSettings.getRenamedPackageLPr(packageName);
@@ -19129,6 +19181,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return ret;
     }
 
+    @GuardedBy("mPackages")
     private void markPackageUninstalledForUserLPw(PackageSetting ps, UserHandle user) {
         final int[] userIds = (user == null || user.getIdentifier() == UserHandle.USER_ALL)
                 ? sUserManager.getUserIds() : new int[] {user.getIdentifier()};
@@ -19403,6 +19456,7 @@ public class PackageManagerService extends IPackageManager.Stub
      *
      * @param userId The device user for which to do a reset.
      */
+    @GuardedBy("mPackages")
     private void resetUserChangesToRuntimePermissionsAndFlagsLPw(int userId) {
         final int packageCount = mPackages.size();
         for (int i = 0; i < packageCount; i++) {
@@ -19422,6 +19476,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * @param ps The package for which to reset.
      * @param userId The device user for which to do a reset.
      */
+    @GuardedBy("mPackages")
     private void resetUserChangesToRuntimePermissionsAndFlagsLPw(
             final PackageSetting ps, final int userId) {
         if (ps.pkg == null) {
@@ -19630,6 +19685,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 "Shame on you for calling the hidden API getPackageSizeInfo(). Shame!");
     }
 
+    @GuardedBy("mInstallLock")
     private boolean getPackageSizeInfoLI(String packageName, int userId, PackageStats stats) {
         final PackageSetting ps;
         synchronized (mPackages) {
@@ -19664,6 +19720,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return true;
     }
 
+    @GuardedBy("mPackages")
     private int getUidTargetSdkVersionLockedLPr(int uid) {
         Object obj = mSettings.getUserIdLPr(uid);
         if (obj instanceof SharedUserSetting) {
@@ -19687,6 +19744,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return Build.VERSION_CODES.CUR_DEVELOPMENT;
     }
 
+    @GuardedBy("mPackages")
     private int getPackageTargetSdkVersionLockedLPr(String packageName) {
         final PackageParser.Package p = mPackages.get(packageName);
         if (p != null) {
@@ -19882,6 +19940,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
+    @GuardedBy("mPackages")
     boolean clearPackagePreferredActivitiesLPw(String packageName, int userId) {
         ArrayList<PreferredActivity> removed = null;
         boolean changed = false;
@@ -19920,6 +19979,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
+    @GuardedBy("mPackages")
     private void clearIntentFilterVerificationsLPw(int userId) {
         final int packageCount = mPackages.size();
         for (int i = 0; i < packageCount; i++) {
@@ -19929,6 +19989,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /** This method takes a specific user id as well as UserHandle.USER_ALL. */
+    @GuardedBy("mPackages")
     void clearIntentFilterVerificationsLPw(String packageName, int userId) {
         if (userId == UserHandle.USER_ALL) {
             if (mSettings.removeIntentFilterVerificationLPw(packageName,
@@ -20339,6 +20400,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void serializeRuntimePermissionGrantsLPr(XmlSerializer serializer, final int userId)
             throws IOException {
         serializer.startTag(null, TAG_ALL_GRANTS);
@@ -20398,6 +20460,7 @@ public class PackageManagerService extends IPackageManager.Stub
         serializer.endTag(null, TAG_ALL_GRANTS);
     }
 
+    @GuardedBy("mPackages")
     private void processRestoredPermissionGrantsLPr(XmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
         String pkgName = null;
@@ -22067,6 +22130,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void dumpDexoptStateLPr(PrintWriter pw, String packageName) {
         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         ipw.println();
@@ -22094,6 +22158,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void dumpCompilerStatsLPr(PrintWriter pw, String packageName) {
         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         ipw.println();
@@ -22471,6 +22536,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mInstallLock")
     private void reconcileAppsDataLI(String volumeUuid, int userId, int flags,
             boolean migrateAppData) {
         reconcileAppsDataLI(volumeUuid, userId, flags, migrateAppData, false /* onlyCoreApps */);
@@ -22486,6 +22552,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * correct for all installed apps.
      * @return list of skipped non-core packages (if {@code onlyCoreApps} is true)
      */
+    @GuardedBy("mInstallLock")
     private List<String> reconcileAppsDataLI(String volumeUuid, int userId, int flags,
             boolean migrateAppData, boolean onlyCoreApps) {
         Slog.v(TAG, "reconcileAppsData for " + volumeUuid + " u" + userId + " 0x"
@@ -23233,6 +23300,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * that are no longer in use by any other user.
      * @param userHandle the user being removed
      */
+    @GuardedBy("mPackages")
     private void removeUnusedPackagesLPw(UserManagerService userManager, final int userHandle) {
         final boolean DEBUG_CLEAN_APKS = false;
         int [] users = userManager.getUserIds();
@@ -23511,6 +23579,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private void deletePackageIfUnusedLPr(final String packageName) {
         PackageSetting ps = mSettings.mPackages.get(packageName);
         if (ps == null) {

@@ -684,6 +684,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /** Assume permissions already checked and caller's identity cleared */
+    @GuardedBy("mUsersLock")
     private List<UserInfo> getProfilesLU(int userId, boolean enabledOnly, boolean fullInfo) {
         IntArray profileIds = getProfileIdsLU(userId, enabledOnly);
         ArrayList<UserInfo> users = new ArrayList<>(profileIds.size());
@@ -706,6 +707,7 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      *  Assume permissions already checked and caller's identity cleared
      */
+    @GuardedBy("mUsersLock")
     private IntArray getProfileIdsLU(int userId, boolean enabledOnly) {
         UserInfo user = getUserInfoLU(userId);
         IntArray result = new IntArray(mUsers.size());
@@ -784,6 +786,7 @@ public class UserManagerService extends IUserManager.Stub {
         return mLocalService.getProfileParentId(userHandle);
     }
 
+    @GuardedBy("mUsersLock")
     private UserInfo getProfileParentLU(int userHandle) {
         UserInfo profile = getUserInfoLU(userHandle);
         if (profile == null) {
@@ -1206,6 +1209,7 @@ public class UserManagerService extends IUserManager.Stub {
     /*
      * Should be locked on mUsers before calling this.
      */
+    @GuardedBy("mUsersLock")
     private UserInfo getUserInfoLU(int userId) {
         final UserData userData = mUsers.get(userId);
         // If it is partial and not in the process of being removed, return as unknown user.
@@ -1216,6 +1220,7 @@ public class UserManagerService extends IUserManager.Stub {
         return userData != null ? userData.info : null;
     }
 
+    @GuardedBy("mUsersLock")
     private UserData getUserDataLU(int userId) {
         final UserData userData = mUsers.get(userId);
         // If it is partial and not in the process of being removed, return as unknown user.
@@ -1718,6 +1723,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     // Package private for the inner class.
+    @GuardedBy("mRestrictionsLock")
     void applyUserRestrictionsLR(int userId) {
         updateUserRestrictionsInternalLR(null, userId);
     }
@@ -1798,6 +1804,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @GuardedBy("mUsersLock")
     private int getAliveUsersExcludingGuestsCountLU() {
         int aliveUserCount = 0;
         final int totalUserCount = mUsers.size();
@@ -1971,6 +1978,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @GuardedBy({"mRestrictionsLock", "mPackagesLock"})
     private void readUserListLP() {
         if (!mUserListFile.exists()) {
             fallbackToSingleUserLP();
@@ -2068,6 +2076,7 @@ public class UserManagerService extends IUserManager.Stub {
      * Upgrade steps between versions, either for fixing bugs or changing the data format.
      * @param oldGlobalUserRestrictions Pre-O global device policy restrictions.
      */
+    @GuardedBy({"mRestrictionsLock", "mPackagesLock"})
     private void upgradeIfNecessaryLP(Bundle oldGlobalUserRestrictions) {
         final int originalVersion = mUserVersion;
         int userVersion = mUserVersion;
@@ -2148,6 +2157,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @GuardedBy({"mPackagesLock", "mRestrictionsLock"})
     private void fallbackToSingleUserLP() {
         int flags = UserInfo.FLAG_INITIALIZED;
         // In split system user mode, the admin and primary flags are assigned to the first human
@@ -2317,6 +2327,7 @@ public class UserManagerService extends IUserManager.Stub {
      *   <user id="2"></user>
      * </users>
      */
+    @GuardedBy({"mRestrictionsLock", "mPackagesLock"})
     private void writeUserListLP() {
         if (DBG) {
             debug("writeUserList");
@@ -4060,6 +4071,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    @GuardedBy("mUsersLock")
     @VisibleForTesting
     int getFreeProfileBadgeLU(int parentUserId) {
         int maxManagedProfiles = getMaxManagedProfiles();
