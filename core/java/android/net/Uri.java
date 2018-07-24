@@ -24,8 +24,6 @@ import android.os.Parcelable;
 import android.os.StrictMode;
 import android.util.Log;
 
-import libcore.net.UriCodec;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -1959,7 +1957,8 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         if (s == null) {
             return null;
         }
-        return UriCodec.decode(s, false, StandardCharsets.UTF_8, false);
+        return UriCodec.decode(
+                s, false /* convertPlus */, StandardCharsets.UTF_8, false /* throwOnFailure */);
     }
 
     /**
