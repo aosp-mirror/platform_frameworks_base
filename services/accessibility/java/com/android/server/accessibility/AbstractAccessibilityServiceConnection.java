@@ -860,7 +860,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            return mSystemSupport.getMagnificationController().reset(animate);
+            MagnificationController magnificationController =
+                    mSystemSupport.getMagnificationController();
+            return (magnificationController.reset(animate)
+                    || !magnificationController.isMagnifying());
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
