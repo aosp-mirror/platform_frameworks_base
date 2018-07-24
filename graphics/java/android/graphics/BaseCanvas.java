@@ -501,7 +501,7 @@ public abstract class BaseCanvas {
                             contextStart - paraStart,
                             contextEnd - contextStart,
                             x, y, isRtl, paint.getNativeInstance(),
-                            mp.getNativePtr());
+                            mp.getNativeMeasuredParagraph().getNativePtr());
                     return;
                 }
             }

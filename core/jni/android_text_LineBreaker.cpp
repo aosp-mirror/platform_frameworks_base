@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "StaticLayout"
+#define LOG_TAG "LineBreaker"
 
 #include "unicode/locid.h"
 #include "unicode/brkiter.h"
@@ -76,9 +76,13 @@ static jlong nInit(JNIEnv* env, jclass /* unused */,
             jintArrayToFloatVector(env, indents)));
 }
 
-// CriticalNative
 static void nFinish(jlong nativePtr) {
     delete toNative(nativePtr);
+}
+
+// CriticalNative
+static jlong nGetReleaseFunc() {
+    return reinterpret_cast<jlong>(nFinish);
 }
 
 static void recycleCopy(JNIEnv* env, jobject recycle, jintArray recycleBreaks,
@@ -144,9 +148,6 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
     recycleCopy(env, recycle, recycleBreaks, recycleWidths, recycleAscents, recycleDescents,
             recycleFlags, recycleLength, result);
 
-    env->SetFloatArrayRegion(charWidths, 0, measuredText->widths.size(),
-                             measuredText->widths.data());
-
     return static_cast<jint>(result.breakPoints.size());
 }
 
@@ -160,7 +161,7 @@ static const JNINativeMethod gMethods[] = {
         ")J", (void*) nInit},
 
     // Critical Natives
-    {"nFinish", "(J)V", (void*) nFinish},
+    {"nGetReleaseFunc", "()J", (void*) nGetReleaseFunc},
 
     // Regular JNI
     {"nComputeLineBreaks", "("
@@ -178,21 +179,20 @@ static const JNINativeMethod gMethods[] = {
         "I"  // indentsOffset
 
         // Outputs
-        "Landroid/text/StaticLayout$LineBreaks;"  // recycle
+        "Landroid/text/NativeLineBreaker$LineBreaks;"  // recycle
         "I"  // recycleLength
         "[I"  // recycleBreaks
         "[F"  // recycleWidths
         "[F"  // recycleAscents
         "[F"  // recycleDescents
         "[I"  // recycleFlags
-        "[F"  // charWidths
         ")I", (void*) nComputeLineBreaks}
 };
 
-int register_android_text_StaticLayout(JNIEnv* env)
+int register_android_text_LineBreaker(JNIEnv* env)
 {
     gLineBreaks_class = MakeGlobalRefOrDie(env,
-            FindClassOrDie(env, "android/text/StaticLayout$LineBreaks"));
+            FindClassOrDie(env, "android/text/NativeLineBreaker$LineBreaks"));
 
     gLineBreaks_fieldID.breaks = GetFieldIDOrDie(env, gLineBreaks_class, "breaks", "[I");
     gLineBreaks_fieldID.widths = GetFieldIDOrDie(env, gLineBreaks_class, "widths", "[F");
@@ -200,7 +200,8 @@ int register_android_text_StaticLayout(JNIEnv* env)
     gLineBreaks_fieldID.descents = GetFieldIDOrDie(env, gLineBreaks_class, "descents", "[F");
     gLineBreaks_fieldID.flags = GetFieldIDOrDie(env, gLineBreaks_class, "flags", "[I");
 
-    return RegisterMethodsOrDie(env, "android/text/StaticLayout", gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, "android/text/NativeLineBreaker",
+                                gMethods, NELEM(gMethods));
 }
 
 }
