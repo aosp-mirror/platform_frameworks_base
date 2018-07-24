@@ -2817,10 +2817,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             }
             results = null;
             newIntents = null;
-            service.mAm.getAppWarningsLocked().onResumeActivity(this);
-            service.mAm.showAskCompatModeDialogLocked(this);
+            service.getAppWarningsLocked().onResumeActivity(this);
         } else {
-            service.mAm.mHandler.removeMessages(PAUSE_TIMEOUT_MSG, this);
+            final ActivityStack stack = getStack();
+            if (stack != null) {
+                stack.mHandler.removeMessages(PAUSE_TIMEOUT_MSG, this);
+            }
             setState(PAUSED, "relaunchActivityLocked");
         }
 

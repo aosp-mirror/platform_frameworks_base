@@ -278,4 +278,7 @@ public abstract class ActivityTaskManagerInternal {
     public abstract long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason);
     public abstract void onProcessMapped(int pid, WindowProcessController proc);
     public abstract void onProcessUnMapped(int pid);
+
+    public abstract void onPackageDataCleared(String name);
+    public abstract void onPackageUninstalled(String name);
 }

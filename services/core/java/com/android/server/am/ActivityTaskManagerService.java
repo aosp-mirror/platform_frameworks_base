@@ -132,6 +132,7 @@ import android.view.WindowManager;
 import com.android.internal.R;
 import com.android.internal.app.IAppOpsService;
 import com.android.server.AppOpsService;
+import com.android.server.SystemServiceManager;
 import com.android.server.pm.UserManagerService;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -471,6 +472,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** If non-null, we are tracking the time the user spends in the currently focused app. */
     AppTimeTracker mCurAppTimeTracker;
 
+    private AppWarnings mAppWarnings;
+
     private FontScaleSettingObserver mFontScaleSettingObserver;
 
     private final class FontScaleSettingObserver extends ContentObserver {
@@ -600,6 +603,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mGlobalLock = mAm;
         mH = new H(mAm.mHandlerThread.getLooper());
         mUiHandler = new UiHandler();
+        mAppWarnings = new AppWarnings(
+                this, mUiContext, mH, mUiHandler, SystemServiceManager.ensureSystemDir());
 
         mTempConfig.setToDefaults();
         mTempConfig.setLocales(LocaleList.getDefault());
@@ -4013,7 +4018,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long origId = Binder.clearCallingIdentity();
             try {
-                mAm.mAppWarnings.alwaysShowUnsupportedCompileSdkWarning(activity);
+                mAppWarnings.alwaysShowUnsupportedCompileSdkWarning(activity);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -4498,7 +4503,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             final boolean isDensityChange = (changes & ActivityInfo.CONFIG_DENSITY) != 0;
             if (isDensityChange && displayId == DEFAULT_DISPLAY) {
-                mAm.mAppWarnings.onDensityChanged();
+                mAppWarnings.onDensityChanged();
 
                 mAm.killAllBackgroundProcessesExcept(N,
                         ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
@@ -4881,6 +4886,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mPmInternal = LocalServices.getService(PackageManagerInternal.class);
         }
         return mPmInternal;
+    }
+
+    AppWarnings getAppWarningsLocked() {
+        return mAppWarnings;
     }
 
     void logAppTooSlow(WindowProcessController app, long startTime, String msg) {
@@ -5351,6 +5360,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void onProcessUnMapped(int pid) {
             synchronized (mGlobalLock) {
                 mPidMap.remove(pid);
+            }
+        }
+
+        @Override
+        public void onPackageDataCleared(String name) {
+            synchronized (mGlobalLock) {
+                mAppWarnings.onPackageDataCleared(name);
+            }
+        }
+
+        @Override
+        public void onPackageUninstalled(String name) {
+            synchronized (mGlobalLock) {
+                mAppWarnings.onPackageUninstalled(name);
             }
         }
     }

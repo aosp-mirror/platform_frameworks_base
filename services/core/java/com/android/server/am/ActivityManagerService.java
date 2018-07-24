@@ -568,8 +568,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final AppErrors mAppErrors;
 
-    final AppWarnings mAppWarnings;
-
     /**
      * Dump of the activity state at the time of the last ANR. Cleared after
      * {@link WindowManagerService#LAST_ANR_LIFETIME_DURATION_MSECS}
@@ -1451,7 +1449,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int CHECK_EXCESSIVE_POWER_USE_MSG = 27;
     static final int CLEAR_DNS_CACHE_MSG = 28;
     static final int UPDATE_HTTP_PROXY_MSG = 29;
-    static final int SHOW_COMPAT_MODE_DIALOG_UI_MSG = 30;
     static final int DISPATCH_PROCESSES_CHANGED_UI_MSG = 31;
     static final int DISPATCH_PROCESS_DIED_UI_MSG = 32;
     static final int REPORT_MEM_USAGE_MSG = 33;
@@ -1482,7 +1479,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static ServiceThread sKillThread = null;
     static KillHandler sKillHandler = null;
 
-    CompatModeDialog mCompatModeDialog;
     long mLastMemUsageReportTime = 0;
 
     /**
@@ -1613,34 +1609,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             } break;
-            case SHOW_COMPAT_MODE_DIALOG_UI_MSG: {
-                synchronized (ActivityManagerService.this) {
-                    ActivityRecord ar = (ActivityRecord) msg.obj;
-                    if (mCompatModeDialog != null) {
-                        if (mCompatModeDialog.mAppInfo.packageName.equals(
-                                ar.info.applicationInfo.packageName)) {
-                            return;
-                        }
-                        mCompatModeDialog.dismiss();
-                        mCompatModeDialog = null;
-                    }
-                    if (ar != null && false) {
-                        if (mCompatModePackages.getPackageAskCompatModeLocked(
-                                ar.packageName)) {
-                            int mode = mCompatModePackages.computeCompatModeLocked(
-                                    ar.info.applicationInfo);
-                            if (mode == ActivityManager.COMPAT_MODE_DISABLED
-                                    || mode == ActivityManager.COMPAT_MODE_ENABLED) {
-                                mCompatModeDialog = new CompatModeDialog(
-                                        ActivityManagerService.this, mUiContext,
-                                        ar.info.applicationInfo);
-                                mCompatModeDialog.show();
-                            }
-                        }
-                    }
-                }
-                break;
-            }
             case DISPATCH_PROCESSES_CHANGED_UI_MSG: {
                 dispatchProcessesChanged();
                 break;
@@ -2459,7 +2427,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUiContext = null;
         GL_ES_VERSION = 0;
         mAppErrors = null;
-        mAppWarnings = null;
         mAppOpsService = mInjector.getAppOpsService(null, null);
         mBatteryStatsService = null;
         mCompatModePackages = null;
@@ -2525,8 +2492,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mAppErrors = new AppErrors(mUiContext, this);
 
         final File systemDir = SystemServiceManager.ensureSystemDir();
-
-        mAppWarnings = new AppWarnings(this, mUiContext, mHandler, mUiHandler, systemDir);
 
         // TODO: Move creation of battery stats service outside of activity manager service.
         mBatteryStatsService = new BatteryStatsService(systemContext, systemDir, mHandler);
@@ -2915,28 +2880,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void unregisterTaskStackListener(ITaskStackListener listener) {
         mActivityTaskManager.unregisterTaskStackListener(listener);
-    }
-
-    final void showAskCompatModeDialogLocked(ActivityRecord r) {
-        Message msg = Message.obtain();
-        msg.what = SHOW_COMPAT_MODE_DIALOG_UI_MSG;
-        msg.obj = r.getTask().askedCompatMode ? null : r;
-        mUiHandler.sendMessage(msg);
-    }
-
-    final AppWarnings getAppWarningsLocked() {
-        return mAppWarnings;
-    }
-
-    /**
-     * Shows app warning dialogs, if necessary.
-     *
-     * @param r activity record for which the warnings may be displayed
-     */
-    final void showAppWarningsIfNeededLocked(ActivityRecord r) {
-        mAppWarnings.showUnsupportedCompileSdkDialogIfNeeded(r);
-        mAppWarnings.showUnsupportedDisplaySizeDialogIfNeeded(r);
-        mAppWarnings.showDeprecatedTargetDialogIfNeeded(r);
     }
 
     private int updateLruProcessInternalLocked(ProcessRecord app, long now, int index,
@@ -16373,7 +16316,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                         mActivityTaskManager.getRecentTasks().removeTasksByPackageName(ssp, userId);
 
                                         mServices.forceStopPackageLocked(ssp, userId);
-                                        mAppWarnings.onPackageUninstalled(ssp);
+                                        mAtmInternal.onPackageUninstalled(ssp);
                                         mCompatModePackages.handlePackageUninstalledLocked(ssp);
                                         mBatteryStatsService.notePackageUninstalled(ssp);
                                     }
@@ -16454,7 +16397,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     String ssp;
                     if (data != null && (ssp = data.getSchemeSpecificPart()) != null) {
                         mCompatModePackages.handlePackageDataClearedLocked(ssp);
-                        mAppWarnings.onPackageDataCleared(ssp);
+                        mAtmInternal.onPackageDataCleared(ssp);
                     }
                     break;
                 }
