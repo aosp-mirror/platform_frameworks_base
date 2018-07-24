@@ -66,11 +66,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
                     Constants.PROPERTY_LAST_SYSTEM_AUDIO_CONTROL,
                     mSystemAudioActivated ? "true" : "false");
         }
-        if (setSystemAudioMode(false)) {
-            mService.sendCecCommand(
-                    HdmiCecMessageBuilder.buildSetSystemAudioMode(
-                            mAddress, Constants.ADDR_BROADCAST, false));
-        }
+        terminateSystemAudioMode();
     }
 
     @Override
@@ -329,6 +325,21 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     protected boolean isSystemAudioActivated() {
         synchronized (mLock) {
             return mSystemAudioActivated;
+        }
+    }
+
+    protected void terminateSystemAudioMode() {
+        // remove pending initiation actions
+        removeAction(SystemAudioInitiationActionFromAvr.class);
+        if (!isSystemAudioActivated()) {
+            return;
+        }
+
+        if (setSystemAudioMode(false)) {
+            // send <Set System Audio Mode> [“Off”]
+            mService.sendCecCommand(
+                    HdmiCecMessageBuilder.buildSetSystemAudioMode(
+                            mAddress, Constants.ADDR_BROADCAST, false));
         }
     }
 
