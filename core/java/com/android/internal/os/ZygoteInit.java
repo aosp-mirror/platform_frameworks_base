@@ -21,9 +21,6 @@ import static android.system.OsConstants.S_IRWXO;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.icu.impl.CacheValue;
-import android.icu.text.DecimalFormatSymbols;
-import android.icu.util.ULocale;
 import android.opengl.EGL14;
 import android.os.Build;
 import android.os.Environment;
@@ -122,9 +119,9 @@ public class ZygoteInit {
 
     static void preload(TimingsTraceLog bootTimingsTraceLog) {
         Log.d(TAG, "begin preload");
-        bootTimingsTraceLog.traceBegin("BeginIcuCachePinning");
-        beginIcuCachePinning();
-        bootTimingsTraceLog.traceEnd(); // BeginIcuCachePinning
+        bootTimingsTraceLog.traceBegin("BeginPreload");
+        beginPreload();
+        bootTimingsTraceLog.traceEnd(); // BeginPreload
         bootTimingsTraceLog.traceBegin("PreloadClasses");
         preloadClasses();
         bootTimingsTraceLog.traceEnd(); // PreloadClasses
@@ -142,7 +139,7 @@ public class ZygoteInit {
         // Ask the WebViewFactory to do any initialization that must run in the zygote process,
         // for memory sharing purposes.
         WebViewFactory.prepareWebViewInZygote();
-        endIcuCachePinning();
+        endPreload();
         warmUpJcaProviders();
         Log.d(TAG, "end preload");
 
@@ -156,27 +153,16 @@ public class ZygoteInit {
         preload(new TimingsTraceLog("ZygoteInitTiming_lazy", Trace.TRACE_TAG_DALVIK));
     }
 
-    private static void beginIcuCachePinning() {
-        // Pin ICU data in memory from this point that would normally be held by soft references.
-        // Without this, any references created immediately below or during class preloading
-        // would be collected when the Zygote GC runs in gcAndFinalize().
-        Log.i(TAG, "Installing ICU cache reference pinning...");
+    private static void beginPreload() {
+        Log.i(TAG, "Calling ZygoteHooks.beginPreload()");
 
-        CacheValue.setStrength(CacheValue.Strength.STRONG);
-
-        Log.i(TAG, "Preloading ICU data...");
-        // Explicitly exercise code to cache data apps are likely to need.
-        ULocale[] localesToPin = { ULocale.ROOT, ULocale.US, ULocale.getDefault() };
-        for (ULocale uLocale : localesToPin) {
-            new DecimalFormatSymbols(uLocale);
-        }
+        ZygoteHooks.onBeginPreload();
     }
 
-    private static void endIcuCachePinning() {
-        // All cache references created by ICU from this point will be soft.
-        CacheValue.setStrength(CacheValue.Strength.SOFT);
+    private static void endPreload() {
+        ZygoteHooks.onEndPreload();
 
-        Log.i(TAG, "Uninstalled ICU cache reference pinning...");
+        Log.i(TAG, "Called ZygoteHooks.endPreload()");
     }
 
     private static void preloadSharedLibraries() {
@@ -436,15 +422,8 @@ public class ZygoteInit {
      * softly- and final-reachable objects, along with any other garbage.
      * This is only useful just before a fork().
      */
-    /*package*/ static void gcAndFinalize() {
-        final VMRuntime runtime = VMRuntime.getRuntime();
-
-        /* runFinalizationSync() lets finalizers be called in Zygote,
-         * which doesn't have a HeapWorker thread.
-         */
-        System.gc();
-        runtime.runFinalizationSync();
-        System.gc();
+    private static void gcAndFinalize() {
+        ZygoteHooks.gcAndFinalize();
     }
 
     /**
