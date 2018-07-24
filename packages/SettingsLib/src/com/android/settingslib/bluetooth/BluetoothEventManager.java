@@ -49,15 +49,15 @@ public class BluetoothEventManager {
 
     private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
-    private LocalBluetoothProfileManager mProfileManager;
     private final IntentFilter mAdapterIntentFilter, mProfileIntentFilter;
     private final Map<String, Handler> mHandlerMap;
-    private Context mContext;
+    private final BroadcastReceiver mBroadcastReceiver = new BluetoothBroadcastReceiver();
+    private final BroadcastReceiver mProfileBroadcastReceiver = new BluetoothBroadcastReceiver();
+    private final Collection<BluetoothCallback> mCallbacks = new ArrayList<>();
 
-    private final Collection<BluetoothCallback> mCallbacks =
-            new ArrayList<BluetoothCallback>();
-
+    private LocalBluetoothProfileManager mProfileManager;
     private android.os.Handler mReceiverHandler;
+    private Context mContext;
 
     interface Handler {
         void onReceive(Context context, Intent intent, BluetoothDevice device);
@@ -110,12 +110,10 @@ public class BluetoothEventManager {
         addHandler(BluetoothDevice.ACTION_BATTERY_LEVEL_CHANGED, new BatteryLevelChangedHandler());
 
         // Active device broadcasts
-        addHandler(BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED,
-                   new ActiveDeviceChangedHandler());
-        addHandler(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED,
-                   new ActiveDeviceChangedHandler());
+        addHandler(BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED, new ActiveDeviceChangedHandler());
+        addHandler(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED, new ActiveDeviceChangedHandler());
         addHandler(BluetoothHearingAid.ACTION_ACTIVE_DEVICE_CHANGED,
-                   new ActiveDeviceChangedHandler());
+                new ActiveDeviceChangedHandler());
 
         // Headset state changed broadcasts
         addHandler(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED,
@@ -153,7 +151,7 @@ public class BluetoothEventManager {
         }
     }
 
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    private class BluetoothBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -165,27 +163,13 @@ public class BluetoothEventManager {
                 handler.onReceive(context, intent, device);
             }
         }
-    };
-
-    private final BroadcastReceiver mProfileBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            BluetoothDevice device = intent
-                    .getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-            Handler handler = mHandlerMap.get(action);
-            if (handler != null) {
-                handler.onReceive(context, intent, device);
-            }
-        }
-    };
+    }
 
     private class AdapterStateChangedHandler implements Handler {
         public void onReceive(Context context, Intent intent,
                 BluetoothDevice device) {
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
-                                    BluetoothAdapter.ERROR);
+                    BluetoothAdapter.ERROR);
             // Reregister Profile Broadcast Receiver as part of TURN OFF
             if (state == BluetoothAdapter.STATE_OFF)
             {
@@ -310,7 +294,7 @@ public class BluetoothEventManager {
                 return;
             }
             int bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE,
-                                               BluetoothDevice.ERROR);
+                    BluetoothDevice.ERROR);
             CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
             if (cachedDevice == null) {
                 Log.w(TAG, "CachedBluetoothDevice for device " + device +
@@ -357,24 +341,24 @@ public class BluetoothEventManager {
             int errorMsg;
 
             switch(reason) {
-            case BluetoothDevice.UNBOND_REASON_AUTH_FAILED:
-                errorMsg = R.string.bluetooth_pairing_pin_error_message;
-                break;
-            case BluetoothDevice.UNBOND_REASON_AUTH_REJECTED:
-                errorMsg = R.string.bluetooth_pairing_rejected_error_message;
-                break;
-            case BluetoothDevice.UNBOND_REASON_REMOTE_DEVICE_DOWN:
-                errorMsg = R.string.bluetooth_pairing_device_down_error_message;
-                break;
-            case BluetoothDevice.UNBOND_REASON_DISCOVERY_IN_PROGRESS:
-            case BluetoothDevice.UNBOND_REASON_AUTH_TIMEOUT:
-            case BluetoothDevice.UNBOND_REASON_REPEATED_ATTEMPTS:
-            case BluetoothDevice.UNBOND_REASON_REMOTE_AUTH_CANCELED:
-                errorMsg = R.string.bluetooth_pairing_error_message;
-                break;
-            default:
-                Log.w(TAG, "showUnbondMessage: Not displaying any message for reason: " + reason);
-                return;
+                case BluetoothDevice.UNBOND_REASON_AUTH_FAILED:
+                    errorMsg = R.string.bluetooth_pairing_pin_error_message;
+                    break;
+                case BluetoothDevice.UNBOND_REASON_AUTH_REJECTED:
+                    errorMsg = R.string.bluetooth_pairing_rejected_error_message;
+                    break;
+                case BluetoothDevice.UNBOND_REASON_REMOTE_DEVICE_DOWN:
+                    errorMsg = R.string.bluetooth_pairing_device_down_error_message;
+                    break;
+                case BluetoothDevice.UNBOND_REASON_DISCOVERY_IN_PROGRESS:
+                case BluetoothDevice.UNBOND_REASON_AUTH_TIMEOUT:
+                case BluetoothDevice.UNBOND_REASON_REPEATED_ATTEMPTS:
+                case BluetoothDevice.UNBOND_REASON_REMOTE_AUTH_CANCELED:
+                    errorMsg = R.string.bluetooth_pairing_error_message;
+                    break;
+                default:
+                    Log.w(TAG, "showUnbondMessage: Not displaying any message for reason: " + reason);
+                    return;
             }
             BluetoothUtils.showError(context, name, errorMsg);
         }
@@ -448,7 +432,7 @@ public class BluetoothEventManager {
     }
 
     private void dispatchActiveDeviceChanged(CachedBluetoothDevice activeDevice,
-                                             int bluetoothProfile) {
+            int bluetoothProfile) {
         mDeviceManager.onActiveDeviceChanged(activeDevice, bluetoothProfile);
         synchronized (mCallbacks) {
             for (BluetoothCallback callback : mCallbacks) {
