@@ -124,6 +124,8 @@ public class StorageManager {
     public static final String PROP_SDCARDFS = "persist.sys.sdcardfs";
     /** {@hide} */
     public static final String PROP_VIRTUAL_DISK = "persist.sys.virtual_disk";
+    /** {@hide} */
+    public static final String PROP_ISOLATED_STORAGE = "persist.sys.isolated_storage";
 
     /** {@hide} */
     public static final String UUID_PRIVATE_INTERNAL = null;
