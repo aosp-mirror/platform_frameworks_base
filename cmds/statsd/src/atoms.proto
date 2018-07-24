@@ -131,7 +131,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10023
+    // Next: 10024
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -156,6 +156,7 @@ message Atom {
         FullBatteryCapacity full_battery_capacity = 10020;
         Temperature temperature = 10021;
         BinderCalls binder_calls = 10022;
+        BinderCallsExceptions binder_calls_exceptions = 10023;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP. Field numbers above
@@ -2094,35 +2095,67 @@ message Temperature {
  *
  * Binder stats are cumulative from boot unless somebody reset the data using
  * > adb shell dumpsys binder_calls_stats --reset
+ *
+ * Next tag: 14
  */
 message BinderCalls {
-   // TODO(gaillard): figure out if binder call stats includes data from isolated uids, if a uid
-   // gets recycled and we have isolated uids, we might attribute the data incorrectly.
-   // TODO(gaillard): there is a high dimensions cardinality, figure out if we should drop the less
-   // commonly used APIs.
-   optional int32 uid = 1 [(is_uid) = true];
-   // Fully qualified class name of the API call.
-   optional string service_class_name = 2;
-   // Method name of the API call. It can also be a transaction code if we cannot resolve it to a
-   // name. See Binder#getTransactionName.
-   optional string service_method_name = 3;
-   // Total number of API calls.
-   optional int64 call_count = 4;
-   // Number of exceptions thrown by the API.
-   optional int64 exception_count = 5;
-   // Total latency of all API calls.
-   // Average can be computed using total_latency_micros / call_count.
-   optional int64 total_latency_micros = 6;
-   // Maximum latency of one API call.
-   optional int64 max_latency_micros = 7;
-   // Total CPU usage of all API calls.
-   optional int64 total_cpu_micros = 8;
-   // Maximum CPU usage of one API call.
-   optional int64 max_cpu_micros = 9;
-   // Maximum parcel reply size of one API call.
-   optional int64 max_reply_size_bytes = 10;
-   // Maximum parcel request size of one API call.
-   optional int64 max_request_size_bytes = 11;
+    optional int32 uid = 1 [(is_uid) = true];
+    // Fully qualified class name of the API call.
+    //
+    // This is a system server class name.
+    //
+    // TODO(gaillard): figure out if binder call stats includes data from isolated uids, if a uid
+    // gets recycled and we have isolated uids, we might attribute the data incorrectly.
+    // TODO(gaillard): there is a high dimensions cardinality, figure out if we should drop the less
+    // commonly used APIs.
+    optional string service_class_name = 2;
+    // Method name of the API call. It can also be a transaction code if we cannot
+    // resolve it to a name. See Binder#getTransactionName.
+    //
+    // This is a system server method name.
+    optional string service_method_name = 3;
+    // Total number of API calls.
+    optional int64 call_count = 4;
+    // True if the screen was interactive PowerManager#isInteractive at the end of the call.
+    optional bool screen_interactive = 13;
+    // Total number of API calls we have data recorded for. If we collected data for all the calls,
+    // call_count will be equal to recorded_call_count.
+    //
+    // If recorded_call_count is different than call_count, it means data collection has been
+    // sampled. All the fields below will be sampled in this case.
+    optional int64 recorded_call_count = 12;
+    // Number of exceptions thrown by the API.
+    optional int64 recorded_exception_count = 5;
+    // Total latency of all API calls.
+    // Average can be computed using total_latency_micros / recorded_call_count.
+    optional int64 recorded_total_latency_micros = 6;
+    // Maximum latency of one API call.
+    optional int64 recorded_max_latency_micros = 7;
+    // Total CPU usage of all API calls.
+    // Average can be computed using total_cpu_micros / recorded_call_count.
+    // Total can be computed using total_cpu_micros / recorded_call_count * call_count.
+    optional int64 recorded_total_cpu_micros = 8;
+    // Maximum CPU usage of one API call.
+    optional int64 recorded_max_cpu_micros = 9;
+    // Maximum parcel reply size of one API call.
+    optional int64 recorded_max_reply_size_bytes = 10;
+    // Maximum parcel request size of one API call.
+    optional int64 recorded_max_request_size_bytes = 11;
+}
+
+/**
+ * Pulls the statistics of exceptions during calls to Binder.
+ *
+ * Binder stats are cumulative from boot unless somebody reset the data using
+ * > adb shell dumpsys binder_calls_stats --reset
+ */
+message BinderCallsExceptions {
+    // Exception class name, e.g. java.lang.IllegalArgumentException.
+    //
+    // This is an exception class name thrown by the system server.
+    optional string exception_class_name = 1;
+    // Total number of exceptions.
+    optional int64 exception_count = 2;
 }
 
 /**
