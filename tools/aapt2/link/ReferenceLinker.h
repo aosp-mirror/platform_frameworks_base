@@ -36,12 +36,10 @@ class ReferenceLinker : public IResourceTableConsumer {
   ReferenceLinker() = default;
 
   // Performs name mangling and looks up the resource in the symbol table. Uses the callsite's
-  // package if the reference has no package name defined (implicit), or if auto_namespace is
-  // set try looking in all avaliable packages for a symbol of that name.
+  // package if the reference has no package name defined (implicit).
   // Returns nullptr if the symbol was not found.
   static const SymbolTable::Symbol* ResolveSymbol(const Reference& reference,
-                                                  const CallSite& callsite, SymbolTable* symbols,
-                                                  bool auto_namespace);
+                                                  const CallSite& callsite, SymbolTable* symbols);
 
   // Performs name mangling and looks up the resource in the symbol table. If the symbol is not
   // visible by the reference at the callsite, nullptr is returned.
@@ -49,7 +47,6 @@ class ReferenceLinker : public IResourceTableConsumer {
   static const SymbolTable::Symbol* ResolveSymbolCheckVisibility(const Reference& reference,
                                                                  const CallSite& callsite,
                                                                  SymbolTable* symbols,
-                                                                 bool auto_namespace,
                                                                  std::string* out_error);
 
   // Same as ResolveSymbolCheckVisibility(), but also makes sure the symbol is an attribute.
@@ -57,14 +54,13 @@ class ReferenceLinker : public IResourceTableConsumer {
   static const SymbolTable::Symbol* ResolveAttributeCheckVisibility(const Reference& reference,
                                                                     const CallSite& callsite,
                                                                     SymbolTable* symbols,
-                                                                    bool auto_namespace,
                                                                     std::string* out_error);
 
   // Resolves the attribute reference and returns an xml::AaptAttribute if successful.
   // If resolution fails, outError holds the error message.
   static Maybe<xml::AaptAttribute> CompileXmlAttribute(const Reference& reference,
                                                        const CallSite& callsite,
-                                                       SymbolTable* symbols, bool auto_namespace,
+                                                       SymbolTable* symbols,
                                                        std::string* out_error);
 
   // Writes the resource name to the DiagMessage, using the

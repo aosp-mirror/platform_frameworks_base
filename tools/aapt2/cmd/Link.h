@@ -64,7 +64,6 @@ struct LinkOptions {
 
   // Static lib options.
   bool no_static_lib_packages = false;
-  bool auto_namespace_static_lib = false;
 
   // AndroidManifest.xml massaging options.
   ManifestFixerOptions manifest_fixer_options;
@@ -188,10 +187,6 @@ class LinkCommand : public Command {
     AddOptionalSwitch("--no-static-lib-packages",
         "Merge all library resources under the app's package.",
         &options_.no_static_lib_packages);
-    AddOptionalSwitch("--auto-namespace-static-lib",
-        "Automatically namespace resource references when building a static\n"
-            "library.",
-        &options_.auto_namespace_static_lib);
     AddOptionalSwitch("--non-final-ids",
         "Generates R.java without the final modifier. This is implied when\n"
             "--static-lib is specified.",

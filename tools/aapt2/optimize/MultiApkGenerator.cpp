@@ -99,10 +99,6 @@ class ContextWrapper : public IAaptContext {
         util::make_unique<SourcePathDiagnostics>(Source{source}, context_->GetDiagnostics());
   }
 
-  bool IsAutoNamespace() override {
-    return context_->IsAutoNamespace();
-  }
-
  private:
   IAaptContext* context_;
   std::unique_ptr<SourcePathDiagnostics> source_diag_;

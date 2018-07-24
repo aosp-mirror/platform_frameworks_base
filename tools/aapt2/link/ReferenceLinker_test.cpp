@@ -267,7 +267,7 @@ TEST(ReferenceLinkerTest, AppsWithSamePackageButDifferentIdAreVisibleNonPublic) 
   std::string error;
   const CallSite call_site{"com.app.test"};
   const SymbolTable::Symbol* symbol = ReferenceLinker::ResolveSymbolCheckVisibility(
-      *test::BuildReference("com.app.test:string/foo"), call_site, &table, false, &error);
+      *test::BuildReference("com.app.test:string/foo"), call_site, &table, &error);
   ASSERT_THAT(symbol, NotNull());
   EXPECT_TRUE(error.empty());
 }
@@ -285,13 +285,13 @@ TEST(ReferenceLinkerTest, AppsWithDifferentPackageCanNotUseEachOthersAttribute) 
   std::string error;
   const CallSite call_site{"com.app.ext"};
 
-  EXPECT_FALSE(ReferenceLinker::CompileXmlAttribute(*test::BuildReference("com.app.test:attr/foo"),
-                                                    call_site, &table, false, &error));
+  EXPECT_FALSE(ReferenceLinker::CompileXmlAttribute(
+      *test::BuildReference("com.app.test:attr/foo"), call_site, &table, &error));
   EXPECT_FALSE(error.empty());
 
   error = "";
   ASSERT_TRUE(ReferenceLinker::CompileXmlAttribute(
-      *test::BuildReference("com.app.test:attr/public_foo"), call_site, &table, false, &error));
+      *test::BuildReference("com.app.test:attr/public_foo"), call_site, &table, &error));
   EXPECT_TRUE(error.empty());
 }
 
@@ -303,74 +303,19 @@ TEST(ReferenceLinkerTest, ReferenceWithNoPackageUsesCallSitePackage) {
                          .AddSymbol("com.app.lib:string/foo", ResourceId(0x7f010001))
                          .Build());
 
-  const SymbolTable::Symbol* s = ReferenceLinker::ResolveSymbol(
-      *test::BuildReference("string/foo"), CallSite{"com.app.test"}, &table, false);
+  const SymbolTable::Symbol* s = ReferenceLinker::ResolveSymbol(*test::BuildReference("string/foo"),
+                                                                CallSite{"com.app.test"}, &table);
   ASSERT_THAT(s, NotNull());
   EXPECT_THAT(s->id, Eq(make_value<ResourceId>(0x7f010000)));
 
   s = ReferenceLinker::ResolveSymbol(*test::BuildReference("string/foo"), CallSite{"com.app.lib"},
-                                     &table, false);
+                                     &table);
   ASSERT_THAT(s, NotNull());
   EXPECT_THAT(s->id, Eq(make_value<ResourceId>(0x7f010001)));
 
   EXPECT_THAT(ReferenceLinker::ResolveSymbol(*test::BuildReference("string/foo"),
-                                             CallSite{"com.app.bad"}, &table, false),
+                                             CallSite{"com.app.bad"}, &table),
               IsNull());
 }
 
-TEST(ReferenceLinkerTest, AutomaticNamespace) {
-  NameMangler mangler(NameManglerPolicy{"com.example.thislib"});
-  SymbolTable table(&mangler);
-  table.AppendSource(
-      test::StaticSymbolSourceBuilder()
-          .AddSymbol("com.example.thislib:string/thislib_string", ResourceId(0x7f010006))
-          .AddSymbol("com.example.thislib:string/explicit_override_string", ResourceId(0x7f010007))
-          .Build());
-  // Lib2 is higher priority than lib1
-  table.AppendSource(
-      test::StaticSymbolSourceBuilder()
-          .AddSymbol("com.example.lib2:string/lib2_string", ResourceId(0x7f010003))
-          .AddSymbol("com.example.lib2:string/explicit_override_string", ResourceId(0x7f010004))
-          .AddSymbol("com.example.lib2:string/implicit_override_string", ResourceId(0x7f010005))
-          .Build());
-  table.AppendSource(
-      test::StaticSymbolSourceBuilder()
-          .AddSymbol("com.example.lib1:string/explicit_override_string", ResourceId(0x7f010001))
-          .AddSymbol("com.example.lib1:string/implicit_override_string", ResourceId(0x7f010002))
-          .Build());
-
-  // Sanity test: Local references are still fine.
-  const SymbolTable::Symbol* s =
-      ReferenceLinker::ResolveSymbol(*test::BuildReference("string/thislib_string"),
-                                     CallSite{"com.example.thislib"}, &table, true);
-  ASSERT_THAT(s, NotNull());
-  EXPECT_THAT(s->id, Eq(make_value<ResourceId>(0x7f010006)));
-
-  // Local references are fine, even if clash with remote ones.
-  s = ReferenceLinker::ResolveSymbol(*test::BuildReference("string/explicit_override_string"),
-                                     CallSite{"com.example.thislib"}, &table, true);
-  ASSERT_THAT(s, NotNull());
-  EXPECT_THAT(s->id, Eq(make_value<ResourceId>(0x7f010007)));
-
-  // An unqualified reference to lib2 is rewritten
-  s = ReferenceLinker::ResolveSymbol(*test::BuildReference("string/lib2_string"),
-                                     CallSite{"com.example.thislib"}, &table, true);
-  ASSERT_THAT(s, NotNull());
-  EXPECT_THAT(s->id, Eq(make_value<ResourceId>(0x7f010003)));
-
-  // Qualified references are left alone.
-  s = ReferenceLinker::ResolveSymbol(
-      *test::BuildReference("com.example.lib2:string/explicit_override_string"),
-      CallSite{"com.example.thislib"}, &table, true);
-  ASSERT_THAT(s, NotNull());
-  EXPECT_THAT(s->id, Eq(make_value<ResourceId>(0x7f010004)));
-
-  // Implicit overrides respect priority ordering.
-  s = ReferenceLinker::ResolveSymbol(*test::BuildReference("string/implicit_override_string"),
-                                     CallSite{"com.example.thislib"}, &table, true);
-  ASSERT_THAT(s, NotNull());
-  EXPECT_THAT(s->id, Eq(make_value<ResourceId>(0x7f010005)));
-
-  //
-}
 }  // namespace aapt
