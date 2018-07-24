@@ -63,28 +63,13 @@ public class BluetoothEventManager {
         void onReceive(Context context, Intent intent, BluetoothDevice device);
     }
 
-    private void addHandler(String action, Handler handler) {
-        mHandlerMap.put(action, handler);
-        mAdapterIntentFilter.addAction(action);
-    }
-
-    void addProfileHandler(String action, Handler handler) {
-        mHandlerMap.put(action, handler);
-        mProfileIntentFilter.addAction(action);
-    }
-
-    // Set profile manager after construction due to circular dependency
-    void setProfileManager(LocalBluetoothProfileManager manager) {
-        mProfileManager = manager;
-    }
-
     BluetoothEventManager(LocalBluetoothAdapter adapter,
             CachedBluetoothDeviceManager deviceManager, Context context) {
         mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mAdapterIntentFilter = new IntentFilter();
         mProfileIntentFilter = new IntentFilter();
-        mHandlerMap = new HashMap<String, Handler>();
+        mHandlerMap = new HashMap<>();
         mContext = context;
 
         // Bluetooth on/off broadcasts
@@ -125,10 +110,6 @@ public class BluetoothEventManager {
         mContext.registerReceiver(mProfileBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
     }
 
-    void registerProfileIntentReceiver() {
-        mContext.registerReceiver(mProfileBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
-    }
-
     public void setReceiverHandler(android.os.Handler handler) {
         mContext.unregisterReceiver(mBroadcastReceiver);
         mContext.unregisterReceiver(mProfileBroadcastReceiver);
@@ -149,6 +130,97 @@ public class BluetoothEventManager {
         synchronized (mCallbacks) {
             mCallbacks.remove(callback);
         }
+    }
+
+    void registerProfileIntentReceiver() {
+        mContext.registerReceiver(mProfileBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
+    }
+
+    void addProfileHandler(String action, Handler handler) {
+        mHandlerMap.put(action, handler);
+        mProfileIntentFilter.addAction(action);
+    }
+
+    // Set profile manager after construction due to circular dependency
+    void setProfileManager(LocalBluetoothProfileManager manager) {
+        mProfileManager = manager;
+    }
+
+    boolean readPairedDevices() {
+        Set<BluetoothDevice> bondedDevices = mLocalAdapter.getBondedDevices();
+        if (bondedDevices == null) {
+            return false;
+        }
+
+        boolean deviceAdded = false;
+        for (BluetoothDevice device : bondedDevices) {
+            CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
+            if (cachedDevice == null) {
+                cachedDevice = mDeviceManager.addDevice(mLocalAdapter, mProfileManager, device);
+                dispatchDeviceAdded(cachedDevice);
+                deviceAdded = true;
+            }
+        }
+
+        return deviceAdded;
+    }
+
+    void dispatchDeviceAdded(CachedBluetoothDevice cachedDevice) {
+        synchronized (mCallbacks) {
+            for (BluetoothCallback callback : mCallbacks) {
+                callback.onDeviceAdded(cachedDevice);
+            }
+        }
+    }
+
+    void dispatchDeviceRemoved(CachedBluetoothDevice cachedDevice) {
+        synchronized (mCallbacks) {
+            for (BluetoothCallback callback : mCallbacks) {
+                callback.onDeviceDeleted(cachedDevice);
+            }
+        }
+    }
+
+    void dispatchProfileConnectionStateChanged(CachedBluetoothDevice device, int state,
+            int bluetoothProfile) {
+        synchronized (mCallbacks) {
+            for (BluetoothCallback callback : mCallbacks) {
+                callback.onProfileConnectionStateChanged(device, state, bluetoothProfile);
+            }
+        }
+        mDeviceManager.onProfileConnectionStateChanged(device, state, bluetoothProfile);
+    }
+
+    private void dispatchConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state) {
+        synchronized (mCallbacks) {
+            for (BluetoothCallback callback : mCallbacks) {
+                callback.onConnectionStateChanged(cachedDevice, state);
+            }
+        }
+    }
+
+    private void dispatchAudioModeChanged() {
+        mDeviceManager.dispatchAudioModeChanged();
+        synchronized (mCallbacks) {
+            for (BluetoothCallback callback : mCallbacks) {
+                callback.onAudioModeChanged();
+            }
+        }
+    }
+
+    private void dispatchActiveDeviceChanged(CachedBluetoothDevice activeDevice,
+            int bluetoothProfile) {
+        mDeviceManager.onActiveDeviceChanged(activeDevice, bluetoothProfile);
+        synchronized (mCallbacks) {
+            for (BluetoothCallback callback : mCallbacks) {
+                callback.onActiveDeviceChanged(activeDevice, bluetoothProfile);
+            }
+        }
+    }
+
+    private void addHandler(String action, Handler handler) {
+        mHandlerMap.put(action, handler);
+        mAdapterIntentFilter.addAction(action);
     }
 
     private class BluetoothBroadcastReceiver extends BroadcastReceiver {
@@ -234,30 +306,6 @@ public class BluetoothEventManager {
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
                     BluetoothAdapter.ERROR);
             dispatchConnectionStateChanged(cachedDevice, state);
-        }
-    }
-
-    private void dispatchConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state) {
-        synchronized (mCallbacks) {
-            for (BluetoothCallback callback : mCallbacks) {
-                callback.onConnectionStateChanged(cachedDevice, state);
-            }
-        }
-    }
-
-    void dispatchDeviceAdded(CachedBluetoothDevice cachedDevice) {
-        synchronized (mCallbacks) {
-            for (BluetoothCallback callback : mCallbacks) {
-                callback.onDeviceAdded(cachedDevice);
-            }
-        }
-    }
-
-    void dispatchDeviceRemoved(CachedBluetoothDevice cachedDevice) {
-        synchronized (mCallbacks) {
-            for (BluetoothCallback callback : mCallbacks) {
-                callback.onDeviceDeleted(cachedDevice);
-            }
         }
     }
 
@@ -388,25 +436,6 @@ public class BluetoothEventManager {
         }
     }
 
-    boolean readPairedDevices() {
-        Set<BluetoothDevice> bondedDevices = mLocalAdapter.getBondedDevices();
-        if (bondedDevices == null) {
-            return false;
-        }
-
-        boolean deviceAdded = false;
-        for (BluetoothDevice device : bondedDevices) {
-            CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
-            if (cachedDevice == null) {
-                cachedDevice = mDeviceManager.addDevice(mLocalAdapter, mProfileManager, device);
-                dispatchDeviceAdded(cachedDevice);
-                deviceAdded = true;
-            }
-        }
-
-        return deviceAdded;
-    }
-
     private class ActiveDeviceChangedHandler implements Handler {
         @Override
         public void onReceive(Context context, Intent intent, BluetoothDevice device) {
@@ -431,16 +460,6 @@ public class BluetoothEventManager {
         }
     }
 
-    private void dispatchActiveDeviceChanged(CachedBluetoothDevice activeDevice,
-            int bluetoothProfile) {
-        mDeviceManager.onActiveDeviceChanged(activeDevice, bluetoothProfile);
-        synchronized (mCallbacks) {
-            for (BluetoothCallback callback : mCallbacks) {
-                callback.onActiveDeviceChanged(activeDevice, bluetoothProfile);
-            }
-        }
-    }
-
     private class AudioModeChangedHandler implements Handler {
 
         @Override
@@ -452,24 +471,5 @@ public class BluetoothEventManager {
             }
             dispatchAudioModeChanged();
         }
-    }
-
-    private void dispatchAudioModeChanged() {
-        mDeviceManager.dispatchAudioModeChanged();
-        synchronized (mCallbacks) {
-            for (BluetoothCallback callback : mCallbacks) {
-                callback.onAudioModeChanged();
-            }
-        }
-    }
-
-    void dispatchProfileConnectionStateChanged(CachedBluetoothDevice device, int state,
-            int bluetoothProfile) {
-        synchronized (mCallbacks) {
-            for (BluetoothCallback callback : mCallbacks) {
-                callback.onProfileConnectionStateChanged(device, state, bluetoothProfile);
-            }
-        }
-        mDeviceManager.onProfileConnectionStateChanged(device, state, bluetoothProfile);
     }
 }
