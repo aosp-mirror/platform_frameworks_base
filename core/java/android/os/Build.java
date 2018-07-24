@@ -1114,8 +1114,7 @@ public class Build {
      * @removed
      */
     @SystemApi
-    public static final boolean PERMISSIONS_REVIEW_REQUIRED =
-            SystemProperties.getInt("ro.permission_review_required", 0) == 1;
+    public static final boolean PERMISSIONS_REVIEW_REQUIRED = true;
 
     /**
      * Returns the version string for the radio firmware.  May return

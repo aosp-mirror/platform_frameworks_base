@@ -342,9 +342,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public boolean isPermissionReviewModeEnabled() {
+    public boolean arePermissionsIndividuallyControlled() {
         return mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_permissionReviewRequired);
+                com.android.internal.R.bool.config_permissionsIndividuallyControlled);
+    }
+
+    @Override
+    public boolean isWirelessConsentModeEnabled() {
+        return mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_wirelessConsentRequired);
     }
 
     @Override

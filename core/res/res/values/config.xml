@@ -3224,12 +3224,11 @@
     <string-array translatable="false" name="config_defaultFirstUserRestrictions">
     </string-array>
 
-    <!-- Specifies whether the permissions needed by a legacy app should be
-         reviewed before any of its components can run. A legacy app is one
-         with targetSdkVersion < 23, i.e apps using the old permission model.
-         If review is not required, permissions are reviewed before the app
-         is installed. -->
-    <bool name="config_permissionReviewRequired">false</bool>
+    <!-- Specifies whether certain permissions should be individually controlled. -->
+    <bool name="config_permissionsIndividuallyControlled">false</bool>
+
+    <!-- Specifies whether the user has to give consent to manage wireless (wifi + bluetooth). -->
+    <bool name="config_wirelessConsentRequired">false</bool>
 
     <!-- Default value for android:focusableInTouchMode for some framework scrolling containers.
          ListView/GridView are notably absent since this is their default anyway.

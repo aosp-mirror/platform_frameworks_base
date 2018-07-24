@@ -19531,8 +19531,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // If permission review is enabled and this is a legacy app, mark the
             // permission as requiring a review as this is the initial state.
             int flags = 0;
-            if (mSettings.mPermissions.mPermissionReviewRequired
-                    && ps.pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
+            if (ps.pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
                 flags |= FLAG_PERMISSION_REVIEW_REQUIRED;
             }
             if (permissionsState.updatePermissionFlags(bp, userId, userSettableMask, flags)) {
@@ -23362,17 +23361,10 @@ public class PackageManagerService extends IPackageManager.Stub
     void onNewUserCreated(final int userId) {
         mDefaultPermissionPolicy.grantDefaultPermissions(userId);
         synchronized(mPackages) {
-            // If permission review for legacy apps is required, we represent
-            // dagerous permissions for such apps as always granted runtime
-            // permissions to keep per user flag state whether review is needed.
-            // Hence, if a new user is added we have to propagate dangerous
-            // permission grants for these legacy apps.
-            if (mSettings.mPermissions.mPermissionReviewRequired) {
-// NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
-                mPermissionManager.updateAllPermissions(
-                        StorageManager.UUID_PRIVATE_INTERNAL, true, mPackages.values(),
-                        mPermissionCallback);
-            }
+            // NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
+            mPermissionManager.updateAllPermissions(
+                    StorageManager.UUID_PRIVATE_INTERNAL, true, mPackages.values(),
+                    mPermissionCallback);
         }
     }
 

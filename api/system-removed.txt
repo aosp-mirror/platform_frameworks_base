@@ -81,7 +81,7 @@ package android.net.wifi {
 package android.os {
 
   public class Build {
-    field public static final boolean PERMISSIONS_REVIEW_REQUIRED;
+    field public static final boolean PERMISSIONS_REVIEW_REQUIRED = true;
   }
 
   public final class PowerManager {

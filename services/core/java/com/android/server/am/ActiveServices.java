@@ -519,12 +519,11 @@ public final class ActiveServices {
         // we do not start the service and launch a review activity if the calling app
         // is in the foreground passing it a pending intent to start the service when
         // review is completed.
-        if (mAm.mPermissionReviewRequired) {
-            // XXX This is not dealing with fgRequired!
-            if (!requestStartTargetPermissionsReviewIfNeededLocked(r, callingPackage,
-                    callingUid, service, callerFg, userId)) {
-                return null;
-            }
+
+        // XXX This is not dealing with fgRequired!
+        if (!requestStartTargetPermissionsReviewIfNeededLocked(r, callingPackage,
+                callingUid, service, callerFg, userId)) {
+            return null;
         }
 
         if (unscheduleServiceRestartLocked(r, callingUid, false)) {
@@ -1535,75 +1534,73 @@ public final class ActiveServices {
         // we schedule binding to the service but do not start its process, then
         // we launch a review activity to which is passed a callback to invoke
         // when done to start the bound service's process to completing the binding.
-        if (mAm.mPermissionReviewRequired) {
-            if (mAm.getPackageManagerInternalLocked().isPermissionsReviewRequired(
-                    s.packageName, s.userId)) {
+        if (mAm.getPackageManagerInternalLocked().isPermissionsReviewRequired(
+                s.packageName, s.userId)) {
 
-                permissionsReviewRequired = true;
+            permissionsReviewRequired = true;
 
-                // Show a permission review UI only for binding from a foreground app
-                if (!callerFg) {
-                    Slog.w(TAG, "u" + s.userId + " Binding to a service in package"
-                            + s.packageName + " requires a permissions review");
-                    return 0;
-                }
+            // Show a permission review UI only for binding from a foreground app
+            if (!callerFg) {
+                Slog.w(TAG, "u" + s.userId + " Binding to a service in package"
+                        + s.packageName + " requires a permissions review");
+                return 0;
+            }
 
-                final ServiceRecord serviceRecord = s;
-                final Intent serviceIntent = service;
+            final ServiceRecord serviceRecord = s;
+            final Intent serviceIntent = service;
 
-                RemoteCallback callback = new RemoteCallback(
-                        new RemoteCallback.OnResultListener() {
-                    @Override
-                    public void onResult(Bundle result) {
-                        synchronized(mAm) {
-                            final long identity = Binder.clearCallingIdentity();
-                            try {
-                                if (!mPendingServices.contains(serviceRecord)) {
-                                    return;
-                                }
-                                // If there is still a pending record, then the service
-                                // binding request is still valid, so hook them up. We
-                                // proceed only if the caller cleared the review requirement
-                                // otherwise we unbind because the user didn't approve.
-                                if (!mAm.getPackageManagerInternalLocked()
-                                        .isPermissionsReviewRequired(
-                                                serviceRecord.packageName,
-                                                serviceRecord.userId)) {
-                                    try {
-                                        bringUpServiceLocked(serviceRecord,
-                                                serviceIntent.getFlags(),
-                                                callerFg, false, false);
-                                    } catch (RemoteException e) {
-                                        /* ignore - local call */
-                                    }
-                                } else {
-                                    unbindServiceLocked(connection);
-                                }
-                            } finally {
-                                Binder.restoreCallingIdentity(identity);
+            RemoteCallback callback = new RemoteCallback(
+                    new RemoteCallback.OnResultListener() {
+                @Override
+                public void onResult(Bundle result) {
+                    synchronized(mAm) {
+                        final long identity = Binder.clearCallingIdentity();
+                        try {
+                            if (!mPendingServices.contains(serviceRecord)) {
+                                return;
                             }
+                            // If there is still a pending record, then the service
+                            // binding request is still valid, so hook them up. We
+                            // proceed only if the caller cleared the review requirement
+                            // otherwise we unbind because the user didn't approve.
+                            if (!mAm.getPackageManagerInternalLocked()
+                                    .isPermissionsReviewRequired(
+                                            serviceRecord.packageName,
+                                            serviceRecord.userId)) {
+                                try {
+                                    bringUpServiceLocked(serviceRecord,
+                                            serviceIntent.getFlags(),
+                                            callerFg, false, false);
+                                } catch (RemoteException e) {
+                                    /* ignore - local call */
+                                }
+                            } else {
+                                unbindServiceLocked(connection);
+                            }
+                        } finally {
+                            Binder.restoreCallingIdentity(identity);
                         }
                     }
-                });
-
-                final Intent intent = new Intent(Intent.ACTION_REVIEW_PERMISSIONS);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-                intent.putExtra(Intent.EXTRA_PACKAGE_NAME, s.packageName);
-                intent.putExtra(Intent.EXTRA_REMOTE_CALLBACK, callback);
-
-                if (DEBUG_PERMISSIONS_REVIEW) {
-                    Slog.i(TAG, "u" + s.userId + " Launching permission review for package "
-                            + s.packageName);
                 }
+            });
 
-                mAm.mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAm.mContext.startActivityAsUser(intent, new UserHandle(userId));
-                    }
-                });
+            final Intent intent = new Intent(Intent.ACTION_REVIEW_PERMISSIONS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+            intent.putExtra(Intent.EXTRA_PACKAGE_NAME, s.packageName);
+            intent.putExtra(Intent.EXTRA_REMOTE_CALLBACK, callback);
+
+            if (DEBUG_PERMISSIONS_REVIEW) {
+                Slog.i(TAG, "u" + s.userId + " Launching permission review for package "
+                        + s.packageName);
             }
+
+            mAm.mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mAm.mContext.startActivityAsUser(intent, new UserHandle(userId));
+                }
+            });
         }
 
         final long origId = Binder.clearCallingIdentity();
