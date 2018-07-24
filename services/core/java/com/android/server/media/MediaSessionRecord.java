@@ -255,8 +255,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
             // Adjust the volume with a handler not to be blocked by other system service.
             int stream = AudioAttributes.toLegacyStreamType(mAudioAttrs);
-            postAdjustLocalVolume(stream, direction, flags, packageName, uid, useSuggested,
-                    previousFlagPlaySound);
+            postAdjustLocalVolume(stream, direction, flags, packageName, uid, asSystemService,
+                    useSuggested, previousFlagPlaySound);
         } else {
             if (mVolumeControlType == VolumeProvider.VOLUME_CONTROL_FIXED) {
                 // Nothing to do, the volume cannot be changed
@@ -462,8 +462,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     }
 
     private void postAdjustLocalVolume(final int stream, final int direction, final int flags,
-            final String packageName, final int uid, final boolean useSuggested,
-            final int previousFlagPlaySound) {
+            final String callingPackageName, final int callingUid, final boolean asSystemService,
+            final boolean useSuggested, final int previousFlagPlaySound) {
+        final String packageName = asSystemService
+                ? mContext.getOpPackageName() : callingPackageName;
+        final int uid = asSystemService ? Process.SYSTEM_UID : callingUid;
         mHandler.post(new Runnable() {
             @Override
             public void run() {

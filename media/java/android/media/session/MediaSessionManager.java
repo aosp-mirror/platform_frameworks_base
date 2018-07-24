@@ -321,7 +321,7 @@ public final class MediaSessionManager {
     private void dispatchMediaKeyEventInternal(boolean asSystemService, @NonNull KeyEvent keyEvent,
             boolean needWakeLock) {
         try {
-            mService.dispatchMediaKeyEvent(mContext.getPackageName(), asSystemService, keyEvent,
+            mService.dispatchMediaKeyEvent(mContext.getOpPackageName(), asSystemService, keyEvent,
                     needWakeLock);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to send key event.", e);
@@ -357,7 +357,7 @@ public final class MediaSessionManager {
     private void dispatchVolumeKeyEventInternal(boolean asSystemService, @NonNull KeyEvent keyEvent,
             int stream, boolean musicOnly) {
         try {
-            mService.dispatchVolumeKeyEvent(mContext.getPackageName(), asSystemService, keyEvent,
+            mService.dispatchVolumeKeyEvent(mContext.getOpPackageName(), asSystemService, keyEvent,
                     stream, musicOnly);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to send volume key event.", e);
@@ -378,7 +378,7 @@ public final class MediaSessionManager {
      */
     public void dispatchAdjustVolume(int suggestedStream, int direction, int flags) {
         try {
-            mService.dispatchAdjustVolume(mContext.getPackageName(), suggestedStream, direction,
+            mService.dispatchAdjustVolume(mContext.getOpPackageName(), suggestedStream, direction,
                     flags);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to send adjust volume.", e);
@@ -460,7 +460,7 @@ public final class MediaSessionManager {
         try {
             List<Bundle> bundles = mService.getSessionTokens(
                     /* activeSessionOnly */ true, /* sessionServiceOnly */ false,
-                    mContext.getPackageName());
+                    mContext.getOpPackageName());
             return toTokenList(bundles);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
@@ -483,7 +483,7 @@ public final class MediaSessionManager {
         try {
             List<Bundle> bundles = mService.getSessionTokens(
                     /* activeSessionOnly */ false, /* sessionServiceOnly */ true,
-                    mContext.getPackageName());
+                    mContext.getOpPackageName());
             return toTokenList(bundles);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
@@ -508,7 +508,7 @@ public final class MediaSessionManager {
         try {
             List<Bundle> bundles = mService.getSessionTokens(
                     /* activeSessionOnly */ false, /* sessionServiceOnly */ false,
-                    mContext.getPackageName());
+                    mContext.getOpPackageName());
             return toTokenList(bundles);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
@@ -561,7 +561,8 @@ public final class MediaSessionManager {
             SessionTokensChangedWrapper wrapper = new SessionTokensChangedWrapper(
                     mContext, executor, listener);
             try {
-                mService.addSessionTokensListener(wrapper.mStub, userId, mContext.getPackageName());
+                mService.addSessionTokensListener(wrapper.mStub, userId,
+                        mContext.getOpPackageName());
                 mSessionTokensListener.put(listener, wrapper);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error in addSessionTokensListener.", e);
@@ -584,7 +585,8 @@ public final class MediaSessionManager {
             SessionTokensChangedWrapper wrapper = mSessionTokensListener.remove(listener);
             if (wrapper != null) {
                 try {
-                    mService.removeSessionTokensListener(wrapper.mStub, mContext.getPackageName());
+                    mService.removeSessionTokensListener(wrapper.mStub,
+                            mContext.getOpPackageName());
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error in removeSessionTokensListener.", e);
                 } finally {
