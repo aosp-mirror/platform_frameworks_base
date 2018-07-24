@@ -30,14 +30,13 @@ import android.util.Log;
 import android.util.Slog;
 import com.android.internal.logging.AndroidConfig;
 import com.android.server.NetworkManagementSocketTagger;
+import dalvik.system.RuntimeHooks;
 import dalvik.system.VMRuntime;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
-import java.util.TimeZone;
 import java.util.logging.LogManager;
-import org.apache.harmony.luni.internal.util.TimezoneGetter;
 
 /**
  * Main entry point for runtime initialization.  Not for
@@ -195,19 +194,13 @@ public class RuntimeInit {
          * the default handler, but not the pre handler.
          */
         LoggingHandler loggingHandler = new LoggingHandler();
-        Thread.setUncaughtExceptionPreHandler(loggingHandler);
+        RuntimeHooks.setUncaughtExceptionPreHandler(loggingHandler);
         Thread.setDefaultUncaughtExceptionHandler(new KillApplicationHandler(loggingHandler));
 
         /*
-         * Install a TimezoneGetter subclass for ZoneInfo.db
+         * Install a time zone supplier that uses the Android persistent time zone system property.
          */
-        TimezoneGetter.setInstance(new TimezoneGetter() {
-            @Override
-            public String getId() {
-                return SystemProperties.get("persist.sys.timezone");
-            }
-        });
-        TimeZone.setDefault(null);
+        RuntimeHooks.setTimeZoneIdSupplier(() -> SystemProperties.get("persist.sys.timezone"));
 
         /*
          * Sets handler for java.util.logging to use Android log facilities.
