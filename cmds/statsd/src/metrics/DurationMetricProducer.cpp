@@ -68,8 +68,8 @@ DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const Durat
                                                const bool nesting,
                                                const sp<ConditionWizard>& wizard,
                                                const FieldMatcher& internalDimensions,
-                                               const int64_t startTimeNs)
-    : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard),
+                                               const int64_t timeBaseNs, const int64_t startTimeNs)
+    : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard),
       mAggregationType(metric.aggregation_type()),
       mStartIndex(startIndex),
       mStopIndex(stopIndex),
@@ -128,6 +128,9 @@ DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const Durat
                                                mMetric2ConditionLinks.begin()->conditionFields);
         }
     }
+    flushIfNeededLocked(startTimeNs);
+    // Adjust start for partial bucket
+    mCurrentBucketStartTimeNs = startTimeNs;
     VLOG("metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
          (long long)mBucketSizeNs, (long long)mTimeBaseNs);
 }

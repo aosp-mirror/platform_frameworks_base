@@ -50,9 +50,32 @@ const int64_t bucket6StartTimeNs = bucketStartTimeNs + 5 * bucketSizeNs;
 const int64_t eventUpgradeTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
 
 /*
+ * Tests that the first bucket works correctly
+ */
+TEST(ValueMetricProducerTest, TestFirstBucket) {
+    ValueMetric metric;
+    metric.set_id(metricId);
+    metric.set_bucket(ONE_MINUTE);
+    metric.mutable_value_field()->set_field(tagId);
+    metric.mutable_value_field()->add_child()->set_field(2);
+
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+
+    // statsd started long ago.
+    // The metric starts in the middle of the bucket
+    ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
+                                      -1, 5, 600 * NS_PER_SEC + NS_PER_SEC/2, pullerManager);
+
+    EXPECT_EQ(600500000000, valueProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(10, valueProducer.mCurrentBucketNum);
+    EXPECT_EQ(660000000005, valueProducer.getCurrentBucketEndTimeNs());
+}
+
+/*
  * Tests pulled atoms with no conditions
  */
-TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
+TEST(ValueMetricProducerTest, TestPulledEventsNoCondition) {
     ValueMetric metric;
     metric.set_id(metricId);
     metric.set_bucket(ONE_MINUTE);
@@ -63,10 +86,20 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
+    EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
+            .WillOnce(Invoke([](int tagId, int64_t timeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
+                event->write(tagId);
+                event->write(3);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -85,7 +118,8 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
     EXPECT_EQ(true, curInterval.startUpdated);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(11, curInterval.start.long_value);
-    EXPECT_EQ(0UL, valueProducer.mPastBuckets.size());
+    EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
+    EXPECT_EQ(8, valueProducer.mPastBuckets.begin()->second.back().mValueLong);
 
     allData.clear();
     event = make_shared<LogEvent>(tagId, bucket3StartTimeNs + 1);
@@ -99,9 +133,9 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
     curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
     // tartUpdated:false sum:12
     EXPECT_EQ(true, curInterval.startUpdated);
-    EXPECT_EQ(0, curInterval.value.long_value);
+    EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
-    EXPECT_EQ(1UL, valueProducer.mPastBuckets.begin()->second.size());
+    EXPECT_EQ(2UL, valueProducer.mPastBuckets.begin()->second.size());
     EXPECT_EQ(12, valueProducer.mPastBuckets.begin()->second.back().mValueLong);
 
     allData.clear();
@@ -115,9 +149,9 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
     curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
     // startUpdated:false sum:12
     EXPECT_EQ(true, curInterval.startUpdated);
-    EXPECT_EQ(0, curInterval.value.long_value);
+    EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
-    EXPECT_EQ(2UL, valueProducer.mPastBuckets.begin()->second.size());
+    EXPECT_EQ(3UL, valueProducer.mPastBuckets.begin()->second.size());
     EXPECT_EQ(13, valueProducer.mPastBuckets.begin()->second.back().mValueLong);
 }
 
@@ -136,10 +170,10 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
+    EXPECT_CALL(*pullerManager, Pull(tagId, _, _)).WillOnce(Return(false));
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -205,10 +239,10 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
+    EXPECT_CALL(*pullerManager, Pull(tagId, _, _)).WillOnce(Return(false));
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -275,6 +309,17 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillRepeatedly(Return());
 
     EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
+            // should not take effect
+            .WillOnce(Invoke([](int tagId, int64_t timeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
+                event->write(tagId);
+                event->write(3);
+                event->init();
+                data->push_back(event);
+                return true;
+            }))
             .WillOnce(Invoke([](int tagId, int64_t timeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
@@ -298,7 +343,6 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
 
     ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 8);
 
     // has one slice
@@ -349,7 +393,6 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -392,6 +435,7 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
+            .WillOnce(Return(false))
             .WillOnce(Invoke([](int tagId, int64_t timeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
@@ -404,7 +448,6 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
             }));
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -447,6 +490,7 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgradeWhileConditionFalse) {
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
+            .WillOnce(Return(false))
             .WillOnce(Invoke([](int tagId, int64_t timeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
@@ -469,7 +513,6 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgradeWhileConditionFalse) {
             }));
     ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 1);
 
     valueProducer.onConditionChanged(false, bucket2StartTimeNs-100);
@@ -496,7 +539,6 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -538,7 +580,6 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithCondition) {
 
     ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, -1, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -612,7 +653,6 @@ TEST(ValueMetricProducerTest, TestAnomalyDetection) {
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       -1 /*not pulled*/, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     sp<AnomalyTracker> anomalyTracker = valueProducer.addAnomalyTracker(alert, alarmMonitor);
 
@@ -687,10 +727,10 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition) {
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
+    EXPECT_CALL(*pullerManager, Pull(tagId, _, _)).WillOnce(Return(false));
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     vector<shared_ptr<LogEvent>> allData;
     // pull 1
@@ -770,6 +810,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition) {
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillRepeatedly(Return());
 
     EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
+            .WillOnce(Return(false))
             // condition becomes true
             .WillOnce(Invoke([](int tagId, int64_t timeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
@@ -795,7 +836,6 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition) {
 
     ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 8);
 
     // has one slice
@@ -849,6 +889,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillRepeatedly(Return());
 
     EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
+            .WillOnce(Return(false))
             // condition becomes true
             .WillOnce(Invoke([](int tagId, int64_t timeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
@@ -885,7 +926,6 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
 
     ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 8);
 
     // has one slice
@@ -947,6 +987,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition3) {
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillRepeatedly(Return());
 
     EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
+            .WillOnce(Return(false))
             // condition becomes true
             .WillOnce(Invoke([](int tagId, int64_t timeNs,
                                 vector<std::shared_ptr<LogEvent>>* data) {
@@ -972,7 +1013,6 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition3) {
 
     ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 8);
 
     // has one slice
@@ -1022,7 +1062,6 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMin) {
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -1065,7 +1104,6 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMax) {
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -1108,7 +1146,6 @@ TEST(ValueMetricProducerTest, TestPushedAggregateAvg) {
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -1154,7 +1191,6 @@ TEST(ValueMetricProducerTest, TestPushedAggregateSum) {
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -1218,14 +1254,12 @@ TEST(ValueMetricProducerTest, TestPushedAggregateSumSliced) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     EXPECT_CALL(*wizard, query(_, key1, _, _, _, _)).WillOnce(Return(ConditionState::kFalse));
-
     EXPECT_CALL(*wizard, query(_, key2, _, _, _, _)).WillOnce(Return(ConditionState::kTrue));
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
     ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, -1, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
-    valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
 

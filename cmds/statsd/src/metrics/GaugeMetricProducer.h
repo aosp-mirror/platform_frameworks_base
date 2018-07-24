@@ -77,7 +77,7 @@ public:
         }
         flushCurrentBucketLocked(eventTimeNs);
         mCurrentBucketStartTimeNs = eventTimeNs;
-        if (mPullTagId != -1) {
+        if (mIsPulled) {
             pullLocked(eventTimeNs);
         }
     };
@@ -121,6 +121,9 @@ private:
     // tagId for pulled data. -1 if this is not pulled
     const int mPullTagId;
 
+    // if this is pulled metric
+    const bool mIsPulled;
+
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
     std::unordered_map<MetricDimensionKey, std::vector<GaugeBucket>> mPastBuckets;
 
@@ -159,12 +162,13 @@ private:
 
     const size_t mGaugeAtomsPerDimensionLimit;
 
-    FRIEND_TEST(GaugeMetricProducerTest, TestWithCondition);
-    FRIEND_TEST(GaugeMetricProducerTest, TestWithSlicedCondition);
-    FRIEND_TEST(GaugeMetricProducerTest, TestNoCondition);
+    FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsWithCondition);
+    FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsWithSlicedCondition);
+    FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsNoCondition);
     FRIEND_TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade);
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledWithUpgrade);
-    FRIEND_TEST(GaugeMetricProducerTest, TestAnomalyDetection);
+    FRIEND_TEST(GaugeMetricProducerTest, TestPulledEventsAnomalyDetection);
+    FRIEND_TEST(GaugeMetricProducerTest, TestFirstBucket);
 };
 
 }  // namespace statsd

@@ -312,7 +312,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
         }
 
         sp<MetricProducer> countProducer =
-                new CountMetricProducer(key, metric, conditionIndex, wizard, timeBaseTimeNs);
+                new CountMetricProducer(key, metric, conditionIndex, wizard, timeBaseTimeNs, currentTimeNs);
         allMetricProducers.push_back(countProducer);
     }
 
@@ -382,7 +382,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
 
         sp<MetricProducer> durationMetric = new DurationMetricProducer(
                 key, metric, conditionIndex, trackerIndices[0], trackerIndices[1],
-                trackerIndices[2], nesting, wizard, internalDimensions, timeBaseTimeNs);
+                trackerIndices[2], nesting, wizard, internalDimensions, timeBaseTimeNs, currentTimeNs);
 
         allMetricProducers.push_back(durationMetric);
     }
