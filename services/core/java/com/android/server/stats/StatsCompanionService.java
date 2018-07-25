@@ -898,6 +898,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullBinderCallsStats(int tagId, List<StatsLogEventWrapper> pulledData) {
         BinderCallsStatsService.Internal binderStats =
                 LocalServices.getService(BinderCallsStatsService.Internal.class);
+        if (binderStats == null) {
+            return;
+        }
+
         List<ExportedCallStat> callStats = binderStats.getExportedCallStats();
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         for (ExportedCallStat callStat : callStats) {
@@ -922,6 +926,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullBinderCallsStatsExceptions(int tagId, List<StatsLogEventWrapper> pulledData) {
         BinderCallsStatsService.Internal binderStats =
                 LocalServices.getService(BinderCallsStatsService.Internal.class);
+        if (binderStats == null) {
+            return;
+        }
+
         ArrayMap<String, Integer> exceptionStats = binderStats.getExportedExceptionStats();
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         for (Entry<String, Integer> entry : exceptionStats.entrySet()) {
