@@ -400,10 +400,11 @@ public final class WindowInsets {
      * @param right New right inset in pixels
      * @param bottom New bottom inset in pixels
      * @return A modified copy of this WindowInsets
+     * @deprecated use {@link Builder#Builder(WindowInsets)} with
+     *             {@link Builder#setSystemWindowInsets(Insets)} instead.
      */
+    @Deprecated
     public WindowInsets replaceSystemWindowInsets(int left, int top, int right, int bottom) {
-        // TODO(roosa): deprecate in follow-up CL, once we have a builder for WindowInsets.
-
         // Compat edge case: what should this do if the insets have already been consumed?
         // On platforms prior to Q, the behavior was to override the insets with non-zero values,
         // but leave them consumed, which is invalid (consumed insets must be zero).
@@ -411,12 +412,7 @@ public final class WindowInsets {
         if (mSystemWindowInsetsConsumed) {
             return this;
         }
-
-        return new WindowInsets(Insets.of(left, top, right, bottom),
-                mWindowDecorInsetsConsumed ? null : mWindowDecorInsets,
-                mStableInsetsConsumed ? null : mStableInsets,
-                mIsRound, mAlwaysConsumeNavBar,
-                displayCutoutCopyConstructorArgument(this));
+        return new Builder(this).setSystemWindowInsets(Insets.of(left, top, right, bottom)).build();
     }
 
     /**
@@ -431,9 +427,11 @@ public final class WindowInsets {
      * @param systemWindowInsets New system window insets. Each field is the inset in pixels
      *                           for that edge
      * @return A modified copy of this WindowInsets
+     * @deprecated use {@link Builder#Builder(WindowInsets)} with
+     *             {@link Builder#setSystemWindowInsets(Insets)} instead.
      */
+    @Deprecated
     public WindowInsets replaceSystemWindowInsets(Rect systemWindowInsets) {
-        // TODO(roosa): deprecate in follow-up CL, once we have a builder for WindowInsets.
         return replaceSystemWindowInsets(systemWindowInsets.left, systemWindowInsets.top,
                 systemWindowInsets.right, systemWindowInsets.bottom);
     }
@@ -674,5 +672,123 @@ public final class WindowInsets {
      */
     boolean isSystemWindowInsetsConsumed() {
         return mSystemWindowInsetsConsumed;
+    }
+
+    /**
+     * Builder for WindowInsets.
+     */
+    public static class Builder {
+
+        private Insets mSystemWindowInsets;
+        private Insets mStableInsets;
+        private DisplayCutout mDisplayCutout;
+
+        private Insets mWindowDecorInsets;
+        private boolean mIsRound;
+        private boolean mAlwaysConsumeNavBar;
+
+        /**
+         * Creates a builder where all insets are initially consumed.
+         */
+        public Builder() {
+        }
+
+        /**
+         * Creates a builder where all insets are initialized from {@link WindowInsets}.
+         *
+         * @param insets the instance to initialize from.
+         */
+        public Builder(WindowInsets insets) {
+            mSystemWindowInsets = insets.mSystemWindowInsetsConsumed ? null
+                    : insets.mSystemWindowInsets;
+            mStableInsets = insets.mStableInsetsConsumed ? null : insets.mStableInsets;
+            mDisplayCutout = displayCutoutCopyConstructorArgument(insets);
+            mWindowDecorInsets =  insets.mWindowDecorInsetsConsumed ? null
+                    : insets.mWindowDecorInsets;
+            mIsRound = insets.mIsRound;
+            mAlwaysConsumeNavBar = insets.mAlwaysConsumeNavBar;
+        }
+
+        /**
+         * Sets system window insets in pixels.
+         *
+         * <p>The system window inset represents the area of a full-screen window that is
+         * partially or fully obscured by the status bar, navigation bar, IME or other system
+         * windows.</p>
+         *
+         * @see #getSystemWindowInsets()
+         * @return itself
+         */
+        @NonNull
+        public Builder setSystemWindowInsets(@NonNull Insets systemWindowInsets) {
+            Preconditions.checkNotNull(systemWindowInsets);
+            mSystemWindowInsets = systemWindowInsets;
+            return this;
+        }
+
+        /**
+         * Sets the stable insets in pixels.
+         *
+         * <p>The stable inset represents the area of a full-screen window that <b>may</b> be
+         * partially or fully obscured by the system UI elements.  This value does not change
+         * based on the visibility state of those elements; for example, if the status bar is
+         * normally shown, but temporarily hidden, the stable inset will still provide the inset
+         * associated with the status bar being shown.</p>
+         *
+         * @see #getStableInsets()
+         * @return itself
+         */
+        @NonNull
+        public Builder setStableInsets(@NonNull Insets stableInsets) {
+            Preconditions.checkNotNull(stableInsets);
+            mStableInsets = stableInsets;
+            return this;
+        }
+
+        /**
+         * Sets the display cutout.
+         *
+         * @see #getDisplayCutout()
+         * @param displayCutout the display cutout or null if there is none
+         * @return itself
+         */
+        @NonNull
+        public Builder setDisplayCutout(@Nullable DisplayCutout displayCutout) {
+            mDisplayCutout = displayCutout != null ? displayCutout : DisplayCutout.NO_CUTOUT;
+            return this;
+        }
+
+        /** @hide */
+        @NonNull
+        public Builder setWindowDecorInsets(@NonNull Insets windowDecorInsets) {
+            Preconditions.checkNotNull(windowDecorInsets);
+            mWindowDecorInsets = windowDecorInsets;
+            return this;
+        }
+
+        /** @hide */
+        @NonNull
+        public Builder setRound(boolean round) {
+            mIsRound = round;
+            return this;
+        }
+
+        /** @hide */
+        @NonNull
+        public Builder setAlwaysConsumeNavBar(boolean alwaysConsumeNavBar) {
+            mAlwaysConsumeNavBar = alwaysConsumeNavBar;
+            return this;
+        }
+
+        /**
+         * Builds a {@link WindowInsets} instance.
+         *
+         * @return the {@link WindowInsets} instance.
+         */
+        @NonNull
+        public WindowInsets build() {
+            return new WindowInsets(mSystemWindowInsets, mWindowDecorInsets, mStableInsets,
+                    mIsRound, mAlwaysConsumeNavBar, mDisplayCutout);
+        }
     }
 }
