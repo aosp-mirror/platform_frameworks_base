@@ -886,6 +886,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public boolean isRotateButtonVisible() { return mShowRotateButton; }
 
+    void hideRecentsOnboarding() {
+        mRecentsOnboarding.hide(true);
+    }
+
     /**
      * @return the button at the given {@param x} and {@param y}.
      */
