@@ -1,19 +1,18 @@
 package com.android.settingslib.drawer;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Bundle;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 public class TileTest {

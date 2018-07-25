@@ -17,12 +17,8 @@ package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothAdapter;
@@ -31,20 +27,18 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 
-import com.android.settingslib.R;
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import java.util.Collection;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class CachedBluetoothDeviceManagerTest {
     private final static String DEVICE_NAME_1 = "TestName_1";
     private final static String DEVICE_NAME_2 = "TestName_2";

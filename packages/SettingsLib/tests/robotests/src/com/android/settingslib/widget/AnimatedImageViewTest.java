@@ -22,13 +22,14 @@ import android.app.Activity;
 import android.graphics.drawable.AnimatedRotateDrawable;
 import android.view.View;
 
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricTestRunner;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class AnimatedImageViewTest {
     private AnimatedImageView mAnimatedImageView;
 
