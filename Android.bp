@@ -1282,7 +1282,9 @@ doc_defaults {
     metalava_enabled: true,
     metalava_annotations_enabled: true,
     metalava_previous_api: ":public-api-for-metalava-annotations",
-    metalava_merge_annotations_dir: "tools/metalava/manual",
+    metalava_merge_annotations_dirs: [
+        "tools/metalava/manual",
+    ],
 }
 
 droiddoc {
