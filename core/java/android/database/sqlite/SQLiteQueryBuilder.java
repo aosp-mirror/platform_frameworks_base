@@ -376,6 +376,11 @@ public class SQLiteQueryBuilder
             return null;
         }
 
+        final String sql;
+        final String unwrappedSql = buildQuery(
+                projectionIn, selection, groupBy, having,
+                sortOrder, limit);
+
         if (mStrict && selection != null && selection.length() > 0) {
             // Validate the user-supplied selection to detect syntactic anomalies
             // in the selection string that could indicate a SQL injection attempt.
@@ -384,14 +389,22 @@ public class SQLiteQueryBuilder
             // originally specified. An attacker cannot create an expression that
             // would escape the SQL expression while maintaining balanced parentheses
             // in both the wrapped and original forms.
-            String sqlForValidation = buildQuery(projectionIn, "(" + selection + ")", groupBy,
-                    having, sortOrder, limit);
-            db.validateSql(sqlForValidation, cancellationSignal); // will throw if query is invalid
-        }
 
-        String sql = buildQuery(
-                projectionIn, selection, groupBy, having,
-                sortOrder, limit);
+            // NOTE: The ordering of the below operations is important; we must
+            // execute the wrapped query to ensure the untrusted clause has been
+            // fully isolated.
+
+            // Validate the unwrapped query
+            db.validateSql(unwrappedSql, cancellationSignal); // will throw if query is invalid
+
+            // Execute wrapped query for extra protection
+            final String wrappedSql = buildQuery(projectionIn, "(" + selection + ")", groupBy,
+                    having, sortOrder, limit);
+            sql = wrappedSql;
+        } else {
+            // Execute unwrapped query
+            sql = unwrappedSql;
+        }
 
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "Performing query: " + sql);
