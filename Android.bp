@@ -609,8 +609,6 @@ java_library {
             "system/netd/server/binder",
             "system/bt/binder",
         ],
-
-        generate_get_transaction_name: true
     },
 
     no_framework_libs: true,
