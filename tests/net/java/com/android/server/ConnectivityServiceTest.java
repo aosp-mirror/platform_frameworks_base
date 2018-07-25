@@ -1465,9 +1465,11 @@ public class ConnectivityServiceTest {
      * received. assertNoCallback may be called at any time.
      */
     private class TestNetworkCallback extends NetworkCallback {
-        // Chosen to be much less than the linger timeout. This ensures that we can distinguish
+        // Chosen to be less than the linger timeout. This ensures that we can distinguish
         // between a LOST callback that arrives immediately and a LOST callback that arrives after
-        // the linger timeout.
+        // the linger timeout. For this, our assertions should run fast enough to leave less than
+        // (mService.mLingerDelayMs - TIMEOUT_MS) between the time callbacks are supposedly fired,
+        // and the time we call expectCallback.
         private final static int TIMEOUT_MS = 100;
 
         private final LinkedBlockingQueue<CallbackInfo> mCallbacks = new LinkedBlockingQueue<>();
@@ -1545,9 +1547,9 @@ public class ConnectivityServiceTest {
             if (state == CallbackState.LOSING) {
                 String msg = String.format(
                         "Invalid linger time value %d, must be between %d and %d",
-                        actual.arg, 0, TEST_LINGER_DELAY_MS);
+                        actual.arg, 0, mService.mLingerDelayMs);
                 int maxMsToLive = (Integer) actual.arg;
-                assertTrue(msg, 0 <= maxMsToLive && maxMsToLive <= TEST_LINGER_DELAY_MS);
+                assertTrue(msg, 0 <= maxMsToLive && maxMsToLive <= mService.mLingerDelayMs);
             }
 
             return actual;
@@ -1769,6 +1771,12 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testMultipleLingering() {
+        // This test would be flaky with the default 120ms timer: that is short enough that
+        // lingered networks are torn down before assertions can be run. We don't want to mock the
+        // lingering timer to keep the WakeupMessage logic realistic: this has already proven useful
+        // in detecting races.
+        mService.mLingerDelayMs = 300;
+
         NetworkRequest request = new NetworkRequest.Builder()
                 .clearCapabilities().addCapability(NET_CAPABILITY_NOT_METERED)
                 .build();
@@ -1986,7 +1994,7 @@ public class ConnectivityServiceTest {
 
         // Let linger run its course.
         callback.assertNoCallback();
-        final int lingerTimeoutMs = TEST_LINGER_DELAY_MS + TEST_LINGER_DELAY_MS / 4;
+        final int lingerTimeoutMs = mService.mLingerDelayMs + mService.mLingerDelayMs / 4;
         callback.expectCallback(CallbackState.LOST, mCellNetworkAgent, lingerTimeoutMs);
 
         // Register a TRACK_DEFAULT request and check that it does not affect lingering.
