@@ -20,7 +20,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,20 +36,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.ParcelUuid;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(resourceDir = "../../res")
+import java.util.ArrayList;
+import java.util.List;
+
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class LocalBluetoothProfileManagerTest {
     @Mock
     private CachedBluetoothDeviceManager mDeviceManager;

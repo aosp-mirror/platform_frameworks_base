@@ -16,6 +16,7 @@
 package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -31,23 +32,29 @@ import android.content.Context;
 import android.content.res.Resources;
 
 import com.android.settingslib.R;
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class A2dpProfileTest {
 
-    @Mock Context mContext;
-    @Mock LocalBluetoothAdapter mAdapter;
-    @Mock CachedBluetoothDeviceManager mDeviceManager;
-    @Mock LocalBluetoothProfileManager mProfileManager;
-    @Mock BluetoothDevice mDevice;
-    @Mock BluetoothA2dp mBluetoothA2dp;
+    @Mock
+    Context mContext;
+    @Mock
+    LocalBluetoothAdapter mAdapter;
+    @Mock
+    CachedBluetoothDeviceManager mDeviceManager;
+    @Mock
+    LocalBluetoothProfileManager mProfileManager;
+    @Mock
+    BluetoothDevice mDevice;
+    @Mock
+    BluetoothA2dp mBluetoothA2dp;
     BluetoothProfile.ServiceListener mServiceListener;
 
     A2dpProfile mProfile;
@@ -126,7 +133,7 @@ public class A2dpProfileTest {
     private static String KNOWN_CODEC_LABEL = "Use high quality audio: %1$s";
     private static String UNKNOWN_CODEC_LABEL = "Use high quality audio";
     private static String[] CODEC_NAMES =
-            new String[] { "Default", "SBC", "AAC", "aptX", "aptX HD", "LDAC" };
+            new String[]{"Default", "SBC", "AAC", "aptX", "aptX HD", "LDAC"};
 
     /**
      * Helper for setting up several tests of getHighQualityAudioOptionLabel
