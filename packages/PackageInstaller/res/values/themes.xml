@@ -17,28 +17,6 @@
 
 <resources>
 
-    <style name="Settings"
-           parent="@android:style/Theme.DeviceDefault.Settings">
-    </style>
-
-    <style name="CarSettingTheme" parent="Theme.Car.Light.NoActionBar">
-        <item name="android:background">@color/car_card</item>
-    </style>
-
-    <style name="Settings.NoActionBar" parent="@style/Settings">
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay.SettingsBase</item>
-    </style>
-
-    <style name="GrantPermissions"
-            parent="@*android:style/Theme.DeviceDefault.Light.Panel.PermissionGrantApp">
-        <!-- The following attributes change the behavior of the dialog, hence they should not be
-             themed -->
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowCloseOnTouchOutside">@*android:bool/config_closeDialogWhenTouchOutside</item>
-    </style>
-
     <style name="DialogWhenLarge"
             parent="@android:style/Theme.DeviceDefault.Light.NoActionBar">
         <item name="android:textAppearanceMedium">@style/MediumText</item>

@@ -15,13 +15,6 @@
 -->
 
 <resources>
-    <dimen name="grant_permissions_app_icon_size">64dp</dimen>
-    <dimen name="grant_permissions_app_icon_margin_top">19dp</dimen>
-
-    <dimen name="grant_permissions_app_breadcrumb_margin_bottom">3dp</dimen>
-    <dimen name="grant_permissions_app_title_margin_bottom">18dp</dimen>
-    <dimen name="grant_permissions_app_details_margin_bottom">8dp</dimen>
-
     <dimen name="action_dialog_z">16dp</dimen>
     <dimen name="action_dialog_padding_left">52dp</dimen>
     <dimen name="action_dialog_padding_right">40dp</dimen>
