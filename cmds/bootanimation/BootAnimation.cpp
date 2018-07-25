@@ -859,11 +859,11 @@ bool BootAnimation::movie()
         mTimeCheckThread = nullptr;
     }
 
-    releaseAnimation(animation);
-
     if (clockFontInitialized) {
         glDeleteTextures(1, &animation->clockFont.texture.name);
     }
+
+    releaseAnimation(animation);
 
     return false;
 }
