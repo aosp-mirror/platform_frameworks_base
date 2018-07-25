@@ -33,8 +33,22 @@ struct ManifestFixerOptions {
   Maybe<std::string> target_sdk_version_default;
   Maybe<std::string> rename_manifest_package;
   Maybe<std::string> rename_instrumentation_target_package;
+
+  // The version name to set if 'android:versionName' is not defined in <manifest> or if
+  // replace_version is set.
   Maybe<std::string> version_name_default;
+
+  // The version code to set if 'android:versionCode' is not defined in <manifest> or if
+  // replace_version is set.
   Maybe<std::string> version_code_default;
+
+  // Wether validation errors should be treated only as warnings. If this is 'true', then an
+  // incorrect node will not result in an error, but only as a warning, and the parsing will
+  // continue.
+  bool warn_validation = false;
+
+  // Whether to replace the manifest version with the the command line version
+  bool replace_version = false;
 };
 
 /**

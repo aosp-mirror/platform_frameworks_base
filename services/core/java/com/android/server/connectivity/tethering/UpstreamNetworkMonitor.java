@@ -20,6 +20,9 @@ import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 
 import android.content.Context;
 import android.os.Handler;
@@ -74,14 +77,13 @@ public class UpstreamNetworkMonitor {
     private static final boolean DBG = false;
     private static final boolean VDBG = false;
 
-    public static final int EVENT_ON_AVAILABLE      = 1;
-    public static final int EVENT_ON_CAPABILITIES   = 2;
-    public static final int EVENT_ON_LINKPROPERTIES = 3;
-    public static final int EVENT_ON_LOST           = 4;
+    public static final int EVENT_ON_CAPABILITIES   = 1;
+    public static final int EVENT_ON_LINKPROPERTIES = 2;
+    public static final int EVENT_ON_LOST           = 3;
     public static final int NOTIFY_LOCAL_PREFIXES   = 10;
 
     private static final int CALLBACK_LISTEN_ALL = 1;
-    private static final int CALLBACK_TRACK_DEFAULT = 2;
+    private static final int CALLBACK_DEFAULT_INTERNET = 2;
     private static final int CALLBACK_MOBILE_REQUEST = 3;
 
     private final Context mContext;
@@ -117,7 +119,7 @@ public class UpstreamNetworkMonitor {
         mCM = cm;
     }
 
-    public void start() {
+    public void start(NetworkRequest defaultNetworkRequest) {
         stop();
 
         final NetworkRequest listenAllRequest = new NetworkRequest.Builder()
@@ -125,8 +127,16 @@ public class UpstreamNetworkMonitor {
         mListenAllCallback = new UpstreamNetworkCallback(CALLBACK_LISTEN_ALL);
         cm().registerNetworkCallback(listenAllRequest, mListenAllCallback, mHandler);
 
-        mDefaultNetworkCallback = new UpstreamNetworkCallback(CALLBACK_TRACK_DEFAULT);
-        cm().registerDefaultNetworkCallback(mDefaultNetworkCallback, mHandler);
+        if (defaultNetworkRequest != null) {
+            // This is not really a "request", just a way of tracking the system default network.
+            // It's guaranteed not to actually bring up any networks because it's the same request
+            // as the ConnectivityService default request, and thus shares fate with it. We can't
+            // use registerDefaultNetworkCallback because it will not track the system default
+            // network if there is a VPN that applies to our UID.
+            final NetworkRequest trackDefaultRequest = new NetworkRequest(defaultNetworkRequest);
+            mDefaultNetworkCallback = new UpstreamNetworkCallback(CALLBACK_DEFAULT_INTERNET);
+            cm().requestNetwork(trackDefaultRequest, mDefaultNetworkCallback, mHandler);
+        }
     }
 
     public void stop() {
@@ -225,6 +235,20 @@ public class UpstreamNetworkMonitor {
         return typeStatePair.ns;
     }
 
+    // Returns null if no current upstream available.
+    public NetworkState getCurrentPreferredUpstream() {
+        final NetworkState dfltState = (mDefaultInternetNetwork != null)
+                ? mNetworkMap.get(mDefaultInternetNetwork)
+                : null;
+        if (!mDunRequired) return dfltState;
+
+        if (isNetworkUsableAndNotCellular(dfltState)) return dfltState;
+
+        // Find a DUN network. Note that code in Tethering causes a DUN request
+        // to be filed, but this might be moved into this class in future.
+        return findFirstDunNetwork(mNetworkMap.values());
+    }
+
     public void setCurrentUpstream(Network upstream) {
         mTetheringUpstreamNetwork = upstream;
     }
@@ -233,72 +257,16 @@ public class UpstreamNetworkMonitor {
         return (Set<IpPrefix>) mLocalPrefixes.clone();
     }
 
-    private void handleAvailable(int callbackType, Network network) {
-        if (VDBG) Log.d(TAG, "EVENT_ON_AVAILABLE for " + network);
+    private void handleAvailable(Network network) {
+        if (mNetworkMap.containsKey(network)) return;
 
-        if (!mNetworkMap.containsKey(network)) {
-            mNetworkMap.put(network,
-                    new NetworkState(null, null, null, network, null, null));
-        }
-
-        // Always request whatever extra information we can, in case this
-        // was already up when start() was called, in which case we would
-        // not have been notified of any information that had not changed.
-        switch (callbackType) {
-            case CALLBACK_LISTEN_ALL:
-                break;
-
-            case CALLBACK_TRACK_DEFAULT:
-                if (mDefaultNetworkCallback == null) {
-                    // The callback was unregistered in the interval between
-                    // ConnectivityService enqueueing onAvailable() and our
-                    // handling of it here on the mHandler thread.
-                    //
-                    // Clean-up of this network entry is deferred to the
-                    // handling of onLost() by other callbacks.
-                    //
-                    // These request*() calls can be deleted post oag/339444.
-                    return;
-                }
-                mDefaultInternetNetwork = network;
-                break;
-
-            case CALLBACK_MOBILE_REQUEST:
-                if (mMobileNetworkCallback == null) {
-                    // The callback was unregistered in the interval between
-                    // ConnectivityService enqueueing onAvailable() and our
-                    // handling of it here on the mHandler thread.
-                    //
-                    // Clean-up of this network entry is deferred to the
-                    // handling of onLost() by other callbacks.
-                    return;
-                }
-                break;
-        }
-
-        // Requesting updates for mListenAllCallback is not currently possible
-        // because it's a "listen". Two possible solutions to getting updates
-        // about networks without waiting for a change (which might never come)
-        // are:
-        //
-        //     [1] extend request{NetworkCapabilities,LinkProperties}() to
-        //         take a Network argument and have ConnectivityService do
-        //         what's required (if the network satisfies the request)
-        //
-        //     [2] explicitly file a NetworkRequest for each connectivity type
-        //         listed as a preferred upstream and wait for these callbacks
-        //         to be notified (requires tracking many more callbacks).
-        //
-        // Until this is addressed, networks that exist prior to the "listen"
-        // registration and which do not subsequently change will not cause
-        // us to learn their NetworkCapabilities nor their LinkProperties.
-
-        // TODO: If sufficient information is available to select a more
-        // preferable upstream, do so now and notify the target.
-        notifyTarget(EVENT_ON_AVAILABLE, network);
+        if (VDBG) Log.d(TAG, "onAvailable for " + network);
+        mNetworkMap.put(network, new NetworkState(null, null, null, network, null, null));
     }
 
-    private void handleNetCap(Network network, NetworkCapabilities newNc) {
+    private void handleNetCap(int callbackType, Network network, NetworkCapabilities newNc) {
+        if (callbackType == CALLBACK_DEFAULT_INTERNET) mDefaultInternetNetwork = network;
+
         final NetworkState prev = mNetworkMap.get(network);
         if (prev == null || newNc.equals(prev.networkCapabilities)) {
             // Ignore notifications about networks for which we have not yet
@@ -360,13 +328,17 @@ public class UpstreamNetworkMonitor {
     }
 
     private void handleLost(int callbackType, Network network) {
-        if (callbackType == CALLBACK_TRACK_DEFAULT) {
+        if (network.equals(mDefaultInternetNetwork)) {
             mDefaultInternetNetwork = null;
-            // Receiving onLost() for a default network does not necessarily
-            // mean the network is gone.  We wait for a separate notification
-            // on either the LISTEN_ALL or MOBILE_REQUEST callbacks before
-            // clearing all state.
-            return;
+            // There are few TODOs within ConnectivityService's rematching code
+            // pertaining to spurious onLost() notifications.
+            //
+            // TODO: simplify this, probably if favor of code that:
+            //     - selects a new upstream if mTetheringUpstreamNetwork has
+            //       been lost (by any callback)
+            //     - deletes the entry from the map only when the LISTEN_ALL
+            //       callback gets  notified.
+            if (callbackType == CALLBACK_DEFAULT_INTERNET) return;
         }
 
         if (!mNetworkMap.containsKey(network)) {
@@ -416,17 +388,19 @@ public class UpstreamNetworkMonitor {
 
         @Override
         public void onAvailable(Network network) {
-            handleAvailable(mCallbackType, network);
+            handleAvailable(network);
         }
 
         @Override
         public void onCapabilitiesChanged(Network network, NetworkCapabilities newNc) {
-            handleNetCap(network, newNc);
+            handleNetCap(mCallbackType, network, newNc);
         }
 
         @Override
         public void onLinkPropertiesChanged(Network network, LinkProperties newLp) {
             handleLinkProp(network, newLp);
+            // TODO(b/110335330): reduce the number of times this is called by
+            // only recomputing on the LISTEN_ALL callback.
             recomputeLocalPrefixes();
         }
 
@@ -443,6 +417,8 @@ public class UpstreamNetworkMonitor {
         @Override
         public void onLost(Network network) {
             handleLost(mCallbackType, network);
+            // TODO(b/110335330): reduce the number of times this is called by
+            // only recomputing on the LISTEN_ALL callback.
             recomputeLocalPrefixes();
         }
     }
@@ -508,5 +484,32 @@ public class UpstreamNetworkMonitor {
     private static String getSignalStrength(NetworkCapabilities nc) {
         if (nc == null || !nc.hasSignalStrength()) return "unknown";
         return Integer.toString(nc.getSignalStrength());
+    }
+
+    private static boolean isCellular(NetworkState ns) {
+        return (ns != null) && isCellular(ns.networkCapabilities);
+    }
+
+    private static boolean isCellular(NetworkCapabilities nc) {
+        return (nc != null) && nc.hasTransport(TRANSPORT_CELLULAR) &&
+               nc.hasCapability(NET_CAPABILITY_NOT_VPN);
+    }
+
+    private static boolean hasCapability(NetworkState ns, int netCap) {
+        return (ns != null) && (ns.networkCapabilities != null) &&
+               ns.networkCapabilities.hasCapability(netCap);
+    }
+
+    private static boolean isNetworkUsableAndNotCellular(NetworkState ns) {
+        return (ns != null) && (ns.networkCapabilities != null) && (ns.linkProperties != null) &&
+               !isCellular(ns.networkCapabilities);
+    }
+
+    private static NetworkState findFirstDunNetwork(Iterable<NetworkState> netStates) {
+        for (NetworkState ns : netStates) {
+            if (isCellular(ns) && hasCapability(ns, NET_CAPABILITY_DUN)) return ns;
+        }
+
+        return null;
     }
 }

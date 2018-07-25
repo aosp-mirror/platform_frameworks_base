@@ -45,6 +45,7 @@ public final class ImsExternalCallState implements Parcelable {
     private int mCallId;
     // Number
     private Uri mAddress;
+    private Uri mLocalAddress;
     private boolean mIsPullable;
     // CALL_STATE_CONFIRMED / CALL_STATE_TERMINATED
     private int mCallState;
@@ -69,10 +70,24 @@ public final class ImsExternalCallState implements Parcelable {
     }
 
     /** @hide */
+    public ImsExternalCallState(int callId, Uri address, Uri localAddress,
+            boolean isPullable, int callState, int callType, boolean isCallheld) {
+        mCallId = callId;
+        mAddress = address;
+        mLocalAddress = localAddress;
+        mIsPullable = isPullable;
+        mCallState = callState;
+        mCallType = callType;
+        mIsHeld = isCallheld;
+        Rlog.d(TAG, "ImsExternalCallState = " + this);
+    }
+
+    /** @hide */
     public ImsExternalCallState(Parcel in) {
         mCallId = in.readInt();
         ClassLoader classLoader = ImsExternalCallState.class.getClassLoader();
         mAddress = in.readParcelable(classLoader);
+        mLocalAddress = in.readParcelable(classLoader);
         mIsPullable = (in.readInt() != 0);
         mCallState = in.readInt();
         mCallType = in.readInt();
@@ -89,6 +104,7 @@ public final class ImsExternalCallState implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mCallId);
         out.writeParcelable(mAddress, 0);
+        out.writeParcelable(mLocalAddress, 0);
         out.writeInt(mIsPullable ? 1 : 0);
         out.writeInt(mCallState);
         out.writeInt(mCallType);
@@ -117,6 +133,11 @@ public final class ImsExternalCallState implements Parcelable {
         return mAddress;
     }
 
+    /** @hide */
+    public Uri getLocalAddress() {
+        return mLocalAddress;
+    }
+
     public boolean isCallPullable() {
         return mIsPullable;
     }
@@ -137,6 +158,7 @@ public final class ImsExternalCallState implements Parcelable {
     public String toString() {
         return "ImsExternalCallState { mCallId = " + mCallId +
                 ", mAddress = " + Log.pii(mAddress) +
+                ", mLocalAddress = " + Log.pii(mLocalAddress) +
                 ", mIsPullable = " + mIsPullable +
                 ", mCallState = " + mCallState +
                 ", mCallType = " + mCallType +

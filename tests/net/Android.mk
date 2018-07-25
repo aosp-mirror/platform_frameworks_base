@@ -32,6 +32,7 @@ LOCAL_CERTIFICATE := platform
 # These are not normally accessible from apps so they must be explicitly included.
 LOCAL_JNI_SHARED_LIBRARIES := \
     android.hidl.token@1.0 \
+    libartbase \
     libbacktrace \
     libbase \
     libbinder \
@@ -52,13 +53,14 @@ LOCAL_JNI_SHARED_LIBRARIES := \
     libpcre2 \
     libselinux \
     libui \
-    libunwind \
     libutils \
     libvintf \
     libvndksupport \
     libtinyxml2 \
     libunwindstack \
-    libutilscallstack
+    libutilscallstack \
+    libziparchive \
+    libz
 
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 

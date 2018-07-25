@@ -117,22 +117,44 @@ TEST(UtilTest, IsJavaClassName) {
   EXPECT_TRUE(util::IsJavaClassName("android.test.Class$Inner"));
   EXPECT_TRUE(util::IsJavaClassName("android_test.test.Class"));
   EXPECT_TRUE(util::IsJavaClassName("_android_.test._Class_"));
-  EXPECT_FALSE(util::IsJavaClassName("android.test.$Inner"));
-  EXPECT_FALSE(util::IsJavaClassName("android.test.Inner$"));
+  EXPECT_TRUE(util::IsJavaClassName("android.test.$Inner"));
+  EXPECT_TRUE(util::IsJavaClassName("android.test.Inner$"));
+  EXPECT_TRUE(util::IsJavaClassName("com.foo.FøøBar"));
+
   EXPECT_FALSE(util::IsJavaClassName(".test.Class"));
   EXPECT_FALSE(util::IsJavaClassName("android"));
+  EXPECT_FALSE(util::IsJavaClassName("FooBar"));
 }
 
 TEST(UtilTest, IsJavaPackageName) {
   EXPECT_TRUE(util::IsJavaPackageName("android"));
   EXPECT_TRUE(util::IsJavaPackageName("android.test"));
   EXPECT_TRUE(util::IsJavaPackageName("android.test_thing"));
-  EXPECT_FALSE(util::IsJavaPackageName("_android"));
-  EXPECT_FALSE(util::IsJavaPackageName("android_"));
+  EXPECT_TRUE(util::IsJavaPackageName("_android"));
+  EXPECT_TRUE(util::IsJavaPackageName("android_"));
+  EXPECT_TRUE(util::IsJavaPackageName("android._test"));
+  EXPECT_TRUE(util::IsJavaPackageName("cøm.foo"));
+
   EXPECT_FALSE(util::IsJavaPackageName("android."));
   EXPECT_FALSE(util::IsJavaPackageName(".android"));
-  EXPECT_FALSE(util::IsJavaPackageName("android._test"));
   EXPECT_FALSE(util::IsJavaPackageName(".."));
+}
+
+TEST(UtilTest, IsAndroidPackageName) {
+  EXPECT_TRUE(util::IsAndroidPackageName("android"));
+  EXPECT_TRUE(util::IsAndroidPackageName("android.test"));
+  EXPECT_TRUE(util::IsAndroidPackageName("com.foo"));
+  EXPECT_TRUE(util::IsAndroidPackageName("com.foo.test_thing"));
+  EXPECT_TRUE(util::IsAndroidPackageName("com.foo.testing_thing_"));
+  EXPECT_TRUE(util::IsAndroidPackageName("com.foo.test_99_"));
+
+  EXPECT_FALSE(util::IsAndroidPackageName("android._test"));
+  EXPECT_FALSE(util::IsAndroidPackageName("com"));
+  EXPECT_FALSE(util::IsAndroidPackageName("_android"));
+  EXPECT_FALSE(util::IsAndroidPackageName("android."));
+  EXPECT_FALSE(util::IsAndroidPackageName(".android"));
+  EXPECT_FALSE(util::IsAndroidPackageName(".."));
+  EXPECT_FALSE(util::IsAndroidPackageName("cøm.foo"));
 }
 
 TEST(UtilTest, FullyQualifiedClassName) {

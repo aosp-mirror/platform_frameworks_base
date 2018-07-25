@@ -462,6 +462,35 @@ public class ZygoteProcess {
     }
 
     /**
+     * Attempt to retrieve the PID of the zygote serving the given abi.
+     */
+    public int getZygotePid(String abi) {
+        try {
+            synchronized (mLock) {
+                ZygoteState state = openZygoteSocketIfNeeded(abi);
+
+                // Each query starts with the argument count (1 in this case)
+                state.writer.write("1");
+                // ... followed by a new-line.
+                state.writer.newLine();
+                // ... followed by our only argument.
+                state.writer.write("--get-pid");
+                state.writer.newLine();
+                state.writer.flush();
+
+                // The response is a length prefixed stream of ASCII bytes.
+                int numBytes = state.inputStream.readInt();
+                byte[] bytes = new byte[numBytes];
+                state.inputStream.readFully(bytes);
+
+                return Integer.parseInt(new String(bytes, StandardCharsets.US_ASCII));
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Failure retrieving pid", ex);
+        }
+    }
+
+    /**
      * Push hidden API blacklisting exemptions into the zygote process(es).
      *
      * <p>The list of exemptions will take affect for all new processes forked from the zygote after

@@ -1923,6 +1923,12 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
           .OptionalFlag("--version-name",
                         "Version name to inject into the AndroidManifest.xml if none is present.",
                         &options.manifest_fixer_options.version_name_default)
+          .OptionalSwitch("--replace-version",
+                         "If --version-code and/or --version-name are specified, these\n"
+                         "values will replace any value already in the manifest. By\n"
+                         "default, nothing is changed if the manifest already defines\n"
+                         "these attributes.",
+                         &options.manifest_fixer_options.replace_version)
           .OptionalSwitch("--shared-lib", "Generates a shared Android runtime library.",
                           &shared_lib)
           .OptionalSwitch("--static-lib", "Generate a static Android library.", &static_lib)
@@ -1968,6 +1974,9 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
                         &options.manifest_fixer_options.rename_instrumentation_target_package)
           .OptionalFlagList("-0", "File extensions not to compress.",
                             &options.extensions_to_not_compress)
+          .OptionalSwitch("--warn-manifest-validation",
+                          "Treat manifest validation errors as warnings.",
+                          &options.manifest_fixer_options.warn_validation)
           .OptionalFlagList("--split",
                             "Split resources matching a set of configs out to a Split APK.\n"
                             "Syntax: path/to/output.apk:<config>[,<config>[...]].\n"

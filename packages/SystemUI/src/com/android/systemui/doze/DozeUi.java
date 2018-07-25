@@ -27,7 +27,6 @@ import com.android.systemui.util.AlarmTimeout;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 /**
  * The policy controlling doze.
@@ -139,7 +138,7 @@ public class DozeUi implements DozeMachine.Part {
     }
 
     private long roundToNextMinute(long timeInMillis) {
-        Calendar calendar = GregorianCalendar.getInstance();
+        Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(timeInMillis);
         calendar.set(Calendar.MILLISECOND, 0);
         calendar.set(Calendar.SECOND, 0);

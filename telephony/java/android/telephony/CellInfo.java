@@ -17,8 +17,10 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -36,6 +38,8 @@ public abstract class CellInfo implements Parcelable {
     protected static final int TYPE_LTE = 3;
     /** @hide */
     protected static final int TYPE_WCDMA = 4;
+    /** @hide */
+    protected static final int TYPE_TDCDMA = 5;
 
     // Type to distinguish where time stamp gets recorded.
 
@@ -120,6 +124,14 @@ public abstract class CellInfo implements Parcelable {
     public void setTimeStamp(long timeStamp) {
         mTimeStamp = timeStamp;
     }
+
+    /** @hide */
+    @NonNull
+    public abstract CellIdentity getCellIdentity();
+
+    /** @hide */
+    @NonNull
+    public abstract CellSignalStrength getCellSignalStrength();
 
     /**
      * Gets the connection status of this cell.
@@ -260,6 +272,7 @@ public abstract class CellInfo implements Parcelable {
                     case TYPE_CDMA: return CellInfoCdma.createFromParcelBody(in);
                     case TYPE_LTE: return CellInfoLte.createFromParcelBody(in);
                     case TYPE_WCDMA: return CellInfoWcdma.createFromParcelBody(in);
+                    case TYPE_TDCDMA: return CellInfoTdscdma.createFromParcelBody(in);
                     default: throw new RuntimeException("Bad CellInfo Parcel");
                 }
         }

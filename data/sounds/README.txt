@@ -31,3 +31,13 @@ Video recording
 ./effects/ogg/VideoStop_48k.ogg
   unused
 
+NFC
+---
+
+./effects/ogg/NFCFailure.ogg
+./effects/ogg/NFCInitiated.ogg
+./effects/ogg/NFCSuccess.ogg
+./effects/ogg/NFCTransferComplete.ogg
+./effects/ogg/NFCTransferInitiated.ogg
+
+referenced in AudioPackage14.mk (= AudioPackage13.mk + NFC sounds).

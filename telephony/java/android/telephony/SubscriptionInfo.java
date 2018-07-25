@@ -33,9 +33,9 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import java.util.Arrays;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -105,12 +105,12 @@ public class SubscriptionInfo implements Parcelable {
     /**
      * Mobile Country Code
      */
-    private int mMcc;
+    private String mMcc;
 
     /**
      * Mobile Network Code
      */
-    private int mMnc;
+    private String mMnc;
 
     /**
      * ISO Country code for the subscription's provider
@@ -138,11 +138,11 @@ public class SubscriptionInfo implements Parcelable {
      * @hide
      */
     public SubscriptionInfo(int id, String iccId, int simSlotIndex, CharSequence displayName,
-        CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
-        Bitmap icon, int mcc, int mnc, String countryIso) {
+            CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
+            Bitmap icon, String mcc, String mnc, String countryIso) {
         this(id, iccId, simSlotIndex, displayName, carrierName, nameSource, iconTint, number,
-            roaming, icon, mcc, mnc, countryIso, false /* isEmbedded */,
-            null /* accessRules */, null /* accessRules */);
+                roaming, icon, mcc, mnc, countryIso, false /* isEmbedded */,
+                null /* accessRules */, null /* accessRules */);
     }
 
     /**
@@ -150,7 +150,7 @@ public class SubscriptionInfo implements Parcelable {
      */
     public SubscriptionInfo(int id, String iccId, int simSlotIndex, CharSequence displayName,
             CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
-            Bitmap icon, int mcc, int mnc, String countryIso,  boolean isEmbedded,
+            Bitmap icon, String mcc, String mnc, String countryIso,  boolean isEmbedded,
             @Nullable UiccAccessRule[] accessRules) {
         this(id, iccId, simSlotIndex, displayName, carrierName, nameSource, iconTint, number,
                 roaming, icon, mcc, mnc, countryIso, isEmbedded, accessRules, null /* cardId */);
@@ -161,7 +161,7 @@ public class SubscriptionInfo implements Parcelable {
      */
     public SubscriptionInfo(int id, String iccId, int simSlotIndex, CharSequence displayName,
             CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
-            Bitmap icon, int mcc, int mnc, String countryIso, boolean isEmbedded,
+            Bitmap icon, String mcc, String mnc, String countryIso, boolean isEmbedded,
             @Nullable UiccAccessRule[] accessRules, String cardId) {
         this.mId = id;
         this.mIccId = iccId;
@@ -316,15 +316,43 @@ public class SubscriptionInfo implements Parcelable {
 
     /**
      * @return the MCC.
+     * @deprecated Use {@link #getMccString()} instead.
      */
+    @Deprecated
     public int getMcc() {
-        return this.mMcc;
+        try {
+            return this.mMcc == null ? 0 : Integer.valueOf(this.mMcc);
+        } catch (NumberFormatException e) {
+            Log.w(SubscriptionInfo.class.getSimpleName(), "MCC string is not a number");
+            return 0;
+        }
     }
 
     /**
      * @return the MNC.
+     * @deprecated Use {@link #getMncString()} instead.
      */
+    @Deprecated
     public int getMnc() {
+        try {
+            return this.mMnc == null ? 0 : Integer.valueOf(this.mMnc);
+        } catch (NumberFormatException e) {
+            Log.w(SubscriptionInfo.class.getSimpleName(), "MNC string is not a number");
+            return 0;
+        }
+    }
+
+    /**
+     * @return The MCC, as a string.
+     */
+    public String getMccString() {
+        return this.mMcc;
+    }
+
+    /**
+     * @return The MNC, as a string.
+     */
+    public String getMncString() {
         return this.mMnc;
     }
 
@@ -425,8 +453,8 @@ public class SubscriptionInfo implements Parcelable {
             int iconTint = source.readInt();
             String number = source.readString();
             int dataRoaming = source.readInt();
-            int mcc = source.readInt();
-            int mnc = source.readInt();
+            String mcc = source.readString();
+            String mnc = source.readString();
             String countryIso = source.readString();
             Bitmap iconBitmap = Bitmap.CREATOR.createFromParcel(source);
             boolean isEmbedded = source.readBoolean();
@@ -455,8 +483,8 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeInt(mIconTint);
         dest.writeString(mNumber);
         dest.writeInt(mDataRoaming);
-        dest.writeInt(mMcc);
-        dest.writeInt(mMnc);
+        dest.writeString(mMcc);
+        dest.writeString(mMnc);
         dest.writeString(mCountryIso);
         mIconBitmap.writeToParcel(dest, flags);
         dest.writeBoolean(mIsEmbedded);

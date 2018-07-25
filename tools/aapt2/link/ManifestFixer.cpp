@@ -127,9 +127,9 @@ static bool VerifyManifest(xml::Element* el, SourcePathDiagnostics* diag) {
     diag->Error(DiagMessage(el->line_number)
                 << "attribute 'package' in <manifest> tag must not be a reference");
     return false;
-  } else if (!util::IsJavaPackageName(attr->value)) {
+  } else if (!util::IsAndroidPackageName(attr->value)) {
     diag->Error(DiagMessage(el->line_number)
-                << "attribute 'package' in <manifest> tag is not a valid Java package name: '"
+                << "attribute 'package' in <manifest> tag is not a valid Android package name: '"
                 << attr->value << "'");
     return false;
   }
@@ -237,6 +237,9 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action.Action(FixCoreAppAttribute);
   manifest_action.Action([&](xml::Element* el) -> bool {
     if (options_.version_name_default) {
+      if (options_.replace_version) {
+        el->RemoveAttribute(xml::kSchemaAndroid, "versionName");
+      }
       if (el->FindAttribute(xml::kSchemaAndroid, "versionName") == nullptr) {
         el->attributes.push_back(
             xml::Attribute{xml::kSchemaAndroid, "versionName",
@@ -245,6 +248,9 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
     }
 
     if (options_.version_code_default) {
+      if (options_.replace_version) {
+        el->RemoveAttribute(xml::kSchemaAndroid, "versionCode");
+      }
       if (el->FindAttribute(xml::kSchemaAndroid, "versionCode") == nullptr) {
         el->attributes.push_back(
             xml::Attribute{xml::kSchemaAndroid, "versionCode",
@@ -409,7 +415,10 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
     return false;
   }
 
-  if (!executor.Execute(xml::XmlActionExecutorPolicy::kWhitelist, context->GetDiagnostics(), doc)) {
+  xml::XmlActionExecutorPolicy policy = options_.warn_validation
+                                            ? xml::XmlActionExecutorPolicy::kWhitelistWarning
+                                            : xml::XmlActionExecutorPolicy::kWhitelist;
+  if (!executor.Execute(policy, context->GetDiagnostics(), doc)) {
     return false;
   }
 

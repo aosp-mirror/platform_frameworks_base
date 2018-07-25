@@ -964,7 +964,8 @@ public final class ActivityThread {
         }
 
         public void setHttpProxy(String host, String port, String exclList, Uri pacFileUrl) {
-            final ConnectivityManager cm = ConnectivityManager.from(getSystemContext());
+            final ConnectivityManager cm = ConnectivityManager.from(
+                getApplication() != null ? getApplication() : getSystemContext());
             final Network network = cm.getBoundNetworkForProcess();
             if (network != null) {
                 Proxy.setHttpProxySystemProperty(cm.getDefaultProxy());
@@ -5294,8 +5295,8 @@ public final class ActivityThread {
                                         }
                                     }
                                 }
-                                final List<String> oldPaths =
-                                        sPackageManager.getPreviousCodePaths(packageName);
+                                final ArrayList<String> oldPaths = new ArrayList<>();
+                                LoadedApk.makePaths(this, loadedApk.getApplicationInfo(), oldPaths);
                                 loadedApk.updateApplicationInfo(aInfo, oldPaths);
                             } catch (RemoteException e) {
                             }

@@ -16,6 +16,9 @@
 
 package com.android.captiveportallogin;
 
+import static android.net.ConnectivityManager.EXTRA_CAPTIVE_PORTAL_PROBE_SPEC;
+import static android.net.captiveportal.CaptivePortalProbeSpec.HTTP_LOCATION_HEADER_NAME;
+
 import android.app.Activity;
 import android.app.LoadedApk;
 import android.content.Context;
@@ -26,16 +29,18 @@ import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.Proxy;
 import android.net.Uri;
+import android.net.captiveportal.CaptivePortalProbeSpec;
 import android.net.dns.ResolvUtil;
 import android.net.http.SslError;
+import android.net.wifi.WifiInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.TypedValue;
@@ -84,6 +89,7 @@ public class CaptivePortalLoginActivity extends Activity {
     };
 
     private URL mUrl;
+    private CaptivePortalProbeSpec mProbeSpec;
     private String mUserAgent;
     private Network mNetwork;
     private CaptivePortal mCaptivePortal;
@@ -115,6 +121,14 @@ public class CaptivePortalLoginActivity extends Activity {
         }
         if (DBG) {
             Log.d(TAG, String.format("onCreate for %s", mUrl.toString()));
+        }
+
+        final String spec = getIntent().getStringExtra(EXTRA_CAPTIVE_PORTAL_PROBE_SPEC);
+        try {
+            mProbeSpec = CaptivePortalProbeSpec.parseSpecOrNull(spec);
+        } catch (Exception e) {
+            // Make extra sure that invalid configurations do not cause crashes
+            mProbeSpec = null;
         }
 
         // Also initializes proxy system properties.
@@ -328,6 +342,7 @@ public class CaptivePortalLoginActivity extends Activity {
                 }
                 HttpURLConnection urlConnection = null;
                 int httpResponseCode = 500;
+                String locationHeader = null;
                 try {
                     urlConnection = (HttpURLConnection) network.openConnection(mUrl);
                     urlConnection.setInstanceFollowRedirects(false);
@@ -342,6 +357,7 @@ public class CaptivePortalLoginActivity extends Activity {
 
                     urlConnection.getInputStream();
                     httpResponseCode = urlConnection.getResponseCode();
+                    locationHeader = urlConnection.getHeaderField(HTTP_LOCATION_HEADER_NAME);
                     if (DBG) {
                         Log.d(TAG, "probe at " + mUrl +
                                 " ret=" + httpResponseCode +
@@ -352,11 +368,18 @@ public class CaptivePortalLoginActivity extends Activity {
                 } finally {
                     if (urlConnection != null) urlConnection.disconnect();
                 }
-                if (httpResponseCode == 204) {
+                if (isDismissed(httpResponseCode, locationHeader, mProbeSpec)) {
                     done(Result.DISMISSED);
                 }
             }
         }).start();
+    }
+
+    private static boolean isDismissed(
+            int httpResponseCode, String locationHeader, CaptivePortalProbeSpec probeSpec) {
+        return (probeSpec != null)
+                ? probeSpec.getResult(httpResponseCode, locationHeader).isSuccessful()
+                : (httpResponseCode == 204);
     }
 
     private class MyWebViewClient extends WebViewClient {
@@ -534,15 +557,12 @@ public class CaptivePortalLoginActivity extends Activity {
     }
 
     private String getHeaderTitle() {
-        NetworkInfo info = mCm.getNetworkInfo(mNetwork);
-        if (info == null) {
-            return getString(R.string.action_bar_label);
-        }
         NetworkCapabilities nc = mCm.getNetworkCapabilities(mNetwork);
-        if (!nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+        if (nc == null || TextUtils.isEmpty(nc.getSSID())
+            || !nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
             return getString(R.string.action_bar_label);
         }
-        return getString(R.string.action_bar_title, info.getExtraInfo().replaceAll("^\"|\"$", ""));
+        return getString(R.string.action_bar_title, WifiInfo.removeDoubleQuotes(nc.getSSID()));
     }
 
     private String getHeaderSubtitle(URL url) {

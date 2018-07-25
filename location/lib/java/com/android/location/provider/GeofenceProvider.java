@@ -31,6 +31,7 @@ import android.location.IGeofenceProvider;
  * <p>IMPORTANT: This class is effectively a public API for unbundled
  * applications, and must remain API stable. See README.txt in the root
  * of this package for more information.
+ * @hide
  */
 public abstract class GeofenceProvider {
 

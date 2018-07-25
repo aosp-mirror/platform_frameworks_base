@@ -98,6 +98,9 @@ class Element : public Node {
   Attribute* FindAttribute(const android::StringPiece& ns, const android::StringPiece& name);
   const Attribute* FindAttribute(const android::StringPiece& ns,
                                  const android::StringPiece& name) const;
+  void RemoveAttribute(const android::StringPiece& ns,
+                       const android::StringPiece& name);
+
   Element* FindChild(const android::StringPiece& ns, const android::StringPiece& name);
   Element* FindChildWithAttribute(const android::StringPiece& ns, const android::StringPiece& name,
                                   const android::StringPiece& attr_ns,

@@ -1,0 +1,12 @@
+package javax.obex {
+
+  public class ObexPacket {
+    method public static javax.obex.ObexPacket read(java.io.InputStream) throws java.io.IOException;
+    method public static javax.obex.ObexPacket read(int, java.io.InputStream) throws java.io.IOException;
+    field public int mHeaderId;
+    field public int mLength;
+    field public byte[] mPayload;
+  }
+
+}
+

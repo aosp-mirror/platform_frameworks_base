@@ -823,6 +823,16 @@ interface ITelephony {
     boolean isResolvingImsBinding();
 
     /**
+    *  @return true if the ImsService to bind to for the slot id specified was set, false otherwise.
+    */
+    boolean setImsService(int slotId, boolean isCarrierImsService, String packageName);
+
+    /**
+    * @return the package name of the carrier/device ImsService associated with this slot.
+    */
+    String getImsService(int slotId, boolean isCarrierImsService);
+
+    /**
      * Set the network selection mode to automatic.
      *
      * @param subId the id of the subscription to update.
@@ -1188,6 +1198,13 @@ interface ITelephony {
     String getImeiForSlot(int slotIndex, String callingPackage);
 
     /**
+     * Returns the Type Allocation Code from the IMEI for the given slot.
+     *
+     * @param slotIndex - Which slot to retrieve the Type Allocation Code from.
+     */
+    String getTypeAllocationCodeForSlot(int slotIndex);
+
+    /**
      * Returns the MEID for the given slot.
      *
      * @param slotIndex - device slot.
@@ -1196,6 +1213,13 @@ interface ITelephony {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     String getMeidForSlot(int slotIndex, String callingPackage);
+
+    /**
+     * Returns the Manufacturer Code from the MEID for the given slot.
+     *
+     * @param slotIndex - Which slot to retrieve the Manufacturer Code from.
+     */
+    String getManufacturerCodeForSlot(int slotIndex);
 
     /**
      * Returns the device software version.

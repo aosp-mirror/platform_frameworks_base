@@ -9207,6 +9207,29 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     /**
+     * Clear the package profile if this was an upgrade and the package
+     * version was updated.
+     */
+    private void maybeClearProfilesForUpgradesLI(
+            @Nullable PackageSetting originalPkgSetting,
+            @NonNull PackageParser.Package currentPkg) {
+        if (originalPkgSetting == null || !isUpgrade()) {
+          return;
+        }
+        if (originalPkgSetting.versionCode == currentPkg.mVersionCode) {
+          return;
+        }
+
+        clearAppProfilesLIF(currentPkg, UserHandle.USER_ALL);
+        if (DEBUG_INSTALL) {
+            Slog.d(TAG, originalPkgSetting.name
+                  + " clear profile due to version change "
+                  + originalPkgSetting.versionCode + " != "
+                  + currentPkg.mVersionCode);
+        }
+    }
+
+    /**
      *  Traces a package scan.
      *  @see #scanPackageLI(File, int, int, long, UserHandle)
      */
@@ -9490,6 +9513,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Verify certificates against what was last scanned
         collectCertificatesLI(ps, pkg, scanFile, policyFlags);
+
+        // Reset profile if the application version is changed
+        maybeClearProfilesForUpgradesLI(ps, pkg);
 
         /*
          * A new system app appeared, but we already had a non-system one of the
@@ -11000,6 +11026,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     // We just determined the app is signed correctly, so bring
                     // over the latest parsed certs.
                     pkgSetting.signatures.mSignatures = pkg.mSignatures;
+
+                    if (signatureCheckPs.sharedUser != null) {
+                        if (signatureCheckPs.sharedUser.signaturesChanged == null) {
+                            signatureCheckPs.sharedUser.signaturesChanged = Boolean.FALSE;
+                        }
+                    }
                 } catch (PackageManagerException e) {
                     if ((policyFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
                         throw e;
@@ -11007,19 +11039,25 @@ public class PackageManagerService extends IPackageManager.Stub
                     // The signature has changed, but this package is in the system
                     // image...  let's recover!
                     pkgSetting.signatures.mSignatures = pkg.mSignatures;
-                    // However...  if this package is part of a shared user, but it
-                    // doesn't match the signature of the shared user, let's fail.
-                    // What this means is that you can't change the signatures
-                    // associated with an overall shared user, which doesn't seem all
-                    // that unreasonable.
+
+                    // If the system app is part of a shared user we allow that shared user to
+                    // change signatures as well as part of an OTA. We still need to verify that the
+                    // signatures are consistent within the shared user for a given boot, so only
+                    // allow updating the signatures on the first package scanned for the shared
+                    // user (i.e. if the signaturesChanged state hasn't been initialized yet in
+                    // SharedUserSetting).
                     if (signatureCheckPs.sharedUser != null) {
-                        if (compareSignatures(signatureCheckPs.sharedUser.signatures.mSignatures,
+                        if (signatureCheckPs.sharedUser.signaturesChanged != null &&
+                            compareSignatures(signatureCheckPs.sharedUser.signatures.mSignatures,
                                 pkg.mSignatures) != PackageManager.SIGNATURE_MATCH) {
                             throw new PackageManagerException(
                                     INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
                                     "Signature mismatch for shared user: "
                                             + pkgSetting.sharedUser);
                         }
+
+                        signatureCheckPs.sharedUser.signatures.mSignatures = pkg.mSignatures;
+                        signatureCheckPs.sharedUser.signaturesChanged = Boolean.TRUE;
                     }
                     // File a report about this.
                     String msg = "System package " + pkg.packageName
@@ -17861,22 +17899,6 @@ public class PackageManagerService extends IPackageManager.Stub
             replaceNonSystemPackageLIF(oldPackage, pkg, policyFlags, scanFlags,
                     user, allUsers, installerPackageName, res, installReason);
         }
-    }
-
-    @Override
-    public List<String> getPreviousCodePaths(String packageName) {
-        final int callingUid = Binder.getCallingUid();
-        final List<String> result = new ArrayList<>();
-        if (getInstantAppPackageName(callingUid) != null) {
-            return result;
-        }
-        final PackageSetting ps = mSettings.mPackages.get(packageName);
-        if (ps != null
-                && ps.oldCodePaths != null
-                && !filterAppAccessLPr(ps, callingUid, UserHandle.getUserId(callingUid))) {
-            result.addAll(ps.oldCodePaths);
-        }
-        return result;
     }
 
     private void replaceNonSystemPackageLIF(PackageParser.Package deletedPackage,

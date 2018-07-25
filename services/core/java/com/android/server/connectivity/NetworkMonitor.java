@@ -19,7 +19,11 @@ package com.android.server.connectivity;
 import static android.net.CaptivePortal.APP_RETURN_DISMISSED;
 import static android.net.CaptivePortal.APP_RETURN_UNWANTED;
 import static android.net.CaptivePortal.APP_RETURN_WANTED_AS_IS;
+import static android.net.ConnectivityManager.EXTRA_CAPTIVE_PORTAL_PROBE_SPEC;
+import static android.net.ConnectivityManager.EXTRA_CAPTIVE_PORTAL_URL;
+import static android.net.metrics.ValidationProbeEvent.PROBE_FALLBACK;
 
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,6 +38,8 @@ import android.net.NetworkRequest;
 import android.net.ProxyInfo;
 import android.net.TrafficStats;
 import android.net.Uri;
+import android.net.captiveportal.CaptivePortalProbeResult;
+import android.net.captiveportal.CaptivePortalProbeSpec;
 import android.net.dns.ResolvUtil;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
@@ -62,6 +68,7 @@ import android.util.LocalLog.ReadOnlyLocalLog;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
@@ -258,6 +265,8 @@ public class NetworkMonitor extends StateMachine {
     private final URL mCaptivePortalHttpsUrl;
     private final URL mCaptivePortalHttpUrl;
     private final URL[] mCaptivePortalFallbackUrls;
+    @Nullable
+    private final CaptivePortalProbeSpec[] mCaptivePortalFallbackSpecs;
 
     @VisibleForTesting
     protected boolean mIsCaptivePortalCheckEnabled;
@@ -333,6 +342,7 @@ public class NetworkMonitor extends StateMachine {
         mCaptivePortalHttpsUrl = makeURL(getCaptivePortalServerHttpsUrl());
         mCaptivePortalHttpUrl = makeURL(getCaptivePortalServerHttpUrl(settings, context));
         mCaptivePortalFallbackUrls = makeCaptivePortalFallbackUrls();
+        mCaptivePortalFallbackSpecs = makeCaptivePortalFallbackProbeSpecs();
 
         start();
     }
@@ -541,8 +551,12 @@ public class NetworkMonitor extends StateMachine {
                                     sendMessage(CMD_CAPTIVE_PORTAL_APP_FINISHED, response);
                                 }
                             }));
-                    intent.putExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_URL,
-                            mLastPortalProbeResult.detectUrl);
+                    final CaptivePortalProbeResult probeRes = mLastPortalProbeResult;
+                    intent.putExtra(EXTRA_CAPTIVE_PORTAL_URL, probeRes.detectUrl);
+                    if (probeRes.probeSpec != null) {
+                        final String encodedSpec = probeRes.probeSpec.getEncodedSpec();
+                        intent.putExtra(EXTRA_CAPTIVE_PORTAL_PROBE_SPEC, encodedSpec);
+                    }
                     intent.putExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_USER_AGENT,
                             mCaptivePortalUserAgent);
                     intent.setFlags(
@@ -558,47 +572,6 @@ public class NetworkMonitor extends StateMachine {
         public void exit() {
             Message message = obtainMessage(EVENT_PROVISIONING_NOTIFICATION, 0, mNetId, null);
             mConnectivityServiceHandler.sendMessage(message);
-        }
-    }
-
-    /**
-     * Result of calling isCaptivePortal().
-     * @hide
-     */
-    @VisibleForTesting
-    public static final class CaptivePortalProbeResult {
-        static final int SUCCESS_CODE = 204;
-        static final int FAILED_CODE = 599;
-
-        static final CaptivePortalProbeResult FAILED = new CaptivePortalProbeResult(FAILED_CODE);
-        static final CaptivePortalProbeResult SUCCESS = new CaptivePortalProbeResult(SUCCESS_CODE);
-
-        private final int mHttpResponseCode;  // HTTP response code returned from Internet probe.
-        final String redirectUrl;             // Redirect destination returned from Internet probe.
-        final String detectUrl;               // URL where a 204 response code indicates
-                                              // captive portal has been appeased.
-
-        public CaptivePortalProbeResult(
-                int httpResponseCode, String redirectUrl, String detectUrl) {
-            mHttpResponseCode = httpResponseCode;
-            this.redirectUrl = redirectUrl;
-            this.detectUrl = detectUrl;
-        }
-
-        public CaptivePortalProbeResult(int httpResponseCode) {
-            this(httpResponseCode, null, null);
-        }
-
-        boolean isSuccessful() {
-            return mHttpResponseCode == SUCCESS_CODE;
-        }
-
-        boolean isPortal() {
-            return !isSuccessful() && (mHttpResponseCode >= 200) && (mHttpResponseCode <= 399);
-        }
-
-        boolean isFailed() {
-            return !isSuccessful() && !isPortal();
         }
     }
 
@@ -822,8 +795,9 @@ public class NetworkMonitor extends StateMachine {
         private void resolveStrictModeHostname() {
             try {
                 // Do a blocking DNS resolution using the network-assigned nameservers.
+                // Do not set AI_ADDRCONFIG in ai_flags so we get all address families in advance.
                 final InetAddress[] ips = ResolvUtil.blockingResolveAllLocally(
-                        mNetwork, mPrivateDnsProviderHostname);
+                        mNetwork, mPrivateDnsProviderHostname, 0 /* aiFlags */);
                 mPrivateDnsConfig = new PrivateDnsConfig(mPrivateDnsProviderHostname, ips);
             } catch (UnknownHostException uhe) {
                 mPrivateDnsConfig = null;
@@ -922,23 +896,47 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private URL[] makeCaptivePortalFallbackUrls() {
-        String separator = ",";
-        String firstUrl = mSettings.getSetting(mContext,
-                Settings.Global.CAPTIVE_PORTAL_FALLBACK_URL, DEFAULT_FALLBACK_URL);
-        String joinedUrls = firstUrl + separator + mSettings.getSetting(mContext,
-                Settings.Global.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS, DEFAULT_OTHER_FALLBACK_URLS);
-        List<URL> urls = new ArrayList<>();
-        for (String s : joinedUrls.split(separator)) {
-            URL u = makeURL(s);
-            if (u == null) {
-                continue;
+        try {
+            String separator = ",";
+            String firstUrl = mSettings.getSetting(mContext,
+                    Settings.Global.CAPTIVE_PORTAL_FALLBACK_URL, DEFAULT_FALLBACK_URL);
+            String joinedUrls = firstUrl + separator + mSettings.getSetting(mContext,
+                    Settings.Global.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS,
+                    DEFAULT_OTHER_FALLBACK_URLS);
+            List<URL> urls = new ArrayList<>();
+            for (String s : joinedUrls.split(separator)) {
+                URL u = makeURL(s);
+                if (u == null) {
+                    continue;
+                }
+                urls.add(u);
             }
-            urls.add(u);
+            if (urls.isEmpty()) {
+                Log.e(TAG, String.format("could not create any url from %s", joinedUrls));
+            }
+            return urls.toArray(new URL[urls.size()]);
+        } catch (Exception e) {
+            // Don't let a misconfiguration bootloop the system.
+            Log.e(TAG, "Error parsing configured fallback URLs", e);
+            return new URL[0];
         }
-        if (urls.isEmpty()) {
-            Log.e(TAG, String.format("could not create any url from %s", joinedUrls));
+    }
+
+    private CaptivePortalProbeSpec[] makeCaptivePortalFallbackProbeSpecs() {
+        try {
+            final String settingsValue = mSettings.getSetting(
+                    mContext, Settings.Global.CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS, null);
+            // Probe specs only used if configured in settings
+            if (TextUtils.isEmpty(settingsValue)) {
+                return null;
+            }
+
+            return CaptivePortalProbeSpec.parseCaptivePortalProbeSpecs(settingsValue);
+        } catch (Exception e) {
+            // Don't let a misconfiguration bootloop the system.
+            Log.e(TAG, "Error parsing configured fallback probe specs", e);
+            return null;
         }
-        return urls.toArray(new URL[urls.size()]);
     }
 
     private String getCaptivePortalUserAgent() {
@@ -953,6 +951,15 @@ public class NetworkMonitor extends StateMachine {
         int idx = Math.abs(mNextFallbackUrlIndex) % mCaptivePortalFallbackUrls.length;
         mNextFallbackUrlIndex += new Random().nextInt(); // randomely change url without memory.
         return mCaptivePortalFallbackUrls[idx];
+    }
+
+    private CaptivePortalProbeSpec nextFallbackSpec() {
+        if (ArrayUtils.isEmpty(mCaptivePortalFallbackSpecs)) {
+            return null;
+        }
+        // Randomly change spec without memory. Also randomize the first attempt.
+        final int idx = Math.abs(new Random().nextInt()) % mCaptivePortalFallbackSpecs.length;
+        return mCaptivePortalFallbackSpecs[idx];
     }
 
     @VisibleForTesting
@@ -1025,7 +1032,7 @@ public class NetworkMonitor extends StateMachine {
         // unnecessary resolution.
         final String host = (proxy != null) ? proxy.getHost() : url.getHost();
         sendDnsProbe(host);
-        return sendHttpProbe(url, probeType);
+        return sendHttpProbe(url, probeType, null);
     }
 
     /** Do a DNS resolution of the given server. */
@@ -1061,7 +1068,8 @@ public class NetworkMonitor extends StateMachine {
      * @return a CaptivePortalProbeResult inferred from the HTTP response.
      */
     @VisibleForTesting
-    protected CaptivePortalProbeResult sendHttpProbe(URL url, int probeType) {
+    protected CaptivePortalProbeResult sendHttpProbe(URL url, int probeType,
+            @Nullable CaptivePortalProbeSpec probeSpec) {
         HttpURLConnection urlConnection = null;
         int httpResponseCode = CaptivePortalProbeResult.FAILED_CODE;
         String redirectUrl = null;
@@ -1133,7 +1141,12 @@ public class NetworkMonitor extends StateMachine {
             TrafficStats.setThreadStatsTag(oldTag);
         }
         logValidationProbe(probeTimer.stop(), probeType, httpResponseCode);
-        return new CaptivePortalProbeResult(httpResponseCode, redirectUrl, url.toString());
+
+        if (probeSpec == null) {
+            return new CaptivePortalProbeResult(httpResponseCode, redirectUrl, url.toString());
+        } else {
+            return probeSpec.getResult(httpResponseCode, redirectUrl);
+        }
     }
 
     private CaptivePortalProbeResult sendParallelHttpProbes(
@@ -1196,11 +1209,12 @@ public class NetworkMonitor extends StateMachine {
         if (httpsResult.isPortal() || httpsResult.isSuccessful()) {
             return httpsResult;
         }
-        // If a fallback url exists, use a fallback probe to try again portal detection.
-        URL fallbackUrl = nextFallbackUrl();
+        // If a fallback method exists, use it to retry portal detection.
+        // If we have new-style probe specs, use those. Otherwise, use the fallback URLs.
+        final CaptivePortalProbeSpec probeSpec = nextFallbackSpec();
+        final URL fallbackUrl = (probeSpec != null) ? probeSpec.getUrl() : nextFallbackUrl();
         if (fallbackUrl != null) {
-            CaptivePortalProbeResult result =
-                    sendHttpProbe(fallbackUrl, ValidationProbeEvent.PROBE_FALLBACK);
+            CaptivePortalProbeResult result = sendHttpProbe(fallbackUrl, PROBE_FALLBACK, probeSpec);
             if (result.isPortal()) {
                 return result;
             }

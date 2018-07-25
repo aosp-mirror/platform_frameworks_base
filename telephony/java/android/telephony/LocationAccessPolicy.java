@@ -21,31 +21,27 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
-import android.location.LocationManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Process;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.util.SparseBooleanArray;
+import android.util.Log;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Helper for performing location access checks.
  * @hide
  */
 public final class LocationAccessPolicy {
+    private static final String TAG = "LocationAccessPolicy";
+    private static final boolean DBG = false;
+
     /**
      * API to determine if the caller has permissions to get cell location.
      *
@@ -58,10 +54,11 @@ public final class LocationAccessPolicy {
             int uid, int pid) throws SecurityException {
         Trace.beginSection("TelephonyLocationCheck");
         try {
-            // Always allow the phone process to access location. This avoid breaking legacy code
-            // that rely on public-facing APIs to access cell location, and it doesn't create a
-            // info leak risk because the cell location is stored in the phone process anyway.
-            if (uid == Process.PHONE_UID) {
+            // Always allow the phone process and system server to access location. This avoid
+            // breaking legacy code that rely on public-facing APIs to access cell location, and
+            // it doesn't create an info leak risk because the cell location is stored in the phone
+            // process anyway, and the system server already has location access.
+            if (uid == Process.PHONE_UID || uid == Process.SYSTEM_UID || uid == Process.ROOT_UID) {
                 return true;
             }
 
@@ -74,15 +71,18 @@ public final class LocationAccessPolicy {
 
             if (context.checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION, pid, uid) ==
                     PackageManager.PERMISSION_DENIED) {
+                if (DBG) Log.w(TAG, "Permission checked failed (" + pid + "," + uid + ")");
                 return false;
             }
             final int opCode = AppOpsManager.permissionToOpCode(
                     Manifest.permission.ACCESS_COARSE_LOCATION);
             if (opCode != AppOpsManager.OP_NONE && context.getSystemService(AppOpsManager.class)
                     .noteOpNoThrow(opCode, uid, pkgName) != AppOpsManager.MODE_ALLOWED) {
+                if (DBG) Log.w(TAG, "AppOp check failed (" + uid + "," + pkgName + ")");
                 return false;
             }
             if (!isLocationModeEnabled(context, UserHandle.getUserId(uid))) {
+                if (DBG) Log.w(TAG, "Location disabled, failed, (" + uid + ")");
                 return false;
             }
             // If the user or profile is current, permission is granted.

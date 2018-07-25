@@ -1,0 +1,47 @@
+package com.android.location.provider {
+
+  public abstract deprecated class FusedProvider {
+    ctor public FusedProvider();
+    method public android.os.IBinder getBinder();
+  }
+
+  public abstract class LocationProviderBase {
+    ctor public LocationProviderBase(java.lang.String, com.android.location.provider.ProviderPropertiesUnbundled);
+    method public android.os.IBinder getBinder();
+    method public abstract void onDisable();
+    method public void onDump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
+    method public abstract void onEnable();
+    method public abstract int onGetStatus(android.os.Bundle);
+    method public abstract long onGetStatusUpdateTime();
+    method public boolean onSendExtraCommand(java.lang.String, android.os.Bundle);
+    method public abstract void onSetRequest(com.android.location.provider.ProviderRequestUnbundled, android.os.WorkSource);
+    method public final void reportLocation(android.location.Location);
+    field public static final java.lang.String EXTRA_NO_GPS_LOCATION = "noGPSLocation";
+    field public static final java.lang.String FUSED_PROVIDER = "fused";
+  }
+
+  public final class LocationRequestUnbundled {
+    method public long getFastestInterval();
+    method public long getInterval();
+    method public int getQuality();
+    method public float getSmallestDisplacement();
+    field public static final int ACCURACY_BLOCK = 102; // 0x66
+    field public static final int ACCURACY_CITY = 104; // 0x68
+    field public static final int ACCURACY_FINE = 100; // 0x64
+    field public static final int POWER_HIGH = 203; // 0xcb
+    field public static final int POWER_LOW = 201; // 0xc9
+    field public static final int POWER_NONE = 200; // 0xc8
+  }
+
+  public final class ProviderPropertiesUnbundled {
+    method public static com.android.location.provider.ProviderPropertiesUnbundled create(boolean, boolean, boolean, boolean, boolean, boolean, boolean, int, int);
+  }
+
+  public final class ProviderRequestUnbundled {
+    method public long getInterval();
+    method public java.util.List<com.android.location.provider.LocationRequestUnbundled> getLocationRequests();
+    method public boolean getReportLocation();
+  }
+
+}
+

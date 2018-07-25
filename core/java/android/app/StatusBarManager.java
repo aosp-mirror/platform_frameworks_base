@@ -121,9 +121,10 @@ public class StatusBarManager {
      */
     public void disable(int what) {
         try {
+            final int userId = Binder.getCallingUserHandle().getIdentifier();
             final IStatusBarService svc = getService();
             if (svc != null) {
-                svc.disable(what, mToken, mContext.getPackageName());
+                svc.disableForUser(what, mToken, mContext.getPackageName(), userId);
             }
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
@@ -138,9 +139,10 @@ public class StatusBarManager {
      */
     public void disable2(@Disable2Flags int what) {
         try {
+            final int userId = Binder.getCallingUserHandle().getIdentifier();
             final IStatusBarService svc = getService();
             if (svc != null) {
-                svc.disable2(what, mToken, mContext.getPackageName());
+                svc.disable2ForUser(what, mToken, mContext.getPackageName(), userId);
             }
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();

@@ -63,34 +63,25 @@ public class DctConstants {
     public static final int EVENT_RADIO_AVAILABLE = BASE + 1;
     public static final int EVENT_RECORDS_LOADED = BASE + 2;
     public static final int EVENT_TRY_SETUP_DATA = BASE + 3;
-    public static final int EVENT_DATA_STATE_CHANGED = BASE + 4;
-    public static final int EVENT_POLL_PDP = BASE + 5;
     public static final int EVENT_RADIO_OFF_OR_NOT_AVAILABLE = BASE + 6;
     public static final int EVENT_VOICE_CALL_STARTED = BASE + 7;
     public static final int EVENT_VOICE_CALL_ENDED = BASE + 8;
     public static final int EVENT_DATA_CONNECTION_DETACHED = BASE + 9;
-    public static final int EVENT_LINK_STATE_CHANGED = BASE + 10;
     public static final int EVENT_ROAMING_ON = BASE + 11;
     public static final int EVENT_ROAMING_OFF = BASE + 12;
     public static final int EVENT_ENABLE_NEW_APN = BASE + 13;
-    public static final int EVENT_RESTORE_DEFAULT_APN = BASE + 14;
     public static final int EVENT_DISCONNECT_DONE = BASE + 15;
     public static final int EVENT_DATA_CONNECTION_ATTACHED = BASE + 16;
     public static final int EVENT_DATA_STALL_ALARM = BASE + 17;
     public static final int EVENT_DO_RECOVERY = BASE + 18;
     public static final int EVENT_APN_CHANGED = BASE + 19;
-    public static final int EVENT_CDMA_DATA_DETACHED = BASE + 20;
-    public static final int EVENT_CDMA_SUBSCRIPTION_SOURCE_CHANGED = BASE + 21;
     public static final int EVENT_PS_RESTRICT_ENABLED = BASE + 22;
     public static final int EVENT_PS_RESTRICT_DISABLED = BASE + 23;
     public static final int EVENT_CLEAN_UP_CONNECTION = BASE + 24;
-    public static final int EVENT_CDMA_OTA_PROVISION = BASE + 25;
     public static final int EVENT_RESTART_RADIO = BASE + 26;
     public static final int EVENT_SET_INTERNAL_DATA_ENABLE = BASE + 27;
-    public static final int EVENT_RESET_DONE = BASE + 28;
     public static final int EVENT_CLEAN_UP_ALL_CONNECTIONS = BASE + 29;
     public static final int CMD_SET_USER_DATA_ENABLE = BASE + 30;
-    public static final int CMD_SET_DEPENDENCY_MET = BASE + 31;
     public static final int CMD_SET_POLICY_DATA_ENABLE = BASE + 32;
     public static final int EVENT_ICC_CHANGED = BASE + 33;
     public static final int EVENT_DISCONNECT_DC_RETRYING = BASE + 34;
@@ -111,19 +102,6 @@ public class DctConstants {
     public static final int EVENT_DATA_SERVICE_BINDING_CHANGED = BASE + 49;
 
     /***** Constants *****/
-
-    public static final int APN_INVALID_ID = -1;
-    public static final int APN_DEFAULT_ID = 0;
-    public static final int APN_MMS_ID = 1;
-    public static final int APN_SUPL_ID = 2;
-    public static final int APN_DUN_ID = 3;
-    public static final int APN_HIPRI_ID = 4;
-    public static final int APN_IMS_ID = 5;
-    public static final int APN_FOTA_ID = 6;
-    public static final int APN_CBS_ID = 7;
-    public static final int APN_IA_ID = 8;
-    public static final int APN_EMERGENCY_ID = 9;
-    public static final int APN_NUM_TYPES = 10;
 
     public static final int INVALID = -1;
     public static final int DISABLED = 0;

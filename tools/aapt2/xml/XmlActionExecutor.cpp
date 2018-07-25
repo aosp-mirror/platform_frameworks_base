@@ -16,6 +16,8 @@
 
 #include "xml/XmlActionExecutor.h"
 
+using ::android::StringPiece;
+
 namespace aapt {
 namespace xml {
 
@@ -46,8 +48,8 @@ static void PrintElementToDiagMessage(const Element* el, DiagMessage* msg) {
   *msg << el->name << ">";
 }
 
-bool XmlNodeAction::Execute(XmlActionExecutorPolicy policy, SourcePathDiagnostics* diag,
-                            Element* el) const {
+bool XmlNodeAction::Execute(XmlActionExecutorPolicy policy, std::vector<StringPiece>* bread_crumb,
+                            SourcePathDiagnostics* diag, Element* el) const {
   bool error = false;
   for (const ActionFuncWithDiag& action : actions_) {
     error |= !action(el, diag);
@@ -57,17 +59,29 @@ bool XmlNodeAction::Execute(XmlActionExecutorPolicy policy, SourcePathDiagnostic
     if (child_el->namespace_uri.empty()) {
       std::map<std::string, XmlNodeAction>::const_iterator iter = map_.find(child_el->name);
       if (iter != map_.end()) {
-        error |= !iter->second.Execute(policy, diag, child_el);
+        // Use the iterator's copy of the element name, because the element may be modified.
+        bread_crumb->push_back(iter->first);
+        error |= !iter->second.Execute(policy, bread_crumb, diag, child_el);
+        bread_crumb->pop_back();
         continue;
       }
 
-      if (policy == XmlActionExecutorPolicy::kWhitelist) {
+      if (policy != XmlActionExecutorPolicy::kNone) {
         DiagMessage error_msg(child_el->line_number);
-        error_msg << "unknown element ";
+        error_msg << "unexpected element ";
         PrintElementToDiagMessage(child_el, &error_msg);
-        error_msg << " found";
-        diag->Error(error_msg);
-        error = true;
+        error_msg << " found in ";
+        for (const StringPiece& element : *bread_crumb) {
+          error_msg << "<" << element << ">";
+        }
+        if (policy == XmlActionExecutorPolicy::kWhitelistWarning) {
+          // Treat the error only as a warning.
+          diag->Warn(error_msg);
+        } else {
+          // Policy is XmlActionExecutorPolicy::kWhitelist, we should fail.
+          diag->Error(error_msg);
+          error = true;
+        }
       }
     }
   }
@@ -90,14 +104,15 @@ bool XmlActionExecutor::Execute(XmlActionExecutorPolicy policy, IDiagnostics* di
   if (el->namespace_uri.empty()) {
     std::map<std::string, XmlNodeAction>::const_iterator iter = map_.find(el->name);
     if (iter != map_.end()) {
-      return iter->second.Execute(policy, &source_diag, el);
+      std::vector<StringPiece> bread_crumb;
+      bread_crumb.push_back(iter->first);
+      return iter->second.Execute(policy, &bread_crumb, &source_diag, el);
     }
 
     if (policy == XmlActionExecutorPolicy::kWhitelist) {
       DiagMessage error_msg(el->line_number);
-      error_msg << "unknown element ";
+      error_msg << "unexpected root element ";
       PrintElementToDiagMessage(el, &error_msg);
-      error_msg << " found";
       source_diag.Error(error_msg);
       return false;
     }

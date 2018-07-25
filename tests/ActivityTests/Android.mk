@@ -9,9 +9,10 @@ LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_MODULE_TAGS := tests
 LOCAL_CERTIFICATE := platform
 
-# Disable AAPT2 to fix:
+LOCAL_USE_AAPT2 := true
+# Disable AAPT2 manifest checks to fix:
 # frameworks/base/tests/ActivityTests/AndroidManifest.xml:42: error: unexpected element <preferred> found in <manifest><application><activity>.
-# TODO(b/79755007): Re-enable AAPT2 when it supports the missing features.
-LOCAL_USE_AAPT2 := false
+# TODO(b/79755007): Remove when AAPT2 recognizes the manifest elements.
+LOCAL_AAPT_FLAGS += --warn-manifest-validation
 
 include $(BUILD_PACKAGE)

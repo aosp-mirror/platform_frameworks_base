@@ -34,7 +34,7 @@ public final class CellIdentityWcdma extends CellIdentity {
     private final int mCid;
     // 9-bit UMTS Primary Scrambling Code described in TS 25.331, 0..511
     private final int mPsc;
-    // 16-bit UMTS Absolute RF Channel Number
+    // 16-bit UMTS Absolute RF Channel Number described in TS 25.101 sec. 5.4.4
     private final int mUarfcn;
 
     /**
@@ -69,7 +69,7 @@ public final class CellIdentityWcdma extends CellIdentity {
      * @param lac 16-bit Location Area Code, 0..65535
      * @param cid 28-bit UMTS Cell Identity
      * @param psc 9-bit UMTS Primary Scrambling Code
-     * @param uarfcn 16-bit UMTS Absolute RF Channel Number
+     * @param uarfcn 16-bit UMTS Absolute RF Channel Number described in TS 25.101 sec. 5.4.3
      *
      * @hide
      */
@@ -82,7 +82,7 @@ public final class CellIdentityWcdma extends CellIdentity {
      * @param lac 16-bit Location Area Code, 0..65535
      * @param cid 28-bit UMTS Cell Identity
      * @param psc 9-bit UMTS Primary Scrambling Code
-     * @param uarfcn 16-bit UMTS Absolute RF Channel Number
+     * @param uarfcn 16-bit UMTS Absolute RF Channel Number described in TS 25.101 sec. 5.4.3
      * @param mccStr 3-digit Mobile Country Code in string format
      * @param mncStr 2 or 3-digit Mobile Network Code in string format
      * @param alphal long alpha Operator Name String or Enhanced Operator Name String
