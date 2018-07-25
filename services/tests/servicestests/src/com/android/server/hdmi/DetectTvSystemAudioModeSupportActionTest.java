@@ -23,16 +23,13 @@ import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Looper;
 import android.os.test.TestLooper;
 import android.support.test.filters.SmallTest;
-
 import com.android.server.hdmi.HdmiCecLocalDeviceAudioSystem.TvSystemAudioModeSupportedCallback;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for {@link DetectTvSystemAudioModeSupportAction} class.
- */
+/** Tests for {@link DetectTvSystemAudioModeSupportAction} class. */
 @SmallTest
 @RunWith(JUnit4.class)
 public class DetectTvSystemAudioModeSupportActionTest {
@@ -49,46 +46,49 @@ public class DetectTvSystemAudioModeSupportActionTest {
     @Before
     public void SetUp() {
         mDeviceInfoForTests = new HdmiDeviceInfo(1001, 1234);
-        HdmiControlService hdmiControlService = new HdmiControlService(null) {
+        HdmiControlService hdmiControlService =
+                new HdmiControlService(null) {
 
-            @Override
-            void sendCecCommand(HdmiCecMessage command,
-                    @Nullable SendMessageCallback callback) {
-                switch (command.getOpcode()) {
-                    case Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE:
-                        if (callback != null) {
-                            callback.onSendCompleted(mSendCecCommandSuccess
-                                    ? SendMessageResult.SUCCESS : SendMessageResult.NACK);
+                    @Override
+                    void sendCecCommand(
+                            HdmiCecMessage command, @Nullable SendMessageCallback callback) {
+                        switch (command.getOpcode()) {
+                            case Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE:
+                                if (callback != null) {
+                                    callback.onSendCompleted(
+                                            mSendCecCommandSuccess
+                                                    ? SendMessageResult.SUCCESS
+                                                    : SendMessageResult.NACK);
+                                }
+                                if (mShouldDispatchFeatureAbort) {
+                                    mHdmiCecLocalDeviceAudioSystem.dispatchMessage(
+                                            HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                                                    Constants.ADDR_TV,
+                                                    mHdmiCecLocalDeviceAudioSystem.mAddress,
+                                                    Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE,
+                                                    Constants.ABORT_UNRECOGNIZED_OPCODE));
+                                }
+                                break;
+                            default:
+                                throw new IllegalArgumentException("Unexpected message");
                         }
-                        if (mShouldDispatchFeatureAbort) {
-                            mHdmiCecLocalDeviceAudioSystem.dispatchMessage(
-                                    HdmiCecMessageBuilder.buildFeatureAbortCommand(
-                                            Constants.ADDR_TV,
-                                            mHdmiCecLocalDeviceAudioSystem.mAddress,
-                                            Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE,
-                                            Constants.ABORT_UNRECOGNIZED_OPCODE));
-                        }
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Unexpected message");
-                }
-            }
+                    }
 
-            @Override
-            boolean isPowerStandby() {
-                return false;
-            }
+                    @Override
+                    boolean isPowerStandby() {
+                        return false;
+                    }
 
-            @Override
-            boolean isAddressAllocated() {
-                return true;
-            }
+                    @Override
+                    boolean isAddressAllocated() {
+                        return true;
+                    }
 
-            @Override
-            Looper getServiceLooper() {
-                return mTestLooper.getLooper();
-            }
-        };
+                    @Override
+                    Looper getServiceLooper() {
+                        return mTestLooper.getLooper();
+                    }
+                };
         mHdmiCecLocalDeviceAudioSystem =
                 new HdmiCecLocalDeviceAudioSystem(hdmiControlService) {
                     @Override
@@ -100,13 +100,14 @@ public class DetectTvSystemAudioModeSupportActionTest {
         Looper looper = mTestLooper.getLooper();
         hdmiControlService.setIoLooper(looper);
 
-        mAction = new DetectTvSystemAudioModeSupportAction(
-                mHdmiCecLocalDeviceAudioSystem,
-                new TvSystemAudioModeSupportedCallback() {
-                    public void onResult(boolean supported) {
-                        mSupported = Boolean.valueOf(supported);
-                    }
-                });
+        mAction =
+                new DetectTvSystemAudioModeSupportAction(
+                        mHdmiCecLocalDeviceAudioSystem,
+                        new TvSystemAudioModeSupportedCallback() {
+                            public void onResult(boolean supported) {
+                                mSupported = Boolean.valueOf(supported);
+                            }
+                        });
         mSupported = null;
     }
 
