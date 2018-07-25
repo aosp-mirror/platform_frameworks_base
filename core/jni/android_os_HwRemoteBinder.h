@@ -20,9 +20,9 @@
 #include <android-base/macros.h>
 #include <hwbinder/Binder.h>
 #include <jni.h>
-#include <utils/List.h>
 #include <utils/Mutex.h>
 #include <utils/RefBase.h>
+#include <vector>
 
 namespace android {
 
@@ -33,7 +33,7 @@ namespace android {
 class HwBinderDeathRecipient;
 
 class HwBinderDeathRecipientList : public RefBase {
-    List< sp<HwBinderDeathRecipient> > mList;
+    std::vector<sp<HwBinderDeathRecipient>> mList;
     Mutex mLock;
 
 public:
@@ -42,6 +42,8 @@ public:
 
     void add(const sp<HwBinderDeathRecipient>& recipient);
     void remove(const sp<HwBinderDeathRecipient>& recipient);
+
+    // finds the most recently added matching death recipient
     sp<HwBinderDeathRecipient> find(jobject recipient);
 
     Mutex& lock();  // Use with care; specifically for mutual exclusion during binder death
