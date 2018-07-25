@@ -32,12 +32,16 @@ import android.util.Slog;
 
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderCallsStats;
+import com.android.internal.os.BinderInternal;
+import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class BinderCallsStatsService extends Binder {
 
@@ -53,15 +57,18 @@ public class BinderCallsStatsService extends Binder {
         private static final String SETTINGS_UPLOAD_DATA_KEY = "upload_data";
         private static final String SETTINGS_SAMPLING_INTERVAL_KEY = "sampling_interval";
 
+        private boolean mEnabled;
         private final Uri mUri = Settings.Global.getUriFor(Settings.Global.BINDER_CALLS_STATS);
         private final Context mContext;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
+        private final BinderCallsStats mBinderCallsStats;
 
-        public SettingsObserver(Context context) {
+        public SettingsObserver(Context context, BinderCallsStats binderCallsStats) {
             super(BackgroundThread.getHandler());
             mContext = context;
             context.getContentResolver().registerContentObserver(mUri, false, this,
                     UserHandle.USER_SYSTEM);
+            mBinderCallsStats = binderCallsStats;
             // Always kick once to ensure that we match current state
             onChange();
         }
@@ -79,20 +86,41 @@ public class BinderCallsStatsService extends Binder {
               return;
             }
 
-            BinderCallsStats stats = BinderCallsStats.getInstance();
             try {
                     mParser.setString(Settings.Global.getString(mContext.getContentResolver(),
                             Settings.Global.BINDER_CALLS_STATS));
             } catch (IllegalArgumentException e) {
                     Slog.e(TAG, "Bad binder call stats settings", e);
             }
-            stats.setEnabled(
-                    mParser.getBoolean(SETTINGS_ENABLED_KEY, BinderCallsStats.ENABLED_DEFAULT));
-            stats.setDetailedTracking(mParser.getBoolean(
+            mBinderCallsStats.setDetailedTracking(mParser.getBoolean(
                     SETTINGS_DETAILED_TRACKING_KEY, BinderCallsStats.DETAILED_TRACKING_DEFAULT));
-            stats.setSamplingInterval(mParser.getInt(
+            mBinderCallsStats.setSamplingInterval(mParser.getInt(
                     SETTINGS_SAMPLING_INTERVAL_KEY,
                     BinderCallsStats.PERIODIC_SAMPLING_INTERVAL_DEFAULT));
+
+
+            final boolean enabled =
+                    mParser.getBoolean(SETTINGS_ENABLED_KEY, BinderCallsStats.ENABLED_DEFAULT);
+            if (mEnabled != enabled) {
+                Binder.setObserver(enabled ? mBinderCallsStats : null);
+                mEnabled = enabled;
+                mBinderCallsStats.reset();
+            }
+        }
+    }
+
+    /**
+     * @hide Only for use within the system server.
+     */
+    public static class Internal {
+        private final BinderCallsStats mBinderCallsStats;
+
+        Internal(BinderCallsStats binderCallsStats) {
+            this.mBinderCallsStats = binderCallsStats;
+        }
+
+        public ArrayList<BinderCallsStats.ExportedCallStat> getExportedCallStats() {
+            return mBinderCallsStats.getExportedCallStats();
         }
     }
 
@@ -105,7 +133,9 @@ public class BinderCallsStatsService extends Binder {
 
         @Override
         public void onStart() {
-            mService = new BinderCallsStatsService();
+            BinderCallsStats binderCallsStats = new BinderCallsStats(new Random());
+            mService = new BinderCallsStatsService(binderCallsStats);
+            LocalServices.addService(Internal.class, new Internal(binderCallsStats));
             publishBinderService("binder_calls_stats", mService);
             boolean detailedTrackingEnabled = SystemProperties.getBoolean(
                     PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING, false);
@@ -114,7 +144,7 @@ public class BinderCallsStatsService extends Binder {
                 Slog.i(TAG, "Enabled CPU usage tracking for binder calls. Controlled by "
                         + PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING
                         + " or via dumpsys binder_calls_stats --enable-detailed-tracking");
-                BinderCallsStats.getInstance().setDetailedTracking(true);
+                binderCallsStats.setDetailedTracking(true);
             }
         }
 
@@ -127,14 +157,19 @@ public class BinderCallsStatsService extends Binder {
     }
 
     private SettingsObserver mSettingsObserver;
+    private final BinderCallsStats mBinderCallsStats;
 
-    public void systemReady(Context context) {
-        mSettingsObserver = new SettingsObserver(context);
+    BinderCallsStatsService(BinderCallsStats binderCallsStats) {
+        mBinderCallsStats = binderCallsStats;
     }
 
-    public static void reset() {
+    public void systemReady(Context context) {
+        mSettingsObserver = new SettingsObserver(context, mBinderCallsStats);
+    }
+
+    public void reset() {
         Slog.i(TAG, "Resetting stats");
-        BinderCallsStats.getInstance().reset();
+        mBinderCallsStats.reset();
     }
 
     @Override
@@ -150,12 +185,12 @@ public class BinderCallsStatsService extends Binder {
                     return;
                 } else if ("--enable-detailed-tracking".equals(arg)) {
                     SystemProperties.set(PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING, "1");
-                    BinderCallsStats.getInstance().setDetailedTracking(true);
+                    mBinderCallsStats.setDetailedTracking(true);
                     pw.println("Detailed tracking enabled");
                     return;
                 } else if ("--disable-detailed-tracking".equals(arg)) {
                     SystemProperties.set(PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING, "");
-                    BinderCallsStats.getInstance().setDetailedTracking(false);
+                    mBinderCallsStats.setDetailedTracking(false);
                     pw.println("Detailed tracking disabled");
                     return;
                 } else if ("-h".equals(arg)) {
@@ -169,7 +204,7 @@ public class BinderCallsStatsService extends Binder {
                 }
             }
         }
-        BinderCallsStats.getInstance().dump(pw, getAppIdToPackagesMap(), verbose);
+        mBinderCallsStats.dump(pw, getAppIdToPackagesMap(), verbose);
     }
 
     private Map<Integer, String> getAppIdToPackagesMap() {

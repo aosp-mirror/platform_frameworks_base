@@ -22,8 +22,8 @@ import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
 
-import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
+import com.android.internal.os.BinderInternal.CallSession;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
@@ -93,6 +93,11 @@ public class Binder implements IBinder {
     private static volatile TransactionTracker sTransactionTracker = null;
 
     /**
+     * Global observer for this process.
+     */
+    private static BinderInternal.Observer sObserver = null;
+
+    /**
      * Guestimate of native memory associated with a Binder.
      */
     private static final int NATIVE_ALLOCATION_SIZE = 500;
@@ -105,6 +110,7 @@ public class Binder implements IBinder {
         public static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
                 Binder.class.getClassLoader(), getNativeFinalizer(), NATIVE_ALLOCATION_SIZE);
     }
+
 
     // Transaction tracking code.
 
@@ -149,6 +155,15 @@ public class Binder implements IBinder {
         if (sTransactionTracker == null)
             sTransactionTracker = new TransactionTracker();
         return sTransactionTracker;
+    }
+
+    /**
+     * Get the binder transaction observer for this process.
+     *
+     * @hide
+     */
+    public static void setObserver(@Nullable BinderInternal.Observer observer) {
+        sObserver = observer;
     }
 
     /** {@hide} */
@@ -721,8 +736,10 @@ public class Binder implements IBinder {
     // Entry point from android_util_Binder.cpp's onTransact
     private boolean execTransact(int code, long dataObj, long replyObj,
             int flags) {
-        BinderCallsStats binderCallsStats = BinderCallsStats.getInstance();
-        BinderCallsStats.CallSession callSession = binderCallsStats.callStarted(this, code);
+        // Make sure the observer won't change while processing a transaction.
+        final BinderInternal.Observer observer = sObserver;
+        final CallSession callSession =
+                observer != null ? observer.callStarted(this, code) : null;
         Parcel data = Parcel.obtain(dataObj);
         Parcel reply = Parcel.obtain(replyObj);
         // theoretically, we should call transact, which will call onTransact,
@@ -738,7 +755,9 @@ public class Binder implements IBinder {
             }
             res = onTransact(code, data, reply, flags);
         } catch (RemoteException|RuntimeException e) {
-            binderCallsStats.callThrewException(callSession, e);
+            if (observer != null) {
+                observer.callThrewException(callSession, e);
+            }
             if (LOG_RUNTIME_EXCEPTION) {
                 Log.w(TAG, "Caught a RuntimeException from the binder stub implementation.", e);
             }
@@ -770,9 +789,10 @@ public class Binder implements IBinder {
         // to the main transaction loop to wait for another incoming transaction.  Either
         // way, strict mode begone!
         StrictMode.clearGatheredViolations();
-        binderCallsStats.callEnded(callSession, requestSizeBytes, replySizeBytes);
+        if (observer != null) {
+            observer.callEnded(callSession, requestSizeBytes, replySizeBytes);
+        }
 
         return res;
     }
 }
-
