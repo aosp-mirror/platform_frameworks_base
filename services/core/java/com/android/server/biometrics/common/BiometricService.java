@@ -577,20 +577,22 @@ public abstract class BiometricService extends SystemService implements IHwBinde
         }
     }
 
-    protected void handleAuthenticated(long deviceId, int biometricId, int groupId,
+    protected void handleAuthenticated(BiometricAuthenticator.Identifier identifier,
             ArrayList<Byte> token) {
         ClientMonitor client = mCurrentClient;
-        if (biometricId != 0) {
+        final boolean authenticated = identifier.getBiometricId() != 0;
+
+        if (authenticated) {
             final byte[] byteToken = new byte[token.size()];
             for (int i = 0; i < token.size(); i++) {
                 byteToken[i] = token.get(i);
             }
             KeyStore.getInstance().addAuthToken(byteToken);
         }
-        if (client != null && client.onAuthenticated(biometricId, groupId)) {
+        if (client != null && client.onAuthenticated(identifier, authenticated)) {
             removeClient(client);
         }
-        if (biometricId != 0) {
+        if (authenticated) {
             mPerformanceStats.accept++;
         } else {
             mPerformanceStats.reject++;

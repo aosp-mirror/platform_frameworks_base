@@ -153,11 +153,12 @@ public abstract class AuthenticationClient extends ClientMonitor {
     }
 
     @Override
-    public boolean onAuthenticated(int fingerId, int groupId) {
+    public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
+            boolean authenticated) {
         boolean result = false;
-        boolean authenticated = fingerId != 0;
 
         // If the fingerprint dialog is showing, notify authentication succeeded
+        // TODO: this goes to BiometricPrompt, split between biometric modalities
         if (mBundle != null) {
             try {
                 if (authenticated) {
@@ -180,12 +181,18 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 } else {
                     if (DEBUG) {
                         Slog.v(getLogTag(), "onAuthenticated(owner=" + getOwnerString()
-                                + ", id=" + fingerId + ", gp=" + groupId + ")");
+                                + ", id=" + identifier.getBiometricId());
                     }
-                    Fingerprint fp = !getIsRestricted()
-                            ? new Fingerprint("" /* TODO */, groupId, fingerId, getHalDeviceId())
-                            : null;
-                    listener.onAuthenticationSucceeded(getHalDeviceId(), fp, getTargetUserId());
+
+                    // Explicitly have if/else here to make it super obvious in case the code is
+                    // touched in the future.
+                    if (!getIsRestricted()) {
+                        listener.onAuthenticationSucceeded(
+                                getHalDeviceId(), identifier, getTargetUserId());
+                    } else {
+                        listener.onAuthenticationSucceeded(
+                                getHalDeviceId(), null, getTargetUserId());
+                    }
                 }
             } catch (RemoteException e) {
                 Slog.w(getLogTag(), "Failed to notify Authenticated:", e);

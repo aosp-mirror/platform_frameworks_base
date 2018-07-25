@@ -127,7 +127,8 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     // to the next client (e.g. authentication accepts or rejects a biometric).
     public abstract boolean onEnrollResult(BiometricAuthenticator.Identifier identifier,
             int remaining);
-    public abstract boolean onAuthenticated(int biometricId, int groupId);
+    public abstract boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
+            boolean authenticated);
     public abstract boolean onRemoved(BiometricAuthenticator.Identifier identifier,
             int remaining);
     public abstract boolean onEnumerationResult(

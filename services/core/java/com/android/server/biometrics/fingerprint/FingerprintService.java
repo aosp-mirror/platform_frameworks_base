@@ -528,7 +528,8 @@ public class FingerprintService extends BiometricService {
         public void onAuthenticated(final long deviceId, final int fingerId, final int groupId,
                 ArrayList<Byte> token) {
             mHandler.post(() -> {
-                FingerprintService.super.handleAuthenticated(deviceId, fingerId, groupId, token);
+                Fingerprint fp = new Fingerprint("", groupId, fingerId, deviceId);
+                FingerprintService.super.handleAuthenticated(fp, token);
             });
         }
 

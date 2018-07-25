@@ -418,7 +418,7 @@ public class FaceManager implements BiometricFaceConstants {
             try {
                 mRemovalCallback = callback;
                 mRemovalFace = face;
-                mService.remove(mToken, face.getFaceId(), userId, mServiceReceiver);
+                mService.remove(mToken, face.getBiometricId(), userId, mServiceReceiver);
             } catch (RemoteException e) {
                 Log.w(TAG, "Remote exception in remove: ", e);
                 if (callback != null) {
@@ -796,6 +796,18 @@ public class FaceManager implements BiometricFaceConstants {
          */
         public void onAuthenticationAcquired(int acquireInfo) {
         }
+
+        /**
+         * @hide
+         * @param result
+         */
+        @Override
+        public void onAuthenticationSucceeded(BiometricAuthenticator.AuthenticationResult result) {
+            onAuthenticationSucceeded(new AuthenticationResult(
+                    result.getCryptoObject(),
+                    (Face) result.getId(), result.getUserId()));
+        }
+
     }
 
     /**
