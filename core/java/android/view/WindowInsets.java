@@ -579,10 +579,8 @@ public final class WindowInsets {
      * @param bottom the amount of insets to remove from the bottom. Must be non-negative.
      *
      * @return the inset insets
-     *
-     * @hide pending API
      */
-    @UnsupportedAppUsage
+    @NonNull
     public WindowInsets inset(int left, int top, int right, int bottom) {
         Preconditions.checkArgumentNonnegative(left);
         Preconditions.checkArgumentNonnegative(top);
