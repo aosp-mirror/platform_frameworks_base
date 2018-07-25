@@ -16,17 +16,25 @@
 
 package android.database.sqlite;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.os.Build;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
 import android.util.Log;
 
+import libcore.util.EmptyArray;
+
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -95,9 +103,6 @@ public class SQLiteQueryBuilder
         if (mWhereClause == null) {
             mWhereClause = new StringBuilder(inWhere.length() + 16);
         }
-        if (mWhereClause.length() == 0) {
-            mWhereClause.append('(');
-        }
         mWhereClause.append(inWhere);
     }
 
@@ -114,9 +119,6 @@ public class SQLiteQueryBuilder
     public void appendWhereEscapeString(String inWhere) {
         if (mWhereClause == null) {
             mWhereClause = new StringBuilder(inWhere.length() + 16);
-        }
-        if (mWhereClause.length() == 0) {
-            mWhereClause.append('(');
         }
         DatabaseUtils.appendEscapedSQLString(mWhereClause, inWhere);
     }
@@ -398,7 +400,7 @@ public class SQLiteQueryBuilder
             db.validateSql(unwrappedSql, cancellationSignal); // will throw if query is invalid
 
             // Execute wrapped query for extra protection
-            final String wrappedSql = buildQuery(projectionIn, "(" + selection + ")", groupBy,
+            final String wrappedSql = buildQuery(projectionIn, wrap(selection), groupBy,
                     having, sortOrder, limit);
             sql = wrappedSql;
         } else {
@@ -406,13 +408,147 @@ public class SQLiteQueryBuilder
             sql = unwrappedSql;
         }
 
+        final String[] sqlArgs = selectionArgs;
         if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "Performing query: " + sql);
+            if (Build.IS_DEBUGGABLE) {
+                Log.d(TAG, sql + " with args " + Arrays.toString(sqlArgs));
+            } else {
+                Log.d(TAG, sql);
+            }
         }
         return db.rawQueryWithFactory(
-                mFactory, sql, selectionArgs,
+                mFactory, sql, sqlArgs,
                 SQLiteDatabase.findEditTable(mTables),
                 cancellationSignal); // will throw if query is invalid
+    }
+
+    /**
+     * Perform an update by combining all current settings and the
+     * information passed into this method.
+     *
+     * @param db the database to update on
+     * @param selection A filter declaring which rows to return,
+     *   formatted as an SQL WHERE clause (excluding the WHERE
+     *   itself). Passing null will return all rows for the given URL.
+     * @param selectionArgs You may include ?s in selection, which
+     *   will be replaced by the values from selectionArgs, in order
+     *   that they appear in the selection. The values will be bound
+     *   as Strings.
+     * @return the number of rows updated
+     * @hide
+     */
+    public int update(@NonNull SQLiteDatabase db, @NonNull ContentValues values,
+            @Nullable String selection, @Nullable String[] selectionArgs) {
+        Objects.requireNonNull(mTables, "No tables defined");
+        Objects.requireNonNull(db, "No database defined");
+        Objects.requireNonNull(values, "No values defined");
+
+        final String sql;
+        final String unwrappedSql = buildUpdate(values, selection);
+
+        if (mStrict) {
+            // Validate the user-supplied selection to detect syntactic anomalies
+            // in the selection string that could indicate a SQL injection attempt.
+            // The idea is to ensure that the selection clause is a valid SQL expression
+            // by compiling it twice: once wrapped in parentheses and once as
+            // originally specified. An attacker cannot create an expression that
+            // would escape the SQL expression while maintaining balanced parentheses
+            // in both the wrapped and original forms.
+
+            // NOTE: The ordering of the below operations is important; we must
+            // execute the wrapped query to ensure the untrusted clause has been
+            // fully isolated.
+
+            // Validate the unwrapped query
+            db.validateSql(unwrappedSql, null); // will throw if query is invalid
+
+            // Execute wrapped query for extra protection
+            final String wrappedSql = buildUpdate(values, wrap(selection));
+            sql = wrappedSql;
+        } else {
+            // Execute unwrapped query
+            sql = unwrappedSql;
+        }
+
+        if (selectionArgs == null) {
+            selectionArgs = EmptyArray.STRING;
+        }
+        final String[] rawKeys = values.keySet().toArray(EmptyArray.STRING);
+        final int valuesLength = rawKeys.length;
+        final Object[] sqlArgs = new Object[valuesLength + selectionArgs.length];
+        for (int i = 0; i < sqlArgs.length; i++) {
+            if (i < valuesLength) {
+                sqlArgs[i] = values.get(rawKeys[i]);
+            } else {
+                sqlArgs[i] = selectionArgs[i - valuesLength];
+            }
+        }
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            if (Build.IS_DEBUGGABLE) {
+                Log.d(TAG, sql + " with args " + Arrays.toString(sqlArgs));
+            } else {
+                Log.d(TAG, sql);
+            }
+        }
+        return db.executeSql(sql, sqlArgs);
+    }
+
+    /**
+     * Perform a delete by combining all current settings and the
+     * information passed into this method.
+     *
+     * @param db the database to delete on
+     * @param selection A filter declaring which rows to return,
+     *   formatted as an SQL WHERE clause (excluding the WHERE
+     *   itself). Passing null will return all rows for the given URL.
+     * @param selectionArgs You may include ?s in selection, which
+     *   will be replaced by the values from selectionArgs, in order
+     *   that they appear in the selection. The values will be bound
+     *   as Strings.
+     * @return the number of rows deleted
+     * @hide
+     */
+    public int delete(@NonNull SQLiteDatabase db, @Nullable String selection,
+            @Nullable String[] selectionArgs) {
+        Objects.requireNonNull(mTables, "No tables defined");
+        Objects.requireNonNull(db, "No database defined");
+
+        final String sql;
+        final String unwrappedSql = buildDelete(selection);
+
+        if (mStrict) {
+            // Validate the user-supplied selection to detect syntactic anomalies
+            // in the selection string that could indicate a SQL injection attempt.
+            // The idea is to ensure that the selection clause is a valid SQL expression
+            // by compiling it twice: once wrapped in parentheses and once as
+            // originally specified. An attacker cannot create an expression that
+            // would escape the SQL expression while maintaining balanced parentheses
+            // in both the wrapped and original forms.
+
+            // NOTE: The ordering of the below operations is important; we must
+            // execute the wrapped query to ensure the untrusted clause has been
+            // fully isolated.
+
+            // Validate the unwrapped query
+            db.validateSql(unwrappedSql, null); // will throw if query is invalid
+
+            // Execute wrapped query for extra protection
+            final String wrappedSql = buildDelete(wrap(selection));
+            sql = wrappedSql;
+        } else {
+            // Execute unwrapped query
+            sql = unwrappedSql;
+        }
+
+        final String[] sqlArgs = selectionArgs;
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            if (Build.IS_DEBUGGABLE) {
+                Log.d(TAG, sql + " with args " + Arrays.toString(sqlArgs));
+            } else {
+                Log.d(TAG, sql);
+            }
+        }
+        return db.executeSql(sql, sqlArgs);
     }
 
     /**
@@ -447,28 +583,10 @@ public class SQLiteQueryBuilder
             String[] projectionIn, String selection, String groupBy,
             String having, String sortOrder, String limit) {
         String[] projection = computeProjection(projectionIn);
-
-        StringBuilder where = new StringBuilder();
-        boolean hasBaseWhereClause = mWhereClause != null && mWhereClause.length() > 0;
-
-        if (hasBaseWhereClause) {
-            where.append(mWhereClause.toString());
-            where.append(')');
-        }
-
-        // Tack on the user's selection, if present.
-        if (selection != null && selection.length() > 0) {
-            if (hasBaseWhereClause) {
-                where.append(" AND ");
-            }
-
-            where.append('(');
-            where.append(selection);
-            where.append(')');
-        }
+        String where = computeWhere(selection);
 
         return buildQueryString(
-                mDistinct, mTables, projection, where.toString(),
+                mDistinct, mTables, projection, where,
                 groupBy, having, sortOrder, limit);
     }
 
@@ -483,6 +601,42 @@ public class SQLiteQueryBuilder
             String[] projectionIn, String selection, String[] selectionArgs,
             String groupBy, String having, String sortOrder, String limit) {
         return buildQuery(projectionIn, selection, groupBy, having, sortOrder, limit);
+    }
+
+    /** {@hide} */
+    public String buildUpdate(ContentValues values, String selection) {
+        if (values == null || values.size() == 0) {
+            throw new IllegalArgumentException("Empty values");
+        }
+
+        StringBuilder sql = new StringBuilder(120);
+        sql.append("UPDATE ");
+        sql.append(mTables);
+        sql.append(" SET ");
+
+        final String[] rawKeys = values.keySet().toArray(EmptyArray.STRING);
+        for (int i = 0; i < rawKeys.length; i++) {
+            if (i > 0) {
+                sql.append(',');
+            }
+            sql.append(rawKeys[i]);
+            sql.append("=?");
+        }
+
+        final String where = computeWhere(selection);
+        appendClause(sql, " WHERE ", where);
+        return sql.toString();
+    }
+
+    /** {@hide} */
+    public String buildDelete(String selection) {
+        StringBuilder sql = new StringBuilder(120);
+        sql.append("DELETE FROM ");
+        sql.append(mTables);
+
+        final String where = computeWhere(selection);
+        appendClause(sql, " WHERE ", where);
+        return sql.toString();
     }
 
     /**
@@ -657,5 +811,38 @@ public class SQLiteQueryBuilder
             return projection;
         }
         return null;
+    }
+
+    private @Nullable String computeWhere(@Nullable String selection) {
+        final boolean hasInternal = !TextUtils.isEmpty(mWhereClause);
+        final boolean hasExternal = !TextUtils.isEmpty(selection);
+
+        if (hasInternal || hasExternal) {
+            final StringBuilder where = new StringBuilder();
+            if (hasInternal) {
+                where.append('(').append(mWhereClause).append(')');
+            }
+            if (hasInternal && hasExternal) {
+                where.append(" AND ");
+            }
+            if (hasExternal) {
+                where.append('(').append(selection).append(')');
+            }
+            return where.toString();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Wrap given argument in parenthesis, unless it's {@code null} or
+     * {@code ()}, in which case return it verbatim.
+     */
+    private @Nullable String wrap(@Nullable String arg) {
+        if (TextUtils.isEmpty(arg)) {
+            return arg;
+        } else {
+            return "(" + arg + ")";
+        }
     }
 }
