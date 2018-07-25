@@ -50,6 +50,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.Predicate;
 
 /** Platform implementation of the quick settings tile host **/
 public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
@@ -226,23 +227,22 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
     }
 
     @Override
-    public void removeTile(String tileSpec) {
-        ArrayList<String> specs = new ArrayList<>(mTileSpecs);
-        specs.remove(tileSpec);
-        Settings.Secure.putStringForUser(mContext.getContentResolver(), TILES_SETTING,
-                TextUtils.join(",", specs), ActivityManager.getCurrentUser());
+    public void removeTile(String spec) {
+        changeTileSpecs(tileSpecs-> tileSpecs.remove(spec));
     }
 
     public void addTile(String spec) {
+        changeTileSpecs(tileSpecs-> tileSpecs.add(spec));
+    }
+
+    private void changeTileSpecs(Predicate<List<String>> changeFunction) {
         final String setting = Settings.Secure.getStringForUser(mContext.getContentResolver(),
-                TILES_SETTING, ActivityManager.getCurrentUser());
+            TILES_SETTING, ActivityManager.getCurrentUser());
         final List<String> tileSpecs = loadTileSpecs(mContext, setting);
-        if (tileSpecs.contains(spec)) {
-            return;
-        }
-        tileSpecs.add(spec);
-        Settings.Secure.putStringForUser(mContext.getContentResolver(), TILES_SETTING,
+        if (changeFunction.test(tileSpecs)) {
+            Settings.Secure.putStringForUser(mContext.getContentResolver(), TILES_SETTING,
                 TextUtils.join(",", tileSpecs), ActivityManager.getCurrentUser());
+        }
     }
 
     public void addTile(ComponentName tile) {
@@ -300,7 +300,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory> {
         throw new RuntimeException("Default factory didn't create view for " + tile.getTileSpec());
     }
 
-    protected List<String> loadTileSpecs(Context context, String tileList) {
+    protected static List<String> loadTileSpecs(Context context, String tileList) {
         final Resources res = context.getResources();
         final String defaultTileList = res.getString(R.string.quick_settings_tiles_default);
         if (tileList == null) {
