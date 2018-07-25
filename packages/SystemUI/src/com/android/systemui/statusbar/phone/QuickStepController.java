@@ -510,6 +510,9 @@ public class QuickStepController implements GestureHelper {
     private void resetQuickScrub() {
         mQuickScrubActive = false;
         mAllowGestureDetection = false;
+        if (mCurrentNavigationBarView != null) {
+            mCurrentNavigationBarView.setAlpha(1f);
+        }
         mCurrentNavigationBarView = null;
         updateHighlight();
     }
