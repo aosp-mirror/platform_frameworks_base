@@ -43,8 +43,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     @GuardedBy("mLock")
     private boolean mSystemAudioControlFeatureEnabled;
 
-    protected Integer mSystemAudioSource;
-
     private boolean mTvSystemAudioModeSupport;
 
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
@@ -232,7 +230,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
             return true;
         }
 
-        mSystemAudioSource = systemAudioStatusOn ? message.getSource() : null;
         mService.sendCecCommand(
                 HdmiCecMessageBuilder.buildSetSystemAudioMode(
                         mAddress, Constants.ADDR_BROADCAST, systemAudioStatusOn));

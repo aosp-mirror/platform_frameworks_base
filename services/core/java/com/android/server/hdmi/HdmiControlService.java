@@ -1732,7 +1732,7 @@ public class HdmiControlService extends SystemService {
                         Slog.w(TAG, "audio system is not available");
                         return;
                     }
-                    if (audioSystem().mSystemAudioSource == null) {
+                    if (!audioSystem().isSystemAudioActivated()) {
                         Slog.w(TAG, "audio system is not in system audio mode");
                         return;
                     }
@@ -1741,7 +1741,7 @@ public class HdmiControlService extends SystemService {
                     sendCecCommand(HdmiCecMessageBuilder
                             .buildReportAudioStatus(
                                     device.getDeviceInfo().getLogicalAddress(),
-                                    audioSystem().mSystemAudioSource,
+                                    Constants.ADDR_TV,
                                     scaledVolume,
                                     isMute));
                 }
