@@ -453,6 +453,20 @@ public class MagnificationControllerTest {
     }
 
     @Test
+    public void testResetIfNeeded_resetsOnlyIfLastMagnifyingServiceIsDisabled() {
+        mMagnificationController.register();
+        PointF startCenter = INITIAL_MAGNIFICATION_BOUNDS_CENTER;
+        mMagnificationController
+                .setScale(2.0f, startCenter.x, startCenter.y, false, SERVICE_ID_1);
+        mMagnificationController
+                .setScale(1.5f, startCenter.x, startCenter.y, false, SERVICE_ID_2);
+        assertFalse(mMagnificationController.resetIfNeeded(SERVICE_ID_1));
+        assertTrue(mMagnificationController.isMagnifying());
+        assertTrue(mMagnificationController.resetIfNeeded(SERVICE_ID_2));
+        assertFalse(mMagnificationController.isMagnifying());
+    }
+
+    @Test
     public void testSetUserId_resetsOnlyIfIdChanges() {
         final int userId1 = 1;
         final int userId2 = 2;
