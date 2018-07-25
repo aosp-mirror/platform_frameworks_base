@@ -579,7 +579,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
                                     0.0f, 0.0f,
                                     mScreenRect.height() / (float) mSurfaceHeight);
                         }
-                        if (sizeChanged) {
+                        if (sizeChanged && !creating) {
                             mSurfaceControl.setSize(mSurfaceWidth, mSurfaceHeight);
                         }
                     } finally {
