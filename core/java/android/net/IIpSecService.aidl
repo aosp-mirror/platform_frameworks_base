@@ -45,25 +45,31 @@ interface IIpSecService
             in String localAddr,
             in String remoteAddr,
             in Network underlyingNetwork,
-            in IBinder binder);
+            in IBinder binder,
+            in String callingPackage);
 
     void addAddressToTunnelInterface(
             int tunnelResourceId,
-            in LinkAddress localAddr);
+            in LinkAddress localAddr,
+            in String callingPackage);
 
     void removeAddressFromTunnelInterface(
             int tunnelResourceId,
-            in LinkAddress localAddr);
+            in LinkAddress localAddr,
+            in String callingPackage);
 
-    void deleteTunnelInterface(int resourceId);
+    void deleteTunnelInterface(int resourceId, in String callingPackage);
 
-    IpSecTransformResponse createTransform(in IpSecConfig c, in IBinder binder);
+    IpSecTransformResponse createTransform(
+            in IpSecConfig c, in IBinder binder, in String callingPackage);
 
     void deleteTransform(int transformId);
 
-    void applyTransportModeTransform(in ParcelFileDescriptor socket, int direction, int transformId);
+    void applyTransportModeTransform(
+            in ParcelFileDescriptor socket, int direction, int transformId);
 
-    void applyTunnelModeTransform(int tunnelResourceId, int direction, int transformResourceId);
+    void applyTunnelModeTransform(
+            int tunnelResourceId, int direction, int transformResourceId, in String callingPackage);
 
     void removeTransportModeTransforms(in ParcelFileDescriptor socket);
 }

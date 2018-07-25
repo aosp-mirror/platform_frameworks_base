@@ -189,8 +189,7 @@ void HwBinderDeathRecipientList::add(const sp<HwBinderDeathRecipient>& recipient
 void HwBinderDeathRecipientList::remove(const sp<HwBinderDeathRecipient>& recipient) {
     AutoMutex _l(mLock);
 
-    List< sp<HwBinderDeathRecipient> >::iterator iter;
-    for (iter = mList.begin(); iter != mList.end(); iter++) {
+    for (auto iter = mList.begin(); iter != mList.end(); iter++) {
         if (*iter == recipient) {
             mList.erase(iter);
             return;
@@ -201,12 +200,13 @@ void HwBinderDeathRecipientList::remove(const sp<HwBinderDeathRecipient>& recipi
 sp<HwBinderDeathRecipient> HwBinderDeathRecipientList::find(jobject recipient) {
     AutoMutex _l(mLock);
 
-    for (const sp<HwBinderDeathRecipient>& deathRecipient : mList) {
-        if (deathRecipient->matches(recipient)) {
-            return deathRecipient;
+    for(auto iter = mList.rbegin(); iter != mList.rend(); iter++) {
+        if ((*iter)->matches(recipient)) {
+            return (*iter);
         }
     }
-    return NULL;
+
+    return nullptr;
 }
 
 Mutex& HwBinderDeathRecipientList::lock() {

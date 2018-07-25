@@ -21,7 +21,7 @@ import android.os.Parcelable;
 import android.telephony.Rlog;
 
 /**
- * Immutable cell information from a point in time.
+ * A {@link CellInfo} representing a CDMA cell that provides identity and measurement info.
  */
 public final class CellInfoCdma extends CellInfo implements Parcelable {
 
@@ -45,6 +45,7 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
         this.mCellSignalStrengthCdma = ci.mCellSignalStrengthCdma.copy();
     }
 
+    @Override
     public CellIdentityCdma getCellIdentity() {
         return mCellIdentityCdma;
     }
@@ -53,6 +54,7 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
         mCellIdentityCdma = cid;
     }
 
+    @Override
     public CellSignalStrengthCdma getCellSignalStrength() {
         return mCellSignalStrengthCdma;
     }

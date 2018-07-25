@@ -2,6 +2,7 @@
 // ============================================================
 java_library {
     name: "services",
+    installable: true,
 
     dex_preopt: {
         app_image: true,

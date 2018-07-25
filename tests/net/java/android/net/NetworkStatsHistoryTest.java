@@ -32,9 +32,14 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 import static android.text.format.DateUtils.YEAR_IN_MILLIS;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.content.Context;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
@@ -46,25 +51,31 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.Random;
 
+import org.junit.After;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@RunWith(AndroidJUnit4.class)
 @SmallTest
-public class NetworkStatsHistoryTest extends AndroidTestCase {
+public class NetworkStatsHistoryTest {
     private static final String TAG = "NetworkStatsHistoryTest";
 
     private static final long TEST_START = 1194220800000L;
 
     private NetworkStatsHistory stats;
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
+    @After
+    public void tearDown() throws Exception {
         if (stats != null) {
             assertConsistent(stats);
         }
     }
 
+    @Test
     public void testReadOriginalVersion() throws Exception {
-        final DataInputStream in = new DataInputStream(
-                getContext().getResources().openRawResource(R.raw.history_v1));
+        final Context context = InstrumentationRegistry.getContext();
+        final DataInputStream in =
+                new DataInputStream(context.getResources().openRawResource(R.raw.history_v1));
 
         NetworkStatsHistory.Entry entry = null;
         try {
@@ -88,6 +99,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testRecordSingleBucket() throws Exception {
         final long BUCKET_SIZE = HOUR_IN_MILLIS;
         stats = new NetworkStatsHistory(BUCKET_SIZE);
@@ -100,6 +112,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertValues(stats, 0, SECOND_IN_MILLIS, 1024L, 10L, 2048L, 20L, 2L);
     }
 
+    @Test
     public void testRecordEqualBuckets() throws Exception {
         final long bucketDuration = HOUR_IN_MILLIS;
         stats = new NetworkStatsHistory(bucketDuration);
@@ -114,6 +127,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertValues(stats, 1, HOUR_IN_MILLIS / 2, 512L, 5L, 64L, 1L, 1L);
     }
 
+    @Test
     public void testRecordTouchingBuckets() throws Exception {
         final long BUCKET_SIZE = 15 * MINUTE_IN_MILLIS;
         stats = new NetworkStatsHistory(BUCKET_SIZE);
@@ -134,6 +148,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertValues(stats, 2, 4 * MINUTE_IN_MILLIS, 200L, 400L, 1000L, 2000L, 20L);
     }
 
+    @Test
     public void testRecordGapBuckets() throws Exception {
         final long BUCKET_SIZE = HOUR_IN_MILLIS;
         stats = new NetworkStatsHistory(BUCKET_SIZE);
@@ -165,6 +180,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertValues(stats, 3, SECOND_IN_MILLIS, 64L, 1L, 512L, 8L, 2L);
     }
 
+    @Test
     public void testRecordOverlapBuckets() throws Exception {
         final long BUCKET_SIZE = HOUR_IN_MILLIS;
         stats = new NetworkStatsHistory(BUCKET_SIZE);
@@ -182,6 +198,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertValues(stats, 1, (HOUR_IN_MILLIS / 2), 512L, 5L, 512L, 5L, 5L);
     }
 
+    @Test
     public void testRecordEntireGapIdentical() throws Exception {
         // first, create two separate histories far apart
         final NetworkStatsHistory stats1 = new NetworkStatsHistory(HOUR_IN_MILLIS);
@@ -206,6 +223,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertValues(stats, 3, 500L, 250L);
     }
 
+    @Test
     public void testRecordEntireOverlapVaryingBuckets() throws Exception {
         // create history just over hour bucket boundary
         final NetworkStatsHistory stats1 = new NetworkStatsHistory(HOUR_IN_MILLIS);
@@ -247,6 +265,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertValues(stats, 3, 150L, 150L);
     }
 
+    @Test
     public void testRemove() throws Exception {
         stats = new NetworkStatsHistory(HOUR_IN_MILLIS);
 
@@ -280,6 +299,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertEquals(0, stats.size());
     }
 
+    @Test
     public void testTotalData() throws Exception {
         final long BUCKET_SIZE = HOUR_IN_MILLIS;
         stats = new NetworkStatsHistory(BUCKET_SIZE);
@@ -304,7 +324,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
 
     }
 
-    @Suppress
+    @Test
     public void testFuzzing() throws Exception {
         try {
             // fuzzing with random events, looking for crashes
@@ -341,6 +361,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         return value < 0 ? -value : value;
     }
 
+    @Test
     public void testIgnoreFields() throws Exception {
         final NetworkStatsHistory history = new NetworkStatsHistory(
                 MINUTE_IN_MILLIS, 0, FIELD_RX_BYTES | FIELD_TX_BYTES);
@@ -353,6 +374,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertFullValues(history, UNKNOWN, 1026L, UNKNOWN, 2050L, UNKNOWN, UNKNOWN);
     }
 
+    @Test
     public void testIgnoreFieldsRecordIn() throws Exception {
         final NetworkStatsHistory full = new NetworkStatsHistory(MINUTE_IN_MILLIS, 0, FIELD_ALL);
         final NetworkStatsHistory partial = new NetworkStatsHistory(
@@ -365,6 +387,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertFullValues(partial, UNKNOWN, UNKNOWN, 10L, UNKNOWN, UNKNOWN, 4L);
     }
 
+    @Test
     public void testIgnoreFieldsRecordOut() throws Exception {
         final NetworkStatsHistory full = new NetworkStatsHistory(MINUTE_IN_MILLIS, 0, FIELD_ALL);
         final NetworkStatsHistory partial = new NetworkStatsHistory(
@@ -377,6 +400,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertFullValues(full, MINUTE_IN_MILLIS, 0L, 10L, 0L, 0L, 4L);
     }
 
+    @Test
     public void testSerialize() throws Exception {
         final NetworkStatsHistory before = new NetworkStatsHistory(MINUTE_IN_MILLIS, 40, FIELD_ALL);
         before.recordData(0, 4 * MINUTE_IN_MILLIS,
@@ -396,6 +420,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertFullValues(after, 5 * MINUTE_IN_MILLIS, 1034L, 30L, 2078L, 60L, 54L);
     }
 
+    @Test
     public void testVarLong() throws Exception {
         assertEquals(0L, performVarLong(0L));
         assertEquals(-1L, performVarLong(-1L));
@@ -409,6 +434,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertEquals(Long.MAX_VALUE - 40, performVarLong(Long.MAX_VALUE - 40));
     }
 
+    @Test
     public void testIndexBeforeAfter() throws Exception {
         final long BUCKET_SIZE = HOUR_IN_MILLIS;
         stats = new NetworkStatsHistory(BUCKET_SIZE);
@@ -451,6 +477,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertIndexBeforeAfter(stats, 4, 4, Long.MAX_VALUE);
     }
 
+    @Test
     public void testIntersects() throws Exception {
         final long BUCKET_SIZE = HOUR_IN_MILLIS;
         stats = new NetworkStatsHistory(BUCKET_SIZE);
@@ -485,6 +512,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertTrue(stats.intersects(Long.MIN_VALUE, TEST_START + 1));
     }
 
+    @Test
     public void testSetValues() throws Exception {
         stats = new NetworkStatsHistory(HOUR_IN_MILLIS);
         stats.recordData(TEST_START, TEST_START + 1,

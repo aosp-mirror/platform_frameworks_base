@@ -90,6 +90,7 @@ package android {
     field public static final java.lang.String MANAGE_CARRIER_OEM_UNLOCK_STATE = "android.permission.MANAGE_CARRIER_OEM_UNLOCK_STATE";
     field public static final java.lang.String MANAGE_CA_CERTIFICATES = "android.permission.MANAGE_CA_CERTIFICATES";
     field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
+    field public static final java.lang.String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
     field public static final java.lang.String MANAGE_SUBSCRIPTION_PLANS = "android.permission.MANAGE_SUBSCRIPTION_PLANS";
     field public static final java.lang.String MANAGE_USB = "android.permission.MANAGE_USB";
     field public static final java.lang.String MANAGE_USERS = "android.permission.MANAGE_USERS";
@@ -2611,10 +2612,10 @@ package android.net {
   }
 
   public static final class IpSecManager.IpSecTunnelInterface implements java.lang.AutoCloseable {
-    method public void addAddress(android.net.LinkAddress) throws java.io.IOException;
+    method public void addAddress(java.net.InetAddress, int) throws java.io.IOException;
     method public void close();
     method public java.lang.String getInterfaceName();
-    method public void removeAddress(android.net.LinkAddress) throws java.io.IOException;
+    method public void removeAddress(java.net.InetAddress, int) throws java.io.IOException;
   }
 
   public final class IpSecTransform implements java.lang.AutoCloseable {
@@ -2634,6 +2635,10 @@ package android.net {
     field public static final int ERROR_HARDWARE_ERROR = 3; // 0x3
     field public static final int ERROR_HARDWARE_UNSUPPORTED = 2; // 0x2
     field public static final int ERROR_INVALID_NETWORK = 1; // 0x1
+  }
+
+  public final class NetworkCapabilities implements android.os.Parcelable {
+    field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
   }
 
   public class NetworkKey implements android.os.Parcelable {
@@ -4269,8 +4274,8 @@ package android.telephony {
     method public int[] getAvailableServices();
     method public android.telephony.CellIdentity getCellIdentity();
     method public int getDomain();
-    method public int getReasonForDenial();
     method public int getRegState();
+    method public int getRejectCause();
     method public int getTransportType();
     method public boolean isEmergencyEnabled();
     method public void writeToParcel(android.os.Parcel, int);
@@ -4724,6 +4729,7 @@ package android.telephony.euicc {
 package android.telephony.ims {
 
   public final class ImsCallForwardInfo implements android.os.Parcelable {
+    ctor public ImsCallForwardInfo(int, int, int, int, java.lang.String, int);
     method public int describeContents();
     method public int getCondition();
     method public java.lang.String getNumber();
@@ -4969,6 +4975,28 @@ package android.telephony.ims {
     field public static final int CODE_RADIO_SETUP_FAILURE = 1509; // 0x5e5
     field public static final int CODE_RADIO_UPLINK_FAILURE = 1508; // 0x5e4
     field public static final int CODE_REGISTRATION_ERROR = 1000; // 0x3e8
+    field public static final int CODE_REJECT_1X_COLLISION = 1603; // 0x643
+    field public static final int CODE_REJECT_CALL_ON_OTHER_SUB = 1602; // 0x642
+    field public static final int CODE_REJECT_CALL_TYPE_NOT_ALLOWED = 1605; // 0x645
+    field public static final int CODE_REJECT_CONFERENCE_TTY_NOT_ALLOWED = 1617; // 0x651
+    field public static final int CODE_REJECT_INTERNAL_ERROR = 1612; // 0x64c
+    field public static final int CODE_REJECT_MAX_CALL_LIMIT_REACHED = 1608; // 0x648
+    field public static final int CODE_REJECT_ONGOING_CALL_SETUP = 1607; // 0x647
+    field public static final int CODE_REJECT_ONGOING_CALL_TRANSFER = 1611; // 0x64b
+    field public static final int CODE_REJECT_ONGOING_CALL_UPGRADE = 1616; // 0x650
+    field public static final int CODE_REJECT_ONGOING_CALL_WAITING_DISABLED = 1601; // 0x641
+    field public static final int CODE_REJECT_ONGOING_CONFERENCE_CALL = 1618; // 0x652
+    field public static final int CODE_REJECT_ONGOING_CS_CALL = 1621; // 0x655
+    field public static final int CODE_REJECT_ONGOING_E911_CALL = 1606; // 0x646
+    field public static final int CODE_REJECT_ONGOING_ENCRYPTED_CALL = 1620; // 0x654
+    field public static final int CODE_REJECT_ONGOING_HANDOVER = 1614; // 0x64e
+    field public static final int CODE_REJECT_QOS_FAILURE = 1613; // 0x64d
+    field public static final int CODE_REJECT_SERVICE_NOT_REGISTERED = 1604; // 0x644
+    field public static final int CODE_REJECT_UNKNOWN = 1600; // 0x640
+    field public static final int CODE_REJECT_UNSUPPORTED_SDP_HEADERS = 1610; // 0x64a
+    field public static final int CODE_REJECT_UNSUPPORTED_SIP_HEADERS = 1609; // 0x649
+    field public static final int CODE_REJECT_VT_AVPF_NOT_ALLOWED = 1619; // 0x653
+    field public static final int CODE_REJECT_VT_TTY_NOT_ALLOWED = 1615; // 0x64f
     field public static final int CODE_REMOTE_CALL_DECLINE = 1404; // 0x57c
     field public static final int CODE_SIP_ALTERNATE_EMERGENCY_CALL = 1514; // 0x5ea
     field public static final int CODE_SIP_BAD_ADDRESS = 337; // 0x151
@@ -5033,7 +5061,7 @@ package android.telephony.ims {
   }
 
   public final class ImsSsData implements android.os.Parcelable {
-    ctor public ImsSsData();
+    ctor public ImsSsData(int, int, int, int, int);
     method public int describeContents();
     method public boolean isTypeBarring();
     method public boolean isTypeCf();
@@ -5084,7 +5112,7 @@ package android.telephony.ims {
   }
 
   public final class ImsSsInfo implements android.os.Parcelable {
-    ctor public ImsSsInfo();
+    ctor public ImsSsInfo(int, java.lang.String);
     method public int describeContents();
     method public java.lang.String getIcbNum();
     method public int getStatus();
@@ -5240,6 +5268,7 @@ package android.telephony.ims.feature {
     method public android.telephony.ims.stub.ImsUtImplBase getUt();
     method public final void notifyCapabilitiesStatusChanged(android.telephony.ims.feature.MmTelFeature.MmTelCapabilities);
     method public final void notifyIncomingCall(android.telephony.ims.stub.ImsCallSessionImplBase, android.os.Bundle);
+    method public final void notifyRejectedCall(android.telephony.ims.ImsCallProfile, android.telephony.ims.ImsReasonInfo);
     method public final void notifyVoiceMessageCountUpdate(int);
     method public void onFeatureReady();
     method public void onFeatureRemoved();

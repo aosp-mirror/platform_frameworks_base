@@ -21,7 +21,7 @@ import android.os.Parcelable;
 import android.telephony.Rlog;
 
 /**
- * Immutable cell information from a point in time.
+ * A {@link CellInfo} representing a GSM cell that provides identity and measurement info.
  */
 public final class CellInfoGsm extends CellInfo implements Parcelable {
 
@@ -45,6 +45,7 @@ public final class CellInfoGsm extends CellInfo implements Parcelable {
         this.mCellSignalStrengthGsm = ci.mCellSignalStrengthGsm.copy();
     }
 
+    @Override
     public CellIdentityGsm getCellIdentity() {
         return mCellIdentityGsm;
     }
@@ -53,6 +54,7 @@ public final class CellInfoGsm extends CellInfo implements Parcelable {
         mCellIdentityGsm = cid;
     }
 
+    @Override
     public CellSignalStrengthGsm getCellSignalStrength() {
         return mCellSignalStrengthGsm;
     }

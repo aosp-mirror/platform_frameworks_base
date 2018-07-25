@@ -22,7 +22,9 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.job.IJobScheduler;
 import android.app.job.JobScheduler;
+import android.app.timedetector.TimeDetector;
 import android.app.timezone.RulesManager;
+import android.app.timezonedetector.TimeZoneDetector;
 import android.app.trust.TrustManager;
 import android.app.usage.IStorageStatsManager;
 import android.app.usage.IUsageStatsManager;
@@ -271,12 +273,12 @@ final class SystemServiceRegistry {
             }});
 
         registerService(Context.IPSEC_SERVICE, IpSecManager.class,
-                new StaticServiceFetcher<IpSecManager>() {
+                new CachedServiceFetcher<IpSecManager>() {
             @Override
-            public IpSecManager createService() {
+            public IpSecManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBinder b = ServiceManager.getService(Context.IPSEC_SERVICE);
                 IIpSecService service = IIpSecService.Stub.asInterface(b);
-                return new IpSecManager(service);
+                return new IpSecManager(ctx, service);
             }});
 
         registerService(Context.COUNTRY_DETECTOR, CountryDetector.class,
@@ -905,6 +907,21 @@ final class SystemServiceRegistry {
             public RulesManager createService(ContextImpl ctx) {
                 return new RulesManager(ctx.getOuterContext());
             }});
+
+        registerService(Context.TIME_DETECTOR_SERVICE, TimeDetector.class,
+                new CachedServiceFetcher<TimeDetector>() {
+                    @Override
+                    public TimeDetector createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new TimeDetector();
+                    }});
+        registerService(Context.TIME_ZONE_DETECTOR_SERVICE, TimeZoneDetector.class,
+                new CachedServiceFetcher<TimeZoneDetector>() {
+                    @Override
+                    public TimeZoneDetector createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new TimeZoneDetector();
+                    }});
     }
 
     /**

@@ -31,9 +31,8 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
 import android.util.ArrayMap;
+import android.util.Base64;
 import android.util.Log;
-
-import com.android.org.bouncycastle.util.encoders.Base64;
 
 import libcore.io.IoUtils;
 
@@ -270,7 +269,7 @@ public class LocalTransport extends BackupTransport {
         BackupDataInput changeSet = new BackupDataInput(data.getFileDescriptor());
         while (changeSet.readNextHeader()) {
             String key = changeSet.getKey();
-            String base64Key = new String(Base64.encode(key.getBytes()));
+            String base64Key = new String(Base64.encode(key.getBytes(), Base64.NO_WRAP));
             int dataSize = changeSet.getDataSize();
             if (DEBUG) {
                 Log.v(TAG, "  Delta operation key " + key + "   size " + dataSize
@@ -652,7 +651,7 @@ public class LocalTransport extends BackupTransport {
 
         public DecodedFilename(File f) {
             file = f;
-            key = new String(Base64.decode(f.getName()));
+            key = new String(Base64.decode(f.getName(), Base64.DEFAULT));
         }
 
         @Override

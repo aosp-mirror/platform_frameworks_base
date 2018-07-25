@@ -253,6 +253,11 @@ package android.net {
     field public static final int INVALID_SECURITY_PARAMETER_INDEX = 0; // 0x0
   }
 
+  public final class NetworkCapabilities implements android.os.Parcelable {
+    method public int[] getCapabilities();
+    method public int[] getTransportTypes();
+  }
+
   public class TrafficStats {
     method public static long getLoopbackRxBytes();
     method public static long getLoopbackRxPackets();
@@ -422,6 +427,14 @@ package android.service.quicksettings {
 
   public class TileService extends android.app.Service {
     method public static boolean isQuickSettingsSupported();
+  }
+
+}
+
+package android.telecom {
+
+  public final class CallAudioState implements android.os.Parcelable {
+    ctor public CallAudioState(boolean, int, int, android.bluetooth.BluetoothDevice, java.util.Collection<android.bluetooth.BluetoothDevice>);
   }
 
 }

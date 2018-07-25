@@ -56,6 +56,7 @@ import com.android.internal.util.FastPrintWriter;
 public abstract class LocationProviderBase {
     private final String TAG;
 
+    /** @hide */
     protected final ILocationManager mLocationManager;
     private final ProviderProperties mProperties;
     private final IBinder mBinder;

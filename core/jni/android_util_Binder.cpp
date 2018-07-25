@@ -33,6 +33,7 @@
 #include <binder/IServiceManager.h>
 #include <binder/IPCThreadState.h>
 #include <binder/Parcel.h>
+#include <binder/BpBinder.h>
 #include <binder/ProcessState.h>
 #include <cutils/atomic.h>
 #include <log/log.h>
@@ -81,8 +82,16 @@ static struct binderinternal_offsets_t
     // Class state.
     jclass mClass;
     jmethodID mForceGc;
+    jmethodID mProxyLimitCallback;
 
 } gBinderInternalOffsets;
+
+static struct sparseintarray_offsets_t
+{
+    jclass classObject;
+    jmethodID constructor;
+    jmethodID put;
+} gSparseIntArrayOffsets;
 
 // ----------------------------------------------------------------------------
 
@@ -993,6 +1002,43 @@ static void android_os_BinderInternal_handleGc(JNIEnv* env, jobject clazz)
     gCollectedAtRefs = gNumLocalRefsCreated + gNumDeathRefsCreated;
 }
 
+static void android_os_BinderInternal_proxyLimitcallback(int uid)
+{
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->CallStaticVoidMethod(gBinderInternalOffsets.mClass,
+                              gBinderInternalOffsets.mProxyLimitCallback,
+                              uid);
+}
+
+static void android_os_BinderInternal_setBinderProxyCountEnabled(JNIEnv* env, jobject clazz,
+                                                                 jboolean enable)
+{
+    BpBinder::setCountByUidEnabled((bool) enable);
+}
+
+static jobject android_os_BinderInternal_getBinderProxyPerUidCounts(JNIEnv* env, jclass clazz)
+{
+    Vector<uint32_t> uids, counts;
+    BpBinder::getCountByUid(uids, counts);
+    jobject sparseIntArray = env->NewObject(gSparseIntArrayOffsets.classObject,
+                                            gSparseIntArrayOffsets.constructor);
+    for (size_t i = 0; i < uids.size(); i++) {
+        env->CallVoidMethod(sparseIntArray, gSparseIntArrayOffsets.put,
+                            static_cast<jint>(uids[i]), static_cast<jint>(counts[i]));
+    }
+    return sparseIntArray;
+}
+
+static jint android_os_BinderInternal_getBinderProxyCount(JNIEnv* env, jobject clazz, jint uid) {
+    return static_cast<jint>(BpBinder::getBinderProxyCount(static_cast<uint32_t>(uid)));
+}
+
+static void android_os_BinderInternal_setBinderProxyCountWatermarks(JNIEnv* env, jobject clazz,
+                                                                    jint high, jint low)
+{
+    BpBinder::setBinderProxyCountWatermarks(high, low);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gBinderInternalMethods[] = {
@@ -1001,7 +1047,11 @@ static const JNINativeMethod gBinderInternalMethods[] = {
     { "joinThreadPool", "()V", (void*)android_os_BinderInternal_joinThreadPool },
     { "disableBackgroundScheduling", "(Z)V", (void*)android_os_BinderInternal_disableBackgroundScheduling },
     { "setMaxThreads", "(I)V", (void*)android_os_BinderInternal_setMaxThreads },
-    { "handleGc", "()V", (void*)android_os_BinderInternal_handleGc }
+    { "handleGc", "()V", (void*)android_os_BinderInternal_handleGc },
+    { "nSetBinderProxyCountEnabled", "(Z)V", (void*)android_os_BinderInternal_setBinderProxyCountEnabled },
+    { "nGetBinderProxyPerUidCounts", "()Landroid/util/SparseIntArray;", (void*)android_os_BinderInternal_getBinderProxyPerUidCounts },
+    { "nGetBinderProxyCount", "(I)I", (void*)android_os_BinderInternal_getBinderProxyCount },
+    { "nSetBinderProxyCountWatermarks", "(II)V", (void*)android_os_BinderInternal_setBinderProxyCountWatermarks}
 };
 
 const char* const kBinderInternalPathName = "com/android/internal/os/BinderInternal";
@@ -1012,6 +1062,16 @@ static int int_register_android_os_BinderInternal(JNIEnv* env)
 
     gBinderInternalOffsets.mClass = MakeGlobalRefOrDie(env, clazz);
     gBinderInternalOffsets.mForceGc = GetStaticMethodIDOrDie(env, clazz, "forceBinderGc", "()V");
+    gBinderInternalOffsets.mProxyLimitCallback = GetStaticMethodIDOrDie(env, clazz, "binderProxyLimitCallbackFromNative", "(I)V");
+
+    jclass SparseIntArrayClass = FindClassOrDie(env, "android/util/SparseIntArray");
+    gSparseIntArrayOffsets.classObject = MakeGlobalRefOrDie(env, SparseIntArrayClass);
+    gSparseIntArrayOffsets.constructor = GetMethodIDOrDie(env, gSparseIntArrayOffsets.classObject,
+                                                           "<init>", "()V");
+    gSparseIntArrayOffsets.put = GetMethodIDOrDie(env, gSparseIntArrayOffsets.classObject, "put",
+                                                   "(II)V");
+
+    BpBinder::setLimitCallback(android_os_BinderInternal_proxyLimitcallback);
 
     return RegisterMethodsOrDie(
         env, kBinderInternalPathName,

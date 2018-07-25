@@ -139,6 +139,7 @@ public class SettingsBackupTest {
                     Settings.Global.CAPTIVE_PORTAL_HTTP_URL,
                     Settings.Global.CAPTIVE_PORTAL_MODE,
                     Settings.Global.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS,
+                    Settings.Global.CAPTIVE_PORTAL_FALLBACK_PROBE_SPECS,
                     Settings.Global.CAPTIVE_PORTAL_SERVER,
                     Settings.Global.CAPTIVE_PORTAL_USE_HTTPS,
                     Settings.Global.CAPTIVE_PORTAL_USER_AGENT,

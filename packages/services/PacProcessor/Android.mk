@@ -26,7 +26,7 @@ LOCAL_PACKAGE_NAME := PacProcessor
 LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_CERTIFICATE := platform
 
-LOCAL_JNI_SHARED_LIBRARIES := libjni_pacprocessor
+LOCAL_JNI_SHARED_LIBRARIES := libjni_pacprocessor libpac
 
 include $(BUILD_PACKAGE)
 

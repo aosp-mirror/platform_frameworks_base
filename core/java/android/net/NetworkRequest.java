@@ -17,6 +17,8 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.net.NetworkCapabilities.NetCapability;
+import android.net.NetworkCapabilities.Transport;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
@@ -165,9 +167,6 @@ public class NetworkRequest implements Parcelable {
          * the requested network's required capabilities.  Note that when searching
          * for a network to satisfy a request, all capabilities requested must be
          * satisfied.
-         * <p>
-         * If the given capability was previously added to the list of unwanted capabilities
-         * then the capability will also be removed from the list of unwanted capabilities.
          *
          * @param capability The capability to add.
          * @return The builder to facilitate chaining
@@ -179,8 +178,7 @@ public class NetworkRequest implements Parcelable {
         }
 
         /**
-         * Removes (if found) the given capability from this builder instance from both required
-         * and unwanted capabilities lists.
+         * Removes (if found) the given capability from this builder instance.
          *
          * @param capability The capability to remove.
          * @return The builder to facilitate chaining.
@@ -199,8 +197,7 @@ public class NetworkRequest implements Parcelable {
          * @hide
          */
         public Builder setCapabilities(NetworkCapabilities nc) {
-            mNetworkCapabilities.clearAll();
-            mNetworkCapabilities.combineCapabilities(nc);
+            mNetworkCapabilities.set(nc);
             return this;
         }
 
@@ -228,6 +225,7 @@ public class NetworkRequest implements Parcelable {
          *
          * @param capability The capability to add to unwanted capability list.
          * @return The builder to facilitate chaining.
+         *
          * @hide
          */
         public Builder addUnwantedCapability(@NetworkCapabilities.NetCapability int capability) {
@@ -424,6 +422,29 @@ public class NetworkRequest implements Parcelable {
      */
     public boolean isBackgroundRequest() {
         return type == Type.BACKGROUND_REQUEST;
+    }
+
+    /**
+     * @see Builder#addCapability(int)
+     */
+    public boolean hasCapability(@NetCapability int capability) {
+        return networkCapabilities.hasCapability(capability);
+    }
+
+    /**
+     * @see Builder#addUnwantedCapability(int)
+     *
+     * @hide
+     */
+    public boolean hasUnwantedCapability(@NetCapability int capability) {
+        return networkCapabilities.hasUnwantedCapability(capability);
+    }
+
+    /**
+     * @see Builder#addTransportType(int)
+     */
+    public boolean hasTransport(@Transport int transportType) {
+        return networkCapabilities.hasTransport(transportType);
     }
 
     public String toString() {

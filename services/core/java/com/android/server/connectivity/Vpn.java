@@ -100,8 +100,6 @@ import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.net.BaseNetworkObserver;
 
-import libcore.io.IoUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -117,10 +115,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import libcore.io.IoUtils;
 
 /**
  * @hide
@@ -172,10 +173,13 @@ public class Vpn {
     private PendingIntent mStatusIntent;
     private volatile boolean mEnableTeardown = true;
     private final INetworkManagementService mNetd;
-    private VpnConfig mConfig;
-    private NetworkAgent mNetworkAgent;
+    @VisibleForTesting
+    protected VpnConfig mConfig;
+    @VisibleForTesting
+    protected NetworkAgent mNetworkAgent;
     private final Looper mLooper;
-    private final NetworkCapabilities mNetworkCapabilities;
+    @VisibleForTesting
+    protected final NetworkCapabilities mNetworkCapabilities;
     private final SystemServices mSystemServices;
 
     /**
@@ -316,15 +320,12 @@ public class Vpn {
         boolean roaming = false;
         boolean congested = false;
 
-        if (ArrayUtils.isEmpty(underlyingNetworks)) {
-            // No idea what the underlying networks are; assume sane defaults
-            metered = true;
-            roaming = false;
-            congested = false;
-        } else {
+        boolean hadUnderlyingNetworks = false;
+        if (null != underlyingNetworks) {
             for (Network underlying : underlyingNetworks) {
                 final NetworkCapabilities underlyingCaps = cm.getNetworkCapabilities(underlying);
                 if (underlyingCaps == null) continue;
+                hadUnderlyingNetworks = true;
                 for (int underlyingType : underlyingCaps.getTransportTypes()) {
                     transportTypes = ArrayUtils.appendInt(transportTypes, underlyingType);
                 }
@@ -339,6 +340,12 @@ public class Vpn {
                 roaming |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_ROAMING);
                 congested |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_CONGESTED);
             }
+        }
+        if (!hadUnderlyingNetworks) {
+            // No idea what the underlying networks are; assume sane defaults
+            metered = true;
+            roaming = false;
+            congested = false;
         }
 
         caps.setTransportTypes(transportTypes);
@@ -889,6 +896,42 @@ public class Vpn {
                 .compareTo(MOST_IPV6_ADDRESSES_COUNT) >= 0;
     }
 
+    /**
+     * Attempt to perform a seamless handover of VPNs by only updating LinkProperties without
+     * registering a new NetworkAgent. This is not always possible if the new VPN configuration
+     * has certain changes, in which case this method would just return {@code false}.
+     */
+    private boolean updateLinkPropertiesInPlaceIfPossible(NetworkAgent agent, VpnConfig oldConfig) {
+        // NetworkMisc cannot be updated without registering a new NetworkAgent.
+        if (oldConfig.allowBypass != mConfig.allowBypass) {
+            Log.i(TAG, "Handover not possible due to changes to allowBypass");
+            return false;
+        }
+
+        // TODO: we currently do not support seamless handover if the allowed or disallowed
+        // applications have changed. Consider diffing UID ranges and only applying the delta.
+        if (!Objects.equals(oldConfig.allowedApplications, mConfig.allowedApplications) ||
+                !Objects.equals(oldConfig.disallowedApplications, mConfig.disallowedApplications)) {
+            Log.i(TAG, "Handover not possible due to changes to whitelisted/blacklisted apps");
+            return false;
+        }
+
+        LinkProperties lp = makeLinkProperties();
+        final boolean hadInternetCapability = mNetworkCapabilities.hasCapability(
+                NetworkCapabilities.NET_CAPABILITY_INTERNET);
+        final boolean willHaveInternetCapability = providesRoutesToMostDestinations(lp);
+        if (hadInternetCapability != willHaveInternetCapability) {
+            // A seamless handover would have led to a change to INTERNET capability, which
+            // is supposed to be immutable for a given network. In this case bail out and do not
+            // perform handover.
+            Log.i(TAG, "Handover not possible due to changes to INTERNET capability");
+            return false;
+        }
+
+        agent.sendLinkProperties(lp);
+        return true;
+    }
+
     private void agentConnect() {
         LinkProperties lp = makeLinkProperties();
 
@@ -997,13 +1040,11 @@ public class Vpn {
         String oldInterface = mInterface;
         Connection oldConnection = mConnection;
         NetworkAgent oldNetworkAgent = mNetworkAgent;
-        mNetworkAgent = null;
         Set<UidRange> oldUsers = mNetworkCapabilities.getUids();
 
         // Configure the interface. Abort if any of these steps fails.
         ParcelFileDescriptor tun = ParcelFileDescriptor.adoptFd(jniCreate(config.mtu));
         try {
-            updateState(DetailedState.CONNECTING, "establish");
             String interfaze = jniGetName(tun.getFd());
 
             // TEMP use the old jni calls until there is support for netd address setting
@@ -1031,15 +1072,26 @@ public class Vpn {
             mConfig = config;
 
             // Set up forwarding and DNS rules.
-            agentConnect();
+            // First attempt to do a seamless handover that only changes the interface name and
+            // parameters. If that fails, disconnect.
+            if (oldConfig != null
+                    && updateLinkPropertiesInPlaceIfPossible(mNetworkAgent, oldConfig)) {
+                // Keep mNetworkAgent unchanged
+            } else {
+                mNetworkAgent = null;
+                updateState(DetailedState.CONNECTING, "establish");
+                // Set up forwarding and DNS rules.
+                agentConnect();
+                // Remove the old tun's user forwarding rules
+                // The new tun's user rules have already been added above so they will take over
+                // as rules are deleted. This prevents data leakage as the rules are moved over.
+                agentDisconnect(oldNetworkAgent);
+            }
 
             if (oldConnection != null) {
                 mContext.unbindService(oldConnection);
             }
-            // Remove the old tun's user forwarding rules
-            // The new tun's user rules have already been added so they will take over
-            // as rules are deleted. This prevents data leakage as the rules are moved over.
-            agentDisconnect(oldNetworkAgent);
+
             if (oldInterface != null && !oldInterface.equals(interfaze)) {
                 jniReset(oldInterface);
             }
@@ -1071,7 +1123,8 @@ public class Vpn {
 
     // Returns true if the VPN has been established and the calling UID is its owner. Used to check
     // that a call to mutate VPN state is admissible.
-    private boolean isCallerEstablishedOwnerLocked() {
+    @VisibleForTesting
+    protected boolean isCallerEstablishedOwnerLocked() {
         return isRunningLocked() && Binder.getCallingUid() == mOwnerUID;
     }
 
@@ -1273,6 +1326,18 @@ public class Vpn {
             addedRanges = createUserAndRestrictedProfilesRanges(mUserHandle,
                     /* allowedApplications */ null,
                     /* disallowedApplications */ exemptedPackages);
+
+            // The UID range of the first user (0-99999) would block the IPSec traffic, which comes
+            // directly from the kernel and is marked as uid=0. So we adjust the range to allow
+            // it through (b/69873852).
+            for (UidRange range : addedRanges) {
+                if (range.start == 0) {
+                    addedRanges.remove(range);
+                    if (range.stop != 0) {
+                        addedRanges.add(new UidRange(1, range.stop));
+                    }
+                }
+            }
 
             removedRanges.removeAll(addedRanges);
             addedRanges.removeAll(mBlockedUsers);

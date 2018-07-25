@@ -40,11 +40,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.os.Parcel;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
+
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,6 +56,9 @@ import java.util.Set;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class NetworkCapabilitiesTest {
+    private static final String TEST_SSID = "TEST_SSID";
+    private static final String DIFFERENT_TEST_SSID = "DIFFERENT_TEST_SSID";
+
     @Test
     public void testMaybeMarkCapabilitiesRestricted() {
         // verify EIMS is restricted
@@ -268,6 +273,8 @@ public class NetworkCapabilitiesTest {
             .addCapability(NET_CAPABILITY_EIMS)
             .addCapability(NET_CAPABILITY_NOT_METERED);
         assertEqualsThroughMarshalling(netCap);
+        netCap.setSSID(TEST_SSID);
+        assertEqualsThroughMarshalling(netCap);
     }
 
     @Test
@@ -362,6 +369,27 @@ public class NetworkCapabilitiesTest {
     }
 
     @Test
+    public void testSSID() {
+        NetworkCapabilities nc1 = new NetworkCapabilities();
+        NetworkCapabilities nc2 = new NetworkCapabilities();
+        assertTrue(nc2.satisfiedBySSID(nc1));
+
+        nc1.setSSID(TEST_SSID);
+        assertTrue(nc2.satisfiedBySSID(nc1));
+        nc2.setSSID("different " + TEST_SSID);
+        assertFalse(nc2.satisfiedBySSID(nc1));
+
+        assertTrue(nc1.satisfiedByImmutableNetworkCapabilities(nc2));
+        assertFalse(nc1.satisfiedByNetworkCapabilities(nc2));
+    }
+
+    private ArraySet<UidRange> uidRange(int from, int to) {
+        final ArraySet<UidRange> range = new ArraySet<>(1);
+        range.add(new UidRange(from, to));
+        return range;
+    }
+
+    @Test
     public void testCombineCapabilities() {
         NetworkCapabilities nc1 = new NetworkCapabilities();
         NetworkCapabilities nc2 = new NetworkCapabilities();
@@ -382,6 +410,35 @@ public class NetworkCapabilitiesTest {
         // will never be satisfied.
         assertTrue(nc2.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(nc2.hasUnwantedCapability(NET_CAPABILITY_NOT_ROAMING));
+
+        nc1.setSSID(TEST_SSID);
+        nc2.combineCapabilities(nc1);
+        assertTrue(TEST_SSID.equals(nc2.getSSID()));
+
+        // Because they now have the same SSID, the following call should not throw
+        nc2.combineCapabilities(nc1);
+
+        nc1.setSSID(DIFFERENT_TEST_SSID);
+        try {
+            nc2.combineCapabilities(nc1);
+            fail("Expected IllegalStateException: can't combine different SSIDs");
+        } catch (IllegalStateException expected) {}
+        nc1.setSSID(TEST_SSID);
+
+        nc1.setUids(uidRange(10, 13));
+        assertNotEquals(nc1, nc2);
+        nc2.combineCapabilities(nc1);  // Everything + 10~13 is still everything.
+        assertNotEquals(nc1, nc2);
+        nc1.combineCapabilities(nc2);  // 10~13 + everything is everything.
+        assertEquals(nc1, nc2);
+        nc1.setUids(uidRange(10, 13));
+        nc2.setUids(uidRange(20, 23));
+        assertNotEquals(nc1, nc2);
+        nc1.combineCapabilities(nc2);
+        assertTrue(nc1.appliesToUid(12));
+        assertFalse(nc2.appliesToUid(12));
+        assertTrue(nc1.appliesToUid(22));
+        assertTrue(nc2.appliesToUid(22));
     }
 
     @Test
@@ -419,5 +476,39 @@ public class NetworkCapabilitiesTest {
         p.unmarshall(marshalledData, 0, marshalledData.length);
         p.setDataPosition(0);
         assertEquals(NetworkCapabilities.CREATOR.createFromParcel(p), netCap);
+    }
+
+    @Test
+    public void testSet() {
+        NetworkCapabilities nc1 = new NetworkCapabilities();
+        NetworkCapabilities nc2 = new NetworkCapabilities();
+
+        nc1.addUnwantedCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
+        nc1.addCapability(NET_CAPABILITY_NOT_ROAMING);
+        assertNotEquals(nc1, nc2);
+        nc2.set(nc1);
+        assertEquals(nc1, nc2);
+        assertTrue(nc2.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(nc2.hasUnwantedCapability(NET_CAPABILITY_CAPTIVE_PORTAL));
+
+        // This will effectively move NOT_ROAMING capability from required to unwanted for nc1.
+        nc1.addUnwantedCapability(NET_CAPABILITY_NOT_ROAMING);
+        nc1.setSSID(TEST_SSID);
+        nc2.set(nc1);
+        assertEquals(nc1, nc2);
+        // Contrary to combineCapabilities, set() will have removed the NOT_ROAMING capability
+        // from nc2.
+        assertFalse(nc2.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(nc2.hasUnwantedCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(TEST_SSID.equals(nc2.getSSID()));
+
+        nc1.setSSID(DIFFERENT_TEST_SSID);
+        nc2.set(nc1);
+        assertEquals(nc1, nc2);
+        assertTrue(DIFFERENT_TEST_SSID.equals(nc2.getSSID()));
+
+        nc1.setUids(uidRange(10, 13));
+        nc2.set(nc1);  // Overwrites, as opposed to combineCapabilities
+        assertEquals(nc1, nc2);
     }
 }

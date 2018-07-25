@@ -150,7 +150,7 @@ static jobject android_os_VintfObject_getVndkSnapshots(JNIEnv* env, jclass) {
     }
     jobject jMap = env->NewObject(gHashMapClazz, gHashMapInit);
     for (const auto &vndk : manifest->vendorNdks()) {
-        std::string key = vndk.version();
+        const std::string& key = vndk.version();
         env->CallObjectMethod(jMap, gHashMapPut,
                 env->NewStringUTF(key.c_str()), toJavaStringArray(env, vndk.libraries()));
     }
