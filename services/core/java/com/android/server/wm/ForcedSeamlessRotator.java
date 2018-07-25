@@ -68,11 +68,13 @@ public class ForcedSeamlessRotator {
     public void finish(WindowToken token, WindowState win) {
         mTransform.reset();
         token.getPendingTransaction().setMatrix(token.mSurfaceControl, mTransform, mFloat9);
-        token.getPendingTransaction().deferTransactionUntil(token.mSurfaceControl,
-                win.mWinAnimator.mSurfaceController.mSurfaceControl.getHandle(),
-                win.getFrameNumber());
-        win.getPendingTransaction().deferTransactionUntil(win.mSurfaceControl,
-                win.mWinAnimator.mSurfaceController.mSurfaceControl.getHandle(),
-                win.getFrameNumber());
+        if (win.mWinAnimator.mSurfaceController != null) {
+            token.getPendingTransaction().deferTransactionUntil(token.mSurfaceControl,
+                    win.mWinAnimator.mSurfaceController.mSurfaceControl.getHandle(),
+                    win.getFrameNumber());
+            win.getPendingTransaction().deferTransactionUntil(win.mSurfaceControl,
+                    win.mWinAnimator.mSurfaceController.mSurfaceControl.getHandle(),
+                    win.getFrameNumber());
+        }
     }
 }
