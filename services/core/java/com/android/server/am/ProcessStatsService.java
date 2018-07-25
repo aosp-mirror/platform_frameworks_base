@@ -612,7 +612,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             stats.dumpCheckinLocked(pw, reqPackage);
         } else {
             if (dumpDetails || dumpFullDetails) {
-                stats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpAll, activeOnly);
+                stats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpDetails, dumpAll,
+                        activeOnly);
             } else {
                 stats.dumpSummaryLocked(pw, reqPackage, now, activeOnly);
             }
@@ -974,8 +975,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 if (checkedIn) pw.print(" (checked in)");
                 pw.println(":");
                 if (dumpDetails || dumpFullDetails) {
-                    processStats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpAll,
-                            activeOnly);
+                    processStats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpDetails,
+                            dumpAll, activeOnly);
                     if (dumpAll) {
                         pw.print("  mFile="); pw.println(mFile.getBaseFile());
                     }
@@ -1030,7 +1031,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                                 // much crud.
                                 if (dumpFullDetails) {
                                     processStats.dumpLocked(pw, reqPackage, now, false, false,
-                                            activeOnly);
+                                            false, activeOnly);
                                 } else {
                                     processStats.dumpSummaryLocked(pw, reqPackage, now, activeOnly);
                                 }
@@ -1060,8 +1061,8 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     }
                     pw.println("CURRENT STATS:");
                     if (dumpDetails || dumpFullDetails) {
-                        mProcessStats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpAll,
-                                activeOnly);
+                        mProcessStats.dumpLocked(pw, reqPackage, now, !dumpFullDetails, dumpDetails,
+                                dumpAll, activeOnly);
                         if (dumpAll) {
                             pw.print("  mFile="); pw.println(mFile.getBaseFile());
                         }

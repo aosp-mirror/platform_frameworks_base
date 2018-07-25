@@ -48,6 +48,9 @@ import java.util.Objects;
  */
 public final class DumpUtils {
     public static final String[] STATE_NAMES;
+    public static final String[] STATE_LABELS;
+    public static final String STATE_LABEL_TOTAL;
+    public static final String STATE_LABEL_CACHED;
     public static final String[] STATE_NAMES_CSV;
     static final String[] STATE_TAGS;
     static final int[] STATE_PROTO_ENUMS;
@@ -55,52 +58,70 @@ public final class DumpUtils {
     // Make the mapping easy to update.
     static {
         STATE_NAMES = new String[STATE_COUNT];
-        STATE_NAMES[STATE_PERSISTENT] = "Persist";
-        STATE_NAMES[STATE_TOP] = "Top";
-        STATE_NAMES[STATE_IMPORTANT_FOREGROUND] = "ImpFg";
-        STATE_NAMES[STATE_IMPORTANT_BACKGROUND] = "ImpBg";
-        STATE_NAMES[STATE_BACKUP] = "Backup";
-        STATE_NAMES[STATE_SERVICE] = "Service";
-        STATE_NAMES[STATE_SERVICE_RESTARTING] = "ServRst";
-        STATE_NAMES[STATE_RECEIVER] = "Receivr";
-        STATE_NAMES[STATE_HEAVY_WEIGHT] = "HeavyWt";
-        STATE_NAMES[STATE_HOME] = "Home";
-        STATE_NAMES[STATE_LAST_ACTIVITY] = "LastAct";
-        STATE_NAMES[STATE_CACHED_ACTIVITY] = "CchAct";
-        STATE_NAMES[STATE_CACHED_ACTIVITY_CLIENT] = "CchCAct";
-        STATE_NAMES[STATE_CACHED_EMPTY] = "CchEmty";
+        STATE_NAMES[STATE_PERSISTENT]               = "Persist";
+        STATE_NAMES[STATE_TOP]                      = "Top";
+        STATE_NAMES[STATE_IMPORTANT_FOREGROUND]     = "ImpFg";
+        STATE_NAMES[STATE_IMPORTANT_BACKGROUND]     = "ImpBg";
+        STATE_NAMES[STATE_BACKUP]                   = "Backup";
+        STATE_NAMES[STATE_SERVICE]                  = "Service";
+        STATE_NAMES[STATE_SERVICE_RESTARTING]       = "ServRst";
+        STATE_NAMES[STATE_RECEIVER]                 = "Receivr";
+        STATE_NAMES[STATE_HEAVY_WEIGHT]             = "HeavyWt";
+        STATE_NAMES[STATE_HOME]                     = "Home";
+        STATE_NAMES[STATE_LAST_ACTIVITY]            = "LastAct";
+        STATE_NAMES[STATE_CACHED_ACTIVITY]          = "CchAct";
+        STATE_NAMES[STATE_CACHED_ACTIVITY_CLIENT]   = "CchCAct";
+        STATE_NAMES[STATE_CACHED_EMPTY]             = "CchEmty";
+
+        STATE_LABELS = new String[STATE_COUNT];
+        STATE_LABELS[STATE_PERSISTENT]              = "Persistent";
+        STATE_LABELS[STATE_TOP]                     = "       Top";
+        STATE_LABELS[STATE_IMPORTANT_FOREGROUND]    = "    Imp Fg";
+        STATE_LABELS[STATE_IMPORTANT_BACKGROUND]    = "    Imp Bg";
+        STATE_LABELS[STATE_BACKUP]                  = "    Backup";
+        STATE_LABELS[STATE_SERVICE]                 = "   Service";
+        STATE_LABELS[STATE_SERVICE_RESTARTING]      = "Service Rs";
+        STATE_LABELS[STATE_RECEIVER]                = "  Receiver";
+        STATE_LABELS[STATE_HEAVY_WEIGHT]            = " Heavy Wgt";
+        STATE_LABELS[STATE_HOME]                    = "    (Home)";
+        STATE_LABELS[STATE_LAST_ACTIVITY]           = "(Last Act)";
+        STATE_LABELS[STATE_CACHED_ACTIVITY]         = " (Cch Act)";
+        STATE_LABELS[STATE_CACHED_ACTIVITY_CLIENT]  = "(Cch CAct)";
+        STATE_LABELS[STATE_CACHED_EMPTY]            = "(Cch Emty)";
+        STATE_LABEL_CACHED                          = "  (Cached)";
+        STATE_LABEL_TOTAL                           = "     TOTAL";
 
         STATE_NAMES_CSV = new String[STATE_COUNT];
-        STATE_NAMES_CSV[STATE_PERSISTENT] = "pers";
-        STATE_NAMES_CSV[STATE_TOP] = "top";
-        STATE_NAMES_CSV[STATE_IMPORTANT_FOREGROUND] = "impfg";
-        STATE_NAMES_CSV[STATE_IMPORTANT_BACKGROUND] = "impbg";
-        STATE_NAMES_CSV[STATE_BACKUP] = "backup";
-        STATE_NAMES_CSV[STATE_SERVICE] = "service";
-        STATE_NAMES_CSV[STATE_SERVICE_RESTARTING] = "service-rs";
-        STATE_NAMES_CSV[STATE_RECEIVER] = "receiver";
-        STATE_NAMES_CSV[STATE_HEAVY_WEIGHT] = "heavy";
-        STATE_NAMES_CSV[STATE_HOME] = "home";
-        STATE_NAMES_CSV[STATE_LAST_ACTIVITY] = "lastact";
-        STATE_NAMES_CSV[STATE_CACHED_ACTIVITY] = "cch-activity";
-        STATE_NAMES_CSV[STATE_CACHED_ACTIVITY_CLIENT] = "cch-aclient";
-        STATE_NAMES_CSV[STATE_CACHED_EMPTY] = "cch-empty";
+        STATE_NAMES_CSV[STATE_PERSISTENT]               = "pers";
+        STATE_NAMES_CSV[STATE_TOP]                      = "top";
+        STATE_NAMES_CSV[STATE_IMPORTANT_FOREGROUND]     = "impfg";
+        STATE_NAMES_CSV[STATE_IMPORTANT_BACKGROUND]     = "impbg";
+        STATE_NAMES_CSV[STATE_BACKUP]                   = "backup";
+        STATE_NAMES_CSV[STATE_SERVICE]                  = "service";
+        STATE_NAMES_CSV[STATE_SERVICE_RESTARTING]       = "service-rs";
+        STATE_NAMES_CSV[STATE_RECEIVER]                 = "receiver";
+        STATE_NAMES_CSV[STATE_HEAVY_WEIGHT]             = "heavy";
+        STATE_NAMES_CSV[STATE_HOME]                     = "home";
+        STATE_NAMES_CSV[STATE_LAST_ACTIVITY]            = "lastact";
+        STATE_NAMES_CSV[STATE_CACHED_ACTIVITY]          = "cch-activity";
+        STATE_NAMES_CSV[STATE_CACHED_ACTIVITY_CLIENT]   = "cch-aclient";
+        STATE_NAMES_CSV[STATE_CACHED_EMPTY]             = "cch-empty";
 
         STATE_TAGS = new String[STATE_COUNT];
-        STATE_TAGS[STATE_PERSISTENT] = "p";
-        STATE_TAGS[STATE_TOP] = "t";
-        STATE_TAGS[STATE_IMPORTANT_FOREGROUND] = "f";
-        STATE_TAGS[STATE_IMPORTANT_BACKGROUND] = "b";
-        STATE_TAGS[STATE_BACKUP] = "u";
-        STATE_TAGS[STATE_SERVICE] = "s";
-        STATE_TAGS[STATE_SERVICE_RESTARTING] = "x";
-        STATE_TAGS[STATE_RECEIVER] = "r";
-        STATE_TAGS[STATE_HEAVY_WEIGHT] = "w";
-        STATE_TAGS[STATE_HOME] = "h";
-        STATE_TAGS[STATE_LAST_ACTIVITY] = "l";
-        STATE_TAGS[STATE_CACHED_ACTIVITY] = "a";
-        STATE_TAGS[STATE_CACHED_ACTIVITY_CLIENT] = "c";
-        STATE_TAGS[STATE_CACHED_EMPTY] = "e";
+        STATE_TAGS[STATE_PERSISTENT]                = "p";
+        STATE_TAGS[STATE_TOP]                       = "t";
+        STATE_TAGS[STATE_IMPORTANT_FOREGROUND]      = "f";
+        STATE_TAGS[STATE_IMPORTANT_BACKGROUND]      = "b";
+        STATE_TAGS[STATE_BACKUP]                    = "u";
+        STATE_TAGS[STATE_SERVICE]                   = "s";
+        STATE_TAGS[STATE_SERVICE_RESTARTING]        = "x";
+        STATE_TAGS[STATE_RECEIVER]                  = "r";
+        STATE_TAGS[STATE_HEAVY_WEIGHT]              = "w";
+        STATE_TAGS[STATE_HOME]                      = "h";
+        STATE_TAGS[STATE_LAST_ACTIVITY]             = "l";
+        STATE_TAGS[STATE_CACHED_ACTIVITY]           = "a";
+        STATE_TAGS[STATE_CACHED_ACTIVITY_CLIENT]    = "c";
+        STATE_TAGS[STATE_CACHED_EMPTY]              = "e";
 
         STATE_PROTO_ENUMS = new int[STATE_COUNT];
         STATE_PROTO_ENUMS[STATE_PERSISTENT] = ProcessStatsProto.State.PERSISTENT;
@@ -166,7 +187,7 @@ public final class DumpUtils {
                 pw.print("SOff/");
                 break;
             case ADJ_SCREEN_ON:
-                pw.print("SOn /");
+                pw.print(" SOn/");
                 break;
             default:
                 pw.print("????/");
@@ -201,11 +222,11 @@ public final class DumpUtils {
                 if (sep != 0) pw.print(sep);
                 break;
             case ADJ_MEM_FACTOR_MODERATE:
-                pw.print("Mod ");
+                pw.print(" Mod");
                 if (sep != 0) pw.print(sep);
                 break;
             case ADJ_MEM_FACTOR_LOW:
-                pw.print("Low ");
+                pw.print(" Low");
                 if (sep != 0) pw.print(sep);
                 break;
             case ADJ_MEM_FACTOR_CRITICAL:
