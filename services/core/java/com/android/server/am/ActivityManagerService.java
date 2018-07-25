@@ -10177,6 +10177,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 abiOverride);
     }
 
+    @GuardedBy("this")
     final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
             boolean disableHiddenApiChecks, String abiOverride) {
         ProcessRecord app;
@@ -12155,6 +12156,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return imp;
     }
 
+    @GuardedBy("this")
     private void fillInProcMemInfoLocked(ProcessRecord app,
             ActivityManager.RunningAppProcessInfo outInfo,
             int clientTargetSdk) {
@@ -21603,6 +21605,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     final void trimApplicationsLocked() {
         // First remove any unused application processes whose package
         // has been removed.
