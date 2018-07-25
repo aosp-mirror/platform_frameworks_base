@@ -237,7 +237,7 @@ public class InputMethodAndSubtypeUtilCompatTest {
         assertThat(InputMethodAndSubtypeUtilCompat.isValidSystemNonAuxAsciiCapableIme(
                 createDummyIme(false, false, createDummySubtype("keyboard", false, true))))
                 .isFalse();
-   }
+    }
 
     private static InputMethodInfo createDummyIme(boolean isSystem, boolean isAuxIme,
             InputMethodSubtype... subtypes) {
@@ -254,7 +254,7 @@ public class InputMethodAndSubtypeUtilCompatTest {
         si.exported = true;
         si.nonLocalizedLabel = "Dummy IME";
         ri.serviceInfo = si;
-        return new InputMethodInfo(ri, isAuxIme, "",  Arrays.asList(subtypes), 1, false);
+        return new InputMethodInfo(ri, isAuxIme, "", Arrays.asList(subtypes), 1, false);
     }
 
     private static InputMethodSubtype createDummySubtype(

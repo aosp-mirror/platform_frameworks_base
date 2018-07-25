@@ -58,7 +58,7 @@ public class ThreadUtilsTest {
     }
 
     @Test
-    public void testPostOnMainThread_shouldRunOnMainTread() throws Exception {
+    public void testPostOnMainThread_shouldRunOnMainTread() {
         TestRunnable cr = new TestRunnable();
         ShadowLooper.pauseMainLooper();
         ThreadUtils.postOnMainThread(cr);
