@@ -259,6 +259,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     final H mH = new H();
     final Executor mExecutor = new HandlerExecutor(mH);
     final ArrayMap<IBinder, ActivityClientRecord> mActivities = new ArrayMap<>();
+    /** The activities to be truly destroyed (not include relaunch). */
     final Map<IBinder, ClientTransactionItem> mActivitiesToBeDestroyed =
             Collections.synchronizedMap(new ArrayMap<IBinder, ClientTransactionItem>());
     // List of new activities (via ActivityRecord.nextIdle) that should
@@ -3077,6 +3078,10 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     private void reportSizeConfigurations(ActivityClientRecord r) {
+        if (mActivitiesToBeDestroyed.containsKey(r.token)) {
+            // Size configurations of a destroyed activity is meaningless.
+            return;
+        }
         Configuration[] configurations = r.activity.getResources().getSizeConfigurations();
         if (configurations == null) {
             return;
@@ -3823,6 +3828,13 @@ public final class ActivityThread extends ClientTransactionHandler {
         final ActivityClientRecord r = performResumeActivity(token, finalStateRequest, reason);
         if (r == null) {
             // We didn't actually resume the activity, so skipping any follow-up actions.
+            return;
+        }
+        if (mActivitiesToBeDestroyed.containsKey(token)) {
+            // Although the activity is resumed, it is going to be destroyed. So the following
+            // UI operations are unnecessary and also prevents exception because its token may
+            // be gone that window manager cannot recognize it. All necessary cleanup actions
+            // performed below will be done while handling destruction.
             return;
         }
 
