@@ -81,10 +81,6 @@ class Context : public IAaptContext {
     return min_sdk_version_;
   }
 
-  bool IsAutoNamespace() override {
-    return auto_namespace_;
-  }
-
  private:
   DISALLOW_COPY_AND_ASSIGN(Context);
 
@@ -97,7 +93,6 @@ class Context : public IAaptContext {
   NameMangler name_mangler_;
   SymbolTable symbols_;
   int min_sdk_version_;
-  bool auto_namespace_;
 };
 
 class ContextBuilder {
@@ -129,11 +124,6 @@ class ContextBuilder {
 
   ContextBuilder& SetMinSdkVersion(int min_sdk) {
     context_->min_sdk_version_ = min_sdk;
-    return *this;
-  }
-
-  ContextBuilder& SetAutoNamespace(bool auto_namespace) {
-    context_->auto_namespace_ = auto_namespace;
     return *this;
   }
 
@@ -180,15 +170,6 @@ class StaticSymbolSourceBuilder {
         return CloneSymbol(iter->second);
       }
       return nullptr;
-    }
-
-    std::string GetPackageForSymbol(const ResourceName& name) override {
-      for (auto const& imap : name_map_) {
-        if (imap.first.type == name.type && imap.first.entry == name.entry) {
-          return imap.first.package;
-        }
-      }
-      return "";
     }
 
     std::unique_ptr<SymbolTable::Symbol> FindById(ResourceId id) override {

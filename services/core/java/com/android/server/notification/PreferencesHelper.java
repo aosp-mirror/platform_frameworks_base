@@ -582,16 +582,15 @@ public class PreferencesHelper implements RankingConfig {
             updatedChannel.setLockscreenVisibility(
                     NotificationListenerService.Ranking.VISIBILITY_NO_OVERRIDE);
         }
-        if (!fromUser) {
-            updatedChannel.unlockFields(updatedChannel.getUserLockedFields());
-        }
         if (fromUser) {
             updatedChannel.lockFields(channel.getUserLockedFields());
             lockFieldsForUpdate(channel, updatedChannel);
+        } else {
+            updatedChannel.unlockFields(updatedChannel.getUserLockedFields());
         }
         r.channels.put(updatedChannel.getId(), updatedChannel);
 
-        if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(updatedChannel.getId())) {
+        if (onlyHasDefaultChannel(pkg, uid)) {
             // copy settings to app level so they are inherited by new channels
             // when the app migrates
             r.importance = updatedChannel.getImportance();

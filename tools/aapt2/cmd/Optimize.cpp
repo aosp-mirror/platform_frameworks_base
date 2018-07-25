@@ -104,10 +104,6 @@ class OptimizeContext : public IAaptContext {
     return sdk_version_;
   }
 
-  bool IsAutoNamespace() override {
-    return false;
-  }
-
  private:
   DISALLOW_COPY_AND_ASSIGN(OptimizeContext);
 

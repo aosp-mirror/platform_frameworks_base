@@ -311,10 +311,6 @@ class Context : public IAaptContext {
     return 0u;
   }
 
-  bool IsAutoNamespace() override {
-    return false;
-  }
-
   bool verbose_ = false;
   std::string package_;
 

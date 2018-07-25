@@ -89,13 +89,6 @@ class SymbolTable {
   // results are stored in a cache which may evict entries on subsequent calls.
   const Symbol* FindByName(const ResourceName& name);
 
-  // Finds the symbol from any package, for use as part of automatic conversion to namespaces.
-  // This returns the symbol from the highest priority package,
-  // which mimics the behavior of the resource merger and overlays.
-  // NOTE: Never hold on to the result between calls to FindByXXX. The
-  // results are stored in a cache which may evict entries on subsequent calls.
-  const Symbol* FindByNameInAnyPackage(const ResourceName& name);
-
   // NOTE: Never hold on to the result between calls to FindByXXX. The
   // results are stored in a cache which may evict entries on subsequent calls.
   const Symbol* FindById(const ResourceId& id);
@@ -160,11 +153,6 @@ class ISymbolSource {
 
   virtual std::unique_ptr<SymbolTable::Symbol> FindByName(
       const ResourceName& name) = 0;
-  // Finds the name of a symbol from any package,
-  // for use as part of automatic conversion to namespaces.
-  // This returns the symbol from the highest priority package,
-  // which mimics the behavior of the resource merger and overlays.
-  virtual std::string GetPackageForSymbol(const ResourceName& name) = 0;
   virtual std::unique_ptr<SymbolTable::Symbol> FindById(ResourceId id) = 0;
 
   // Default implementation tries the name if it exists, else the ID.
@@ -189,7 +177,6 @@ class ResourceTableSymbolSource : public ISymbolSource {
   std::unique_ptr<SymbolTable::Symbol> FindByName(
       const ResourceName& name) override;
 
-  std::string GetPackageForSymbol(const ResourceName& name) override;
   std::unique_ptr<SymbolTable::Symbol> FindById(ResourceId id) override {
     return {};
   }
@@ -210,9 +197,6 @@ class AssetManagerSymbolSource : public ISymbolSource {
 
   std::unique_ptr<SymbolTable::Symbol> FindByName(
       const ResourceName& name) override;
-  std::string GetPackageForSymbol(const ResourceName& name) override {
-    return {};
-  }
   std::unique_ptr<SymbolTable::Symbol> FindById(ResourceId id) override;
   std::unique_ptr<SymbolTable::Symbol> FindByReference(
       const Reference& ref) override;

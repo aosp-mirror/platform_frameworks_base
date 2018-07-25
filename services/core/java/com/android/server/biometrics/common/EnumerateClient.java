@@ -93,7 +93,8 @@ public abstract class EnumerateClient extends ClientMonitor {
     }
 
     @Override
-    public boolean onAuthenticated(int biometricId, int groupId) {
+    public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
+            boolean authenticated) {
         if (DEBUG) Slog.w(getLogTag(), "onAuthenticated() called for enumerate!");
         return true; // Invalid for Enumerate.
     }

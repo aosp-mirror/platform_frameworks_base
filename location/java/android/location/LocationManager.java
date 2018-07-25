@@ -734,6 +734,11 @@ public class LocationManager {
      * calling Activity. If a Looper is specified with a {@link LocationListener}
      * then callbacks are made on the supplied Looper thread.
      *
+     * <p> When location callbacks are invoked, the system will hold a wakelock
+     * on your application's behalf for some period of time, but not
+     * indefinitely. If your application requires a long running wakelock
+     * within the location callback, you should acquire it yourself.
+     *
      * <p class="note"> Prior to Jellybean, the minTime parameter was
      * only a hint, and some location provider implementations ignored it.
      * From Jellybean and onwards it is mandatory for Android compatible

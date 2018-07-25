@@ -137,14 +137,6 @@ class LinkContext : public IAaptContext {
     min_sdk_version_ = minSdk;
   }
 
-  bool IsAutoNamespace() override {
-    return auto_namespace_;
-  }
-
-  void SetAutoNamespace(bool val) {
-    auto_namespace_ = val;
-  }
-
  private:
   DISALLOW_COPY_AND_ASSIGN(LinkContext);
 
@@ -156,7 +148,6 @@ class LinkContext : public IAaptContext {
   SymbolTable symbols_;
   bool verbose_ = false;
   int min_sdk_version_ = 0;
-  bool auto_namespace_ = false;
 };
 
 // A custom delegate that generates compatible pre-O IDs for use with feature splits.
@@ -2040,15 +2031,6 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
     options_.output_format = OutputFormat::kProto;
   } else if (proto_format_) {
     options_.output_format = OutputFormat::kProto;
-  }
-
-  if (options_.auto_namespace_static_lib) {
-    if (!static_lib_) {
-      context.GetDiagnostics()->Error(
-          DiagMessage() << "--auto-namespace-static-lib can only be used with --static-lib");
-      return 1;
-    }
-    context.SetAutoNamespace(true);
   }
 
   if (package_id_) {

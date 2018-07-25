@@ -85,7 +85,7 @@ public class FaceUserState extends BiometricUserState {
         ArrayList<Face> result = new ArrayList<>(array.size());
         for (int i = 0; i < array.size(); i++) {
             Face f = (Face) array.get(i);
-            result.add(new Face(f.getName(), f.getFaceId(), f.getDeviceId()));
+            result.add(new Face(f.getName(), f.getBiometricId(), f.getDeviceId()));
         }
         return result;
     }
@@ -114,7 +114,7 @@ public class FaceUserState extends BiometricUserState {
             for (int i = 0; i < count; i++) {
                 Face f = faces.get(i);
                 serializer.startTag(null, TAG_FACE);
-                serializer.attribute(null, ATTR_FACE_ID, Integer.toString(f.getFaceId()));
+                serializer.attribute(null, ATTR_FACE_ID, Integer.toString(f.getBiometricId()));
                 serializer.attribute(null, ATTR_NAME, f.getName().toString());
                 serializer.attribute(null, ATTR_DEVICE_ID, Long.toString(f.getDeviceId()));
                 serializer.endTag(null, TAG_FACE);

@@ -1388,6 +1388,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mRequiredVerifierPackage;
     final @NonNull String mRequiredInstallerPackage;
     final @NonNull String mRequiredUninstallerPackage;
+    final String mRequiredPermissionControllerPackage;
     final @Nullable String mSetupWizardPackage;
     final @Nullable String mStorageManagerPackage;
     final @Nullable String mSystemTextClassifierPackage;
@@ -3240,6 +3241,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSharedSystemSharedLibraryPackageName = getRequiredSharedLibraryLPr(
                         PackageManager.SYSTEM_SHARED_LIBRARY_SHARED,
                         SharedLibraryInfo.VERSION_UNDEFINED);
+                mRequiredPermissionControllerPackage = getRequiredPermissionsControllerLPr();
             } else {
                 mRequiredVerifierPackage = null;
                 mRequiredInstallerPackage = null;
@@ -3248,6 +3250,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mIntentFilterVerifier = null;
                 mServicesSystemSharedLibraryPackageName = null;
                 mSharedSystemSharedLibraryPackageName = null;
+                mRequiredPermissionControllerPackage = null;
             }
 
             mInstallerService = new PackageInstallerService(context, this);
@@ -3593,6 +3596,25 @@ public class PackageManagerService extends IPackageManager.Stub
                     + resolveInfo);
         }
         return resolveInfo.getComponentInfo().packageName;
+    }
+
+    private @NonNull String getRequiredPermissionsControllerLPr() {
+        final Intent intent = new Intent(Intent.ACTION_MANAGE_PERMISSIONS);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+
+        final List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null,
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                UserHandle.USER_SYSTEM);
+        if (matches.size() == 1) {
+            ResolveInfo resolveInfo = matches.get(0);
+            if (!resolveInfo.activityInfo.applicationInfo.isPrivilegedApp()) {
+                throw new RuntimeException("The permissions manager must be a privileged app");
+            }
+            return matches.get(0).getComponentInfo().packageName;
+        } else {
+            throw new RuntimeException("There must be exactly one permissions manager; found "
+                    + matches);
+        }
     }
 
     private @NonNull ComponentName getIntentFilterVerifierComponentNameLPr() {
@@ -5400,6 +5422,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getPermissionControllerPackageName() {
+        synchronized (mPackages) {
+            return mRequiredPermissionControllerPackage;
+        }
+    }
+
+    String getPackageInstallerPackageName() {
         synchronized (mPackages) {
             return mRequiredInstallerPackage;
         }
@@ -14513,6 +14541,12 @@ public class PackageManagerService extends IPackageManager.Stub
             return false;
         }
 
+        if (packageName.equals(mRequiredPermissionControllerPackage)) {
+            Slog.w(TAG, "Cannot suspend package \"" + packageName
+                    + "\": required for permissions management");
+            return false;
+        }
+
         if (mProtectedPackages.isPackageStateProtected(userId, packageName)) {
             Slog.w(TAG, "Cannot suspend package \"" + packageName
                     + "\": protected package");
@@ -19531,8 +19565,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // If permission review is enabled and this is a legacy app, mark the
             // permission as requiring a review as this is the initial state.
             int flags = 0;
-            if (mSettings.mPermissions.mPermissionReviewRequired
-                    && ps.pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
+            if (ps.pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
                 flags |= FLAG_PERMISSION_REVIEW_REQUIRED;
             }
             if (permissionsState.updatePermissionFlags(bp, userId, userSettableMask, flags)) {
@@ -23362,17 +23395,10 @@ public class PackageManagerService extends IPackageManager.Stub
     void onNewUserCreated(final int userId) {
         mDefaultPermissionPolicy.grantDefaultPermissions(userId);
         synchronized(mPackages) {
-            // If permission review for legacy apps is required, we represent
-            // dagerous permissions for such apps as always granted runtime
-            // permissions to keep per user flag state whether review is needed.
-            // Hence, if a new user is added we have to propagate dangerous
-            // permission grants for these legacy apps.
-            if (mSettings.mPermissions.mPermissionReviewRequired) {
-// NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
-                mPermissionManager.updateAllPermissions(
-                        StorageManager.UUID_PRIVATE_INTERNAL, true, mPackages.values(),
-                        mPermissionCallback);
-            }
+            // NOTE: This adds UPDATE_PERMISSIONS_REPLACE_PKG
+            mPermissionManager.updateAllPermissions(
+                    StorageManager.UUID_PRIVATE_INTERNAL, true, mPackages.values(),
+                    mPermissionCallback);
         }
     }
 

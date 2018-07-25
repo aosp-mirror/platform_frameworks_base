@@ -947,10 +947,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         Preconditions.checkNotNull(mResolvedBaseFile);
 
         if (needToAskForPermissionsLocked()) {
-            // User needs to accept permissions; give installer an intent they
-            // can use to involve user.
-            final Intent intent = new Intent(PackageInstaller.ACTION_CONFIRM_PERMISSIONS);
-            intent.setPackage(mContext.getPackageManager().getPermissionControllerPackageName());
+            // User needs to confirm installation; give installer an intent they can use to involve
+            // user.
+            final Intent intent = new Intent(PackageInstaller.ACTION_CONFIRM_INSTALL);
+            intent.setPackage(mPm.getPackageInstallerPackageName());
             intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
             try {
                 mRemoteObserver.onUserActionRequired(intent);

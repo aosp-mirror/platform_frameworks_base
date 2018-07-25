@@ -41,6 +41,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.WindowLayout;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -72,8 +73,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 
-import com.android.internal.os.BatteryStatsImpl;
-import com.android.server.am.ActivityStarter.Factory;
 import com.android.server.am.LaunchParamsController.LaunchParamsModifier;
 import com.android.server.am.TaskRecord.TaskRecordFactory;
 
@@ -202,8 +201,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // If no caller app, return {@code null} {@link ProcessRecord}.
         final ProcessRecord record = containsConditions(preconditions, PRECONDITION_NO_CALLER_APP)
-                ? null : new ProcessRecord(service.mAm, mock(BatteryStatsImpl.class),
-                mock(ApplicationInfo.class), null, 0);
+                ? null : new ProcessRecord(service.mAm, mock(ApplicationInfo.class), null, 0);
 
         doReturn(record).when(service.mAm).getRecordForAppLocked(anyObject());
 
@@ -326,6 +324,16 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 .getLaunchStack(any(), any(), any(), anyBoolean());
         doReturn(stack).when(mService.mStackSupervisor)
                 .getLaunchStack(any(), any(), any(), anyBoolean(), anyInt());
+
+        // Set up mock package manager internal and make sure no unmocked methods are called
+        PackageManagerInternal mockPackageManager = mock(PackageManagerInternal.class,
+                invocation -> {
+                    throw new RuntimeException("Not stubbed");
+                });
+        doReturn(mockPackageManager).when(mService.mAm).getPackageManagerInternalLocked();
+
+        // Never review permissions
+        doReturn(false).when(mockPackageManager).isPermissionsReviewRequired(any(), anyInt());
 
         final Intent intent = new Intent();
         intent.addFlags(launchFlags);

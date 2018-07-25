@@ -389,13 +389,23 @@ public class HeadsUpManager {
 
     /**
      * Unpins all pinned Heads Up Notifications.
+     * @param userUnPinned The unpinned action is trigger by user real operation.
      */
-    public void unpinAll() {
+    public void unpinAll(boolean userUnPinned) {
         for (String key : mHeadsUpEntries.keySet()) {
             HeadsUpEntry entry = mHeadsUpEntries.get(key);
             setEntryPinned(entry, false /* isPinned */);
             // maybe it got un sticky
             entry.updateEntry(false /* updatePostTime */);
+
+            // when the user unpinned all of HUNs by moving one HUN, all of HUNs should not stay
+            // on the screen.
+            if (userUnPinned && entry.entry != null && entry.entry.row != null) {
+                ExpandableNotificationRow row = entry.entry.row;
+                if (row.mustStayOnScreen()) {
+                    row.setHeadsUpIsVisible();
+                }
+            }
         }
     }
 

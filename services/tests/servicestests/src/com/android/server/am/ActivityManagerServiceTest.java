@@ -66,7 +66,6 @@ import android.support.test.filters.MediumTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.AppOpsService;
 
 import org.junit.After;
@@ -121,7 +120,6 @@ public class ActivityManagerServiceTest {
     @Mock private Context mContext;
     @Mock private AppOpsService mAppOpsService;
     @Mock private PackageManager mPackageManager;
-    @Mock private BatteryStatsImpl mBatteryStatsImpl;
 
     private TestInjector mInjector;
     private ActivityManagerService mAms;
@@ -258,8 +256,7 @@ public class ActivityManagerServiceTest {
         uidRec.hasInternetPermission = true;
         mAms.mActiveUids.put(uid, uidRec);
 
-        final ProcessRecord appRec = new ProcessRecord(mAms, mBatteryStatsImpl,
-                new ApplicationInfo(), TAG, uid);
+        final ProcessRecord appRec = new ProcessRecord(mAms, new ApplicationInfo(), TAG, uid);
         appRec.thread = Mockito.mock(IApplicationThread.class);
         mAms.mLruProcesses.add(appRec);
 

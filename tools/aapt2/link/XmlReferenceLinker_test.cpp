@@ -18,7 +18,6 @@
 
 #include "test/Test.h"
 
-using ::testing::Eq;
 using ::testing::IsNull;
 using ::testing::NotNull;
 
@@ -71,29 +70,12 @@ class XmlReferenceLinkerTest : public ::testing::Test {
                                                 .Build())
                            .AddPublicSymbol("com.app.test:attr/attr", ResourceId(0x7f010002),
                                             test::AttributeBuilder().Build())
-                           .AddPublicSymbol("com.app.lib:string/lib_string", ResourceId(0x7f020003))
                            .Build())
                    .Build();
-
-    auto_namespace_context_ =
-        test::ContextBuilder()
-            .SetCompilationPackage("com.app.test")
-            .SetNameManglerPolicy(NameManglerPolicy{"com.app.test", {"com.android.support"}})
-            .SetAutoNamespace(true)
-            .AddSymbolSource(
-                test::StaticSymbolSourceBuilder()
-                    .AddPublicSymbol("android:attr/text", ResourceId(0x01010003),
-                                     test::AttributeBuilder()
-                                         .SetTypeMask(android::ResTable_map::TYPE_STRING)
-                                         .Build())
-                    .AddPublicSymbol("com.app.lib:string/lib_string", ResourceId(0x7f020003))
-                    .Build())
-            .Build();
   }
 
  protected:
   std::unique_ptr<IAaptContext> context_;
-  std::unique_ptr<IAaptContext> auto_namespace_context_;
 };
 
 TEST_F(XmlReferenceLinkerTest, LinkBasicAttributes) {
@@ -211,31 +193,6 @@ TEST_F(XmlReferenceLinkerTest, LinkAutoResReference) {
   ASSERT_THAT(ref, NotNull());
   ASSERT_TRUE(ref->name);
   EXPECT_EQ(make_value(ResourceId(0x7f020001)), ref->id);
-}
-
-TEST_F(XmlReferenceLinkerTest, LinkAutoNamespaceResReference) {
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDomForPackageName(context_.get(), R"(
-      <View
-          xmlns:android="http://schemas.android.com/apk/res/android"
-          android:text="@string/lib_string" />)");
-
-  XmlReferenceLinker linker;
-  // Should not link with auto-namespace support disabled.
-  ASSERT_FALSE(linker.Consume(context_.get(), doc.get()));
-  // Should link with auto-namespace enabled.
-  ASSERT_TRUE(linker.Consume(auto_namespace_context_.get(), doc.get()));
-
-  xml::Element* view_el = doc->root.get();
-  ASSERT_THAT(view_el, NotNull());
-
-  xml::Attribute* xml_attr = view_el->FindAttribute(xml::kSchemaAndroid, "text");
-  ASSERT_THAT(xml_attr, NotNull());
-  ASSERT_TRUE(xml_attr->compiled_attribute);
-  EXPECT_EQ(make_value(ResourceId(0x01010003)), xml_attr->compiled_attribute.value().id);
-  Reference* ref = ValueCast<Reference>(xml_attr->compiled_value.get());
-  ASSERT_THAT(ref, NotNull());
-  ASSERT_TRUE(ref->name);
-  EXPECT_EQ(make_value(ResourceId(0x7f020003)), ref->id);
 }
 
 TEST_F(XmlReferenceLinkerTest, LinkViewWithShadowedPackageAlias) {

@@ -125,7 +125,8 @@ public abstract class EnrollClient extends ClientMonitor {
     }
 
     @Override
-    public boolean onAuthenticated(int biometricId, int groupId) {
+    public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
+            boolean authenticated) {
         if (DEBUG) Slog.w(getLogTag(), "onAuthenticated() called for enroll!");
         return true; // Invalid for EnrollClient
     }

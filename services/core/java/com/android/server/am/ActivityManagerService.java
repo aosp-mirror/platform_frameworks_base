@@ -1591,8 +1591,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     PackageManagerInternal mPackageManagerInt;
 
-    final boolean mPermissionReviewRequired;
-
     boolean mHasHeavyWeightFeature;
 
     /**
@@ -2561,7 +2559,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mHandler = null;
         mHandlerThread = null;
         mIntentFirewall = null;
-        mPermissionReviewRequired = false;
         mProcessCpuThread = null;
         mProcessStats = null;
         mProviderMap = null;
@@ -2586,9 +2583,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUiContext = mSystemThread.getSystemUiContext();
 
         Slog.i(TAG, "Memory class: " + ActivityManager.staticGetMemoryClass());
-
-        mPermissionReviewRequired = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_permissionReviewRequired);
 
         mHandlerThread = new ServiceThread(TAG,
                 THREAD_PRIORITY_FOREGROUND, false /*allowIo*/);
@@ -9383,10 +9377,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // If permissions need a review before any of the app components can run,
                     // we return no provider and launch a review activity if the calling app
                     // is in the foreground.
-                    if (mPermissionReviewRequired) {
-                        if (!requestTargetProviderPermissionsReviewIfNeededLocked(cpi, r, userId)) {
-                            return null;
-                        }
+                    if (!requestTargetProviderPermissionsReviewIfNeededLocked(cpi, r, userId)) {
+                        return null;
                     }
 
                     try {
@@ -10068,7 +10060,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ProcessRecord newProcessRecordLocked(ApplicationInfo info, String customProcess,
             boolean isolated, int isolatedUid) {
         String proc = customProcess != null ? customProcess : info.processName;
-        BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         final int userId = UserHandle.getUserId(info.uid);
         int uid = info.uid;
         if (isolated) {
@@ -10107,7 +10098,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             StatsLog.write(StatsLog.ISOLATED_UID_CHANGED, info.uid, uid,
                     StatsLog.ISOLATED_UID_CHANGED__EVENT__CREATED);
         }
-        final ProcessRecord r = new ProcessRecord(this, stats, info, proc, uid);
+        final ProcessRecord r = new ProcessRecord(this, info, proc, uid);
         if (!mBooted && !mBooting
                 && userId == UserHandle.USER_SYSTEM
                 && (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK) {

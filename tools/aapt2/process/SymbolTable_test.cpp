@@ -120,39 +120,4 @@ TEST(SymbolTableTest, FindByNameWhenSymbolIsMangledInResTable) {
   EXPECT_THAT(symbol_table.FindByName(test::ParseNameOrDie("com.android.other:id/foo")), IsNull());
 }
 
-TEST(SymbolTableTest, FindByNameInAnyPackage) {
-  // This represents lib3 --depends-on--> lib2 --depends-on--> lib1
-
-  NameMangler mangler(NameManglerPolicy{"com.example.lib3"});
-  SymbolTable symbol_table(&mangler);
-  // Lib2 has higher precedence than lib1, as it is closer to the current library (lib3)
-  // in the dependency graph.
-
-  symbol_table.AppendSource(test::StaticSymbolSourceBuilder()
-                                .AddPublicSymbol("com.example.lib1:string/foo", ResourceId())
-                                .AddSymbol("com.example.lib1:attr/foo", ResourceId(),
-                                           test::AttributeBuilder()
-                                               .SetTypeMask(android::ResTable_map::TYPE_FLAGS)
-                                               .AddItem("one", 0x01)
-                                               .AddItem("two", 0x02)
-                                               .Build())
-                                .Build());
-  symbol_table.PrependSource(test::StaticSymbolSourceBuilder()
-                                 .AddPublicSymbol("com.example.lib2:string/foo", ResourceId())
-                                 .Build());
-
-  // Sanity test
-  EXPECT_THAT(symbol_table.FindByName(test::ParseNameOrDie("string/foo")), IsNull());
-
-  // Test public symbol resolution
-  const SymbolTable::Symbol* const found_string =
-      symbol_table.FindByNameInAnyPackage(test::ParseNameOrDie("string/foo"));
-  ASSERT_THAT(found_string, NotNull());
-
-  // Test attr resolution
-  const SymbolTable::Symbol* const found_attr =
-      symbol_table.FindByNameInAnyPackage(test::ParseNameOrDie("attr/foo"));
-  ASSERT_THAT(found_attr, NotNull());
-}
-
 }  // namespace aapt

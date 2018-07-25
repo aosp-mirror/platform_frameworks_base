@@ -400,7 +400,8 @@ public class FaceService extends BiometricService {
                 public void onAuthenticated(final long deviceId, final int faceId, final int userId,
                         ArrayList<Byte> token) {
                     mHandler.post(() -> {
-                        FaceService.super.handleAuthenticated(deviceId, faceId, userId, token);
+                        Face face = new Face("", faceId, deviceId);
+                        FaceService.super.handleAuthenticated(face, token);
                     });
                 }
 
