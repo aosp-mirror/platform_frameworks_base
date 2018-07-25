@@ -74,6 +74,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.ANIMATE;
 import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
+import static com.android.server.am.ActivityRecord.RELAUNCH_REASON_NONE;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
@@ -2100,6 +2101,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             if (isTopDisplayFocusedStack(r.getStack()) || fromTimeout) {
                 booting = checkFinishBootingLocked();
             }
+
+            // When activity is idle, we consider the relaunch must be successful, so let's clear
+            // the flag.
+            r.mRelaunchReason = RELAUNCH_REASON_NONE;
         }
 
         if (allResumedActivitiesIdle()) {

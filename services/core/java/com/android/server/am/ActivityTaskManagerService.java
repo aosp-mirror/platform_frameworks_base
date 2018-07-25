@@ -1192,6 +1192,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     if (!res) {
                         Slog.i(TAG, "Removing task failed to finish activity");
                     }
+                    // Explicitly dismissing the activity so reset its relaunch flag.
+                    r.mRelaunchReason = ActivityRecord.RELAUNCH_REASON_NONE;
                 } else {
                     res = tr.getStack().requestFinishActivityLocked(token, resultCode,
                             resultData, "app-request", true);

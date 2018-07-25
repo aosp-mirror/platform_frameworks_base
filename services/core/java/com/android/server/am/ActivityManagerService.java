@@ -11869,6 +11869,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         StatsLog.write(StatsLog.WTF_OCCURRED, callingUid, tag, processName,
                 callingPid);
 
+        final int relaunchReason = r == null ? ActivityRecord.RELAUNCH_REASON_NONE
+                        : r.getWindowProcessController().computeRelaunchReason();
+        final String relaunchReasonString = ActivityRecord.relaunchReasonToString(relaunchReason);
+        if (crashInfo.crashTag == null) {
+            crashInfo.crashTag = relaunchReasonString;
+        } else {
+            crashInfo.crashTag = crashInfo.crashTag + " " + relaunchReasonString;
+        }
+
         addErrorToDropBox("wtf", r, processName, null, null, tag, null, null, crashInfo);
 
         return r;
@@ -12022,6 +12031,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
         if (Debug.isDebuggerConnected()) {
             sb.append("Debugger: Connected\n");
+        }
+        if (crashInfo != null && crashInfo.crashTag != null && !crashInfo.crashTag.isEmpty()) {
+            sb.append("Crash-Tag: ").append(crashInfo.crashTag).append("\n");
         }
         sb.append("\n");
 

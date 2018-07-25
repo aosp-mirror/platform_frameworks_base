@@ -431,6 +431,19 @@ public class WindowProcessController {
         return minTaskLayer;
     }
 
+    int computeRelaunchReason() {
+        synchronized (mAtm.mGlobalLock) {
+            final int activitiesSize = mActivities.size();
+            for (int i = activitiesSize - 1; i >= 0; i--) {
+                final ActivityRecord r = mActivities.get(i);
+                if (r.mRelaunchReason != ActivityRecord.RELAUNCH_REASON_NONE) {
+                    return r.mRelaunchReason;
+                }
+            }
+        }
+        return ActivityRecord.RELAUNCH_REASON_NONE;
+    }
+
     void clearProfilerIfNeeded() {
         if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
