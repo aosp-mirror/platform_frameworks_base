@@ -346,6 +346,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action["uses-permission"];
   manifest_action["uses-permission-sdk-23"];
   manifest_action["permission"];
+  manifest_action["permission"]["meta-data"] = meta_data_action;
   manifest_action["permission-tree"];
   manifest_action["permission-group"];
   manifest_action["uses-configuration"];
@@ -355,6 +356,8 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action["compatible-screens"];
   manifest_action["compatible-screens"]["screen"];
   manifest_action["supports-gl-texture"];
+  manifest_action["restrict-update"];
+  manifest_action["package-verifier"];
   manifest_action["meta-data"] = meta_data_action;
   manifest_action["uses-split"].Action(RequiredNameIsJavaPackage);
 
@@ -376,6 +379,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   uses_static_library_action.Action(RequiredNameIsJavaPackage);
   uses_static_library_action.Action(RequiredAndroidAttribute("version"));
   uses_static_library_action.Action(RequiredAndroidAttribute("certDigest"));
+  uses_static_library_action["additional-certificate"];
 
   if (options_.debug_mode) {
     application_action.Action([&](xml::Element* el) -> bool {
