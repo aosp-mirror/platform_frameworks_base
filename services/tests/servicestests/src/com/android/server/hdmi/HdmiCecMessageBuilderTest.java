@@ -34,13 +34,13 @@ public class HdmiCecMessageBuilderTest {
     public void buildReportPhysicalAddressCommand() {
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
-                        ADDR_PLAYBACK_1, 01234, HdmiDeviceInfo.DEVICE_PLAYBACK);
+                        ADDR_PLAYBACK_1, 0x1234, HdmiDeviceInfo.DEVICE_PLAYBACK);
         assertThat(message)
                 .isEqualTo(
                         new HdmiCecMessage(
                                 ADDR_PLAYBACK_1,
                                 ADDR_BROADCAST,
                                 Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS,
-                                new byte[] {012, 034}));
+                                new byte[] {0x12, 0x34, 0x04}));
     }
 }
