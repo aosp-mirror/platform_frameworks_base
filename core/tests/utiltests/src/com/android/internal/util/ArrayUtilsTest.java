@@ -16,6 +16,8 @@
 
 package com.android.internal.util;
 
+import static com.android.internal.util.ArrayUtils.concatElements;
+
 import static org.junit.Assert.assertArrayEquals;
 
 import junit.framework.TestCase;
@@ -156,23 +158,23 @@ public class ArrayUtilsTest extends TestCase {
 
     public void testConcatEmpty() throws Exception {
         assertArrayEquals(new Long[] {},
-                ArrayUtils.concat(Long.class, null, null));
+                concatElements(Long.class, null, null));
         assertArrayEquals(new Long[] {},
-                ArrayUtils.concat(Long.class, new Long[] {}, null));
+                concatElements(Long.class, new Long[] {}, null));
         assertArrayEquals(new Long[] {},
-                ArrayUtils.concat(Long.class, null, new Long[] {}));
+                concatElements(Long.class, null, new Long[] {}));
         assertArrayEquals(new Long[] {},
-                ArrayUtils.concat(Long.class, new Long[] {}, new Long[] {}));
+                concatElements(Long.class, new Long[] {}, new Long[] {}));
     }
 
-    public void testConcat() throws Exception {
+    public void testconcatElements() throws Exception {
         assertArrayEquals(new Long[] { 1L },
-                ArrayUtils.concat(Long.class, new Long[] { 1L }, new Long[] {}));
+                concatElements(Long.class, new Long[] { 1L }, new Long[] {}));
         assertArrayEquals(new Long[] { 1L },
-                ArrayUtils.concat(Long.class, new Long[] {}, new Long[] { 1L }));
+                concatElements(Long.class, new Long[] {}, new Long[] { 1L }));
         assertArrayEquals(new Long[] { 1L, 2L },
-                ArrayUtils.concat(Long.class, new Long[] { 1L }, new Long[] { 2L }));
+                concatElements(Long.class, new Long[] { 1L }, new Long[] { 2L }));
         assertArrayEquals(new Long[] { 1L, 2L, 3L, 4L },
-                ArrayUtils.concat(Long.class, new Long[] { 1L, 2L }, new Long[] { 3L, 4L }));
+                concatElements(Long.class, new Long[] { 1L, 2L }, new Long[] { 3L, 4L }));
     }
 }
