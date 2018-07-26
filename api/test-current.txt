@@ -1467,6 +1467,11 @@ package android.view {
     method public static int getLongPressTooltipHideTimeout();
   }
 
+  public final class ViewTreeObserver {
+    method public void registerFrameCommitCallback(java.lang.Runnable);
+    method public boolean unregisterFrameCommitCallback(java.lang.Runnable);
+  }
+
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
     field public static final int ACCESSIBILITY_TITLE_CHANGED = 33554432; // 0x2000000
     field public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 64; // 0x40

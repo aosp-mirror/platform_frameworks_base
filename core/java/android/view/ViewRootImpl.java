@@ -3097,13 +3097,27 @@ public final class ViewRootImpl implements ViewParent,
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "draw");
 
         boolean usingAsyncReport = false;
-        if (mReportNextDraw && mAttachInfo.mThreadedRenderer != null
-                && mAttachInfo.mThreadedRenderer.isEnabled()) {
-            usingAsyncReport = true;
-            mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) -> {
-                // TODO: Use the frame number
-                pendingDrawFinished();
-            });
+        if (mAttachInfo.mThreadedRenderer != null && mAttachInfo.mThreadedRenderer.isEnabled()) {
+            ArrayList<Runnable> commitCallbacks = mAttachInfo.mTreeObserver
+                    .captureFrameCommitCallbacks();
+            if (mReportNextDraw) {
+                usingAsyncReport = true;
+                mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) -> {
+                    // TODO: Use the frame number
+                    pendingDrawFinished();
+                    if (commitCallbacks != null) {
+                        for (int i = 0; i < commitCallbacks.size(); i++) {
+                            commitCallbacks.get(i).run();
+                        }
+                    }
+                });
+            } else if (commitCallbacks != null && commitCallbacks.size() > 0) {
+                mAttachInfo.mThreadedRenderer.setFrameCompleteCallback((long frameNr) -> {
+                    for (int i = 0; i < commitCallbacks.size(); i++) {
+                        commitCallbacks.get(i).run();
+                    }
+                });
+            }
         }
 
         try {
