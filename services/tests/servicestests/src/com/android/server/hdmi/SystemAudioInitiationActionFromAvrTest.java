@@ -130,6 +130,11 @@ public class SystemAudioInitiationActionFromAvrTest {
             void wakeUp() {
 
             }
+
+            @Override
+            int getPhysicalAddress() {
+                return 0;
+            }
         };
         mHdmiCecLocalDeviceAudioSystem =
                 new HdmiCecLocalDeviceAudioSystem(hdmiControlService) {

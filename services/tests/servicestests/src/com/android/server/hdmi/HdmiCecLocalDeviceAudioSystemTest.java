@@ -306,4 +306,43 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
     }
+
+    @Test
+    public void isPhysicalAddressMeOrBelow_isMe() {
+        int targetPhysicalAddress = 0x1000;
+        mNativeWrapper.setPhysicalAddress(0x1000);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
+            .isEqualTo(true);
+    }
+
+    @Test
+    public void isPhysicalAddressMeOrBelow_isBelow() {
+        int targetPhysicalAddress = 0x1100;
+        mNativeWrapper.setPhysicalAddress(0x1000);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
+            .isEqualTo(true);
+    }
+
+    @Test
+    public void isPhysicalAddressMeOrBelow_neitherMeNorBelow() {
+        int targetPhysicalAddress = 0x3000;
+        mNativeWrapper.setPhysicalAddress(0x2000);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
+            .isEqualTo(false);
+
+        targetPhysicalAddress = 0x2200;
+        mNativeWrapper.setPhysicalAddress(0x3300);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
+            .isEqualTo(false);
+
+        targetPhysicalAddress = 0x2213;
+        mNativeWrapper.setPhysicalAddress(0x2212);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
+            .isEqualTo(false);
+
+        targetPhysicalAddress = 0x2340;
+        mNativeWrapper.setPhysicalAddress(0x2310);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
+            .isEqualTo(false);
+    }
 }
