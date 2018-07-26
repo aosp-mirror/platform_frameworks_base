@@ -345,7 +345,6 @@ import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
-import com.android.server.BinderCallsStatsService;
 import com.android.server.DeviceIdleController;
 import com.android.server.IntentResolver;
 import com.android.server.IoThread;
@@ -2924,7 +2923,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void batteryStatsReset() {
-        BinderCallsStatsService.reset();
         mOomAdjProfiler.reset();
     }
 
@@ -10177,6 +10175,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 abiOverride);
     }
 
+    @GuardedBy("this")
     final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
             boolean disableHiddenApiChecks, String abiOverride) {
         ProcessRecord app;
@@ -12155,6 +12154,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return imp;
     }
 
+    @GuardedBy("this")
     private void fillInProcMemInfoLocked(ProcessRecord app,
             ActivityManager.RunningAppProcessInfo outInfo,
             int clientTargetSdk) {
@@ -21603,6 +21603,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @GuardedBy("this")
     final void trimApplicationsLocked() {
         // First remove any unused application processes whose package
         // has been removed.

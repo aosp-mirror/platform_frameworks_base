@@ -66,6 +66,8 @@ public abstract class ClientTransactionHandler {
 
     abstract void sendMessage(int what, Object obj);
 
+    /** Get activity instance for the token. */
+    public abstract Activity getActivity(IBinder token);
 
     // Prepare phase related logic and handlers. Methods that inform about about pending changes or
     // do other internal bookkeeping.

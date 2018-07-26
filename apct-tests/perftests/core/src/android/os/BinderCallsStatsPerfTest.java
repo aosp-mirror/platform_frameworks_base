@@ -22,6 +22,7 @@ import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BinderCallsStats;
+import com.android.internal.os.BinderInternal.CallSession;
 
 import java.util.Random;
 
@@ -61,7 +62,7 @@ public class BinderCallsStatsPerfTest {
         Binder b = new Binder();
         int i = 0;
         while (state.keepRunning()) {
-            BinderCallsStats.CallSession s = mBinderCallsStats.callStarted(b, i % 100);
+            CallSession s = mBinderCallsStats.callStarted(b, i % 100);
             mBinderCallsStats.callEnded(s, 0, 0);
             i++;
         }
@@ -73,7 +74,7 @@ public class BinderCallsStatsPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         Binder b = new Binder();
         while (state.keepRunning()) {
-            BinderCallsStats.CallSession s = mBinderCallsStats.callStarted(b, 0);
+            CallSession s = mBinderCallsStats.callStarted(b, 0);
             mBinderCallsStats.callEnded(s, 0, 0);
         }
     }

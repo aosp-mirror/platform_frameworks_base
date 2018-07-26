@@ -25,15 +25,16 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class InputMethodAndSubtypeUtilCompatTest {
 
     private static final HashSet<String> EMPTY_STRING_SET = new HashSet<>();
@@ -236,7 +237,7 @@ public class InputMethodAndSubtypeUtilCompatTest {
         assertThat(InputMethodAndSubtypeUtilCompat.isValidSystemNonAuxAsciiCapableIme(
                 createDummyIme(false, false, createDummySubtype("keyboard", false, true))))
                 .isFalse();
-   }
+    }
 
     private static InputMethodInfo createDummyIme(boolean isSystem, boolean isAuxIme,
             InputMethodSubtype... subtypes) {
@@ -253,7 +254,7 @@ public class InputMethodAndSubtypeUtilCompatTest {
         si.exported = true;
         si.nonLocalizedLabel = "Dummy IME";
         ri.serviceInfo = si;
-        return new InputMethodInfo(ri, isAuxIme, "",  Arrays.asList(subtypes), 1, false);
+        return new InputMethodInfo(ri, isAuxIme, "", Arrays.asList(subtypes), 1, false);
     }
 
     private static InputMethodSubtype createDummySubtype(

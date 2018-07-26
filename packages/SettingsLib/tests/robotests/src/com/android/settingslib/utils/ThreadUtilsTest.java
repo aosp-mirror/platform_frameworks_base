@@ -17,14 +17,16 @@ package com.android.settingslib.utils;
 
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.fail;
+
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.shadows.ShadowLooper;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class ThreadUtilsTest {
 
     @Test
@@ -56,7 +58,7 @@ public class ThreadUtilsTest {
     }
 
     @Test
-    public void testPostOnMainThread_shouldRunOnMainTread() throws Exception {
+    public void testPostOnMainThread_shouldRunOnMainTread() {
         TestRunnable cr = new TestRunnable();
         ShadowLooper.pauseMainLooper();
         ThreadUtils.postOnMainThread(cr);

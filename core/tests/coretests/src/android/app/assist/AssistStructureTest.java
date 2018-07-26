@@ -81,6 +81,22 @@ public class AssistStructureTest {
     }
 
     @Test
+    public void testParcelizationForAutofill_oneSmallView() {
+        mActivity.addView(newSmallView());
+
+        waitUntilViewsAreLaidOff();
+
+        AssistStructure structure = new AssistStructure(mActivity, FOR_AUTOFILL, NO_FLAGS);
+
+        // Check properties on "original" structure
+        assertStructureWithManySmallViews(structure, 1);
+
+        // Check properties on "cloned" structure
+        AssistStructure clone = cloneThroughParcel(structure);
+        assertStructureWithManySmallViews(clone, 1);
+    }
+
+    @Test
     public void testParcelizationForAutofill_manySmallViews() {
         Log.d(TAG, "Adding " + NUMBER_SMALL_VIEWS + " small views");
 
@@ -93,14 +109,14 @@ public class AssistStructureTest {
         AssistStructure structure = new AssistStructure(mActivity, FOR_AUTOFILL, NO_FLAGS);
 
         // Check properties on "original" structure
-        assertStructureWithManySmallViews(structure);
+        assertStructureWithManySmallViews(structure, NUMBER_SMALL_VIEWS);
 
         // Check properties on "cloned" structure
         AssistStructure clone = cloneThroughParcel(structure);
-        assertStructureWithManySmallViews(clone);
+        assertStructureWithManySmallViews(clone, NUMBER_SMALL_VIEWS);
     }
 
-    private void assertStructureWithManySmallViews(AssistStructure structure) {
+    private void assertStructureWithManySmallViews(AssistStructure structure, int expectedSize) {
         int i = 0;
         try {
             assertPackageName(structure);
@@ -123,12 +139,12 @@ public class AssistStructureTest {
             // Parent
             ViewNode parent = rootView.getChildAt(1);
             assertThat(parent.getClassName()).isEqualTo(LinearLayout.class.getName());
-            assertThat(parent.getChildCount()).isEqualTo(NUMBER_SMALL_VIEWS);
+            assertThat(parent.getChildCount()).isEqualTo(expectedSize);
             assertThat(parent.getIdEntry()).isEqualTo("parent");
             assertThat(parent.getAutofillId()).isNotNull();
 
             // Children
-            for (i = 0; i < NUMBER_SMALL_VIEWS; i++) {
+            for (i = 0; i < expectedSize; i++) {
                 ViewNode smallView = parent.getChildAt(i);
                 assertSmallView(smallView);
             }

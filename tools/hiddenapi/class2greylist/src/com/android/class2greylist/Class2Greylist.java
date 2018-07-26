@@ -33,7 +33,7 @@ import java.io.IOException;
  */
 public class Class2Greylist {
 
-    private static final String ANNOTATION_TYPE = "Landroid/annotation/UsedByApps;";
+    private static final String ANNOTATION_TYPE = "Landroid/annotation/UnsupportedAppUsage ;";
 
     public static void main(String[] args) {
         Options options = new Options();

@@ -26,6 +26,7 @@ import android.os.RemoteException;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -164,32 +165,6 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
         ObjectPool.recycle(this);
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder(64);
-        sb.append("ClientTransaction{");
-        if (mActivityToken != null) {
-            sb.append(" a:").append(Integer.toHexString(System.identityHashCode(mActivityToken)));
-        }
-        if (mActivityCallbacks != null && !mActivityCallbacks.isEmpty()) {
-            sb.append(" c:");
-            final int size = mActivityCallbacks.size();
-            for (int i = 0; i < size; i++) {
-                sb.append(mActivityCallbacks.get(i).getClass().getSimpleName());
-                if (i < size - 1) {
-                    sb.append(",");
-                }
-            }
-        }
-        if (mLifecycleStateRequest != null) {
-            sb.append(" s:");
-            sb.append(mLifecycleStateRequest.getClass().getSimpleName());
-        }
-        sb.append(" }");
-        return sb.toString();
-    }
-
-
     // Parcelable implementation
 
     /** Write to Parcel. */
@@ -261,5 +236,24 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
         result = 31 * result + Objects.hashCode(mActivityCallbacks);
         result = 31 * result + Objects.hashCode(mLifecycleStateRequest);
         return result;
+    }
+
+    /** Dump transaction items callback items and final lifecycle state request. */
+    public void dump(String prefix, PrintWriter pw) {
+        pw.append(prefix).println("ClientTransaction{");
+        pw.append(prefix).print("  callbacks=[");
+        final int size = mActivityCallbacks != null ? mActivityCallbacks.size() : 0;
+        if (size > 0) {
+            pw.println();
+            for (int i = 0; i < size; i++) {
+                pw.append(prefix).append("    ").println(mActivityCallbacks.get(i).toString());
+            }
+            pw.append(prefix).println("  ]");
+        } else {
+            pw.println("]");
+        }
+        pw.append(prefix).append("  stateRequest=").println(mLifecycleStateRequest != null
+                ? mLifecycleStateRequest.toString() : null);
+        pw.append(prefix).println("}");
     }
 }

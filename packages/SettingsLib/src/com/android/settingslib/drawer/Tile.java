@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,17 +17,19 @@
 package com.android.settingslib.drawer;
 
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON_URI;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.text.TextUtils;
-import android.widget.RemoteViews;
 
 import java.util.ArrayList;
 
@@ -36,23 +38,22 @@ import java.util.ArrayList;
  */
 public class Tile implements Parcelable {
 
+    private static final String TAG = "Tile";
+    private ActivityInfo mActivityInfo;
+
     /**
      * Title of the tile that is shown to the user.
+     *
      * @attr ref android.R.styleable#PreferenceHeader_title
      */
     public CharSequence title;
 
     /**
      * Optional summary describing what this tile controls.
+     *
      * @attr ref android.R.styleable#PreferenceHeader_summary
      */
     public CharSequence summary;
-
-    /**
-     * Optional icon to show for this tile.
-     * @attr ref android.R.styleable#PreferenceHeader_icon
-     */
-    public Icon icon;
 
     /**
      * Whether the icon can be tinted. This should be set to true for monochrome (single-color)
@@ -95,8 +96,8 @@ public class Tile implements Parcelable {
      */
     public String key;
 
-    public Tile() {
-        // Empty
+    public Tile(ActivityInfo activityInfo) {
+        mActivityInfo = activityInfo;
     }
 
     @Override
@@ -106,14 +107,9 @@ public class Tile implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(mActivityInfo, flags);
         TextUtils.writeToParcel(title, dest, flags);
         TextUtils.writeToParcel(summary, dest, flags);
-        if (icon != null) {
-            dest.writeByte((byte) 1);
-            icon.writeToParcel(dest, flags);
-        } else {
-            dest.writeByte((byte) 0);
-        }
         if (intent != null) {
             dest.writeByte((byte) 1);
             intent.writeToParcel(dest, flags);
@@ -133,12 +129,36 @@ public class Tile implements Parcelable {
         dest.writeBoolean(isIconTintable);
     }
 
+    /**
+     * Optional icon to show for this tile.
+     *
+     * @attr ref android.R.styleable#PreferenceHeader_icon
+     */
+    public Icon getIcon() {
+        if (mActivityInfo == null || metaData == null) {
+            return null;
+        }
+        int iconResId = metaData.getInt(META_DATA_PREFERENCE_ICON);
+        // Set the icon
+        if (iconResId == 0) {
+            // Only fallback to activityinfo.icon if metadata does not contain ICON_URI.
+            // ICON_URI should be loaded in app UI when need the icon object. Handling IPC at this
+            // level is too complex because we don't have a strong threading contract for this class
+            if (!metaData.containsKey(META_DATA_PREFERENCE_ICON_URI)) {
+                iconResId = mActivityInfo.icon;
+            }
+        }
+        if (iconResId != 0) {
+            return Icon.createWithResource(mActivityInfo.packageName, iconResId);
+        } else {
+            return null;
+        }
+    }
+
     public void readFromParcel(Parcel in) {
+        mActivityInfo = ActivityInfo.CREATOR.createFromParcel(in);
         title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         summary = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-        if (in.readByte() != 0) {
-            icon = Icon.CREATOR.createFromParcel(in);
-        }
         if (in.readByte() != 0) {
             intent = Intent.CREATOR.createFromParcel(in);
         }
@@ -162,6 +182,7 @@ public class Tile implements Parcelable {
         public Tile createFromParcel(Parcel source) {
             return new Tile(source);
         }
+
         public Tile[] newArray(int size) {
             return new Tile[size];
         }
@@ -169,7 +190,7 @@ public class Tile implements Parcelable {
 
     public boolean isPrimaryProfileOnly() {
         String profile = metaData != null ?
-            metaData.getString(META_DATA_KEY_PROFILE) : PROFILE_ALL;
+                metaData.getString(META_DATA_KEY_PROFILE) : PROFILE_ALL;
         profile = (profile != null ? profile : PROFILE_ALL);
         return TextUtils.equals(profile, PROFILE_PRIMARY);
     }

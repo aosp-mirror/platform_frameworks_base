@@ -2502,8 +2502,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
         if (displayId != INVALID_DISPLAY && canLaunchOnDisplay(r, displayId)) {
             if (r != null) {
-                // TODO: This should also take in the windowing mode and activity type into account.
-                stack = (T) getValidLaunchStackOnDisplay(displayId, r);
+                stack = (T) getValidLaunchStackOnDisplay(displayId, r, options);
                 if (stack != null) {
                     return stack;
                 }
@@ -2548,12 +2547,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
 
-        if (display == null
-                || !canLaunchOnDisplay(r, display.mDisplayId)
-                // TODO: Can be removed once we figure-out how non-standard types should launch
-                // outside the default display.
-                || (activityType != ACTIVITY_TYPE_STANDARD
-                && activityType != ACTIVITY_TYPE_UNDEFINED)) {
+        if (display == null || !canLaunchOnDisplay(r, display.mDisplayId)) {
             display = getDefaultDisplay();
         }
 
@@ -2575,7 +2569,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * @param r Activity that should be launched there.
      * @return Existing stack if there is a valid one, new dynamic stack if it is valid or null.
      */
-    ActivityStack getValidLaunchStackOnDisplay(int displayId, @NonNull ActivityRecord r) {
+    ActivityStack getValidLaunchStackOnDisplay(int displayId, @NonNull ActivityRecord r,
+            @Nullable ActivityOptions options) {
         final ActivityDisplay activityDisplay = getActivityDisplayOrCreateLocked(displayId);
         if (activityDisplay == null) {
             throw new IllegalArgumentException(
@@ -2597,7 +2592,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // If there is no valid stack on the external display - check if new dynamic stack will do.
         if (displayId != DEFAULT_DISPLAY) {
             return activityDisplay.createStack(
-                    r.getWindowingMode(), r.getActivityType(), true /*onTop*/);
+                    options != null ? options.getLaunchWindowingMode() : r.getWindowingMode(),
+                    options != null ? options.getLaunchActivityType() : r.getActivityType(),
+                    true /*onTop*/);
         }
 
         Slog.w(TAG, "getValidLaunchStackOnDisplay: can't launch on displayId " + displayId);
@@ -2698,7 +2695,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             if (displayId == currentFocus) {
                 continue;
             }
-            final ActivityStack stack = getValidLaunchStackOnDisplay(displayId, r);
+            final ActivityStack stack = getValidLaunchStackOnDisplay(displayId, r,
+                    null /* options */);
             if (stack != null) {
                 return stack;
             }

@@ -314,7 +314,7 @@ public class TileUtilsTest {
                 false /* checkCategory */, true /* forceTintExternalIcon */);
 
         assertThat(outTiles.size()).isEqualTo(1);
-        assertThat(outTiles.get(0).icon.getResId()).isEqualTo(314159);
+        assertThat(outTiles.get(0).getIcon().getResId()).isEqualTo(314159);
         assertThat(outTiles.get(0).summary).isEqualTo("static-summary");
 
         // Case 2: Empty bundle.
@@ -332,7 +332,7 @@ public class TileUtilsTest {
                 false /* checkCategory */, true /* forceTintExternalIcon */);
 
         assertThat(outTiles.size()).isEqualTo(1);
-        assertThat(outTiles.get(0).icon.getResId()).isEqualTo(314159);
+        assertThat(outTiles.get(0).getIcon().getResId()).isEqualTo(314159);
         assertThat(outTiles.get(0).summary).isEqualTo("static-summary");
     }
 

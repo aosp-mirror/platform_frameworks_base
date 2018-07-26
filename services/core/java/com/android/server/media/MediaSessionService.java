@@ -1844,7 +1844,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                             String packageName = getContext().getOpPackageName();
                             mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream,
                                     flags, packageName, TAG);
-                        } catch (RemoteException e) {
+                        } catch (RemoteException|SecurityException e) {
                             Log.e(TAG, "Error adjusting default volume.", e);
                         } catch (IllegalArgumentException e) {
                             Log.e(TAG, "Cannot adjust volume: direction=" + direction

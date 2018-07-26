@@ -69,6 +69,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 import java.util.ArrayList;
 
 import java.util.zip.ZipFile;
@@ -345,31 +346,76 @@ public final class PinnerService extends SystemService {
     }
 
     private ApplicationInfo getCameraInfo(int userHandle) {
-        //  find the camera via an intent
-        //  use INTENT_ACTION_STILL_IMAGE_CAMERA instead of _SECURE.  On a
-        //  device without a fbe enabled, the _SECURE intent will never get set.
         Intent cameraIntent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
-        return getApplicationInfoForIntent(cameraIntent, userHandle);
+        ApplicationInfo info = getApplicationInfoForIntent(cameraIntent, userHandle,
+            false /* defaultToSystemApp */);
+
+        // If the STILL_IMAGE_CAMERA intent doesn't resolve, try the _SECURE intent.
+        // We don't use _SECURE first because it will never get set on a device
+        // without File-based Encryption. But if the user has only set the intent
+        // before unlocking their device, we may still be able to identify their
+        // preference using this intent.
+        if (info == null) {
+            cameraIntent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE);
+            info = getApplicationInfoForIntent(cameraIntent, userHandle,
+                false /* defaultToSystemApp */);
+        }
+
+        // If the _SECURE intent doesn't resolve, try the original intent but request
+        // the system app for camera if there was more than one result.
+        if (info == null) {
+            cameraIntent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
+            info = getApplicationInfoForIntent(cameraIntent, userHandle,
+                true /* defaultToSystemApp */);
+        }
+        return info;
     }
 
     private ApplicationInfo getHomeInfo(int userHandle) {
         Intent intent = mAmInternal.getHomeIntent();
-        return getApplicationInfoForIntent(intent, userHandle);
+        return getApplicationInfoForIntent(intent, userHandle, false);
     }
 
-    private ApplicationInfo getApplicationInfoForIntent(Intent intent, int userHandle) {
+    private ApplicationInfo getApplicationInfoForIntent(Intent intent, int userHandle,
+            boolean defaultToSystemApp) {
         if (intent == null) {
             return null;
         }
-        ResolveInfo info = mContext.getPackageManager().resolveActivityAsUser(intent,
+
+        ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivityAsUser(intent,
                 MATCH_FLAGS, userHandle);
-        if (info == null) {
+
+        // If this intent can resolve to only one app, choose that one.
+        // Otherwise, if we've requested to default to the system app, return it;
+        // if we have not requested that default, return null if there's more than one option.
+        // If there's more than one system app, return null since we don't know which to pick.
+        if (resolveInfo == null) {
             return null;
         }
-        if (isResolverActivity(info.activityInfo)) {
-            return null;
+
+        if (!isResolverActivity(resolveInfo.activityInfo)) {
+            return resolveInfo.activityInfo.applicationInfo;
         }
-        return info.activityInfo.applicationInfo;
+
+        if (defaultToSystemApp) {
+            List<ResolveInfo> infoList = mContext.getPackageManager()
+                .queryIntentActivitiesAsUser(intent, MATCH_FLAGS, userHandle);
+            ApplicationInfo systemAppInfo = null;
+            for (ResolveInfo info : infoList) {
+                if ((info.activityInfo.applicationInfo.flags
+                      & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                    if (systemAppInfo == null) {
+                        systemAppInfo = info.activityInfo.applicationInfo;
+                    } else {
+                        // If there's more than one system app, return null due to ambiguity.
+                        return null;
+                    }
+                }
+            }
+            return systemAppInfo;
+        }
+
+        return null;
     }
 
     private void sendPinAppsMessage(int userHandle) {

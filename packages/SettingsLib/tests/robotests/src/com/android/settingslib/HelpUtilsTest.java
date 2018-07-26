@@ -17,6 +17,7 @@
 package com.android.settingslib;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -43,13 +44,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 /**
  * Tests for {@link HelpUtils}.
  */
-@RunWith(RobolectricTestRunner.class)
+@RunWith(SettingsLibRobolectricTestRunner.class)
 public class HelpUtilsTest {
     private static final String TEST_HELP_URL = "intent:#Intent;action=com.android.test;end";
     private static final String PACKAGE_NAME_KEY = "package-name-key";

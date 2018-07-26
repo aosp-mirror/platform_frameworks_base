@@ -63,7 +63,8 @@ public class UptimePreferenceControllerTest {
         uptimePreferenceController.displayPreference(mScreen);
 
         // SystemClock is shadowed so it shouldn't advance unexpectedly while the test is running
-        verify(mPreference).setSummary(DateUtils.formatDuration(SystemClock.elapsedRealtime()));
+        verify(mPreference).setSummary(
+                DateUtils.formatElapsedTime(SystemClock.elapsedRealtime() / 1000));
     }
 
     @Test
