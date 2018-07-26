@@ -117,8 +117,20 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     private void processCallEnded(CallSession s, int parcelRequestSize, int parcelReplySize) {
+        // Non-negative time signals we need to record data for this call.
+        final boolean recordCall = s.cpuTimeStarted >= 0;
+        final long duration;
+        final long latencyDuration;
+        if (recordCall) {
+            duration = getThreadTimeMicro() - s.cpuTimeStarted;
+            latencyDuration = getElapsedRealtimeMicro() - s.timeStarted;
+        } else {
+            duration = 0;
+            latencyDuration = 0;
+        }
+        final int callingUid = getCallingUid();
+
         synchronized (mLock) {
-            final int callingUid = getCallingUid();
             UidEntry uidEntry = mUidEntries.get(callingUid);
             if (uidEntry == null) {
                 uidEntry = new UidEntry(callingUid);
@@ -128,11 +140,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
             CallStat callStat = uidEntry.getOrCreate(s.className, s.transactionCode);
             callStat.callCount++;
 
-            // Non-negative time signals we need to record data for this call.
-            final boolean recordCall = s.cpuTimeStarted >= 0;
             if (recordCall) {
-                final long duration = getThreadTimeMicro() - s.cpuTimeStarted;
-                final long latencyDuration = getElapsedRealtimeMicro() - s.timeStarted;
                 uidEntry.cpuTimeMicros += duration;
                 uidEntry.recordedCallCount++;
 
