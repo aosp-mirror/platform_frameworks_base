@@ -3922,7 +3922,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      * </li>
      * <li><strong>Overriden standard actions</strong> - These are actions that override
      * standard actions to customize them. For example, an app may add a label to the
-     * standard {@link #ACTION_CLICK} action to announce that this action clears browsing history.
+     * standard {@link #ACTION_CLICK} action to indicate to the user that this action clears
+     * browsing history.
      * </ul>
      * </p>
      * <p>
