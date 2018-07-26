@@ -654,6 +654,8 @@ java_library {
             "system/bt/binder",
             "system/security/keystore/binder",
         ],
+
+        generate_get_transaction_name: true
     },
 
     exclude_srcs: [
