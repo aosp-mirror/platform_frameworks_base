@@ -24,6 +24,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.view.IApplicationToken;
 import android.view.IWindow;
+import android.view.SurfaceControl;
+import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
 
 import static android.app.AppOpsManager.OP_NONE;
@@ -113,6 +115,7 @@ public class WindowTestUtils {
     /** Used so we can gain access to some protected members of the {@link AppWindowToken} class. */
     public static class TestAppWindowToken extends AppWindowToken {
         boolean mOnTop = false;
+        private Transaction mPendingTransactionOverride;
 
         private TestAppWindowToken(DisplayContent dc) {
             super(dc.mService, new IApplicationToken.Stub() {
@@ -157,6 +160,17 @@ public class WindowTestUtils {
         @Override
         boolean isOnTop() {
             return mOnTop;
+        }
+
+        void setPendingTransaction(Transaction transaction) {
+            mPendingTransactionOverride = transaction;
+        }
+
+        @Override
+        public Transaction getPendingTransaction() {
+            return mPendingTransactionOverride == null
+                    ? super.getPendingTransaction()
+                    : mPendingTransactionOverride;
         }
     }
 

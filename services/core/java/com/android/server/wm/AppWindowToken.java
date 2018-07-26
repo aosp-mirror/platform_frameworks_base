@@ -78,6 +78,7 @@ import static com.android.server.wm.AppWindowTokenProto.STARTING_MOVED;
 import static com.android.server.wm.AppWindowTokenProto.STARTING_WINDOW;
 import static com.android.server.wm.AppWindowTokenProto.THUMBNAIL;
 import static com.android.server.wm.AppWindowTokenProto.WINDOW_TOKEN;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 
 import android.annotation.CallSuper;
 import android.app.Activity;
@@ -263,6 +264,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      * the WM side.
      */
     private boolean mWillCloseOrEnterPip;
+
+    /** Layer used to constrain the animation to a token's stack bounds. */
+    SurfaceControl mAnimationBoundsLayer;
+
+    /** Whether this token needs to create mAnimationBoundsLayer for cropping animations. */
+    boolean mNeedsAnimationBoundsLayer;
 
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
             DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
@@ -1720,6 +1727,20 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return !isSplitScreenPrimary || allowSplitScreenPrimaryAnimation;
     }
 
+    /**
+     * Creates a layer to apply crop to an animation.
+     */
+    private SurfaceControl createAnimationBoundsLayer(Transaction t) {
+        if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.i(TAG, "Creating animation bounds layer");
+        final SurfaceControl.Builder builder = makeAnimationLeash()
+                .setParent(getAnimationLeashParent())
+                .setName(getSurfaceControl() + " - animation-bounds")
+                .setSize(getSurfaceWidth(), getSurfaceHeight());
+        final SurfaceControl boundsLayer = builder.build();
+        t.show(boundsLayer);
+        return boundsLayer;
+    }
+
     boolean applyAnimationLocked(WindowManager.LayoutParams lp, int transit, boolean enter,
             boolean isVoiceInteraction) {
 
@@ -1753,12 +1774,15 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 adapter = mService.mAppTransition.getRemoteAnimationController()
                         .createAnimationAdapter(this, mTmpPoint, mTmpRect);
             } else {
+                final int appStackClipMode = mService.mAppTransition.getAppStackClipMode();
+                mNeedsAnimationBoundsLayer = (appStackClipMode == STACK_CLIP_AFTER_ANIM);
+
                 final Animation a = loadAnimation(lp, transit, enter, isVoiceInteraction);
                 if (a != null) {
                     adapter = new LocalAnimationAdapter(
                             new WindowAnimationSpec(a, mTmpPoint, mTmpRect,
                                     mService.mAppTransition.canSkipFirstFrame(),
-                                    mService.mAppTransition.getAppStackClipMode(),
+                                    appStackClipMode,
                                     true /* isAppAnimation */),
                             mService.mSurfaceAnimationRunner);
                     if (a.getZAdjustment() == Animation.ZORDER_TOP) {
@@ -1858,6 +1882,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     @Override
     public void onAnimationLeashDestroyed(Transaction t) {
         super.onAnimationLeashDestroyed(t);
+        if (mAnimationBoundsLayer != null) {
+            t.destroy(mAnimationBoundsLayer);
+            mAnimationBoundsLayer = null;
+        }
+
         if (mAnimatingAppWindowTokenRegistry != null) {
             mAnimatingAppWindowTokenRegistry.notifyFinished(this);
         }
@@ -1908,6 +1937,26 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (mAnimatingAppWindowTokenRegistry != null) {
             mAnimatingAppWindowTokenRegistry.notifyStarting(this);
         }
+
+        // If the animation needs to be cropped then an animation bounds layer is created as a child
+        // of the pinned stack or animation layer. The leash is then reparented to this new layer.
+        if (mNeedsAnimationBoundsLayer) {
+            final TaskStack stack = getStack();
+            if (stack == null) {
+                return;
+            }
+            mAnimationBoundsLayer = createAnimationBoundsLayer(t);
+
+            // Set clip rect to stack bounds.
+            mTmpRect.setEmpty();
+            stack.getBounds(mTmpRect);
+
+            // Crop to stack bounds.
+            t.setWindowCrop(mAnimationBoundsLayer, mTmpRect);
+
+            // Reparent leash to animation bounds layer.
+            t.reparent(leash, mAnimationBoundsLayer.getHandle());
+        }
     }
 
     /**
@@ -1927,6 +1976,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         mTransit = TRANSIT_UNSET;
         mTransitFlags = 0;
         mNeedsZBoost = false;
+        mNeedsAnimationBoundsLayer = false;
 
         setAppLayoutChanges(FINISH_LAYOUT_REDO_ANIM | FINISH_LAYOUT_REDO_WALLPAPER,
                 "AppWindowToken");
