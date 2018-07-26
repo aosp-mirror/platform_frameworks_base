@@ -789,7 +789,7 @@ $(LOCAL_LIGHT_GREYLIST): REGEX_SERIALIZATION := \
     "writeObject\(Ljava/io/ObjectOutputStream;\)V" \
     "writeReplace\(\)Ljava/lang/Object;"
 $(LOCAL_LIGHT_GREYLIST): $(LOCAL_SRC_ALL)
-	sort $(LOCAL_SRC_GREYLIST) $(LOCAL_SRC_VENDOR_LIST) \
+	sort $(LOCAL_SRC_GREYLIST) $(LOCAL_SRC_VENDOR_LIST) $(PRIVATE_GREYLIST_INPUTS) \
 	     <(grep -E "\->("$(subst $(space),"|",$(REGEX_SERIALIZATION))")$$" \
 	               $(LOCAL_SRC_PRIVATE_API)) \
 	     <(comm -12 <(sort $(LOCAL_SRC_REMOVED_API)) <(sort $(LOCAL_SRC_PRIVATE_API))) \
