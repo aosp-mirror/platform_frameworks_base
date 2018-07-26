@@ -49,9 +49,6 @@ public interface BackupManagerServiceInterface {
 
   boolean hasBackupPassword();
 
-  // fire off a backup agent, blocking until it attaches or times out
-  IBackupAgent bindToAgentSynchronous(ApplicationInfo app, int mode);
-
   // Get the restore-set token for the best-available restore set for this package:
   // the active set if possible, else the ancestral one.  Returns zero if none available.
   long getAvailableRestoreToken(String packageName);

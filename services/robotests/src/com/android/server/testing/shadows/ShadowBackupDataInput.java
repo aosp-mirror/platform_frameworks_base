@@ -33,6 +33,7 @@ import java.io.ObjectInputStream;
  */
 @Implements(BackupDataInput.class)
 public class ShadowBackupDataInput {
+    private FileDescriptor mFileDescriptor;
     private ObjectInputStream mInput;
     private int mSize;
     private String mKey;
@@ -40,17 +41,14 @@ public class ShadowBackupDataInput {
 
     @Implementation
     public void __constructor__(FileDescriptor fd) {
-        try {
-            mInput = new ObjectInputStream(new FileInputStream(fd));
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
+        mFileDescriptor = fd;
     }
 
     @Implementation
     public boolean readNextHeader() throws IOException {
         mHeaderReady = false;
         try {
+            ensureInput();
             mSize = mInput.readInt();
         } catch (EOFException e) {
             return false;
@@ -91,6 +89,24 @@ public class ShadowBackupDataInput {
     private void checkHeaderReady() {
         if (!mHeaderReady) {
             throw new IllegalStateException("Entity header not read");
+        }
+    }
+
+    /**
+     * Lazily initializing input to avoid throwing exception when stream is completely empty in
+     * constructor (Java Object IO writes/reads some header data).
+     *
+     * @throws EOFException When the input is empty.
+     */
+    private void ensureInput() throws EOFException {
+        if (mInput == null) {
+            try {
+                mInput = new ObjectInputStream(new FileInputStream(mFileDescriptor));
+            } catch (EOFException e) {
+                throw e;
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
         }
     }
 }

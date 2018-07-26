@@ -23,6 +23,7 @@ import android.os.Process;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+// TODO: Preconditions is not available, include its target in dependencies
 public class PackageData {
     public static final PackageData PM_PACKAGE = new PmPackageData();
 
@@ -42,15 +43,24 @@ public class PackageData {
     public final String packageName;
     public final String agentName;
     @BackupStatus public final int backupStatus;
+    public final boolean available;
     public final boolean stopped;
     public final int uid;
 
     private PackageData(
-            String packageName, String agentName, int backupStatus, boolean stopped, int uid) {
+            String packageName,
+            String agentName,
+            int backupStatus,
+            boolean stopped,
+            boolean available,
+            int uid) {
+        // checkArgument(!stopped || !available, "stopped => !available")
+
         this.packageName = packageName;
         this.agentName = agentName;
         this.backupStatus = backupStatus;
         this.stopped = stopped;
+        this.available = available;
         this.uid = uid;
     }
 
@@ -70,11 +80,15 @@ public class PackageData {
 
     public PackageData backupNotAllowed() {
         return new PackageData(
-                packageName, agentName, BackupStatus.BACKUP_NOT_ALLOWED, stopped, uid);
+                packageName, agentName, BackupStatus.BACKUP_NOT_ALLOWED, stopped, available, uid);
     }
 
     public PackageData stopped() {
-        return new PackageData(packageName, agentName, backupStatus, true, uid);
+        return new PackageData(packageName, agentName, backupStatus, true, false, uid);
+    }
+
+    public PackageData unavailable() {
+        return new PackageData(packageName, agentName, backupStatus, stopped, false, uid);
     }
 
     public boolean isPm() {
@@ -82,7 +96,6 @@ public class PackageData {
     }
 
     private static PackageData androidPackage(int identifier, @BackupStatus int backupStatus) {
-        // TODO: Preconditions is not available, include its target in dependencies
         // checkArgument(identifier >= 0, "identifier can't be < 0");
 
         String packageName = "com.sample.package" + identifier;
@@ -91,6 +104,7 @@ public class PackageData {
                 packageName + ".BackupAgent",
                 backupStatus,
                 false,
+                true,
                 Process.FIRST_APPLICATION_UID + identifier);
     }
 
@@ -101,6 +115,7 @@ public class PackageData {
                     "com.android.server.backup.PackageManagerBackupAgent",
                     BackupStatus.KEY_VALUE_BACKUP,
                     false,
+                    true,
                     Process.SYSTEM_UID);
         }
 
@@ -117,6 +132,11 @@ public class PackageData {
         @Override
         public PackageData stopped() {
             throw new UnsupportedOperationException("PM \"package\" can't be stopped");
+        }
+
+        @Override
+        public PackageData unavailable() {
+            throw new UnsupportedOperationException("PM \"package\" is always available");
         }
     }
 

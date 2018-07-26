@@ -468,7 +468,7 @@ public class PerformBackupTask implements BackupRestoreTask {
 
             IBackupAgent agent = null;
             try {
-                backupManagerService.getWakelock().setWorkSource(
+                backupManagerService.setWorkSource(
                         new WorkSource(mCurrentPackage.applicationInfo.uid));
                 agent = backupManagerService.bindToAgentSynchronous(mCurrentPackage.applicationInfo,
                         ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL);
@@ -494,7 +494,7 @@ public class PerformBackupTask implements BackupRestoreTask {
             backupManagerService.addBackupTrace("no such package");
             mStatus = BackupTransport.AGENT_UNKNOWN;
         } finally {
-            backupManagerService.getWakelock().setWorkSource(null);
+            backupManagerService.setWorkSource(null);
 
             // If there was an agent error, no timeout/completion handling will occur.
             // That means we need to direct to the next state ourselves.
@@ -1202,10 +1202,7 @@ public class PerformBackupTask implements BackupRestoreTask {
         // If this was a pseudopackage there's no associated Activity Manager state
         if (mCurrentPackage.applicationInfo != null) {
             backupManagerService.addBackupTrace("unbinding " + mCurrentPackage.packageName);
-            try {  // unbind even on timeout, just in case
-                backupManagerService.getActivityManager().unbindBackupAgent(
-                        mCurrentPackage.applicationInfo);
-            } catch (RemoteException e) { /* can't happen; activity manager is local */ }
+            backupManagerService.unbindAgent(mCurrentPackage.applicationInfo);
         }
     }
 
