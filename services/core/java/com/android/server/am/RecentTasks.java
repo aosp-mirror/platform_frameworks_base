@@ -702,8 +702,7 @@ class RecentTasks {
             if (intent == null || !callingPackage.equals(intent.getComponent().getPackageName())) {
                 continue;
             }
-            ActivityManager.RecentTaskInfo taskInfo = createRecentTaskInfo(tr);
-            AppTaskImpl taskImpl = new AppTaskImpl(mService, taskInfo.persistentId, callingUid);
+            AppTaskImpl taskImpl = new AppTaskImpl(mService, tr.taskId, callingUid);
             list.add(taskImpl.asBinder());
         }
         return list;
@@ -1543,33 +1542,11 @@ class RecentTasks {
      * Creates a new RecentTaskInfo from a TaskRecord.
      */
     ActivityManager.RecentTaskInfo createRecentTaskInfo(TaskRecord tr) {
-        // Compose the recent task info
         ActivityManager.RecentTaskInfo rti = new ActivityManager.RecentTaskInfo();
-        rti.id = tr.getTopActivity() == null ? INVALID_TASK_ID : tr.taskId;
-        rti.persistentId = tr.taskId;
-        rti.baseIntent = new Intent(tr.getBaseIntent());
-        rti.origActivity = tr.origActivity;
-        rti.realActivity = tr.realActivity;
-        rti.description = tr.lastDescription;
-        rti.stackId = tr.getStackId();
-        rti.userId = tr.userId;
-        rti.taskDescription = new ActivityManager.TaskDescription(tr.lastTaskDescription);
-        rti.lastActiveTime = tr.lastActiveTime;
-        rti.affiliatedTaskId = tr.mAffiliatedTaskId;
-        rti.affiliatedTaskColor = tr.mAffiliatedTaskColor;
-        rti.numActivities = 0;
-        if (!tr.matchParentBounds()) {
-            rti.bounds = new Rect(tr.getOverrideBounds());
-        }
-        rti.supportsSplitScreenMultiWindow = tr.supportsSplitScreenWindowingMode();
-        rti.resizeMode = tr.mResizeMode;
-        rti.configuration.setTo(tr.getConfiguration());
-
-        tr.getNumRunningActivities(mTmpReport);
-        rti.numActivities = mTmpReport.numActivities;
-        rti.baseActivity = (mTmpReport.base != null) ? mTmpReport.base.intent.getComponent() : null;
-        rti.topActivity = (mTmpReport.top != null) ? mTmpReport.top.intent.getComponent() : null;
-
+        tr.fillTaskInfo(rti, mTmpReport);
+        // Fill in some deprecated values
+        rti.id = rti.isRunning ? rti.taskId : INVALID_TASK_ID;
+        rti.persistentId = rti.taskId;
         return rti;
     }
 

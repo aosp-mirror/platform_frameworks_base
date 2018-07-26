@@ -1,7 +1,6 @@
 Landroid/accounts/AccountManager;-><init>(Landroid/content/Context;Landroid/accounts/IAccountManager;Landroid/os/Handler;)V
 Landroid/app/Activity;->managedQuery(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;
 Landroid/app/Activity;->registerRemoteAnimations(Landroid/view/RemoteAnimationDefinition;)V
-Landroid/app/ActivityManager$RecentTaskInfo;->configuration:Landroid/content/res/Configuration;
 Landroid/app/ActivityManager$TaskDescription;->loadTaskDescriptionIcon(Ljava/lang/String;I)Landroid/graphics/Bitmap;
 Landroid/app/ActivityManager$TaskSnapshot;->getSnapshot()Landroid/graphics/GraphicBuffer;
 Landroid/app/ActivityManagerNative;->broadcastStickyIntent(Landroid/content/Intent;Ljava/lang/String;I)V
@@ -40,6 +39,7 @@ Landroid/app/KeyguardManager;->isDeviceLocked(I)Z
 Landroid/app/NotificationManager;->cancelAsUser(Ljava/lang/String;ILandroid/os/UserHandle;)V
 Landroid/app/StatusBarManager;->removeIcon(Ljava/lang/String;)V
 Landroid/app/StatusBarManager;->setIcon(Ljava/lang/String;IILjava/lang/String;)V
+Landroid/app/TaskInfo;->configuration:Landroid/content/res/Configuration;
 Landroid/app/TaskStackListener;->onActivityDismissingDockedStack()V
 Landroid/app/TaskStackListener;->onActivityForcedResizable(Ljava/lang/String;II)V
 Landroid/app/TaskStackListener;->onActivityLaunchOnSecondaryDisplayFailed()V

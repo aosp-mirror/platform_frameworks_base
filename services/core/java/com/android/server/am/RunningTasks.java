@@ -85,20 +85,10 @@ class RunningTasks {
      * Constructs a {@link RunningTaskInfo} from a given {@param task}.
      */
     private RunningTaskInfo createRunningTaskInfo(TaskRecord task) {
-        task.getNumRunningActivities(mTmpReport);
-
-        final RunningTaskInfo ci = new RunningTaskInfo();
-        ci.id = task.taskId;
-        ci.stackId = task.getStackId();
-        ci.baseActivity = mTmpReport.base.intent.getComponent();
-        ci.topActivity = mTmpReport.top.intent.getComponent();
-        ci.lastActiveTime = task.lastActiveTime;
-        ci.description = task.lastDescription;
-        ci.numActivities = mTmpReport.numActivities;
-        ci.numRunning = mTmpReport.numRunning;
-        ci.supportsSplitScreenMultiWindow = task.supportsSplitScreenWindowingMode();
-        ci.resizeMode = task.mResizeMode;
-        ci.configuration.setTo(task.getConfiguration());
-        return ci;
+        final RunningTaskInfo rti = new RunningTaskInfo();
+        task.fillTaskInfo(rti, mTmpReport);
+        // Fill in some deprecated values
+        rti.id = rti.taskId;
+        return rti;
     }
 }
