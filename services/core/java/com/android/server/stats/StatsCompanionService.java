@@ -87,6 +87,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -900,7 +901,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         List<ExportedCallStat> callStats = binderStats.getExportedCallStats();
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         for (ExportedCallStat callStat : callStats) {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 11 /* fields */);
+            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 13 /* fields */);
             e.writeInt(callStat.uid);
             e.writeString(callStat.className);
             e.writeString(callStat.methodName);
@@ -912,6 +913,21 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(callStat.maxCpuTimeMicros);
             e.writeLong(callStat.maxReplySizeBytes);
             e.writeLong(callStat.maxRequestSizeBytes);
+            e.writeLong(callStat.recordedCallCount);
+            e.writeInt(callStat.screenInteractive ? 1 : 0);
+            pulledData.add(e);
+        }
+    }
+
+    private void pullBinderCallsStatsExceptions(int tagId, List<StatsLogEventWrapper> pulledData) {
+        BinderCallsStatsService.Internal binderStats =
+                LocalServices.getService(BinderCallsStatsService.Internal.class);
+        ArrayMap<String, Integer> exceptionStats = binderStats.getExportedExceptionStats();
+        long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        for (Entry<String, Integer> entry : exceptionStats.entrySet()) {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 2 /* fields */);
+            e.writeString(entry.getKey());
+            e.writeInt(entry.getValue());
             pulledData.add(e);
         }
     }
@@ -1000,6 +1016,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.BINDER_CALLS: {
                 pullBinderCallsStats(tagId, ret);
+                break;
+            }
+            case StatsLog.BINDER_CALLS_EXCEPTIONS: {
+                pullBinderCallsStatsExceptions(tagId, ret);
                 break;
             }
             default:

@@ -174,10 +174,16 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         {android::util::TEMPERATURE, {{}, {}, 1, new ResourceThermalManagerPuller()}},
         // binder_calls
         {android::util::BINDER_CALLS,
-         {{4, 5, 6, 8},
-          {2, 3, 7, 9, 10, 11},
+         {{4, 5, 6, 8, 12},
+          {2, 3, 7, 9, 10, 11, 13},
           1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::BINDER_CALLS)}}
+          new StatsCompanionServicePuller(android::util::BINDER_CALLS)}},
+        // binder_calls_exceptions
+        {android::util::BINDER_CALLS_EXCEPTIONS,
+         {{},
+          {},
+          1 * NS_PER_SEC,
+          new StatsCompanionServicePuller(android::util::BINDER_CALLS_EXCEPTIONS)}}
         };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {

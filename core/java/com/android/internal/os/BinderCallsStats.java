@@ -209,6 +209,13 @@ public class BinderCallsStats implements BinderInternal.Observer {
         return resultCallStats;
     }
 
+    /** @hide */
+    public ArrayMap<String, Integer> getExportedExceptionStats() {
+        synchronized (mLock) {
+            return new ArrayMap(mExceptionCounts);
+        }
+    }
+
     public void dump(PrintWriter pw, Map<Integer,String> appIdToPkgNameMap, boolean verbose) {
         synchronized (mLock) {
             dumpLocked(pw, appIdToPkgNameMap, verbose);
@@ -351,6 +358,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
         public int uid;
         public String className;
         public String methodName;
+        public boolean screenInteractive;
         public long cpuTimeMicros;
         public long maxCpuTimeMicros;
         public long latencyMicros;

@@ -27,6 +27,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.ArrayMap;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
@@ -121,6 +122,10 @@ public class BinderCallsStatsService extends Binder {
 
         public ArrayList<BinderCallsStats.ExportedCallStat> getExportedCallStats() {
             return mBinderCallsStats.getExportedCallStats();
+        }
+
+        public ArrayMap<String, Integer> getExportedExceptionStats() {
+            return mBinderCallsStats.getExportedExceptionStats();
         }
     }
 
