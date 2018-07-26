@@ -59,32 +59,32 @@ public class TileTest {
     }
 
     @Test
-    public void getIcon_noActivityOrMetadata_returnNull() {
-        final Tile tile1 = new Tile((ActivityInfo) null);
-        assertThat(tile1.getIcon()).isNull();
-
-        final Tile tile2 = new Tile(new ActivityInfo());
-        assertThat(tile2.getIcon()).isNull();
+    public void getIcon_noContextOrMetadata_returnNull() {
+        final Tile tile = new Tile(new ActivityInfo());
+        assertThat(tile.getIcon(null)).isNull();
+        assertThat(tile.getIcon(RuntimeEnvironment.application)).isNull();
     }
 
     @Test
     public void getIcon_providedByUri_returnNull() {
         mTile.metaData.putString(META_DATA_PREFERENCE_ICON_URI, "content://foobar/icon");
 
-        assertThat(mTile.getIcon()).isNull();
+        assertThat(mTile.getIcon(RuntimeEnvironment.application)).isNull();
     }
 
     @Test
     public void getIcon_hasIconMetadata_returnIcon() {
         mTile.metaData.putInt(META_DATA_PREFERENCE_ICON, R.drawable.ic_info);
 
-        assertThat(mTile.getIcon().getResId()).isEqualTo(R.drawable.ic_info);
+        assertThat(mTile.getIcon(RuntimeEnvironment.application).getResId())
+                .isEqualTo(R.drawable.ic_info);
     }
 
     @Test
     public void getIcon_noIconMetadata_returnActivityIcon() {
         mTile.metaData.putInt(META_DATA_PREFERENCE_ICON, 0);
 
-        assertThat(mTile.getIcon().getResId()).isEqualTo(mActivityInfo.icon);
+        assertThat(mTile.getIcon(RuntimeEnvironment.application).getResId())
+                .isEqualTo(mActivityInfo.icon);
     }
 }
