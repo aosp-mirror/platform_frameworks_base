@@ -4397,17 +4397,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (isKeyguardShowingAndNotOccluded()) {
                 // don't launch home if keyguard showing
                 return;
-            } else if (mKeyguardOccluded && mKeyguardDelegate.isShowing()) {
-                mKeyguardDelegate.dismiss(new KeyguardDismissCallback() {
-                    @Override
-                    public void onDismissSucceeded() throws RemoteException {
-                        mHandler.post(() -> {
-                            startDockOrHome(true /*fromHomeKey*/, awakenFromDreams);
-                        });
-                    }
-                }, null /* message */);
-                return;
-            } else if (!mKeyguardOccluded && mKeyguardDelegate.isInputRestricted()) {
+            }
+
+            if (!mKeyguardOccluded && mKeyguardDelegate.isInputRestricted()) {
                 // when in keyguard restricted mode, must first verify unlock
                 // before launching home
                 mKeyguardDelegate.verifyUnlock(new OnKeyguardExitResult() {
