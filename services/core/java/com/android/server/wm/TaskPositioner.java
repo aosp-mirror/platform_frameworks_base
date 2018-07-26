@@ -209,6 +209,7 @@ class TaskPositioner {
                     // Post back to WM to handle clean-ups. We still need the input
                     // event handler for the last finishInputEvent()!
                     mService.mTaskPositioningController.finishTaskPositioning();
+                    mTask.getDisplayContent().getInputMonitor().updateInputWindowsLw(true /*force*/);
                 }
                 handled = true;
             } catch (Exception e) {

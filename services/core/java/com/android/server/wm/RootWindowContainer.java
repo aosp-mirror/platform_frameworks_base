@@ -724,7 +724,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         }
 
         // Finally update all input windows now that the window changes have stabilized.
-        mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
+        forAllDisplays(dc -> {
+            dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
+        });
 
         mService.setHoldScreenLocked(mHoldScreen);
         if (!mService.mDisplayFrozen) {
@@ -784,7 +786,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         }
 
         if (updateInputWindowsNeeded) {
-            mService.mInputMonitor.updateInputWindowsLw(false /*force*/);
+            forAllDisplays(dc -> {
+                dc.getInputMonitor().updateInputWindowsLw(false /*force*/);
+            });
         }
         mService.setFocusTaskRegionLocked(null);
         if (touchExcludeRegionUpdateDisplays != null) {
@@ -1090,5 +1094,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     @Override
     void scheduleAnimation() {
         mService.scheduleAnimationLocked();
+    }
+
+    /**
+     * For all display at or below this call the callback.
+     *
+     * @param callback Callback to be called for every display.
+     */
+    void forAllDisplays(Consumer<DisplayContent> callback) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            callback.accept(mChildren.get(i));
+        }
     }
 }

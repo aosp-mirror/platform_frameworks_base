@@ -449,13 +449,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     + ": hidden=" + isHidden() + " hiddenRequested=" + hiddenRequested);
 
             if (changed) {
-                mService.mInputMonitor.setUpdateInputWindowsNeededLw();
+                getDisplayContent().getInputMonitor().setUpdateInputWindowsNeededLw();
                 if (performLayout) {
                     mService.updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                             false /*updateInputWindows*/);
                     mService.mWindowPlacerLocked.performSurfacePlacement();
                 }
-                mService.mInputMonitor.updateInputWindowsLw(false /*force*/);
+                getDisplayContent().getInputMonitor().updateInputWindowsLw(false /*force*/);
             }
         }
 
@@ -677,7 +677,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Removing focused app token:" + this);
             mService.mFocusedApp = null;
             mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
-            mService.mInputMonitor.setFocusedAppLw(null);
+            getDisplayContent().getInputMonitor().setFocusedAppLw(null);
         }
 
         if (!delayed) {

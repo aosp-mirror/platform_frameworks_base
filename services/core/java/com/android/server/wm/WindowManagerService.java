@@ -269,6 +269,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
         implements Watchdog.Monitor, WindowManagerPolicy.WindowManagerFuncs {
@@ -1073,7 +1075,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromWindowLayout);
 
         mTaskPositioningController = new TaskPositioningController(
-                this, mInputManager, mInputMonitor, mActivityTaskManager, mH.getLooper());
+                this, mInputManager, mActivityTaskManager, mH.getLooper());
         mDragDropController = new DragDropController(this, mH.getLooper());
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
@@ -1099,9 +1101,8 @@ public class WindowManagerService extends IWindowManager.Stub
         showEmulatorDisplayOverlayIfNeeded();
     }
 
-
-    public InputMonitor getInputMonitor() {
-        return mInputMonitor;
+    public InputManagerCallback getInputManagerCallback() {
+        return mInputManagerCallback;
     }
 
     @Override
@@ -1489,7 +1490,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 res |= WindowManagerGlobal.ADD_FLAG_APP_VISIBLE;
             }
 
-            mInputMonitor.setUpdateInputWindowsNeededLw();
+            displayContent.getInputMonitor().setUpdateInputWindowsNeededLw();
 
             boolean focusChanged = false;
             if (win.canReceiveKeys()) {
@@ -1509,9 +1510,10 @@ public class WindowManagerService extends IWindowManager.Stub
             win.getParent().assignChildLayers();
 
             if (focusChanged) {
-                mInputMonitor.setInputFocusLw(mCurrentFocus, false /*updateInputWindows*/);
+                displayContent.getInputMonitor().setInputFocusLw(mCurrentFocus,
+                        false /*updateInputWindows*/);
             }
-            mInputMonitor.updateInputWindowsLw(false /*force*/);
+            displayContent.getInputMonitor().updateInputWindowsLw(false /*force*/);
 
             if (localLOGV || DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "addWindow: New client "
                     + client.asBinder() + ": window=" + win + " Callers=" + Debug.getCallers(5));
@@ -1724,7 +1726,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        mInputMonitor.updateInputWindowsLw(true /*force*/);
+        dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
     }
 
     void setInputMethodWindowLocked(WindowState win) {
@@ -2043,7 +2045,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 try {
                     result = createSurfaceControl(outSurface, result, win, winAnimator);
                 } catch (Exception e) {
-                    mInputMonitor.updateInputWindowsLw(true /*force*/);
+                    win.getDisplayContent().getInputMonitor().updateInputWindowsLw(true /*force*/);
 
                     Slog.w(TAG_WM, "Exception thrown when creating surface for client "
                              + client + " (" + win.mAttrs.getTitle() + ")",
@@ -2377,7 +2379,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     return;
                 }
 
-                mInputMonitor.updateInputWindowsLw(true /*force*/);
+                dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -2566,7 +2568,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (changed) {
                 AppWindowToken prev = mFocusedApp;
                 mFocusedApp = newFocus;
-                mInputMonitor.setFocusedAppLw(newFocus);
+                mFocusedApp.getDisplayContent().getInputMonitor().setFocusedAppLw(newFocus);
                 setFocusTaskRegionLocked(prev);
             }
 
@@ -3474,7 +3476,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_SCREEN_ON || DEBUG_BOOT) Slog.i(TAG_WM, "******************** ENABLING SCREEN!");
 
             // Enable input dispatch.
-            mInputMonitor.setEventDispatchingLw(mEventDispatchingEnabled);
+            mInputManagerCallback.setEventDispatchingLw(mEventDispatchingEnabled);
         }
 
         try {
@@ -4421,7 +4423,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // Input Events and Focus Management
     // -------------------------------------------------------------
 
-    final InputMonitor mInputMonitor = new InputMonitor(this);
+    final InputManagerCallback mInputManagerCallback = new InputManagerCallback(this);
     private boolean mEventDispatchingEnabled;
 
     @Override
@@ -4433,7 +4435,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             mEventDispatchingEnabled = enabled;
             if (mDisplayEnabled) {
-                mInputMonitor.setEventDispatchingLw(enabled);
+                mInputManagerCallback.setEventDispatchingLw(enabled);
             }
         }
     }
@@ -4458,7 +4460,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public boolean detectSafeMode() {
-        if (!mInputMonitor.waitForInputDevicesReady(
+        if (!mInputManagerCallback.waitForInputDevicesReady(
                 INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS)) {
             Slog.w(TAG_WM, "Devices still not ready after waiting "
                    + INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS
@@ -5712,7 +5714,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS) {
                 // If we defer assigning layers, then the caller is responsible for
                 // doing this part.
-                mInputMonitor.setInputFocusLw(mCurrentFocus, updateInputWindows);
+                displayContent.getInputMonitor().setInputFocusLw(mCurrentFocus, updateInputWindows);
             }
 
             displayContent.adjustForImeIfNeeded();
@@ -5759,7 +5761,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // As a result, we only track the display that has initially froze the screen.
         mFrozenDisplayId = displayContent.getDisplayId();
 
-        mInputMonitor.freezeInputDispatchingLw();
+        mInputManagerCallback.freezeInputDispatchingLw();
 
         // Clear the last input window -- that is just used for
         // clean transitions between IMEs, and if we are freezing
@@ -5825,7 +5827,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final int displayId = mFrozenDisplayId;
         mFrozenDisplayId = INVALID_DISPLAY;
         mDisplayFrozen = false;
-        mInputMonitor.thawInputDispatchingLw();
+        mInputManagerCallback.thawInputDispatchingLw();
         mLastDisplayFreezeDuration = (int)(SystemClock.elapsedRealtime() - mDisplayFreezeTime);
         StringBuilder sb = new StringBuilder(128);
         sb.append("Screen frozen for ");
@@ -6065,24 +6067,38 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public WindowManagerPolicy.InputConsumer createInputConsumer(Looper looper, String name,
-            InputEventReceiver.Factory inputEventReceiverFactory) {
+            InputEventReceiver.Factory inputEventReceiverFactory, int displayId) {
         synchronized (mWindowMap) {
-            return mInputMonitor.createInputConsumer(looper, name, inputEventReceiverFactory);
+            DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent != null) {
+                return displayContent.getInputMonitor().createInputConsumer(looper, name,
+                        inputEventReceiverFactory);
+            } else {
+                return null;
+            }
         }
     }
 
     @Override
     public void createInputConsumer(IBinder token, String name, InputChannel inputChannel) {
         synchronized (mWindowMap) {
-            mInputMonitor.createInputConsumer(token, name, inputChannel, Binder.getCallingPid(),
-                    Binder.getCallingUserHandle());
+            mRoot.forAllDisplays(dc -> {
+                dc.getInputMonitor().createInputConsumer(token, name, inputChannel,
+                        Binder.getCallingPid(), Binder.getCallingUserHandle());
+            });
         }
     }
 
     @Override
     public boolean destroyInputConsumer(String name) {
         synchronized (mWindowMap) {
-            return mInputMonitor.destroyInputConsumer(name);
+            AtomicBoolean retValue = new AtomicBoolean(true);
+            mRoot.forAllDisplays(dc -> {
+                if (!dc.getInputMonitor().destroyInputConsumer(name)) {
+                    retValue.set(false);
+                }
+            });
+            return retValue.get();
         }
     }
 
@@ -6426,7 +6442,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print(" mLastWakeLockObscuringWindow="); pw.print(mLastWakeLockObscuringWindow);
                 pw.println();
 
-        mInputMonitor.dump(pw, "  ");
+        mInputManagerCallback.dump(pw, "  ");
         mUnknownAppVisibilityController.dump(pw, "  ");
         mTaskSnapshotController.dump(pw, "  ");
 

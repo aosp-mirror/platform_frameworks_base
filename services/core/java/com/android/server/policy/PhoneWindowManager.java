@@ -4669,7 +4669,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else if (mInputConsumer == null && mStatusBar != null && canHideNavigationBar()) {
                 mInputConsumer = mWindowManagerFuncs.createInputConsumer(mHandler.getLooper(),
                         INPUT_CONSUMER_NAVIGATION,
-                        (channel, looper) -> new HideNavInputEventReceiver(channel, looper));
+                        (channel, looper) -> new HideNavInputEventReceiver(channel, looper),
+                        displayFrames.mDisplayId);
                 // As long as mInputConsumer is active, hover events are not dispatched to the app
                 // and the pointer icon is likely to become stale. Hide it to avoid confusion.
                 InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_NULL);

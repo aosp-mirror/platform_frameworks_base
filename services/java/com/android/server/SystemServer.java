@@ -909,7 +909,7 @@ public final class SystemServer {
             }
 
             traceBeginAndSlog("StartInputManager");
-            inputManager.setWindowManagerCallbacks(wm.getInputMonitor());
+            inputManager.setWindowManagerCallbacks(wm.getInputManagerCallback());
             inputManager.start();
             traceEnd();
 
