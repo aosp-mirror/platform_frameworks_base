@@ -27,6 +27,7 @@ import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STOP_APP_SWITCHES;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
+import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.provider.Settings.Global.HIDE_ERROR_DIALOGS;
 import static android.provider.Settings.System.FONT_SCALE;
@@ -541,6 +542,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final boolean forceRtl = Settings.Global.getInt(resolver, DEVELOPMENT_FORCE_RTL, 0) != 0;
         final boolean forceResizable = Settings.Global.getInt(
                 resolver, DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
+        final boolean isPc = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
 
         // Transfer any global setting for forcing RTL layout, into a System Property
         SystemProperties.set(DEVELOPMENT_FORCE_RTL, forceRtl ? "1":"0");
@@ -573,6 +575,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             mWindowManager.setForceResizableTasks(mForceResizableActivities);
             mWindowManager.setSupportsPictureInPicture(mSupportsPictureInPicture);
+            mWindowManager.setSupportsFreeformWindowManagement(mSupportsFreeformWindowManagement);
+            mWindowManager.setIsPc(isPc);
             // This happens before any activities are started, so we can change global configuration
             // in-place.
             updateConfigurationLocked(configuration, null, true);

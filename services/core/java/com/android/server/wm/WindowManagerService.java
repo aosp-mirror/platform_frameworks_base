@@ -565,6 +565,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean mForceResizableTasks = false;
     boolean mSupportsPictureInPicture = false;
+    boolean mSupportsFreeformWindowManagement = false;
+    boolean mIsPc = false;
 
     boolean mDisableTransitionAnimation = false;
 
@@ -953,7 +955,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_disableTransitionAnimation);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
-        mDisplaySettings = new DisplaySettings();
+        mDisplaySettings = new DisplaySettings(this);
         mDisplaySettings.readSettingsLocked();
 
         mPolicy = policy;
@@ -6919,6 +6921,18 @@ public class WindowManagerService extends IWindowManager.Stub
     public void setSupportsPictureInPicture(boolean supportsPictureInPicture) {
         synchronized (mWindowMap) {
             mSupportsPictureInPicture = supportsPictureInPicture;
+        }
+    }
+
+    public void setSupportsFreeformWindowManagement(boolean supportsFreeformWindowManagement) {
+        synchronized (mWindowMap) {
+            mSupportsFreeformWindowManagement = supportsFreeformWindowManagement;
+        }
+    }
+
+    public void setIsPc(boolean isPc) {
+        synchronized (mWindowMap) {
+            mIsPc = isPc;
         }
     }
 
