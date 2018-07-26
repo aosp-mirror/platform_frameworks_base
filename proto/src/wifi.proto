@@ -473,6 +473,9 @@ message WifiLog {
 
   // Number of times the SarManager failed to register SAR sensor listener
   optional int32 num_sar_sensor_registration_failures = 122;
+
+  // Histogram of the EAP method type of all installed Passpoint profiles
+  repeated PasspointProfileTypeCount installed_passpoint_profile_type = 123;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -1614,4 +1617,32 @@ message WifiIsUnusableEvent {
 
   // Firmware alert code. Only valid when the event was triggered by a firmware alert, otherwise -1.
   optional int32 firmware_alert_code = 10 [default = -1];
+}
+
+message PasspointProfileTypeCount {
+  enum EapMethod {
+    // Unknown Type
+    TYPE_UNKNOWN = 0;
+
+    // EAP_TLS (13)
+    TYPE_EAP_TLS = 1;
+
+    // EAP_TTLS (21)
+    TYPE_EAP_TTLS = 2;
+
+    // EAP_SIM (18)
+    TYPE_EAP_SIM = 3;
+
+    // EAP_AKA (23)
+    TYPE_EAP_AKA = 4;
+
+    // EAP_AKA_PRIME (50)
+    TYPE_EAP_AKA_PRIME = 5;
+  }
+
+  // Eap method type set in Passpoint profile
+  optional EapMethod eap_method_type = 1;
+
+  // Num of installed Passpoint profile with same eap method
+  optional int32 count = 2;
 }
