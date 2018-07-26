@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+
 import android.Manifest;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
@@ -28,7 +30,6 @@ import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
@@ -60,7 +61,6 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Singleton;
@@ -1394,6 +1394,42 @@ public class ActivityManager {
                 return new RecentTaskInfo[size];
             }
         };
+
+        /**
+         * @hide
+         */
+        public void dump(PrintWriter pw, String indent) {
+            final String activityType = WindowConfiguration.activityTypeToString(
+                    configuration.windowConfiguration.getActivityType());
+            final String windowingMode = WindowConfiguration.activityTypeToString(
+                    configuration.windowConfiguration.getActivityType());
+
+            pw.println(); pw.print("   ");
+            pw.print(" id=" + persistentId);
+            pw.print(" stackId=" + stackId);
+            pw.print(" userId=" + userId);
+            pw.print(" hasTask=" + (id != -1));
+            pw.print(" lastActiveTime=" + lastActiveTime);
+            pw.println(); pw.print("   ");
+            pw.print(" baseIntent=" + baseIntent);
+            pw.println(); pw.print("   ");
+            pw.print(" isExcluded="
+                    + ((baseIntent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0));
+            pw.print(" activityType=" + activityType);
+            pw.print(" windowingMode=" + windowingMode);
+            pw.print(" supportsSplitScreenMultiWindow=" + supportsSplitScreenMultiWindow);
+            if (taskDescription != null) {
+                pw.println(); pw.print("   ");
+                final ActivityManager.TaskDescription td = taskDescription;
+                pw.print(" taskDescription {");
+                pw.print(" colorBackground=#" + Integer.toHexString(td.getBackgroundColor()));
+                pw.print(" colorPrimary=#" + Integer.toHexString(td.getPrimaryColor()));
+                pw.print(" iconRes=" + (td.getIconResource() != 0));
+                pw.print(" iconBitmap=" + (td.getIconFilename() != null
+                        || td.getInMemoryIcon() != null));
+                pw.println(" }");
+            }
+        }
     }
 
     /**

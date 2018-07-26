@@ -26,10 +26,12 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
+import static android.os.Process.SYSTEM_UID;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS_TRIM_TASKS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
@@ -497,7 +499,7 @@ class RecentTasks {
             if (tr.userId == userId) {
                 if(DEBUG_TASKS) Slog.i(TAG_TASKS,
                         "remove RecentTask " + tr + " when finishing user" + userId);
-                remove(mTasks.get(i));
+                remove(tr);
             }
         }
     }
@@ -589,8 +591,7 @@ class RecentTasks {
             }
             if (task.autoRemoveRecents && task.getTopActivity() == null) {
                 // This situation is broken, and we should just get rid of it now.
-                mTasks.remove(i);
-                notifyTaskRemoved(task, !TRIMMED);
+                remove(task);
                 Slog.w(TAG, "Removing auto-remove without activity: " + task);
                 continue;
             }
@@ -636,8 +637,7 @@ class RecentTasks {
                     if (app == NO_APPLICATION_INFO_TOKEN
                             || (app.flags & ApplicationInfo.FLAG_INSTALLED) == 0) {
                         // Doesn't exist any more! Good-bye.
-                        mTasks.remove(i);
-                        notifyTaskRemoved(task, !TRIMMED);
+                        remove(task);
                         Slog.w(TAG, "Removing no longer valid recent: " + task);
                         continue;
                     } else {
@@ -734,11 +734,21 @@ class RecentTasks {
      */
     ParceledListSlice<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum, int flags,
             boolean getTasksAllowed, boolean getDetailedTasks, int userId, int callingUid) {
+        return new ParceledListSlice<>(getRecentTasksImpl(maxNum, flags, getTasksAllowed,
+                getDetailedTasks, userId, callingUid));
+    }
+
+
+    /**
+     * @return the list of recent tasks for presentation.
+     */
+    ArrayList<ActivityManager.RecentTaskInfo> getRecentTasksImpl(int maxNum, int flags,
+            boolean getTasksAllowed, boolean getDetailedTasks, int userId, int callingUid) {
         final boolean withExcluded = (flags & RECENT_WITH_EXCLUDED) != 0;
 
         if (!mService.mAm.isUserRunning(userId, FLAG_AND_UNLOCKED)) {
             Slog.i(TAG, "user " + userId + " is still locked. Cannot load recents");
-            return ParceledListSlice.emptyList();
+            return new ArrayList<>();
         }
         loadUserRecentsLocked(userId);
 
@@ -789,7 +799,7 @@ class RecentTasks {
             if (i == 0
                     || withExcluded
                     || (tr.intent == null)
-                    || ((tr.intent.getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                    || ((tr.intent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
                     == 0)) {
                 if (!getTasksAllowed) {
                     // If the caller doesn't have the GET_TASKS permission, then only
@@ -826,7 +836,7 @@ class RecentTasks {
                 res.add(rti);
             }
         }
-        return new ParceledListSlice<>(res);
+        return res;
     }
 
     /**
@@ -1158,9 +1168,8 @@ class RecentTasks {
             case ACTIVITY_TYPE_ASSISTANT:
                 // Ignore assistant that chose to be excluded from Recents, even if it's a top
                 // task.
-                if ((task.getBaseIntent().getFlags()
-                        & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                        == Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) {
+                if ((task.getBaseIntent().getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                        == FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) {
                     return false;
                 }
         }
@@ -1192,8 +1201,8 @@ class RecentTasks {
     private boolean isInVisibleRange(TaskRecord task, int numVisibleTasks) {
         // Keep the last most task even if it is excluded from recents
         final boolean isExcludeFromRecents =
-                (task.getBaseIntent().getFlags() & Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                        == Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+                (task.getBaseIntent().getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                        == FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
         if (isExcludeFromRecents) {
             if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "\texcludeFromRecents=true");
             return numVisibleTasks == 1;
@@ -1511,6 +1520,7 @@ class RecentTasks {
             return;
         }
 
+        // Dump raw recent task list
         boolean printedAnything = false;
         boolean printedHeader = false;
         final int size = mTasks.size();
@@ -1530,6 +1540,30 @@ class RecentTasks {
             pw.println(tr);
             if (dumpAll) {
                 tr.dump(pw, "    ");
+            }
+        }
+
+        // Dump visible recent task list
+        if (mHasVisibleRecentTasks) {
+            // Reset the header flag for the next block
+            printedHeader = false;
+            ArrayList<ActivityManager.RecentTaskInfo> tasks = getRecentTasksImpl(Integer.MAX_VALUE,
+                    0, true /* getTasksAllowed */, false /* getDetailedTasks */,
+                    mService.getCurrentUserId(), SYSTEM_UID);
+            for (int i = 0; i < tasks.size(); i++) {
+                final ActivityManager.RecentTaskInfo taskInfo = tasks.get(i);
+                if (!printedHeader) {
+                    if (printedAnything) {
+                        // Separate from the last block if it printed
+                        pw.println();
+                    }
+                    pw.println("  Visible recent tasks (most recent first):");
+                    printedHeader = true;
+                    printedAnything = true;
+                }
+
+                pw.print("  * RecentTaskInfo #"); pw.print(i); pw.print(": ");
+                taskInfo.dump(pw, "    ");
             }
         }
 
