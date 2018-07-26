@@ -19,6 +19,8 @@ import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.MessageQueue;
 import com.android.server.hdmi.HdmiCecController.NativeWrapper;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Fake {@link NativeWrapper} useful for testing. */
 final class FakeNativeWrapper implements NativeWrapper {
@@ -41,7 +43,7 @@ final class FakeNativeWrapper implements NativeWrapper {
                 SendMessageResult.NACK,
             };
 
-    private HdmiCecMessage mResultMessage;
+    private final List<HdmiCecMessage> mResultMessages = new ArrayList<>();
 
     @Override
     public long nativeInit(HdmiCecController handler, MessageQueue messageQueue) {
@@ -54,7 +56,7 @@ final class FakeNativeWrapper implements NativeWrapper {
         if (body.length == 0) {
             return mPollAddressResponse[dstAddress];
         } else {
-            mResultMessage = HdmiCecMessageBuilder.of(srcAddress, dstAddress, body);
+            mResultMessages.add(HdmiCecMessageBuilder.of(srcAddress, dstAddress, body));
         }
         return SendMessageResult.SUCCESS;
     }
@@ -103,8 +105,15 @@ final class FakeNativeWrapper implements NativeWrapper {
         return false;
     }
 
-    public HdmiCecMessage getResultMessage() {
-        return mResultMessage;
+    public List<HdmiCecMessage> getResultMessages() {
+        return new ArrayList<>(mResultMessages);
+    }
+
+    public HdmiCecMessage getOnlyResultMessage() throws Exception {
+        if (mResultMessages.size() != 1) {
+            throw new Exception("There is not exactly one message");
+        }
+        return mResultMessages.get(0);
     }
 
     public void setPollAddressResponse(int logicalAddress, int response) {
