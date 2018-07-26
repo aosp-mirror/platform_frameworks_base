@@ -394,7 +394,8 @@ public class DisplayContentTests extends WindowTestsBase {
                 WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, mDisplayContent).mContainer;
         final Task task = createTaskInStack(alwaysOnTopStack, 0 /* userId */);
         alwaysOnTopStack.setAlwaysOnTop(true);
-        mDisplayContent.positionStackAt(POSITION_TOP, alwaysOnTopStack);
+        mDisplayContent.positionStackAt(POSITION_TOP, alwaysOnTopStack,
+                false /* includingParents */);
         assertTrue(alwaysOnTopStack.isAlwaysOnTop());
         // Ensure always on top state is synced to the children of the stack.
         assertTrue(alwaysOnTopStack.getTopChild().isAlwaysOnTop());
@@ -408,7 +409,8 @@ public class DisplayContentTests extends WindowTestsBase {
         final TaskStack anotherAlwaysOnTopStack = createStackControllerOnStackOnDisplay(
                 WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, mDisplayContent).mContainer;
         anotherAlwaysOnTopStack.setAlwaysOnTop(true);
-        mDisplayContent.positionStackAt(POSITION_TOP, anotherAlwaysOnTopStack);
+        mDisplayContent.positionStackAt(POSITION_TOP, anotherAlwaysOnTopStack,
+                false /* includingParents */);
         assertTrue(anotherAlwaysOnTopStack.isAlwaysOnTop());
         int topPosition = mDisplayContent.getStacks().size() - 1;
         // Ensure the new alwaysOnTop stack is put below the pinned stack, but on top of the
@@ -424,7 +426,8 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(nonAlwaysOnTopStack, mDisplayContent.getStacks().get(topPosition - 3));
 
         anotherAlwaysOnTopStack.setAlwaysOnTop(false);
-        mDisplayContent.positionStackAt(POSITION_TOP, anotherAlwaysOnTopStack);
+        mDisplayContent.positionStackAt(POSITION_TOP, anotherAlwaysOnTopStack,
+                false /* includingParents */);
         assertFalse(anotherAlwaysOnTopStack.isAlwaysOnTop());
         // Ensure, when always on top is turned off for a stack, the stack is put just below all
         // other always on top stacks.
