@@ -62,9 +62,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.eq;
@@ -85,7 +83,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.net.CaptivePortal;
 import android.net.ConnectivityManager;
@@ -114,7 +111,6 @@ import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.StringNetworkSpecifier;
 import android.net.UidRange;
-import android.net.VpnService;
 import android.net.captiveportal.CaptivePortalProbeResult;
 import android.net.metrics.IpConnectivityLog;
 import android.net.util.MultinetworkPolicyTracker;
@@ -135,7 +131,6 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -196,7 +191,13 @@ public class ConnectivityServiceTest {
     private static final String TAG = "ConnectivityServiceTest";
 
     private static final int TIMEOUT_MS = 500;
-    private static final int TEST_LINGER_DELAY_MS = 120;
+    private static final int TEST_LINGER_DELAY_MS = 250;
+    // Chosen to be less than the linger timeout. This ensures that we can distinguish between a
+    // LOST callback that arrives immediately and a LOST callback that arrives after the linger
+    // timeout. For this, our assertions should run fast enough to leave less than
+    // (mService.mLingerDelayMs - TEST_CALLBACK_TIMEOUT_MS) between the time callbacks are
+    // supposedly fired, and the time we call expectCallback.
+    private final static int TEST_CALLBACK_TIMEOUT_MS = 200;
 
     private static final String CLAT_PREFIX = "v4-";
     private static final String MOBILE_IFNAME = "test_rmnet_data0";
@@ -1463,13 +1464,6 @@ public class ConnectivityServiceTest {
      * received. assertNoCallback may be called at any time.
      */
     private class TestNetworkCallback extends NetworkCallback {
-        // Chosen to be less than the linger timeout. This ensures that we can distinguish
-        // between a LOST callback that arrives immediately and a LOST callback that arrives after
-        // the linger timeout. For this, our assertions should run fast enough to leave less than
-        // (mService.mLingerDelayMs - TIMEOUT_MS) between the time callbacks are supposedly fired,
-        // and the time we call expectCallback.
-        private final static int TIMEOUT_MS = 100;
-
         private final LinkedBlockingQueue<CallbackInfo> mCallbacks = new LinkedBlockingQueue<>();
         private Network mLastAvailableNetwork;
 
@@ -1554,11 +1548,11 @@ public class ConnectivityServiceTest {
         }
 
         CallbackInfo expectCallback(CallbackState state, MockNetworkAgent agent) {
-            return expectCallback(state, agent, TIMEOUT_MS);
+            return expectCallback(state, agent, TEST_CALLBACK_TIMEOUT_MS);
         }
 
         CallbackInfo expectCallbackLike(Predicate<CallbackInfo> fn) {
-            return expectCallbackLike(fn, TIMEOUT_MS);
+            return expectCallbackLike(fn, TEST_CALLBACK_TIMEOUT_MS);
         }
 
         CallbackInfo expectCallbackLike(Predicate<CallbackInfo> fn, int timeoutMs) {
@@ -1601,15 +1595,15 @@ public class ConnectivityServiceTest {
 
         // Expects the available callbacks (validated), plus onSuspended.
         void expectAvailableAndSuspendedCallbacks(MockNetworkAgent agent, boolean expectValidated) {
-            expectAvailableCallbacks(agent, true, expectValidated, TIMEOUT_MS);
+            expectAvailableCallbacks(agent, true, expectValidated, TEST_CALLBACK_TIMEOUT_MS);
         }
 
         void expectAvailableCallbacksValidated(MockNetworkAgent agent) {
-            expectAvailableCallbacks(agent, false, true, TIMEOUT_MS);
+            expectAvailableCallbacks(agent, false, true, TEST_CALLBACK_TIMEOUT_MS);
         }
 
         void expectAvailableCallbacksUnvalidated(MockNetworkAgent agent) {
-            expectAvailableCallbacks(agent, false, false, TIMEOUT_MS);
+            expectAvailableCallbacks(agent, false, false, TEST_CALLBACK_TIMEOUT_MS);
         }
 
         // Expects the available callbacks (where the onCapabilitiesChanged must contain the
@@ -1617,9 +1611,9 @@ public class ConnectivityServiceTest {
         // one we just sent.
         // TODO: this is likely a bug. Fix it and remove this method.
         void expectAvailableDoubleValidatedCallbacks(MockNetworkAgent agent) {
-            expectCallback(CallbackState.AVAILABLE, agent, TIMEOUT_MS);
+            expectCallback(CallbackState.AVAILABLE, agent, TEST_CALLBACK_TIMEOUT_MS);
             NetworkCapabilities nc1 = expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, agent);
-            expectCallback(CallbackState.LINK_PROPERTIES, agent, TIMEOUT_MS);
+            expectCallback(CallbackState.LINK_PROPERTIES, agent, TEST_CALLBACK_TIMEOUT_MS);
             NetworkCapabilities nc2 = expectCapabilitiesWith(NET_CAPABILITY_VALIDATED, agent);
             assertEquals(nc1, nc2);
         }
@@ -1633,7 +1627,7 @@ public class ConnectivityServiceTest {
         }
 
         NetworkCapabilities expectCapabilitiesWith(int capability, MockNetworkAgent agent) {
-            return expectCapabilitiesWith(capability, agent, TIMEOUT_MS);
+            return expectCapabilitiesWith(capability, agent, TEST_CALLBACK_TIMEOUT_MS);
         }
 
         NetworkCapabilities expectCapabilitiesWith(int capability, MockNetworkAgent agent,
@@ -1645,7 +1639,7 @@ public class ConnectivityServiceTest {
         }
 
         NetworkCapabilities expectCapabilitiesWithout(int capability, MockNetworkAgent agent) {
-            return expectCapabilitiesWithout(capability, agent, TIMEOUT_MS);
+            return expectCapabilitiesWithout(capability, agent, TEST_CALLBACK_TIMEOUT_MS);
         }
 
         NetworkCapabilities expectCapabilitiesWithout(int capability, MockNetworkAgent agent,
