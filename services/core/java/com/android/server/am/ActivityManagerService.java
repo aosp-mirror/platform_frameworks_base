@@ -11115,6 +11115,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
             }
             mOomAdjProfiler.dump(pw);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpBinderProxies(pw);
         }
     }
 
@@ -11276,10 +11281,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } else if ("binder-proxies".equals(cmd)) {
                 if (opti >= args.length) {
-                    dumpBinderProxyInterfaceCounts(pw,
-                            "Top proxy interface names held by SYSTEM");
-                    dumpBinderProxiesCounts(pw, BinderInternal.nGetBinderProxyPerUidCounts(),
-                            "Number of proxies per uid held by SYSTEM");
+                    dumpBinderProxies(pw);
                 } else {
                     String uid = args[opti];
                     opti++;
@@ -11674,7 +11676,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    boolean dumpBinderProxiesCounts(PrintWriter pw, SparseIntArray counts, String header) {
+    boolean dumpBinderProxiesCounts(PrintWriter pw, String header) {
+        SparseIntArray counts = BinderInternal.nGetBinderProxyPerUidCounts();
         if(counts != null) {
             pw.println(header);
             for (int i = 0; i < counts.size(); i++) {
@@ -11700,6 +11703,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             return true;
         }
         return false;
+    }
+
+    void dumpBinderProxies(PrintWriter pw) {
+        dumpBinderProxyInterfaceCounts(pw,
+                "Top proxy interface names held by SYSTEM");
+        dumpBinderProxiesCounts(pw,
+                "Counts of Binder Proxies held by SYSTEM");
     }
 
     @GuardedBy("this")
