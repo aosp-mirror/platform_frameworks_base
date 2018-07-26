@@ -88,7 +88,7 @@ public abstract class AbstractUptimePreferenceController extends AbstractPrefere
     }
 
     private void updateTimes() {
-        mUptime.setSummary(DateUtils.formatDuration(SystemClock.elapsedRealtime()));
+        mUptime.setSummary(DateUtils.formatElapsedTime(SystemClock.elapsedRealtime() / 1000));
     }
 
     private static class MyHandler extends Handler {
