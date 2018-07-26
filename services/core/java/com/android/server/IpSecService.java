@@ -24,6 +24,7 @@ import static android.system.OsConstants.AF_UNSPEC;
 import static android.system.OsConstants.EINVAL;
 import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.SOCK_DGRAM;
+
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.NonNull;
@@ -62,6 +63,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
+import libcore.io.IoUtils;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -72,8 +75,6 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-
-import libcore.io.IoUtils;
 
 /**
  * A service to manage multiple clients that want to access the IpSec API. The service is
@@ -1523,6 +1524,9 @@ public class IpSecService extends IIpSecService.Stub {
                 throw new IllegalArgumentException(
                         "Invalid IpSecTransform.mode: " + config.getMode());
         }
+
+        config.setMarkValue(0);
+        config.setMarkMask(0);
     }
 
     private static final String TUNNEL_OP = AppOpsManager.OPSTR_MANAGE_IPSEC_TUNNELS;
@@ -1740,8 +1744,14 @@ public class IpSecService extends IIpSecService.Stub {
                         : tunnelInterfaceInfo.getIkey();
 
         try {
-            c.setMarkValue(mark);
-            c.setMarkMask(0xffffffff);
+            // TODO: enable this when UPDSA supports updating marks. Adding kernel support upstream
+            //     (and backporting) would allow us to narrow the mark space, and ensure that the SA
+            //     and SPs have matching marks (as VTI are meant to be built).
+            // Currently update does nothing with marks. Leave empty (defaulting to 0) to ensure the
+            //     config matches the actual allocated resources in the kernel.
+            //
+            // c.setMarkValue(mark);
+            // c.setMarkMask(0xffffffff);
 
             if (direction == IpSecManager.DIRECTION_OUT) {
                 // Set output mark via underlying network (output only)
@@ -1758,7 +1768,7 @@ public class IpSecService extends IIpSecService.Stub {
                                     tunnelInterfaceInfo.getLocalAddress(),
                                     tunnelInterfaceInfo.getRemoteAddress(),
                                     transformInfo.getSpiRecord().getSpi(),
-                                    mark,
+                                    mark, // Must always set policy mark; ikey/okey for VTIs
                                     0xffffffff);
                 }
             }
