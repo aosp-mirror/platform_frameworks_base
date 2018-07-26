@@ -21,6 +21,7 @@ import static com.android.server.hdmi.Constants.USE_LAST_STATE_SYSTEM_AUDIO_CONT
 
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.AudioManager;
+import android.media.AudioSystem;
 import android.os.SystemProperties;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -44,6 +45,11 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     private boolean mSystemAudioControlFeatureEnabled;
 
     private boolean mTvSystemAudioModeSupport;
+
+    // Whether ARC is available or not. "true" means that ARC is established between TV and
+    // AVR as audio receiver.
+    @ServiceThreadOnly
+    private boolean mArcEstablished = false;
 
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
@@ -254,6 +260,39 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
             mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
         }
         return true;
+    }
+
+    @ServiceThreadOnly
+    void setArcStatus(boolean enabled) {
+        // TODO(shubang): add tests
+        assertRunOnServiceThread();
+
+        HdmiLogger.debug("Set Arc Status[old:%b new:%b]", mArcEstablished, enabled);
+        // 1. Enable/disable ARC circuit.
+        enableAudioReturnChannel(enabled);
+        // 2. Notify arc status to audio service.
+        notifyArcStatusToAudioService(enabled);
+        // 3. Update arc status;
+        mArcEstablished = enabled;
+    }
+
+    /**
+     * Switch hardware ARC circuit in the system.
+     */
+    @ServiceThreadOnly
+    private void enableAudioReturnChannel(boolean enabled) {
+        assertRunOnServiceThread();
+        mService.enableAudioReturnChannel(
+                SystemProperties.getInt(
+                        Constants.PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT, 0),
+                enabled);
+    }
+
+    private void notifyArcStatusToAudioService(boolean enabled) {
+        // Note that we don't set any name to ARC.
+        mService.getAudioManager().setWiredDeviceConnectionState(
+                AudioSystem.DEVICE_IN_HDMI,
+                enabled ? 1 : 0, "", "");
     }
 
     private void reportAudioStatus(HdmiCecMessage message) {
