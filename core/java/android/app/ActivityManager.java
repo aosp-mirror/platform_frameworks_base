@@ -2559,7 +2559,6 @@ public class ActivityManager {
         return clearApplicationUserData(mContext.getPackageName(), null);
     }
 
-
     /**
      * Permits an application to get the persistent URI permissions granted to another.
      *
@@ -2571,17 +2570,13 @@ public class ActivityManager {
      * @return list of granted URI permissions
      *
      * @hide
+     * @deprecated use {@link UriGrantsManager#getGrantedUriPermissions(String)} instead.
      */
+    @Deprecated
     public ParceledListSlice<GrantedUriPermission> getGrantedUriPermissions(
             @Nullable String packageName) {
-        try {
-            @SuppressWarnings("unchecked")
-            final ParceledListSlice<GrantedUriPermission> castedList = getService()
-                    .getGrantedUriPermissions(packageName, mContext.getUserId());
-            return castedList;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return ((UriGrantsManager) mContext.getSystemService(Context.URI_GRANTS_SERVICE))
+                .getGrantedUriPermissions(packageName);
     }
 
     /**
@@ -2592,14 +2587,12 @@ public class ActivityManager {
      * @param packageName application to clear its granted permissions
      *
      * @hide
+     * @deprecated use {@link UriGrantsManager#clearGrantedUriPermissions(String)} instead.
      */
+    @Deprecated
     public void clearGrantedUriPermissions(String packageName) {
-        try {
-            getService().clearGrantedUriPermissions(packageName,
-                    mContext.getUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        ((UriGrantsManager) mContext.getSystemService(Context.URI_GRANTS_SERVICE))
+                .clearGrantedUriPermissions(packageName);
     }
 
     /**

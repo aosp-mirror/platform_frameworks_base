@@ -44,6 +44,8 @@ import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
+import com.android.server.uri.NeededUriGrants;
+import com.android.server.uri.UriPermissionOwner;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -129,7 +131,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         final int id;
         final int callingId;
         final Intent intent;
-        final ActivityManagerService.NeededUriGrants neededGrants;
+        final NeededUriGrants neededGrants;
         long deliveredTime;
         int deliveryCount;
         int doneExecutingCount;
@@ -138,7 +140,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         String stringName;      // caching of toString
 
         StartItem(ServiceRecord _sr, boolean _taskRemoved, int _id, Intent _intent,
-                ActivityManagerService.NeededUriGrants _neededGrants, int _callingId) {
+                NeededUriGrants _neededGrants, int _callingId) {
             sr = _sr;
             taskRemoved = _taskRemoved;
             id = _id;
@@ -149,14 +151,14 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
         UriPermissionOwner getUriPermissionsLocked() {
             if (uriPermissions == null) {
-                uriPermissions = new UriPermissionOwner(sr.ams, this);
+                uriPermissions = new UriPermissionOwner(sr.ams.mUgmInternal, this);
             }
             return uriPermissions;
         }
 
         void removeUriPermissionsLocked() {
             if (uriPermissions != null) {
-                uriPermissions.removeUriPermissionsLocked();
+                uriPermissions.removeUriPermissions();
                 uriPermissions = null;
             }
         }

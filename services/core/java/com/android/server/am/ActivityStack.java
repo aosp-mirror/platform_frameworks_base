@@ -3368,7 +3368,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             String resultWho, int requestCode, int resultCode, Intent data) {
 
         if (callingUid > 0) {
-            mService.mAm.grantUriPermissionFromIntentLocked(callingUid, r.packageName,
+            mService.mUgmInternal.grantUriPermissionFromIntent(callingUid, r.packageName,
                     data, r.getUriPermissionsLocked(), r.userId);
         }
 
@@ -3682,7 +3682,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
             }
             if (r.info.applicationInfo.uid > 0) {
-                mService.mAm.grantUriPermissionFromIntentLocked(r.info.applicationInfo.uid,
+                mService.mUgmInternal.grantUriPermissionFromIntent(r.info.applicationInfo.uid,
                         resultTo.packageName, resultData,
                         resultTo.getUriPermissionsLocked(), resultTo.userId);
             }

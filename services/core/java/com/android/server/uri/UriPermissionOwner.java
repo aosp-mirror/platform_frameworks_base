@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,27 +11,30 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
-package com.android.server.am;
+package com.android.server.uri;
 
-import android.content.Intent;
+import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
+import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.server.am.UriPermissionOwnerProto;
 import com.google.android.collect.Sets;
 
 import java.io.PrintWriter;
 import java.util.Iterator;
 
-final class UriPermissionOwner {
-    final ActivityManagerService service;
-    final Object owner;
+public class UriPermissionOwner {
+    private final UriGrantsManagerInternal mService;
+    private final Object mOwner;
 
-    Binder externalToken;
+    private Binder externalToken;
 
     private ArraySet<UriPermission> mReadPerms;
     private ArraySet<UriPermission> mWritePerms;
@@ -42,12 +45,12 @@ final class UriPermissionOwner {
         }
     }
 
-    UriPermissionOwner(ActivityManagerService service, Object owner) {
-        this.service = service;
-        this.owner = owner;
+    public UriPermissionOwner(UriGrantsManagerInternal service, Object owner) {
+        mService = service;
+        mOwner = owner;
     }
 
-    Binder getExternalTokenLocked() {
+    public Binder getExternalToken() {
         if (externalToken == null) {
             externalToken = new ExternalToken();
         }
@@ -61,24 +64,22 @@ final class UriPermissionOwner {
         return null;
     }
 
-    void removeUriPermissionsLocked() {
-        removeUriPermissionsLocked(Intent.FLAG_GRANT_READ_URI_PERMISSION
-                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+    public void removeUriPermissions() {
+        removeUriPermissions(FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION);
     }
 
-    void removeUriPermissionsLocked(int mode) {
-        removeUriPermissionLocked(null, mode);
+    void removeUriPermissions(int mode) {
+        removeUriPermission(null, mode);
     }
 
-    void removeUriPermissionLocked(ActivityManagerService.GrantUri grantUri, int mode) {
-        if ((mode & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0
-                && mReadPerms != null) {
+    void removeUriPermission(GrantUri grantUri, int mode) {
+        if ((mode & FLAG_GRANT_READ_URI_PERMISSION) != 0 && mReadPerms != null) {
             Iterator<UriPermission> it = mReadPerms.iterator();
             while (it.hasNext()) {
                 UriPermission perm = it.next();
                 if (grantUri == null || grantUri.equals(perm.uri)) {
                     perm.removeReadOwner(this);
-                    service.removeUriPermissionIfNeededLocked(perm);
+                    mService.removeUriPermissionIfNeeded(perm);
                     it.remove();
                 }
             }
@@ -86,14 +87,14 @@ final class UriPermissionOwner {
                 mReadPerms = null;
             }
         }
-        if ((mode & Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0
+        if ((mode & FLAG_GRANT_WRITE_URI_PERMISSION) != 0
                 && mWritePerms != null) {
             Iterator<UriPermission> it = mWritePerms.iterator();
             while (it.hasNext()) {
                 UriPermission perm = it.next();
                 if (grantUri == null || grantUri.equals(perm.uri)) {
                     perm.removeWriteOwner(this);
-                    service.removeUriPermissionIfNeededLocked(perm);
+                    mService.removeUriPermissionIfNeeded(perm);
                     it.remove();
                 }
             }
@@ -142,7 +143,7 @@ final class UriPermissionOwner {
 
     public void writeToProto(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
-        proto.write(UriPermissionOwnerProto.OWNER, owner.toString());
+        proto.write(UriPermissionOwnerProto.OWNER, mOwner.toString());
         if (mReadPerms != null) {
             synchronized (mReadPerms) {
                 for (UriPermission p : mReadPerms) {
@@ -162,6 +163,6 @@ final class UriPermissionOwner {
 
     @Override
     public String toString() {
-        return owner.toString();
+        return mOwner.toString();
     }
 }

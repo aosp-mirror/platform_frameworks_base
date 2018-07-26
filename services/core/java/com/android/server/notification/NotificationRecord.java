@@ -70,6 +70,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Array;
@@ -96,6 +97,7 @@ public final class NotificationRecord {
     private static final int MAX_LOGTAG_LENGTH = 35;
     final StatusBarNotification sbn;
     IActivityManager mAm;
+    UriGrantsManagerInternal mUgmInternal;
     final int mTargetSdkVersion;
     final int mOriginalFlags;
     private final Context mContext;
@@ -182,6 +184,7 @@ public final class NotificationRecord {
         mTargetSdkVersion = LocalServices.getService(PackageManagerInternal.class)
                 .getPackageTargetSdkVersion(sbn.getPackageName());
         mAm = ActivityManager.getService();
+        mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mOriginalFlags = sbn.getNotification().flags;
         mRankingTimeMs = calculateRankingTimeMs(0L);
         mCreationTimeMs = sbn.getPostTime();
@@ -1107,7 +1110,7 @@ public final class NotificationRecord {
         final long ident = Binder.clearCallingIdentity();
         try {
             // This will throw SecurityException if caller can't grant
-            mAm.checkGrantUriPermission(sourceUid, null,
+            mUgmInternal.checkGrantUriPermission(sourceUid, null,
                     ContentProvider.getUriWithoutUserId(uri),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION,
                     ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)));
@@ -1116,8 +1119,6 @@ public final class NotificationRecord {
                 mGrantableUris = new ArraySet<>();
             }
             mGrantableUris.add(uri);
-        } catch (RemoteException ignored) {
-            // Ignored because we're in same process
         } catch (SecurityException e) {
             if (!userOverriddenUri) {
                 if (mTargetSdkVersion >= Build.VERSION_CODES.P) {

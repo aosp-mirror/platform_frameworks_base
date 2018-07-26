@@ -186,6 +186,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
 import com.android.server.AttributeCache.Entry;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.uri.UriPermissionOwner;
 import com.android.server.wm.AppWindowContainerController;
 import com.android.server.wm.AppWindowContainerListener;
 import com.android.server.wm.ConfigurationContainer;
@@ -1376,7 +1377,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     UriPermissionOwner getUriPermissionsLocked() {
         if (uriPermissions == null) {
-            uriPermissions = new UriPermissionOwner(service.mAm, this);
+            uriPermissions = new UriPermissionOwner(service.mUgmInternal, this);
         }
         return uriPermissions;
     }
@@ -1428,7 +1429,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      */
     final void deliverNewIntentLocked(int callingUid, Intent intent, String referrer) {
         // The activity now gets access to the data associated with this Intent.
-        service.mAm.grantUriPermissionFromIntentLocked(callingUid, packageName,
+        service.mUgmInternal.grantUriPermissionFromIntent(callingUid, packageName,
                 intent, getUriPermissionsLocked(), userId);
         final ReferrerIntent rintent = new ReferrerIntent(intent, referrer);
         boolean unsent = true;
@@ -1588,7 +1589,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     void removeUriPermissionsLocked() {
         if (uriPermissions != null) {
-            uriPermissions.removeUriPermissionsLocked();
+            uriPermissions.removeUriPermissions();
             uriPermissions = null;
         }
     }

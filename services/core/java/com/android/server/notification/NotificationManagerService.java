@@ -91,6 +91,7 @@ import android.app.AutomaticZenRule;
 import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
+import android.app.IUriGrantsManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
@@ -98,6 +99,7 @@ import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
+import android.app.UriGrantsManager;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.backup.BackupManager;
@@ -204,6 +206,7 @@ import com.android.server.notification.ManagedServices.ManagedServiceInfo;
 import com.android.server.notification.ManagedServices.UserProfiles;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import libcore.io.IoUtils;
@@ -318,6 +321,8 @@ public class NotificationManagerService extends SystemService {
     private ICompanionDeviceManager mCompanionManager;
     private AccessibilityManager mAccessibilityManager;
     private IDeviceIdleController mDeviceIdleController;
+    private IUriGrantsManager mUgm;
+    private UriGrantsManagerInternal mUgmInternal;
 
     final IBinder mForegroundToken = new Binder();
     private WorkerHandler mHandler;
@@ -1365,7 +1370,8 @@ public class NotificationManagerService extends SystemService {
             ICompanionDeviceManager companionManager, SnoozeHelper snoozeHelper,
             NotificationUsageStats usageStats, AtomicFile policyFile,
             ActivityManager activityManager, GroupHelper groupHelper, IActivityManager am,
-            UsageStatsManagerInternal appUsageStats, DevicePolicyManagerInternal dpm) {
+            UsageStatsManagerInternal appUsageStats, DevicePolicyManagerInternal dpm,
+            IUriGrantsManager ugm, UriGrantsManagerInternal ugmInternal) {
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
                 Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
@@ -1374,6 +1380,8 @@ public class NotificationManagerService extends SystemService {
         mAccessibilityManager =
                 (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
         mAm = am;
+        mUgm = ugm;
+        mUgmInternal = ugmInternal;
         mPackageManager = packageManager;
         mPackageManagerClient = packageManagerClient;
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
@@ -1528,7 +1536,9 @@ public class NotificationManagerService extends SystemService {
                 (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE),
                 getGroupHelper(), ActivityManager.getService(),
                 LocalServices.getService(UsageStatsManagerInternal.class),
-                LocalServices.getService(DevicePolicyManagerInternal.class));
+                LocalServices.getService(DevicePolicyManagerInternal.class),
+                UriGrantsManager.getService(),
+                LocalServices.getService(UriGrantsManagerInternal.class));
 
         // register for various Intents
         IntentFilter filter = new IntentFilter();
@@ -5620,12 +5630,8 @@ public class NotificationManagerService extends SystemService {
 
         // If we have Uris to grant, but no owner yet, go create one
         if (newUris != null && permissionOwner == null) {
-            try {
-                if (DBG) Slog.d(TAG, key + ": creating owner");
-                permissionOwner = mAm.newUriPermissionOwner("NOTIF:" + key);
-            } catch (RemoteException ignored) {
-                // Ignored because we're in same process
-            }
+            if (DBG) Slog.d(TAG, key + ": creating owner");
+            permissionOwner = mUgmInternal.newUriPermissionOwner("NOTIF:" + key);
         }
 
         // If we have no Uris to grant, but an existing owner, go destroy it
@@ -5633,11 +5639,9 @@ public class NotificationManagerService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 if (DBG) Slog.d(TAG, key + ": destroying owner");
-                mAm.revokeUriPermissionFromOwner(permissionOwner, null, ~0,
+                mUgmInternal.revokeUriPermissionFromOwner(permissionOwner, null, ~0,
                         UserHandle.getUserId(oldRecord.getUid()));
                 permissionOwner = null;
-            } catch (RemoteException ignored) {
-                // Ignored because we're in same process
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -5677,7 +5681,7 @@ public class NotificationManagerService extends SystemService {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            mAm.grantUriPermissionFromOwner(owner, sourceUid, targetPkg,
+            mUgm.grantUriPermissionFromOwner(owner, sourceUid, targetPkg,
                     ContentProvider.getUriWithoutUserId(uri),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION,
                     ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)),
@@ -5694,12 +5698,11 @@ public class NotificationManagerService extends SystemService {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            mAm.revokeUriPermissionFromOwner(owner,
+            mUgmInternal.revokeUriPermissionFromOwner(
+                    owner,
                     ContentProvider.getUriWithoutUserId(uri),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION,
                     ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)));
-        } catch (RemoteException ignored) {
-            // Ignored because we're in same process
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

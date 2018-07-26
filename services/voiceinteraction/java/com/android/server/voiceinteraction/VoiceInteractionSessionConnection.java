@@ -30,6 +30,7 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.UriGrantsManager;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.content.ClipData;
@@ -62,6 +63,7 @@ import com.android.server.LocalServices;
 import com.android.server.am.AssistDataRequester;
 import com.android.server.am.AssistDataRequester.AssistDataRequesterCallbacks;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -82,6 +84,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
     final int mCallingUid;
     final Handler mHandler;
     final IActivityManager mAm;
+    final UriGrantsManagerInternal mUgmInternal;
     final IWindowManager mIWindowManager;
     final AppOpsManager mAppOps;
     final IBinder mPermissionOwner;
@@ -141,19 +144,15 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         mCallingUid = callingUid;
         mHandler = handler;
         mAm = ActivityManager.getService();
+        mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mAppOps = context.getSystemService(AppOpsManager.class);
         mAssistDataRequester = new AssistDataRequester(mContext, mIWindowManager,
                 (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE),
                 this, mLock, OP_ASSIST_STRUCTURE, OP_ASSIST_SCREENSHOT);
-        IBinder permOwner = null;
-        try {
-            permOwner = mAm.newUriPermissionOwner("voicesession:"
+        final IBinder permOwner = mUgmInternal.newUriPermissionOwner("voicesession:"
                     + component.flattenToShortString());
-        } catch (RemoteException e) {
-            Slog.w("voicesession", "AM dead", e);
-        }
         mPermissionOwner = permOwner;
         mBindIntent = new Intent(VoiceInteractionService.SERVICE_INTERFACE);
         mBindIntent.setComponent(mSessionComponentName);
@@ -303,13 +302,14 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         long ident = Binder.clearCallingIdentity();
         try {
             // This will throw SecurityException for us.
-            mAm.checkGrantUriPermission(srcUid, null, ContentProvider.getUriWithoutUserId(uri),
-                    mode, ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(srcUid)));
+            mUgmInternal.checkGrantUriPermission(srcUid, null,
+                    ContentProvider.getUriWithoutUserId(uri), mode,
+                    ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(srcUid)));
             // No security exception, do the grant.
             int sourceUserId = ContentProvider.getUserIdFromUri(uri, mUser);
             uri = ContentProvider.getUriWithoutUserId(uri);
-            mAm.grantUriPermissionFromOwner(mPermissionOwner, srcUid, destPkg,
-                    uri, FLAG_GRANT_READ_URI_PERMISSION, sourceUserId, mUser);
+            UriGrantsManager.getService().grantUriPermissionFromOwner(mPermissionOwner, srcUid,
+                    destPkg, uri, FLAG_GRANT_READ_URI_PERMISSION, sourceUserId, mUser);
         } catch (RemoteException e) {
         } catch (SecurityException e) {
             Slog.w(TAG, "Can't propagate permission", e);
@@ -352,12 +352,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
                     } catch (RemoteException e) {
                     }
                 }
-                try {
-                    mAm.revokeUriPermissionFromOwner(mPermissionOwner, null,
-                            FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION,
-                            mUser);
-                } catch (RemoteException e) {
-                }
+                mUgmInternal.revokeUriPermissionFromOwner(mPermissionOwner, null,
+                        FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION, mUser);
                 if (mSession != null) {
                     try {
                         ActivityTaskManager.getService().finishVoiceTask(mSession);

@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.app.UriGrantsManager;
 import android.content.ClipData;
 import android.net.Uri;
 import android.os.Binder;
@@ -25,6 +26,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.android.internal.view.IDragAndDropPermissions;
+import com.android.server.LocalServices;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import java.util.ArrayList;
 
@@ -72,7 +75,7 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         long origId = Binder.clearCallingIdentity();
         try {
             for (int i = 0; i < mUris.size(); i++) {
-                ActivityManager.getService().grantUriPermissionFromOwner(
+                UriGrantsManager.getService().grantUriPermissionFromOwner(
                         permissionOwner, mSourceUid, mTargetPackage, mUris.get(i), mMode,
                         mSourceUserId, mTargetUserId);
             }
@@ -86,7 +89,8 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
         if (mActivityToken != null || mPermissionOwnerToken != null) {
             return;
         }
-        mPermissionOwnerToken = ActivityManager.getService().newUriPermissionOwner("drop");
+        mPermissionOwnerToken = LocalServices.getService(UriGrantsManagerInternal.class)
+                .newUriPermissionOwner("drop");
         mTransientToken = transientToken;
         mTransientToken.linkToDeath(this, 0);
 
@@ -117,9 +121,9 @@ class DragAndDropPermissionsHandler extends IDragAndDropPermissions.Stub
             mTransientToken = null;
         }
 
+        UriGrantsManagerInternal ugm = LocalServices.getService(UriGrantsManagerInternal.class);
         for (int i = 0; i < mUris.size(); ++i) {
-            ActivityManager.getService().revokeUriPermissionFromOwner(
-                    permissionOwner, mUris.get(i), mMode, mSourceUserId);
+            ugm.revokeUriPermissionFromOwner(permissionOwner, mUris.get(i), mMode, mSourceUserId);
         }
     }
 
