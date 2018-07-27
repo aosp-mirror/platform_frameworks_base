@@ -43,7 +43,7 @@
     <string name="battery_low_why" msgid="4553600287639198111">"Indstillinger"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Vil du aktivere Batterisparefunktion?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Aktivér"</string>
-    <string name="battery_saver_start_action" msgid="8187820911065797519">"Aktivér Batterisparefunktion"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"Aktivér batterisparefunktion"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Indstillinger"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Automatisk skærmrotation"</string>
@@ -431,7 +431,7 @@
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Fjern"</string>
     <string name="battery_saver_notification_title" msgid="8614079794522291840">"Batterisparefunktion er aktiveret"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reducerer ydeevne og baggrundsdata"</string>
-    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Deaktiver Batterisparefunktion"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Deaktiver batterisparefunktion"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> vil begynde at optage alt, hvad der vises på din skærm."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Vis ikke igen"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Ryd alt"</string>
@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Vil du skjule <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Den vises igen, næste gang du aktiverer den i indstillingerne."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Skjul"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Du bruger din arbejdsprofil"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Ring op"</string>
     <string name="stream_system" msgid="7493299064422163147">"System"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Ring"</string>
