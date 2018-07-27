@@ -44,7 +44,7 @@ LOCAL_JACK_FLAGS := -D jack.dex.output.policy=minimal-multidex \
 include $(BUILD_PACKAGE)
 
 ifndef LOCAL_JACK_ENABLED
-$(mainDexList): $(full_classes_proguard_jar) | $(MAINDEXCLASSES)
+$(mainDexList): $(full_classes_pre_proguard_jar) | $(MAINDEXCLASSES)
 	$(hide) mkdir -p $(dir $@)
 	$(MAINDEXCLASSES) $< 1>$@
 	echo "com/android/multidexlegacyandexception/Test.class" >> $@
