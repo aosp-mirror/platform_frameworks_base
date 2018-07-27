@@ -21,7 +21,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Paint;
-import android.text.AutoGrowArray.FloatArray;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
 import android.text.style.LineHeightSpan;
@@ -31,9 +30,6 @@ import android.util.Pools.SynchronizedPool;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
-
-import dalvik.annotation.optimization.CriticalNative;
-import dalvik.annotation.optimization.FastNative;
 
 import java.util.Arrays;
 
@@ -57,7 +53,7 @@ public class StaticLayout extends Layout {
      *
      *   - Create MeasuredParagraph by MeasuredParagraph.buildForStaticLayout which measures in
      *     native.
-     *   - Run nComputeLineBreaks() to obtain line breaks for the paragraph.
+     *   - Run NativeLineBreaker.computeLineBreaks() to obtain line breaks for the paragraph.
      *
      * After all paragraphs, call finish() to release expensive buffers.
      */
@@ -586,8 +582,7 @@ public class StaticLayout extends Layout {
         float ellipsizedWidth = b.mEllipsizedWidth;
         TextUtils.TruncateAt ellipsize = b.mEllipsize;
         final boolean addLastLineSpacing = b.mAddLastLineLineSpacing;
-        LineBreaks lineBreaks = new LineBreaks();  // TODO: move to builder to avoid allocation costs
-        FloatArray widths = new FloatArray();
+        NativeLineBreaker.LineBreaks lineBreaks = new NativeLineBreaker.LineBreaks();
 
         mLineCount = 0;
         mEllipsized = false;
@@ -615,7 +610,7 @@ public class StaticLayout extends Layout {
             indents = null;
         }
 
-        final long nativePtr = nInit(
+        final NativeLineBreaker lineBreaker = new NativeLineBreaker(
                 b.mBreakStrategy, b.mHyphenationFrequency,
                 // TODO: Support more justification mode, e.g. letter spacing, stretching.
                 b.mJustificationMode != Layout.JUSTIFICATION_MODE_NONE,
@@ -639,243 +634,219 @@ public class StaticLayout extends Layout {
                     bufEnd, false /* computeLayout */);
         }
 
-        try {
-            for (int paraIndex = 0; paraIndex < paragraphInfo.length; paraIndex++) {
-                final int paraStart = paraIndex == 0
-                        ? bufStart : paragraphInfo[paraIndex - 1].paragraphEnd;
-                final int paraEnd = paragraphInfo[paraIndex].paragraphEnd;
+        for (int paraIndex = 0; paraIndex < paragraphInfo.length; paraIndex++) {
+            final int paraStart = paraIndex == 0
+                    ? bufStart : paragraphInfo[paraIndex - 1].paragraphEnd;
+            final int paraEnd = paragraphInfo[paraIndex].paragraphEnd;
 
-                int firstWidthLineCount = 1;
-                int firstWidth = outerWidth;
-                int restWidth = outerWidth;
+            int firstWidthLineCount = 1;
+            int firstWidth = outerWidth;
+            int restWidth = outerWidth;
 
-                LineHeightSpan[] chooseHt = null;
+            LineHeightSpan[] chooseHt = null;
+            if (spanned != null) {
+                LeadingMarginSpan[] sp = getParagraphSpans(spanned, paraStart, paraEnd,
+                        LeadingMarginSpan.class);
+                for (int i = 0; i < sp.length; i++) {
+                    LeadingMarginSpan lms = sp[i];
+                    firstWidth -= sp[i].getLeadingMargin(true);
+                    restWidth -= sp[i].getLeadingMargin(false);
 
-                if (spanned != null) {
-                    LeadingMarginSpan[] sp = getParagraphSpans(spanned, paraStart, paraEnd,
-                            LeadingMarginSpan.class);
-                    for (int i = 0; i < sp.length; i++) {
-                        LeadingMarginSpan lms = sp[i];
-                        firstWidth -= sp[i].getLeadingMargin(true);
-                        restWidth -= sp[i].getLeadingMargin(false);
+                    // LeadingMarginSpan2 is odd.  The count affects all
+                    // leading margin spans, not just this particular one
+                    if (lms instanceof LeadingMarginSpan2) {
+                        LeadingMarginSpan2 lms2 = (LeadingMarginSpan2) lms;
+                        firstWidthLineCount = Math.max(firstWidthLineCount,
+                                lms2.getLeadingMarginLineCount());
+                    }
+                }
 
-                        // LeadingMarginSpan2 is odd.  The count affects all
-                        // leading margin spans, not just this particular one
-                        if (lms instanceof LeadingMarginSpan2) {
-                            LeadingMarginSpan2 lms2 = (LeadingMarginSpan2) lms;
-                            firstWidthLineCount = Math.max(firstWidthLineCount,
-                                    lms2.getLeadingMarginLineCount());
-                        }
+                chooseHt = getParagraphSpans(spanned, paraStart, paraEnd, LineHeightSpan.class);
+
+                if (chooseHt.length == 0) {
+                    chooseHt = null; // So that out() would not assume it has any contents
+                } else {
+                    if (chooseHtv == null || chooseHtv.length < chooseHt.length) {
+                        chooseHtv = ArrayUtils.newUnpaddedIntArray(chooseHt.length);
                     }
 
-                    chooseHt = getParagraphSpans(spanned, paraStart, paraEnd, LineHeightSpan.class);
+                    for (int i = 0; i < chooseHt.length; i++) {
+                        int o = spanned.getSpanStart(chooseHt[i]);
 
-                    if (chooseHt.length == 0) {
-                        chooseHt = null; // So that out() would not assume it has any contents
+                        if (o < paraStart) {
+                            // starts in this layout, before the
+                            // current paragraph
+
+                            chooseHtv[i] = getLineTop(getLineForOffset(o));
+                        } else {
+                            // starts in this paragraph
+
+                            chooseHtv[i] = v;
+                        }
+                    }
+                }
+            }
+            // tab stop locations
+            int[] variableTabStops = null;
+            if (spanned != null) {
+                TabStopSpan[] spans = getParagraphSpans(spanned, paraStart,
+                        paraEnd, TabStopSpan.class);
+                if (spans.length > 0) {
+                    int[] stops = new int[spans.length];
+                    for (int i = 0; i < spans.length; i++) {
+                        stops[i] = spans[i].getTabStop();
+                    }
+                    Arrays.sort(stops, 0, stops.length);
+                    variableTabStops = stops;
+                }
+            }
+
+            final MeasuredParagraph measuredPara = paragraphInfo[paraIndex].measured;
+            final char[] chs = measuredPara.getChars();
+            final int[] spanEndCache = measuredPara.getSpanEndCache().getRawArray();
+            final int[] fmCache = measuredPara.getFontMetrics().getRawArray();
+            int breakCount = lineBreaker.computeLineBreaks(
+                    measuredPara.getChars(),
+                    measuredPara.getNativeMeasuredParagraph(),
+                    paraEnd - paraStart,
+                    firstWidth,
+                    firstWidthLineCount,
+                    restWidth,
+                    variableTabStops,
+                    TAB_INCREMENT,
+                    mLineCount,
+                    lineBreaks);
+
+            final int[] breaks = lineBreaks.breaks;
+            final float[] lineWidths = lineBreaks.widths;
+            final float[] ascents = lineBreaks.ascents;
+            final float[] descents = lineBreaks.descents;
+            final int[] flags = lineBreaks.flags;
+
+            final int remainingLineCount = mMaximumVisibleLineCount - mLineCount;
+            final boolean ellipsisMayBeApplied = ellipsize != null
+                    && (ellipsize == TextUtils.TruncateAt.END
+                        || (mMaximumVisibleLineCount == 1
+                                && ellipsize != TextUtils.TruncateAt.MARQUEE));
+            if (0 < remainingLineCount && remainingLineCount < breakCount
+                    && ellipsisMayBeApplied) {
+                // Calculate width
+                float width = 0;
+                int flag = 0;  // XXX May need to also have starting hyphen edit
+                for (int i = remainingLineCount - 1; i < breakCount; i++) {
+                    if (i == breakCount - 1) {
+                        width += lineWidths[i];
                     } else {
-                        if (chooseHtv == null || chooseHtv.length < chooseHt.length) {
-                            chooseHtv = ArrayUtils.newUnpaddedIntArray(chooseHt.length);
-                        }
-
-                        for (int i = 0; i < chooseHt.length; i++) {
-                            int o = spanned.getSpanStart(chooseHt[i]);
-
-                            if (o < paraStart) {
-                                // starts in this layout, before the
-                                // current paragraph
-
-                                chooseHtv[i] = getLineTop(getLineForOffset(o));
-                            } else {
-                                // starts in this paragraph
-
-                                chooseHtv[i] = v;
-                            }
+                        for (int j = (i == 0 ? 0 : breaks[i - 1]); j < breaks[i]; j++) {
+                            width += measuredPara.getCharWidthAt(j - paraStart);
                         }
                     }
+                    flag |= flags[i] & TAB_MASK;
+                }
+                // Treat the last line and overflowed lines as a single line.
+                breaks[remainingLineCount - 1] = breaks[breakCount - 1];
+                lineWidths[remainingLineCount - 1] = width;
+                flags[remainingLineCount - 1] = flag;
+
+                breakCount = remainingLineCount;
+            }
+
+            // here is the offset of the starting character of the line we are currently
+            // measuring
+            int here = paraStart;
+
+            int fmTop = 0, fmBottom = 0, fmAscent = 0, fmDescent = 0;
+            int fmCacheIndex = 0;
+            int spanEndCacheIndex = 0;
+            int breakIndex = 0;
+            for (int spanStart = paraStart, spanEnd; spanStart < paraEnd; spanStart = spanEnd) {
+                // retrieve end of span
+                spanEnd = spanEndCache[spanEndCacheIndex++];
+
+                // retrieve cached metrics, order matches above
+                fm.top = fmCache[fmCacheIndex * 4 + 0];
+                fm.bottom = fmCache[fmCacheIndex * 4 + 1];
+                fm.ascent = fmCache[fmCacheIndex * 4 + 2];
+                fm.descent = fmCache[fmCacheIndex * 4 + 3];
+                fmCacheIndex++;
+
+                if (fm.top < fmTop) {
+                    fmTop = fm.top;
+                }
+                if (fm.ascent < fmAscent) {
+                    fmAscent = fm.ascent;
+                }
+                if (fm.descent > fmDescent) {
+                    fmDescent = fm.descent;
+                }
+                if (fm.bottom > fmBottom) {
+                    fmBottom = fm.bottom;
                 }
 
-                // tab stop locations
-                int[] variableTabStops = null;
-                if (spanned != null) {
-                    TabStopSpan[] spans = getParagraphSpans(spanned, paraStart,
-                            paraEnd, TabStopSpan.class);
-                    if (spans.length > 0) {
-                        int[] stops = new int[spans.length];
-                        for (int i = 0; i < spans.length; i++) {
-                            stops[i] = spans[i].getTabStop();
-                        }
-                        Arrays.sort(stops, 0, stops.length);
-                        variableTabStops = stops;
-                    }
+                // skip breaks ending before current span range
+                while (breakIndex < breakCount && paraStart + breaks[breakIndex] < spanStart) {
+                    breakIndex++;
                 }
 
-                final MeasuredParagraph measuredPara = paragraphInfo[paraIndex].measured;
-                final char[] chs = measuredPara.getChars();
-                final int[] spanEndCache = measuredPara.getSpanEndCache().getRawArray();
-                final int[] fmCache = measuredPara.getFontMetrics().getRawArray();
-                // TODO: Stop keeping duplicated width copy in native and Java.
-                widths.resize(chs.length);
+                while (breakIndex < breakCount && paraStart + breaks[breakIndex] <= spanEnd) {
+                    int endPos = paraStart + breaks[breakIndex];
 
-                // measurement has to be done before performing line breaking
-                // but we don't want to recompute fontmetrics or span ranges the
-                // second time, so we cache those and then use those stored values
+                    boolean moreChars = (endPos < bufEnd);
 
-                int breakCount = nComputeLineBreaks(
-                        nativePtr,
+                    final int ascent = fallbackLineSpacing
+                            ? Math.min(fmAscent, Math.round(ascents[breakIndex]))
+                            : fmAscent;
+                    final int descent = fallbackLineSpacing
+                            ? Math.max(fmDescent, Math.round(descents[breakIndex]))
+                            : fmDescent;
 
-                        // Inputs
-                        chs,
-                        measuredPara.getNativePtr(),
-                        paraEnd - paraStart,
-                        firstWidth,
-                        firstWidthLineCount,
-                        restWidth,
-                        variableTabStops,
-                        TAB_INCREMENT,
-                        mLineCount,
+                    v = out(source, here, endPos,
+                            ascent, descent, fmTop, fmBottom,
+                            v, spacingmult, spacingadd, chooseHt, chooseHtv, fm,
+                            flags[breakIndex], needMultiply, measuredPara, bufEnd,
+                            includepad, trackpad, addLastLineSpacing, chs,
+                            paraStart, ellipsize, ellipsizedWidth, lineWidths[breakIndex],
+                            paint, moreChars);
 
-                        // Outputs
-                        lineBreaks,
-                        lineBreaks.breaks.length,
-                        lineBreaks.breaks,
-                        lineBreaks.widths,
-                        lineBreaks.ascents,
-                        lineBreaks.descents,
-                        lineBreaks.flags,
-                        widths.getRawArray());
-
-                final int[] breaks = lineBreaks.breaks;
-                final float[] lineWidths = lineBreaks.widths;
-                final float[] ascents = lineBreaks.ascents;
-                final float[] descents = lineBreaks.descents;
-                final int[] flags = lineBreaks.flags;
-
-                final int remainingLineCount = mMaximumVisibleLineCount - mLineCount;
-                final boolean ellipsisMayBeApplied = ellipsize != null
-                        && (ellipsize == TextUtils.TruncateAt.END
-                            || (mMaximumVisibleLineCount == 1
-                                    && ellipsize != TextUtils.TruncateAt.MARQUEE));
-                if (0 < remainingLineCount && remainingLineCount < breakCount
-                        && ellipsisMayBeApplied) {
-                    // Calculate width and flag.
-                    float width = 0;
-                    int flag = 0; // XXX May need to also have starting hyphen edit
-                    for (int i = remainingLineCount - 1; i < breakCount; i++) {
-                        if (i == breakCount - 1) {
-                            width += lineWidths[i];
-                        } else {
-                            for (int j = (i == 0 ? 0 : breaks[i - 1]); j < breaks[i]; j++) {
-                                width += widths.get(j);
-                            }
-                        }
-                        flag |= flags[i] & TAB_MASK;
-                    }
-                    // Treat the last line and overflowed lines as a single line.
-                    breaks[remainingLineCount - 1] = breaks[breakCount - 1];
-                    lineWidths[remainingLineCount - 1] = width;
-                    flags[remainingLineCount - 1] = flag;
-
-                    breakCount = remainingLineCount;
-                }
-
-                // here is the offset of the starting character of the line we are currently
-                // measuring
-                int here = paraStart;
-
-                int fmTop = 0, fmBottom = 0, fmAscent = 0, fmDescent = 0;
-                int fmCacheIndex = 0;
-                int spanEndCacheIndex = 0;
-                int breakIndex = 0;
-                for (int spanStart = paraStart, spanEnd; spanStart < paraEnd; spanStart = spanEnd) {
-                    // retrieve end of span
-                    spanEnd = spanEndCache[spanEndCacheIndex++];
-
-                    // retrieve cached metrics, order matches above
-                    fm.top = fmCache[fmCacheIndex * 4 + 0];
-                    fm.bottom = fmCache[fmCacheIndex * 4 + 1];
-                    fm.ascent = fmCache[fmCacheIndex * 4 + 2];
-                    fm.descent = fmCache[fmCacheIndex * 4 + 3];
-                    fmCacheIndex++;
-
-                    if (fm.top < fmTop) {
+                    if (endPos < spanEnd) {
+                        // preserve metrics for current span
                         fmTop = fm.top;
-                    }
-                    if (fm.ascent < fmAscent) {
-                        fmAscent = fm.ascent;
-                    }
-                    if (fm.descent > fmDescent) {
-                        fmDescent = fm.descent;
-                    }
-                    if (fm.bottom > fmBottom) {
                         fmBottom = fm.bottom;
+                        fmAscent = fm.ascent;
+                        fmDescent = fm.descent;
+                    } else {
+                        fmTop = fmBottom = fmAscent = fmDescent = 0;
                     }
 
-                    // skip breaks ending before current span range
-                    while (breakIndex < breakCount && paraStart + breaks[breakIndex] < spanStart) {
-                        breakIndex++;
+                    here = endPos;
+                    breakIndex++;
+
+                    if (mLineCount >= mMaximumVisibleLineCount && mEllipsized) {
+                        return;
                     }
-
-                    while (breakIndex < breakCount && paraStart + breaks[breakIndex] <= spanEnd) {
-                        int endPos = paraStart + breaks[breakIndex];
-
-                        boolean moreChars = (endPos < bufEnd);
-
-                        final int ascent = fallbackLineSpacing
-                                ? Math.min(fmAscent, Math.round(ascents[breakIndex]))
-                                : fmAscent;
-                        final int descent = fallbackLineSpacing
-                                ? Math.max(fmDescent, Math.round(descents[breakIndex]))
-                                : fmDescent;
-                        v = out(source, here, endPos,
-                                ascent, descent, fmTop, fmBottom,
-                                v, spacingmult, spacingadd, chooseHt, chooseHtv, fm,
-                                flags[breakIndex], needMultiply, measuredPara, bufEnd,
-                                includepad, trackpad, addLastLineSpacing, chs, widths.getRawArray(),
-                                paraStart, ellipsize, ellipsizedWidth, lineWidths[breakIndex],
-                                paint, moreChars);
-
-                        if (endPos < spanEnd) {
-                            // preserve metrics for current span
-                            fmTop = fm.top;
-                            fmBottom = fm.bottom;
-                            fmAscent = fm.ascent;
-                            fmDescent = fm.descent;
-                        } else {
-                            fmTop = fmBottom = fmAscent = fmDescent = 0;
-                        }
-
-                        here = endPos;
-                        breakIndex++;
-
-                        if (mLineCount >= mMaximumVisibleLineCount && mEllipsized) {
-                            return;
-                        }
-                    }
-                }
-
-                if (paraEnd == bufEnd) {
-                    break;
                 }
             }
 
-            if ((bufEnd == bufStart || source.charAt(bufEnd - 1) == CHAR_NEW_LINE)
-                    && mLineCount < mMaximumVisibleLineCount) {
-                final MeasuredParagraph measuredPara =
-                        MeasuredParagraph.buildForBidi(source, bufEnd, bufEnd, textDir, null);
-                paint.getFontMetricsInt(fm);
-                v = out(source,
-                        bufEnd, bufEnd, fm.ascent, fm.descent,
-                        fm.top, fm.bottom,
-                        v,
-                        spacingmult, spacingadd, null,
-                        null, fm, 0,
-                        needMultiply, measuredPara, bufEnd,
-                        includepad, trackpad, addLastLineSpacing, null,
-                        null, bufStart, ellipsize,
-                        ellipsizedWidth, 0, paint, false);
+            if (paraEnd == bufEnd) {
+                break;
             }
-        } finally {
-            nFinish(nativePtr);
+        }
+
+        if ((bufEnd == bufStart || source.charAt(bufEnd - 1) == CHAR_NEW_LINE)
+                && mLineCount < mMaximumVisibleLineCount) {
+            final MeasuredParagraph measuredPara =
+                    MeasuredParagraph.buildForBidi(source, bufEnd, bufEnd, textDir, null);
+            paint.getFontMetricsInt(fm);
+            v = out(source,
+                    bufEnd, bufEnd, fm.ascent, fm.descent,
+                    fm.top, fm.bottom,
+                    v,
+                    spacingmult, spacingadd, null,
+                    null, fm, 0,
+                    needMultiply, measuredPara, bufEnd,
+                    includepad, trackpad, addLastLineSpacing, null,
+                    bufStart, ellipsize,
+                    ellipsizedWidth, 0, paint, false);
         }
     }
 
@@ -884,7 +855,7 @@ public class StaticLayout extends Layout {
             final LineHeightSpan[] chooseHt, final int[] chooseHtv, final Paint.FontMetricsInt fm,
             final int flags, final boolean needMultiply, @NonNull final MeasuredParagraph measured,
             final int bufEnd, final boolean includePad, final boolean trackPad,
-            final boolean addLastLineLineSpacing, final char[] chs, final float[] widths,
+            final boolean addLastLineLineSpacing, final char[] chs,
             final int widthStart, final TextUtils.TruncateAt ellipsize, final float ellipsisWidth,
             final float textWidth, final TextPaint paint, final boolean moreChars) {
         final int j = mLineCount;
@@ -942,7 +913,7 @@ public class StaticLayout extends Layout {
                     (!firstLine && (currentLineIsTheLastVisibleOne || !moreChars) &&
                             ellipsize == TextUtils.TruncateAt.END);
             if (doEllipsis) {
-                calculateEllipsis(start, end, widths, widthStart,
+                calculateEllipsis(start, end, measured, widthStart,
                         ellipsisWidth, ellipsize, j,
                         textWidth, paint, forceEllipsis);
             }
@@ -1026,7 +997,7 @@ public class StaticLayout extends Layout {
     }
 
     private void calculateEllipsis(int lineStart, int lineEnd,
-                                   float[] widths, int widthStart,
+                                   MeasuredParagraph measured, int widthStart,
                                    float avail, TextUtils.TruncateAt where,
                                    int line, float textWidth, TextPaint paint,
                                    boolean forceEllipsis) {
@@ -1050,9 +1021,10 @@ public class StaticLayout extends Layout {
                 int i;
 
                 for (i = len; i > 0; i--) {
-                    float w = widths[i - 1 + lineStart - widthStart];
+                    float w = measured.getCharWidthAt(i - 1 + lineStart - widthStart);
                     if (w + sum + ellipsisWidth > avail) {
-                        while (i < len && widths[i + lineStart - widthStart] == 0.0f) {
+                        while (i < len
+                                && measured.getCharWidthAt(i + lineStart - widthStart) == 0.0f) {
                             i++;
                         }
                         break;
@@ -1074,7 +1046,7 @@ public class StaticLayout extends Layout {
             int i;
 
             for (i = 0; i < len; i++) {
-                float w = widths[i + lineStart - widthStart];
+                float w = measured.getCharWidthAt(i + lineStart - widthStart);
 
                 if (w + sum + ellipsisWidth > avail) {
                     break;
@@ -1097,10 +1069,12 @@ public class StaticLayout extends Layout {
 
                 float ravail = (avail - ellipsisWidth) / 2;
                 for (right = len; right > 0; right--) {
-                    float w = widths[right - 1 + lineStart - widthStart];
+                    float w = measured.getCharWidthAt(right - 1 + lineStart - widthStart);
 
                     if (w + rsum > ravail) {
-                        while (right < len && widths[right + lineStart - widthStart] == 0.0f) {
+                        while (right < len
+                                && measured.getCharWidthAt(right + lineStart - widthStart)
+                                    == 0.0f) {
                             right++;
                         }
                         break;
@@ -1110,7 +1084,7 @@ public class StaticLayout extends Layout {
 
                 float lavail = avail - ellipsisWidth - rsum;
                 for (left = 0; left < right; left++) {
-                    float w = widths[left + lineStart - widthStart];
+                    float w = measured.getCharWidthAt(left + lineStart - widthStart);
 
                     if (w + lsum > lavail) {
                         break;
@@ -1306,47 +1280,6 @@ public class StaticLayout extends Layout {
                 ? mMaxLineHeight : super.getHeight();
     }
 
-    @FastNative
-    private static native long nInit(
-            @BreakStrategy int breakStrategy,
-            @HyphenationFrequency int hyphenationFrequency,
-            boolean isJustified,
-            @Nullable int[] indents);
-
-    @CriticalNative
-    private static native void nFinish(long nativePtr);
-
-    // populates LineBreaks and returns the number of breaks found
-    //
-    // the arrays inside the LineBreaks objects are passed in as well
-    // to reduce the number of JNI calls in the common case where the
-    // arrays do not have to be resized
-    // The individual character widths will be returned in charWidths. The length of charWidths must
-    // be at least the length of the text.
-    private static native int nComputeLineBreaks(
-            /* non zero */ long nativePtr,
-
-            // Inputs
-            @NonNull char[] text,
-            /* Non Zero */ long measuredTextPtr,
-            @IntRange(from = 0) int length,
-            @FloatRange(from = 0.0f) float firstWidth,
-            @IntRange(from = 0) int firstWidthLineCount,
-            @FloatRange(from = 0.0f) float restWidth,
-            @Nullable int[] variableTabStops,
-            int defaultTabStop,
-            @IntRange(from = 0) int indentsOffset,
-
-            // Outputs
-            @NonNull LineBreaks recycle,
-            @IntRange(from  = 0) int recycleLength,
-            @NonNull int[] recycleBreaks,
-            @NonNull float[] recycleWidths,
-            @NonNull float[] recycleAscents,
-            @NonNull float[] recycleDescents,
-            @NonNull int[] recycleFlags,
-            @NonNull float[] charWidths);
-
     private int mLineCount;
     private int mTopPadding, mBottomPadding;
     private int mColumns;
@@ -1396,8 +1329,7 @@ public class StaticLayout extends Layout {
 
     private static final int DEFAULT_MAX_LINE_HEIGHT = -1;
 
-    // This is used to return three arrays from a single JNI call when
-    // performing line breaking
+    // Unused, here because of gray list private API accesses.
     /*package*/ static class LineBreaks {
         private static final int INITIAL_SIZE = 16;
         public int[] breaks = new int[INITIAL_SIZE];

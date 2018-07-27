@@ -518,6 +518,21 @@ public class PrecomputedText implements Spannable {
     }
 
     /**
+     * Returns a width of a character at offset
+     *
+     * @param offset an offset of the text.
+     * @return a width of the character.
+     * @hide
+     */
+    public float getCharWidthAt(@IntRange(from = 0) int offset) {
+        Preconditions.checkArgument(0 <= offset && offset < mText.length(), "invalid offset");
+        final int paraIndex = findParaIndex(offset);
+        final int paraStart = getParagraphStart(paraIndex);
+        final int paraEnd = getParagraphEnd(paraIndex);
+        return getMeasuredParagraph(paraIndex).getCharWidthAt(offset - paraStart);
+    }
+
+    /**
      * Returns the size of native PrecomputedText memory usage.
      *
      * Note that this is not guaranteed to be accurate. Must be used only for testing purposes.
