@@ -1,5 +1,7 @@
 package com.google.vr.platform;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * Class to load the dvr api.
  * @hide
@@ -10,6 +12,7 @@ public class Dvr {
      *
      * @return A Long object describing the handle returned by dlopen.
      */
+    @UnsupportedAppUsage
     public static Long loadLibrary() {
         // Load a thin JNI library that runs dlopen on request.
         System.loadLibrary("dvr_loader");
