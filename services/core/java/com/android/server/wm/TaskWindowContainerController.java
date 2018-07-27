@@ -209,6 +209,12 @@ public class TaskWindowContainerController
         }
     }
 
+    public boolean isDragResizing() {
+        synchronized (mWindowMap) {
+            return mContainer.isDragResizing();
+        }
+    }
+
     void reportSnapshotChanged(TaskSnapshot snapshot) {
         mHandler.obtainMessage(H.REPORT_SNAPSHOT_CHANGED, snapshot).sendToTarget();
     }
