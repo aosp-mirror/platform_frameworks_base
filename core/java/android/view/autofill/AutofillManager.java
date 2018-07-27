@@ -34,6 +34,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Rect;
 import android.metrics.LogMaker;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
@@ -202,10 +203,17 @@ public final class AutofillManager {
     /** @hide */ public static final int ACTION_VIEW_EXITED = 3;
     /** @hide */ public static final int ACTION_VALUE_CHANGED = 4;
 
-
+    /** @hide */ public static final int NO_LOGGING = 0;
     /** @hide */ public static final int FLAG_ADD_CLIENT_ENABLED = 0x1;
     /** @hide */ public static final int FLAG_ADD_CLIENT_DEBUG = 0x2;
     /** @hide */ public static final int FLAG_ADD_CLIENT_VERBOSE = 0x4;
+    /** @hide */
+    public static final int DEFAULT_LOGGING_LEVEL = Build.IS_DEBUGGABLE
+            ? AutofillManager.FLAG_ADD_CLIENT_DEBUG
+            : AutofillManager.NO_LOGGING;
+
+    /** @hide */
+    public static final int DEFAULT_MAX_PARTITIONS_SIZE = 10;
 
     /** Which bits in an authentication id are used for the dataset id */
     private static final int AUTHENTICATION_ID_DATASET_ID_MASK = 0xFFFF;

@@ -12067,6 +12067,33 @@ public final class Settings {
                 "autofill_compat_mode_allowed_packages";
 
         /**
+         * Level of autofill logging.
+         *
+         * <p>Valid values are
+         * {@link android.view.autofill.AutofillManager#NO_LOGGING},
+         * {@link android.view.autofill.AutofillManager#FLAG_ADD_CLIENT_DEBUG}, or
+         * {@link android.view.autofill.AutofillManager#FLAG_ADD_CLIENT_VERBOSE}.
+         *
+         * @hide
+         */
+        public static final String AUTOFILL_LOGGING_LEVEL = "autofill_logging_level";
+
+        /**
+         * Maximum number of partitions that can be allowed in an autofill session.
+         *
+         * @hide
+         */
+        public static final String AUTOFILL_MAX_PARTITIONS_SIZE = "autofill_max_partitions_size";
+
+        /**
+         * Maximum number of visible datasets in the Autofill dataset picker UI, or {@code 0} to use
+         * the default value from resources.
+         *
+         * @hide
+         */
+        public static final String AUTOFILL_MAX_VISIBLE_DATASETS = "autofill_max_visible_datasets";
+
+        /**
          * Exemptions to the hidden API blacklist.
          *
          * @hide
