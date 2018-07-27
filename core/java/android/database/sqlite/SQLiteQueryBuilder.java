@@ -29,7 +29,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 
-import com.android.internal.util.ArrayUtils;
+import libcore.util.EmptyArray;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -436,7 +436,6 @@ public class SQLiteQueryBuilder
      *   that they appear in the selection. The values will be bound
      *   as Strings.
      * @return the number of rows updated
-     * @hide
      */
     public int update(@NonNull SQLiteDatabase db, @NonNull ContentValues values,
             @Nullable String selection, @Nullable String[] selectionArgs) {
@@ -471,14 +470,19 @@ public class SQLiteQueryBuilder
             sql = unwrappedSql;
         }
 
-        final ArrayMap<String, Object> rawValues = values.getValues();
-        final String[] updateArgs = new String[rawValues.size()];
-        for (int i = 0; i < updateArgs.length; i++) {
-            final Object arg = rawValues.valueAt(i);
-            updateArgs[i] = (arg != null) ? arg.toString() : null;
+        if (selectionArgs == null) {
+            selectionArgs = EmptyArray.STRING;
         }
-
-        final String[] sqlArgs = ArrayUtils.concat(String.class, updateArgs, selectionArgs);
+        final ArrayMap<String, Object> rawValues = values.getValues();
+        final int valuesLength = rawValues.size();
+        final Object[] sqlArgs = new Object[valuesLength + selectionArgs.length];
+        for (int i = 0; i < sqlArgs.length; i++) {
+            if (i < valuesLength) {
+                sqlArgs[i] = rawValues.valueAt(i);
+            } else {
+                sqlArgs[i] = selectionArgs[i - valuesLength];
+            }
+        }
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             if (Build.IS_DEBUGGABLE) {
                 Log.d(TAG, sql + " with args " + Arrays.toString(sqlArgs));
@@ -502,7 +506,6 @@ public class SQLiteQueryBuilder
      *   that they appear in the selection. The values will be bound
      *   as Strings.
      * @return the number of rows deleted
-     * @hide
      */
     public int delete(@NonNull SQLiteDatabase db, @Nullable String selection,
             @Nullable String[] selectionArgs) {
