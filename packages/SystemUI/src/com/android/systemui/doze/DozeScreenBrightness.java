@@ -23,6 +23,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.Trace;
+import android.os.UserHandle;
+import android.provider.Settings;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -111,7 +113,7 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
             int brightness = computeBrightness(mLastSensorValue);
             boolean brightnessReady = brightness > 0;
             if (brightnessReady) {
-                mDozeService.setDozeScreenBrightness(brightness);
+                mDozeService.setDozeScreenBrightness(clampToUserSetting(brightness));
             }
 
             int scrimOpacity = -1;
@@ -150,8 +152,15 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
     }
 
     private void resetBrightnessToDefault() {
-        mDozeService.setDozeScreenBrightness(mDefaultDozeBrightness);
+        mDozeService.setDozeScreenBrightness(clampToUserSetting(mDefaultDozeBrightness));
         mDozeHost.setAodDimmingScrim(0f);
+    }
+
+    private int clampToUserSetting(int brightness) {
+        int userSetting = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS, Integer.MAX_VALUE,
+                UserHandle.USER_CURRENT);
+        return Math.min(brightness, userSetting);
     }
 
     private void setLightSensorEnabled(boolean enabled) {
