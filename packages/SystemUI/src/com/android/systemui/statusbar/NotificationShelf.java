@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.Interpolators.FAST_OUT_SLOW_IN_REVERSE;
 import static com.android.systemui.statusbar.phone.NotificationIconContainer.IconState.NO_VALUE;
 
 import android.content.Context;
@@ -26,9 +27,11 @@ import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.DisplayCutout;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.systemui.Interpolators;
@@ -89,6 +92,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private boolean mShowNotificationShelf;
     private float mFirstElementRoundness;
     private Rect mClipRect = new Rect();
+    private int mCutoutHeight;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -200,8 +204,12 @@ public class NotificationShelf extends ActivatableNotificationView implements
                     0 : mAmbientState.getDarkAmount();
             mShelfState.yTranslation = MathUtils.lerp(awakenTranslation, darkTranslation, yRatio);
             mShelfState.zTranslation = ambientState.getBaseZHeight();
+            // For the small display size, it's not enough to make the icon not covered by
+            // the top cutout so the denominator add the height of cutout.
+            // Totally, (getIntrinsicHeight() * 2 + mCutoutHeight) should be smaller then
+            // mAmbientState.getTopPadding().
             float openedAmount = (mShelfState.yTranslation - getFullyClosedTranslation())
-                    / (getIntrinsicHeight() * 2);
+                    / (getIntrinsicHeight() * 2 + mCutoutHeight);
             openedAmount = Math.min(1.0f, openedAmount);
             mShelfState.openedAmount = openedAmount;
             mShelfState.clipTopAmount = 0;
@@ -745,6 +753,22 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mRelativeOffset -= mTmp[0];
     }
 
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        WindowInsets ret = super.onApplyWindowInsets(insets);
+
+        // NotificationShelf drag from the status bar and the status bar dock on the top
+        // of the display for current design so just focus on the top of ScreenDecorations.
+        // In landscape or multiple window split mode, the NotificationShelf still drag from
+        // the top and the physical notch/cutout goes to the right, left, or both side of the
+        // display so it doesn't matter for the NotificationSelf in landscape.
+        DisplayCutout displayCutout = insets.getDisplayCutout();
+        mCutoutHeight = displayCutout == null || displayCutout.getSafeInsetTop() < 0
+                ? 0 : displayCutout.getSafeInsetTop();
+
+        return ret;
+    }
+
     private void setOpenedAmount(float openedAmount) {
         mNoAnimationsInThisFrame = openedAmount == 1.0f && mOpenedAmount == 0.0f;
         mOpenedAmount = openedAmount;
@@ -759,7 +783,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         int width = (int) NotificationUtils.interpolate(
                 start + mCollapsedIcons.getFinalTranslationX(),
                 mShelfIcons.getWidth(),
-                openedAmount);
+                FAST_OUT_SLOW_IN_REVERSE.getInterpolation(openedAmount));
         mShelfIcons.setActualLayoutWidth(width);
         boolean hasOverflow = mCollapsedIcons.hasOverflow();
         int collapsedPadding = mCollapsedIcons.getPaddingEnd();
