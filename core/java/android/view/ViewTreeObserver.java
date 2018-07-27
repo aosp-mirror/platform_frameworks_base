@@ -16,6 +16,9 @@
 
 package android.view;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -55,6 +58,9 @@ public final class ViewTreeObserver {
     private boolean mInDispatchOnDraw;
     private ArrayList<OnDrawListener> mOnDrawListeners;
     private static boolean sIllegalOnDrawModificationIsFatal;
+
+    // These listeners are one-shot
+    private ArrayList<Runnable> mOnFrameCommitListeners;
 
     /** Remains false until #dispatchOnWindowShown() is called. If a listener registers after
      * that the listener will be immediately called. */
@@ -393,6 +399,14 @@ public final class ViewTreeObserver {
             }
         }
 
+        if (observer.mOnFrameCommitListeners != null) {
+            if (mOnFrameCommitListeners != null) {
+                mOnFrameCommitListeners.addAll(observer.captureFrameCommitCallbacks());
+            } else {
+                mOnFrameCommitListeners = observer.captureFrameCommitCallbacks();
+            }
+        }
+
         if (observer.mOnTouchModeChangeListeners != null) {
             if (mOnTouchModeChangeListeners != null) {
                 mOnTouchModeChangeListeners.addAll(observer.mOnTouchModeChangeListeners);
@@ -710,6 +724,49 @@ public final class ViewTreeObserver {
             }
         }
         mOnDrawListeners.remove(victim);
+    }
+
+    /**
+     * Adds a frame commit callback. This callback will be invoked when the current rendering
+     * content has been rendered into a frame and submitted to the swap chain. The frame may
+     * not currently be visible on the display when this is invoked, but it has been submitted.
+     * This callback is useful in combination with {@link PixelCopy} to capture the current
+     * rendered content of the UI reliably.
+     *
+     * Note: Only works with hardware rendering. Does nothing otherwise.
+     *
+     * @param callback The callback to invoke when the frame is committed.
+     */
+    @TestApi
+    public void registerFrameCommitCallback(@NonNull Runnable callback) {
+        checkIsAlive();
+        if (mOnFrameCommitListeners == null) {
+            mOnFrameCommitListeners = new ArrayList<>();
+        }
+        mOnFrameCommitListeners.add(callback);
+    }
+
+    @Nullable ArrayList<Runnable> captureFrameCommitCallbacks() {
+        ArrayList<Runnable> ret = mOnFrameCommitListeners;
+        mOnFrameCommitListeners = null;
+        return ret;
+    }
+
+    /**
+     * Attempts to remove the given callback from the list of pending frame complete callbacks.
+     *
+     * @param callback The callback to remove
+     * @return Whether or not the callback was removed. If this returns true the callback will
+     *         not be invoked. If false is returned then the callback was either never added
+     *         or may already be pending execution and was unable to be removed
+     */
+    @TestApi
+    public boolean unregisterFrameCommitCallback(@NonNull Runnable callback) {
+        checkIsAlive();
+        if (mOnFrameCommitListeners == null) {
+            return false;
+        }
+        return mOnFrameCommitListeners.remove(callback);
     }
 
     /**
