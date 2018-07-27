@@ -51,6 +51,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.Manifest;
+import android.accessibilityservice.AccessibilityService;
 import android.annotation.AnyThread;
 import android.annotation.BinderThread;
 import android.annotation.ColorInt;
@@ -888,10 +889,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (showImeUri.equals(uri)) {
                     updateKeyboardFromSettingsLocked();
                 } else if (accessibilityRequestingNoImeUri.equals(uri)) {
-                    mAccessibilityRequestingNoSoftKeyboard = Settings.Secure.getIntForUser(
+                    final int accessibilitySoftKeyboardSetting = Settings.Secure.getIntForUser(
                             mContext.getContentResolver(),
-                            Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
-                            0, mUserId) == 1;
+                            Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, 0, mUserId);
+                    mAccessibilityRequestingNoSoftKeyboard =
+                            (accessibilitySoftKeyboardSetting & AccessibilityService.SHOW_MODE_MASK)
+                                    == AccessibilityService.SHOW_MODE_HIDDEN;
                     if (mAccessibilityRequestingNoSoftKeyboard) {
                         final boolean showRequested = mShowRequested;
                         hideCurrentInputLocked(0, null);

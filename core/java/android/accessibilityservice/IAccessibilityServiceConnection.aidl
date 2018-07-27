@@ -87,6 +87,8 @@ interface IAccessibilityServiceConnection {
 
     boolean setSoftKeyboardShowMode(int showMode);
 
+    int getSoftKeyboardShowMode();
+
     void setSoftKeyboardCallbackEnabled(boolean enabled);
 
     boolean isAccessibilityButtonAvailable();
