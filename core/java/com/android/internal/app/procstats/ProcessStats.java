@@ -158,7 +158,7 @@ public final class ProcessStats implements Parcelable {
     };
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 32;
+    private static final int PARCEL_VERSION = 33;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535454;
 
@@ -1380,9 +1380,13 @@ public final class ProcessStats implements Parcelable {
         final int NUM = mTrackingAssociations.size();
         for (int i = NUM - 1; i >= 0; i--) {
             final AssociationState.SourceState act = mTrackingAssociations.get(i);
-            if (act.mProcStateSeq != curSeq) {
+            if (act.mProcStateSeq != curSeq || act.mProcState >= ProcessStats.STATE_HOME) {
+                // If this association did not get touched the last time we computed
+                // process states, or its state ended up down in cached, then we no
+                // longer have a reason to track it at all.
+                act.stopActive(now);
                 act.mInTrackingList = false;
-                act.mProcState = STATE_NOTHING;
+                act.mProcState = ProcessStats.STATE_NOTHING;
                 mTrackingAssociations.remove(i);
             } else {
                 final ProcessState proc = act.getAssociationState().getProcess();
@@ -1407,7 +1411,7 @@ public final class ProcessStats implements Parcelable {
     }
 
     public void dumpLocked(PrintWriter pw, String reqPackage, long now, boolean dumpSummary,
-            boolean dumpAll, boolean activeOnly) {
+            boolean dumpDetails, boolean dumpAll, boolean activeOnly) {
         long totalTime = DumpUtils.dumpSingleTime(null, null, mMemFactorDurations, mMemFactor,
                 mStartTime, now);
         boolean sepNeeded = false;
@@ -1538,7 +1542,7 @@ public final class ProcessStats implements Parcelable {
                         pw.println(":");
                         pw.print("        Process: "); pw.println(asc.getProcessName());
                         asc.dumpStats(pw, "        ", "          ", "    ",
-                                now, totalTime, dumpSummary, dumpAll);
+                                now, totalTime, dumpDetails, dumpAll);
                     }
                 }
             }
@@ -1632,21 +1636,8 @@ public final class ProcessStats implements Parcelable {
                     if (src.mActiveCount > 0) {
                         pw.print("    Active count ");
                         pw.print(src.mActiveCount);
-                        long duration = src.mActiveDuration;
-                        if (src.mActiveStartUptime > 0) {
-                            duration += now - src.mActiveStartUptime;
-                        }
-                        if (dumpAll) {
-                            pw.print(" / Duration ");
-                            TimeUtils.formatDuration(duration, pw);
-                            pw.print(" / ");
-                        } else {
-                            pw.print(" / time ");
-                        }
-                        DumpUtils.printPercent(pw, (double)duration/(double)totalTime);
-                        if (src.mActiveStartUptime > 0) {
-                            pw.print(" (running)");
-                        }
+                        pw.print(": ");
+                        asc.dumpActiveDurationSummary(pw, src, totalTime, now, dumpAll);
                         pw.println();
                     }
                 }
