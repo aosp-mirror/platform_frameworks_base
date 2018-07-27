@@ -7866,8 +7866,7 @@
              wallpaper. -->
         <attr name="showMetadataInPreview" format="boolean" />
 
-        <!-- Wallpapers optimized and capable of drawing in ambient mode will return true.
-            @hide -->
+        <!-- Wallpapers optimized and capable of drawing in ambient mode will return true. -->
         <attr name="supportsAmbientMode" format="boolean" />
 
     </declare-styleable>

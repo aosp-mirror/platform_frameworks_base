@@ -55,13 +55,13 @@ public class WallpaperInfoTest {
 
         // Defined as true in the XML
         assertTrue("supportsAmbientMode should be true, as defined in the XML.",
-                wallpaperInfo.getSupportsAmbientMode());
+                wallpaperInfo.supportsAmbientMode());
         Parcel parcel = Parcel.obtain();
         wallpaperInfo.writeToParcel(parcel, 0 /* flags */);
         parcel.setDataPosition(0);
         WallpaperInfo fromParcel = WallpaperInfo.CREATOR.createFromParcel(parcel);
         assertTrue("supportsAmbientMode should have been restored from parcelable",
-                fromParcel.getSupportsAmbientMode());
+                fromParcel.supportsAmbientMode());
         parcel.recycle();
     }
 }

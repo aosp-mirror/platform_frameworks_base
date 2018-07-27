@@ -516,7 +516,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             WallpaperInfo info = wallpaperManager.getWallpaperInfo(UserHandle.USER_CURRENT);
             final boolean supportsAmbientMode = info != null &&
-                    info.getSupportsAmbientMode();
+                    info.supportsAmbientMode();
 
             mStatusBarWindowManager.setWallpaperSupportsAmbientMode(supportsAmbientMode);
             mScrimController.setWallpaperSupportsAmbientMode(supportsAmbientMode);

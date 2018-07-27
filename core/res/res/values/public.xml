@@ -2908,6 +2908,7 @@
         <public name="opticalInsetRight" />
         <public name="opticalInsetBottom" />
         <public name="allowForceDark" />
+        <public name="supportsAmbientMode" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e2">

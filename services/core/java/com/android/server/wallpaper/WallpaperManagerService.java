@@ -965,7 +965,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     }
                     mPaddingChanged = false;
                 }
-                if (mInfo != null && mInfo.getSupportsAmbientMode()) {
+                if (mInfo != null && mInfo.supportsAmbientMode()) {
                     try {
                         mEngine.setInAmbientMode(mInAmbientMode, false /* animated */);
                     } catch (RemoteException e) {
@@ -1777,7 +1777,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             mInAmbientMode = inAmbienMode;
             final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
             if (data != null && data.connection != null && data.connection.mInfo != null
-                    && data.connection.mInfo.getSupportsAmbientMode()) {
+                    && data.connection.mInfo.supportsAmbientMode()) {
                 engine = data.connection.mEngine;
             } else {
                 engine = null;
