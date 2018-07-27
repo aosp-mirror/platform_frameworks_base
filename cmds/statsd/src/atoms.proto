@@ -29,7 +29,6 @@ import "frameworks/base/core/proto/android/server/enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
-import "frameworks/base/proto/src/metrics_constants.proto";
 
 /**
  * The master atom class. This message defines all of the available
@@ -2160,11 +2159,11 @@ message BinderCallsExceptions {
 
 /**
  * An atom for generic metrics logging. Available from Android Q.
- * One has to add an enum to frameworks/base/proto/src/metrics_constants.proto
- * to extend another metric.
  */
 message GenericAtom {
-  // Type of event. Previously it only indicated visual elements but now it
-  // is expanded to describe any type of event.
-  optional com_android_internal_logging.MetricsEvent.View view = 1;
+    // The uid of the application that sent this custom atom.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // An event_id indicates the type of event.
+    optional int32 event_id = 2;
 }
