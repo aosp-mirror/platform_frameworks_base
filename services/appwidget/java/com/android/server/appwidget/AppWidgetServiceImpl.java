@@ -19,7 +19,6 @@ package com.android.server.appwidget;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.UserIdInt;
@@ -2697,7 +2696,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    void onUserUnlocked(int userId) {
+    /**
+     * This does not use the usual onUserUnlocked() listener mechanism because it is
+     * invoked at a choreographed point in the middle of the user unlock sequence,
+     * before the boot-completed broadcast is issued and the listeners notified.
+     */
+    void handleUserUnlocked(int userId) {
         if (isProfileWithLockedParent(userId)) {
             return;
         }
@@ -2734,7 +2738,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 }
             }
         }
-        Slog.i(TAG, "Async processing of onUserUnlocked u" + userId + " took "
+        Slog.i(TAG, "Processing of handleUserUnlocked u" + userId + " took "
                 + (SystemClock.elapsedRealtime() - time) + " ms");
     }
 
@@ -4801,5 +4805,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 return widgetPackages;
             }
         }
+
+        @Override
+        public void unlockUser(int userId) {
+            handleUserUnlocked(userId);
+        }
+
     }
 }
