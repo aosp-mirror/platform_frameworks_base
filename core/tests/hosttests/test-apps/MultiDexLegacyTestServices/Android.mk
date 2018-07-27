@@ -36,7 +36,7 @@ LOCAL_DEX_PREOPT := false
 
 include $(BUILD_PACKAGE)
 
-$(mainDexList): $(full_classes_proguard_jar) | $(MAINDEXCLASSES)
+$(mainDexList): $(full_classes_pre_proguard_jar) | $(MAINDEXCLASSES)
 	$(hide) mkdir -p $(dir $@)
 	$(MAINDEXCLASSES) $< 1>$@
 
