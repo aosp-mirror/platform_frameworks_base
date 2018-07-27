@@ -42,7 +42,7 @@ public:
                            const int conditionIndex, const size_t startIndex,
                            const size_t stopIndex, const size_t stopAllIndex, const bool nesting,
                            const sp<ConditionWizard>& wizard,
-                           const FieldMatcher& internalDimensions, const int64_t startTimeNs);
+                           const FieldMatcher& internalDimensions, const int64_t timeBaseNs, const int64_t startTimeNs);
 
     virtual ~DurationMetricProducer();
 
@@ -141,6 +141,7 @@ private:
     FRIEND_TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgrade);
     FRIEND_TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgradeInNextBucket);
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicates);
+    FRIEND_TEST(DurationMetricTrackerTest, TestFirstBucket);
 };
 
 }  // namespace statsd

@@ -53,9 +53,12 @@ public:
     virtual ~StatsPullerManager() {
     }
 
+    // Registers a receiver for tagId. It will be pulled on the nextPullTimeNs
+    // and then every intervalNs thereafter.
     virtual void RegisterReceiver(int tagId, wp<PullDataReceiver> receiver, int64_t nextPullTimeNs,
                                   int64_t intervalNs);
 
+    // Stop listening on a tagId.
     virtual void UnRegisterReceiver(int tagId, wp<PullDataReceiver> receiver);
 
     // Verify if we know how to pull for this matcher
@@ -63,11 +66,16 @@ public:
 
     void OnAlarmFired(const int64_t timeNs);
 
+    // Use respective puller to pull the data. The returned data will have
+    // elapsedTimeNs set as timeNs and will have wallClockTimeNs set as current
+    // wall clock time.
     virtual bool Pull(const int tagId, const int64_t timeNs,
                       vector<std::shared_ptr<LogEvent>>* data);
 
+    // Clear pull data cache immediately.
     int ForceClearPullerCache();
 
+    // Clear pull data cache if it is beyond respective cool down time.
     int ClearPullerCacheIfNecessary(int64_t timestampNs);
 
     void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService);

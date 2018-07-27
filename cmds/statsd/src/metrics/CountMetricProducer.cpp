@@ -66,8 +66,8 @@ const int FIELD_ID_END_BUCKET_ELAPSED_MILLIS = 6;
 CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric& metric,
                                          const int conditionIndex,
                                          const sp<ConditionWizard>& wizard,
-                                         const int64_t startTimeNs)
-    : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard) {
+                                         const int64_t timeBaseNs, const int64_t startTimeNs)
+    : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard) {
     if (metric.has_bucket()) {
         mBucketSizeNs =
                 TimeUnitToBucketSizeInMillisGuardrailed(key.GetUid(), metric.bucket()) * 1000000;
@@ -99,6 +99,10 @@ CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric
     }
 
     mConditionSliced = (metric.links().size() > 0) || (mDimensionsInCondition.size() > 0);
+
+    flushIfNeededLocked(startTimeNs);
+    // Adjust start for partial bucket
+    mCurrentBucketStartTimeNs = startTimeNs;
 
     VLOG("metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
          (long long)mBucketSizeNs, (long long)mTimeBaseNs);

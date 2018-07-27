@@ -42,7 +42,7 @@ class CountMetricProducer : public MetricProducer {
 public:
     CountMetricProducer(const ConfigKey& key, const CountMetric& countMetric,
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int64_t startTimeNs);
+                        const int64_t timeBaseNs, const int64_t startTimeNs);
 
     virtual ~CountMetricProducer();
 
@@ -98,6 +98,7 @@ private:
     FRIEND_TEST(CountMetricProducerTest, TestAnomalyDetectionUnSliced);
     FRIEND_TEST(CountMetricProducerTest, TestEventWithAppUpgrade);
     FRIEND_TEST(CountMetricProducerTest, TestEventWithAppUpgradeInNextBucket);
+    FRIEND_TEST(CountMetricProducerTest, TestFirstBucket);
 };
 
 }  // namespace statsd
