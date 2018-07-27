@@ -114,7 +114,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
 
                             @Override
                             public void setWiredDeviceConnectionState(
-                                int type, int state, String address, String name) {
+                                    int type, int state, String address, String name) {
                                 // Do nothing.
                             }
                         };
@@ -144,6 +144,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         // No TV device interacts with AVR so system audio control won't be turned on here
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
+        mNativeWrapper.clearResultMessages();
         SystemProperties.set(Constants.PROPERTY_ARC_SUPPORT, "true");
     }
 
@@ -158,10 +159,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                         ADDR_AUDIO_SYSTEM, ADDR_TV, scaledVolume, true);
         HdmiCecMessage messageGive =
                 HdmiCecMessageBuilder.buildGiveAudioStatus(ADDR_TV, ADDR_AUDIO_SYSTEM);
-        assertThat(mHdmiCecLocalDeviceAudioSystem.handleGiveAudioStatus(messageGive))
-                .isTrue();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleGiveAudioStatus(messageGive)).isTrue();
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
 
     @Test
@@ -173,7 +173,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleGiveSystemAudioModeStatus(messageGive))
                 .isTrue();
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
 
     @Ignore("b/80297700")
@@ -244,17 +244,17 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleGiveSystemAudioModeStatus(messageGive))
                 .isTrue();
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
         // Check if correctly turned on
+        mNativeWrapper.clearResultMessages();
         expectedMessage =
                 HdmiCecMessageBuilder.buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, true);
-        assertThat(mHdmiCecLocalDeviceAudioSystem.handleSetSystemAudioMode(messageSet))
-                .isTrue();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleSetSystemAudioMode(messageSet)).isTrue();
         mTestLooper.dispatchAll();
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleGiveSystemAudioModeStatus(messageGive))
                 .isTrue();
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
         assertThat(mMusicMute).isFalse();
     }
 
@@ -274,13 +274,15 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleSystemAudioModeRequest(messageRequestOff))
                 .isTrue();
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
+
+        mNativeWrapper.clearResultMessages();
         expectedMessage =
                 HdmiCecMessageBuilder.buildReportSystemAudioMode(ADDR_AUDIO_SYSTEM, ADDR_TV, false);
         assertThat(mHdmiCecLocalDeviceAudioSystem.handleGiveSystemAudioModeStatus(messageGive))
                 .isTrue();
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
         assertThat(mMusicMute).isTrue();
     }
 
@@ -295,7 +297,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         HdmiCecMessage expectedMessage =
                 HdmiCecMessageBuilder.buildSetSystemAudioMode(
                         ADDR_AUDIO_SYSTEM, ADDR_BROADCAST, false);
-        assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
         assertThat(mMusicMute).isTrue();
     }
 
@@ -347,8 +349,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     public void handleActiveSource_updateActiveSource() throws Exception {
         HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
         ActiveSource expectedActiveSource = new ActiveSource(ADDR_TV, 0x0000);
-        assertThat(mHdmiCecLocalDeviceAudioSystem.handleActiveSource(message))
-                .isTrue();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleActiveSource(message)).isTrue();
         mTestLooper.dispatchAll();
         assertThat(mHdmiCecLocalDeviceAudioSystem.getActiveSource().equals(expectedActiveSource))
                 .isTrue();
@@ -365,7 +366,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mHdmiCecLocalDeviceAudioSystem.terminateSystemAudioMode();
         assertThat(mHdmiCecLocalDeviceAudioSystem.isSystemAudioActivated()).isFalse();
         assertThat(mMusicMute).isFalse();
-        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(message);
+        assertThat(mNativeWrapper.getResultMessages()).isEmpty();
     }
 
     @Ignore("b/80297700")
@@ -389,7 +390,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         int targetPhysicalAddress = 0x1000;
         mNativeWrapper.setPhysicalAddress(0x1000);
         assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
-            .isTrue();
+                .isTrue();
     }
 
     @Test
@@ -397,7 +398,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         int targetPhysicalAddress = 0x1100;
         mNativeWrapper.setPhysicalAddress(0x1000);
         assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
-            .isTrue();
+                .isTrue();
     }
 
     @Test
@@ -405,54 +406,52 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         int targetPhysicalAddress = 0x3000;
         mNativeWrapper.setPhysicalAddress(0x2000);
         assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
-            .isFalse();
+                .isFalse();
 
         targetPhysicalAddress = 0x2200;
         mNativeWrapper.setPhysicalAddress(0x3300);
         assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
-            .isFalse();
+                .isFalse();
 
         targetPhysicalAddress = 0x2213;
         mNativeWrapper.setPhysicalAddress(0x2212);
         assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
-            .isFalse();
+                .isFalse();
 
         targetPhysicalAddress = 0x2340;
         mNativeWrapper.setPhysicalAddress(0x2310);
         assertThat(mHdmiCecLocalDeviceAudioSystem.isPhysicalAddressMeOrBelow(targetPhysicalAddress))
-            .isFalse();
+                .isFalse();
     }
 
     @Test
     public void handleRequestArcInitiate_isNotDirectConnectedToTv() throws Exception {
-        HdmiCecMessage message = HdmiCecMessageBuilder
-            .buildRequestArcInitiation(ADDR_TV, ADDR_AUDIO_SYSTEM);
-        HdmiCecMessage expectedMessage = HdmiCecMessageBuilder
-            .buildFeatureAbortCommand(
-                ADDR_AUDIO_SYSTEM, ADDR_TV,
-                Constants.MESSAGE_REQUEST_ARC_INITIATION,
-                Constants.ABORT_NOT_IN_CORRECT_MODE);
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRequestArcInitiation(ADDR_TV, ADDR_AUDIO_SYSTEM);
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                        ADDR_AUDIO_SYSTEM,
+                        ADDR_TV,
+                        Constants.MESSAGE_REQUEST_ARC_INITIATION,
+                        Constants.ABORT_NOT_IN_CORRECT_MODE);
         mNativeWrapper.setPhysicalAddress(0x1100);
 
-        assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcInitiate(message))
-            .isTrue();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcInitiate(message)).isTrue();
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
     }
 
     @Test
     public void handleRequestArcInitiate_startArcInitiationActionFromAvr() throws Exception {
-        HdmiCecMessage message = HdmiCecMessageBuilder
-            .buildRequestArcInitiation(ADDR_TV, ADDR_AUDIO_SYSTEM);
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRequestArcInitiation(ADDR_TV, ADDR_AUDIO_SYSTEM);
         mNativeWrapper.setPhysicalAddress(0x1000);
-        mHdmiCecLocalDeviceAudioSystem.removeAction(
-            ArcInitiationActionFromAvr.class);
+        mHdmiCecLocalDeviceAudioSystem.removeAction(ArcInitiationActionFromAvr.class);
 
-        assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcInitiate(message))
-            .isTrue();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcInitiate(message)).isTrue();
         mTestLooper.dispatchAll();
-        assertThat(mHdmiCecLocalDeviceAudioSystem
-            .getActions(ArcInitiationActionFromAvr.class)).isNotEmpty();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getActions(ArcInitiationActionFromAvr.class))
+                .isNotEmpty();
     }
 
     @Test
@@ -460,50 +459,48 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         mHdmiCecLocalDeviceAudioSystem.setArcStatus(true);
         assertThat(mHdmiCecLocalDeviceAudioSystem.isArcEnabled()).isTrue();
 
-        HdmiCecMessage message = HdmiCecMessageBuilder
-            .buildRequestArcTermination(ADDR_TV, ADDR_AUDIO_SYSTEM);
-        mHdmiCecLocalDeviceAudioSystem.removeAction(
-            ArcTerminationActionFromAvr.class);
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRequestArcTermination(ADDR_TV, ADDR_AUDIO_SYSTEM);
+        mHdmiCecLocalDeviceAudioSystem.removeAction(ArcTerminationActionFromAvr.class);
 
-        assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcTermination(message))
-            .isTrue();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcTermination(message)).isTrue();
         mTestLooper.dispatchAll();
-        assertThat(mHdmiCecLocalDeviceAudioSystem
-            .getActions(ArcTerminationActionFromAvr.class)).isNotEmpty();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.getActions(ArcTerminationActionFromAvr.class))
+                .isNotEmpty();
     }
 
     @Test
     public void handleRequestArcTerminate_arcIsNotOn() throws Exception {
         assertThat(mHdmiCecLocalDeviceAudioSystem.isArcEnabled()).isFalse();
-        HdmiCecMessage message = HdmiCecMessageBuilder
-            .buildRequestArcTermination(ADDR_TV, ADDR_AUDIO_SYSTEM);
-        HdmiCecMessage expectedMessage = HdmiCecMessageBuilder
-            .buildFeatureAbortCommand(
-                ADDR_AUDIO_SYSTEM, ADDR_TV,
-                Constants.MESSAGE_REQUEST_ARC_TERMINATION,
-                Constants.ABORT_NOT_IN_CORRECT_MODE);
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRequestArcTermination(ADDR_TV, ADDR_AUDIO_SYSTEM);
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                        ADDR_AUDIO_SYSTEM,
+                        ADDR_TV,
+                        Constants.MESSAGE_REQUEST_ARC_TERMINATION,
+                        Constants.ABORT_NOT_IN_CORRECT_MODE);
 
-        assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcTermination(message))
-            .isTrue();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcTermination(message)).isTrue();
         mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
     }
 
     @Test
     public void handleRequestArcInit_arcIsNotSupported() throws Exception {
-        HdmiCecMessage message = HdmiCecMessageBuilder
-            .buildRequestArcInitiation(ADDR_TV, ADDR_AUDIO_SYSTEM);
-        HdmiCecMessage expectedMessage = HdmiCecMessageBuilder
-            .buildFeatureAbortCommand(
-                ADDR_AUDIO_SYSTEM, ADDR_TV,
-                Constants.MESSAGE_REQUEST_ARC_INITIATION,
-                Constants.ABORT_UNRECOGNIZED_OPCODE);
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRequestArcInitiation(ADDR_TV, ADDR_AUDIO_SYSTEM);
+        HdmiCecMessage expectedMessage =
+                HdmiCecMessageBuilder.buildFeatureAbortCommand(
+                        ADDR_AUDIO_SYSTEM,
+                        ADDR_TV,
+                        Constants.MESSAGE_REQUEST_ARC_INITIATION,
+                        Constants.ABORT_UNRECOGNIZED_OPCODE);
         SystemProperties.set(Constants.PROPERTY_ARC_SUPPORT, "false");
 
-        assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcInitiate(message))
-            .isTrue();
+        assertThat(mHdmiCecLocalDeviceAudioSystem.handleRequestArcInitiate(message)).isTrue();
         mTestLooper.dispatchAll();
-        assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
+        assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
 
     @Test
