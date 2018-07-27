@@ -25,9 +25,6 @@ import static android.net.wifi.WifiManager.LocalOnlyHotspotCallback.ERROR_NO_CHA
 import static android.net.wifi.WifiManager.LocalOnlyHotspotCallback.ERROR_TETHERING_DISALLOWED;
 import static android.net.wifi.WifiManager.LocalOnlyHotspotCallback.REQUEST_REGISTERED;
 import static android.net.wifi.WifiManager.SAP_START_FAILURE_GENERAL;
-import static android.net.wifi.WifiManager.SAP_START_FAILURE_NO_CHANNEL;
-import static android.net.wifi.WifiManager.WIFI_AP_STATE_DISABLED;
-import static android.net.wifi.WifiManager.WIFI_AP_STATE_DISABLING;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLED;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLING;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_FAILED;
@@ -47,6 +44,7 @@ import android.net.wifi.WifiManager.LocalOnlyHotspotObserver;
 import android.net.wifi.WifiManager.LocalOnlyHotspotReservation;
 import android.net.wifi.WifiManager.LocalOnlyHotspotSubscription;
 import android.net.wifi.WifiManager.SoftApCallback;
+import android.net.wifi.WifiManager.TrafficStateCallback;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -57,6 +55,7 @@ import android.support.test.filters.SmallTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -77,6 +76,7 @@ public class WifiManagerTest {
     @Mock WifiConfiguration mApConfig;
     @Mock IBinder mAppBinder;
     @Mock SoftApCallback mSoftApCallback;
+    @Mock TrafficStateCallback mTrafficStateCallback;
 
     private Handler mHandler;
     private TestLooper mLooper;
@@ -702,7 +702,7 @@ public class WifiManagerTest {
     }
 
     /*
-     * Verify client provided callback is being called through callback proxy
+     * Verify client-provided callback is being called through callback proxy
      */
     @Test
     public void softApCallbackProxyCallsOnStateChanged() throws Exception {
@@ -718,7 +718,7 @@ public class WifiManagerTest {
     }
 
     /*
-     * Verify client provided callback is being called through callback proxy
+     * Verify client-provided callback is being called through callback proxy
      */
     @Test
     public void softApCallbackProxyCallsOnNumClientsChanged() throws Exception {
@@ -735,7 +735,7 @@ public class WifiManagerTest {
     }
 
     /*
-     * Verify client provided callback is being called through callback proxy on multiple events
+     * Verify client-provided callback is being called through callback proxy on multiple events
      */
     @Test
     public void softApCallbackProxyCallsOnMultipleUpdates() throws Exception {
@@ -757,7 +757,7 @@ public class WifiManagerTest {
     }
 
     /*
-     * Verify client provided callback is being called on the correct thread
+     * Verify client-provided callback is being called on the correct thread
      */
     @Test
     public void softApCallbackIsCalledOnCorrectThread() throws Exception {
@@ -1081,5 +1081,85 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
 
         when(mWifiService.startScan(TEST_PACKAGE_NAME)).thenReturn(false);
         assertFalse(mWifiManager.startScan());
+    }
+
+    /**
+     * Verify main looper is used when handler is not provided.
+     */
+    @Test
+    public void registerTrafficStateCallbackUsesMainLooperOnNullArgumentForHandler()
+            throws Exception {
+        when(mContext.getMainLooper()).thenReturn(mLooper.getLooper());
+        ArgumentCaptor<ITrafficStateCallback.Stub> callbackCaptor =
+                ArgumentCaptor.forClass(ITrafficStateCallback.Stub.class);
+        mWifiManager.registerTrafficStateCallback(mTrafficStateCallback, null);
+        verify(mWifiService).registerTrafficStateCallback(
+                any(IBinder.class), callbackCaptor.capture(), anyInt());
+
+        assertEquals(0, mLooper.dispatchAll());
+        callbackCaptor.getValue().onStateChanged(TrafficStateCallback.DATA_ACTIVITY_INOUT);
+        assertEquals(1, mLooper.dispatchAll());
+        verify(mTrafficStateCallback).onStateChanged(TrafficStateCallback.DATA_ACTIVITY_INOUT);
+    }
+
+    /**
+     * Verify the call to unregisterTrafficStateCallback goes to WifiServiceImpl.
+     */
+    @Test
+    public void unregisterTrafficStateCallbackCallGoesToWifiServiceImpl() throws Exception {
+        ArgumentCaptor<Integer> callbackIdentifier = ArgumentCaptor.forClass(Integer.class);
+        mWifiManager.registerTrafficStateCallback(mTrafficStateCallback, mHandler);
+        verify(mWifiService).registerTrafficStateCallback(any(IBinder.class),
+                any(ITrafficStateCallback.Stub.class), callbackIdentifier.capture());
+
+        mWifiManager.unregisterTrafficStateCallback(mTrafficStateCallback);
+        verify(mWifiService).unregisterTrafficStateCallback(
+                eq((int) callbackIdentifier.getValue()));
+    }
+
+    /*
+     * Verify client-provided callback is being called through callback proxy on multiple events
+     */
+    @Test
+    public void trafficStateCallbackProxyCallsOnMultipleUpdates() throws Exception {
+        ArgumentCaptor<ITrafficStateCallback.Stub> callbackCaptor =
+                ArgumentCaptor.forClass(ITrafficStateCallback.Stub.class);
+        mWifiManager.registerTrafficStateCallback(mTrafficStateCallback, mHandler);
+        verify(mWifiService).registerTrafficStateCallback(
+                any(IBinder.class), callbackCaptor.capture(), anyInt());
+
+        InOrder inOrder = inOrder(mTrafficStateCallback);
+
+        callbackCaptor.getValue().onStateChanged(TrafficStateCallback.DATA_ACTIVITY_IN);
+        callbackCaptor.getValue().onStateChanged(TrafficStateCallback.DATA_ACTIVITY_INOUT);
+        callbackCaptor.getValue().onStateChanged(TrafficStateCallback.DATA_ACTIVITY_OUT);
+
+        mLooper.dispatchAll();
+        inOrder.verify(mTrafficStateCallback).onStateChanged(
+                TrafficStateCallback.DATA_ACTIVITY_IN);
+        inOrder.verify(mTrafficStateCallback).onStateChanged(
+                TrafficStateCallback.DATA_ACTIVITY_INOUT);
+        inOrder.verify(mTrafficStateCallback).onStateChanged(
+                TrafficStateCallback.DATA_ACTIVITY_OUT);
+    }
+
+    /*
+     * Verify client-provided callback is being called on the correct thread
+     */
+    @Test
+    public void trafficStateCallbackIsCalledOnCorrectThread() throws Exception {
+        ArgumentCaptor<ITrafficStateCallback.Stub> callbackCaptor =
+                ArgumentCaptor.forClass(ITrafficStateCallback.Stub.class);
+        TestLooper altLooper = new TestLooper();
+        Handler altHandler = new Handler(altLooper.getLooper());
+        mWifiManager.registerTrafficStateCallback(mTrafficStateCallback, altHandler);
+        verify(mContext, never()).getMainLooper();
+        verify(mWifiService).registerTrafficStateCallback(
+                any(IBinder.class), callbackCaptor.capture(), anyInt());
+
+        assertEquals(0, altLooper.dispatchAll());
+        callbackCaptor.getValue().onStateChanged(TrafficStateCallback.DATA_ACTIVITY_INOUT);
+        assertEquals(1, altLooper.dispatchAll());
+        verify(mTrafficStateCallback).onStateChanged(TrafficStateCallback.DATA_ACTIVITY_INOUT);
     }
 }
