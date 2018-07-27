@@ -23,8 +23,10 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Looper;
 import android.os.test.TestLooper;
+
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,9 +44,8 @@ public class ArcTerminationActionFromAvrTest {
     private TestLooper mTestLooper = new TestLooper();
     private boolean mSendCecCommandSuccess;
     private boolean mShouldDispatchReportArcTerminated;
-    private boolean mArcEnabled;
-    private boolean mSetArcStatusCalled;
     private Instrumentation mInstrumentation;
+    @Nullable private Boolean mArcEnabled = null;
 
     @Before
     public void setUp() {
@@ -102,7 +103,6 @@ public class ArcTerminationActionFromAvrTest {
 
                     @Override
                     void setArcStatus(boolean enabled) {
-                        mSetArcStatusCalled = true;
                         mArcEnabled = enabled;
                     }
                 };
@@ -110,45 +110,38 @@ public class ArcTerminationActionFromAvrTest {
         Looper looper = mTestLooper.getLooper();
         hdmiControlService.setIoLooper(looper);
 
-        mArcEnabled = true;
         mAction = new ArcTerminationActionFromAvr(mHdmiCecLocalDeviceAudioSystem);
     }
 
     @Test
-    public void testSendMessage_NotSuccess() {
+    public void testSendMessage_notSuccess() {
         mSendCecCommandSuccess = false;
         mShouldDispatchReportArcTerminated = false;
-        mSetArcStatusCalled = false;
         mHdmiCecLocalDeviceAudioSystem.addAndStartAction(mAction);
 
         mTestLooper.dispatchAll();
-        assertThat(mSetArcStatusCalled).isFalse();
-        assertThat(mArcEnabled).isTrue();
+        assertThat(mArcEnabled).isNull();
     }
 
     @Test
-    public void testReportArcTerminated_NotReceived() {
+    public void testReportArcTerminated_notReceived() {
         mSendCecCommandSuccess = true;
         mShouldDispatchReportArcTerminated = false;
-        mSetArcStatusCalled = false;
         mHdmiCecLocalDeviceAudioSystem.addAndStartAction(mAction);
 
         mTestLooper.moveTimeForward(1000);
         mTestLooper.dispatchAll();
-        assertThat(mSetArcStatusCalled).isFalse();
-        assertThat(mArcEnabled).isTrue();
+        assertThat(mArcEnabled).isNull();
     }
 
     @Test
-    public void testReportArcTerminated_Received() {
+    public void testReportArcTerminated_received() {
         mSendCecCommandSuccess = true;
         mShouldDispatchReportArcTerminated = true;
-        mSetArcStatusCalled = false;
         mHdmiCecLocalDeviceAudioSystem.addAndStartAction(mAction);
 
         mTestLooper.moveTimeForward(1000);
         mTestLooper.dispatchAll();
-        assertThat(mSetArcStatusCalled).isTrue();
         assertThat(mArcEnabled).isFalse();
     }
 }
