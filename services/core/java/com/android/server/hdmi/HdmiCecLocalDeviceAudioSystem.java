@@ -327,18 +327,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
             !isPhysicalAddressMeOrBelow(targetPhysicalAddress)) {
             switchToAudioInput();
         }
-        // Mute device when feature is turned off and unmute device when feature is turned on
-        boolean currentMuteStatus =
-                mService.getAudioManager().isStreamMute(AudioManager.STREAM_MUSIC);
-        if (currentMuteStatus == newSystemAudioMode) {
-            mService.getAudioManager()
-                    .adjustStreamVolume(
-                            AudioManager.STREAM_MUSIC,
-                            newSystemAudioMode
-                                    ? AudioManager.ADJUST_UNMUTE
-                                    : AudioManager.ADJUST_MUTE,
-                            0);
-        }
+        // TODO(b/80297700): Mute device when TV terminates the system audio control
         updateAudioManagerForSystemAudio(newSystemAudioMode);
         synchronized (mLock) {
             if (mSystemAudioActivated != newSystemAudioMode) {
