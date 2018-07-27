@@ -149,6 +149,7 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -649,6 +650,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
     }
 
+    int increaseConfigurationSeqLocked() {
+        mConfigurationSeq = Math.max(++mConfigurationSeq, 1);
+        return mConfigurationSeq;
+    }
+
     protected ActivityStackSupervisor createStackSupervisor() {
         final ActivityStackSupervisor supervisor = new ActivityStackSupervisor(this, mH.getLooper());
         supervisor.initialize();
@@ -702,6 +708,46 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     LockTaskController getLockTaskController() {
         return mLockTaskController;
+    }
+
+    /**
+     * Return the global configuration used by the process corresponding to the input pid. This is
+     * usually the global configuration with some overrides specific to that process.
+     */
+    Configuration getGlobalConfigurationForCallingPid() {
+        final int pid = Binder.getCallingPid();
+        if (pid == MY_PID || pid < 0) {
+            return getGlobalConfiguration();
+        }
+        synchronized (mGlobalLock) {
+            final WindowProcessController app = mPidMap.get(pid);
+            return app != null ? app.getConfiguration() : getGlobalConfiguration();
+        }
+    }
+
+    /**
+     * Return the device configuration info used by the process corresponding to the input pid.
+     * The value is consistent with the global configuration for the process.
+     */
+    @Override
+    public ConfigurationInfo getDeviceConfigurationInfo() {
+        ConfigurationInfo config = new ConfigurationInfo();
+        synchronized (mGlobalLock) {
+            final Configuration globalConfig = getGlobalConfigurationForCallingPid();
+            config.reqTouchScreen = globalConfig.touchscreen;
+            config.reqKeyboardType = globalConfig.keyboard;
+            config.reqNavigation = globalConfig.navigation;
+            if (globalConfig.navigation == Configuration.NAVIGATION_DPAD
+                    || globalConfig.navigation == Configuration.NAVIGATION_TRACKBALL) {
+                config.reqInputFeatures |= ConfigurationInfo.INPUT_FEATURE_FIVE_WAY_NAV;
+            }
+            if (globalConfig.keyboard != Configuration.KEYBOARD_UNDEFINED
+                    && globalConfig.keyboard != Configuration.KEYBOARD_NOKEYS) {
+                config.reqInputFeatures |= ConfigurationInfo.INPUT_FEATURE_HARD_KEYBOARD;
+            }
+            config.reqGlEsVersion = mAm.GL_ES_VERSION;
+        }
+        return config;
     }
 
     private void start() {
@@ -4264,7 +4310,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public Configuration getConfiguration() {
         Configuration ci;
         synchronized(mGlobalLock) {
-            ci = new Configuration(getGlobalConfiguration());
+            ci = new Configuration(getGlobalConfigurationForCallingPid());
             ci.userSetLocale = false;
         }
         return ci;
@@ -4420,8 +4466,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     locales.get(bestLocaleIndex)));
         }
 
-        mConfigurationSeq = Math.max(++mConfigurationSeq, 1);
-        mTempConfig.seq = mConfigurationSeq;
+        mTempConfig.seq = increaseConfigurationSeqLocked();
 
         // Update stored global config and notify everyone about the change.
         mStackSupervisor.onConfigurationChanged(mTempConfig);
@@ -4455,6 +4500,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mAm.mHandler.sendMessage(msg);
         }
 
+        // TODO: Consider using mPidMap to update configurations for processes.
         for (int i = mAm.mLruProcesses.size() - 1; i >= 0; i--) {
             ProcessRecord app = mAm.mLruProcesses.get(i);
             try {
@@ -5596,5 +5642,47 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
 
+        /**
+         * Set the corresponding display information for the process global configuration. To be
+         * called when we need to show IME on a different display.
+         *
+         * @param pid The process id associated with the IME window.
+         * @param displayId The ID of the display showing the IME.
+         */
+        @Override
+        public void onImeWindowSetOnDisplay(int pid, int displayId) {
+            if (pid == MY_PID || pid < 0) {
+                if (DEBUG_CONFIGURATION) {
+                    Slog.w(TAG,
+                            "Trying to update display configuration for system/invalid process.");
+                }
+                return;
+            }
+            mH.post(() -> {
+                synchronized (mGlobalLock) {
+                    // Check if display is initialized in AM.
+                    if (!mStackSupervisor.isDisplayAdded(displayId)) {
+                        // Call come when display is not yet added or has already been removed.
+                        if (DEBUG_CONFIGURATION) {
+                            Slog.w(TAG, "Trying to update display configuration for non-existing "
+                                            + "displayId=" + displayId);
+                        }
+                        return;
+                    }
+                    final WindowProcessController imeProcess = mPidMap.get(pid);
+                    if (imeProcess == null) {
+                        if (DEBUG_CONFIGURATION) {
+                            Slog.w(TAG, "Trying to update display configuration for invalid pid: "
+                                            + pid);
+                        }
+                        return;
+                    }
+                    // Fetch the current override configuration of the display and set it to the
+                    // process global configuration.
+                    imeProcess.onConfigurationChanged(
+                            mStackSupervisor.getDisplayOverrideConfiguration(displayId));
+                }
+            });
+        }
     }
 }

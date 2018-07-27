@@ -281,7 +281,7 @@ public class ActivityTestsBase {
             final WindowProcessController wpc = new WindowProcessController(mService,
                     mService.mContext.getApplicationInfo(), "name", 12345,
                     UserHandle.getUserId(12345), mock(Object.class),
-                    mock(WindowProcessListener.class));
+                    mock(WindowProcessListener.class), null);
             wpc.setThread(mock(IApplicationThread.class));
             activity.setProcess(wpc);
             return activity;

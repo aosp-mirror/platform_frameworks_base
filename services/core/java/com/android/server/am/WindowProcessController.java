@@ -17,7 +17,10 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RELEASE;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONFIGURATION;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RELEASE;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -29,11 +32,12 @@ import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
 
 import android.app.Activity;
-import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.IApplicationThread;
+import android.app.servertransaction.ConfigurationChangeItem;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.res.Configuration;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Log;
@@ -41,7 +45,7 @@ import android.util.Slog;
 
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.internal.util.function.pooled.PooledRunnable;
+import com.android.server.wm.ConfigurationContainer;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -57,9 +61,10 @@ import java.util.ArrayList;
  * window manager so the window manager lock is held and appropriate permissions are checked before
  * calls are allowed to proceed.
  */
-public class WindowProcessController {
+public class WindowProcessController extends ConfigurationContainer<ConfigurationContainer> {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowProcessController" : TAG_AM;
     private static final String TAG_RELEASE = TAG + POSTFIX_RELEASE;
+    private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
 
     // all about the first app in the process
     final ApplicationInfo mInfo;
@@ -108,8 +113,12 @@ public class WindowProcessController {
     // any tasks this process had run root activities in
     private final ArrayList<TaskRecord> mRecentTasks = new ArrayList<>();
 
+    // Last configuration that was reported to the process.
+    private final Configuration mLastReportedConfiguration;
+
     WindowProcessController(ActivityTaskManagerService atm, ApplicationInfo info, String name,
-            int uid, int userId, Object owner, WindowProcessListener listener) {
+            int uid, int userId, Object owner, WindowProcessListener listener,
+            Configuration config) {
         mInfo = info;
         mName = name;
         mUid = uid;
@@ -117,6 +126,10 @@ public class WindowProcessController {
         mOwner = owner;
         mListener = listener;
         mAtm = atm;
+        mLastReportedConfiguration = new Configuration();
+        if (config != null) {
+            onConfigurationChanged(config);
+        }
     }
 
     public void setPid(int pid) {
@@ -217,6 +230,21 @@ public class WindowProcessController {
 
     boolean isInstrumenting() {
         return mInstrumenting;
+    }
+
+    @Override
+    protected int getChildCount() {
+        return 0;
+    }
+
+    @Override
+    protected ConfigurationContainer getChildAt(int index) {
+        return null;
+    }
+
+    @Override
+    protected ConfigurationContainer getParent() {
+        return null;
     }
 
     public void addPackage(String packageName) {
@@ -526,6 +554,50 @@ public class WindowProcessController {
         mAtm.mH.post(r);
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newGlobalConfig) {
+        super.onConfigurationChanged(newGlobalConfig);
+        updateConfiguration();
+    }
+
+    @Override
+    public void onOverrideConfigurationChanged(Configuration newOverrideConfig) {
+        super.onOverrideConfigurationChanged(newOverrideConfig);
+        updateConfiguration();
+    }
+
+    private void updateConfiguration() {
+        final Configuration config = getConfiguration();
+        if (mLastReportedConfiguration.diff(config) == 0) {
+            // Nothing changed.
+            return;
+        }
+
+        try {
+            if (mThread == null) {
+                return;
+            }
+            if (DEBUG_CONFIGURATION) {
+                Slog.v(TAG_CONFIGURATION, "Sending to proc " + mName
+                        + " new config " + config);
+            }
+            config.seq = mAtm.increaseConfigurationSeqLocked();
+            mAtm.getLifecycleManager().scheduleTransaction(mThread,
+                    ConfigurationChangeItem.obtain(config));
+            setLastReportedConfiguration(config);
+        } catch (Exception e) {
+            Slog.e(TAG_CONFIGURATION, "Failed to schedule configuration change", e);
+        }
+    }
+
+    private void setLastReportedConfiguration(Configuration config) {
+        mLastReportedConfiguration.setTo(config);
+    }
+
+    Configuration getLastReportedConfiguration() {
+        return mLastReportedConfiguration;
+    }
+
     /** Returns the total time (in milliseconds) spent executing in both user and system code. */
     public long getCpuTime() {
         return (mListener != null) ? mListener.getCpuTime() : 0;
@@ -574,6 +646,9 @@ public class WindowProcessController {
                 pw.print(prefix); pw.print("mVrThreadTid="); pw.println(mVrThreadTid);
             }
         }
+        pw.println(prefix + " Configuration=" + getConfiguration());
+        pw.println(prefix + " OverrideConfiguration=" + getOverrideConfiguration());
+        pw.println(prefix + " mLastReportedConfiguration=" + mLastReportedConfiguration);
     }
 
 }

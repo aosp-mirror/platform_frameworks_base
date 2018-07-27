@@ -304,6 +304,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private final MergedConfiguration mLastReportedConfiguration = new MergedConfiguration();
 
+    private final Configuration mTempConfiguration = new Configuration();
+
     /**
      * The last content insets returned to the client in relayout. We use
      * these in the bounds animation to ensure we only observe inset changes
@@ -2250,8 +2252,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
+    private Configuration getProcessGlobalConfiguration() {
+        // For child windows we want to use the pid for the parent window in case the the child
+        // window was added from another process.
+        final int pid = isChildWindow() ? getParentWindow().mSession.mPid : mSession.mPid;
+        mTempConfiguration.setTo(mService.mProcessConfigurations.get(
+                pid, mService.mRoot.getConfiguration()));
+        return mTempConfiguration;
+    }
+
     void getMergedConfiguration(MergedConfiguration outConfiguration) {
-        final Configuration globalConfig = mService.mRoot.getConfiguration();
+        final Configuration globalConfig = getProcessGlobalConfiguration();
         final Configuration overrideConfig = getMergedOverrideConfiguration();
         outConfiguration.setConfiguration(globalConfig, overrideConfig);
     }
@@ -2854,7 +2865,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return mAppToken.mFrozenMergedConfig.peek();
         }
 
-        return super.getConfiguration();
+        // We use the process config this window is associated with as the based global config since
+        // the process can override it config, but isn't part of the window hierarchy.
+        final Configuration config = getProcessGlobalConfiguration();
+        config.updateFrom(getMergedOverrideConfiguration());
+        return config;
     }
 
     void reportResized() {

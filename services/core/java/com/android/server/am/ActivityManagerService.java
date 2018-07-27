@@ -5895,7 +5895,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                  PackageManager.NOTIFY_PACKAGE_USE_INSTRUMENTATION);
             }
             if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Binding proc "
-                    + processName + " with config " + getGlobalConfiguration());
+                    + processName + " with config "
+                    + app.getWindowProcessController().getConfiguration());
             ApplicationInfo appInfo = instr != null ? instr.mTargetInfo : app.info;
             app.compat = compatibilityInfoForPackage(appInfo);
 
@@ -6008,8 +6009,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         instr2.mUiAutomationConnection, testMode,
                         mBinderTransactionTrackingEnabled, enableTrackAllocation,
                         isRestrictedBackupMode || !normalMode, app.isPersistent(),
-                        new Configuration(getGlobalConfiguration()), app.compat,
-                        getCommonServicesLocked(app.isolated),
+                        new Configuration(app.getWindowProcessController().getConfiguration()),
+                        app.compat, getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
                         buildSerial, isAutofillCompatEnabled);
             } else {
@@ -6017,8 +6018,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         null, null, null, testMode,
                         mBinderTransactionTrackingEnabled, enableTrackAllocation,
                         isRestrictedBackupMode || !normalMode, app.isPersistent(),
-                        new Configuration(getGlobalConfiguration()), app.compat,
-                        getCommonServicesLocked(app.isolated),
+                        new Configuration(app.getWindowProcessController().getConfiguration()),
+                        app.compat, getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
                         buildSerial, isAutofillCompatEnabled);
             }
@@ -8718,7 +8719,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             StatsLog.write(StatsLog.ISOLATED_UID_CHANGED, info.uid, uid,
                     StatsLog.ISOLATED_UID_CHANGED__EVENT__CREATED);
         }
-        final ProcessRecord r = new ProcessRecord(this, info, proc, uid);
+        final ProcessRecord r = new ProcessRecord(this, info, proc, uid, getGlobalConfiguration());
         if (!mBooted && !mBooting
                 && userId == UserHandle.USER_SYSTEM
                 && (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK) {
@@ -17080,30 +17081,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             finishInstrumentationLocked(app, resultCode, results);
             Binder.restoreCallingIdentity(origId);
         }
-    }
-
-    // =========================================================
-    // CONFIGURATION
-    // =========================================================
-
-    public ConfigurationInfo getDeviceConfigurationInfo() {
-        ConfigurationInfo config = new ConfigurationInfo();
-        synchronized (this) {
-            final Configuration globalConfig = getGlobalConfiguration();
-            config.reqTouchScreen = globalConfig.touchscreen;
-            config.reqKeyboardType = globalConfig.keyboard;
-            config.reqNavigation = globalConfig.navigation;
-            if (globalConfig.navigation == Configuration.NAVIGATION_DPAD
-                    || globalConfig.navigation == Configuration.NAVIGATION_TRACKBALL) {
-                config.reqInputFeatures |= ConfigurationInfo.INPUT_FEATURE_FIVE_WAY_NAV;
-            }
-            if (globalConfig.keyboard != Configuration.KEYBOARD_UNDEFINED
-                    && globalConfig.keyboard != Configuration.KEYBOARD_NOKEYS) {
-                config.reqInputFeatures |= ConfigurationInfo.INPUT_FEATURE_HARD_KEYBOARD;
-            }
-            config.reqGlEsVersion = GL_ES_VERSION;
-        }
-        return config;
     }
 
     @Override

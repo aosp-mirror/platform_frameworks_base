@@ -3379,7 +3379,7 @@ public class ActivityManager {
      */
     public ConfigurationInfo getDeviceConfigurationInfo() {
         try {
-            return getService().getDeviceConfigurationInfo();
+            return getTaskService().getDeviceConfigurationInfo();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
