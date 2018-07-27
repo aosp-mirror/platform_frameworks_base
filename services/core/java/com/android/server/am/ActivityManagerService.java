@@ -10406,6 +10406,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                         : StatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__UNKNOWN
         );
 
+        final int relaunchReason = r == null ? ActivityRecord.RELAUNCH_REASON_NONE
+                        : r.getWindowProcessController().computeRelaunchReason();
+        final String relaunchReasonString = ActivityRecord.relaunchReasonToString(relaunchReason);
+        if (crashInfo.crashTag == null) {
+            crashInfo.crashTag = relaunchReasonString;
+        } else {
+            crashInfo.crashTag = crashInfo.crashTag + " " + relaunchReasonString;
+        }
+
         addErrorToDropBox(eventType, r, processName, null, null, null, null, null, crashInfo);
 
         mAppErrors.crashApplication(r, crashInfo);
@@ -10577,15 +10586,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         StatsLog.write(StatsLog.WTF_OCCURRED, callingUid, tag, processName,
                 callingPid);
-
-        final int relaunchReason = r == null ? ActivityRecord.RELAUNCH_REASON_NONE
-                        : r.getWindowProcessController().computeRelaunchReason();
-        final String relaunchReasonString = ActivityRecord.relaunchReasonToString(relaunchReason);
-        if (crashInfo.crashTag == null) {
-            crashInfo.crashTag = relaunchReasonString;
-        } else {
-            crashInfo.crashTag = crashInfo.crashTag + " " + relaunchReasonString;
-        }
 
         addErrorToDropBox("wtf", r, processName, null, null, tag, null, null, crashInfo);
 
