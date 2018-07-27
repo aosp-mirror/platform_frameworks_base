@@ -3217,7 +3217,8 @@ public class ConnectivityServiceTest {
 
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(false);
-        networkCallback.expectAvailableCallbacks(mWiFiNetworkAgent, false, false, timeoutMs);
+        networkCallback.expectAvailableCallbacks(mWiFiNetworkAgent, false, false,
+                TEST_CALLBACK_TIMEOUT_MS);
 
         // pass timeout and validate that UNAVAILABLE is not called
         networkCallback.assertNoCallback();
@@ -3237,8 +3238,8 @@ public class ConnectivityServiceTest {
 
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(false);
-        final int assertTimeoutMs = 100;
-        networkCallback.expectAvailableCallbacks(mWiFiNetworkAgent, false, false, assertTimeoutMs);
+        networkCallback.expectAvailableCallbacks(mWiFiNetworkAgent, false, false,
+                TEST_CALLBACK_TIMEOUT_MS);
         mWiFiNetworkAgent.disconnect();
         networkCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
 
