@@ -3181,7 +3181,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
                 if (!proc.shouldKillProcessForRemovedTask(tr)) {
                     // Don't kill process(es) that has an activity in a different task that is also
-                    // in recents.
+                    // in recents, or has an activity not stopped.
                     return;
                 }
 
