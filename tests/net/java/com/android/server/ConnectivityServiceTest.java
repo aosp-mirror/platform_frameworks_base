@@ -198,6 +198,9 @@ public class ConnectivityServiceTest {
     // (mService.mLingerDelayMs - TEST_CALLBACK_TIMEOUT_MS) between the time callbacks are
     // supposedly fired, and the time we call expectCallback.
     private final static int TEST_CALLBACK_TIMEOUT_MS = 200;
+    // Chosen to be less than TEST_CALLBACK_TIMEOUT_MS. This ensures that requests have time to
+    // complete before callbacks are verified.
+    private final static int TEST_REQUEST_TIMEOUT_MS = 150;
 
     private static final String CLAT_PREFIX = "v4-";
     private static final String MOBILE_IFNAME = "test_rmnet_data0";
@@ -3212,8 +3215,7 @@ public class ConnectivityServiceTest {
         NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
                 NetworkCapabilities.TRANSPORT_WIFI).build();
         final TestNetworkCallback networkCallback = new TestNetworkCallback();
-        final int timeoutMs = 150;
-        mCm.requestNetwork(nr, networkCallback, timeoutMs);
+        mCm.requestNetwork(nr, networkCallback, TEST_REQUEST_TIMEOUT_MS);
 
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(false);
@@ -3233,8 +3235,7 @@ public class ConnectivityServiceTest {
         NetworkRequest nr = new NetworkRequest.Builder().addTransportType(
                 NetworkCapabilities.TRANSPORT_WIFI).build();
         final TestNetworkCallback networkCallback = new TestNetworkCallback();
-        final int requestTimeoutMs = 50;
-        mCm.requestNetwork(nr, networkCallback, requestTimeoutMs);
+        mCm.requestNetwork(nr, networkCallback, TEST_REQUEST_TIMEOUT_MS);
 
         mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
         mWiFiNetworkAgent.connect(false);
