@@ -3287,8 +3287,20 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void generateViewResizeEvent() {
         if (mNeedViewResizeAnimation) {
-            mAnimationEvents.add(
-                    new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_VIEW_RESIZE));
+            boolean hasDisappearAnimation = false;
+            for (AnimationEvent animationEvent : mAnimationEvents) {
+                final int type = animationEvent.animationType;
+                if (type == AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK
+                    || type == AnimationEvent.ANIMATION_TYPE_HEADS_UP_DISAPPEAR) {
+                    hasDisappearAnimation = true;
+                    break;
+                }
+            }
+
+            if (!hasDisappearAnimation) {
+                mAnimationEvents.add(
+                        new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_VIEW_RESIZE));
+            }
         }
         mNeedViewResizeAnimation = false;
     }
