@@ -28,9 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for {@link ArcTerminationActionFromAvr}
- */
+/** Tests for {@link ArcTerminationActionFromAvr} */
 @SmallTest
 @RunWith(JUnit4.class)
 public class ArcTerminationActionFromAvrTest {
@@ -49,57 +47,60 @@ public class ArcTerminationActionFromAvrTest {
     public void setUp() {
         mDeviceInfoForTests = new HdmiDeviceInfo(1000, 1);
 
-        HdmiControlService hdmiControlService = new HdmiControlService(null) {
-            @Override
-            void sendCecCommand(HdmiCecMessage command,
-                @Nullable SendMessageCallback callback) {
-                switch (command.getOpcode()) {
-                    case Constants.MESSAGE_TERMINATE_ARC:
-                        if (callback != null) {
-                            callback.onSendCompleted(mSendCecCommandSuccess
-                                ? SendMessageResult.SUCCESS : SendMessageResult.NACK);
+        HdmiControlService hdmiControlService =
+                new HdmiControlService(null) {
+                    @Override
+                    void sendCecCommand(
+                            HdmiCecMessage command, @Nullable SendMessageCallback callback) {
+                        switch (command.getOpcode()) {
+                            case Constants.MESSAGE_TERMINATE_ARC:
+                                if (callback != null) {
+                                    callback.onSendCompleted(
+                                            mSendCecCommandSuccess
+                                                    ? SendMessageResult.SUCCESS
+                                                    : SendMessageResult.NACK);
+                                }
+                                if (mShouldDispatchReportArcTerminated) {
+                                    mHdmiCecLocalDeviceAudioSystem.dispatchMessage(
+                                            HdmiCecMessageBuilder.buildReportArcTerminated(
+                                                    Constants.ADDR_TV,
+                                                    mHdmiCecLocalDeviceAudioSystem.mAddress));
+                                }
+                                break;
+                            default:
+                                throw new IllegalArgumentException("Unexpected message");
                         }
-                        if (mShouldDispatchReportArcTerminated) {
-                            mHdmiCecLocalDeviceAudioSystem.dispatchMessage(
-                                HdmiCecMessageBuilder.buildReportArcTerminated(
-                                    Constants.ADDR_TV,
-                                    mHdmiCecLocalDeviceAudioSystem.mAddress));
-                        }
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Unexpected message");
-                }
-            }
+                    }
 
-            @Override
-            boolean isPowerStandby() {
-                return false;
-            }
+                    @Override
+                    boolean isPowerStandby() {
+                        return false;
+                    }
 
-            @Override
-            boolean isAddressAllocated() {
-                return true;
-            }
+                    @Override
+                    boolean isAddressAllocated() {
+                        return true;
+                    }
 
-            @Override
-            Looper getServiceLooper() {
-                return mTestLooper.getLooper();
-            }
-        };
+                    @Override
+                    Looper getServiceLooper() {
+                        return mTestLooper.getLooper();
+                    }
+                };
 
         mHdmiCecLocalDeviceAudioSystem =
-            new HdmiCecLocalDeviceAudioSystem(hdmiControlService) {
-                @Override
-                HdmiDeviceInfo getDeviceInfo() {
-                    return mDeviceInfoForTests;
-                }
+                new HdmiCecLocalDeviceAudioSystem(hdmiControlService) {
+                    @Override
+                    HdmiDeviceInfo getDeviceInfo() {
+                        return mDeviceInfoForTests;
+                    }
 
-                @Override
-                void setArcStatus(boolean enabled) {
-                    mSetArcStatusCalled = true;
-                    mArcEnabled = enabled;
-                }
-            };
+                    @Override
+                    void setArcStatus(boolean enabled) {
+                        mSetArcStatusCalled = true;
+                        mArcEnabled = enabled;
+                    }
+                };
         mHdmiCecLocalDeviceAudioSystem.init();
         Looper looper = mTestLooper.getLooper();
         hdmiControlService.setIoLooper(looper);

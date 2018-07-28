@@ -18,10 +18,10 @@ package com.android.server.hdmi;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.MessageQueue;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.HdmiCecController.NativeWrapper;
 import java.util.ArrayList;
 import java.util.List;
-import com.android.internal.annotations.VisibleForTesting;
 
 /** Fake {@link NativeWrapper} useful for testing. */
 final class FakeNativeWrapper implements NativeWrapper {
