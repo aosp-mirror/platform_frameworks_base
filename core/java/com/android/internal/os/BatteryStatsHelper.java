@@ -31,6 +31,7 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -1004,6 +1005,10 @@ public class BatteryStatsHelper {
         try {
             ParcelFileDescriptor pfd = service.getStatisticsStream();
             if (pfd != null) {
+                if (false) {
+                    Log.d(TAG, "selinux context: "
+                            + SELinux.getFileContext(pfd.getFileDescriptor()));
+                }
                 try (FileInputStream fis = new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
                     byte[] data = readFully(fis, MemoryFile.getSize(pfd.getFileDescriptor()));
                     Parcel parcel = Parcel.obtain();
