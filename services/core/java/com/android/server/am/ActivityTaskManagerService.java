@@ -135,6 +135,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
 import com.android.server.AppOpsService;
 import com.android.server.pm.UserManagerService;
+import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import android.app.AppGlobals;
 import android.app.IActivityController;
@@ -259,6 +260,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     UiHandler mUiHandler;
     ActivityManagerService mAm;
     ActivityManagerInternal mAmInternal;
+    UriGrantsManagerInternal mUgmInternal;
     /* Global service lock used by the package the owns this service. */
     Object mGlobalLock;
     ActivityStackSupervisor mStackSupervisor;
@@ -612,6 +614,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     void onActivityManagerInternalAdded() {
         mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
     }
 
     protected ActivityStackSupervisor createStackSupervisor() {
@@ -1192,6 +1195,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     if (!res) {
                         Slog.i(TAG, "Removing task failed to finish activity");
                     }
+                    // Explicitly dismissing the activity so reset its relaunch flag.
+                    r.mRelaunchReason = ActivityRecord.RELAUNCH_REASON_NONE;
                 } else {
                     res = tr.getStack().requestFinishActivityLocked(token, resultCode,
                             resultData, "app-request", true);
@@ -3613,7 +3618,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 throw new IllegalArgumentException("Activity does not exist; token="
                         + activityToken);
             }
-            return r.getUriPermissionsLocked().getExternalTokenLocked();
+            return r.getUriPermissionsLocked().getExternalToken();
         }
     }
 

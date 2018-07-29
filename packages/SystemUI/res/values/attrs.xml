@@ -143,5 +143,8 @@
     <attr name="rotateButtonEndAngle" format="float" />
     <attr name="rotateButtonScaleX" format="float" />
 
+    <!-- Used to style charging animation AVD animation -->
+    <attr name="chargingAnimColor" format="color" />
+
 </resources>
 

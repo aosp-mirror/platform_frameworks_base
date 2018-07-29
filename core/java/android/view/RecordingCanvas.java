@@ -515,7 +515,7 @@ public class RecordingCanvas extends Canvas {
                             contextStart - paraStart,
                             contextEnd - contextStart,
                             x, y, isRtl, paint.getNativeInstance(),
-                            mp.getNativePtr());
+                            mp.getNativeMeasuredParagraph().getNativePtr());
                     return;
                 }
             }

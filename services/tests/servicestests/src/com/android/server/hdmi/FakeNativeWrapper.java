@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.MessageQueue;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.HdmiCecController.NativeWrapper;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,8 @@ final class FakeNativeWrapper implements NativeWrapper {
             };
 
     private final List<HdmiCecMessage> mResultMessages = new ArrayList<>();
+    private HdmiCecMessage mResultMessage;
+    private int mMyPhysicalAddress = 0;
 
     @Override
     public long nativeInit(HdmiCecController handler, MessageQueue messageQueue) {
@@ -71,7 +74,7 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     @Override
     public int nativeGetPhysicalAddress(long controllerPtr) {
-        return 0;
+        return mMyPhysicalAddress;
     }
 
     @Override
@@ -118,5 +121,10 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     public void setPollAddressResponse(int logicalAddress, int response) {
         mPollAddressResponse[logicalAddress] = response;
+    }
+
+    @VisibleForTesting
+    protected void setPhysicalAddress(int physicalAddress) {
+        mMyPhysicalAddress = physicalAddress;
     }
 }

@@ -218,24 +218,18 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             if (!isCalledForCurrentUserLocked()) {
                 return false;
             }
+            final UserState userState = mUserStateWeakReference.get();
+            if (userState == null) return false;
+            return userState.setSoftKeyboardModeLocked(showMode, mComponentName);
         }
-        UserState userState = mUserStateWeakReference.get();
-        if (userState == null) return false;
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            // Keep track of the last service to request a non-default show mode. The show mode
-            // should be restored to default should this service be disabled.
-            userState.mServiceChangingSoftKeyboardMode = (showMode == SHOW_MODE_AUTO)
-                    ? null : mComponentName;
-
-            Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, showMode,
-                    userState.mUserId);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-        return true;
     }
+
+    @Override
+    public int getSoftKeyboardShowMode() {
+        final UserState userState = mUserStateWeakReference.get();
+        return (userState != null) ? userState.getSoftKeyboardShowMode() : 0;
+    }
+
 
     @Override
     public boolean isAccessibilityButtonAvailable() {

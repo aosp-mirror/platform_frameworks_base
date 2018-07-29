@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+
 import android.Manifest;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
@@ -28,7 +30,6 @@ import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
@@ -60,7 +61,6 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Singleton;
@@ -1323,129 +1323,48 @@ public class ActivityManager {
      * Information you can retrieve about tasks that the user has most recently
      * started or visited.
      */
-    public static class RecentTaskInfo implements Parcelable {
+    public static class RecentTaskInfo extends TaskInfo implements Parcelable {
         /**
          * If this task is currently running, this is the identifier for it.
          * If it is not running, this will be -1.
+         *
+         * @deprecated As of {@link android.os.Build.VERSION_CODES#Q}, use
+         * {@link RecentTaskInfo#taskId} to get the task id and {@link RecentTaskInfo#isRunning}
+         * to determine if it is running.
          */
+        @Deprecated
         public int id;
 
         /**
          * The true identifier of this task, valid even if it is not running.
+         *
+         * @deprecated As of {@link android.os.Build.VERSION_CODES#Q}, use
+         * {@link RecentTaskInfo#taskId}.
          */
+        @Deprecated
         public int persistentId;
 
         /**
-         * The original Intent used to launch the task.  You can use this
-         * Intent to re-launch the task (if it is no longer running) or bring
-         * the current task to the front.
-         */
-        public Intent baseIntent;
-
-        /**
-         * If this task was started from an alias, this is the actual
-         * activity component that was initially started; the component of
-         * the baseIntent in this case is the name of the actual activity
-         * implementation that the alias referred to.  Otherwise, this is null.
-         */
-        public ComponentName origActivity;
-
-        /**
-         * The actual activity component that started the task.
-         * @hide
-         */
-        @Nullable
-        public ComponentName realActivity;
-
-        /**
          * Description of the task's last state.
+         *
+         * @deprecated As of {@link android.os.Build.VERSION_CODES#Q}, currently always null.
          */
+        @Deprecated
         public CharSequence description;
 
         /**
-         * The id of the ActivityStack this Task was on most recently.
-         * @hide
-         */
-        public int stackId;
-
-        /**
-         * The id of the user the task was running as.
-         * @hide
-         */
-        public int userId;
-
-        /**
-         * The first time this task was active.
-         * @hide
-         */
-        public long firstActiveTime;
-
-        /**
-         * The last time this task was active.
-         * @hide
-         */
-        public long lastActiveTime;
-
-        /**
-         * The recent activity values for the highest activity in the stack to have set the values.
-         * {@link Activity#setTaskDescription(android.app.ActivityManager.TaskDescription)}.
-         */
-        public TaskDescription taskDescription;
-
-        /**
          * Task affiliation for grouping with other tasks.
+         *
+         * @deprecated As of {@link android.os.Build.VERSION_CODES#Q}, currently always 0.
          */
+        @Deprecated
         public int affiliatedTaskId;
 
-        /**
-         * Task affiliation color of the source task with the affiliated task id.
-         *
-         * @hide
-         */
-        public int affiliatedTaskColor;
-
-        /**
-         * The component launched as the first activity in the task.
-         * This can be considered the "application" of this task.
-         */
-        public ComponentName baseActivity;
-
-        /**
-         * The activity component at the top of the history stack of the task.
-         * This is what the user is currently doing.
-         */
-        public ComponentName topActivity;
-
-        /**
-         * Number of activities in this task.
-         */
-        public int numActivities;
-
-        /**
-         * The bounds of the task.
-         * @hide
-         */
-        public Rect bounds;
-
-        /**
-         * True if the task can go in the docked stack.
-         * @hide
-         */
-        public boolean supportsSplitScreenMultiWindow;
-
-        /**
-         * The resize mode of the task. See {@link ActivityInfo#resizeMode}.
-         * @hide
-         */
-        public int resizeMode;
-
-        /**
-         * The current configuration this task is in.
-         * @hide
-         */
-        final public Configuration configuration = new Configuration();
-
         public RecentTaskInfo() {
+        }
+
+        private RecentTaskInfo(Parcel source) {
+            readFromParcel(source);
         }
 
         @Override
@@ -1453,67 +1372,17 @@ public class ActivityManager {
             return 0;
         }
 
+        public void readFromParcel(Parcel source) {
+            id = source.readInt();
+            persistentId = source.readInt();
+            super.readFromParcel(source);
+        }
+
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(id);
             dest.writeInt(persistentId);
-            if (baseIntent != null) {
-                dest.writeInt(1);
-                baseIntent.writeToParcel(dest, 0);
-            } else {
-                dest.writeInt(0);
-            }
-            ComponentName.writeToParcel(origActivity, dest);
-            ComponentName.writeToParcel(realActivity, dest);
-            TextUtils.writeToParcel(description, dest,
-                    Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
-            if (taskDescription != null) {
-                dest.writeInt(1);
-                taskDescription.writeToParcel(dest, 0);
-            } else {
-                dest.writeInt(0);
-            }
-            dest.writeInt(stackId);
-            dest.writeInt(userId);
-            dest.writeLong(lastActiveTime);
-            dest.writeInt(affiliatedTaskId);
-            dest.writeInt(affiliatedTaskColor);
-            ComponentName.writeToParcel(baseActivity, dest);
-            ComponentName.writeToParcel(topActivity, dest);
-            dest.writeInt(numActivities);
-            if (bounds != null) {
-                dest.writeInt(1);
-                bounds.writeToParcel(dest, 0);
-            } else {
-                dest.writeInt(0);
-            }
-            dest.writeInt(supportsSplitScreenMultiWindow ? 1 : 0);
-            dest.writeInt(resizeMode);
-            configuration.writeToParcel(dest, flags);
-        }
-
-        public void readFromParcel(Parcel source) {
-            id = source.readInt();
-            persistentId = source.readInt();
-            baseIntent = source.readInt() > 0 ? Intent.CREATOR.createFromParcel(source) : null;
-            origActivity = ComponentName.readFromParcel(source);
-            realActivity = ComponentName.readFromParcel(source);
-            description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
-            taskDescription = source.readInt() > 0 ?
-                    TaskDescription.CREATOR.createFromParcel(source) : null;
-            stackId = source.readInt();
-            userId = source.readInt();
-            lastActiveTime = source.readLong();
-            affiliatedTaskId = source.readInt();
-            affiliatedTaskColor = source.readInt();
-            baseActivity = ComponentName.readFromParcel(source);
-            topActivity = ComponentName.readFromParcel(source);
-            numActivities = source.readInt();
-            bounds = source.readInt() > 0 ?
-                    Rect.CREATOR.createFromParcel(source) : null;
-            supportsSplitScreenMultiWindow = source.readInt() == 1;
-            resizeMode = source.readInt();
-            configuration.readFromParcel(source);
+            super.writeToParcel(dest, flags);
         }
 
         public static final Creator<RecentTaskInfo> CREATOR
@@ -1526,8 +1395,40 @@ public class ActivityManager {
             }
         };
 
-        private RecentTaskInfo(Parcel source) {
-            readFromParcel(source);
+        /**
+         * @hide
+         */
+        public void dump(PrintWriter pw, String indent) {
+            final String activityType = WindowConfiguration.activityTypeToString(
+                    configuration.windowConfiguration.getActivityType());
+            final String windowingMode = WindowConfiguration.activityTypeToString(
+                    configuration.windowConfiguration.getActivityType());
+
+            pw.println(); pw.print("   ");
+            pw.print(" id=" + persistentId);
+            pw.print(" stackId=" + stackId);
+            pw.print(" userId=" + userId);
+            pw.print(" hasTask=" + (id != -1));
+            pw.print(" lastActiveTime=" + lastActiveTime);
+            pw.println(); pw.print("   ");
+            pw.print(" baseIntent=" + baseIntent);
+            pw.println(); pw.print("   ");
+            pw.print(" isExcluded="
+                    + ((baseIntent.getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS) != 0));
+            pw.print(" activityType=" + activityType);
+            pw.print(" windowingMode=" + windowingMode);
+            pw.print(" supportsSplitScreenMultiWindow=" + supportsSplitScreenMultiWindow);
+            if (taskDescription != null) {
+                pw.println(); pw.print("   ");
+                final ActivityManager.TaskDescription td = taskDescription;
+                pw.print(" taskDescription {");
+                pw.print(" colorBackground=#" + Integer.toHexString(td.getBackgroundColor()));
+                pw.print(" colorPrimary=#" + Integer.toHexString(td.getPrimaryColor()));
+                pw.print(" iconRes=" + (td.getIconResource() != 0));
+                pw.print(" iconBitmap=" + (td.getIconFilename() != null
+                        || td.getInMemoryIcon() != null));
+                pw.println(" }");
+            }
         }
     }
 
@@ -1596,119 +1497,62 @@ public class ActivityManager {
      * the system may have killed its process and is only holding on to its
      * last state in order to restart it when the user returns.
      */
-    public static class RunningTaskInfo implements Parcelable {
+    public static class RunningTaskInfo extends TaskInfo implements Parcelable {
+
         /**
          * A unique identifier for this task.
+         *
+         * @deprecated As of {@link android.os.Build.VERSION_CODES#Q}, use
+         * {@link RunningTaskInfo#taskId}.
          */
+        @Deprecated
         public int id;
 
         /**
-         * The stack that currently contains this task.
-         * @hide
+         * Thumbnail representation of the task's current state.
+         *
+         * @deprecated As of {@link android.os.Build.VERSION_CODES#Q}, currently always null.
          */
-        public int stackId;
-
-        /**
-         * The component launched as the first activity in the task.  This can
-         * be considered the "application" of this task.
-         */
-        public ComponentName baseActivity;
-
-        /**
-         * The activity component at the top of the history stack of the task.
-         * This is what the user is currently doing.
-         */
-        public ComponentName topActivity;
-
-        /**
-         * Thumbnail representation of the task's current state.  Currently
-         * always null.
-         */
+        @Deprecated
         public Bitmap thumbnail;
 
         /**
          * Description of the task's current state.
+         *
+         * @deprecated As of {@link android.os.Build.VERSION_CODES#Q}, currently always null.
          */
+        @Deprecated
         public CharSequence description;
 
         /**
-         * Number of activities in this task.
+         * Number of activities that are currently running (not stopped and persisted) in this task.
+         *
+         * @deprecated As of {@link android.os.Build.VERSION_CODES#Q}, currently always 0.
          */
-        public int numActivities;
-
-        /**
-         * Number of activities that are currently running (not stopped
-         * and persisted) in this task.
-         */
+        @Deprecated
         public int numRunning;
-
-        /**
-         * Last time task was run. For sorting.
-         * @hide
-         */
-        public long lastActiveTime;
-
-        /**
-         * True if the task can go in the docked stack.
-         * @hide
-         */
-        public boolean supportsSplitScreenMultiWindow;
-
-        /**
-         * The resize mode of the task. See {@link ActivityInfo#resizeMode}.
-         * @hide
-         */
-        public int resizeMode;
-
-        /**
-         * The full configuration the task is currently running in.
-         * @hide
-         */
-        final public Configuration configuration = new Configuration();
 
         public RunningTaskInfo() {
         }
 
+        private RunningTaskInfo(Parcel source) {
+            readFromParcel(source);
+        }
+
+        @Override
         public int describeContents() {
             return 0;
         }
 
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(id);
-            dest.writeInt(stackId);
-            ComponentName.writeToParcel(baseActivity, dest);
-            ComponentName.writeToParcel(topActivity, dest);
-            if (thumbnail != null) {
-                dest.writeInt(1);
-                thumbnail.writeToParcel(dest, 0);
-            } else {
-                dest.writeInt(0);
-            }
-            TextUtils.writeToParcel(description, dest,
-                    Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
-            dest.writeInt(numActivities);
-            dest.writeInt(numRunning);
-            dest.writeInt(supportsSplitScreenMultiWindow ? 1 : 0);
-            dest.writeInt(resizeMode);
-            configuration.writeToParcel(dest, flags);
-        }
-
         public void readFromParcel(Parcel source) {
             id = source.readInt();
-            stackId = source.readInt();
-            baseActivity = ComponentName.readFromParcel(source);
-            topActivity = ComponentName.readFromParcel(source);
-            if (source.readInt() != 0) {
-                thumbnail = Bitmap.CREATOR.createFromParcel(source);
-            } else {
-                thumbnail = null;
-            }
-            description = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
-            numActivities = source.readInt();
-            numRunning = source.readInt();
-            supportsSplitScreenMultiWindow = source.readInt() != 0;
-            resizeMode = source.readInt();
-            configuration.readFromParcel(source);
+            super.readFromParcel(source);
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(id);
+            super.writeToParcel(dest, flags);
         }
 
         public static final Creator<RunningTaskInfo> CREATOR = new Creator<RunningTaskInfo>() {
@@ -1719,10 +1563,6 @@ public class ActivityManager {
                 return new RunningTaskInfo[size];
             }
         };
-
-        private RunningTaskInfo(Parcel source) {
-            readFromParcel(source);
-        }
     }
 
     /**
@@ -2559,7 +2399,6 @@ public class ActivityManager {
         return clearApplicationUserData(mContext.getPackageName(), null);
     }
 
-
     /**
      * Permits an application to get the persistent URI permissions granted to another.
      *
@@ -2571,17 +2410,13 @@ public class ActivityManager {
      * @return list of granted URI permissions
      *
      * @hide
+     * @deprecated use {@link UriGrantsManager#getGrantedUriPermissions(String)} instead.
      */
+    @Deprecated
     public ParceledListSlice<GrantedUriPermission> getGrantedUriPermissions(
             @Nullable String packageName) {
-        try {
-            @SuppressWarnings("unchecked")
-            final ParceledListSlice<GrantedUriPermission> castedList = getService()
-                    .getGrantedUriPermissions(packageName, mContext.getUserId());
-            return castedList;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return ((UriGrantsManager) mContext.getSystemService(Context.URI_GRANTS_SERVICE))
+                .getGrantedUriPermissions(packageName);
     }
 
     /**
@@ -2592,14 +2427,12 @@ public class ActivityManager {
      * @param packageName application to clear its granted permissions
      *
      * @hide
+     * @deprecated use {@link UriGrantsManager#clearGrantedUriPermissions(String)} instead.
      */
+    @Deprecated
     public void clearGrantedUriPermissions(String packageName) {
-        try {
-            getService().clearGrantedUriPermissions(packageName,
-                    mContext.getUserId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        ((UriGrantsManager) mContext.getSystemService(Context.URI_GRANTS_SERVICE))
+                .clearGrantedUriPermissions(packageName);
     }
 
     /**

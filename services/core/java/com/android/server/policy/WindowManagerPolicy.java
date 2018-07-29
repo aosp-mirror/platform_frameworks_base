@@ -525,7 +525,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * Add a input consumer which will consume all input events going to any window below it.
          */
         public InputConsumer createInputConsumer(Looper looper, String name,
-                InputEventReceiver.Factory inputEventReceiverFactory);
+                InputEventReceiver.Factory inputEventReceiverFactory, int displayId);
 
         /**
          * Returns a code that describes the current state of the lid switch.

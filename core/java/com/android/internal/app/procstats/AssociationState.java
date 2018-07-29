@@ -36,7 +36,6 @@ public final class AssociationState {
     private final ProcessStats.PackageState mPackageState;
     private final String mProcessName;
     private final String mName;
-    private final DurationsTable mDurations;
 
     public final class SourceState {
         final SourceKey mKey;
@@ -49,8 +48,10 @@ public final class AssociationState {
         long mDuration;
         long mTrackingUptime;
         int mActiveCount;
+        int mActiveProcState = ProcessStats.STATE_NOTHING;
         long mActiveStartUptime;
         long mActiveDuration;
+        DurationsTable mDurations;
 
         SourceState(SourceKey key) {
             mKey = key;
@@ -77,13 +78,15 @@ public final class AssociationState {
                 mProcState = procState;
             }
             if (procState < ProcessStats.STATE_HOME) {
+                // If the proc state has become better than cached, then we want to
+                // start tracking it to count when it is actually active.  If it drops
+                // down to cached, we will clean it up when we later evaluate all currently
+                // tracked associations in ProcessStats.updateTrackingAssociationsLocked().
                 if (!mInTrackingList) {
                     mInTrackingList = true;
                     mTrackingUptime = now;
                     mProcessStats.mTrackingAssociations.add(this);
                 }
-            } else {
-                stopTracking(now);
             }
         }
 
@@ -102,6 +105,22 @@ public final class AssociationState {
                     mActiveStartUptime = now;
                     mActiveCount++;
                 }
+                if (mActiveProcState != mProcState) {
+                    if (mActiveProcState != ProcessStats.STATE_NOTHING) {
+                        // Currently active proc state changed, need to store the duration
+                        // so far and switch tracking to the new proc state.
+                        final long duration = mActiveDuration + now - mActiveStartUptime;
+                        if (duration != 0) {
+                            if (mDurations == null) {
+                                makeDurations();
+                            }
+                            mDurations.addDuration(mActiveProcState, duration);
+                            mActiveDuration = 0;
+                        }
+                        mActiveStartUptime = now;
+                    }
+                    mActiveProcState = mProcState;
+                }
             } else {
                 Slog.wtf(TAG, "startActive while not tracking: " + this);
             }
@@ -112,15 +131,25 @@ public final class AssociationState {
                 if (!mInTrackingList) {
                     Slog.wtf(TAG, "stopActive while not tracking: " + this);
                 }
-                mActiveDuration += now - mActiveStartUptime;
+                final long duration = mActiveDuration + now - mActiveStartUptime;
+                if (mDurations != null) {
+                    mDurations.addDuration(mActiveProcState, duration);
+                } else {
+                    mActiveDuration = duration;
+                }
                 mActiveStartUptime = 0;
             }
+        }
+
+        void makeDurations() {
+            mDurations = new DurationsTable(mProcessStats.mTableData);
         }
 
         void stopTracking(long now) {
             stopActive(now);
             if (mInTrackingList) {
                 mInTrackingList = false;
+                mProcState = ProcessStats.STATE_NOTHING;
                 // Do a manual search for where to remove, since these objects will typically
                 // be towards the end of the array.
                 final ArrayList<SourceState> list = mProcessStats.mTrackingAssociations;
@@ -207,7 +236,6 @@ public final class AssociationState {
         mPackageState = packageState;
         mName = name;
         mProcessName = processName;
-        mDurations = new DurationsTable(processStats.mTableData);
         mProc = proc;
     }
 
@@ -254,7 +282,6 @@ public final class AssociationState {
     }
 
     public void add(AssociationState other) {
-        mDurations.addDurations(other.mDurations);
         for (int isrc = other.mSources.size() - 1; isrc >= 0; isrc--) {
             final SourceKey key = other.mSources.keyAt(isrc);
             final SourceState otherSrc = other.mSources.valueAt(isrc);
@@ -266,7 +293,48 @@ public final class AssociationState {
             mySrc.mCount += otherSrc.mCount;
             mySrc.mDuration += otherSrc.mDuration;
             mySrc.mActiveCount += otherSrc.mActiveCount;
-            mySrc.mActiveDuration += otherSrc.mActiveDuration;
+            if (otherSrc.mActiveDuration != 0 || otherSrc.mDurations != null) {
+                // Only need to do anything if the other one has some duration data.
+                if (mySrc.mDurations != null) {
+                    // If the target already has multiple durations, just add in whatever
+                    // we have in the other.
+                    if (otherSrc.mDurations != null) {
+                        mySrc.mDurations.addDurations(otherSrc.mDurations);
+                    } else {
+                        mySrc.mDurations.addDuration(otherSrc.mActiveProcState,
+                                otherSrc.mActiveDuration);
+                    }
+                } else if (otherSrc.mDurations != null) {
+                    // The other one has multiple durations, but we don't.  Expand to
+                    // multiple durations and copy over.
+                    mySrc.makeDurations();
+                    mySrc.mDurations.addDurations(otherSrc.mDurations);
+                    if (mySrc.mActiveDuration != 0) {
+                        mySrc.mDurations.addDuration(mySrc.mActiveProcState, mySrc.mActiveDuration);
+                        mySrc.mActiveDuration = 0;
+                        mySrc.mActiveProcState = ProcessStats.STATE_NOTHING;
+                    }
+                } else if (mySrc.mActiveDuration != 0) {
+                    // Both have a single inline duration...  we can either add them together,
+                    // or need to expand to multiple durations.
+                    if (mySrc.mActiveProcState == otherSrc.mActiveProcState) {
+                        mySrc.mDuration += otherSrc.mDuration;
+                    } else {
+                        // The two have durations with different proc states, need to turn
+                        // in to multiple durations.
+                        mySrc.makeDurations();
+                        mySrc.mDurations.addDuration(mySrc.mActiveProcState, mySrc.mActiveDuration);
+                        mySrc.mDurations.addDuration(otherSrc.mActiveProcState,
+                                otherSrc.mActiveDuration);
+                        mySrc.mActiveDuration = 0;
+                        mySrc.mActiveProcState = ProcessStats.STATE_NOTHING;
+                    }
+                } else {
+                    // The other one has a duration, and we know the target doesn't.  Copy over.
+                    mySrc.mActiveProcState = otherSrc.mActiveProcState;
+                    mySrc.mActiveDuration = otherSrc.mActiveDuration;
+                }
+            }
         }
     }
 
@@ -275,7 +343,6 @@ public final class AssociationState {
     }
 
     public void resetSafely(long now) {
-        mDurations.resetTable();
         if (!isInUse()) {
             mSources.clear();
         } else {
@@ -293,6 +360,7 @@ public final class AssociationState {
                         src.mActiveCount = 0;
                     }
                     src.mActiveDuration = 0;
+                    src.mDurations = null;
                 } else {
                     mSources.removeAt(isrc);
                 }
@@ -301,7 +369,6 @@ public final class AssociationState {
     }
 
     public void writeToParcel(ProcessStats stats, Parcel out, long nowUptime) {
-        mDurations.writeToParcel(out);
         final int NSRC = mSources.size();
         out.writeInt(NSRC);
         for (int isrc = 0; isrc < NSRC; isrc++) {
@@ -312,7 +379,14 @@ public final class AssociationState {
             out.writeInt(src.mCount);
             out.writeLong(src.mDuration);
             out.writeInt(src.mActiveCount);
-            out.writeLong(src.mActiveDuration);
+            if (src.mDurations != null) {
+                out.writeInt(1);
+                src.mDurations.writeToParcel(out);
+            } else {
+                out.writeInt(0);
+                out.writeInt(src.mActiveProcState);
+                out.writeLong(src.mActiveDuration);
+            }
         }
     }
 
@@ -321,9 +395,6 @@ public final class AssociationState {
      * caused it to fail.
      */
     public String readFromParcel(ProcessStats stats, Parcel in, int parcelVersion) {
-        if (!mDurations.readFromParcel(in)) {
-            return "Duration table corrupt";
-        }
         final int NSRC = in.readInt();
         if (NSRC < 0 || NSRC > 100000) {
             return "Association with bad src count: " + NSRC;
@@ -336,7 +407,15 @@ public final class AssociationState {
             src.mCount = in.readInt();
             src.mDuration = in.readLong();
             src.mActiveCount = in.readInt();
-            src.mActiveDuration = in.readLong();
+            if (in.readInt() != 0) {
+                src.makeDurations();
+                if (!src.mDurations.readFromParcel(in)) {
+                    return "Duration table corrupt: " + key + " <- " + src;
+                }
+            } else {
+                src.mActiveProcState = in.readInt();
+                src.mActiveDuration = in.readLong();
+            }
             mSources.put(key, src);
         }
         return null;
@@ -351,7 +430,12 @@ public final class AssociationState {
                     src.mStartUptime = nowUptime;
                 }
                 if (src.mActiveStartUptime > 0) {
-                    src.mActiveDuration += nowUptime - src.mActiveStartUptime;
+                    final long duration = src.mActiveDuration + nowUptime - src.mActiveStartUptime;
+                    if (src.mDurations != null) {
+                        src.mDurations.addDuration(src.mActiveProcState, duration);
+                    } else {
+                        src.mActiveDuration = duration;
+                    }
                     src.mActiveStartUptime = nowUptime;
                 }
             }
@@ -359,7 +443,7 @@ public final class AssociationState {
     }
 
     public void dumpStats(PrintWriter pw, String prefix, String prefixInner, String headerPrefix,
-            long now, long totalTime, boolean dumpSummary, boolean dumpAll) {
+            long now, long totalTime, boolean dumpDetails, boolean dumpAll) {
         if (dumpAll) {
             pw.print(prefix);
             pw.print("mNumActive=");
@@ -376,18 +460,18 @@ public final class AssociationState {
             UserHandle.formatUid(pw, key.mUid);
             pw.println(":");
             pw.print(prefixInner);
-            pw.print("   Count ");
+            pw.print("   Total count ");
             pw.print(src.mCount);
             long duration = src.mDuration;
             if (src.mNesting > 0) {
                 duration += now - src.mStartUptime;
             }
             if (dumpAll) {
-                pw.print(" / Duration ");
+                pw.print(": Duration ");
                 TimeUtils.formatDuration(duration, pw);
                 pw.print(" / ");
             } else {
-                pw.print(" / time ");
+                pw.print(": time ");
             }
             DumpUtils.printPercent(pw, (double)duration/(double)totalTime);
             if (src.mNesting > 0) {
@@ -401,28 +485,118 @@ public final class AssociationState {
                 pw.print(")");
             }
             pw.println();
-            if (src.mActiveCount > 0) {
+            if (src.mActiveCount > 0 || src.mDurations != null || src.mActiveDuration != 0
+                    || src.mActiveStartUptime != 0) {
                 pw.print(prefixInner);
                 pw.print("   Active count ");
                 pw.print(src.mActiveCount);
-                duration = src.mActiveDuration;
-                if (src.mActiveStartUptime > 0) {
-                    duration += now - src.mActiveStartUptime;
-                }
-                if (dumpAll) {
-                    pw.print(" / Duration ");
-                    TimeUtils.formatDuration(duration, pw);
-                    pw.print(" / ");
+                if (dumpDetails) {
+                    if (dumpAll) {
+                        pw.print(src.mDurations != null ? " (multi-field)" : " (inline)");
+                    }
+                    pw.println(":");
+                    dumpTime(pw, prefixInner, src, totalTime, now, dumpDetails, dumpAll);
                 } else {
-                    pw.print(" / time ");
+                    pw.print(": ");
+                    dumpActiveDurationSummary(pw, src, totalTime, now, dumpAll);
+                    pw.println();
                 }
-                DumpUtils.printPercent(pw, (double)duration/(double)totalTime);
-                if (src.mActiveStartUptime > 0) {
-                    pw.print(" (running)");
+            }
+            if (dumpAll) {
+                if (src.mInTrackingList) {
+                    pw.print(prefixInner);
+                    pw.print("   mInTrackingList=");
+                    pw.println(src.mInTrackingList);
                 }
-                pw.println();
+                if (src.mProcState != ProcessStats.STATE_NOTHING) {
+                    pw.print(prefixInner);
+                    pw.print("   mProcState=");
+                    pw.print(DumpUtils.STATE_NAMES[src.mProcState]);
+                    pw.print(" mProcStateSeq=");
+                    pw.println(src.mProcStateSeq);
+                }
             }
         }
+    }
+
+    void dumpActiveDurationSummary(PrintWriter pw, final SourceState src, long totalTime,
+            long now, boolean dumpAll) {
+        long duration = dumpTime(null, null, src, totalTime, now, false, false);
+        final boolean isRunning = duration < 0;
+        if (isRunning) {
+            duration = -duration;
+        }
+        if (dumpAll) {
+            pw.print("Duration ");
+            TimeUtils.formatDuration(duration, pw);
+            pw.print(" / ");
+        } else {
+            pw.print("time ");
+        }
+        DumpUtils.printPercent(pw, (double) duration / (double) totalTime);
+        if (src.mActiveStartUptime > 0) {
+            pw.print(" (running)");
+        }
+        pw.println();
+    }
+
+    long dumpTime(PrintWriter pw, String prefix, final SourceState src, long overallTime, long now,
+            boolean dumpDetails, boolean dumpAll) {
+        long totalTime = 0;
+        boolean isRunning = false;
+        for (int iprocstate = 0; iprocstate < ProcessStats.STATE_COUNT; iprocstate++) {
+            long time;
+            if (src.mDurations != null) {
+                time = src.mDurations.getValueForId((byte)iprocstate);
+            } else {
+                time = src.mActiveProcState == iprocstate ? src.mDuration : 0;
+            }
+            final String running;
+            if (src.mActiveStartUptime != 0 && src.mActiveProcState == iprocstate) {
+                running = " (running)";
+                isRunning = true;
+                time += now - src.mActiveStartUptime;
+            } else {
+                running = null;
+            }
+            if (time != 0) {
+                if (pw != null) {
+                    pw.print(prefix);
+                    pw.print("  ");
+                    pw.print(DumpUtils.STATE_LABELS[iprocstate]);
+                    pw.print(": ");
+                    if (dumpAll) {
+                        pw.print("Duration ");
+                        TimeUtils.formatDuration(time, pw);
+                        pw.print(" / ");
+                    } else {
+                        pw.print("time ");
+                    }
+                    DumpUtils.printPercent(pw, (double) time / (double) overallTime);
+                    if (running != null) {
+                        pw.print(running);
+                    }
+                    pw.println();
+                }
+                totalTime += time;
+            }
+        }
+        if (totalTime != 0 && pw != null) {
+            pw.print(prefix);
+            pw.print("  ");
+            pw.print(DumpUtils.STATE_LABEL_TOTAL);
+            pw.print(": ");
+            if (dumpAll) {
+                pw.print("Duration ");
+                TimeUtils.formatDuration(totalTime, pw);
+                pw.print(" / ");
+            } else {
+                pw.print("time ");
+            }
+            DumpUtils.printPercent(pw, (double) totalTime / (double) overallTime);
+            pw.println();
+        }
+        return isRunning ? -totalTime : totalTime;
     }
 
     public void dumpTimesCheckin(PrintWriter pw, String pkgName, int uid, long vers,
@@ -454,12 +628,30 @@ public final class AssociationState {
             pw.print(duration);
             pw.print(",");
             pw.print(src.mActiveCount);
-            duration = src.mActiveDuration;
-            if (src.mActiveStartUptime > 0) {
-                duration += now - src.mActiveStartUptime;
+            final long timeNow = src.mActiveStartUptime != 0 ? (now-src.mActiveStartUptime) : 0;
+            if (src.mDurations != null) {
+                final int N = src.mDurations.getKeyCount();
+                for (int i=0; i<N; i++) {
+                    final int dkey = src.mDurations.getKeyAt(i);
+                    duration = src.mDurations.getValue(dkey);
+                    if (dkey == src.mActiveProcState) {
+                        duration += timeNow;
+                    }
+                    final int procState = SparseMappingTable.getIdFromKey(dkey);
+                    pw.print(",");
+                    DumpUtils.printArrayEntry(pw, DumpUtils.STATE_TAGS,  procState, 1);
+                    pw.print(':');
+                    pw.print(duration);
+                }
+            } else {
+                duration = src.mActiveDuration + timeNow;
+                if (duration != 0) {
+                    pw.print(",");
+                    DumpUtils.printArrayEntry(pw, DumpUtils.STATE_TAGS,  src.mActiveProcState, 1);
+                    pw.print(':');
+                    pw.print(duration);
+                }
             }
-            pw.print(",");
-            pw.print(duration);
             pw.println();
         }
     }

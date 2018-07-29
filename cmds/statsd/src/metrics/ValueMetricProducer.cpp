@@ -74,7 +74,7 @@ const int FIELD_ID_END_BUCKET_ELAPSED_MILLIS = 6;
 ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric& metric,
                                          const int conditionIndex,
                                          const sp<ConditionWizard>& wizard, const int pullTagId,
-                                         const int64_t timeBaseNs, const int64_t startTimestampNs,
+                                         const int64_t timeBaseNs, const int64_t startTimeNs,
                                          const sp<StatsPullerManager>& pullerManager)
     : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard),
       mPullerManager(pullerManager),
@@ -127,13 +127,20 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
     mSliceByPositionALL = HasPositionALL(metric.dimensions_in_what()) ||
             HasPositionALL(metric.dimensions_in_condition());
 
-    flushIfNeededLocked(startTimestampNs);
+    flushIfNeededLocked(startTimeNs);
     // Kicks off the puller immediately.
     if (mIsPulled) {
-        mPullerManager->RegisterReceiver(mPullTagId, this,
-                                         mCurrentBucketStartTimeNs + mBucketSizeNs, mBucketSizeNs);
+        mPullerManager->RegisterReceiver(mPullTagId, this, getCurrentBucketEndTimeNs(),
+                                         mBucketSizeNs);
     }
 
+    // TODO: Only do this for partial buckets like first bucket. All other buckets should use
+    // flushIfNeeded to adjust start and end to bucket boundaries.
+    // Adjust start for partial bucket
+    mCurrentBucketStartTimeNs = startTimeNs;
+    if (mIsPulled) {
+        pullLocked(startTimeNs);
+    }
     VLOG("value metric %lld created. bucket size %lld start_time: %lld",
         (long long)metric.id(), (long long)mBucketSizeNs, (long long)mTimeBaseNs);
 }
@@ -280,16 +287,19 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
     flushIfNeededLocked(eventTimeNs);
 
     if (mIsPulled) {
-        vector<shared_ptr<LogEvent>> allData;
-        if (mPullerManager->Pull(mPullTagId, eventTimeNs, &allData)) {
-            if (allData.size() == 0) {
-                return;
-            }
-            for (const auto& data : allData) {
-                onMatchedLogEventLocked(0, *data);
-            }
+        pullLocked(eventTimeNs);
+    }
+}
+
+void ValueMetricProducer::pullLocked(const int64_t timestampNs) {
+    vector<std::shared_ptr<LogEvent>> allData;
+    if (mPullerManager->Pull(mPullTagId, timestampNs, &allData)) {
+        if (allData.size() == 0) {
+            return;
         }
-        return;
+        for (const auto& data : allData) {
+            onMatchedLogEventLocked(0, *data);
+        }
     }
 }
 
@@ -306,12 +316,14 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
         int64_t eventTime = mTimeBaseNs +
             ((realEventTime - mTimeBaseNs) / mBucketSizeNs) * mBucketSizeNs;
 
+        // close the end of the bucket
         mCondition = false;
         for (const auto& data : allData) {
             data->setElapsedTimestampNs(eventTime - 1);
             onMatchedLogEventLocked(0, *data);
         }
 
+        // start a new bucket
         mCondition = true;
         for (const auto& data : allData) {
             data->setElapsedTimestampNs(eventTime);

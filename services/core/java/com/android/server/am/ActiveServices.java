@@ -65,7 +65,6 @@ import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
-import com.android.server.am.ActivityManagerService.NeededUriGrants;
 
 import android.app.ActivityManager;
 import android.app.AppGlobals;
@@ -96,6 +95,7 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.webkit.WebViewZygote;
+import com.android.server.uri.NeededUriGrants;
 
 public final class ActiveServices {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActiveServices" : TAG_AM;
@@ -512,7 +512,7 @@ public final class ActiveServices {
             fgRequired = false;
         }
 
-        NeededUriGrants neededGrants = mAm.checkGrantUriPermissionFromIntentLocked(
+        NeededUriGrants neededGrants = mAm.mUgmInternal.checkGrantUriPermissionFromIntent(
                 callingUid, r.packageName, service, service.getFlags(), null, r.userId);
 
         // If permissions need a review before any of the app components can run,
@@ -2578,7 +2578,7 @@ public final class ActiveServices {
             r.deliveredStarts.add(si);
             si.deliveryCount++;
             if (si.neededGrants != null) {
-                mAm.grantUriPermissionUncheckedFromIntentLocked(si.neededGrants,
+                mAm.mUgmInternal.grantUriPermissionUncheckedFromIntent(si.neededGrants,
                         si.getUriPermissionsLocked());
             }
             mAm.grantEphemeralAccessLocked(r.userId, si.intent,

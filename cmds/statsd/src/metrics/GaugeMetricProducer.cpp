@@ -76,6 +76,7 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
     : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard),
       mPullerManager(pullerManager),
       mPullTagId(pullTagId),
+      mIsPulled(pullTagId != -1),
       mMinBucketSizeNs(metric.min_bucket_size_nanos()),
       mDimensionSoftLimit(StatsdStats::kAtomDimensionKeySizeLimitMap.find(pullTagId) !=
                                           StatsdStats::kAtomDimensionKeySizeLimitMap.end()
@@ -125,9 +126,15 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
 
     flushIfNeededLocked(startTimeNs);
     // Kicks off the puller immediately.
-    if (mPullTagId != -1 && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
+    if (mIsPulled && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
         mPullerManager->RegisterReceiver(mPullTagId, this, getCurrentBucketEndTimeNs(),
                                          mBucketSizeNs);
+    }
+
+    // Adjust start for partial bucket
+    mCurrentBucketStartTimeNs = startTimeNs;
+    if (mIsPulled) {
+        pullLocked(startTimeNs);
     }
 
     VLOG("Gauge metric %lld created. bucket size %lld start_time: %lld sliced %d",
@@ -137,7 +144,7 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
 
 GaugeMetricProducer::~GaugeMetricProducer() {
     VLOG("~GaugeMetricProducer() called");
-    if (mPullTagId != -1 && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
+    if (mIsPulled && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
         mPullerManager->UnRegisterReceiver(mPullTagId, this);
     }
 }
@@ -323,13 +330,11 @@ void GaugeMetricProducer::pullLocked(const int64_t timestampNs) {
     if (!triggerPuller) {
         return;
     }
-
     vector<std::shared_ptr<LogEvent>> allData;
     if (!mPullerManager->Pull(mPullTagId, timestampNs, &allData)) {
-        ALOGE("Gauge Stats puller failed for tag: %d", mPullTagId);
+        ALOGE("Gauge Stats puller failed for tag: %d at %lld", mPullTagId, (long long)timestampNs);
         return;
     }
-
     for (const auto& data : allData) {
         onMatchedLogEventLocked(0, *data);
     }
@@ -340,8 +345,7 @@ void GaugeMetricProducer::onConditionChangedLocked(const bool conditionMet,
     VLOG("GaugeMetric %lld onConditionChanged", (long long)mMetricId);
     flushIfNeededLocked(eventTimeNs);
     mCondition = conditionMet;
-
-    if (mPullTagId != -1) {
+    if (mIsPulled) {
         pullLocked(eventTimeNs);
     }  // else: Push mode. No need to proactively pull the gauge data.
 }
@@ -354,7 +358,7 @@ void GaugeMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition
     // If the condition is sliced, mCondition is true if any of the dimensions is true. And we will
     // pull for every dimension.
     mCondition = overallCondition;
-    if (mPullTagId != -1) {
+    if (mIsPulled) {
         pullLocked(eventTimeNs);
     }  // else: Push mode. No need to proactively pull the gauge data.
 }

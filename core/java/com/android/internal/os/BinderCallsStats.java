@@ -49,7 +49,7 @@ import java.util.function.ToDoubleFunction;
  * per thread, uid or call description.
  */
 public class BinderCallsStats implements BinderInternal.Observer {
-    public static final boolean ENABLED_DEFAULT = true;
+    public static final boolean ENABLED_DEFAULT = false;
     public static final boolean DETAILED_TRACKING_DEFAULT = true;
     public static final int PERIODIC_SAMPLING_INTERVAL_DEFAULT = 10;
 
@@ -209,6 +209,13 @@ public class BinderCallsStats implements BinderInternal.Observer {
         return resultCallStats;
     }
 
+    /** @hide */
+    public ArrayMap<String, Integer> getExportedExceptionStats() {
+        synchronized (mLock) {
+            return new ArrayMap(mExceptionCounts);
+        }
+    }
+
     public void dump(PrintWriter pw, Map<Integer,String> appIdToPkgNameMap, boolean verbose) {
         synchronized (mLock) {
             dumpLocked(pw, appIdToPkgNameMap, verbose);
@@ -351,6 +358,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
         public int uid;
         public String className;
         public String methodName;
+        public boolean screenInteractive;
         public long cpuTimeMicros;
         public long maxCpuTimeMicros;
         public long latencyMicros;

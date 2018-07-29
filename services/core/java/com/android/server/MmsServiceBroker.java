@@ -42,6 +42,7 @@ import android.telephony.TelephonyManager;
 import android.util.Slog;
 
 import com.android.internal.telephony.IMms;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import java.util.List;
 
@@ -512,7 +513,7 @@ public class MmsServiceBroker extends SystemService {
 
             long token = Binder.clearCallingIdentity();
             try {
-                LocalServices.getService(ActivityManagerInternal.class)
+                LocalServices.getService(UriGrantsManagerInternal.class)
                         .grantUriPermissionFromIntent(callingUid, PHONE_PACKAGE_NAME,
                                 grantIntent, UserHandle.USER_SYSTEM);
 
@@ -523,7 +524,7 @@ public class MmsServiceBroker extends SystemService {
                 List<String> carrierPackages = telephonyManager.getCarrierPackageNamesForIntent(
                         intent);
                 if (carrierPackages != null && carrierPackages.size() == 1) {
-                    LocalServices.getService(ActivityManagerInternal.class)
+                    LocalServices.getService(UriGrantsManagerInternal.class)
                             .grantUriPermissionFromIntent(callingUid, carrierPackages.get(0),
                                     grantIntent, UserHandle.USER_SYSTEM);
                 }

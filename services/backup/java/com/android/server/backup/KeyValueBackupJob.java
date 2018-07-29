@@ -102,6 +102,12 @@ public class KeyValueBackupJob extends JobService {
         }
     }
 
+    public static boolean isScheduled() {
+        synchronized (KeyValueBackupJob.class) {
+            return sScheduled;
+        }
+    }
+
     @Override
     public boolean onStartJob(JobParameters params) {
         synchronized (KeyValueBackupJob.class) {

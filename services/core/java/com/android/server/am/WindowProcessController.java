@@ -334,7 +334,12 @@ public class WindowProcessController {
 
     boolean shouldKillProcessForRemovedTask(TaskRecord tr) {
         for (int k = 0; k < mActivities.size(); k++) {
-            final TaskRecord otherTask = mActivities.get(k).getTask();
+            final ActivityRecord activity = mActivities.get(k);
+            if (!activity.stopped) {
+                // Don't kill process(es) that has an activity not stopped.
+                return false;
+            }
+            final TaskRecord otherTask = activity.getTask();
             if (tr.taskId != otherTask.taskId && otherTask.inRecents) {
                 // Don't kill process(es) that has an activity in a different task that is
                 // also in recents.
@@ -429,6 +434,19 @@ public class WindowProcessController {
         }
 
         return minTaskLayer;
+    }
+
+    int computeRelaunchReason() {
+        synchronized (mAtm.mGlobalLock) {
+            final int activitiesSize = mActivities.size();
+            for (int i = activitiesSize - 1; i >= 0; i--) {
+                final ActivityRecord r = mActivities.get(i);
+                if (r.mRelaunchReason != ActivityRecord.RELAUNCH_REASON_NONE) {
+                    return r.mRelaunchReason;
+                }
+            }
+        }
+        return ActivityRecord.RELAUNCH_REASON_NONE;
     }
 
     void clearProfilerIfNeeded() {

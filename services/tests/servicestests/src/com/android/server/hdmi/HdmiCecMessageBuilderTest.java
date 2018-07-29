@@ -15,8 +15,9 @@
  */
 package com.android.server.hdmi;
 
-import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
+import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
+import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.hardware.hdmi.HdmiDeviceInfo;
@@ -35,12 +36,33 @@ public class HdmiCecMessageBuilderTest {
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildReportPhysicalAddressCommand(
                         ADDR_PLAYBACK_1, 0x1234, HdmiDeviceInfo.DEVICE_PLAYBACK);
-        assertThat(message)
-                .isEqualTo(
-                        new HdmiCecMessage(
-                                ADDR_PLAYBACK_1,
-                                ADDR_BROADCAST,
-                                Constants.MESSAGE_REPORT_PHYSICAL_ADDRESS,
-                                new byte[] {0x12, 0x34, 0x04}));
+        assertThat(message).isEqualTo(buildMessage("4f:84:12:34:04"));
+    }
+
+    @Test
+    public void buildRequestShortAudioDescriptor() {
+        HdmiCecMessage message =
+                HdmiCecMessageBuilder.buildRequestShortAudioDescriptor(
+                        ADDR_TV,
+                        ADDR_AUDIO_SYSTEM,
+                        new int[] {Constants.AUDIO_CODEC_AAC, Constants.AUDIO_CODEC_LPCM});
+        assertThat(message).isEqualTo(buildMessage("05:A4:06:01"));
+    }
+
+    /**
+     * Build a CEC message from a hex byte string with bytes separated by {@code :}.
+     *
+     * <p>This format is used by both cec-client and www.cec-o-matic.com
+     */
+    private static HdmiCecMessage buildMessage(String message) {
+        String[] parts = message.split(":");
+        int src = Integer.parseInt(parts[0].substring(0, 1), 16);
+        int dest = Integer.parseInt(parts[0].substring(1, 2), 16);
+        int opcode = Integer.parseInt(parts[1], 16);
+        byte[] params = new byte[parts.length - 2];
+        for (int i = 0; i < params.length; i++) {
+            params[i] = Byte.parseByte(parts[i + 2], 16);
+        }
+        return new HdmiCecMessage(src, dest, opcode, params);
     }
 }

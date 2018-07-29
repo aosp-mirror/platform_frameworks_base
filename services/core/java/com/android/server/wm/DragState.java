@@ -143,7 +143,7 @@ class DragState {
             mDragDropController.sendHandlerMessage(
                     MSG_TEAR_DOWN_DRAG_AND_DROP_INPUT, mInputInterceptor);
             mInputInterceptor = null;
-            mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
+            mDisplayContent.getInputMonitor().updateInputWindowsLw(true /*force*/);
         }
 
         // Send drag end broadcast if drag start has been sent.
@@ -296,7 +296,7 @@ class DragState {
             Slog.e(TAG_WM, "Duplicate register of drag input channel");
         } else {
             mInputInterceptor = new InputInterceptor(display);
-            mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
+            mDisplayContent.getInputMonitor().updateInputWindowsLw(true /*force*/);
         }
     }
 

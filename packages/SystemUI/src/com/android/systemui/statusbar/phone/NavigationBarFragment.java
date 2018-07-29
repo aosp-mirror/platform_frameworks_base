@@ -22,7 +22,9 @@ import static android.app.StatusBarManager.windowStateToString;
 import static com.android.internal.view.RotationPolicy.NATURAL_ROTATION;
 
 import static com.android.systemui.shared.system.NavigationBarCompat.InteractionType;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.StatusBar.DEBUG_WINDOW_STATE;
 import static com.android.systemui.statusbar.phone.StatusBar.dumpBarTransitions;
 import static com.android.systemui.OverviewProxyService.OverviewProxyListener;
@@ -660,6 +662,10 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             nbModeChanged = nbMode != -1;
             if (nbModeChanged) {
                 if (mNavigationBarMode != nbMode) {
+                    if (mNavigationBarMode == MODE_TRANSPARENT
+                            || mNavigationBarMode == MODE_LIGHTS_OUT_TRANSPARENT) {
+                        mNavigationBarView.hideRecentsOnboarding();
+                    }
                     mNavigationBarMode = nbMode;
                     checkNavBarModes();
                 }

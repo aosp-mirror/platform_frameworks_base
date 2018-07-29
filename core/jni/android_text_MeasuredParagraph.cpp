@@ -109,6 +109,10 @@ static jfloat nGetWidth(jlong ptr, jint start, jint end) {
     return r;
 }
 
+static jfloat nGetCharWidthAt(jlong ptr, jint offset) {
+    return toMeasuredParagraph(ptr)->widths[offset];
+}
+
 // Regular JNI
 static void nGetBounds(JNIEnv* env, jobject, jlong ptr, jcharArray javaText, jint start, jint end,
                        jobject bounds) {
@@ -138,23 +142,29 @@ static jint nGetMemoryUsage(jlong ptr) {
     return static_cast<jint>(toMeasuredParagraph(ptr)->getMemoryUsage());
 }
 
-static const JNINativeMethod gMethods[] = {
+static const JNINativeMethod gMTBuilderMethods[] = {
     // MeasuredParagraphBuilder native functions.
     {"nInitBuilder", "()J", (void*) nInitBuilder},
     {"nAddStyleRun", "(JJIIZ)V", (void*) nAddStyleRun},
     {"nAddReplacementRun", "(JJIIF)V", (void*) nAddReplacementRun},
     {"nBuildNativeMeasuredParagraph", "(J[CZZ)J", (void*) nBuildNativeMeasuredParagraph},
     {"nFreeBuilder", "(J)V", (void*) nFreeBuilder},
+};
 
+static const JNINativeMethod gMTMethods[] = {
     // MeasuredParagraph native functions.
     {"nGetWidth", "(JII)F", (void*) nGetWidth},  // Critical Natives
     {"nGetBounds", "(J[CIILandroid/graphics/Rect;)V", (void*) nGetBounds},  // Regular JNI
     {"nGetReleaseFunc", "()J", (void*) nGetReleaseFunc},  // Critical Natives
     {"nGetMemoryUsage", "(J)I", (void*) nGetMemoryUsage},  // Critical Native
+    {"nGetCharWidthAt", "(JI)F", (void*) nGetCharWidthAt},  // Critical Native
 };
 
 int register_android_text_MeasuredParagraph(JNIEnv* env) {
-    return RegisterMethodsOrDie(env, "android/text/MeasuredParagraph", gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, "android/text/NativeMeasuredParagraph",
+            gMTMethods, NELEM(gMTMethods))
+        + RegisterMethodsOrDie(env, "android/text/NativeMeasuredParagraph$Builder",
+            gMTBuilderMethods, NELEM(gMTBuilderMethods));
 }
 
 }

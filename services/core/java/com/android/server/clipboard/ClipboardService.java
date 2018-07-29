@@ -21,7 +21,9 @@ import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.IUriGrantsManager;
 import android.app.KeyguardManager;
+import android.app.UriGrantsManager;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ContentProvider;
@@ -48,7 +50,9 @@ import android.os.UserManager;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -143,6 +147,8 @@ public class ClipboardService extends SystemService {
         SystemProperties.getBoolean("ro.kernel.qemu", false);
 
     private final IActivityManager mAm;
+    private final IUriGrantsManager mUgm;
+    private final UriGrantsManagerInternal mUgmInternal;
     private final IUserManager mUm;
     private final PackageManager mPm;
     private final AppOpsManager mAppOps;
@@ -159,15 +165,12 @@ public class ClipboardService extends SystemService {
         super(context);
 
         mAm = ActivityManager.getService();
+        mUgm = UriGrantsManager.getService();
+        mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
         mPm = getContext().getPackageManager();
         mUm = (IUserManager) ServiceManager.getService(Context.USER_SERVICE);
         mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
-        IBinder permOwner = null;
-        try {
-            permOwner = mAm.newUriPermissionOwner("clipboard");
-        } catch (RemoteException e) {
-            Slog.w("clipboard", "AM dead", e);
-        }
+        final IBinder permOwner = mUgmInternal.newUriPermissionOwner("clipboard");
         mPermissionOwner = permOwner;
         if (IS_EMULATOR) {
             mHostClipboardMonitor = new HostClipboardMonitor(
@@ -497,12 +500,10 @@ public class ClipboardService extends SystemService {
         final long ident = Binder.clearCallingIdentity();
         try {
             // This will throw SecurityException if caller can't grant
-            mAm.checkGrantUriPermission(sourceUid, null,
+            mUgmInternal.checkGrantUriPermission(sourceUid, null,
                     ContentProvider.getUriWithoutUserId(uri),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION,
                     ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)));
-        } catch (RemoteException ignored) {
-            // Ignored because we're in same process
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -531,7 +532,7 @@ public class ClipboardService extends SystemService {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            mAm.grantUriPermissionFromOwner(mPermissionOwner, sourceUid, targetPkg,
+            mUgm.grantUriPermissionFromOwner(mPermissionOwner, sourceUid, targetPkg,
                     ContentProvider.getUriWithoutUserId(uri),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION,
                     ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)),
@@ -588,12 +589,10 @@ public class ClipboardService extends SystemService {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            mAm.revokeUriPermissionFromOwner(mPermissionOwner,
+            mUgmInternal.revokeUriPermissionFromOwner(mPermissionOwner,
                     ContentProvider.getUriWithoutUserId(uri),
                     Intent.FLAG_GRANT_READ_URI_PERMISSION,
                     ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)));
-        } catch (RemoteException ignored) {
-            // Ignored because we're in same process
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

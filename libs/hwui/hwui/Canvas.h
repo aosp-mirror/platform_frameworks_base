@@ -74,7 +74,6 @@ typedef uint32_t Flags;
 }  // namespace SaveFlags
 
 namespace uirenderer {
-class SkiaCanvasProxy;
 namespace VectorDrawable {
 class Tree;
 };
@@ -305,7 +304,6 @@ protected:
 
     friend class DrawTextFunctor;
     friend class DrawTextOnPathFunctor;
-    friend class uirenderer::SkiaCanvasProxy;
 };
 
 };  // namespace android

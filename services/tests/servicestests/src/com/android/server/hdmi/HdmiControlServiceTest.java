@@ -30,9 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for {@link HdmiControlService} class.
- */
+/** Tests for {@link HdmiControlService} class. */
 @SmallTest
 @RunWith(JUnit4.class)
 public class HdmiControlServiceTest {
@@ -48,9 +46,7 @@ public class HdmiControlServiceTest {
         }
 
         @Override
-        protected void onAddressAllocated(int logicalAddress, int reason) {
-
-        }
+        protected void onAddressAllocated(int logicalAddress, int reason) {}
 
         @Override
         protected int getPreferredAddress() {
@@ -58,9 +54,7 @@ public class HdmiControlServiceTest {
         }
 
         @Override
-        protected void setPreferredAddress(int addr) {
-
-        }
+        protected void setPreferredAddress(int addr) {}
 
         @Override
         protected boolean canGoToStandby() {
@@ -68,8 +62,8 @@ public class HdmiControlServiceTest {
         }
 
         @Override
-        protected void disableDevice(boolean initiatedByCec,
-            final PendingActionClearedCallback originalCallback) {
+        protected void disableDevice(
+                boolean initiatedByCec, final PendingActionClearedCallback originalCallback) {
             mIsDisabled = true;
             originalCallback.onCleared(this);
         }
@@ -105,26 +99,26 @@ public class HdmiControlServiceTest {
 
     @Before
     public void SetUp() {
-        mHdmiControlService = new HdmiControlService(null) {
-            @Override
-            boolean isStandbyMessageReceived() {
-                return mStandbyMessageReceived;
-            }
-        };
+        mHdmiControlService =
+                new HdmiControlService(null) {
+                    @Override
+                    boolean isStandbyMessageReceived() {
+                        return mStandbyMessageReceived;
+                    }
+                };
         mMyLooper = mTestLooper.getLooper();
 
-        mMyAudioSystemDevice = new HdmiCecLocalDeviceMyDevice(
-            mHdmiControlService, DEVICE_AUDIO_SYSTEM);
-        mMyPlaybackDevice = new HdmiCecLocalDeviceMyDevice(
-            mHdmiControlService, DEVICE_PLAYBACK);
+        mMyAudioSystemDevice =
+                new HdmiCecLocalDeviceMyDevice(mHdmiControlService, DEVICE_AUDIO_SYSTEM);
+        mMyPlaybackDevice = new HdmiCecLocalDeviceMyDevice(mHdmiControlService, DEVICE_PLAYBACK);
         mMyAudioSystemDevice.init();
         mMyPlaybackDevice.init();
 
         mHdmiControlService.setIoLooper(mMyLooper);
 
         mNativeWrapper = new FakeNativeWrapper();
-        mHdmiCecController = HdmiCecController.createWithNativeWrapper(
-            mHdmiControlService, mNativeWrapper);
+        mHdmiCecController =
+                HdmiCecController.createWithNativeWrapper(mHdmiControlService, mNativeWrapper);
         mHdmiControlService.setCecController(mHdmiCecController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         mHdmiControlService.setMessageValidator(new HdmiCecMessageValidator(mHdmiControlService));

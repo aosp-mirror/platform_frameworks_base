@@ -85,6 +85,7 @@ java_library {
         "core/java/android/app/IUidObserver.aidl",
         "core/java/android/app/IUiAutomationConnection.aidl",
         "core/java/android/app/IUiModeManager.aidl",
+        "core/java/android/app/IUriGrantsManager.aidl",
         "core/java/android/app/IUserSwitchObserver.aidl",
         "core/java/android/app/IWallpaperManager.aidl",
         "core/java/android/app/IWallpaperManagerCallback.aidl",
@@ -576,6 +577,7 @@ java_library {
         "telephony/java/com/android/internal/telephony/euicc/ISetNicknameCallback.aidl",
         "telephony/java/com/android/internal/telephony/euicc/ISwitchToProfileCallback.aidl",
         "wifi/java/android/net/wifi/ISoftApCallback.aidl",
+        "wifi/java/android/net/wifi/ITrafficStateCallback.aidl",
         "wifi/java/android/net/wifi/IWifiManager.aidl",
         "wifi/java/android/net/wifi/aware/IWifiAwareDiscoverySessionCallback.aidl",
         "wifi/java/android/net/wifi/aware/IWifiAwareEventCallback.aidl",
@@ -653,6 +655,8 @@ java_library {
             "system/bt/binder",
             "system/security/keystore/binder",
         ],
+
+        generate_get_transaction_name: true
     },
 
     exclude_srcs: [

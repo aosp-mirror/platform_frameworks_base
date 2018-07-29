@@ -26,6 +26,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
+import android.app.UriGrantsManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
@@ -2143,7 +2144,7 @@ public abstract class ContentResolver {
             @Intent.AccessUriMode int modeFlags) {
         Preconditions.checkNotNull(uri, "uri");
         try {
-            ActivityManager.getService().takePersistableUriPermission(
+            UriGrantsManager.getService().takePersistableUriPermission(
                     ContentProvider.getUriWithoutUserId(uri), modeFlags, /* toPackage= */ null,
                     resolveUserId(uri));
         } catch (RemoteException e) {
@@ -2159,7 +2160,7 @@ public abstract class ContentResolver {
         Preconditions.checkNotNull(toPackage, "toPackage");
         Preconditions.checkNotNull(uri, "uri");
         try {
-            ActivityManager.getService().takePersistableUriPermission(
+            UriGrantsManager.getService().takePersistableUriPermission(
                     ContentProvider.getUriWithoutUserId(uri), modeFlags, toPackage,
                     resolveUserId(uri));
         } catch (RemoteException e) {
@@ -2179,7 +2180,7 @@ public abstract class ContentResolver {
             @Intent.AccessUriMode int modeFlags) {
         Preconditions.checkNotNull(uri, "uri");
         try {
-            ActivityManager.getService().releasePersistableUriPermission(
+            UriGrantsManager.getService().releasePersistableUriPermission(
                     ContentProvider.getUriWithoutUserId(uri), modeFlags, /* toPackage= */ null,
                     resolveUserId(uri));
         } catch (RemoteException e) {
@@ -2199,7 +2200,7 @@ public abstract class ContentResolver {
      */
     public @NonNull List<UriPermission> getPersistedUriPermissions() {
         try {
-            return ActivityManager.getService()
+            return UriGrantsManager.getService()
                     .getPersistedUriPermissions(mPackageName, true).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -2215,7 +2216,7 @@ public abstract class ContentResolver {
      */
     public @NonNull List<UriPermission> getOutgoingPersistedUriPermissions() {
         try {
-            return ActivityManager.getService()
+            return UriGrantsManager.getService()
                     .getPersistedUriPermissions(mPackageName, false).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

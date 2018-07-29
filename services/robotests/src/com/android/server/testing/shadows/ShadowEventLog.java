@@ -78,7 +78,7 @@ public class ShadowEventLog {
 
         @Override
         public String toString() {
-            return "Entry{" + "tag=" + tag + ", values=" + values + '}';
+            return "Entry{" + tag + ", " + values + '}';
         }
     }
 }

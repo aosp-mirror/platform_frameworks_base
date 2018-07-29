@@ -37,7 +37,6 @@ import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUC
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IAssistDataReceiver;
 import android.app.assist.AssistStructure;

@@ -787,35 +787,36 @@ public final class ProcessState {
         pw.print(" / v");
         pw.print(mVersion);
         pw.println(":");
-        dumpProcessSummaryDetails(pw, prefix, "         TOTAL: ", screenStates, memStates,
-                procStates, now, totalTime, true);
-        dumpProcessSummaryDetails(pw, prefix, "    Persistent: ", screenStates, memStates,
-                new int[] { STATE_PERSISTENT }, now, totalTime, true);
-        dumpProcessSummaryDetails(pw, prefix, "           Top: ", screenStates, memStates,
-                new int[] {STATE_TOP}, now, totalTime, true);
-        dumpProcessSummaryDetails(pw, prefix, "        Imp Fg: ", screenStates, memStates,
-                new int[] { STATE_IMPORTANT_FOREGROUND }, now, totalTime, true);
-        dumpProcessSummaryDetails(pw, prefix, "        Imp Bg: ", screenStates, memStates,
-                new int[] {STATE_IMPORTANT_BACKGROUND}, now, totalTime, true);
-        dumpProcessSummaryDetails(pw, prefix, "        Backup: ", screenStates, memStates,
-                new int[] {STATE_BACKUP}, now, totalTime, true);
-        dumpProcessSummaryDetails(pw, prefix, "     Heavy Wgt: ", screenStates, memStates,
-                new int[] {STATE_HEAVY_WEIGHT}, now, totalTime, true);
-        dumpProcessSummaryDetails(pw, prefix, "       Service: ", screenStates, memStates,
-                new int[] {STATE_SERVICE}, now, totalTime, true);
-        dumpProcessSummaryDetails(pw, prefix, "    Service Rs: ", screenStates, memStates,
-                new int[] {STATE_SERVICE_RESTARTING}, now, totalTime, true);
-        dumpProcessSummaryDetails(pw, prefix, "      Receiver: ", screenStates, memStates,
-                new int[] {STATE_RECEIVER}, now, totalTime, true);
-        dumpProcessSummaryDetails(pw, prefix, "         Heavy: ", screenStates, memStates,
-                new int[] {STATE_HOME}, now, totalTime, true);
-        dumpProcessSummaryDetails(pw, prefix, "        (Home): ", screenStates, memStates,
-                new int[] {STATE_HOME}, now, totalTime, true);
-        dumpProcessSummaryDetails(pw, prefix, "    (Last Act): ", screenStates, memStates,
-                new int[] {STATE_LAST_ACTIVITY}, now, totalTime, true);
-        dumpProcessSummaryDetails(pw, prefix, "      (Cached): ", screenStates, memStates,
-                new int[] {STATE_CACHED_ACTIVITY, STATE_CACHED_ACTIVITY_CLIENT,
-                        STATE_CACHED_EMPTY}, now, totalTime, true);
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABEL_TOTAL,
+                screenStates, memStates, procStates, now, totalTime, true);
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_PERSISTENT],
+                screenStates, memStates, new int[] { STATE_PERSISTENT }, now, totalTime, true);
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_TOP],
+                screenStates, memStates, new int[] {STATE_TOP}, now, totalTime, true);
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_IMPORTANT_FOREGROUND],
+                screenStates, memStates, new int[] { STATE_IMPORTANT_FOREGROUND }, now, totalTime,
+                true);
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_IMPORTANT_BACKGROUND],
+                screenStates, memStates, new int[] {STATE_IMPORTANT_BACKGROUND}, now, totalTime,
+                true);
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_BACKUP],
+                screenStates, memStates, new int[] {STATE_BACKUP}, now, totalTime, true);
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_SERVICE],
+                screenStates, memStates, new int[] {STATE_SERVICE}, now, totalTime, true);
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_SERVICE_RESTARTING],
+                screenStates, memStates, new int[] {STATE_SERVICE_RESTARTING}, now, totalTime,
+                true);
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_RECEIVER],
+                screenStates, memStates, new int[] {STATE_RECEIVER}, now, totalTime, true);
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_HEAVY_WEIGHT],
+                screenStates, memStates, new int[] {STATE_HEAVY_WEIGHT}, now, totalTime, true);
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_HOME],
+                screenStates, memStates, new int[] {STATE_HOME}, now, totalTime, true);
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABELS[STATE_LAST_ACTIVITY],
+                screenStates, memStates, new int[] {STATE_LAST_ACTIVITY}, now, totalTime, true);
+        dumpProcessSummaryDetails(pw, prefix, DumpUtils.STATE_LABEL_CACHED,
+                screenStates, memStates, new int[] {STATE_CACHED_ACTIVITY,
+                        STATE_CACHED_ACTIVITY_CLIENT, STATE_CACHED_EMPTY}, now, totalTime, true);
     }
 
     public void dumpProcessState(PrintWriter pw, String prefix,
@@ -846,7 +847,7 @@ public final class ProcessState {
                                     printedMem != imem ? imem : STATE_NOTHING, '/');
                             printedMem = imem;
                         }
-                        pw.print(DumpUtils.STATE_NAMES[procStates[ip]]); pw.print(": ");
+                        pw.print(DumpUtils.STATE_LABELS[procStates[ip]]); pw.print(": ");
                         TimeUtils.formatDuration(time, pw); pw.println(running);
                         totalTime += time;
                     }
@@ -861,7 +862,8 @@ public final class ProcessState {
             if (memStates.length > 1) {
                 DumpUtils.printMemLabel(pw, STATE_NOTHING, '/');
             }
-            pw.print("TOTAL  : ");
+            pw.print(DumpUtils.STATE_LABEL_TOTAL);
+            pw.print(": ");
             TimeUtils.formatDuration(totalTime, pw);
             pw.println();
         }
@@ -899,7 +901,7 @@ public final class ProcessState {
                                     printedMem != imem ? imem : STATE_NOTHING, '/');
                             printedMem = imem;
                         }
-                        pw.print(DumpUtils.STATE_NAMES[procStates[ip]]); pw.print(": ");
+                        pw.print(DumpUtils.STATE_LABELS[procStates[ip]]); pw.print(": ");
                         pw.print(count);
                         pw.print(" samples ");
                         DebugUtils.printSizeValue(pw, getPssMinimum(bucket) * 1024);
@@ -950,7 +952,9 @@ public final class ProcessState {
                 pw.print(prefix);
             }
             if (label != null) {
+                pw.print("  ");
                 pw.print(label);
+                pw.print(": ");
             }
             totals.print(pw, totalTime, full);
             if (prefix != null) {

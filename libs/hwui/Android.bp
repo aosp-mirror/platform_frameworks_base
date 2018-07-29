@@ -230,7 +230,6 @@ cc_defaults {
         "RenderProperties.cpp",
         "ResourceCache.cpp",
         "SkiaCanvas.cpp",
-        "SkiaCanvasProxy.cpp",
         "Snapshot.cpp",
         "Texture.cpp",
         "VectorDrawable.cpp",

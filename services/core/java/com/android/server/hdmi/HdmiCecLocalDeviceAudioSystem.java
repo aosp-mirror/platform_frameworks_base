@@ -21,6 +21,7 @@ import static com.android.server.hdmi.Constants.USE_LAST_STATE_SYSTEM_AUDIO_CONT
 
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.AudioManager;
+import android.media.AudioSystem;
 import android.os.SystemProperties;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -44,6 +45,11 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
     private boolean mSystemAudioControlFeatureEnabled;
 
     private boolean mTvSystemAudioModeSupport;
+
+    // Whether ARC is available or not. "true" means that ARC is established between TV and
+    // AVR as audio receiver.
+    @ServiceThreadOnly
+    private boolean mArcEstablished = false;
 
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
@@ -256,6 +262,39 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         return true;
     }
 
+    @ServiceThreadOnly
+    void setArcStatus(boolean enabled) {
+        // TODO(shubang): add tests
+        assertRunOnServiceThread();
+
+        HdmiLogger.debug("Set Arc Status[old:%b new:%b]", mArcEstablished, enabled);
+        // 1. Enable/disable ARC circuit.
+        enableAudioReturnChannel(enabled);
+        // 2. Notify arc status to audio service.
+        notifyArcStatusToAudioService(enabled);
+        // 3. Update arc status;
+        mArcEstablished = enabled;
+    }
+
+    /**
+     * Switch hardware ARC circuit in the system.
+     */
+    @ServiceThreadOnly
+    private void enableAudioReturnChannel(boolean enabled) {
+        assertRunOnServiceThread();
+        mService.enableAudioReturnChannel(
+                SystemProperties.getInt(
+                        Constants.PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT, 0),
+                enabled);
+    }
+
+    private void notifyArcStatusToAudioService(boolean enabled) {
+        // Note that we don't set any name to ARC.
+        mService.getAudioManager().setWiredDeviceConnectionState(
+                AudioSystem.DEVICE_IN_HDMI,
+                enabled ? 1 : 0, "", "");
+    }
+
     private void reportAudioStatus(HdmiCecMessage message) {
         assertRunOnServiceThread();
 
@@ -284,7 +323,11 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
         // Wake up device if System Audio Control is turned on but device is still on standby
         if (newSystemAudioMode && mService.isPowerStandbyOrTransient()) {
             mService.wakeUp();
-            // TODO(amyjojo): Switch to the corresponding input
+        }
+        int targetPhysicalAddress = getActiveSource().physicalAddress;
+        if (newSystemAudioMode &&
+            !isPhysicalAddressMeOrBelow(targetPhysicalAddress)) {
+            switchToAudioInput();
         }
         // Mute device when feature is turned off and unmute device when feature is turned on
         boolean currentMuteStatus =
@@ -306,6 +349,32 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDevice {
             }
         }
         return true;
+    }
+
+    /**
+     * Method to check if the target device belongs to the subtree of the current device or not.
+     * <p>Return true if it does or if the two devices share the same physical address.
+     *
+     * <p>This check assumes both device physical address and target address are valid.
+     * @param targetPhysicalAddress is the physical address of the target device
+     */
+    protected boolean isPhysicalAddressMeOrBelow(int targetPhysicalAddress) {
+        int myPhysicalAddress = mService.getPhysicalAddress();
+        int xor = targetPhysicalAddress ^ myPhysicalAddress;
+        // Return true if two addresses are the same
+        // or if they only differs for one byte, but not the first byte,
+        // and myPhysicalAddress is 0 after that byte
+        if (xor == 0
+            || ((xor & 0x0f00) == xor && (myPhysicalAddress & 0x0fff) == 0)
+            || ((xor & 0x00f0) == xor && (myPhysicalAddress & 0x00ff) == 0)
+            || ((xor & 0x000f) == xor && (myPhysicalAddress & 0x000f) == 0)) {
+            return true;
+        }
+        return false;
+    }
+
+    protected void switchToAudioInput() {
+        // TODO(b/111396634): switch input according to PROPERTY_SYSTEM_AUDIO_MODE_AUDIO_PORT
     }
 
     private void updateAudioManagerForSystemAudio(boolean on) {

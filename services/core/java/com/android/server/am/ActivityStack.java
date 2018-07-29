@@ -72,6 +72,8 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_USER_LEAV
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityRecord.RELAUNCH_REASON_FREE_RESIZE;
+import static com.android.server.am.ActivityRecord.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.am.ActivityStack.ActivityState.FINISHING;
@@ -3368,7 +3370,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             String resultWho, int requestCode, int resultCode, Intent data) {
 
         if (callingUid > 0) {
-            mService.mAm.grantUriPermissionFromIntentLocked(callingUid, r.packageName,
+            mService.mUgmInternal.grantUriPermissionFromIntent(callingUid, r.packageName,
                     data, r.getUriPermissionsLocked(), r.userId);
         }
 
@@ -3682,7 +3684,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
             }
             if (r.info.applicationInfo.uid > 0) {
-                mService.mAm.grantUriPermissionFromIntentLocked(r.info.applicationInfo.uid,
+                mService.mUgmInternal.grantUriPermissionFromIntent(r.info.applicationInfo.uid,
                         resultTo.packageName, resultData,
                         resultTo.getUriPermissionsLocked(), resultTo.userId);
             }
@@ -4483,7 +4485,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         hasVisibleActivities = true;
                     }
                     final boolean remove;
-                    if ((!r.haveState && !r.stateNotNeeded) || r.finishing) {
+                    if ((r.mRelaunchReason == RELAUNCH_REASON_WINDOWING_MODE_RESIZE
+                            || r.mRelaunchReason == RELAUNCH_REASON_FREE_RESIZE)
+                            && r.launchCount < 3 && !r.finishing) {
+                        // If the process crashed during a resize, always try to relaunch it, unless
+                        // it has failed more than twice. Skip activities that's already finishing
+                        // cleanly by itself.
+                        remove = false;
+                    } else if ((!r.haveState && !r.stateNotNeeded) || r.finishing) {
                         // Don't currently have state for the activity, or
                         // it is finishing -- always remove it.
                         remove = true;

@@ -38,8 +38,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="@dimen/car_user_switcher_margin_top"
+            android:theme="@style/Theme.Car.Light.List"
             app:verticallyCenterListContent="true"
-            app:dayNightStyle="always_light"
             app:showPagedListViewDivider="false"
             app:gutter="both"
             app:itemSpacing="@dimen/car_user_switcher_vertical_spacing_between_users"/>

@@ -19,6 +19,7 @@ package com.android.server;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.UriGrantsManager;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Binder;
@@ -27,6 +28,7 @@ import android.os.RemoteException;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.IInputContentUriToken;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 final class InputContentUriTokenHandler extends IInputContentUriToken.Stub {
 
@@ -63,12 +65,8 @@ final class InputContentUriTokenHandler extends IInputContentUriToken.Stub {
                 return;
             }
 
-            try {
-                mPermissionOwnerToken = ActivityManager.getService()
-                        .newUriPermissionOwner("InputContentUriTokenHandler");
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
-            }
+            mPermissionOwnerToken = LocalServices.getService(UriGrantsManagerInternal.class)
+                    .newUriPermissionOwner("InputContentUriTokenHandler");
 
             doTakeLocked(mPermissionOwnerToken);
         }
@@ -78,7 +76,7 @@ final class InputContentUriTokenHandler extends IInputContentUriToken.Stub {
         long origId = Binder.clearCallingIdentity();
         try {
             try {
-                ActivityManager.getService().grantUriPermissionFromOwner(
+                UriGrantsManager.getService().grantUriPermissionFromOwner(
                         permissionOwner, mSourceUid, mTargetPackage, mUri,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION, mSourceUserId, mTargetUserId);
             } catch (RemoteException e) {
@@ -96,11 +94,9 @@ final class InputContentUriTokenHandler extends IInputContentUriToken.Stub {
                 return;
             }
             try {
-                ActivityManager.getService().revokeUriPermissionFromOwner(
-                        mPermissionOwnerToken, mUri,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION, mSourceUserId);
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
+                LocalServices.getService(UriGrantsManagerInternal.class)
+                        .revokeUriPermissionFromOwner(mPermissionOwnerToken, mUri,
+                                Intent.FLAG_GRANT_READ_URI_PERMISSION, mSourceUserId);
             } finally {
                 mPermissionOwnerToken = null;
             }

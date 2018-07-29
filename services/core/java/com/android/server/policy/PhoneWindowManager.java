@@ -4391,17 +4391,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (isKeyguardShowingAndNotOccluded()) {
                 // don't launch home if keyguard showing
                 return;
-            } else if (mKeyguardOccluded && mKeyguardDelegate.isShowing()) {
-                mKeyguardDelegate.dismiss(new KeyguardDismissCallback() {
-                    @Override
-                    public void onDismissSucceeded() throws RemoteException {
-                        mHandler.post(() -> {
-                            startDockOrHome(true /*fromHomeKey*/, awakenFromDreams);
-                        });
-                    }
-                }, null /* message */);
-                return;
-            } else if (!mKeyguardOccluded && mKeyguardDelegate.isInputRestricted()) {
+            }
+
+            if (!mKeyguardOccluded && mKeyguardDelegate.isInputRestricted()) {
                 // when in keyguard restricted mode, must first verify unlock
                 // before launching home
                 mKeyguardDelegate.verifyUnlock(new OnKeyguardExitResult() {
@@ -4669,7 +4661,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else if (mInputConsumer == null && mStatusBar != null && canHideNavigationBar()) {
                 mInputConsumer = mWindowManagerFuncs.createInputConsumer(mHandler.getLooper(),
                         INPUT_CONSUMER_NAVIGATION,
-                        (channel, looper) -> new HideNavInputEventReceiver(channel, looper));
+                        (channel, looper) -> new HideNavInputEventReceiver(channel, looper),
+                        displayFrames.mDisplayId);
                 // As long as mInputConsumer is active, hover events are not dispatched to the app
                 // and the pointer icon is likely to become stale. Hide it to avoid confusion.
                 InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_NULL);

@@ -186,6 +186,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
 import com.android.server.AttributeCache.Entry;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.uri.UriPermissionOwner;
 import com.android.server.wm.AppWindowContainerController;
 import com.android.server.wm.AppWindowContainerListener;
 import com.android.server.wm.ConfigurationContainer;
@@ -337,6 +338,17 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     static final int STARTING_WINDOW_REMOVED = 2;
     int mStartingWindowState = STARTING_WINDOW_NOT_SHOWN;
     boolean mTaskOverlay = false; // Task is always on-top of other activities in the task.
+
+    // This activity is not being relaunched, or being relaunched for a non-resize reason.
+    static final int RELAUNCH_REASON_NONE = 0;
+    // This activity is being relaunched due to windowing mode change.
+    static final int RELAUNCH_REASON_WINDOWING_MODE_RESIZE = 1;
+    // This activity is being relaunched due to a free-resize operation.
+    static final int RELAUNCH_REASON_FREE_RESIZE = 2;
+    // Marking the reason why this activity is being relaunched. Mainly used to track that this
+    // activity is being relaunched to fulfill a resize request due to compatibility issues, e.g. in
+    // pre-NYC apps that don't have a sense of being resized.
+    int mRelaunchReason = RELAUNCH_REASON_NONE;
 
     TaskDescription taskDescription; // the recents information for this activity
     boolean mLaunchTaskBehind; // this activity is actively being launched with
@@ -1376,7 +1388,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     UriPermissionOwner getUriPermissionsLocked() {
         if (uriPermissions == null) {
-            uriPermissions = new UriPermissionOwner(service.mAm, this);
+            uriPermissions = new UriPermissionOwner(service.mUgmInternal, this);
         }
         return uriPermissions;
     }
@@ -1428,7 +1440,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      */
     final void deliverNewIntentLocked(int callingUid, Intent intent, String referrer) {
         // The activity now gets access to the data associated with this Intent.
-        service.mAm.grantUriPermissionFromIntentLocked(callingUid, packageName,
+        service.mUgmInternal.grantUriPermissionFromIntent(callingUid, packageName,
                 intent, getUriPermissionsLocked(), userId);
         final ReferrerIntent rintent = new ReferrerIntent(intent, referrer);
         boolean unsent = true;
@@ -1588,7 +1600,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     void removeUriPermissionsLocked() {
         if (uriPermissions != null) {
-            uriPermissions.removeUriPermissionsLocked();
+            uriPermissions.removeUriPermissions();
             uriPermissions = null;
         }
     }
@@ -2616,6 +2628,15 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             startFreezingScreenLocked(app, globalChanges);
             forceNewConfig = false;
             preserveWindow &= isResizeOnlyChange(changes);
+            final boolean hasResizeChange = hasResizeChange(changes & ~info.getRealConfigChanged());
+            if (hasResizeChange) {
+                final boolean isDragResizing =
+                        getTask().getWindowContainerController().isDragResizing();
+                mRelaunchReason = isDragResizing ? RELAUNCH_REASON_FREE_RESIZE
+                        : RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
+            } else {
+                mRelaunchReason = RELAUNCH_REASON_NONE;
+            }
             if (!attachedToProcess()) {
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION,
                         "Config is destroying non-running " + this);
@@ -2735,6 +2756,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private static boolean isResizeOnlyChange(int change) {
         return (change & ~(CONFIG_SCREEN_SIZE | CONFIG_SMALLEST_SCREEN_SIZE | CONFIG_ORIENTATION
                 | CONFIG_SCREEN_LAYOUT)) == 0;
+    }
+
+    private static boolean hasResizeChange(int change) {
+        return (change & (CONFIG_SCREEN_SIZE | CONFIG_SMALLEST_SCREEN_SIZE | CONFIG_ORIENTATION
+                | CONFIG_SCREEN_LAYOUT)) != 0;
     }
 
     void relaunchActivityLocked(boolean andResume, boolean preserveWindow) {
@@ -3014,6 +3040,17 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     void registerRemoteAnimations(RemoteAnimationDefinition definition) {
         mWindowContainerController.registerRemoteAnimations(definition);
+    }
+
+    static String relaunchReasonToString(int relaunchReason) {
+        switch (relaunchReason) {
+            case RELAUNCH_REASON_WINDOWING_MODE_RESIZE:
+                return "window_resize";
+            case RELAUNCH_REASON_FREE_RESIZE:
+                return "free_resize";
+            default:
+                return null;
+        }
     }
 
     @Override

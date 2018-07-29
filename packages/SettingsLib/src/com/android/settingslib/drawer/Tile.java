@@ -22,8 +22,11 @@ import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -32,6 +35,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Description of a single dashboard tile that the user can select.
@@ -39,7 +43,6 @@ import java.util.ArrayList;
 public class Tile implements Parcelable {
 
     private static final String TAG = "Tile";
-    private ActivityInfo mActivityInfo;
 
     /**
      * Title of the tile that is shown to the user.
@@ -96,8 +99,15 @@ public class Tile implements Parcelable {
      */
     public String key;
 
+
+    private final String mActivityPackage;
+    private final String mActivityName;
+    private ActivityInfo mActivityInfo;
+
     public Tile(ActivityInfo activityInfo) {
         mActivityInfo = activityInfo;
+        mActivityPackage = mActivityInfo.packageName;
+        mActivityName = mActivityInfo.name;
     }
 
     @Override
@@ -107,7 +117,8 @@ public class Tile implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeParcelable(mActivityInfo, flags);
+        dest.writeString(mActivityPackage);
+        dest.writeString(mActivityName);
         TextUtils.writeToParcel(title, dest, flags);
         TextUtils.writeToParcel(summary, dest, flags);
         if (intent != null) {
@@ -134,10 +145,11 @@ public class Tile implements Parcelable {
      *
      * @attr ref android.R.styleable#PreferenceHeader_icon
      */
-    public Icon getIcon() {
-        if (mActivityInfo == null || metaData == null) {
+    public Icon getIcon(Context context) {
+        if (context == null || metaData == null) {
             return null;
         }
+
         int iconResId = metaData.getInt(META_DATA_PREFERENCE_ICON);
         // Set the icon
         if (iconResId == 0) {
@@ -145,18 +157,19 @@ public class Tile implements Parcelable {
             // ICON_URI should be loaded in app UI when need the icon object. Handling IPC at this
             // level is too complex because we don't have a strong threading contract for this class
             if (!metaData.containsKey(META_DATA_PREFERENCE_ICON_URI)) {
-                iconResId = mActivityInfo.icon;
+                iconResId = getActivityInfo(context).icon;
             }
         }
         if (iconResId != 0) {
-            return Icon.createWithResource(mActivityInfo.packageName, iconResId);
+            return Icon.createWithResource(getActivityInfo(context).packageName, iconResId);
         } else {
             return null;
         }
     }
 
-    public void readFromParcel(Parcel in) {
-        mActivityInfo = ActivityInfo.CREATOR.createFromParcel(in);
+    Tile(Parcel in) {
+        mActivityPackage = in.readString();
+        mActivityName = in.readString();
         title = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         summary = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         if (in.readByte() != 0) {
@@ -174,8 +187,17 @@ public class Tile implements Parcelable {
         isIconTintable = in.readBoolean();
     }
 
-    Tile(Parcel in) {
-        readFromParcel(in);
+    private ActivityInfo getActivityInfo(Context context) {
+        if (mActivityInfo == null) {
+            final PackageManager pm = context.getApplicationContext().getPackageManager();
+            final Intent intent = new Intent().setClassName(mActivityPackage, mActivityName);
+            final List<ResolveInfo> infoList =
+                    pm.queryIntentActivities(intent, PackageManager.GET_META_DATA);
+            if (infoList != null && !infoList.isEmpty()) {
+                mActivityInfo = infoList.get(0).activityInfo;
+            }
+        }
+        return mActivityInfo;
     }
 
     public static final Creator<Tile> CREATOR = new Creator<Tile>() {

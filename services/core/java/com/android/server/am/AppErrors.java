@@ -410,6 +410,10 @@ class AppErrors {
             RescueParty.notePersistentAppCrash(mContext, r.uid);
         }
 
+        final int relaunchReason = r != null
+                ? r.getWindowProcessController().computeRelaunchReason()
+                : ActivityRecord.RELAUNCH_REASON_NONE;
+
         AppErrorResult result = new AppErrorResult();
         TaskRecord task;
         synchronized (mService) {
@@ -419,6 +423,12 @@ class AppErrors {
              */
             if (handleAppCrashInActivityController(r, crashInfo, shortMsg, longMsg, stackTrace,
                     timeMillis, callingPid, callingUid)) {
+                return;
+            }
+
+            // Suppress crash dialog if the process is being relaunched due to a crash during a free
+            // resize.
+            if (relaunchReason == ActivityRecord.RELAUNCH_REASON_FREE_RESIZE) {
                 return;
             }
 

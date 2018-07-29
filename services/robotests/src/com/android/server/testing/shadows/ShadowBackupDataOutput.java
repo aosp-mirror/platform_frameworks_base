@@ -33,18 +33,14 @@ import java.io.ObjectOutputStream;
  */
 @Implements(BackupDataOutput.class)
 public class ShadowBackupDataOutput {
+    private FileDescriptor mFileDescriptor;
+    private ObjectOutputStream mOutput;
     private long mQuota;
     private int mTransportFlags;
-    private ObjectOutputStream mOutput;
 
     @Implementation
     public void __constructor__(FileDescriptor fd, long quota, int transportFlags) {
-        try {
-            // This writes 4 bytes
-            mOutput = new ObjectOutputStream(new FileOutputStream(fd));
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
+        mFileDescriptor = fd;
         mQuota = quota;
         mTransportFlags = transportFlags;
     }
@@ -61,6 +57,7 @@ public class ShadowBackupDataOutput {
 
     @Implementation
     public int writeEntityHeader(String key, int dataSize) throws IOException {
+        ensureOutput();
         final int size;
         try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream()) {
             writeEntityHeader(new ObjectOutputStream(byteStream), key, dataSize);
@@ -80,8 +77,24 @@ public class ShadowBackupDataOutput {
 
     @Implementation
     public int writeEntityData(byte[] data, int size) throws IOException {
+        ensureOutput();
         mOutput.write(data, 0, size);
         mOutput.flush();
         return size;
+    }
+
+    /**
+     * Lazily initializing output to avoid writing the header data below for when there is no data
+     * (Java Object IO writes/reads some header data).
+     */
+    private void ensureOutput() {
+        if (mOutput == null) {
+            try {
+                // This writes 4 bytes: Java Object IO writes/reads some header data
+                mOutput = new ObjectOutputStream(new FileOutputStream(mFileDescriptor));
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
+        }
     }
 }

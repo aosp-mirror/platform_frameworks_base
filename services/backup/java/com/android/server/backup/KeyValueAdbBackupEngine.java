@@ -47,7 +47,7 @@ public class KeyValueAdbBackupEngine {
     private static final String BACKUP_KEY_VALUE_BACKUP_DATA_FILENAME_SUFFIX = ".data";
     private static final String BACKUP_KEY_VALUE_NEW_STATE_FILENAME_SUFFIX = ".new";
 
-    private BackupManagerServiceInterface mBackupManagerService;
+    private BackupManagerService mBackupManagerService;
     private final PackageManager mPackageManager;
     private final OutputStream mOutput;
     private final PackageInfo mCurrentPackage;
@@ -63,7 +63,7 @@ public class KeyValueAdbBackupEngine {
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     public KeyValueAdbBackupEngine(OutputStream output, PackageInfo packageInfo,
-            BackupManagerServiceInterface backupManagerService, PackageManager packageManager,
+            BackupManagerService backupManagerService, PackageManager packageManager,
             File baseStateDir, File dataDir) {
         mOutput = output;
         mCurrentPackage = packageInfo;

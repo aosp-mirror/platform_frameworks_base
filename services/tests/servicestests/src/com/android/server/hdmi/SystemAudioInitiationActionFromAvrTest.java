@@ -26,15 +26,12 @@ import android.media.AudioManager;
 import android.os.Looper;
 import android.os.test.TestLooper;
 import android.support.test.filters.SmallTest;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-/**
- * Tests for {@link SystemAudioInitiationActionFromAvr}
- */
+/** Tests for {@link SystemAudioInitiationActionFromAvr} */
 @SmallTest
 @RunWith(JUnit4.class)
 public class SystemAudioInitiationActionFromAvrTest {
@@ -54,83 +51,86 @@ public class SystemAudioInitiationActionFromAvrTest {
     @Before
     public void SetUp() {
         mDeviceInfoForTests = new HdmiDeviceInfo(1001, 1234);
-        HdmiControlService hdmiControlService = new HdmiControlService(null) {
-
-            @Override
-            void sendCecCommand(HdmiCecMessage command,
-                    @Nullable SendMessageCallback callback) {
-                switch (command.getOpcode()) {
-                    case Constants.MESSAGE_REQUEST_ACTIVE_SOURCE:
-                        mMsgRequestActiveSourceCount++;
-                        if (mTryCountBeforeSucceed >= mMsgRequestActiveSourceCount
-                                && callback != null) {
-                            callback.onSendCompleted(SendMessageResult.NACK);
-                            break;
-                        }
-                        if (mShouldDispatchActiveSource) {
-                            mHdmiCecLocalDeviceAudioSystem.dispatchMessage(
-                                    HdmiCecMessageBuilder.buildActiveSource(
-                                            Constants.ADDR_TV, 1002));
-                        }
-                        break;
-                    case Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE:
-                        mMsgSetSystemAudioModeCount++;
-                        if (mTryCountBeforeSucceed >= mMsgSetSystemAudioModeCount
-                                && callback != null) {
-                            callback.onSendCompleted(SendMessageResult.NACK);
-                        }
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Unexpected message");
-                }
-            }
-
-            @Override
-            AudioManager getAudioManager() {
-                return new AudioManager() {
+        HdmiControlService hdmiControlService =
+                new HdmiControlService(null) {
 
                     @Override
-                    public int setHdmiSystemAudioSupported(boolean on) {
-                        return 0;
+                    void sendCecCommand(
+                            HdmiCecMessage command, @Nullable SendMessageCallback callback) {
+                        switch (command.getOpcode()) {
+                            case Constants.MESSAGE_REQUEST_ACTIVE_SOURCE:
+                                mMsgRequestActiveSourceCount++;
+                                if (mTryCountBeforeSucceed >= mMsgRequestActiveSourceCount
+                                        && callback != null) {
+                                    callback.onSendCompleted(SendMessageResult.NACK);
+                                    break;
+                                }
+                                if (mShouldDispatchActiveSource) {
+                                    mHdmiCecLocalDeviceAudioSystem.dispatchMessage(
+                                            HdmiCecMessageBuilder.buildActiveSource(
+                                                    Constants.ADDR_TV, 1002));
+                                }
+                                break;
+                            case Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE:
+                                mMsgSetSystemAudioModeCount++;
+                                if (mTryCountBeforeSucceed >= mMsgSetSystemAudioModeCount
+                                        && callback != null) {
+                                    callback.onSendCompleted(SendMessageResult.NACK);
+                                }
+                                break;
+                            default:
+                                throw new IllegalArgumentException("Unexpected message");
+                        }
                     }
 
                     @Override
-                    public int getStreamVolume(int streamType) {
-                        return 0;
+                    AudioManager getAudioManager() {
+                        return new AudioManager() {
+
+                            @Override
+                            public int setHdmiSystemAudioSupported(boolean on) {
+                                return 0;
+                            }
+
+                            @Override
+                            public int getStreamVolume(int streamType) {
+                                return 0;
+                            }
+
+                            @Override
+                            public boolean isStreamMute(int streamType) {
+                                return false;
+                            }
+
+                            @Override
+                            public int getStreamMaxVolume(int streamType) {
+                                return 100;
+                            }
+
+                            @Override
+                            public void adjustStreamVolume(
+                                    int streamType, int direction, int flags) {}
+                        };
                     }
 
                     @Override
-                    public boolean isStreamMute(int streamType) {
+                    boolean isPowerStandby() {
                         return false;
                     }
 
                     @Override
-                    public int getStreamMaxVolume(int streamType) {
-                        return 100;
+                    boolean isAddressAllocated() {
+                        return true;
                     }
 
                     @Override
-                    public void adjustStreamVolume(int streamType, int direction, int flags) {
+                    void wakeUp() {}
 
+                    @Override
+                    int getPhysicalAddress() {
+                        return 0;
                     }
                 };
-            }
-
-            @Override
-            boolean isPowerStandby() {
-                return false;
-            }
-
-            @Override
-            boolean isAddressAllocated() {
-                return true;
-            }
-
-            @Override
-            void wakeUp() {
-
-            }
-        };
         mHdmiCecLocalDeviceAudioSystem =
                 new HdmiCecLocalDeviceAudioSystem(hdmiControlService) {
                     @Override
@@ -205,7 +205,6 @@ public class SystemAudioInitiationActionFromAvrTest {
         assertTrue(mHdmiCecLocalDeviceAudioSystem.isSystemAudioActivated());
 
         assertThat(mHdmiCecLocalDeviceAudioSystem.mActiveSource.physicalAddress).isEqualTo(1002);
-
     }
 
     @Test

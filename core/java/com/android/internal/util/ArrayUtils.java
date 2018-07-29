@@ -309,7 +309,7 @@ public class ArrayUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static @NonNull <T> T[] concat(Class<T> kind, @Nullable T[] a, @Nullable T[] b) {
+    public static @NonNull <T> T[] concatElements(Class<T> kind, @Nullable T[] a, @Nullable T[] b) {
         final int an = (a != null) ? a.length : 0;
         final int bn = (b != null) ? b.length : 0;
         if (an == 0 && bn == 0) {

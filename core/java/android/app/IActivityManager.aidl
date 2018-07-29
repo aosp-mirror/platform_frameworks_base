@@ -243,12 +243,6 @@ interface IActivityManager {
     boolean isTopActivityImmersive();
     void crashApplication(int uid, int initialPid, in String packageName, int userId, in String message);
     String getProviderMimeType(in Uri uri, int userId);
-    IBinder newUriPermissionOwner(in String name);
-    void grantUriPermissionFromOwner(in IBinder owner, int fromUid, in String targetPkg,
-            in Uri uri, int mode, int sourceUserId, int targetUserId);
-    void revokeUriPermissionFromOwner(in IBinder owner, in Uri uri, int mode, int userId);
-    int checkGrantUriPermission(int callingUid, in String targetPkg, in Uri uri,
-            int modeFlags, int userId);
     // Cause the specified process to dump the specified heap.
     boolean dumpHeap(in String process, int userId, boolean managed, boolean mallocInfo,
             boolean runGc, in String path, in ParcelFileDescriptor fd,
@@ -363,9 +357,6 @@ interface IActivityManager {
     ActivityManager.StackInfo getFocusedStackInfo();
     void restart();
     void performIdleMaintenance();
-    void takePersistableUriPermission(in Uri uri, int modeFlags, String toPackage, int userId);
-    void releasePersistableUriPermission(in Uri uri, int modeFlags, String toPackage, int userId);
-    ParceledListSlice getPersistedUriPermissions(in String packageName, boolean incoming);
     void appNotRespondingViaProvider(in IBinder connection);
     Rect getTaskBounds(int taskId);
     boolean setProcessMemoryTrimLevel(in String process, int uid, int level);
@@ -441,12 +432,6 @@ interface IActivityManager {
     void resizeDockedStack(in Rect dockedBounds, in Rect tempDockedTaskBounds,
             in Rect tempDockedTaskInsetBounds,
             in Rect tempOtherTaskBounds, in Rect tempOtherTaskInsetBounds);
-    // Gets the URI permissions granted to an arbitrary package (or all packages if null)
-    // NOTE: this is different from getPersistedUriPermissions(), which returns the URIs the package
-    // granted to another packages (instead of those granted to it).
-    ParceledListSlice getGrantedUriPermissions(in String packageName, int userId);
-    // Clears the URI permissions granted to an arbitrary package.
-    void clearGrantedUriPermissions(in String packageName, int userId);
     boolean isAppForeground(int uid);
     void removeStack(int stackId);
     void makePackageIdle(String packageName, int userId);

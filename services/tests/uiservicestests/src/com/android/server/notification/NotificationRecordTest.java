@@ -62,6 +62,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.android.internal.R;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.UiServiceTestCase;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -646,7 +647,8 @@ public class NotificationRecordTest extends UiServiceTestCase {
     @Test
     public void testCalculateGrantableUris_PappProvided() throws RemoteException {
         IActivityManager am = mock(IActivityManager.class);
-        when(am.checkGrantUriPermission(anyInt(), eq(null), any(),
+        UriGrantsManagerInternal ugm = mock(UriGrantsManagerInternal.class);
+        when(ugm.checkGrantUriPermission(anyInt(), eq(null), any(Uri.class),
                 anyInt(), anyInt())).thenThrow(new SecurityException());
 
         Notification n = mock(Notification.class);
@@ -655,6 +657,7 @@ public class NotificationRecordTest extends UiServiceTestCase {
                 new StatusBarNotification(PKG_P, PKG_P, id1, tag1, uid, uid, n, mUser, null, uid);
         NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
         record.mAm = am;
+        record.mUgmInternal = ugm;
 
         try {
             record.calculateGrantableUris();
@@ -667,8 +670,9 @@ public class NotificationRecordTest extends UiServiceTestCase {
     @Test
     public void testCalculateGrantableUris_PuserOverridden() throws RemoteException {
         IActivityManager am = mock(IActivityManager.class);
-        when(am.checkGrantUriPermission(anyInt(), eq(null), any(),
-                anyInt(), anyInt())).thenThrow(SecurityException.class);
+        UriGrantsManagerInternal ugm = mock(UriGrantsManagerInternal.class);
+        when(ugm.checkGrantUriPermission(anyInt(), eq(null), any(Uri.class),
+                anyInt(), anyInt())).thenThrow(new SecurityException());
 
         channel.lockFields(NotificationChannel.USER_LOCKED_SOUND);
         Notification n = mock(Notification.class);
@@ -684,8 +688,9 @@ public class NotificationRecordTest extends UiServiceTestCase {
     @Test
     public void testCalculateGrantableUris_prePappProvided() throws RemoteException {
         IActivityManager am = mock(IActivityManager.class);
-        when(am.checkGrantUriPermission(anyInt(), eq(null), any(),
-                anyInt(), anyInt())).thenThrow(SecurityException.class);
+        UriGrantsManagerInternal ugm = mock(UriGrantsManagerInternal.class);
+        when(ugm.checkGrantUriPermission(anyInt(), eq(null), any(Uri.class),
+                anyInt(), anyInt())).thenThrow(new SecurityException());
 
         Notification n = mock(Notification.class);
         when(n.getChannelId()).thenReturn(channel.getId());

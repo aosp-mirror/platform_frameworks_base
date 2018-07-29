@@ -55,7 +55,7 @@ public:
                           const int64_t version) override {
         std::lock_guard<std::mutex> lock(mMutex);
 
-        if (mPullTagId != -1 && (mCondition == true || mConditionTrackerIndex < 0) ) {
+        if (mIsPulled && (mCondition == true || mConditionTrackerIndex < 0)) {
             vector<shared_ptr<LogEvent>> allData;
             mPullerManager->Pull(mPullTagId, eventTimeNs, &allData);
             if (allData.size() == 0) {
@@ -159,6 +159,8 @@ private:
     // Util function to check whether the specified dimension hits the guardrail.
     bool hitGuardRailLocked(const MetricDimensionKey& newKey);
 
+    void pullLocked(const int64_t timestampNs);
+
     static const size_t kBucketSize = sizeof(ValueBucket{});
 
     const size_t mDimensionSoftLimit;
@@ -171,7 +173,7 @@ private:
 
     const Type mValueType;
 
-    FRIEND_TEST(ValueMetricProducerTest, TestNonDimensionalEvents);
+    FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsNoCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset);
     FRIEND_TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition);
@@ -190,6 +192,7 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestPushedAggregateAvg);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedAggregateSum);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedAggregateSumSliced);
+    FRIEND_TEST(ValueMetricProducerTest, TestFirstBucket);
 };
 
 }  // namespace statsd
