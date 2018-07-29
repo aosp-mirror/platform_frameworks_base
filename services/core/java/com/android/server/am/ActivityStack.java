@@ -2722,8 +2722,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                             next.shortComponentName);
 
                     next.sleeping = false;
-                    mService.mAm.getAppWarningsLocked().onResumeActivity(next);
-                    mService.mAm.showAskCompatModeDialogLocked(next);
+                    mService.getAppWarningsLocked().onResumeActivity(next);
                     next.app.setPendingUiCleanAndForceProcessStateUpTo(mService.mTopProcessState);
                     next.clearOptionsLocked();
                     transaction.setLifecycleStateRequest(

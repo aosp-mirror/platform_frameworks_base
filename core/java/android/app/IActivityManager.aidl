@@ -325,7 +325,6 @@ interface IActivityManager {
      */
     void requestWifiBugReport(in String shareTitle, in String shareDescription);
 
-    long inputDispatchingTimedOut(int pid, boolean aboveSystem, in String reason);
     void clearPendingBackup();
     Intent getIntentForIntentSender(in IIntentSender sender);
     // This is not public because you need to be very careful in how you

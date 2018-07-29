@@ -93,6 +93,12 @@ public class WindowProcessController {
     private volatile String mRequiredAbi;
     // Running any services that are foreground?
     private volatile boolean mHasForegroundServices;
+    // was app launched for debugging?
+    private volatile boolean mDebugging;
+    // Active instrumentation running in process?
+    private volatile boolean mInstrumenting;
+    // Set to true when process was launched with a wrapper attached
+    private volatile boolean mUsingWrapper;
 
     // Thread currently set for VR scheduling
     int mVrThreadTid;
@@ -187,6 +193,30 @@ public class WindowProcessController {
 
     String getRequiredAbi() {
         return mRequiredAbi;
+    }
+
+    public void setDebugging(boolean debugging) {
+        mDebugging = debugging;
+    }
+
+    boolean isDebugging() {
+        return mDebugging;
+    }
+
+    public void setUsingWrapper(boolean usingWrapper) {
+        mUsingWrapper = usingWrapper;
+    }
+
+    boolean isUsingWrapper() {
+        return mUsingWrapper;
+    }
+
+    public void setInstrumenting(boolean instrumenting) {
+        mInstrumenting = instrumenting;
+    }
+
+    boolean isInstrumenting() {
+        return mInstrumenting;
     }
 
     public void addPackage(String packageName) {

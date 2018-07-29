@@ -32,12 +32,16 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
+import android.content.pm.PackageManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.DisplayWindowController;
 
 import org.junit.Rule;
@@ -128,17 +132,16 @@ public class ActivityTestsBase {
     }
 
     ActivityManagerService setupActivityManagerService(TestActivityTaskManagerService atm) {
-        final ActivityManagerService am = spy(new TestActivityManagerService(mContext, atm));
+        final TestActivityManagerService am = spy(new TestActivityManagerService(mContext, atm));
         setupActivityManagerService(am, atm);
         return am;
     }
 
-    void setupActivityManagerService(ActivityManagerService am, ActivityTaskManagerService atm) {
+    void setupActivityManagerService(
+            TestActivityManagerService am, TestActivityTaskManagerService atm) {
         atm.setActivityManagerService(am);
-        atm.mAmInternal = am.new LocalService();
-        am.mAtmInternal = atm.new LocalService();
-        am.mUgmInternal = mock(UriGrantsManagerInternal.class);
-        atm.mUgmInternal = mock(UriGrantsManagerInternal.class);
+        atm.mAmInternal = am.getLocalService();
+        am.mAtmInternal = atm.getLocalService();
         // Makes sure the supervisor is using with the spy object.
         atm.mStackSupervisor.setService(atm);
         doReturn(mock(IPackageManager.class)).when(am).getPackageManager();
@@ -378,6 +381,8 @@ public class ActivityTestsBase {
 
     protected static class TestActivityTaskManagerService extends ActivityTaskManagerService {
         private LockTaskController mLockTaskController;
+        private ActivityTaskManagerInternal mInternal;
+        private PackageManagerInternal mPmInternal;
 
         TestActivityTaskManagerService(Context context) {
             super(context);
@@ -386,6 +391,7 @@ public class ActivityTestsBase {
             mSupportsSplitScreenMultiWindow = true;
             mSupportsFreeformWindowManagement = true;
             mSupportsPictureInPicture = true;
+            mUgmInternal = mock(UriGrantsManagerInternal.class);
         }
 
         @Override
@@ -430,16 +436,34 @@ public class ActivityTestsBase {
         protected ActivityStackSupervisor createTestSupervisor() {
             return new TestActivityStackSupervisor(this, mH.getLooper());
         }
+
+        ActivityTaskManagerInternal getLocalService() {
+            if (mInternal == null) {
+                mInternal = new ActivityTaskManagerService.LocalService();
+            }
+            return mInternal;
+        }
+
+        PackageManagerInternal getPackageManagerInternalLocked() {
+            if (mPmInternal == null) {
+                mPmInternal = mock(PackageManagerInternal.class);
+                doReturn(false).when(mPmInternal).isPermissionsReviewRequired(anyString(), anyInt());
+            }
+            return mPmInternal;
+        }
     }
 
     /**
      * An {@link ActivityManagerService} subclass which provides a test
      * {@link ActivityStackSupervisor}.
      */
-    protected static class TestActivityManagerService extends ActivityManagerService {
+    static class TestActivityManagerService extends ActivityManagerService {
+
+        private ActivityManagerInternal mInternal;
 
         TestActivityManagerService(Context context, TestActivityTaskManagerService atm) {
             super(context, atm);
+            mUgmInternal = mock(UriGrantsManagerInternal.class);
         }
 
         @Override
@@ -449,6 +473,13 @@ public class ActivityTestsBase {
         @Override
         Configuration getGlobalConfiguration() {
             return mContext.getResources().getConfiguration();
+        }
+
+        ActivityManagerInternal getLocalService() {
+            if (mInternal == null) {
+                mInternal = new LocalService();
+            }
+            return mInternal;
         }
     }
 

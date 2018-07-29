@@ -17,7 +17,6 @@
 package com.android.server.am;
 
 import android.annotation.UiThread;
-import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -57,9 +56,9 @@ class AppWarnings {
 
     private final HashMap<String, Integer> mPackageFlags = new HashMap<>();
 
-    private final ActivityManagerService mAms;
+    private final ActivityTaskManagerService mAtm;
     private final Context mUiContext;
-    private final ConfigHandler mAmsHandler;
+    private final ConfigHandler mHandler;
     private final UiHandler mUiHandler;
     private final AtomicFile mConfigFile;
 
@@ -81,17 +80,17 @@ class AppWarnings {
      * <p>
      * <strong>Note:</strong> Must be called from the ActivityManagerService thread.
      *
-     * @param ams
+     * @param atm
      * @param uiContext
-     * @param amsHandler
+     * @param handler
      * @param uiHandler
      * @param systemDir
      */
-    public AppWarnings(ActivityManagerService ams, Context uiContext, Handler amsHandler,
+    public AppWarnings(ActivityTaskManagerService atm, Context uiContext, Handler handler,
             Handler uiHandler, File systemDir) {
-        mAms = ams;
+        mAtm = atm;
         mUiContext = uiContext;
-        mAmsHandler = new ConfigHandler(amsHandler.getLooper());
+        mHandler = new ConfigHandler(handler.getLooper());
         mUiHandler = new UiHandler(uiHandler.getLooper());
         mConfigFile = new AtomicFile(new File(systemDir, CONFIG_FILE_NAME), "warnings-config");
 
@@ -104,7 +103,7 @@ class AppWarnings {
      * @param r activity record for which the warning may be displayed
      */
     public void showUnsupportedDisplaySizeDialogIfNeeded(ActivityRecord r) {
-        final Configuration globalConfig = mAms.getGlobalConfiguration();
+        final Configuration globalConfig = mAtm.getGlobalConfiguration();
         if (globalConfig.densityDpi != DisplayMetrics.DENSITY_DEVICE_STABLE
                 && r.appInfo.requiresSmallestWidthDp > globalConfig.smallestScreenWidthDp) {
             mUiHandler.showUnsupportedDisplaySizeDialog(r);
@@ -211,7 +210,7 @@ class AppWarnings {
 
         synchronized (mPackageFlags) {
             mPackageFlags.remove(name);
-            mAmsHandler.scheduleWrite();
+            mHandler.scheduleWrite();
         }
     }
 
@@ -351,7 +350,7 @@ class AppWarnings {
                 } else {
                     mPackageFlags.remove(name);
                 }
-                mAmsHandler.scheduleWrite();
+                mHandler.scheduleWrite();
             }
         }
     }
@@ -430,10 +429,10 @@ class AppWarnings {
     }
 
     /**
-     * Handles messages on the ActivityManagerService thread.
+     * Handles messages on the ActivityTaskManagerService thread.
      */
     private final class ConfigHandler extends Handler {
-        private static final int MSG_WRITE = ActivityManagerService.FIRST_COMPAT_MODE_MSG;
+        private static final int MSG_WRITE = 1;
 
         private static final int DELAY_MSG_WRITE = 10000;
 

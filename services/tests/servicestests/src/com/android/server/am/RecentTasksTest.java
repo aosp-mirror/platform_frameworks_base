@@ -115,7 +115,8 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         mTaskPersister = new TestTaskPersister(mContext.getFilesDir());
         mService = spy(new MyTestActivityTaskManagerService(mContext));
-        final ActivityManagerService am = spy(new MyTestActivityManagerService(mContext, mService));
+        final TestActivityManagerService am =
+                spy(new MyTestActivityManagerService(mContext, mService));
         setupActivityManagerService(am, mService);
         mRecentTasks = (TestRecentTasks) mService.getRecentTasks();
         mRecentTasks.loadParametersFromResources(mContext.getResources());
