@@ -1151,7 +1151,7 @@
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Connecté à un accessoire USB"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Appuyez ici pour plus d\'options."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Débogage USB activé"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Appuyez ici pour désactiver le débogage USB."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Appuyez ici pour désactiver le débogage USB"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Création du rapport de bug…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Partager le rapport de bug ?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Partage du rapport de bug…"</string>
