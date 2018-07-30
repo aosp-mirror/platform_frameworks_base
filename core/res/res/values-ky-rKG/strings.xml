@@ -696,7 +696,7 @@
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"Токтотуу"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Артка түрүү"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Алдыга түрүү"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Шашылыш чалуу гана"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Өзгөчө кырдаалда гана чалууга болот"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Тармак кулпуланган"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-карта PUK-бөгөттө."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Колдонуучунун нускамасын караңыз же Кардарларды тейлөө борборуна кайрылыңыз."</string>
@@ -1143,7 +1143,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"Эч уруксаттын кереги жок"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"бул үчүн акы алынышы мүмкүн"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Жарайт"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Бул түзмөк USB менен кубатталууда"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Бул түзмөк USB аркылуу кубатталууда"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"Тиркелген түзмөк USB менен кубатталууда"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"Файл өткөрүү үчүн USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"Сүрөт өткөрүү үчүн USB"</string>
@@ -1151,7 +1151,7 @@
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB аксессуарга байланышты"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Кошумча параметрлерди ачуу үчүн таптап коюңуз."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Мүчүлүштүктөрдү USB аркылуу оңдоо иштетилген"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Мүчүлштктрдү USB аркл оңдну өчр үчн тийп коюңуз."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Өчүргүңүз келсе басып коюңуз."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Мүчүлүштүк тууралуу кабар алынууда…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Мүчүлүштүк тууралуу баяндама бөлүшүлсүнбү?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"Мүчүлүштүк тууралуу баяндама бөлүшүлүүдө…"</string>
