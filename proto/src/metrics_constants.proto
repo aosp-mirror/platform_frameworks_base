@@ -6175,6 +6175,11 @@ message MetricsEvent {
     // OS: Q
     FACE = 1511;
 
+    // OPEN: Settings > Acessibility > HearingAid pairing instructions dialog
+    // CATEGORY: SETTINGS
+    // OS: Q
+    DIALOG_ACCESSIBILITY_HEARINGAID = 1512;
+
 
     // ---- End Q Constants, all Q constants go above this line ----
 
