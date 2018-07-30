@@ -111,7 +111,7 @@ public class WirelessChargingAnimation {
             params.width = WindowManager.LayoutParams.MATCH_PARENT;
             params.format = PixelFormat.TRANSLUCENT;
 
-            params.type = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
+            params.type = WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
             params.setTitle("Charging Animation");
             params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
