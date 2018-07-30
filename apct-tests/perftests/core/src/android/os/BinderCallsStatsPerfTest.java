@@ -69,6 +69,19 @@ public class BinderCallsStatsPerfTest {
     }
 
     @Test
+    public void timeCallSessionOnePercentSampling() {
+        mBinderCallsStats.setSamplingInterval(100);
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        Binder b = new Binder();
+        int i = 0;
+        while (state.keepRunning()) {
+            CallSession s = mBinderCallsStats.callStarted(b, i % 100);
+            mBinderCallsStats.callEnded(s, 0, 0);
+            i++;
+        }
+    }
+
+    @Test
     public void timeCallSessionTrackingDisabled() {
         mBinderCallsStats.setDetailedTracking(false);
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
