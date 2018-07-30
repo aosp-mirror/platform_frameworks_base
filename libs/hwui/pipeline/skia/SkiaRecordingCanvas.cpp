@@ -257,9 +257,8 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
     SkRect dst = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
 
     PaintCoW filteredPaint(paint);
-    // Besides kNone, the other three SkFilterQualities are treated the same. And Android's
-    // Java API only supports kLow and kNone anyway.
-    if (!filteredPaint || filteredPaint->getFilterQuality() == kNone_SkFilterQuality) {
+    // HWUI always draws 9-patches with bilinear filtering, regardless of what is set in the Paint.
+    if (!filteredPaint || filteredPaint->getFilterQuality() != kLow_SkFilterQuality) {
         filteredPaint.writeable().setFilterQuality(kLow_SkFilterQuality);
     }
     sk_sp<SkColorFilter> colorFilter;
