@@ -407,8 +407,7 @@ public class AppWindowContainerController
                 if (mService.mAppTransition.getAppTransition()
                         == WindowManager.TRANSIT_TASK_OPEN_BEHIND) {
                     // We're launchingBehind, add the launching activity to mOpeningApps.
-                    final WindowState win =
-                            mService.getDefaultDisplayContentLocked().findFocusedWindow();
+                    final WindowState win = mContainer.getDisplayContent().findFocusedWindow();
                     if (win != null) {
                         final AppWindowToken focusedToken = win.mAppToken;
                         if (focusedToken != null) {

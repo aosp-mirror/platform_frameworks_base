@@ -5434,7 +5434,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         // Do not sleep activities in this stack if we're marked as focused and the keyguard
         // is in the process of going away.
-        if (mStackSupervisor.getTopDisplayFocusedStack() == this
+        if (isFocusedStackOnDisplay()
                 && mStackSupervisor.getKeyguardController().isKeyguardGoingAway()) {
             return false;
         }

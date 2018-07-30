@@ -763,6 +763,7 @@ class WindowSurfacePlacer {
 
     private void processApplicationsAnimatingInPlace(int transit) {
         if (transit == TRANSIT_TASK_IN_PLACE) {
+            // TODO (b/111362605): non-default-display transition.
             // Find the focused window
             final WindowState win = mService.getDefaultDisplayContentLocked().findFocusedWindow();
             if (win != null) {

@@ -17,11 +17,14 @@
 package com.android.server.wm;
 
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
 import android.content.res.Configuration;
 import android.os.Binder;
+import android.os.IBinder;
 import android.util.Slog;
 import android.view.Display;
 
@@ -120,6 +123,42 @@ public class DisplayWindowController
             final DisplayContent dc = mRoot.getDisplayContent(mDisplayId);
             if (dc != null) {
                 dc.continueUpdateImeTarget();
+            }
+        }
+    }
+
+    /**
+     * Sets a focused app on this display.
+     *
+     * @param token Specifies which app should be focused.
+     * @param moveFocusNow Specifies if we should update the focused window immediately.
+     */
+    public void setFocusedApp(IBinder token, boolean moveFocusNow) {
+        synchronized (mWindowMap) {
+            if (mContainer == null) {
+                if (DEBUG_FOCUS_LIGHT) Slog.i(TAG_WM, "setFocusedApp: could not find displayId="
+                        + mDisplayId);
+                return;
+            }
+            final AppWindowToken newFocus;
+            if (token == null) {
+                if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Clearing focused app, displayId="
+                        + mDisplayId);
+                newFocus = null;
+            } else {
+                newFocus = mRoot.getAppWindowToken(token);
+                if (newFocus == null) {
+                    Slog.w(TAG_WM, "Attempted to set focus to non-existing app token: " + token
+                            + ", displayId=" + mDisplayId);
+                }
+                if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Set focused app to: " + newFocus
+                        + " moveFocusNow=" + moveFocusNow + " displayId=" + mDisplayId);
+            }
+
+            final boolean changed = mContainer.setFocusedApp(newFocus);
+            if (moveFocusNow && changed) {
+                mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
+                        true /*updateInputWindows*/);
             }
         }
     }

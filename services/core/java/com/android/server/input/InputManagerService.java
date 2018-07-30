@@ -209,7 +209,8 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeSetInputDispatchMode(long ptr, boolean enabled, boolean frozen);
     private static native void nativeSetSystemUiVisibility(long ptr, int visibility);
     private static native void nativeSetFocusedApplication(long ptr,
-            InputApplicationHandle application);
+            int displayId, InputApplicationHandle application);
+    private static native void nativeSetFocusedDisplay(long ptr, int displayId);
     private static native boolean nativeTransferTouchFocus(long ptr,
             InputChannel fromChannel, InputChannel toChannel);
     private static native void nativeSetPointerSpeed(long ptr, int speed);
@@ -1431,21 +1432,27 @@ public class InputManagerService extends IInputManager.Stub
         }
     }
 
-    public void setInputWindows(InputWindowHandle[] windowHandles,
-            InputWindowHandle focusedWindowHandle, int displayId) {
-        final IWindow newFocusedWindow =
-            focusedWindowHandle != null ? focusedWindowHandle.clientWindow : null;
-        if (mFocusedWindow != newFocusedWindow) {
-            mFocusedWindow = newFocusedWindow;
-            if (mFocusedWindowHasCapture) {
-                setPointerCapture(false);
-            }
-        }
+    public void setInputWindows(InputWindowHandle[] windowHandles, int displayId) {
         nativeSetInputWindows(mPtr, windowHandles, displayId);
     }
 
-    public void setFocusedApplication(InputApplicationHandle application) {
-        nativeSetFocusedApplication(mPtr, application);
+    public void setFocusedApplication(int displayId, InputApplicationHandle application) {
+        nativeSetFocusedApplication(mPtr, displayId, application);
+    }
+
+    public void setFocusedWindow(InputWindowHandle focusedWindowHandle) {
+        final IWindow newFocusedWindow =
+            focusedWindowHandle != null ? focusedWindowHandle.clientWindow : null;
+        if (mFocusedWindow != newFocusedWindow) {
+            if (mFocusedWindowHasCapture) {
+                setPointerCapture(false);
+            }
+            mFocusedWindow = newFocusedWindow;
+        }
+    }
+
+    public void setFocusedDisplay(int displayId) {
+        nativeSetFocusedDisplay(mPtr, displayId);
     }
 
     @Override
@@ -1460,16 +1467,18 @@ public class InputManagerService extends IInputManager.Stub
             return;
         }
         setPointerCapture(enabled);
-        try {
-            mFocusedWindow.dispatchPointerCaptureChanged(enabled);
-        } catch (RemoteException ex) {
-            /* ignore */
-        }
     }
 
     private void setPointerCapture(boolean enabled) {
-        mFocusedWindowHasCapture = enabled;
-        nativeSetPointerCapture(mPtr, enabled);
+        if (mFocusedWindowHasCapture != enabled) {
+            mFocusedWindowHasCapture = enabled;
+            try {
+                mFocusedWindow.dispatchPointerCaptureChanged(enabled);
+            } catch (RemoteException ex) {
+                /* ignore */
+            }
+            nativeSetPointerCapture(mPtr, enabled);
+        }
     }
 
     public void setInputDispatchMode(boolean enabled, boolean frozen) {

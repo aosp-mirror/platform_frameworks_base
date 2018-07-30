@@ -3588,7 +3588,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     stack.goToSleepIfPossible(false /* shuttingDown */);
                 } else {
                     stack.awakeFromSleepingLocked();
-                    if (isTopDisplayFocusedStack(stack) && !getKeyguardController()
+                    if (stack.isFocusedStackOnDisplay() && !getKeyguardController()
                             .isKeyguardOrAodShowing(display.mDisplayId)) {
                         // If the keyguard is unlocked - resume immediately.
                         // It is possible that the display will not be awake at the time we

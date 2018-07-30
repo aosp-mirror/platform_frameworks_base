@@ -920,6 +920,10 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 && (mSupervisor.mService.mRunningVoice == null);
     }
 
+    void setFocusedApp(ActivityRecord r, boolean moveFocusNow) {
+        mWindowContainerController.setFocusedApp(r.appToken, moveFocusNow);
+    }
+
     /**
      * @return the stack currently above the {@param stack}.  Can be null if the {@param stack} is
      *         already top-most.

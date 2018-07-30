@@ -1833,7 +1833,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (startingWindow && DEBUG_STARTING_WINDOW) Slog.d(TAG_WM,
                 "Starting window removed " + this);
 
-        if (localLOGV || DEBUG_FOCUS || DEBUG_FOCUS_LIGHT && this == mService.mCurrentFocus)
+        if (localLOGV || DEBUG_FOCUS || DEBUG_FOCUS_LIGHT && isFocused())
             Slog.v(TAG_WM, "Remove " + this + " client="
                         + Integer.toHexString(System.identityHashCode(mClient.asBinder()))
                         + ", surfaceController=" + mWinAnimator.mSurfaceController + " Callers="
@@ -1945,7 +1945,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (wasVisible && mService.updateOrientationFromAppTokensLocked(displayId)) {
                 mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
             }
-            mService.updateFocusedWindowLocked(mService.mCurrentFocus == this
+            mService.updateFocusedWindowLocked(isFocused()
                             ? UPDATE_FOCUS_REMOVING_FOCUS
                             : UPDATE_FOCUS_NORMAL,
                     true /*updateInputWindows*/);
@@ -2180,7 +2180,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mPolicyVisibility = mPolicyVisibilityAfterAnim;
             if (!mPolicyVisibility) {
                 mWinAnimator.hide("checkPolicyVisibilityChange");
-                if (mService.mCurrentFocus == this) {
+                if (isFocused()) {
                     if (DEBUG_FOCUS_LIGHT) Slog.i(TAG,
                             "setAnimationLocked: setting mFocusMayChange true");
                     mService.mFocusMayChange = true;
@@ -2482,6 +2482,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
         mPolicyVisibilityAfterAnim = false;
+        final boolean isFocused = isFocused();
         if (!doAnimation) {
             if (DEBUG_VISIBILITY) Slog.v(TAG, "Policy visibility false: " + this);
             mPolicyVisibility = false;
@@ -2489,7 +2490,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // for it to be displayed before enabling the display, that
             // we allow the display to be enabled now.
             mService.enableScreenIfNeededLocked();
-            if (mService.mCurrentFocus == this) {
+            if (isFocused) {
                 if (DEBUG_FOCUS_LIGHT) Slog.i(TAG,
                         "WindowState.hideLw: setting mFocusMayChange true");
                 mService.mFocusMayChange = true;
@@ -2498,7 +2499,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (requestAnim) {
             mService.scheduleAnimationLocked();
         }
-        if (mService.mCurrentFocus == this) {
+        if (isFocused) {
             mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /* updateImWindows */);
         }
         return true;
@@ -2994,10 +2995,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-    public boolean isFocused() {
-        synchronized(mService.mWindowMap) {
-            return mService.mCurrentFocus == this;
-        }
+    boolean isFocused() {
+        return getDisplayContent().mCurrentFocus == this;
     }
 
     @Override
@@ -4435,7 +4434,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         @Override
         public boolean isFocused() {
             final WindowState outer = mOuter.get();
-            return outer != null && outer.isFocused();
+            if (outer != null) {
+                synchronized (outer.mService.mWindowMap) {
+                    return outer.isFocused();
+                }
+            }
+            return false;
         }
     }
 
@@ -4663,10 +4667,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         mTapExcludeRegionHolder.updateRegion(regionId, left, top, width, height);
         // Trigger touch exclude region update on current display.
-        final boolean isAppFocusedOnDisplay = mService.mFocusedApp != null
-                && mService.mFocusedApp.getDisplayContent() == currentDisplay;
-        currentDisplay.setTouchExcludeRegion(isAppFocusedOnDisplay ? mService.mFocusedApp.getTask()
-                : null);
+        currentDisplay.updateTouchExcludeRegion();
     }
 
     /** Union the region with current tap exclude region that this window provides. */

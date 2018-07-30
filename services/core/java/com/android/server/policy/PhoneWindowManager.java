@@ -4777,6 +4777,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             pf.bottom = df.bottom = of.bottom = displayFrames.mUnrestricted.bottom;
             // ...with content insets above the nav bar
             cf.bottom = vf.bottom = displayFrames.mStable.bottom;
+            // TODO (b/111364446): Support showing IME on non-default displays
             if (mStatusBar != null && mFocusedWindow == mStatusBar && canReceiveInput(mStatusBar)) {
                 // The status bar forces the navigation bar while it's visible. Make sure the IME
                 // avoids the navigation bar in that case.

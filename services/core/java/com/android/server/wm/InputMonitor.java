@@ -64,7 +64,6 @@ final class InputMonitor {
     // Array of window handles to provide to the input dispatcher.
     private InputWindowHandle[] mInputWindowHandles;
     private int mInputWindowHandleCount;
-    private InputWindowHandle mFocusedInputWindowHandle;
 
     private boolean mDisableWallpaperTouchEvents;
     private final Rect mTmpRect = new Rect();
@@ -229,16 +228,12 @@ final class InputMonitor {
                     + child + ", " + inputWindowHandle);
         }
         addInputWindowHandle(inputWindowHandle);
-        if (hasFocus) {
-            mFocusedInputWindowHandle = inputWindowHandle;
-        }
     }
 
     private void clearInputWindowHandlesLw() {
         while (mInputWindowHandleCount != 0) {
             mInputWindowHandles[--mInputWindowHandleCount] = null;
         }
-        mFocusedInputWindowHandle = null;
     }
 
     void setUpdateInputWindowsNeededLw() {
@@ -325,13 +320,13 @@ final class InputMonitor {
     public void setFocusedAppLw(AppWindowToken newApp) {
         // Focused app has changed.
         if (newApp == null) {
-            mService.mInputManager.setFocusedApplication(null);
+            mService.mInputManager.setFocusedApplication(mDisplayId, null);
         } else {
             final InputApplicationHandle handle = newApp.mInputApplicationHandle;
             handle.name = newApp.toString();
             handle.dispatchingTimeoutNanos = newApp.mInputDispatchingTimeoutNanos;
 
-            mService.mInputManager.setFocusedApplication(handle);
+            mService.mInputManager.setFocusedApplication(mDisplayId, handle);
         }
     }
 
@@ -370,8 +365,7 @@ final class InputMonitor {
     void onRemoved() {
         // If DisplayContent removed, we need find a way to remove window handles of this display
         // from InputDispatcher, so pass an empty InputWindowHandles to remove them.
-        mService.mInputManager.setInputWindows(mInputWindowHandles, mFocusedInputWindowHandle,
-                mDisplayId);
+        mService.mInputManager.setInputWindows(mInputWindowHandles, mDisplayId);
     }
 
     private final class UpdateInputForAllWindowsConsumer implements Consumer<WindowState> {
@@ -414,8 +408,7 @@ final class InputMonitor {
             }
 
             // Send windows to native code.
-            mService.mInputManager.setInputWindows(mInputWindowHandles, mFocusedInputWindowHandle,
-                    mDisplayId);
+            mService.mInputManager.setInputWindows(mInputWindowHandles, mDisplayId);
 
             clearInputWindowHandlesLw();
 
@@ -435,7 +428,6 @@ final class InputMonitor {
             final int flags = w.mAttrs.flags;
             final int privateFlags = w.mAttrs.privateFlags;
             final int type = w.mAttrs.type;
-            // TODO(b/111361570): multi-display focus, one focus window per display.
             final boolean hasFocus = w.isFocused();
             final boolean isVisible = w.isVisibleLw();
 

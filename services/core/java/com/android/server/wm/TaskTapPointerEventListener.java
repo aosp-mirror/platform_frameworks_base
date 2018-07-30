@@ -19,12 +19,12 @@ package com.android.server.wm;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
+import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.server.wm.WindowManagerService.H;
 
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.PointerIcon.TYPE_NOT_SPECIFIED;
 import static android.view.PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
 import static android.view.PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
@@ -36,6 +36,8 @@ public class TaskTapPointerEventListener implements PointerEventListener {
     final private Region mTouchExcludeRegion = new Region();
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
+    private final Handler mHandler;
+    private final Runnable mMoveDisplayToTop;
     private final Rect mTmpRect = new Rect();
     private int mPointerIconType = TYPE_NOT_SPECIFIED;
 
@@ -43,6 +45,13 @@ public class TaskTapPointerEventListener implements PointerEventListener {
             DisplayContent displayContent) {
         mService = service;
         mDisplayContent = displayContent;
+        mHandler = new Handler(mService.mH.getLooper());
+        mMoveDisplayToTop = () -> {
+            synchronized (mService.mWindowMap) {
+                mDisplayContent.getParent().positionChildAt(WindowContainer.POSITION_TOP,
+                        mDisplayContent, true /* includingParents */);
+            }
+        };
     }
 
     @Override
@@ -61,6 +70,7 @@ public class TaskTapPointerEventListener implements PointerEventListener {
                         mService.mTaskPositioningController.handleTapOutsideTask(
                                 mDisplayContent, x, y);
                     }
+                    mHandler.post(mMoveDisplayToTop);
                 }
             }
             break;

@@ -232,6 +232,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         doReturn(displaySleeping).when(display).isSleeping();
         doReturn(keyguardShowing).when(keyguard).isKeyguardOrAodShowing(anyInt());
 
+        doReturn(isFocusedStack).when(stack).isFocusedStackOnDisplay();
         doReturn(isFocusedStack ? stack : null).when(display).getFocusedStack();
         mSupervisor.applySleepTokensLocked(true);
         verify(stack, times(expectWakeFromSleep ? 1 : 0)).awakeFromSleepingLocked();

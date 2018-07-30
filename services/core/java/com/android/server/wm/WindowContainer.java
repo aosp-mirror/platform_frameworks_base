@@ -273,6 +273,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             parent.mTreeWeight += child.mTreeWeight;
             parent = parent.getParent();
         }
+        onChildPositionChanged();
     }
 
     /**
@@ -298,6 +299,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             parent.mTreeWeight -= child.mTreeWeight;
             parent = parent.getParent();
         }
+        onChildPositionChanged();
     }
 
     /**
@@ -455,7 +457,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 mChildren.remove(child);
                 mChildren.add(position, child);
         }
+        onChildPositionChanged();
     }
+
+    /**
+     * Notify that a child's position has changed. Possible changes are adding or removing a child.
+     */
+    void onChildPositionChanged() { }
 
     /**
      * Update override configuration and recalculate full config.
