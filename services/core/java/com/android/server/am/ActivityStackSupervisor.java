@@ -17,10 +17,8 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.ACTIVITY_EMBEDDING;
-import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
-import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
@@ -76,7 +74,6 @@ import static com.android.server.am.ActivityManagerService.ANIMATE;
 import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
 import static com.android.server.am.ActivityRecord.RELAUNCH_REASON_NONE;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
-import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
@@ -201,8 +198,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
     private static final String TAG_RELEASE = TAG + POSTFIX_RELEASE;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
-    private static final String TAG_STATES = TAG + POSTFIX_STATES;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
+    static final String TAG_STATES = TAG + POSTFIX_STATES;
     static final String TAG_TASKS = TAG + POSTFIX_TASKS;
 
     /** How long we wait until giving up on the last activity telling us it is idle. */
@@ -821,7 +818,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // Only resume home activity if isn't finishing.
         if (r != null && !r.finishing) {
             moveFocusableActivityStackToFrontLocked(r, myReason);
-            return resumeFocusedStackTopActivityLocked(mHomeStack, prev, null);
+            return resumeFocusedStacksTopActivitiesLocked(mHomeStack, prev, null);
         }
         return mService.mAm.startHomeActivityLocked(mCurrentUser, myReason);
     }
@@ -1119,16 +1116,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     boolean pauseBackStacks(boolean userLeaving, ActivityRecord resuming, boolean dontWait) {
         boolean someActivityPaused = false;
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.valueAt(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                if (!isTopDisplayFocusedStack(stack) && stack.getResumedActivity() != null) {
-                    if (DEBUG_STATES) Slog.d(TAG_STATES, "pauseBackStacks: stack=" + stack +
-                            " mResumedActivity=" + stack.getResumedActivity());
-                    someActivityPaused |= stack.startPausingLocked(userLeaving, false, resuming,
-                            dontWait);
-                }
-            }
+            someActivityPaused |= mActivityDisplays.valueAt(displayNdx)
+                    .pauseBackStacks(userLeaving, resuming, dontWait);
         }
         return someActivityPaused;
     }
@@ -2175,7 +2164,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         //mWindowManager.dump();
 
         if (activityRemoved) {
-            resumeFocusedStackTopActivityLocked();
+            resumeFocusedStacksTopActivitiesLocked();
         }
 
         return r;
@@ -2271,28 +2260,35 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    boolean resumeFocusedStackTopActivityLocked() {
-        return resumeFocusedStackTopActivityLocked(null, null, null);
+    boolean resumeFocusedStacksTopActivitiesLocked() {
+        return resumeFocusedStacksTopActivitiesLocked(null, null, null);
     }
 
-    boolean resumeFocusedStackTopActivityLocked(
+    boolean resumeFocusedStacksTopActivitiesLocked(
             ActivityStack targetStack, ActivityRecord target, ActivityOptions targetOptions) {
 
         if (!readyToResume()) {
             return false;
         }
 
-        if (targetStack != null && isTopDisplayFocusedStack(targetStack)) {
+        if (targetStack != null && targetStack.isTopStackOnDisplay()) {
             return targetStack.resumeTopActivityUncheckedLocked(target, targetOptions);
         }
 
-        final ActivityStack focusedStack = getTopDisplayFocusedStack();
-        final ActivityRecord r = focusedStack.topRunningActivityLocked();
-        if (r == null || !r.isState(RESUMED)) {
-            focusedStack.resumeTopActivityUncheckedLocked(null, null);
-        } else if (r.isState(RESUMED)) {
-            // Kick off any lingering app transitions form the MoveTaskToFront operation.
-            focusedStack.executeAppTransition(targetOptions);
+        // Resume all top activities in focused stacks on all displays.
+        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            final ActivityDisplay display = mActivityDisplays.valueAt(displayNdx);
+            final ActivityStack focusedStack = display.getFocusedStack();
+            if (focusedStack == null) {
+                continue;
+            }
+            final ActivityRecord r = focusedStack.topRunningActivityLocked();
+            if (r == null || !r.isState(RESUMED)) {
+                focusedStack.resumeTopActivityUncheckedLocked(null, null);
+            } else if (r.isState(RESUMED)) {
+                // Kick off any lingering app transitions form the MoveTaskToFront operation.
+                focusedStack.executeAppTransition(targetOptions);
+            }
         }
 
         return false;
@@ -2628,58 +2624,48 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     /**
-     * Get next focusable stack in the system. This will search across displays and stacks
-     * in last-focused order for a focusable and visible stack, different from the target stack.
+     * Get next focusable stack in the system. This will search through the stack on the same
+     * display as the current focused stack, looking for a focusable and visible stack, different
+     * from the target stack. If no valid candidates will be found, it will then go through all
+     * displays and stacks in last-focused order.
      *
      * @param currentFocus The stack that previously had focus.
      * @param ignoreCurrent If we should ignore {@param currentFocus} when searching for next
      *                     candidate.
-     * @return Next focusable {@link ActivityStack}, null if not found.
+     * @return Next focusable {@link ActivityStack}, {@code null} if not found.
      */
-    ActivityStack getNextFocusableStackLocked(ActivityStack currentFocus, boolean ignoreCurrent) {
-        mWindowManager.getDisplaysInFocusOrder(mTmpOrderedDisplayIds);
+    ActivityStack getNextFocusableStackLocked(@NonNull ActivityStack currentFocus,
+            boolean ignoreCurrent) {
+        // First look for next focusable stack on the same display
+        final ActivityDisplay preferredDisplay = currentFocus.getDisplay();
+        final ActivityStack preferredFocusableStack = preferredDisplay.getNextFocusableStack(
+                currentFocus, ignoreCurrent);
+        if (preferredFocusableStack != null) {
+            return preferredFocusableStack;
+        }
 
-        final int currentWindowingMode = currentFocus != null
-                ? currentFocus.getWindowingMode() : WINDOWING_MODE_UNDEFINED;
-        ActivityStack candidate = null;
+        // Now look through all displays
+        mWindowManager.getDisplaysInFocusOrder(mTmpOrderedDisplayIds);
         for (int i = mTmpOrderedDisplayIds.size() - 1; i >= 0; --i) {
             final int displayId = mTmpOrderedDisplayIds.get(i);
+            if (displayId == preferredDisplay.mDisplayId) {
+                // We've already checked this one
+                continue;
+            }
             // If a display is registered in WM, it must also be available in AM.
             final ActivityDisplay display = getActivityDisplayOrCreateLocked(displayId);
             if (display == null) {
                 // Looks like the display no longer exists in the system...
                 continue;
             }
-            for (int j = display.getChildCount() - 1; j >= 0; --j) {
-                final ActivityStack stack = display.getChildAt(j);
-                if (ignoreCurrent && stack == currentFocus) {
-                    continue;
-                }
-                if (!stack.isFocusable() || !stack.shouldBeVisible(null)) {
-                    continue;
-                }
-
-                if (currentWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
-                        && candidate == null && stack.inSplitScreenPrimaryWindowingMode()) {
-                    // If the currently focused stack is in split-screen secondary we save off the
-                    // top primary split-screen stack as a candidate for focus because we might
-                    // prefer focus to move to an other stack to avoid primary split-screen stack
-                    // overlapping with a fullscreen stack when a fullscreen stack is higher in z
-                    // than the next split-screen stack. Assistant stack, I am looking at you...
-                    // We only move the focus to the primary-split screen stack if there isn't a
-                    // better alternative.
-                    candidate = stack;
-                    continue;
-                }
-                if (candidate != null && stack.inSplitScreenSecondaryWindowingMode()) {
-                    // Use the candidate stack since we are now at the secondary split-screen.
-                    return candidate;
-                }
-                return stack;
+            final ActivityStack nextFocusableStack = display.getNextFocusableStack(currentFocus,
+                    ignoreCurrent);
+            if (nextFocusableStack != null) {
+                return nextFocusableStack;
             }
         }
 
-        return candidate;
+        return null;
     }
 
     /**
@@ -2878,7 +2864,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
 
             ensureActivitiesVisibleLocked(null, 0, PRESERVE_WINDOWS);
-            resumeFocusedStackTopActivityLocked();
+            resumeFocusedStacksTopActivitiesLocked();
         } finally {
             mAllowDockedStackResize = true;
             mWindowManager.continueSurfaceLayout();
@@ -3435,7 +3421,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // drawn signal is scheduled after the bounds animation start call on the bounds animator
         // thread.
         ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-        resumeFocusedStackTopActivityLocked();
+        resumeFocusedStacksTopActivitiesLocked();
 
         mService.getTaskChangeNotificationController().notifyActivityPinned(r);
     }
@@ -3466,6 +3452,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 "moveActivityStackToFront: r=" + r);
 
         stack.moveToFront(reason, task);
+        // Report top activity change to tracking services and WM
+        if (r == getTopResumedActivity()) {
+            // TODO(b/111541062): Support tracking multiple resumed activities
+            mService.setResumedActivityUncheckLocked(r, reason);
+        }
         return true;
     }
 
@@ -3622,7 +3613,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         // It is possible that the display will not be awake at the time we
                         // process the keyguard going away, which can happen before the sleep token
                         // is released. As a result, it is important we resume the activity here.
-                        resumeFocusedStackTopActivityLocked();
+                        resumeFocusedStacksTopActivitiesLocked();
                     }
                 }
             }
@@ -4728,7 +4719,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 } break;
                 case RESUME_TOP_ACTIVITY_MSG: {
                     synchronized (mService.mGlobalLock) {
-                        resumeFocusedStackTopActivityLocked();
+                        resumeFocusedStacksTopActivitiesLocked();
                     }
                 } break;
                 case SLEEP_TIMEOUT_MSG: {

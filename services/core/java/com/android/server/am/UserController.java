@@ -104,11 +104,9 @@ import com.android.server.wm.WindowManagerService;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -2243,7 +2241,7 @@ class UserController implements Handler.Callback {
 
         protected void stackSupervisorResumeFocusedStackTopActivity() {
             synchronized (mService) {
-                mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                mService.mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
             }
         }
 

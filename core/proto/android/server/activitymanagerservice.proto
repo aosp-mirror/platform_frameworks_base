@@ -62,6 +62,8 @@ message ActivityStackSupervisorProto {
     optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
     repeated ActivityDisplayProto displays = 2;
     optional KeyguardControllerProto keyguard_controller = 3;
+    // TODO(b/111541062): Focused stack and resumed activity are now per-display. Topmost instances
+    // can be obtained from top display and these fields can be removed.
     optional int32 focused_stack_id = 4;
     optional .com.android.server.wm.IdentifierProto resumed_activity = 5;
     // Whether or not the home activity is the recents activity. This is needed for the CTS tests to
@@ -77,6 +79,8 @@ message ActivityDisplayProto {
     optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
     optional int32 id = 2;
     repeated ActivityStackProto stacks = 3;
+    optional int32 focused_stack_id = 4;
+    optional .com.android.server.wm.IdentifierProto resumed_activity = 5;
 }
 
 message ActivityStackProto {

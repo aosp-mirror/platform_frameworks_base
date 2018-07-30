@@ -1941,7 +1941,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             } else {
                 if (deferRelaunchUntilPaused) {
                     stack.destroyActivityLocked(this, true /* removeFromApp */, "stop-config");
-                    mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                    mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
                 } else {
                     mStackSupervisor.updatePreviousProcessLocked(this);
                 }
@@ -2362,7 +2362,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             frozenBeforeDestroy = true;
             if (!service.updateDisplayOverrideConfigurationLocked(config, this,
                     false /* deferResume */, displayId)) {
-                mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
             }
         }
         service.getTaskChangeNotificationController().notifyActivityRequestedOrientationChanged(

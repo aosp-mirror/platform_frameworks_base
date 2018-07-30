@@ -1624,7 +1624,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 final ActivityRecord r = stack.topRunningActivityLocked();
                 if (mStackSupervisor.moveFocusableActivityStackToFrontLocked(
                         r, "setFocusedStack")) {
-                    mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                    mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
                 }
             }
         } finally {
@@ -1645,7 +1645,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 final ActivityRecord r = task.topRunningActivityLocked();
                 if (mStackSupervisor.moveFocusableActivityStackToFrontLocked(r, "setFocusedTask")) {
-                    mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                    mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
                 }
             }
         } finally {
@@ -4735,6 +4735,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         updateResumedAppTrace(r);
         mLastResumedActivity = r;
 
+        // TODO(b/111541062): Support multiple focused apps in WM
         mWindowManager.setFocusedApp(r.appToken, true);
 
         applyUpdateLockStateLocked(r);
@@ -5149,7 +5150,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 if (mStackSupervisor.moveFocusableActivityStackToFrontLocked(
                         r, "setFocusedActivity")) {
-                    mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                    mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
                 }
             }
         }
