@@ -227,12 +227,13 @@ public class ZygoteProcess {
                                                   String instructionSet,
                                                   String appDataDir,
                                                   String invokeWith,
+                                                  String packageName,
                                                   String[] zygoteArgs) {
         try {
             return startViaZygote(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, false /* startChildZygote */,
-                    zygoteArgs);
+                    packageName, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -366,6 +367,7 @@ public class ZygoteProcess {
                                                       String appDataDir,
                                                       String invokeWith,
                                                       boolean startChildZygote,
+                                                      String packageName,
                                                       String[] extraArgs)
                                                       throws ZygoteStartFailedEx {
         ArrayList<String> argsForZygote = new ArrayList<String>();
@@ -424,6 +426,10 @@ public class ZygoteProcess {
 
         if (startChildZygote) {
             argsForZygote.add("--start-child-zygote");
+        }
+
+        if (packageName != null) {
+            argsForZygote.add("--package-name=" + packageName);
         }
 
         argsForZygote.add(processClass);
@@ -733,7 +739,7 @@ public class ZygoteProcess {
             result = startViaZygote(processClass, niceName, uid, gid,
                     gids, runtimeFlags, 0 /* mountExternal */, 0 /* targetSdkVersion */, seInfo,
                     abi, instructionSet, null /* appDataDir */, null /* invokeWith */,
-                    true /* startChildZygote */, extraArgs);
+                    true /* startChildZygote */, null /* packageName */, extraArgs);
         } catch (ZygoteStartFailedEx ex) {
             throw new RuntimeException("Starting child-zygote through Zygote failed", ex);
         }
