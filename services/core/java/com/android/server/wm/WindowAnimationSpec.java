@@ -99,13 +99,7 @@ public class WindowAnimationSpec implements AnimationSpec {
         tmp.transformation.getMatrix().postTranslate(mPosition.x, mPosition.y);
         t.setMatrix(leash, tmp.transformation.getMatrix(), tmp.floats);
         t.setAlpha(leash, tmp.transformation.getAlpha());
-        if (mStackClipMode == STACK_CLIP_NONE) {
-            t.setWindowCrop(leash, tmp.transformation.getClipRect());
-        } else if (mStackClipMode == STACK_CLIP_AFTER_ANIM) {
-            mTmpRect.set(mStackBounds);
-            // Offset stack bounds to stack position so the final crop is in screen space.
-            mTmpRect.offsetTo(mPosition.x, mPosition.y);
-            t.setFinalCrop(leash, mTmpRect);
+        if (mStackClipMode == STACK_CLIP_NONE || mStackClipMode == STACK_CLIP_AFTER_ANIM) {
             t.setWindowCrop(leash, tmp.transformation.getClipRect());
         } else {
             mTmpRect.set(mStackBounds);

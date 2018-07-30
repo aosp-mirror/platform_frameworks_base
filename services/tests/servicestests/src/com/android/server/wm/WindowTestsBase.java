@@ -231,6 +231,11 @@ class WindowTestsBase {
     }
 
     AppWindowToken createAppWindowToken(DisplayContent dc, int windowingMode, int activityType) {
+        return createTestAppWindowToken(dc, windowingMode, activityType);
+    }
+
+    WindowTestUtils.TestAppWindowToken createTestAppWindowToken(DisplayContent dc, int
+            windowingMode, int activityType) {
         final TaskStack stack = createStackControllerOnStackOnDisplay(windowingMode, activityType,
                 dc).mContainer;
         final Task task = createTaskInStack(stack, 0 /* userId */);

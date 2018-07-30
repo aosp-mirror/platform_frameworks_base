@@ -70,8 +70,6 @@ public class WindowAnimationSpecTest {
                 true /* isAppAnimation */);
         windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
         verify(mTransaction).setWindowCrop(eq(mSurfaceControl), argThat(Rect::isEmpty));
-        verify(mTransaction).setFinalCrop(eq(mSurfaceControl),
-                argThat(rect -> rect.equals(mStackBounds)));
     }
 
     @Test
@@ -83,9 +81,6 @@ public class WindowAnimationSpecTest {
                 true /* isAppAnimation */);
         windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
         verify(mTransaction).setWindowCrop(eq(mSurfaceControl), argThat(Rect::isEmpty));
-        verify(mTransaction).setFinalCrop(eq(mSurfaceControl),
-                argThat(rect -> rect.left == 20 && rect.top == 40 && rect.right == 30
-                        && rect.bottom == 50));
     }
 
     @Test
