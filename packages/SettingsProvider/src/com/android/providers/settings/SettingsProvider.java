@@ -816,7 +816,7 @@ public class SettingsProvider extends ContentProvider {
             @Override
             public void onPackageRemoved(String packageName, int uid) {
                 synchronized (mLock) {
-                    mSettingsRegistry.onPackageRemovedLocked(packageName,
+                    mSettingsRegistry.removeSettingsForPackageLocked(packageName,
                             UserHandle.getUserId(uid));
                 }
             }
@@ -825,6 +825,14 @@ public class SettingsProvider extends ContentProvider {
             public void onUidRemoved(int uid) {
                 synchronized (mLock) {
                     mSettingsRegistry.onUidRemovedLocked(uid);
+                }
+            }
+
+            @Override
+            public void onPackageDataCleared(String packageName, int uid) {
+                synchronized (mLock) {
+                    mSettingsRegistry.removeSettingsForPackageLocked(packageName,
+                            UserHandle.getUserId(uid));
                 }
             }
         };
@@ -2547,7 +2555,7 @@ public class SettingsProvider extends ContentProvider {
             }
         }
 
-        public void onPackageRemovedLocked(String packageName, int userId) {
+        public void removeSettingsForPackageLocked(String packageName, int userId) {
             // Global and secure settings are signature protected. Apps signed
             // by the platform certificate are generally not uninstalled  and
             // the main exception is tests. We trust components signed
@@ -2556,7 +2564,7 @@ public class SettingsProvider extends ContentProvider {
             final int systemKey = makeKey(SETTINGS_TYPE_SYSTEM, userId);
             SettingsState systemSettings = mSettingsStates.get(systemKey);
             if (systemSettings != null) {
-                systemSettings.onPackageRemovedLocked(packageName);
+                systemSettings.removeSettingsForPackageLocked(packageName);
             }
         }
 
