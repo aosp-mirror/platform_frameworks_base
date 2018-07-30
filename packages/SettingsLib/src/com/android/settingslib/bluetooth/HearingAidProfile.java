@@ -64,7 +64,7 @@ public class HearingAidProfile implements LocalBluetoothProfile {
                     if (V) {
                         Log.d(TAG, "HearingAidProfile found new device: " + nextDevice);
                     }
-                    device = mDeviceManager.addDevice(mLocalAdapter, mProfileManager, nextDevice);
+                    device = mDeviceManager.addDevice(mLocalAdapter, nextDevice);
                 }
                 device.onProfileStateChanged(HearingAidProfile.this,
                         BluetoothProfile.STATE_CONNECTED);

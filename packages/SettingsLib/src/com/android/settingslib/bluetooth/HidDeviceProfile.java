@@ -73,7 +73,7 @@ public class HidDeviceProfile implements LocalBluetoothProfile {
                 // we may add a new device here, but generally this should not happen
                 if (device == null) {
                     Log.w(TAG, "HidProfile found new device: " + nextDevice);
-                    device = mDeviceManager.addDevice(mLocalAdapter, mProfileManager, nextDevice);
+                    device = mDeviceManager.addDevice(mLocalAdapter, nextDevice);
                 }
                 Log.d(TAG, "Connection status changed: " + device);
                 device.onProfileStateChanged(HidDeviceProfile.this,
