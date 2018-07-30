@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import android.annotation.Nullable;
@@ -159,9 +160,11 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
         final WindowManagerService wm = mWmSupplier.get();
         synchronized (wm.mWindowMap) {
             atoken = wm.mRoot.getAppWindowToken(appToken);
+            IWindow iWindow = mock(IWindow.class);
+            doReturn(mock(IBinder.class)).when(iWindow).asBinder();
             window = WindowTestsBase.createWindow(null, TYPE_APPLICATION_STARTING, atoken,
                     "Starting window", 0 /* ownerId */, false /* internalWindows */, wm,
-                    mock(Session.class), mock(IWindow.class));
+                    mock(Session.class), iWindow);
             atoken.startingWindow = window;
         }
         if (mRunnableWhenAddingSplashScreen != null) {

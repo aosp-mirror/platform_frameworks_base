@@ -1462,7 +1462,7 @@ public final class BroadcastQueue {
         // If the receiver app is being debugged we quietly ignore unresponsiveness, just
         // tidying up and moving on to the next broadcast without crashing or ANRing this
         // app just because it's stopped at a breakpoint.
-        final boolean debugging = (r.curApp != null && r.curApp.debugging);
+        final boolean debugging = (r.curApp != null && r.curApp.isDebugging());
 
         Slog.w(TAG, "Timeout of broadcast " + r + " - receiver=" + r.receiver
                 + ", started " + (now - r.receiverTime) + "ms ago");

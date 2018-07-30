@@ -123,7 +123,7 @@ public class ActivityStartInterceptorTest {
                 mDevicePolicyManager);
         when(mDevicePolicyManager.createShowAdminSupportIntent(TEST_USER_ID, true))
                 .thenReturn(ADMIN_SUPPORT_INTENT);
-        when(mAm.getPackageManagerInternalLocked()).thenReturn(mPackageManagerInternal);
+        when(mService.getPackageManagerInternalLocked()).thenReturn(mPackageManagerInternal);
 
         // Mock UserManager
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
@@ -136,7 +136,7 @@ public class ActivityStartInterceptorTest {
                 thenReturn(CONFIRM_CREDENTIALS_INTENT);
 
         // Mock PackageManager
-        when(mAm.getPackageManager()).thenReturn(mPackageManager);
+        when(mService.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.getHarmfulAppWarning(TEST_PACKAGE_NAME, TEST_USER_ID))
                 .thenReturn(null);
 

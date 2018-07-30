@@ -20,7 +20,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -46,6 +45,13 @@ public class FontFileUtil {
         return (packed & 0x10000) != 0;
     }
 
+    /**
+     * Returns true if the analyzeStyle succeeded
+     */
+    public static boolean isSuccess(int packed) {
+        return packed != ANALYZE_ERROR;
+    }
+
     private static int pack(@IntRange(from = 0, to = 1000) int weight, boolean italic) {
         return weight | (italic ? 0x10000 : 0);
     }
@@ -55,12 +61,13 @@ public class FontFileUtil {
     private static final int TTC_TAG = 0x74746366;
     private static final int OS2_TABLE_TAG = 0x4F532F32;
 
+    private static final int ANALYZE_ERROR = 0xFFFFFFFF;
+
     /**
      * Analyze the font file returns packed style info
      */
     public static final int analyzeStyle(@NonNull ByteBuffer buffer,
-            @IntRange(from = 0) int ttcIndex, @Nullable FontVariationAxis[] varSettings)
-            throws IOException {
+            @IntRange(from = 0) int ttcIndex, @Nullable FontVariationAxis[] varSettings) {
         int weight = -1;
         int italic = -1;
         if (varSettings != null) {
@@ -88,7 +95,7 @@ public class FontFileUtil {
             if (magicNumber == TTC_TAG) {
                 // TTC file.
                 if (ttcIndex >= buffer.getInt(8 /* offset to number of fonts in TTC */)) {
-                    throw new IOException("Font index out of bounds");
+                    return ANALYZE_ERROR;
                 }
                 fontFileOffset = buffer.getInt(
                     12 /* offset to array of offsets of font files */ + 4 * ttcIndex);
@@ -96,7 +103,7 @@ public class FontFileUtil {
             int sfntVersion = buffer.getInt(fontFileOffset);
 
             if (sfntVersion != SFNT_VERSION_1 && sfntVersion != SFNT_VERSION_OTTO) {
-                throw new IOException("Unknown font file format");
+                return ANALYZE_ERROR;
             }
 
             int numTables = buffer.getShort(fontFileOffset + 4 /* offset to number of tables */);

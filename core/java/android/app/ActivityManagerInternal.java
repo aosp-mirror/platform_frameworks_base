@@ -228,4 +228,7 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isCurrentProfile(int userId);
     public abstract boolean hasStartedUserState(int userId);
     public abstract void finishUserSwitch(Object uss);
+
+    /** Schedule the execution of all pending app GCs. */
+    public abstract void scheduleAppGcs();
 }

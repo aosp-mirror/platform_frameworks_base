@@ -436,7 +436,7 @@ class AppErrors {
              * If this process was running instrumentation, finish now - it will be handled in
              * {@link ActivityManagerService#handleAppDiedLocked}.
              */
-            if (r != null && r.instr != null) {
+            if (r != null && r.getActiveInstrumentation() != null) {
                 return;
             }
 

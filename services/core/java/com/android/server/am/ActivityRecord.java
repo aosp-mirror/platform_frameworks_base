@@ -1036,7 +1036,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 (info.flags & FLAG_SHOW_FOR_ALL_USERS) != 0, info.configChanges,
                 task.voiceSession != null, mLaunchTaskBehind, isAlwaysFocusable(),
                 appInfo.targetSdkVersion, mRotationAnimationHint,
-                ActivityManagerService.getInputDispatchingTimeoutLocked(this) * 1000000L);
+                ActivityTaskManagerService.getInputDispatchingTimeoutLocked(this) * 1000000L);
 
         task.addActivityToTop(this);
 
@@ -2134,7 +2134,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     mStackSupervisor.processStoppingActivitiesLocked(null /* idleActivity */,
                             false /* remove */, true /* processPausingActivities */);
                 }
-                service.mAm.scheduleAppGcsLocked();
+                service.scheduleAppGcsLocked();
             }
         }
     }
@@ -2159,13 +2159,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     !hasProcess() || app.getPid() == windowPid || windowPid == -1;
         }
         if (windowFromSameProcessAsActivity) {
-            return service.mAm.inputDispatchingTimedOut(
-                    (ProcessRecord) anrApp.mOwner, anrActivity, this, false, reason);
+            return service.inputDispatchingTimedOut(anrApp, anrActivity, this, false, reason);
         } else {
             // In this case another process added windows using this activity token. So, we call the
             // generic service input dispatch timed out method so that the right process is blamed.
-            return service.mAm.inputDispatchingTimedOut(
-                    windowPid, false /* aboveSystem */, reason) < 0;
+            return service.inputDispatchingTimedOut(windowPid, false /* aboveSystem */, reason) < 0;
         }
     }
 
@@ -2819,10 +2817,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             }
             results = null;
             newIntents = null;
-            service.mAm.getAppWarningsLocked().onResumeActivity(this);
-            service.mAm.showAskCompatModeDialogLocked(this);
+            service.getAppWarningsLocked().onResumeActivity(this);
         } else {
-            service.mAm.mHandler.removeMessages(PAUSE_TIMEOUT_MSG, this);
+            final ActivityStack stack = getStack();
+            if (stack != null) {
+                stack.mHandler.removeMessages(PAUSE_TIMEOUT_MSG, this);
+            }
             setState(PAUSED, "relaunchActivityLocked");
         }
 

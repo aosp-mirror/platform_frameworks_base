@@ -1400,7 +1400,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // (e.g. AMS.startActivityAsUser).
                 final long token = Binder.clearCallingIdentity();
                 try {
-                    return mService.mAm.getPackageManagerInternalLocked().resolveIntent(
+                    return mService.getPackageManagerInternalLocked().resolveIntent(
                             intent, resolvedType, modifiedFlags, userId, true, filterCallingUid);
                 } finally {
                     Binder.restoreCallingIdentity(token);
@@ -1523,8 +1523,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         PackageManager.NOTIFY_PACKAGE_USE_ACTIVITY);
                 r.sleeping = false;
                 r.forceNewConfig = false;
-                mService.mAm.getAppWarningsLocked().onStartActivity(r);
-                mService.mAm.showAskCompatModeDialogLocked(r);
+                mService.getAppWarningsLocked().onStartActivity(r);
                 r.compat = mService.mAm.compatibilityInfoForPackageLocked(r.info.applicationInfo);
                 ProfilerInfo profilerInfo = null;
                 if (mService.mAm.mProfileApp != null && mService.mAm.mProfileApp.equals(app.processName)) {
@@ -2109,7 +2108,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         if (allResumedActivitiesIdle()) {
             if (r != null) {
-                mService.mAm.scheduleAppGcsLocked();
+                mService.scheduleAppGcsLocked();
             }
 
             if (mLaunchingActivity.isHeld()) {

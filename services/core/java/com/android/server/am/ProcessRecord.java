@@ -187,8 +187,9 @@ final class ProcessRecord implements WindowProcessListener {
     int lruSeq;                 // Sequence id for identifying LRU update cycles
     CompatibilityInfo compat;   // last used compatibility mode
     IBinder.DeathRecipient deathRecipient; // Who is watching for the death.
-    ActiveInstrumentation instr;// Set to currently active instrumentation running in process
-    boolean usingWrapper;       // Set to true when process was launched with a wrapper attached
+    private ActiveInstrumentation mInstr; // Set to currently active instrumentation running in
+                                          // process.
+    private boolean mUsingWrapper; // Set to true when process was launched with a wrapper attached
     final ArraySet<BroadcastRecord> curReceivers = new ArraySet<BroadcastRecord>();// receivers currently running in the app
     long whenUnimportant;       // When (uptime) the process last became unimportant
     long lastCpuTime;           // How long proc has run CPU at last check
@@ -232,7 +233,7 @@ final class ProcessRecord implements WindowProcessListener {
     private boolean mNotResponding; // does the app have a not responding dialog?
     Dialog anrDialog;           // dialog being displayed due to app not resp.
     boolean removed;            // has app package been removed from device?
-    boolean debugging;          // was app launched for debugging?
+    private boolean mDebugging; // was app launched for debugging?
     boolean waitedForDebugger;  // has process show wait for debugger dialog?
     Dialog waitDialog;          // current wait for debugger dialog
 
@@ -317,8 +318,8 @@ final class ProcessRecord implements WindowProcessListener {
             pw.println("}");
         }
         pw.print(prefix); pw.print("compat="); pw.println(compat);
-        if (instr != null) {
-            pw.print(prefix); pw.print("instr="); pw.println(instr);
+        if (mInstr != null) {
+            pw.print(prefix); pw.print("mInstr="); pw.println(mInstr);
         }
         pw.print(prefix); pw.print("thread="); pw.println(thread);
         pw.print(prefix); pw.print("pid="); pw.print(pid); pw.print(" starting=");
@@ -435,9 +436,9 @@ final class ProcessRecord implements WindowProcessListener {
                     pw.print(" killedByAm="); pw.print(killedByAm);
                     pw.print(" waitingToKill="); pw.println(waitingToKill);
         }
-        if (debugging || mCrashing || crashDialog != null || mNotResponding
+        if (mDebugging || mCrashing || crashDialog != null || mNotResponding
                 || anrDialog != null || bad) {
-            pw.print(prefix); pw.print("debugging="); pw.print(debugging);
+            pw.print(prefix); pw.print("mDebugging="); pw.print(mDebugging);
                     pw.print(" mCrashing="); pw.print(mCrashing);
                     pw.print(" "); pw.print(crashDialog);
                     pw.print(" mNotResponding="); pw.print(mNotResponding);
@@ -973,6 +974,33 @@ final class ProcessRecord implements WindowProcessListener {
 
     boolean hasForegroundServices() {
         return mHasForegroundServices;
+    }
+
+    void setDebugging(boolean debugging) {
+        mDebugging = debugging;
+        mWindowProcessController.setDebugging(debugging);
+    }
+
+    boolean isDebugging() {
+        return mDebugging;
+    }
+
+    void setUsingWrapper(boolean usingWrapper) {
+        mUsingWrapper = usingWrapper;
+        mWindowProcessController.setUsingWrapper(usingWrapper);
+    }
+
+    boolean isUsingWrapper() {
+        return mUsingWrapper;
+    }
+
+    void setActiveInstrumentation(ActiveInstrumentation instr) {
+        mInstr = instr;
+        mWindowProcessController.setInstrumenting(instr != null);
+    }
+
+    ActiveInstrumentation getActiveInstrumentation() {
+        return mInstr;
     }
 
     @Override
