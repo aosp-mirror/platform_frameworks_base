@@ -1747,6 +1747,14 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         return updateOverrideConfiguration(bounds, null /* insetBounds */);
     }
 
+    void setLastNonFullscreenBounds(Rect bounds) {
+        if (mLastNonFullscreenBounds == null) {
+            mLastNonFullscreenBounds = new Rect(bounds);
+        } else {
+            mLastNonFullscreenBounds.set(bounds);
+        }
+    }
+
     /**
      * Update task's override configuration based on the bounds.
      * @param bounds The bounds of the task.
@@ -1768,7 +1776,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         final boolean persistBounds = getWindowConfiguration().persistTaskBounds();
         if (matchParentBounds) {
             if (!currentBounds.isEmpty() && persistBounds) {
-                mLastNonFullscreenBounds = currentBounds;
+                setLastNonFullscreenBounds(currentBounds);
             }
             setBounds(null);
             newConfig.unset();
@@ -1778,7 +1786,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             setBounds(mTmpRect);
 
             if (mStack == null || persistBounds) {
-                mLastNonFullscreenBounds = getOverrideBounds();
+                setLastNonFullscreenBounds(getOverrideBounds());
             }
             computeOverrideConfiguration(newConfig, mTmpRect, insetBounds,
                     mTmpRect.right != bounds.right, mTmpRect.bottom != bounds.bottom);

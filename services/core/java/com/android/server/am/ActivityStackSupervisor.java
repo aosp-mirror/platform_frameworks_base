@@ -2339,6 +2339,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
+    /**
+     * This doesn't just find a task, it also moves the task to front.
+     */
     void findTaskToMoveToFront(TaskRecord task, int flags, ActivityOptions options, String reason,
             boolean forceNonResizeable) {
         final ActivityStack currentStack = task.getStack();
@@ -2608,19 +2611,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             case ACTIVITY_TYPE_RECENTS: return r.isActivityTypeRecents();
             case ACTIVITY_TYPE_ASSISTANT: return r.isActivityTypeAssistant();
         }
-        switch (stack.getWindowingMode()) {
-            case WINDOWING_MODE_FULLSCREEN: return true;
-            case WINDOWING_MODE_FREEFORM: return r.supportsFreeform();
-            case WINDOWING_MODE_PINNED: return r.supportsPictureInPicture();
-            case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY: return r.supportsSplitScreenWindowingMode();
-            case WINDOWING_MODE_SPLIT_SCREEN_SECONDARY: return r.supportsSplitScreenWindowingMode();
+        // There is a 1-to-1 relationship between stack and task when not in
+        // primary split-windowing mode.
+        if (stack.getWindowingMode() != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+            return false;
+        } else {
+            return r.supportsSplitScreenWindowingMode();
         }
-
-        if (!stack.isOnHomeDisplay()) {
-            return r.canBeLaunchedOnDisplay(displayId);
-        }
-        Slog.e(TAG, "isValidLaunchStack: Unexpected stack=" + stack);
-        return false;
     }
 
     /**
