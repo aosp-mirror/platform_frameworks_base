@@ -600,6 +600,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mStackSupervisor.mNoAnimActivities.add(topActivity);
             }
             super.setWindowingMode(windowingMode);
+            // setWindowingMode triggers an onConfigurationChanged cascade which can result in a
+            // different resolved windowing mode (usually when preferredWindowingMode is UNDEFINED).
             windowingMode = getWindowingMode();
 
             if (creating) {
@@ -4802,7 +4804,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 final TaskRecord task = mTaskHistory.get(i);
                 if (task.isResizeable()) {
                     if (inFreeformWindowingMode()) {
-                        // TODO: Can be removed now since each freeform task is in its own stack.
+                        // TODO(b/71028874): Can be removed since each freeform task is its own
+                        //                   stack.
                         // For freeform stack we don't adjust the size of the tasks to match that
                         // of the stack, but we do try to make sure the tasks are still contained
                         // with the bounds of the stack.
