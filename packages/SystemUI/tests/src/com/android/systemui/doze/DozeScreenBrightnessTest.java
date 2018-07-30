@@ -34,6 +34,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import android.os.PowerManager;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -60,6 +62,9 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        Settings.System.putIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS, DEFAULT_BRIGHTNESS,
+                UserHandle.USER_CURRENT);
         mServiceFake = new DozeServiceFake();
         mHostFake = new DozeHostFake();
         mSensorManager = new FakeSensorManager(mContext);
@@ -85,6 +90,17 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
         mSensor.sendSensorEvent(3);
 
         assertEquals(3, mServiceFake.screenBrightness);
+    }
+
+    @Test
+    public void testAod_usesLightSensorRespectingUserSetting() throws Exception {
+        int maxBrightness = 3;
+        Settings.System.putIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS, maxBrightness,
+                UserHandle.USER_CURRENT);
+
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        assertEquals(maxBrightness, mServiceFake.screenBrightness);
     }
 
     @Test
