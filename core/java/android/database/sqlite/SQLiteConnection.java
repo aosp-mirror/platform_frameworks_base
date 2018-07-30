@@ -34,9 +34,9 @@ import dalvik.system.CloseGuard;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
-
 
 /**
  * Represents a SQLite database connection.
@@ -89,6 +89,8 @@ import java.util.Map;
 public final class SQLiteConnection implements CancellationSignal.OnCancelListener {
     private static final String TAG = "SQLiteConnection";
     private static final boolean DEBUG = false;
+
+    public static volatile boolean sLocalDebug = false;
 
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
     private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
@@ -991,6 +993,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     }
 
     private void bindArguments(PreparedStatement statement, Object[] bindArgs) {
+        if (sLocalDebug) {
+            Log.v(TAG, statement.mSql + " with args " + Arrays.toString(bindArgs));
+        }
+
         final int count = bindArgs != null ? bindArgs.length : 0;
         if (count != statement.mNumParameters) {
             throw new SQLiteBindOrColumnIndexOutOfRangeException(
