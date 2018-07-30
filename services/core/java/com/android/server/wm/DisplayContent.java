@@ -2055,6 +2055,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
             }
             mService.mAnimator.removeDisplayLocked(mDisplayId);
+            mWindowingLayer.release();
+            mOverlayLayer.release();
         } finally {
             mRemovingDisplay = false;
         }
