@@ -39,7 +39,6 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.GridLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextClock;
 import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -64,7 +63,7 @@ public class KeyguardStatusView extends GridLayout implements
     private final float mSmallClockScale;
 
     private TextView mLogoutView;
-    private TextClock mClockView;
+    private KeyguardClockSwitch mClockView;
     private View mClockSeparator;
     private TextView mOwnerInfo;
     private KeyguardSliceView mKeyguardSlice;
@@ -248,7 +247,7 @@ public class KeyguardStatusView extends GridLayout implements
                         .scaleX(clockScale)
                         .scaleY(clockScale)
                         .withEndAction(() -> {
-                            mClockView.getPaint().setStyle(style);
+                            mClockView.setStyle(style);
                             mClockView.invalidate();
                         })
                         .start();
@@ -256,7 +255,7 @@ public class KeyguardStatusView extends GridLayout implements
                 mClockView.setY(top);
                 mClockView.setScaleX(clockScale);
                 mClockView.setScaleY(clockScale);
-                mClockView.getPaint().setStyle(style);
+                mClockView.setStyle(style);
                 mClockView.invalidate();
             }
         } else if (view == mClockSeparator) {
