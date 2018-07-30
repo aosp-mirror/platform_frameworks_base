@@ -1523,7 +1523,7 @@ public final class MediaDrm implements AutoCloseable {
                 // this should never happen as mWrappedKey is initialized in
                 // JNI after construction of the KeyRequest object. The check
                 // is needed here to guarantee @NonNull annotation.
-                throw new RuntimeException("Cerfificate is not initialized");
+                throw new RuntimeException("Certificate is not initialized");
             }
             return mWrappedKey;
         }
@@ -1537,7 +1537,7 @@ public final class MediaDrm implements AutoCloseable {
                 // this should never happen as mCertificateData is initialized in
                 // JNI after construction of the KeyRequest object. The check
                 // is needed here to guarantee @NonNull annotation.
-                throw new RuntimeException("Cerfificate is not initialized");
+                throw new RuntimeException("Certificate is not initialized");
             }
             return mCertificateData;
         }
