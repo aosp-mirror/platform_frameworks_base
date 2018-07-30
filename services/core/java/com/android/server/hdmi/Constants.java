@@ -295,6 +295,13 @@ final class Constants {
             "persist.sys.hdmi.last_system_audio_control";
 
     /**
+     * Property to indicate if device supports ARC or not
+     * <p>Default is true.
+     */
+    static final String PROPERTY_ARC_SUPPORT =
+        "persist.sys.hdmi.property_arc_support";
+
+    /**
      * Property to save the audio port to switch to when system audio control is on.
      * <P>Audio system should switch to this port when cec active source is not its child in the tree
      * or is not itself.
