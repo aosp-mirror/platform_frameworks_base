@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
@@ -43,6 +44,7 @@ import static java.lang.Integer.MAX_VALUE;
 import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
+import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -51,7 +53,6 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -276,13 +277,11 @@ public class RecentTasksTest extends ActivityTestsBase {
     public void testAddTaskCompatibleActivityType_expectRemove() throws Exception {
         // Test with undefined activity type since the type is not persisted by the task persister
         // and we want to ensure that a new task will match a restored task
-        Configuration config1 = new Configuration();
-        config1.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
         TaskRecord task1 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .setStack(mStack)
                 .build();
-        task1.onConfigurationChanged(config1);
+        setTaskActivityType(task1, ACTIVITY_TYPE_UNDEFINED);
         assertTrue(task1.getActivityType() == ACTIVITY_TYPE_UNDEFINED);
         mRecentTasks.add(task1);
         mCallbacksRecorder.clear();
@@ -302,14 +301,12 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     @Test
     public void testAddTaskCompatibleActivityTypeDifferentUser_expectNoRemove() throws Exception {
-        Configuration config1 = new Configuration();
-        config1.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
         TaskRecord task1 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .setStack(mStack)
                 .setUserId(TEST_USER_0_ID)
                 .build();
-        task1.onConfigurationChanged(config1);
+        setTaskActivityType(task1, ACTIVITY_TYPE_UNDEFINED);
         assertTrue(task1.getActivityType() == ACTIVITY_TYPE_UNDEFINED);
         mRecentTasks.add(task1);
         mCallbacksRecorder.clear();
@@ -329,24 +326,20 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     @Test
     public void testAddTaskCompatibleWindowingMode_expectRemove() throws Exception {
-        Configuration config1 = new Configuration();
-        config1.windowConfiguration.setWindowingMode(WINDOWING_MODE_UNDEFINED);
         TaskRecord task1 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .setStack(mStack)
                 .build();
-        task1.onConfigurationChanged(config1);
+        setTaskWindowingMode(task1, WINDOWING_MODE_UNDEFINED);
         assertTrue(task1.getWindowingMode() == WINDOWING_MODE_UNDEFINED);
         mRecentTasks.add(task1);
         mCallbacksRecorder.clear();
 
-        Configuration config2 = new Configuration();
-        config2.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         TaskRecord task2 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .setStack(mStack)
                 .build();
-        task2.onConfigurationChanged(config2);
+        setTaskWindowingMode(task2, WINDOWING_MODE_FULLSCREEN);
         assertTrue(task2.getWindowingMode() == WINDOWING_MODE_FULLSCREEN);
         mRecentTasks.add(task2);
 
@@ -359,23 +352,19 @@ public class RecentTasksTest extends ActivityTestsBase {
 
     @Test
     public void testAddTaskIncompatibleWindowingMode_expectNoRemove() throws Exception {
-        Configuration config1 = new Configuration();
-        config1.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         TaskRecord task1 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .setStack(mStack)
                 .build();
-        task1.onConfigurationChanged(config1);
+        setTaskWindowingMode(task1, WINDOWING_MODE_FULLSCREEN);
         assertTrue(task1.getWindowingMode() == WINDOWING_MODE_FULLSCREEN);
         mRecentTasks.add(task1);
 
-        Configuration config2 = new Configuration();
-        config2.windowConfiguration.setWindowingMode(WINDOWING_MODE_PINNED);
         TaskRecord task2 = createTaskBuilder(".Task1")
                 .setFlags(FLAG_ACTIVITY_NEW_TASK)
                 .setStack(mStack)
                 .build();
-        task2.onConfigurationChanged(config2);
+        setTaskWindowingMode(task2, WINDOWING_MODE_PINNED);
         assertTrue(task2.getWindowingMode() == WINDOWING_MODE_PINNED);
         mRecentTasks.add(task2);
 
@@ -644,6 +633,43 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     @Test
+    public void testRemoveAllVisibleTasks() throws Exception {
+        mRecentTasks.setParameters(-1 /* min */, 3 /* max */, 100 /* ms */);
+
+        // Create some set of tasks, some of which are visible and some are not
+        TaskRecord t1 = createTaskBuilder("com.android.pkg1", ".Task1").build();
+        mRecentTasks.add(t1);
+        mRecentTasks.add(setTaskActivityType(
+                createTaskBuilder("com.android.pkg1", ".HomeTask").build(),
+                ACTIVITY_TYPE_HOME));
+        TaskRecord t2 = createTaskBuilder("com.android.pkg2", ".Task2").build();
+        mRecentTasks.add(t2);
+        mRecentTasks.add(setTaskWindowingMode(
+                createTaskBuilder("com.android.pkg1", ".PipTask").build(),
+                WINDOWING_MODE_PINNED));
+        TaskRecord t3 = createTaskBuilder("com.android.pkg3", ".Task3").build();
+        mRecentTasks.add(t3);
+
+        // Create some more tasks that are out of visible range, but are still visible
+        TaskRecord t4 = createTaskBuilder("com.android.pkg3", ".Task4").build();
+        mRecentTasks.add(t4);
+        TaskRecord t5 = createTaskBuilder("com.android.pkg3", ".Task5").build();
+        mRecentTasks.add(t5);
+
+        // Create some more tasks that are out of the active session range, but are still visible
+        TaskRecord t6 = createTaskBuilder("com.android.pkg3", ".Task6").build();
+        t6.lastActiveTime = SystemClock.elapsedRealtime() - 200;
+        mRecentTasks.add(t6);
+        TaskRecord t7 = createTaskBuilder("com.android.pkg3", ".Task7").build();
+        t7.lastActiveTime = SystemClock.elapsedRealtime() - 200;
+        mRecentTasks.add(t7);
+
+        // Remove all the visible tasks and ensure that they are removed
+        mRecentTasks.removeAllVisibleTasks();
+        assertTrimmed(t1, t2, t3, t4, t5, t6, t7);
+    }
+
+    @Test
     public void testNotRecentsComponent_denyApiAccess() throws Exception {
         doReturn(PackageManager.PERMISSION_DENIED).when(mService)
                 .checkGetTasksPermission(anyString(), anyInt(), anyInt());
@@ -751,6 +777,22 @@ public class RecentTasksTest extends ActivityTestsBase {
                 .build();
         task.affinity = null;
         task.maxRecents = ActivityTaskManager.getMaxAppRecentsLimitStatic();
+        return task;
+    }
+
+    private TaskRecord setTaskActivityType(TaskRecord task,
+            @WindowConfiguration.ActivityType int activityType) {
+        Configuration config1 = new Configuration();
+        config1.windowConfiguration.setActivityType(activityType);
+        task.onConfigurationChanged(config1);
+        return task;
+    }
+
+    private TaskRecord setTaskWindowingMode(TaskRecord task,
+            @WindowConfiguration.WindowingMode int windowingMode) {
+        Configuration config1 = new Configuration();
+        config1.windowConfiguration.setWindowingMode(windowingMode);
+        task.onConfigurationChanged(config1);
         return task;
     }
 
@@ -880,7 +922,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         }
 
         @Override
-        public void onRecentTaskRemoved(TaskRecord task, boolean wasTrimmed) {
+        public void onRecentTaskRemoved(TaskRecord task, boolean wasTrimmed, boolean killProcess) {
             if (wasTrimmed) {
                 trimmed.add(task);
             }

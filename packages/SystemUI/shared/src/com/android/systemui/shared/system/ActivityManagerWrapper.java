@@ -394,6 +394,22 @@ public class ActivityManagerWrapper {
     }
 
     /**
+     * Removes all the recent tasks.
+     */
+    public void removeAllRecentTasks() {
+        mBackgroundExecutor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ActivityTaskManager.getService().removeAllVisibleRecentTasks();
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failed to remove all tasks", e);
+                }
+            }
+        });
+    }
+
+    /**
      * Cancels the current window transtion to/from Recents for the given task id.
      */
     public void cancelWindowTransition(int taskId) {

@@ -3230,12 +3230,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     @Override
-    public void onRecentTaskRemoved(TaskRecord task, boolean wasTrimmed) {
+    public void onRecentTaskRemoved(TaskRecord task, boolean wasTrimmed, boolean killProcess) {
         if (wasTrimmed) {
             // Task was trimmed from the recent tasks list -- remove the active task record as well
             // since the user won't really be able to go back to it
-            removeTaskByIdLocked(task.taskId, false /* killProcess */,
-                    false /* removeFromRecents */, !PAUSE_IMMEDIATELY, "recent-task-trimmed");
+            removeTaskByIdLocked(task.taskId, killProcess, false /* removeFromRecents */,
+                    !PAUSE_IMMEDIATELY, "recent-task-trimmed");
         }
         task.removedFromRecents();
     }
