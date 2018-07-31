@@ -41,7 +41,6 @@ public class MapProfile implements LocalBluetoothProfile {
     private BluetoothMap mService;
     private boolean mIsProfileReady;
 
-    private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
     private final LocalBluetoothProfileManager mProfileManager;
 
@@ -70,7 +69,7 @@ public class MapProfile implements LocalBluetoothProfile {
                 // we may add a new device here, but generally this should not happen
                 if (device == null) {
                     Log.w(TAG, "MapProfile found new device: " + nextDevice);
-                    device = mDeviceManager.addDevice(mLocalAdapter, nextDevice);
+                    device = mDeviceManager.addDevice(nextDevice);
                 }
                 device.onProfileStateChanged(MapProfile.this,
                         BluetoothProfile.STATE_CONNECTED);
@@ -98,13 +97,11 @@ public class MapProfile implements LocalBluetoothProfile {
         return BluetoothProfile.MAP;
     }
 
-    MapProfile(Context context, LocalBluetoothAdapter adapter,
-            CachedBluetoothDeviceManager deviceManager,
+    MapProfile(Context context, CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
-        mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        mLocalAdapter.getProfileProxy(context, new MapServiceListener(),
+        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, new MapServiceListener(),
                 BluetoothProfile.MAP);
     }
 

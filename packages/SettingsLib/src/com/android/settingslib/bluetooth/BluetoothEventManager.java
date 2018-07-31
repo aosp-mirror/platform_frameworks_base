@@ -150,7 +150,7 @@ public class BluetoothEventManager {
         for (BluetoothDevice device : bondedDevices) {
             CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
             if (cachedDevice == null) {
-                cachedDevice = mDeviceManager.addDevice(mLocalAdapter, device);
+                cachedDevice = mDeviceManager.addDevice(device);
                 dispatchDeviceAdded(cachedDevice);
                 deviceAdded = true;
             }
@@ -282,7 +282,7 @@ public class BluetoothEventManager {
             // Skip for now, there's a bluez problem and we are not getting uuids even for 2.1.
             CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
             if (cachedDevice == null) {
-                cachedDevice = mDeviceManager.addDevice(mLocalAdapter, device);
+                cachedDevice = mDeviceManager.addDevice(device);
                 Log.d(TAG, "DeviceFoundHandler created new CachedBluetoothDevice: "
                         + cachedDevice);
             }
@@ -348,8 +348,7 @@ public class BluetoothEventManager {
                 if (cachedDevice == null) {
                     Log.w(TAG, "Got bonding state changed for " + device +
                             ", but we have no record of that device.");
-
-                    cachedDevice = mDeviceManager.addDevice(mLocalAdapter, device);
+                    cachedDevice = mDeviceManager.addDevice(device);
                     dispatchDeviceAdded(cachedDevice);
                 }
             }
