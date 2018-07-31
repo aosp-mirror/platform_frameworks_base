@@ -43,27 +43,27 @@ namespace android {
 
 #define FIND_CLASS(var, className) \
     var = env->FindClass(className); \
-    LOG_FATAL_IF(! (var), "Unable to find class " className);
+    LOG_FATAL_IF(! (var), "Unable to find class %s", className);
 
 #define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
     var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
-    LOG_FATAL_IF(! (var), "Unable to find field " fieldName);
+    LOG_FATAL_IF(! (var), "Unable to find field %s", fieldName);
 
 #define GET_METHOD_ID(var, clazz, fieldName, fieldDescriptor) \
     var = env->GetMethodID(clazz, fieldName, fieldDescriptor); \
-    LOG_FATAL_IF(! (var), "Unable to find method " fieldName);
+    LOG_FATAL_IF(! (var), "Unable to find method %s", fieldName);
 
 #define GET_STATIC_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
     var = env->GetStaticFieldID(clazz, fieldName, fieldDescriptor); \
-    LOG_FATAL_IF(! (var), "Unable to find field " fieldName);
+    LOG_FATAL_IF(! (var), "Unable to find field %s", fieldName);
 
 #define GET_STATIC_METHOD_ID(var, clazz, fieldName, fieldDescriptor) \
     var = env->GetStaticMethodID(clazz, fieldName, fieldDescriptor); \
-    LOG_FATAL_IF(! (var), "Unable to find static method " fieldName);
+    LOG_FATAL_IF(! (var), "Unable to find static method %s", fieldName);
 
-#define GET_STATIC_OBJECT_FIELD(var, clazz, fieldName) \
-    var = env->GetStaticObjectField(clazz, fieldName); \
-    LOG_FATAL_IF(! (var), "Unable to find static object field " fieldName);
+#define GET_STATIC_OBJECT_FIELD(var, clazz, fieldId) \
+    var = env->GetStaticObjectField(clazz, fieldId); \
+    LOG_FATAL_IF(! (var), "Unable to find static object field %p", fieldId);
 
 
 struct RequestFields {

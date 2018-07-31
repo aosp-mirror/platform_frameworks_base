@@ -382,7 +382,7 @@ static int UnmountTree(const char* path) {
 // Create a private mount namespace and bind mount appropriate emulated
 // storage for the given user.
 static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
-        bool force_mount_namespace, std::string* error_msg) {
+        bool force_mount_namespace, std::string* error_msg, const char* package_name) {
     // See storage config details at http://source.android.com/tech/storage/
 
     String8 storageSource;
@@ -544,7 +544,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGi
                              jlong permittedCapabilities, jlong effectiveCapabilities,
                              jint mount_external, jstring java_se_info, jstring java_se_name,
                              bool is_system_server, bool is_child_zygote, jstring instructionSet,
-                             jstring dataDir) {
+                             jstring dataDir, jstring packageName) {
   std::string error_msg;
 
   auto fail_fn = [env, java_se_name, is_system_server](const std::string& msg)
@@ -594,7 +594,18 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGi
     ALOGW("Native bridge will not be used because dataDir == NULL.");
   }
 
-  if (!MountEmulatedStorage(uid, mount_external, use_native_bridge, &error_msg)) {
+  ScopedUtfChars* package_name = nullptr;
+  const char* package_name_c_str = nullptr;
+  if (packageName != nullptr) {
+    package_name = new ScopedUtfChars(env, packageName);
+    package_name_c_str = package_name->c_str();
+  } else if (is_system_server) {
+    package_name_c_str = "android";
+  }
+  bool success = MountEmulatedStorage(uid, mount_external, use_native_bridge, &error_msg,
+      package_name_c_str);
+  delete package_name;
+  if (!success) {
     ALOGW("Failed to mount emulated storage: %s (%s)", error_msg.c_str(), strerror(errno));
     if (errno == ENOTCONN || errno == EROFS) {
       // When device is actively encrypting, we get ENOTCONN here
@@ -858,7 +869,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         jint runtime_flags, jobjectArray rlimits,
         jint mount_external, jstring se_info, jstring se_name,
         jintArray fdsToClose, jintArray fdsToIgnore, jboolean is_child_zygote,
-        jstring instructionSet, jstring appDataDir) {
+        jstring instructionSet, jstring appDataDir, jstring packageName) {
     jlong capabilities = 0;
 
     // Grant CAP_WAKE_ALARM to the Bluetooth process.
@@ -911,7 +922,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
       SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
                        capabilities, capabilities,
                        mount_external, se_info, se_name, false,
-                       is_child_zygote == JNI_TRUE, instructionSet, appDataDir);
+                       is_child_zygote == JNI_TRUE, instructionSet, appDataDir, packageName);
     }
     return pid;
 }
@@ -925,7 +936,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
       SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
                        permittedCapabilities, effectiveCapabilities,
                        MOUNT_EXTERNAL_DEFAULT, NULL, NULL, true,
-                       false, NULL, NULL);
+                       false, NULL, NULL, nullptr);
   } else if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
       ALOGI("System server process %d has been created", pid);
@@ -1006,7 +1017,7 @@ static const JNINativeMethod gMethods[] = {
     { "nativeSecurityInit", "()V",
       (void *) com_android_internal_os_Zygote_nativeSecurityInit },
     { "nativeForkAndSpecialize",
-      "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/String;)I",
+      "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
       (void *) com_android_internal_os_Zygote_nativeForkAndSpecialize },
     { "nativeForkSystemServer", "(II[II[[IJJ)I",
       (void *) com_android_internal_os_Zygote_nativeForkSystemServer },

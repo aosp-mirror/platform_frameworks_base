@@ -16,8 +16,11 @@
 
 package android.provider;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.content.ClipData;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -25,21 +28,22 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.UriPermission;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.media.MiniThumbFile;
-import android.media.ThumbnailUtils;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Environment;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.service.media.CameraPrewarmService;
+import android.util.ArrayMap;
 import android.util.Log;
+
+import com.android.internal.annotations.GuardedBy;
 
 import libcore.io.IoUtils;
 
@@ -49,7 +53,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -611,178 +614,79 @@ public final class MediaStore {
         }
     }
 
+    /** @hide */
+    public static class ThumbnailConstants {
+        public static final int MINI_KIND = 1;
+        public static final int FULL_SCREEN_KIND = 2;
+        public static final int MICRO_KIND = 3;
+
+        public static final Point MINI_SIZE = new Point(512, 384);
+        public static final Point MICRO_SIZE = new Point(96, 96);
+    }
+
     /**
      * This class is used internally by Images.Thumbnails and Video.Thumbnails, it's not intended
      * to be accessed elsewhere.
      */
     private static class InternalThumbnails implements BaseColumns {
-        private static final int MINI_KIND = 1;
-        private static final int FULL_SCREEN_KIND = 2;
-        private static final int MICRO_KIND = 3;
-        private static final String[] PROJECTION = new String[] {_ID, MediaColumns.DATA};
-        static final int DEFAULT_GROUP_ID = 0;
-        private static final Object sThumbBufLock = new Object();
-        private static byte[] sThumbBuf;
-
-        private static Bitmap getMiniThumbFromFile(
-                Cursor c, Uri baseUri, ContentResolver cr, BitmapFactory.Options options) {
-            Bitmap bitmap = null;
-            Uri thumbUri = null;
-            try {
-                long thumbId = c.getLong(0);
-                String filePath = c.getString(1);
-                thumbUri = ContentUris.withAppendedId(baseUri, thumbId);
-                ParcelFileDescriptor pfdInput = cr.openFileDescriptor(thumbUri, "r");
-                bitmap = BitmapFactory.decodeFileDescriptor(
-                        pfdInput.getFileDescriptor(), null, options);
-                pfdInput.close();
-            } catch (FileNotFoundException ex) {
-                Log.e(TAG, "couldn't open thumbnail " + thumbUri + "; " + ex);
-            } catch (IOException ex) {
-                Log.e(TAG, "couldn't open thumbnail " + thumbUri + "; " + ex);
-            } catch (OutOfMemoryError ex) {
-                Log.e(TAG, "failed to allocate memory for thumbnail "
-                        + thumbUri + "; " + ex);
-            }
-            return bitmap;
-        }
+        /**
+         * Currently outstanding thumbnail requests that can be cancelled.
+         */
+        @GuardedBy("sPending")
+        private static ArrayMap<Uri, CancellationSignal> sPending = new ArrayMap<>();
 
         /**
-         * This method cancels the thumbnail request so clients waiting for getThumbnail will be
-         * interrupted and return immediately. Only the original process which made the getThumbnail
-         * requests can cancel their own requests.
+         * Make a blocking request to obtain the given thumbnail, generating it
+         * if needed.
          *
-         * @param cr ContentResolver
-         * @param origId original image or video id. use -1 to cancel all requests.
-         * @param groupId the same groupId used in getThumbnail
-         * @param baseUri the base URI of requested thumbnails
+         * @see #cancelThumbnail(ContentResolver, Uri)
          */
-        static void cancelThumbnailRequest(ContentResolver cr, long origId, Uri baseUri,
-                long groupId) {
-            Uri cancelUri = baseUri.buildUpon().appendQueryParameter("cancel", "1")
-                    .appendQueryParameter("orig_id", String.valueOf(origId))
-                    .appendQueryParameter("group_id", String.valueOf(groupId)).build();
-            Cursor c = null;
-            try {
-                c = cr.query(cancelUri, PROJECTION, null, null, null);
+        static @Nullable Bitmap getThumbnail(@NonNull ContentResolver cr, @NonNull Uri uri,
+                int kind, @Nullable BitmapFactory.Options opts) {
+            final Bundle openOpts = new Bundle();
+            if (kind == ThumbnailConstants.MICRO_KIND) {
+                openOpts.putParcelable(ContentResolver.EXTRA_SIZE, ThumbnailConstants.MICRO_SIZE);
+            } else if (kind == ThumbnailConstants.MINI_KIND) {
+                openOpts.putParcelable(ContentResolver.EXTRA_SIZE, ThumbnailConstants.MINI_SIZE);
+            } else {
+                throw new IllegalArgumentException("Unsupported kind: " + kind);
             }
-            finally {
-                if (c != null) c.close();
+
+            CancellationSignal signal = null;
+            synchronized (sPending) {
+                signal = sPending.get(uri);
+                if (signal == null) {
+                    signal = new CancellationSignal();
+                    sPending.put(uri, signal);
+                }
             }
-        }
 
-        /**
-         * This method ensure thumbnails associated with origId are generated and decode the byte
-         * stream from database (MICRO_KIND) or file (MINI_KIND).
-         *
-         * Special optimization has been done to avoid further IPC communication for MICRO_KIND
-         * thumbnails.
-         *
-         * @param cr ContentResolver
-         * @param origId original image or video id
-         * @param kind could be MINI_KIND or MICRO_KIND
-         * @param options this is only used for MINI_KIND when decoding the Bitmap
-         * @param baseUri the base URI of requested thumbnails
-         * @param groupId the id of group to which this request belongs
-         * @return Bitmap bitmap of specified thumbnail kind
-         */
-        static Bitmap getThumbnail(ContentResolver cr, long origId, long groupId, int kind,
-                BitmapFactory.Options options, Uri baseUri, boolean isVideo) {
-            Bitmap bitmap = null;
-            // Log.v(TAG, "getThumbnail: origId="+origId+", kind="+kind+", isVideo="+isVideo);
-            // If the magic is non-zero, we simply return thumbnail if it does exist.
-            // querying MediaProvider and simply return thumbnail.
-            MiniThumbFile thumbFile = MiniThumbFile.instance(
-                    isVideo ? Video.Media.EXTERNAL_CONTENT_URI : Images.Media.EXTERNAL_CONTENT_URI);
-            Cursor c = null;
-            try {
-                long magic = thumbFile.getMagic(origId);
-                if (magic != 0) {
-                    if (kind == MICRO_KIND) {
-                        synchronized (sThumbBufLock) {
-                            if (sThumbBuf == null) {
-                                sThumbBuf = new byte[MiniThumbFile.BYTES_PER_MINTHUMB];
-                            }
-                            if (thumbFile.getMiniThumbFromFile(origId, sThumbBuf) != null) {
-                                bitmap = BitmapFactory.decodeByteArray(sThumbBuf, 0, sThumbBuf.length);
-                                if (bitmap == null) {
-                                    Log.w(TAG, "couldn't decode byte array.");
-                                }
-                            }
-                        }
-                        return bitmap;
-                    } else if (kind == MINI_KIND) {
-                        String column = isVideo ? "video_id=" : "image_id=";
-                        c = cr.query(baseUri, PROJECTION, column + origId, null, null);
-                        if (c != null && c.moveToFirst()) {
-                            bitmap = getMiniThumbFromFile(c, baseUri, cr, options);
-                            if (bitmap != null) {
-                                return bitmap;
-                            }
-                        }
-                    }
-                }
-
-                Uri blockingUri = baseUri.buildUpon().appendQueryParameter("blocking", "1")
-                        .appendQueryParameter("orig_id", String.valueOf(origId))
-                        .appendQueryParameter("group_id", String.valueOf(groupId)).build();
-                if (c != null) c.close();
-                c = cr.query(blockingUri, PROJECTION, null, null, null);
-                // This happens when original image/video doesn't exist.
-                if (c == null) return null;
-
-                // Assuming thumbnail has been generated, at least original image exists.
-                if (kind == MICRO_KIND) {
-                    synchronized (sThumbBufLock) {
-                        if (sThumbBuf == null) {
-                            sThumbBuf = new byte[MiniThumbFile.BYTES_PER_MINTHUMB];
-                        }
-                        Arrays.fill(sThumbBuf, (byte)0);
-                        if (thumbFile.getMiniThumbFromFile(origId, sThumbBuf) != null) {
-                            bitmap = BitmapFactory.decodeByteArray(sThumbBuf, 0, sThumbBuf.length);
-                            if (bitmap == null) {
-                                Log.w(TAG, "couldn't decode byte array.");
-                            }
-                        }
-                    }
-                } else if (kind == MINI_KIND) {
-                    if (c.moveToFirst()) {
-                        bitmap = getMiniThumbFromFile(c, baseUri, cr, options);
-                    }
-                } else {
-                    throw new IllegalArgumentException("Unsupported kind: " + kind);
-                }
-
-                // We probably run out of space, so create the thumbnail in memory.
-                if (bitmap == null) {
-                    Log.v(TAG, "Create the thumbnail in memory: origId=" + origId
-                            + ", kind=" + kind + ", isVideo="+isVideo);
-                    Uri uri = Uri.parse(
-                            baseUri.buildUpon().appendPath(String.valueOf(origId))
-                                    .toString().replaceFirst("thumbnails", "media"));
-                    if (c != null) c.close();
-                    c = cr.query(uri, PROJECTION, null, null, null);
-                    if (c == null || !c.moveToFirst()) {
-                        return null;
-                    }
-                    String filePath = c.getString(1);
-                    if (filePath != null) {
-                        if (isVideo) {
-                            bitmap = ThumbnailUtils.createVideoThumbnail(filePath, kind);
-                        } else {
-                            bitmap = ThumbnailUtils.createImageThumbnail(filePath, kind);
-                        }
-                    }
-                }
-            } catch (SQLiteException ex) {
-                Log.w(TAG, ex);
+            try (AssetFileDescriptor afd = cr.openTypedAssetFileDescriptor(uri,
+                    "image/*", openOpts, signal)) {
+                return BitmapFactory.decodeFileDescriptor(afd.getFileDescriptor(), null, opts);
+            } catch (IOException e) {
+                Log.w(TAG, "Failed to obtain thumbnail for " + uri, e);
+                return null;
             } finally {
-                if (c != null) c.close();
-                // To avoid file descriptor leak in application process.
-                thumbFile.deactivate();
-                thumbFile = null;
+                synchronized (sPending) {
+                    sPending.remove(uri);
+                }
             }
-            return bitmap;
+        }
+
+        /**
+         * This method cancels the thumbnail request so clients waiting for
+         * {@link #getThumbnail} will be interrupted and return immediately.
+         * Only the original process which made the request can cancel their own
+         * requests.
+         */
+        static void cancelThumbnail(@NonNull ContentResolver cr, @NonNull Uri uri) {
+            synchronized (sPending) {
+                final CancellationSignal signal = sPending.get(uri);
+                if (signal != null) {
+                    signal.cancel();
+                }
+            }
         }
     }
 
@@ -916,48 +820,6 @@ public final class MediaStore {
                 }
             }
 
-            private static final Bitmap StoreThumbnail(
-                    ContentResolver cr,
-                    Bitmap source,
-                    long id,
-                    float width, float height,
-                    int kind) {
-                // create the matrix to scale it
-                Matrix matrix = new Matrix();
-
-                float scaleX = width / source.getWidth();
-                float scaleY = height / source.getHeight();
-
-                matrix.setScale(scaleX, scaleY);
-
-                Bitmap thumb = Bitmap.createBitmap(source, 0, 0,
-                                                   source.getWidth(),
-                                                   source.getHeight(), matrix,
-                                                   true);
-
-                ContentValues values = new ContentValues(4);
-                values.put(Images.Thumbnails.KIND,     kind);
-                values.put(Images.Thumbnails.IMAGE_ID, (int)id);
-                values.put(Images.Thumbnails.HEIGHT,   thumb.getHeight());
-                values.put(Images.Thumbnails.WIDTH,    thumb.getWidth());
-
-                Uri url = cr.insert(Images.Thumbnails.EXTERNAL_CONTENT_URI, values);
-
-                try {
-                    OutputStream thumbOut = cr.openOutputStream(url);
-
-                    thumb.compress(Bitmap.CompressFormat.JPEG, 100, thumbOut);
-                    thumbOut.close();
-                    return thumb;
-                }
-                catch (FileNotFoundException ex) {
-                    return null;
-                }
-                catch (IOException ex) {
-                    return null;
-                }
-            }
-
             /**
              * Insert an image and create a thumbnail for it.
              *
@@ -990,12 +852,9 @@ public final class MediaStore {
                         }
 
                         long id = ContentUris.parseId(url);
-                        // Wait until MINI_KIND thumbnail is generated.
-                        Bitmap miniThumb = Images.Thumbnails.getThumbnail(cr, id,
-                                Images.Thumbnails.MINI_KIND, null);
-                        // This is for backward compatibility.
-                        Bitmap microThumb = StoreThumbnail(cr, miniThumb, id, 50F, 50F,
-                                Images.Thumbnails.MICRO_KIND);
+                        // Block until we've generated common thumbnails
+                        Images.Thumbnails.getThumbnail(cr, id, Images.Thumbnails.MINI_KIND, null);
+                        Images.Thumbnails.getThumbnail(cr, id, Images.Thumbnails.MICRO_KIND, null);
                     } else {
                         Log.e(TAG, "Failed to create thumbnail, removing original");
                         cr.delete(url, null, null);
@@ -1085,8 +944,9 @@ public final class MediaStore {
              * @param origId original image id
              */
             public static void cancelThumbnailRequest(ContentResolver cr, long origId) {
-                InternalThumbnails.cancelThumbnailRequest(cr, origId, EXTERNAL_CONTENT_URI,
-                        InternalThumbnails.DEFAULT_GROUP_ID);
+                final Uri uri = ContentUris.withAppendedId(
+                        Images.Media.EXTERNAL_CONTENT_URI, origId);
+                InternalThumbnails.cancelThumbnail(cr, uri);
             }
 
             /**
@@ -1102,9 +962,9 @@ public final class MediaStore {
              */
             public static Bitmap getThumbnail(ContentResolver cr, long origId, int kind,
                     BitmapFactory.Options options) {
-                return InternalThumbnails.getThumbnail(cr, origId,
-                        InternalThumbnails.DEFAULT_GROUP_ID, kind, options,
-                        EXTERNAL_CONTENT_URI, false);
+                final Uri uri = ContentUris.withAppendedId(
+                        Images.Media.EXTERNAL_CONTENT_URI, origId);
+                return InternalThumbnails.getThumbnail(cr, uri, kind, options);
             }
 
             /**
@@ -1117,7 +977,7 @@ public final class MediaStore {
              * @param groupId the same groupId used in getThumbnail.
              */
             public static void cancelThumbnailRequest(ContentResolver cr, long origId, long groupId) {
-                InternalThumbnails.cancelThumbnailRequest(cr, origId, EXTERNAL_CONTENT_URI, groupId);
+                cancelThumbnailRequest(cr, origId);
             }
 
             /**
@@ -1134,8 +994,7 @@ public final class MediaStore {
              */
             public static Bitmap getThumbnail(ContentResolver cr, long origId, long groupId,
                     int kind, BitmapFactory.Options options) {
-                return InternalThumbnails.getThumbnail(cr, origId, groupId, kind, options,
-                        EXTERNAL_CONTENT_URI, false);
+                return getThumbnail(cr, origId, kind, options);
             }
 
             /**
@@ -1193,9 +1052,9 @@ public final class MediaStore {
              */
             public static final String KIND = "kind";
 
-            public static final int MINI_KIND = 1;
-            public static final int FULL_SCREEN_KIND = 2;
-            public static final int MICRO_KIND = 3;
+            public static final int MINI_KIND = ThumbnailConstants.MINI_KIND;
+            public static final int FULL_SCREEN_KIND = ThumbnailConstants.FULL_SCREEN_KIND;
+            public static final int MICRO_KIND = ThumbnailConstants.MICRO_KIND;
             /**
              * The blob raw data of thumbnail
              * <P>Type: DATA STREAM</P>
@@ -2155,8 +2014,9 @@ public final class MediaStore {
              * @param origId original video id
              */
             public static void cancelThumbnailRequest(ContentResolver cr, long origId) {
-                InternalThumbnails.cancelThumbnailRequest(cr, origId, EXTERNAL_CONTENT_URI,
-                        InternalThumbnails.DEFAULT_GROUP_ID);
+                final Uri uri = ContentUris.withAppendedId(
+                        Video.Media.EXTERNAL_CONTENT_URI, origId);
+                InternalThumbnails.cancelThumbnail(cr, uri);
             }
 
             /**
@@ -2172,9 +2032,9 @@ public final class MediaStore {
              */
             public static Bitmap getThumbnail(ContentResolver cr, long origId, int kind,
                     BitmapFactory.Options options) {
-                return InternalThumbnails.getThumbnail(cr, origId,
-                        InternalThumbnails.DEFAULT_GROUP_ID, kind, options,
-                        EXTERNAL_CONTENT_URI, true);
+                final Uri uri = ContentUris.withAppendedId(
+                        Video.Media.EXTERNAL_CONTENT_URI, origId);
+                return InternalThumbnails.getThumbnail(cr, uri, kind, options);
             }
 
             /**
@@ -2191,8 +2051,7 @@ public final class MediaStore {
              */
             public static Bitmap getThumbnail(ContentResolver cr, long origId, long groupId,
                     int kind, BitmapFactory.Options options) {
-                return InternalThumbnails.getThumbnail(cr, origId, groupId, kind, options,
-                        EXTERNAL_CONTENT_URI, true);
+                return getThumbnail(cr, origId, kind, options);
             }
 
             /**
@@ -2205,7 +2064,7 @@ public final class MediaStore {
              * @param groupId the same groupId used in getThumbnail.
              */
             public static void cancelThumbnailRequest(ContentResolver cr, long origId, long groupId) {
-                InternalThumbnails.cancelThumbnailRequest(cr, origId, EXTERNAL_CONTENT_URI, groupId);
+                cancelThumbnailRequest(cr, origId);
             }
 
             /**
@@ -2263,9 +2122,9 @@ public final class MediaStore {
              */
             public static final String KIND = "kind";
 
-            public static final int MINI_KIND = 1;
-            public static final int FULL_SCREEN_KIND = 2;
-            public static final int MICRO_KIND = 3;
+            public static final int MINI_KIND = ThumbnailConstants.MINI_KIND;
+            public static final int FULL_SCREEN_KIND = ThumbnailConstants.FULL_SCREEN_KIND;
+            public static final int MICRO_KIND = ThumbnailConstants.MICRO_KIND;
 
             /**
              * The width of the thumbnal

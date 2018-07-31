@@ -293,7 +293,7 @@ final class SettingsState {
     }
 
     // The settings provider must hold its lock when calling here.
-    public void onPackageRemovedLocked(String packageName) {
+    public void removeSettingsForPackageLocked(String packageName) {
         boolean removedSomething = false;
 
         final int settingCount = mSettings.size();

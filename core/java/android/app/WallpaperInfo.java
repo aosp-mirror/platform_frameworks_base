@@ -315,12 +315,13 @@ public final class WallpaperInfo implements Parcelable {
     }
 
     /**
-     * Returns whether a wallpaper was optimized or not for ambient mode.
+     * Returns whether a wallpaper was optimized or not for ambient mode and can be drawn in there.
      *
-     * @return {@code true} if wallpaper can draw in ambient mode.
-     * @hide
+     * @see WallpaperService.Engine#onAmbientModeChanged(boolean, boolean)
+     * @see WallpaperService.Engine#isInAmbientMode()
+     * @return {@code true} if wallpaper can draw when in ambient mode.
      */
-    public boolean getSupportsAmbientMode() {
+    public boolean supportsAmbientMode() {
         return mSupportsAmbientMode;
     }
 

@@ -34,6 +34,7 @@ import com.android.internal.util.Preconditions;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -76,16 +77,17 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
     @Override
     public CallSession callStarted(Binder binder, int code) {
-        return callStarted(binder.getClass().getName(), code, binder.getTransactionName(code));
+        return callStarted(binder.getClass(), code, binder.getTransactionName(code));
     }
 
-    private CallSession callStarted(String className, int code, @Nullable String methodName) {
+    private CallSession callStarted(Class<? extends Binder> binderClass, int code,
+            @Nullable String methodName) {
         CallSession s = mCallSessionsPool.poll();
         if (s == null) {
             s = new CallSession();
         }
 
-        s.className = className;
+        s.binderClass = binderClass;
         s.transactionCode = code;
         s.methodName = methodName;
         s.exceptionThrown = false;
@@ -117,22 +119,30 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     private void processCallEnded(CallSession s, int parcelRequestSize, int parcelReplySize) {
+        // Non-negative time signals we need to record data for this call.
+        final boolean recordCall = s.cpuTimeStarted >= 0;
+        final long duration;
+        final long latencyDuration;
+        if (recordCall) {
+            duration = getThreadTimeMicro() - s.cpuTimeStarted;
+            latencyDuration = getElapsedRealtimeMicro() - s.timeStarted;
+        } else {
+            duration = 0;
+            latencyDuration = 0;
+        }
+        final int callingUid = getCallingUid();
+
         synchronized (mLock) {
-            final int callingUid = getCallingUid();
             UidEntry uidEntry = mUidEntries.get(callingUid);
             if (uidEntry == null) {
                 uidEntry = new UidEntry(callingUid);
                 mUidEntries.put(callingUid, uidEntry);
             }
             uidEntry.callCount++;
-            CallStat callStat = uidEntry.getOrCreate(s.className, s.transactionCode);
+            CallStat callStat = uidEntry.getOrCreate(s.binderClass, s.transactionCode);
             callStat.callCount++;
 
-            // Non-negative time signals we need to record data for this call.
-            final boolean recordCall = s.cpuTimeStarted >= 0;
             if (recordCall) {
-                final long duration = getThreadTimeMicro() - s.cpuTimeStarted;
-                final long latencyDuration = getElapsedRealtimeMicro() - s.timeStarted;
                 uidEntry.cpuTimeMicros += duration;
                 uidEntry.recordedCallCount++;
 
@@ -175,6 +185,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
         }
     }
 
+    /**
+     * This method is expensive to call.
+     */
     public ArrayList<ExportedCallStat> getExportedCallStats() {
         // We do not collect all the data if detailed tracking is off.
         if (!mDetailedTracking) {
@@ -189,7 +202,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 for (CallStat stat : entry.getCallStatsList()) {
                     ExportedCallStat exported = new ExportedCallStat();
                     exported.uid = entry.uid;
-                    exported.className = stat.className;
+                    exported.className = stat.binderClass.getName();
                     exported.methodName = stat.methodName == null
                             ? String.valueOf(stat.transactionCode) : stat.methodName;
                     exported.cpuTimeMicros = stat.cpuTimeMicros;
@@ -250,23 +263,22 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 + "latency_time_micros, max_latency_time_micros, exception_count, "
                 + "max_request_size_bytes, max_reply_size_bytes, recorded_call_count, "
                 + "call_count):");
-        for (UidEntry uidEntry : topEntries) {
-            for (CallStat e : uidEntry.getCallStatsList()) {
-                sb.setLength(0);
-                sb.append("    ")
-                        .append(uidToString(uidEntry.uid, appIdToPkgNameMap))
-                        .append(',').append(e)
-                        .append(',').append(e.cpuTimeMicros)
-                        .append(',').append(e.maxCpuTimeMicros)
-                        .append(',').append(e.latencyMicros)
-                        .append(',').append(e.maxLatencyMicros)
-                        .append(',').append(mDetailedTracking ? e.exceptionCount : '_')
-                        .append(',').append(mDetailedTracking ? e.maxRequestSizeBytes : '_')
-                        .append(',').append(mDetailedTracking ? e.maxReplySizeBytes : '_')
-                        .append(',').append(e.recordedCallCount)
-                        .append(',').append(e.callCount);
-                pw.println(sb);
-            }
+        for (ExportedCallStat e : sortByCpuDesc(getExportedCallStats())) {
+            sb.setLength(0);
+            sb.append("    ")
+                    .append(uidToString(e.uid, appIdToPkgNameMap))
+                    .append(',').append(e.className)
+                    .append('#').append(e.methodName)
+                    .append(',').append(e.cpuTimeMicros)
+                    .append(',').append(e.maxCpuTimeMicros)
+                    .append(',').append(e.latencyMicros)
+                    .append(',').append(e.maxLatencyMicros)
+                    .append(',').append(mDetailedTracking ? e.exceptionCount : '_')
+                    .append(',').append(mDetailedTracking ? e.maxRequestSizeBytes : '_')
+                    .append(',').append(mDetailedTracking ? e.maxReplySizeBytes : '_')
+                    .append(',').append(e.recordedCallCount)
+                    .append(',').append(e.callCount);
+            pw.println(sb);
         }
         pw.println();
         pw.println("Per-UID Summary " + datasetSizeDesc
@@ -372,7 +384,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
     @VisibleForTesting
     public static class CallStat {
-        public String className;
+        public Class<? extends Binder> binderClass;
         public int transactionCode;
         // Method name might be null when we cannot resolve the transaction code. For instance, if
         // the binder was not generated by AIDL.
@@ -397,23 +409,15 @@ public class BinderCallsStats implements BinderInternal.Observer {
         public long maxReplySizeBytes;
         public long exceptionCount;
 
-        CallStat() {
-        }
-
-        CallStat(String className, int transactionCode) {
-            this.className = className;
+        CallStat(Class<? extends Binder> binderClass, int transactionCode) {
+            this.binderClass = binderClass;
             this.transactionCode = transactionCode;
-        }
-
-        @Override
-        public String toString() {
-            return className + "#" + (methodName == null ? transactionCode : methodName);
         }
     }
 
     /** Key used to store CallStat object in a Map. */
     public static class CallStatKey {
-        public String className;
+        public Class<? extends Binder> binderClass;
         public int transactionCode;
 
         @Override
@@ -424,12 +428,12 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
             CallStatKey key = (CallStatKey) o;
             return transactionCode == key.transactionCode
-                    && (className.equals(key.className));
+                    && (binderClass.equals(key.binderClass));
         }
 
         @Override
         public int hashCode() {
-            int result = className.hashCode();
+            int result = binderClass.hashCode();
             result = 31 * result + transactionCode;
             return result;
         }
@@ -457,16 +461,16 @@ public class BinderCallsStats implements BinderInternal.Observer {
         private Map<CallStatKey, CallStat> mCallStats = new ArrayMap<>();
         private CallStatKey mTempKey = new CallStatKey();
 
-        CallStat getOrCreate(String className, int transactionCode) {
+        CallStat getOrCreate(Class<? extends Binder> binderClass, int transactionCode) {
             // Use a global temporary key to avoid creating new objects for every lookup.
-            mTempKey.className = className;
+            mTempKey.binderClass = binderClass;
             mTempKey.transactionCode = transactionCode;
             CallStat mapCallStat = mCallStats.get(mTempKey);
             // Only create CallStat if it's a new entry, otherwise update existing instance
             if (mapCallStat == null) {
-                mapCallStat = new CallStat(className, transactionCode);
+                mapCallStat = new CallStat(binderClass, transactionCode);
                 CallStatKey key = new CallStatKey();
-                key.className = className;
+                key.binderClass = binderClass;
                 key.transactionCode = transactionCode;
                 mCallStats.put(key, mapCallStat);
             }
@@ -476,17 +480,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
         /**
          * Returns list of calls sorted by CPU time
          */
-        public List<CallStat> getCallStatsList() {
-            List<CallStat> callStats = new ArrayList<>(mCallStats.values());
-            callStats.sort((o1, o2) -> {
-                if (o1.cpuTimeMicros < o2.cpuTimeMicros) {
-                    return 1;
-                } else if (o1.cpuTimeMicros > o2.cpuTimeMicros) {
-                    return -1;
-                }
-                return 0;
-            });
-            return callStats;
+        public Collection<CallStat> getCallStatsList() {
+            return mCallStats.values();
         }
 
         @Override
@@ -545,4 +540,15 @@ public class BinderCallsStats implements BinderInternal.Observer {
         return result;
     }
 
+    private List<ExportedCallStat> sortByCpuDesc(List<ExportedCallStat> callStats) {
+        callStats.sort((o1, o2) -> {
+            if (o1.cpuTimeMicros < o2.cpuTimeMicros) {
+                return 1;
+            } else if (o1.cpuTimeMicros > o2.cpuTimeMicros) {
+                return -1;
+            }
+            return 0;
+        });
+        return callStats;
+    }
 }

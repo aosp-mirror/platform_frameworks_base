@@ -503,7 +503,7 @@ class AppErrors {
                     mService.mStackSupervisor.handleAppCrashLocked(r.getWindowProcessController());
                     if (!r.isPersistent()) {
                         mService.removeProcessLocked(r, false, false, "crash");
-                        mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                        mService.mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
                     }
                 } finally {
                     Binder.restoreCallingIdentity(orig);
@@ -743,12 +743,12 @@ class AppErrors {
                 // annoy the user repeatedly.  Unless it is persistent, since those
                 // processes run critical code.
                 mService.removeProcessLocked(app, false, tryAgain, "crash");
-                mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                mService.mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
                 if (!showBackground) {
                     return false;
                 }
             }
-            mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
+            mService.mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
         } else {
             final TaskRecord affectedTask =
                     mService.mStackSupervisor.finishTopCrashedActivitiesLocked(app.getWindowProcessController(), reason);

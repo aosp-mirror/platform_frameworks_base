@@ -106,10 +106,12 @@ message ValueBucketInfo {
 
   optional int64 end_bucket_elapsed_nanos = 2;
 
-  oneof values {
-      int64 value_long = 3;
+  optional int64 value = 3 [deprecated = true];
 
-      double value_double = 7;
+  oneof values {
+      int64 value_long = 7;
+
+      double value_double = 8;
   }
 
   optional int64 bucket_num = 4;

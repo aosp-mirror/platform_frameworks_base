@@ -75,7 +75,7 @@ public class BinderInternal {
      */
     public static class CallSession {
         // Binder interface descriptor.
-        public String className;
+        public Class<? extends Binder> binderClass;
         // Binder transaction code.
         public int transactionCode;
         // Binder transaction method name.

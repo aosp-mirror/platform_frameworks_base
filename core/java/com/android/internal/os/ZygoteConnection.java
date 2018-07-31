@@ -239,7 +239,7 @@ class ZygoteConnection {
         pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid, parsedArgs.gids,
                 parsedArgs.runtimeFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
                 parsedArgs.niceName, fdsToClose, fdsToIgnore, parsedArgs.startChildZygote,
-                parsedArgs.instructionSet, parsedArgs.appDataDir);
+                parsedArgs.instructionSet, parsedArgs.appDataDir, parsedArgs.packageName);
 
         try {
             if (pid == 0) {
@@ -425,6 +425,9 @@ class ZygoteConnection {
 
         /** from --invoke-with */
         String invokeWith;
+
+        /** from --package-name */
+        String packageName;
 
         /**
          * Any args after and including the first non-option arg
@@ -674,6 +677,8 @@ class ZygoteConnection {
                                 "Invalid log sampling rate: " + rateStr, nfe);
                     }
                     expectRuntimeArgs = false;
+                } else if (arg.startsWith("--package-name=")) {
+                    packageName = arg.substring(arg.indexOf('=') + 1);
                 } else {
                     break;
                 }

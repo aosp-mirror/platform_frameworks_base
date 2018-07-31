@@ -21,6 +21,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Service;
 import android.app.WallpaperColors;
+import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
@@ -436,8 +437,7 @@ public abstract class WallpaperService extends Service {
 
         /**
          * Returns true if this engine is running in ambient mode -- that is,
-         * it is being shown in low power mode, in always on display.
-         * @hide
+         * it is being shown in low power mode, on always on display.
          */
         public boolean isInAmbientMode() {
             return mIsInAmbientMode;
@@ -563,10 +563,12 @@ public abstract class WallpaperService extends Service {
          * Called when the device enters or exits ambient mode.
          *
          * @param inAmbientMode {@code true} if in ambient mode.
-         * @param animated {@code true} if you'll have te opportunity of animating your transition
-         *                 {@code false} when the screen will blank and the wallpaper should be
-         *                 set to ambient mode immediately.
-         * @hide
+         * @param animated {@code true} if you'll have the opportunity of animating your transition
+         *                 {@code false} when the wallpaper should present its ambient version
+         *                 immediately.
+         *
+         * @see #isInAmbientMode()
+         * @see WallpaperInfo#supportsAmbientMode()
          */
         public void onAmbientModeChanged(boolean inAmbientMode, boolean animated) {
         }

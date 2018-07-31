@@ -31,6 +31,7 @@ import org.junit.runner.RunWith;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -62,11 +63,11 @@ public class BinderCallsStatsTest {
         assertEquals(1, uidEntries.size());
         BinderCallsStats.UidEntry uidEntry = uidEntries.get(TEST_UID);
         Assert.assertNotNull(uidEntry);
-        List<BinderCallsStats.CallStat> callStatsList = uidEntry.getCallStatsList();
+        List<BinderCallsStats.CallStat> callStatsList = new ArrayList(uidEntry.getCallStatsList());
         assertEquals(1, uidEntry.callCount);
         assertEquals(1, uidEntry.recordedCallCount);
         assertEquals(10, uidEntry.cpuTimeMicros);
-        assertEquals(binder.getClass().getName(), callStatsList.get(0).className);
+        assertEquals(binder.getClass(), callStatsList.get(0).binderClass);
         assertEquals(1, callStatsList.get(0).transactionCode);
 
         // CPU usage is sampled, should not be tracked here.
@@ -85,7 +86,7 @@ public class BinderCallsStatsTest {
         assertEquals(3, uidEntry.callCount);
         assertEquals(1, uidEntry.recordedCallCount);
         // Still sampled even for another API.
-        callStatsList = uidEntry.getCallStatsList();
+        callStatsList = new ArrayList(uidEntry.getCallStatsList());
         assertEquals(2, callStatsList.size());
     }
 
@@ -105,12 +106,12 @@ public class BinderCallsStatsTest {
         Assert.assertNotNull(uidEntry);
         assertEquals(1, uidEntry.callCount);
         assertEquals(10, uidEntry.cpuTimeMicros);
-        assertEquals(1, uidEntry.getCallStatsList().size());
+        assertEquals(1, new ArrayList(uidEntry.getCallStatsList()).size());
 
-        List<BinderCallsStats.CallStat> callStatsList = uidEntry.getCallStatsList();
+        List<BinderCallsStats.CallStat> callStatsList = new ArrayList(uidEntry.getCallStatsList());
         assertEquals(1, callStatsList.get(0).callCount);
         assertEquals(10, callStatsList.get(0).cpuTimeMicros);
-        assertEquals(binder.getClass().getName(), callStatsList.get(0).className);
+        assertEquals(binder.getClass(), callStatsList.get(0).binderClass);
         assertEquals(1, callStatsList.get(0).transactionCode);
 
         callSession = bcs.callStarted(binder, 1);
@@ -120,7 +121,7 @@ public class BinderCallsStatsTest {
         uidEntry = bcs.getUidEntries().get(TEST_UID);
         assertEquals(2, uidEntry.callCount);
         assertEquals(30, uidEntry.cpuTimeMicros);
-        callStatsList = uidEntry.getCallStatsList();
+        callStatsList = new ArrayList(uidEntry.getCallStatsList());
         assertEquals(1, callStatsList.size());
 
         callSession = bcs.callStarted(binder, 2);
@@ -131,7 +132,7 @@ public class BinderCallsStatsTest {
 
         // This is the first transaction of a new type, so the real CPU time will be measured
         assertEquals(80, uidEntry.cpuTimeMicros);
-        callStatsList = uidEntry.getCallStatsList();
+        callStatsList = new ArrayList(uidEntry.getCallStatsList());
         assertEquals(2, callStatsList.size());
     }
 
@@ -182,7 +183,7 @@ public class BinderCallsStatsTest {
         assertEquals(3, uidEntry.callCount);
         assertEquals(60 /* 10 + 50 */, uidEntry.cpuTimeMicros);
 
-        List<BinderCallsStats.CallStat> callStatsList = uidEntry.getCallStatsList();
+        List<BinderCallsStats.CallStat> callStatsList = new ArrayList(uidEntry.getCallStatsList());
         assertEquals(1, callStatsList.size());
         BinderCallsStats.CallStat callStats = callStatsList.get(0);
         assertEquals(3, callStats.callCount);
@@ -216,7 +217,7 @@ public class BinderCallsStatsTest {
         assertEquals(1, uidEntry.recordedCallCount);
         assertEquals(10, uidEntry.cpuTimeMicros);
 
-        List<BinderCallsStats.CallStat> callStatsList = uidEntry.getCallStatsList();
+        List<BinderCallsStats.CallStat> callStatsList = new ArrayList(uidEntry.getCallStatsList());
         assertEquals(2, callStatsList.size());
 
         BinderCallsStats.CallStat callStats = callStatsList.get(0);
@@ -248,7 +249,7 @@ public class BinderCallsStatsTest {
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
 
         List<BinderCallsStats.CallStat> callStatsList =
-                bcs.getUidEntries().get(TEST_UID).getCallStatsList();
+                new ArrayList(bcs.getUidEntries().get(TEST_UID).getCallStatsList());
         assertEquals(1, callStatsList.get(0).transactionCode);
         assertEquals("resolved", callStatsList.get(0).methodName);
     }
@@ -263,7 +264,7 @@ public class BinderCallsStatsTest {
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
 
         List<BinderCallsStats.CallStat> callStatsList =
-                bcs.getUidEntries().get(TEST_UID).getCallStatsList();
+                new ArrayList(bcs.getUidEntries().get(TEST_UID).getCallStatsList());
 
         assertEquals(REQUEST_SIZE, callStatsList.get(0).maxRequestSizeBytes);
         assertEquals(REPLY_SIZE, callStatsList.get(0).maxReplySizeBytes);
@@ -283,7 +284,7 @@ public class BinderCallsStatsTest {
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
 
         List<BinderCallsStats.CallStat> callStatsList =
-                bcs.getUidEntries().get(TEST_UID).getCallStatsList();
+                new ArrayList(bcs.getUidEntries().get(TEST_UID).getCallStatsList());
 
         assertEquals(50, callStatsList.get(0).maxCpuTimeMicros);
     }
@@ -302,7 +303,7 @@ public class BinderCallsStatsTest {
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
 
         List<BinderCallsStats.CallStat> callStatsList =
-                bcs.getUidEntries().get(TEST_UID).getCallStatsList();
+                new ArrayList(bcs.getUidEntries().get(TEST_UID).getCallStatsList());
 
         assertEquals(5, callStatsList.get(0).maxLatencyMicros);
     }
@@ -386,6 +387,20 @@ public class BinderCallsStatsTest {
         assertEquals(REQUEST_SIZE, stat.maxRequestSizeBytes);
         assertEquals(REPLY_SIZE, stat.maxReplySizeBytes);
         assertEquals(0, stat.exceptionCount);
+    }
+
+    @Test
+    public void testGetExportedStatsWithoutCalls() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        Binder binder = new Binder();
+        assertEquals(0, bcs.getExportedCallStats().size());
+    }
+
+    @Test
+    public void testGetExportedExceptionsWithoutCalls() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        Binder binder = new Binder();
+        assertEquals(0, bcs.getExceptionCounts().size());
     }
 
     static class TestBinderCallsStats extends BinderCallsStats {

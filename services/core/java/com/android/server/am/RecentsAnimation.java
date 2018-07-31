@@ -287,7 +287,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
                     mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, false);
-                    mStackSupervisor.resumeFocusedStackTopActivityLocked();
+                    mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
 
                     // No reason to wait for the pausing activity in this case, as the hiding of
                     // surfaces needs to be done immediately.
