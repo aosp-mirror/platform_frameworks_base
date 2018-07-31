@@ -612,7 +612,11 @@ public class ZenModeHelper {
                 config.manualRule = null;  // don't restore the manual rule
             }
 
-            boolean resetToDefaultRules = true;
+            // booleans to determine whether to reset the rules to the default rules
+            boolean allRulesDisabled = true;
+            boolean hasDefaultRules = config.automaticRules.containsAll(
+                    ZenModeConfig.DEFAULT_RULE_IDS);
+
             long time = System.currentTimeMillis();
             if (config.automaticRules != null && config.automaticRules.size() > 0) {
                 for (ZenRule automaticRule : config.automaticRules.values()) {
@@ -622,21 +626,24 @@ public class ZenModeHelper {
                         automaticRule.condition = null;
                         automaticRule.creationTime = time;
                     }
-                    resetToDefaultRules &= !automaticRule.enabled;
+
+                    allRulesDisabled &= !automaticRule.enabled;
                 }
             }
 
-            if (config.version < ZenModeConfig.XML_VERSION || forRestore) {
+            if (!hasDefaultRules && allRulesDisabled
+                    && (forRestore || config.version < ZenModeConfig.XML_VERSION)) {
+                // reset zen automatic rules to default on restore or upgrade if:
+                // - doesn't already have default rules and
+                // - all previous automatic rules were disabled
+                config.automaticRules = new ArrayMap<>();
+                appendDefaultRules(config);
+                reason += ", reset to default rules";
+            }
+
+            if (config.version < ZenModeConfig.XML_VERSION) {
                 Settings.Secure.putInt(mContext.getContentResolver(),
                         Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 1);
-
-                // resets zen automatic rules to default
-                // if all prev auto rules were disabled on update
-                if (resetToDefaultRules) {
-                    config.automaticRules = new ArrayMap<>();
-                    appendDefaultRules(config);
-                    reason += ", reset to default rules";
-                }
             } else {
                 // devices not restoring/upgrading already have updated zen settings
                 Settings.Secure.putInt(mContext.getContentResolver(),
