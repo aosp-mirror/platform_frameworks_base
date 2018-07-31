@@ -17,6 +17,7 @@
 package android.graphics.drawable;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -54,9 +55,11 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
      * to improve the quality at negligible cost.
      */
     private static final boolean DEFAULT_DITHER = true;
+    @UnsupportedAppUsage
     private DrawableContainerState mDrawableContainerState;
     private Rect mHotspotBounds;
     private Drawable mCurrDrawable;
+    @UnsupportedAppUsage
     private Drawable mLastDrawable;
     private int mAlpha = 0xFF;
 
@@ -686,11 +689,13 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         @Config int mChildrenChangingConfigurations;
 
         SparseArray<ConstantState> mDrawableFutures;
+        @UnsupportedAppUsage
         Drawable[] mDrawables;
         int mNumChildren;
 
         boolean mVariablePadding = false;
         boolean mCheckedPadding;
+        @UnsupportedAppUsage
         Rect mConstantPadding;
 
         boolean mConstantSize = false;
@@ -720,6 +725,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         boolean mAutoMirrored;
 
         ColorFilter mColorFilter;
+        @UnsupportedAppUsage
         boolean mHasColorFilter;
 
         ColorStateList mTintList;
@@ -730,6 +736,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         /**
          * @hide
          */
+        @UnsupportedAppUsage
         protected DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
                 Resources res) {
             mOwner = owner;

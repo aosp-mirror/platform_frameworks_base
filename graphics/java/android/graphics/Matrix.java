@@ -21,6 +21,7 @@ import dalvik.annotation.optimization.FastNative;
 
 import libcore.util.NativeAllocationRegistry;
 
+import android.annotation.UnsupportedAppUsage;
 import java.io.PrintWriter;
 
 /**
@@ -39,6 +40,7 @@ public class Matrix {
     public static final int MPERSP_2 = 8;   //!< use with getValues/setValues
 
     /** @hide */
+    @UnsupportedAppUsage
     public final static Matrix IDENTITY_MATRIX = new Matrix() {
         void oops() {
             throw new IllegalStateException("Matrix can not be modified");
@@ -231,6 +233,7 @@ public class Matrix {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public final long native_instance;
 
     /**

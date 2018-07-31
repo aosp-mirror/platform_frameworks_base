@@ -18,6 +18,7 @@ package android.graphics.drawable;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -46,6 +47,7 @@ import java.io.IOException;
  * Drawable container with only one child element.
  */
 public abstract class DrawableWrapper extends Drawable implements Drawable.Callback {
+    @UnsupportedAppUsage
     private DrawableWrapperState mState;
     private Drawable mDrawable;
     private boolean mMutated;

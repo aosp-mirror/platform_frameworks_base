@@ -19,6 +19,7 @@ package android.graphics.drawable;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -562,6 +563,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
      *  callback, so no need to post.
      */
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private void onAnimationEnd() {
         if (mAnimationCallbacks != null) {
             for (Animatable2.AnimationCallback callback : mAnimationCallbacks) {

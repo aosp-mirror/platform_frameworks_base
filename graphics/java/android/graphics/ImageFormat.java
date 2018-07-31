@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import android.annotation.UnsupportedAppUsage;
+
 public class ImageFormat {
     /*
      * these constants are chosen to be binary compatible with their previous
@@ -103,6 +105,7 @@ public class ImageFormat {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static final int Y8 = 0x20203859;
 
     /**

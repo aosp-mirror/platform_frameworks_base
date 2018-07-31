@@ -20,6 +20,7 @@ import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.Canvas.VertexMode;
 import android.text.GraphicsOperations;
 import android.text.MeasuredParagraph;
@@ -44,6 +45,7 @@ public abstract class BaseCanvas {
      * freed by NativeAllocation.
      * @hide
      */
+    @UnsupportedAppUsage
     protected long mNativeCanvasWrapper;
 
     /**

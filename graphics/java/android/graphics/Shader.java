@@ -18,6 +18,7 @@ package android.graphics;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -72,6 +73,7 @@ public class Shader {
         TileMode(int nativeInt) {
             this.nativeInt = nativeInt;
         }
+        @UnsupportedAppUsage
         final int nativeInt;
     }
 

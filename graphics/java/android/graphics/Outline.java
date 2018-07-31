@@ -19,6 +19,7 @@ package android.graphics;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.graphics.drawable.Drawable;
 
 import java.lang.annotation.Retention;
@@ -66,6 +67,7 @@ public final class Outline {
     public Path mPath;
 
     /** @hide */
+    @UnsupportedAppUsage
     public final Rect mRect = new Rect();
     /** @hide */
     public float mRadius = RADIUS_UNDEFINED;

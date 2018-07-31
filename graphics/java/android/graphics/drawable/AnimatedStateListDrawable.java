@@ -20,6 +20,7 @@ import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
@@ -66,6 +67,7 @@ public class AnimatedStateListDrawable extends StateListDrawable {
     private static final String ELEMENT_TRANSITION = "transition";
     private static final String ELEMENT_ITEM = "item";
 
+    @UnsupportedAppUsage
     private AnimatedStateListState mState;
 
     /** The currently running transition, if any. */
@@ -558,7 +560,9 @@ public class AnimatedStateListDrawable extends StateListDrawable {
 
         int[] mAnimThemeAttrs;
 
+        @UnsupportedAppUsage
         LongSparseLongArray mTransitions;
+        @UnsupportedAppUsage
         SparseIntArray mStateIds;
 
         AnimatedStateListState(@Nullable AnimatedStateListState orig,

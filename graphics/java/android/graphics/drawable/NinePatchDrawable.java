@@ -18,6 +18,7 @@ package android.graphics.drawable;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -70,6 +71,7 @@ public class NinePatchDrawable extends Drawable {
     /** Temporary rect used for density scaling. */
     private Rect mTempRect;
 
+    @UnsupportedAppUsage
     private NinePatchState mNinePatchState;
     private PorterDuffColorFilter mTintFilter;
     private Rect mPadding;
@@ -588,6 +590,7 @@ public class NinePatchDrawable extends Drawable {
         @Config int mChangingConfigurations;
 
         // Values loaded during inflation.
+        @UnsupportedAppUsage
         NinePatch mNinePatch = null;
         ColorStateList mTint = null;
         Mode mTintMode = DEFAULT_TINT_MODE;
