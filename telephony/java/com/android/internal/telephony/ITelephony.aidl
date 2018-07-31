@@ -390,7 +390,7 @@ interface ITelephony {
     /**
      * Returns the neighboring cell information of the device.
      */
-    List<NeighboringCellInfo> getNeighboringCellInfo(String callingPkg);
+    List<NeighboringCellInfo> getNeighboringCellInfo(String callingPkg, int targetSdk);
 
      int getCallState();
 
