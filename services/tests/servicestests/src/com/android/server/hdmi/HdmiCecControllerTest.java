@@ -18,7 +18,6 @@ package com.android.server.hdmi;
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM;
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_PLAYBACK;
 import static android.hardware.hdmi.HdmiDeviceInfo.DEVICE_TV;
-
 import static com.android.server.hdmi.Constants.ADDR_AUDIO_SYSTEM;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_2;
@@ -26,18 +25,15 @@ import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_3;
 import static com.android.server.hdmi.Constants.ADDR_SPECIFIC_USE;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.Constants.ADDR_UNREGISTERED;
-
 import static junit.framework.Assert.assertEquals;
 
 import android.content.Context;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Looper;
 import android.os.test.TestLooper;
-
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-
 import com.android.server.hdmi.HdmiCecController.AllocateAddressCallback;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -84,7 +80,7 @@ public class HdmiCecControllerTest {
     public void SetUp() {
         mMyLooper = mTestLooper.getLooper();
         mMyLooper = mTestLooper.getLooper();
-        mHdmiControlService = new MyHdmiControlService(null);
+        mHdmiControlService = new MyHdmiControlService(InstrumentationRegistry.getTargetContext());
         mNativeWrapper = new FakeNativeWrapper();
         mHdmiCecController =
                 HdmiCecController.createWithNativeWrapper(mHdmiControlService, mNativeWrapper);

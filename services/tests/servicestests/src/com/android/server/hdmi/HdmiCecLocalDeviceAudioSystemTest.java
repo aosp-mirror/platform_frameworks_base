@@ -30,14 +30,13 @@ import android.media.AudioManager;
 import android.os.Looper;
 import android.os.SystemProperties;
 import android.os.test.TestLooper;
-
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-
 import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
 
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -48,7 +47,6 @@ import java.util.ArrayList;
 /** Tests for {@link HdmiCecLocalDeviceAudioSystem} class. */
 public class HdmiCecLocalDeviceAudioSystemTest {
 
-    private static final String TAG = "HdmiCecLocalDeviceAudioSystemTest";
     private HdmiControlService mHdmiControlService;
     private HdmiCecController mHdmiCecController;
     private HdmiCecLocalDeviceAudioSystem mHdmiCecLocalDeviceAudioSystem;
@@ -61,9 +59,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     private boolean mMusicMute;
 
     @Before
-    public void SetUp() {
+    public void setUp() {
         mHdmiControlService =
-                new HdmiControlService(null) {
+                new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
                     @Override
                     AudioManager getAudioManager() {
                         return new AudioManager() {

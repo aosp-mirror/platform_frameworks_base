@@ -18,13 +18,13 @@ package com.android.server.hdmi;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.annotation.Nullable;
+import android.app.Instrumentation;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Looper;
 import android.os.test.TestLooper;
-
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,13 +44,16 @@ public class ArcTerminationActionFromAvrTest {
     private boolean mShouldDispatchReportArcTerminated;
     private boolean mArcEnabled;
     private boolean mSetArcStatusCalled;
+    private Instrumentation mInstrumentation;
 
     @Before
     public void setUp() {
         mDeviceInfoForTests = new HdmiDeviceInfo(1000, 1);
 
+        mInstrumentation = InstrumentationRegistry.getInstrumentation();
+
         HdmiControlService hdmiControlService =
-                new HdmiControlService(null) {
+                new HdmiControlService(mInstrumentation.getTargetContext()) {
                     @Override
                     void sendCecCommand(
                             HdmiCecMessage command, @Nullable SendMessageCallback callback) {
