@@ -19,9 +19,8 @@
 // This contains the junit.framework and android.test classes that were in
 // Android API level 25 excluding those from android.test.runner.
 // Also contains the com.android.internal.util.Predicate[s] classes.
-java_library {
+java_sdk_library {
     name: "android.test.base",
-    installable: true,
 
     srcs: ["src/**/*.java"],
 
@@ -29,11 +28,38 @@ java_library {
       javacflags: ["-Xep:DepAnn:ERROR"],
     },
 
+    hostdex: true,
+
+    api_packages: [
+        "android.test",
+        "android.test.suitebuilder.annotation",
+        "com.android.internal.util",
+        "junit.framework",
+    ],
+
+    droiddoc_options: ["stubsourceonly"],
+    compile_dex: true,
+}
+
+// Build the android.test.base_static library
+// ==========================================
+// This is only intended for inclusion in the android.test.runner-minus-junit,
+// robolectric_android-all-stub and repackaged.android.test.* libraries.
+// Must not be used elewhere.
+java_library_static {
+    name: "android.test.base_static",
+    installable: false,
+
+    srcs: ["src/**/*.java"],
+
+    errorprone: {
+        javacflags: ["-Xep:DepAnn:ERROR"],
+    },
+
     // Needs to be consistent with the repackaged version of this make target.
     java_version: "1.8",
 
     sdk_version: "current",
-    hostdex: true,
 }
 
 // Build the legacy-test library
@@ -46,7 +72,7 @@ java_library {
     installable: true,
 
     sdk_version: "current",
-    static_libs: ["android.test.base"],
+    static_libs: ["android.test.base_static"],
 }
 
 // Build the repackaged.android.test.base library
@@ -57,7 +83,7 @@ java_library_static {
     name: "repackaged.android.test.base",
 
     sdk_version: "current",
-    static_libs: ["android.test.base"],
+    static_libs: ["android.test.base_static"],
 
     jarjar_rules: "jarjar-rules.txt",
     // Pin java_version until jarjar is certified to support later versions. http://b/72703434
@@ -84,38 +110,3 @@ java_library_static {
     ],
 }
 
-droiddoc {
-    name: "android-test-base-api-stubs-gen-docs",
-    srcs: [
-        "src/**/*.java",
-    ],
-    custom_template: "droiddoc-templates-sdk",
-    installable: false,
-    args: "-stubpackages android.test:" +
-          "android.test.suitebuilder.annotation:" +
-          "com.android.internal.util:" +
-          "junit.framework -stubsourceonly -nodocs",
-    sdk_version: "current",
-    api_tag_name: "ANDROID_TEST_BASE",
-    api_filename: "android-test-base-api.txt",
-    removed_api_filename: "android-test-base-removed.txt",
-}
-
-// Build the android.test.base.stubs library
-// =========================================
-java_library_static {
-    name: "android.test.base.stubs",
-    srcs: [
-        ":android-test-base-api-stubs-gen-docs",
-    ],
-    product_variables: {
-        pdk: {
-            enabled: false,
-        },
-        unbundled_build: {
-            enabled: false,
-        },
-    },
-    sdk_version: "current",
-    compile_dex: true,
-}

@@ -1039,7 +1039,7 @@ doc_defaults {
         "ext",
         "framework",
         "voip-common",
-        "android.test.mock",
+        "android.test.mock.impl",
     ],
     local_sourcepaths: frameworks_base_subdirs,
     html_dirs: [
@@ -1474,7 +1474,7 @@ doc_defaults {
         "ext",
         "framework",
         "voip-common",
-        "android.test.mock",
+        "android.test.mock.impl",
     ],
     local_sourcepaths: frameworks_base_subdirs,
     installable: false,
