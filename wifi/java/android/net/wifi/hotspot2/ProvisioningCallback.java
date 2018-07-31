@@ -85,6 +85,17 @@ public abstract class ProvisioningCallback {
     public static final int OSU_FAILURE_SOAP_MESSAGE_EXCHANGE = 11;
 
     /**
+     * The reason code for provisioning failure when a redirect server fails to start.
+     */
+    public static final int OSU_FAILURE_START_REDIRECT_SERVER = 12;
+
+    /**
+     * The reason code for provisioning failure when there is no OSU activity to listen to
+     * {@link WifiManager#ACTION_PASSPOINT_LAUNCH_OSU_VIEW} intent.
+     */
+    public static final int OSU_FAILURE_NO_OSU_ACTIVITY_FOUND = 13;
+
+    /**
      * The status code for provisioning flow to indicate connecting to OSU AP
      */
     public static final int OSU_STATUS_AP_CONNECTING = 1;
@@ -113,6 +124,16 @@ public abstract class ProvisioningCallback {
      * The status code for provisioning flow to indicate starting the SOAP exchange.
      */
     public static final int OSU_STATUS_INIT_SOAP_EXCHANGE = 6;
+
+    /**
+     * The status code for provisioning flow to indicate waiting for a HTTP redirect response.
+     */
+    public static final int OSU_STATUS_WAITING_FOR_REDIRECT_RESPONSE = 7;
+
+    /**
+     * The status code for provisioning flow to indicate a HTTP redirect response is received.
+     */
+    public static final int OSU_STATUS_REDIRECT_RESPONSE_RECEIVED = 8;
 
     /**
      * Provisioning status for OSU failure

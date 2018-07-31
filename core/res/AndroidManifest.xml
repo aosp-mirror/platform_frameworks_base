@@ -359,6 +359,7 @@
     <protected-broadcast android:name="android.net.wifi.action.PASSPOINT_ICON" />
     <protected-broadcast android:name="android.net.wifi.action.PASSPOINT_OSU_PROVIDERS_LIST" />
     <protected-broadcast android:name="android.net.wifi.action.PASSPOINT_SUBSCRIPTION_REMEDIATION" />
+    <protected-broadcast android:name="android.net.wifi.action.PASSPOINT_LAUNCH_OSU_VIEW" />
     <protected-broadcast android:name="android.net.wifi.supplicant.CONNECTION_CHANGE" />
     <protected-broadcast android:name="android.net.wifi.supplicant.STATE_CHANGE" />
     <protected-broadcast android:name="android.net.wifi.p2p.STATE_CHANGED" />
