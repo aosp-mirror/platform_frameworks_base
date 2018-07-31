@@ -158,4 +158,19 @@ public class ContentResolverTest {
 
         assertImageAspectAndContents(res);
     }
+
+    @Test
+    public void testTranslateDeprecatedDataPath() throws Exception {
+        assertTranslate(Uri.parse("content://com.example/path/?foo=bar&baz=meow"));
+        assertTranslate(Uri.parse("content://com.example/path/subpath/12/"));
+        assertTranslate(Uri.parse("content://com.example/path/subpath/12"));
+        assertTranslate(Uri.parse("content://com.example/path/12"));
+        assertTranslate(Uri.parse("content://com.example/"));
+        assertTranslate(Uri.parse("content://com.example"));
+    }
+
+    private static void assertTranslate(Uri uri) {
+        assertEquals(uri, ContentResolver
+                .translateDeprecatedDataPath(ContentResolver.translateDeprecatedDataPath(uri)));
+    }
 }

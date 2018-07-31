@@ -22,16 +22,19 @@ import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
 import static android.os.ParcelFileDescriptor.MODE_WRITE_ONLY;
+import static android.system.OsConstants.F_OK;
 import static android.system.OsConstants.O_APPEND;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_RDWR;
 import static android.system.OsConstants.O_TRUNC;
 import static android.system.OsConstants.O_WRONLY;
+import static android.system.OsConstants.R_OK;
 import static android.system.OsConstants.SPLICE_F_MORE;
 import static android.system.OsConstants.SPLICE_F_MOVE;
 import static android.system.OsConstants.S_ISFIFO;
 import static android.system.OsConstants.S_ISREG;
+import static android.system.OsConstants.W_OK;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1297,6 +1300,23 @@ public class FileUtils {
             res |= O_APPEND;
         }
         return res;
+    }
+
+    /** {@hide} */
+    public static int translateModeAccessToPosix(int mode) {
+        if (mode == F_OK) {
+            // There's not an exact mapping, so we attempt a read-only open to
+            // determine if a file exists
+            return O_RDONLY;
+        } else if ((mode & (R_OK | W_OK)) == (R_OK | W_OK)) {
+            return O_RDWR;
+        } else if ((mode & R_OK) == R_OK) {
+            return O_RDONLY;
+        } else if ((mode & W_OK) == W_OK) {
+            return O_WRONLY;
+        } else {
+            throw new IllegalArgumentException("Bad mode: " + mode);
+        }
     }
 
     /** {@hide} */

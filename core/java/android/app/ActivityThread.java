@@ -23,6 +23,8 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_RESUME;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_START;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
+import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
+import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.NonNull;
@@ -45,6 +47,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IContentProvider;
 import android.content.IIntentReceiver;
@@ -84,6 +87,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.GraphicsEnvironment;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -114,6 +118,9 @@ import android.provider.Settings;
 import android.renderscript.RenderScriptCacheDir;
 import android.security.NetworkSecurityPolicy;
 import android.security.net.config.NetworkSecurityConfigProvider;
+import android.system.ErrnoException;
+import android.system.OsConstants;
+import android.system.StructStat;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
@@ -162,13 +169,16 @@ import dalvik.system.VMRuntime;
 
 import libcore.io.DropBox;
 import libcore.io.EventLogger;
+import libcore.io.ForwardingOs;
 import libcore.io.IoUtils;
+import libcore.io.Os;
 import libcore.net.event.NetworkEventDispatcher;
 
 import org.apache.harmony.dalvik.ddmc.DdmVmInternal;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -6749,7 +6759,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
-    private class DropBoxReporter implements DropBox.Reporter {
+    private static class DropBoxReporter implements DropBox.Reporter {
 
         private DropBoxManager dropBox;
 
@@ -6769,13 +6779,93 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         private synchronized void ensureInitialized() {
             if (dropBox == null) {
-                dropBox = (DropBoxManager) getSystemContext().getSystemService(Context.DROPBOX_SERVICE);
+                dropBox = currentActivityThread().getApplication()
+                        .getSystemService(DropBoxManager.class);
+            }
+        }
+    }
+
+    private static class AndroidOs extends ForwardingOs {
+        /**
+         * Install selective syscall interception. For example, this is used to
+         * implement special filesystem paths that will be redirected to
+         * {@link ContentResolver#openFileDescriptor(Uri, String)}.
+         */
+        public static void install() {
+            // If feature is disabled, we don't need to install
+            if (!DEPRECATE_DATA_COLUMNS) return;
+
+            // If app is modern enough, we don't need to install
+            if (VMRuntime.getRuntime().getTargetSdkVersion() >= Build.VERSION_CODES.Q) return;
+
+            // Install interception and make sure it sticks!
+            Os def = null;
+            do {
+                def = Os.getDefault();
+            } while (!Os.compareAndSetDefault(def, new AndroidOs(def)));
+        }
+
+        private AndroidOs(Os os) {
+            super(os);
+        }
+
+        private FileDescriptor openDeprecatedDataPath(String path, int mode) throws ErrnoException {
+            final Uri uri = ContentResolver.translateDeprecatedDataPath(path);
+            Log.v(TAG, "Redirecting " + path + " to " + uri);
+
+            final ContentResolver cr = currentActivityThread().getApplication()
+                    .getContentResolver();
+            try {
+                final FileDescriptor fd = new FileDescriptor();
+                fd.setInt$(cr.openFileDescriptor(uri,
+                        FileUtils.translateModePosixToString(mode)).detachFd());
+                return fd;
+            } catch (FileNotFoundException e) {
+                throw new ErrnoException(e.getMessage(), OsConstants.ENOENT);
+            }
+        }
+
+        @Override
+        public boolean access(String path, int mode) throws ErrnoException {
+            if (path != null && path.startsWith(DEPRECATE_DATA_PREFIX)) {
+                // If we opened it okay, then access check succeeded
+                IoUtils.closeQuietly(
+                        openDeprecatedDataPath(path, FileUtils.translateModeAccessToPosix(mode)));
+                return true;
+            } else {
+                return super.access(path, mode);
+            }
+        }
+
+        @Override
+        public FileDescriptor open(String path, int flags, int mode) throws ErrnoException {
+            if (path != null && path.startsWith(DEPRECATE_DATA_PREFIX)) {
+                return openDeprecatedDataPath(path, mode);
+            } else {
+                return super.open(path, flags, mode);
+            }
+        }
+
+        @Override
+        public StructStat stat(String path) throws ErrnoException {
+            if (path != null && path.startsWith(DEPRECATE_DATA_PREFIX)) {
+                final FileDescriptor fd = openDeprecatedDataPath(path, OsConstants.O_RDONLY);
+                try {
+                    return android.system.Os.fstat(fd);
+                } finally {
+                    IoUtils.closeQuietly(fd);
+                }
+            } else {
+                return super.stat(path);
             }
         }
     }
 
     public static void main(String[] args) {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "ActivityThreadMain");
+
+        // Install selective syscall interception
+        AndroidOs.install();
 
         // CloseGuard defaults to true and can be quite spammy.  We
         // disable it here, but selectively enable it later (via
