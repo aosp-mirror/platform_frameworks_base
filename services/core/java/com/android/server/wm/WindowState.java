@@ -191,7 +191,7 @@ import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
-import com.android.server.input.InputWindowHandle;
+import android.view.InputWindowHandle;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 import com.android.server.wm.utils.InsetUtils;

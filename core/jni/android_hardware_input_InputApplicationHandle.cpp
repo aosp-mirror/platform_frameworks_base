@@ -135,13 +135,13 @@ static const JNINativeMethod gInputApplicationHandleMethods[] = {
         LOG_FATAL_IF(! (var), "Unable to find field " fieldName);
 
 int register_android_server_InputApplicationHandle(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "com/android/server/input/InputApplicationHandle",
+    int res = jniRegisterNativeMethods(env, "android/view/InputApplicationHandle",
             gInputApplicationHandleMethods, NELEM(gInputApplicationHandleMethods));
     (void) res;  // Faked use when LOG_NDEBUG.
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
 
     jclass clazz;
-    FIND_CLASS(clazz, "com/android/server/input/InputApplicationHandle");
+    FIND_CLASS(clazz, "android/view/InputApplicationHandle");
 
     GET_FIELD_ID(gInputApplicationHandleClassInfo.ptr, clazz,
             "ptr", "J");

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.input;
+package android.view;
 
 /**
  * Functions as a handle for an application that can receive input.

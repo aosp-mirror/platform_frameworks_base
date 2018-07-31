@@ -57,8 +57,8 @@ import android.view.animation.Interpolator;
 
 import com.android.internal.view.IDragAndDropPermissions;
 import com.android.server.LocalServices;
-import com.android.server.input.InputApplicationHandle;
-import com.android.server.input.InputWindowHandle;
+import android.view.InputApplicationHandle;
+import android.view.InputWindowHandle;
 
 import java.util.ArrayList;
 

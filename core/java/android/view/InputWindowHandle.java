@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.input;
+package android.view;
 
 import android.graphics.Region;
 import android.view.IWindow;

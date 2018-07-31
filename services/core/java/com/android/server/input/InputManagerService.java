@@ -72,6 +72,8 @@ import android.view.IInputFilter;
 import android.view.IInputFilterHost;
 import android.view.IWindow;
 import android.view.InputChannel;
+import android.view.InputApplicationHandle;
+import android.view.InputWindowHandle;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.KeyEvent;

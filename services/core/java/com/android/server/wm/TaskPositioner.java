@@ -49,8 +49,9 @@ import android.view.MotionEvent;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.input.InputApplicationHandle;
-import com.android.server.input.InputWindowHandle;
+import android.view.InputApplicationHandle;
+import android.view.InputWindowHandle;
+import com.android.server.wm.WindowManagerService.H;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

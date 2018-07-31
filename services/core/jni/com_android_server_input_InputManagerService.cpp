@@ -42,6 +42,8 @@
 #include <utils/Trace.h>
 #include <utils/SortedVector.h>
 
+#include <binder/IServiceManager.h>
+
 #include <input/PointerController.h>
 #include <input/SpriteController.h>
 
@@ -1640,7 +1642,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
     { "nativeHasKeys", "(JII[I[Z)Z",
             (void*) nativeHasKeys },
     { "nativeRegisterInputChannel",
-            "(JLandroid/view/InputChannel;Lcom/android/server/input/InputWindowHandle;I)V",
+            "(JLandroid/view/InputChannel;Landroid/view/InputWindowHandle;I)V",
             (void*) nativeRegisterInputChannel },
     { "nativeUnregisterInputChannel", "(JLandroid/view/InputChannel;)V",
             (void*) nativeUnregisterInputChannel },
@@ -1650,9 +1652,9 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeInjectInputEvent },
     { "nativeToggleCapsLock", "(JI)V",
             (void*) nativeToggleCapsLock },
-    { "nativeSetInputWindows", "(J[Lcom/android/server/input/InputWindowHandle;I)V",
+    { "nativeSetInputWindows", "(J[Landroid/view/InputWindowHandle;I)V",
             (void*) nativeSetInputWindows },
-    { "nativeSetFocusedApplication", "(JILcom/android/server/input/InputApplicationHandle;)V",
+    { "nativeSetFocusedApplication", "(JILandroid/view/InputApplicationHandle;)V",
             (void*) nativeSetFocusedApplication },
     { "nativeSetFocusedDisplay", "(JI)V",
             (void*) nativeSetFocusedDisplay },
@@ -1731,11 +1733,11 @@ int register_android_server_InputManager(JNIEnv* env) {
             "notifySwitch", "(JII)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyInputChannelBroken, clazz,
-            "notifyInputChannelBroken", "(Lcom/android/server/input/InputWindowHandle;)V");
+            "notifyInputChannelBroken", "(Landroid/view/InputWindowHandle;)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyANR, clazz,
             "notifyANR",
-            "(Lcom/android/server/input/InputApplicationHandle;Lcom/android/server/input/InputWindowHandle;Ljava/lang/String;)J");
+            "(Landroid/view/InputApplicationHandle;Landroid/view/InputWindowHandle;Ljava/lang/String;)J");
 
     GET_METHOD_ID(gServiceClassInfo.filterInputEvent, clazz,
             "filterInputEvent", "(Landroid/view/InputEvent;I)Z");
@@ -1748,11 +1750,11 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gServiceClassInfo.interceptKeyBeforeDispatching, clazz,
             "interceptKeyBeforeDispatching",
-            "(Lcom/android/server/input/InputWindowHandle;Landroid/view/KeyEvent;I)J");
+            "(Landroid/view/InputWindowHandle;Landroid/view/KeyEvent;I)J");
 
     GET_METHOD_ID(gServiceClassInfo.dispatchUnhandledKey, clazz,
             "dispatchUnhandledKey",
-            "(Lcom/android/server/input/InputWindowHandle;Landroid/view/KeyEvent;I)Landroid/view/KeyEvent;");
+            "(Landroid/view/InputWindowHandle;Landroid/view/KeyEvent;I)Landroid/view/KeyEvent;");
 
     GET_METHOD_ID(gServiceClassInfo.checkInjectEventsPermission, clazz,
             "checkInjectEventsPermission", "(II)Z");

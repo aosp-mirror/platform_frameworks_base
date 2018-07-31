@@ -23,8 +23,8 @@ import android.os.UserHandle;
 import android.view.InputChannel;
 import android.view.WindowManager;
 
-import com.android.server.input.InputApplicationHandle;
-import com.android.server.input.InputWindowHandle;
+import android.view.InputApplicationHandle;
+import android.view.InputWindowHandle;
 
 import java.io.PrintWriter;
 
