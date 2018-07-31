@@ -362,8 +362,6 @@ Landroid/os/SystemVibrator;-><init>()V
 Landroid/os/UserHandle;->isSameApp(II)Z
 Landroid/os/UserManager;->hasUserRestriction(Ljava/lang/String;Landroid/os/UserHandle;)Z
 Landroid/os/UserManager;->isAdminUser()Z
-Landroid/print/PrintDocumentAdapter$LayoutResultCallback;-><init>()V
-Landroid/print/PrintDocumentAdapter$WriteResultCallback;-><init>()V
 Landroid/provider/CalendarContract$Events;->PROVIDER_WRITABLE_COLUMNS:[Ljava/lang/String;
 Landroid/provider/ContactsContract$CommonDataKinds$Phone;->getDisplayLabel(Landroid/content/Context;ILjava/lang/CharSequence;)Ljava/lang/CharSequence;
 Landroid/provider/Settings$Global;->getStringForUser(Landroid/content/ContentResolver;Ljava/lang/String;I)Ljava/lang/String;

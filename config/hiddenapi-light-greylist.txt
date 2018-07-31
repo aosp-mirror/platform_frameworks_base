@@ -4286,10 +4286,6 @@ Landroid/preference/VolumePreference$VolumeStore;->originalVolume:I
 Landroid/preference/VolumePreference$VolumeStore;->volume:I
 Landroid/preference/VolumePreference;-><init>(Landroid/content/Context;Landroid/util/AttributeSet;)V
 Landroid/preference/VolumePreference;->mStreamType:I
-Landroid/print/PrinterId;->getServiceName()Landroid/content/ComponentName;
-Landroid/print/PrintJobInfo;->getAdvancedOptions()Landroid/os/Bundle;
-Landroid/print/PrintJobInfo;->getDocumentInfo()Landroid/print/PrintDocumentInfo;
-Landroid/print/PrintManager;->addPrintJobStateChangeListener(Landroid/print/PrintManager$PrintJobStateChangeListener;)V
 Landroid/provider/Browser;->getVisitedHistory(Landroid/content/ContentResolver;)[Ljava/lang/String;
 Landroid/provider/Browser;->sendString(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
 Landroid/provider/BrowserContract$Accounts;->CONTENT_URI:Landroid/net/Uri;
