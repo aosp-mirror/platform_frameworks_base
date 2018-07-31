@@ -65,6 +65,7 @@ public class PipTouchHandler {
     private static final boolean ENABLE_FLING_DISMISS = false;
 
     private static final int SHOW_DISMISS_AFFORDANCE_DELAY = 225;
+    private static final int BOTTOM_OFFSET_BUFFER_DP = 1;
 
     // Allow dragging the PIP to a location to close it
     private final boolean mEnableDimissDragToEdge;
@@ -314,8 +315,10 @@ public class PipTouchHandler {
                 // above the position as if shelf/IME shows, don't move the PIP window.
                 int movementBoundsAdjustment = toMovementBounds.bottom - mMovementBounds.bottom;
                 int offsetAdjustment = fromImeAdjustment ? mImeOffset : mShelfHeight;
+                final float bottomOffsetBufferInPx = BOTTOM_OFFSET_BUFFER_DP
+                        * mContext.getResources().getDisplayMetrics().density;
                 if (toAdjustedBounds.bottom >= mMovementBounds.bottom
-                        && animatingBounds.top
+                        && animatingBounds.top + Math.round(bottomOffsetBufferInPx)
                         < toAdjustedBounds.bottom - movementBoundsAdjustment - offsetAdjustment) {
                     return;
                 }
