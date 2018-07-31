@@ -2167,14 +2167,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // The last inset values represent the last client state.
             win.updateLastInsetValues();
 
-            outFrame.set(win.mCompatFrame);
-            outOverscanInsets.set(win.mOverscanInsets);
-            outContentInsets.set(win.mContentInsets);
-            win.mLastRelayoutContentInsets.set(win.mContentInsets);
-            outVisibleInsets.set(win.mVisibleInsets);
-            outStableInsets.set(win.mStableInsets);
+            win.getCompatFrame(outFrame);
+            win.getInsetsForRelayout(outOverscanInsets, outContentInsets, outVisibleInsets,
+                    outStableInsets, outOutsets);
             outCutout.set(win.getWmDisplayCutout().getDisplayCutout());
-            outOutsets.set(win.mOutsets);
             outBackdropFrame.set(win.getBackdropFrame(win.getFrameLw()));
             if (localLOGV) Slog.v(
                 TAG_WM, "Relayout given client " + client.asBinder()

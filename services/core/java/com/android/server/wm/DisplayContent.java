@@ -3009,7 +3009,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (w.isVisibleLw() && (w.mAppToken != null || keyguard)) {
                 w.mWinAnimator.mDrawState = DRAW_PENDING;
                 // Force add to mResizingWindows.
-                w.mLastContentInsets.set(-1, -1, -1, -1);
+                w.resetLastContentInsets();
                 mService.mWaitingForDrawn.add(w);
             }
         }, true /* traverseTopToBottom */);
