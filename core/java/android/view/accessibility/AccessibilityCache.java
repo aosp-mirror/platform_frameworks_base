@@ -336,7 +336,13 @@ public class AccessibilityCache {
             AccessibilityNodeInfo clone = AccessibilityNodeInfo.obtain(info);
             nodes.put(sourceId, clone);
             if (clone.isAccessibilityFocused()) {
+                if (mAccessibilityFocus != AccessibilityNodeInfo.UNDEFINED_ITEM_ID
+                        && mAccessibilityFocus != sourceId) {
+                    refreshCachedNodeLocked(windowId, mAccessibilityFocus);
+                }
                 mAccessibilityFocus = sourceId;
+            } else if (mAccessibilityFocus == sourceId) {
+                mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
             }
             if (clone.isFocused()) {
                 mInputFocus = sourceId;
