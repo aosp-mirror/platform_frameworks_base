@@ -19,6 +19,7 @@ package android.graphics;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 
 public class SweepGradient extends Shader {
 
@@ -31,11 +32,17 @@ public class SweepGradient extends Shader {
      */
     private int mType;
 
+    @UnsupportedAppUsage
     private float mCx;
+    @UnsupportedAppUsage
     private float mCy;
+    @UnsupportedAppUsage
     private int[] mColors;
+    @UnsupportedAppUsage
     private float[] mPositions;
+    @UnsupportedAppUsage
     private int mColor0;
+    @UnsupportedAppUsage
     private int mColor1;
 
     /**

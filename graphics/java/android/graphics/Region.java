@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Pools.SynchronizedPool;
@@ -30,6 +31,7 @@ public class Region implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public long mNativeRegion;
 
     // the native values for these must match up with the enum in SkRegion.h
@@ -48,6 +50,7 @@ public class Region implements Parcelable {
         /**
          * @hide
          */
+        @UnsupportedAppUsage
         public final int nativeInt;
     }
 
@@ -236,6 +239,7 @@ public class Region implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void scale(float scale) {
         scale(scale, null);
     }
@@ -327,6 +331,7 @@ public class Region implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void recycle() {
         setEmpty();
         sPool.release(this);
@@ -395,6 +400,7 @@ public class Region implements Parcelable {
 
     /* add dummy parameter so constructor can be called from jni without
        triggering 'not cloneable' exception */
+    @UnsupportedAppUsage
     private Region(long ni, int dummy) {
         this(ni);
     }

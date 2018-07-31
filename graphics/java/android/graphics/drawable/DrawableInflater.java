@@ -22,6 +22,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -49,6 +50,7 @@ public final class DrawableInflater {
             new HashMap<>();
 
     private final Resources mRes;
+    @UnsupportedAppUsage
     private final ClassLoader mClassLoader;
 
     /**

@@ -18,6 +18,7 @@ package android.graphics.drawable;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -93,6 +94,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     public static final int INSET_UNDEFINED = Integer.MIN_VALUE;
 
     @NonNull
+    @UnsupportedAppUsage
     LayerState mLayerState;
 
     private int[] mPaddingL;
@@ -428,6 +430,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * @param layer The layer to add.
      * @return The index of the layer.
      */
+    @UnsupportedAppUsage
     int addLayer(@NonNull ChildDrawable layer) {
         final LayerState st = mLayerState;
         final int N = st.mChildren != null ? st.mChildren.length : 0;
@@ -1739,6 +1742,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     /**
      * Ensures the child padding caches are large enough.
      */
+    @UnsupportedAppUsage
     void ensurePadding() {
         final int N = mLayerState.mNumChildren;
         if (mPaddingL != null && mPaddingL.length >= N) {
@@ -1820,6 +1824,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     static class ChildDrawable {
+        @UnsupportedAppUsage
         public Drawable mDrawable;
         public int[] mThemeAttrs;
         public int mDensity = DisplayMetrics.DENSITY_DEFAULT;
@@ -1922,6 +1927,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         private int[] mThemeAttrs;
 
         int mNumChildren;
+        @UnsupportedAppUsage
         ChildDrawable[] mChildren;
 
         int mDensity;

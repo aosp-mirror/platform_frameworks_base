@@ -18,6 +18,7 @@ package android.graphics;
 
 import static android.graphics.BitmapFactory.Options.validate;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.Trace;
@@ -822,11 +823,15 @@ public class BitmapFactory {
         return decodeFileDescriptor(fd, null, null);
     }
 
+    @UnsupportedAppUsage
     private static native Bitmap nativeDecodeStream(InputStream is, byte[] storage,
             Rect padding, Options opts);
+    @UnsupportedAppUsage
     private static native Bitmap nativeDecodeFileDescriptor(FileDescriptor fd,
             Rect padding, Options opts);
+    @UnsupportedAppUsage
     private static native Bitmap nativeDecodeAsset(long nativeAsset, Rect padding, Options opts);
+    @UnsupportedAppUsage
     private static native Bitmap nativeDecodeByteArray(byte[] data, int offset,
             int length, Options opts);
     private static native boolean nativeIsSeekable(FileDescriptor fd);

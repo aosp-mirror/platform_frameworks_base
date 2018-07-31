@@ -16,13 +16,16 @@
 
 package android.graphics;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import java.io.InputStream;
 import java.io.FileInputStream;
 
 public class Movie {
+    @UnsupportedAppUsage
     private long mNativeMovie;
 
+    @UnsupportedAppUsage
     private Movie(long nativeMovie) {
         if (nativeMovie == 0) {
             throw new RuntimeException("native movie creation failed");
