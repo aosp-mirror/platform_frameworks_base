@@ -51,10 +51,13 @@ public class CarrierConfigManager {
     public static final String EXTRA_SUBSCRIPTION_INDEX =
             SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX;
 
+    private final Context mContext;
+
     /**
      * @hide
      */
-    public CarrierConfigManager() {
+    public CarrierConfigManager(Context context) {
+        mContext = context;
     }
 
     /**
@@ -2373,7 +2376,7 @@ public class CarrierConfigManager {
                         + " ICarrierConfigLoader is null");
                 return null;
             }
-            return loader.getConfigForSubId(subId);
+            return loader.getConfigForSubId(subId, mContext.getOpPackageName());
         } catch (RemoteException ex) {
             Rlog.e(TAG, "Error getting config for subId " + subId + ": "
                     + ex.toString());
