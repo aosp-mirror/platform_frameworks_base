@@ -551,9 +551,6 @@
          radio is unable to find any MCC information to infer wifi country code from -->
     <bool translatable="false" name="config_wifi_revert_country_code_on_cellular_loss">false</bool>
 
-    <!-- Boolean indicating whether or not wifi firmware debugging is enabled -->
-    <bool translatable="false" name="config_wifi_enable_wifi_firmware_debugging">true</bool>
-
     <!-- Integer size limit, in KB, for a single WifiLogger ringbuffer, in default logging mode -->
     <integer translatable="false" name="config_wifi_logger_ring_buffer_default_size_limit_kb">32</integer>
 
