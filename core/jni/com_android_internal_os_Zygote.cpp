@@ -70,6 +70,7 @@
 namespace {
 
 using android::String8;
+using android::base::StringAppendF;
 using android::base::StringPrintf;
 using android::base::WriteStringToFile;
 using android::base::GetBoolProperty;
@@ -79,6 +80,7 @@ using android::base::GetBoolProperty;
 
 static pid_t gSystemServerPid = 0;
 
+static const char kIsolatedStorage[] = "persist.sys.isolated_storage";
 static const char kZygoteClassName[] = "com/android/internal/os/Zygote";
 static jclass gZygoteClass;
 static jmethodID gCallPostForkChildHooks;
@@ -379,6 +381,28 @@ static int UnmountTree(const char* path) {
     return 0;
 }
 
+static bool createPkgSandbox(uid_t uid, const char* package_name, std::string& pkg_sandbox_dir,
+        std::string* error_msg) {
+    // Create /mnt/user/0/package/<package-name>
+    userid_t user_id = multiuser_get_user_id(uid);
+    StringAppendF(&pkg_sandbox_dir, "/%d", user_id);
+    if (fs_prepare_dir(pkg_sandbox_dir.c_str(), 0700, AID_ROOT, AID_ROOT) != 0) {
+        *error_msg = CREATE_ERROR("fs_prepare_dir failed on %s", pkg_sandbox_dir.c_str());
+        return false;
+    }
+    StringAppendF(&pkg_sandbox_dir, "/package");
+    if (fs_prepare_dir(pkg_sandbox_dir.c_str(), 0700, AID_ROOT, AID_ROOT) != 0) {
+        *error_msg = CREATE_ERROR("fs_prepare_dir failed on %s", pkg_sandbox_dir.c_str());
+        return false;
+    }
+    StringAppendF(&pkg_sandbox_dir, "/%s", package_name);
+    if (fs_prepare_dir(pkg_sandbox_dir.c_str(), 0755, uid, uid) != 0) {
+        *error_msg = CREATE_ERROR("fs_prepare_dir failed on %s", pkg_sandbox_dir.c_str());
+        return false;
+    }
+    return true;
+}
+
 // Create a private mount namespace and bind mount appropriate emulated
 // storage for the given user.
 static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
@@ -408,27 +432,44 @@ static bool MountEmulatedStorage(uid_t uid, jint mount_mode,
         return true;
     }
 
-    if (TEMP_FAILURE_RETRY(mount(storageSource.string(), "/storage",
-            NULL, MS_BIND | MS_REC | MS_SLAVE, NULL)) == -1) {
-        *error_msg = CREATE_ERROR("Failed to mount %s to /storage: %s",
-                                  storageSource.string(),
-                                  strerror(errno));
-        return false;
-    }
+    if (GetBoolProperty(kIsolatedStorage, false)) {
+        if (package_name == nullptr) {
+            return true;
+        }
 
-    // Mount user-specific symlink helper into place
-    userid_t user_id = multiuser_get_user_id(uid);
-    const String8 userSource(String8::format("/mnt/user/%d", user_id));
-    if (fs_prepare_dir(userSource.string(), 0751, 0, 0) == -1) {
-        *error_msg = CREATE_ERROR("fs_prepare_dir failed on %s", userSource.string());
-        return false;
-    }
-    if (TEMP_FAILURE_RETRY(mount(userSource.string(), "/storage/self",
-            NULL, MS_BIND, NULL)) == -1) {
-        *error_msg = CREATE_ERROR("Failed to mount %s to /storage/self: %s",
-                                  userSource.string(),
-                                  strerror(errno));
-        return false;
+        std::string pkgSandboxDir("/mnt/user");
+        if (!createPkgSandbox(uid, package_name, pkgSandboxDir, error_msg)) {
+            return false;
+        }
+        if (TEMP_FAILURE_RETRY(mount(pkgSandboxDir.c_str(), "/storage",
+                nullptr, MS_BIND | MS_REC | MS_SLAVE, nullptr)) == -1) {
+            *error_msg = CREATE_ERROR("Failed to mount %s to /storage: %s",
+                    pkgSandboxDir.c_str(), strerror(errno));
+            return false;
+        }
+    } else {
+        if (TEMP_FAILURE_RETRY(mount(storageSource.string(), "/storage",
+                NULL, MS_BIND | MS_REC | MS_SLAVE, NULL)) == -1) {
+            *error_msg = CREATE_ERROR("Failed to mount %s to /storage: %s",
+                                      storageSource.string(),
+                                      strerror(errno));
+            return false;
+        }
+
+        // Mount user-specific symlink helper into place
+        userid_t user_id = multiuser_get_user_id(uid);
+        const String8 userSource(String8::format("/mnt/user/%d", user_id));
+        if (fs_prepare_dir(userSource.string(), 0751, 0, 0) == -1) {
+            *error_msg = CREATE_ERROR("fs_prepare_dir failed on %s", userSource.string());
+            return false;
+        }
+        if (TEMP_FAILURE_RETRY(mount(userSource.string(), "/storage/self",
+                NULL, MS_BIND, NULL)) == -1) {
+            *error_msg = CREATE_ERROR("Failed to mount %s to /storage/self: %s",
+                                      userSource.string(),
+                                      strerror(errno));
+            return false;
+        }
     }
 
     return true;
