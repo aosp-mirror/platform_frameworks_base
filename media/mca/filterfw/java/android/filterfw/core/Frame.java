@@ -17,6 +17,7 @@
 
 package android.filterfw.core;
 
+import android.annotation.UnsupportedAppUsage;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.core.FrameManager;
 import android.graphics.Bitmap;
@@ -54,6 +55,7 @@ public abstract class Frame {
         mBindingId = bindingId;
     }
 
+    @UnsupportedAppUsage
     public FrameFormat getFormat() {
         return mFormat;
     }
@@ -94,6 +96,7 @@ public abstract class Frame {
 
     public abstract Object getObjectValue();
 
+    @UnsupportedAppUsage
     public abstract void setInts(int[] ints);
 
     public abstract int[] getInts();
@@ -116,12 +119,15 @@ public abstract class Frame {
 
     public abstract void setBitmap(Bitmap bitmap);
 
+    @UnsupportedAppUsage
     public abstract Bitmap getBitmap();
 
+    @UnsupportedAppUsage
     public void setTimestamp(long timestamp) {
         mTimestamp = timestamp;
     }
 
+    @UnsupportedAppUsage
     public long getTimestamp() {
         return mTimestamp;
     }
@@ -138,6 +144,7 @@ public abstract class Frame {
         return mRefCount;
     }
 
+    @UnsupportedAppUsage
     public Frame release() {
         if (mFrameManager != null) {
             return mFrameManager.releaseFrame(this);
