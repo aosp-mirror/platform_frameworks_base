@@ -551,7 +551,7 @@ public class ActivityStackTests extends ActivityTestsBase {
             // Home stack and activity are created in ActivityTestsBase#setupActivityManagerService
             stack = mDefaultDisplay.getStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
             if (onTop) {
-                mDefaultDisplay.positionChildAtTop(stack);
+                mDefaultDisplay.positionChildAtTop(stack, false /* includingParents */);
             } else {
                 mDefaultDisplay.positionChildAtBottom(stack);
             }

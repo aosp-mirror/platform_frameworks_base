@@ -76,7 +76,8 @@ public class DisplayWindowController
     /**
      * Positions the task stack at the given position in the task stack container.
      */
-    public void positionChildAt(StackWindowController child, int position) {
+    public void positionChildAt(StackWindowController child, int position,
+            boolean includingParents) {
         synchronized (mWindowMap) {
             if (DEBUG_STACK) Slog.i(TAG_WM, "positionTaskStackAt: positioning stack=" + child
                     + " at " + position);
@@ -90,7 +91,7 @@ public class DisplayWindowController
                         "positionTaskStackAt: could not find stack=" + this);
                 return;
             }
-            mContainer.positionStackAt(position, child.mContainer);
+            mContainer.positionStackAt(position, child.mContainer, includingParents);
         }
     }
 

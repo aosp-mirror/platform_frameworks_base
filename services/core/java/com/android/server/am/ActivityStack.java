@@ -521,7 +521,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // Since always on top is only on when the stack is freeform or pinned, the state
             // can be toggled when the windowing mode changes. We must make sure the stack is
             // placed properly when always on top state changes.
-            display.positionChildAtTop(this);
+            display.positionChildAtTop(this, false /* includingParents */);
         }
     }
 
@@ -1055,7 +1055,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             mStackSupervisor.moveHomeStackToFront(reason + " returnToHome");
         }
 
-        display.positionChildAtTop(this);
+        display.positionChildAtTop(this, true /* includingParents */);
         mStackSupervisor.setFocusStackUnchecked(reason, this);
         if (task != null) {
             // This also moves the entire hierarchy branch to top, including parents
@@ -5318,7 +5318,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // always on top windows. Since the position the stack should be inserted into is calculated
         // properly in {@link ActivityDisplay#getTopInsertPosition()} in both cases, we can just
         // request that the stack is put at top here.
-        display.positionChildAtTop(this);
+        display.positionChildAtTop(this, false /* includingParents */);
     }
 
     void moveToFrontAndResumeStateIfNeeded(ActivityRecord r, boolean moveToFront, boolean setResume,
