@@ -671,4 +671,11 @@ public abstract class PackageManagerInternal {
      * @param delegate A delegate instance or null to clear.
      */
     public abstract void setCheckPermissionDelegate(@Nullable CheckPermissionDelegate delegate);
+
+    /**
+     * Get appIds of all available apps which specified android:sharedUserId in the manifest.
+     *
+     * @return a SparseArray mapping from appId to it's sharedUserId.
+     */
+    public abstract SparseArray<String> getAppsWithSharedUserIds();
 }
