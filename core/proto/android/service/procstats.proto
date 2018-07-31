@@ -174,4 +174,8 @@ message ProcessStatsProto {
         optional android.util.AggStats rss = 8;
     }
     repeated State states = 5;
+
+    // Total time process has been running...  screen_state, memory_state, and process_state
+    // will not be set.
+    optional State totalRunningState = 6;
 }
