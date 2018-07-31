@@ -4108,7 +4108,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // the package was initially frozen through KILL_APPLICATION_MSG, so
             // it doesn't hurt to use it again.)
             forceStopPackageLocked(app.info.packageName, UserHandle.getAppId(app.uid), false,
-                    false, true, false, false, UserHandle.getUserId(app.userId), "start failure");
+                    false, true, false, false, app.userId, "start failure");
         }
     }
 
