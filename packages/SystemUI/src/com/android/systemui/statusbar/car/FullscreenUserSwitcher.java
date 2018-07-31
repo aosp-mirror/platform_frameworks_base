@@ -101,7 +101,8 @@ public class FullscreenUserSwitcher {
             hideUserGrid();
         }
 
-        if (record.mIsForeground) {
+        if (record.mIsForeground || (record.mIsStartGuestSession
+                && mUserManagerHelper.foregroundUserIsGuestUser())) {
             dismissKeyguard();
             return;
         }
