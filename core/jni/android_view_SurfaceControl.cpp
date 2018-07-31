@@ -446,7 +446,7 @@ static void nativeSetWindowCrop(JNIEnv* env, jclass clazz, jlong transactionObj,
 
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     Rect crop(l, t, r, b);
-    transaction->setCrop(ctrl, crop);
+    transaction->setCrop_legacy(ctrl, crop);
 }
 
 static void nativeSetFinalCrop(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -456,7 +456,7 @@ static void nativeSetFinalCrop(JNIEnv* env, jclass clazz, jlong transactionObj,
 
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     Rect crop(l, t, r, b);
-    transaction->setFinalCrop(ctrl, crop);
+    transaction->setFinalCrop_legacy(ctrl, crop);
 }
 
 static void nativeSetLayerStack(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -799,7 +799,7 @@ static void nativeDeferTransactionUntil(JNIEnv* env, jclass clazz, jlong transac
 
     {
         auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
-        transaction->deferTransactionUntil(ctrl, handle, frameNumber);
+        transaction->deferTransactionUntil_legacy(ctrl, handle, frameNumber);
     }
 }
 
@@ -811,7 +811,7 @@ static void nativeDeferTransactionUntilSurface(JNIEnv* env, jclass clazz, jlong 
     auto ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     sp<Surface> barrier = reinterpret_cast<Surface *>(surfaceObject);
 
-    transaction->deferTransactionUntil(ctrl, barrier, frameNumber);
+    transaction->deferTransactionUntil_legacy(ctrl, barrier, frameNumber);
 }
 
 static void nativeReparentChildren(JNIEnv* env, jclass clazz, jlong transactionObj,
