@@ -129,11 +129,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private static AtomicInteger sIdCounter = new AtomicInteger();
 
-    /** Id of the session */
+    /** ID of the session */
     public final int id;
 
     /** uid the session is for */
     public final int uid;
+
+    /** ID of the task associated with this session's activity */
+    public final int taskId;
 
     /** Flags used to start the session */
     public final int mFlags;
@@ -329,8 +332,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // until the dispatch happens. The items in the list don't need to be cloned
                 // since we don't hold on them anywhere else. The client state is not touched
                 // by us, so no need to copy.
-                request = new FillRequest(requestId, new ArrayList<>(mContexts),
-                        mClientState, flags);
+                request = new FillRequest(requestId, new ArrayList<>(mContexts), mClientState,
+                        flags);
             }
 
             mRemoteFillService.onFillRequest(request);
@@ -528,14 +531,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     Session(@NonNull AutofillManagerServiceImpl service, @NonNull AutoFillUI ui,
-            @NonNull Context context, @NonNull Handler handler, int userId,
-            @NonNull Object lock, int sessionId, int uid, @NonNull IBinder activityToken,
+            @NonNull Context context, @NonNull Handler handler, int userId, @NonNull Object lock,
+            int sessionId, int taskId, int uid, @NonNull IBinder activityToken,
             @NonNull IBinder client, boolean hasCallback, @NonNull LocalLog uiLatencyHistory,
-            @NonNull LocalLog wtfHistory,
-            @NonNull ComponentName serviceComponentName, @NonNull ComponentName componentName,
-            boolean compatMode, boolean bindInstantServiceAllowed, int flags) {
+            @NonNull LocalLog wtfHistory, @NonNull ComponentName serviceComponentName,
+            @NonNull ComponentName componentName, boolean compatMode,
+            boolean bindInstantServiceAllowed, int flags) {
         id = sessionId;
         mFlags = flags;
+        this.taskId = taskId;
         this.uid = uid;
         mStartTime = SystemClock.elapsedRealtime();
         mService = service;
@@ -1431,7 +1435,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /**
      * Shows the save UI, when session can be saved.
      *
-     * @return {@code true} if session is done, or {@code false} if it's pending user action.
+     * @return {@code true} if session is done and could be removed, or {@code false} if it's
+     * pending user action or the service asked to keep it alive (for multi-screens workflow).
      */
     @GuardedBy("mLock")
     public boolean showSaveLocked() {
@@ -1451,10 +1456,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
          * - autofillValue of at least one id (required or optional) has changed.
          * - there is no Dataset in the last FillResponse whose values of all dataset fields matches
          *   the current values of all fields in the screen.
+         * - server didn't ask to keep session alive
          */
         if (saveInfo == null) {
             if (sVerbose) Slog.v(TAG, "showSaveLocked(): no saveInfo from service");
             return true;
+        }
+
+        if ((saveInfo.getFlags() & SaveInfo.FLAG_DELAY_SAVE) != 0) {
+            // TODO(b/112051762): log metrics
+            if (sDebug) Slog.v(TAG, "showSaveLocked(): service asked to delay save");
+            return false;
         }
 
         final ArrayMap<AutofillId, InternalSanitizer> sanitizers = createSanitizers(saveInfo);
@@ -1769,6 +1781,66 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     /**
+     * Update the {@link AutofillValue values} of the {@link AssistStructure} before sending it to
+     * the service on save().
+     */
+    private void updateValuesForSaveLocked() {
+        final ArrayMap<AutofillId, InternalSanitizer> sanitizers =
+                createSanitizers(getSaveInfoLocked());
+
+        final int numContexts = mContexts.size();
+        for (int contextNum = 0; contextNum < numContexts; contextNum++) {
+            final FillContext context = mContexts.get(contextNum);
+
+            final ViewNode[] nodes =
+                context.findViewNodesByAutofillIds(getIdsOfAllViewStatesLocked());
+
+            if (sVerbose) Slog.v(TAG, "updateValuesForSaveLocked(): updating " + context);
+
+            for (int viewStateNum = 0; viewStateNum < mViewStates.size(); viewStateNum++) {
+                final ViewState viewState = mViewStates.valueAt(viewStateNum);
+
+                final AutofillId id = viewState.id;
+                final AutofillValue value = viewState.getCurrentValue();
+                if (value == null) {
+                    if (sVerbose) Slog.v(TAG, "updateValuesForSaveLocked(): skipping " + id);
+                    continue;
+                }
+                final ViewNode node = nodes[viewStateNum];
+                if (node == null) {
+                    Slog.w(TAG, "callSaveLocked(): did not find node with id " + id);
+                    continue;
+                }
+                if (sVerbose) {
+                    Slog.v(TAG, "updateValuesForSaveLocked(): updating " + id + " to " + value);
+                }
+
+                AutofillValue sanitizedValue = viewState.getSanitizedValue();
+
+                if (sanitizedValue == null) {
+                    // Field is optional and haven't been sanitized yet.
+                    sanitizedValue = getSanitizedValue(sanitizers, id, value);
+                }
+                if (sanitizedValue != null) {
+                    node.updateAutofillValue(sanitizedValue);
+                } else if (sDebug) {
+                    Slog.d(TAG, "updateValuesForSaveLocked(): not updating field " + id
+                            + " because it failed sanitization");
+                }
+            }
+
+            // Sanitize structure before it's sent to service.
+            context.getStructure().sanitizeForParceling(false);
+
+            if (sVerbose) {
+                Slog.v(TAG, "updateValuesForSaveLocked(): dumping structure of " + context
+                        + " before calling service.save()");
+                context.getStructure().dump(false);
+            }
+        }
+    }
+
+    /**
      * Calls service when user requested save.
      */
     @GuardedBy("mLock")
@@ -1786,66 +1858,49 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
-        final ArrayMap<AutofillId, InternalSanitizer> sanitizers =
-                createSanitizers(getSaveInfoLocked());
-
-        final int numContexts = mContexts.size();
-
-        for (int contextNum = 0; contextNum < numContexts; contextNum++) {
-            final FillContext context = mContexts.get(contextNum);
-
-            final ViewNode[] nodes =
-                context.findViewNodesByAutofillIds(getIdsOfAllViewStatesLocked());
-
-            if (sVerbose) Slog.v(TAG, "callSaveLocked(): updating " + context);
-
-            for (int viewStateNum = 0; viewStateNum < mViewStates.size(); viewStateNum++) {
-                final ViewState viewState = mViewStates.valueAt(viewStateNum);
-
-                final AutofillId id = viewState.id;
-                final AutofillValue value = viewState.getCurrentValue();
-                if (value == null) {
-                    if (sVerbose) Slog.v(TAG, "callSaveLocked(): skipping " + id);
-                    continue;
-                }
-                final ViewNode node = nodes[viewStateNum];
-                if (node == null) {
-                    Slog.w(TAG, "callSaveLocked(): did not find node with id " + id);
-                    continue;
-                }
-                if (sVerbose) Slog.v(TAG, "callSaveLocked(): updating " + id + " to " + value);
-
-                AutofillValue sanitizedValue = viewState.getSanitizedValue();
-
-                if (sanitizedValue == null) {
-                    // Field is optional and haven't been sanitized yet.
-                    sanitizedValue = getSanitizedValue(sanitizers, id, value);
-                }
-                if (sanitizedValue != null) {
-                    node.updateAutofillValue(sanitizedValue);
-                } else if (sDebug) {
-                    Slog.d(TAG, "Not updating field " + id + " because it failed sanitization");
-                }
-            }
-
-            // Sanitize structure before it's sent to service.
-            context.getStructure().sanitizeForParceling(false);
-
-            if (sVerbose) {
-                Slog.v(TAG, "Dumping structure of " + context + " before calling service.save()");
-                context.getStructure().dump(false);
-            }
-        }
+        updateValuesForSaveLocked();
 
         // Remove pending fill requests as the session is finished.
         cancelCurrentRequestLocked();
 
-        // Dispatch a snapshot of the current contexts list since it may change
-        // until the dispatch happens. The items in the list don't need to be cloned
-        // since we don't hold on them anywhere else. The client state is not touched
-        // by us, so no need to copy.
-        final SaveRequest saveRequest = new SaveRequest(new ArrayList<>(mContexts), mClientState,
-                mSelectedDatasetIds);
+        // Merge the previous sessions that the service asked to be kept alive
+        final ArrayList<Session> previousSessions = mService.getPreviousSessionsLocked(this);
+        final ArrayList<FillContext> contexts;
+        final Bundle clientState;
+        if (previousSessions != null) {
+            if (sDebug) {
+                Slog.d(TAG, "callSaveLocked(): Merging the content of " + previousSessions.size()
+                        + " sessions for task " + taskId);
+            }
+            contexts = new ArrayList<>();
+            for (int i = 0; i < previousSessions.size(); i++) {
+                final Session previousSession = previousSessions.get(i);
+                final ArrayList<FillContext> previousContexts = previousSession.mContexts;
+                if (previousContexts == null) {
+                    Slog.w(TAG, "callSaveLocked(): Not merging null contexts from "
+                            + previousSession.id);
+                    continue;
+                }
+                previousSession.updateValuesForSaveLocked();
+                if (sVerbose) {
+                    Slog.v(TAG, "callSaveLocked(): adding " + previousContexts.size()
+                            + " context from previous session #" + previousSession.id);
+                }
+                contexts.addAll(previousContexts);
+            }
+            contexts.addAll(mContexts);
+            // TODO(b/112051762): decided what to do with client state / add CTS test
+            clientState = mClientState;
+        } else {
+            // Dispatch a snapshot of the current contexts list since it may change
+            // until the dispatch happens. The items in the list don't need to be cloned
+            // since we don't hold on them anywhere else. The client state is not touched
+            // by us, so no need to copy.
+            contexts = new ArrayList<>(mContexts);
+            clientState = mClientState;
+        }
+
+        final SaveRequest saveRequest = new SaveRequest(contexts, clientState, mSelectedDatasetIds);
         mRemoteFillService.onSaveRequest(saveRequest);
     }
 
@@ -2510,6 +2565,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final String prefix2 = prefix + "  ";
         pw.print(prefix); pw.print("id: "); pw.println(id);
         pw.print(prefix); pw.print("uid: "); pw.println(uid);
+        pw.print(prefix); pw.print("taskId: "); pw.println(taskId);
         pw.print(prefix); pw.print("flags: "); pw.println(mFlags);
         pw.print(prefix); pw.print("mComponentName: "); pw.println(mComponentName);
         pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);

@@ -25,11 +25,9 @@ import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
-import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -82,7 +80,6 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.LocalServices;
 import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
 import com.android.server.autofill.ui.AutoFillUI;
-import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -342,7 +339,7 @@ final class AutofillManagerServiceImpl {
     }
 
     @GuardedBy("mLock")
-    int startSessionLocked(@NonNull IBinder activityToken, int uid,
+    int startSessionLocked(@NonNull IBinder activityToken, int taskId, int uid,
             @NonNull IBinder appCallbackToken, @NonNull AutofillId autofillId,
             @NonNull Rect virtualBounds, @Nullable AutofillValue value, boolean hasCallback,
             @NonNull ComponentName componentName, boolean compatMode,
@@ -375,8 +372,9 @@ final class AutofillManagerServiceImpl {
         // Occasionally clean up abandoned sessions
         pruneAbandonedSessionsLocked();
 
-        final Session newSession = createSessionByTokenLocked(activityToken, uid, appCallbackToken,
-                hasCallback, componentName, compatMode, bindInstantServiceAllowed, flags);
+        final Session newSession = createSessionByTokenLocked(activityToken, taskId, uid,
+                appCallbackToken, hasCallback, componentName, compatMode, bindInstantServiceAllowed,
+                flags);
         if (newSession == null) {
             return NO_SESSION;
         }
@@ -493,7 +491,7 @@ final class AutofillManagerServiceImpl {
     }
 
     @GuardedBy("mLock")
-    private Session createSessionByTokenLocked(@NonNull IBinder activityToken, int uid,
+    private Session createSessionByTokenLocked(@NonNull IBinder activityToken, int taskId, int uid,
             @NonNull IBinder appCallbackToken, boolean hasCallback,
             @NonNull ComponentName componentName, boolean compatMode,
             boolean bindInstantServiceAllowed, int flags) {
@@ -513,9 +511,9 @@ final class AutofillManagerServiceImpl {
         assertCallerLocked(componentName, compatMode);
 
         final Session newSession = new Session(this, mUi, mContext, mHandler, mUserId, mLock,
-                sessionId, uid, activityToken, appCallbackToken, hasCallback, mUiLatencyHistory,
-                mWtfHistory, mInfo.getServiceInfo().getComponentName(), componentName, compatMode,
-                bindInstantServiceAllowed, flags);
+                sessionId, taskId, uid, activityToken, appCallbackToken, hasCallback,
+                mUiLatencyHistory, mWtfHistory, mInfo.getServiceInfo().getComponentName(),
+                componentName, compatMode, bindInstantServiceAllowed, flags);
         mSessions.put(newSession.id, newSession);
 
         return newSession;
@@ -605,6 +603,30 @@ final class AutofillManagerServiceImpl {
     @GuardedBy("mLock")
     void removeSessionLocked(int sessionId) {
         mSessions.remove(sessionId);
+    }
+
+    /**
+     * Ges the previous sessions asked to be kept alive in a given activity task.
+     *
+     * @param session session calling this method (so it's excluded from the result).
+     */
+    @Nullable
+    @GuardedBy("mLock")
+    ArrayList<Session> getPreviousSessionsLocked(@NonNull Session session) {
+        final int size = mSessions.size();
+        ArrayList<Session> previousSessions = null;
+        for (int i = 0; i < size; i++) {
+            final Session previousSession = mSessions.valueAt(i);
+            // TODO(b/112051762): only return sessions asked to be kept alive / add CTS test
+            if (previousSession.taskId == session.taskId && previousSession.id != session.id) {
+                if (previousSessions == null) {
+                    previousSessions = new ArrayList<>(size);
+                }
+                previousSessions.add(previousSession);
+            }
+        }
+        // TODO(b/112051762): remove returned sessions / add CTS test
+        return previousSessions;
     }
 
     void handleSessionSave(Session session) {

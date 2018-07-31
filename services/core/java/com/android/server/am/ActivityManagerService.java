@@ -56,7 +56,6 @@ import static android.os.Process.PROC_CHAR;
 import static android.os.Process.PROC_OUT_LONG;
 import static android.os.Process.PROC_PARENS;
 import static android.os.Process.PROC_SPACE_TERM;
-import static android.os.Process.ProcessStartResult;
 import static android.os.Process.ROOT_UID;
 import static android.os.Process.SCHED_FIFO;
 import static android.os.Process.SCHED_OTHER;
@@ -91,9 +90,7 @@ import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
-import static com.android.internal.util.XmlUtils.readBooleanAttribute;
-import static com.android.internal.util.XmlUtils.readIntAttribute;
-import static com.android.internal.util.XmlUtils.readLongAttribute;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
@@ -254,6 +251,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.Process;
+import android.os.Process.ProcessStartResult;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -297,9 +295,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.autofill.AutofillManagerInternal;
-
-import com.android.server.uri.GrantUri;
-import com.android.server.uri.UriGrantsManagerInternal;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -352,10 +347,16 @@ import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexManager;
+import com.android.server.uri.GrantUri;
+import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.PriorityDump;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerService;
+
+import dalvik.system.VMRuntime;
+
+import libcore.util.EmptyArray;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -389,9 +390,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
-
-import dalvik.system.VMRuntime;
-import libcore.util.EmptyArray;
 
 public class ActivityManagerService extends IActivityManager.Stub
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback {
@@ -21103,6 +21101,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void scheduleAppGcs() {
             synchronized (ActivityManagerService.this) {
                 ActivityManagerService.this.scheduleAppGcsLocked();
+            }
+        }
+
+        @Override
+        public int getTaskIdForActivity(IBinder token, boolean onlyRoot) {
+            synchronized (ActivityManagerService.this) {
+                return ActivityManagerService.this.getTaskForActivity(token, onlyRoot);
             }
         }
     }
