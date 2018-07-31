@@ -109,6 +109,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.text.Html;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
+import android.util.Log;
 
 import com.android.internal.R;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -191,6 +192,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
         int countSystemChecks = 0;
+        boolean isSystemUid = true;
 
         public TestableNotificationManagerService(Context context) {
             super(context);
@@ -199,13 +201,13 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         @Override
         protected boolean isCallingUidSystem() {
             countSystemChecks++;
-            return true;
+            return isSystemUid;
         }
 
         @Override
         protected boolean isCallerSystemOrPhone() {
             countSystemChecks++;
-            return true;
+            return isSystemUid;
         }
 
         @Override
@@ -638,6 +640,79 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
         assertEquals(0, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
         assertNull(mService.getNotificationRecord(sbn.getKey()));
+    }
+
+    /**
+     * Confirm the system user on automotive devices can use car categories
+     */
+    @Test
+    public void testEnqueuedRestrictedNotifications_asSystem() throws Exception {
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0))
+                .thenReturn(true);
+        List<String> categories = Arrays.asList(Notification.CATEGORY_CAR_EMERGENCY,
+                Notification.CATEGORY_CAR_WARNING,
+                Notification.CATEGORY_CAR_INFORMATION);
+        int id = 0;
+        for (String category: categories) {
+            final StatusBarNotification sbn =
+                    generateNotificationRecord(mTestNotificationChannel, ++id, "", false).sbn;
+            sbn.getNotification().category = category;
+            mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                    sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        }
+        waitForIdle();
+        assertEquals(categories.size(), mBinderService.getActiveNotifications(PKG).length);
+    }
+
+
+    /**
+     * Confirm restricted notification categories only apply to automotive.
+     */
+    @Test
+    public void testEnqueuedRestrictedNotifications_notAutomotive() throws Exception {
+        mService.isSystemUid = false;
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0))
+                .thenReturn(false);
+        List<String> categories = Arrays.asList(Notification.CATEGORY_CAR_EMERGENCY,
+                Notification.CATEGORY_CAR_WARNING,
+                Notification.CATEGORY_CAR_INFORMATION);
+        int id = 0;
+        for (String category: categories) {
+            final StatusBarNotification sbn =
+                    generateNotificationRecord(mTestNotificationChannel, ++id, "", false).sbn;
+            sbn.getNotification().category = category;
+            mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                    sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        }
+        waitForIdle();
+        assertEquals(categories.size(), mBinderService.getActiveNotifications(PKG).length);
+    }
+
+    /**
+     * Confirm if a non-system user tries to use the car categories on a automotive device that
+     * they will get a security exception
+     */
+    @Test
+    public void testEnqueuedRestrictedNotifications_badUser() throws Exception {
+        mService.isSystemUid = false;
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0))
+                .thenReturn(true);
+        List<String> categories = Arrays.asList(Notification.CATEGORY_CAR_EMERGENCY,
+                Notification.CATEGORY_CAR_WARNING,
+                Notification.CATEGORY_CAR_INFORMATION);
+        for (String category: categories) {
+            final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+            sbn.getNotification().category = category;
+            try {
+                mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                        sbn.getId(), sbn.getNotification(), sbn.getUserId());
+                fail("Calls from non system apps should not allow use of restricted categories");
+            } catch (SecurityException e) {
+                // pass
+            }
+        }
+        waitForIdle();
+        assertEquals(0, mBinderService.getActiveNotifications(PKG).length);
     }
 
     @Test

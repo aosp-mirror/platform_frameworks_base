@@ -4022,6 +4022,7 @@ public class NotificationManagerService extends SystemService {
                     + " notification=" + notification);
         }
         checkCallerIsSystemOrSameApp(pkg);
+        checkRestrictedCategories(notification);
 
         final int userId = ActivityManager.handleIncomingUser(callingPid,
                 callingUid, incomingUserId, true, false, "enqueueNotification", pkg);
@@ -6191,6 +6192,26 @@ public class NotificationManagerService extends SystemService {
             return;
         }
         checkCallerIsSameApp(pkg);
+    }
+
+    /**
+     * Check if the notification is of a category type that is restricted to system use only,
+     * if so throw SecurityException
+     */
+    private void checkRestrictedCategories(final Notification notification) {
+        try {
+            if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0)) {
+                return;
+            }
+        } catch (RemoteException re) {
+            if (DBG) Log.e(TAG, "Unable to confirm if it's safe to skip category "
+                    + "restrictions check thus the check will be done anyway");
+        }
+        if (Notification.CATEGORY_CAR_EMERGENCY.equals(notification.category)
+                || Notification.CATEGORY_CAR_WARNING.equals(notification.category)
+                || Notification.CATEGORY_CAR_INFORMATION.equals(notification.category)) {
+                    checkCallerIsSystem();
+        }
     }
 
     private boolean isCallerInstantApp(String pkg) {
