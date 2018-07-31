@@ -18,6 +18,9 @@ package android.graphics.fonts;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.text.FontConfig;
+import android.text.TextUtils;
 
 import com.android.internal.util.Preconditions;
 
@@ -107,11 +110,25 @@ public class FontFamily {
          * @return a font family
          */
         public @NonNull FontFamily build() {
+            return build(null, FontConfig.Family.VARIANT_DEFAULT);
+        }
+
+        /** @hide */
+        public @NonNull FontFamily build(@Nullable String[] langTags, int variant) {
             final long builderPtr = nInitBuilder();
             for (int i = 0; i < mFonts.size(); ++i) {
                 nAddFont(builderPtr, mFonts.get(i).getNativePtr());
             }
-            final long ptr = nBuild(builderPtr);
+            final String langString;
+            if (langTags == null || langTags.length == 0) {
+                langString = null;
+            } else if (langTags.length == 1) {
+                langString = langTags[0];
+            } else {
+                langString = TextUtils.join(",", langTags);
+            }
+
+            final long ptr = nBuild(builderPtr, langString, variant);
             final FontFamily family = new FontFamily(mFonts, ptr);
             sFamilyRegistory.registerNativeAllocation(family, ptr);
             return family;
@@ -124,7 +141,7 @@ public class FontFamily {
         private static native long nInitBuilder();
         @CriticalNative
         private static native void nAddFont(long builderPtr, long fontPtr);
-        private static native long nBuild(long builderPtr);
+        private static native long nBuild(long builderPtr, String langTags, int variant);
         @CriticalNative
         private static native long nGetReleaseNativeFamily();
     }
