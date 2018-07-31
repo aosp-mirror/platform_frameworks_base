@@ -300,6 +300,7 @@ message SecureSettingsProto {
         optional SettingProto enabled_policy_access_packages = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto badging = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto show_note_about_notification_hiding = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto in_call_notification_enabled = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Notification notification = 41;
 
@@ -404,6 +405,15 @@ message SecureSettingsProto {
     optional SettingProto skip_first_use_hints = 52 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto sleep_timeout = 53 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto sms_default_application = 54 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message Sounds {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto charging_sounds_enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto charging_vibration_enabled = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Sounds sounds = 72;
+
     // Defines whether managed profile ringtones should be synced from its
     // parent profile.
     optional SettingProto sync_parent_sounds = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
@@ -484,7 +494,22 @@ message SecureSettingsProto {
 
     optional SettingProto wake_gesture_enabled = 68 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
+    message Zen {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        // If 0, turning on dnd manually will last indefinitely. Else if
+        // non-negative, turning on dnd manually will last for this many minutes.
+        // Else (if negative), turning on dnd manually will surface a dialog that
+        // prompts user to specify a duration.
+        optional SettingProto duration = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto show_zen_upgrade_notification = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto show_zen_settings_suggestion = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto settings_updated = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto settings_suggestion_viewed = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Zen zen = 71;
+
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 71;
+    // Next tag = 73;
 }

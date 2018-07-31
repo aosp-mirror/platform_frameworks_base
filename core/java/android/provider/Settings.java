@@ -6031,6 +6031,57 @@ public final class Settings {
                 NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
+         * Whether to play a sound for charging events.
+         * @hide
+         */
+        public static final String CHARGING_SOUNDS_ENABLED = "charging_sounds_enabled";
+
+        /**
+         * Whether to vibrate for wireless charging events.
+         * @hide
+         */
+        public static final String CHARGING_VIBRATION_ENABLED = "charging_vibration_enabled";
+
+        /**
+         * If 0, turning on dnd manually will last indefinitely.
+         * Else if non-negative, turning on dnd manually will last for this many minutes.
+         * Else (if negative), turning on dnd manually will surface a dialog that prompts
+         * user to specify a duration.
+         * @hide
+         */
+        public static final String ZEN_DURATION = "zen_duration";
+
+        private static final Validator ZEN_DURATION_VALIDATOR = ANY_INTEGER_VALIDATOR;
+
+        /** @hide */ public static final int ZEN_DURATION_PROMPT = -1;
+        /** @hide */ public static final int ZEN_DURATION_FOREVER = 0;
+
+        /**
+         * If nonzero, will show the zen upgrade notification when the user toggles DND on/off.
+         * @hide
+         */
+        public static final String SHOW_ZEN_UPGRADE_NOTIFICATION = "show_zen_upgrade_notification";
+
+        /**
+         * If nonzero, will show the zen update settings suggestion.
+         * @hide
+         */
+        public static final String SHOW_ZEN_SETTINGS_SUGGESTION = "show_zen_settings_suggestion";
+
+        /**
+         * If nonzero, zen has not been updated to reflect new changes.
+         * @hide
+         */
+        public static final String ZEN_SETTINGS_UPDATED = "zen_settings_updated";
+
+        /**
+         * If nonzero, zen setting suggestion has been viewed by user
+         * @hide
+         */
+        public static final String ZEN_SETTINGS_SUGGESTION_VIEWED =
+                "zen_settings_suggestion_viewed";
+
+        /**
          * Whether the in call notification is enabled to play sound during calls.  The value is
          * boolean (1 or 0).
          * @hide
@@ -8033,6 +8084,13 @@ public final class Settings {
             IN_CALL_NOTIFICATION_ENABLED,
             LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
             LOCK_SCREEN_SHOW_NOTIFICATIONS,
+            ZEN_DURATION,
+            SHOW_ZEN_UPGRADE_NOTIFICATION,
+            SHOW_ZEN_SETTINGS_SUGGESTION,
+            ZEN_SETTINGS_UPDATED,
+            ZEN_SETTINGS_SUGGESTION_VIEWED,
+            CHARGING_SOUNDS_ENABLED,
+            CHARGING_VIBRATION_ENABLED,
         };
 
         /**
@@ -8178,6 +8236,13 @@ public final class Settings {
             VALIDATORS.put(IN_CALL_NOTIFICATION_ENABLED, IN_CALL_NOTIFICATION_ENABLED_VALIDATOR);
             VALIDATORS.put(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, BOOLEAN_VALIDATOR);
             VALIDATORS.put(LOCK_SCREEN_SHOW_NOTIFICATIONS, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(ZEN_DURATION, ZEN_DURATION_VALIDATOR);
+            VALIDATORS.put(SHOW_ZEN_UPGRADE_NOTIFICATION, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(SHOW_ZEN_SETTINGS_SUGGESTION, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(ZEN_SETTINGS_UPDATED, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(ZEN_SETTINGS_SUGGESTION_VIEWED, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(CHARGING_SOUNDS_ENABLED, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(CHARGING_VIBRATION_ENABLED, BOOLEAN_VALIDATOR);
         }
 
         /**
@@ -8651,16 +8716,20 @@ public final class Settings {
 
         /**
          * Whether to play a sound for charging events.
+         * @deprecated Use {@link android.provider.Settings.Secure#CHARGING_SOUNDS_ENABLED} instead
          * @hide
          */
+        @Deprecated
         public static final String CHARGING_SOUNDS_ENABLED = "charging_sounds_enabled";
 
         private static final Validator CHARGING_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether to vibrate for wireless charging events.
+         * @deprecated Use {@link android.provider.Settings.Secure#CHARGING_VIBRATION_ENABLED}
          * @hide
          */
+        @Deprecated
         public static final String CHARGING_VIBRATION_ENABLED = "charging_vibration_enabled";
 
         private static final Validator CHARGING_VIBRATION_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
@@ -11721,18 +11790,27 @@ public final class Settings {
         public static final String ZEN_MODE_CONFIG_ETAG = "zen_mode_config_etag";
 
         /**
-         * If 0, turning on dnd manually will last indefinitely.
-         * Else if non-negative, turning on dnd manually will last for this many minutes.
-         * Else (if negative), turning on dnd manually will surface a dialog that prompts
-         * user to specify a duration.
+         * @deprecated Use {@link android.provider.Settings.Secure#ZEN_DURATION} instead
          * @hide
          */
+        @Deprecated
         public static final String ZEN_DURATION = "zen_duration";
 
         private static final Validator ZEN_DURATION_VALIDATOR = ANY_INTEGER_VALIDATOR;
 
-        /** @hide */ public static final int ZEN_DURATION_PROMPT = -1;
-        /** @hide */ public static final int ZEN_DURATION_FOREVER = 0;
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#ZEN_DURATION_PROMPT} instead
+         * @hide
+         */
+        @Deprecated
+        public static final int ZEN_DURATION_PROMPT = -1;
+
+        /**
+         * @deprecated Use {@link android.provider.Settings.Secure#ZEN_DURATION_FOREVER} instead
+         * @hide
+         */
+        @Deprecated
+        public static final int ZEN_DURATION_FOREVER = 0;
 
         /**
          * Defines global heads up toggle.  One of HEADS_UP_OFF, HEADS_UP_ON.
@@ -12276,8 +12354,16 @@ public final class Settings {
         // Certain settings have been moved from global to the per-user secure namespace
         private static final HashSet<String> MOVED_TO_SECURE;
         static {
-            MOVED_TO_SECURE = new HashSet<>(1);
-            MOVED_TO_SECURE.add(Settings.Global.INSTALL_NON_MARKET_APPS);
+            MOVED_TO_SECURE = new HashSet<>(8);
+            MOVED_TO_SECURE.add(Global.INSTALL_NON_MARKET_APPS);
+            MOVED_TO_SECURE.add(Global.ZEN_DURATION);
+            MOVED_TO_SECURE.add(Global.SHOW_ZEN_UPGRADE_NOTIFICATION);
+            MOVED_TO_SECURE.add(Global.SHOW_ZEN_SETTINGS_SUGGESTION);
+            MOVED_TO_SECURE.add(Global.ZEN_SETTINGS_UPDATED);
+            MOVED_TO_SECURE.add(Global.ZEN_SETTINGS_SUGGESTION_VIEWED);
+            MOVED_TO_SECURE.add(Global.CHARGING_SOUNDS_ENABLED);
+            MOVED_TO_SECURE.add(Global.CHARGING_VIBRATION_ENABLED);
+
         }
 
         /** @hide */
@@ -12953,28 +13039,37 @@ public final class Settings {
          */
         public static final String SHOW_MUTE_IN_CRASH_DIALOG = "show_mute_in_crash_dialog";
 
+
         /**
          * If nonzero, will show the zen upgrade notification when the user toggles DND on/off.
          * @hide
+         * @deprecated - Use {@link android.provider.Settings.Secure#SHOW_ZEN_UPGRADE_NOTIFICATION}
          */
+        @Deprecated
         public static final String SHOW_ZEN_UPGRADE_NOTIFICATION = "show_zen_upgrade_notification";
 
         /**
          * If nonzero, will show the zen update settings suggestion.
          * @hide
+         * @deprecated - Use {@link android.provider.Settings.Secure#SHOW_ZEN_SETTINGS_SUGGESTION}
          */
+        @Deprecated
         public static final String SHOW_ZEN_SETTINGS_SUGGESTION = "show_zen_settings_suggestion";
 
         /**
          * If nonzero, zen has not been updated to reflect new changes.
+         * @deprecated - Use {@link android.provider.Settings.Secure#ZEN_SETTINGS_UPDATED}
          * @hide
          */
+        @Deprecated
         public static final String ZEN_SETTINGS_UPDATED = "zen_settings_updated";
 
         /**
-         * If nonzero, zen setting suggestion has beem viewed by user
+         * If nonzero, zen setting suggestion has been viewed by user
          * @hide
+         * @deprecated - Use {@link android.provider.Settings.Secure#ZEN_SETTINGS_SUGGESTION_VIEWED}
          */
+        @Deprecated
         public static final String ZEN_SETTINGS_SUGGESTION_VIEWED =
                 "zen_settings_suggestion_viewed";
 

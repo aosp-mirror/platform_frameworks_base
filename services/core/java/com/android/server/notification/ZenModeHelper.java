@@ -508,8 +508,8 @@ public class ZenModeHelper {
 
     public void setManualZenMode(int zenMode, Uri conditionId, String caller, String reason) {
         setManualZenMode(zenMode, conditionId, reason, caller, true /*setRingerMode*/);
-        Settings.Global.putInt(mContext.getContentResolver(), Global.SHOW_ZEN_SETTINGS_SUGGESTION,
-                0);
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.SHOW_ZEN_SETTINGS_SUGGESTION, 0);
     }
 
     private void setManualZenMode(int zenMode, Uri conditionId, String reason, String caller,
@@ -627,8 +627,8 @@ public class ZenModeHelper {
             }
 
             if (config.version < ZenModeConfig.XML_VERSION || forRestore) {
-                Settings.Global.putInt(mContext.getContentResolver(),
-                        Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 1);
+                Settings.Secure.putInt(mContext.getContentResolver(),
+                        Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 1);
 
                 // resets zen automatic rules to default
                 // if all prev auto rules were disabled on update
@@ -639,8 +639,8 @@ public class ZenModeHelper {
                 }
             } else {
                 // devices not restoring/upgrading already have updated zen settings
-                Settings.Global.putInt(mContext.getContentResolver(),
-                        Global.ZEN_SETTINGS_UPDATED, 1);
+                Settings.Secure.putInt(mContext.getContentResolver(),
+                        Settings.Secure.ZEN_SETTINGS_UPDATED, 1);
             }
             if (DEBUG) Log.d(TAG, reason);
             synchronized (mConfig) {
@@ -824,10 +824,10 @@ public class ZenModeHelper {
                 if (automaticRule.isAutomaticActive()) {
                     if (zenSeverity(automaticRule.zenMode) > zenSeverity(zen)) {
                         // automatic rule triggered dnd and user hasn't seen update dnd dialog
-                        if (Settings.Global.getInt(mContext.getContentResolver(),
-                                Global.ZEN_SETTINGS_SUGGESTION_VIEWED, 1) == 0) {
-                            Settings.Global.putInt(mContext.getContentResolver(),
-                                    Global.SHOW_ZEN_SETTINGS_SUGGESTION, 1);
+                        if (Settings.Secure.getInt(mContext.getContentResolver(),
+                                Settings.Secure.ZEN_SETTINGS_SUGGESTION_VIEWED, 1) == 0) {
+                            Settings.Secure.putInt(mContext.getContentResolver(),
+                                    Settings.Secure.SHOW_ZEN_SETTINGS_SUGGESTION, 1);
                         }
                         zen = automaticRule.zenMode;
                     }
@@ -1192,18 +1192,18 @@ public class ZenModeHelper {
                 && zen != Global.ZEN_MODE_OFF
                 && !isWatch
                 && Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0;
+                Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0;
 
         if (isWatch) {
             Settings.Global.putInt(mContext.getContentResolver(),
-                    Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
+                    Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
         }
 
         if (showNotification) {
             mNotificationManager.notify(TAG, SystemMessage.NOTE_ZEN_UPGRADE,
                     createZenUpgradeNotification());
-            Settings.Global.putInt(mContext.getContentResolver(),
-                    Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
         }
     }
 

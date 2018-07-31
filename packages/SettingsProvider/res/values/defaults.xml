@@ -217,4 +217,10 @@
 
     <!-- Default for Settings.System.VIBRATE_WHEN_RINGING -->
     <bool name="def_vibrate_when_ringing">false</bool>
+
+    <!-- Default for Settings.Secure.CHARGING_VIBRATION_ENABLED -->
+    <bool name="def_charging_vibration_enabled">true</bool>
+
+    <!-- Default for Settings.Secure.CHARGING_SOUNDS_ENABLED -->
+    <bool name="def_charging_sounds_enabled">true</bool>
 </resources>
