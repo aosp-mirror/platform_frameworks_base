@@ -177,5 +177,5 @@ message ProcessStatsProto {
 
     // Total time process has been running...  screen_state, memory_state, and process_state
     // will not be set.
-    optional State totalRunningState = 6;
+    optional State total_running_state = 6;
 }
