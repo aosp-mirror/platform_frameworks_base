@@ -6082,23 +6082,26 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void createInputConsumer(IBinder token, String name, InputChannel inputChannel) {
         synchronized (mWindowMap) {
-            mRoot.forAllDisplays(dc -> {
-                dc.getInputMonitor().createInputConsumer(token, name, inputChannel,
+            // TODO(b/112049699): Fix this for multiple displays. There is only one inputChannel
+            // here to accept the return value.
+            DisplayContent display = mRoot.getDisplayContent(Display.DEFAULT_DISPLAY);
+            if (display != null) {
+                display.getInputMonitor().createInputConsumer(token, name, inputChannel,
                         Binder.getCallingPid(), Binder.getCallingUserHandle());
-            });
+            }
         }
     }
 
     @Override
     public boolean destroyInputConsumer(String name) {
         synchronized (mWindowMap) {
-            AtomicBoolean retValue = new AtomicBoolean(true);
-            mRoot.forAllDisplays(dc -> {
-                if (!dc.getInputMonitor().destroyInputConsumer(name)) {
-                    retValue.set(false);
-                }
-            });
-            return retValue.get();
+            // TODO(b/112049699): Fix this for multiple displays. For consistency with
+            // createInputConsumer above.
+            DisplayContent display = mRoot.getDisplayContent(Display.DEFAULT_DISPLAY);
+            if (display != null) {
+                return display.getInputMonitor().destroyInputConsumer(name);
+            }
+            return false;
         }
     }
 
