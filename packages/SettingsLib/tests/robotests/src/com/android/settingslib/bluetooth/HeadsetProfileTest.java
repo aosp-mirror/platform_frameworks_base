@@ -2,18 +2,17 @@ package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
+import com.android.settingslib.testutils.shadow.ShadowBluetoothAdapter;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,12 +20,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadow.api.Shadow;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
+@Config(shadows = {ShadowBluetoothAdapter.class})
 public class HeadsetProfileTest {
 
-    @Mock
-    private LocalBluetoothAdapter mAdapter;
     @Mock
     private CachedBluetoothDeviceManager mDeviceManager;
     @Mock
@@ -39,19 +39,18 @@ public class HeadsetProfileTest {
     private BluetoothDevice mBluetoothDevice;
     private BluetoothProfile.ServiceListener mServiceListener;
     private HeadsetProfile mProfile;
+    private ShadowBluetoothAdapter mShadowBluetoothAdapter;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         Context context = spy(RuntimeEnvironment.application);
+        mShadowBluetoothAdapter = Shadow.extract(BluetoothAdapter.getDefaultAdapter());
 
-        doAnswer((invocation) -> {
-            mServiceListener = (BluetoothProfile.ServiceListener) invocation.getArguments()[1];
-            return null;
-        }).when(mAdapter).getProfileProxy(any(Context.class), any(), eq(BluetoothProfile.HEADSET));
         when(mCachedBluetoothDevice.getDevice()).thenReturn(mBluetoothDevice);
 
-        mProfile = new HeadsetProfile(context, mAdapter, mDeviceManager, mProfileManager);
+        mProfile = new HeadsetProfile(context, mDeviceManager, mProfileManager);
+        mServiceListener = mShadowBluetoothAdapter.getServiceListener();
         mServiceListener.onServiceConnected(BluetoothProfile.HEADSET, mService);
     }
 
