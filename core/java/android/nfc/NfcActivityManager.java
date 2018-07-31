@@ -16,6 +16,7 @@
 
 package android.nfc;
 
+import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.Application;
 import android.content.ContentProvider;
@@ -45,6 +46,7 @@ public final class NfcActivityManager extends IAppCallback.Stub
     static final String TAG = NfcAdapter.TAG;
     static final Boolean DBG = false;
 
+    @UnsupportedAppUsage
     final NfcAdapter mAdapter;
 
     // All objects in the lists are protected by this
