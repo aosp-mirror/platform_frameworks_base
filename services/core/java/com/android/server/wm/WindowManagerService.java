@@ -7090,19 +7090,24 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void dontOverrideDisplayInfo(int displayId) {
-        synchronized (mWindowMap) {
-            final DisplayContent dc = getDisplayContentOrCreate(displayId);
-            if (dc == null) {
-                throw new IllegalArgumentException(
-                        "Trying to register a non existent display.");
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mWindowMap) {
+                final DisplayContent dc = getDisplayContentOrCreate(displayId);
+                if (dc == null) {
+                    throw new IllegalArgumentException(
+                            "Trying to register a non existent display.");
+                }
+                // We usually set the override info in DisplayManager so that we get consistent
+                // values when displays are changing. However, we don't do this for displays that
+                // serve as containers for ActivityViews because we don't want letter-/pillar-boxing
+                // during resize.
+                dc.mShouldOverrideDisplayConfiguration = false;
+                mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(displayId,
+                        null /* info */);
             }
-            // We usually set the override info in DisplayManager so that we get consistent
-            // values when displays are changing. However, we don't do this for displays that
-            // serve as containers for ActivityViews because we don't want letter-/pillar-boxing
-            // during resize.
-            dc.mShouldOverrideDisplayConfiguration = false;
-            mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(displayId,
-                    null /* info */);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
