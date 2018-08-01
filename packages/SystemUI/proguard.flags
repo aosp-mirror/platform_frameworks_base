@@ -39,6 +39,6 @@
 -keep class ** extends androidx.preference.PreferenceFragment
 -keep class com.android.systemui.tuner.*
 -keep class com.android.systemui.plugins.** {
-    public protected *;
+    *;
 }
 -keep class androidx.core.app.CoreComponentFactory
