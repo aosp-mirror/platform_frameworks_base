@@ -158,7 +158,7 @@ public final class ProcessStats implements Parcelable {
     };
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 33;
+    private static final int PARCEL_VERSION = 34;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535454;
 
@@ -1483,7 +1483,7 @@ public final class ProcessStats implements Parcelable {
                             proc.dumpProcessState(pw, "        ", ALL_SCREEN_ADJ, ALL_MEM_ADJ,
                                     ALL_PROC_STATES, now);
                             proc.dumpPss(pw, "        ", ALL_SCREEN_ADJ, ALL_MEM_ADJ,
-                                    ALL_PROC_STATES);
+                                    ALL_PROC_STATES, now);
                             proc.dumpInternalLocked(pw, "        ", dumpAll);
                         }
                     } else {
@@ -1558,7 +1558,7 @@ public final class ProcessStats implements Parcelable {
                 int uid = uids.keyAt(iu);
                 numTotalProcs++;
                 final ProcessState proc = uids.valueAt(iu);
-                if (proc.hasAnyData()) {
+                if (!proc.hasAnyData()) {
                     continue;
                 }
                 if (!proc.isMultiPackage()) {
@@ -1587,7 +1587,7 @@ public final class ProcessStats implements Parcelable {
                         pw.print(" entries)"); pw.println(":");
                 proc.dumpProcessState(pw, "        ", ALL_SCREEN_ADJ, ALL_MEM_ADJ,
                         ALL_PROC_STATES, now);
-                proc.dumpPss(pw, "        ", ALL_SCREEN_ADJ, ALL_MEM_ADJ, ALL_PROC_STATES);
+                proc.dumpPss(pw, "        ", ALL_SCREEN_ADJ, ALL_MEM_ADJ, ALL_PROC_STATES, now);
                 proc.dumpInternalLocked(pw, "        ", dumpAll);
             }
         }
