@@ -234,24 +234,38 @@ public class BinderCallsStatsTest {
         assertEquals(0, callStats.maxCpuTimeMicros);
     }
 
+    private static class BinderWithGetTransactionName extends Binder {
+        public static String getDefaultTransactionName(int code) {
+            return "resolved";
+        }
+    }
+
     @Test
     public void testTransactionCodeResolved() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         bcs.setDetailedTracking(true);
-        Binder binder = new Binder() {
-            @Override
-            public String getTransactionName(int code) {
-                return "resolved";
-            }
-        };
+        Binder binder = new BinderWithGetTransactionName();
         CallSession callSession = bcs.callStarted(binder, 1);
         bcs.time += 10;
         bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
 
-        List<BinderCallsStats.CallStat> callStatsList =
-                new ArrayList(bcs.getUidEntries().get(TEST_UID).getCallStatsList());
-        assertEquals(1, callStatsList.get(0).transactionCode);
+        List<BinderCallsStats.ExportedCallStat> callStatsList =
+                bcs.getExportedCallStats();
         assertEquals("resolved", callStatsList.get(0).methodName);
+    }
+
+    @Test
+    public void testResolvingCodeDoesNotThrowWhenMethodNotPresent() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setDetailedTracking(true);
+        Binder binder = new Binder();
+        CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        List<BinderCallsStats.ExportedCallStat> callStatsList =
+                bcs.getExportedCallStats();
+        assertEquals("1", callStatsList.get(0).methodName);
     }
 
     @Test

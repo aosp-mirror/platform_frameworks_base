@@ -751,7 +751,7 @@ public class TaskStack extends WindowContainer<Task> implements
             // be inserted into is calculated properly in
             // {@link DisplayContent#findPositionForStack()} in both cases, we can just request that
             // the stack is put at top here.
-            mDisplayContent.positionStackAt(POSITION_TOP, this);
+            mDisplayContent.positionStackAt(POSITION_TOP, this, false /* includingParents */);
         }
     }
 

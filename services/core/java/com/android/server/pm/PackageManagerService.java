@@ -19565,7 +19565,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // If permission review is enabled and this is a legacy app, mark the
             // permission as requiring a review as this is the initial state.
             int flags = 0;
-            if (ps.pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
+            if (ps.pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.M && bp.isRuntime()) {
                 flags |= FLAG_PERMISSION_REVIEW_REQUIRED;
             }
             if (permissionsState.updatePermissionFlags(bp, userId, userSettableMask, flags)) {

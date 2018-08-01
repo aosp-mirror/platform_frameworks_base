@@ -1399,11 +1399,11 @@
     <!-- Content description which should be used for the fingerprint icon. -->
     <string name="fingerprint_icon_content_description">Fingerprint icon</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50] -->
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=70] -->
     <string name="permlab_manageFace">manage face authentication hardware</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=90] -->
     <string name="permdesc_manageFace">Allows the app to invoke methods to add and delete facial templates for use.</string>
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50] -->
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=70] -->
     <string name="permlab_useFaceAuthentication">use face authentication hardware</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=90] -->
     <string name="permdesc_useFaceAuthentication">Allows the app to use face authentication hardware for authentication</string>

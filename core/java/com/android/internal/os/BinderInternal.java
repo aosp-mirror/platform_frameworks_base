@@ -78,8 +78,6 @@ public class BinderInternal {
         public Class<? extends Binder> binderClass;
         // Binder transaction code.
         public int transactionCode;
-        // Binder transaction method name.
-        public String methodName;
         // CPU time at the beginning of the call.
         long cpuTimeStarted;
         // System time at the beginning of the call.

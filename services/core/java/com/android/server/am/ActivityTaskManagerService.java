@@ -2410,10 +2410,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public boolean isTopOfTask(IBinder token) {
         synchronized (mGlobalLock) {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
-            if (r == null) {
-                throw new IllegalArgumentException();
-            }
-            return r.getTask().getTopActivity() == r;
+            return r != null && r.getTask().getTopActivity() == r;
         }
     }
 

@@ -474,14 +474,13 @@ SkPaint* Tree::getPaint() {
 // Update the given paint with alpha and color filter. Return nullptr if no color filter is
 // specified and root alpha is 1. Otherwise, return updated paint.
 SkPaint* Tree::updatePaint(SkPaint* outPaint, TreeProperties* prop) {
-    if (prop->getRootAlpha() == 1.0f && prop->getColorFilter() == nullptr) {
-        return nullptr;
-    } else {
+    // HWUI always draws VD with bilinear filtering.
+    outPaint->setFilterQuality(kLow_SkFilterQuality);
+    if (prop->getRootAlpha() < 1.0f || prop->getColorFilter() != nullptr) {
         outPaint->setColorFilter(sk_ref_sp(prop->getColorFilter()));
-        outPaint->setFilterQuality(kLow_SkFilterQuality);
         outPaint->setAlpha(prop->getRootAlpha() * 255);
-        return outPaint;
     }
+    return outPaint;
 }
 
 Bitmap& Tree::getBitmapUpdateIfDirty() {

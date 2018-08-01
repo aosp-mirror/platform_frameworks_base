@@ -159,15 +159,19 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         onStackOrderChanged();
     }
 
-    void positionChildAtTop(ActivityStack stack) {
-        positionChildAt(stack, mStacks.size());
+    void positionChildAtTop(ActivityStack stack, boolean includingParents) {
+        positionChildAt(stack, mStacks.size(), includingParents);
     }
 
     void positionChildAtBottom(ActivityStack stack) {
-        positionChildAt(stack, 0);
+        positionChildAt(stack, 0, false /* includingParents */);
     }
 
     private void positionChildAt(ActivityStack stack, int position) {
+        positionChildAt(stack, position, false /* includingParents */);
+    }
+
+    private void positionChildAt(ActivityStack stack, int position, boolean includingParents) {
         // TODO: Keep in sync with WindowContainer.positionChildAt(), once we change that to adjust
         //       the position internally, also update the logic here
         mStacks.remove(stack);
@@ -179,7 +183,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         // we don't have to call WindowContainerController#positionChildAt() here.
         if (stack.getWindowContainerController() != null) {
             mWindowContainerController.positionChildAt(stack.getWindowContainerController(),
-                    insertPosition);
+                    insertPosition, includingParents);
         }
         onStackOrderChanged();
     }

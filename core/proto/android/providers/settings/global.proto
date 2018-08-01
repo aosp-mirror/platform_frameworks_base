@@ -745,7 +745,7 @@ message GlobalSettingsProto {
 
         optional SettingProto car_dock = 1;
         optional SettingProto car_undock = 2;
-        optional SettingProto charging_sounds_enabled = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        reserved 3; // Moved to secure settings Sound.charging_sounds_enabled
         optional SettingProto charging_started = 4;
         optional SettingProto desk_dock = 5;
         optional SettingProto desk_undock = 6;
@@ -941,12 +941,8 @@ message GlobalSettingsProto {
         optional SettingProto mode = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto mode_ringer_level = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto mode_config_etag = 3;
-        // If 0, turning on dnd manually will last indefinitely. Else if
-        // non-negative, turning on dnd manually will last for this many minutes.
-        // Else (if negative), turning on dnd manually will surface a dialog that
-        // prompts user to specify a duration.
-        optional SettingProto duration = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto show_zen_upgrade_notification = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        reserved 4; // Moved to secure settings Zen.duration
+        reserved 5; // Moved to secure settings Zen.show_zen_upgrade_notification
     }
     optional Zen zen = 138;
 

@@ -2943,7 +2943,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 170;
+            private static final int SETTINGS_VERSION = 171;
 
             private final int mUserId;
 
@@ -3603,7 +3603,8 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 156) {
-                    // Version 157: Set a default value for zen duration
+                    // Version 157: Set a default value for zen duration,
+                    // in version 169, zen duration is moved to secure settings
                     final SettingsState globalSettings = getGlobalSettingsLocked();
                     final Setting currentSetting = globalSettings.getSettingLocked(
                             Global.ZEN_DURATION);
@@ -3739,32 +3740,8 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 165) {
-                    // Version 165: Show zen settings suggestion and zen updated
-                    final SettingsState settings = getGlobalSettingsLocked();
-                    final Setting currentSetting = settings.getSettingLocked(
-                            Global.SHOW_ZEN_SETTINGS_SUGGESTION);
-                    if (currentSetting.isNull()) {
-                        settings.insertSettingLocked(
-                                Global.SHOW_ZEN_SETTINGS_SUGGESTION, "1",
-                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                    }
-
-                    final Setting currentUpdatedSetting = settings.getSettingLocked(
-                            Global.ZEN_SETTINGS_UPDATED);
-                    if (currentUpdatedSetting.isNull()) {
-                        settings.insertSettingLocked(
-                                Global.ZEN_SETTINGS_UPDATED, "0",
-                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                    }
-
-                    final Setting currentSettingSuggestionViewed = settings.getSettingLocked(
-                            Global.ZEN_SETTINGS_SUGGESTION_VIEWED);
-                    if (currentSettingSuggestionViewed.isNull()) {
-                        settings.insertSettingLocked(
-                                Global.ZEN_SETTINGS_SUGGESTION_VIEWED, "0",
-                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                    }
-
+                    // Version 165: MOVED: Show zen settings suggestion and zen updated settings
+                    // moved to secure settings and are set in version 169
                     currentVersion = 166;
                 }
 
@@ -3791,15 +3768,8 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 167) {
-                    // Version 167: by default, vibrate for wireless charging
-                    final SettingsState globalSettings = getGlobalSettingsLocked();
-                    final Setting currentSetting = globalSettings.getSettingLocked(
-                            Global.CHARGING_VIBRATION_ENABLED);
-                    if (currentSetting.isNull()) {
-                        globalSettings.insertSettingLocked(
-                                Global.CHARGING_VIBRATION_ENABLED, "1",
-                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                    }
+                    // Version 167: MOVED - Settings.Global.CHARGING_VIBRATION_ENABLED moved to
+                    // Settings.Secure.CHARGING_VIBRATION_ENABLED, set in version 170
                     currentVersion = 168;
                 }
 
@@ -3819,34 +3789,110 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 169) {
-                    // Version 169: by default, add STREAM_VOICE_CALL to list of streams that can
-                    // be muted.
-                    final SettingsState systemSettings = getSystemSettingsLocked(userId);
-                    final Setting currentSetting = systemSettings.getSettingLocked(
-                              Settings.System.MUTE_STREAMS_AFFECTED);
-                    if (!currentSetting.isNull()) {
-                        try {
-                            int currentSettingIntegerValue = Integer.parseInt(
-                                    currentSetting.getValue());
-                            if ((currentSettingIntegerValue
-                                 & (1 << AudioManager.STREAM_VOICE_CALL)) == 0) {
-                                systemSettings.insertSettingLocked(
-                                    Settings.System.MUTE_STREAMS_AFFECTED,
-                                    Integer.toString(
-                                        currentSettingIntegerValue
-                                        | (1 << AudioManager.STREAM_VOICE_CALL)),
-                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                            }
-                        } catch (NumberFormatException e) {
-                            // remove the setting in case it is not a valid integer
-                            Slog.w("Failed to parse integer value of MUTE_STREAMS_AFFECTED"
-                                   + "setting, removing setting", e);
-                            systemSettings.deleteSettingLocked(
-                                Settings.System.MUTE_STREAMS_AFFECTED);
-                        }
+                    // Version 169: Set the default value for Secure Settings ZEN_DURATION,
+                    // SHOW_ZEN_SETTINGS_SUGGESTION, ZEN_SETTINGS_UPDATE and
+                    // ZEN_SETTINGS_SUGGESTION_VIEWED
 
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+                    final Setting globalZenDuration = globalSettings.getSettingLocked(
+                            Global.ZEN_DURATION);
+
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting secureZenDuration = secureSettings.getSettingLocked(
+                            Secure.ZEN_DURATION);
+
+                    // ZEN_DURATION
+                    if (!globalZenDuration.isNull()) {
+                        secureSettings.insertSettingLocked(
+                                Secure.ZEN_DURATION, globalZenDuration.getValue(), null, false,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+
+                        // set global zen duration setting to null since it's deprecated
+                        globalSettings.insertSettingLocked(
+                                Global.ZEN_DURATION, null, null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    } else if (secureZenDuration.isNull()) {
+                        String defaultZenDuration = Integer.toString(getContext()
+                                .getResources().getInteger(R.integer.def_zen_duration));
+                        secureSettings.insertSettingLocked(
+                                Secure.ZEN_DURATION, defaultZenDuration, null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
                     }
+
+                    // SHOW_ZEN_SETTINGS_SUGGESTION
+                    final Setting currentShowZenSettingSuggestion = secureSettings.getSettingLocked(
+                            Secure.SHOW_ZEN_SETTINGS_SUGGESTION);
+                    if (currentShowZenSettingSuggestion.isNull()) {
+                        secureSettings.insertSettingLocked(
+                                Secure.SHOW_ZEN_SETTINGS_SUGGESTION, "1",
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    // ZEN_SETTINGS_UPDATED
+                    final Setting currentUpdatedSetting = secureSettings.getSettingLocked(
+                            Secure.ZEN_SETTINGS_UPDATED);
+                    if (currentUpdatedSetting.isNull()) {
+                        secureSettings.insertSettingLocked(
+                                Secure.ZEN_SETTINGS_UPDATED, "0",
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    // ZEN_SETTINGS_SUGGESTION_VIEWED
+                    final Setting currentSettingSuggestionViewed = secureSettings.getSettingLocked(
+                            Secure.ZEN_SETTINGS_SUGGESTION_VIEWED);
+                    if (currentSettingSuggestionViewed.isNull()) {
+                        secureSettings.insertSettingLocked(
+                                Secure.ZEN_SETTINGS_SUGGESTION_VIEWED, "0",
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
                     currentVersion = 170;
+                }
+
+                if (currentVersion == 170) {
+                    // Version 170: Set the default value for Secure Settings:
+                    // CHARGING_SOUNDS_ENABLED and CHARGING_VIBRATION_ENABLED
+
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+
+                    // CHARGING_SOUNDS_ENABLED
+                    final Setting globalChargingSoundEnabled = globalSettings.getSettingLocked(
+                            Global.CHARGING_SOUNDS_ENABLED);
+                    final Setting secureChargingSoundsEnabled = secureSettings.getSettingLocked(
+                            Secure.CHARGING_SOUNDS_ENABLED);
+
+                    if (!globalChargingSoundEnabled.isNull()) {
+                        secureSettings.insertSettingLocked(
+                                Secure.CHARGING_SOUNDS_ENABLED,
+                                globalChargingSoundEnabled.getValue(), null, false,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+
+                        // set global charging_sounds_enabled setting to null since it's deprecated
+                        globalSettings.insertSettingLocked(
+                                Global.CHARGING_SOUNDS_ENABLED, null, null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    } else if (secureChargingSoundsEnabled.isNull()) {
+                        String defChargingSoundsEnabled = getContext().getResources()
+                                .getBoolean(R.bool.def_charging_sounds_enabled) ? "1" : "0";
+                        secureSettings.insertSettingLocked(
+                                Secure.CHARGING_SOUNDS_ENABLED, defChargingSoundsEnabled, null,
+                                true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    // CHARGING_VIBRATION_ENABLED
+                    final Setting secureChargingVibrationEnabled = secureSettings.getSettingLocked(
+                            Secure.CHARGING_VIBRATION_ENABLED);
+
+                    if (secureChargingVibrationEnabled.isNull()) {
+                        String defChargingVibrationEnabled = getContext().getResources()
+                                .getBoolean(R.bool.def_charging_vibration_enabled) ? "1" : "0";
+                        secureSettings.insertSettingLocked(
+                                Secure.CHARGING_VIBRATION_ENABLED, defChargingVibrationEnabled,
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 171;
                 }
 
                 // vXXX: Add new settings above this point.

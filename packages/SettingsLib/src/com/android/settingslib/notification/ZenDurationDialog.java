@@ -24,7 +24,6 @@ import android.content.DialogInterface;
 import android.provider.Settings;
 import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
-import androidx.annotation.VisibleForTesting;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -41,6 +40,8 @@ import com.android.internal.policy.PhoneWindow;
 import com.android.settingslib.R;
 
 import java.util.Arrays;
+
+import androidx.annotation.VisibleForTesting;
 
 public class ZenDurationDialog {
     private static final int[] MINUTE_BUCKETS = ZenModeConfig.MINUTE_BUCKETS;
@@ -66,9 +67,9 @@ public class ZenDurationDialog {
     }
 
     public Dialog createDialog() {
-        int zenDuration = Settings.Global.getInt(
-                mContext.getContentResolver(), Settings.Global.ZEN_DURATION,
-                Settings.Global.ZEN_DURATION_FOREVER);
+        int zenDuration = Settings.Secure.getInt(
+                mContext.getContentResolver(), Settings.Secure.ZEN_DURATION,
+                Settings.Secure.ZEN_DURATION_FOREVER);
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(mContext)
                 .setTitle(R.string.zen_mode_duration_settings_title)
@@ -91,12 +92,12 @@ public class ZenDurationDialog {
     protected void updateZenDuration(int currZenDuration) {
         final int checkedRadioButtonId = mZenRadioGroup.getCheckedRadioButtonId();
 
-        int newZenDuration = Settings.Global.getInt(
-                mContext.getContentResolver(), Settings.Global.ZEN_DURATION,
-                Settings.Global.ZEN_DURATION_FOREVER);
+        int newZenDuration = Settings.Secure.getInt(
+                mContext.getContentResolver(), Settings.Secure.ZEN_DURATION,
+                Settings.Secure.ZEN_DURATION_FOREVER);
         switch (checkedRadioButtonId) {
             case FOREVER_CONDITION_INDEX:
-                newZenDuration = Settings.Global.ZEN_DURATION_FOREVER;
+                newZenDuration = Settings.Secure.ZEN_DURATION_FOREVER;
                 MetricsLogger.action(mContext,
                         MetricsProto.MetricsEvent.
                                 NOTIFICATION_ZEN_MODE_DURATION_FOREVER);
@@ -110,7 +111,7 @@ public class ZenDurationDialog {
                         newZenDuration);
                 break;
             case ALWAYS_ASK_CONDITION_INDEX:
-                newZenDuration = Settings.Global.ZEN_DURATION_PROMPT;
+                newZenDuration = Settings.Secure.ZEN_DURATION_PROMPT;
                 MetricsLogger.action(mContext,
                         MetricsProto.MetricsEvent.
                                 NOTIFICATION_ZEN_MODE_DURATION_PROMPT);
@@ -118,8 +119,8 @@ public class ZenDurationDialog {
         }
 
         if (currZenDuration != newZenDuration) {
-            Settings.Global.putInt(mContext.getContentResolver(),
-                    Settings.Global.ZEN_DURATION, newZenDuration);
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.ZEN_DURATION, newZenDuration);
         }
     }
 
