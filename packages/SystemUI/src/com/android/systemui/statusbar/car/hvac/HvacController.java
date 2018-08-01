@@ -147,7 +147,7 @@ public class HvacController {
                 return;
             }
             view.setTemp(mHvacManager.getFloatProperty(id, zone));
-        } catch (CarNotConnectedException e) {
+        } catch (Exception e) {
             view.setTemp(Float.NaN);
             Log.e(TAG, "Failed to get value from hvac service", e);
         }
