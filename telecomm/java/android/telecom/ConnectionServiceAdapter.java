@@ -255,6 +255,18 @@ final class ConnectionServiceAdapter implements DeathRecipient {
     }
 
     /**
+        * Resets the cdma connection time.
+        */
+    void resetConnectionTime(String callId) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.resetConnectionTime(callId, Log.getExternalSession());
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    /**
      * Indicates that the call no longer exists. Can be used with either a call or a conference
      * call.
      *
