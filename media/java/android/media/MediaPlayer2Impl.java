@@ -210,6 +210,22 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             @Override
             void process() {
                 stayAwake(true);
+
+                // TODO: remove this block when native code sends MEDIA_INFO_DATA_SOURCE_START
+                // when pipeline is created.
+                if (getState() == PLAYER_STATE_PREPARED) {
+                    final DataSourceDesc dsd;
+                    synchronized (mSrcLock) {
+                        dsd = mCurrentDSD;
+                    }
+                    synchronized (mEventCbLock) {
+                        for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
+                            cb.first.execute(() -> cb.second.onInfo(
+                                    MediaPlayer2Impl.this, dsd, MEDIA_INFO_DATA_SOURCE_START, 0));
+                        }
+                    }
+                }
+
                 _start();
             }
         });
@@ -246,6 +262,22 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             @Override
             void process() {
                 stayAwake(false);
+
+                // TODO: remove this block when native code allows prepared -> pause
+                // and sends MEDIA_INFO_DATA_SOURCE_START when pipeline is created.
+                if (getState() == PLAYER_STATE_PREPARED) {
+                    final DataSourceDesc dsd;
+                    synchronized (mSrcLock) {
+                        dsd = mCurrentDSD;
+                    }
+                    synchronized (mEventCbLock) {
+                        for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
+                            cb.first.execute(() -> cb.second.onInfo(
+                                    MediaPlayer2Impl.this, dsd, MEDIA_INFO_DATA_SOURCE_START, 0));
+                        }
+                    }
+                }
+
                 _pause();
             }
         });
@@ -888,23 +920,30 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private native void nativeHandleDataSourceCallback(
             boolean isCurrent, long srcId, Media2DataSource dataSource);
 
+    /**
+     * @return true if there is a next data source, false otherwise.
+     */
     // This function should be always called on |mHandlerThread|.
-    private void prepareNextDataSource() {
+    private boolean prepareNextDataSource() {
         if (Looper.myLooper() != mHandlerThread.getLooper()) {
             Log.e(TAG, "prepareNextDataSource: called on wrong looper");
+        }
+
+        boolean hasNextDSD;
+        synchronized (mSrcLock) {
+            hasNextDSD = (mNextDSDs != null && !mNextDSDs.isEmpty());
         }
 
         int state = getState();
         if (state == PLAYER_STATE_ERROR || state == PLAYER_STATE_IDLE) {
             // Current source has not been prepared yet.
-            return;
+            return hasNextDSD;
         }
 
         synchronized (mSrcLock) {
-            if (mNextDSDs == null || mNextDSDs.isEmpty()
-                    || mNextSourceState != NEXT_SOURCE_STATE_INIT) {
+            if (!hasNextDSD || mNextSourceState != NEXT_SOURCE_STATE_INIT) {
                 // There is no next source or it's in preparing or prepared state.
-                return;
+                return hasNextDSD;
             }
 
             try {
@@ -919,9 +958,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 // make a new SrcId to obsolete notification for previous one.
                 mNextSrcId = mSrcIdGenerator++;
                 mNextSourceState = NEXT_SOURCE_STATE_INIT;
-                prepareNextDataSource();
+                return prepareNextDataSource();
             }
         }
+        return hasNextDSD;
     }
 
     // This function should be always called on |mHandlerThread|.
@@ -930,40 +970,48 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             Log.e(TAG, "playNextDataSource: called on wrong looper");
         }
 
+        boolean hasNextDSD = false;
         synchronized (mSrcLock) {
-            if (mNextDSDs == null || mNextDSDs.isEmpty()) {
-                return;
-            }
+            if (mNextDSDs != null && !mNextDSDs.isEmpty()) {
+                hasNextDSD = true;
+                if (mNextSourceState == NEXT_SOURCE_STATE_PREPARED) {
+                    // Switch to next source only when it has been prepared.
+                    mCurrentDSD = mNextDSDs.get(0);
+                    mCurrentSrcId = mNextSrcId;
+                    mBufferedPercentageCurrent.set(mBufferedPercentageNext.get());
+                    mNextDSDs.remove(0);
+                    mNextSrcId = mSrcIdGenerator++;  // make it different from |mCurrentSrcId|
+                    mBufferedPercentageNext.set(0);
+                    mNextSourceState = NEXT_SOURCE_STATE_INIT;
 
-            if (mNextSourceState == NEXT_SOURCE_STATE_PREPARED) {
-                // Switch to next source only when it has been prepared.
-                mCurrentDSD = mNextDSDs.get(0);
-                mCurrentSrcId = mNextSrcId;
-                mBufferedPercentageCurrent.set(mBufferedPercentageNext.get());
-                mNextDSDs.remove(0);
-                mNextSrcId = mSrcIdGenerator++;  // make it different from |mCurrentSrcId|
-                mBufferedPercentageNext.set(0);
-                mNextSourceState = NEXT_SOURCE_STATE_INIT;
+                    long srcId = mCurrentSrcId;
+                    try {
+                        nativePlayNextDataSource(srcId);
+                    } catch (Exception e) {
+                        Message msg2 = mTaskHandler.obtainMessage(
+                                MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, MEDIA_ERROR_UNSUPPORTED, null);
+                        mTaskHandler.handleMessage(msg2, srcId);
+                        // Keep |mNextSourcePlayPending|
+                        hasNextDSD = prepareNextDataSource();
+                    }
+                    if (hasNextDSD) {
+                        stayAwake(true);
 
-                long srcId = mCurrentSrcId;
-                try {
-                    nativePlayNextDataSource(srcId);
-                } catch (Exception e) {
-                    Message msg2 = mTaskHandler.obtainMessage(
-                            MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, MEDIA_ERROR_UNSUPPORTED, null);
-                    mTaskHandler.handleMessage(msg2, srcId);
-                    // Keep |mNextSourcePlayPending|
-                    prepareNextDataSource();
-                    return;
+                        // Now a new current src is playing.
+                        // Wait for MEDIA_INFO_DATA_SOURCE_START to prepare next source.
+                        mNextSourcePlayPending = false;
+                    }
+                } else if (mNextSourceState == NEXT_SOURCE_STATE_INIT) {
+                    hasNextDSD = prepareNextDataSource();
                 }
-                stayAwake(true);
+            }
+        }
 
-                // Now a new current src is playing.
-                // Wait for MEDIA2_INFO_STARTED_AS_NEXT to prepare next source.
-                mNextSourcePlayPending = false;
-            } else {
-                if (mNextSourceState == NEXT_SOURCE_STATE_INIT) {
-                    prepareNextDataSource();
+        if (!hasNextDSD) {
+            synchronized (mEventCbLock) {
+                for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
+                    cb.first.execute(() -> cb.second.onInfo(
+                            MediaPlayer2Impl.this, null, MEDIA_INFO_DATA_SOURCE_LIST_END, 0));
                 }
             }
         }
@@ -2767,7 +2815,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     synchronized (mEventCbLock) {
                         for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
                             cb.first.execute(() -> cb.second.onInfo(
-                                    mMediaPlayer, dsd, MEDIA_INFO_PLAYBACK_COMPLETE, 0));
+                                    mMediaPlayer, dsd, MEDIA_INFO_DATA_SOURCE_END, 0));
                         }
                     }
                     stayAwake(false);
@@ -2869,7 +2917,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                         cb.first.execute(() -> cb.second.onError(
                                 mMediaPlayer, dsd, what, extra));
                         cb.first.execute(() -> cb.second.onInfo(
-                                mMediaPlayer, dsd, MEDIA_INFO_PLAYBACK_COMPLETE, 0));
+                                mMediaPlayer, dsd, MEDIA_INFO_DATA_SOURCE_END, 0));
                     }
                 }
                 stayAwake(false);
@@ -2878,8 +2926,15 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
             case MEDIA_INFO:
             {
+                synchronized (mEventCbLock) {
+                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
+                        cb.first.execute(() -> cb.second.onInfo(
+                                mMediaPlayer, dsd, what, extra));
+                    }
+                }
+
                 switch (msg.arg1) {
-                    case MEDIA_INFO_STARTED_AS_NEXT:
+                    case MEDIA_INFO_DATA_SOURCE_START:
                         if (isCurrentSrcId) {
                             prepareNextDataSource();
                         }
@@ -2915,13 +2970,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                             timeProvider.onBuffering(msg.arg1 == MEDIA_INFO_BUFFERING_START);
                         }
                         break;
-                }
-
-                synchronized (mEventCbLock) {
-                    for (Pair<Executor, EventCallback> cb : mEventCallbackRecords) {
-                        cb.first.execute(() -> cb.second.onInfo(
-                                mMediaPlayer, dsd, what, extra));
-                    }
                 }
                 // No real default action so far.
                 return;
@@ -3034,19 +3082,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }
 
         switch (what) {
-        case MEDIA_INFO:
-            if (arg1 == MEDIA_INFO_STARTED_AS_NEXT) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // this acquires the wakelock if needed, and sets the client side state
-                        mp.play();
-                    }
-                }).start();
-                Thread.yield();
-            }
-            break;
-
         case MEDIA_DRM_INFO:
             // We need to derive mDrmInfoImpl before prepare() returns so processing it here
             // before the notification is sent to TaskHandler below. TaskHandler runs in the

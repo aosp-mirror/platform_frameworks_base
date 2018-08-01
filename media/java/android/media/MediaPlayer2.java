@@ -1794,18 +1794,17 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
     public @interface MediaError {}
 
     /* Do not change these values without updating their counterparts
-     * in include/media/mediaplayer2.h!
+     * in include/media/MediaPlayer2Types.h!
      */
     /** Unspecified media player info.
      * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
     public static final int MEDIA_INFO_UNKNOWN = 1;
 
-    /** The player switched to this datas source because it is the
-     * next-to-be-played in the playlist.
+    /** The player just started the playback of this datas source.
      * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
-    public static final int MEDIA_INFO_STARTED_AS_NEXT = 2;
+    public static final int MEDIA_INFO_DATA_SOURCE_START = 2;
 
     /** The player just pushed the very first video frame for rendering.
      * @see android.media.MediaPlayer2.EventCallback#onInfo
@@ -1820,12 +1819,13 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
     /** The player just completed the playback of this data source.
      * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
-    public static final int MEDIA_INFO_PLAYBACK_COMPLETE = 5;
+    public static final int MEDIA_INFO_DATA_SOURCE_END = 5;
 
-    /** The player just completed the playback of the full playlist.
+    /** The player just completed the playback of all data sources set by {@link #setDataSource},
+     * {@link #setNextDataSource} and {@link #setNextDataSources}.
      * @see android.media.MediaPlayer2.EventCallback#onInfo
      */
-    public static final int MEDIA_INFO_PLAYLIST_END = 6;
+    public static final int MEDIA_INFO_DATA_SOURCE_LIST_END = 6;
 
     /** The player just prepared a data source.
      * @see android.media.MediaPlayer2.EventCallback#onInfo
@@ -1927,11 +1927,11 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
      */
     @IntDef(flag = false, prefix = "MEDIA_INFO", value = {
             MEDIA_INFO_UNKNOWN,
-            MEDIA_INFO_STARTED_AS_NEXT,
+            MEDIA_INFO_DATA_SOURCE_START,
             MEDIA_INFO_VIDEO_RENDERING_START,
             MEDIA_INFO_AUDIO_RENDERING_START,
-            MEDIA_INFO_PLAYBACK_COMPLETE,
-            MEDIA_INFO_PLAYLIST_END,
+            MEDIA_INFO_DATA_SOURCE_END,
+            MEDIA_INFO_DATA_SOURCE_LIST_END,
             MEDIA_INFO_PREPARED,
             MEDIA_INFO_VIDEO_TRACK_LAGGING,
             MEDIA_INFO_BUFFERING_START,
