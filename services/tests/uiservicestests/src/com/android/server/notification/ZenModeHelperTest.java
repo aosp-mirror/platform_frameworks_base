@@ -618,7 +618,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void testReadXml() throws Exception {
         setupZenConfig();
 
-        // automatic zen rule is enabled on upgrade so rules should not be overriden by default
+        // automatic zen rule is enabled on upgrade so rules should not be overriden to default
         ArrayMap<String, ZenModeConfig.ZenRule> enabledAutoRule = new ArrayMap<>();
         ZenModeConfig.ZenRule customRule = new ZenModeConfig.ZenRule();
         final ScheduleInfo weeknights = new ScheduleInfo();
@@ -756,7 +756,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void testReadXmlResetDefaultRules() throws Exception {
         setupZenConfig();
 
-        // no enabled automatic zen rule, so rules should be overriden by default rules
+        // no enabled automatic zen rules and no default rules
+        // so rules should be overriden by default rules
         mZenModeHelperSpy.mConfig.automaticRules = new ArrayMap<>();
 
         // set previous version
@@ -782,8 +783,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void testReadXmlAllDisabledRulesResetDefaultRules() throws Exception {
         setupZenConfig();
 
-        // all automatic zen rules are diabled on upgrade so rules should be overriden by default
-        // rules
+        // all automatic zen rules are diabled on upgrade (and default rules don't already exist)
+        // so rules should be overriden by default rules
         ArrayMap<String, ZenModeConfig.ZenRule> enabledAutoRule = new ArrayMap<>();
         ZenModeConfig.ZenRule customRule = new ZenModeConfig.ZenRule();
         final ScheduleInfo weeknights = new ScheduleInfo();
@@ -809,6 +810,108 @@ public class ZenModeHelperTest extends UiServiceTestCase {
             assertTrue(rules.containsKey(defaultId));
         }
         assertFalse(rules.containsKey("customRule"));
+
+        setupZenConfigMaintained();
+    }
+
+    @Test
+    public void testReadXmlOnlyOneDefaultRuleExists() throws Exception {
+        setupZenConfig();
+
+        // all automatic zen rules are disabled on upgrade and only one default rule exists
+        // so rules should be overriden to the default rules
+        ArrayMap<String, ZenModeConfig.ZenRule> automaticRules = new ArrayMap<>();
+        ZenModeConfig.ZenRule customRule = new ZenModeConfig.ZenRule();
+        final ScheduleInfo customRuleInfo = new ScheduleInfo();
+        customRule.enabled = false;
+        customRule.name = "Custom Rule";
+        customRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        customRule.conditionId = ZenModeConfig.toScheduleConditionId(customRuleInfo);
+        automaticRules.put("customRule", customRule);
+
+        ZenModeConfig.ZenRule defaultScheduleRule = new ZenModeConfig.ZenRule();
+        final ScheduleInfo defaultScheduleRuleInfo = new ScheduleInfo();
+        defaultScheduleRule.enabled = false;
+        defaultScheduleRule.name = "Default Schedule Rule";
+        defaultScheduleRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        defaultScheduleRule.conditionId = ZenModeConfig.toScheduleConditionId(
+                defaultScheduleRuleInfo);
+        defaultScheduleRule.id = ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID;
+        automaticRules.put(ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID, defaultScheduleRule);
+
+        mZenModeHelperSpy.mConfig.automaticRules = automaticRules;
+
+        // set previous version
+        ByteArrayOutputStream baos = writeXmlAndPurge(false, 5);
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), null);
+        parser.nextTag();
+        mZenModeHelperSpy.readXml(parser, false);
+
+        // check default rules
+        ArrayMap<String, ZenModeConfig.ZenRule> rules = mZenModeHelperSpy.mConfig.automaticRules;
+        assertTrue(rules.size() != 0);
+        for (String defaultId : ZenModeConfig.DEFAULT_RULE_IDS) {
+            assertTrue(rules.containsKey(defaultId));
+        }
+        assertFalse(rules.containsKey("customRule"));
+
+        setupZenConfigMaintained();
+    }
+
+
+    @Test
+    public void testReadXmlDefaultRulesExist() throws Exception {
+        setupZenConfig();
+
+        // Default rules exist so rules should not be overridden by defaults
+        ArrayMap<String, ZenModeConfig.ZenRule> automaticRules = new ArrayMap<>();
+        ZenModeConfig.ZenRule customRule = new ZenModeConfig.ZenRule();
+        final ScheduleInfo customRuleInfo = new ScheduleInfo();
+        customRule.enabled = false;
+        customRule.name = "Custom Rule";
+        customRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        customRule.conditionId = ZenModeConfig.toScheduleConditionId(customRuleInfo);
+        automaticRules.put("customRule", customRule);
+
+        ZenModeConfig.ZenRule defaultScheduleRule = new ZenModeConfig.ZenRule();
+        final ScheduleInfo defaultScheduleRuleInfo = new ScheduleInfo();
+        defaultScheduleRule.enabled = false;
+        defaultScheduleRule.name = "Default Schedule Rule";
+        defaultScheduleRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        defaultScheduleRule.conditionId = ZenModeConfig.toScheduleConditionId(
+                defaultScheduleRuleInfo);
+        defaultScheduleRule.id = ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID;
+        automaticRules.put(ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID, defaultScheduleRule);
+
+        ZenModeConfig.ZenRule defaultEventRule = new ZenModeConfig.ZenRule();
+        final ScheduleInfo defaultEventRuleInfo = new ScheduleInfo();
+        defaultEventRule.enabled = false;
+        defaultEventRule.name = "Default Event Rule";
+        defaultEventRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        defaultEventRule.conditionId = ZenModeConfig.toScheduleConditionId(
+                defaultEventRuleInfo);
+        defaultEventRule.id = ZenModeConfig.EVENTS_DEFAULT_RULE_ID;
+        automaticRules.put(ZenModeConfig.EVENTS_DEFAULT_RULE_ID, defaultEventRule);
+
+        mZenModeHelperSpy.mConfig.automaticRules = automaticRules;
+
+        // set previous version
+        ByteArrayOutputStream baos = writeXmlAndPurge(false, 5);
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), null);
+        parser.nextTag();
+        mZenModeHelperSpy.readXml(parser, false);
+
+        // check default rules
+        ArrayMap<String, ZenModeConfig.ZenRule> rules = mZenModeHelperSpy.mConfig.automaticRules;
+        assertTrue(rules.size() != 0);
+        for (String defaultId : ZenModeConfig.DEFAULT_RULE_IDS) {
+            assertTrue(rules.containsKey(defaultId));
+        }
+        assertTrue(rules.containsKey("customRule"));
 
         setupZenConfigMaintained();
     }
