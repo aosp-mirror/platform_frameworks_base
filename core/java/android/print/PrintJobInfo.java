@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -549,6 +550,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public PrintDocumentInfo getDocumentInfo() {
         return mDocumentInfo;
     }
@@ -630,6 +632,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public Bundle getAdvancedOptions() {
         return mAdvancedOptions;
     }
