@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -53,8 +54,11 @@ public class AudioState implements Parcelable {
     private static final int ROUTE_ALL = ROUTE_EARPIECE | ROUTE_BLUETOOTH | ROUTE_WIRED_HEADSET |
             ROUTE_SPEAKER;
 
+    @UnsupportedAppUsage
     private final boolean isMuted;
+    @UnsupportedAppUsage
     private final int route;
+    @UnsupportedAppUsage
     private final int supportedRouteMask;
 
     public AudioState(boolean muted, int route, int supportedRouteMask) {
