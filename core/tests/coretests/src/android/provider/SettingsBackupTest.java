@@ -383,6 +383,8 @@ public class SettingsBackupTest {
                     Settings.Global.SETUP_PREPAID_DATA_SERVICE_URL,
                     Settings.Global.SETUP_PREPAID_DETECTION_REDIR_HOST,
                     Settings.Global.SETUP_PREPAID_DETECTION_TARGET_URL,
+                    Settings.Global.SETTINGS_USE_EXTERNAL_PROVIDER_API,
+                    Settings.Global.SETTINGS_USE_PSD_API,
                     Settings.Global.SHORTCUT_MANAGER_CONSTANTS,
                     Settings.Global.SHOW_FIRST_CRASH_DIALOG,
                     Settings.Global.SHOW_MUTE_IN_CRASH_DIALOG,
@@ -705,3 +707,4 @@ public class SettingsBackupTest {
     }
 
 }
+
