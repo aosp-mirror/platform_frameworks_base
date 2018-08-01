@@ -80,30 +80,22 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
     @Override
     public CallSession callStarted(Binder binder, int code) {
-        return callStarted(binder.getClass(), code);
-    }
-
-    private CallSession callStarted(Class<? extends Binder> binderClass, int code) {
-        CallSession s = mCallSessionsPool.poll();
-        if (s == null) {
-            s = new CallSession();
-        }
-
-        s.binderClass = binderClass;
+        final CallSession s = obtainCallSession();
+        s.binderClass = binder.getClass();
         s.transactionCode = code;
         s.exceptionThrown = false;
         s.cpuTimeStarted = -1;
         s.timeStarted = -1;
-
-        synchronized (mLock) {
-            if (!mDetailedTracking && !shouldTrackCall()) {
-                return s;
-            }
-
+        if (mDetailedTracking || shouldRecordDetailedData()) {
             s.cpuTimeStarted = getThreadTimeMicro();
             s.timeStarted = getElapsedRealtimeMicro();
         }
         return s;
+    }
+
+    private CallSession obtainCallSession() {
+        CallSession s = mCallSessionsPool.poll();
+        return s == null ? new CallSession() : s;
     }
 
     @Override
@@ -134,13 +126,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
         final int callingUid = getCallingUid();
 
         synchronized (mLock) {
-            UidEntry uidEntry = mUidEntries.get(callingUid);
-            if (uidEntry == null) {
-                uidEntry = new UidEntry(callingUid);
-                mUidEntries.put(callingUid, uidEntry);
-            }
+            final UidEntry uidEntry = getUidEntry(callingUid);
             uidEntry.callCount++;
-            CallStat callStat = uidEntry.getOrCreate(s.binderClass, s.transactionCode);
+            final CallStat callStat = uidEntry.getOrCreate(s.binderClass, s.transactionCode);
             callStat.callCount++;
 
             if (recordCall) {
@@ -164,6 +152,15 @@ public class BinderCallsStats implements BinderInternal.Observer {
         }
     }
 
+    private UidEntry getUidEntry(int uid) {
+        UidEntry uidEntry = mUidEntries.get(uid);
+        if (uidEntry == null) {
+            uidEntry = new UidEntry(uid);
+            mUidEntries.put(uid, uidEntry);
+        }
+        return uidEntry;
+    }
+
     @Override
     public void callThrewException(@Nullable CallSession s, Exception exception) {
         if (s == null) {
@@ -176,7 +173,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 if (mExceptionCounts.size() >= MAX_EXCEPTION_COUNT_SIZE) {
                     className = EXCEPTION_COUNT_OVERFLOW_NAME;
                 }
-                Integer count = mExceptionCounts.get(className);
+                final Integer count = mExceptionCounts.get(className);
                 mExceptionCounts.put(className, count == null ? 1 : count + 1);
             }
         } catch (RuntimeException e) {
@@ -219,9 +216,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
         ArrayList<ExportedCallStat> resultCallStats = new ArrayList<>();
         synchronized (mLock) {
-            int uidEntriesSize = mUidEntries.size();
+            final int uidEntriesSize = mUidEntries.size();
             for (int entryIdx = 0; entryIdx < uidEntriesSize; entryIdx++){
-                UidEntry entry = mUidEntries.valueAt(entryIdx);
+                final UidEntry entry = mUidEntries.valueAt(entryIdx);
                 for (CallStat stat : entry.getCallStatsList()) {
                     ExportedCallStat exported = new ExportedCallStat();
                     exported.uid = entry.uid;
@@ -294,9 +291,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
         pw.print("Start time: ");
         pw.println(DateFormat.format("yyyy-MM-dd HH:mm:ss", mStartTime));
         pw.println("Sampling interval period: " + mPeriodicSamplingInterval);
-        List<UidEntry> entries = new ArrayList<>();
+        final List<UidEntry> entries = new ArrayList<>();
 
-        int uidEntriesSize = mUidEntries.size();
+        final int uidEntriesSize = mUidEntries.size();
         for (int i = 0; i < uidEntriesSize; i++) {
             UidEntry e = mUidEntries.valueAt(i);
             entries.add(e);
@@ -306,16 +303,16 @@ public class BinderCallsStats implements BinderInternal.Observer {
         }
 
         entries.sort(Comparator.<UidEntry>comparingDouble(value -> value.cpuTimeMicros).reversed());
-        String datasetSizeDesc = verbose ? "" : "(top 90% by cpu time) ";
-        StringBuilder sb = new StringBuilder();
-        List<UidEntry> topEntries = verbose ? entries
+        final String datasetSizeDesc = verbose ? "" : "(top 90% by cpu time) ";
+        final StringBuilder sb = new StringBuilder();
+        final List<UidEntry> topEntries = verbose ? entries
                 : getHighestValues(entries, value -> value.cpuTimeMicros, 0.9);
         pw.println("Per-UID raw data " + datasetSizeDesc
                 + "(package/uid, call_desc, cpu_time_micros, max_cpu_time_micros, "
                 + "latency_time_micros, max_latency_time_micros, exception_count, "
                 + "max_request_size_bytes, max_reply_size_bytes, recorded_call_count, "
                 + "call_count):");
-        List<ExportedCallStat> exportedCallStats = getExportedCallStats();
+        final List<ExportedCallStat> exportedCallStats = getExportedCallStats();
         exportedCallStats.sort(BinderCallsStats::compareByCpuDesc);
         for (ExportedCallStat e : exportedCallStats) {
             sb.setLength(0);
@@ -337,7 +334,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
         pw.println();
         pw.println("Per-UID Summary " + datasetSizeDesc
                 + "(cpu_time, % of total cpu_time, recorded_call_count, call_count, package/uid):");
-        List<UidEntry> summaryEntries = verbose ? entries
+        final List<UidEntry> summaryEntries = verbose ? entries
                 : getHighestValues(entries, value -> value.cpuTimeMicros, 0.9);
         for (UidEntry entry : summaryEntries) {
             String uidStr = uidToString(entry.uid, appIdToPkgNameMap);
@@ -352,7 +349,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
         pw.println();
 
         pw.println("Exceptions thrown (exception_count, class_name):");
-        List<Pair<String, Integer>> exceptionEntries = new ArrayList<>();
+        final List<Pair<String, Integer>> exceptionEntries = new ArrayList<>();
         // We cannot use new ArrayList(Collection) constructor because MapCollections does not
         // implement toArray method.
         mExceptionCounts.entrySet().iterator().forEachRemaining(
@@ -369,9 +366,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     private static String uidToString(int uid, Map<Integer, String> pkgNameMap) {
-        int appId = UserHandle.getAppId(uid);
-        String pkgName = pkgNameMap == null ? null : pkgNameMap.get(appId);
-        String uidStr = UserHandle.formatUid(uid);
+        final int appId = UserHandle.getAppId(uid);
+        final String pkgName = pkgNameMap == null ? null : pkgNameMap.get(appId);
+        final String uidStr = UserHandle.formatUid(uid);
         return pkgName == null ? uidStr : pkgName + '/' + uidStr;
     }
 
@@ -387,7 +384,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
         return SystemClock.elapsedRealtimeNanos() / 1000;
     }
 
-    private boolean shouldTrackCall() {
+    private boolean shouldRecordDetailedData() {
         return mRandom.nextInt() % mPeriodicSamplingInterval == 0;
     }
 
@@ -481,7 +478,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 return true;
             }
 
-            CallStatKey key = (CallStatKey) o;
+            final CallStatKey key = (CallStatKey) o;
             return transactionCode == key.transactionCode
                     && (binderClass.equals(key.binderClass));
         }
