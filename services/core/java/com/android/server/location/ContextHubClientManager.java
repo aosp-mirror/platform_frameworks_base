@@ -45,7 +45,7 @@ import java.util.function.Consumer;
     /*
      * Local flag to enable debug logging.
      */
-    private static final boolean DEBUG_LOG_ENABLED = true;
+    private static final boolean DEBUG_LOG_ENABLED = false;
 
     /*
      * The context of the service.
