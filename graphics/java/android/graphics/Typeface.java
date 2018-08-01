@@ -25,6 +25,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.graphics.fonts.FontVariationAxis;
 import android.net.Uri;
@@ -93,6 +94,7 @@ public class Typeface {
     /** The NORMAL style of the default monospace typeface. */
     public static final Typeface MONOSPACE;
 
+    @UnsupportedAppUsage
     static Typeface[] sDefaults;
 
     /**
@@ -119,12 +121,15 @@ public class Typeface {
     private static final Object sDynamicCacheLock = new Object();
 
     static Typeface sDefaultTypeface;
+    @UnsupportedAppUsage
     static final Map<String, Typeface> sSystemFontMap;
+    @UnsupportedAppUsage
     static final Map<String, FontFamily[]> sSystemFallbackMap;
 
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public long native_instance;
 
     /** @hide */
@@ -139,6 +144,7 @@ public class Typeface {
     public static final int BOLD_ITALIC = 3;
     /** @hide */ public static final int STYLE_MASK = 0x03;
 
+    @UnsupportedAppUsage
     private @Style int mStyle = 0;
 
     /**
@@ -162,6 +168,7 @@ public class Typeface {
     private int[] mSupportedAxes;
     private static final int[] EMPTY_AXES = {};
 
+    @UnsupportedAppUsage
     private static void setDefault(Typeface t) {
         sDefaultTypeface = t;
         nativeSetDefault(t.native_instance);
@@ -891,6 +898,7 @@ public class Typeface {
      *
      * @param families array of font families
      */
+    @UnsupportedAppUsage
     private static Typeface createFromFamilies(FontFamily[] families) {
         long[] ptrArray = new long[families.length];
         for (int i = 0; i < families.length; i++) {
@@ -904,6 +912,7 @@ public class Typeface {
      * This method is used by supportlib-v27.
      * TODO: Remove private API use in supportlib: http://b/72665240
      */
+    @UnsupportedAppUsage
     private static Typeface createFromFamiliesWithDefault(FontFamily[] families, int weight,
                 int italic) {
         return createFromFamiliesWithDefault(families, DEFAULT_FAMILY, weight, italic);
@@ -922,6 +931,7 @@ public class Typeface {
      *               closest to the regular weight and upright font is used.
      * @param families array of font families
      */
+    @UnsupportedAppUsage
     private static Typeface createFromFamiliesWithDefault(FontFamily[] families,
                 String fallbackName, int weight, int italic) {
         FontFamily[] fallback = sSystemFallbackMap.get(fallbackName);
@@ -939,6 +949,7 @@ public class Typeface {
     }
 
     // don't allow clients to call this directly
+    @UnsupportedAppUsage
     private Typeface(long ni) {
         if (ni == 0) {
             throw new RuntimeException("native typeface cannot be made");
@@ -1197,7 +1208,9 @@ public class Typeface {
     // TODO: clean up: change List<FontVariationAxis> to FontVariationAxis[]
     private static native long nativeCreateFromTypefaceWithVariation(
             long native_instance, List<FontVariationAxis> axes);
+    @UnsupportedAppUsage
     private static native long nativeCreateWeightAlias(long native_instance, int weight);
+    @UnsupportedAppUsage
     private static native long nativeCreateFromArray(long[] familyArray, int weight, int italic);
     private static native int[] nativeGetSupportedAxes(long native_instance);
 

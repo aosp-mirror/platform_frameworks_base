@@ -16,6 +16,7 @@ package android.graphics.drawable;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.ComplexColor;
@@ -321,6 +322,7 @@ public class VectorDrawable extends Drawable {
 
     private VectorDrawableState mVectorState;
 
+    @UnsupportedAppUsage
     private PorterDuffColorFilter mTintFilter;
     private ColorFilter mColorFilter;
 
@@ -389,6 +391,7 @@ public class VectorDrawable extends Drawable {
         mMutated = false;
     }
 
+    @UnsupportedAppUsage
     Object getTargetByName(String name) {
         return mVectorState.mVGTargetsMap.get(name);
     }
@@ -867,6 +870,7 @@ public class VectorDrawable extends Drawable {
         return super.getChangingConfigurations() | mVectorState.getChangingConfigurations();
     }
 
+    @UnsupportedAppUsage
     void setAllowCaching(boolean allowCaching) {
         nSetAllowCaching(mVectorState.getNativeRenderer(), allowCaching);
     }
@@ -1498,6 +1502,7 @@ public class VectorDrawable extends Drawable {
         }
 
         @SuppressWarnings("unused")
+        @UnsupportedAppUsage
         public void setRotation(float rotation) {
             if (isTreeValid()) {
                 nSetRotation(mNativePtr, rotation);
@@ -1510,6 +1515,7 @@ public class VectorDrawable extends Drawable {
         }
 
         @SuppressWarnings("unused")
+        @UnsupportedAppUsage
         public void setPivotX(float pivotX) {
             if (isTreeValid()) {
                 nSetPivotX(mNativePtr, pivotX);
@@ -1522,6 +1528,7 @@ public class VectorDrawable extends Drawable {
         }
 
         @SuppressWarnings("unused")
+        @UnsupportedAppUsage
         public void setPivotY(float pivotY) {
             if (isTreeValid()) {
                 nSetPivotY(mNativePtr, pivotY);
@@ -1558,6 +1565,7 @@ public class VectorDrawable extends Drawable {
         }
 
         @SuppressWarnings("unused")
+        @UnsupportedAppUsage
         public void setTranslateX(float translateX) {
             if (isTreeValid()) {
                 nSetTranslateX(mNativePtr, translateX);
@@ -1570,6 +1578,7 @@ public class VectorDrawable extends Drawable {
         }
 
         @SuppressWarnings("unused")
+        @UnsupportedAppUsage
         public void setTranslateY(float translateY) {
             if (isTreeValid()) {
                 nSetTranslateY(mNativePtr, translateY);

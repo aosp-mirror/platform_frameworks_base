@@ -15,6 +15,7 @@
 
 package android.graphics;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 
 import java.io.FileDescriptor;
@@ -165,6 +166,7 @@ public final class BitmapRegionDecoder {
 
         This can be called from JNI code.
     */
+    @UnsupportedAppUsage
     private BitmapRegionDecoder(long decoder) {
         mNativeBitmapRegionDecoder = decoder;
         mRecycled = false;
@@ -267,6 +269,7 @@ public final class BitmapRegionDecoder {
     private static native int nativeGetHeight(long lbm);
     private static native void nativeClean(long lbm);
 
+    @UnsupportedAppUsage
     private static native BitmapRegionDecoder nativeNewInstance(
             byte[] data, int offset, int length, boolean isShareable);
     private static native BitmapRegionDecoder nativeNewInstance(

@@ -28,6 +28,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
@@ -1856,6 +1857,7 @@ public final class ImageDecoder implements AutoCloseable {
      * Private method called by JNI.
      */
     @SuppressWarnings("unused")
+    @UnsupportedAppUsage
     private int postProcessAndRelease(@NonNull Canvas canvas) {
         try {
             return mPostProcessor.onPostProcess(canvas);
