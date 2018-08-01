@@ -19,6 +19,8 @@ package android.service.notification;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -34,6 +36,22 @@ import java.util.List;
 
 /**
  * A service that helps the user manage notifications.
+ * <p>
+ * Only one notification assistant can be active at a time. Unlike notification listener services,
+ * assistant services can additionally modify certain aspects about notifications
+ * (see {@link Adjustment}) before they are posted.
+ *<p>
+ * A note about managed profiles: Unlike {@link NotificationListenerService listener services},
+ * NotificationAssistantServices are allowed to run in managed profiles
+ * (see {@link DevicePolicyManager#isManagedProfile(ComponentName)}), so they can access the
+ * information they need to create good {@link Adjustment adjustments}. To maintain the contract
+ * with {@link NotificationListenerService}, an assistant service will receive all of the
+ * callbacks from {@link NotificationListenerService} for the current user, managed profiles of
+ * that user, and ones that affect all users. However,
+ * {@link #onNotificationEnqueued(StatusBarNotification)} will only be called for notifications
+ * sent to the current user, and {@link Adjustment adjuments} will only be accepted for the
+ * current user.
+ *
  * @hide
  */
 @SystemApi

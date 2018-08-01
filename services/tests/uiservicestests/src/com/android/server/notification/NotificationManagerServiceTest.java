@@ -36,6 +36,10 @@ import static android.content.pm.PackageManager.FEATURE_WATCH;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.os.Build.VERSION_CODES.P;
+import static android.service.notification.NotificationListenerService.Ranking
+        .USER_SENTIMENT_NEGATIVE;
+import static android.service.notification.NotificationListenerService.Ranking
+        .USER_SENTIMENT_NEUTRAL;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -50,7 +54,6 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -84,7 +87,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -97,7 +99,6 @@ import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.service.notification.Adjustment;
-import android.service.notification.INotificationListener;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.service.notification.NotifyingApp;
@@ -2396,16 +2397,81 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testUserSentimentChangeTriggersUpdate() throws Exception {
+    public void testApplyAdjustmentMultiUser() throws Exception {
         final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
         mService.addNotification(r);
         NotificationManagerService.WorkerHandler handler = mock(
                 NotificationManagerService.WorkerHandler.class);
         mService.setHandler(handler);
 
+        when(mAssistants.isSameUser(eq(null), anyInt())).thenReturn(false);
+
         Bundle signals = new Bundle();
         signals.putInt(Adjustment.KEY_USER_SENTIMENT,
-                NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
+                USER_SENTIMENT_NEGATIVE);
+        Adjustment adjustment = new Adjustment(
+                r.sbn.getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
+        mBinderService.applyAdjustmentFromAssistant(null, adjustment);
+
+        waitForIdle();
+
+        verify(handler, timeout(300).times(0)).scheduleSendRankingUpdate();
+    }
+
+    @Test
+    public void testApplyEnqueuedAdjustmentFromAssistant_singleUser() throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addEnqueuedNotification(r);
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(eq(null), anyInt())).thenReturn(true);
+
+        Bundle signals = new Bundle();
+        signals.putInt(Adjustment.KEY_USER_SENTIMENT,
+                USER_SENTIMENT_NEGATIVE);
+        Adjustment adjustment = new Adjustment(
+                r.sbn.getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
+        mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
+
+        assertEquals(USER_SENTIMENT_NEGATIVE, r.getUserSentiment());
+    }
+
+    @Test
+    public void testApplyEnqueuedAdjustmentFromAssistant_crossUser() throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addEnqueuedNotification(r);
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(eq(null), anyInt())).thenReturn(false);
+
+        Bundle signals = new Bundle();
+        signals.putInt(Adjustment.KEY_USER_SENTIMENT,
+                USER_SENTIMENT_NEGATIVE);
+        Adjustment adjustment = new Adjustment(
+                r.sbn.getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
+        mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
+
+        assertEquals(USER_SENTIMENT_NEUTRAL, r.getUserSentiment());
+
+        waitForIdle();
+
+        verify(handler, timeout(300).times(0)).scheduleSendRankingUpdate();
+    }
+
+    @Test
+    public void testUserSentimentChangeTriggersUpdate() throws Exception {
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(r);
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(eq(null), anyInt())).thenReturn(true);
+
+        Bundle signals = new Bundle();
+        signals.putInt(Adjustment.KEY_USER_SENTIMENT,
+                USER_SENTIMENT_NEGATIVE);
         Adjustment adjustment = new Adjustment(
                 r.sbn.getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
         mBinderService.applyAdjustmentFromAssistant(null, adjustment);
@@ -2422,10 +2488,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationManagerService.WorkerHandler handler = mock(
                 NotificationManagerService.WorkerHandler.class);
         mService.setHandler(handler);
+        when(mAssistants.isSameUser(eq(null), anyInt())).thenReturn(true);
 
         Bundle signals = new Bundle();
         signals.putInt(Adjustment.KEY_USER_SENTIMENT,
-                NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
+                USER_SENTIMENT_NEGATIVE);
         Adjustment adjustment = new Adjustment(
                 r.sbn.getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
         mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
@@ -2442,15 +2509,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationManagerService.WorkerHandler handler = mock(
                 NotificationManagerService.WorkerHandler.class);
         mService.setHandler(handler);
+        when(mAssistants.isSameUser(eq(null), anyInt())).thenReturn(true);
 
         Bundle signals = new Bundle();
         signals.putInt(Adjustment.KEY_USER_SENTIMENT,
-                NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
+                USER_SENTIMENT_NEGATIVE);
         Adjustment adjustment = new Adjustment(
                 r.sbn.getPackageName(), r.getKey(), signals, "", r.getUser().getIdentifier());
         mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
 
-        assertEquals(NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE,
+        assertEquals(USER_SENTIMENT_NEGATIVE,
                 r.getUserSentiment());
     }
 
