@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -117,6 +118,7 @@ public final class ParcelableCall implements Parcelable {
     }
 
     /** The unique ID of the call. */
+    @UnsupportedAppUsage
     public String getId() {
         return mId;
     }
@@ -130,6 +132,7 @@ public final class ParcelableCall implements Parcelable {
      * Reason for disconnection, as described by {@link android.telecomm.DisconnectCause}. Valid
      * when call state is {@link CallState#DISCONNECTED}.
      */
+    @UnsupportedAppUsage
     public DisconnectCause getDisconnectCause() {
         return mDisconnectCause;
     }
@@ -155,11 +158,13 @@ public final class ParcelableCall implements Parcelable {
     }
 
     /** The time that the call switched to the active state. */
+    @UnsupportedAppUsage
     public long getConnectTimeMillis() {
         return mConnectTimeMillis;
     }
 
     /** The endpoint to which the call is connected. */
+    @UnsupportedAppUsage
     public Uri getHandle() {
         return mHandle;
     }
@@ -300,6 +305,7 @@ public final class ParcelableCall implements Parcelable {
     }
 
     /** Responsible for creating ParcelableCall objects for deserialized Parcels. */
+    @UnsupportedAppUsage
     public static final Parcelable.Creator<ParcelableCall> CREATOR =
             new Parcelable.Creator<ParcelableCall> () {
         @Override

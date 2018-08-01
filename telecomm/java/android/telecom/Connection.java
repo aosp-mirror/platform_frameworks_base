@@ -23,6 +23,7 @@ import com.android.internal.telecom.IVideoProvider;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Notification;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
@@ -1279,6 +1280,7 @@ public abstract class Connection extends Conferenceable {
          * @param looper The looper.
          * @hide
          */
+        @UnsupportedAppUsage
         public VideoProvider(Looper looper) {
             mBinder = new VideoProvider.VideoProviderBinder();
             mMessageHandler = new VideoProvider.VideoProviderHandler(looper);
