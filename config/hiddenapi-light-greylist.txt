@@ -1948,8 +1948,6 @@ Landroid/database/sqlite/SQLiteStatement;-><init>(Landroid/database/sqlite/SQLit
 Landroid/database/sqlite/SqliteWrapper;->checkSQLiteException(Landroid/content/Context;Landroid/database/sqlite/SQLiteException;)V
 Landroid/database/sqlite/SqliteWrapper;->delete(Landroid/content/Context;Landroid/content/ContentResolver;Landroid/net/Uri;Ljava/lang/String;[Ljava/lang/String;)I
 Landroid/database/sqlite/SqliteWrapper;->update(Landroid/content/Context;Landroid/content/ContentResolver;Landroid/net/Uri;Landroid/content/ContentValues;Ljava/lang/String;[Ljava/lang/String;)I
-Landroid/ddm/DdmHandleAppName;->getAppName()Ljava/lang/String;
-Landroid/ddm/DdmHandleAppName;->setAppName(Ljava/lang/String;I)V
 Landroid/filterfw/core/Filter;-><init>(Ljava/lang/String;)V
 Landroid/filterfw/core/Filter;->isAvailable(Ljava/lang/String;)Z
 Landroid/filterfw/core/Filter;->setInputValue(Ljava/lang/String;Ljava/lang/Object;)V
