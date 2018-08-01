@@ -16,6 +16,7 @@
 
 package android.animation;
 
+import android.annotation.UnsupportedAppUsage;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -1070,6 +1071,7 @@ public class LayoutTransition {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void cancel() {
         if (currentChangingAnimations.size() > 0) {
             LinkedHashMap<View, Animator> currentAnimCopy =
@@ -1105,6 +1107,7 @@ public class LayoutTransition {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void cancel(int transitionType) {
         switch (transitionType) {
             case CHANGE_APPEARING:
