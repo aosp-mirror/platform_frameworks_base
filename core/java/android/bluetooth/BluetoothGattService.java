@@ -15,6 +15,7 @@
  */
 package android.bluetooth;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
@@ -48,6 +49,7 @@ public class BluetoothGattService implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     protected BluetoothDevice mDevice;
 
     /**
@@ -265,6 +267,7 @@ public class BluetoothGattService implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setInstanceId(int instanceId) {
         mInstanceId = instanceId;
     }
@@ -382,6 +385,7 @@ public class BluetoothGattService implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setAdvertisePreferred(boolean advertisePreferred) {
         mAdvertisePreferred = advertisePreferred;
     }

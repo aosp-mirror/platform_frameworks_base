@@ -55,7 +55,6 @@ Landroid/app/TaskStackListener;->onTaskRemoved(I)V
 Landroid/app/TaskStackListener;->onTaskSnapshotChanged(ILandroid/app/ActivityManager$TaskSnapshot;)V
 Landroid/app/TaskStackListener;->onTaskStackChanged()V
 Landroid/app/WallpaperColors;-><init>(Landroid/graphics/Color;Landroid/graphics/Color;Landroid/graphics/Color;I)V
-Landroid/bluetooth/BluetoothHeadset;->phoneStateChanged(IIILjava/lang/String;I)V
 Landroid/bluetooth/IBluetooth;->sendConnectionStateChange(Landroid/bluetooth/BluetoothDevice;III)V
 Landroid/companion/AssociationRequest;->getDeviceFilters()Ljava/util/List;
 Landroid/companion/AssociationRequest;->isSingleDevice()Z
