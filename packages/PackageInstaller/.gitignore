@@ -1,0 +1,6 @@
+bin/
+gen/
+*.iml
+.project
+.classpath
+project.properties

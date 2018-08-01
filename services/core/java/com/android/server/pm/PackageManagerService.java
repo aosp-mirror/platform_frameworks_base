@@ -3241,7 +3241,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSharedSystemSharedLibraryPackageName = getRequiredSharedLibraryLPr(
                         PackageManager.SYSTEM_SHARED_LIBRARY_SHARED,
                         SharedLibraryInfo.VERSION_UNDEFINED);
-                mRequiredPermissionControllerPackage = getRequiredPermissionsControllerLPr();
+                mRequiredPermissionControllerPackage = getRequiredPermissionControllerLPr();
             } else {
                 mRequiredVerifierPackage = null;
                 mRequiredInstallerPackage = null;
@@ -3598,7 +3598,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return resolveInfo.getComponentInfo().packageName;
     }
 
-    private @NonNull String getRequiredPermissionsControllerLPr() {
+    private @NonNull String getRequiredPermissionControllerLPr() {
         final Intent intent = new Intent(Intent.ACTION_MANAGE_PERMISSIONS);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
 
@@ -23972,6 +23972,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     return mRequiredVerifierPackage;
                 case PackageManagerInternal.PACKAGE_SYSTEM_TEXT_CLASSIFIER:
                     return mSystemTextClassifierPackage;
+                case PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER:
+                    return mRequiredPermissionControllerPackage;
             }
             return null;
         }
