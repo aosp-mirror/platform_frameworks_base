@@ -22,6 +22,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -103,6 +104,7 @@ public class RenderScript {
      * Detect the bitness of the VM to allow FieldPacker to do the right thing.
      */
     static native int rsnSystemGetPointerSize();
+    @UnsupportedAppUsage
     static int sPointerSize;
 
     static {
@@ -153,6 +155,7 @@ public class RenderScript {
      * @return Always return 1
      *
      */
+    @UnsupportedAppUsage
     public static long getMinorID() {
         return 1;
     }
@@ -833,6 +836,7 @@ public class RenderScript {
 
     native long rsnScriptCCreate(long con, String resName, String cacheDir,
                                  byte[] script, int length);
+    @UnsupportedAppUsage
     synchronized long nScriptCCreate(String resName, String cacheDir, byte[] script, int length) {
         validate();
         return rsnScriptCCreate(mContext, resName, cacheDir, script, length);
@@ -1158,6 +1162,7 @@ public class RenderScript {
      * sendToClient} by scripts from this context.
      *
      */
+    @UnsupportedAppUsage
     RSMessageHandler mMessageCallback = null;
 
     public void setMessageHandler(RSMessageHandler msg) {
@@ -1232,6 +1237,7 @@ public class RenderScript {
         }
     }
 
+    @UnsupportedAppUsage
     void validate() {
         if (mContext == 0) {
             throw new RSInvalidStateException("Calling RS with no Context active.");
@@ -1495,6 +1501,7 @@ public class RenderScript {
      * @param sdkVersion The target SDK Version.
      * @return RenderScript
      */
+    @UnsupportedAppUsage
     public static RenderScript create(Context ctx, int sdkVersion) {
         return create(ctx, sdkVersion, ContextType.NORMAL, CREATE_FLAG_NONE);
     }
@@ -1508,6 +1515,7 @@ public class RenderScript {
      * @param flags The OR of the CREATE_FLAG_* options desired
      * @return RenderScript
      */
+    @UnsupportedAppUsage
     private static RenderScript create(Context ctx, int sdkVersion, ContextType ct, int flags) {
         if (sdkVersion < 23) {
             return internalCreate(ctx, sdkVersion, ct, flags);
