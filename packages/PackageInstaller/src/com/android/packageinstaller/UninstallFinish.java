@@ -16,6 +16,7 @@
 
 package com.android.packageinstaller;
 
+import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -35,7 +36,6 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import androidx.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 

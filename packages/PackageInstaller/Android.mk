@@ -12,8 +12,7 @@ LOCAL_STATIC_ANDROID_LIBRARIES += \
     androidx.leanback_leanback
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    xz-java \
-    androidx.annotation_annotation
+    xz-java
 
 LOCAL_PACKAGE_NAME := PackageInstaller
 

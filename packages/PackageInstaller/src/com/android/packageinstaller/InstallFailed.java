@@ -16,6 +16,7 @@
 
 package com.android.packageinstaller;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -28,7 +29,6 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
 import android.util.Log;
 import android.widget.TextView;
 
