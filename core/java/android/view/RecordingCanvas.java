@@ -536,9 +536,6 @@ public class RecordingCanvas extends Canvas {
             @Nullable int[] colors, int colorOffset, @Nullable short[] indices, int indexOffset,
             int indexCount, @NonNull Paint paint) {
         checkRange(verts.length, vertOffset, vertexCount);
-        if (isHardwareAccelerated()) {
-            return;
-        }
         if (texs != null) {
             checkRange(texs.length, texOffset, vertexCount);
         }
