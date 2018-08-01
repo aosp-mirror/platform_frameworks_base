@@ -38,7 +38,6 @@ import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
-import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.fullbackup.PerformAdbBackupTask;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
@@ -52,6 +51,7 @@ import com.android.server.backup.params.RestoreGetSetsParams;
 import com.android.server.backup.params.RestoreParams;
 import com.android.server.backup.restore.PerformAdbRestoreTask;
 import com.android.server.backup.restore.PerformUnifiedRestoreTask;
+import com.android.server.backup.transport.TransportClient;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -150,17 +150,22 @@ public class BackupHandler extends Handler {
                 if (queue.size() > 0) {
                     // Spin up a backup state sequence and set it running
                     try {
-                        String dirName = transport.transportDirName();
                         OnTaskFinishedListener listener =
                                 caller ->
                                         transportManager
                                                 .disposeOfTransportClient(transportClient, caller);
-                        PerformBackupTask pbt = new PerformBackupTask(
-                                backupManagerService, transportClient, dirName, queue,
-                                oldJournal, null, null, listener, Collections.emptyList(), false,
-                                false /* nonIncremental */);
-                        Message pbtMessage = obtainMessage(MSG_BACKUP_RESTORE_STEP, pbt);
-                        sendMessage(pbtMessage);
+                        PerformBackupTask.start(
+                                backupManagerService,
+                                transportClient,
+                                transport.transportDirName(),
+                                queue,
+                                oldJournal,
+                                /* observer */ null,
+                                /* monitor */ null,
+                                listener,
+                                Collections.emptyList(),
+                                /* userInitiated */ false,
+                                /* nonIncremental */ false);
                     } catch (Exception e) {
                         // unable to ask the transport its dir name -- transient failure, since
                         // the above check succeeded.  Try again next time.
@@ -405,13 +410,18 @@ public class BackupHandler extends Handler {
                 backupManagerService.setBackupRunning(true);
                 backupManagerService.getWakelock().acquire();
 
-                PerformBackupTask pbt = new PerformBackupTask(
+                PerformBackupTask.start(
                         backupManagerService,
-                        params.transportClient, params.dirName,
-                        kvQueue, null, params.observer, params.monitor, params.listener,
-                        params.fullPackages, true, params.nonIncrementalBackup);
-                Message pbtMessage = obtainMessage(MSG_BACKUP_RESTORE_STEP, pbt);
-                sendMessage(pbtMessage);
+                        params.transportClient,
+                        params.dirName,
+                        kvQueue,
+                        /* dataChangedJournal */ null,
+                        params.observer,
+                        params.monitor,
+                        params.listener,
+                        params.fullPackages,
+                        /* userInitiated */ true,
+                        params.nonIncrementalBackup);
                 break;
             }
 

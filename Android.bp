@@ -94,6 +94,7 @@ java_library {
         "core/java/android/app/trust/IStrongAuthTracker.aidl",
         "core/java/android/app/trust/ITrustManager.aidl",
         "core/java/android/app/trust/ITrustListener.aidl",
+        "core/java/android/app/backup/IBackupCallback.aidl",
         "core/java/android/app/backup/IBackupManager.aidl",
         "core/java/android/app/backup/IBackupObserver.aidl",
         "core/java/android/app/backup/IBackupManagerMonitor.aidl",

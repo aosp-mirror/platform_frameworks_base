@@ -16,6 +16,8 @@
 
 package com.android.server.backup.testing;
 
+import static com.android.server.backup.testing.TestUtils.runToEndOfTasks;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -46,8 +48,6 @@ import org.mockito.stubbing.Answer;
 import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.ShadowBinder;
 import org.robolectric.shadows.ShadowLog;
-import org.robolectric.shadows.ShadowLooper;
-import org.robolectric.shadows.ShadowSystemClock;
 
 import java.io.File;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -79,14 +79,7 @@ public class BackupManagerServiceTestUtils {
                         baseStateDir,
                         dataDir,
                         transportManager);
-        ShadowLooper shadowBackupLooper = shadowOf(backupThread.getLooper());
-        shadowBackupLooper.runToEndOfTasks();
-        // Handler instances have their own clock, so advancing looper (with runToEndOfTasks())
-        // above does NOT advance the handlers' clock, hence whenever a handler post messages with
-        // specific time to the looper the time of those messages will be before the looper's time.
-        // To fix this we advance SystemClock as well since that is from where the handlers read
-        // time.
-        ShadowSystemClock.setCurrentTimeMillis(shadowBackupLooper.getScheduler().getCurrentTime());
+        runToEndOfTasks(backupThread.getLooper());
         return backupManagerService;
     }
 
