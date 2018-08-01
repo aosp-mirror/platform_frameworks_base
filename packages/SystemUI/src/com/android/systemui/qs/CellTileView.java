@@ -43,9 +43,9 @@ public class CellTileView extends SignalTileView {
                 R.dimen.qs_tile_icon_size));
     }
 
-    protected void updateIcon(ImageView iv, State state) {
+    protected void updateIcon(ImageView iv, State state, boolean allowAnimations) {
         if (!(state.icon instanceof SignalIcon)) {
-            super.updateIcon(iv, state);
+            super.updateIcon(iv, state, allowAnimations);
             return;
         } else if (!Objects.equals(state.icon, iv.getTag(R.id.qs_icon_tag))) {
             mSignalDrawable.setLevel(((SignalIcon) state.icon).getState());

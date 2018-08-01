@@ -47,6 +47,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
 
     private static final String TAG = "QSTileBaseView";
     private final H mHandler = new H();
+    private final int[] mLocInScreen = new int[2];
     private final FrameLayout mIconFrame;
     protected QSIconView mIcon;
     protected RippleDrawable mRipple;
@@ -178,8 +179,9 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
 
     protected void handleStateChanged(QSTile.State state) {
         int circleColor = getCircleColor(state.state);
+        boolean allowAnimations = animationsEnabled();
         if (circleColor != mCircleColor) {
-            if (mBg.isShown() && animationsEnabled()) {
+            if (allowAnimations) {
                 ValueAnimator animator = ValueAnimator.ofArgb(mCircleColor, circleColor)
                         .setDuration(QS_ANIM_LENGTH);
                 animator.addUpdateListener(animation -> mBg.setImageTintList(ColorStateList.valueOf(
@@ -192,7 +194,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         }
 
         setClickable(state.state != Tile.STATE_UNAVAILABLE);
-        mIcon.setIcon(state);
+        mIcon.setIcon(state, allowAnimations);
         setContentDescription(state.contentDescription);
 
         mAccessibilityClass = state.expandedAccessibilityClassName;
@@ -205,8 +207,17 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         }
     }
 
+    /* The view should not be animated if it's not on screen and no part of it is visible.
+     */
     protected boolean animationsEnabled() {
-        return true;
+        if (!isShown()) {
+            return false;
+        }
+        if (getAlpha() != 1f) {
+            return false;
+        }
+        getLocationOnScreen(mLocInScreen);
+        return mLocInScreen[1] >= -getHeight();
     }
 
     private int getCircleColor(int state) {
