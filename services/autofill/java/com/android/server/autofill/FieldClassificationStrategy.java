@@ -17,8 +17,8 @@ package com.android.server.autofill;
 
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
-import static android.service.autofill.AutofillFieldClassificationService.SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS;
-import static android.service.autofill.AutofillFieldClassificationService.SERVICE_META_DATA_KEY_DEFAULT_ALGORITHM;
+import static android.service.autofill.AutofillFieldClassificationService.RESOURCE_AVAILABLE_ALGORITHMS;
+import static android.service.autofill.AutofillFieldClassificationService.RESOURCE_DEFAULT_ALGORITHM;
 
 import android.Manifest;
 import android.annotation.MainThread;
@@ -226,7 +226,7 @@ final class FieldClassificationStrategy {
      */
     @Nullable
     String[] getAvailableAlgorithms() {
-        return getMetadataValue(SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS,
+        return getMetadataValue(RESOURCE_AVAILABLE_ALGORITHMS, "array",
                 (res, id) -> res.getStringArray(id));
     }
 
@@ -235,11 +235,12 @@ final class FieldClassificationStrategy {
      */
     @Nullable
     String getDefaultAlgorithm() {
-        return getMetadataValue(SERVICE_META_DATA_KEY_DEFAULT_ALGORITHM, (res, id) -> res.getString(id));
+        return getMetadataValue(RESOURCE_DEFAULT_ALGORITHM, "string",
+                (res, id) -> res.getString(id));
     }
 
     @Nullable
-    private <T> T getMetadataValue(String field, MetadataParser<T> parser) {
+    private <T> T getMetadataValue(String field, String type, MetadataParser<T> parser) {
         final ServiceInfo serviceInfo = getServiceInfo();
         if (serviceInfo == null) return null;
 
@@ -253,7 +254,7 @@ final class FieldClassificationStrategy {
             return null;
         }
 
-        final int resourceId = serviceInfo.metaData.getInt(field);
+        final int resourceId = res.getIdentifier(field, type, serviceInfo.packageName);
         return parser.get(res, resourceId);
     }
 
