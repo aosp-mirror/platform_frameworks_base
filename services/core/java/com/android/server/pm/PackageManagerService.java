@@ -24447,6 +24447,23 @@ public class PackageManagerService extends IPackageManager.Stub
                 PackageManagerService.this.setCheckPermissionDelegateLocked(delegate);
             }
         }
+
+        @Override
+        public SparseArray<String> getAppsWithSharedUserIds() {
+            synchronized (mPackages) {
+                return getAppsWithSharedUserIdsLocked();
+            }
+        }
+    }
+
+    private SparseArray<String> getAppsWithSharedUserIdsLocked() {
+        final SparseArray<String> sharedUserIds = new SparseArray<>();
+        synchronized (mPackages) {
+            for (SharedUserSetting setting : mSettings.getAllSharedUsersLPw()) {
+                sharedUserIds.put(UserHandle.getAppId(setting.userId), setting.name);
+            }
+        }
+        return sharedUserIds;
     }
 
     @Override
