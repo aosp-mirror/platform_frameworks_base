@@ -320,9 +320,12 @@ static void drawVertices(JNIEnv* env, jobject, jlong canvasHandle,
                          jintArray jcolors, jint colorIndex,
                          jshortArray jindices, jint indexIndex,
                          jint indexCount, jlong paintHandle) {
+
+    const int vertexCount = floatCount >> 1;  // 2 floats per SkPoint
+
     AutoJavaFloatArray  vertA(env, jverts, vertIndex + floatCount);
     AutoJavaFloatArray  texA(env, jtexs, texIndex + floatCount);
-    AutoJavaIntArray    colorA(env, jcolors, colorIndex + floatCount);
+    AutoJavaIntArray    colorA(env, jcolors, colorIndex + vertexCount);
     AutoJavaShortArray  indexA(env, jindices, indexIndex + indexCount);
 
     const float* verts = vertA.ptr() + vertIndex;
@@ -337,7 +340,6 @@ static void drawVertices(JNIEnv* env, jobject, jlong canvasHandle,
         indices = (const uint16_t*)(indexA.ptr() + indexIndex);
     }
 
-    int vertexCount = floatCount >> 1;  // 2 floats per SkPoint
     SkVertices::VertexMode mode = static_cast<SkVertices::VertexMode>(modeHandle);
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     get_canvas(canvasHandle)->drawVertices(SkVertices::MakeCopy(mode, vertexCount,
