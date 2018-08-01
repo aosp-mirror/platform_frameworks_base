@@ -1495,10 +1495,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             }
 
             try {
-                mConnector.execute("idletimer", "add", iface, Integer.toString(timeout),
-                        Integer.toString(type));
-            } catch (NativeDaemonConnectorException e) {
-                throw e.rethrowAsParcelableException();
+                mNetdService.idletimerAddInterface(iface, timeout, Integer.toString(type));
+            } catch (RemoteException | ServiceSpecificException e) {
+                throw new IllegalStateException(e);
             }
             mActiveIdleTimers.put(iface, new IdleTimerParams(timeout, type));
 
@@ -1529,10 +1528,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             }
 
             try {
-                mConnector.execute("idletimer", "remove", iface,
-                        Integer.toString(params.timeout), Integer.toString(params.type));
-            } catch (NativeDaemonConnectorException e) {
-                throw e.rethrowAsParcelableException();
+                mNetdService.idletimerRemoveInterface(iface,
+                        params.timeout, Integer.toString(params.type));
+            } catch (RemoteException | ServiceSpecificException e) {
+                throw new IllegalStateException(e);
             }
             mActiveIdleTimers.remove(iface);
             mDaemonHandler.post(new Runnable() {
