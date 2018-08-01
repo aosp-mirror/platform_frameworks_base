@@ -243,7 +243,7 @@ public final class ProcessState {
     public void setMultiPackage(boolean val) {
         mMultiPackage = val;
     }
-    
+
     public int getDurationsBucketCount() {
         return mDurations.getKeyCount();
     }
@@ -717,7 +717,7 @@ public final class ProcessState {
 
     /**
      * Sums up the PSS data and adds it to 'data'.
-     * 
+     *
      * @param data The aggregate data is added here.
      * @param now SystemClock.uptimeMillis()
      */
@@ -1410,7 +1410,6 @@ public final class ProcessState {
                 PssTable.writeStatsToProto(proto, mTotalRunningPss, 0);
             }
             proto.end(stateToken);
-
         }
 
         proto.end(token);
