@@ -121,4 +121,6 @@ oneway interface IConnectionServiceAdapter {
     in Session.Info sessionInfo);
 
     void onConnectionServiceFocusReleased(in Session.Info sessionInfo);
+
+    void resetConnectionTime(String callIdi, in Session.Info sessionInfo);
 }
