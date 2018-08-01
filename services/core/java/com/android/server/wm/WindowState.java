@@ -3870,7 +3870,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean isAccessibilityOverlay =
                 windowInfo.type == WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
         if (TextUtils.isEmpty(windowInfo.title) && (isPanelWindow || isAccessibilityOverlay)) {
-            windowInfo.title = mAttrs.getTitle();
+            final CharSequence title = mAttrs.getTitle();
+            windowInfo.title = TextUtils.isEmpty(title) ? null : title;
         }
         windowInfo.accessibilityIdOfAnchor = mAttrs.accessibilityIdOfAnchor;
         windowInfo.focused = isFocused();
