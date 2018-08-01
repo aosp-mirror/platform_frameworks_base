@@ -1,5 +1,6 @@
 package com.google.vr.platform;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.SystemProperties;
 
 /**
@@ -13,6 +14,7 @@ public class DeviceInfo {
     /**
      * Returns true if this device boots directly in VR mode.
      */
+    @UnsupportedAppUsage
     public static boolean getVrBoot() {
         return SystemProperties.getBoolean(VR_MODE_BOOT, false);
     }
