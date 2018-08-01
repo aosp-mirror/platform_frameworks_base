@@ -906,7 +906,7 @@ class StorageManagerService extends IStorageManager.Stub
                     mVold.onUserAdded(user.id, user.serialNumber);
                 }
                 for (int userId : systemUnlockedUsers) {
-                    mVold.onUserStarted(userId);
+                    mVold.onUserStarted(userId, getPackagesArrayForUser(userId));
                     mStoraged.onUserStarted(userId);
                 }
                 mVold.onSecureKeyguardStateChanged(mSecureKeyguardShowing);
@@ -923,7 +923,7 @@ class StorageManagerService extends IStorageManager.Stub
         // staging area is ready so it's ready for zygote-forked apps to
         // bind mount against.
         try {
-            mVold.onUserStarted(userId);
+            mVold.onUserStarted(userId, getPackagesArrayForUser(userId));
             mStoraged.onUserStarted(userId);
         } catch (Exception e) {
             Slog.wtf(TAG, e);
