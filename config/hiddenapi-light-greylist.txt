@@ -1,6 +1,3 @@
-Landroid/accessibilityservice/AccessibilityService;->mInfo:Landroid/accessibilityservice/AccessibilityServiceInfo;
-Landroid/accessibilityservice/AccessibilityService;->mWindowToken:Landroid/os/IBinder;
-Landroid/accessibilityservice/AccessibilityServiceInfo;->setCapabilities(I)V
 Landroid/accessibilityservice/IAccessibilityServiceConnection$Stub;-><init>()V
 Landroid/accessibilityservice/IAccessibilityServiceConnection$Stub;->asInterface(Landroid/os/IBinder;)Landroid/accessibilityservice/IAccessibilityServiceConnection;
 Landroid/accounts/Account;->accessId:Ljava/lang/String;
