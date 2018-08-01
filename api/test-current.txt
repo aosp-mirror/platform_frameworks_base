@@ -314,9 +314,6 @@ package android.database.sqlite {
   public final class SQLiteDebug {
     method public static void dump(android.util.Printer, java.lang.String[]);
     method public static android.database.sqlite.SQLiteDebug.PagerStats getDatabaseInfo();
-    field public static final boolean DEBUG_SQL_LOG;
-    field public static final boolean DEBUG_SQL_STATEMENTS;
-    field public static final boolean DEBUG_SQL_TIME;
   }
 
   public static class SQLiteDebug.DbStats {
