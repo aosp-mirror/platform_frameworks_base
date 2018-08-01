@@ -240,6 +240,12 @@ public class BinderCallsStatsTest {
         }
     }
 
+    private static class AnotherBinderWithGetTransactionName extends Binder {
+        public static String getDefaultTransactionName(int code) {
+            return "foo" + code;
+        }
+    }
+
     @Test
     public void testTransactionCodeResolved() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
@@ -252,6 +258,38 @@ public class BinderCallsStatsTest {
         List<BinderCallsStats.ExportedCallStat> callStatsList =
                 bcs.getExportedCallStats();
         assertEquals("resolved", callStatsList.get(0).methodName);
+    }
+
+    @Test
+    public void testMultipleTransactionCodeResolved() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setDetailedTracking(true);
+
+        Binder binder = new AnotherBinderWithGetTransactionName();
+        CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        Binder binder2 = new BinderWithGetTransactionName();
+        callSession = bcs.callStarted(binder2, 1);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        callSession = bcs.callStarted(binder, 2);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        List<BinderCallsStats.ExportedCallStat> callStatsList =
+                bcs.getExportedCallStats();
+        assertEquals("foo1", callStatsList.get(0).methodName);
+        assertEquals(AnotherBinderWithGetTransactionName.class.getName(),
+                callStatsList.get(0).className);
+        assertEquals("foo2", callStatsList.get(1).methodName);
+        assertEquals(AnotherBinderWithGetTransactionName.class.getName(),
+                callStatsList.get(1).className);
+        assertEquals("resolved", callStatsList.get(2).methodName);
+        assertEquals(BinderWithGetTransactionName.class.getName(),
+                callStatsList.get(2).className);
     }
 
     @Test

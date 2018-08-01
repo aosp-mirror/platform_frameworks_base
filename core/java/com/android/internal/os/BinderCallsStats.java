@@ -45,6 +45,7 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 
 /**
@@ -185,14 +186,21 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     @Nullable
-    private String resolveTransactionCode(Class<? extends Binder> binder, int transactionCode) {
-        final Method getDefaultTransactionName;
+    private Method getDefaultTransactionNameMethod(Class<? extends Binder> binder) {
         try {
-            getDefaultTransactionName = binder.getMethod("getDefaultTransactionName", int.class);
+            return binder.getMethod("getDefaultTransactionName", int.class);
         } catch (NoSuchMethodException e) {
             // The method might not be present for stubs not generated with AIDL.
             return null;
         }
+    }
+
+    @Nullable
+    private String resolveTransactionCode(Method getDefaultTransactionName, int transactionCode) {
+        if (getDefaultTransactionName == null) {
+            return null;
+        }
+
         try {
             return (String) getDefaultTransactionName.invoke(null, transactionCode);
         } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
@@ -218,11 +226,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
                     ExportedCallStat exported = new ExportedCallStat();
                     exported.uid = entry.uid;
                     exported.className = stat.binderClass.getName();
-                    // TODO refactor in order to call resolveTransactionCode outside of the lock.
-                    String methodName =
-                            resolveTransactionCode(stat.binderClass, stat.transactionCode);
-                    exported.methodName = methodName == null
-                            ? String.valueOf(stat.transactionCode) : methodName;
+                    exported.binderClass = stat.binderClass;
+                    exported.transactionCode = stat.transactionCode;
                     exported.cpuTimeMicros = stat.cpuTimeMicros;
                     exported.maxCpuTimeMicros = stat.maxCpuTimeMicros;
                     exported.latencyMicros = stat.latencyMicros;
@@ -236,6 +241,36 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 }
             }
         }
+
+        // Resolve codes outside of the lock since it can be slow.
+        ExportedCallStat previous = null;
+        // Cache the previous method/transaction code.
+        Method getDefaultTransactionName = null;
+        String previousMethodName = null;
+        resultCallStats.sort(BinderCallsStats::compareByBinderClassAndCode);
+        for (ExportedCallStat exported : resultCallStats) {
+            final boolean isClassDifferent = previous == null
+                    || !previous.className.equals(exported.className);
+            if (isClassDifferent) {
+                getDefaultTransactionName = getDefaultTransactionNameMethod(exported.binderClass);
+            }
+
+            final boolean isCodeDifferent = previous == null
+                    || previous.transactionCode != exported.transactionCode;
+            final String methodName;
+            if (isClassDifferent || isCodeDifferent) {
+                String resolvedCode = resolveTransactionCode(
+                        getDefaultTransactionName, exported.transactionCode);
+                methodName = resolvedCode == null
+                        ? String.valueOf(exported.transactionCode)
+                        : resolvedCode;
+            } else {
+                methodName = previousMethodName;
+            }
+            previousMethodName = methodName;
+            exported.methodName = methodName;
+        }
+
         return resultCallStats;
     }
 
@@ -280,7 +315,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 + "latency_time_micros, max_latency_time_micros, exception_count, "
                 + "max_request_size_bytes, max_reply_size_bytes, recorded_call_count, "
                 + "call_count):");
-        for (ExportedCallStat e : sortByCpuDesc(getExportedCallStats())) {
+        List<ExportedCallStat> exportedCallStats = getExportedCallStats();
+        exportedCallStats.sort(BinderCallsStats::compareByCpuDesc);
+        for (ExportedCallStat e : exportedCallStats) {
             sb.setLength(0);
             sb.append("    ")
                     .append(uidToString(e.uid, appIdToPkgNameMap))
@@ -397,6 +434,10 @@ public class BinderCallsStats implements BinderInternal.Observer {
         public long maxRequestSizeBytes;
         public long maxReplySizeBytes;
         public long exceptionCount;
+
+        // Used internally.
+        Class<? extends Binder> binderClass;
+        int transactionCode;
     }
 
     @VisibleForTesting
@@ -554,15 +595,16 @@ public class BinderCallsStats implements BinderInternal.Observer {
         return result;
     }
 
-    private List<ExportedCallStat> sortByCpuDesc(List<ExportedCallStat> callStats) {
-        callStats.sort((o1, o2) -> {
-            if (o1.cpuTimeMicros < o2.cpuTimeMicros) {
-                return 1;
-            } else if (o1.cpuTimeMicros > o2.cpuTimeMicros) {
-                return -1;
-            }
-            return 0;
-        });
-        return callStats;
+    private static int compareByCpuDesc(
+            ExportedCallStat a, ExportedCallStat b) {
+        return Long.compare(b.cpuTimeMicros, a.cpuTimeMicros);
+    }
+
+    private static int compareByBinderClassAndCode(
+            ExportedCallStat a, ExportedCallStat b) {
+        int result = a.className.compareTo(b.className);
+        return result != 0
+                ? result
+                : Integer.compare(a.transactionCode, b.transactionCode);
     }
 }
