@@ -100,6 +100,7 @@ public class Watchdog extends Thread {
         "android.hardware.audio@4.0::IDevicesFactory",
         "android.hardware.bluetooth@1.0::IBluetoothHci",
         "android.hardware.camera.provider@2.4::ICameraProvider",
+        "android.hardware.graphics.allocator@2.0::IAllocator",
         "android.hardware.graphics.composer@2.1::IComposer",
         "android.hardware.media.omx@1.0::IOmx",
         "android.hardware.media.omx@1.0::IOmxStore",
