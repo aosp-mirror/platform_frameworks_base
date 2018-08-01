@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.UnsupportedAppUsage;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -393,8 +394,10 @@ public abstract class AccessibilityService extends Service {
 
     private int mConnectionId = AccessibilityInteractionClient.NO_ID;
 
+    @UnsupportedAppUsage
     private AccessibilityServiceInfo mInfo;
 
+    @UnsupportedAppUsage
     private IBinder mWindowToken;
 
     private WindowManager mWindowManager;
