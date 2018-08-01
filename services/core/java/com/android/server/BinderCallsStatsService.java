@@ -34,7 +34,6 @@ import android.util.Slog;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
-import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -131,6 +130,7 @@ public class BinderCallsStatsService extends Binder {
 
     public static class LifeCycle extends SystemService {
         private BinderCallsStatsService mService;
+        private BinderCallsStats mBinderCallsStats;
 
         public LifeCycle(Context context) {
             super(context);
@@ -138,9 +138,9 @@ public class BinderCallsStatsService extends Binder {
 
         @Override
         public void onStart() {
-            BinderCallsStats binderCallsStats = new BinderCallsStats(new Random());
-            mService = new BinderCallsStatsService(binderCallsStats);
-            LocalServices.addService(Internal.class, new Internal(binderCallsStats));
+            mBinderCallsStats = new BinderCallsStats(new BinderCallsStats.Injector());
+            mService = new BinderCallsStatsService(mBinderCallsStats);
+            publishLocalService(Internal.class, new Internal(mBinderCallsStats));
             publishBinderService("binder_calls_stats", mService);
             boolean detailedTrackingEnabled = SystemProperties.getBoolean(
                     PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING, false);
@@ -149,7 +149,7 @@ public class BinderCallsStatsService extends Binder {
                 Slog.i(TAG, "Enabled CPU usage tracking for binder calls. Controlled by "
                         + PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING
                         + " or via dumpsys binder_calls_stats --enable-detailed-tracking");
-                binderCallsStats.setDetailedTracking(true);
+                mBinderCallsStats.setDetailedTracking(true);
             }
         }
 
@@ -157,6 +157,7 @@ public class BinderCallsStatsService extends Binder {
         public void onBootPhase(int phase) {
             if (SystemService.PHASE_SYSTEM_SERVICES_READY == phase) {
                 mService.systemReady(getContext());
+                mBinderCallsStats.systemReady(getContext());
             }
         }
     }

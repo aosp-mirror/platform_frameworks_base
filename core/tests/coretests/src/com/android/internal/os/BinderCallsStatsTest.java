@@ -16,7 +16,11 @@
 
 package com.android.internal.os;
 
+import android.content.Context;
+import android.content.Intent;
+import android.os.BatteryManager;
 import android.os.Binder;
+import android.os.OsProtoEnums;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -392,6 +396,113 @@ public class BinderCallsStatsTest {
     }
 
     @Test
+    public void testDataResetWhenInitialStateSet() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setDetailedTracking(true);
+        Binder binder = new Binder();
+        CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        bcs.setInitialState(true, true);
+
+        SparseArray<BinderCallsStats.UidEntry> uidEntries = bcs.getUidEntries();
+        assertEquals(0, uidEntries.size());
+    }
+
+    @Test
+    public void testScreenAndChargerInitialStates() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setDetailedTracking(true);
+        Binder binder = new Binder();
+        bcs.setInitialState(true /** screen iteractive */, false);
+
+        CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.time += 10;
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        List<BinderCallsStats.CallStat> callStatsList =
+                new ArrayList(bcs.getUidEntries().get(TEST_UID).getCallStatsList());
+        assertEquals(true, callStatsList.get(0).screenInteractive);
+    }
+
+    @Test
+    public void testNoDataCollectedOnCharger() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setDetailedTracking(true);
+        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED)
+                .putExtra(BatteryManager.EXTRA_PLUGGED, OsProtoEnums.BATTERY_PLUGGED_AC);
+        bcs.getBroadcastReceiver().onReceive(null, intent);
+        Binder binder = new Binder();
+        CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        assertEquals(0, bcs.getUidEntries().size());
+    }
+
+    @Test
+    public void testScreenOff() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setDetailedTracking(true);
+        bcs.getBroadcastReceiver().onReceive(null, new Intent(Intent.ACTION_SCREEN_OFF));
+        Binder binder = new Binder();
+        CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        SparseArray<BinderCallsStats.UidEntry> uidEntries = bcs.getUidEntries();
+        assertEquals(1, uidEntries.size());
+        BinderCallsStats.UidEntry uidEntry = uidEntries.get(TEST_UID);
+        Assert.assertNotNull(uidEntry);
+        List<BinderCallsStats.CallStat> callStatsList = new ArrayList(uidEntry.getCallStatsList());
+        assertEquals(false, callStatsList.get(0).screenInteractive);
+    }
+
+    @Test
+    public void testScreenOn() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setDetailedTracking(true);
+        bcs.getBroadcastReceiver().onReceive(null, new Intent(Intent.ACTION_SCREEN_ON));
+        Binder binder = new Binder();
+        CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        SparseArray<BinderCallsStats.UidEntry> uidEntries = bcs.getUidEntries();
+        assertEquals(1, uidEntries.size());
+        BinderCallsStats.UidEntry uidEntry = uidEntries.get(TEST_UID);
+        Assert.assertNotNull(uidEntry);
+        List<BinderCallsStats.CallStat> callStatsList = new ArrayList(uidEntry.getCallStatsList());
+        assertEquals(true, callStatsList.get(0).screenInteractive);
+    }
+
+    @Test
+    public void testOnCharger() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setDetailedTracking(true);
+        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED)
+                .putExtra(BatteryManager.EXTRA_PLUGGED, OsProtoEnums.BATTERY_PLUGGED_AC);
+        bcs.getBroadcastReceiver().onReceive(null, intent);
+        Binder binder = new Binder();
+        CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        assertEquals(0, bcs.getExportedCallStats().size());
+    }
+
+    @Test
+    public void testOnBattery() {
+        TestBinderCallsStats bcs = new TestBinderCallsStats();
+        bcs.setDetailedTracking(true);
+        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED)
+                .putExtra(BatteryManager.EXTRA_PLUGGED, OsProtoEnums.BATTERY_PLUGGED_NONE);
+        bcs.getBroadcastReceiver().onReceive(null, intent);
+        Binder binder = new Binder();
+        CallSession callSession = bcs.callStarted(binder, 1);
+        bcs.callEnded(callSession, REQUEST_SIZE, REPLY_SIZE);
+
+        assertEquals(1, bcs.getExportedCallStats().size());
+    }
+
+    @Test
     public void testDumpDoesNotThrowException() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         bcs.setDetailedTracking(true);
@@ -419,6 +530,8 @@ public class BinderCallsStatsTest {
     public void testGetExportedStatsWhenDetailedTrackingEnabled() {
         TestBinderCallsStats bcs = new TestBinderCallsStats();
         bcs.setDetailedTracking(true);
+        bcs.getBroadcastReceiver().onReceive(null, new Intent(Intent.ACTION_SCREEN_ON));
+
         Binder binder = new Binder();
         CallSession callSession = bcs.callStarted(binder, 1);
         bcs.time += 10;
@@ -430,6 +543,7 @@ public class BinderCallsStatsTest {
         assertEquals(TEST_UID, stat.uid);
         assertEquals("android.os.Binder", stat.className);
         assertEquals("1", stat.methodName);
+        assertEquals(true, stat.screenInteractive);
         assertEquals(10, stat.cpuTimeMicros);
         assertEquals(10, stat.maxCpuTimeMicros);
         assertEquals(20, stat.latencyMicros);
@@ -462,11 +576,15 @@ public class BinderCallsStatsTest {
 
         TestBinderCallsStats() {
             // Make random generator not random.
-            super(new Random() {
-                int mCallCount = 0;
+            super(new Injector() {
+                public Random getRandomGenerator() {
+                    return new Random() {
+                        int mCallCount = 0;
 
-                public int nextInt() {
-                    return mCallCount++;
+                        public int nextInt() {
+                            return mCallCount++;
+                        }
+                    };
                 }
             });
         }
