@@ -9148,6 +9148,19 @@ public final class Settings {
        /** {@hide} */
        public static final String STORAGE_BENCHMARK_INTERVAL = "storage_benchmark_interval";
 
+        /**
+         * Whether or not Settings should enable psd API.
+         * {@hide}
+         */
+        public static final String SETTINGS_USE_PSD_API = "settings_use_psd_api";
+
+        /**
+         * Whether or not Settings should enable external provider API.
+         * {@hide}
+         */
+        public static final String SETTINGS_USE_EXTERNAL_PROVIDER_API =
+                "settings_use_external_provider_api";
+
        /**
         * Sample validity in seconds to configure for the system DNS resolver.
         * {@hide}
