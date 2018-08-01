@@ -166,6 +166,5 @@ public class PssTable extends SparseMappingTable.Table {
                 stats[statsIndex + PSS_RSS_MINIMUM],
                 stats[statsIndex + PSS_RSS_AVERAGE],
                 stats[statsIndex + PSS_RSS_MAXIMUM]);
-
     }
 }
