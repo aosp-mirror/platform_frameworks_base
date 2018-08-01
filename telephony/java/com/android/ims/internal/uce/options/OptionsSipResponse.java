@@ -16,6 +16,7 @@
 
 package com.android.ims.internal.uce.options;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -41,6 +42,7 @@ public class OptionsSipResponse implements Parcelable {
      * Sets the Options command ID.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setCmdId(OptionsCmdId cmdId) {
         this.mCmdId = cmdId;
     }
@@ -57,6 +59,7 @@ public class OptionsSipResponse implements Parcelable {
      * Sets the request ID
      * @hide
      */
+    @UnsupportedAppUsage
     public void setRequestId(int requestId) {
         this.mRequestId = requestId;
     }
@@ -73,6 +76,7 @@ public class OptionsSipResponse implements Parcelable {
      * Sets the SIP response code.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setSipResponseCode(int sipResponseCode) {
         this.mSipResponseCode = sipResponseCode;
     }
@@ -89,6 +93,7 @@ public class OptionsSipResponse implements Parcelable {
      * Sets the SIP response code reason phrase.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setReasonPhrase(String reasonPhrase) {
         this.mReasonPhrase = reasonPhrase;
     }
@@ -105,6 +110,7 @@ public class OptionsSipResponse implements Parcelable {
      * Sets the SIP retryAfter sec value
      * @hide
      */
+    @UnsupportedAppUsage
     public void setRetryAfter(int retryAfter) {
         this.mRetryAfter = retryAfter;
     }
@@ -113,6 +119,7 @@ public class OptionsSipResponse implements Parcelable {
      * Constructor for the OptionsSipResponse class.
      * @hide
      */
+    @UnsupportedAppUsage
     public OptionsSipResponse() {
         mCmdId = new OptionsCmdId();
     };
