@@ -18,6 +18,7 @@ package com.android.ims.internal.uce.presence;
 
 import com.android.ims.internal.uce.common.StatusCode;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -42,6 +43,7 @@ public class PresCmdStatus implements Parcelable{
      * Sets the command ID.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setCmdId(PresCmdId cmdId) {
         this.mCmdId = cmdId;
     }
@@ -58,6 +60,7 @@ public class PresCmdStatus implements Parcelable{
      * Sets the user data.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setUserData(int userData) {
         this.mUserData = userData;
     }
@@ -73,6 +76,7 @@ public class PresCmdStatus implements Parcelable{
      * Sets the status code.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setStatus(StatusCode status) {
         this.mStatus = status;
     }
@@ -89,6 +93,7 @@ public class PresCmdStatus implements Parcelable{
      * Sets the request ID.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setRequestId(int requestId) {
         this.mRequestId = requestId;
     }
@@ -97,6 +102,7 @@ public class PresCmdStatus implements Parcelable{
      * Constructor for the PresCmdStatus class.
      * @hide
      */
+    @UnsupportedAppUsage
     public PresCmdStatus() {
         mStatus = new StatusCode();
     };

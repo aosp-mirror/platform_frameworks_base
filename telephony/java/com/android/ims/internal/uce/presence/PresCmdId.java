@@ -16,6 +16,7 @@
 
 package com.android.ims.internal.uce.presence;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -57,6 +58,7 @@ public class PresCmdId implements Parcelable {
      * Sets the command ID.
      * @hide
      */
+    @UnsupportedAppUsage
     public void setCmdId(int nCmdId) {
         this.mCmdId = nCmdId;
     }
@@ -66,6 +68,7 @@ public class PresCmdId implements Parcelable {
     * Constructor for the PresCmdId class.
     * @hide
     */
+    @UnsupportedAppUsage
     public PresCmdId(){};
 
 
