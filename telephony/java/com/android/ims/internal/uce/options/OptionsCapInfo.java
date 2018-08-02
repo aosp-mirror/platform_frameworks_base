@@ -15,6 +15,7 @@
  */
 package com.android.ims.internal.uce.options;
 
+import android.annotation.UnsupportedAppUsage;
 import com.android.ims.internal.uce.common.CapInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -30,10 +31,12 @@ public class OptionsCapInfo implements Parcelable {
         return new OptionsCapInfo();
     }
 
+    @UnsupportedAppUsage
     public String getSdp() {
         return mSdp;
     }
 
+    @UnsupportedAppUsage
     public void setSdp(String sdp) {
         this.mSdp = sdp;
     }
@@ -41,16 +44,19 @@ public class OptionsCapInfo implements Parcelable {
     /**
      * Constructor for the OptionsCapInfo class.
      */
+    @UnsupportedAppUsage
     public OptionsCapInfo() {
         mCapInfo = new CapInfo();
     };
 
+    @UnsupportedAppUsage
     public CapInfo getCapInfo() {
         return mCapInfo;
     }
     /**
      * Sets the CapInfo
      */
+    @UnsupportedAppUsage
     public void setCapInfo(CapInfo capInfo) {
         this.mCapInfo = capInfo;
     }
