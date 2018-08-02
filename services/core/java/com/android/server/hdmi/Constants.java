@@ -318,6 +318,17 @@ final class Constants {
     static final String PROPERTY_SYSTEM_AUDIO_DEVICE_ARC_PORT =
         "persist.sys.hdmi.property_sytem_audio_device_arc_port";
 
+    /**
+     * Property to strip local audio of amplifier and use local speaker
+     * when TV does not support system audio mode.
+     *
+     * <p>This property applies to device with both audio system/playback types.
+     * <p>True means using local speaker when TV does not support system audio.
+     * <p>False means passing audio to TV. Default is true.
+     */
+    static final String PROPERTY_STRIP_AUDIO_TV_NO_SYSTEM_AUDIO =
+        "persist.sys.hdmi.property_strip_audio_tv_no_system_audio";
+
     static final int RECORDING_TYPE_DIGITAL_RF = 1;
     static final int RECORDING_TYPE_ANALOGUE_RF = 2;
     static final int RECORDING_TYPE_EXTERNAL_PHYSICAL_ADDRESS = 3;
