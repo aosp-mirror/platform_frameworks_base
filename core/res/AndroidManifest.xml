@@ -3508,6 +3508,10 @@
     <permission android:name="android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE"
                 android:protectionLevel="signature" />
 
+    <!-- @hide Internal permission to allows an application to access card content provider. -->
+    <permission android:name="android.permission.WRITE_SETTINGS_HOMEPAGE_DATA"
+                android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows applications to set a live wallpaper.
          @hide XXX Change to signature once the picker is moved to its
          own apk as Ghod Intended. -->
