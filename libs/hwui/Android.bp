@@ -72,7 +72,6 @@ cc_defaults {
         "libft2",
         "libminikin",
         "libandroidfw",
-        "libRScpp",
     ],
     static_libs: [
         "libEGL_blobCache",
@@ -242,7 +241,6 @@ cc_defaults {
     },
 
     export_include_dirs: ["."],
-    export_shared_lib_headers: ["libRScpp"],
 }
 
 cc_library {
