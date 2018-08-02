@@ -340,7 +340,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         boolean bound = false;
         try {
             bound = mContext.bindServiceAsUser(launcherServiceIntent,
-                    mOverviewServiceConnection, Context.BIND_AUTO_CREATE,
+                    mOverviewServiceConnection,
+                    Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
                     UserHandle.of(mDeviceProvisionedController.getCurrentUser()));
         } catch (SecurityException e) {
             Log.e(TAG_OPS, "Unable to bind because of security error", e);
