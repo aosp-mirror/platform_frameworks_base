@@ -109,11 +109,6 @@ public class ViewPropertyAnimator {
     private ValueAnimator mTempValueAnimator;
 
     /**
-     * A RenderThread-driven backend that may intercept startAnimation
-     */
-    private ViewPropertyAnimatorRT mRTBackend;
-
-    /**
      * This listener is the mechanism by which the underlying Animator causes changes to the
      * properties currently being animated, as well as the cleanup after an animation is
      * complete.
@@ -434,9 +429,6 @@ public class ViewPropertyAnimator {
         mPendingOnStartAction = null;
         mPendingOnEndAction = null;
         mView.removeCallbacks(mAnimationStarter);
-        if (mRTBackend != null) {
-            mRTBackend.cancelAll();
-        }
     }
 
     /**
@@ -859,9 +851,6 @@ public class ViewPropertyAnimator {
      * value accordingly.
      */
     private void startAnimation() {
-        if (mRTBackend != null && mRTBackend.startAnimation(this)) {
-            return;
-        }
         mView.setHasTransientState(true);
         ValueAnimator animator = ValueAnimator.ofFloat(1.0f);
         ArrayList<NameValuesHolder> nameValueList =
