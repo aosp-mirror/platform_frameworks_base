@@ -599,21 +599,6 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
             mHandler.obtainMessage(MSG_ON_DEVICE_BOND_STATE_CHANGED,
                     bondState, 0, cachedDevice).sendToTarget();
         }
-
-        @Override
-        public void onDeviceAdded(CachedBluetoothDevice cachedDevice) { }
-        @Override
-        public void onDeviceDeleted(CachedBluetoothDevice cachedDevice) { }
-        @Override
-        public void onScanningStateChanged(boolean started) { }
-        @Override
-        public void onConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state) { }
-        @Override
-        public void onActiveDeviceChanged(CachedBluetoothDevice activeDevice,
-                                          int bluetoothProfile) { }
-
-        @Override
-        public void onAudioModeChanged() { }
     }
 
     private final class BluetoothErrorListener implements BluetoothUtils.ErrorListener {
