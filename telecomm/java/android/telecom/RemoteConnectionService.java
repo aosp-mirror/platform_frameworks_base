@@ -466,6 +466,11 @@ final class RemoteConnectionService {
                 Log.w(this, "onRemoteRttRequest called on a remote conference");
             }
         }
+
+        @Override
+        public void resetConnectionTime(String callId, Session.Info sessionInfo) {
+            // Do nothing
+        }
     };
 
     private final ConnectionServiceAdapterServant mServant =
