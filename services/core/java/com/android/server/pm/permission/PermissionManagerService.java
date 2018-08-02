@@ -1267,9 +1267,15 @@ public class PermissionManagerService {
                 // we still want to blindly grant it to old apps.
                 allowed = true;
             }
+            // TODO (moltmann): The installer now shares the platforms signature. Hence it does not
+            //                  need a separate flag anymore. Hence we need to check which
+            //                  permissions are needed by the permission controller
             if (!allowed && bp.isInstaller()
-                    && pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
-                            PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM))) {
+                    && (pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
+                            PackageManagerInternal.PACKAGE_INSTALLER, UserHandle.USER_SYSTEM))
+                    || pkg.packageName.equals(mPackageManagerInt.getKnownPackageName(
+                            PackageManagerInternal.PACKAGE_PERMISSION_CONTROLLER,
+                            UserHandle.USER_SYSTEM)))) {
                 // If this permission is to be granted to the system installer and
                 // this app is an installer, then it gets the permission.
                 allowed = true;

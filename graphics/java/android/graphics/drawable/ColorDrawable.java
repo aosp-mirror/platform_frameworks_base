@@ -20,6 +20,7 @@ import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -52,6 +53,7 @@ import java.io.IOException;
  * @attr ref android.R.styleable#ColorDrawable_color
  */
 public class ColorDrawable extends Drawable {
+    @UnsupportedAppUsage
     private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     @ViewDebug.ExportedProperty(deepExport = true, prefix = "state_")
@@ -336,6 +338,7 @@ public class ColorDrawable extends Drawable {
         int[] mThemeAttrs;
         int mBaseColor; // base color, independent of setAlpha()
         @ViewDebug.ExportedProperty
+        @UnsupportedAppUsage
         int mUseColor;  // basecolor modulated by setAlpha()
         @Config int mChangingConfigurations;
         ColorStateList mTint = null;

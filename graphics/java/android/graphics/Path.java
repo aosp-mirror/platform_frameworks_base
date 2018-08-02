@@ -20,6 +20,7 @@ import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.UnsupportedAppUsage;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -46,10 +47,12 @@ public class Path {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isSimplePath = true;
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public Region rects;
     private Direction mLastDirection = null;
 

@@ -77,6 +77,11 @@ public class ContextHubService extends IContextHubService.Stub {
 
     private static final int OS_APP_INSTANCE = -1;
 
+    /*
+     * Local flag to enable debug logging.
+     */
+    private static final boolean DEBUG_LOG_ENABLED = false;
+
     private final Context mContext;
 
     private final Map<Integer, ContextHubInfo> mContextHubIdToInfoMap;
@@ -779,12 +784,16 @@ public class ContextHubService extends IContextHubService.Stub {
 
         int msgVersion = 0;
         int callbacksCount = mCallbacksList.beginBroadcast();
-        Log.d(TAG, "Sending message " + msgType + " version " + msgVersion + " from hubHandle " +
-                contextHubHandle + ", appInstance " + appInstance + ", callBackCount "
-                + callbacksCount);
+        if (DEBUG_LOG_ENABLED) {
+            Log.v(TAG, "Sending message " + msgType + " version " + msgVersion + " from hubHandle "
+                    + contextHubHandle + ", appInstance " + appInstance + ", callBackCount "
+                    + callbacksCount);
+        }
 
         if (callbacksCount < 1) {
-            Log.v(TAG, "No message callbacks registered.");
+            if (DEBUG_LOG_ENABLED) {
+                Log.v(TAG, "No message callbacks registered.");
+            }
             return 0;
         }
 

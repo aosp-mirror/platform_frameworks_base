@@ -383,6 +383,8 @@ public class SettingsBackupTest {
                     Settings.Global.SETUP_PREPAID_DATA_SERVICE_URL,
                     Settings.Global.SETUP_PREPAID_DETECTION_REDIR_HOST,
                     Settings.Global.SETUP_PREPAID_DETECTION_TARGET_URL,
+                    Settings.Global.SETTINGS_USE_EXTERNAL_PROVIDER_API,
+                    Settings.Global.SETTINGS_USE_PSD_API,
                     Settings.Global.SHORTCUT_MANAGER_CONSTANTS,
                     Settings.Global.SHOW_FIRST_CRASH_DIALOG,
                     Settings.Global.SHOW_MUTE_IN_CRASH_DIALOG,
@@ -484,6 +486,7 @@ public class SettingsBackupTest {
                     Settings.Global.WIFI_SAVED_STATE,
                     Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE,
                     Settings.Global.WIFI_SCAN_INTERVAL_WHEN_P2P_CONNECTED_MS,
+                    Settings.Global.WIFI_SCAN_THROTTLE_ENABLED,
                     Settings.Global.WIFI_SCORE_PARAMS,
                     Settings.Global.WIFI_SLEEP_POLICY,
                     Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,
@@ -704,3 +707,4 @@ public class SettingsBackupTest {
     }
 
 }
+

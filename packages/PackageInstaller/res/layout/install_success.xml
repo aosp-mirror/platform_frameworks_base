@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2016 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+    <LinearLayout android:id="@+id/app_snippet"
+            android:background="?android:attr/colorPrimary"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:orientation="horizontal"
+            android:elevation="@dimen/headerElevation"
+            android:gravity="center_vertical">
+
+        <ImageView android:id="@+id/app_icon"
+                android:layout_marginStart="16dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:scaleType="fitCenter" />
+
+        <TextView android:id="@+id/app_name"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/titleTextStyle"
+                android:singleLine="true"
+                android:ellipsize="end" />
+
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingLeft="16dip"
+            android:paddingRight="16dip">
+
+        <ImageView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:src="@drawable/ic_done_92"
+                android:tint="@color/bigIconColor"
+                android:contentDescription="@null" />
+
+        <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="@string/install_done"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    </LinearLayout>
+
+    <LinearLayout style="?android:attr/buttonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:measureWithLargestChild="true"
+            android:padding="8dip">
+
+        <!-- spacer to push buttons to the right -->
+        <View android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+        <Button android:id="@+id/done_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/done"
+                android:maxLines="2"
+                style="?android:attr/buttonBarButtonStyle" />
+
+        <Button android:id="@+id/launch_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/launch"
+                android:maxLines="2"
+                style="?android:attr/buttonBarButtonStyle" />
+
+    </LinearLayout>
+
+</LinearLayout>
+
+

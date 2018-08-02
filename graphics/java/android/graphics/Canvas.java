@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Build;
 
 import dalvik.annotation.optimization.CriticalNative;
@@ -54,6 +55,7 @@ public class Canvas extends BaseCanvas {
     public static boolean sCompatibilitySetBitmap = false;
 
     /** @hide */
+    @UnsupportedAppUsage
     public long getNativeCanvasWrapper() {
         return mNativeCanvasWrapper;
     }
@@ -62,6 +64,7 @@ public class Canvas extends BaseCanvas {
     public boolean isRecordingFor(Object o) { return false; }
 
     // may be null
+    @UnsupportedAppUsage
     private Bitmap mBitmap;
 
     // optional field set by the caller
@@ -123,6 +126,7 @@ public class Canvas extends BaseCanvas {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public Canvas(long nativeCanvas) {
         if (nativeCanvas == 0) {
             throw new IllegalStateException();
@@ -141,6 +145,7 @@ public class Canvas extends BaseCanvas {
      * @hide
      */
     @Deprecated
+    @UnsupportedAppUsage
     protected GL getGL() {
         return null;
     }
@@ -269,6 +274,7 @@ public class Canvas extends BaseCanvas {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setScreenDensity(int density) {
         mScreenDensity = density;
     }
@@ -1263,6 +1269,7 @@ public class Canvas extends BaseCanvas {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void release() {
         mNativeCanvasWrapper = 0;
         if (mFinalizer != null) {
@@ -1276,6 +1283,7 @@ public class Canvas extends BaseCanvas {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static void freeCaches() {
         nFreeCaches();
     }
@@ -1285,6 +1293,7 @@ public class Canvas extends BaseCanvas {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static void freeTextLayoutCaches() {
         nFreeTextLayoutCaches();
     }
@@ -1591,9 +1600,9 @@ public class Canvas extends BaseCanvas {
      * Draw the specified circle using the specified paint. If radius is <= 0, then nothing will be
      * drawn. The circle will be filled or framed based on the Style in the paint.
      *
-     * @param cx The x-coordinate of the center of the cirle to be drawn
-     * @param cy The y-coordinate of the center of the cirle to be drawn
-     * @param radius The radius of the cirle to be drawn
+     * @param cx The x-coordinate of the center of the circle to be drawn
+     * @param cy The y-coordinate of the center of the circle to be drawn
+     * @param radius The radius of the circle to be drawn
      * @param paint The paint used to draw the circle
      */
     public void drawCircle(float cx, float cy, float radius, @NonNull Paint paint) {

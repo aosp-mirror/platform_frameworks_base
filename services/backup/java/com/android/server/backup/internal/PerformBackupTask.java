@@ -16,16 +16,11 @@
 
 package com.android.server.backup.internal;
 
-import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.DEBUG_BACKUP_TRACE;
 import static com.android.server.backup.BackupManagerService.KEY_WIDGET_STATE;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.OP_PENDING;
 import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP;
-import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT;
 import static com.android.server.backup.BackupManagerService.PACKAGE_MANAGER_SENTINEL;
-import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_OPERATION_TIMEOUT;
-import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_RESTORE_STEP;
 
 import android.annotation.Nullable;
 import android.app.ApplicationThreadConstants;
@@ -36,14 +31,16 @@ import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupManager;
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.BackupTransport;
+import android.app.backup.IBackupCallback;
+import android.app.backup.IBackupManager;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.IBackupObserver;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Message;
+import android.os.ConditionVariable;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.UserHandle;
@@ -51,23 +48,24 @@ import android.os.WorkSource;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.EventLog;
+import android.util.Pair;
 import android.util.Slog;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.KeyValueBackupJob;
-import com.android.server.backup.PackageManagerBackupAgent;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
+import com.android.server.backup.remote.RemoteCall;
+import com.android.server.backup.remote.RemoteCallable;
+import com.android.server.backup.remote.RemoteResult;
 import com.android.server.backup.transport.TransportClient;
-import com.android.server.backup.transport.TransportUtils;
 import com.android.server.backup.utils.AppBackupUtils;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 import com.android.server.backup.utils.BackupObserverUtils;
@@ -85,85 +83,225 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * This class handles the process of backing up a given list of key/value backup packages.
- * Also takes in a list of pending dolly backups and kicks them off when key/value backups
- * are done.
+ * Represents the task of performing a sequence of key-value backups for a given list of packages.
+ * Method {@link #run()} executes the backups to the transport specified via the {@code
+ * transportClient} parameter in the constructor.
  *
- * Flow:
- * If required, backup @pm@.
- * For each pending key/value backup package:
- *     - Bind to agent.
- *     - Call agent.doBackup()
- *     - Wait either for cancel/timeout or operationComplete() callback from the agent.
- * Start task to perform dolly backups.
+ * <p>A few definitions:
  *
- * There are three entry points into this class:
- *     - execute() [Called from the handler thread]
- *     - operationComplete(long result) [Called from the handler thread]
- *     - handleCancel(boolean cancelAll) [Can be called from any thread]
- * These methods synchronize on mCancelLock.
+ * <ul>
+ *   <li>State directory: {@link BackupManagerService#getBaseStateDir()}/&lt;transport&gt;
+ *   <li>State file: {@link
+ *       BackupManagerService#getBaseStateDir()}/&lt;transport&gt;/&lt;package&gt;<br>
+ *       Represents the state of the backup data for a specific package in the current dataset.
+ *   <li>Stage directory: {@link BackupManagerService#getDataDir()}
+ *   <li>Stage file: {@link BackupManagerService#getDataDir()}/&lt;package&gt;.data<br>
+ *       Contains staged data that the agents wrote via {@link BackupDataOutput}, to be transmitted
+ *       to the transport.
+ * </ul>
  *
- * Interaction with mCurrentOperations:
- *     - An entry for this task is put into mCurrentOperations for the entire lifetime of the
- *       task. This is useful to cancel the task if required.
- *     - An ephemeral entry is put into mCurrentOperations each time we are waiting on for
- *       response from a backup agent. This is used to plumb timeouts and completion callbacks.
+ * If there is no PackageManager (PM) pseudo-package state file in the state directory, the
+ * specified transport will be initialized with {@link IBackupTransport#initializeDevice()}.
+ *
+ * <p>The PM pseudo-package is the first package to be backed-up and sent to the transport in case
+ * of incremental choice. If non-incremental, PM will only be backed-up if specified in the queue,
+ * and if it's the case it will be re-positioned at the head of the queue.
+ *
+ * <p>Before starting, this task will register itself in {@link BackupManagerService} current
+ * operations.
+ *
+ * <p>In summary, this task will for each package:
+ *
+ * <ul>
+ *   <li>Bind to its {@link IBackupAgent}.
+ *   <li>Request transport quota and flags.
+ *   <li>Call {@link IBackupAgent#doBackup(ParcelFileDescriptor, ParcelFileDescriptor,
+ *       ParcelFileDescriptor, long, int, IBackupManager, int)} via {@link RemoteCall} passing the
+ *       old state file descriptor (read), the backup data file descriptor (write), the new state
+ *       file descriptor (write), the quota and the transport flags. This will call {@link
+ *       BackupAgent#onBackup(ParcelFileDescriptor, BackupDataOutput, ParcelFileDescriptor)} with
+ *       the old state file to be read, a {@link BackupDataOutput} object to write the backup data
+ *       and the new state file to write. By writing to {@link BackupDataOutput}, the agent will
+ *       write data to the stage file. The task will block waiting for either:
+ *       <ul>
+ *         <li>Agent response.
+ *         <li>Agent time-out (specified via {@link
+ *             BackupManagerService#getAgentTimeoutParameters()}.
+ *         <li>External cancellation or thread interrupt.
+ *       </ul>
+ *   <li>Unbind the agent.
+ *   <li>Assuming agent response, send the staged data that the agent wrote to disk to the transport
+ *       via {@link IBackupTransport#performBackup(PackageInfo, ParcelFileDescriptor, int)}.
+ *   <li>Call {@link IBackupTransport#finishBackup()} if previous call was successful.
+ *   <li>Save the new state in the state file. During the agent call it was being written to
+ *       &lt;state file&gt;.new, here we rename it and replace the old one.
+ *   <li>Delete the stage file.
+ * </ul>
+ *
+ * In the end, this task will:
+ *
+ * <ul>
+ *   <li>Mark data-changed for the remaining packages in the queue (skipped packages).
+ *   <li>Delete the {@link DataChangedJournal} provided. Note that this should not be the current
+ *       journal.
+ *   <li>Set {@link BackupManagerService} current token as {@link
+ *       IBackupTransport#getCurrentRestoreSet()}, if applicable.
+ *   <li>Add the transport to the list of transports pending initialization ({@link
+ *       BackupManagerService#getPendingInits()}) and kick-off initialization if the transport ever
+ *       returned {@link BackupTransport#TRANSPORT_NOT_INITIALIZED}.
+ *   <li>Unregister the task in current operations.
+ *   <li>Release the wakelock.
+ *   <li>Kick-off {@link PerformFullTransportBackupTask} if a list of full-backup packages was
+ *       provided.
+ * </ul>
+ *
+ * The caller can specify whether this should be an incremental or non-incremental backup. In the
+ * case of non-incremental the agents will be passed an empty old state file, which signals that a
+ * complete backup should be performed.
+ *
+ * <p>This task is designed to run on a dedicated thread, with the exception of the {@link
+ * #handleCancel(boolean)} method, which can be called from any thread.
  */
-public class PerformBackupTask implements BackupRestoreTask {
+// TODO: Stop poking into BMS state and doing things for it (e.g. synchronizing on public locks)
+// TODO: Consider having the caller responsible for some clean-up (like resetting state)
+// TODO: Distinguish between cancel and time-out where possible for logging/monitoring/observing
+public class PerformBackupTask implements BackupRestoreTask, Runnable {
     private static final String TAG = "PerformBackupTask";
+    private static final boolean DEBUG = BackupManagerService.DEBUG || true;
+    private static final boolean MORE_DEBUG = BackupManagerService.MORE_DEBUG || false;
+    private static final int THREAD_PRIORITY = Process.THREAD_PRIORITY_BACKGROUND;
+    private static final AtomicInteger THREAD_COUNT = new AtomicInteger();
     private static final String BLANK_STATE_FILE_NAME = "blank_state";
     @VisibleForTesting
     public static final String STAGING_FILE_SUFFIX = ".data";
     @VisibleForTesting
     public static final String NEW_STATE_FILE_SUFFIX = ".new";
 
-    private BackupManagerService backupManagerService;
-    private final Object mCancelLock = new Object();
+    /**
+     * Creates a new {@link PerformBackupTask} for key-value backup operation, spins up a new
+     * dedicated thread and kicks off the operation in it.
+     *
+     * @param backupManagerService The {@link BackupManagerService} system service.
+     * @param transportClient The {@link TransportClient} that contains the transport used for the
+     *     operation.
+     * @param transportDirName The value of {@link IBackupTransport#transportDirName()} for the
+     *     transport whose {@link TransportClient} was provided above.
+     * @param queue The list of packages that will be backed-up, in the form of {@link
+     *     BackupRequest}.
+     * @param dataChangedJournal The old data-changed journal file that will be deleted when the
+     *     operation finishes (successfully or not) or {@code null}.
+     * @param observer A {@link IBackupObserver}.
+     * @param monitor A {@link IBackupManagerMonitor}.
+     * @param listener A {@link OnTaskFinishedListener} or {@code null}.
+     * @param pendingFullBackups The list of packages that will be passed for a new {@link
+     *     PerformFullTransportBackupTask} operation, which will be started when this finishes.
+     * @param userInitiated Whether this was user-initiated or not.
+     * @param nonIncremental If {@code true}, this will be a complete backup for each package,
+     *     otherwise it will be just an incremental one over the current dataset.
+     * @return The {@link PerformBackupTask} that was started.
+     */
+    public static PerformBackupTask start(
+            BackupManagerService backupManagerService,
+            TransportClient transportClient,
+            String transportDirName,
+            ArrayList<BackupRequest> queue,
+            @Nullable DataChangedJournal dataChangedJournal,
+            IBackupObserver observer,
+            IBackupManagerMonitor monitor,
+            @Nullable OnTaskFinishedListener listener,
+            List<String> pendingFullBackups,
+            boolean userInitiated,
+            boolean nonIncremental) {
+        PerformBackupTask task =
+                new PerformBackupTask(
+                        backupManagerService,
+                        transportClient,
+                        transportDirName,
+                        queue,
+                        dataChangedJournal,
+                        observer,
+                        monitor,
+                        listener,
+                        pendingFullBackups,
+                        userInitiated,
+                        nonIncremental);
+        Thread thread = new Thread(task, "key-value-backup-" + THREAD_COUNT.incrementAndGet());
+        if (DEBUG) {
+            Slog.d(TAG, "Spinning thread " + thread.getName());
+        }
+        thread.start();
+        return task;
+    }
 
-    private ArrayList<BackupRequest> mQueue;
-    private ArrayList<BackupRequest> mOriginalQueue;
-    private File mStateDir;
-    @Nullable private DataChangedJournal mJournal;
-    private BackupState mCurrentState;
-    private List<String> mPendingFullBackups;
-    private IBackupObserver mObserver;
-    private IBackupManagerMonitor mMonitor;
-
+    private final BackupManagerService mBackupManagerService;
     private final TransportClient mTransportClient;
+    private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
+    private final IBackupObserver mObserver;
     private final OnTaskFinishedListener mListener;
-    private final PerformFullTransportBackupTask mFullBackupTask;
+    private final boolean mUserInitiated;
+    private final boolean mNonIncremental;
     private final int mCurrentOpToken;
-    private volatile int mEphemeralOpToken;
+    private final File mStateDir;
+    private final ArrayList<BackupRequest> mOriginalQueue;
+    private final ArrayList<BackupRequest> mQueue;
+    private final List<String> mPendingFullBackups;
+    @Nullable private final DataChangedJournal mJournal;
+    private IBackupManagerMonitor mMonitor;
+    @Nullable private PerformFullTransportBackupTask mFullBackupTask;
 
-    // carried information about the current in-flight operation
     private IBackupAgent mAgentBinder;
     private PackageInfo mCurrentPackage;
-    private File mSavedStateName;
-    private File mBackupDataName;
-    private File mNewStateName;
+    private File mSavedStateFile;
+    private File mBackupDataFile;
+    private File mNewStateFile;
     private ParcelFileDescriptor mSavedState;
     private ParcelFileDescriptor mBackupData;
     private ParcelFileDescriptor mNewState;
     private int mStatus;
-    private boolean mFinished;
-    private final boolean mUserInitiated;
-    private final boolean mNonIncremental;
-    private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
-    private volatile boolean mCancelAll;
+    /**
+     * This {@link ConditionVariable} is used to signal that the cancel operation has been
+     * received by the task and that no more transport calls will be made. Anyone can call {@link
+     * ConditionVariable#block()} to wait for these conditions to hold true, but there should only
+     * be one place where {@link ConditionVariable#open()} is called. Also there should be no calls
+     * to {@link ConditionVariable#close()}, which means there is only one cancel per backup -
+     * subsequent calls to block will return immediately.
+     */
+    private final ConditionVariable mCancelAcknowledged = new ConditionVariable(false);
 
-    public PerformBackupTask(BackupManagerService backupManagerService,
-            TransportClient transportClient, String dirName,
-            ArrayList<BackupRequest> queue, @Nullable DataChangedJournal journal,
-            IBackupObserver observer, IBackupManagerMonitor monitor,
-            @Nullable OnTaskFinishedListener listener, List<String> pendingFullBackups,
-            boolean userInitiated, boolean nonIncremental) {
-        this.backupManagerService = backupManagerService;
+    /**
+     * Set it to {@code true} and block on {@code mCancelAcknowledged} to wait for the cancellation.
+     * DO NOT set it to {@code false}.
+     */
+    private volatile boolean mCancelled = false;
+
+    /**
+     * If non-{@code null} there is a pending agent call being made. This call can be cancelled (and
+     * control returned to this task) with {@link RemoteCall#cancel()}.
+     */
+    @Nullable private volatile RemoteCall mPendingCall;
+
+    @VisibleForTesting
+    public PerformBackupTask(
+            BackupManagerService backupManagerService,
+            TransportClient transportClient,
+            String transportDirName,
+            ArrayList<BackupRequest> queue,
+            @Nullable DataChangedJournal journal,
+            IBackupObserver observer,
+            IBackupManagerMonitor monitor,
+            @Nullable OnTaskFinishedListener listener,
+            List<String> pendingFullBackups,
+            boolean userInitiated,
+            boolean nonIncremental) {
+        mBackupManagerService = backupManagerService;
         mTransportClient = transportClient;
         mOriginalQueue = queue;
-        mQueue = new ArrayList<>();
+        // We need to retain the original queue contents in case of transport failure
+        mQueue = new ArrayList<>(mOriginalQueue);
         mJournal = journal;
         mObserver = observer;
         mMonitor = monitor;
@@ -171,92 +309,80 @@ public class PerformBackupTask implements BackupRestoreTask {
         mPendingFullBackups = pendingFullBackups;
         mUserInitiated = userInitiated;
         mNonIncremental = nonIncremental;
-        mAgentTimeoutParameters = Preconditions.checkNotNull(
-                backupManagerService.getAgentTimeoutParameters(),
-                "Timeout parameters cannot be null");
-
-        mStateDir = new File(backupManagerService.getBaseStateDir(), dirName);
+        mAgentTimeoutParameters =
+                Preconditions.checkNotNull(
+                        backupManagerService.getAgentTimeoutParameters(),
+                        "Timeout parameters cannot be null");
+        mStateDir = new File(backupManagerService.getBaseStateDir(), transportDirName);
         mCurrentOpToken = backupManagerService.generateRandomIntegerToken();
-
-        mFinished = false;
-
-        synchronized (backupManagerService.getCurrentOpLock()) {
-            if (backupManagerService.isBackupOperationInProgress()) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Skipping backup since one is already in progress.");
-                }
-                mCancelAll = true;
-                mFullBackupTask = null;
-                mCurrentState = BackupState.FINAL;
-                backupManagerService.addBackupTrace("Skipped. Backup already in progress.");
-            } else {
-                mCurrentState = BackupState.INITIAL;
-                CountDownLatch latch = new CountDownLatch(1);
-                String[] fullBackups =
-                        mPendingFullBackups.toArray(new String[mPendingFullBackups.size()]);
-                mFullBackupTask =
-                        new PerformFullTransportBackupTask(backupManagerService,
-                                transportClient,
-                                /*fullBackupRestoreObserver*/ null,
-                                fullBackups, /*updateSchedule*/ false, /*runningJob*/ null,
-                                latch,
-                                mObserver, mMonitor, mListener, mUserInitiated);
-
-                registerTask();
-                backupManagerService.addBackupTrace("STATE => INITIAL");
-            }
-        }
     }
 
-    /**
-     * Put this task in the repository of running tasks.
-     */
     private void registerTask() {
-        backupManagerService.putOperation(
+        mBackupManagerService.putOperation(
                 mCurrentOpToken, new Operation(OP_PENDING, this, OP_TYPE_BACKUP));
     }
 
-    /**
-     * Remove this task from repository of running tasks.
-     */
     private void unregisterTask() {
-        backupManagerService.removeOperation(mCurrentOpToken);
+        mBackupManagerService.removeOperation(mCurrentOpToken);
     }
 
-    // Main entry point: perform one chunk of work, updating the state as appropriate
-    // and reposting the next chunk to the primary backup handler thread.
     @Override
-    @GuardedBy("mCancelLock")
-    public void execute() {
-        synchronized (mCancelLock) {
-            switch (mCurrentState) {
-                case INITIAL:
-                    beginBackup();
-                    break;
+    public void run() {
+        Process.setThreadPriority(THREAD_PRIORITY);
 
+        BackupState state = beginBackup();
+        while (state == BackupState.RUNNING_QUEUE || state == BackupState.BACKUP_PM) {
+            if (mCancelled) {
+                state = BackupState.CANCELLED;
+            }
+            switch (state) {
                 case BACKUP_PM:
-                    backupPm();
+                    state = backupPm();
                     break;
-
                 case RUNNING_QUEUE:
-                    invokeNextAgent();
-                    break;
-
-                case FINAL:
-                    if (!mFinished) {
-                        finalizeBackup();
-                    } else {
-                        Slog.e(TAG, "Duplicate finish of K/V pass");
+                    Pair<BackupState, RemoteResult> stateAndResult = invokeNextAgent();
+                    state = stateAndResult.first;
+                    if (state == null) {
+                        state = processAgentInvocation(stateAndResult.second);
                     }
                     break;
             }
         }
+        if (state == BackupState.CANCELLED) {
+            finalizeCancelledBackup();
+        } else {
+            finalizeBackup();
+        }
     }
 
-    // We're starting a backup pass.  Initialize the transport if we haven't already.
-    private void beginBackup() {
+    private BackupState processAgentInvocation(RemoteResult result) {
+        if (result == RemoteResult.FAILED_THREAD_INTERRUPTED) {
+            // Not an explicit cancel, we need to flag it
+            mCancelled = true;
+            handleAgentCancelled();
+            return BackupState.CANCELLED;
+        }
+        if (result == RemoteResult.FAILED_CANCELLED) {
+            handleAgentCancelled();
+            return BackupState.CANCELLED;
+        }
+        if (result == RemoteResult.FAILED_TIMED_OUT) {
+            handleAgentTimeout();
+            return BackupState.RUNNING_QUEUE;
+        }
+        Preconditions.checkState(result.succeeded());
+        return handleAgentResult(result.get());
+    }
+
+    @Override
+    public void execute() {}
+
+    @Override
+    public void operationComplete(long unusedResult) {}
+
+    private BackupState beginBackup() {
         if (DEBUG_BACKUP_TRACE) {
-            backupManagerService.clearBackupTrace();
+            mBackupManagerService.clearBackupTrace();
             StringBuilder b = new StringBuilder(256);
             b.append("beginBackup: [");
             for (BackupRequest req : mOriginalQueue) {
@@ -264,8 +390,34 @@ public class PerformBackupTask implements BackupRestoreTask {
                 b.append(req.packageName);
             }
             b.append(" ]");
-            backupManagerService.addBackupTrace(b.toString());
+            mBackupManagerService.addBackupTrace(b.toString());
         }
+        synchronized (mBackupManagerService.getCurrentOpLock()) {
+            if (mBackupManagerService.isBackupOperationInProgress()) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Skipping backup since one is already in progress.");
+                }
+                mBackupManagerService.addBackupTrace("Skipped. Backup already in progress.");
+                return BackupState.FINAL;
+            }
+        }
+
+        String[] fullBackups = mPendingFullBackups.toArray(new String[mPendingFullBackups.size()]);
+        mFullBackupTask =
+                new PerformFullTransportBackupTask(
+                        mBackupManagerService,
+                        mTransportClient,
+                        /* fullBackupRestoreObserver */ null,
+                        fullBackups,
+                        /* updateSchedule */ false,
+                        /* runningJob */ null,
+                        new CountDownLatch(1),
+                        mObserver,
+                        mMonitor,
+                        mListener,
+                        mUserInitiated);
+        registerTask();
+        mBackupManagerService.addBackupTrace("STATE => INITIAL");
 
         mAgentBinder = null;
         mStatus = BackupTransport.TRANSPORT_OK;
@@ -273,15 +425,9 @@ public class PerformBackupTask implements BackupRestoreTask {
         // Sanity check: if the queue is empty we have no work to do.
         if (mOriginalQueue.isEmpty() && mPendingFullBackups.isEmpty()) {
             Slog.w(TAG, "Backup begun with an empty queue - nothing to do.");
-            backupManagerService.addBackupTrace("queue empty at begin");
-            executeNextState(BackupState.FINAL);
-            return;
+            mBackupManagerService.addBackupTrace("queue empty at begin");
+            return BackupState.FINAL;
         }
-
-        // We need to retain the original queue contents in case of transport
-        // failure, but we want a working copy that we can manipulate along
-        // the way.
-        mQueue = (ArrayList<BackupRequest>) mOriginalQueue.clone();
 
         // When the transport is forcing non-incremental key/value payloads, we send the
         // metadata only if it explicitly asks for it.
@@ -292,8 +438,7 @@ public class PerformBackupTask implements BackupRestoreTask {
         // we performed a backup.  Drop it from the working queue now that
         // we're committed to evaluating it for backup regardless.
         for (int i = 0; i < mQueue.size(); i++) {
-            if (PACKAGE_MANAGER_SENTINEL.equals(
-                    mQueue.get(i).packageName)) {
+            if (PACKAGE_MANAGER_SENTINEL.equals(mQueue.get(i).packageName)) {
                 if (MORE_DEBUG) {
                     Slog.i(TAG, "Metadata in queue; eliding");
                 }
@@ -309,17 +454,17 @@ public class PerformBackupTask implements BackupRestoreTask {
         File pmState = new File(mStateDir, PACKAGE_MANAGER_SENTINEL);
         try {
             IBackupTransport transport = mTransportClient.connectOrThrow("PBT.beginBackup()");
-            final String transportName = transport.transportDirName();
+            String transportName = transport.name();
             EventLog.writeEvent(EventLogTags.BACKUP_START, transportName);
 
             // If we haven't stored package manager metadata yet, we must init the transport.
-            if (mStatus == BackupTransport.TRANSPORT_OK && pmState.length() <= 0) {
+            if (pmState.length() <= 0) {
                 Slog.i(TAG, "Initializing (wiping) backup state and transport storage");
-                backupManagerService.addBackupTrace("initializing transport " + transportName);
-                backupManagerService.resetBackupState(mStateDir);  // Just to make sure.
+                mBackupManagerService.addBackupTrace("initializing transport " + transportName);
+                mBackupManagerService.resetBackupState(mStateDir);  // Just to make sure.
                 mStatus = transport.initializeDevice();
 
-                backupManagerService.addBackupTrace("transport.initializeDevice() == " + mStatus);
+                mBackupManagerService.addBackupTrace("transport.initializeDevice() == " + mStatus);
                 if (mStatus == BackupTransport.TRANSPORT_OK) {
                     EventLog.writeEvent(EventLogTags.BACKUP_INITIALIZE);
                 } else {
@@ -327,82 +472,81 @@ public class PerformBackupTask implements BackupRestoreTask {
                     Slog.e(TAG, "Transport error in initializeDevice()");
                 }
             }
-
-            if (skipPm) {
-                Slog.d(TAG, "Skipping backup of package metadata.");
-                executeNextState(BackupState.RUNNING_QUEUE);
-            } else {
-                // As the package manager is running here in the system process we can just set up
-                // its agent directly. Thus we always run this pass because it's cheap and this way
-                // we guarantee that we don't get out of step even if we're selecting among various
-                // transports at run time.
-                if (mStatus == BackupTransport.TRANSPORT_OK) {
-                    executeNextState(BackupState.BACKUP_PM);
-                }
-            }
         } catch (Exception e) {
             Slog.e(TAG, "Error in backup thread during init", e);
-            backupManagerService.addBackupTrace("Exception in backup thread during init: " + e);
+            mBackupManagerService.addBackupTrace("Exception in backup thread during init: " + e);
             mStatus = BackupTransport.TRANSPORT_ERROR;
-        } finally {
-            // If we've succeeded so far, we will move to the BACKUP_PM state. If something has gone
-            // wrong then that won't have happen so cleanup.
-            backupManagerService.addBackupTrace("exiting prelim: " + mStatus);
-            if (mStatus != BackupTransport.TRANSPORT_OK) {
-                // if things went wrong at this point, we need to
-                // restage everything and try again later.
-                backupManagerService.resetBackupState(mStateDir);  // Just to make sure.
-                // In case of any other error, it's backup transport error.
-                executeNextState(BackupState.FINAL);
-            }
         }
+        mBackupManagerService.addBackupTrace("exiting prelim: " + mStatus);
+
+        if (mStatus != BackupTransport.TRANSPORT_OK) {
+            // if things went wrong at this point, we need to
+            // restage everything and try again later.
+            mBackupManagerService.resetBackupState(mStateDir);  // Just to make sure.
+            return BackupState.FINAL;
+        }
+
+        if (skipPm) {
+            Slog.d(TAG, "Skipping backup of package metadata.");
+            return BackupState.RUNNING_QUEUE;
+        }
+
+        return BackupState.BACKUP_PM;
     }
 
-    private void backupPm() {
+    private BackupState backupPm() {
+        RemoteResult agentResult = null;
+        BackupState nextState;
         try {
             // The package manager doesn't have a proper <application> etc, but since it's running
             // here in the system process we can just set up its agent directly and use a synthetic
             // BackupRequest.
-            BackupAgent pmAgent = backupManagerService.makeMetadataAgent();
-            mStatus = invokeAgentForBackup(
-                    PACKAGE_MANAGER_SENTINEL,
-                    IBackupAgent.Stub.asInterface(pmAgent.onBind()));
-            backupManagerService.addBackupTrace("PMBA invoke: " + mStatus);
+            BackupAgent pmAgent = mBackupManagerService.makeMetadataAgent();
+            Pair<Integer, RemoteResult> statusAndResult =
+                    invokeAgentForBackup(
+                            PACKAGE_MANAGER_SENTINEL,
+                            IBackupAgent.Stub.asInterface(pmAgent.onBind()));
+            mStatus = statusAndResult.first;
+            agentResult = statusAndResult.second;
 
-            // Because the PMBA is a local instance, it has already executed its backup callback and
-            // returned.  Blow away the lingering (spurious) pending timeout message for it.
-            backupManagerService.getBackupHandler().removeMessages(
-                    MSG_BACKUP_OPERATION_TIMEOUT);
+            mBackupManagerService.addBackupTrace("PMBA invoke: " + mStatus);
         } catch (Exception e) {
             Slog.e(TAG, "Error in backup thread during pm", e);
-            backupManagerService.addBackupTrace("Exception in backup thread during pm: " + e);
+            mBackupManagerService.addBackupTrace("Exception in backup thread during pm: " + e);
             mStatus = BackupTransport.TRANSPORT_ERROR;
-        } finally {
-            // If we've succeeded so far, invokeAgentForBackup() will have run the PM
-            // metadata and its completion/timeout callback will continue the state
-            // machine chain.  If it failed that won't happen; we handle that now.
-            backupManagerService.addBackupTrace("exiting backupPm: " + mStatus);
-            if (mStatus != BackupTransport.TRANSPORT_OK) {
-                // if things went wrong at this point, we need to
-                // restage everything and try again later.
-                backupManagerService.resetBackupState(mStateDir);  // Just to make sure.
-                executeNextState(BackupState.FINAL);
-            }
         }
+        mBackupManagerService.addBackupTrace("exiting backupPm: " + mStatus);
+
+        if (mStatus == BackupTransport.TRANSPORT_OK) {
+            Preconditions.checkNotNull(agentResult);
+            nextState = processAgentInvocation(agentResult);
+        } else {
+            // if things went wrong at this point, we need to
+            // restage everything and try again later.
+            mBackupManagerService.resetBackupState(mStateDir);  // Just to make sure.
+            nextState = BackupState.FINAL;
+        }
+
+        return nextState;
     }
 
-    // Transport has been initialized and the PM metadata submitted successfully
-    // if that was warranted.  Now we process the single next thing in the queue.
-    private void invokeNextAgent() {
+    /**
+     * Returns either:
+     *
+     * <ul>
+     *   <li>(next state, {@code null}): In case we failed to call the agent.
+     *   <li>({@code null}, agent result): In case we successfully called the agent.
+     * </ul>
+     */
+    private Pair<BackupState, RemoteResult> invokeNextAgent() {
         mStatus = BackupTransport.TRANSPORT_OK;
-        backupManagerService.addBackupTrace("invoke q=" + mQueue.size());
+        mBackupManagerService.addBackupTrace("invoke q=" + mQueue.size());
 
         // Sanity check that we have work to do.  If not, skip to the end where
         // we reestablish the wakelock invariants etc.
         if (mQueue.isEmpty()) {
             if (MORE_DEBUG) Slog.i(TAG, "queue now empty");
-            executeNextState(BackupState.FINAL);
-            return;
+            return Pair.create(BackupState.FINAL, null);
         }
 
         // pop the entry we're going to process on this step
@@ -410,15 +554,16 @@ public class PerformBackupTask implements BackupRestoreTask {
         mQueue.remove(0);
 
         Slog.d(TAG, "starting key/value backup of " + request);
-        backupManagerService.addBackupTrace("launch agent for " + request.packageName);
+        mBackupManagerService.addBackupTrace("launch agent for " + request.packageName);
 
         // Verify that the requested app exists; it might be something that
         // requested a backup but was then uninstalled.  The request was
         // journalled and rather than tamper with the journal it's safer
         // to sanity-check here.  This also gives us the classname of the
         // package's backup agent.
+        RemoteResult agentResult = null;
         try {
-            PackageManager pm = backupManagerService.getPackageManager();
+            PackageManager pm = mBackupManagerService.getPackageManager();
             mCurrentPackage = pm.getPackageInfo(request.packageName,
                     PackageManager.GET_SIGNING_CERTIFICATES);
             if (!AppBackupUtils.appIsEligibleForBackup(mCurrentPackage.applicationInfo, pm)) {
@@ -427,14 +572,13 @@ public class PerformBackupTask implements BackupRestoreTask {
                 // backups.
                 Slog.i(TAG, "Package " + request.packageName
                         + " no longer supports backup; skipping");
-                backupManagerService.addBackupTrace("skipping - not eligible, completion is noop");
+                mBackupManagerService.addBackupTrace("skipping - not eligible, completion is noop");
                 // Shouldn't happen in case of requested backup, as pre-check was done in
                 // #requestBackup(), except to app update done concurrently
                 BackupObserverUtils.sendBackupOnPackageResult(mObserver,
                         mCurrentPackage.packageName,
                         BackupManager.ERROR_BACKUP_NOT_ALLOWED);
-                executeNextState(BackupState.RUNNING_QUEUE);
-                return;
+                return Pair.create(BackupState.RUNNING_QUEUE, null);
             }
 
             if (AppBackupUtils.appGetsFullBackup(mCurrentPackage)) {
@@ -443,42 +587,41 @@ public class PerformBackupTask implements BackupRestoreTask {
                 // Don't proceed with a key/value backup for it in this case.
                 Slog.i(TAG, "Package " + request.packageName
                         + " requests full-data rather than key/value; skipping");
-                backupManagerService.addBackupTrace(
+                mBackupManagerService.addBackupTrace(
                         "skipping - fullBackupOnly, completion is noop");
                 // Shouldn't happen in case of requested backup, as pre-check was done in
                 // #requestBackup()
                 BackupObserverUtils.sendBackupOnPackageResult(mObserver,
                         mCurrentPackage.packageName,
                         BackupManager.ERROR_BACKUP_NOT_ALLOWED);
-                executeNextState(BackupState.RUNNING_QUEUE);
-                return;
+                return Pair.create(BackupState.RUNNING_QUEUE, null);
             }
 
             if (AppBackupUtils.appIsStopped(mCurrentPackage.applicationInfo)) {
                 // The app has been force-stopped or cleared or just installed,
                 // and not yet launched out of that state, so just as it won't
                 // receive broadcasts, we won't run it for backup.
-                backupManagerService.addBackupTrace("skipping - stopped");
+                mBackupManagerService.addBackupTrace("skipping - stopped");
                 BackupObserverUtils.sendBackupOnPackageResult(mObserver,
                         mCurrentPackage.packageName,
                         BackupManager.ERROR_BACKUP_NOT_ALLOWED);
-                executeNextState(BackupState.RUNNING_QUEUE);
-                return;
+                return Pair.create(BackupState.RUNNING_QUEUE, null);
             }
 
-            IBackupAgent agent = null;
             try {
-                backupManagerService.setWorkSource(
+                mBackupManagerService.setWorkSource(
                         new WorkSource(mCurrentPackage.applicationInfo.uid));
-                agent = backupManagerService.bindToAgentSynchronous(mCurrentPackage.applicationInfo,
-                        ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL);
-                backupManagerService.addBackupTrace("agent bound; a? = " + (agent != null));
+                IBackupAgent agent =
+                        mBackupManagerService.bindToAgentSynchronous(
+                                mCurrentPackage.applicationInfo,
+                                ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL);
+                mBackupManagerService.addBackupTrace("agent bound; a? = " + (agent != null));
                 if (agent != null) {
                     mAgentBinder = agent;
-                    mStatus = invokeAgentForBackup(request.packageName, agent);
-                    // at this point we'll either get a completion callback from the
-                    // agent, or a timeout message on the main handler.  either way, we're
-                    // done here as long as we're successful so far.
+                    Pair<Integer, RemoteResult> statusAndResult =
+                            invokeAgentForBackup(request.packageName, agent);
+                    mStatus = statusAndResult.first;
+                    agentResult = statusAndResult.second;
                 } else {
                     // Timeout waiting for the agent
                     mStatus = BackupTransport.AGENT_ERROR;
@@ -487,62 +630,59 @@ public class PerformBackupTask implements BackupRestoreTask {
                 // Try for the next one.
                 Slog.d(TAG, "error in bind/backup", ex);
                 mStatus = BackupTransport.AGENT_ERROR;
-                backupManagerService.addBackupTrace("agent SE");
+                mBackupManagerService.addBackupTrace("agent SE");
             }
-        } catch (NameNotFoundException e) {
+        } catch (PackageManager.NameNotFoundException e) {
             Slog.d(TAG, "Package does not exist; skipping");
-            backupManagerService.addBackupTrace("no such package");
+            mBackupManagerService.addBackupTrace("no such package");
             mStatus = BackupTransport.AGENT_UNKNOWN;
         } finally {
-            backupManagerService.setWorkSource(null);
-
-            // If there was an agent error, no timeout/completion handling will occur.
-            // That means we need to direct to the next state ourselves.
-            if (mStatus != BackupTransport.TRANSPORT_OK) {
-                BackupState nextState = BackupState.RUNNING_QUEUE;
-                mAgentBinder = null;
-
-                // An agent-level failure means we reenqueue this one agent for
-                // a later retry, but otherwise proceed normally.
-                if (mStatus == BackupTransport.AGENT_ERROR) {
-                    if (MORE_DEBUG) {
-                        Slog.i(TAG, "Agent failure for " + request.packageName
-                                + " - restaging");
-                    }
-                    backupManagerService.dataChangedImpl(request.packageName);
-                    mStatus = BackupTransport.TRANSPORT_OK;
-                    if (mQueue.isEmpty()) nextState = BackupState.FINAL;
-                    BackupObserverUtils
-                            .sendBackupOnPackageResult(mObserver, mCurrentPackage.packageName,
-                                    BackupManager.ERROR_AGENT_FAILURE);
-                } else if (mStatus == BackupTransport.AGENT_UNKNOWN) {
-                    // Failed lookup of the app, so we couldn't bring up an agent, but
-                    // we're otherwise fine.  Just drop it and go on to the next as usual.
-                    mStatus = BackupTransport.TRANSPORT_OK;
-                    BackupObserverUtils
-                            .sendBackupOnPackageResult(mObserver, request.packageName,
-                                    BackupManager.ERROR_PACKAGE_NOT_FOUND);
-                } else {
-                    // Transport-level failure means we reenqueue everything
-                    revertAndEndBackup();
-                    nextState = BackupState.FINAL;
-                }
-
-                executeNextState(nextState);
-            } else {
-                // success case
-                backupManagerService.addBackupTrace("expecting completion/timeout callback");
-            }
+            mBackupManagerService.setWorkSource(null);
         }
+
+        if (mStatus != BackupTransport.TRANSPORT_OK) {
+            BackupState nextState = BackupState.RUNNING_QUEUE;
+            mAgentBinder = null;
+
+            // An agent-level failure means we re-enqueue this one agent for
+            // a later retry, but otherwise proceed normally.
+            if (mStatus == BackupTransport.AGENT_ERROR) {
+                if (MORE_DEBUG) {
+                    Slog.i(TAG, "Agent failure for " + request.packageName + " - restaging");
+                }
+                mBackupManagerService.dataChangedImpl(request.packageName);
+                mStatus = BackupTransport.TRANSPORT_OK;
+                BackupObserverUtils
+                        .sendBackupOnPackageResult(mObserver, mCurrentPackage.packageName,
+                                BackupManager.ERROR_AGENT_FAILURE);
+            } else if (mStatus == BackupTransport.AGENT_UNKNOWN) {
+                // Failed lookup of the app, so we couldn't bring up an agent, but
+                // we're otherwise fine.  Just drop it and go on to the next as usual.
+                mStatus = BackupTransport.TRANSPORT_OK;
+                BackupObserverUtils
+                        .sendBackupOnPackageResult(mObserver, request.packageName,
+                                BackupManager.ERROR_PACKAGE_NOT_FOUND);
+            } else {
+                // Transport-level failure means we re-enqueue everything
+                revertAndEndBackup();
+                nextState = BackupState.FINAL;
+            }
+
+            return Pair.create(nextState, null);
+        }
+
+        // Success: caller will figure out the state based on call result
+        mBackupManagerService.addBackupTrace("call made; result = " + agentResult);
+        return Pair.create(null, agentResult);
     }
 
     private void finalizeBackup() {
-        backupManagerService.addBackupTrace("finishing");
+        mBackupManagerService.addBackupTrace("finishing");
 
         // Mark packages that we didn't backup (because backup was cancelled, etc.) as needing
         // backup.
         for (BackupRequest req : mQueue) {
-            backupManagerService.dataChangedImpl(req.packageName);
+            mBackupManagerService.dataChangedImpl(req.packageName);
         }
 
         // Either backup was successful, in which case we of course do not need
@@ -557,65 +697,62 @@ public class PerformBackupTask implements BackupRestoreTask {
         // done a backup, we can now record what the current backup dataset token
         // is.
         String callerLogString = "PBT.finalizeBackup()";
-        if ((backupManagerService.getCurrentToken() == 0) && (mStatus
+        if ((mBackupManagerService.getCurrentToken() == 0) && (mStatus
                 == BackupTransport.TRANSPORT_OK)) {
-            backupManagerService.addBackupTrace("success; recording token");
+            mBackupManagerService.addBackupTrace("success; recording token");
             try {
-                IBackupTransport transport =
-                        mTransportClient.connectOrThrow(callerLogString);
-                backupManagerService.setCurrentToken(transport.getCurrentRestoreSet());
-                backupManagerService.writeRestoreTokens();
+                IBackupTransport transport = mTransportClient.connectOrThrow(callerLogString);
+                mBackupManagerService.setCurrentToken(transport.getCurrentRestoreSet());
+                mBackupManagerService.writeRestoreTokens();
             } catch (Exception e) {
                 // nothing for it at this point, unfortunately, but this will be
                 // recorded the next time we fully succeed.
                 Slog.e(TAG, "Transport threw reporting restore set: " + e.getMessage());
-                backupManagerService.addBackupTrace("transport threw returning token");
+                mBackupManagerService.addBackupTrace("transport threw returning token");
             }
         }
 
         // Set up the next backup pass - at this point we can set mBackupRunning
-        // to false to allow another pass to fire, because we're done with the
-        // state machine sequence and the wakelock is refcounted.
-        synchronized (backupManagerService.getQueueLock()) {
-            backupManagerService.setBackupRunning(false);
+        // to false to allow another pass to fire
+        synchronized (mBackupManagerService.getQueueLock()) {
+            mBackupManagerService.setBackupRunning(false);
             if (mStatus == BackupTransport.TRANSPORT_NOT_INITIALIZED) {
                 // Make sure we back up everything and perform the one-time init
                 if (MORE_DEBUG) {
                     Slog.d(TAG, "Server requires init; rerunning");
                 }
-                backupManagerService.addBackupTrace("init required; rerunning");
+                mBackupManagerService.addBackupTrace("init required; rerunning");
                 try {
-                    String name = backupManagerService.getTransportManager()
+                    String name = mBackupManagerService.getTransportManager()
                             .getTransportName(mTransportClient.getTransportComponent());
-                    backupManagerService.getPendingInits().add(name);
+                    mBackupManagerService.getPendingInits().add(name);
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to query transport name for init: " + e.getMessage());
                     // swallow it and proceed; we don't rely on this
                 }
                 clearMetadata();
-                backupManagerService.backupNow();
+                mBackupManagerService.backupNow();
             }
         }
 
-        backupManagerService.clearBackupTrace();
+        mBackupManagerService.clearBackupTrace();
 
         unregisterTask();
 
-        if (!mCancelAll && mStatus == BackupTransport.TRANSPORT_OK &&
+        if (!mCancelled && mStatus == BackupTransport.TRANSPORT_OK &&
                 mPendingFullBackups != null && !mPendingFullBackups.isEmpty()) {
             Slog.d(TAG, "Starting full backups for: " + mPendingFullBackups);
             // Acquiring wakelock for PerformFullTransportBackupTask before its start.
-            backupManagerService.getWakelock().acquire();
+            mBackupManagerService.getWakelock().acquire();
             // The full-backup task is now responsible for calling onFinish() on mListener, which
             // was the listener we passed it.
             (new Thread(mFullBackupTask, "full-transport-requested")).start();
-        } else if (mCancelAll) {
+        } else if (mCancelled) {
             mListener.onFinished(callerLogString);
             if (mFullBackupTask != null) {
                 mFullBackupTask.unregisterTask();
             }
-            BackupObserverUtils.sendBackupFinished(mObserver,
-                    BackupManager.ERROR_BACKUP_CANCELLED);
+            BackupObserverUtils.sendBackupFinished(mObserver, BackupManager.ERROR_BACKUP_CANCELLED);
         } else {
             mListener.onFinished(callerLogString);
             mFullBackupTask.unregisterTask();
@@ -623,8 +760,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                 case BackupTransport.TRANSPORT_OK:
                 case BackupTransport.TRANSPORT_QUOTA_EXCEEDED:
                 case BackupTransport.TRANSPORT_PACKAGE_REJECTED:
-                    BackupObserverUtils.sendBackupFinished(mObserver,
-                            BackupManager.SUCCESS);
+                    BackupObserverUtils.sendBackupFinished(mObserver, BackupManager.SUCCESS);
                     break;
                 case BackupTransport.TRANSPORT_NOT_INITIALIZED:
                     BackupObserverUtils.sendBackupFinished(mObserver,
@@ -637,10 +773,9 @@ public class PerformBackupTask implements BackupRestoreTask {
                     break;
             }
         }
-        mFinished = true;
         Slog.i(TAG, "K/V backup pass finished.");
         // Only once we're entirely finished do we release the wakelock for k/v backup.
-        backupManagerService.getWakelock().release();
+        mBackupManagerService.getWakelock().release();
     }
 
     // Remove the PM metadata state. This will generate an init on the next pass.
@@ -649,27 +784,34 @@ public class PerformBackupTask implements BackupRestoreTask {
         if (pmState.exists()) pmState.delete();
     }
 
-    // Invoke an agent's doBackup() and start a timeout message spinning on the main
-    // handler in case it doesn't get back to us.
-    private int invokeAgentForBackup(String packageName, IBackupAgent agent) {
+    /**
+     * Returns a {@link Pair}. The first of the pair contains the status. In case the status is
+     * {@link BackupTransport#TRANSPORT_OK}, the second of the pair contains the agent result,
+     * otherwise {@code null}.
+     */
+    private Pair<Integer, RemoteResult> invokeAgentForBackup(
+            String packageName, IBackupAgent agent) {
         if (DEBUG) {
             Slog.d(TAG, "invokeAgentForBackup on " + packageName);
         }
-        backupManagerService.addBackupTrace("invoking " + packageName);
+        mBackupManagerService.addBackupTrace("invoking " + packageName);
 
-        File blankStateName = new File(mStateDir, BLANK_STATE_FILE_NAME);
-        mSavedStateName = new File(mStateDir, packageName);
-        mBackupDataName =
-                new File(backupManagerService.getDataDir(), packageName + STAGING_FILE_SUFFIX);
-        mNewStateName = new File(mStateDir, packageName + NEW_STATE_FILE_SUFFIX);
-        if (MORE_DEBUG) Slog.d(TAG, "data file: " + mBackupDataName);
+        File blankStateFile = new File(mStateDir, BLANK_STATE_FILE_NAME);
+        mSavedStateFile = new File(mStateDir, packageName);
+        mBackupDataFile =
+                new File(mBackupManagerService.getDataDir(), packageName + STAGING_FILE_SUFFIX);
+        mNewStateFile = new File(mStateDir, packageName + NEW_STATE_FILE_SUFFIX);
+        if (MORE_DEBUG) {
+            Slog.d(TAG, "data file: " + mBackupDataFile);
+        }
+
 
         mSavedState = null;
         mBackupData = null;
         mNewState = null;
 
         boolean callingAgent = false;
-        mEphemeralOpToken = backupManagerService.generateRandomIntegerToken();
+        final RemoteResult agentResult;
         try {
             // Look up the package info & signatures.  This is first so that if it
             // throws an exception, there's no file setup yet that would need to
@@ -681,24 +823,21 @@ public class PerformBackupTask implements BackupRestoreTask {
                 mCurrentPackage.packageName = packageName;
             }
 
-            // In a full backup, we pass a null ParcelFileDescriptor as
-            // the saved-state "file". For key/value backups we pass the old state if
-            // an incremental backup is required, and a blank state otherwise.
             mSavedState = ParcelFileDescriptor.open(
-                    mNonIncremental ? blankStateName : mSavedStateName,
+                    (mNonIncremental) ? blankStateFile : mSavedStateFile,
                     ParcelFileDescriptor.MODE_READ_ONLY |
                             ParcelFileDescriptor.MODE_CREATE);  // Make an empty file if necessary
 
-            mBackupData = ParcelFileDescriptor.open(mBackupDataName,
+            mBackupData = ParcelFileDescriptor.open(mBackupDataFile,
                     ParcelFileDescriptor.MODE_READ_WRITE |
                             ParcelFileDescriptor.MODE_CREATE |
                             ParcelFileDescriptor.MODE_TRUNCATE);
 
-            if (!SELinux.restorecon(mBackupDataName)) {
-                Slog.e(TAG, "SELinux restorecon failed on " + mBackupDataName);
+            if (!SELinux.restorecon(mBackupDataFile)) {
+                Slog.e(TAG, "SELinux restorecon failed on " + mBackupDataFile);
             }
 
-            mNewState = ParcelFileDescriptor.open(mNewStateName,
+            mNewState = ParcelFileDescriptor.open(mNewStateFile,
                     ParcelFileDescriptor.MODE_READ_WRITE |
                             ParcelFileDescriptor.MODE_CREATE |
                             ParcelFileDescriptor.MODE_TRUNCATE);
@@ -710,36 +849,36 @@ public class PerformBackupTask implements BackupRestoreTask {
             callingAgent = true;
 
             // Initiate the target's backup pass
-            backupManagerService.addBackupTrace("setting timeout");
             long kvBackupAgentTimeoutMillis =
                     mAgentTimeoutParameters.getKvBackupAgentTimeoutMillis();
-            backupManagerService.prepareOperationTimeout(
-                    mEphemeralOpToken, kvBackupAgentTimeoutMillis, this, OP_TYPE_BACKUP_WAIT);
-            backupManagerService.addBackupTrace("calling agent doBackup()");
+            mBackupManagerService.addBackupTrace("calling agent doBackup()");
 
-            agent.doBackup(
-                    mSavedState, mBackupData, mNewState, quota, mEphemeralOpToken,
-                    backupManagerService.getBackupManagerBinder(), transport.getTransportFlags());
+            agentResult =
+                    remoteCall(
+                            callback ->
+                                    agent.doBackup(
+                                            mSavedState,
+                                            mBackupData,
+                                            mNewState,
+                                            quota,
+                                            callback,
+                                            transport.getTransportFlags()),
+                            kvBackupAgentTimeoutMillis);
         } catch (Exception e) {
             Slog.e(TAG, "Error invoking for backup on " + packageName + ". " + e);
-            backupManagerService.addBackupTrace("exception: " + e);
-            EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, packageName,
-                    e.toString());
+            mBackupManagerService.addBackupTrace("exception: " + e);
+            EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, packageName, e.toString());
             errorCleanup();
-            return callingAgent ? BackupTransport.AGENT_ERROR
-                    : BackupTransport.TRANSPORT_ERROR;
+            int status =
+                    callingAgent ? BackupTransport.AGENT_ERROR : BackupTransport.TRANSPORT_ERROR;
+            return Pair.create(status, null);
         } finally {
             if (mNonIncremental) {
-                blankStateName.delete();
+                blankStateFile.delete();
             }
         }
 
-        // At this point the agent is off and running.  The next thing to happen will
-        // either be a callback from the agent, at which point we'll process its data
-        // for transport, or a timeout.  Either way the next phase will happen in
-        // response to the TimeoutHandler interface callbacks.
-        backupManagerService.addBackupTrace("invoke success");
-        return BackupTransport.TRANSPORT_OK;
+        return Pair.create(BackupTransport.TRANSPORT_OK, agentResult);
     }
 
     private void failAgent(IBackupAgent agent, String message) {
@@ -829,327 +968,319 @@ public class PerformBackupTask implements BackupRestoreTask {
         }
     }
 
-    @Override
-    @GuardedBy("mCancelLock")
-    public void operationComplete(long unusedResult) {
-        backupManagerService.removeOperation(mEphemeralOpToken);
-        synchronized (mCancelLock) {
-            // The agent reported back to us!
-            if (mFinished) {
-                Slog.d(TAG, "operationComplete received after task finished.");
-                return;
-            }
+    private BackupState handleAgentResult(long unusedResult) {
+        Preconditions.checkState(mBackupData != null);
 
-            if (mBackupData == null) {
-                // This callback was racing with our timeout, so we've cleaned up the
-                // agent state already and are on to the next thing.  We have nothing
-                // further to do here: agent state having been cleared means that we've
-                // initiated the appropriate next operation.
-                final String pkg = (mCurrentPackage != null)
-                        ? mCurrentPackage.packageName : "[none]";
-                if (MORE_DEBUG) {
-                    Slog.i(TAG, "Callback after agent teardown: " + pkg);
-                }
-                backupManagerService.addBackupTrace("late opComplete; curPkg = " + pkg);
-                return;
-            }
-
-            final String pkgName = mCurrentPackage.packageName;
-            final long filepos = mBackupDataName.length();
-            FileDescriptor fd = mBackupData.getFileDescriptor();
-            try {
-                // If it's a 3rd party app, see whether they wrote any protected keys
-                // and complain mightily if they are attempting shenanigans.
-                if (mCurrentPackage.applicationInfo != null &&
-                        (mCurrentPackage.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
-                                == 0) {
-                    ParcelFileDescriptor readFd = ParcelFileDescriptor.open(mBackupDataName,
-                            ParcelFileDescriptor.MODE_READ_ONLY);
-                    BackupDataInput in = new BackupDataInput(readFd.getFileDescriptor());
-                    try {
-                        while (in.readNextHeader()) {
-                            final String key = in.getKey();
-                            if (key != null && key.charAt(0) >= 0xff00) {
-                                // Not okay: crash them and bail.
-                                failAgent(mAgentBinder, "Illegal backup key: " + key);
-                                backupManagerService
-                                        .addBackupTrace("illegal key " + key + " from " + pkgName);
-                                EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, pkgName,
-                                        "bad key");
-                                mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
-                                        BackupManagerMonitor.LOG_EVENT_ID_ILLEGAL_KEY,
-                                        mCurrentPackage,
-                                        BackupManagerMonitor
-                                                .LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                                        BackupManagerMonitorUtils.putMonitoringExtra(null,
-                                                BackupManagerMonitor.EXTRA_LOG_ILLEGAL_KEY,
-                                                key));
-                                backupManagerService.getBackupHandler().removeMessages(
-                                        MSG_BACKUP_OPERATION_TIMEOUT);
-                                BackupObserverUtils
-                                        .sendBackupOnPackageResult(mObserver, pkgName,
-                                                BackupManager.ERROR_AGENT_FAILURE);
-                                errorCleanup();
-                                if (MORE_DEBUG) {
-                                    Slog.i(TAG, "Agent failure for " + pkgName
-                                            + " with illegal key: " + key + "; dropped");
-                                }
-                                executeNextState(mQueue.isEmpty() ? BackupState.FINAL
-                                        : BackupState.RUNNING_QUEUE);
-                                return;
+        final String pkgName = mCurrentPackage.packageName;
+        final long filepos = mBackupDataFile.length();
+        FileDescriptor fd = mBackupData.getFileDescriptor();
+        try {
+            // If it's a 3rd party app, see whether they wrote any protected keys
+            // and complain mightily if they are attempting shenanigans.
+            if (mCurrentPackage.applicationInfo != null &&
+                    (mCurrentPackage.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
+                            == 0) {
+                ParcelFileDescriptor readFd = ParcelFileDescriptor.open(mBackupDataFile,
+                        ParcelFileDescriptor.MODE_READ_ONLY);
+                BackupDataInput in = new BackupDataInput(readFd.getFileDescriptor());
+                try {
+                    while (in.readNextHeader()) {
+                        final String key = in.getKey();
+                        if (key != null && key.charAt(0) >= 0xff00) {
+                            // Not okay: crash them and bail.
+                            failAgent(mAgentBinder, "Illegal backup key: " + key);
+                            mBackupManagerService
+                                    .addBackupTrace("illegal key " + key + " from " + pkgName);
+                            EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, pkgName,
+                                    "bad key");
+                            mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
+                                    BackupManagerMonitor.LOG_EVENT_ID_ILLEGAL_KEY,
+                                    mCurrentPackage,
+                                    BackupManagerMonitor
+                                            .LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                                    BackupManagerMonitorUtils.putMonitoringExtra(null,
+                                            BackupManagerMonitor.EXTRA_LOG_ILLEGAL_KEY,
+                                            key));
+                            BackupObserverUtils
+                                    .sendBackupOnPackageResult(mObserver, pkgName,
+                                            BackupManager.ERROR_AGENT_FAILURE);
+                            errorCleanup();
+                            if (MORE_DEBUG) {
+                                Slog.i(TAG, "Agent failure for " + pkgName
+                                        + " with illegal key: " + key + "; dropped");
                             }
-                            in.skipEntityData();
+
+                            return BackupState.RUNNING_QUEUE;
                         }
-                    } finally {
-                        if (readFd != null) {
-                            readFd.close();
-                        }
+                        in.skipEntityData();
+                    }
+                } finally {
+                    if (readFd != null) {
+                        readFd.close();
                     }
                 }
-
-                // Piggyback the widget state payload, if any
-                writeWidgetPayloadIfAppropriate(fd, pkgName);
-            } catch (IOException e) {
-                // Hard disk error; recovery/failure policy TBD.  For now roll back,
-                // but we may want to consider this a transport-level failure (i.e.
-                // we're in such a bad state that we can't contemplate doing backup
-                // operations any more during this pass).
-                Slog.w(TAG, "Unable to save widget state for " + pkgName);
-                try {
-                    Os.ftruncate(fd, filepos);
-                } catch (ErrnoException ee) {
-                    Slog.w(TAG, "Unable to roll back!");
-                }
             }
 
-            // Spin the data off to the transport and proceed with the next stage.
-            if (MORE_DEBUG) {
-                Slog.v(TAG, "operationComplete(): sending data to transport for "
-                        + pkgName);
-            }
-            backupManagerService.getBackupHandler().removeMessages(MSG_BACKUP_OPERATION_TIMEOUT);
-            clearAgentState();
-            backupManagerService.addBackupTrace("operation complete");
-
-            IBackupTransport transport = mTransportClient.connect("PBT.operationComplete()");
-            ParcelFileDescriptor backupData = null;
-            mStatus = BackupTransport.TRANSPORT_OK;
-            long size = 0;
+            // Piggyback the widget state payload, if any
+            writeWidgetPayloadIfAppropriate(fd, pkgName);
+        } catch (IOException e) {
+            // Hard disk error; recovery/failure policy TBD.  For now roll back,
+            // but we may want to consider this a transport-level failure (i.e.
+            // we're in such a bad state that we can't contemplate doing backup
+            // operations any more during this pass).
+            Slog.w(TAG, "Unable read backup data or to save widget state for " + pkgName);
             try {
-                TransportUtils.checkTransportNotNull(transport);
-                size = mBackupDataName.length();
-                if (size > 0) {
-                    boolean isNonIncremental = mSavedStateName.length() == 0;
-                    if (mStatus == BackupTransport.TRANSPORT_OK) {
-                        backupData = ParcelFileDescriptor.open(mBackupDataName,
-                                ParcelFileDescriptor.MODE_READ_ONLY);
-                        backupManagerService.addBackupTrace("sending data to transport");
+                Os.ftruncate(fd, filepos);
+            } catch (ErrnoException ee) {
+                Slog.w(TAG, "Unable to roll back!");
+            }
+        }
 
-                        int userInitiatedFlag =
-                                mUserInitiated ? BackupTransport.FLAG_USER_INITIATED : 0;
-                        int incrementalFlag =
-                                isNonIncremental
+        clearAgentState();
+        mBackupManagerService.addBackupTrace("operation complete");
+
+        ParcelFileDescriptor backupData = null;
+        mStatus = BackupTransport.TRANSPORT_OK;
+        long size = 0;
+        try {
+            IBackupTransport transport = mTransportClient.connectOrThrow("PBT.handleAgentResult()");
+            size = mBackupDataFile.length();
+            if (size > 0) {
+                if (MORE_DEBUG) {
+                    Slog.v(TAG, "Sending non-empty data to transport for " + pkgName);
+                }
+                boolean isNonIncremental = mSavedStateFile.length() == 0;
+                if (mStatus == BackupTransport.TRANSPORT_OK) {
+                    backupData = ParcelFileDescriptor.open(mBackupDataFile,
+                            ParcelFileDescriptor.MODE_READ_ONLY);
+                    mBackupManagerService.addBackupTrace("sending data to transport");
+
+                    int userInitiatedFlag =
+                            mUserInitiated ? BackupTransport.FLAG_USER_INITIATED : 0;
+                    int incrementalFlag =
+                            isNonIncremental
                                     ? BackupTransport.FLAG_NON_INCREMENTAL
                                     : BackupTransport.FLAG_INCREMENTAL;
-                        int flags = userInitiatedFlag | incrementalFlag;
+                    int flags = userInitiatedFlag | incrementalFlag;
 
-                        mStatus = transport.performBackup(mCurrentPackage, backupData, flags);
-                    }
+                    mStatus = transport.performBackup(mCurrentPackage, backupData, flags);
+                }
 
-                    if (isNonIncremental
+                if (isNonIncremental
                         && mStatus == BackupTransport.TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED) {
-                        // TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED is only valid if the backup was
-                        // incremental, as if the backup is non-incremental there is no state to
-                        // clear. This avoids us ending up in a retry loop if the transport always
-                        // returns this code.
-                        Slog.w(TAG,
-                                "Transport requested non-incremental but already the case, error");
-                        backupManagerService.addBackupTrace(
-                                "Transport requested non-incremental but already the case, error");
-                        mStatus = BackupTransport.TRANSPORT_ERROR;
-                    }
-
-                    // TODO - We call finishBackup() for each application backed up, because
-                    // we need to know now whether it succeeded or failed.  Instead, we should
-                    // hold off on finishBackup() until the end, which implies holding off on
-                    // renaming *all* the output state files (see below) until that happens.
-
-                    backupManagerService.addBackupTrace("data delivered: " + mStatus);
-                    if (mStatus == BackupTransport.TRANSPORT_OK) {
-                        backupManagerService.addBackupTrace("finishing op on transport");
-                        mStatus = transport.finishBackup();
-                        backupManagerService.addBackupTrace("finished: " + mStatus);
-                    } else if (mStatus == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
-                        backupManagerService.addBackupTrace("transport rejected package");
-                    }
-                } else {
-                    if (MORE_DEBUG) {
-                        Slog.i(TAG, "no backup data written; not calling transport");
-                    }
-                    backupManagerService.addBackupTrace("no data to send");
-                    mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
-                            BackupManagerMonitor.LOG_EVENT_ID_NO_DATA_TO_SEND,
-                            mCurrentPackage,
-                            BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
-                            null);
+                    // TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED is only valid if the backup was
+                    // incremental, as if the backup is non-incremental there is no state to
+                    // clear. This avoids us ending up in a retry loop if the transport always
+                    // returns this code.
+                    Slog.w(TAG, "Transport requested non-incremental but already the case, error");
+                    mBackupManagerService.addBackupTrace(
+                            "Transport requested non-incremental but already the case, error");
+                    mStatus = BackupTransport.TRANSPORT_ERROR;
                 }
 
+                mBackupManagerService.addBackupTrace("data delivered: " + mStatus);
                 if (mStatus == BackupTransport.TRANSPORT_OK) {
-                    // After successful transport, delete the now-stale data
-                    // and juggle the files so that next time we supply the agent
-                    // with the new state file it just created.
-                    mBackupDataName.delete();
-                    mNewStateName.renameTo(mSavedStateName);
-                    BackupObserverUtils
-                            .sendBackupOnPackageResult(mObserver, pkgName, BackupManager.SUCCESS);
-                    EventLog.writeEvent(EventLogTags.BACKUP_PACKAGE, pkgName, size);
-                    backupManagerService.logBackupComplete(pkgName);
+                    mBackupManagerService.addBackupTrace("finishing op on transport");
+                    mStatus = transport.finishBackup();
+                    mBackupManagerService.addBackupTrace("finished: " + mStatus);
                 } else if (mStatus == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
-                    // The transport has rejected backup of this specific package.  Roll it
-                    // back but proceed with running the rest of the queue.
-                    mBackupDataName.delete();
-                    mNewStateName.delete();
-                    BackupObserverUtils.sendBackupOnPackageResult(mObserver, pkgName,
-                            BackupManager.ERROR_TRANSPORT_PACKAGE_REJECTED);
-                    EventLogTags.writeBackupAgentFailure(pkgName, "Transport rejected");
-                } else if (mStatus == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
-                    BackupObserverUtils.sendBackupOnPackageResult(mObserver, pkgName,
-                            BackupManager.ERROR_TRANSPORT_QUOTA_EXCEEDED);
-                    EventLog.writeEvent(EventLogTags.BACKUP_QUOTA_EXCEEDED, pkgName);
-
-                } else if (mStatus == BackupTransport.TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED) {
-                    Slog.i(TAG, "Transport lost data, retrying package");
-                    backupManagerService.addBackupTrace(
-                            "Transport lost data, retrying package:" + pkgName);
-                    BackupManagerMonitorUtils.monitorEvent(
-                            mMonitor,
-                            BackupManagerMonitor
-                                    .LOG_EVENT_ID_TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED,
-                            mCurrentPackage,
-                            BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT,
-                            /*extras=*/ null);
-
-                    mBackupDataName.delete();
-                    mSavedStateName.delete();
-                    mNewStateName.delete();
-
-                    // Immediately retry the package by adding it back to the front of the queue.
-                    // We cannot add @pm@ to the queue because we back it up separately at the start
-                    // of the backup pass in state BACKUP_PM. Instead we retry this state (see
-                    // below).
-                    if (!PACKAGE_MANAGER_SENTINEL.equals(pkgName)) {
-                        mQueue.add(0, new BackupRequest(pkgName));
-                    }
-
-                } else {
-                    // Actual transport-level failure to communicate the data to the backend
-                    BackupObserverUtils.sendBackupOnPackageResult(mObserver, pkgName,
-                            BackupManager.ERROR_TRANSPORT_ABORTED);
-                    EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, pkgName);
+                    mBackupManagerService.addBackupTrace("transport rejected package");
                 }
-            } catch (Exception e) {
-                BackupObserverUtils.sendBackupOnPackageResult(mObserver, pkgName,
-                        BackupManager.ERROR_TRANSPORT_ABORTED);
-                Slog.e(TAG, "Transport error backing up " + pkgName, e);
-                EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, pkgName);
-                mStatus = BackupTransport.TRANSPORT_ERROR;
-            } finally {
-                try {
-                    if (backupData != null) backupData.close();
-                } catch (IOException e) {
+            } else {
+                if (MORE_DEBUG) {
+                    Slog.i(TAG, "No backup data written; not calling transport");
                 }
+                mBackupManagerService.addBackupTrace("no data to send");
+                mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
+                        BackupManagerMonitor.LOG_EVENT_ID_NO_DATA_TO_SEND,
+                        mCurrentPackage,
+                        BackupManagerMonitor.LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
+                        null);
             }
 
-            final BackupState nextState;
-            if (mStatus == BackupTransport.TRANSPORT_OK
-                    || mStatus == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
-                // Success or single-package rejection.  Proceed with the next app if any,
-                // otherwise we're done.
-                nextState = (mQueue.isEmpty()) ? BackupState.FINAL : BackupState.RUNNING_QUEUE;
+            if (mStatus == BackupTransport.TRANSPORT_OK) {
+                // After successful transport, delete the now-stale data
+                // and juggle the files so that next time we supply the agent
+                // with the new state file it just created.
+                mBackupDataFile.delete();
+                mNewStateFile.renameTo(mSavedStateFile);
+                BackupObserverUtils.sendBackupOnPackageResult(
+                        mObserver, pkgName, BackupManager.SUCCESS);
+                EventLog.writeEvent(EventLogTags.BACKUP_PACKAGE, pkgName, size);
+                mBackupManagerService.logBackupComplete(pkgName);
+            } else if (mStatus == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
+                // The transport has rejected backup of this specific package.  Roll it
+                // back but proceed with running the rest of the queue.
+                mBackupDataFile.delete();
+                mNewStateFile.delete();
+                BackupObserverUtils.sendBackupOnPackageResult(mObserver, pkgName,
+                        BackupManager.ERROR_TRANSPORT_PACKAGE_REJECTED);
+                EventLogTags.writeBackupAgentFailure(pkgName, "Transport rejected");
+            } else if (mStatus == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
+                BackupObserverUtils.sendBackupOnPackageResult(mObserver, pkgName,
+                        BackupManager.ERROR_TRANSPORT_QUOTA_EXCEEDED);
+                EventLog.writeEvent(EventLogTags.BACKUP_QUOTA_EXCEEDED, pkgName);
 
             } else if (mStatus == BackupTransport.TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED) {
-                // We want to immediately retry the current package.
-                if (PACKAGE_MANAGER_SENTINEL.equals(pkgName)) {
-                    nextState = BackupState.BACKUP_PM;
-                } else {
-                    // This is an ordinary package so we will have added it back into the queue
-                    // above. Thus, we proceed processing the queue.
-                    nextState = BackupState.RUNNING_QUEUE;
+                Slog.i(TAG, "Transport lost data, retrying package");
+                mBackupManagerService.addBackupTrace(
+                        "Transport lost data, retrying package:" + pkgName);
+                BackupManagerMonitorUtils.monitorEvent(
+                        mMonitor,
+                        BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED,
+                        mCurrentPackage,
+                        BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT,
+                        /*extras=*/ null);
+
+                mBackupDataFile.delete();
+                mSavedStateFile.delete();
+                mNewStateFile.delete();
+
+                // Immediately retry the package by adding it back to the front of the queue.
+                // We cannot add @pm@ to the queue because we back it up separately at the start
+                // of the backup pass in state BACKUP_PM. Instead we retry this state (see
+                // below).
+                if (!PACKAGE_MANAGER_SENTINEL.equals(pkgName)) {
+                    mQueue.add(0, new BackupRequest(pkgName));
                 }
 
-            } else if (mStatus == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
-                if (MORE_DEBUG) {
-                    Slog.d(TAG, "Package " + mCurrentPackage.packageName +
-                            " hit quota limit on k/v backup");
-                }
-                if (mAgentBinder != null) {
-                    try {
-                        TransportUtils.checkTransportNotNull(transport);
-                        long quota = transport.getBackupQuota(mCurrentPackage.packageName, false);
-                        mAgentBinder.doQuotaExceeded(size, quota);
-                    } catch (Exception e) {
-                        Slog.e(TAG, "Unable to notify about quota exceeded: " + e.getMessage());
-                    }
-                }
-                nextState = (mQueue.isEmpty()) ? BackupState.FINAL : BackupState.RUNNING_QUEUE;
             } else {
-                // Any other error here indicates a transport-level failure.  That means
-                // we need to halt everything and reschedule everything for next time.
-                revertAndEndBackup();
-                nextState = BackupState.FINAL;
+                // Actual transport-level failure to communicate the data to the backend
+                BackupObserverUtils.sendBackupOnPackageResult(mObserver, pkgName,
+                        BackupManager.ERROR_TRANSPORT_ABORTED);
+                EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, pkgName);
+            }
+        } catch (Exception e) {
+            BackupObserverUtils.sendBackupOnPackageResult(mObserver, pkgName,
+                    BackupManager.ERROR_TRANSPORT_ABORTED);
+            Slog.e(TAG, "Transport error backing up " + pkgName, e);
+            EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, pkgName);
+            mStatus = BackupTransport.TRANSPORT_ERROR;
+        } finally {
+            try {
+                if (backupData != null) {
+                    backupData.close();
+                }
+            } catch (IOException e) {
+                Slog.w(TAG, "Error closing backup data fd");
+            }
+        }
+
+        final BackupState nextState;
+        if (mStatus == BackupTransport.TRANSPORT_OK
+                || mStatus == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
+            // Success or single-package rejection.  Proceed with the next app if any,
+            // otherwise we're done.
+            nextState = BackupState.RUNNING_QUEUE;
+
+        } else if (mStatus == BackupTransport.TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED) {
+            // We want to immediately retry the current package.
+            if (PACKAGE_MANAGER_SENTINEL.equals(pkgName)) {
+                nextState = BackupState.BACKUP_PM;
+            } else {
+                // This is an ordinary package so we will have added it back into the queue
+                // above. Thus, we proceed processing the queue.
+                nextState = BackupState.RUNNING_QUEUE;
             }
 
-            executeNextState(nextState);
+        } else if (mStatus == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
+            if (MORE_DEBUG) {
+                Slog.d(TAG, "Package " + mCurrentPackage.packageName +
+                        " hit quota limit on k/v backup");
+            }
+            if (mAgentBinder != null) {
+                try {
+                    IBackupTransport transport =
+                            mTransportClient.connectOrThrow("PBT.handleAgentResult()");
+                    long quota = transport.getBackupQuota(mCurrentPackage.packageName, false);
+                    mAgentBinder.doQuotaExceeded(size, quota);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Unable to notify about quota exceeded: " + e.getMessage());
+                }
+            }
+            nextState = BackupState.RUNNING_QUEUE;
+        } else {
+            // Any other error here indicates a transport-level failure.  That means
+            // we need to halt everything and reschedule everything for next time.
+            revertAndEndBackup();
+            nextState = BackupState.FINAL;
         }
+
+        return nextState;
     }
 
-
+    /**
+     * Cancels this task. After this method returns there will be no more calls to the transport.
+     *
+     * <p>If this method is executed while an agent is performing a backup, we will stop waiting for
+     * it, disregard its backup data and finalize the task. However, if this method is executed in
+     * between agent calls, the backup data of the last called agent will be sent to
+     * the transport and we will not consider the next agent (nor the rest of the queue), proceeding
+     * to finalize the backup.
+     *
+     * @param cancelAll MUST be {@code true}. Will be removed.
+     */
     @Override
-    @GuardedBy("mCancelLock")
     public void handleCancel(boolean cancelAll) {
-        backupManagerService.removeOperation(mEphemeralOpToken);
-        synchronized (mCancelLock) {
-            if (mFinished) {
-                // We have already cancelled this operation.
-                if (MORE_DEBUG) {
-                    Slog.d(TAG, "Ignoring stale cancel. cancelAll=" + cancelAll);
-                }
-                return;
-            }
-            mCancelAll = cancelAll;
-            final String logPackageName = (mCurrentPackage != null)
-                    ? mCurrentPackage.packageName
-                    : "no_package_yet";
-            Slog.i(TAG, "Cancel backing up " + logPackageName);
-            EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, logPackageName);
-            backupManagerService.addBackupTrace(
-                    "cancel of " + logPackageName + ", cancelAll=" + cancelAll);
-            mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
-                    BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_BACKUP_CANCEL,
-                    mCurrentPackage, BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT,
-                    BackupManagerMonitorUtils.putMonitoringExtra(null,
-                            BackupManagerMonitor.EXTRA_LOG_CANCEL_ALL,
-                            mCancelAll));
-            errorCleanup();
-            if (!cancelAll) {
-                // The current agent either timed out or was cancelled running doBackup().
-                // Restage it for the next time we run a backup pass.
-                // !!! TODO: keep track of failure counts per agent, and blacklist those which
-                // fail repeatedly (i.e. have proved themselves to be buggy).
-                executeNextState(
-                        mQueue.isEmpty() ? BackupState.FINAL : BackupState.RUNNING_QUEUE);
-                backupManagerService.dataChangedImpl(mCurrentPackage.packageName);
-            } else {
-                finalizeBackup();
-            }
+        Preconditions.checkArgument(cancelAll, "Can't partially cancel a key-value backup task");
+        if (MORE_DEBUG) {
+            Slog.v(TAG, "Cancel received");
         }
+        mCancelled = true;
+        RemoteCall pendingCall = mPendingCall;
+        if (pendingCall != null) {
+            pendingCall.cancel();
+        }
+        mCancelAcknowledged.block();
+    }
+
+    private void handleAgentTimeout() {
+        String packageName = getPackageNameForLog();
+        Slog.i(TAG, "Agent " + packageName + " timed out");
+        EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, packageName);
+        mBackupManagerService.addBackupTrace("timeout of " + packageName);
+        mMonitor =
+                BackupManagerMonitorUtils.monitorEvent(
+                        mMonitor,
+                        BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_BACKUP_CANCEL,
+                        mCurrentPackage,
+                        BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT,
+                        BackupManagerMonitorUtils.putMonitoringExtra(
+                                null, BackupManagerMonitor.EXTRA_LOG_CANCEL_ALL, false));
+        errorCleanup();
+    }
+
+    private void handleAgentCancelled() {
+        String packageName = getPackageNameForLog();
+        Slog.i(TAG, "Cancel backing up " + packageName);
+        EventLog.writeEvent(EventLogTags.BACKUP_AGENT_FAILURE, packageName);
+        mBackupManagerService.addBackupTrace("cancel of " + packageName);
+        errorCleanup();
+    }
+
+    private void finalizeCancelledBackup() {
+        mMonitor =
+                BackupManagerMonitorUtils.monitorEvent(
+                        mMonitor,
+                        BackupManagerMonitor.LOG_EVENT_ID_KEY_VALUE_BACKUP_CANCEL,
+                        mCurrentPackage,
+                        BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT,
+                        BackupManagerMonitorUtils.putMonitoringExtra(
+                                null, BackupManagerMonitor.EXTRA_LOG_CANCEL_ALL, true));
+        finalizeBackup();
+        // finalizeBackup() may call the transport, so we only acknowledge the cancellation here.
+        mCancelAcknowledged.open();
+    }
+
+    private String getPackageNameForLog() {
+        return (mCurrentPackage != null) ? mCurrentPackage.packageName : "no_package_yet";
     }
 
     private void revertAndEndBackup() {
         if (MORE_DEBUG) {
             Slog.i(TAG, "Reverting backup queue - restaging everything");
         }
-        backupManagerService.addBackupTrace("transport error; reverting");
+        mBackupManagerService.addBackupTrace("transport error; reverting");
 
         // We want to reset the backup schedule based on whatever the transport suggests
         // by way of retry/backoff time.
@@ -1162,59 +1293,65 @@ public class PerformBackupTask implements BackupRestoreTask {
             Slog.w(TAG, "Unable to contact transport for recommended backoff: " + e.getMessage());
             delay = 0;  // use the scheduler's default
         }
-        KeyValueBackupJob.schedule(backupManagerService.getContext(), delay,
-                backupManagerService.getConstants());
+        KeyValueBackupJob.schedule(mBackupManagerService.getContext(), delay,
+                mBackupManagerService.getConstants());
 
         for (BackupRequest request : mOriginalQueue) {
-            backupManagerService.dataChangedImpl(request.packageName);
+            mBackupManagerService.dataChangedImpl(request.packageName);
         }
-
     }
 
     private void errorCleanup() {
-        mBackupDataName.delete();
-        mNewStateName.delete();
+        mBackupDataFile.delete();
+        mNewStateFile.delete();
         clearAgentState();
     }
 
     // Cleanup common to both success and failure cases
     private void clearAgentState() {
         try {
-            if (mSavedState != null) mSavedState.close();
+            if (mSavedState != null) {
+                mSavedState.close();
+            }
         } catch (IOException e) {
+            Slog.w(TAG, "Error closing old state fd");
         }
         try {
-            if (mBackupData != null) mBackupData.close();
+            if (mBackupData != null) {
+                mBackupData.close();
+            }
         } catch (IOException e) {
+            Slog.w(TAG, "Error closing backup data fd");
         }
         try {
-            if (mNewState != null) mNewState.close();
+            if (mNewState != null) {
+                mNewState.close();
+            }
         } catch (IOException e) {
+            Slog.w(TAG, "Error closing new state fd");
         }
-        synchronized (backupManagerService.getCurrentOpLock()) {
+        synchronized (mBackupManagerService.getCurrentOpLock()) {
             // Current-operation callback handling requires the validity of these various
             // bits of internal state as an invariant of the operation still being live.
             // This means we make sure to clear all of the state in unison inside the lock.
-            backupManagerService.getCurrentOperations().remove(mEphemeralOpToken);
             mSavedState = mBackupData = mNewState = null;
         }
 
-        // If this was a pseudopackage there's no associated Activity Manager state
+        // If this was a pseudo-package there's no associated Activity Manager state
         if (mCurrentPackage.applicationInfo != null) {
-            backupManagerService.addBackupTrace("unbinding " + mCurrentPackage.packageName);
-            backupManagerService.unbindAgent(mCurrentPackage.applicationInfo);
+            mBackupManagerService.addBackupTrace("unbinding " + mCurrentPackage.packageName);
+            mBackupManagerService.unbindAgent(mCurrentPackage.applicationInfo);
         }
     }
 
-    private void executeNextState(BackupState nextState) {
+    private RemoteResult remoteCall(RemoteCallable<IBackupCallback> remoteCallable, long timeoutMs)
+            throws RemoteException {
+        mPendingCall = new RemoteCall(mCancelled, remoteCallable, timeoutMs);
+        RemoteResult result = mPendingCall.call();
         if (MORE_DEBUG) {
-            Slog.i(TAG, " => executing next step on "
-                    + this + " nextState=" + nextState);
+            Slog.v(TAG, "Agent call returned " + result);
         }
-        backupManagerService.addBackupTrace("executeNextState => " + nextState);
-        mCurrentState = nextState;
-        Message msg = backupManagerService.getBackupHandler().obtainMessage(
-                MSG_BACKUP_RESTORE_STEP, this);
-        backupManagerService.getBackupHandler().sendMessage(msg);
+        mPendingCall = null;
+        return result;
     }
 }

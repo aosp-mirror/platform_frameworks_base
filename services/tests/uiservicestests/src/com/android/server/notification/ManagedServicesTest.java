@@ -25,6 +25,7 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -691,6 +692,20 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
             verifyExpectedApprovedEntries(service);
         }
+    }
+
+    @Test
+    public void testIsSameUser() {
+        IInterface service = mock(IInterface.class);
+        when(service.asBinder()).thenReturn(mock(IBinder.class));
+        ManagedServices services = new TestManagedServices(getContext(), mLock, mUserProfiles,
+                mIpm, APPROVAL_BY_PACKAGE);
+        services.registerService(service, null, 10);
+        ManagedServices.ManagedServiceInfo info = services.checkServiceTokenLocked(service);
+        info.isSystem = true;
+
+        assertFalse(services.isSameUser(service, 0));
+        assertTrue(services.isSameUser(service, 10));
     }
 
     private void loadXml(ManagedServices service) throws Exception {

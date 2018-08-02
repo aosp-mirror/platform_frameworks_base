@@ -328,6 +328,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                             PackageManager pm = context.getPackageManager();
                             String app = intent.getData().getSchemeSpecificPart();
                             sStatsd.informOnePackageRemoved(app, uid);
+                            StatsLog.write(StatsLog.GENERIC_ATOM, uid, 1000);
                         }
                     } else {
                         PackageManager pm = context.getPackageManager();
@@ -336,6 +337,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         String app = intent.getData().getSchemeSpecificPart();
                         PackageInfo pi = pm.getPackageInfo(app, PackageManager.MATCH_ANY_USER);
                         sStatsd.informOnePackage(app, uid, pi.getLongVersionCode());
+                        StatsLog.write(StatsLog.GENERIC_ATOM, uid, 1001);
                     }
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to inform statsd of an app update", e);

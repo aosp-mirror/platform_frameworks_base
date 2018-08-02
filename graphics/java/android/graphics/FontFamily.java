@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.graphics.fonts.FontVariationAxis;
 import android.text.TextUtils;
@@ -51,16 +52,19 @@ public class FontFamily {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public long mNativePtr;
 
     // Points native font family builder. Must be zero after freezing this family.
     private long mBuilderPtr;
 
+    @UnsupportedAppUsage
     public FontFamily() {
         mBuilderPtr = nInitBuilder(null, 0);
         mNativeBuilderCleaner = sBuilderRegistry.registerNativeAllocation(this, mBuilderPtr);
     }
 
+    @UnsupportedAppUsage
     public FontFamily(@Nullable String[] langs, int variant) {
         final String langsString;
         if (langs == null || langs.length == 0) {
@@ -80,6 +84,7 @@ public class FontFamily {
      * @return boolean returns false if some error happens in native code, e.g. broken font file is
      *                 passed, etc.
      */
+    @UnsupportedAppUsage
     public boolean freeze() {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("This FontFamily is already frozen");
@@ -93,6 +98,7 @@ public class FontFamily {
         return mNativePtr != 0;
     }
 
+    @UnsupportedAppUsage
     public void abortCreation() {
         if (mBuilderPtr == 0) {
             throw new IllegalStateException("This FontFamily is already frozen or abandoned");
@@ -122,6 +128,7 @@ public class FontFamily {
         }
     }
 
+    @UnsupportedAppUsage
     public boolean addFontFromBuffer(ByteBuffer font, int ttcIndex, FontVariationAxis[] axes,
             int weight, int italic) {
         if (mBuilderPtr == 0) {
@@ -147,6 +154,7 @@ public class FontFamily {
      *            using the OS/2 table in the font.
      * @return
      */
+    @UnsupportedAppUsage
     public boolean addFontFromAssetManager(AssetManager mgr, String path, int cookie,
             boolean isAsset, int ttcIndex, int weight, int isItalic,
             FontVariationAxis[] axes) {

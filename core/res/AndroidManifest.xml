@@ -606,6 +606,14 @@
     <protected-broadcast android:name="android.intent.action.DOCK_IDLE" />
     <protected-broadcast android:name="android.intent.action.DOCK_ACTIVE" />
 
+    <!-- Added in Q -->
+
+    <!-- For CarIdlenessTracker -->
+    <protected-broadcast android:name="com.android.server.jobscheduler.GARAGE_MODE_ON" />
+    <protected-broadcast android:name="com.android.server.jobscheduler.GARAGE_MODE_OFF" />
+    <protected-broadcast android:name="com.android.server.jobscheduler.FORCE_IDLE" />
+    <protected-broadcast android:name="com.android.server.jobscheduler.UNFORCE_IDLE" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->

@@ -47,8 +47,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
@@ -81,6 +83,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManagerInternal;
 import android.os.storage.DiskInfo;
 import android.os.storage.IObbActionListener;
 import android.os.storage.IStorageEventListener;
@@ -97,11 +100,13 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.DataUnit;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
@@ -174,7 +179,12 @@ class StorageManagerService extends IStorageManager.Stub
 
     /* Read during boot to decide whether to enable zram when available */
     private static final String ZRAM_ENABLED_PROPERTY =
-        "persist.sys.zram_enabled";
+            "persist.sys.zram_enabled";
+
+    private static final String ISOLATED_STORAGE_PROPERTY =
+            "persist.sys.isolated_storage";
+
+    private static final String SHARED_SANDBOX_ID_PREFIX = "shared:";
 
     public static class Lifecycle extends SystemService {
         private StorageManagerService mStorageManagerService;
@@ -267,6 +277,18 @@ class StorageManagerService extends IStorageManager.Stub
      */
     private final Object mLock = LockGuard.installNewLock(LockGuard.INDEX_STORAGE);
 
+    /**
+     * Similar to {@link #mLock}, never hold this lock while performing downcalls into vold.
+     * Also, never hold this while calling into PackageManagerService since it is used in callbacks
+     * from PackageManagerService.
+     *
+     * If both {@link #mLock} and this lock need to be held, {@link #mLock} should be acquired
+     * before this.
+     *
+     * Use -PL suffix for methods that need to called with this lock held.
+     */
+    private final Object mPackagesLock = new Object();
+
     /** Set of users that we know are unlocked. */
     @GuardedBy("mLock")
     private int[] mLocalUnlockedUsers = EmptyArray.INT;
@@ -295,6 +317,15 @@ class StorageManagerService extends IStorageManager.Stub
     private IPackageMoveObserver mMoveCallback;
     @GuardedBy("mLock")
     private String mMoveTargetUuid;
+
+    @GuardedBy("mPackagesLock")
+    private final SparseArray<ArraySet<String>> mPackages = new SparseArray<>();
+
+    @GuardedBy("mPackagesLock")
+    private final ArrayMap<String, Integer> mAppIds = new ArrayMap<>();
+
+    @GuardedBy("mPackagesLock")
+    private final SparseArray<String> mSandboxIds = new SparseArray<>();
 
     private volatile int mCurrentUserId = UserHandle.USER_SYSTEM;
 
@@ -417,6 +448,7 @@ class StorageManagerService extends IStorageManager.Stub
     private volatile boolean mSecureKeyguardShowing = true;
 
     private PackageManagerService mPms;
+    private PackageManagerInternal mPmInternal;
 
     private final Callbacks mCallbacks;
     private final LockPatternUtils mLockPatternUtils;
@@ -868,12 +900,13 @@ class StorageManagerService extends IStorageManager.Stub
             try {
                 mVold.reset();
 
+                pushPackagesInfo();
                 // Tell vold about all existing and started users
                 for (UserInfo user : users) {
                     mVold.onUserAdded(user.id, user.serialNumber);
                 }
                 for (int userId : systemUnlockedUsers) {
-                    mVold.onUserStarted(userId);
+                    mVold.onUserStarted(userId, getPackagesArrayForUser(userId));
                     mStoraged.onUserStarted(userId);
                 }
                 mVold.onSecureKeyguardStateChanged(mSecureKeyguardShowing);
@@ -890,7 +923,7 @@ class StorageManagerService extends IStorageManager.Stub
         // staging area is ready so it's ready for zygote-forked apps to
         // bind mount against.
         try {
-            mVold.onUserStarted(userId);
+            mVold.onUserStarted(userId, getPackagesArrayForUser(userId));
             mStoraged.onUserStarted(userId);
         } catch (Exception e) {
             Slog.wtf(TAG, e);
@@ -1396,6 +1429,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         // XXX: This will go away soon in favor of IMountServiceObserver
         mPms = (PackageManagerService) ServiceManager.getService("package");
+        mPmInternal = LocalServices.getService(PackageManagerInternal.class);
 
         HandlerThread hthread = new HandlerThread(TAG);
         hthread.start();
@@ -1445,7 +1479,97 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     private void start() {
+        collectPackagesInfo();
         connect();
+    }
+
+    private void collectPackagesInfo() {
+        if (!SystemProperties.getBoolean(ISOLATED_STORAGE_PROPERTY, false)) {
+            return;
+        }
+        resetPackageData();
+        final SparseArray<String> sharedUserIds = mPmInternal.getAppsWithSharedUserIds();
+        final int[] userIds = LocalServices.getService(
+                UserManagerInternal.class).getUserIds();
+        for (int userId : userIds) {
+            final List<ApplicationInfo> appInfos
+                    = mContext.getPackageManager().getInstalledApplicationsAsUser(
+                            PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+            synchronized (mPackagesLock) {
+                final ArraySet<String> userPackages = getPackagesForUserPL(userId);
+                for (int i = appInfos.size() - 1; i >= 0; --i) {
+                    if (appInfos.get(i).isInstantApp()) {
+                        continue;
+                    }
+                    final String packageName = appInfos.get(i).packageName;
+                    userPackages.add(packageName);
+
+                    final int appId = UserHandle.getAppId(appInfos.get(i).uid);
+                    mAppIds.put(packageName, appId);
+                    mSandboxIds.put(appId, getSandboxId(packageName, sharedUserIds.get(appId)));
+                }
+            }
+        }
+    }
+
+    private void resetPackageData() {
+        synchronized (mPackagesLock) {
+            mPackages.clear();
+            mAppIds.clear();
+            mSandboxIds.clear();
+        }
+    }
+
+    private static String getSandboxId(String packageName, String sharedUserId) {
+        return sharedUserId == null ? packageName : SHARED_SANDBOX_ID_PREFIX + sharedUserId;
+    }
+    private void pushPackagesInfo() throws RemoteException {
+        if (!SystemProperties.getBoolean(ISOLATED_STORAGE_PROPERTY, false)) {
+            return;
+        }
+        // Arrays to fill up from {@link #mAppIds}
+        final String[] allPackageNames;
+        final int[] appIdsForPackages;
+
+        // Arrays to fill up from {@link #mSandboxIds}
+        final int[] allAppIds;
+        final String[] sandboxIdsForApps;
+        synchronized (mPackagesLock) {
+            allPackageNames = new String[mAppIds.size()];
+            appIdsForPackages = new int[mAppIds.size()];
+            for (int i = mAppIds.size() - 1; i >= 0; --i) {
+                allPackageNames[i] = mAppIds.keyAt(i);
+                appIdsForPackages[i] = mAppIds.valueAt(i);
+            }
+
+            allAppIds = new int[mSandboxIds.size()];
+            sandboxIdsForApps = new String[mSandboxIds.size()];
+            for (int i = mSandboxIds.size() - 1; i >= 0; --i) {
+                allAppIds[i] = mSandboxIds.keyAt(i);
+                sandboxIdsForApps[i] = mSandboxIds.valueAt(i);
+            }
+        }
+        mVold.addAppIds(allPackageNames, appIdsForPackages);
+        mVold.addSandboxIds(allAppIds, sandboxIdsForApps);
+    }
+
+    @GuardedBy("mPackagesLock")
+    private ArraySet<String> getPackagesForUserPL(int userId) {
+        ArraySet<String> userPackages = mPackages.get(userId);
+        if (userPackages == null) {
+            userPackages = new ArraySet<>();
+            mPackages.put(userId, userPackages);
+        }
+        return userPackages;
+    }
+
+    private String[] getPackagesArrayForUser(int userId) {
+        if (!SystemProperties.getBoolean(ISOLATED_STORAGE_PROPERTY, false)) {
+            return new String[0];
+        }
+        synchronized (mPackagesLock) {
+            return getPackagesForUserPL(userId).toArray(new String[0]);
+        }
     }
 
     private void connect() {
@@ -3635,6 +3759,10 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public void onExternalStoragePolicyChanged(int uid, String packageName) {
+            // No runtime storage permissions in isolated storage world, so nothing to do here.
+            if (SystemProperties.getBoolean(ISOLATED_STORAGE_PROPERTY, false)) {
+                return;
+            }
             final int mountMode = getExternalStorageMountMode(uid, packageName);
             remountUidExternalStorage(uid, mountMode);
         }

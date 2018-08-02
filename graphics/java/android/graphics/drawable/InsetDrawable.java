@@ -18,6 +18,7 @@ package android.graphics.drawable;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
@@ -57,6 +58,7 @@ public class InsetDrawable extends DrawableWrapper {
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpInsetRect = new Rect();
 
+    @UnsupportedAppUsage
     private InsetState mState;
 
     /**

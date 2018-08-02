@@ -1405,7 +1405,8 @@ public final class AutofillManager {
         final SyncResultReceiver receiver = new SyncResultReceiver();
         try {
             mService.getAvailableFieldClassificationAlgorithms(receiver);
-            final String[] algorithms = receiver.getObjectResult(SyncResultReceiver.TYPE_STRING);
+            final String[] algorithms = receiver
+                    .getObjectResult(SyncResultReceiver.TYPE_STRING_ARRAY);
             return algorithms != null ? Arrays.asList(algorithms) : Collections.emptyList();
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
@@ -2906,7 +2907,7 @@ public final class AutofillManager {
                 case TYPE_STRING:
                     return (T) mBundle.getString(EXTRA);
                 case TYPE_STRING_ARRAY:
-                    return (T) mBundle.getString(EXTRA);
+                    return (T) mBundle.getStringArray(EXTRA);
                 case TYPE_PARCELABLE:
                     return (T) mBundle.getParcelable(EXTRA);
                 default:

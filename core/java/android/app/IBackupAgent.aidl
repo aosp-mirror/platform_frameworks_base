@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.app.backup.IBackupCallback;
 import android.app.backup.IBackupManager;
 import android.os.ParcelFileDescriptor;
  
@@ -55,7 +56,7 @@ oneway interface IBackupAgent {
     void doBackup(in ParcelFileDescriptor oldState,
             in ParcelFileDescriptor data,
             in ParcelFileDescriptor newState,
-            long quotaBytes, int token, IBackupManager callbackBinder, int transportFlags);
+            long quotaBytes, IBackupCallback callbackBinder, int transportFlags);
 
     /**
      * Restore an entire data snapshot to the application.

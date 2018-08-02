@@ -7,5 +7,6 @@ enum BackupState {
     INITIAL,
     BACKUP_PM,
     RUNNING_QUEUE,
+    CANCELLED,
     FINAL
 }

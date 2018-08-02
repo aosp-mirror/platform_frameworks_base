@@ -399,7 +399,8 @@ final class InputMonitor {
             this.inDrag = inDrag;
             wallpaperController = mService.mRoot.mWallpaperController;
 
-            mService.mRoot.getDisplayContent(mDisplayId).forAllWindows(this,
+            // TODO(b/112081256): Use independent InputMonitor for each display.
+            mService.mRoot/*.getDisplayContent(mDisplayId)*/.forAllWindows(this,
                     true /* traverseTopToBottom */);
             if (mAddWallpaperInputConsumerHandle) {
                 // No visible wallpaper found, add the wallpaper input consumer at the end.

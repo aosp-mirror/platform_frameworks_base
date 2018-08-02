@@ -17,7 +17,7 @@
 
 <!-- themes for the permission grant dialog. -->
 <resources>
-    <style name="Theme.DeviceDefault.Light.Panel.PermissionGrantApp"
+    <style name="Theme.DeviceDefault.PermissionGrantApp"
            parent="@style/Theme.DeviceDefault.Light.Panel">
         <item name="windowIsFloating">false</item>
         <item name="windowTranslucentStatus">true</item>
@@ -25,7 +25,7 @@
         <item name="windowAnimationStyle">@style/Animation.Material.Dialog</item>
     </style>
 
-    <style name="Theme.DeviceDefault.Light.Dialog.PermissionGrant"
+    <style name="Theme.DeviceDefault.PermissionGrant"
            parent="@style/Theme.DeviceDefault.Light.Dialog">
         <item name="titleTextStyle">@style/PermissionGrantTitleMessage</item>
         <item name="radioButtonStyle">@style/PermissionGrantRadioButton</item>

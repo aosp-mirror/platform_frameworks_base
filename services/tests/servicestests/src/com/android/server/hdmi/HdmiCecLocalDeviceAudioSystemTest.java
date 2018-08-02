@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -163,6 +164,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mNativeWrapper.getResultMessages()).contains(expectedMessage);
     }
 
+    @Ignore("b/80297700")
     @Test
     public void handleSetSystemAudioMode_setOn_orignalOff() {
         mMusicMute = true;
@@ -190,6 +192,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mMusicMute).isFalse();
     }
 
+    @Ignore("b/80297700")
     @Test
     public void handleSystemAudioModeRequest_turnOffByTv() {
         assertThat(mMusicMute).isFalse();
@@ -215,6 +218,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mMusicMute).isTrue();
     }
 
+    @Ignore("b/80297700")
     @Test
     public void onStandbyAudioSystem_currentSystemAudioControlOn() {
         // Set system audio control on first
@@ -298,6 +302,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mNativeWrapper.getResultMessages()).doesNotContain(message);
     }
 
+    @Ignore("b/80297700")
     @Test
     public void terminateSystemAudioMode_systemAudioModeOn() {
         mHdmiCecLocalDeviceAudioSystem.setSystemAudioMode(true);

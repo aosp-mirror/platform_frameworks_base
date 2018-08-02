@@ -148,6 +148,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     private SafetyWarningDialog mSafetyWarning;
     private boolean mHovering = false;
     private boolean mShowActiveStreamOnly;
+    private boolean mConfigChanged = false;
 
     public VolumeDialogImpl(Context context) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
@@ -551,6 +552,11 @@ public class VolumeDialogImpl implements VolumeDialog {
         rescheduleTimeoutH();
         mShowing = true;
 
+        if (mConfigChanged) {
+            initDialog();
+            mConfigurableTexts.update();
+            mConfigChanged = false;
+        }
         initSettingsH();
         mDialog.show();
         Events.writeEvent(mContext, Events.EVENT_SHOW_DIALOG, reason, mKeyguard.isKeyguardLocked());
@@ -1102,8 +1108,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         @Override
         public void onConfigurationChanged() {
             mDialog.dismiss();
-            initDialog();
-            mConfigurableTexts.update();
+            mConfigChanged = true;
         }
 
         @Override

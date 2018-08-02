@@ -28,7 +28,7 @@
     <ImageView android:id="@+id/user_avatar"
         android:layout_width="@dimen/car_user_switcher_image_avatar_size"
         android:layout_height="@dimen/car_user_switcher_image_avatar_size"
-        android:background="@drawable/car_button_ripple_background_inverse"
+        android:background="@drawable/car_button_ripple_background_light"
         android:gravity="center"/>
 
     <TextView android:id="@+id/user_name"

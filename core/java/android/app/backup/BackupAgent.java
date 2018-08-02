@@ -941,11 +941,13 @@ public abstract class BackupAgent extends ContextWrapper {
         private static final String TAG = "BackupServiceBinder";
 
         @Override
-        public void doBackup(ParcelFileDescriptor oldState,
+        public void doBackup(
+                ParcelFileDescriptor oldState,
                 ParcelFileDescriptor data,
                 ParcelFileDescriptor newState,
-                long quotaBytes, int token, IBackupManager callbackBinder, int transportFlags)
-                throws RemoteException {
+                long quotaBytes,
+                IBackupCallback callbackBinder,
+                int transportFlags) throws RemoteException {
             // Ensure that we're running with the app's normal permission level
             long ident = Binder.clearCallingIdentity();
 
@@ -969,7 +971,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
                 Binder.restoreCallingIdentity(ident);
                 try {
-                    callbackBinder.opComplete(token, 0);
+                    callbackBinder.operationComplete(0);
                 } catch (RemoteException e) {
                     // we'll time out anyway, so we're safe
                 }

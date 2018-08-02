@@ -18,6 +18,7 @@ package android.graphics;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 
 /**
  * A color filter that transforms colors through a 4x5 color matrix. This filter
@@ -26,6 +27,7 @@ import android.annotation.Nullable;
  * @see ColorMatrix
  */
 public class ColorMatrixColorFilter extends ColorFilter {
+    @UnsupportedAppUsage
     private final ColorMatrix mMatrix = new ColorMatrix();
 
     /**
@@ -76,6 +78,7 @@ public class ColorMatrixColorFilter extends ColorFilter {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setColorMatrix(@Nullable ColorMatrix matrix) {
         discardNativeInstance();
         if (matrix == null) {
@@ -104,6 +107,7 @@ public class ColorMatrixColorFilter extends ColorFilter {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setColorMatrixArray(@Nullable float[] array) {
         // called '...Array' so that passing null isn't ambiguous
         discardNativeInstance();

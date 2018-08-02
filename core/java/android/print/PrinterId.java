@@ -17,6 +17,7 @@
 package android.print;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -57,6 +58,7 @@ public final class PrinterId implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public @NonNull ComponentName getServiceName() {
         return mServiceName;
     }

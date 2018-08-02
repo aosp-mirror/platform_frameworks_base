@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import android.annotation.UnsupportedAppUsage;
+
 /**
  * The NinePatch class permits drawing a bitmap in nine or more sections.
  * Essentially, it allows the creation of custom graphics that will scale the
@@ -41,6 +43,7 @@ public class NinePatch {
      */
     public static class InsetStruct {
         @SuppressWarnings({"UnusedDeclaration"}) // called from JNI
+        @UnsupportedAppUsage
         InsetStruct(int opticalLeft, int opticalTop, int opticalRight, int opticalBottom,
                 int outlineLeft, int outlineTop, int outlineRight, int outlineBottom,
                 float outlineRadius, int outlineAlpha, float decodeScale) {
@@ -77,6 +80,7 @@ public class NinePatch {
         }
     }
 
+    @UnsupportedAppUsage
     private final Bitmap mBitmap;
 
     /**
@@ -84,6 +88,7 @@ public class NinePatch {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public long mNativeChunk;
 
     private Paint mPaint;

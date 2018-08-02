@@ -18,6 +18,7 @@ package android.graphics.drawable;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
@@ -63,6 +64,7 @@ public class StateListDrawable extends DrawableContainer {
 
     private static final boolean DEBUG = false;
 
+    @UnsupportedAppUsage
     private StateListState mStateListState;
     private boolean mMutated;
 
@@ -129,6 +131,7 @@ public class StateListDrawable extends DrawableContainer {
     /**
      * Updates the constant state from the values in the typed array.
      */
+    @UnsupportedAppUsage
     private void updateStateFromTypedArray(TypedArray a) {
         final StateListState state = mStateListState;
 
@@ -206,6 +209,7 @@ public class StateListDrawable extends DrawableContainer {
      * @param attrs The attribute set.
      * @return An array of state_ attributes.
      */
+    @UnsupportedAppUsage
     int[] extractStateSet(AttributeSet attrs) {
         int j = 0;
         final int numAttrs = attrs.getAttributeCount();
@@ -329,6 +333,7 @@ public class StateListDrawable extends DrawableContainer {
             mStateSets = stateSets;
         }
 
+        @UnsupportedAppUsage
         int addStateSet(int[] stateSet, Drawable drawable) {
             final int pos = addChild(drawable);
             mStateSets[pos] = stateSet;

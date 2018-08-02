@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2015 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="grant_dialog_button_deny_dont_ask_again" msgid="5694574989758145558">"Odmów i nie pytaj ponownie"</string>
+    <string name="grant_dialog_how_to_change" msgid="615414835189256888">"Możesz to później zmienić, wybierając Ustawienia &gt; Aplikacje"</string>
+    <string name="current_permission_template" msgid="4793247012451594523">"<xliff:g id="CURRENT_PERMISSION_INDEX">%1$s</xliff:g>/<xliff:g id="PERMISSION_COUNT">%2$s</xliff:g>"</string>
+    <string name="preference_show_system_apps" msgid="7330308025768596149">"Pokaż aplikacje systemowe"</string>
+    <string name="app_permissions_decor_title" msgid="1461057434211920209">"Uprawnienia aplikacji"</string>
+    <string name="manage_permissions_decor_title" msgid="4823785025722958092">"Uprawnienia aplikacji"</string>
+    <string name="permission_apps_decor_title" msgid="3644363529649579576">"<xliff:g id="PERMISSION">%1$s</xliff:g> – uprawnienia"</string>
+    <string name="additional_permissions_decor_title" msgid="7000432624396037882">"Dodatkowe uprawnienia"</string>
+    <string name="system_apps_decor_title" msgid="5292119639812561805">"<xliff:g id="PERMISSION">%1$s</xliff:g> – uprawnienia"</string>
+</resources>

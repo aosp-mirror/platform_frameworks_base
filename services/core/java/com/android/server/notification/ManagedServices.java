@@ -629,6 +629,15 @@ abstract public class ManagedServices {
                 + service + " " + service.getClass());
     }
 
+    public boolean isSameUser(IInterface service, int userId) {
+        checkNotNull(service);
+        ManagedServiceInfo info = getServiceFromTokenLocked(service);
+        if (info != null) {
+            return info.isSameUser(userId);
+        }
+        return false;
+    }
+
     public void unregisterService(IInterface service, int userid) {
         checkNotNull(service);
         // no need to check permissions; if your service binder is in the list,
@@ -1203,6 +1212,13 @@ abstract public class ManagedServices {
             proto.write(ManagedServiceInfoProto.IS_SYSTEM, isSystem);
             proto.write(ManagedServiceInfoProto.IS_GUEST, isGuest(host));
             proto.end(token);
+        }
+
+        public boolean isSameUser(int userId) {
+            if (!isEnabledForCurrentProfiles()) {
+                return false;
+            }
+            return this.userid == userId;
         }
 
         public boolean enabledAndUserMatches(int nid) {

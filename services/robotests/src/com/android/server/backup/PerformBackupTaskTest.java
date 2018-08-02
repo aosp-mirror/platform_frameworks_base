@@ -54,6 +54,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
+import static org.robolectric.shadow.api.Shadow.extract;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Collections.emptyList;
@@ -79,6 +80,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.DeadObjectException;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
@@ -101,6 +103,7 @@ import com.android.server.backup.transport.TransportClient;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderClasses;
 import com.android.server.testing.SystemLoaderPackages;
+import com.android.server.testing.shadows.FrameworkShadowLooper;
 import com.android.server.testing.shadows.ShadowBackupDataInput;
 import com.android.server.testing.shadows.ShadowBackupDataOutput;
 import com.android.server.testing.shadows.ShadowEventLog;
@@ -143,10 +146,11 @@ import java.util.stream.Stream;
         manifest = Config.NONE,
         sdk = 26,
         shadows = {
+            FrameworkShadowLooper.class,
             ShadowBackupDataInput.class,
             ShadowBackupDataOutput.class,
             ShadowEventLog.class,
-            ShadowQueuedWork.class
+            ShadowQueuedWork.class,
         })
 @SystemLoaderPackages({"com.android.server.backup", "android.app.backup"})
 @SystemLoaderClasses({IBackupTransport.class, IBackupAgent.class, PackageInfo.class})
@@ -171,6 +175,7 @@ public class PerformBackupTaskTest {
     private File mDataDir;
     private Application mApplication;
     private ShadowApplication mShadowApplication;
+    private FrameworkShadowLooper mShadowMainLooper;
     private Context mContext;
 
     @Before
@@ -182,6 +187,8 @@ public class PerformBackupTaskTest {
         mApplication = RuntimeEnvironment.application;
         mShadowApplication = shadowOf(mApplication);
         mContext = mApplication;
+
+        mShadowMainLooper = extract(Looper.getMainLooper());
 
         File cacheDir = mApplication.getCacheDir();
         // Corresponds to /data/backup
@@ -337,7 +344,7 @@ public class PerformBackupTaskTest {
 
         runTask(task);
 
-        assertEventLogged(EventLogTags.BACKUP_START, mTransport.transportDirName);
+        assertEventLogged(EventLogTags.BACKUP_START, mTransport.transportName);
     }
 
     @Test
@@ -1571,11 +1578,10 @@ public class PerformBackupTaskTest {
     }
 
     private void runTask(PerformBackupTask task) {
-        Message message = mBackupHandler.obtainMessage(BackupHandler.MSG_BACKUP_RESTORE_STEP, task);
-        mBackupHandler.sendMessage(message);
-        while (mShadowBackupLooper.getScheduler().areAnyRunnable()) {
-            mShadowBackupLooper.runToEndOfTasks();
-        }
+        // Pretend we are not on the main-thread to prevent RemoteCall from complaining
+        mShadowMainLooper.setCurrentThread(false);
+        task.run();
+        mShadowMainLooper.reset();
         assertTaskPostConditions();
     }
 
@@ -1699,7 +1705,7 @@ public class PerformBackupTaskTest {
             String transportDirName,
             boolean nonIncremental,
             PackageData... packages) {
-        ArrayList<BackupRequest> backupRequests =
+        ArrayList<BackupRequest> keyValueBackupRequests =
                 Stream.of(packages)
                         .map(packageData -> packageData.packageName)
                         .map(BackupRequest::new)
@@ -1713,7 +1719,7 @@ public class PerformBackupTaskTest {
                         mBackupManagerService,
                         transportClient,
                         transportDirName,
-                        backupRequests,
+                        keyValueBackupRequests,
                         mOldJournal,
                         mObserver,
                         mMonitor,

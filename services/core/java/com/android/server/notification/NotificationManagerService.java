@@ -3450,7 +3450,8 @@ public class NotificationManagerService extends SystemService {
                     for (int i = 0; i < N; i++) {
                         final NotificationRecord r = mEnqueuedNotifications.get(i);
                         if (Objects.equals(adjustment.getKey(), r.getKey())
-                                && Objects.equals(adjustment.getUser(), r.getUserId())) {
+                                && Objects.equals(adjustment.getUser(), r.getUserId())
+                                && mAssistants.isSameUser(token, r.getUserId())) {
                             applyAdjustment(r, adjustment);
                             r.applyAdjustments();
                             foundEnqueued = true;
@@ -3470,17 +3471,9 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void applyAdjustmentFromAssistant(INotificationListener token,
                 Adjustment adjustment) {
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                synchronized (mNotificationLock) {
-                    mAssistants.checkServiceTokenLocked(token);
-                    NotificationRecord n = mNotificationsByKey.get(adjustment.getKey());
-                    applyAdjustment(n, adjustment);
-                }
-                mRankingHandler.requestSort();
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+            List<Adjustment> adjustments = new ArrayList<>();
+            adjustments.add(adjustment);
+            applyAdjustmentsFromAssistant(token, adjustments);
         }
 
         @Override
@@ -3489,14 +3482,20 @@ public class NotificationManagerService extends SystemService {
 
             final long identity = Binder.clearCallingIdentity();
             try {
+                boolean appliedAdjustment = false;
                 synchronized (mNotificationLock) {
                     mAssistants.checkServiceTokenLocked(token);
                     for (Adjustment adjustment : adjustments) {
-                        NotificationRecord n = mNotificationsByKey.get(adjustment.getKey());
-                        applyAdjustment(n, adjustment);
+                        NotificationRecord r = mNotificationsByKey.get(adjustment.getKey());
+                        if (r != null && mAssistants.isSameUser(token, r.getUserId())) {
+                            applyAdjustment(r, adjustment);
+                            appliedAdjustment = true;
+                        }
                     }
                 }
-                mRankingHandler.requestSort();
+                if (appliedAdjustment) {
+                    mRankingHandler.requestSort();
+                }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -4032,6 +4031,7 @@ public class NotificationManagerService extends SystemService {
                     + " notification=" + notification);
         }
         checkCallerIsSystemOrSameApp(pkg);
+        checkRestrictedCategories(notification);
 
         final int userId = ActivityManager.handleIncomingUser(callingPid,
                 callingUid, incomingUserId, true, false, "enqueueNotification", pkg);
@@ -6198,6 +6198,26 @@ public class NotificationManagerService extends SystemService {
         checkCallerIsSameApp(pkg);
     }
 
+    /**
+     * Check if the notification is of a category type that is restricted to system use only,
+     * if so throw SecurityException
+     */
+    private void checkRestrictedCategories(final Notification notification) {
+        try {
+            if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, 0)) {
+                return;
+            }
+        } catch (RemoteException re) {
+            if (DBG) Log.e(TAG, "Unable to confirm if it's safe to skip category "
+                    + "restrictions check thus the check will be done anyway");
+        }
+        if (Notification.CATEGORY_CAR_EMERGENCY.equals(notification.category)
+                || Notification.CATEGORY_CAR_WARNING.equals(notification.category)
+                || Notification.CATEGORY_CAR_INFORMATION.equals(notification.category)) {
+                    checkCallerIsSystem();
+        }
+    }
+
     private boolean isCallerInstantApp(String pkg) {
         // System is always allowed to act for ephemeral apps.
         if (isCallerSystemOrPhone()) {
@@ -6468,7 +6488,8 @@ public class NotificationManagerService extends SystemService {
             // There should be only one, but it's a list, so while we enforce
             // singularity elsewhere, we keep it general here, to avoid surprises.
             for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
-                boolean sbnVisible = isVisibleToListener(sbn, info);
+                boolean sbnVisible = isVisibleToListener(sbn, info)
+                        && info.isSameUser(r.getUserId());
                 if (!sbnVisible) {
                     continue;
                 }
