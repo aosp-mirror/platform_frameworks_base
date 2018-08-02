@@ -55,6 +55,7 @@ import android.view.accessibility.IAccessibilityManager;
 
 import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.wm.DisplayFrames;
+import com.android.server.wm.WindowTestUtils.TestDisplayContent;
 import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Before;
@@ -123,7 +124,6 @@ public class PhoneWindowManagerTestBase {
         mNavigationBar.attrs.gravity = Gravity.BOTTOM;
 
         mPolicy.addWindow(mNavigationBar);
-        mPolicy.mHasNavigationBar = true;
         mPolicy.mLastSystemUiFlags |= View.NAVIGATION_BAR_TRANSPARENT;
     }
 
@@ -245,12 +245,10 @@ public class PhoneWindowManagerTestBase {
                 policy[0].mAccessibilityManager = new AccessibilityManager(context,
                         mock(IAccessibilityManager.class), UserHandle.USER_CURRENT);
                 policy[0].mSystemGestures = mock(SystemGesturesPointerEventListener.class);
-                policy[0].mNavigationBarCanMove = true;
-                policy[0].mPortraitRotation = ROTATION_0;
-                policy[0].mLandscapeRotation = ROTATION_90;
-                policy[0].mUpsideDownRotation = ROTATION_180;
-                policy[0].mSeascapeRotation = ROTATION_270;
-                policy[0].onConfigurationChanged();
+
+                final TestDisplayContent displayContent = TestDisplayContent.create(context);
+                policy[0].setDefaultDisplay(displayContent);
+                policy[0].onConfigurationChanged(displayContent);
             });
             return policy[0];
         }

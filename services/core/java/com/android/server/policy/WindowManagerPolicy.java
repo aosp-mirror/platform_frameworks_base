@@ -93,6 +93,7 @@ import android.view.animation.Animation;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 import com.android.server.wm.DisplayFrames;
+import com.android.server.wm.DisplayRotation;
 import com.android.server.wm.WindowFrames;
 import com.android.server.wm.utils.WmDisplayCutout;
 
@@ -177,7 +178,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     /**
      * Called when the resource overlays change.
      */
-    default void onOverlayChangedLw() {}
+    default void onOverlayChangedLw(DisplayContentInfo displayContentInfo) {}
 
     /**
      * Interface to the Window Manager state associated with a particular
@@ -638,6 +639,27 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * The keyguard showing state has changed
          */
         void onKeyguardShowingAndNotOccludedChanged();
+
+        DisplayContentInfo getDefaultDisplayContentInfo();
+    }
+
+    /**
+     * Provides the rotation of a device.
+     *
+     * @see com.android.server.policy.WindowOrientationListener
+     */
+    public interface RotationSource {
+        int getProposedRotation();
+
+        void setCurrentRotation(int rotation);
+    }
+
+    /**
+     * Interface to get public information of a display content.
+     */
+    public interface DisplayContentInfo {
+        DisplayRotation getDisplayRotation();
+        Display getDisplay();
     }
 
     /** Window has been added to the screen. */
@@ -669,23 +691,17 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     public final int USER_ROTATION_LOCKED = 1;
 
     /**
+     * Set the default display content to provide basic functions for the policy.
+     */
+    public void setDefaultDisplay(DisplayContentInfo displayContentInfo);
+
+    /**
      * Perform initialization of the policy.
      *
      * @param context The system context we are running in.
      */
     public void init(Context context, IWindowManager windowManager,
             WindowManagerFuncs windowManagerFuncs);
-
-    /**
-     * @return true if com.android.internal.R.bool#config_forceDefaultOrientation is true.
-     */
-    public boolean isDefaultOrientationForced();
-
-    /**
-     * Called by window manager once it has the initial, default native
-     * display dimensions.
-     */
-    public void setInitialDisplaySize(Display display, int width, int height, int density);
 
     /**
      * Check permissions when adding a window.
@@ -1410,44 +1426,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     public boolean isShowingDreamLw();
 
     /**
-     * Given an orientation constant, returns the appropriate surface rotation,
-     * taking into account sensors, docking mode, rotation lock, and other factors.
-     *
-     * @param orientation An orientation constant, such as
-     * {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_LANDSCAPE}.
-     * @param lastRotation The most recently used rotation.
-     * @param defaultDisplay Flag indicating whether the rotation is computed for the default
-     *                       display. Currently for all non-default displays sensors, docking mode,
-     *                       rotation lock and other factors are ignored.
-     * @return The surface rotation to use.
-     */
-    public int rotationForOrientationLw(@ActivityInfo.ScreenOrientation int orientation,
-            int lastRotation, boolean defaultDisplay);
-
-    /**
-     * Given an orientation constant and a rotation, returns true if the rotation
-     * has compatible metrics to the requested orientation.  For example, if
-     * the application requested landscape and got seascape, then the rotation
-     * has compatible metrics; if the application requested portrait and got landscape,
-     * then the rotation has incompatible metrics; if the application did not specify
-     * a preference, then anything goes.
-     *
-     * @param orientation An orientation constant, such as
-     * {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_LANDSCAPE}.
-     * @param rotation The rotation to check.
-     * @return True if the rotation is compatible with the requested orientation.
-     */
-    public boolean rotationHasCompatibleMetricsLw(@ActivityInfo.ScreenOrientation int orientation,
-            int rotation);
-
-    /**
-     * Called by the window manager when the rotation changes.
-     *
-     * @param rotation The new rotation.
-     */
-    public void setRotationLw(int rotation);
-
-    /**
      * Called when the system is mostly done booting to set whether
      * the system should go into safe mode.
      */
@@ -1486,8 +1464,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * this point the display is active.
      */
     public void enableScreenAfterBoot();
-
-    public void setCurrentOrientationLw(@ActivityInfo.ScreenOrientation int newOrientation);
 
     /**
      * Call from application to perform haptic feedback on its window.
@@ -1702,9 +1678,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     /**
      * Called when the configuration has changed, and it's safe to load new values from resources.
      */
-    public void onConfigurationChanged();
+    public void onConfigurationChanged(DisplayContentInfo displayContentInfo);
 
-    public boolean shouldRotateSeamlessly(int oldRotation, int newRotation);
+    public boolean shouldRotateSeamlessly(DisplayRotation displayRotation,
+            int oldRotation, int newRotation);
 
     /**
      * Called when System UI has been started.

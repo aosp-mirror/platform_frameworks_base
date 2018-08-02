@@ -569,7 +569,7 @@ class WindowSurfacePlacer {
             // animation after the old one finally finishes. It's better to defer the
             // app transition.
             if (screenRotationAnimation != null && screenRotationAnimation.isAnimating() &&
-                    mService.rotationNeedsUpdateLocked()) {
+                    mService.getDefaultDisplayContentLocked().rotationNeedsUpdate()) {
                 if (DEBUG_APP_TRANSITIONS) {
                     Slog.v(TAG, "Delaying app transition for screen rotation animation to finish");
                 }
