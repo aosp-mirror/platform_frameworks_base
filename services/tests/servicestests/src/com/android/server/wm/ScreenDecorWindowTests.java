@@ -255,8 +255,12 @@ public class ScreenDecorWindowTests {
      * Asserts the top inset of {@param activity} is equal to {@param expected} waiting as needed.
      */
     private void assertTopInsetEquals(Activity activity, int expected) throws Exception {
-        waitFor(() -> getInsets(activity).getSystemWindowInsetTop() == expected);
+        waitForTopInsetEqual(activity, expected);
         assertEquals(expected, getInsets(activity).getSystemWindowInsetTop());
+    }
+
+    private void waitForTopInsetEqual(Activity activity, int expected) {
+        waitFor(() -> getInsets(activity).getSystemWindowInsetTop() == expected);
     }
 
     /**
@@ -265,6 +269,18 @@ public class ScreenDecorWindowTests {
      */
     private void assertInsetGreaterOrEqual(Activity activity, int side, int expected)
             throws Exception {
+        waitForInsetGreaterOrEqual(activity, side, expected);
+
+        final WindowInsets insets = getInsets(activity);
+        switch (side) {
+            case TOP: assertGreaterOrEqual(insets.getSystemWindowInsetTop(), expected); break;
+            case BOTTOM: assertGreaterOrEqual(insets.getSystemWindowInsetBottom(), expected); break;
+            case LEFT: assertGreaterOrEqual(insets.getSystemWindowInsetLeft(), expected); break;
+            case RIGHT: assertGreaterOrEqual(insets.getSystemWindowInsetRight(), expected); break;
+        }
+    }
+
+    private void waitForInsetGreaterOrEqual(Activity activity, int side, int expected) {
         waitFor(() -> {
             final WindowInsets insets = getInsets(activity);
             switch (side) {
@@ -275,14 +291,6 @@ public class ScreenDecorWindowTests {
                 default: return true;
             }
         });
-
-        final WindowInsets insets = getInsets(activity);
-        switch (side) {
-            case TOP: assertGreaterOrEqual(insets.getSystemWindowInsetTop(), expected); break;
-            case BOTTOM: assertGreaterOrEqual(insets.getSystemWindowInsetBottom(), expected); break;
-            case LEFT: assertGreaterOrEqual(insets.getSystemWindowInsetLeft(), expected); break;
-            case RIGHT: assertGreaterOrEqual(insets.getSystemWindowInsetRight(), expected); break;
-        }
     }
 
     /** Asserts that the first entry is greater than or equal to the second entry. */
