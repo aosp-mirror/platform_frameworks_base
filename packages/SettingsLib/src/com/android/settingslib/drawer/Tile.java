@@ -35,6 +35,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -73,11 +74,6 @@ public class Tile implements Parcelable {
      * Optional list of user handles which the intent should be launched on.
      */
     public ArrayList<UserHandle> userHandle = new ArrayList<>();
-
-    /**
-     * Optional additional data for use by subclasses of the activity
-     */
-    public Bundle extras;
 
     /**
      * Category in which the tile should be placed.
@@ -132,7 +128,6 @@ public class Tile implements Parcelable {
         for (int i = 0; i < N; i++) {
             userHandle.get(i).writeToParcel(dest, flags);
         }
-        dest.writeBundle(extras);
         dest.writeString(category);
         dest.writeInt(priority);
         dest.writeBundle(metaData);
@@ -179,7 +174,6 @@ public class Tile implements Parcelable {
         for (int i = 0; i < N; i++) {
             userHandle.add(UserHandle.CREATOR.createFromParcel(in));
         }
-        extras = in.readBundle();
         category = in.readString();
         priority = in.readInt();
         metaData = in.readBundle();
@@ -216,4 +210,7 @@ public class Tile implements Parcelable {
         profile = (profile != null ? profile : PROFILE_ALL);
         return TextUtils.equals(profile, PROFILE_PRIMARY);
     }
+
+    public static final Comparator<Tile> TILE_COMPARATOR =
+            (lhs, rhs) -> rhs.priority - lhs.priority;
 }
