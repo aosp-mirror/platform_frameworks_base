@@ -20,6 +20,7 @@ import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -155,10 +156,14 @@ public class GradientDrawable extends Drawable {
     private static final float DEFAULT_INNER_RADIUS_RATIO = 3.0f;
     private static final float DEFAULT_THICKNESS_RATIO = 9.0f;
 
+    @UnsupportedAppUsage
     private GradientState mGradientState;
 
+    @UnsupportedAppUsage
     private final Paint mFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    @UnsupportedAppUsage
     private Rect mPadding;
+    @UnsupportedAppUsage
     private Paint mStrokePaint;   // optional, set by the caller
     private ColorFilter mColorFilter;   // optional, set by the caller
     private PorterDuffColorFilter mTintFilter;
@@ -1793,27 +1798,46 @@ public class GradientDrawable extends Drawable {
 
     final static class GradientState extends ConstantState {
         public @Config int mChangingConfigurations;
+        @UnsupportedAppUsage
         public @Shape int mShape = RECTANGLE;
+        @UnsupportedAppUsage
         public @GradientType int mGradient = LINEAR_GRADIENT;
+        @UnsupportedAppUsage
         public int mAngle = 0;
+        @UnsupportedAppUsage
         public Orientation mOrientation;
+        @UnsupportedAppUsage
         public ColorStateList mSolidColors;
         public ColorStateList mStrokeColors;
+        @UnsupportedAppUsage
         public @ColorInt int[] mGradientColors;
         public @ColorInt int[] mTempColors; // no need to copy
         public float[] mTempPositions; // no need to copy
+        @UnsupportedAppUsage
         public float[] mPositions;
+        @UnsupportedAppUsage
         public int mStrokeWidth = -1; // if >= 0 use stroking.
+        @UnsupportedAppUsage
         public float mStrokeDashWidth = 0.0f;
+        @UnsupportedAppUsage
         public float mStrokeDashGap = 0.0f;
+        @UnsupportedAppUsage
         public float mRadius = 0.0f; // use this if mRadiusArray is null
+        @UnsupportedAppUsage
         public float[] mRadiusArray = null;
+        @UnsupportedAppUsage
         public Rect mPadding = null;
+        @UnsupportedAppUsage
         public int mWidth = -1;
+        @UnsupportedAppUsage
         public int mHeight = -1;
+        @UnsupportedAppUsage
         public float mInnerRadiusRatio = DEFAULT_INNER_RADIUS_RATIO;
+        @UnsupportedAppUsage
         public float mThicknessRatio = DEFAULT_THICKNESS_RATIO;
+        @UnsupportedAppUsage
         public int mInnerRadius = -1;
+        @UnsupportedAppUsage
         public int mThickness = -1;
         public boolean mDither = false;
         public Insets mOpticalInsets = Insets.NONE;

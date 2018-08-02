@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -68,13 +69,17 @@ import java.lang.ref.WeakReference;
  */
 public class SurfaceTexture {
     private final Looper mCreatorLooper;
+    @UnsupportedAppUsage
     private Handler mOnFrameAvailableHandler;
 
     /**
      * These fields are used by native code, do not access or modify.
      */
+    @UnsupportedAppUsage
     private long mSurfaceTexture;
+    @UnsupportedAppUsage
     private long mProducer;
+    @UnsupportedAppUsage
     private long mFrameAvailableListener;
 
     private boolean mIsSingleBuffered;
@@ -378,6 +383,7 @@ public class SurfaceTexture {
      * This method is invoked from native code only.
      */
     @SuppressWarnings({"UnusedDeclaration"})
+    @UnsupportedAppUsage
     private static void postEventFromNative(WeakReference<SurfaceTexture> weakSelf) {
         SurfaceTexture st = weakSelf.get();
         if (st != null) {
@@ -405,6 +411,7 @@ public class SurfaceTexture {
     private native void nativeSetDefaultBufferSize(int width, int height);
     private native void nativeUpdateTexImage();
     private native void nativeReleaseTexImage();
+    @UnsupportedAppUsage
     private native int nativeDetachFromGLContext();
     private native int nativeAttachToGLContext(int texName);
     private native void nativeRelease();

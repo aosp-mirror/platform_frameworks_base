@@ -21,6 +21,7 @@ import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.content.res.ResourcesImpl;
 import android.os.Parcel;
@@ -57,6 +58,7 @@ public final class Bitmap implements Parcelable {
     private static final long NATIVE_ALLOCATION_SIZE = 32;
 
     // Convenience for JNI access
+    @UnsupportedAppUsage
     private final long mNativePtr;
 
     private final boolean mIsMutable;
@@ -75,9 +77,13 @@ public final class Bitmap implements Parcelable {
      */
     private boolean mRequestPremultiplied;
 
+    @UnsupportedAppUsage
     private byte[] mNinePatchChunk; // may be null
+    @UnsupportedAppUsage
     private NinePatch.InsetStruct mNinePatchInsets; // may be null
+    @UnsupportedAppUsage
     private int mWidth;
+    @UnsupportedAppUsage
     private int mHeight;
     private boolean mRecycled;
 
@@ -99,11 +105,13 @@ public final class Bitmap implements Parcelable {
      * density when running old apps.
      * @hide
      */
+    @UnsupportedAppUsage
     public static void setDefaultDensity(int density) {
         sDefaultDensity = density;
     }
 
     @SuppressWarnings("deprecation")
+    @UnsupportedAppUsage
     static int getDefaultDensity() {
         if (sDefaultDensity >= 0) {
             return sDefaultDensity;
@@ -160,6 +168,7 @@ public final class Bitmap implements Parcelable {
      * width/height values
      */
     @SuppressWarnings("unused") // called from JNI
+    @UnsupportedAppUsage
     void reinit(int width, int height, boolean requestPremultiplied) {
         mWidth = width;
         mHeight = height;
@@ -330,6 +339,7 @@ public final class Bitmap implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setNinePatchChunk(byte[] chunk) {
         mNinePatchChunk = chunk;
     }
@@ -530,6 +540,7 @@ public final class Bitmap implements Parcelable {
          */
         HARDWARE    (7);
 
+        @UnsupportedAppUsage
         final int nativeInt;
 
         private static Config sConfigs[] = {
@@ -540,6 +551,7 @@ public final class Bitmap implements Parcelable {
             this.nativeInt = ni;
         }
 
+        @UnsupportedAppUsage
         static Config nativeToConfig(int ni) {
             return sConfigs[ni];
         }
@@ -674,6 +686,7 @@ public final class Bitmap implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public Bitmap createAshmemBitmap() {
         checkRecycled("Can't copy a recycled bitmap");
         noteHardwareBitmapSlowCall();
@@ -692,6 +705,7 @@ public final class Bitmap implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public Bitmap createAshmemBitmap(Config config) {
         checkRecycled("Can't copy a recycled bitmap");
         noteHardwareBitmapSlowCall();
@@ -710,6 +724,7 @@ public final class Bitmap implements Parcelable {
      *         currently PIXEL_FORMAT_RGBA_8888 is the only supported format
      * @hide
      */
+    @UnsupportedAppUsage
     public static Bitmap createHardwareBitmap(@NonNull GraphicBuffer graphicBuffer) {
         return nativeCreateHardwareBitmap(graphicBuffer);
     }
@@ -1494,6 +1509,7 @@ public final class Bitmap implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     static public int scaleFromDensity(int size, int sdensity, int tdensity) {
         if (sdensity == DENSITY_NONE || tdensity == DENSITY_NONE || sdensity == tdensity) {
             return size;
@@ -2026,6 +2042,7 @@ public final class Bitmap implements Parcelable {
      * @return {@link GraphicBuffer} which is internally used by hardware bitmap
      * @hide
      */
+    @UnsupportedAppUsage
     public GraphicBuffer createGraphicBufferHandle() {
         return nativeCreateGraphicBufferHandle(mNativePtr);
     }
@@ -2043,6 +2060,7 @@ public final class Bitmap implements Parcelable {
     private static native Bitmap nativeCopyAshmemConfig(long nativeSrcBitmap, int nativeConfig);
     private static native long nativeGetNativeFinalizer();
     private static native boolean nativeRecycle(long nativeBitmap);
+    @UnsupportedAppUsage
     private static native void nativeReconfigure(long nativeBitmap, int width, int height,
                                                  int config, boolean isPremultiplied);
 

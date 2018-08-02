@@ -24,6 +24,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.Resources.Theme;
@@ -88,6 +89,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
     private AnimationState mAnimationState;
 
     /** The current frame, ranging from 0 to {@link #mAnimationState#getChildCount() - 1} */
+    @UnsupportedAppUsage
     private int mCurFrame = 0;
 
     /** Whether the drawable has an animation callback posted. */
