@@ -128,7 +128,11 @@ public class KeyStore {
     public static final int FLAG_STRONGBOX = 1 << 4;
 
     // States
-    public enum State { UNLOCKED, LOCKED, UNINITIALIZED };
+    public enum State {
+        UNLOCKED,
+        LOCKED,
+        UNINITIALIZED
+    };
 
     private int mError = NO_ERROR;
 
