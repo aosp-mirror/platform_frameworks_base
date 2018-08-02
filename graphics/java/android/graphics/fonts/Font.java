@@ -469,4 +469,9 @@ public class Font {
     public long getNativePtr() {
         return mNativePtr;
     }
+
+    @Override
+    public String toString() {
+        return "Font {weight=" + mWeight + ", italic=" + mItalic + "}";
+    }
 }
