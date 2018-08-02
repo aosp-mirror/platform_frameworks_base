@@ -102,7 +102,7 @@ import java.util.List;
  * is provisioned.
  */
 class GlobalActionsDialog implements DialogInterface.OnDismissListener,
-        DialogInterface.OnClickListener {
+        DialogInterface.OnClickListener, DialogInterface.OnShowListener {
 
     static public final String SYSTEM_DIALOG_REASON_KEY = "reason";
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
@@ -399,6 +399,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         dialog.setKeyguardShowing(mKeyguardShowing);
 
         dialog.setOnDismissListener(this);
+        dialog.setOnShowListener(this);
 
         return dialog;
     }
@@ -457,6 +458,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         @Override
         public void onPress() {
+            MetricsLogger.action(mContext, MetricsEvent.ACTION_EMERGENCY_DIALER_FROM_POWER_MENU);
             Intent intent = new Intent(EmergencyDialerConstants.ACTION_DIAL);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.putExtra(EmergencyDialerConstants.EXTRA_ENTRY_TYPE,
@@ -861,6 +863,11 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             dialog.dismiss();
         }
         item.onPress();
+    }
+
+    /** {@inheritDoc} */
+    public void onShow(DialogInterface dialog) {
+        MetricsLogger.visible(mContext, MetricsEvent.POWER_MENU);
     }
 
     /**
