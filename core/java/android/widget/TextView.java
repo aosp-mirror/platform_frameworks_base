@@ -321,6 +321,12 @@ import java.util.function.Supplier;
  * @attr ref android.R.styleable#TextView_autoSizeMaxTextSize
  * @attr ref android.R.styleable#TextView_autoSizeStepGranularity
  * @attr ref android.R.styleable#TextView_autoSizePresetSizes
+ * @attr ref android.R.styleable#TextView_textCursorDrawable
+ * @attr ref android.R.styleable#TextView_textSelectHandle
+ * @attr ref android.R.styleable#TextView_textSelectHandleLeft
+ * @attr ref android.R.styleable#TextView_textSelectHandleRight
+ * @attr ref android.R.styleable#TextView_allowUndo
+ * @attr ref android.R.styleable#TextView_enabled
  */
 @RemoteView
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {
