@@ -4936,10 +4936,29 @@
          by an autofill service, and the service does knows what the activity represents, and it represents 3 types of
          data (for example, username, password and credit card info) [CHAR LIMIT=NONE] -->
     <string name="autofill_save_title_with_3types">Save <xliff:g id="type" example="Username">%1$s</xliff:g>, <xliff:g id="type" example="Password">%2$s</xliff:g>, and <xliff:g id="type" example="Credit Card">%3$s</xliff:g> to &lt;b><xliff:g id="label" example="MyPass">%4$s</xliff:g>&lt;/b>?</string>
+
+    <!-- Title for the autofill update dialog shown when the the contents of the activity can be updated
+         by an autofill service, but the service does not know what the activity represents [CHAR LIMIT=NONE] -->
+    <string name="autofill_update_title">Update to &lt;b><xliff:g id="label" example="MyPass">%1$s</xliff:g>&lt;/b>?</string>
+    <!-- Title for the autofill update dialog shown when the the contents of the activity can be updated
+         by an autofill service, and the service does knows what the activity represents (for example, credit card info) [CHAR LIMIT=NONE] -->
+    <string name="autofill_update_title_with_type">Update <xliff:g id="type" example="Credit Card">%1$s</xliff:g> to &lt;b><xliff:g id="label" example="MyPass">%2$s</xliff:g>&lt;/b>?</string>
+    <!-- Title for the autofill update dialog shown when the the contents of the activity can be updated
+         by an autofill service, and the service does knows what the activity represents, and it represents 2 types of
+         data (for example, password and credit card info) [CHAR LIMIT=NONE] -->
+    <string name="autofill_update_title_with_2types">Update <xliff:g id="type" example="Password">%1$s</xliff:g> and <xliff:g id="type" example="Credit Card">%2$s</xliff:g> to &lt;b><xliff:g id="label" example="MyPass">%3$s</xliff:g>&lt;/b>?</string>
+    <!-- Title for the autofill update dialog shown when the the contents of the activity can be updated
+         by an autofill service, and the service does knows what the activity represents, and it represents 3 types of
+         data (for example, username, password and credit card info) [CHAR LIMIT=NONE] -->
+    <string name="autofill_update_title_with_3types">Update <xliff:g id="type" example="Username">%1$s</xliff:g>, <xliff:g id="type" example="Password">%2$s</xliff:g>, and <xliff:g id="type" example="Credit Card">%3$s</xliff:g> to &lt;b><xliff:g id="label" example="MyPass">%4$s</xliff:g>&lt;/b>?</string>
+
+
     <!-- Label for the autofill save button [CHAR LIMIT=NONE] -->
     <string name="autofill_save_yes">Save</string>
     <!-- Label for the autofill cancel button [CHAR LIMIT=NONE] -->
     <string name="autofill_save_no">No thanks</string>
+    <!-- Label for the autofill update button [CHAR LIMIT=NONE] -->
+    <string name="autofill_update_yes">Update</string>
 
     <!-- Label for the type of data being saved for autofill when it represent user credentials with a password [CHAR LIMIT=NONE] -->
     <string name="autofill_save_type_password">password</string>

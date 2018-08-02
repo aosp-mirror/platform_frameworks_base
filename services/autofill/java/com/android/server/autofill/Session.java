@@ -1479,6 +1479,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final AutofillId[] requiredIds = saveInfo.getRequiredIds();
         boolean allRequiredAreNotEmpty = true;
         boolean atLeastOneChanged = false;
+        // If an autofilled field is changed, we need to change isUpdate to true so the proper UI is
+        // shown.
+        boolean isUpdate = false;
         if (requiredIds != null) {
             for (int i = 0; i < requiredIds.length; i++) {
                 final AutofillId id = requiredIds[i];
@@ -1536,6 +1539,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             }
                             changed = false;
                         }
+                    } else {
+                        isUpdate = true;
                     }
                     if (changed) {
                         if (sDebug) {
@@ -1549,8 +1554,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         final AutofillId[] optionalIds = saveInfo.getOptionalIds();
+        if (sVerbose) {
+            Slog.v(TAG, "allRequiredAreNotEmpty: " + allRequiredAreNotEmpty + " hasOptional: "
+                    + (optionalIds != null));
+        }
         if (allRequiredAreNotEmpty) {
-            if (!atLeastOneChanged && optionalIds != null) {
+            // Must look up all optional ids in 2 scenarios:
+            // - if no required id changed but an optional id did, it should trigger save / update
+            // - if at least one required id changed but it was not part of a filled dataset, we
+            //   need to check if an optional id is part of a filled datased (in which case we show
+            //   Update instead of Save)
+            if (optionalIds!= null && (!atLeastOneChanged || !isUpdate)) {
                 // No change on required ids yet, look for changes on optional ids.
                 for (int i = 0; i < optionalIds.length; i++) {
                     final AutofillId id = optionalIds[i];
@@ -1562,17 +1576,27 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     }
                     if ((viewState.getState() & ViewState.STATE_CHANGED) != 0) {
                         final AutofillValue currentValue = viewState.getCurrentValue();
-                        currentValues.put(id, currentValue);
+                        final AutofillValue value = getSanitizedValue(sanitizers, id, currentValue);
+                        if (value == null) {
+                            if (sDebug) {
+                                Slog.d(TAG, "value of opt. field " + id + " failed sanitization");
+                            }
+                            continue;
+                        }
+
+                        currentValues.put(id, value);
                         final AutofillValue filledValue = viewState.getAutofilledValue();
-                        if (currentValue != null && !currentValue.equals(filledValue)) {
+                        if (value != null && !value.equals(filledValue)) {
                             if (sDebug) {
                                 Slog.d(TAG, "found a change on optional " + id + ": " + filledValue
-                                        + " => " + currentValue);
+                                        + " => " + value);
+                            }
+                            if (filledValue != null) {
+                                isUpdate = true;
                             }
                             atLeastOneChanged = true;
-                            break;
                         }
-                    } else {
+                    } else  {
                         // Update current values cache based on initial value
                         final AutofillValue initialValue = getValueFromContextsLocked(id);
                         if (sDebug) {
@@ -1623,7 +1647,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                                 Helper.getFields(dataset);
                         if (sVerbose) {
                             Slog.v(TAG, "Checking if saved fields match contents of dataset #" + i
-                                    + ": " + dataset + "; allSavableIds=" + savableIds);
+                                    + ": " + dataset + "; savableIds=" + savableIds);
                         }
                         savable_ids_loop: for (int j = 0; j < savableIds.size(); j++) {
                             final AutofillId id = savableIds.valueAt(j);
@@ -1658,13 +1682,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
 
                 // Use handler so logContextCommitted() is logged first
-                mHandler.sendMessage(obtainMessage( Session::logSaveShown, this));
+                mHandler.sendMessage(obtainMessage(Session::logSaveShown, this));
 
                 final IAutoFillManagerClient client = getClient();
                 mPendingSaveUi = new PendingUi(mActivityToken, id, client);
                 getUiForShowing().showSaveUi(mService.getServiceLabel(), mService.getServiceIcon(),
                         mService.getServicePackageName(), saveInfo, this,
-                        mComponentName, this, mPendingSaveUi, mCompatMode);
+                        mComponentName, this, mPendingSaveUi, isUpdate, mCompatMode);
                 if (client != null) {
                     try {
                         client.setSaveUiState(id, true);
@@ -1714,12 +1738,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return sanitizers;
     }
 
+    // TODO: this method is called a few times in the save process, we should cache its results into
+    // ViewState.
     @Nullable
     private AutofillValue getSanitizedValue(
             @Nullable ArrayMap<AutofillId, InternalSanitizer> sanitizers,
             @NonNull AutofillId id,
-            @NonNull AutofillValue value) {
-        if (sanitizers == null) return value;
+            @Nullable AutofillValue value) {
+        if (sanitizers == null || value == null) return value;
 
         final InternalSanitizer sanitizer = sanitizers.get(id);
         if (sanitizer == null) {

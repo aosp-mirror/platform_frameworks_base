@@ -4084,6 +4084,8 @@ message MetricsEvent {
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Tag FIELD_AUTOFILL_SESSION_ID: id of the autofill session associated with this metric.
     // Tag FIELD_AUTOFILL_COMPAT_MODE: package is being autofilled on compatibility mode.
+    // NOTE: starting on OS Q, it also added the following fields:
+    // FIELD_AUTOFILL_UPDATE: Whether the UI displayed "UPDATE" instead of "SAVE"
     AUTOFILL_SAVE_UI = 916;
 
     // Tag of a field for the number of saveable ids
@@ -6429,6 +6431,9 @@ message MetricsEvent {
     // OPEN: Settings > Add face
     // OS: Q
     FACE_ENROLL_PREVIEW = 1554;
+
+    // Field used to indicate whether a save request was used to update existing user data.
+    FIELD_AUTOFILL_UPDATE = 1555;
 
     // ---- End Q Constants, all Q constants go above this line ----
 

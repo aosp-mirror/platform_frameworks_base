@@ -149,7 +149,7 @@ final class SaveUi {
            @Nullable String servicePackageName, @NonNull ComponentName componentName,
            @NonNull SaveInfo info, @NonNull ValueFinder valueFinder,
            @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener,
-           boolean compatMode) {
+           boolean isUpdate, boolean compatMode) {
         mPendingUi= pendingUi;
         mListener = new OneTimeListener(listener);
         mOverlayControl = overlayControl;
@@ -184,21 +184,29 @@ final class SaveUi {
 
         switch (types.size()) {
             case 1:
-                mTitle = Html.fromHtml(context.getString(R.string.autofill_save_title_with_type,
+                mTitle = Html.fromHtml(context.getString(
+                        isUpdate ? R.string.autofill_update_title_with_type
+                                : R.string.autofill_save_title_with_type,
                         types.valueAt(0), serviceLabel), 0);
                 break;
             case 2:
-                mTitle = Html.fromHtml(context.getString(R.string.autofill_save_title_with_2types,
+                mTitle = Html.fromHtml(context.getString(
+                        isUpdate ? R.string.autofill_update_title_with_2types
+                                : R.string.autofill_save_title_with_2types,
                         types.valueAt(0), types.valueAt(1), serviceLabel), 0);
                 break;
             case 3:
-                mTitle = Html.fromHtml(context.getString(R.string.autofill_save_title_with_3types,
+                mTitle = Html.fromHtml(context.getString(
+                        isUpdate ? R.string.autofill_update_title_with_3types
+                                : R.string.autofill_save_title_with_3types,
                         types.valueAt(0), types.valueAt(1), types.valueAt(2), serviceLabel), 0);
                 break;
             default:
                 // Use generic if more than 3 or invalid type (size 0).
                 mTitle = Html.fromHtml(
-                        context.getString(R.string.autofill_save_title, serviceLabel), 0);
+                        context.getString(isUpdate ? R.string.autofill_update_title
+                                : R.string.autofill_save_title, serviceLabel),
+                        0);
         }
         titleView.setText(mTitle);
 
@@ -233,7 +241,10 @@ final class SaveUi {
         }
         noButton.setOnClickListener((v) -> mListener.onCancel(info.getNegativeActionListener()));
 
-        final View yesButton = view.findViewById(R.id.autofill_save_yes);
+        final TextView yesButton = view.findViewById(R.id.autofill_save_yes);
+        if (isUpdate) {
+            yesButton.setText(R.string.autofill_update_yes);
+        }
         yesButton.setOnClickListener((v) -> mListener.onSave());
 
         mDialog = new Dialog(context, THEME_ID);
