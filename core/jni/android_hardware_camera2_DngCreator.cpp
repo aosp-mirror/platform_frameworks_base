@@ -1748,19 +1748,20 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
             }
         }
 
-
-        size_t listSize = builder.getSize();
-        uint8_t opcodeListBuf[listSize];
-        err = builder.buildOpList(opcodeListBuf);
-        if (err == OK) {
-            BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_OPCODELIST2, listSize, opcodeListBuf,
-                    TIFF_IFD_0), env, TAG_OPCODELIST2, writer);
-        } else {
-            ALOGE("%s: Could not build list of opcodes for distortion correction and lens shading"
-                    "map.", __FUNCTION__);
-            jniThrowRuntimeException(env, "failed to construct opcode list for distortion"
-                    " correction and lens shading map");
-            return nullptr;
+        if (builder.getCount() > 0) {
+            size_t listSize = builder.getSize();
+            uint8_t opcodeListBuf[listSize];
+            err = builder.buildOpList(opcodeListBuf);
+            if (err == OK) {
+                BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_OPCODELIST2, listSize,
+                        opcodeListBuf, TIFF_IFD_0), env, TAG_OPCODELIST2, writer);
+            } else {
+                ALOGE("%s: Could not build list of opcodes for lens shading map and bad pixel "
+                        "correction.", __FUNCTION__);
+                jniThrowRuntimeException(env, "failed to construct opcode list for lens shading "
+                        "map and bad pixel correction");
+                return nullptr;
+            }
         }
     }
 
@@ -1846,18 +1847,20 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
             }
         }
 
-        size_t listSize = builder.getSize();
-        uint8_t opcodeListBuf[listSize];
-        err = builder.buildOpList(opcodeListBuf);
-        if (err == OK) {
-            BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_OPCODELIST3, listSize, opcodeListBuf,
-                    TIFF_IFD_0), env, TAG_OPCODELIST3, writer);
-        } else {
-            ALOGE("%s: Could not build list of opcodes for distortion correction and lens shading"
-                    "map.", __FUNCTION__);
-            jniThrowRuntimeException(env, "failed to construct opcode list for distortion"
-                    " correction and lens shading map");
-            return nullptr;
+        if (builder.getCount() > 0) {
+            size_t listSize = builder.getSize();
+            uint8_t opcodeListBuf[listSize];
+            err = builder.buildOpList(opcodeListBuf);
+            if (err == OK) {
+                BAIL_IF_INVALID_RET_NULL_SP(writer->addEntry(TAG_OPCODELIST3, listSize,
+                        opcodeListBuf, TIFF_IFD_0), env, TAG_OPCODELIST3, writer);
+            } else {
+                ALOGE("%s: Could not build list of opcodes for distortion correction.",
+                        __FUNCTION__);
+                jniThrowRuntimeException(env, "failed to construct opcode list for distortion"
+                        " correction");
+                return nullptr;
+            }
         }
     }
 
