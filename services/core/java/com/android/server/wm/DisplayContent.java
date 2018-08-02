@@ -1389,9 +1389,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int dw = displayInfo.logicalWidth;
         final int dh = displayInfo.logicalHeight;
         config.orientation = (dw <= dh) ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
-        // TODO: Probably best to set this based on some setting in the display content object,
-        // so the display can be configured for things like fullscreen.
-        config.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        config.windowConfiguration.setWindowingMode(getWindowingMode());
 
         final float density = mDisplayMetrics.density;
         config.screenWidthDp =

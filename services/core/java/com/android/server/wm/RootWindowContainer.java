@@ -224,16 +224,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Adding display=" + display);
 
-        final DisplayInfo displayInfo = dc.getDisplayInfo();
-        final Rect rect = new Rect();
-        mService.mDisplaySettings.getOverscanLocked(displayInfo.name, displayInfo.uniqueId, rect);
-        displayInfo.overscanLeft = rect.left;
-        displayInfo.overscanTop = rect.top;
-        displayInfo.overscanRight = rect.right;
-        displayInfo.overscanBottom = rect.bottom;
+        mService.mDisplaySettings.applySettingsToDisplayLocked(dc);
+
         if (mService.mDisplayManagerInternal != null) {
             mService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(
-                    displayId, displayInfo);
+                    displayId, dc.getDisplayInfo());
             dc.configureDisplayPolicy();
 
             // Tap Listeners are supported for:
