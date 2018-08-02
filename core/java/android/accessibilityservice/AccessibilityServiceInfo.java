@@ -19,6 +19,7 @@ package android.accessibilityservice;
 import static android.content.pm.PackageManager.FEATURE_FINGERPRINT;
 
 import android.annotation.IntDef;
+import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -695,6 +696,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setCapabilities(int capabilities) {
         mCapabilities = capabilities;
     }
