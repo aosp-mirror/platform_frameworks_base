@@ -454,31 +454,6 @@ android::Bitmap* GraphicsJNI::mapAshmemBitmap(JNIEnv* env, SkBitmap* bitmap,
     return wrapper;
 }
 
-sk_sp<SkColorSpace> GraphicsJNI::defaultColorSpace() {
-#ifdef ANDROID_ENABLE_LINEAR_BLENDING
-    return SkColorSpace::MakeSRGB();
-#else
-    return nullptr;
-#endif
-}
-
-sk_sp<SkColorSpace> GraphicsJNI::linearColorSpace() {
-    return SkColorSpace::MakeSRGBLinear();
-}
-
-sk_sp<SkColorSpace> GraphicsJNI::colorSpaceForType(SkColorType type) {
-    switch (type) {
-        case kRGBA_F16_SkColorType:
-            return linearColorSpace();
-        default:
-            return defaultColorSpace();
-    }
-}
-
-bool GraphicsJNI::isColorSpaceSRGB(SkColorSpace* colorSpace) {
-    return colorSpace == nullptr || colorSpace->isSRGB();
-}
-
 SkColorSpaceTransferFn GraphicsJNI::getNativeTransferParameters(JNIEnv* env, jobject transferParams) {
     SkColorSpaceTransferFn p;
     p.fA = (float) env->GetDoubleField(transferParams, gTransferParams_aFieldID);
