@@ -173,14 +173,14 @@ public class SmartReplyView extends ViewGroup {
                 Math.max(getChildCount(), 1), DECREASING_MEASURED_WIDTH_WITHOUT_PADDING_COMPARATOR);
     }
 
-    public void setRepliesFromRemoteInput(RemoteInput remoteInput, PendingIntent pendingIntent,
+    public void setRepliesFromRemoteInput(
+            RemoteInput remoteInput, PendingIntent pendingIntent,
             SmartReplyController smartReplyController, NotificationData.Entry entry,
-            View smartReplyContainer) {
+            View smartReplyContainer, CharSequence[] choices) {
         mSmartReplyContainer = smartReplyContainer;
         removeAllViews();
         mCurrentBackgroundColor = mDefaultBackgroundColor;
         if (remoteInput != null && pendingIntent != null) {
-            CharSequence[] choices = remoteInput.getChoices();
             if (choices != null) {
                 for (int i = 0; i < choices.length; ++i) {
                     Button replyButton = inflateReplyButton(

@@ -1427,6 +1427,7 @@ public abstract class NotificationListenerService extends Service {
         private @UserSentiment int mUserSentiment = USER_SENTIMENT_NEUTRAL;
         private boolean mHidden;
         private ArrayList<Notification.Action> mSmartActions;
+        private ArrayList<CharSequence> mSmartReplies;
 
         public Ranking() {}
 
@@ -1564,6 +1565,13 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
+         * @hide
+         */
+        public List<CharSequence> getSmartReplies() {
+            return mSmartReplies;
+        }
+
+        /**
          * Returns whether this notification can be displayed as a badge.
          *
          * @return true if the notification can be displayed as a badge, false otherwise.
@@ -1591,7 +1599,8 @@ public abstract class NotificationListenerService extends Service {
                 CharSequence explanation, String overrideGroupKey,
                 NotificationChannel channel, ArrayList<String> overridePeople,
                 ArrayList<SnoozeCriterion> snoozeCriteria, boolean showBadge,
-                int userSentiment, boolean hidden, ArrayList<Notification.Action> smartActions) {
+                int userSentiment, boolean hidden, ArrayList<Notification.Action> smartActions,
+                ArrayList<CharSequence> smartReplies) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -1608,6 +1617,7 @@ public abstract class NotificationListenerService extends Service {
             mUserSentiment = userSentiment;
             mHidden = hidden;
             mSmartActions = smartActions;
+            mSmartReplies = smartReplies;
         }
 
         /**
@@ -1658,6 +1668,7 @@ public abstract class NotificationListenerService extends Service {
         private ArrayMap<String, Integer> mUserSentiment;
         private ArrayMap<String, Boolean> mHidden;
         private ArrayMap<String, ArrayList<Notification.Action>> mSmartActions;
+        private ArrayMap<String, ArrayList<CharSequence>> mSmartReplies;
 
         private RankingMap(NotificationRankingUpdate rankingUpdate) {
             mRankingUpdate = rankingUpdate;
@@ -1686,7 +1697,8 @@ public abstract class NotificationListenerService extends Service {
                     getVisibilityOverride(key), getSuppressedVisualEffects(key),
                     getImportance(key), getImportanceExplanation(key), getOverrideGroupKey(key),
                     getChannel(key), getOverridePeople(key), getSnoozeCriteria(key),
-                    getShowBadge(key), getUserSentiment(key), getHidden(key), getSmartActions(key));
+                    getShowBadge(key), getUserSentiment(key), getHidden(key), getSmartActions(key),
+                    getSmartReplies(key));
             return rank >= 0;
         }
 
@@ -1833,6 +1845,15 @@ public abstract class NotificationListenerService extends Service {
             return mSmartActions.get(key);
         }
 
+        private ArrayList<CharSequence> getSmartReplies(String key) {
+            synchronized (this) {
+                if (mSmartReplies == null) {
+                    buildSmartReplies();
+                }
+            }
+            return mSmartReplies.get(key);
+        }
+
         // Locked by 'this'
         private void buildRanksLocked() {
             String[] orderedKeys = mRankingUpdate.getOrderedKeys();
@@ -1956,6 +1977,15 @@ public abstract class NotificationListenerService extends Service {
             mSmartActions = new ArrayMap<>(smartActions.size());
             for (String key : smartActions.keySet()) {
                 mSmartActions.put(key, smartActions.getParcelableArrayList(key));
+            }
+        }
+
+        // Locked by 'this'
+        private void buildSmartReplies() {
+            Bundle smartReplies = mRankingUpdate.getSmartReplies();
+            mSmartReplies = new ArrayMap<>(smartReplies.size());
+            for (String key : smartReplies.keySet()) {
+                mSmartReplies.put(key, smartReplies.getCharSequenceArrayList(key));
             }
         }
 

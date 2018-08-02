@@ -24,6 +24,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.Process;
+import android.os.SystemProperties;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -32,13 +33,13 @@ import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 public class SmartActionsHelper {
-    private static final ArrayList<Notification.Action> EMPTY_LIST = new ArrayList<>();
+    private static final ArrayList<Notification.Action> EMPTY_ACTION_LIST = new ArrayList<>();
+    private static final ArrayList<CharSequence> EMPTY_REPLY_LIST = new ArrayList<>();
 
     // If a notification has any of these flags set, it's inelgibile for actions being added.
     private static final int FLAG_MASK_INELGIBILE_FOR_ACTIONS =
@@ -49,6 +50,10 @@ public class SmartActionsHelper {
     private static final int MAX_ACTION_EXTRACTION_TEXT_LENGTH = 400;
     private static final int MAX_ACTIONS_PER_LINK = 1;
     private static final int MAX_SMART_ACTIONS = Notification.MAX_ACTION_BUTTONS;
+    // Allow us to test out smart reply with dumb suggestions, it is disabled by default.
+    // TODO: Removed this once we have the model.
+    private static final String SYS_PROP_SMART_REPLIES_EXPERIMENT =
+            "persist.sys.smart_replies_experiment";
 
     SmartActionsHelper() {}
 
@@ -62,14 +67,14 @@ public class SmartActionsHelper {
     ArrayList<Notification.Action> suggestActions(
             @Nullable Context context, @NonNull StatusBarNotification sbn) {
         if (!isEligibleForActionAdjustment(sbn)) {
-            return EMPTY_LIST;
+            return EMPTY_ACTION_LIST;
         }
         if (context == null) {
-            return EMPTY_LIST;
+            return EMPTY_ACTION_LIST;
         }
         TextClassificationManager tcm = context.getSystemService(TextClassificationManager.class);
         if (tcm == null) {
-            return EMPTY_LIST;
+            return EMPTY_ACTION_LIST;
         }
         Notification.Action[] actions = sbn.getNotification().actions;
         int numOfExistingActions = actions == null ? 0: actions.length;
@@ -77,6 +82,18 @@ public class SmartActionsHelper {
         return suggestActionsFromText(
                 tcm,
                 getMostSalientActionText(sbn.getNotification()), maxSmartActions);
+    }
+
+    ArrayList<CharSequence> suggestReplies(
+            @Nullable Context context, @NonNull StatusBarNotification sbn) {
+        if (!isEligibleForReplyAdjustment(sbn)) {
+            return EMPTY_REPLY_LIST;
+        }
+        if (context == null) {
+            return EMPTY_REPLY_LIST;
+        }
+        // TODO: replaced this with our model when it is ready.
+        return new ArrayList<>(Arrays.asList("Yes, please", "No, thanks"));
     }
 
     /**
@@ -106,6 +123,17 @@ public class SmartActionsHelper {
         return Notification.CATEGORY_MESSAGE.equals(notification.category)
                 || Notification.MessagingStyle.class.equals(notification.getNotificationStyle())
                 || hasInlineReply(notification);
+    }
+
+    private boolean isEligibleForReplyAdjustment(@NonNull StatusBarNotification sbn) {
+        if (!SystemProperties.getBoolean(SYS_PROP_SMART_REPLIES_EXPERIMENT, false)) {
+            return false;
+        }
+        Notification notification = sbn.getNotification();
+        if (notification.actions == null) {
+            return false;
+        }
+        return hasInlineReply(sbn.getNotification());
     }
 
     private boolean hasInlineReply(Notification notification) {
@@ -151,7 +179,7 @@ public class SmartActionsHelper {
             @NonNull TextClassificationManager tcm, @Nullable CharSequence text,
             int maxSmartActions) {
         if (TextUtils.isEmpty(text)) {
-            return EMPTY_LIST;
+            return EMPTY_ACTION_LIST;
         }
         TextClassifier textClassifier = tcm.getTextClassifier();
 

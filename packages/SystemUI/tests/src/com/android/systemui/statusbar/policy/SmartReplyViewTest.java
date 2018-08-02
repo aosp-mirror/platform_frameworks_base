@@ -375,7 +375,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
                 new Intent(TEST_ACTION), 0);
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).setChoices(choices).build();
-        mView.setRepliesFromRemoteInput(input, pendingIntent, mLogger, mEntry, mContainer);
+        mView.setRepliesFromRemoteInput(input, pendingIntent, mLogger, mEntry, mContainer, choices);
     }
 
     /** Builds a {@link ViewGroup} whose measures and layout mirror a {@link SmartReplyView}. */

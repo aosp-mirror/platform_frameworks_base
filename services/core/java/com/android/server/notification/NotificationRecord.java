@@ -162,6 +162,7 @@ public final class NotificationRecord {
     private String mGroupLogTag;
     private String mChannelIdLogTag;
     private ArrayList<Notification.Action> mSmartActions;
+    private ArrayList<CharSequence> mSmartReplies;
 
     private final List<Adjustment> mAdjustments;
     private final NotificationStats mStats;
@@ -637,6 +638,9 @@ public final class NotificationRecord {
                 if (signals.containsKey(Adjustment.KEY_SMART_ACTIONS)) {
                     setSmartActions(signals.getParcelableArrayList(Adjustment.KEY_SMART_ACTIONS));
                 }
+                if (signals.containsKey(Adjustment.KEY_SMART_REPLIES)) {
+                    setSmartReplies(signals.getCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES));
+                }
             }
         }
     }
@@ -1062,6 +1066,14 @@ public final class NotificationRecord {
 
     public ArrayList<Notification.Action> getSmartActions() {
         return mSmartActions;
+    }
+
+    public void setSmartReplies(ArrayList<CharSequence> smartReplies) {
+        mSmartReplies = smartReplies;
+    }
+
+    public ArrayList<CharSequence> getSmartReplies() {
+        return mSmartReplies;
     }
 
     /**

@@ -112,6 +112,7 @@ public class NotificationData {
         public int userSentiment = Ranking.USER_SENTIMENT_NEUTRAL;
         @NonNull
         public List<Notification.Action> smartActions = Collections.emptyList();
+        public CharSequence[] smartReplies = new CharSequence[0];
 
         private int mCachedContrastColor = COLOR_INVALID;
         private int mCachedContrastColorIsFor = COLOR_INVALID;
@@ -155,6 +156,9 @@ public class NotificationData {
             userSentiment = ranking.getUserSentiment();
             smartActions = ranking.getSmartActions() == null
                     ? Collections.emptyList() : ranking.getSmartActions();
+            smartReplies = ranking.getSmartReplies() == null
+                    ? new CharSequence[0]
+                    : ranking.getSmartReplies().toArray(new CharSequence[0]);
         }
 
         public void setInterruption() {
