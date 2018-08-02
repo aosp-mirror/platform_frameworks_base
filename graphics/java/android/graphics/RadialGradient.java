@@ -19,6 +19,7 @@ package android.graphics;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.ColorInt;
+import android.annotation.UnsupportedAppUsage;
 
 public class RadialGradient extends Shader {
 
@@ -31,14 +32,22 @@ public class RadialGradient extends Shader {
      */
     private int mType;
 
+    @UnsupportedAppUsage
     private float mX;
+    @UnsupportedAppUsage
     private float mY;
+    @UnsupportedAppUsage
     private float mRadius;
+    @UnsupportedAppUsage
     private int[] mColors;
+    @UnsupportedAppUsage
     private float[] mPositions;
+    @UnsupportedAppUsage
     private int mCenterColor;
+    @UnsupportedAppUsage
     private int mEdgeColor;
 
+    @UnsupportedAppUsage
     private TileMode mTileMode;
 
     /**

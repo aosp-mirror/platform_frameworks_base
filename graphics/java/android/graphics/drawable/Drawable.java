@@ -27,6 +27,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -186,6 +187,7 @@ public abstract class Drawable {
     private int mLevel = 0;
     private @Config int mChangingConfigurations = 0;
     private Rect mBounds = ZERO_BOUNDS_RECT;  // lazily becomes a new Rect()
+    @UnsupportedAppUsage
     private WeakReference<Callback> mCallback = null;
     private boolean mVisible = true;
 
@@ -204,6 +206,7 @@ public abstract class Drawable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     protected int mSrcDensityOverride = 0;
 
     /**
@@ -714,6 +717,7 @@ public abstract class Drawable {
      *
      * @hide magic!
      */
+    @UnsupportedAppUsage
     public boolean isProjected() {
         return false;
     }
@@ -1390,6 +1394,7 @@ public abstract class Drawable {
      * @throws XmlPullParserException
      * @throws IOException
      */
+    @UnsupportedAppUsage
     void inflateWithAttributes(@NonNull @SuppressWarnings("unused") Resources r,
             @NonNull @SuppressWarnings("unused") XmlPullParser parser, @NonNull TypedArray attrs,
             @AttrRes int visibleAttr) throws XmlPullParserException, IOException {
@@ -1509,6 +1514,7 @@ public abstract class Drawable {
      * Ensures the tint filter is consistent with the current tint color and
      * mode.
      */
+    @UnsupportedAppUsage
     @Nullable PorterDuffColorFilter updateTintFilter(@Nullable PorterDuffColorFilter tintFilter,
             @Nullable ColorStateList tint, @Nullable PorterDuff.Mode tintMode) {
         if (tint == null || tintMode == null) {
@@ -1615,6 +1621,7 @@ public abstract class Drawable {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public static PorterDuff.Mode parseTintMode(int value, Mode defaultMode) {
         switch (value) {
             case 3: return Mode.SRC_OVER;

@@ -17,6 +17,7 @@
 package android.graphics.drawable;
 
 import android.annotation.NonNull;
+import android.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -88,9 +89,11 @@ public class BitmapDrawable extends Drawable {
 
     private final Rect mDstRect = new Rect();   // #updateDstRectAndInsetsIfDirty() sets this
 
+    @UnsupportedAppUsage
     private BitmapState mBitmapState;
     private PorterDuffColorFilter mTintFilter;
 
+    @UnsupportedAppUsage
     private int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
 
     private boolean mDstRectAndInsetsDirty = true;
@@ -238,6 +241,7 @@ public class BitmapDrawable extends Drawable {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setBitmap(Bitmap bitmap) {
         if (mBitmapState.mBitmap != bitmap) {
             mBitmapState.mBitmap = bitmap;
@@ -696,6 +700,7 @@ public class BitmapDrawable extends Drawable {
     /**
      * @hide only needed by a hack within ProgressBar
      */
+    @UnsupportedAppUsage
     public ColorStateList getTint() {
         return mBitmapState.mTint;
     }
@@ -703,6 +708,7 @@ public class BitmapDrawable extends Drawable {
     /**
      * @hide only needed by a hack within ProgressBar
      */
+    @UnsupportedAppUsage
     public Mode getTintMode() {
         return mBitmapState.mTintMode;
     }

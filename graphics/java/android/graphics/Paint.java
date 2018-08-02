@@ -19,6 +19,8 @@ package android.graphics;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Size;
+import android.annotation.UnsupportedAppUsage;
+import android.graphics.FontListParser;
 import android.graphics.fonts.FontVariationAxis;
 import android.os.LocaleList;
 import android.text.GraphicsOperations;
@@ -44,6 +46,7 @@ import java.util.Locale;
  */
 public class Paint {
 
+    @UnsupportedAppUsage
     private long mNativePaint;
     private long mNativeShader;
     private long mNativeColorFilter;
@@ -61,6 +64,7 @@ public class Paint {
     private MaskFilter  mMaskFilter;
     private PathEffect  mPathEffect;
     private Shader      mShader;
+    @UnsupportedAppUsage
     private Typeface    mTypeface;
     private Xfermode    mXfermode;
 
@@ -618,6 +622,7 @@ public class Paint {
     }
 
     /** @hide */
+    @UnsupportedAppUsage
     public void setCompatibilityScaling(float factor) {
         if (factor == 1.0) {
             mHasCompatScaling = false;
@@ -635,6 +640,7 @@ public class Paint {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public long getNativeInstance() {
         long newNativeShader = mShader == null ? 0 : mShader.getNativeInstance();
         if (newNativeShader != mNativeShader) {
@@ -1718,6 +1724,7 @@ public class Paint {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public void setHyphenEdit(int hyphen) {
         nSetHyphenEdit(mNativePaint, hyphen);
     }
@@ -2261,6 +2268,7 @@ public class Paint {
      * @see #getTextRunAdvances(String, int, int, int, int, boolean, float[], int)
      * @hide
      */
+    @UnsupportedAppUsage
     public float getTextRunAdvances(char[] chars, int index, int count,
             int contextIndex, int contextCount, boolean isRtl, float[] advances,
             int advancesIndex) {
@@ -2451,6 +2459,7 @@ public class Paint {
      * @return the offset of the next position, or -1
      * @hide
      */
+    @UnsupportedAppUsage
     public int getTextRunCursor(char[] text, int contextStart, int contextLength,
             int dir, int offset, int cursorOpt) {
         int contextEnd = contextStart + contextLength;

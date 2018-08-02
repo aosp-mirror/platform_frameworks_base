@@ -16,12 +16,14 @@
 
 package android.graphics;
 
+import android.annotation.UnsupportedAppUsage;
 import com.android.internal.util.ArrayUtils;
 
 /**
  * @hide
  */
 public class TemporaryBuffer {
+    @UnsupportedAppUsage
     public static char[] obtain(int len) {
         char[] buf;
 
@@ -37,6 +39,7 @@ public class TemporaryBuffer {
         return buf;
     }
 
+    @UnsupportedAppUsage
     public static void recycle(char[] temp) {
         if (temp.length > 1000) return;
 
