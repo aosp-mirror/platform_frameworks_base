@@ -16,6 +16,8 @@
 */
 package com.android.packageinstaller;
 
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.StringRes;
@@ -45,9 +47,9 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.TextView;
+
+import com.android.internal.app.AlertActivity;
 
 import java.io.File;
 
@@ -61,7 +63,7 @@ import java.io.File;
  * Based on the user response the package is then installed by launching InstallAppConfirm
  * sub activity. All state transitions are handled in this activity
  */
-public class PackageInstallerActivity extends OverlayTouchActivity implements OnClickListener {
+public class PackageInstallerActivity extends AlertActivity {
     private static final String TAG = "PackageInstaller";
 
     private static final int REQUEST_TRUST_EXTERNAL_SOURCE = 1;
@@ -95,7 +97,6 @@ public class PackageInstallerActivity extends OverlayTouchActivity implements On
 
     // Buttons to indicate user acceptance
     private Button mOk;
-    private Button mCancel;
 
     private PackageUtil.AppSnippet mAppSnippet;
 
@@ -119,18 +120,18 @@ public class PackageInstallerActivity extends OverlayTouchActivity implements On
     private boolean mEnableOk = false;
 
     private void startInstallConfirm() {
-        int msg;
+        View viewToEnable;
 
         if (mAppInfo != null) {
-            msg = (mAppInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
-                    ? R.string.install_confirm_question_update_system
-                    : R.string.install_confirm_question_update;
+            viewToEnable = (mAppInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
+                    ? requireViewById(R.id.install_confirm_question_update_system)
+                    : requireViewById(R.id.install_confirm_question_update);
         } else {
             // This is a new application with no permissions.
-            msg = R.string.install_confirm_question;
+            viewToEnable = requireViewById(R.id.install_confirm_question);
         }
 
-        ((TextView) findViewById(R.id.install_confirm_question)).setText(msg);
+        viewToEnable.setVisibility(View.VISIBLE);
 
         mEnableOk = true;
         mOk.setEnabled(true);
@@ -280,6 +281,8 @@ public class PackageInstallerActivity extends OverlayTouchActivity implements On
 
     @Override
     protected void onCreate(Bundle icicle) {
+        getWindow().addPrivateFlags(PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
+
         super.onCreate(null);
 
         if (icicle != null) {
@@ -344,7 +347,7 @@ public class PackageInstallerActivity extends OverlayTouchActivity implements On
 
         // load dummy layout with OK button disabled until we override this layout in
         // startInstallConfirm
-        bindUi(R.layout.install_confirm);
+        bindUi();
         checkIfAllowedAndInitiateInstall();
     }
 
@@ -374,17 +377,34 @@ public class PackageInstallerActivity extends OverlayTouchActivity implements On
         outState.putBoolean(ALLOW_UNKNOWN_SOURCES_KEY, mAllowUnknownSources);
     }
 
-    private void bindUi(int layout) {
-        setContentView(layout);
+    private void bindUi() {
+        mAlert.setIcon(mAppSnippet.icon);
+        mAlert.setTitle(mAppSnippet.label);
+        mAlert.setView(R.layout.install_content_view);
+        mAlert.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.install),
+                (ignored, ignored2) -> {
+                    if (mOk.isEnabled()) {
+                        if (mSessionId != -1) {
+                            mInstaller.setPermissionsResult(mSessionId, true);
+                            finish();
+                        } else {
+                            startInstall();
+                        }
+                    }
+                }, null);
+        mAlert.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel),
+                (ignored, ignored2) -> {
+                    // Cancel and finish
+                    setResult(RESULT_CANCELED);
+                    if (mSessionId != -1) {
+                        mInstaller.setPermissionsResult(mSessionId, false);
+                    }
+                    finish();
+                }, null);
+        setupAlert();
 
-        mOk = (Button) findViewById(R.id.ok_button);
-        mCancel = (Button)findViewById(R.id.cancel_button);
-        mOk.setOnClickListener(this);
-        mCancel.setOnClickListener(this);
-
+        mOk = mAlert.getButton(DialogInterface.BUTTON_POSITIVE);
         mOk.setEnabled(false);
-
-        PackageUtil.initSnippetForNewApp(this, mAppSnippet, R.id.app_snippet);
     }
 
     /**
@@ -523,26 +543,6 @@ public class PackageInstallerActivity extends OverlayTouchActivity implements On
             mInstaller.setPermissionsResult(mSessionId, false);
         }
         super.onBackPressed();
-    }
-
-    public void onClick(View v) {
-        if (v == mOk) {
-            if (mOk.isEnabled()) {
-                if (mSessionId != -1) {
-                    mInstaller.setPermissionsResult(mSessionId, true);
-                    finish();
-                } else {
-                    startInstall();
-                }
-            }
-        } else if (v == mCancel) {
-            // Cancel and finish
-            setResult(RESULT_CANCELED);
-            if (mSessionId != -1) {
-                mInstaller.setPermissionsResult(mSessionId, false);
-            }
-            finish();
-        }
     }
 
     private void startInstall() {

@@ -30,41 +30,49 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
+import android.view.View;
+
+import com.android.internal.app.AlertActivity;
 
 import java.io.File;
 
 /**
  * Installation failed: Return status code to the caller or display failure UI to user
  */
-public class InstallFailed extends Activity {
+public class InstallFailed extends AlertActivity {
     private static final String LOG_TAG = InstallFailed.class.getSimpleName();
 
     /** Label of the app that failed to install */
     private CharSequence mLabel;
 
     /**
-     * Convert an package installer status code into the user friendly label.
+     * Unhide the appropriate label for the statusCode.
      *
      * @param statusCode The status code from the package installer.
-     *
-     * @return The user friendly label for the status code
      */
-    private int getExplanationFromErrorCode(int statusCode) {
+    private void setExplanationFromErrorCode(int statusCode) {
         Log.d(LOG_TAG, "Installation status code: " + statusCode);
 
+        View viewToEnable;
         switch (statusCode) {
             case PackageInstaller.STATUS_FAILURE_BLOCKED:
-                return R.string.install_failed_blocked;
+                viewToEnable = requireViewById(R.id.install_failed_blocked);
+                break;
             case PackageInstaller.STATUS_FAILURE_CONFLICT:
-                return R.string.install_failed_conflict;
+                viewToEnable = requireViewById(R.id.install_failed_conflict);
+                break;
             case PackageInstaller.STATUS_FAILURE_INCOMPATIBLE:
-                return R.string.install_failed_incompatible;
+                viewToEnable = requireViewById(R.id.install_failed_incompatible);
+                break;
             case PackageInstaller.STATUS_FAILURE_INVALID:
-                return R.string.install_failed_invalid_apk;
+                viewToEnable = requireViewById(R.id.install_failed_invalid_apk);
+                break;
             default:
-                return R.string.install_failed;
+                viewToEnable = requireViewById(R.id.install_failed);
+                break;
         }
+
+        viewToEnable.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -89,8 +97,6 @@ public class InstallFailed extends Activity {
                     .getParcelableExtra(PackageUtil.INTENT_ATTR_APPLICATION_INFO);
             Uri packageURI = intent.getData();
 
-            setContentView(R.layout.install_failed);
-
             // Set header icon and title
             PackageUtil.AppSnippet as;
             PackageManager pm = getPackageManager();
@@ -106,7 +112,12 @@ public class InstallFailed extends Activity {
             // Store label for dialog
             mLabel = as.label;
 
-            PackageUtil.initSnippetForNewApp(this, as, R.id.app_snippet);
+            mAlert.setIcon(as.icon);
+            mAlert.setTitle(as.label);
+            mAlert.setView(R.layout.install_content_view);
+            mAlert.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.done),
+                    (ignored, ignored2) -> finish(), null);
+            setupAlert();
 
             // Show out of space dialog if needed
             if (statusCode == PackageInstaller.STATUS_FAILURE_STORAGE) {
@@ -114,11 +125,7 @@ public class InstallFailed extends Activity {
             }
 
             // Get status messages
-            ((TextView) findViewById(R.id.simple_status)).setText(
-                    getExplanationFromErrorCode(statusCode));
-
-            // Set up "done" button
-            findViewById(R.id.done_button).setOnClickListener(view -> finish());
+            setExplanationFromErrorCode(statusCode);
         }
     }
 

@@ -29,6 +29,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+
+import com.android.internal.app.AlertActivity;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,7 +43,7 @@ import java.io.OutputStream;
  * If a package gets installed from an content URI this step loads the package and turns it into
  * and installation from a file. Then it re-starts the installation as usual.
  */
-public class InstallStaging extends Activity {
+public class InstallStaging extends AlertActivity {
     private static final String LOG_TAG = InstallStaging.class.getSimpleName();
 
     private static final String STAGED_FILE = "STAGED_FILE";
@@ -55,7 +58,19 @@ public class InstallStaging extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.install_staging);
+        mAlert.setIcon(R.drawable.ic_file_download);
+        mAlert.setTitle(getString(R.string.app_name_unknown));
+        mAlert.setView(R.layout.install_content_view);
+        mAlert.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel),
+                (ignored, ignored2) -> {
+                    if (mStagingTask != null) {
+                        mStagingTask.cancel(true);
+                    }
+                    setResult(RESULT_CANCELED);
+                    finish();
+                }, null);
+        setupAlert();
+        requireViewById(R.id.staging).setVisibility(View.VISIBLE);
 
         if (savedInstanceState != null) {
             mStagedFile = new File(savedInstanceState.getString(STAGED_FILE));
@@ -64,14 +79,6 @@ public class InstallStaging extends Activity {
                 mStagedFile = null;
             }
         }
-
-        findViewById(R.id.cancel_button).setOnClickListener(view -> {
-            if (mStagingTask != null) {
-                mStagingTask.cancel(true);
-            }
-            setResult(RESULT_CANCELED);
-            finish();
-        });
     }
 
     @Override

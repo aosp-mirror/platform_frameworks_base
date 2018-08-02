@@ -108,26 +108,6 @@ public class PackageUtil {
                 icon);
     }
 
-    /**
-     * Utility method to display application snippet of a new package.
-     * The content view should have been set on context before invoking this method.
-     * appSnippet view should include R.id.app_icon and R.id.app_name
-     * defined on it.
-     *
-     * @param pContext context of package that can load the resources
-     * @param as The resources to be loaded
-     * @param snippetId view id of app snippet view
-     */
-    @NonNull public static View initSnippetForNewApp(@NonNull Activity pContext,
-            @NonNull AppSnippet as, int snippetId) {
-        View appSnippet = pContext.findViewById(snippetId);
-        if (as.icon != null) {
-            ((ImageView) appSnippet.findViewById(R.id.app_icon)).setImageDrawable(as.icon);
-        }
-        ((TextView)appSnippet.findViewById(R.id.app_name)).setText(as.label);
-        return appSnippet;
-    }
-
     static public class AppSnippet {
         @NonNull public CharSequence label;
         @Nullable public Drawable icon;
