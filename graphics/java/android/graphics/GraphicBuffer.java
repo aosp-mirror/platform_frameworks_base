@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -53,6 +54,7 @@ public class GraphicBuffer implements Parcelable {
     private final int mFormat;
     private final int mUsage;
     // Note: do not rename, this field is used by native code
+    @UnsupportedAppUsage
     private final long mNativeObject;
 
     // These two fields are only used by lock/unlockCanvas()
@@ -84,6 +86,7 @@ public class GraphicBuffer implements Parcelable {
     /**
      * Private use only. See {@link #create(int, int, int, int)}.
      */
+    @UnsupportedAppUsage
     private GraphicBuffer(int width, int height, int format, int usage, long nativeObject) {
         mWidth = width;
         mHeight = height;
@@ -96,6 +99,7 @@ public class GraphicBuffer implements Parcelable {
      * For SurfaceControl JNI.
      * @hide
      */
+    @UnsupportedAppUsage
     public static GraphicBuffer createFromExisting(int width, int height,
             int format, int usage, long unwrappedNativeObject) {
         long nativeObject = nWrapGraphicBuffer(unwrappedNativeObject);
@@ -274,6 +278,7 @@ public class GraphicBuffer implements Parcelable {
         nWriteGraphicBufferToParcel(mNativeObject, dest);
     }
 
+    @UnsupportedAppUsage
     public static final Parcelable.Creator<GraphicBuffer> CREATOR =
             new Parcelable.Creator<GraphicBuffer>() {
         public GraphicBuffer createFromParcel(Parcel in) {
