@@ -154,7 +154,7 @@ public class BackupHandler extends Handler {
                                 caller ->
                                         transportManager
                                                 .disposeOfTransportClient(transportClient, caller);
-                        PerformBackupTask.start(
+                        KeyValueBackupTask.start(
                                 backupManagerService,
                                 transportClient,
                                 transport.transportDirName(),
@@ -410,7 +410,7 @@ public class BackupHandler extends Handler {
                 backupManagerService.setBackupRunning(true);
                 backupManagerService.getWakelock().acquire();
 
-                PerformBackupTask.start(
+                KeyValueBackupTask.start(
                         backupManagerService,
                         params.transportClient,
                         params.dirName,

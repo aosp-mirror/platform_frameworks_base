@@ -168,8 +168,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 // TODO: Stop poking into BMS state and doing things for it (e.g. synchronizing on public locks)
 // TODO: Consider having the caller responsible for some clean-up (like resetting state)
 // TODO: Distinguish between cancel and time-out where possible for logging/monitoring/observing
-public class PerformBackupTask implements BackupRestoreTask, Runnable {
-    private static final String TAG = "PerformBackupTask";
+public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
+    private static final String TAG = "KeyValueBackupTask";
     private static final boolean DEBUG = BackupManagerService.DEBUG || true;
     private static final boolean MORE_DEBUG = BackupManagerService.MORE_DEBUG || false;
     private static final int THREAD_PRIORITY = Process.THREAD_PRIORITY_BACKGROUND;
@@ -181,7 +181,7 @@ public class PerformBackupTask implements BackupRestoreTask, Runnable {
     public static final String NEW_STATE_FILE_SUFFIX = ".new";
 
     /**
-     * Creates a new {@link PerformBackupTask} for key-value backup operation, spins up a new
+     * Creates a new {@link KeyValueBackupTask} for key-value backup operation, spins up a new
      * dedicated thread and kicks off the operation in it.
      *
      * @param backupManagerService The {@link BackupManagerService} system service.
@@ -201,13 +201,13 @@ public class PerformBackupTask implements BackupRestoreTask, Runnable {
      * @param userInitiated Whether this was user-initiated or not.
      * @param nonIncremental If {@code true}, this will be a complete backup for each package,
      *     otherwise it will be just an incremental one over the current dataset.
-     * @return The {@link PerformBackupTask} that was started.
+     * @return The {@link KeyValueBackupTask} that was started.
      */
-    public static PerformBackupTask start(
+    public static KeyValueBackupTask start(
             BackupManagerService backupManagerService,
             TransportClient transportClient,
             String transportDirName,
-            ArrayList<BackupRequest> queue,
+            List<BackupRequest> queue,
             @Nullable DataChangedJournal dataChangedJournal,
             IBackupObserver observer,
             IBackupManagerMonitor monitor,
@@ -215,8 +215,8 @@ public class PerformBackupTask implements BackupRestoreTask, Runnable {
             List<String> pendingFullBackups,
             boolean userInitiated,
             boolean nonIncremental) {
-        PerformBackupTask task =
-                new PerformBackupTask(
+        KeyValueBackupTask task =
+                new KeyValueBackupTask(
                         backupManagerService,
                         transportClient,
                         transportDirName,
@@ -245,8 +245,8 @@ public class PerformBackupTask implements BackupRestoreTask, Runnable {
     private final boolean mNonIncremental;
     private final int mCurrentOpToken;
     private final File mStateDir;
-    private final ArrayList<BackupRequest> mOriginalQueue;
-    private final ArrayList<BackupRequest> mQueue;
+    private final List<BackupRequest> mOriginalQueue;
+    private final List<BackupRequest> mQueue;
     private final List<String> mPendingFullBackups;
     @Nullable private final DataChangedJournal mJournal;
     private IBackupManagerMonitor mMonitor;
@@ -285,11 +285,11 @@ public class PerformBackupTask implements BackupRestoreTask, Runnable {
     @Nullable private volatile RemoteCall mPendingCall;
 
     @VisibleForTesting
-    public PerformBackupTask(
+    public KeyValueBackupTask(
             BackupManagerService backupManagerService,
             TransportClient transportClient,
             String transportDirName,
-            ArrayList<BackupRequest> queue,
+            List<BackupRequest> queue,
             @Nullable DataChangedJournal journal,
             IBackupObserver observer,
             IBackupManagerMonitor monitor,
@@ -453,7 +453,7 @@ public class PerformBackupTask implements BackupRestoreTask, Runnable {
         }
         File pmState = new File(mStateDir, PACKAGE_MANAGER_SENTINEL);
         try {
-            IBackupTransport transport = mTransportClient.connectOrThrow("PBT.beginBackup()");
+            IBackupTransport transport = mTransportClient.connectOrThrow("KVBT.beginBackup()");
             String transportName = transport.name();
             EventLog.writeEvent(EventLogTags.BACKUP_START, transportName);
 
@@ -696,7 +696,7 @@ public class PerformBackupTask implements BackupRestoreTask, Runnable {
         // If everything actually went through and this is the first time we've
         // done a backup, we can now record what the current backup dataset token
         // is.
-        String callerLogString = "PBT.finalizeBackup()";
+        String callerLogString = "KVBT.finalizeBackup()";
         if ((mBackupManagerService.getCurrentToken() == 0) && (mStatus
                 == BackupTransport.TRANSPORT_OK)) {
             mBackupManagerService.addBackupTrace("success; recording token");
@@ -843,7 +843,7 @@ public class PerformBackupTask implements BackupRestoreTask, Runnable {
                             ParcelFileDescriptor.MODE_TRUNCATE);
 
             IBackupTransport transport =
-                    mTransportClient.connectOrThrow("PBT.invokeAgentForBackup()");
+                    mTransportClient.connectOrThrow("KVBT.invokeAgentForBackup()");
 
             final long quota = transport.getBackupQuota(packageName, false /* isFullBackup */);
             callingAgent = true;
@@ -1043,7 +1043,7 @@ public class PerformBackupTask implements BackupRestoreTask, Runnable {
         mStatus = BackupTransport.TRANSPORT_OK;
         long size = 0;
         try {
-            IBackupTransport transport = mTransportClient.connectOrThrow("PBT.handleAgentResult()");
+            IBackupTransport transport = mTransportClient.connectOrThrow("KVBT.handleAgentResult()");
             size = mBackupDataFile.length();
             if (size > 0) {
                 if (MORE_DEBUG) {
@@ -1191,7 +1191,7 @@ public class PerformBackupTask implements BackupRestoreTask, Runnable {
             if (mAgentBinder != null) {
                 try {
                     IBackupTransport transport =
-                            mTransportClient.connectOrThrow("PBT.handleAgentResult()");
+                            mTransportClient.connectOrThrow("KVBT.handleAgentResult()");
                     long quota = transport.getBackupQuota(mCurrentPackage.packageName, false);
                     mAgentBinder.doQuotaExceeded(size, quota);
                 } catch (Exception e) {
@@ -1287,7 +1287,7 @@ public class PerformBackupTask implements BackupRestoreTask, Runnable {
         long delay;
         try {
             IBackupTransport transport =
-                    mTransportClient.connectOrThrow("PBT.revertAndEndBackup()");
+                    mTransportClient.connectOrThrow("KVBT.revertAndEndBackup()");
             delay = transport.requestBackupTime();
         } catch (Exception e) {
             Slog.w(TAG, "Unable to contact transport for recommended backoff: " + e.getMessage());

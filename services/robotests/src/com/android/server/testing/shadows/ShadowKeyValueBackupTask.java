@@ -24,7 +24,7 @@ import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.internal.BackupRequest;
 import com.android.server.backup.internal.OnTaskFinishedListener;
-import com.android.server.backup.internal.PerformBackupTask;
+import com.android.server.backup.internal.KeyValueBackupTask;
 import com.android.server.backup.transport.TransportClient;
 
 import org.robolectric.annotation.Implementation;
@@ -33,17 +33,17 @@ import org.robolectric.annotation.Implements;
 import java.util.ArrayList;
 import java.util.List;
 
-@Implements(PerformBackupTask.class)
-public class ShadowPerformBackupTask {
-    @Nullable private static ShadowPerformBackupTask sLastShadow;
+@Implements(KeyValueBackupTask.class)
+public class ShadowKeyValueBackupTask {
+    @Nullable private static ShadowKeyValueBackupTask sLastShadow;
 
     /**
-     * Retrieves the shadow for the last {@link PerformBackupTask} object created.
+     * Retrieves the shadow for the last {@link KeyValueBackupTask} object created.
      *
      * @return The shadow or {@code null} if no object created since last {@link #reset()}.
      */
     @Nullable
-    public static ShadowPerformBackupTask getLastCreated() {
+    public static ShadowKeyValueBackupTask getLastCreated() {
         return sLastShadow;
     }
 
@@ -52,7 +52,7 @@ public class ShadowPerformBackupTask {
     }
 
     private OnTaskFinishedListener mListener;
-    private ArrayList<BackupRequest> mQueue;
+    private List<BackupRequest> mQueue;
     private List<String> mPendingFullBackups;
 
     @Implementation
@@ -60,7 +60,7 @@ public class ShadowPerformBackupTask {
             BackupManagerService backupManagerService,
             TransportClient transportClient,
             String dirName,
-            ArrayList<BackupRequest> queue,
+            List<BackupRequest> queue,
             @Nullable DataChangedJournal journal,
             IBackupObserver observer,
             IBackupManagerMonitor monitor,
@@ -76,7 +76,7 @@ public class ShadowPerformBackupTask {
 
     @Implementation
     public void execute() {
-        mListener.onFinished("ShadowPerformBackupTask.execute()");
+        mListener.onFinished("ShadowKeyValueBackupTask.execute()");
     }
 
     public List<BackupRequest> getQueue() {
