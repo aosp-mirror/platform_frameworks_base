@@ -45,7 +45,7 @@ import android.os.PowerManager;
 import android.os.PowerSaveState;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
-import com.android.server.backup.internal.BackupRequest;
+import com.android.server.backup.keyvalue.BackupRequest;
 import com.android.server.backup.testing.BackupManagerServiceTestUtils;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;

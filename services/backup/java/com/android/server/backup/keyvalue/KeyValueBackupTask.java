@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server.backup.internal;
+package com.android.server.backup.keyvalue;
 
 import static com.android.server.backup.BackupManagerService.DEBUG_BACKUP_TRACE;
 import static com.android.server.backup.BackupManagerService.KEY_WIDGET_STATE;
@@ -62,6 +62,8 @@ import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.KeyValueBackupJob;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
+import com.android.server.backup.internal.OnTaskFinishedListener;
+import com.android.server.backup.internal.Operation;
 import com.android.server.backup.remote.RemoteCall;
 import com.android.server.backup.remote.RemoteCallable;
 import com.android.server.backup.remote.RemoteResult;
@@ -1350,5 +1352,13 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         }
         mPendingCall = null;
         return result;
+    }
+
+    private enum BackupState {
+        INITIAL,
+        BACKUP_PM,
+        RUNNING_QUEUE,
+        CANCELLED,
+        FINAL
     }
 }

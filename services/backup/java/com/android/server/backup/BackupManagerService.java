@@ -104,7 +104,7 @@ import com.android.server.SystemService;
 import com.android.server.backup.fullbackup.FullBackupEntry;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
 import com.android.server.backup.internal.BackupHandler;
-import com.android.server.backup.internal.BackupRequest;
+import com.android.server.backup.keyvalue.BackupRequest;
 import com.android.server.backup.internal.ClearDataObserver;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.internal.Operation;
