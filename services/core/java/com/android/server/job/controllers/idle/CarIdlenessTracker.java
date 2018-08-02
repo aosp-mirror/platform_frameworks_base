@@ -16,8 +16,6 @@
 
 package com.android.server.job.controllers.idle;
 
-import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,20 +33,27 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
     private static final boolean DEBUG = JobSchedulerService.DEBUG
             || Log.isLoggable(TAG, Log.DEBUG);
 
-    public static final String ACTION_FORCE_IDLE = "com.android.server.ACTION_FORCE_IDLE";
-    public static final String ACTION_UNFORCE_IDLE = "com.android.server.ACTION_UNFORCE_IDLE";
+    public static final String ACTION_GARAGE_MODE_ON =
+            "com.android.server.jobscheduler.GARAGE_MODE_ON";
+    public static final String ACTION_GARAGE_MODE_OFF =
+            "com.android.server.jobscheduler.GARAGE_MODE_OFF";
+
+    public static final String ACTION_FORCE_IDLE = "com.android.server.jobscheduler.FORCE_IDLE";
+    public static final String ACTION_UNFORCE_IDLE = "com.android.server.jobscheduler.UNFORCE_IDLE";
 
     // After construction, mutations of idle/screen-on state will only happen
     // on the main looper thread, either in onReceive() or in an alarm callback.
     private boolean mIdle;
-    private boolean mScreenOn;
+    private boolean mGarageModeOn;
+    private boolean mForced;
     private IdlenessListener mIdleListener;
 
     public CarIdlenessTracker() {
         // At boot we presume that the user has just "interacted" with the
         // device in some meaningful way.
         mIdle = false;
-        mScreenOn = true;
+        mGarageModeOn = false;
+        mForced = false;
     }
 
     @Override
@@ -62,9 +67,9 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
 
         IntentFilter filter = new IntentFilter();
 
-        // Screen state
-        filter.addAction(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        // State of GarageMode
+        filter.addAction(ACTION_GARAGE_MODE_ON);
+        filter.addAction(ACTION_GARAGE_MODE_OFF);
 
         // Debugging/instrumentation
         filter.addAction(ACTION_FORCE_IDLE);
@@ -77,7 +82,7 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
     @Override
     public void dump(PrintWriter pw) {
         pw.print("  mIdle: "); pw.println(mIdle);
-        pw.print("  mScreenOn: "); pw.println(mScreenOn);
+        pw.print("  mGarageModeOn: "); pw.println(mGarageModeOn);
     }
 
     @Override
@@ -88,47 +93,58 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
         // Check for forced actions
         if (action.equals(ACTION_FORCE_IDLE)) {
             logIfDebug("Forcing idle...");
-            enterIdleState(true);
+            setForceIdleState(true);
         } else if (action.equals(ACTION_UNFORCE_IDLE)) {
             logIfDebug("Unforcing idle...");
-            exitIdleState(true);
-        } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
-            logIfDebug("Going idle...");
-            mScreenOn = false;
-            enterIdleState(false);
-        } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
-            logIfDebug("exiting idle...");
-            mScreenOn = true;
-            exitIdleState(true);
+            setForceIdleState(false);
+        } else if (action.equals(ACTION_GARAGE_MODE_ON)) {
+            logIfDebug("GarageMode is on...");
+            mGarageModeOn = true;
+            updateIdlenessState();
+        } else if (action.equals(ACTION_GARAGE_MODE_OFF)) {
+            logIfDebug("GarageMode is off...");
+            mGarageModeOn = false;
+            updateIdlenessState();
         } else if (action.equals(ActivityManagerService.ACTION_TRIGGER_IDLE)) {
-            if (!mScreenOn) {
+            if (!mGarageModeOn) {
                 logIfDebug("Idle trigger fired...");
-                enterIdleState(false);
+                triggerIdlenessOnce();
             } else {
                 logIfDebug("TRIGGER_IDLE received but not changing state; idle="
-                        + mIdle + " screen=" + mScreenOn);
+                        + mIdle + " screen=" + mGarageModeOn);
             }
         }
     }
 
-    private void enterIdleState(boolean forced) {
-        if (!forced && mIdle) {
-            // Already idle and don't need to trigger callbacks since not forced
-            logIfDebug("Device is already considered idle");
-            return;
-        }
-        mIdle = true;
-        mIdleListener.reportNewIdleState(mIdle);
+    private void setForceIdleState(boolean forced) {
+        mForced = forced;
+        updateIdlenessState();
     }
 
-    private void exitIdleState(boolean forced) {
-        if (!forced && !mIdle) {
-            // Already out of idle and don't need to trigger callbacks since not forced
-            logIfDebug("Device is already considered not idle");
-            return;
+    private void updateIdlenessState() {
+        final boolean newState = (mForced || mGarageModeOn);
+        if (mIdle != newState) {
+            // State of idleness changed. Notifying idleness controller
+            logIfDebug("Device idleness changed. New idle=" + newState);
+            mIdle = newState;
+            mIdleListener.reportNewIdleState(mIdle);
+        } else {
+            // Nothing changed, device idleness is in the same state as new state
+            logIfDebug("Device idleness is the same. Current idle=" + newState);
         }
-        mIdle = false;
-        mIdleListener.reportNewIdleState(mIdle);
+    }
+
+    private void triggerIdlenessOnce() {
+        // This is simply triggering idleness once until some constraint will switch it back off
+        if (mIdle) {
+            // Already in idle state. Nothing to do
+            logIfDebug("Device is already idle");
+        } else {
+            // Going idle once
+            logIfDebug("Device is going idle once");
+            mIdle = true;
+            mIdleListener.reportNewIdleState(mIdle);
+        }
     }
 
     private void logIfDebug(String msg) {
